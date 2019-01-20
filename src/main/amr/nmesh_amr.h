@@ -1,4 +1,7 @@
 
+/* declarations from main that we need here already */
+#include "../main/skeleton.h"
+
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
@@ -18,6 +21,7 @@ typedef struct tNODE {
              // nb[0][0]= 1st neighb. in +X dir, nb[1][4]= 3rd neighb. in +X dir
              // if e.g. nb[3][1]=0 there in no 2nd neighb. in +Y dir.
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
+  int n[3];               /* number of points in X,Y,Z-directions */
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int i;                  /* node index (0-7) */
@@ -34,7 +38,6 @@ typedef struct tPAT {
   int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
   double bbox[6];   /* bounding box (in X,Y,Z) of this patch */
   tNode *rnode;     /* root node in this patch */
-  int n[3];         /* number of points in X,Y,Z-directions on each node */
   int np;           /* np = n[0] * n[1] * n[2]; */
   double *D[3];     /* differentiation matrix in all 3 dirs for [-1,1] domain */
 } tPat;
@@ -51,12 +54,15 @@ typedef struct tNLIST {
 /* several patches and thus a list of leaf nodes make up the 
    computational mesh */
 typedef struct tMESH {
-  tNlist *lnodes;  /* linked list of leaf nodes */
-  tPat **pat;      /* list of pointers to patches */
-  int npatches;    /* number of patches */
-  int nvars;       /* number of variables */
-  int npars;       /* number of mesh parameters */
-  int iteration;   /* current iteration number */
-  double dt;       /* time step */
+  double dt;        /* time step */
+  int iteration;    /* current iteration number */
+  int npatches;     /* number of patches */
+  int nvdb;         /* number of variables */
+  int npdb;         /* number of mesh parameters */
+  tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
+  struct tVAR *vdb; /* variable data base */
+  struct tPAR *pdb; /* parameter data base */
+  tNlist *lnodes;   /* linked list of leaf nodes */
+  tPat **pat;       /* list of pointers to patches */
 } tMesh;
 

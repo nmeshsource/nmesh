@@ -40,7 +40,7 @@ OFLAGS = -O2
 # --------------------------------------------------------------------------
 # some libraries are currently required
 libpaths = src/main/amr
-#libpaths += src/utility/output
+libpaths += src/main/nMPI
 
 
 # --------------------------------------------------------------------------
