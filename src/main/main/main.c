@@ -15,8 +15,7 @@ void initialize_libraries(void)
 #include "nmesh_automatic_initialize.c"
 }
 
-
-**************************************************************************/
+/**************************************************************************/
 /* main */
 int main(int argc, char **argv) 
 {
@@ -158,6 +157,7 @@ int make_output_directory(void)
   }
 
   /* check if we remove outdir_previous */
+  /*
   if(!GetvLax("nmesh_options", "--keep_previous"))
   {
     char *prev = checkpoint_filename("_previous", "");
@@ -178,7 +178,7 @@ int make_output_directory(void)
     if(fpcurr) fclose(fpcurr);
     free(prev);
     free(curr);
-  
+    */
     /* remove outdir_previous and move outdir to outdir_previous */
     system2("rm -rf", outdirp);
     system3("mv", outdir, outdirp);
@@ -266,24 +266,24 @@ int inidata_mesh(tMesh *m)
   }
 
   /* compute initial data */
-  RunFun(g, INITIALDATA);
+  RunFun(m, INITIALDATA);
 
   /* initial data is just another new time slice */
-  RunFun(g, POST_EVOLVE);
+  RunFun(m, POST_EVOLVE);
 
   /* initial data complete */
   prdivider(0);
   printf("Done with initialization\n");
-  printf(" iteration %d, time=%g\n", g->iteration, g->time);
+  printf(" iteration %d, time=%g\n", m->iteration, m->time);
 
   /* analyze initial data */
-  RunFun(g, ANALYZE);
+  RunFun(m, ANALYZE);
 
   /* output for permanent variables */
-  RunFun(g, OUTPUT);
+  RunFun(m, OUTPUT);
 
   /* checkpoint, just in case we need it here already */
-  checkpoint(g);
+  //checkpoint(m);
 
   return 0;
 }
@@ -338,7 +338,7 @@ int evolve_mesh(tMesh *mesh)
     RunFun(mesh, POST_OUTPUT);
 
     /* checkpoint */
-    checkpoint(mesh);
+    //checkpoint(mesh);
   
     /* update since this may change during evolution, say when checkpointing */
     timemax= Getd("finaltime");
