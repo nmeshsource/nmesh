@@ -39,8 +39,8 @@ OFLAGS = -O2
 
 # --------------------------------------------------------------------------
 # some libraries are currently required
-libpaths = src/main/MemoryMan 
-libpaths += src/utility/output
+libpaths = src/main/amr
+#libpaths += src/utility/output
 
 
 # --------------------------------------------------------------------------
@@ -148,7 +148,7 @@ tar:
 
 # take a fresh look at things
 clean:
-	-rm -r lib 
+	-rm -r lib
 	-rm $(autoinclude)
 	-rm $(autoinitial)
 
