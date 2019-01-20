@@ -51,8 +51,8 @@ typedef struct tNLIST {
 /* several patches and thus a list of leaf nodes make up the 
    computational mesh */
 typedef struct tMESH {
-  tNlist *lnodes   /* linked list of leaf nodes */
-  tBox **pat;      /* list of pointers to patches */
+  tNlist *lnodes;  /* linked list of leaf nodes */
+  tPat **pat;      /* list of pointers to patches */
   int npatches;    /* number of patches */
   int nvars;       /* number of variables */
   int npars;       /* number of mesh parameters */
