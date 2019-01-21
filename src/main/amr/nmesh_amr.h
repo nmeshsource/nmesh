@@ -70,8 +70,8 @@ typedef struct tMESH {
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
   struct tVAR *vdb; /* variable data base */
   struct tPAR *pdb; /* parameter data base */
-  tNlist *ln;       /* linked list of all leaf nodes */
   tPat **pat;       /* list of pointers to patches */
+  tNlist *ln;       /* linked list of all leaf nodes */
 } tMesh;
 /* NOTE: the list lnodes needs to be distributed amoung MPI job:
 use space filling curve as in
