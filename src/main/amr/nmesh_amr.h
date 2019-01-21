@@ -5,10 +5,13 @@
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
-  int nvenabled;
-  struct tARRAY **v;    /* list of data pointers to 3d variables */
+  int nv;               /* number of vars */
+  int nvenabled;        /* number of enabled vars */
+  struct tARRAY **v;    /* list of data pointers to 3d vars */
+                        // if v[i]=NULL var v[i] and its ghosts are not enabled
   struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
         // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
+//??? //  struct tNODE *node;   /* pointer to node where dat is in */
 } tDat;
 
 
@@ -32,6 +35,13 @@ typedef struct tNODE {
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
 } tNode;
 
+/* a linked list of nodes */
+typedef struct tNLIST {
+  tNode *node;
+  struct tNLIST *next;
+  struct tNLIST *prev;
+} tNlist;
+
 
 /* the nodes fill a patch */
 typedef struct tPAT {
@@ -44,15 +54,9 @@ typedef struct tPAT {
   tNode *rnode;         /* root node in this patch */
   struct tARRAY **D;    /* list of differentiation matrices */
   int nD;               /* number of diff matrices stored */
+  tNlist *ln;           /* linked list of leaf nodes in this patch */
 } tPat;
 
-
-/* a linked list of nodes */
-typedef struct tNLIST {
-  tNode *node;
-  struct tNLIST *next;
-  struct tNLIST *prev;
-} tNlist;
 
 
 /* several patches and thus a list of leaf nodes make up the 
@@ -66,31 +70,44 @@ typedef struct tMESH {
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
   struct tVAR *vdb; /* variable data base */
   struct tPAR *pdb; /* parameter data base */
-  tNlist *lnodes;   /* linked list of leaf nodes */
+  tNlist *ln;       /* linked list of all leaf nodes */
   tPat **pat;       /* list of pointers to patches */
 } tMesh;
-
-
+/* NOTE: the list lnodes needs to be distributed amoung MPI job:
+use space filling curve as in
+http://www.speedup.ch/workshops/w42_2013/carsten.pdf
+*/
 
 
 /***********************************************************************/
 /* other useful objects */
 /***********************************************************************/
+/* owner types */
+enum
+{
+  NODE,
+  PAT,
+  MESH,
+  NOWNERS
+};
+
 /* arrays */
 typedef struct tARRAY {
-  void *p;    /* pointer to patch or node array belongs to */
-  double *d;  /* pointer to double data */
-  int n[3];   /* dims in all 3 dirs */
-  int np;     /* np = n[0] * n[1] * n[2]; */
+  int n[3];    /* dims in all 3 dirs */
+  int N;       /* N = n[0] * n[1] * n[2]; */
+  double *a;   /* pointer to double data (could add one more for GPU data) */
+  void *Owner; /* pointer to patch or node this array belongs to */
+  int tOwner;  /* type of owner, e.g. NODE OR PAT */
 } tArray;
 
 
 /* variable lists */
 typedef struct tVARLIST {
-  struct tMESH *mesh;
   double time;
   int n;
   int *index;
+  void *Owner;  /* pointer to patch or node this array belongs to */
+  int tOwner;   /* type of owner, e.g. NODE OR PAT */
   void *vlPars; /* A pointer that is usually NULL, but can point to some
                    object that contains special extra pars or info. This
                    pointer is not touched by the funcs in variables.c (such
@@ -109,7 +126,17 @@ tMesh *alloc_mesh(void);
 
 
 /* storage.c */
-
+tArray *alloc_array(int n[3], void *Owner, int tOwner);
+void free_array(tArray *array);
+tMesh *alloc_mesh(void);
+void free_mesh(tMesh *mesh);
+tPat *alloc_patch(tMesh *mesh, int p, int nD) ;
+void free_patch(tPat *pat) ;
+tNode *alloc_node();
+void free_node(tNode *node) ;
+tDat *alloc_dat(int nv);
+void free_dat(tDat *dat);
+void realloc_dat_varlists(tDat *dat, int nv_new);
 
 
 /* print.c */

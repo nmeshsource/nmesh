@@ -9,6 +9,41 @@
 
 /**************************************************************************/
 /* basic memory management */
+/**************************************************************************/
+
+/**********************************************************************/
+/* storage for arrays */
+/**********************************************************************/
+/* allocate an array */
+tArray *alloc_array(int n[3], void *Owner, int tOwner)
+{
+  int i;
+  tArray *array = calloc(1, sizeof(tArray));
+  if(!array) errorexit("out of memory");
+
+  array->N = n[0] * n[1] * n[2];
+  for(i=0; i<3; i++)  array->n[i] = n[i];
+
+  array->a = calloc(array->N, sizeof(array->a[0]));
+  if(!array->a) errorexit("out of memory for array->a");
+
+  array->Owner  = Owner;
+  array->tOwner = tOwner;
+
+  return array;
+}
+
+/* free an array */
+void free_array(tArray *array)
+{
+  free(array->a);
+  free(array);
+}
+
+
+/**************************************************************************/
+/* mesh, patch, and node storage */
+/**************************************************************************/
 
 /* allocate mesh */
 tMesh *alloc_mesh(void)
@@ -19,6 +54,17 @@ tMesh *alloc_mesh(void)
   if (!mesh) errorexit("out of memory");
 
   return mesh;
+}
+
+/* free mesh */
+void free_mesh(tMesh *mesh)
+{
+  int i;
+
+  if (!mesh) return;
+  for (i = 0; i < mesh->npatches; i++)
+    free_patch(mesh->pat[i]);
+  free(mesh);
 }
 
 
@@ -44,9 +90,8 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
   return pat;
 } 
 
-
 /* free pat, currently leaves mesh untouched */
-void free_pat(tPat *pat) 
+void free_patch(tPat *pat) 
 {
   int i;
 
@@ -61,22 +106,199 @@ void free_pat(tPat *pat)
   free(pat);
 }
 
+tNode *alloc_node()
+{
+  tNode *node = calloc(1, sizeof(tNode));
+  if(!node) errorexit("out of memory");
 
-/* free mesh */
-void free_mesh(tMesh *mesh)
+  return node;
+}
+
+/* free one node */
+void free_node(tNode *node) 
 {
   int i;
 
-  if (!mesh) return;
-  for (i = 0; i < mesh->npatches; i++)
-    free_pat(mesh->pat[i]);
-  free_mesh_only(mesh);
+  if (!node) return;
+
+  //for (i = 0; i < pat->mesh->nvariables; i++)
+  //  disablevarcomp_inpat(pat, i);
+  //free(pat->v);
+
+  //free_all_bfaces(pat);
+
+  free(node);
+}
+
+
+/**********************************************************************/
+/* storage for dat lists in the nodes */
+/**********************************************************************/
+/* allocate for nv variables that can be enabled or disabled */
+tDat *alloc_dat(int nv)
+{
+  tDat *dat;
+  int j;
+
+  dat = calloc(1, sizeof(tDat));
+  if(!dat) errorexit("out of memory for dat");
+
+  dat->nv = nv;
+
+  dat->v = calloc(nv, sizeof(tArray *));
+  if(!dat->v) errorexit("out of memory for dat->v");
+
+  for(j=0; j<6; j++)
+  {
+    dat->g[j] = calloc(nv, sizeof(tArray *));
+    if(!dat->g[j]) errorexit("out of memory for dat->g[j]");
+  }
+  return dat;
+}
+/* free dat and all arrays within it */
+void free_dat(tDat *dat)
+{
+  int i,j;
+
+  if(!dat) return;
+
+  for(i=0; i<dat->nv; i++)
+  {
+    free_array(dat->v[i]);
+    for(j=0; j<6; j++) free_array(dat->g[j][i]);
+  }
+
+  free(dat->v);
+  for(j=0; j<6; j++) free(dat->g[j]);
+  free(dat);
+}
+
+/* change dat->nv  to  dat->nv=nv_new */
+void realloc_dat_varlists(tDat *dat, int nv_new)
+{
+  int i,j;
+
+  dat->v = realloc(dat->v, nv_new*sizeof(tArray *));
+  if(!dat->v) errorexit("out of memory for dat->v");
+
+  for(j=0; j<6; j++)
+  {
+    dat->g[j] = realloc(dat->g, nv_new*sizeof(tArray *));
+    if(!dat->g[j]) errorexit("out of memory for dat->g");
+  }
+  if(nv_new<dat->nv) errorexit("implement var removal");
+
+  /* set newly added var pointers to NULL */
+  for(i=dat->nv; i<nv_new; i++)
+  {
+    dat->v[i] = NULL;
+    for(j=0; j<6; j++) dat->g[j][i] = NULL; 
+  }
+  dat->nv = nv_new;
+}
+
+/**********************************************************************/
+/* storage for variables in the nodes */
+/**********************************************************************/
+
+/* enable one component of variable i on one node */
+void enablevarcomp_innode(tNode *node, int i)
+{
+  tDat *dat = node->dat;
+
+  /* do nothing if no data is stored on this node */
+  if(dat==NULL) return;
+
+  if(i>=dat->nv) errorexiti("var comp %i does not exist", i);
+  if(!dat->v[i])
+  {
+    dat->v[i] = alloc_array(node->n, node, NODE);
+    dat->nvenabled++;
+  }
+}
+
+/* disable one component of variable */
+void disablevarcomp_innode(tNode *node, int i) 
+{
+  tDat *dat = node->dat;
+
+  /* do nothing if no data is stored on this node */
+  if(dat==NULL) return;
+
+  if(i>=dat->nv) errorexiti("var comp %i does not exist", i);
+  if(!dat->v[i])
+  {
+    free_array(dat->v[i]);
+    dat->nvenabled--;
+  }
+}
+
+/* enable all components of a variable on one node */
+void enablevar_innode(tNode *node, int i)
+{
+  int j, n = VarNComponents(i);
+  for(j=0; j<n; j++) enablevarcomp_innode(node, i+j);
+}
+
+/* disable all components of a variable on one node */
+void disablevar_innode(tNode *node, int i)
+{
+  int j, n = VarNComponents(i);
+  for(j=0; j<n; j++) disablevarcomp_innode(node, i+j);
 }
 
 
 
+/* enable all components of a variable on one pat */
+void enablevar_inpatch(tPat *pat, int i)
+{
+  //fornodes(pat->ln)
+  //  enablevar_innode(node, i);
+}
 
- 
+/* disable all components of a variable on one pat */
+void disablevar_inpatch(tPat *pat, int i)
+{
+  //fornodes(pat->ln)
+  //  disablevar_innode(node, i);
+}
+
+
+/* enable all components of a variable on one mesh */
+void enablevar(tMesh *mesh, int i)
+{
+  //forallpats(mesh)
+  //  enablevar_inpatch(pat, i)
+}
+
+/* disable all components of a variable on one mesh */
+void disablevar(tMesh *mesh, int i)
+{
+  //forallpats(mesh)
+  //  disablevar_inpatch(pat, i)
+}
+
+
+/* enable variable list */
+void enablevarlist_innode(tNode *node, tVarList *vl)
+{
+  int i;
+  if(vl) for(i=0; i<vl->n; i++) enablevarcomp_innode(node, vl->index[i]);
+}
+
+/* disable variable list */
+void disablevarlist_innode(tNode *node, tVarList *vl)
+{
+  int i;
+  if(vl) for(i=0; i<vl->n; i++) disablevarcomp_innode(node, vl->index[i]);
+}
+
+// may need enablevarlist rather for patch or mesh ???
+
+
+
+
+/* Bfaces stuff */
 // /* add a bface to a pat, f denotes the pat face (0 to 5),
 //    return index in bface list */
 // int add_empty_bface(tPat *pat, int f)
@@ -226,177 +448,4 @@ void free_mesh(tMesh *mesh)
 //   return n;
 // }
 
-
-/**********************************************************************/
-/* storage for arrays in the nodes */
-/**********************************************************************/
-tDat *alloc_dat(int listlen)
-{
-  tDat *dat;
-
-  dat = calloc(1, sizeof(tDat));
-  if (!dat) errorexit("out of memory for dat");
-  dat->v = calloc(listlen, sizeof(*tArray));
-  if (!dat) errorexit("out of memory for dat->v");
-  dat->g = calloc(listlen, sizeof(*tArray));
-  if (!dat) errorexit("out of memory for dat->g");
-
-  return dat;
-}
-
-
-/**********************************************************************/
-/* storage for variables in the nodes */
-/**********************************************************************/
-
-/* enable one component of variable on one node */
-void enablevarcomp_innode(tNode *node, int i)
-{
-  if (!node->v[i]) {
-    node->v[i] = calloc( node->nnodes, sizeof(double) );
-    if (!node->v[i]) {
-      printf("enable storage for variable %d = %s: out of memory\n",
-	     i, VarName(i));
-      errorexit("");
-    }
-    nenabled++;
-    if (storage_verbose) {
-      printf("enabling variable %d = %s in b=%d, nenabled=%d => ",
-	     i, VarName(i), node->b, nenabled);
-      printf("%d*%d = %d bytes\n", 
-	     node->nnodes, (int) sizeof(double), 
-	     node->nnodes * ((int) (sizeof(double))) );
-    } 
-  }
-}
-
-
-/* disable one component of variable */
-void disablevarcomp_innode(tNode *node, int i) 
-{
-  if (node->v[i]) {
-    free(node->v[i]);
-    node->v[i] = 0;
-    nenabled--;
-    if (storage_verbose) {
-      printf("disabling variable %d = %s in b=%d, nenabled=%d => ",
-             i, VarName(i), node->b, nenabled);
-      printf("%d*%d = %d bytes\n", 
-	     node->nnodes, (int) sizeof(double), 
-	     node->nnodes * ((int) (sizeof(double))) );
-    } 
-  }
-}
-
-
-/* enable all components of a variable on one node */
-void enablevar_innode(tNode *node, int i)
-{
-  int j, n = VarNComponents(i);
-
-  for (j = 0; j < n; j++)
-    enablevarcomp_innode(node, i+j);
-}
-
-
-/* disable all components of a variable on one node */
-void disablevar_innode(tNode *node, int i)
-{
-  int j, n = VarNComponents(i);
-
-  for (j = 0; j < n; j++)
-    disablevarcomp_innode(node, i+j);
-}
-
-
-
-
-
-
-/* enable variable list */
-void enablevarlist(tVarList *v) 
-{
-  int i;
-
-  if (v) 
-    for (i = 0; i < v->n; i++)
-      enablevarcomp(v->grid, v->index[i]);
-}
-
-
-
-
-/* disable variable list */
-void disablevarlist(tVarList *v) 
-{
-  int i;
-
-  if (v)
-    for (i = 0; i < v->n; i++)
-      disablevarcomp(v->grid, v->index[i]);
-}
-
-
-
-
-/* enable all variables found on given grid */
-void enablesamevars(tGrid *grid, tGrid *newgrid)
-{
-  int i, b;
-
-  if (grid->nvariables != newgrid->nvariables)
-  {
-    printf("nvariables: old %d, new %d\n", 
-	   grid->nvariables, newgrid->nvariables);
-    errorexit("enablesamevars: need same number of variables");
-  }
-  if (grid->nboxes != newgrid->nboxes)
-  {
-    printf("nboxes: old %d, new %d\n", 
-	   grid->nboxes, newgrid->nboxes);
-    errorexit("enablesamevars: need same number of boxes");
-  }
-
-  for (i = 0; i < newgrid->nvariables; i++)
-    for (b = 0; b < newgrid->nboxes; b++)
-    {
-      tNode *newbox = newgrid->box[b];
-      if(grid->box[b]->v[i])
-        enablevarcomp_inbox(newbox, i);
-    }
-}
-
-
-
-/* create room for more variables in one box */
-void realloc_boxvariables(tNode *box, int nvariables)
-{
-  tGrid *grid = box->grid;
-  int i;
-  int box_nvariables = grid->nvariables;
-
-  if (PR) printf(" realloc_boxvariables in box%d from %d to %d\n", 
-		 box->b, grid->nvariables, nvariables);
-
-  if(box->v == NULL) box_nvariables=0;
-  box->v = (double **) realloc(box->v, sizeof(double *) * nvariables);
-  if(nvariables > box_nvariables) 
-    for(i=box_nvariables; i<nvariables; i++)  box->v[i] = 0;
-}
-
-/* create room for more variables */
-void realloc_gridvariables(tGrid *grid, int nvariables)
-{
-  int b;
-
-  if (PR) printf("realloc_gridvariables from %d to %d\n", 
-		 grid->nvariables, nvariables);
-
-  for (b = 0; b < grid->nboxes; b++)
-  {
-    tNode *box = grid->box[b];
-    realloc_boxvariables(box, nvariables);
-  }
-  grid->nvariables = nvariables;
-}
 
