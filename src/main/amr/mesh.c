@@ -3,7 +3,7 @@
 
 
 #include "nmesh.h"
-#include "MemoryMan.h"
+#include "amr.h"
 
 #define PR 0
 

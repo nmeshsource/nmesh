@@ -5,6 +5,7 @@
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
+  int nvenabled;
   struct tARRAY **v;    /* list of data pointers to 3d variables */
   struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
         // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
@@ -70,12 +71,54 @@ typedef struct tMESH {
 } tMesh;
 
 
+
+
 /***********************************************************************/
 /* other useful objects */
 /***********************************************************************/
+/* arrays */
 typedef struct tARRAY {
   void *p;    /* pointer to patch or node array belongs to */
   double *d;  /* pointer to double data */
   int n[3];   /* dims in all 3 dirs */
   int np;     /* np = n[0] * n[1] * n[2]; */
 } tArray;
+
+
+/* variable lists */
+typedef struct tVARLIST {
+  struct tMESH *mesh;
+  double time;
+  int n;
+  int *index;
+  void *vlPars; /* A pointer that is usually NULL, but can point to some
+                   object that contains special extra pars or info. This
+                   pointer is not touched by the funcs in variables.c (such
+                   as vlduplicate, vlcopy, vlfree, ...). So the user has 
+                   to manage it: e.g. free it, before calling vlfree. */
+} tVarList;
+
+
+/**************************************************************************/
+/* functions */
+/***********************************************************************/
+
+/* mesh.c */
+tMesh *make_empty_mesh(int pr);
+tMesh *alloc_mesh(void);
+
+
+/* storage.c */
+
+
+
+/* print.c */
+void printmesh(tMesh *g);
+void printpatch(tPat *box);
+void printnode(tNode *n);
+//void printbface(tBface *bface);
+//void printbfaces(tPat *pat);
+void printvar_innode(tNode *node, char *name);
+void printVarList(tVarList *vl);
+
+

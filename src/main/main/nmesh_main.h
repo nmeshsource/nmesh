@@ -161,18 +161,6 @@ typedef struct tVAR {
   int sym[3];
   int constant;
 } tVar;
-/* variable lists */
-typedef struct tVARLIST {
-  struct tGRID *grid;  /* struct tBOX *box;  is not needed in here */
-  double time;
-  int n;
-  int *index;
-  void *vlPars; /* A pointer that is usually NULL, but can point to some
-                   object that contains special extra pars or info. This
-                   pointer is not touched by the funcs in variables.c (such
-                   as vlduplicate, vlcopy, vlfree, ...). So the user has 
-                   to manage it: e.g. free it, before calling vlfree. */
-} tVarList;
 int IndLax(char *name);
 int Ind(char *name);
 int Set_vdb_iStart_AtPar(char *name);

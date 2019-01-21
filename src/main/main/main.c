@@ -7,7 +7,7 @@
 
 /* initialize libraries 
    the automatically generated file calls the initializers for each module */
-void initialize_libraries(void)
+void initialize_libraries(struct tMESH *mesh)
 {
   prdivider(0);
   printf("Initializing libraries\n");
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
     inidata_mesh(m);
     evolve_mesh(m);
     finalize_mesh(m);
-    RunFun(m, POST_FINALIZE_GRID); //hook after finalize_mesh, e.g. for special cleanup
+    RunFun(m, POST_FINALIZE_MESH); //hook after finalize_mesh, e.g. for special cleanup
     makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
     Sets("outdir_previous_iteration", Gets("outdir"));
   }
