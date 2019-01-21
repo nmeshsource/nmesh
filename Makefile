@@ -134,11 +134,11 @@ $(autoinclude): MyConfig
 $(autoinitial): MyConfig
 	echo $(autotext) > $(autoinitial) 
 	for X in $(libnames); do \
-	  echo int nmesh\_$$X\(\)\; >> $(autoinitial); \
+	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinitial); \
 	done
 	echo "/* call nmesh initialization functions: */" >> $(autoinitial); \
 	for X in $(libnames); do \
-	  echo nmesh\_$$X\(\)\; >> $(autoinitial); \
+	  echo nmesh\_$$X\(mesh\)\; >> $(autoinitial); \
 	done
 
 
