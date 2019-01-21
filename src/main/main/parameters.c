@@ -13,19 +13,19 @@
 */
 
 
-#include <ctype.h>
+#include <ctype.h>  // needed for isspace
 #include "nmesh.h"
 
 
 /* maximum number of pars allowed */
 int npdbmax = 1000;
 
-
-tParameter *findparameter(char *name, int fatal);
-void setparameter(char *name, char *value);
-void makeparameter(char *name, char *value, char *description);
+void makeparameter(tMesh *mesh, char *name, char *value, char *description);
+int findparameterindex(tMesh *mesh, char *name, int fatal);
+tParameter *findparameter(tMesh *mesh, char *name, int fatal);
+void setparameter(tMesh *mesh, int i, char *value);
 void printparameter(tParameter *p);
-void printparameters(void);
+void printparameters(tMesh *mesh);
 void translatevalue(char **value);
 int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
 int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
@@ -33,7 +33,7 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
 
 
 /* parse given parameter file */
-void parse_parameter_file(char *parfile)
+void parse_parameter_file(tMesh *mesh, char *parfile)
 {
   FILE *fp;
   int c, i, j;
@@ -42,11 +42,11 @@ void parse_parameter_file(char *parfile)
   char *par, *val;
   int lpar, lval;
 
-  if (1) printf("Reading parameter file \"%s\"\n", parfile);
+  if(1) printf("Reading parameter file \"%s\"\n", parfile);
 
   /* read file into memory, add one space at end and beginning */
   fp = fopen(parfile, "r");
-  if (!fp)
+  if(!fp)
   {
     printf("Could not open parameter file \"%s\"\n", parfile);
     errorexit("");
@@ -125,23 +125,26 @@ void parse_parameter_file(char *parfile)
   }
 
   /* loop over all parameter/value pairs */
-  for (i = 1; i < nbuffer; i += lpar + lval + 2) {
+  for (i = 1; i < nbuffer; i += lpar + lval + 2)
+  {
+    int pari;
     par = buffer+i;
     lpar = strlen(par);
     val = par + lpar + 1;
     lval = strlen(val);
     if (0) printf("%s = |%s|\n", par, val);
 
-    if (!findparameter(par, 0))
-      makeparameter(par, val, "not in libs");
+    pari = findparameterindex(mesh, par, 0);
+    if(pari<0)
+      makeparameter(mesh, par, val, "not in libs");
     else
-      setparameter(par, val);
+      setparameter(mesh, pari, val);
   }  
 
   /* print parameters */
   if (0) {
     printf("after reading the parameterfile:\n");
-    printparameters();
+    printparameters(mesh);
   }
   free(buffer);
 }
@@ -154,51 +157,53 @@ void parse_parameter_file(char *parfile)
 /* parameter data base */
 
 /* make new parameter in parameter data base, merge if already there */
-void makeparameter(char *name, char *value, char *description) 
+void makeparameter(tMesh *mesh, char *name, char *value, char *description) 
 {
-  static int firstcall = 1;
+  tParameter *pdb = mesh->pdb;
   tParameter *p;
+  int npdb = mesh->npdb;
 
-  if (0) printf("Makp %s = %s,  %s\n", name, value, description);
+  if(0) {PRF;printf(" %s = %s,  %s\n", name, value, description);}
 
-  if (firstcall) {
-    firstcall = 0;
-    pdb = (tParameter *) calloc(npdbmax, sizeof(tParameter));
-    if (!pdb) errorexit("makeparameter: out of memory");
-    npdb = 0;
-  }
+  pdb = realloc(pdb, npdbmax*sizeof(tParameter));
+  if(!pdb) errorexit("out of memory");
 
-  p = findparameter(name, 0);
-
-  if (!p) {
+  p = findparameter(mesh, name, 0);
+  if (!p)
+  {
     p = &pdb[npdb++];
-    p->name = (char *) calloc(strlen(name)+1, sizeof(char));
+    p->name  = (char *) calloc(strlen(name)+1, sizeof(char));
     p->value = (char *) calloc(strlen(value)+1, sizeof(char));
-    strcpy(p->name, name);
+    strcpy(p->name,  name);
     strcpy(p->value, value);
     translatevalue(&p->value);
     set_numericalvalue_byIndex(pdb, npdb-1, npdb);
     set_booleanvalue_byIndex(pdb, npdb-1, npdb);
-  } else {
+  }
+  else
+  {
     free(p->description);
   }
   p->description = (char *) calloc(strlen(description)+1, sizeof(char));
   strcpy(p->description, description);
 
-  if (npdb >= npdbmax) 
-    errorexit("makeparameter: lazy coding, no more space for new parameters");
+  if(npdb >= npdbmax) 
+    errorexit("lazy coding, no more space for new parameters");
 
-  if (0) printparameters();
+  if(0) printparameters(mesh);
 }
 
 
 
 
 /* set parameter */
-void setparameter(char *name, char *value)
+void setparameter(tMesh *mesh, int i, char *value)
 {
-  tParameter *p = findparameter(name, 1);
+  tParameter *p;
 
+  if(i<0 || i>=mesh->npdb) errorexit("this parameter index does not exist");
+
+  p = &(mesh->pdb[i]);
   free(p->value);
   p->value = strdup(value);
   translatevalue(&p->value);
@@ -207,14 +212,23 @@ void setparameter(char *name, char *value)
 }
 
 
+/* set the mesh pdb_iStart to the index of par name */
+void Set_pdb_iStart(tMesh *mesh, int i)
+{
+  if(i<0 || i>=mesh->npdb) errorexit("this index does not exist");
+  mesh->pdb_iStart = i;
+}
 
 
 /* find parameter index */
-int findparameterindex(char *name, int fatal)
+int findparameterindex(tMesh *mesh, char *name, int fatal)
 {
-  int i, iS = pdb_iStart;
+  tParameter *pdb = mesh->pdb;
+  int npdb = mesh->npdb;
+  int iS   = mesh->pdb_iStart;
+  int i;
 
-  if(!name) errorexit("findparameterindex: called without parameter name");
+  if(!name) errorexit("no parameter name");
 
   if( (iS < 0) || (iS >= npdb) ) iS = 0; /* make sure first i is in range */
 
@@ -231,23 +245,27 @@ int findparameterindex(char *name, int fatal)
   /* -1 means par was not found */
   return -1;
 }
-
-/* find parameter */
-tParameter *findparameter(char *name, int fatal)
+tParameter *parameterfromindex(tMesh *mesh, int i)
 {
-  int i = findparameterindex(name, fatal);
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+
+  return &(mesh->pdb[i]);
+}
+/* find parameter */
+tParameter *findparameter(tMesh *mesh, char *name, int fatal)
+{
+  int i = findparameterindex(mesh, name, fatal);
 
   if(i<0) return 0;
 
-  return &pdb[i];
+  return &(mesh->pdb[i]);
 }
 
 
 
-
 /* translate parameter value 
-   should be much more elaborate, say, implement simple arithmetic
-*/
+   should be much more elaborate, say, implement simple arithmetic */
 void translatevalue(char **value)
 {
   double x = 0;
@@ -259,7 +277,8 @@ void translatevalue(char **value)
   if (strcmp(*value, "2*pi")  == 0) x =  2*PI;
   if (strcmp(*value, "-2*pi") == 0) x = -2*PI;
 
-  if (x) {
+  if(x)
+  {
     char newvalue[100];
     sprintf(newvalue, "%.18e", x);
     free(*value);
@@ -275,7 +294,7 @@ int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
   if(pdb1!=NULL && ind>=0 && ind<npdb1max)
     pdb1[ind].numericalvalue = atof(pdb1[ind].value);
   else
-    errorexit("set_numericalvalue_byIndex: index out of range");
+    errorexit("index out of range");
 
   return 1;
 }
@@ -303,7 +322,7 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
     pdb1[ind].booleanvalue = boolval;
   }
   else
-    errorexit("set_booleanvalue_byIndex: index out of range");
+    errorexit("index out of range");
 
   return 1;
 }
@@ -316,113 +335,128 @@ void printparameter(tParameter *p)
 }
 
 /* print parameters */
-void printparameters(void)
+void printparameters(tMesh *mesh)
 {
+  tParameter *pdb = mesh->pdb;
+  int npdb = mesh->npdb;
   int i;
 
-  for (i = 0; i < npdb; i++)
+  for(i = 0; i < npdb; i++)
     printf("pdb[%3d]:  %16s = %-16s,  %s\n", 
 	   i, pdb[i].name, pdb[i].value, pdb[i].description);
 }
-
-
-
-
 
 
 /***************************************************************************/
 /* functions for external calls */
 
 /* creation functions */
-void AddPar(char *name, char *value, char *description)
+void AddMeshPar(tMesh *mesh, char *name, char *value, char *description)
 {
-  makeparameter(name, value, description);
-  printf("  parameter %-25s  =  %s\n", name, Gets(name));
+  makeparameter(mesh, name, value, description);
+  printf("  parameter %-25s  =  %s\n", name, Gets(Par(name)));
 }
 
-void AddOrModifyPar(char *name, char *value, char *description)
+void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description)
 {
-  if (!findparameter(name, 0))
-    makeparameter(name, value, description);
+  int pari = findparameterindex(mesh, name, 0);
+
+  if(pari<0)
+    makeparameter(mesh, name, value, description);
   else
-    setparameter(name, value);
-  printf("  parameter %-25s  =  %s\n", name, Gets(name));
+    setparameter(mesh, pari, value);
+  printf("  parameter %-25s  =  %s\n", name, Gets(Par(name)));
 }
 
 
 
 /* assignment functions */
-void Sets(char *name, char *value)
+void MeshParSets(tMesh *mesh, int pi, char *value)
 {
-  setparameter(name, value);
+  setparameter(mesh, pi, value);
 }
 
-void Seti(char *name, int i)
+void MeshParSeti(tMesh *mesh, int pi, int i)
 {
   char value[100];
-  sprintf(value, "%d", i);
-  setparameter(name, value);
+  snprintf(value,99, "%d", i);
+  setparameter(mesh, pi, value);
 }
 
-void Setd(char *name, double d)
+void MeshParSetd(tMesh *mesh, int pi, double d)
 {
   char value[100];
-  sprintf(value, "%.20e", d);
-  setparameter(name, value);
+  snprintf(value,99, "%.20e", d);
+  setparameter(mesh, pi, value);
 }
 
-void Appends(char *name, char *value)
+void MeshParAppends(tMesh *mesh, int pi, char *value)
 {
-  if (Getv(name, value)) return;
-
+  if(MeshParGetv_fatal(mesh, pi, value, 1)) return;
   {
-    char *oldvalue = Gets(name);
+    char *oldvalue = MeshParGets(mesh, pi);
     char *newvalue = cmalloc(strlen(oldvalue) + strlen(value) + 2);
     sprintf(newvalue, "%s %s", oldvalue, value);
-    setparameter(name, newvalue);
+    setparameter(mesh, pi, newvalue);
     free(newvalue);
   }
 }
 
 
-
-
 /* query functions */
-char *Gets(char *name) 
+char *MeshParGets(tMesh *mesh, int i)
 {
-  tParameter *p = findparameter(name, 1);
-  return p->value; 
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+  return mesh->pdb[i].value;
 }
 
-char *GetsLax(char *name) 
+char *MeshParGetsLax(tMesh *mesh, int i)
 {
-  tParameter *p = findparameter(name, 0);
-  return p ? p->value : 0; 
+  if(i<0 || i>=mesh->npdb) return 0;
+  return mesh->pdb[i].value;
 }
 
-int Geti(char *name)
+int MeshParGeti(tMesh *mesh, int i)
 {
-  tParameter *p = findparameter(name, 1);
-  return atoi(p->value); 
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+  return mesh->pdb[i].numericalvalue;
 }
 
-double Getd(char *name)
+double MeshParGetd(tMesh *mesh, int i)
 {
-  tParameter *p = findparameter(name, 1);
-  return atof(p->value);
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+  return mesh->pdb[i].numericalvalue;
 }
 
-/* "get value" returns 1 if value is in the list of values and 0 else 
-   (not equivalent to value being a substring of string parameter) 
-*/
-int GetvFlag(char *name, char *value, int fatal)
+/* return 0 or 1 */
+int MeshParGetb(tMesh *mesh, int i)
 {
-  tParameter *p = findparameter(name, fatal);
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+  return mesh->pdb[i].booleanvalue;
+}
+
+/* "get value?" returns 1 if value is in the list of values and 0 else 
+   (not equivalent to value being a substring of string parameter) */
+int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
+{
+  tParameter *p;
   char *s=NULL;
   char *parval;
   int lv, ls, lp, startok, endok;
 
-  if (!p) return 0;
+  if(i<0 || i>=mesh->npdb)
+  { 
+    if(fatal) errorexit("parameter with this index does not exist");
+    else      return 0;
+  }
+
+  p = &(mesh->pdb[i]);
+
+  if(!p) return 0;
   parval = p->value;
   while( (s = strstr(parval, value)) )
   {
@@ -438,17 +472,6 @@ int GetvFlag(char *name, char *value, int fatal)
   endok   = (s+ls == p->value+lp || *(s+ls) == ' ');
   return startok && endok ? 1 : 0;
 }
-
-int GetvLax(char *name, char *value)
-{
-  return GetvFlag(name, value, 0);
-}
-
-int Getv(char *name, char *value)
-{
-  return GetvFlag(name, value, 1);
-}
-
 
 
 
@@ -486,64 +509,8 @@ char *NextEntry(char *list)
   return s;
 }
 
-
-
-
-/* direct index access to parameter data base 
-   should not be needed except for, say, dumping the database 
-   for checkpointing */
-char *GetsInd(int i)
-{
-  if (0 <= i && i < npdb)
-    return pdb[i].value;
-  return 0;
-}
-
-char *GetnameInd(int i)
-{
-  if (0 <= i && i < npdb)
-    return pdb[i].name;
-  return 0;
-}
-
-tParameter *GetPointerTo_pbd(void)
-{
-  return pdb;
-}
-
-int GetnParameters(void)
-{
-  return npdb;
-}
-
-/* get the cached numerical value by Index */
-double GetCachedNumValByParIndex(int i)
-{
-  return pdb[i].numericalvalue;
-}
-
-/* get the cached boolean value by Index */
-int GetCachedBoolValByParIndex(int i)
-{
-  return pdb[i].booleanvalue;
-}
-
-/* get the par Index */
-int GetParIndex(char *name)
-{
-  return findparameterindex(name, 1);
-}
-
-/* set the global var pdb_iStart to the index of par name */
-int Set_pdb_iStart_AtPar(char *name)
-{
-  pdb_iStart = findparameterindex(name, 1);
-  return pdb_iStart;
-}
-
-
 /**************************************************************************/
-int iterate_parameters(int next)
+int iterate_parameters(tMesh* mesh, int next)
 {
   static int ncall = 0;
   tParameter *p;
@@ -556,7 +523,7 @@ int iterate_parameters(int next)
   if(next==0) { ncall=0;  return 0; }
 
   /* the default is that we don't want to iterate */
-  if (!Getv("iterate_parameters", "yes")) {
+  if (!Getv(Par("iterate_parameters"), "yes")) {
 
     /* return 1 for first call, but 0 for second call, which exits nmesh */
     if (ncall < 0) 
@@ -571,19 +538,19 @@ int iterate_parameters(int next)
   prdivider(0);
   printf("Iterating parameters:\n");
 
-  sprintf(newoutdir, "%s", Gets("parameterfile"));
+  sprintf(newoutdir, "%s", Gets(Par("parameterfile")));
   *strstr(newoutdir, ".par") = '\0';
 
-  p = findparameter(iterpar, 0);
+  p = findparameter(mesh, iterpar, 0);
   if (!p)
     errorexit("none found, specify iterate_parameter1\n");
 
   j = 1;
   while (p) {
-    list = Gets(iterpar);
+    list = Gets(Par(iterpar));
 
     name = NextEntry(list);
-    if (!findparameter(name, 0))
+    if (!findparameter(mesh, name, 0))
       errorexit("iterate_parameterN has to start "
 		"with name of existing parameter");
  
@@ -600,23 +567,23 @@ int iterate_parameters(int next)
     }
 
     if (newvalue) {
-      Sets(name, newvalue);
-      printf("%38s = %s\n", name, Gets(name));
+      Sets(Par(name), newvalue);
+      printf("%38s = %s\n", name, Gets(Par(name)));
 
       l = strlen(newoutdir);
       sprintf(newoutdir+l, "_%s", newvalue);
-      Sets("outdir", newoutdir);
+      Sets(Par("outdir"), newoutdir);
     }
 
     j++;
     l = strlen("iterate_parameter");
     sprintf(iterpar+l, "%d", j);
-    p = findparameter(iterpar, 0);
+    p = findparameter(mesh, iterpar, 0);
   }
 
   if (newvalue) {
     printf("Starting iteration %d\n", ncall);
-    if (1) printf("  outdir = %s\n", Gets("outdir"));
+    if (1) printf("  outdir = %s\n", Gets(Par("outdir")));
     outdirp = (char *) calloc(strlen(newoutdir)+40, sizeof(char));
     strcpy(outdirp, newoutdir);
     strcat(outdirp, "_previous");
@@ -647,9 +614,9 @@ void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache)
   }
 }
 /* print entire parameter database */
-void print_parameter_database(void)
+void print_parameter_database(tMesh *mesh)
 {
-  print_pdb_i1_i2(pdb, 0, npdb-1, 0,0);
+  print_pdb_i1_i2(mesh->pdb, 0, mesh->npdb-1, 0,0);
 }
 
 /**********************************************/
@@ -755,11 +722,4 @@ void free_pdb(tParameter *pdb1, int npdb1)
 {
   free_pdb_contents(pdb1, npdb1);
   free(pdb1);
-}
-
-/* free the global parameter database pdb and set npdb=0 */
-void free_global_parameter_database_contents(void)
-{
-  free_pdb_contents(pdb, npdb);
-  npdb = 0;
 }

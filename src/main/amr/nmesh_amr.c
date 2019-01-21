@@ -6,7 +6,7 @@
 
 
 
-int nmesh_amr(void) 
+int nmesh_amr(tMesh *mesh)
 {
   printf("Adding amr\n");
 

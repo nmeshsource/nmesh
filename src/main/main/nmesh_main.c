@@ -6,7 +6,7 @@
 
 
 
-int nmesh_main(void) 
+int nmesh_main(tMesh *mesh)
 {
   printf("Adding main\n");
 

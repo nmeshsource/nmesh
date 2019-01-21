@@ -70,6 +70,7 @@ typedef struct tMESH {
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
   struct tVAR *vdb; /* variable data base */
   struct tPAR *pdb; /* parameter data base */
+  int pdb_iStart;   /* index we start at when searching for a par */
   tPat **pat;       /* list of pointers to patches */
   tNlist *ln;       /* linked list of all leaf nodes */
 } tMesh;

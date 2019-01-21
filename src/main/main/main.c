@@ -19,32 +19,33 @@ void initialize_libraries(struct tMESH *mesh)
 /* main */
 int main(int argc, char **argv) 
 {
-  tMesh *m;
+  tMesh *mesh;
   
   nmesh_MPI_Init(&argc, &argv);
 
   /* make first mesh in which we store pars, vars and funs */
-  m = make_empty_mesh(1);
+  mesh = make_empty_mesh(1);
 
   /* start the main parts of nmesh: */
   initTimeIn_s();
-  read_command_line(m, argc, argv);
-  parse_parameter_file(m, Gets("parameterfile"));
-  parse_command_line_options(m);
-  make_output_directory(m);
-  initialize_libraries(m);
+  read_command_line(mesh, argc, argv);
+  parse_parameter_file(mesh, Gets(Par("parameterfile")));
+  parse_command_line_options(mesh);
+  make_output_directory(mesh);
+  initialize_libraries(mesh);
 
-  iterate_parameters(m, 0); /* start of new iteration */
-  while(iterate_parameters(m, 1))
+  iterate_parameters(mesh, 0); /* start of new iteration */
+  while(iterate_parameters(mesh, 1))
   {
-    RunFun(m, POST_PARAMETERS); //hook for funs right after iterate_parameters
-    RunFun(m, INITMESH); // here we schedule funcs to programatically set up the mesh
-    inidata_mesh(m);
-    evolve_mesh(m);
-    finalize_mesh(m);
-    RunFun(m, POST_FINALIZE_MESH); //hook after finalize_mesh, e.g. for special cleanup
-    makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
-    Sets("outdir_previous_iteration", Gets("outdir"));
+    RunFun(mesh, POST_PARAMETERS); //hook for funs right after iterate_parameters
+    RunFun(mesh, INITMESH); // here we schedule funcs to programatically set up the mesh
+    inidata_mesh(mesh);
+    evolve_mesh(mesh);
+    finalize_mesh(mesh);
+    RunFun(mesh, POST_FINALIZE_MESH); //hook after finalize_mesh, e.g. for special cleanup
+    makeparameter(mesh, "outdir_previous_iteration", "",
+                  "outdir of previous iteration");
+    Sets(Par("outdir_previous_iteration"), Gets(Par("outdir")));
   }
 
   nmesh_MPI_Finalize();
@@ -139,7 +140,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
 
 int make_output_directory(tMesh *mesh)
 {
-  char *outdir  = Gets("outdir");
+  char *outdir  = Gets(Par("outdir"));
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
   char so[1000];
 
@@ -158,7 +159,7 @@ int make_output_directory(tMesh *mesh)
 
   /* check if we remove outdir_previous */
   /*
-  if(!GetvLax("nmesh_options", "--keep_previous"))
+  if(!GetvLax(Par("nmesh_options"), "--keep_previous"))
   {
     char *prev = checkpoint_filename("_previous", "");
     char *curr = checkpoint_filename("", "");
@@ -186,8 +187,8 @@ int make_output_directory(tMesh *mesh)
 
   /* make output directory, save parfile */
   system2("mkdir", outdir);
-  /* system3("cp", Gets("parameterfile"), outdir); */
-  copy_file_into_dir(Gets("parameterfile"), outdir);
+  /* system3("cp", Gets(Par("parameterfile")), outdir); */
+  copy_file_into_dir(Gets(Par("parameterfile")), outdir);
 
   /* redirect stdout and stderr for MPI jobs 
      all output is collected in outdir/stdout.001 etc  */
@@ -226,11 +227,11 @@ int parse_command_line_options(tMesh *mesh)
   char *val;
   
   /* get length of nmesh_options string */
-  if(GetsLax("nmesh_options")==0) return 0;
+  if(GetsLax(Par("nmesh_options"))==0) return 0;
   printf("Parsing command line options\n");
 
   /* parse for all --modify-par: */
-  optionstr = strdup((GetsLax("nmesh_options")));
+  optionstr = strdup((GetsLax(Par("nmesh_options"))));
   str1 = optionstr;
   while( (str1=strstr(str1, "--modify-par:"))!=NULL )
   {
@@ -258,7 +259,7 @@ int parse_command_line_options(tMesh *mesh)
 
 
 /* initialize mesh */
-int inidata_mesh(tMesh *m)
+int inidata_mesh(tMesh *mesh)
 {
   if (1) {
     prdivider(0);
@@ -266,25 +267,25 @@ int inidata_mesh(tMesh *m)
   }
 
   /* compute initial data */
-  RunFun(m, INITIALDATA);
+  RunFun(mesh, INITIALDATA);
 
   /* initial data is just another new time slice */
-  RunFun(m, POST_EVOLVE);
+  RunFun(mesh, POST_EVOLVE);
 
   /* initial data complete */
   prdivider(0);
   printf("Done with initialization\n");
-  //printf(" iteration %d, time=%g\n", m->iteration, m->time);
-  printf(" iteration %d\n", m->iteration);
+  //printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
+  printf(" iteration %d\n", mesh->iteration);
 
   /* analyze initial data */
-  RunFun(m, ANALYZE);
+  RunFun(mesh, ANALYZE);
 
   /* output for permanent variables */
-  RunFun(m, OUTPUT);
+  RunFun(mesh, OUTPUT);
 
   /* checkpoint, just in case we need it here already */
-  //checkpoint(m);
+  //checkpoint(mesh);
 
   return 0;
 }
@@ -295,8 +296,8 @@ int inidata_mesh(tMesh *m)
 /* evolve mesh */
 int evolve_mesh(tMesh *mesh)
 {
-  int iterationmax = Geti("iterations");
-  double timemax = Getd("finaltime");
+  int iterationmax = Geti(Par("iterations"));
+  double timemax = Getd(Par("finaltime"));
 
   prdivider(0);
 
@@ -310,7 +311,7 @@ int evolve_mesh(tMesh *mesh)
   if (iterationmax <= 0) return 0;
 
   /* outermost evolution loop */
-  while (mesh->iteration < iterationmax)
+  while(mesh->iteration < iterationmax)
   { 
     /* pre evolve */
     RunFun(mesh, PRE_EVOLVE); 
@@ -343,8 +344,9 @@ int evolve_mesh(tMesh *mesh)
     //checkpoint(mesh);
   
     /* update since this may change during evolution, say when checkpointing */
-    timemax= Getd("finaltime");
-    iterationmax= (timemax > 0) ? timemax/mesh->dt + 0.5 : Geti("iterations");
+    timemax = Getd(Par("finaltime"));
+    iterationmax
+      = (timemax > 0) ? timemax/mesh->dt + 0.5 : Geti(Par("iterations"));
   }
   return 0;
 }
@@ -352,9 +354,9 @@ int evolve_mesh(tMesh *mesh)
 
 
 /* finalize mesh */
-int finalize_mesh(tMesh *m)
+int finalize_mesh(tMesh *mesh)
 {
   prdivider(0);
-  free_mesh(m);
+  free_mesh(mesh);
   return 0;
 }

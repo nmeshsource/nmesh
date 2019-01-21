@@ -96,43 +96,49 @@ void RunFun(tMesh *mesh, int step);
 
 /* parameters.c */
 /* parameter data base structure */
-typedef struct {
+typedef struct tPAR {
   char *name;
   char *value;
   char *description;
   double numericalvalue; /* some pars are pure numbers, we cache them here */
   int booleanvalue; /* some pars are true/false, we cache them here as 1/0 */
 } tParameter;
-void makeparameter(char *name, char *value, char *description);
-void AddPar(char *name, char *value, char *description);
-void AddOrModifyPar(char *name, char *value, char *description);
-void Sets(char *name, char *value);
-void Seti(char *name, int i);
-void Setd(char *name, double d);
-char *Gets(char *name);
-char *GetsLax(char *name);
-int Geti(char *name);
-double Getd(char *name);
-int Getv(char *name, char *value);
-int GetvLax(char *name, char *value);
-char *NextEntry(char *list);
-void Appends(char *name, char *value);
-char *GetsInd(int i);
-char *GetnameInd(int i);
-tParameter *GetPointerTo_pbd(void);
-int GetnParameters(void);
-double GetCachedNumValByParIndex(int i);
-int GetCachedBoolValByParIndex(int i);
-int GetParIndex(char *name);
-int Set_pdb_iStart_AtPar(char *name);
-void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache);
-void print_parameter_database(void);
-void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
-                                 tParameter **pdb2);
-tParameter *make_empty_pdb(int npdb1max);
-void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2);
-void free_pdb(tParameter *pdb1, int npdb1);
-void free_global_parameter_database_contents(void);
+void AddMeshPar(tMesh *mesh, char *name, char *value, char *description);
+void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description);
+void makeparameter(tMesh *mesh, char *name, char *value, char *description);
+int findparameterindex(tMesh *mesh, char *name, int fatal);
+void MeshParSets(tMesh *mesh, int pi, char *value);
+void MeshParSeti(tMesh *mesh, int pi, int i);
+void MeshParSetd(tMesh *mesh, int pi, double d);
+void MeshParAppends(tMesh *mesh, int pi, char *value);
+char *MeshParGets(tMesh *mesh, int i);
+char *MeshParGetsLax(tMesh *mesh, int i);
+int MeshParGeti(tMesh *mesh, int i);
+double MeshParGetd(tMesh *mesh, int i);
+int MeshParGetb(tMesh *mesh, int i);
+int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal);
+/* conveniece macros to query and set  pars */
+#define AddPar(name, val, desc) AddMeshPar(mesh, (name), (val), (desc))
+#define AddOrModifyPar(name, val, desc) AddOrModifyMeshPar(mesh, (name), \
+                                                           (val), (desc))
+#define GetMeshParIndex(mesh, name, fatal) findparameterindex((mesh), (name), (fatal))
+#define Par(name)     findparameterindex(mesh, (name), 1)
+#define PLax(name)    findparameterindex(mesh, (name), 0)
+#define Geti(ip)      MeshParGeti(mesh, (ip))
+#define Getd(ip)      MeshParGetd(mesh, (ip))
+#define Getb(ip)      MeshParGetb(mesh, (ip))
+#define Gets(ip)      MeshParGets(mesh, (ip))
+#define GetsLax(ip)   MeshParGetsLax(mesh, (ip))
+#define Getv(ip, val) MeshParGetv_fatal(mesh, (ip), (val), 1)
+// use like this: if(Getv(Par("parname"), "value")) x = Setd(Par("parname2"))
+#define Seti(ip, i)   MeshParSeti(mesh, (ip), (i))
+#define Setd(ip, x)   MeshParSetd(mesh, (ip), (x))
+#define Sets(ip, s)   MeshParSets(mesh, (ip), (s))
+#define Appends(ip, s)  MeshParAppends(mesh, (ip), (s))
+
+
+
+
 
 
 /* tensors.c */
