@@ -5,8 +5,8 @@
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
-  double **v;           /* list of data pointers to 3d variables */
-  double **g[6];        /* list of data pointers to 2d ghost zones */
+  struct tARRAY **v;    /* list of data pointers to 3d variables */
+  struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
         // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
 } tDat;
 
@@ -22,6 +22,9 @@ typedef struct tNODE {
              // if e.g. nb[3][1]=0 there in no 2nd neighb. in +Y dir.
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
   int n[3];               /* number of points in X,Y,Z-directions */
+  int np;                 /* np = n[0] * n[1] * n[2]; */
+  struct tARRAY *D[3];    /* differentiation matrix in all 3 dirs for [-1,1]
+                             domain. This just points to an array in patch. */
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int i;                  /* node index (0-7) */
@@ -31,15 +34,15 @@ typedef struct tNODE {
 
 /* the nodes fill a patch */
 typedef struct tPAT {
-  struct tMESH *mesh;   /* pointer to mesh that contains patch */
+  double bbox[6];       /* bounding box (in X,Y,Z) of this patch */
   int p;                /* index of this patch */
+  struct tMESH *mesh;   /* pointer to mesh that contains patch */
   /* funcs to compute X,Y,Z from x,y,z and vice versa: */
   int (*XYZ_Of_xyz)(struct tPAT *pat, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
   int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
-  double bbox[6];   /* bounding box (in X,Y,Z) of this patch */
-  tNode *rnode;     /* root node in this patch */
-  int np;           /* np = n[0] * n[1] * n[2]; */
-  double *D[3];     /* differentiation matrix in all 3 dirs for [-1,1] domain */
+  tNode *rnode;         /* root node in this patch */
+  struct tARRAY **D;    /* list of differentiation matrices */
+  int nD;               /* number of diff matrices stored */
 } tPat;
 
 
@@ -66,3 +69,13 @@ typedef struct tMESH {
   tPat **pat;       /* list of pointers to patches */
 } tMesh;
 
+
+/***********************************************************************/
+/* other useful objects */
+/***********************************************************************/
+typedef struct tARRAY {
+  void *p;    /* pointer to patch or node array belongs to */
+  double *d;  /* pointer to double data */
+  int n[3];   /* dims in all 3 dirs */
+  int np;     /* np = n[0] * n[1] * n[2]; */
+} tArray;
