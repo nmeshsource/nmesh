@@ -62,7 +62,7 @@ void free_mesh(tMesh *mesh)
   int i;
 
   if (!mesh) return;
-  for (i = 0; i < mesh->npatches; i++)
+  for(i = 0; i < mesh->npats; i++)
     free_patch(mesh->pat[i]);
   free(mesh);
 }

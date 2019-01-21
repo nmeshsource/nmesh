@@ -7,25 +7,54 @@
 
 /* print information about various objects */
 
-void printmesh(tMesh *g)
+void printmesh(tMesh *m)
 {
   int i;
 
-  printf("mesh=%p: nboxes=%d, nvariables=%d, dt=%g\n",
-	 g, g->nboxes, g->nvariables, g->dt);
-  for (i = 0; i < g->nboxes; i++)
-    printbox(g->box[i]);
+  printf("mesh=%p: npats=%d, nvdb=%d, dt=%g\n",
+	 m, m->npats, m->nvdb, m->dt);
+  //forallpats
+  // printpatch(pat);
 }
 
-void printpatch(tPat *box)
+void printpatch(tPat *pat)
 {
-  printf("p=%d:\n", box->b);
+  printf("p=%d:\n", pat->p);
 }
 
 void printnode(tNode *n) 
 {
   printf("l=%d", n->l);
   printf("\n");
+}
+
+
+/* print a variable in a node */
+void printvar_innode(tNode *node, char *name)
+{
+  double *v = 0; //node->v[Ind(name)];
+  int i,j,k;
+  int *n = node->n;
+
+  printf("%s, %p, Ind=%d:\n", name, v, Ind(name));
+  if(v)
+  {
+    //forallijk(i,j,k)
+    {
+      printf("%g ", v[Index(i,j,k)]);
+    }
+  }    
+  printf("%s ends here.\n", name);
+}
+
+
+/* print a variable list */
+void printVarList(tVarList *vl)
+{
+  int i;
+
+  for(i = 0; i < vl->n; i++)
+    printf("%s\n", VarName(vl->index[i]));      
 }
 
 /*
@@ -59,33 +88,3 @@ void printbfaces(tPat *pat)
   }
 }
 */
-
-/* print a variable in a node */
-void printvar_innode(tNode *node, char *name)
-{
-  double *v = 0; //node->v[Ind(name)];
-  int i,j,k;
-  int *n = node->n;
-
-  printf("%s, %p, Ind=%d:\n", name, v, Ind(name));
-  if(v)
-  {
-    //forallijk(i,j,k)
-    {
-      printf("%g ", v[Index(i,j,k)]);
-    }
-  }    
-  printf("%s ends here.\n", name);
-}
-
-
-/* print a variable list */
-void printVarList(tVarList *vl)
-{
-  int i;
-  tMesh *mesh = vl->mesh;
-
-  for(i = 0; i < vl->n; i++)
-    printf("%s\n", VarName(vl->index[i]));      
-}
-

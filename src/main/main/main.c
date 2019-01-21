@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
 
 /* read command line */
-int read_command_line(int argc, char **argv)
+int read_command_line(tMesh *mesh, int argc, char **argv)
 {
   int i; 
 
@@ -137,7 +137,7 @@ int read_command_line(int argc, char **argv)
   return 0;
 }
 
-int make_output_directory(void)
+int make_output_directory(tMesh *mesh)
 {
   char *outdir  = Gets("outdir");
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
@@ -178,11 +178,11 @@ int make_output_directory(void)
     if(fpcurr) fclose(fpcurr);
     free(prev);
     free(curr);
-    */
-    /* remove outdir_previous and move outdir to outdir_previous */
+    // remove outdir_previous and move outdir to outdir_previous
     system2("rm -rf", outdirp);
     system3("mv", outdir, outdirp);
   }
+  */
 
   /* make output directory, save parfile */
   system2("mkdir", outdir);
@@ -191,17 +191,17 @@ int make_output_directory(void)
 
   /* redirect stdout and stderr for MPI jobs 
      all output is collected in outdir/stdout.001 etc  */
-  if (nmesh_MPI_rank()>0)
+  if(nMPI_rank()>0)
   {
-    f[100];
+    char f[100];
     snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nmesh_MPI_size())+1);
-    snprintf(so,999, f, outdir, nmesh_MPI_rank());  
+    snprintf(so,999, f, outdir, nMPI_rank());  
     freopen(so, "w", stdout);   
     freopen(so, "w", stderr);
   }
   else /* always redirect output of proc0 to outdir.log */
   {
-    snprintf(s,999, "%s.log", outdir);
+    snprintf(so,999, "%s.log", outdir);
     freopen(so, "a", stdout);   
     freopen(so, "a", stderr);
   }
@@ -217,7 +217,7 @@ int make_output_directory(void)
 
 
 /* go through options and act accordingly */
-int parse_command_line_options(void)
+int parse_command_line_options(tMesh *mesh)
 {
   char *optionstr;
   char *str1;
@@ -274,7 +274,8 @@ int inidata_mesh(tMesh *m)
   /* initial data complete */
   prdivider(0);
   printf("Done with initialization\n");
-  printf(" iteration %d, time=%g\n", m->iteration, m->time);
+  //printf(" iteration %d, time=%g\n", m->iteration, m->time);
+  printf(" iteration %d\n", m->iteration);
 
   /* analyze initial data */
   RunFun(m, ANALYZE);
@@ -322,10 +323,11 @@ int evolve_mesh(tMesh *mesh)
 
     /* evolution step complete */
     mesh->iteration++;
-    mesh->time = mesh->iteration * mesh->dt;
+    //mesh->time = mesh->iteration * mesh->dt;
 
     /* print info */
-    printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
+    //printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
+    printf(" iteration %d\n", mesh->iteration);
     fflush(stdout); 
 
     /* analyze */

@@ -64,7 +64,7 @@ typedef struct tPAT {
 typedef struct tMESH {
   double dt;        /* time step */
   int iteration;    /* current iteration number */
-  int npatches;     /* number of patches */
+  int npats;        /* number of patches */
   int nvdb;         /* number of variables */
   int npdb;         /* number of mesh parameters */
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
