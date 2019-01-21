@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   nmesh_MPI_Init(&argc, &argv);
 
   /* make first mesh in which we store pars, vars and funs */
-  m = make_emmpty_mesh(1);
+  m = make_empty_mesh(1);
 
   /* start the main parts of nmesh: */
   initTimeIn_s();

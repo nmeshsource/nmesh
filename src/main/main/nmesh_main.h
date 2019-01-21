@@ -228,12 +228,12 @@ tVarList *VLPtrEnable1(tMesh *mesh, char *varname);
 void VLDisableFree(tVarList *vl);
 
 /* utilities.c */
-void errorexit(char *file, int line, char *s);
-void errorexits(char *file, int line, char *s, char *t);
-void errorexiti(char *file, int line, char *s, int i);
-#define errorexit(s) errorexit(__FILE__, __LINE__, (s))
-#define errorexits(s,t) errorexits(__FILE__, __LINE__, (s), (t))
-#define errorexiti(s,i) errorexiti(__FILE__, __LINE__, (s), (i))
+void  errorexit(char *file, int line, const char *func, char *s);
+void errorexits(char *file, int line, const char *func, char *s, char *t);
+void errorexiti(char *file, int line, const char *func, char *s, int i);
+#define errorexit(s)     errorexit(__FILE__, __LINE__, __func__, (s))
+#define errorexits(s,t) errorexits(__FILE__, __LINE__, __func__, (s), (t))
+#define errorexiti(s,i) errorexiti(__FILE__, __LINE__, __func__, (s), (i))
 #define PRF     printf("%s", __func__)
 #define PRFs(s) printf("%s%s", __func__, s)
 

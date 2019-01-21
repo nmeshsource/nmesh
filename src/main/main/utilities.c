@@ -454,28 +454,30 @@ void finalexit(int ec)
 #undef errorexits
 #undef errorexiti
 
-void errorexit(char *file, int line, char *s) 
+void errorexit(char *file, int line, const char *func, char *s)
 {
-  fprintf(stdout, "Error: %s  ", s);
-  fprintf(stdout, "(%s, line %d)\n", file, line);
+  fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
+  fprintf(stdout, "Error: %s\n", s);
   fflush(stdout);
   finalexit(1);
 }
 
-void errorexits(char *file, int line, char *s, char *t)
+void errorexits(char *file, int line, const char *func, char *s, char *t)
 {
+  fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: ");
   fprintf(stdout, s, t);
-  fprintf(stdout, "  (%s, line %d)\n", file, line);
+  fprintf(stdout, "\n");
   fflush(stdout);
   finalexit(1);
 }
 
-void errorexiti(char *file, int line, char *s, int i)
+void errorexiti(char *file, int line, const char *func, char *s, int i)
 {
+  fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: ");
   fprintf(stdout, s, i);
-  fprintf(stdout, "  (%s, line %d)\n", file, line);
+  fprintf(stdout, "\n");
   fflush(stdout);
   finalexit(1);
 }
