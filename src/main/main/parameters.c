@@ -71,7 +71,7 @@ void parse_parameter_file(char *parfile)
   buffer[i] = '\0';
   nbuffer = strlen(buffer);
 
-  if (0) { printf("%s", buffer); yo(); }
+  if(0) { printf("%s", buffer); Yo(1); }
 
   /* white out comments and quotes */
   for (i = 0; i < nbuffer; i++) { 
