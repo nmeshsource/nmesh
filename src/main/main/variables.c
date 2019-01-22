@@ -387,7 +387,7 @@ void vldisable(tVarList *v)
 tVarList *VLPtrEnable1(tMesh *mesh, char *varname)
 {
   tVarList *vl = vlalloc(mesh);
-  int i = MeshVarInd(varname);
+  int i = MeshVarInd(mesh, varname);
   
   enablevar(mesh, i);
   vlpush(vl, i);
@@ -413,6 +413,8 @@ void VLDisableFree(tVarList *vl)
 */
 tVarList *AddDuplicate(tVarList *vl, char *postfix) 
 {
+  tMesh *mesh = vl->mesh;
+  tVar *vdb = mesh->vdb;
   char name[1000];
   int i, j;
   int nadded = 0;
@@ -454,7 +456,6 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
     newvar->ncomponents   = var->ncomponents;
     newvar->farlimit      = var->farlimit;
     newvar->falloff       = var->falloff;
-    newvar->propspeed     = var->propspeed;
     newvar->constant      = var->constant;
     for (j = 0; j < 3; j++)
       newvar->sym[j] = var->sym[j];
@@ -464,11 +465,10 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
      do it on all pats so that nvariables remains the same on all pats
   */
   if (vl->mesh && nadded) {
-    tMesh *m = vl->mesh;
-    int n = g->nvariables + nadded;
-    realloc_meshvariables(g, n);
+    int n = mesh->nvariables + nadded;
+    realloc_meshvariables(mesh, n);
   }
-  if (0) printf("nvdb is now %d\n", nvdb);
+  if (0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
   
   return newvl;
 }
@@ -493,21 +493,18 @@ tVarList *AddDuplicateEnable(tVarList *vl, char *postfix)
 void vlsetconstant(tVarList *u, const double c)
 {
   tMesh *mesh = u->mesh;
+  tNode *node;
   double *pu;
-  int i, n;
+  int i, n, ui;
   int b;
 
-  forallpates(mesh, b)
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[b];
-    int nnodes = pat->nnodes;
-
-    for (n = 0; n < u->n; n++)
+    for(n=0; n<u->n; n++)
     {
-      pu = pat->v[u->index[n]];
-
-      SGRID_LEVEL3_Pragma(omp parallel for)
-      for (i = 0; i < nnodes; i++)
+      ui = u->index[n];
+      pu = GetVarDpointer(node, ui);
+      forvari(node, ui, i)
         pu[i] = c;
     }
   }
@@ -520,25 +517,23 @@ void vlsetconstant(tVarList *u, const double c)
 void vlcopy(tVarList *v, tVarList *u)
 {
   tMesh *mesh = v->mesh;
+  tNode *node;
   double *pu, *pv;
-  int i, n;
+  int i, n, vi,ui;
   int b;
 
   /* copy time */
   v->time = u->time;
 
-  forallpates(mesh, b)
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[b];
-    int nnodes = pat->nnodes;
-
-    for (n = 0; n < v->n; n++)
+    for(n=0; n<v->n; n++)
     {
-      pu = pat->v[u->index[n]];
-      pv = pat->v[v->index[n]];
-
-      SGRID_LEVEL3_Pragma(omp parallel for)
-      for (i = 0; i < nnodes; i++)
+      ui = u->index[n];
+      vi = v->index[n];
+      pu = GetVarDpointer(node, ui);
+      pv = GetVarDpointer(node, vi);
+      forvari(node, vi, i)
         pv[i] = pu[i];
     }
   }
@@ -568,6 +563,7 @@ void varcopy(tMesh *mesh, int iv, int iu)
 void vlswap(tVarList *v, tVarList *u)
 {
   tMesh *mesh = v->mesh;
+  tNode *node;
   double *pu, *pv;
   int i, n;
   int b;
@@ -578,18 +574,15 @@ void vlswap(tVarList *v, tVarList *u)
   v->time = u->time;
   u->time = temp;
 
-  forallpates(mesh, b)
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[b];
-    int nnodes = pat->nnodes;
-
-    for (n = 0; n < v->n; n++)
+    for(n=0; n<v->n; n++)
     {
-      pu = pat->v[u->index[n]];
-      pv = pat->v[v->index[n]];
-
-      SGRID_LEVEL3_Pragma(omp parallel for)
-      for (i = 0; i < nnodes; i++)
+      int ui = u->index[n];
+      int vi = v->index[n];
+      pu = GetVarDpointer(node, ui);
+      pv = GetVarDpointer(node, vi);
+      forvari(node, vi, i)
       {
         temp  = pv[i];
         pv[i] = pu[i];
@@ -616,24 +609,23 @@ void varswap(tMesh *mesh, int iv, int iu)
 void vlaverage(tVarList *r, tVarList *a, tVarList *b)
 {
   tMesh *mesh = r->mesh;
+  tNode *node;
   double *pr, *pa, *pb;
   double c = 0.5;
   int i, n;
-  int bi;
 
-  forallpates(mesh, bi)
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[bi];
-    int nnodes = pat->nnodes;
-
-    for (n = 0; n < r->n; n++)
+    for(n=0; n<r->n; n++)
     {
-      pr = pat->v[r->index[n]];
-      pa = pat->v[a->index[n]];
-      pb = pat->v[b->index[n]];
+      int ri = r->index[n];
+      int ai = a->index[n];
+      int bi = b->index[n];
+      pr = GetVarDpointer(node, ri);
+      pa = GetVarDpointer(node, ai);
+      pb = GetVarDpointer(node, bi);
 
-      SGRID_LEVEL3_Pragma(omp parallel for)
-      for (i = 0; i < nnodes; i++)
+      forvari(node, ri, i)
         pr[i] = c * (pa[i] + pb[i]);
     }
   }
@@ -649,23 +641,22 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
 void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
 {
   tMesh *mesh = r->mesh;
+  tNode *node;
   double *pr, *pa, *pb;
   int i, n;
-  int bi;
 
-  forallpates(mesh, bi)
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[bi];
-    int nnodes = pat->nnodes;
-
-    for (n = 0; n < r->n; n++)
+    for(n=0; n<r->n; n++)
     {
-      pr = pat->v[r->index[n]];
-      pa = pat->v[a->index[n]];
-      pb = pat->v[b->index[n]];
+      int ri = r->index[n];
+      int ai = a->index[n];
+      int bi = b->index[n];
+      pr = GetVarDpointer(node, ri);
+      pa = GetVarDpointer(node, ai);
+      pb = GetVarDpointer(node, bi);
 
-      SGRID_LEVEL3_Pragma(omp parallel for)
-      for (i = 0; i < nnodes; i++)
+      forvari(node, ri, i)
         pr[i] = pa[i] - pb[i];
     }
   }
@@ -684,36 +675,37 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
 void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b) 
 {
   tMesh *mesh = r->mesh;
+  tNode *node;
   double *pr, *pa, *pb;
   int i, n;
-  int bi;
 
-  forallpates(mesh, bi)
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[bi];
-    int nnodes = pat->nnodes;
-
-    for (n = 0; n < r->n; n++)
+    for(n=0; n<r->n; n++)
     {
-      pr = pat->v[r->index[n]];
-      if(ca!=0)  pa = pat->v[a->index[n]];
-      if(cb!=0)  pb = pat->v[b->index[n]];
+      int ri = r->index[n];
+      int ai = a->index[n];
+      int bi = b->index[n];
+      pr = GetVarDpointer(node, ri);
+      if(ca!=0)  pa = GetVarDpointer(node, ai);
+      if(cb!=0)  pb = GetVarDpointer(node, bi);
 
-      if (ca == 0 && cb == 0) {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] = 0; }
-
-      else if (ca == 0) {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] = cb * pb[i]; }
-
-      else if (cb == 0) {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] = ca * pa[i]; }
-
-      else {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] = ca * pa[i] + cb * pb[i]; }
+      if (ca == 0 && cb == 0)
+      {
+        forvari(node, ri, i) pr[i] = 0;
+      }
+      else if(ca == 0)
+      {
+        forvari(node, ri, i) pr[i] = cb * pb[i];
+      }
+      else if(cb == 0)
+      {
+        forvari(node, ri, i) pr[i] = ca * pa[i];
+      }
+      else
+      {
+        forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
+      }
     }
   }
   /* add times as well */
@@ -743,31 +735,34 @@ void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
 void vladdto(tVarList *r, const double ca, tVarList *a) 
 {
   tMesh *mesh = r->mesh;
-  int bi;
+  tNode *node;
 
   if (ca == 0) return;
-  
-  forallpates(mesh, bi)
+
+  fornodelist(mesh->lnodes, node)
   {
-    tPat *pat = mesh->pat[bi];
-    int nnodes = pat->nnodes;
     double *pr, *pa;
     int i, n;
 
-    for (n = 0; n < r->n; n++)
+    for(n=0; n<r->n; n++)
     {
-      pr = pat->v[r->index[n]];
-      pa = pat->v[a->index[n]];
-  
-      if (ca == 1) {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] += pa[i]; }
-      else if (ca == -1) {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] -= pa[i]; }
-      else {
-        SGRID_LEVEL3_Pragma(omp parallel for)
-        for (i = 0; i < nnodes; i++) pr[i] += ca * pa[i]; }
+      int ri = r->index[n];
+      int ai = a->index[n];
+      pr = GetVarDpointer(node, ri);
+      pa = GetVarDpointer(node, ai);
+
+      if (ca == 1)
+      {
+        forvari(node, ri, i) pr[i] += pa[i];
+      }
+      else if(ca == -1)
+      {
+        forvari(node, ri, i) pr[i] -= pa[i];
+      }
+      else
+      {
+        forvari(node, ri, i) pr[i] += ca * pa[i];
+      }
     }
   }
   /* add times as well */

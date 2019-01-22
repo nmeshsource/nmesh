@@ -54,9 +54,8 @@ typedef struct tPAT {
   tNode *rnode;         /* root node in this patch */
   struct tARRAY **D;    /* list of differentiation matrices */
   int nD;               /* number of diff matrices stored */
-  tNlist *ln;           /* linked list of leaf nodes in this patch */
+  tNlist *lnodes;       /* linked list of leaf nodes in this patch */
 } tPat;
-
 
 
 /* several patches and thus a list of leaf nodes make up the 
@@ -74,7 +73,7 @@ typedef struct tMESH {
   int pdb_iStart;   /* index we start at when searching for a par */
   int vdb_iStart;   /* index we start at when searching for a var */
   tPat **pat;       /* list of pointers to patches */
-  tNlist *ln;       /* linked list of all leaf nodes */
+  tNlist *lnodes    /* linked list of all leaf nodes */
 } tMesh;
 /* NOTE: the list lnodes needs to be distributed amoung MPI job:
 use space filling curve as in
@@ -85,22 +84,13 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 /***********************************************************************/
 /* other useful objects */
 /***********************************************************************/
-/* owner types */
-enum
-{
-  NODE,
-  PAT,
-  MESH,
-  NOWNERS
-};
-
 /* arrays */
 typedef struct tARRAY {
   int n[3];    /* dims in all 3 dirs */
   int N;       /* N = n[0] * n[1] * n[2]; */
   double *a;   /* pointer to double data (could add one more for GPU data) */
-  void *Owner; /* pointer to patch or node this array belongs to */
-  int tOwner;  /* type of owner, e.g. NODE OR PAT */
+//  void *Owner; /* pointer to patch or node this array belongs to */
+//  int tOwner;  /* type of owner, e.g. NODE OR PAT */
 } tArray;
 
 
@@ -110,8 +100,6 @@ typedef struct tVARLIST {
   int n;
   int *index;
   tMesh *mesh;  /* pointer to mesh to which vars belong */
-  void *Owner;  /* pointer to patch or node or ... this list belongs to */
-  int tOwner;   /* type of owner, e.g. NODE OR PAT */
   void *vlPars; /* A pointer that is usually NULL, but can point to some
                    object that contains special extra pars or info. This
                    pointer is not touched by the funcs in variables.c (such
@@ -121,8 +109,13 @@ typedef struct tVARLIST {
 
 
 /**************************************************************************/
+/* loops */
+/**************************************************************************/
+#include "nmesh_amr_loops.h"
+
+/**************************************************************************/
 /* functions */
-/***********************************************************************/
+/**************************************************************************/
 
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
