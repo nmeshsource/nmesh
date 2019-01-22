@@ -99,7 +99,7 @@ typedef struct tMESH {
   tPat **pat;       /* list of pointers to patches */
   tNlist *lnodes;   /* linked list of all leaf nodes */
 } tMesh;
-/* NOTE: the list lnodes needs to be distributed amoung MPI job:
+/* NOTE: the list lnodes needs to be distributed among MPI jobs:
 use space filling curve as in
 http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
