@@ -33,11 +33,6 @@ int main(int argc, char **argv)
 
   /* start the main parts of nmesh: */
   initTimeIn_s();
-
-  /* this par is needed here already, so that finalexit can check it */
-  printf("Adding first parameter\n");
-  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
-
   read_command_line(mesh, argc, argv);
   parse_parameter_file(mesh, Gets(Par("parameterfile")));
   parse_command_line_options(mesh);
@@ -88,7 +83,11 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
     exit(0);
   }
 
-  /* got two parameters */
+  /* this par is needed here already, so that finalexit can check it */
+  printf("Adding first parameter\n");
+  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+
+  /* got two or more arguments? */
   if (argc >= 2)
   {
     int nopts, nargs;
