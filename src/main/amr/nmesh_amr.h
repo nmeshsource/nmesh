@@ -135,6 +135,12 @@ tDat *alloc_dat(int nv);
 void free_dat(tDat *dat);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
+void enablevar_innode(tNode *node, int i);
+void disablevar_innode(tNode *node, int i);
+void enablevar_inpatch(tPat *pat, int i);
+void disablevar_inpatch(tPat *pat, int i);
+void enablevar(tMesh *mesh, int i);
+void disablevar(tMesh *mesh, int i);
 
 
 /* print.c */

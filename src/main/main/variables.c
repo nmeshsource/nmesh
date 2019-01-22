@@ -16,9 +16,7 @@ extern int nmesh_restarts;
    Don't use this if we have a mesh already! Instead use: AddVarToGrid */
 void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
 {
-  tVar *vdb = mesh->vdb;
-  int nvdb  = mesh->nvdb;
-  tVar *new;
+  tVar *newv;
   int i, j;
   char fullname[100];
   int nilist;
@@ -26,57 +24,53 @@ void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
   int sym[3*NINDEXLIST];
   char *symsigns[3] = {"-", "0", "+"}, **ss = symsigns+1;
 
-  if (0) printf("AddVar: name %s, tensorindices %s\n", name, tensorindices);
+  if(0) printf("AddVar: name %s, tensorindices %s\n", name, tensorindices);
 
   /* construct list of tensor indices */
   tensorindexlist(tensorindices, &nilist, ilist, sym);
 
   /* for each tensor index */
-  for (j = 0; j < nilist; j++)
+  for(j = 0; j < nilist; j++)
   {
     /* construct name of variable */
     snprintf(fullname, 100, "%s%s", name, ilist[j]);
     free(ilist[j]); /* free string allocated in tensorindexlist */
 
     /* make sure that this variable does not exist yet */
-    for(i = 0; i < nvdb; i++)
-      if(!strcmp(vdb[i].name, fullname))
+    for(i = 0; i < mesh->nvdb; i++)
+      if(!strcmp(mesh->vdb[i].name, fullname))
         break; /* this var is there already */
 
-    if(i < nvdb) /* we found a var that exist already */
-    {
-      if(nmesh_restarts==0)
-        errorexits("AddVar: variable \"%s\" already exists\n", fullname);
-      else
-        continue; /* jump to next var if nmesh_restarts!=0 */
-    }
+    if(i < mesh->nvdb) /* we found a var that exists already */
+      errorexits("variable \"%s\" already exists\n", fullname);
 
     /* print name of variable */
     printf("  variable  %s\n", fullname);
     if (0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
 
     /* variable does not exist, so add a new element to data base */
-    vdb = (tVar *) realloc(vdb, sizeof(tVar)*(nvdb+1));
-errorexit("we need to realloc mesh->vdb not vdb");
-    new = &vdb[nvdb];
+    mesh->vdb = realloc(mesh->vdb, sizeof(tVar)*(mesh->nvdb+1));
+
     /* initialize and fill in structure */
-    memset(new, 0, sizeof(tVar));
-    new->name          = strdup(fullname);
-    new->tensorindices = strdup(tensorindices);
-    new->description   = strdup(description);
-    new->index         = nvdb;
-    new->ncomponents   = nilist;
-    new->component     = j;
-    new->io            = NULL;
-    new->sym[0]        = sym[3*j];
-    new->sym[1]        = sym[3*j+1];
-    new->sym[2]        = sym[3*j+2];
+    newv = &(mesh->vdb[mesh->nvdb]);
+    memset(newv, 0, sizeof(tVar));
+    newv->name          = strdup(fullname);
+    newv->tensorindices = strdup(tensorindices);
+    newv->description   = strdup(description);
+    newv->index         = mesh->nvdb;
+    newv->ncomponents   = nilist;
+    newv->component     = j;
+    newv->io            = NULL;
+    newv->sym[0]        = sym[3*j];
+    newv->sym[1]        = sym[3*j+1];
+    newv->sym[2]        = sym[3*j+2];
 
-    nvdb++;
-errorexit("we need to incr mesh->nvdb not nvdb");
+    mesh->nvdb++;
   }
-}
 
+  /* ensure that allocation also happnes in the dat structs of the nodes */
+  realloc_meshvariables(mesh, mesh->nvdb);
+}
 
 
 /* add constant variable to data base */
@@ -422,6 +416,8 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
   tVarList *newvl;
   tVar *var, *newvar;
 
+  if(mesh==NULL) errorexit("vl->mesh is NULL");
+
   /* new variable list with same number of indices */
   newvl = vlduplicate(vl);
 
@@ -463,13 +459,12 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
       newvar->sym[j] = var->sym[j];
   }
 
-  /* create storage for as many variables as have been actually added 
-     do it on all pats so that nvariables remains the same on all pats
-  */
-  if (vl->mesh && nadded) {
-    int n = mesh->nvariables + nadded;
-    realloc_meshvariables(mesh, n);
-  }
+//  /* create storage for as many variables as have been actually added 
+//     do it on all pats so that nvariables remains the same on all pats */
+//  if (vl->mesh && nadded) {
+//    int n = mesh->nvariables + nadded;
+//    realloc_meshvariables(mesh, n);
+//  }
   if (0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
   
   return newvl;

@@ -208,14 +208,25 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
+  int nvdb_old = mesh->nvdb;
   tNode *node;
   if(1) printf("realloc_meshvariables from %d to %d\n", 
                  mesh->nvdb, nvdb_new);
 
+  /* realloc list on mesh struct */
+  mesh->vdb = realloc(mesh->vdb, sizeof(tVar)*(nvdb_new));
+
+  /* set newly added stuff to 0 */
+  if(nvdb_new > mesh->nvdb)
+  {
+    tVar *newv0 = &(mesh->vdb[nvdb_old]);
+    memset(newv0, 0, sizeof(tVar)*(nvdb_new-nvdb_old));
+  }
+  mesh->nvdb = nvdb_new;
+
+  /* now make sure dat in nodes is also reallocated */
   fornodelist(mesh->lnodes, node)
     realloc_nodevariables(node, nvdb_new);
-
-  mesh->nvdb = nvdb_new;
 }
 
 /**********************************************************************/
@@ -275,30 +286,38 @@ void disablevar_innode(tNode *node, int i)
 /* enable all components of a variable on one pat */
 void enablevar_inpatch(tPat *pat, int i)
 {
-  //fornodes(pat->ln)
-  //  enablevar_innode(node, i);
+  tNode *node;
+
+  fornodelist(pat->lnodes, node)
+    enablevar_innode(node, i);
 }
 
 /* disable all components of a variable on one pat */
 void disablevar_inpatch(tPat *pat, int i)
 {
-  //fornodes(pat->ln)
-  //  disablevar_innode(node, i);
+  tNode *node;
+
+  fornodelist(pat->lnodes, node)
+    disablevar_innode(node, i);
 }
 
 
 /* enable all components of a variable on one mesh */
 void enablevar(tMesh *mesh, int i)
 {
-  //forallpats(mesh)
-  //  enablevar_inpatch(pat, i)
+  int pi;
+
+  forpatches(mesh, pi)
+    enablevar_inpatch(mesh->pat[pi], i);
 }
 
 /* disable all components of a variable on one mesh */
 void disablevar(tMesh *mesh, int i)
 {
-  //forallpats(mesh)
-  //  disablevar_inpatch(pat, i)
+  int pi;
+
+  forpatches(mesh, pi)
+    disablevar_inpatch(mesh->pat[pi], i);
 }
 
 
