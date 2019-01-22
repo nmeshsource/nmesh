@@ -5,6 +5,10 @@
 #include "main.h"
 
 
+/* global var that contain the mesh made in main */
+tMesh *main_mesh;
+
+
 /* initialize libraries 
    the automatically generated file calls the initializers for each module */
 void initialize_libraries(struct tMESH *mesh)
@@ -25,6 +29,7 @@ int main(int argc, char **argv)
 
   /* make first mesh in which we store pars, vars and funs */
   mesh = make_empty_mesh(1);
+  main_mesh = mesh; /* save this mesh in a global var as well */
 
   /* start the main parts of nmesh: */
   initTimeIn_s();
@@ -275,8 +280,7 @@ int inidata_mesh(tMesh *mesh)
   /* initial data complete */
   prdivider(0);
   printf("Done with initialization\n");
-  //printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
-  printf(" iteration %d\n", mesh->iteration);
+  printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
   /* analyze initial data */
   RunFun(mesh, ANALYZE);
@@ -324,11 +328,10 @@ int evolve_mesh(tMesh *mesh)
 
     /* evolution step complete */
     mesh->iteration++;
-    //mesh->time = mesh->iteration * mesh->dt;
+    mesh->time = mesh->iteration * mesh->dt;
 
     /* print info */
-    //printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
-    printf(" iteration %d\n", mesh->iteration);
+    printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
     fflush(stdout); 
 
     /* analyze */

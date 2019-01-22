@@ -94,6 +94,7 @@
 void AddFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name);
 void RunFun(tMesh *mesh, int step);
 
+
 /* parameters.c */
 /* parameter data base structure */
 typedef struct tPAR {
@@ -130,15 +131,12 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal);
 #define Gets(ip)      MeshParGets(mesh, (ip))
 #define GetsLax(ip)   MeshParGetsLax(mesh, (ip))
 #define Getv(ip, val) MeshParGetv_fatal(mesh, (ip), (val), 1)
+#define GetvLax(ip, val) MeshParGetv_fatal(mesh, (ip), (val), 0)
 // use like this: if(Getv(Par("parname"), "value")) x = Setd(Par("parname2"))
 #define Seti(ip, i)   MeshParSeti(mesh, (ip), (i))
 #define Setd(ip, x)   MeshParSetd(mesh, (ip), (x))
 #define Sets(ip, s)   MeshParSets(mesh, (ip), (s))
 #define Appends(ip, s)  MeshParAppends(mesh, (ip), (s))
-
-
-
-
 
 
 /* tensors.c */
@@ -163,63 +161,31 @@ typedef struct tVAR {
   tIO *io;
   double farlimit;
   double falloff;
-  double propspeed;
   int sym[3];
   int constant;
 } tVar;
-int IndLax(char *name);
-int Ind(char *name);
-int Set_vdb_iStart_AtPar(char *name);
-void AddVar(char *name, char *indices, char *description);
-void AddConstantVar(char *name, char *tensorindices, char *description);
-void AddVarToGrid(tMesh *mesh, char *name, char *tensorindices,
-                  char *description);
-tVarList *AddDuplicate(tVarList *vl, char *postfix);
-tVarList *AddDuplicateEnable(tVarList *vl, char *postfix);
+void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description);
+void AddConstantMeshVar(tMesh *mesh, char *name, 
+                        char *tensorindices, char *description);
+int MeshVarIndLax(tMesh *mesh, char *name) ;
+int MeshVarInd(tMesh *mesh, char *name);
+int Set_vdb_iStart_AtVar(tMesh *mesh, char *name);
 
-char *VarName(int i);
-int VarNComponents(int i);
-int VarComponent(int i);
-int IndComponent0(int i);
-char *VarNameComponent0(char *name);
-char *VarTensorIndices(int i);
-void VarNameSetBoundaryInfo(char *name, 
-			    double farlimit, double falloff, double propspeed);
-double VarFallOff(int i);
-double VarFarLimit(int i);
-double VarPropSpeed(int i);
-int VarSymmetry(int i, int dir);
-void VarNameSetConstantFlag(char *name);
-int VarConstantFlag(int i);
+char *MeshVarName(tMesh *mesh, int i);
+int MeshVarNComponents(tMesh *mesh, int i);
+int MeshVarComponent(tMesh *mesh, int i);
+int MeshVarIndComponent0(tMesh *mesh, int i);
+char *MeshVarNameComponent0(tMesh *mesh, char *name);
+char *MeshVarTensorIndices(tMesh *mesh, int i);
+void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
+			        double farlimit, double falloff);
+void MeshVarNameSetConstantFlag(tMesh *mesh, char *name);
+double MeshVarFallOff(tMesh *mesh, int i);
+double MeshVarFarLimit(tMesh *mesh, int i);
+int MeshVarSymmetry(tMesh *mesh, int i, int dir);
+int MeshVarConstantFlag(tMesh *mesh, int i);
 
-void prvarlist(tVarList *v);
-void prvarlist_inpat(tPat *pat, tVarList *v);
-tVarList *vlalloc(tMesh *mesh);
-void vlenable(tVarList *v);
-void vlenablemesh(tMesh *mesh, tVarList *v);
-void vldisable(tVarList *v);
-void vlfree(tVarList *u);
-void vlpushone(tVarList *v, int vi);
-void vlpush(tVarList *v, int vi);
-void vlpushvl(tVarList *v, tVarList *u);
-void vldropone(tVarList *v, int vi);
-void vldrop(tVarList *v, int vi);
-void vldropn(tVarList *v, int n);
-tVarList *vlduplicate(tVarList *v);
-void vlsetconstant(tVarList *u, const double c);
-void vlcopy(tVarList *v, tVarList *u);
-void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u);
-void varcopy(tMesh *mesh, int iv, int iu);
-void vlswap(tVarList *v, tVarList *u);
-void varswap(tMesh *mesh, int iv, int iu);
-void vlaverage(tVarList *r, tVarList *a, tVarList *b);
-void vlsubtract(tVarList *r, tVarList *a, tVarList *b);
-void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b);
-void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib);
-void vladdto(tVarList *r, const double ca, tVarList *a);
 
-tVarList *VLPtrEnable1(tMesh *mesh, char *varname);
-void VLDisableFree(tVarList *vl);
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);
@@ -260,9 +226,11 @@ int *imalloc(int n);
 char *cmalloc(int n);
 void *pmalloc(int n);
 
+
 /* endianIO.c */
 size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp);
 size_t fread_double_little(double *buf, size_t nmemb, FILE *fp);
+
 
 /* nmesh_MPI.c */
 int nmesh_MPI_Init(int *pargc, char ***pargv);

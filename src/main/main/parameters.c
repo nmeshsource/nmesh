@@ -136,7 +136,10 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 
     pari = findparameterindex(mesh, par, 0);
     if(pari<0)
+    {
+      errorexits("par %s not found in any module", par);
       makeparameter(mesh, par, val, "not in libs");
+    }
     else
       setparameter(mesh, pari, val);
   }  

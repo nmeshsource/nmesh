@@ -63,6 +63,7 @@ typedef struct tPAT {
    computational mesh */
 typedef struct tMESH {
   double dt;        /* time step */
+  double time;      /* current time */
   int iteration;    /* current iteration number */
   int npats;        /* number of patches */
   int nvdb;         /* number of variables */
@@ -71,6 +72,7 @@ typedef struct tMESH {
   struct tVAR *vdb; /* variable data base */
   struct tPAR *pdb; /* parameter data base */
   int pdb_iStart;   /* index we start at when searching for a par */
+  int vdb_iStart;   /* index we start at when searching for a var */
   tPat **pat;       /* list of pointers to patches */
   tNlist *ln;       /* linked list of all leaf nodes */
 } tMesh;
@@ -107,7 +109,8 @@ typedef struct tVARLIST {
   double time;
   int n;
   int *index;
-  void *Owner;  /* pointer to patch or node this array belongs to */
+  tMesh *mesh;  /* pointer to mesh to which vars belong */
+  void *Owner;  /* pointer to patch or node or ... this list belongs to */
   int tOwner;   /* type of owner, e.g. NODE OR PAT */
   void *vlPars; /* A pointer that is usually NULL, but can point to some
                    object that contains special extra pars or info. This

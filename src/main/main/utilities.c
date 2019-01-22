@@ -16,7 +16,7 @@
 
 /* global vars for timing */
 double time_in_s_at_nmesh_start; /* set in main.c */
-
+extern tMesh *main_mesh;         /* mesh created in main */
 
 
 /* debug */
@@ -24,7 +24,7 @@ void Yo(double x) {fprintf(stdout, "Yo:%g\n", x);fflush(stdout);}
 
 
 
-/* pretty */
+/* output divider lines */
 void prdivider(int n)
 {
   printf("------------------------------------------------------------------------------\n");
@@ -441,9 +441,10 @@ void *pmalloc(int n)
 /* function that selects how we exit inside errorexit */
 void finalexit(int ec)
 {
+  tMesh *mesh = main_mesh;
   nmesh_MPI_Finalize();
-  if(GetvLax("errorexit", "abort"))  abort();
-  else                               exit(ec);
+  if(GetvLax(Par("errorexit"), "abort"))  abort();
+  else                                    exit(ec);
 }
 
 /* errorexit functions */

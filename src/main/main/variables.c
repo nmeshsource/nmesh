@@ -7,16 +7,17 @@
 extern int nmesh_restarts;
 
 
-tVar *vdb = 0;
-int vdb_iStart = 0, nvdb = 0, globalnvariables = 0;
-
+//tVar *vdb = 0;
+//int vdb_iStart = 0, nvdb = 0, globalnvariables = 0;
 
 
 
 /* add variable to data base.
    Don't use this if we have a mesh already! Instead use: AddVarToGrid */
-void AddVar(char *name, char *tensorindices, char *description)
+void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
 {
+  tVar *vdb = mesh->vdb;
+  int nvdb  = mesh->nvdb;
   tVar *new;
   int i, j;
   char fullname[100];
@@ -72,34 +73,29 @@ void AddVar(char *name, char *tensorindices, char *description)
     new->sym[2]        = sym[3*j+2];
 
     nvdb++;
-    globalnvariables = nvdb;
   }
 }
 
 
 
 /* add constant variable to data base */
-void AddConstantVar(char *name, char *tensorindices, char *description)
+void AddConstantMeshVar(tMesh *mesh, char *name,
+                        char *tensorindices, char *description)
 {
-  AddVar(name, tensorindices, description);
-  VarNameSetConstantFlag(vdb[nvdb-1].name);
-}
-
-/* add a Var if we have a mesh already */
-void AddVarToGrid(tMesh *mesh, char *name, char *tensorindices,
-                  char *description)
-{
-  AddVar(name, tensorindices, description);
-  if(mesh)
-    realloc_meshvariables(mesh, globalnvariables);
+  tVar *vdb = mesh->vdb;
+  int nvdb  = mesh->nvdb;
+  AddMeshVar(mesh, name, tensorindices, description);
+  MeshVarNameSetConstantFlag(mesh, vdb[nvdb-1].name);
 }
 
 
 
 /* return index of variable or -1 if it was not found */
-int IndLax(char *name) 
+int MeshVarIndLax(tMesh *mesh, char *name) 
 {
-  int i, iS = vdb_iStart;
+  tVar *vdb = mesh->vdb;
+  int nvdb  = mesh->nvdb;
+  int i, iS = mesh->vdb_iStart;
 
   if( (iS < 0) || (iS >= nvdb) ) iS = 0; /* make sure first i is in range */
 
@@ -121,37 +117,44 @@ int IndLax(char *name)
 }
 
 /* return index of variable */
-int Ind(char *name) 
+int MeshVarInd(tMesh *mesh, char *name)
 {
-  int i = IndLax(name);
-  if(i<0) errorexits("Ind: variable \"%s\" does not exist\n", name);
+  int i = MeshVarIndLax(mesh, name);
+  if(i<0) errorexits("variable \"%s\" does not exist\n", name);
   return i;
 }
 
 /* return index of variable given pointer */
-int IndFromPtr(tPat *pat, double *p) 
+int VarIndFromPtr(tNode *node, double *p) 
 {
+  tMesh *mesh = node->pat->mesh;
+  tVar *vdb = mesh->vdb;
+  int nvdb  = mesh->nvdb;
+  tDat *dat = node->dat;
   int i;
 
-  for (i = 0; i < nvdb; i++)
-    if (pat->v[i] == p)
-      return vdb[i].index;
+  if(dat)
+    for(i = 0; i < nvdb; i++)
+      if(dat->v[i]->a == p)
+        return vdb[i].index;
   return -1;
 }
 
 /* set the global var vdb_iStart to the index of variable "name" */
-int Set_vdb_iStart_AtPar(char *name)
+int Set_vdb_iStart_AtVar(tMesh *mesh, char *name)
 {
-  int i = IndLax(name);
+  int i = MeshVarIndLax(mesh, name);
   if(i<0) errorexits("Ind: variable \"%s\" does not exist\n", name);
-  vdb_iStart = i;
+  mesh->vdb_iStart = i;
   return i;
 }
 
 
 /* return name given index */
-char *VarName(int i) 
+char *MeshVarName(tMesh *mesh, int i) 
 {
+  tVar *vdb = mesh->vdb;
+  int nvdb  = mesh->nvdb;
   if (i < 0 || i >= nvdb)
     errorexit("VarName: index out of range");
 
@@ -159,58 +162,64 @@ char *VarName(int i)
 }
 
 /* return number of components */
-int VarNComponents(int i)
+int MeshVarNComponents(tMesh *mesh, int i)
 {
+  tVar *vdb = mesh->vdb;
+  int nvdb  = mesh->nvdb;
   if (i < 0 || i >= nvdb)
     errorexit("VarNComponents: index out of range");
   if (vdb[i].component != 0)
   {
     /* errorexit("VarNComponents: you have to use index of zeroth component"); */
-    i = IndComponent0(i);
+    i = MeshVarIndComponent0(mesh, i);
   }
   return vdb[i].ncomponents;
 }
 
 /* return component */
-int VarComponent(int i)
+int MeshVarComponent(tMesh *mesh, int i)
 {
+  tVar *vdb = mesh->vdb;
   return vdb[i].component;
 }
 
 /* return index of component 0 */
-int IndComponent0(int i)
+int MeshVarIndComponent0(tMesh *mesh, int i)
 {
+  tVar *vdb = mesh->vdb;
   return i - vdb[i].component;
 }
 
 /* return name of component 0 for a given name */
-char *VarNameComponent0(char *name)
+char *MeshVarNameComponent0(tMesh *mesh, char *name)
 {
-  return VarName(IndComponent0(Ind(name)));
+  return MeshVarName(mesh, 
+                     MeshVarIndComponent0(mesh, MeshVarInd(mesh, name)));
 }
 
 /* return string with tensor indices */
-char *VarTensorIndices(int i)
+char *MeshVarTensorIndices(tMesh *mesh, int i)
 {
+  tVar *vdb = mesh->vdb;
   return vdb[i].tensorindices;
 }
 
 /* set information on how variable behaves at Boundary*/
-void VarNameSetBoundaryInfo(char *name, 
-			    double farlimit, double falloff, double propspeed)
+void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name, 
+			        double farlimit, double falloff)
 {
-  int i = Ind(name);
-
+  tVar *vdb = mesh->vdb;
+  int i = MeshVarInd(mesh, name);
   vdb[i].farlimit = farlimit;
   vdb[i].falloff = falloff;
-  vdb[i].propspeed = propspeed;
 }
 
 /* set information on how variable behaves at Boundary*/
-void VarNameSetConstantFlag(char *name)
+void MeshVarNameSetConstantFlag(tMesh *mesh, char *name)
 {
-  int i, i0 = IndComponent0(Ind(name));
-  int n  = VarNComponents(i0);
+  tVar *vdb = mesh->vdb;
+  int i, i0 = MeshVarIndComponent0(mesh, MeshVarInd(mesh, name));
+  int n  = MeshVarNComponents(mesh, i0);
 
   for (i = 0; i < n; i++) {
     vdb[i+i0].constant = 1;
@@ -218,49 +227,34 @@ void VarNameSetConstantFlag(char *name)
   }
 }
 
-/* return various boundary information */
-double VarFallOff(int i) {return vdb[i].falloff;}
-double VarFarLimit(int i) {return vdb[i].farlimit;}
-double VarPropSpeed(int i) {return vdb[i].propspeed;}
-int VarSymmetry(int i, int dir) {return vdb[i].sym[dir];}
-int VarConstantFlag(int i) {return vdb[i].constant;}
-
-
+/* return various information, e.g. boundary information */
+double MeshVarFallOff(tMesh *mesh, int i)
+{ return mesh->vdb[i].falloff; }
+double MeshVarFarLimit(tMesh *mesh, int i)
+{ return mesh->vdb[i].farlimit; }
+int MeshVarSymmetry(tMesh *mesh, int i, int dir)
+{ return mesh->vdb[i].sym[dir]; }
+int MeshVarConstantFlag(tMesh *mesh, int i)
+{ return mesh->vdb[i].constant; }
 
 
 
 /************************************************************************/
 /* utility functions for variable lists */
 
-
 /* print variable list */
 void prvarlist(tVarList *v)
 {
+  tMesh *mesh = v->mesh;
   int i, j;
 
-  printf("VarList=%p  mesh=%p  time=%g  n=%d\n", v, v->mesh, v->time, v->n);
+  printf("VarList=%p  time=%g  n=%d\n", v, v->time, v->n);
   for (i = 0; i < v->n; i++)
   {
     j = v->index[i];
-    printf(" %d  VarIndex=%d  %s\n", i, j, VarName(j));
+    printf(" %d  VarIndex=%d  %s\n", i, j, MeshVarName(mesh, j));
   }
 }
-
-/* print variable list in one pat */
-void prvarlist_inpat(tPat *pat, tVarList *v)
-{
-  int i, j;
-
-  printf("pat%d=%p: VarList=%p  mesh=%p  time=%g  n=%d\n",
-          pat->b, pat, v, v->mesh, v->time, v->n);
-  for (i = 0; i < v->n; i++)
-  {
-    j = v->index[i];
-    printf(" %d  VarIndex=%d  pat->v[%d]=%p  %s\n",
-           i, j, j, pat->v[j], VarName(j));
-  }
-}
-
 
 /* allocate an empty variable list */
 tVarList *vlalloc(tMesh *mesh)
@@ -268,26 +262,21 @@ tVarList *vlalloc(tMesh *mesh)
   tVarList *u;
 
   u = calloc(1, sizeof(tVarList));
-  u->mesh = mesh;
+  
   if(mesh) u->time = mesh->time;
   u->vlPars = NULL; /* set special pointer to NULL */
   return u;
 } 
 
-
-
-
 /* free a variable list */
 void vlfree(tVarList *u)
 {
-  if (u) {
-    if (u->index) free(u->index);
+  if(u)
+  {
+    if(u->index) free(u->index);
     free(u);
   }
 } 
-
-
-
 
 /* add a variable (one component) to a variable list */
 void vlpushone(tVarList *v, int vi)
@@ -297,48 +286,41 @@ void vlpushone(tVarList *v, int vi)
   v->index[v->n-1] = vi;
 }
 
-
-
-
 /* add a variable with all its components to a variable list */
 void vlpush(tVarList *v, int vi)
 {
-  int i, n = VarNComponents(vi);
+  tMesh *mesh = v->mesh;
+  int i, n = MeshVarNComponents(mesh, vi);
 
-  if(IndComponent0(vi)!=vi) 
-    errorexit("vlpush (23.8.2008): vi needs to be index of component 0. "
+  if(MeshVarIndComponent0(mesh, vi)!=vi) 
+    errorexit("vi needs to be index of component 0. "
               "Consider using vlpushone.");
   v->n += n;
   v->index = realloc(v->index, sizeof(int) * v->n); 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
     v->index[v->n-n+i] = vi + i;
 }
-
-
-
 
 /* add a variable list to a variable list */
 void vlpushvl(tVarList *v, tVarList *u)
 {
   int i;
 
-  if (!v || !u) return;
+  if(!v || !u) return;
   v->n += u->n;
   v->index = realloc(v->index, sizeof(int) * v->n); 
-  for (i = 0; i < u->n; i++)
+  for(i = 0; i < u->n; i++)
     v->index[v->n - u->n + i] = u->index[i];
 }
-
-
-
 
 /* drop a variable (one component) from a variable list */
 void vldropone(tVarList *v, int vi)
 {
   int i;
   
-  for (i = 0; i < v->n; i++)
-    if (v->index[i] == vi) {
+  for(i = 0; i < v->n; i++)
+    if(v->index[i] == vi)
+    {
       v->n -= 1;
       for (; i < v->n; i++)
 	v->index[i] = v->index[i+1];
@@ -349,25 +331,18 @@ void vldropone(tVarList *v, int vi)
 /* drop a variable with all its components from a variable list */
 void vldrop(tVarList *v, int vi)
 {
-  int i, n = VarNComponents(vi);
-
-  for (i = 0; i < n; i++)
-    vldropone(v, vi+i);
+  tMesh *mesh = v->mesh;
+  int i, n = MeshVarNComponents(mesh, vi);
+  for(i = 0; i < n; i++) vldropone(v, vi+i);
 }
 
 /* drop last n variables from a variable list */
 void vldropn(tVarList *v, int n)
 {
-  if (n <= 0) 
-    return;
-  if (n >= v->n) 
-    v->n = 0;
-  else
-    v->n -= n;
+  if(n <= 0) return;
+  if(n >= v->n) v->n  = 0;
+  else          v->n -= n;
 }
-
-
-
 
 /* duplicate variable list */
 tVarList *vlduplicate(tVarList *v)
@@ -376,9 +351,7 @@ tVarList *vlduplicate(tVarList *v)
   tVarList *u = vlalloc(v->mesh);
 
   u->time = v->time;
-
-  for (i = 0; i < v->n; i++) 
-    vlpushone(u, v->index[i]);
+  for (i = 0; i < v->n; i++) vlpushone(u, v->index[i]);
 
   return u;
 }
@@ -414,7 +387,7 @@ void vldisable(tVarList *v)
 tVarList *VLPtrEnable1(tMesh *mesh, char *varname)
 {
   tVarList *vl = vlalloc(mesh);
-  int i = Ind(varname);
+  int i = MeshVarInd(varname);
   
   enablevar(mesh, i);
   vlpush(vl, i);
