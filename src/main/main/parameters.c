@@ -160,28 +160,27 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 /* parameter data base */
 
 /* make new parameter in parameter data base, merge if already there */
-void makeparameter(tMesh *mesh, char *name, char *value, char *description) 
+void makeparameter(tMesh *mesh, char *name, char *value, char *description)
 {
-  tParameter *pdb = mesh->pdb;
   tParameter *p;
-  int npdb = mesh->npdb;
 
   if(0) {PRF;printf(" %s = %s,  %s\n", name, value, description);}
 
-  pdb = realloc(pdb, npdbmax*sizeof(tParameter));
-  if(!pdb) errorexit("out of memory");
+  mesh->pdb = realloc(mesh->pdb, npdbmax*sizeof(tParameter));
+  if(!mesh->pdb) errorexit("out of memory for mesh->pdb");
 
   p = findparameter(mesh, name, 0);
   if (!p)
   {
-    p = &pdb[npdb++];
+    p = &(mesh->pdb[mesh->npdb]);
+    mesh->npdb++;
     p->name  = (char *) calloc(strlen(name)+1, sizeof(char));
     p->value = (char *) calloc(strlen(value)+1, sizeof(char));
     strcpy(p->name,  name);
     strcpy(p->value, value);
     translatevalue(&p->value);
-    set_numericalvalue_byIndex(pdb, npdb-1, npdb);
-    set_booleanvalue_byIndex(pdb, npdb-1, npdb);
+    set_numericalvalue_byIndex(mesh->pdb, mesh->npdb-1, mesh->npdb);
+    set_booleanvalue_byIndex(mesh->pdb, mesh->npdb-1, mesh->npdb);
   }
   else
   {
@@ -190,7 +189,7 @@ void makeparameter(tMesh *mesh, char *name, char *value, char *description)
   p->description = (char *) calloc(strlen(description)+1, sizeof(char));
   strcpy(p->description, description);
 
-  if(npdb >= npdbmax) 
+  if(mesh->npdb >= npdbmax)
     errorexit("lazy coding, no more space for new parameters");
 
   if(0) printparameters(mesh);

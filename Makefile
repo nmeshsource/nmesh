@@ -33,8 +33,7 @@ WARN = # -Wall
 # different machines and environments
 
 # Linux
-OFLAGS = -O2
-#CC = icc:  quite different compared to Cactus: icc gives slower results!    
+OFLAGS = -g
 
 
 # --------------------------------------------------------------------------

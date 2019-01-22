@@ -4,6 +4,7 @@
 
 
 /* nMPI.c */
+int nMPI_print_compile_info(tMesh *mesh);
 int nMPI_Init(int *pargc, char ***pargv);
 int nMPI_Finalize(void);
 int nMPI_rank(void);

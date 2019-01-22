@@ -10,6 +10,17 @@
 #endif
 
 
+/* print some compile info */
+int nMPI_print_compile_info(tMesh *mesh)
+{
+#ifdef USEMPI
+  printf("MPI is compiled in.\n");
+#else
+  printf("MPI is not compiled in.\n");
+#endif
+  return 0;
+}
+
 /* Wrappers for MPI_Init and MPI_Finalize */
 int nMPI_Init(int *pargc, char ***pargv)
 {

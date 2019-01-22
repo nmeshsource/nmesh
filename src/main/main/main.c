@@ -33,6 +33,11 @@ int main(int argc, char **argv)
 
   /* start the main parts of nmesh: */
   initTimeIn_s();
+
+  /* this par is needed here already, so that finalexit can check it */
+  printf("Adding first parameter\n");
+  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+
   read_command_line(mesh, argc, argv);
   parse_parameter_file(mesh, Gets(Par("parameterfile")));
   parse_command_line_options(mesh);
@@ -230,7 +235,10 @@ int parse_command_line_options(tMesh *mesh)
   char *str2;
   char *par;
   char *val;
-  
+
+  PRFs(":\n");
+  printf("Par(\"nmesh_options\")=%i\n", Par("nmesh_options"));
+  Yo(9);
   /* get length of nmesh_options string */
   if(GetsLax(Par("nmesh_options"))==0) return 0;
   printf("Parsing command line options\n");

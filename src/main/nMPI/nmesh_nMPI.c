@@ -8,7 +8,7 @@
 int nmesh_nMPI(tMesh *mesh)
 {
   /* functions */
-  //AddFun(POST_PARAMETERS, nMPI_info);
+  AddFun(POST_PARAMETERS, nMPI_print_compile_info);
 
   /* variables */
   //AddVar("nMPI_temp1", "", "temporary variable");

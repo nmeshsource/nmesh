@@ -130,8 +130,8 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal);
 #define AddOrModifyPar(name, val, desc) AddOrModifyMeshPar(mesh, (name), \
                                                            (val), (desc))
 #define GetMeshParIndex(mesh, name, fatal) findparameterindex((mesh), (name), (fatal))
-#define Par(name)     findparameterindex(mesh, (name), 1)
-#define PLax(name)    findparameterindex(mesh, (name), 0)
+#define Par(name)     findparameterindex(mesh, (name), 0)
+#define ParF(name)    findparameterindex(mesh, (name), 1)
 #define Geti(ip)      MeshParGeti(mesh, (ip))
 #define Getd(ip)      MeshParGetd(mesh, (ip))
 #define Getb(ip)      MeshParGetb(mesh, (ip))
