@@ -15,7 +15,7 @@
 /* storage for arrays */
 /**********************************************************************/
 /* allocate an array */
-tArray *alloc_array(int n[3], void *Owner, int tOwner)
+tArray *alloc_array(int n[3]) //, void *Owner, int tOwner)
 {
   int i;
   tArray *array = calloc(1, sizeof(tArray));
@@ -27,8 +27,8 @@ tArray *alloc_array(int n[3], void *Owner, int tOwner)
   array->a = calloc(array->N, sizeof(array->a[0]));
   if(!array->a) errorexit("out of memory for array->a");
 
-  array->Owner  = Owner;
-  array->tOwner = tOwner;
+  //array->Owner  = Owner;
+  //array->tOwner = tOwner;
 
   return array;
 }
@@ -174,7 +174,7 @@ void free_dat(tDat *dat)
 }
 
 /* change dat->nv  to  dat->nv=nv_new */
-void realloc_dat_varlists(tDat *dat, int nv_new)
+void realloc_datvariables(tDat *dat, int nv_new)
 {
   int i,j;
 
@@ -198,6 +198,27 @@ void realloc_dat_varlists(tDat *dat, int nv_new)
 }
 
 /**********************************************************************/
+/* storage for variable data base vdb in mesh */
+/**********************************************************************/
+void realloc_nodevariables(tNode *node, int nvdb_new)
+{
+  tDat *dat = node->dat;
+  if(dat) realloc_datvariables(dat, nvdb_new);
+}
+
+void realloc_meshvariables(tMesh *mesh, int nvdb_new)
+{
+  tNode *node;
+  if(1) printf("realloc_meshvariables from %d to %d\n", 
+                 mesh->nvdb, nvdb_new);
+
+  fornodelist(mesh->lnodes, node)
+    realloc_nodevariables(node, nvdb_new);
+
+  mesh->nvdb = nvdb_new;
+}
+
+/**********************************************************************/
 /* storage for variables in the nodes */
 /**********************************************************************/
 
@@ -212,7 +233,7 @@ void enablevarcomp_innode(tNode *node, int i)
   if(i>=dat->nv) errorexiti("var comp %i does not exist", i);
   if(!dat->v[i])
   {
-    dat->v[i] = alloc_array(node->n, node, NODE);
+    dat->v[i] = alloc_array(node->n); //, node, NODE);
     dat->nvenabled++;
   }
 }
@@ -236,14 +257,16 @@ void disablevarcomp_innode(tNode *node, int i)
 /* enable all components of a variable on one node */
 void enablevar_innode(tNode *node, int i)
 {
-  int j, n = VarNComponents(i);
+  tMesh *mesh = node->pat->mesh;
+  int j, n = MeshVarNComponents(mesh, i);
   for(j=0; j<n; j++) enablevarcomp_innode(node, i+j);
 }
 
 /* disable all components of a variable on one node */
 void disablevar_innode(tNode *node, int i)
 {
-  int j, n = VarNComponents(i);
+  tMesh *mesh = node->pat->mesh;
+  int j, n = MeshVarNComponents(mesh, i);
   for(j=0; j<n; j++) disablevarcomp_innode(node, i+j);
 }
 

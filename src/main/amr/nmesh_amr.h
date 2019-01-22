@@ -73,7 +73,7 @@ typedef struct tMESH {
   int pdb_iStart;   /* index we start at when searching for a par */
   int vdb_iStart;   /* index we start at when searching for a var */
   tPat **pat;       /* list of pointers to patches */
-  tNlist *lnodes    /* linked list of all leaf nodes */
+  tNlist *lnodes;   /* linked list of all leaf nodes */
 } tMesh;
 /* NOTE: the list lnodes needs to be distributed amoung MPI job:
 use space filling curve as in
@@ -123,7 +123,7 @@ tMesh *alloc_mesh(void);
 
 
 /* storage.c */
-tArray *alloc_array(int n[3], void *Owner, int tOwner);
+tArray *alloc_array(int n[3]); //, void *Owner, int tOwner);
 void free_array(tArray *array);
 tMesh *alloc_mesh(void);
 void free_mesh(tMesh *mesh);
@@ -133,7 +133,8 @@ tNode *alloc_node();
 void free_node(tNode *node) ;
 tDat *alloc_dat(int nv);
 void free_dat(tDat *dat);
-void realloc_dat_varlists(tDat *dat, int nv_new);
+void realloc_datvariables(tDat *dat, int nv_new);
+void realloc_meshvariables(tMesh *mesh, int nvdb_new);
 
 
 /* print.c */

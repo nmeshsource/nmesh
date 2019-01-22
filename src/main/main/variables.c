@@ -57,8 +57,8 @@ void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
 
     /* variable does not exist, so add a new element to data base */
     vdb = (tVar *) realloc(vdb, sizeof(tVar)*(nvdb+1));
+errorexit("we need to realloc mesh->vdb not vdb");
     new = &vdb[nvdb];
-
     /* initialize and fill in structure */
     memset(new, 0, sizeof(tVar));
     new->name          = strdup(fullname);
@@ -73,6 +73,7 @@ void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
     new->sym[2]        = sym[3*j+2];
 
     nvdb++;
+errorexit("we need to incr mesh->nvdb not nvdb");
   }
 }
 
@@ -425,27 +426,28 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
   newvl = vlduplicate(vl);
 
   /* for all scalar variables in list */
-  for (i = 0; i < vl->n; i++) {
-
+  for(i = 0; i < vl->n; i++)
+  {
     /* construct new name */
     var = &vdb[vl->index[i]];
     snprintf(name, 1000, "%s%s", var->name, postfix);
 
     /* if variable already exists, don't add it again */
     /* note that we nevertheless return a corresponding variable list */
-    if ((j = IndLax(name)) >= 0) {
+    if ((j = MeshVarIndLax(mesh, name)) >= 0)
+    {
       newvl->index[i] = j;
       continue;
     }
 
     /* add scalar variable with new name to variable database */
-    AddVar(name, "", var->description);
+    AddMeshVar(mesh, name, "", var->description);
     nadded++;
 
     /* get index of new variable and overwrite index in duplicate */
-    newvl->index[i] = Ind(name);
+    newvl->index[i] = MeshVarInd(mesh, name);
 
-    /* get pointer to old variable again since AddVar reallocates vdb */
+    /* get pointer to old variable again since AddMeshVar reallocates vdb */
     var = &vdb[vl->index[i]];
 
     /* set structure in variable data base */
