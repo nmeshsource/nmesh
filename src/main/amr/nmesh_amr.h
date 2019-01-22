@@ -3,6 +3,30 @@
 #include "../main/skeleton.h"
 
 
+/* Main parts of a mesh:
+
+tMesh:    ---------------------mesh-----------------------------------------
+tPat:     |-----patch0-----|-------patch1-------|--patch2----|...
+tNode:     node node ...     node node node ...  node node ...
+                   ^
+  The nodes shown here are the leaf nodes. They are kept in 
+  linked lists (tNlist *lnodes).
+
+  Each node has a tDat struct that can be empty if the data is on another
+  proc. The tDat struct contain lists of arrays, one for each variable.
+
+  Also, each node is part of an oct-tree. Here we only show 2 instead of 8:
+level
+l=0                  ___________rnode_____________
+l=1          ______node______             ______node______
+l=2     __node__            node     __node__            node
+l=3  node      _node_                       node
+l=4        node 
+  We have one tree per patch.
+  The ends of the tree are called leaf nodes.
+*/
+
+
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
   int nv;               /* number of vars */
@@ -31,7 +55,7 @@ typedef struct tNODE {
                              domain. This just points to an array in patch. */
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
-  int i;                  /* node index (0-7) */
+  int ni;                 /* node index (0-7) */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
 } tNode;
 
