@@ -244,7 +244,7 @@ void prvarlist(tVarList *v)
   int i, j;
 
   printf("VarList=%p  time=%g  n=%d\n", v, v->time, v->n);
-  for (i = 0; i < v->n; i++)
+  for(i=0; i<v->n; i++)
   {
     j = v->index[i];
     printf(" %d  VarIndex=%d  %s\n", i, j, MeshVarName(mesh, j));
