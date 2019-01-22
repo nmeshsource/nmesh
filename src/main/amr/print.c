@@ -32,6 +32,7 @@ void printnode(tNode *n)
 /* print a variable in a node */
 void printvar_innode(tNode *node, char *name)
 {
+  tMesh *mesh = node->pat->mesh;
   double *v = 0; //node->v[Ind(name)];
   int i,j,k;
   int *n = node->n;
@@ -51,6 +52,7 @@ void printvar_innode(tNode *node, char *name)
 /* print a variable list */
 void printVarList(tVarList *vl)
 {
+  tMesh *mesh = vl->mesh;
   int i;
 
   for(i = 0; i < vl->n; i++)

@@ -281,7 +281,23 @@ void disablevar_innode(tNode *node, int i)
   for(j=0; j<n; j++) disablevarcomp_innode(node, i+j);
 }
 
+/* enable onr component of a variable on one pat */
+void enablevarcomp_inpatch(tPat *pat, int i)
+{
+  tNode *node;
 
+  fornodelist(pat->lnodes, node)
+    enablevarcomp_innode(node, i);
+}
+
+/* disable one component of a variable on one pat */
+void disablevarcomp_inpatch(tPat *pat, int i)
+{
+  tNode *node;
+
+  fornodelist(pat->lnodes, node)
+    disablevarcomp_innode(node, i);
+}
 
 /* enable all components of a variable on one pat */
 void enablevar_inpatch(tPat *pat, int i)
@@ -300,7 +316,6 @@ void disablevar_inpatch(tPat *pat, int i)
   fornodelist(pat->lnodes, node)
     disablevar_innode(node, i);
 }
-
 
 /* enable all components of a variable on one mesh */
 void enablevar(tMesh *mesh, int i)
@@ -321,18 +336,44 @@ void disablevar(tMesh *mesh, int i)
 }
 
 
-/* enable variable list */
+/* enable variable list in a node */
 void enablevarlist_innode(tNode *node, tVarList *vl)
 {
   int i;
   if(vl) for(i=0; i<vl->n; i++) enablevarcomp_innode(node, vl->index[i]);
 }
 
-/* disable variable list */
+/* disable variable list in a node */
 void disablevarlist_innode(tNode *node, tVarList *vl)
 {
   int i;
   if(vl) for(i=0; i<vl->n; i++) disablevarcomp_innode(node, vl->index[i]);
+}
+
+/* enable variable list */
+void enablevarlist(tVarList *vl)
+{
+  tMesh *mesh = vl->mesh;
+  int i, pi;
+  if(vl)
+  {
+    for(i=0; i<vl->n; i++)
+      forpatches(mesh, pi)
+        enablevarcomp_inpatch(mesh->pat[pi], vl->index[i]);
+  }
+}
+
+/* disable variable list */
+void disablevarlist(tVarList *vl)
+{
+  tMesh *mesh = vl->mesh;
+  int i, pi;
+  if(vl)
+  {
+    for(i=0; i<vl->n; i++)
+      forpatches(mesh, pi)
+        disablevarcomp_inpatch(mesh->pat[pi], vl->index[i]);
+  }
 }
 
 // may need enablevarlist rather for patch or mesh ???

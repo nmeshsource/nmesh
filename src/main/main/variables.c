@@ -351,9 +351,6 @@ tVarList *vlduplicate(tVarList *v)
   return u;
 }
 
-
-
-
 /* enable all variables in a variable list */
 void vlenable(tVarList *v)
 {
@@ -366,16 +363,11 @@ void vlenablemesh(tMesh *mesh, tVarList *v)
   enablevarlist(v);
 }
 
-
-
-
 /* disable all variables in a variable list */
 void vldisable(tVarList *v)
 {
   disablevarlist(v);
 }
-
-
 
 
 /* create, enable, return pointer for a 1 variable VarList */
@@ -389,18 +381,12 @@ tVarList *VLPtrEnable1(tMesh *mesh, char *varname)
   return vl;
 }
 
-
-
-
 /* disable variables in a VarList and free VarList */
 void VLDisableFree(tVarList *vl)
 {
   disablevarlist(vl);
   vlfree(vl);
 }
-
-
-
 
 /* add variables based on an existing variable list and a postfix 
    note that we add each component as a scalar but fix it later because
@@ -470,9 +456,6 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
   return newvl;
 }
 
-
-
-
 /* add duplicate and enable variables */
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix) 
 {
@@ -506,9 +489,6 @@ void vlsetconstant(tVarList *u, const double c)
     }
   }
 }
-
-
-
 
 /* copy: v = u */   
 void vlcopy(tVarList *v, tVarList *u)
@@ -601,7 +581,6 @@ void varswap(tMesh *mesh, int iv, int iu)
   vlfree(v);
 }
 
-
 /* average: r=(a+b)/2 */   
 void vlaverage(tVarList *r, tVarList *a, tVarList *b)
 {
@@ -629,9 +608,6 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
   /* average times as well */
   r->time = c * (a->time + b->time);
 }
-
-
-
 
 /* subtract two var lists: r = a - b
    can be called as vlsubtract(r,a,b); or vlsubtract(a,a,b); */   
@@ -661,14 +637,10 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
   r->time = a->time - b->time;
 }
 
-
-
-
 /* linear combination of two var lists: r = ca*a + cb*b
    should change function name
    one function can catch several special cases like cb == 0 (unfinished)
-   important: if coefficient is zero we guarantee that memory is not accessed
-*/
+   important: if coefficient is zero we guarantee that memory is not accessed */
 void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b) 
 {
   tMesh *mesh = r->mesh;

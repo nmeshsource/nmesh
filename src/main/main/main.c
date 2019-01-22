@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 {
   tMesh *mesh;
   
-  nmesh_MPI_Init(&argc, &argv);
+  nMPI_Init(&argc, &argv);
 
   /* make first mesh in which we store pars, vars and funs */
   mesh = make_empty_mesh(1);
@@ -42,18 +42,18 @@ int main(int argc, char **argv)
   iterate_parameters(mesh, 0); /* start of new iteration */
   while(iterate_parameters(mesh, 1))
   {
-    RunFun(mesh, POST_PARAMETERS); //hook for funs right after iterate_parameters
-    RunFun(mesh, INITMESH); // here we schedule funcs to programatically set up the mesh
+    RunFun(POST_PARAMETERS); //hook for funs right after iterate_parameters
+    RunFun(INITMESH); // here we schedule funcs to programatically set up the mesh
     inidata_mesh(mesh);
     evolve_mesh(mesh);
     finalize_mesh(mesh);
-    RunFun(mesh, POST_FINALIZE_MESH); //hook after finalize_mesh, e.g. for special cleanup
+    RunFun(POST_FINALIZE_MESH); //hook after finalize_mesh, e.g. for special cleanup
     makeparameter(mesh, "outdir_previous_iteration", "",
                   "outdir of previous iteration");
     Sets(Par("outdir_previous_iteration"), Gets(Par("outdir")));
   }
 
-  nmesh_MPI_Finalize();
+  nMPI_Finalize();
   return 0;
 }
 
@@ -200,7 +200,7 @@ int make_output_directory(tMesh *mesh)
   if(nMPI_rank()>0)
   {
     char f[100];
-    snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nmesh_MPI_size())+1);
+    snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
     snprintf(so,999, f, outdir, nMPI_rank());  
     freopen(so, "w", stdout);   
     freopen(so, "w", stderr);
@@ -272,10 +272,10 @@ int inidata_mesh(tMesh *mesh)
   }
 
   /* compute initial data */
-  RunFun(mesh, INITIALDATA);
+  RunFun(INITIALDATA);
 
   /* initial data is just another new time slice */
-  RunFun(mesh, POST_EVOLVE);
+  RunFun(POST_EVOLVE);
 
   /* initial data complete */
   prdivider(0);
@@ -283,10 +283,10 @@ int inidata_mesh(tMesh *mesh)
   printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
   /* analyze initial data */
-  RunFun(mesh, ANALYZE);
+  RunFun(ANALYZE);
 
   /* output for permanent variables */
-  RunFun(mesh, OUTPUT);
+  RunFun(OUTPUT);
 
   /* checkpoint, just in case we need it here already */
   //checkpoint(mesh);
@@ -318,13 +318,13 @@ int evolve_mesh(tMesh *mesh)
   while(mesh->iteration < iterationmax)
   { 
     /* pre evolve */
-    RunFun(mesh, PRE_EVOLVE); 
+    RunFun(PRE_EVOLVE); 
 
     /* evolve */
-    RunFun(mesh, EVOLVE); 
+    RunFun(EVOLVE); 
 
     /* post evolve */
-    RunFun(mesh, POST_EVOLVE); 
+    RunFun(POST_EVOLVE); 
 
     /* evolution step complete */
     mesh->iteration++;
@@ -335,13 +335,13 @@ int evolve_mesh(tMesh *mesh)
     fflush(stdout); 
 
     /* analyze */
-    RunFun(mesh, ANALYZE);
+    RunFun(ANALYZE);
 
     /* output for permanent variables */
-    RunFun(mesh, OUTPUT);
+    RunFun(OUTPUT);
 
     /* post output */
-    RunFun(mesh, POST_OUTPUT);
+    RunFun(POST_OUTPUT);
 
     /* checkpoint */
     //checkpoint(mesh);

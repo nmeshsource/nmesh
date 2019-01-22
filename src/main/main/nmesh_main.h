@@ -1,6 +1,10 @@
 /* nmesh_main.h */
 /* Wolfgang Tichy, 1/2019 */
 
+/* use MSTR(x) to transform x into a string */
+#define XMSTR(x) STRING(x)
+#define MSTR(x ) #x
+
 /* constants */
 #ifdef PI
 #undef PI
@@ -91,8 +95,11 @@
 
 
 /* skeleton.c */
-void AddFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name);
-void RunFun(tMesh *mesh, int step);
+void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name);
+void RunMeshFun(tMesh *mesh, int step);
+/* conveniece macros for functions */
+#define AddFun(step, f)  AddMeshFun(mesh, step, f, MSTR(f))
+#define RunFun(step)     RunMeshFun(mesh, step)
 
 
 /* parameters.c */
@@ -184,8 +191,11 @@ double MeshVarFallOff(tMesh *mesh, int i);
 double MeshVarFarLimit(tMesh *mesh, int i);
 int MeshVarSymmetry(tMesh *mesh, int i, int dir);
 int MeshVarConstantFlag(tMesh *mesh, int i);
-
-
+/* conveniece macros for vars */
+#define VarName(i) MeshVarName(mesh, (i))
+#define Ind(name)  MeshVarInd(mesh, (name))
+#define AddVar(name, tensorindices, description) \
+  AddMeshVar(mesh, (name), (tensorindices), (description))
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);
@@ -230,11 +240,3 @@ void *pmalloc(int n);
 /* endianIO.c */
 size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp);
 size_t fread_double_little(double *buf, size_t nmemb, FILE *fp);
-
-
-/* nmesh_MPI.c */
-int nmesh_MPI_Init(int *pargc, char ***pargv);
-int nmesh_MPI_Finalize(void);
-int nmesh_MPI_rank(void);
-int nmesh_MPI_size(void);  
-int nmesh_MPI_barrier(void);

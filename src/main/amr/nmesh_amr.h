@@ -141,7 +141,8 @@ void enablevar_inpatch(tPat *pat, int i);
 void disablevar_inpatch(tPat *pat, int i);
 void enablevar(tMesh *mesh, int i);
 void disablevar(tMesh *mesh, int i);
-
+void enablevarlist(tVarList *vl);
+void disablevarlist(tVarList *vl);
 
 /* print.c */
 void printmesh(tMesh *g);
