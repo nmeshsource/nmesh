@@ -158,7 +158,8 @@ tMesh *make_empty_mesh(int pr);
 /* storage.c */
 tArray *alloc_array(int n[3]); //, void *Owner, int tOwner);
 void free_array(tArray *array);
-tMesh *alloc_mesh(int npatches);
+tMesh *alloc_mesh(int npats);
+void realloc_mesh_patches(tMesh *mesh, int npats);
 void free_mesh(tMesh *mesh);
 tPat *alloc_patch(tMesh *mesh, int p, int nD);
 void free_patch(tPat *pat);

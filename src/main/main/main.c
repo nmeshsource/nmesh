@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   nMPI_Init(&argc, &argv);
 
   /* make first mesh in which we store pars, vars and funs */
-  mesh = make_empty_mesh(1);
+  mesh = make_empty_mesh(0);
   main_mesh = mesh; /* save this mesh in a global var as well */
 
   /* start the main parts of nmesh: */

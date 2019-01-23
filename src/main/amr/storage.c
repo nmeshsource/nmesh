@@ -193,11 +193,13 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   return nlist;
 }
 
-
+/* remove leaves */
 tNode *remove8_leaf_nodes(tNode *leaf0)
 {
   tNode *parent = leaf0->parent;
   tNode *node;
+
+  if(!leaf0->leaf) errorexit("argument leaf0 is not a leaf node");
 
   /* parent is now a leaf node */
   parent->leaf = 1;
@@ -241,7 +243,7 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
   if(!(pat->D) )
     errorexit("out of memory for diff. matrices");
 
-  /* bfaces */
+  /* Bfaces */
 
   return pat;
 }
@@ -253,6 +255,7 @@ void free_patch(tPat *pat)
 
   if (!pat) return;
 
+PRF;printf(" isn't working yet!!!");
   //for (i = 0; i < pat->mesh->nvariables; i++)
   //  disablevarcomp_inpat(pat, i);
   //free(pat->v);
@@ -267,18 +270,35 @@ void free_patch(tPat *pat)
 
 
 /* allocate mesh */
-tMesh *alloc_mesh(int npatches)
+tMesh *alloc_mesh(int npats)
 {
   tMesh *mesh;
 
   mesh = calloc(1, sizeof(*mesh));
   if(!mesh) errorexit("out of memory for mesh");
 
-  /* alloc list of pointers to patches */
-  mesh->pat = calloc(npatches, sizeof(mesh->pat[0]));
-  if(mesh->pat) errorexit("out of memory for mesh->pat");
+  realloc_mesh_patches(mesh, npats);
 
   return mesh;
+}
+
+/* make room for more patches */
+void realloc_mesh_patches(tMesh *mesh, int npats)
+{
+  int opats = mesh->npats;
+
+//printf("npats=%d sss=%d\n", npats, sizeof(mesh->pat[0]));
+
+  /* alloc list of pointers to patches */
+  if(npats > opats)
+  {
+    mesh->pat = realloc(mesh->pat, npats*sizeof(mesh->pat[0]));
+    if(!mesh->pat) errorexit("out of memory for mesh->pat");
+
+    /* zero newly allocated part */
+    memset(&(mesh->pat[opats]), 0, (npats-opats)*sizeof(mesh->pat[0]));
+  }
+  mesh->npats = npats;
 }
 
 /* free mesh */
