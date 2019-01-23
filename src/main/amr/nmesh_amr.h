@@ -75,7 +75,7 @@ typedef struct tPAT {
   int (*XYZ_Of_xyz)(struct tPAT *pat, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
   int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
   tNode *rnode;         /* root node in this patch */
-  struct tARRAY **D;    /* list of differentiation matrices */
+  struct tARRAY ***D;   /* list of differentiation matrices */
   int nD;               /* number of diff matrices stored */
   tNlist *lns;          /* start of linked list of leaf nodes in this patch */
 } tPat;
@@ -163,6 +163,8 @@ void remove1_in_nodelist(tNlist *elem);
 void free_nodelist(tNlist *elem);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
+void enablevarcomp_innode(tNode *node, int i);
+void disablevarcomp_innode(tNode *node, int i);
 void enablevar_innode(tNode *node, int i);
 void disablevar_innode(tNode *node, int i);
 void enablevar_inpatch(tPat *pat, int i);

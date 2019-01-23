@@ -55,7 +55,7 @@ tNode *alloc_node()
 }
 
 /* free one node */
-void free_node(tNode *node) 
+void free_node(tNode *node)
 {
   if(!node) return;
   free_dat(node->dat);
@@ -173,12 +173,12 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   /* fill in neighbor info, as fas as these 8 are concerned */
   // still TODO
 /*
-  fornodes(nlist, elem)
+  fornodelist(nlist, elem) //
   {
     node = elem->node;
     switch(node->ijk)
     {
-    case 0: node->nb... = ...  
+    case 0: node->nb... = ... 
     }
   }
 */
@@ -195,7 +195,7 @@ void insert8_childnodes_asleaves(tNlist *elem, int n[3])
 
 
 /* allocate patch */
-tPat *alloc_patch(tMesh *mesh, int p, int nD) 
+tPat *alloc_patch(tMesh *mesh, int p, int nD)
 {
   tPat *pat;
 
@@ -205,7 +205,7 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
   pat->mesh = mesh;
   pat->p = p;
   pat->nD = nD;
-    
+
   /* allocate storage for data pointers, they default to NULL */
 
   /* get mem. for diff. matrices */
@@ -214,10 +214,10 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
     errorexit("out of memory for diff. matrices");
 
   return pat;
-} 
+}
 
 /* free pat, currently leaves mesh untouched */
-void free_patch(tPat *pat) 
+void free_patch(tPat *pat)
 {
   int i;
 
@@ -419,7 +419,7 @@ void realloc_datvariables(tDat *dat, int nv_new)
   for(i=dat->nv; i<nv_new; i++)
   {
     dat->v[i] = NULL;
-    for(j=0; j<6; j++) dat->g[j][i] = NULL; 
+    for(j=0; j<6; j++) dat->g[j][i] = NULL;
   }
   dat->nv = nv_new;
 }
@@ -438,7 +438,7 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   int nvdb_old = mesh->nvdb;
   tNlist *elem;
   tNode *node;
-  if(1) printf("realloc_meshvariables from %d to %d\n", 
+  if(1) printf("realloc_meshvariables from %d to %d\n",
                  mesh->nvdb, nvdb_new);
 
   /* realloc list on mesh struct */
@@ -453,8 +453,9 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   mesh->nvdb = nvdb_new;
 
   /* now make sure dat in nodes is also reallocated */
-  fornodes(mesh->lns, node)
+  fornodes(mesh, node) {
     realloc_nodevariables(node, nvdb_new);
+  } endfornodes;
 }
 
 /**********************************************************************/
@@ -478,7 +479,7 @@ void enablevarcomp_innode(tNode *node, int i)
 }
 
 /* disable one component of variable */
-void disablevarcomp_innode(tNode *node, int i) 
+void disablevarcomp_innode(tNode *node, int i)
 {
   tDat *dat = node->dat;
 
@@ -514,8 +515,9 @@ void enablevarcomp_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat->lns, node)
+  fornodes(pat, node) {
     enablevarcomp_innode(node, i);
+  } endfornodes;
 }
 
 /* disable one component of a variable on one pat */
@@ -523,8 +525,9 @@ void disablevarcomp_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat->lns, node)
+  fornodes(pat, node) {
     disablevarcomp_innode(node, i);
+  } endfornodes;
 }
 
 /* enable all components of a variable on one pat */
@@ -532,8 +535,9 @@ void enablevar_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat->lns, node)
+  fornodes(pat, node) {
     enablevar_innode(node, i);
+  } endfornodes;
 }
 
 /* disable all components of a variable on one pat */
@@ -541,8 +545,9 @@ void disablevar_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat->lns, node)
+  fornodes(pat, node) {
     disablevar_innode(node, i);
+  } endfornodes;
 }
 
 /* enable all components of a variable on one mesh */
@@ -616,19 +621,19 @@ void disablevarlist(tVarList *vl)
 // {
 //   int fi = pat->nbfaces; /* add bface in this pos. in bface list */
 //   void *ret;
-// 
+//
 //   /* increase size of bface list */
 //   ret = realloc( pat->bface, (sizeof( *(pat->bface) ))*(fi+1) );
 //   if(ret==NULL)  errorexit("add_bface: not enough memory for pat->bface");
 //   pat->bface = ret;
-// 
+//
 //   /* mem for new bface */
 //   ret = calloc( 1, sizeof( *(pat->bface[fi]) ) );
 //   if(ret==NULL) errorexit("add_bface: not enough memory for pat->bface[n]");
 //   /* add new bface */
 //   pat->bface[fi] = ret;
 //   pat->nbfaces = fi+1;
-// 
+//
 //   /* set some bface info */
 //   pat->bface[fi]->mesh = pat->mesh;
 //   pat->bface[fi]->b    = pat->b;
@@ -641,7 +646,7 @@ void disablevarlist(tVarList *vl)
 //   pat->bface[fi]->oZi  = -1; /* var indices of other coords not known yet */
 //   return fi;
 // }
-// 
+//
 // /* add a point ijk on face f to a bface with index fi, returns fi */
 // /* if called with fi<0, it first calls add_empty_bface and returns the new fi */
 // int add_point_to_bface_inpat(tPat *pat, int fi, int ijk, int f)
@@ -659,30 +664,30 @@ void disablevarlist(tVarList *vl)
 //   if(bface->f!=f) bface->f = -1;
 //   return fi;
 // }
-// 
+//
 // /* duplicate bface without pointlist fpts */
 // tBface *duplicate_bface_without_fpts_for_mesh(tBface *bface0, tMesh *mesh)
 // {
 //   tBface *bface;
 //   void *ret;
 //   if(bface0==NULL) return NULL;
-// 
+//
 //   /* mem for new bface */
 //   ret = calloc( 1, sizeof( *(bface) ) );
 //   if(ret==NULL)
 //     errorexit("duplicate_bface_without_fpts_for_mesh: not enough memory");
 //   bface = ret;
-// 
+//
 //   /* make a shallow copy of the struct */
 //   *bface = *bface0;
 //   /* now set mesh pointer */
 //   bface->mesh = mesh;
 //   /* remove pointer to bface0->fpts */
 //   bface->fpts = NULL;
-//   
+// 
 //   return bface;
 // }
-// 
+//
 // /* duplicate bface with pointlist fpts */
 // tBface *duplicate_bface_for_mesh(tBface *bface0, tMesh *mesh)
 // {
@@ -691,18 +696,18 @@ void disablevarlist(tVarList *vl)
 //   bface->fpts = DuplicatePointList_for_mesh(bface0->fpts, mesh);
 //   return bface;
 // }
-// 
+//
 // /* free a bface */
 // void free_bface(tBface *bface)
 // {
 //   if(bface!=NULL)
 //   {
-//     /* free the point lists of the faces */ 
+//     /* free the point lists of the faces */
 //     FreePointList(bface->fpts);
 //     free(bface);
 //   }
 // }
-// 
+//
 // /* free all bfaces in pat */
 // void free_all_bfaces(tPat *pat)
 // {
@@ -712,27 +717,27 @@ void disablevarlist(tVarList *vl)
 //   pat->bface = NULL;
 //   pat->nbfaces = 0;
 // }
-// 
+//
 // /* remove a bface with index fi from a pat, return number of bfaces removed */
 // int remove_bface(tPat *pat, int fi)
 // {
 //   void *ret;
 //   int nbfaces = pat->nbfaces;
 //   int i;
-// 
+//
 //   /* return 0 if bface does not exist */
 //   if(fi<0 || fi>=nbfaces) return 0;
-// 
+//
 //   /* free the bface */
 //   free_bface(pat->bface[fi]);
-// 
+//
 //   /* shift bfaces behind fi one position to the front */
 //   for(i=fi; i<nbfaces-1; i++)
 //   {
 //     pat->bface[i] = pat->bface[i+1];
 //     pat->bface[i]->fi = i;
 //   }
-// 
+//
 //   /* reduce size of bface list */
 //   nbfaces--;
 //   ret = realloc( pat->bface, (sizeof( *(pat->bface) ))*(nbfaces) );
@@ -740,10 +745,10 @@ void disablevarlist(tVarList *vl)
 //     errorexit("remove_bface: not enough memory for pat->bface");
 //   pat->bface = ret;
 //   pat->nbfaces = nbfaces;
-// 
+//
 //   return 1;
 // }
-// 
+//
 // /* look for empty bfaces and remove them */
 // int remove_bfaces_with_NULL_fpts(tPat *pat)
 // {

@@ -26,12 +26,19 @@
 #define fornodelist(nlist, elem) \
   for(elem=nlist; elem; elem=elem->next)
 
+/* loop over nodes in a node list */
+#define fornodes(meshORpat, node) { \
+  tNlist *elem_; \
+  for(elem_ = meshORpat->lns, node = elem_ ?  elem_->node : 0; \
+      elem_; node=elem_->node, elem_=elem_->next)
+#define endfornodes }
+  
 //#define fornodes(nlist, node) \
 //  for(tNlist *elem_ = nlist, node = elem_ ?  elem_->node : 0; \
 //      elem_; node=elem_->node, elem_=elem_->next)
-#define fornodes(nlist, node) \
-  for(elem_ = nlist, node = elem_ ?  elem_->node : 0; \
-      elem_; node=elem_->node, elem_=elem_->next)
+//#define fornodes(nlist, node) \
+//  for(elem_ = nlist, node = elem_ ?  elem_->node : 0; \
+//      elem_; node=elem_->node, elem_=elem_->next)
 //#define fornodes(nlist, node) \
 //for(node=nlist->node; nlist; nlist=nlist->next)
 
