@@ -478,7 +478,7 @@ void vlsetconstant(tVarList *u, const double c)
   int i, n, ui;
   int b;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     for(n=0; n<u->n; n++)
     {
@@ -502,7 +502,7 @@ void vlcopy(tVarList *v, tVarList *u)
   /* copy time */
   v->time = u->time;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     for(n=0; n<v->n; n++)
     {
@@ -551,7 +551,7 @@ void vlswap(tVarList *v, tVarList *u)
   v->time = u->time;
   u->time = temp;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     for(n=0; n<v->n; n++)
     {
@@ -590,7 +590,7 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
   double c = 0.5;
   int i, n;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     for(n=0; n<r->n; n++)
     {
@@ -618,7 +618,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
   double *pr, *pa, *pb;
   int i, n;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     for(n=0; n<r->n; n++)
     {
@@ -648,7 +648,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
   double *pr, *pa, *pb;
   int i, n;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     for(n=0; n<r->n; n++)
     {
@@ -708,7 +708,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
 
   if (ca == 0) return;
 
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
   {
     double *pr, *pa;
     int i, n;

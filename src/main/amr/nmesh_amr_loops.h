@@ -23,8 +23,14 @@
   if(node->dat) forarray(node->dat->v[(varindex)], k)
 
 /* loop over a node list nlist (type tNlist) */
-#define fornodelist(nlist, node) \
-  for(node=nlist->node; nlist->next; nlist=nlist->next, node=nlist->node)
+#define fornodelist(nlist, elem) \
+  for(elem=nlist; elem; elem=elem->next)
+
+//#define fornodes(nlist, node) \
+//  for(tNlist *elem_ = nlist, node = elem_ ?  elem_->node : 0; \
+//      elem_; node=elem_->node, elem_=elem_->next)
+#define fornodes(nlist, node) \
+for(node=nlist->node; nlist; nlist=nlist->next)
 
 ///* loop over all points in a node list */
 //#define fornodelistpoints(nlist,curnode, ijk) \

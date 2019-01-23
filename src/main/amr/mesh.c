@@ -30,7 +30,7 @@ tMesh *make_empty_mesh(int pr)
     PRF;
   }
 
-  mesh = alloc_mesh();
+  mesh = alloc_mesh(42); // FIXME
   //if(pr) printf("g->nboxes=%d  g->box=%p  nvariables=%d\n",
   //               g->nboxes, g->box, nvariables);
 

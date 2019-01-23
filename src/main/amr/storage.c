@@ -63,7 +63,7 @@ void free_node(tNode *node)
 }
 
 /* make root node */
-Node *make_root_node(tPat *pat, int n[3], int withdat)
+tNode *make_root_node(tPat *pat, int n[3], int withdat)
 {
   tNode *node = alloc_node();
   int i, nvdb;
@@ -93,7 +93,7 @@ Node *make_root_node(tPat *pat, int n[3], int withdat)
 }
 
 /* make a child node */
-Node *make_child_node(tNode *parent, int n[3], int ijk)
+tNode *make_child_node(tNode *parent, int n[3], int ijk)
 {
   tNode *node = alloc_node();
   double mid[3];
@@ -159,26 +159,38 @@ Node *make_child_node(tNode *parent, int n[3], int ijk)
 /* make 8 childern and return them in a short list */
 tNlist *make8_child_nodes(tNode *parent, int n[3])
 {
-  tNlist *nlist = alloc_nodelist();
+  tNlist *nlist;
+  tNlist *elem = NULL;
   tNode *node;
   int ijk;
 
   for(ijk=0; ijk<7; ijk++)
   {
     node = make_child_node(parent, n, ijk);
-    addto_nodelist(nlist, node);
+    elem = addnode_to_nodelist(elem, node);
+    if(ijk==0) nlist = elem; // save list head
   }
   /* fill in neighbor info, as fas as these 8 are concerned */
   // still TODO
+/*
+  fornodes(nlist, elem)
+  {
+    node = elem->node;
+    switch(node->ijk)
+    {
+    case 0: node->nb... = ...  
+    }
+  }
+*/
   return nlist;
 }
 
 /* replace current entry in leaf node list with its 8 childern */
-void insert8_childnodes_asleaves(tNlist *lnodes, int n[3])
+void insert8_childnodes_asleaves(tNlist *elem, int n[3])
 {
-  tNode *parent = lnodes->node;
+  tNode *parent = elem->node;
   tNlist *children = make8_child_nodes(parent, n);
-  replace1_in_nodelist(lnodes, children);
+  replace1_in_nodelist(elem, children);
 }
 
 
@@ -251,39 +263,88 @@ void free_mesh(tMesh *mesh)
 /**********************************************************************/
 /* storage for lists of nodes */
 /**********************************************************************/
-tNlist *alloc_nodelist(void)
+/* allocate an empty node list */
+tNlist *alloc_nodelist(tNode *node)
 {
   tNlist *nlist;
   nlist = calloc(1, sizeof(*nlist));
+  if(!nlist) errorexit("out of memory for nlist");
+  nlist->node = node;
 }
 
-void addto_nodelist(tNlist *nlist, tNode *node)
+/* add one node to nodelist after elem, and return new nodelist element
+   that now contains the node */
+tNlist *addnode_to_nodelist(tNlist *elem, tNode *node)
 {
-  if(nlist->node)
-  {
-    tNlist *tmp = alloc_nodelist();
-    tmp->next = nlist->next;
-    tmp->prev = nlist;
-    nlist->next = tmp;
-    tmp->node = node;
-  }
-  else
-    nlist->node = node;
+  tNlist *after = alloc_nodelist(node);
+  after->node = node;
+
+  return addnodelist_to_nodelist(elem, after);
 }
 
+/* insert nodelist "list" to another nodelist after elem,
+   and return the end of "list" */
+tNlist *addnodelist_to_nodelist(tNlist *elem, tNlist *list)
+{
+  tNlist *elem2;
+  tNlist *lend;
+  tNlist *lbeg;
 
+  /* find end and beginning of tNlist *list */
+  for(lend=list; lend->next; lend=lend->next) ;
+  for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
+
+  if(!elem) return lend;
+
+  elem2 = elem->next;
+  lend->next = elem2;
+  lbeg->prev = elem;
+  elem->next = lbeg;
+  if(elem2) elem2->prev = lend;
+  return lend;
+}
+
+tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
+{
+  tNlist *left;
+  tNlist *right;
+  tNlist *lend;
+  tNlist *lbeg;
+
+  /* find end and beginning of tNlist *list */
+  for(lend=list; lend->next; lend=lend->next) ;
+  for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
+
+  if(!elem) return lend;
+
+  left = elem->prev;
+  right= elem->next;
+
+  lend->next = right;
+  lbeg->prev = left;
+  if(right) right->prev = lend;
+  if(left)  left->next = lbeg;
+  return lbeg;
+}
+
+/* remove 1 element from nodelist */
 void remove1_in_nodelist(tNlist *elem)
 {
-  tNode *left = elem->prev;
-  tNode *right= elem->next;
+  tNlist *left;
+  tNlist *right;
+  if(!elem) return;
+
+  left = elem->prev;
+  right= elem->next;
   if(right) right->prev = left;
   if(left)  left->next = right;
   free(elem);
 }
 
-free_nodelist(tNlist *elem)
+/* remove all from nodelist and free it */
+void free_nodelist(tNlist *elem)
 {
-  tNode *tmp;
+  tNlist *tmp;
 
   /* remove all after elem */
   while(tmp=elem->next)
@@ -375,6 +436,7 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
   int nvdb_old = mesh->nvdb;
+  tNlist *elem;
   tNode *node;
   if(1) printf("realloc_meshvariables from %d to %d\n", 
                  mesh->nvdb, nvdb_new);
@@ -391,7 +453,7 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   mesh->nvdb = nvdb_new;
 
   /* now make sure dat in nodes is also reallocated */
-  fornodelist(mesh->lnodes, node)
+  fornodes(mesh->lns, node)
     realloc_nodevariables(node, nvdb_new);
 }
 
@@ -452,7 +514,7 @@ void enablevarcomp_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodelist(pat->lnodes, node)
+  fornodes(pat->lns, node)
     enablevarcomp_innode(node, i);
 }
 
@@ -461,7 +523,7 @@ void disablevarcomp_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodelist(pat->lnodes, node)
+  fornodes(pat->lns, node)
     disablevarcomp_innode(node, i);
 }
 
@@ -470,7 +532,7 @@ void enablevar_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodelist(pat->lnodes, node)
+  fornodes(pat->lns, node)
     enablevar_innode(node, i);
 }
 
@@ -479,7 +541,7 @@ void disablevar_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodelist(pat->lnodes, node)
+  fornodes(pat->lns, node)
     disablevar_innode(node, i);
 }
 

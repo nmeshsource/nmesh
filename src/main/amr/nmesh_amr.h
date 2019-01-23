@@ -77,7 +77,7 @@ typedef struct tPAT {
   tNode *rnode;         /* root node in this patch */
   struct tARRAY **D;    /* list of differentiation matrices */
   int nD;               /* number of diff matrices stored */
-  tNlist *lnodes;       /* linked list of leaf nodes in this patch */
+  tNlist *lns;          /* start of linked list of leaf nodes in this patch */
 } tPat;
 
 
@@ -96,7 +96,7 @@ typedef struct tMESH {
   int pdb_iStart;   /* index we start at when searching for a par */
   int vdb_iStart;   /* index we start at when searching for a var */
   tPat **pat;       /* list of pointers to patches */
-  tNlist *lnodes;   /* linked list of all leaf nodes */
+  tNlist *lns;      /* start of linked list of all leaf nodes */
 } tMesh;
 /* NOTE: the list lnodes needs to be distributed among MPI jobs:
 use space filling curve as in
@@ -142,20 +142,25 @@ typedef struct tVARLIST {
 
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
-tMesh *alloc_mesh(void);
 
 
 /* storage.c */
 tArray *alloc_array(int n[3]); //, void *Owner, int tOwner);
 void free_array(tArray *array);
-tMesh *alloc_mesh(void);
+tMesh *alloc_mesh(int npatches);
 void free_mesh(tMesh *mesh);
-tPat *alloc_patch(tMesh *mesh, int p, int nD) ;
-void free_patch(tPat *pat) ;
+tPat *alloc_patch(tMesh *mesh, int p, int nD);
+void free_patch(tPat *pat);
 tNode *alloc_node();
-void free_node(tNode *node) ;
+void free_node(tNode *node);
 tDat *alloc_dat(int nv);
 void free_dat(tDat *dat);
+tNlist *alloc_nodelist(tNode *node);
+tNlist *addnode_to_nodelist(tNlist *elem, tNode *node);
+tNlist *addnodelist_to_nodelist(tNlist *elem, tNlist *list);
+tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list);
+void remove1_in_nodelist(tNlist *elem);
+void free_nodelist(tNlist *elem);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
 void enablevar_innode(tNode *node, int i);
