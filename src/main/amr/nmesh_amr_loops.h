@@ -30,7 +30,10 @@
 //  for(tNlist *elem_ = nlist, node = elem_ ?  elem_->node : 0; \
 //      elem_; node=elem_->node, elem_=elem_->next)
 #define fornodes(nlist, node) \
-for(node=nlist->node; nlist; nlist=nlist->next)
+  for(elem_ = nlist, node = elem_ ?  elem_->node : 0; \
+      elem_; node=elem_->node, elem_=elem_->next)
+//#define fornodes(nlist, node) \
+//for(node=nlist->node; nlist; nlist=nlist->next)
 
 ///* loop over all points in a node list */
 //#define fornodelistpoints(nlist,curnode, ijk) \
