@@ -10,6 +10,10 @@ int nmesh_amr(tMesh *mesh)
 {
   printf("Adding amr\n");
 
+  /* functions */
+/* for testing */
+AddFun(POST_PARAMETERS, setup_test_mesh);
+
   /* variables */
   AddVar("X", "",
   "coordinate 1 used for output and in spectral expansion e.g. rho");

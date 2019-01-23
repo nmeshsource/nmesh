@@ -84,8 +84,10 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   }
 
   /* this par is needed here already, so that finalexit can check it */
-  printf("Adding first parameter\n");
+  printf("Adding first parameters\n");
   AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+  /* this one is about how output */
+  AddPar("logfile_creation", "append", "how create logfile [append]");
 
   /* got two or more arguments? */
   if (argc >= 2)
@@ -206,20 +208,28 @@ int make_output_directory(tMesh *mesh)
     char f[100];
     snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
     snprintf(so,999, f, outdir, nMPI_rank());  
-    freopen(so, "w", stdout);   
+    prdivider(0);
+    printf("*** NOTE *** : Output redirected to:\n %s\n", so);
+    freopen(so, "w", stdout);
     freopen(so, "w", stderr);
   }
   else /* always redirect output of proc0 to outdir.log */
   {
+    char *opt;
     snprintf(so,999, "%s.log", outdir);
-    freopen(so, "a", stdout);   
-    freopen(so, "a", stderr);
+    prdivider(0);
+    printf("*** NOTE *** : Output redirected to:\n %s\n", so);
+    if(Getv(Par("logfile_creation"),"append"))
+      opt = "a";
+    else
+      opt = "w";
+    freopen(so, opt, stdout);
+    freopen(so, opt, stderr);
   }
   /* say what we have after redirection: */
   prdivider(0);
-  PRF;printf(": stdout redirected to:\n %s\n", so);
+  //PRF;printf(": stdout redirected to:\n %s\n", so);
   printf("nmesh was compiled on %s at %s\n", __DATE__, __TIME__);
-  prdivider(0);
 
   free(outdirp);
   return 0;

@@ -3,3 +3,7 @@
 
 
 /* storage.c */
+
+
+/* mesh.c */
+int setup_test_mesh(tMesh *mesh);
