@@ -44,9 +44,10 @@ typedef struct tNODE {
   struct tPAT *pat;       /* pointer to patch that contains node */
   struct tNODE *parent;   /* pointer to parent node */
   struct tNODE *child[8]; /* list of pointers to childeren nodes */
-  struct tNODE *nb[6][4]; /* neighbors in +/-X,Y,Z dirs. */
-             // nb[0][0]= 1st neighb. in +X dir, nb[1][4]= 3rd neighb. in +X dir
-             // if e.g. nb[3][1]=0 there in no 2nd neighb. in +Y dir.
+  struct tNODE *nb[6][5]; /* neighbs in +/-X,Y,Z dir: nb[+-dir][neib.-index] */
+             // nb[4][0]= 1st neighb in +Z dir, nb[1][4]= 3rd neighb in +X dir
+             // nb[dir][k] is 0 terminated, i.e. 0 for one k in {0,1,2,3,4}
+             // if e.g. nb[3][1]=0 there is no 2nd neighb. in +Y dir.
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
   int n[3];               /* number of points in X,Y,Z-directions */
   int np;                 /* np = n[0] * n[1] * n[2]; */
