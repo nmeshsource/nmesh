@@ -49,6 +49,7 @@ typedef struct tNODE {
              // nb[dir][k] is 0 terminated, i.e. 0 for one k in {0,1,2,3,4}
              // if e.g. nb[3][1]=0 there is no 2nd neighb. in +Y dir.
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
+  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
   int n[3];               /* number of points in X,Y,Z-directions */
   int np;                 /* np = n[0] * n[1] * n[2]; */
   int l;                  /* refinement level of this node */
@@ -57,6 +58,7 @@ typedef struct tNODE {
   struct tARRAY *D[3];    /* differentiation matrix in all 3 dirs for [-1,1]
                              domain. This just points to an array in patch. */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
+  int datrank;            /* rank of proc that rightfully has data */
 } tNode;
 
 /* a linked list of nodes */
@@ -80,6 +82,14 @@ typedef struct tPAT {
   int nD;               /* number of diff matrices stored */
   tNlist *lns;          /* start of linked list of leaf nodes in this patch */
 } tPat;
+/* Note: each patch should have Bfaces as in sgrid. But instead of pointlists
+   we can use bounding rectangles in both adjacent bfaces, because we will
+   only allow patches that are touching cubed spheres. So when a node needs
+   data from the other side of a patch boundary, it can:
+   1. figure out its bounding rectangle on the other side
+   2. ask all nodes on the other side within the rectangle on the other side
+      for data
+   For this we need a node list of all leaf nodes on all faces. */
 
 
 /* several patches and thus a list of leaf nodes make up the 
@@ -160,7 +170,7 @@ tNlist *alloc_nodelist(tNode *node);
 tNlist *addnode_to_nodelist(tNlist *elem, tNode *node);
 tNlist *addnodelist_to_nodelist(tNlist *elem, tNlist *list);
 tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list);
-void remove1_in_nodelist(tNlist *elem);
+tNlist *remove1_in_nodelist(tNlist *elem);
 void free_nodelist(tNlist *elem);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);

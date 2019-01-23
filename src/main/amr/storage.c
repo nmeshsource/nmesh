@@ -63,7 +63,7 @@ void free_node(tNode *node)
 }
 
 /* make root node */
-tNode *make_root_node(tPat *pat, int n[3], int withdat)
+tNode *make_root_node(tPat *pat, int n[3], int datrank)
 {
   tNode *node = alloc_node();
   int i, nvdb;
@@ -73,8 +73,12 @@ tNode *make_root_node(tPat *pat, int n[3], int withdat)
   /* node->nb is left uninitialized here !!! */
   /* we assume that it has no neighbors */
 
-  /* take bounding boxes from pat */
-  for(i=0; i<6; i++) node->bbox[i] = pat->bbox[i];
+  /* take bounding boxes from pat, and mark it as touching all patch faces */
+  for(i=0; i<6; i++)
+  {
+    node->bbox[i] = pat->bbox[i];
+    node->patface[i] = 1;
+  }
 
   for(i=0; i<3; i++) node->n[i] = n[i];
   node->np = n[0] * n[1] * n[2];
@@ -85,8 +89,9 @@ tNode *make_root_node(tPat *pat, int n[3], int withdat)
   /* get node->D from patch */
   for(i=0; i<3; i++) node->D[i] = node->pat->D[n[i]][i];
 
-  /* if parent has dat the child will have it too */
-  if(withdat)
+  /* see where dat needs to be allocated */
+  node->datrank = datrank;
+  if(nMPI_rank()==datrank)
     node->dat = alloc_dat(nvdb);
 
   return node;
@@ -114,16 +119,18 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
     mid[i] = 0.5*(parent->bbox[2*i] + parent->bbox[2*i+1]);
 
   /* set new bounding boxes */
-  for(i=0; i<6; i++) node->bbox[i] = parent->bbox[i];
-
-  if(i%2) node->bbox[0] = mid[0];
-  else    node->bbox[1] = mid[0];
-
-  if(j%2) node->bbox[2] = mid[1];
-  else    node->bbox[3] = mid[1];
-
-  if(k%2) node->bbox[4] = mid[2];
-  else    node->bbox[5] = mid[2];
+  /* at first take bbox from pat, patface from parent */
+  for(i=0; i<6; i++)
+  {
+    node->bbox[i]    = parent->bbox[i];
+    node->patface[i] = parent->patface[i];
+  }
+  if(i%2) { node->bbox[0] = mid[0]; node->patface[0] = 0; }
+  else    { node->bbox[1] = mid[0]; node->patface[1] = 0; }
+  if(j%2) { node->bbox[2] = mid[1]; node->patface[2] = 0; }
+  else    { node->bbox[3] = mid[1]; node->patface[3] = 0; }
+  if(k%2) { node->bbox[4] = mid[2]; node->patface[4] = 0; }
+  else    { node->bbox[5] = mid[2]; node->patface[5] = 0; }
 
   /* fill in info */
   node->pat    = parent->pat;
@@ -145,6 +152,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   if(parent->dat)
   {
     node->dat = alloc_dat(nvdb);
+    node->datrank = parent->datrank;
     /* enable same vars in this dat as in parent->dat */
     for(i=0; i<nvdb; i++)
       if(parent->dat->v[i])  enablevarcomp_innode(node, i);
@@ -185,6 +193,28 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   return nlist;
 }
 
+
+tNode *remove8_leaf_nodes(tNode *leaf0)
+{
+  tNode *parent = leaf0->parent;
+  tNode *node;
+
+  /* parent is now a leaf node */
+  parent->leaf = 1;
+
+  /* update lns lists in patch here ??? NO! make separate func */
+  //...
+
+  /* update neighbor info */
+  //...
+
+  //for node \in {parent's children}
+  //  free_node(node);
+
+  return parent;
+}
+
+
 /* replace current entry in leaf node list with its 8 childern */
 void insert8_childnodes_asleaves(tNlist *elem, int n[3])
 {
@@ -200,18 +230,18 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));
-  if (!pat) errorexit("out of memory");
+  if(!pat) errorexit("out of memory");
 
   pat->mesh = mesh;
   pat->p = p;
   pat->nD = nD;
 
-  /* allocate storage for data pointers, they default to NULL */
-
   /* get mem. for diff. matrices */
-  pat->D = calloc(nD, sizeof(pat->D[0]));
-  if( !(pat->D) )
+  pat->D = calloc(nD, sizeof(pat->D[0][0]));
+  if(!(pat->D) )
     errorexit("out of memory for diff. matrices");
+
+  /* bfaces */
 
   return pat;
 }
@@ -228,6 +258,8 @@ void free_patch(tPat *pat)
   //free(pat->v);
 
   //free_all_bfaces(pat);
+
+  //free_nodesinlist(tNlist *elem)
 
   free(pat);
 }
@@ -327,18 +359,19 @@ tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
   return lbeg;
 }
 
-/* remove 1 element from nodelist */
-void remove1_in_nodelist(tNlist *elem)
+/* remove 1 element from nodelist, and return element after elem */
+tNlist *remove1_in_nodelist(tNlist *elem)
 {
   tNlist *left;
   tNlist *right;
-  if(!elem) return;
+  if(!elem) return 0;
 
   left = elem->prev;
   right= elem->next;
   if(right) right->prev = left;
   if(left)  left->next = right;
   free(elem);
+  return right;
 }
 
 /* remove all from nodelist and free it */
@@ -356,6 +389,19 @@ void free_nodelist(tNlist *elem)
 
   /* remove elem */
   remove1_in_nodelist(elem);
+}
+
+void free_nodesinlist(tNlist *elem)
+{
+  tNlist *tmp;
+
+  /* free nodes in elem and all after in */
+  for(tmp=elem; tmp; tmp=tmp->next)
+    free_node(tmp->node);
+
+  /* free nodes in all before elem */
+  for(tmp=elem->prev; tmp; tmp=tmp->prev)
+    free_node(tmp->node);
 }
 
 /**********************************************************************/
