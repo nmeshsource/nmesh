@@ -265,28 +265,36 @@ void addto_nodelist(tNlist *nlist, tNode *node)
     tmp->next = nlist->next;
     tmp->prev = nlist;
     nlist->next = tmp;
+    tmp->node = node;
   }
   else
     nlist->node = node;
 }
 
-void remove1_in_nodelist(tNlist *nlist)
+
+void remove1_in_nodelist(tNlist *elem)
 {
-  tNode *left = nlist->prev;
-  tNode *right= nlist->next;
+  tNode *left = elem->prev;
+  tNode *right= elem->next;
   if(right) right->prev = left;
   if(left)  left->next = right;
-  free(nlist);
+  free(elem);
 }
 
-free_nodelist(tNlist *nlist)
+free_nodelist(tNlist *elem)
 {
-  tNode *start=nlist->right;
   tNode *tmp;
 
-  for(tmp=start; tmp->next; tmp=tmp->next)
+  /* remove all after elem */
+  while(tmp=elem->next)
     remove1_in_nodelist(tmp);
-// ...
+
+  /* remove all before elem */
+  while(tmp=elem->prev)
+    remove1_in_nodelist(tmp);
+
+  /* remove elem */
+  remove1_in_nodelist(elem);
 }
 
 /**********************************************************************/
