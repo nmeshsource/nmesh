@@ -286,7 +286,7 @@ free_nodelist(tNlist *nlist)
 
   for(tmp=start; tmp->next; tmp=tmp->next)
     remove1_in_nodelist(tmp);
-
+// ...
 }
 
 /**********************************************************************/
