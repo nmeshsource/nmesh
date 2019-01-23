@@ -42,7 +42,6 @@ typedef struct tDAT {
 /* a node */
 typedef struct tNODE {
   struct tPAT *pat;       /* pointer to patch that contains node */
-  struct tNODE *rnode;    /* pointer to root node */
   struct tNODE *parent;   /* pointer to parent node */
   struct tNODE *child[8]; /* list of pointers to childeren nodes */
   struct tNODE *nb[6][4]; /* neighbors in +/-X,Y,Z dirs. */
@@ -51,11 +50,11 @@ typedef struct tNODE {
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
   int n[3];               /* number of points in X,Y,Z-directions */
   int np;                 /* np = n[0] * n[1] * n[2]; */
-  struct tARRAY *D[3];    /* differentiation matrix in all 3 dirs for [-1,1]
-                             domain. This just points to an array in patch. */
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
-  int ni;                 /* node index (0-7) */
+  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
+  struct tARRAY *D[3];    /* differentiation matrix in all 3 dirs for [-1,1]
+                             domain. This just points to an array in patch. */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
 } tNode;
 

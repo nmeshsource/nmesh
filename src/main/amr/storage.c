@@ -45,26 +45,140 @@ void free_array(tArray *array)
 /* mesh, patch, and node storage */
 /**************************************************************************/
 
-/* allocate mesh */
-tMesh *alloc_mesh(void)
+/* allocate one node*/
+tNode *alloc_node()
 {
-  tMesh *mesh;
+  tNode *node = calloc(1, sizeof(*node));
+  if(!node) errorexit("out of memory");
 
-  mesh = calloc(1, sizeof(tMesh));
-  if (!mesh) errorexit("out of memory");
-
-  return mesh;
+  return node;
 }
 
-/* free mesh */
-void free_mesh(tMesh *mesh)
+/* free one node */
+void free_node(tNode *node) 
 {
-  int i;
+  if(!node) return;
+  free_dat(node->dat);
+  free(node);
+}
 
-  if (!mesh) return;
-  for(i = 0; i < mesh->npats; i++)
-    free_patch(mesh->pat[i]);
-  free(mesh);
+/* make root node */
+Node *make_root_node(tPat *pat, int n[3], int withdat)
+{
+  tNode *node = alloc_node();
+  int i, nvdb;
+
+  /* fill in info */
+  node->pat = pat;
+  /* node->nb is left uninitialized here !!! */
+  /* we assume that it has no neighbors */
+
+  /* take bounding boxes from pat */
+  for(i=0; i<6; i++) node->bbox[i] = pat->bbox[i];
+
+  for(i=0; i<3; i++) node->n[i] = n[i];
+  node->np = n[0] * n[1] * n[2];
+  node->l = 0;
+  node->leaf = 1;    /* make this a leaf node */
+  nvdb = pat->mesh->nvdb;
+
+  /* get node->D from patch */
+  for(i=0; i<3; i++) node->D[i] = node->pat->D[n[i]][i];
+
+  /* if parent has dat the child will have it too */
+  if(withdat)
+    node->dat = alloc_dat(nvdb);
+
+  return node;
+}
+
+/* make a child node */
+Node *make_child_node(tNode *parent, int n[3], int ijk)
+{
+  tNode *node = alloc_node();
+  double mid[3];
+  int i,j,k, nvdb;
+  int ns[] = {2,2,2};
+
+  /* register this child with the parent */
+  parent->child[ijk] = node;
+  parent->leaf = 0;  /* parent is now no longer a leaf node */
+
+  /* node coords from node index ijk */
+  k = kOfInd_n(ijk, n);
+  j = jOfInd_n_k(ijk, n,k);
+  i = iOfInd_n_jk(ijk,n,j,k);
+
+  /* mid point in parent node */
+  for(i=0; i<3; i++)
+    mid[i] = 0.5*(parent->bbox[2*i] + parent->bbox[2*i+1]);
+
+  /* set new bounding boxes */
+  for(i=0; i<6; i++) node->bbox[i] = parent->bbox[i];
+
+  if(i%2) node->bbox[0] = mid[0];
+  else    node->bbox[1] = mid[0];
+
+  if(j%2) node->bbox[2] = mid[1];
+  else    node->bbox[3] = mid[1];
+
+  if(k%2) node->bbox[4] = mid[2];
+  else    node->bbox[5] = mid[2];
+
+  /* fill in info */
+  node->pat    = parent->pat;
+  node->parent = parent;
+  /* node->nb is left uninitialized here !!! */
+
+  for(i=0; i<3; i++) node->n[i] = n[i];
+  node->np = n[0] * n[1] * n[2];
+
+  node->l = parent->l + 1;
+  node->leaf = 1;    /* make this a leaf node */
+  node->ijk = ijk;
+  nvdb = node->pat->mesh->nvdb;
+
+  /* get node->D from patch */
+  for(i=0; i<3; i++) node->D[i] = node->pat->D[n[i]][i];
+
+  /* if parent has dat the child will have it too */
+  if(parent->dat)
+  {
+    node->dat = alloc_dat(nvdb);
+    /* enable same vars in this dat as in parent->dat */
+    for(i=0; i<nvdb; i++)
+      if(parent->dat->v[i])  enablevarcomp_innode(node, i);
+
+    /* fill node->dat with interpolation data from parent */
+    // still TODO
+  }
+
+  return node;
+}
+
+/* make 8 childern and return them in a short list */
+tNlist *make8_child_nodes(tNode *parent, int n[3])
+{
+  tNlist *nlist = alloc_nodelist();
+  tNode *node;
+  int ijk;
+
+  for(ijk=0; ijk<7; ijk++)
+  {
+    node = make_child_node(parent, n, ijk);
+    addto_nodelist(nlist, node);
+  }
+  /* fill in neighbor info, as fas as these 8 are concerned */
+  // still TODO
+  return nlist;
+}
+
+/* replace current entry in leaf node list with its 8 childern */
+void insert8_childnodes_asleaves(tNlist *lnodes, int n[3])
+{
+  tNode *parent = lnodes->node;
+  tNlist *children = make8_child_nodes(parent, n);
+  replace1_in_nodelist(lnodes, children);
 }
 
 
@@ -73,7 +187,7 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
 {
   tPat *pat;
 
-  pat = calloc(1, sizeof(tPat));
+  pat = calloc(1, sizeof(*pat));
   if (!pat) errorexit("out of memory");
 
   pat->mesh = mesh;
@@ -106,35 +220,79 @@ void free_patch(tPat *pat)
   free(pat);
 }
 
-tNode *alloc_node()
-{
-  tNode *node = calloc(1, sizeof(tNode));
-  if(!node) errorexit("out of memory");
 
-  return node;
+
+/* allocate mesh */
+tMesh *alloc_mesh(int npatches)
+{
+  tMesh *mesh;
+
+  mesh = calloc(1, sizeof(*mesh));
+  if(!mesh) errorexit("out of memory for mesh");
+
+  /* alloc list of pointers to patches */
+  mesh->pat = calloc(npatches, sizeof(mesh->pat[0]));
+  if(mesh->pat) errorexit("out of memory for mesh->pat");
+
+  return mesh;
 }
 
-/* free one node */
-void free_node(tNode *node) 
+/* free mesh */
+void free_mesh(tMesh *mesh)
 {
   int i;
 
-  if (!node) return;
-
-  //for (i = 0; i < pat->mesh->nvariables; i++)
-  //  disablevarcomp_inpat(pat, i);
-  //free(pat->v);
-
-  //free_all_bfaces(pat);
-
-  free(node);
+  if (!mesh) return;
+  for(i = 0; i < mesh->npats; i++)
+    free_patch(mesh->pat[i]);
+  free(mesh);
 }
 
+/**********************************************************************/
+/* storage for lists of nodes */
+/**********************************************************************/
+tNlist *alloc_nodelist(void)
+{
+  tNlist *nlist;
+  nlist = calloc(1, sizeof(*nlist));
+}
+
+void addto_nodelist(tNlist *nlist, tNode *node)
+{
+  if(nlist->node)
+  {
+    tNlist *tmp = alloc_nodelist();
+    tmp->next = nlist->next;
+    tmp->prev = nlist;
+    nlist->next = tmp;
+  }
+  else
+    nlist->node = node;
+}
+
+void remove1_in_nodelist(tNlist *nlist)
+{
+  tNode *left = nlist->prev;
+  tNode *right= nlist->next;
+  if(right) right->prev = left;
+  if(left)  left->next = right;
+  free(nlist);
+}
+
+free_nodelist(tNlist *nlist)
+{
+  tNode *start=nlist->right;
+  tNode *tmp;
+
+  for(tmp=start; tmp->next; tmp=tmp->next)
+    remove1_in_nodelist(tmp);
+
+}
 
 /**********************************************************************/
 /* storage for dat lists in the nodes */
 /**********************************************************************/
-/* allocate for nv variables that can be enabled or disabled */
+/* allocate room for nv variables that can be enabled or disabled */
 tDat *alloc_dat(int nv)
 {
   tDat *dat;
