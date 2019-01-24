@@ -46,13 +46,12 @@ int main(int argc, char **argv)
     RunFun(INITMESH); // here we schedule funcs to programatically set up the mesh
     inidata_mesh(mesh);
     evolve_mesh(mesh);
-    finalize_mesh(mesh);
-    RunFun(POST_FINALIZE_MESH); //hook after finalize_mesh, e.g. for special cleanup
     makeparameter(mesh, "outdir_previous_iteration", "",
                   "outdir of previous iteration");
     Sets(Par("outdir_previous_iteration"), Gets(Par("outdir")));
   }
 
+  finalize_mesh(mesh);
   nMPI_Finalize();
   return 0;
 }
@@ -87,7 +86,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   printf("Adding first parameters\n");
   AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
   /* this one is about how output */
-  AddPar("logfile_creation", "append", "how create logfile [append]");
+  AddPar("logfile_creation", "append", "how to create logfile [no,yes,append]");
 
   /* got two or more arguments? */
   if (argc >= 2)
@@ -213,7 +212,7 @@ int make_output_directory(tMesh *mesh)
     freopen(so, "w", stdout);
     freopen(so, "w", stderr);
   }
-  else /* always redirect output of proc0 to outdir.log */
+  else if(!Getv(Par("logfile_creation"),"no"))
   {
     char *opt;
     snprintf(so,999, "%s.log", outdir);

@@ -47,10 +47,7 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   /* read file into memory, add one space at end and beginning */
   fp = fopen(parfile, "r");
   if(!fp)
-  {
-    printf("Could not open parameter file \"%s\"\n", parfile);
-    errorexit("");
-  }
+    errorexits("Could not open parameter file \"%s\"\n", parfile);
 
   buffer = 0;
   for (i = nbuffer = 0;; i++)
@@ -164,6 +161,7 @@ void makeparameter(tMesh *mesh, char *name, char *value, char *description)
 {
   tParameter *p;
 
+  if(0) {PRF;printf(" mesh=%p\n", mesh);}
   if(0) {PRF;printf(" %s = %s,  %s\n", name, value, description);}
 
   mesh->pdb = realloc(mesh->pdb, npdbmax*sizeof(tParameter));
@@ -296,7 +294,7 @@ int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
   if(pdb1!=NULL && ind>=0 && ind<npdb1max)
     pdb1[ind].numericalvalue = atof(pdb1[ind].value);
   else
-    errorexit("index out of range");
+    errorexit("parameter index out of range");
 
   return 1;
 }
@@ -324,7 +322,7 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
     pdb1[ind].booleanvalue = boolval;
   }
   else
-    errorexit("index out of range");
+    errorexit("parameter index out of range");
 
   return 1;
 }
