@@ -3,7 +3,7 @@
 
 #include "nmesh.h"
 #include "main.h"
-
+#include <time.h> // for time and ctime functions
 
 /* global var that contain the mesh made in main */
 tMesh *main_mesh;
@@ -152,6 +152,8 @@ int make_output_directory(tMesh *mesh)
   char *outdir  = Gets(Par("outdir"));
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
   char so[1000];
+  time_t mytime = time(NULL);       // get time
+  char *time_str = ctime(&mytime);
 
   /* set outdirp to outdir_previous */
   strcpy(outdirp, outdir);
@@ -226,7 +228,8 @@ int make_output_directory(tMesh *mesh)
   }
   /* say what we have after redirection: */
   prdivider(0);
-  //PRF;printf(": stdout redirected to:\n %s\n", so);
+  time_str[strlen(time_str)-1] = '\0';
+  printf("The current time is %s\n", time_str);
   printf("nmesh was compiled on %s at %s\n", __DATE__, __TIME__);
   printf("  outdir = %s \n", outdir);
 
@@ -244,9 +247,7 @@ int parse_command_line_options(tMesh *mesh)
   char *par;
   char *val;
 
-  PRFs(":\n");
-  printf("Par(\"nmesh_options\")=%i\n", Par("nmesh_options"));
-  Yo(9);
+  //PRF;printf(":\nPar(\"nmesh_options\")=%i\n", Par("nmesh_options"));
   /* get length of nmesh_options string */
   if(GetsLax(Par("nmesh_options"))==0) return 0;
   printf("Parsing command line options\n");
