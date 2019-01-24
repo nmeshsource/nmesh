@@ -1,5 +1,5 @@
 /* nmesh_main.c */
-/* Wolfgang Tichy, April 2005 */
+/* Wolfgang Tichy, 1/2019 */
 
 #include "nmesh.h"
 #include "main.h"

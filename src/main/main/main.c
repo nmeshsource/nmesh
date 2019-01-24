@@ -62,7 +62,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
 {
   int i; 
 
-  if (0) 
+  if(0) 
     for (i = 0; i < argc; i++)
       printf("argv[%d] = %s\n", i, argv[i]);
 
@@ -70,11 +70,10 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   printf("Welcome to nmesh, compiled on %s at %s\n", __DATE__, __TIME__);
   prdivider(0);
 
-  if (argc < 2)
+  if(argc < 2)
   {
     printf("Usage:  nmesh name.par\n");
     printf("or:     nmesh name.par options and extra arguments\n");
-    printf("or:     nmesh --argsfile args.txt\n");
     printf("\n");
     printf("options: --keep_previous           do not touch name_previous\n");
     printf("         --modify-par:\"P=v\"        set par P to value v\n");
@@ -85,7 +84,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   /* this par is needed here already, so that finalexit can check it */
   printf("Adding first parameters\n");
   AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
-  /* this one is about how output */
+  /* this is about how we output */
   AddPar("logfile_creation", "append", "how to create logfile [no,yes,append]");
 
   /* got two or more arguments? */
@@ -168,9 +167,9 @@ int make_output_directory(tMesh *mesh)
   }
 
   /* check if we remove outdir_previous */
-  /*
   if(!GetvLax(Par("nmesh_options"), "--keep_previous"))
   {
+    /*
     char *prev = checkpoint_filename("_previous", "");
     char *curr = checkpoint_filename("", "");
     FILE *fpprev = fopen(prev, "r");
@@ -189,18 +188,18 @@ int make_output_directory(tMesh *mesh)
     if(fpcurr) fclose(fpcurr);
     free(prev);
     free(curr);
+    */
     // remove outdir_previous and move outdir to outdir_previous
     system2("rm -rf", outdirp);
     system3("mv", outdir, outdirp);
   }
-  */
 
   /* make output directory, save parfile */
   system2("mkdir", outdir);
   /* system3("cp", Gets(Par("parameterfile")), outdir); */
   copy_file_into_dir(Gets(Par("parameterfile")), outdir);
 
-  /* redirect stdout and stderr for MPI jobs 
+  /* redirect stdout and stderr. Do it for all MPI ranks>0
      all output is collected in outdir/stdout.001 etc  */
   if(nMPI_rank()>0)
   {
@@ -229,6 +228,7 @@ int make_output_directory(tMesh *mesh)
   prdivider(0);
   //PRF;printf(": stdout redirected to:\n %s\n", so);
   printf("nmesh was compiled on %s at %s\n", __DATE__, __TIME__);
+  printf("  outdir = %s \n", outdir);
 
   free(outdirp);
   return 0;

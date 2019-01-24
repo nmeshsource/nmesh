@@ -1,5 +1,5 @@
 /* nmesh.h */
-/* Wolfgang Tichy, April 2005 */
+/* Wolfgang Tichy, 1/2019 */
 
 
 #include <math.h>

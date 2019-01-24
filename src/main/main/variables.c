@@ -1,19 +1,12 @@
 /* variables.c */
-/* Wolfgang Tichy, April 2005 */
+/* Wolfgang Tichy, 1/2019 */
 
 #include "nmesh.h"
 
-/* global var that tells us how often we have restarted nmesh */
-extern int nmesh_restarts;
-
-
-//tVar *vdb = 0;
-//int vdb_iStart = 0, nvdb = 0, globalnvariables = 0;
 
 
 
-/* add variable to data base.
-   Don't use this if we have a mesh already! Instead use: AddVarToGrid */
+/* add a variable to data base that is located in mesh */
 void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
 {
   tVar *newv;

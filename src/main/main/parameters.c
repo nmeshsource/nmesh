@@ -1,15 +1,27 @@
 /* parameters.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 12/99 */
+/* Wolfgang Tichy, 1/2019 */
 
-/* basic parameter file syntax:
-   parameter_name = parameter_value parameter_value ...
-   
-   special characters:
-   #: this and the rest of the line is ignored
-   ": counts as white space
+/* The parameter file has this format:
 
-   before interpretation the file content is converted to the form
-   par=val ... val par=val ... val ...
+parameter_name = parameter_value1 parameter_value2 ...
+
+   Note that if there are lots of values it can also be written like this
+   in the parameter file:
+
+parameter_name = parameter_value1 parameter_value2 parameter_value3
+  parameter_value4 parameter_value5
+
+   Comments:
+   Anything after the character # is ignored until the end of the line.
+   I.e. comments can look like these:
+
+# my fav parameter:
+parameter_name = parameter_value1  # this is just a comment
+
+   Before storing the parameters and their values, all comments are removed
+   and then the file content is converted to the form
+   #par=val ... val#par=val ... val ...
+   Here # now indicates the start of a par and not a comment!
 */
 
 
@@ -18,7 +30,7 @@
 
 
 /* maximum number of pars allowed */
-int npdbmax = 1000;
+int npdbmax = 2000;
 
 void makeparameter(tMesh *mesh, char *name, char *value, char *description);
 int findparameterindex(tMesh *mesh, char *name, int fatal);
@@ -42,25 +54,25 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   char *par, *val;
   int lpar, lval;
 
-  if(1) printf("Reading parameter file \"%s\"\n", parfile);
+  printf("Reading parameter file \"%s\"\n", parfile);
 
-  /* read file into memory, add one space at end and beginning */
+  /* read file into memory, and also add one space at end and beginning */
   fp = fopen(parfile, "r");
   if(!fp)
     errorexits("Could not open parameter file \"%s\"\n", parfile);
 
   buffer = 0;
-  for (i = nbuffer = 0;; i++)
+  for(i = nbuffer = 0;; i++)
   {
-    if (i >= nbuffer-2)
+    if(i >= nbuffer-2)
     {
-	if (nbuffer > 1000000) 
-	  errorexit("Sanity forbids parameter files bigger than 1MB");
-	buffer = (char *) realloc(buffer, sizeof(char)*(nbuffer += 1000));
-	if (!buffer) errorexit("Out of memory while reading parameter file.");
+      if(nbuffer > 1000000) 
+        errorexit("Sanity forbids parameter files bigger than 1MB");
+      buffer = (char *) realloc(buffer, sizeof(char)*(nbuffer += 1000));
+      if(!buffer) errorexit("Out of memory while reading parameter file.");
     }
-    if (i == 0) buffer[i++] = ' ';
-    if ((c = fgetc(fp)) == EOF) break;
+    if(i == 0) buffer[i++] = ' ';
+    if((c = fgetc(fp)) == EOF) break;
     buffer[i] = c;
   }
   fclose(fp);
@@ -70,26 +82,25 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 
   if(0) { printf("%s", buffer); Yo(1); }
 
-  /* white out comments and quotes */
-  for (i = 0; i < nbuffer; i++) { 
-    if (buffer[i] == '#') 
+  /* replace comments by spaces */
+  for(i = 0; i < nbuffer; i++)
+  { 
+    if(buffer[i] == '#') 
       while (i < nbuffer && buffer[i] != '\n')
-	buffer[i++] = ' ';
-    if (buffer[i] == '"')
-      buffer[i] = ' ';
+        buffer[i++] = ' ';
   }
 
-  /* collapse all white space to single space */
-  for (i = j = 1; i < nbuffer; i++) {
-    if (!isspace(buffer[i])) buffer[j++] = buffer[i];
-    else if (!isspace(buffer[j-1])) buffer[j++] = ' ';
+  /* collapse all white space into single space */
+  for(i = j = 1; i < nbuffer; i++) {
+    if(!isspace(buffer[i])) buffer[j++] = buffer[i];
+    else if(!isspace(buffer[j-1])) buffer[j++] = ' ';
   }
   buffer[j] = '\0';
   nbuffer = strlen(buffer);
-  if (0) printf("|%s|\n", buffer);
+  if(0) printf("|%s|\n", buffer);
 
   /* put a # in front of each par name */
-  for (i=0; i<nbuffer-2; i++)
+  for(i=0; i<nbuffer-2; i++)
   {
     if(buffer[i]==' ') j=i; /* save pos of newest space found in j */
     if(buffer[i+1]=='=' || buffer[i+2]=='=') /* there's a '=' after pos i */
@@ -98,21 +109,20 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
       i++;
     }
   }
-  if (0) printf("|%s|\n", buffer);
+  if(0) printf("|%s|\n", buffer);
 
-  /* and remove spaces around = */
-  for (i = j = 1; i < nbuffer; i++) {
-    if (buffer[i] != ' ' || (buffer[i-1] != '=' && buffer[i+1] != '=')) 
+  /* now remove spaces around = */
+  for(i = j = 1; i < nbuffer; i++) {
+    if(buffer[i] != ' ' || (buffer[i-1] != '=' && buffer[i+1] != '=')) 
       buffer[j++] = buffer[i];
   }
   buffer[j] = '\0';
   if(buffer[j-1] == ' ') buffer[j-1] = '\0';
   nbuffer = strlen(buffer);
-  if (0) printf("|%s|\n", buffer);
+  if(0) printf("|%s|\n", buffer);
 
-  /* now buffer is 
-     |#par=val ... val#par=val ... val| 
-  */
+  /* now the buffer is 
+     |#par=val ... val#par=val ... val| */
 
   /* split parameter names and values by replacing '#' and '=' by zero */
   for(i=0; i<nbuffer; i++)
@@ -122,14 +132,14 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   }
 
   /* loop over all parameter/value pairs */
-  for (i = 1; i < nbuffer; i += lpar + lval + 2)
+  for(i = 1; i < nbuffer; i += lpar + lval + 2)
   {
     int pari;
     par = buffer+i;
     lpar = strlen(par);
     val = par + lpar + 1;
     lval = strlen(val);
-    if (0) printf("%s = |%s|\n", par, val);
+    if(0) printf("%s = |%s|\n", par, val);
 
     pari = findparameterindex(mesh, par, 0);
     if(pari<0)
@@ -142,7 +152,8 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   }  
 
   /* print parameters */
-  if (0) {
+  if(0) 
+  {
     printf("after reading the parameterfile:\n");
     printparameters(mesh);
   }
@@ -168,7 +179,7 @@ void makeparameter(tMesh *mesh, char *name, char *value, char *description)
   if(!mesh->pdb) errorexit("out of memory for mesh->pdb");
 
   p = findparameter(mesh, name, 0);
-  if (!p)
+  if(!p)
   {
     p = &(mesh->pdb[mesh->npdb]);
     mesh->npdb++;
@@ -264,23 +275,24 @@ tParameter *findparameter(tMesh *mesh, char *name, int fatal)
 
 
 
-/* translate parameter value 
-   should be much more elaborate, say, implement simple arithmetic */
+/* translate parameter value in some simple cases */
 void translatevalue(char **value)
 {
   double x = 0;
 
-  if (strcmp(*value, "pi")    == 0) x =    PI;
-  if (strcmp(*value, "-pi")   == 0) x =   -PI;
-  if (strcmp(*value, "pi/2")  == 0) x =    PI/2;
-  if (strcmp(*value, "-pi/2") == 0) x =   -PI/2;
-  if (strcmp(*value, "2*pi")  == 0) x =  2*PI;
-  if (strcmp(*value, "-2*pi") == 0) x = -2*PI;
+  if(strcmp(*value, "pi")    == 0) x =    PI;
+  if(strcmp(*value, "-pi")   == 0) x =   -PI;
+  if(strcmp(*value, "pi/2")  == 0) x =    PI/2;
+  if(strcmp(*value, "-pi/2") == 0) x =   -PI/2;
+  if(strcmp(*value, "2*pi")  == 0) x =  2*PI;
+  if(strcmp(*value, "2pi")   == 0) x =  2*PI;
+  if(strcmp(*value, "-2*pi") == 0) x = -2*PI;
+  if(strcmp(*value, "-2pi")  == 0) x = -2*PI;
 
   if(x)
   {
     char newvalue[100];
-    sprintf(newvalue, "%.18e", x);
+    snprintf(newvalue,99, "%.18e", x);
     free(*value);
     *value = strdup(newvalue);
   }
@@ -342,13 +354,15 @@ void printparameters(tMesh *mesh)
   int i;
 
   for(i = 0; i < npdb; i++)
-    printf("pdb[%3d]:  %16s = %-16s,  %s\n", 
-	   i, pdb[i].name, pdb[i].value, pdb[i].description);
+    printf("pdb[%2d]:  %12s = %-16s,  %s\n", 
+           i, pdb[i].name, pdb[i].value, pdb[i].description);
 }
 
 
 /***************************************************************************/
-/* functions for external calls */
+/* functions for external calls, we have macros for many of them, e.g.
+   AddPar(name, value, description);
+   instead of AddMeshPar(mesh, name, value, description); */
 
 /* creation functions */
 void AddMeshPar(tMesh *mesh, char *name, char *value, char *description)
@@ -368,9 +382,7 @@ void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description)
   printf("  parameter %-25s  =  %s\n", name, Gets(Par(name)));
 }
 
-
-
-/* assignment functions */
+/* functions for setting pars */
 void MeshParSets(tMesh *mesh, int pi, char *value)
 {
   setparameter(mesh, pi, value);
@@ -403,7 +415,7 @@ void MeshParAppends(tMesh *mesh, int pi, char *value)
 }
 
 
-/* query functions */
+/* functions for getting par values */
 char *MeshParGets(tMesh *mesh, int i)
 {
   if(i<0 || i>=mesh->npdb)
@@ -465,7 +477,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
     if( s[lv]==' ' || s[lv]==0 ) break;
     parval = s+1;
   }
-  if (!s) return 0;
+  if(!s) return 0;
   ls = strlen(s);
   lp = strlen(p->value);
   startok = (s == p->value || *(s-1) == ' ');  /* how robust is this? */
@@ -488,12 +500,12 @@ char *NextEntry(char *list)
   static int i = 0, l = 0;
   char *s;
 
-  if (!list || !*list || (i && i == l)) {
+  if(!list || !*list || (i && i == l)) {
     i = l = 0;
     return 0;
   }
 
-  if (!i) {
+  if(!i) {
     //FIX: crashes now: free(copyoflist);  /* no op if null */
     free(copyoflist);
     l = strlen(list);
@@ -503,18 +515,19 @@ char *NextEntry(char *list)
     i++;
 
   s = copyoflist + i;
-  for (; i < l && copyoflist[i] != ' '; i++);
-  if (copyoflist[i] == ' ') copyoflist[i] = 0;
+  for(; i < l && copyoflist[i] != ' '; i++);
+  if(copyoflist[i] == ' ') copyoflist[i] = 0;
   
   return s;
 }
 
 /**************************************************************************/
+/* we can iterate over pars */
 int iterate_parameters(tMesh* mesh, int next)
 {
   static int ncall = 0;
   tParameter *p;
-  char *list, *name, *newvalue, *value;
+  char *list, *name, *newvalue, *value, *saveptr;
   char iterpar[100] = "iterate_parameter1";
   char newoutdir[10000], *outdirp;
   int i, j, l;
@@ -523,10 +536,10 @@ int iterate_parameters(tMesh* mesh, int next)
   if(next==0) { ncall=0;  return 0; }
 
   /* the default is that we don't want to iterate */
-  if (!Getv(Par("iterate_parameters"), "yes")) {
-
+  if(!Getv(Par("iterate_parameters"), "yes"))
+  {
     /* return 1 for first call, but 0 for second call, which exits nmesh */
-    if (ncall < 0) 
+    if(ncall < 0) 
       return 0;
     ncall = -1;
     return 1;
@@ -542,31 +555,48 @@ int iterate_parameters(tMesh* mesh, int next)
   *strstr(newoutdir, ".par") = '\0';
 
   p = findparameter(mesh, iterpar, 0);
-  if (!p)
-    errorexit("none found, specify iterate_parameter1\n");
+  if(!p)
+    errorexit("nothing to iterate, specify at least iterate_parameter1\n");
 
   j = 1;
-  while (p) {
-    list = Gets(Par(iterpar));
+  while(p)
+  {
+printparameters(mesh);
 
-    name = NextEntry(list);
-    if (!findparameter(mesh, name, 0))
+
+    list = strdup( Gets(Par(iterpar)) );
+printf("list=|%s|\n", list);
+//    name = NextEntry(list);
+//printf("  name= |%s|\n", name);
+    name = strtok_r(list, " ", &saveptr);
+printf("  name2=|%s|\n", name);
+
+
+    if(!findparameter(mesh, name, 0))
       errorexit("iterate_parameterN has to start "
-		"with name of existing parameter");
+                "with name of existing parameter");
  
-    value = NextEntry(list);
-    if (!value)
+//    value = NextEntry(list);
+//printf("  value= |%s|\n", value);
+    value = strtok_r(0, " ", &saveptr);
+printf("  value2=|%s|\n", value);
+    if(!value)
       errorexit("iterate_parameterN needs at least one value");
 
     i = 0;
     newvalue = 0;
-    while (value) {
-      if (i == ncall) newvalue = value;
-      value = NextEntry(list);
+    while (value)
+    {
+      if(i == ncall) newvalue = value;
+//      value = NextEntry(list);
+//printf("    value= |%s|\n", value);
+      value = strtok_r(0, " ", &saveptr);
+printf("    value2=|%s|\n", value);
       i++;
     }
 
-    if (newvalue) {
+    if(newvalue)
+    {
       Sets(Par(name), newvalue);
       printf("%38s = %s\n", name, Gets(Par(name)));
 
@@ -579,11 +609,15 @@ int iterate_parameters(tMesh* mesh, int next)
     l = strlen("iterate_parameter");
     sprintf(iterpar+l, "%d", j);
     p = findparameter(mesh, iterpar, 0);
+
+    free(list);
   }
 
-  if (newvalue) {
+printparameters(mesh);
+  if(newvalue)
+  {
     printf("Starting iteration %d\n", ncall);
-    if (1) printf("  outdir = %s\n", Gets(Par("outdir")));
+    if(1) printf("  outdir = %s\n", Gets(Par("outdir")));
     outdirp = (char *) calloc(strlen(newoutdir)+40, sizeof(char));
     strcpy(outdirp, newoutdir);
     strcat(outdirp, "_previous");

@@ -1,5 +1,5 @@
 /* tensors.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 6/02, 11/02 */
+/* Wolfgang Tichy, 1/2019 */
 
 #include "nmesh.h"
 #include <ctype.h>
@@ -7,11 +7,11 @@
 #define ilistSTRLEN 8
 
 
-/* helper function: 
-   decode tensor index string
+/* decode tensor index string
    return list of indices into variable list 
    return sign under reflections for symmetry boundaries
    note that we treat 3d indices i,j,k,... and 4d indices a,b,c,...
+   and 2d indices q,r,s,...
    ilist[0], ilist[1], ... need to be freed by caller
 
    should be made automatic, but for now this is simpler 
@@ -387,4 +387,3 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
   *nilist = n;
   free(tensorindices);
 }
-

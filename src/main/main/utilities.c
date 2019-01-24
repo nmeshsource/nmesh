@@ -1,5 +1,5 @@
 /* utilities.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann, 12/99 */
+/* Wolfgang Tichy, 1/2019 */
 
 #include <time.h>
 
@@ -71,7 +71,7 @@ void prClockTimeIn_s(char *comment)
 }
 
 
-/* minimum and maximum, also works for integers in most places */
+/* minimum and maximum funcs, works for integers id they are not too big */
 double min2(double x, double y)
 {
   return (x < y) ? x : y;
@@ -274,7 +274,8 @@ int remove_dir(char *which_dir)
   return 0;
 }
 
-/* ugh, but how universal are those built in functions? */
+/* call system with 2 or 3 arguments, also call c-functions directly 
+   in some special case to avoid some unix shell commands */
 int system2(char *s1, char *s2) 
 {
   return system3(s1, s2, "");
@@ -400,7 +401,7 @@ int unlock_curr_til_EOF(FILE *out)
 }
 
 
-/* malloc memory for some simple cases */
+/* malloc memory (and check out of memory) for some simple cases */
 double *dmalloc(int n)
 {
   double *p = (double *) malloc(sizeof(double) * n);
@@ -449,8 +450,8 @@ void finalexit(int ec)
 
 /* errorexit functions */
 /* note that nmesh_main.h defines a macro so that the user does not have
-   to specify __FILE__ and __LINE__ for location where the error occured
-*/
+   to specify __FILE__ , __LINE__ and __func__ to describe where the
+   error occured */
 #undef errorexit
 #undef errorexits
 #undef errorexiti
@@ -482,6 +483,8 @@ void errorexiti(char *file, int line, const char *func, char *s, int i)
   fflush(stdout);
   finalexit(1);
 }
-
-/* do not write functions beyond this line because the undef/define 
-   method for the errorexit functions means that they should go last */
+/************************************************************************/
+/* NOTE: DO NOT WRITE ANYTHING BELOW THIS LINE!!!
+   Because the method of using macros and undef/define for the
+   errorexit functions means that they have to be at the end. */
+/************************************************************************/
