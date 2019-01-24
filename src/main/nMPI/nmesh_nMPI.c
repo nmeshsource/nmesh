@@ -7,6 +7,8 @@
 
 int nmesh_nMPI(tMesh *mesh)
 {
+  printf("Adding nMPI\n");
+
   /* functions */
   AddFun(POST_PARAMETERS, nMPI_print_compile_info);
 

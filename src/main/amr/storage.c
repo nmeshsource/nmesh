@@ -527,7 +527,7 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   int nvdb_old = mesh->nvdb;
   tNlist *elem;
   tNode *node;
-  if(1) printf("realloc_meshvariables from %d to %d\n",
+  if(0) printf("realloc_meshvariables from %d to %d\n",
                  mesh->nvdb, nvdb_new);
 
   /* realloc list on mesh struct */
