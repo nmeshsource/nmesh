@@ -4,6 +4,8 @@
 
 /* storage.c */
 
-
 /* mesh.c */
 int setup_test_mesh(tMesh *mesh);
+
+/* connect.c */
+void connect8_siblings(tNode *narray[]);

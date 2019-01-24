@@ -110,9 +110,9 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   parent->leaf = 0;  /* parent is now no longer a leaf node */
 
   /* node coords from node index ijk */
-  k = kOfInd_n(ijk, n);
-  j = jOfInd_n_k(ijk, n,k);
-  i = iOfInd_n_jk(ijk,n,j,k);
+  k = kOfInd_n(ijk, ns);
+  j = jOfInd_n_k(ijk, ns,k);
+  i = iOfInd_n_jk(ijk, ns,j,k);
 
   /* mid point in parent node */
   for(i=0; i<3; i++)
@@ -167,9 +167,10 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
 /* make 8 childern and return them in a short list */
 tNlist *make8_child_nodes(tNode *parent, int n[3])
 {
-  tNlist *nlist;
+  tNlist *nlist, el;
   tNlist *elem = NULL;
-  tNode *node;
+  tNode *node, *onode;
+  tNode *narray[8];
   int ijk;
 
   for(ijk=0; ijk<7; ijk++)
@@ -177,19 +178,11 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     node = make_child_node(parent, n, ijk);
     elem = addnode_to_nodelist(elem, node);
     if(ijk==0) nlist = elem; // save list head
+    narray[ijk] = node; /* save nodes also in an array */
   }
   /* fill in neighbor info, as fas as these 8 are concerned */
-  // still TODO
-/*
-  fornodelist(nlist, elem) //
-  {
-    node = elem->node;
-    switch(node->ijk)
-    {
-    case 0: node->nb... = ... 
-    }
-  }
-*/
+  connect8_siblings(narray);
+
   return nlist;
 }
 
