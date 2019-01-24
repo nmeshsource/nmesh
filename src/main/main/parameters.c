@@ -18,7 +18,7 @@ parameter_name = parameter_value1 parameter_value2 parameter_value3
 # my fav parameter:
 parameter_name = parameter_value1  # this is just a comment
 
-   Before storing the parameters and their values, all comments are removed
+   For processing the parameters and their values, all comments are removed
    and then the file content is converted to the form
    #par=val ... val#par=val ... val ...
    Here # now indicates the start of a par and not a comment!
@@ -66,7 +66,7 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   {
     if(i >= nbuffer-2)
     {
-      if(nbuffer > 1000000) 
+      if(nbuffer > 1000000)
         errorexit("Sanity forbids parameter files bigger than 1MB");
       buffer = (char *) realloc(buffer, sizeof(char)*(nbuffer += 1000));
       if(!buffer) errorexit("Out of memory while reading parameter file.");
@@ -84,8 +84,8 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 
   /* replace comments by spaces */
   for(i = 0; i < nbuffer; i++)
-  { 
-    if(buffer[i] == '#') 
+  {
+    if(buffer[i] == '#')
       while (i < nbuffer && buffer[i] != '\n')
         buffer[i++] = ' ';
   }
@@ -113,7 +113,7 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 
   /* now remove spaces around = */
   for(i = j = 1; i < nbuffer; i++) {
-    if(buffer[i] != ' ' || (buffer[i-1] != '=' && buffer[i+1] != '=')) 
+    if(buffer[i] != ' ' || (buffer[i-1] != '=' && buffer[i+1] != '='))
       buffer[j++] = buffer[i];
   }
   buffer[j] = '\0';
@@ -121,7 +121,7 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   nbuffer = strlen(buffer);
   if(0) printf("|%s|\n", buffer);
 
-  /* now the buffer is 
+  /* now the buffer is
      |#par=val ... val#par=val ... val| */
 
   /* split parameter names and values by replacing '#' and '=' by zero */
@@ -149,10 +149,10 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
     }
     else
       setparameter(mesh, pari, val);
-  }  
+  }
 
   /* print parameters */
-  if(0) 
+  if(0)
   {
     printf("after reading the parameterfile:\n");
     printparameters(mesh);
@@ -203,8 +203,6 @@ void makeparameter(tMesh *mesh, char *name, char *value, char *description)
 
   if(0) printparameters(mesh);
 }
-
-
 
 
 /* set parameter */
@@ -274,7 +272,6 @@ tParameter *findparameter(tMesh *mesh, char *name, int fatal)
 }
 
 
-
 /* translate parameter value in some simple cases */
 void translatevalue(char **value)
 {
@@ -298,8 +295,8 @@ void translatevalue(char **value)
   }
 }
 
-/* Write the numerical (double) value of the par with index ind into the 
-   par cache. 
+/* Write the numerical (double) value of the par with index ind into the
+   par cache.
    Note: we keep the numerical (double) values of each par in a cache */
 int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
 {
@@ -311,8 +308,8 @@ int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
   return 1;
 }
 
-/* Write the boolean (int) value of the par with index ind into the 
-   par cache. 
+/* Write the boolean (int) value of the par with index ind into the
+   par cache.
    Note: we keep the boolean values of each par in a cache */
 int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
 {
@@ -330,7 +327,7 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
     if(strstr(par, "true")) boolval=1;
     if(strstr(par, "True")) boolval=1;
     if(strstr(par, "TRUE")) boolval=1;
-    
+
     pdb1[ind].booleanvalue = boolval;
   }
   else
@@ -338,7 +335,6 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
 
   return 1;
 }
-
 
 void printparameter(tParameter *p)
 {
@@ -354,7 +350,7 @@ void printparameters(tMesh *mesh)
   int i;
 
   for(i = 0; i < npdb; i++)
-    printf("pdb[%2d]:  %12s = %-16s,  %s\n", 
+    printf("pdb[%2d]:  %12s = %-16s,  %s\n",
            i, pdb[i].name, pdb[i].value, pdb[i].description);
 }
 
@@ -451,7 +447,7 @@ int MeshParGetb(tMesh *mesh, int i)
   return mesh->pdb[i].booleanvalue;
 }
 
-/* "get value?" returns 1 if value is in the list of values and 0 else 
+/* "get value?" returns 1 if value is in the list of values and 0 else
    (not equivalent to value being a substring of string parameter) */
 int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
 {
@@ -461,7 +457,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
   int lv, ls, lp, startok, endok;
 
   if(i<0 || i>=mesh->npdb)
-  { 
+  {
     if(fatal) errorexit("parameter with this index does not exist");
     else      return 0;
   }
@@ -473,7 +469,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
   while( (s = strstr(parval, value)) )
   {
     lv = strlen(value);
-    //printf("ls=%d  value=%s| s=%s| p->value=%s|\n", ls, value, s, p->value); 
+    //printf("ls=%d  value=%s| s=%s| p->value=%s|\n", ls, value, s, p->value);
     if( s[lv]==' ' || s[lv]==0 ) break;
     parval = s+1;
   }
@@ -488,65 +484,32 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
 
 
 
-/* "for each"
-   return next string delimited by SINGLE space (as in parameter data base) 
-   0 if end of list, then restart 
-   list = 0 or *list = "" restarts, too
-*/
-/* how universal is strdup? strsep? */
-char *NextEntry(char *list) 
-{
-  static char *copyoflist = 0;
-  static int i = 0, l = 0;
-  char *s;
-
-  if(!list || !*list || (i && i == l)) {
-    i = l = 0;
-    return 0;
-  }
-
-  if(!i) {
-    //FIX: crashes now: free(copyoflist);  /* no op if null */
-    free(copyoflist);
-    l = strlen(list);
-    copyoflist = (char *) malloc(sizeof(char)*(l+1));
-    strcpy(copyoflist, list);
-  } else 
-    i++;
-
-  s = copyoflist + i;
-  for(; i < l && copyoflist[i] != ' '; i++);
-  if(copyoflist[i] == ' ') copyoflist[i] = 0;
-  
-  return s;
-}
-
 /**************************************************************************/
 /* we can iterate over pars */
 int iterate_parameters(tMesh* mesh, int next)
 {
-  static int ncall = 0;
+  static int iter = 0; // should make this a value in mesh or a global var
   tParameter *p;
   char *list, *name, *newvalue, *value, *saveptr;
   char iterpar[100] = "iterate_parameter1";
   char newoutdir[10000], *outdirp;
   int i, j, l;
 
-  /* reset ncall to zero if next=0 */
-  if(next==0) { ncall=0;  return 0; }
+  /* reset iter to zero if next=0 */
+  if(next==0) { iter=0;  return 0; }
 
   /* the default is that we don't want to iterate */
   if(!Getv(Par("iterate_parameters"), "yes"))
   {
     /* return 1 for first call, but 0 for second call, which exits nmesh */
-    if(ncall < 0) 
+    if(iter < 0)
       return 0;
-    ncall = -1;
+    iter = -1;
     return 1;
   }
 
-  /* so we want to iterate */
-  if(ncall<0) ncall=0;
+  /* If we get here, we want to iterate */
+  if(iter<0) iter=0;
   printf("\n");
   prdivider(0);
   printf("Iterating parameters:\n");
@@ -561,40 +524,27 @@ int iterate_parameters(tMesh* mesh, int next)
   j = 1;
   while(p)
   {
-printparameters(mesh);
-
-
+    /* put val of iterate_parameter? in list,
+       duplicate Gets(Par(iterpar)) because strtok_r will modify list */
     list = strdup( Gets(Par(iterpar)) );
-printf("list=|%s|\n", list);
-//    name = NextEntry(list);
-//printf("  name= |%s|\n", name);
     name = strtok_r(list, " ", &saveptr);
-printf("  name2=|%s|\n", name);
-
 
     if(!findparameter(mesh, name, 0))
-      errorexit("iterate_parameterN has to start "
-                "with name of existing parameter");
- 
-//    value = NextEntry(list);
-//printf("  value= |%s|\n", value);
+      errorexit("iterate_parameterN has to start with name of "
+                "existing parameter");
+
     value = strtok_r(0, " ", &saveptr);
-printf("  value2=|%s|\n", value);
     if(!value)
       errorexit("iterate_parameterN needs at least one value");
 
-    i = 0;
-    newvalue = 0;
-    while (value)
+    /* loop until newvalue is value number iter */
+    for(i=0, newvalue=0; value; i++)
     {
-      if(i == ncall) newvalue = value;
-//      value = NextEntry(list);
-//printf("    value= |%s|\n", value);
+      if(i == iter) newvalue = value;
       value = strtok_r(0, " ", &saveptr);
-printf("    value2=|%s|\n", value);
-      i++;
     }
 
+    /* if we get a new value we set the par and make a new output dir */
     if(newvalue)
     {
       Sets(Par(name), newvalue);
@@ -605,6 +555,7 @@ printf("    value2=|%s|\n", value);
       Sets(Par("outdir"), newoutdir);
     }
 
+    /* get the next iterate_parameterN */
     j++;
     l = strlen("iterate_parameter");
     sprintf(iterpar+l, "%d", j);
@@ -613,22 +564,22 @@ printf("    value2=|%s|\n", value);
     free(list);
   }
 
-printparameters(mesh);
+  //printparameters(mesh);
   if(newvalue)
   {
-    printf("Starting iteration %d\n", ncall);
-    if(1) printf("  outdir = %s\n", Gets(Par("outdir")));
+    printf("Starting parameter iteration %d:\n", iter);
+    if(1) printf("outdir = %s\n", Gets(Par("outdir")));
     outdirp = (char *) calloc(strlen(newoutdir)+40, sizeof(char));
     strcpy(outdirp, newoutdir);
     strcat(outdirp, "_previous");
     system2("rm -rf", outdirp);
-    system3("mv", newoutdir, outdirp); 
+    system3("mv", newoutdir, outdirp);
     system2("mkdir", newoutdir);
     free(outdirp);
-    ncall++;
+    iter++;
     return 1;
   }
-  printf("  done with iterations.\n");
+  printf("  finished iterating.\n");
   prdivider(0);
   return 0;
 }
@@ -657,7 +608,7 @@ void print_parameter_database(tMesh *mesh)
 /* functions to copy the entire par data base */
 /**********************************************/
 
-/* Create a copy of parameter database pdb1 in pdb2. 
+/* Create a copy of parameter database pdb1 in pdb2.
    This allocates all memory needed for pdb2.
    The caller has to free pdb2 later on its own, e.g. with free_pdb */
 /* if we have: tParameter *pdb2;
@@ -718,14 +669,14 @@ void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2)
   /* Go over pars in pdb1. Use realloc and strcpy to create copies in pdb2 */
   for(i=0; i<npdb1; i++)
   {
-    pdb2[i].name = 
-     (char *) realloc(pdb2[i].name, 
+    pdb2[i].name =
+     (char *) realloc(pdb2[i].name,
                       sizeof(char)*(strlen(pdb1[i].name)+1));
-    pdb2[i].value = 
-     (char *) realloc(pdb2[i].value, 
+    pdb2[i].value =
+     (char *) realloc(pdb2[i].value,
                       sizeof(char)*(strlen(pdb1[i].value)+1));
-    pdb2[i].description = 
-     (char *) realloc(pdb2[i].description, 
+    pdb2[i].description =
+     (char *) realloc(pdb2[i].description,
                       sizeof(char)*(strlen(pdb1[i].description)+1));
     if(!pdb2[i].name || !pdb2[i].value || !pdb2[i].description)
       errorexit("copy_pdb: out of memory");
