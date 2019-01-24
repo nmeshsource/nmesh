@@ -39,7 +39,6 @@ int add_patch(tMesh *mesh, int nmax[3])
 }
 
 
-char *NextEntry(char *list);
 
 /* a function just for testing */
 int setup_test_mesh(tMesh *mesh)
@@ -51,22 +50,6 @@ int setup_test_mesh(tMesh *mesh)
   add_patch(mesh, nmax);
   printmesh(mesh);
 
-  char str[] = "asl 10 wro";
-  char *ret=0;
-  printf("str=%s\n", str);
-
-/*
-  ret=NextEntry(str);
-if(ret) printf("ret=%s\n", ret);
-  ret=NextEntry(str);
-if(ret) printf("ret=%s\n", ret);
-  ret=NextEntry(str);
-  ret=NextEntry(str);
-if(ret) printf("ret=%s\n", ret);
-if(ret) printf("ret=%s\n", ret);
-  ret=NextEntry(str);
-if(ret) printf("ret=%s\n", ret);
-*/
 
   return 0;
 }
