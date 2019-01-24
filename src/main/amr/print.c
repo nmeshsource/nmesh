@@ -49,16 +49,6 @@ void printvar_innode(tNode *node, char *name)
 }
 
 
-/* print a variable list */
-void printVarList(tVarList *vl)
-{
-  tMesh *mesh = vl->mesh;
-  int i;
-
-  for(i = 0; i < vl->n; i++)
-    printf("%s\n", VarName(vl->index[i]));      
-}
-
 /*
 void printbface(tBface *bface)
 {

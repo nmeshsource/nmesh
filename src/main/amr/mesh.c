@@ -33,7 +33,8 @@ tMesh *make_empty_mesh(int pr)
 int setup_test_mesh(tMesh *mesh)
 {
   PRFs(":\n");
-  realloc_mesh_patches(mesh, 1);
+  realloc_patlist_in_mesh(mesh, 1);
+  
 
   return 0;
 }

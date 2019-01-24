@@ -42,7 +42,7 @@ void free_array(tArray *array)
 
 
 /**************************************************************************/
-/* mesh, patch, and node storage */
+/* node storage */
 /**************************************************************************/
 
 /* allocate one node*/
@@ -225,6 +225,9 @@ void insert8_childnodes_asleaves(tNlist *elem, int n[3])
   replace1_in_nodelist(elem, children);
 }
 
+/**************************************************************************/
+/* patch and mesh storage */
+/**************************************************************************/
 
 /* allocate patch */
 tPat *alloc_patch(tMesh *mesh, int p, int nD)
@@ -277,13 +280,13 @@ tMesh *alloc_mesh(int npats)
   mesh = calloc(1, sizeof(*mesh));
   if(!mesh) errorexit("out of memory for mesh");
 
-  realloc_mesh_patches(mesh, npats);
+  realloc_patlist_in_mesh(mesh, npats);
 
   return mesh;
 }
 
 /* make room for more patches */
-void realloc_mesh_patches(tMesh *mesh, int npats)
+void realloc_patlist_in_mesh(tMesh *mesh, int npats)
 {
   int opats = mesh->npats;
 
@@ -298,6 +301,14 @@ void realloc_mesh_patches(tMesh *mesh, int npats)
     /* zero newly allocated part */
     memset(&(mesh->pat[opats]), 0, (npats-opats)*sizeof(mesh->pat[0]));
   }
+  if(npats < opats)
+  {
+    int p;
+    for(p=npats; p<opats; p++)
+      free_patch(mesh->pat[p]);
+    mesh->pat = realloc(mesh->pat, npats*sizeof(mesh->pat[0]));
+    if(!mesh->pat) errorexit("cannot shrink mesh->pat");
+  }
   mesh->npats = npats;
 }
 
@@ -306,9 +317,19 @@ void free_mesh(tMesh *mesh)
 {
   int i;
 
-  if (!mesh) return;
+  if(!mesh) return;
+
+  /* free patches */
   for(i = 0; i < mesh->npats; i++)
     free_patch(mesh->pat[i]);
+
+  /* free vdb and pdb in mesh */
+  free(mesh->vdb);
+  free(mesh->pdb);
+
+  /* node list in mesh */
+  free_nodelist(mesh->lns);
+
   free(mesh);
 }
 
@@ -398,6 +419,8 @@ tNlist *remove1_in_nodelist(tNlist *elem)
 void free_nodelist(tNlist *elem)
 {
   tNlist *tmp;
+
+  if(!elem) return;
 
   /* remove all after elem */
   while(tmp=elem->next)

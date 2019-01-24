@@ -159,7 +159,7 @@ tMesh *make_empty_mesh(int pr);
 tArray *alloc_array(int n[3]); //, void *Owner, int tOwner);
 void free_array(tArray *array);
 tMesh *alloc_mesh(int npats);
-void realloc_mesh_patches(tMesh *mesh, int npats);
+void realloc_patlist_in_mesh(tMesh *mesh, int npats);
 void free_mesh(tMesh *mesh);
 tPat *alloc_patch(tMesh *mesh, int p, int nD);
 void free_patch(tPat *pat);
@@ -193,6 +193,5 @@ void printnode(tNode *n);
 //void printbface(tBface *bface);
 //void printbfaces(tPat *pat);
 void printvar_innode(tNode *node, char *name);
-void printVarList(tVarList *vl);
 
 

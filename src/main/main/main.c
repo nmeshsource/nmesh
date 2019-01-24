@@ -375,7 +375,6 @@ int evolve_mesh(tMesh *mesh)
 /* finalize mesh */
 int finalize_mesh(tMesh *mesh)
 {
-  prdivider(0);
   free_mesh(mesh);
   return 0;
 }
