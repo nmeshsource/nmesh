@@ -258,7 +258,7 @@ void free_patch(tPat *pat)
 
   if (!pat) return;
 
-PRF;printf(" isn't working yet!!!");
+PRF;printf(" isn't working yet!!!\n");
   //for (i = 0; i < pat->mesh->nvariables; i++)
   //  disablevarcomp_inpat(pat, i);
   //free(pat->v);

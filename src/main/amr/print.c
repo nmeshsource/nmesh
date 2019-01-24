@@ -9,17 +9,26 @@
 
 void printmesh(tMesh *m)
 {
-  int i;
+  int p;
 
   printf("mesh=%p: npats=%d, nvdb=%d, dt=%g\n",
 	 m, m->npats, m->nvdb, m->dt);
-  //forallpats
-  // printpatch(pat);
+  forpatches(m, p)
+    printpatch(m->pat[p]);
 }
 
 void printpatch(tPat *pat)
 {
-  printf("p=%d:\n", pat->p);
+  tNode *node;
+
+  printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] nD=%d\n",
+         pat->p, pat->bbox[0], pat->bbox[1], pat->bbox[2], pat->bbox[3],
+         pat->bbox[4],pat->bbox[5], pat->nD);
+  printf("nodes:\n");
+  fornodes(pat, node)
+  {
+    printnode(node);
+  } endfornodes;
 }
 
 void printnode(tNode *n) 

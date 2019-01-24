@@ -29,12 +29,28 @@ tMesh *make_empty_mesh(int pr)
   return mesh;
 }
 
+/* add apatch to the mesh */
+int add_patch(tMesh *mesh, int nmax[3])
+{
+  int p = mesh->npats;
+  int nD = max3(nmax[0],nmax[1],nmax[2]) * 2;
+
+  realloc_patlist_in_mesh(mesh, p + 1);
+  mesh->pat[p]  = alloc_patch(mesh, p, nD);
+  return 0;
+}
+
+
 /* a function just for testing */
 int setup_test_mesh(tMesh *mesh)
 {
+  int nmax[3] = { 5,5,5 };
   PRFs(":\n");
-  realloc_patlist_in_mesh(mesh, 1);
-  
+
+  //realloc_patlist_in_mesh(mesh, 1);
+  add_patch(mesh, nmax);
+  printmesh(mesh);
+
 
   return 0;
 }
