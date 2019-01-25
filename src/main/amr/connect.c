@@ -78,3 +78,38 @@ void connect8_siblings(tNode *narray[])
     }
   }
 }
+
+/* set neighbor connection info of 8 siblings with nodes from different
+   parents. We assume that all priorly created nodes already have
+   complete neighbor info. */
+void connect8_____(tNode *narray[])
+{
+  tNode *parent = narray[0]->parent;
+  tNode *oparent = narray[0]->parent;
+  int ns[] = {2,2,2};
+
+  /* level 0 and 1 nodes have only their siblings as neighbors */
+  if(narray[0]->l <= 1) return;
+
+  /* -X dir => i=0 */
+/*
+  i=0;
+  // i,j,k = 0,0,0
+  // loop over j,k
+  ijk = Ind_n(i,j,k, ns)
+  node = narray[ijk];
+
+  parentnb = parent->nb[0]; // neig. in -X
+  node->nb[0] = parentnb;
+  if(parentnb)
+  {
+    ijk2 = Ind_n(i^1,j,k, ns);
+    nbchild = parentnb->child[ijk2]
+    if(nbchild)
+    {
+      node->nb[0] = nbchild;
+      nbchild->nb[1] = node;
+    }
+  }
+*/
+}
