@@ -7,6 +7,11 @@
 
 
 
+// We need a func that just connects one newly added, whether if has
+// siblings or not!!!
+
+
+
 /* enter neighbor info as far as the 8 children of one parent are concerned */
 /* this operates on a node array indexed by ijk */
 void connect8_siblings(tNode *narray[])
