@@ -176,7 +176,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   for(ijk=0; ijk<7; ijk++)
   {
     node = make_child_node(parent, n, ijk);
-    elem = addnode_to_nodelist(elem, node);
+    elem = addnode_to_nodelist_after(elem, node);
     if(ijk==0) nlist = elem; // save list head
     narray[ijk] = node; /* save nodes also in an array */
   }
@@ -336,21 +336,27 @@ tNlist *alloc_nodelist(tNode *node)
   nlist = calloc(1, sizeof(*nlist));
   if(!nlist) errorexit("out of memory for nlist");
   nlist->node = node;
+  return nlist;
 }
 
 /* add one node to nodelist after elem, and return new nodelist element
    that now contains the node */
-tNlist *addnode_to_nodelist(tNlist *elem, tNode *node)
+tNlist *addnode_to_nodelist_after(tNlist *elem, tNode *node)
 {
   tNlist *after = alloc_nodelist(node);
-  after->node = node;
-
-  return addnodelist_to_nodelist(elem, after);
+  return insertnodelist_into_nodelist_after(elem, after);
+}
+/* add one node to nodelist before elem, and return new nodelist element
+   that now contains the node */
+tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node)
+{
+  tNlist *before = alloc_nodelist(node);
+  return insertnodelist_into_nodelist_before(elem, before);
 }
 
-/* insert nodelist "list" to another nodelist after elem,
+/* insert nodelist "list" into another nodelist after elem,
    and return the end of "list" */
-tNlist *addnodelist_to_nodelist(tNlist *elem, tNlist *list)
+tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list)
 {
   tNlist *elem2;
   tNlist *lend;
@@ -369,6 +375,29 @@ tNlist *addnodelist_to_nodelist(tNlist *elem, tNlist *list)
   if(elem2) elem2->prev = lend;
   return lend;
 }
+
+/* insert nodelist "list" into another nodelist before elem,
+   and return the first of "list" */
+tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list)
+{
+  tNlist *elem2;
+  tNlist *lend;
+  tNlist *lbeg;
+
+  /* find end and beginning of tNlist *list */
+  for(lend=list; lend->next; lend=lend->next) ;
+  for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
+
+  if(!elem) return lbeg;
+
+  elem2 = elem->prev;
+  lend->next = elem;
+  lbeg->prev = elem2;
+  elem->prev = lend;
+  if(elem2) elem2->next = lbeg;
+  return lbeg;
+}
+
 
 tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
 {
