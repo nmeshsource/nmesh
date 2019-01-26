@@ -37,7 +37,7 @@ int add_patch(tMesh *mesh, int nroot[3], int nmax[3])
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
   pat = alloc_patch(mesh, p, nD);
-  mesh->pat[p]  = pat;
+  mesh->pat[p] = pat;
 
   /* set diff matrices */
 
@@ -57,6 +57,8 @@ int setup_test_mesh(tMesh *mesh)
   int n[3]    = { 3,3,3 };
   PRFs(":\n");
 
+//tNode *tnode = alloc_node();
+//mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
   add_patch(mesh, n, nmax);
   make8_child_nodes(mesh->pat[0]->rnode, nmax);

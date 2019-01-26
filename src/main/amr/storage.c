@@ -46,7 +46,7 @@ void free_array(tArray *array)
 /**************************************************************************/
 
 /* allocate one node*/
-tNode *alloc_node()
+tNode *alloc_node(void)
 {
   tNode *node = calloc(1, sizeof(*node));
   if(!node) errorexit("out of memory");
