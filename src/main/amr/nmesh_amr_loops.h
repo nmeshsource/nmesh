@@ -29,29 +29,16 @@
 /* loop over nodes in a node list */
 #define fornodes(nlist, listnode) { \
   tNlist *elem_; \
-  for(elem_ = nlist, listnode = elem_ ?  elem_->node : 0; \
-      elem_; listnode=elem_->node, elem_=elem_->next)
+  for(elem_ = nlist,            listnode = elem_ ?  elem_->node : 0; \
+      elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
 #define endfornodes }
 /* loop over nodes in a node list */
-#define forlnodes(meshORpat, node) { \
+#define forlnodes(meshORpat, listnode) { \
   tNlist *elem_; \
-  for(elem_ = meshORpat->lns, node = elem_ ?  elem_->node : 0; \
-      elem_; node=elem_->node, elem_=elem_->next)
+  for(elem_ = meshORpat->lns,   listnode = elem_ ?  elem_->node : 0; \
+      elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
 #define endforlnodes }
   
-//#define fornodes(nlist, node) \
-//  for(tNlist *elem_ = nlist, node = elem_ ?  elem_->node : 0; \
-//      elem_; node=elem_->node, elem_=elem_->next)
-//#define fornodes(nlist, node) \
-//  for(elem_ = nlist, node = elem_ ?  elem_->node : 0; \
-//      elem_; node=elem_->node, elem_=elem_->next)
-//#define fornodes(nlist, node) \
-//for(node=nlist->node; nlist; nlist=nlist->next)
-
-///* loop over all points in a node list */
-//#define fornodelistpoints(nlist,curnode, ijk) \
-//  fornodelist(nlist, curnode) \
-//    forpoints(node,ijk)
 
 /* loop over planes e.g. i=p plane */
 #define forplane1(i,j,k, n, p) \

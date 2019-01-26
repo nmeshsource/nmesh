@@ -33,14 +33,14 @@ void printpatch(tPat *pat)
     printnode(node);
   } endforlnodes;
 
-
+/*
   printf("leaf nodes again:\n");
   fornodelist(pat->lns, el)
   {
     printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
     printnode(el->node);
   }
-
+*/
 
 }
 

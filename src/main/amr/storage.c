@@ -102,7 +102,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
 {
   tNode *node = alloc_node();
   double mid[3];
-  int i,j,k, nvdb;
+  int i,j,k, d, nvdb;
   int ns[] = {2,2,2};
 
   /* register this child with the parent */
@@ -115,15 +115,15 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   i = iOfInd_n_jk(ijk, ns,j,k);
 
   /* mid point in parent node */
-  for(i=0; i<3; i++)
-    mid[i] = 0.5*(parent->bbox[2*i] + parent->bbox[2*i+1]);
+  for(d=0; d<3; d++)
+    mid[d] = 0.5*(parent->bbox[2*d] + parent->bbox[2*d+1]);
 
   /* set new bounding boxes */
   /* at first take bbox from pat, patface from parent */
-  for(i=0; i<6; i++)
+  for(d=0; d<6; d++)
   {
-    node->bbox[i]    = parent->bbox[i];
-    node->patface[i] = parent->patface[i];
+    node->bbox[d]    = parent->bbox[d];
+    node->patface[d] = parent->patface[d];
   }
   if(i%2) { node->bbox[0] = mid[0]; node->patface[0] = 0; }
   else    { node->bbox[1] = mid[0]; node->patface[1] = 0; }
@@ -137,7 +137,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   node->parent = parent;
   /* node->nb is left uninitialized here !!! */
 
-  for(i=0; i<3; i++) node->n[i] = n[i];
+  for(d=0; d<3; d++) node->n[d] = n[d];
   node->np = n[0] * n[1] * n[2];
 
   node->l = parent->l + 1;
@@ -146,7 +146,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   nvdb = node->pat->mesh->nvdb;
 
   /* get node->D from patch */
-  for(i=0; i<3; i++) node->D[i] = node->pat->D[n[i]][i];
+  for(d=0; d<3; d++) node->D[d] = node->pat->D[n[d]][d];
 
   /* if parent has dat the child will have it too */
   if(parent->dat)
@@ -154,8 +154,8 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
     node->dat = alloc_dat(nvdb);
     node->datrank = parent->datrank;
     /* enable same vars in this dat as in parent->dat */
-    for(i=0; i<nvdb; i++)
-      if(parent->dat->v[i])  enablevarcomp_innode(node, i);
+    for(d=0; d<nvdb; d++)
+      if(parent->dat->v[d])  enablevarcomp_innode(node, d);
 
     /* fill node->dat with interpolation data from parent */
     // still TODO
