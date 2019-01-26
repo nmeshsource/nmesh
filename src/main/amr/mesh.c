@@ -57,7 +57,7 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nD)
 /* a function just for testing */
 int setup_test_mesh(tMesh *mesh)
 {
-  double bbox[6] = { -.5,1, -2.1,2, 4,5 };
+  double bbox[6] = { -4,4, -2,2, -1,1 };
   int n1max = 55;
   int n[3] = { 9,9,9 };
   tNlist *nlist, *el;
@@ -74,7 +74,7 @@ int setup_test_mesh(tMesh *mesh)
   nd = mesh->pat[0]->rnode;
   nlist = make8_child_nodes(nd, n);
 
-  mesh->pat[0]->lns = replace1_in_nodelist(mesh->pat[0]->lns, nlist);
+  mesh->pat[0]->lns = first_replace1_in_nodelist(mesh->pat[0]->lns, nlist);
   //printnodelist(nlist);
   printmesh(mesh);
 
@@ -82,17 +82,18 @@ int setup_test_mesh(tMesh *mesh)
   for(i=1; i<=1; i++) el = el->next;
   nd = el->node;
   nlist = make8_child_nodes(nd, n);
-  replace1_in_nodelist(el, nlist);
+  mesh->pat[0]->lns = first_replace1_in_nodelist(el, nlist);
 
   el = mesh->pat[0]->lns;
   for(i=1; i<=8+2; i++) el = el->next;
   nd = el->node;
   nlist = make8_child_nodes(nd, n);
-  replace1_in_nodelist(el, nlist);
+  mesh->pat[0]->lns = first_replace1_in_nodelist(el, nlist);
 
   //printnodelist(nlist);
   printmesh(mesh);
 
+  printnodelist_and_neighbors(mesh->pat[0]->lns);
 
   return 0;
 }

@@ -70,6 +70,37 @@ void printnode(tNode *n)
   printf("\n");
 }
 
+void printnode_and_neighbors(tNode *n)
+{
+  tNode *n0, *n0p, *n1;
+  int i, dir, ni, count;
+
+  for(dir=0; dir<3; dir++)
+  {
+    printf("dir%d l%d neighbors cover:\n", dir, n->l);
+    //printnode(n);
+    ni=0;
+    for(n0=n;   n0; n0=n0->nb[dir*2], ni--) n0p = n0;
+    ni++;
+    for(n1=n0p; n1; n1=n1->nb[dir*2+1], ni++)
+    {
+      printf(" [%+5g,%+5g]x[%+5g,%+5g]x[%+5g,%+5g]  ni=%d\n",
+             n1->bbox[0], n1->bbox[1], n1->bbox[2], n1->bbox[3],
+             n1->bbox[4], n1->bbox[5], ni);
+    }
+  }
+}
+
+void printnodelist_and_neighbors(tNlist *nl)
+{
+  tNlist *el;
+  fornodelist(nl, el)
+  {
+    printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
+    printnode_and_neighbors(el->node);
+  }
+}
+
 void printnodelist(tNlist *nl)
 {
   tNlist *el;

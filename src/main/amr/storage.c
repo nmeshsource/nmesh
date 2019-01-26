@@ -411,7 +411,7 @@ tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list)
   return lbeg;
 }
 
-
+/* replace 1 element in a nodelist by a list and then free the element */
 tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
 {
   tNlist *left;
@@ -432,7 +432,17 @@ tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
   lbeg->prev = left;
   if(right) right->prev = lend;
   if(left)  left->next = lbeg;
+
+  free(elem);
   return lbeg;
+}
+
+/* replace 1 element in a nodelist by a list, then free the element,
+   return the very first element of the new list */
+tNlist *first_replace1_in_nodelist(tNlist *elem, tNlist *list)
+{
+  tNlist *newlist = replace1_in_nodelist(elem, list);
+  return first_nodelist(newlist);
 }
 
 /* remove 1 element from nodelist, and return element after elem */
@@ -449,6 +459,24 @@ tNlist *remove1_in_nodelist(tNlist *elem)
   free(elem);
   return right;
 }
+
+/* return 1st element in a nodelist */
+tNlist *first_nodelist(tNlist *list)
+{
+  tNlist *lbeg;
+  /* find beginning of tNlist *list */
+  for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
+  return lbeg;
+}
+/* return last element in a nodelist */
+tNlist *last_nodelist(tNlist *list)
+{
+  tNlist *lend;
+  /* find end of tNlist *list */
+  for(lend=list; lend->next; lend=lend->next) ;
+  return lend;
+}
+
 
 /* remove all from nodelist and free it */
 void free_nodelist(tNlist *elem)
@@ -469,6 +497,7 @@ void free_nodelist(tNlist *elem)
   remove1_in_nodelist(elem);
 }
 
+/* free all nodes in a list */
 void free_nodesinlist(tNlist *elem)
 {
   tNlist *tmp;
