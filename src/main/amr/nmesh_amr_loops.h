@@ -24,14 +24,20 @@
 
 /* loop over a node list nlist (type tNlist) */
 #define fornodelist(nlist, elem) \
-  for(elem=nlist; elem; elem=elem->next)
+  for(elem=(nlist); elem; elem=elem->next)
 
 /* loop over nodes in a node list */
-#define fornodes(meshORpat, node) { \
+#define fornodes(nlist, listnode) { \
+  tNlist *elem_; \
+  for(elem_ = nlist, listnode = elem_ ?  elem_->node : 0; \
+      elem_; listnode=elem_->node, elem_=elem_->next)
+#define endfornodes }
+/* loop over nodes in a node list */
+#define forlnodes(meshORpat, node) { \
   tNlist *elem_; \
   for(elem_ = meshORpat->lns, node = elem_ ?  elem_->node : 0; \
       elem_; node=elem_->node, elem_=elem_->next)
-#define endfornodes }
+#define endforlnodes }
   
 //#define fornodes(nlist, node) \
 //  for(tNlist *elem_ = nlist, node = elem_ ?  elem_->node : 0; \

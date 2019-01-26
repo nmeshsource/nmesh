@@ -8,4 +8,5 @@
 int setup_test_mesh(tMesh *mesh);
 
 /* connect.c */
-void connect8_siblings(tNode *narray[]);
+void connect8_with_neighbors(tNode *narray[8]);
+void connect8_siblings(tNode *narray[8]);

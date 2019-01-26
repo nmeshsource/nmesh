@@ -183,6 +183,8 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   /* fill in neighbor info, as fas as these 8 are concerned */
   connect8_siblings(narray);
 
+  connect8_with_neighbors(narray);
+
   return nlist;
 }
 
@@ -564,9 +566,9 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   mesh->nvdb = nvdb_new;
 
   /* now make sure dat in nodes is also reallocated */
-  fornodes(mesh, node) {
+  forlnodes(mesh, node) {
     realloc_nodevariables(node, nvdb_new);
-  } endfornodes;
+  } endforlnodes;
 }
 
 /**********************************************************************/
@@ -626,9 +628,9 @@ void enablevarcomp_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat, node) {
+  forlnodes(pat, node) {
     enablevarcomp_innode(node, i);
-  } endfornodes;
+  } endforlnodes;
 }
 
 /* disable one component of a variable on one pat */
@@ -636,9 +638,9 @@ void disablevarcomp_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat, node) {
+  forlnodes(pat, node) {
     disablevarcomp_innode(node, i);
-  } endfornodes;
+  } endforlnodes;
 }
 
 /* enable all components of a variable on one pat */
@@ -646,9 +648,9 @@ void enablevar_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat, node) {
+  forlnodes(pat, node) {
     enablevar_innode(node, i);
-  } endfornodes;
+  } endforlnodes;
 }
 
 /* disable all components of a variable on one pat */
@@ -656,9 +658,9 @@ void disablevar_inpatch(tPat *pat, int i)
 {
   tNode *node;
 
-  fornodes(pat, node) {
+  forlnodes(pat, node) {
     disablevar_innode(node, i);
-  } endfornodes;
+  } endforlnodes;
 }
 
 /* enable all components of a variable on one mesh */

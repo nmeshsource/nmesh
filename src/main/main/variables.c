@@ -471,7 +471,7 @@ void vlsetconstant(tVarList *u, const double c)
   int i, n, ui;
   int b;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     for(n=0; n<u->n; n++)
     {
@@ -480,7 +480,7 @@ void vlsetconstant(tVarList *u, const double c)
       forvari(node, ui, i)
         pu[i] = c;
     }
-  } endfornodes;
+  } endforlnodes;
 }
 
 /* copy: v = u */   
@@ -495,7 +495,7 @@ void vlcopy(tVarList *v, tVarList *u)
   /* copy time */
   v->time = u->time;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     for(n=0; n<v->n; n++)
     {
@@ -506,7 +506,7 @@ void vlcopy(tVarList *v, tVarList *u)
       forvari(node, vi, i)
         pv[i] = pu[i];
     }
-  } endfornodes;
+  } endforlnodes;
 }
 
 void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u)
@@ -544,7 +544,7 @@ void vlswap(tVarList *v, tVarList *u)
   v->time = u->time;
   u->time = temp;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     for(n=0; n<v->n; n++)
     {
@@ -559,7 +559,7 @@ void vlswap(tVarList *v, tVarList *u)
         pu[i] = temp;
       }
     }
-  } endfornodes;
+  } endforlnodes;
 }
             
 /* wrapper for single variable: swap u and v (iv/u is index of v/u) */
@@ -583,7 +583,7 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
   double c = 0.5;
   int i, n;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     for(n=0; n<r->n; n++)
     {
@@ -597,7 +597,7 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
       forvari(node, ri, i)
         pr[i] = c * (pa[i] + pb[i]);
     }
-  } endfornodes;
+  } endforlnodes;
   /* average times as well */
   r->time = c * (a->time + b->time);
 }
@@ -611,7 +611,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
   double *pr, *pa, *pb;
   int i, n;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     for(n=0; n<r->n; n++)
     {
@@ -625,7 +625,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
       forvari(node, ri, i)
         pr[i] = pa[i] - pb[i];
     }
-  } endfornodes;
+  } endforlnodes;
   /* subtract times as well */
   r->time = a->time - b->time;
 }
@@ -641,7 +641,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
   double *pr, *pa, *pb;
   int i, n;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     for(n=0; n<r->n; n++)
     {
@@ -669,7 +669,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
         forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
       }
     }
-  } endfornodes;
+  } endforlnodes;
   /* add times as well */
   if (ca == 0 && cb == 0) r->time = 0.0;
   else if (ca == 0)	  r->time = cb * b->time;
@@ -701,7 +701,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
 
   if (ca == 0) return;
 
-  fornodes(mesh, node)
+  forlnodes(mesh, node)
   {
     double *pr, *pa;
     int i, n;
@@ -726,7 +726,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
         forvari(node, ri, i) pr[i] += ca * pa[i];
       }
     }
-  } endfornodes;
+  } endforlnodes;
   /* add times as well */
   r->time += ca * a->time;
 }

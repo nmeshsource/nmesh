@@ -25,10 +25,10 @@ void printpatch(tPat *pat)
          pat->p, pat->bbox[0], pat->bbox[1], pat->bbox[2], pat->bbox[3],
          pat->bbox[4],pat->bbox[5], pat->nD);
   printf("nodes:\n");
-  fornodes(pat, node)
+  forlnodes(pat, node)
   {
     printnode(node);
-  } endfornodes;
+  } endforlnodes;
 }
 
 void printnode(tNode *n) 

@@ -28,13 +28,20 @@ tMesh *make_empty_mesh(int pr)
 }
 
 /* add apatch to the mesh */
-int add_patch(tMesh *mesh, int nmax[3])
+int add_patch(tMesh *mesh, int nroot[3], int nmax[3])
 {
+  tPat *pat;
   int p = mesh->npats;
   int nD = max3(nmax[0],nmax[1],nmax[2]) * 2;
 
   realloc_patlist_in_mesh(mesh, p + 1);
-  mesh->pat[p]  = alloc_patch(mesh, p, nD);
+  pat = alloc_patch(mesh, p, nD);
+  mesh->pat[p]  = pat;
+
+  
+
+  make_root_node(pat, nroot, 0);
+
   return 0;
 }
 
@@ -44,10 +51,12 @@ int add_patch(tMesh *mesh, int nmax[3])
 int setup_test_mesh(tMesh *mesh)
 {
   int nmax[3] = { 5,5,5 };
+  int n[3]    = { 3,3,3 };
   PRFs(":\n");
 
   //realloc_patlist_in_mesh(mesh, 1);
-  add_patch(mesh, nmax);
+  add_patch(mesh, n, nmax);
+  make8_child_nodes(mesh->pat[0]->rnode, nmax);
   printmesh(mesh);
 
 
