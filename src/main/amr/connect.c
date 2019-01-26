@@ -53,8 +53,8 @@ void connect8_with_neighbors(tNode *narray[8])
       node->nb[fo] = NULL;
 
     /* Y-dir: nb[2] and nb[3] */
-    fo = 2 + k;   /* face index in direction of other neighbor */
-    fs = 2 + knb; /* face index in direction of sibling */
+    fo = 2 + j;   /* face index in direction of other neighbor */
+    fs = 2 + jnb; /* face index in direction of sibling */
     /* set sibling neighbor */
     node->nb[fs] = parent->child[Ind_n(i,jnb,k, ns)];
     /* set other neighbor at same level if it exists */
