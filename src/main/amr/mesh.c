@@ -68,11 +68,16 @@ int setup_test_mesh(tMesh *mesh)
 //mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
   add_patch(mesh, bbox, n, n1max);
+
   nlist = make8_child_nodes(mesh->pat[0]->rnode, n);
   mesh->pat[0]->lns = replace1_in_nodelist(mesh->pat[0]->lns, nlist);
   //printnodelist(nlist);
+  printmesh(mesh);
 
-
+  nlist = make8_child_nodes(mesh->pat[0]->lns->next->node, n);
+  //mesh->pat[0]->lns = 
+  replace1_in_nodelist(mesh->pat[0]->lns->next, nlist);
+  //printnodelist(nlist);
   printmesh(mesh);
 
 
