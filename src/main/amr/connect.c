@@ -20,7 +20,7 @@ void connect8_with_neighbors(tNode *narray[8])
   if(!parent) return;
 
   /* fill in neighbor info for the 8 in narray */
-  for(ind=0; ind<7; ind++)
+  for(ind=0; ind<8; ind++)
   {
     int fs,fo;           /* sibling and other face index */
     tNode *node = narray[ind];
@@ -95,7 +95,7 @@ void connect8_siblings(tNode *narray[8])
   int ijk;
 
   /* fill in neighbor info, as far as these 8 are concerned */
-  for(ijk=0; ijk<7; ijk++)
+  for(ijk=0; ijk<8; ijk++)
   {
     tNode *node = narray[ijk];
     switch(node->ijk)

@@ -193,6 +193,7 @@ void disablevarlist(tVarList *vl);
 void printmesh(tMesh *g);
 void printpatch(tPat *box);
 void printnode(tNode *n);
+void printnodelist(tNlist *nl);
 //void printbface(tBface *bface);
 //void printbfaces(tPat *pat);
 void printvar_innode(tNode *node, char *name);

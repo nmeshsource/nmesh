@@ -173,7 +173,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   tNode *narray[8];
   int ijk;
 
-  for(ijk=0; ijk<7; ijk++)
+  for(ijk=0; ijk<8; ijk++)
   {
     node = make_child_node(parent, n, ijk);
     elem = addnode_to_nodelist_after(elem, node);
@@ -181,8 +181,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
   /* fill in neighbor info, as fas as these 8 are concerned */
-  connect8_siblings(narray);
-
+//  connect8_siblings(narray);
   connect8_with_neighbors(narray);
 
   return nlist;
@@ -227,7 +226,8 @@ void insert8_childnodes_asleaves(tNlist *elem, int n[3])
 /* allocate patch */
 tPat *alloc_patch(tMesh *mesh, int p, int nD)
 {
-  int i;
+  int n[3];
+  int i, d;
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));
@@ -238,9 +238,16 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
   pat->nD = nD;
 
   /* get mem. for diff. matrices */
-  pat->D = calloc(nD, sizeof(pat->D[0][0]));
+  pat->D = calloc(nD, sizeof(pat->D[0]));
   if(!(pat->D) )
     errorexit("out of memory for diff. matrices");
+  for(d=0; d<nD; d++)
+  {
+    n[0] = n[1] = d+1;
+    n[2] = 1;
+    for(i=0; i<3; i++)
+      pat->D[d][i] = alloc_array(n);
+  }
 
   /* Bfaces */
 
@@ -255,6 +262,9 @@ void free_patch(tPat *pat)
   if (!pat) return;
 
 PRF;printf(" isn't working yet!!!\n");
+
+  /* free diff matrices */
+
   //for (i = 0; i < pat->mesh->nvariables; i++)
   //  disablevarcomp_inpat(pat, i);
   //free(pat->v);

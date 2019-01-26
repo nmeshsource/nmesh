@@ -28,18 +28,22 @@ tMesh *make_empty_mesh(int pr)
 }
 
 /* add apatch to the mesh */
-int add_patch(tMesh *mesh, int nroot[3], int nmax[3])
+int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nD)
 {
   tPat *pat;
   int p = mesh->npats;
-  int nD = max3(nmax[0],nmax[1],nmax[2]) * 2;
+  int i;
 
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
   pat = alloc_patch(mesh, p, nD);
   mesh->pat[p] = pat;
 
+  /* set bbox */
+  for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
+
   /* set diff matrices */
+  pat->D[5][1]->a[4] = 4;
 
   /* setup root node */
   pat->rnode = make_root_node(pat, nroot, 0);
@@ -53,15 +57,24 @@ int add_patch(tMesh *mesh, int nroot[3], int nmax[3])
 /* a function just for testing */
 int setup_test_mesh(tMesh *mesh)
 {
-  int nmax[3] = { 5,5,5 };
-  int n[3]    = { 3,3,3 };
+  double bbox[6] = { -.5,1, -2.1,2, 4,5 };
+  int n1max = 55;
+  int n[3] = { 9,9,9 };
+  tNlist *nlist;
+
   PRFs(":\n");
 
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
-  add_patch(mesh, n, nmax);
-  make8_child_nodes(mesh->pat[0]->rnode, nmax);
+  add_patch(mesh, bbox, n, n1max);
+  nlist = make8_child_nodes(mesh->pat[0]->rnode, n);
+//printnodelist(nlist);
+  mesh->pat[0]->lns = replace1_in_nodelist(mesh->pat[0]->lns, nlist);
+
+  printnodelist(nlist);
+
+
   printmesh(mesh);
 
 
