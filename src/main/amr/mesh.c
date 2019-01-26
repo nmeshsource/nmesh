@@ -60,7 +60,9 @@ int setup_test_mesh(tMesh *mesh)
   double bbox[6] = { -.5,1, -2.1,2, 4,5 };
   int n1max = 55;
   int n[3] = { 9,9,9 };
-  tNlist *nlist;
+  tNlist *nlist, *el;
+  tNode *nd;
+  int i;
 
   PRFs(":\n");
 
@@ -69,14 +71,25 @@ int setup_test_mesh(tMesh *mesh)
   //realloc_patlist_in_mesh(mesh, 1);
   add_patch(mesh, bbox, n, n1max);
 
-  nlist = make8_child_nodes(mesh->pat[0]->rnode, n);
+  nd = mesh->pat[0]->rnode;
+  nlist = make8_child_nodes(nd, n);
+
   mesh->pat[0]->lns = replace1_in_nodelist(mesh->pat[0]->lns, nlist);
   //printnodelist(nlist);
   printmesh(mesh);
 
-  nlist = make8_child_nodes(mesh->pat[0]->lns->next->node, n);
-  //mesh->pat[0]->lns = 
-  replace1_in_nodelist(mesh->pat[0]->lns->next, nlist);
+  el = mesh->pat[0]->lns;
+  for(i=1; i<=1; i++) el = el->next;
+  nd = el->node;
+  nlist = make8_child_nodes(nd, n);
+  replace1_in_nodelist(el, nlist);
+
+  el = mesh->pat[0]->lns;
+  for(i=1; i<=8+2; i++) el = el->next;
+  nd = el->node;
+  nlist = make8_child_nodes(nd, n);
+  replace1_in_nodelist(el, nlist);
+
   //printnodelist(nlist);
   printmesh(mesh);
 

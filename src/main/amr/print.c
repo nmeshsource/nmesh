@@ -51,11 +51,11 @@ void printnode(tNode *n)
   printf("ijk%d: p%d [%g,%g]x[%g,%g]x[%g,%g] np=%dx%dx%d=%d",
          n->ijk, n->pat->p, n->bbox[0], n->bbox[1], n->bbox[2], n->bbox[3],
          n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
-  printf(" leaf=%d l=%d", n->leaf, n->l);
   printf(" patface=");
   for(i=0; i<6; i++) printf("%d", n->patface[i]);
   printf("\n");
-  printf(" node = %p   parent = %p\n", n, n->parent);
+  printf(" l%d leaf=%d:  node = %p   parent = %p\n",
+          n->l, n->leaf, n, n->parent);
   printf(" nb =");
   for(i=0; i<6; i++) printf(" %p", n->nb[i]);
   printf("\n");
