@@ -227,6 +227,7 @@ void insert8_childnodes_asleaves(tNlist *elem, int n[3])
 /* allocate patch */
 tPat *alloc_patch(tMesh *mesh, int p, int nD)
 {
+  int i;
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));

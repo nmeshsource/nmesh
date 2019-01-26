@@ -34,13 +34,16 @@ int add_patch(tMesh *mesh, int nroot[3], int nmax[3])
   int p = mesh->npats;
   int nD = max3(nmax[0],nmax[1],nmax[2]) * 2;
 
+  /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
   pat = alloc_patch(mesh, p, nD);
   mesh->pat[p]  = pat;
 
-  
+  /* set diff matrices */
 
-  make_root_node(pat, nroot, 0);
+  /* setup root node */
+  pat->rnode = make_root_node(pat, nroot, 0);
+  pat->lns = alloc_nodelist(pat->rnode);
 
   return 0;
 }
