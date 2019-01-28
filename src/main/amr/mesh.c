@@ -94,6 +94,87 @@ int setup_test_mesh(tMesh *mesh)
   printmesh(mesh);
 
   printnodelist_and_neighbors(mesh->pat[0]->lns);
+
+
+double  A[6] = { 1,2,
+                 3,4,
+                 5,6 };
+/*
+double B0[24] = { 1,2,3,4,5,6,7,8,9,10,11,12,
+                  13,14,15,16,17,18,19,20,21,22,23,24 };
+*/
+double B0[24], B1[24], B2[24];
+double AB[36];
+int j,k;
+int nB0[] = {2,3,4};
+int nB1[] = {3,2,4};
+int nB2[] = {4,3,2};
+
+for(i=0; i<12; i++) { B0[2*i] = 2*i+1; B0[2*i+1] = 2*i+2; }
+
+for(k=0; k<4; k++)
+for(j=0; j<3; j++)
+for(i=0; i<2; i++)
+B2[Ind_n(k,j,i, nB2)] = B1[Ind_n(j,i,k, nB1)] = B0[Ind_n(i,j,k, nB0)];
+
+n[0]=2; n[1]=2; n[2]=1;
+tArray *Aa = alloc_array(n);
+Aa->a = A;
+//Aa->n[0]=3; Aa->n[1]=2; Aa->n[1]=1;
+
+tArray *B0a = alloc_array(nB0);
+B0a->a = B0;
+tArray *B1a = alloc_array(nB1);
+B1a->a = B1;
+tArray *B2a = alloc_array(nB2);
+B2a->a = B2;
+
+
+int nC0[] = {2,3,4};
+tArray *C0a = alloc_array(nC0);
+double *C0 = C0a->a;
+//printarray_matrix0(Aa);
+printarray(Aa);
+//printarray_matrix0(B0a);
+printarray(B0a);
+mm_array0(Aa,B0a, C0a);
+//printarray_matrix0(C0a);
+printarray(C0a);
+
+
+Yo(1);
+int nC1[] = {3,2,4};
+tArray *C1a = alloc_array(nC1);
+double *C1 = C1a->a;
+//printarray_matrix1(B1a);
+printarray(B1a);
+mm_array1(Aa,B1a, C1a);
+//printarray_matrix0(Ca1);
+set_const_array(C0a, 0.);
+for(k=0; k<4; k++)
+for(j=0; j<2; j++)
+for(i=0; i<3; i++)
+C0[Ind_n(j,i,k, nC0)] = C1[Ind_n(i,j,k, nC1)];
+printarray_matrix0(C0a);
+printarray(C1a);
+
+Yo(2);
+int nC2[] = {4,3,2};
+tArray *C2a = alloc_array(nC2);
+double *C2 = C2a->a;
+//printarray_matrix2(B2a);
+printarray(B2a);
+mm_array2(Aa,B2a, C2a);
+//printarray_matrix0(Ca1);
+set_const_array(C0a, 0.);
+for(k=0; k<2; k++)
+for(j=0; j<3; j++)
+for(i=0; i<4; i++)
+C0[Ind_n(k,j,i, nC0)] = C2[Ind_n(i,j,k, nC2)];
+printarray_matrix0(C0a);
+printarray(C2a);
+
+
 abort();
   return 0;
 }
