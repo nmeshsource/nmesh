@@ -94,6 +94,6 @@ int setup_test_mesh(tMesh *mesh)
   printmesh(mesh);
 
   printnodelist_and_neighbors(mesh->pat[0]->lns);
-
+abort();
   return 0;
 }
