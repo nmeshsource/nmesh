@@ -62,9 +62,8 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   int nt1 = n0;
   int nC[] = { nt0, nt1, n2 };
   tArray *Ca = alloc_array(nC);
-  int nat0 = Ata->n[0];
-  int nat1 = nt1;
-  int nAC[] = { nat0, nat1, n2 };
+  int nat1 = Ata->n[1];
+  int nAC[] = { nat1, nt1, n2 };
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { ABa->n[0],ABa->n[1],ABa->n[2] };
@@ -108,9 +107,8 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   int nt1 = n1;
   int nC[] = { nt0, nt1, n0 };
   tArray *Ca = alloc_array(nC);
-  int nat0 = Ata->n[0];
-  int nat1 = nt1;
-  int nAC[] = { nat0, nat1, n0 };
+  int nat1 = Ata->n[1];
+  int nAC[] = { nat1, nt1, n0 };
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { ABa->n[0],ABa->n[1],ABa->n[2] };
@@ -137,4 +135,11 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
 
   free_array(ACa);
   free_array(Ca);
+}
+
+/* set entire array to value c */
+void set_const_array(tArray *A, double c)
+{
+  int i;
+  for(i=0; i<A->N; i++)  A->a[i] = c;
 }
