@@ -29,21 +29,21 @@ void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
   double *restrict B  =  Ba->a;
   double *restrict AB = ABa->a;
   int atn0 = Ata->n[0];
-  int atn1 = Ata->n[1];
+  int atn1 = Ata->n[1] * Ata->n[2];
   int bn0 = Ba->n[0];
   int bn1 = Ba->n[1] * Ba->n[2];
   int i,l,j;
 
   if(atn0 != bn0) errorexit("Ata->n[0] != Ba->n[0]");
 
-  for(i=0; i<atn1; i++)
-    for(j=0; j<bn1; j++)
+  for(j=0; j<bn1; j++)
+    for(i=0; i<atn1; i++)
     {
       double sum=0.0;
       for(l=0; l<atn0; l++)
         sum += At[l + atn0*i] * B[l + atn0*j];
         // At is col major transpose of A, and B is col major
-      AB[i + atn0*j] = sum; // AB is col major
+      AB[i + atn1*j] = sum; // AB is col major
     }
 }
 
