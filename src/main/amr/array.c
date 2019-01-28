@@ -6,12 +6,12 @@
 
 
 /* NOTE about nmesh variables and arrays:
-   var arrays a = v_{ijk} are indexed like this:
+   var arrays a[ind] = v_{ijk} are indexed like this:
    ind = i + n[0]*(j + n[1]*k)
-   So rows in X-dir can be accessed sequentially as a[i]. I.e. v is 
-   stored like J major (~column major), where J = j + n[1]*k.
-   Thus we can simply store the diff matrices and such in row-major form.
-   The matrix multiplication simplifies */
+   So rows in X-dir can be accessed sequentially as a[i + n[0]*J]. I.e. v is
+   stored in J major (~column major) form, where J = j + n[1]*k.
+   Thus we can simply store the diff matrices and such in row-major form, to
+   simplify matrix multiplication!!! */
 
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
