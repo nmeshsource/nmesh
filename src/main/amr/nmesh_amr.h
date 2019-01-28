@@ -191,6 +191,11 @@ void disablevar(tMesh *mesh, int i);
 void enablevarlist(tVarList *vl);
 void disablevarlist(tVarList *vl);
 
+/* array.c */
+void mm_array0(tArray *Aa, tArray *Ba, tArray *ABa);
+void mm_array1(tArray *Aa, tArray *Ba, tArray *ABa);
+void mm_array2(tArray *Aa, tArray *Ba, tArray *ABa);
+
 /* print.c */
 void printmesh(tMesh *g);
 void printpatch(tPat *box);
@@ -198,8 +203,12 @@ void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);
 void printnodelist_and_neighbors(tNlist *nl);
 void printnodelist(tNlist *nl);
+void printvar_innode(tNode *node, char *name);
+void printarray(tArray *A);
+void printarray_matrix0(tArray *A);
+void printarray_matrix1(tArray *A);
+void printarray_matrix2(tArray *A);
 //void printbface(tBface *bface);
 //void printbfaces(tPat *pat);
-void printvar_innode(tNode *node, char *name);
 
 

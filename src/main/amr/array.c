@@ -10,127 +10,131 @@
    ind = i + n[0]*(j + n[1]*k)
    So rows in X-dir can be accessed sequentially as a[i + n[0]*J]. I.e. v is
    stored in J major (~column major) form, where J = j + n[1]*k.
-   Thus we can simply store the diff matrices and such in row-major form, to
-   simplify matrix multiplication!!! */
+   So we will store all other matrices also in column major form. But to speed
+   up matrix products A B, we will store always the transpose of A, since
+   computing (A^t)^t B is faster than A B.
+   Thus we simply store the transposes of diff matrices and such to speed up
+   matrix multiplication!!! */
 
 
-/* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
-   Aa contains an (Aa->n[0]) x (Aa->n[1]) matrix stored in row-major
-   form. We should have Aa->n[2] = 1.
+/* Multiply two matricies A and B:
+   AB = A B ,   AB_ij = A_il B_lj = At_li B_lj
+   Ata contains an (Ata->n[0]) x (Ata->n[1]) matrix that is the transpose
+   of A, stored in column major form. We should have Ata->n[2] = 1.
    Ba contains a (Ba->n[0]) x (Ba->n[1] * Ba->n[2]) matrix stored in
    column major form. ABa will contain AB stored in column major form. */
-void mm_RMarray_times_CMarray0(tArray *Aa, tArray *Ba, tArray *ABa)
+void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
 {
-  double *restrict A  =  Aa->a;
+  double *restrict At = Ata->a;
   double *restrict B  =  Ba->a;
   double *restrict AB = ABa->a;
-  int an0 = Aa->n[0];
-  int an1 = Aa->n[1];
+  int atn0 = Ata->n[0];
+  int atn1 = Ata->n[1];
   int bn0 = Ba->n[0];
   int bn1 = Ba->n[1] * Ba->n[2];
   int i,l,j;
 
-  if(an1 != bn0) errorexit("Aa->n[1] != Ba->n[0]");
+  if(atn0 != bn0) errorexit("Ata->n[0] != Ba->n[0]");
 
-  for(i=0; i<an0; i++)
+  for(i=0; i<atn1; i++)
     for(j=0; j<bn1; j++)
     {
       double sum=0.0;
-      for(l=0; l<an1; l++)
-        sum += A[an1*i + l] * B[l + an1*j];
-        // A is row major and B is col major
-      AB[i + an0*j] = sum; // AB is col major
+      for(l=0; l<atn0; l++)
+        sum += At[l + atn0*i] * B[l + atn0*j];
+        // At is col major transpose of A, and B is col major
+      AB[i + atn0*j] = sum; // AB is col major
     }
 }
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
-   Aa contains an (Aa->n[0]) x (Aa->n[1]) matrix stored in row-major
-   form. We should have Aa->n[2] = 1.
-   Ba will first be copied into a form Ta where j is the least major index.
-   Next we call mm_RMarray_times_CMarray0 with Ta to get AT.
-   Then we construct AB from AT */
-void mm_RMarray_times_CMarray1(tArray *Aa, tArray *Ba, tArray *ABa)
+   Ata contains an (Ata->n[0]) x (Ata->n[1]) matrix stored in row-major
+   form. We should have Ata->n[2] = 1.
+   Ba will first be copied into a form Ca where j is the least major index.
+   Next we call mm_array0 with Ca to get AC.
+   Then we construct AB from AC */
+void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
 {
   int n0 = Ba->n[0];
   int n1 = Ba->n[1];
   int n2 = Ba->n[2];
   int nt0 = n1;
   int nt1 = n0;
-  int nT[] = { nt0, nt1, n2 };
-  tArray *Ta = alloc_array(nT);
-  int nat0 = Aa->n[0];
+  int nC[] = { nt0, nt1, n2 };
+  tArray *Ca = alloc_array(nC);
+  int nat0 = Ata->n[0];
   int nat1 = nt1;
-  int nAT[] = { nat0, nat1, n2 };
-  tArray *ATa = alloc_array(nAT);
+  int nAC[] = { nat0, nat1, n2 };
+  tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { ABa->n[0],ABa->n[1],ABa->n[2] };
   double *restrict B = Ba->a;
-  double *restrict T = Ta->a;
+  double *restrict C = Ca->a;
   double *restrict AB = ABa->a;
-  double *restrict AT = ATa->a;
+  double *restrict AC = ACa->a;
   int i,j,k;
 
-  /* copy Ba into Ta */
+  /* copy Ba into Ca */
   for(k=0; k<n2; k++)
     for(i=0; i<n0; i++)
       for(j=0; j<n1; j++)
-        T[Ind_n(j,i,k, nT)] = B[Ind_n(i,j,k, nB)];
+        C[Ind_n(j,i,k, nC)] = B[Ind_n(i,j,k, nB)];
 
   /* now multiply */
-  mm_RMarray_times_CMarray0(Aa, Ta, ATa);
+  mm_array0(Ata, Ca, ACa);
 
-  /* copy ATa into ABa */
+  /* copy ACa into ABa */
   for(k=0; k<nAB[2]; k++)
     for(j=0; j<nAB[1]; j++)
       for(i=0; i<nAB[0]; i++)
-        AB[Ind_n(i,j,k, nAB)] = AT[Ind_n(j,i,k, nAT)];
+        AB[Ind_n(i,j,k, nAB)] = AC[Ind_n(j,i,k, nAC)];
 
-  free_array(ATa);
-  free_array(Ta);
+  free_array(ACa);
+  free_array(Ca);
 }
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
-   Aa contains an (Aa->n[0]) x (Aa->n[1]) matrix stored in row-major
-   form. We should have Aa->n[2] = 1.
-   Ba will first be copied into a form Ta where k is the least major index.
-   Next we call mm_RMarray_times_CMarray0 with Ta to get AT.
-   Then we construct AB from AT */
-void mm_RMarray_times_CMarray2(tArray *Aa, tArray *Ba, tArray *ABa)
+   Ata contains an (Ata->n[0]) x (Ata->n[1]) matrix stored in row-major
+   form. We should have Ata->n[2] = 1.
+   Ba will first be copied into a form Ca where k is the least major index.
+   Next we call mm_array0 with Ca to get AC.
+   Then we construct AB from AC */
+void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
 {
   int n0 = Ba->n[0];
   int n1 = Ba->n[1];
   int n2 = Ba->n[2];
   int nt0 = n2;
   int nt1 = n1;
-  int nT[] = { nt0, nt1, n0 };
-  tArray *Ta = alloc_array(nT);
-  int nat0 = Aa->n[0];
+  int nC[] = { nt0, nt1, n0 };
+  tArray *Ca = alloc_array(nC);
+  int nat0 = Ata->n[0];
   int nat1 = nt1;
-  int nAT[] = { nat0, nat1, n0 };
-  tArray *ATa = alloc_array(nAT);
+  int nAC[] = { nat0, nat1, n0 };
+  tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { ABa->n[0],ABa->n[1],ABa->n[2] };
   double *restrict B = Ba->a;
-  double *restrict T = Ta->a;
+  double *restrict C = Ca->a;
   double *restrict AB = ABa->a;
-  double *restrict AT = ATa->a;
+  double *restrict AC = ACa->a;
   int i,j,k;
 
-  /* copy Ba into Ta */
+  /* copy Ba into Ca */
   for(i=0; i<n0; i++)
     for(j=0; j<n1; j++)
       for(k=0; k<n2; k++)
-        T[Ind_n(k,j,i, nT)] = B[Ind_n(i,j,k, nB)];
+        C[Ind_n(k,j,i, nC)] = B[Ind_n(i,j,k, nB)];
 
   /* now multiply */
-  mm_RMarray_times_CMarray0(Aa, Ta, ATa);
+  mm_array0(Ata, Ca, ACa);
 
-  /* copy ATa into ABa */
+  /* copy ACa into ABa */
   for(k=0; k<nAB[2]; k++)
     for(j=0; j<nAB[1]; j++)
       for(i=0; i<nAB[0]; i++)
-        AB[Ind_n(i,j,k, nAB)] = AT[Ind_n(k,j,i, nAT)];
+        AB[Ind_n(i,j,k, nAB)] = AC[Ind_n(k,j,i, nAC)];
 
-  free_array(ATa);
-  free_array(Ta);
+  free_array(ACa);
+  free_array(Ca);
 }

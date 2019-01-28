@@ -131,6 +131,68 @@ void printvar_innode(tNode *node, char *name)
   printf("%s ends here.\n", name);
 }
 
+/* print an array */
+void printarray(tArray *A)
+{
+  int i,j,k;
+  printf("->n[] = {%d,%d,%d}\n", A->n[0],A->n[1],A->n[2]);
+  for(k=0; k<A->n[2]; k++)
+  {
+    for(j=0; j<A->n[1]; j++)
+    {
+      for(i=0; i<A->n[0]; i++)
+        printf(" %g", A->a[Ind_n(i,j,k, A->n)]);
+      printf("\n");
+    }
+    printf("\n");
+  }
+}
+
+/* print an array */
+void printarray_matrix0(tArray *A)
+{
+  int i,J;
+  int nJ = A->n[1] * A->n[2];
+  int dJ = A->n[0];
+  printf("->n[] = {%d,%d,%d} => %dx%d\n", A->n[0],A->n[1],A->n[2], A->n[0],nJ);
+  for(i=0; i<A->n[0]; i++)
+  {
+    for(J=0; J<nJ; J++)
+      printf(" %g", A->a[i + dJ*J]);
+    printf("\n");
+  }
+}
+
+/* print an array */
+void printarray_matrix1(tArray *A)
+{
+  int j,J;
+  int nJ = A->n[0] * A->n[2];
+  int dJ = A->n[1];
+  printf("->n[] = {%d,%d,%d} => %dx%d\n", A->n[0],A->n[1],A->n[2], A->n[1],nJ);
+  for(j=0; j<A->n[1]; j++)
+  {
+    for(J=0; J<nJ; J++)
+      printf(" %g", A->a[j + dJ*J]);
+    printf("\n");
+  }
+}
+
+/* print an array */
+void printarray_matrix2(tArray *A)
+{
+  int k,J;
+  int nJ = A->n[1] * A->n[0];
+  int dJ = A->n[2];
+  printf("->n[] = {%d,%d,%d} => %dx%d\n", A->n[0],A->n[1],A->n[2], A->n[2],nJ);
+  for(k=0; k<A->n[2]; k++)
+  {
+    for(J=0; J<nJ; J++)
+      printf(" %g", A->a[k + dJ*J]);
+    printf("\n");
+  }
+}
+
 
 /*
 void printbface(tBface *bface)
