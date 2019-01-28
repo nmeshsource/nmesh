@@ -66,7 +66,7 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   int nAC[] = { nat1, nt1, n2 };
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
-  int nAB[] = { ABa->n[0],ABa->n[1],ABa->n[2] };
+  int nAB[] = { nt1, nat1, n2 };
   double *restrict B = Ba->a;
   double *restrict C = Ca->a;
   double *restrict AB = ABa->a;
@@ -83,10 +83,10 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   mm_array0(Ata, Ca, ACa);
 
   /* copy ACa into ABa */
-  for(k=0; k<nAB[2]; k++)
-    for(j=0; j<nAB[1]; j++)
-      for(i=0; i<nAB[0]; i++)
-        AB[Ind_n(i,j,k, nAB)] = AC[Ind_n(j,i,k, nAC)];
+  for(k=0; k<nAC[2]; k++)
+    for(i=0; i<nAC[0]; i++)
+      for(j=0; j<nAC[1]; j++)
+        AB[Ind_n(j,i,k, nAB)] = AC[Ind_n(i,j,k, nAC)];
 
   free_array(ACa);
   free_array(Ca);
@@ -111,7 +111,7 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   int nAC[] = { nat1, nt1, n0 };
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
-  int nAB[] = { ABa->n[0],ABa->n[1],ABa->n[2] };
+  int nAB[] = { n0, nt1, nat1 };
   double *restrict B = Ba->a;
   double *restrict C = Ca->a;
   double *restrict AB = ABa->a;
