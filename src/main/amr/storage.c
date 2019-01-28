@@ -238,12 +238,12 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
   pat->nD = nD;
 
   /* get mem. for diff. matrices */
-  pat->D = calloc(nD, sizeof(pat->D[0]));
+  pat->D = calloc(nD+1, sizeof(pat->D[0]));
   if(!(pat->D) )
     errorexit("out of memory for diff. matrices");
-  for(d=0; d<nD; d++)
+  for(d=1; d<=nD; d++)
   {
-    n[0] = n[1] = d+1;
+    n[0] = n[1] = d;
     n[2] = 1;
     for(i=0; i<3; i++)
       pat->D[d][i] = alloc_array(n);
