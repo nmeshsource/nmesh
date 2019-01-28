@@ -86,8 +86,8 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   node->leaf = 1;    /* make this a leaf node */
   nvdb = pat->mesh->nvdb;
 
-  /* get node->D from patch */
-  for(i=0; i<3; i++) node->D[i] = node->pat->D[n[i]][i];
+  /* get node->Dt from patch */
+  for(i=0; i<3; i++) node->Dt[i] = node->pat->Dt[n[i]][i];
 
   /* see where dat needs to be allocated */
   node->datrank = datrank;
@@ -145,8 +145,8 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   node->ijk = ijk;
   nvdb = node->pat->mesh->nvdb;
 
-  /* get node->D from patch */
-  for(d=0; d<3; d++) node->D[d] = node->pat->D[n[d]][d];
+  /* get node->Dt from patch */
+  for(d=0; d<3; d++) node->Dt[d] = node->pat->Dt[n[d]][d];
 
   /* if parent has dat the child will have it too */
   if(parent->dat)
@@ -224,7 +224,7 @@ void insert8_childnodes_asleaves(tNlist *elem, int n[3])
 /**************************************************************************/
 
 /* allocate patch */
-tPat *alloc_patch(tMesh *mesh, int p, int nD)
+tPat *alloc_patch(tMesh *mesh, int p, int nmax)
 {
   int n[3];
   int i, d;
@@ -235,18 +235,18 @@ tPat *alloc_patch(tMesh *mesh, int p, int nD)
 
   pat->mesh = mesh;
   pat->p = p;
-  pat->nD = nD;
+  pat->nmax = nmax;
 
   /* get mem. for diff. matrices */
-  pat->D = calloc(nD+1, sizeof(pat->D[0]));
-  if(!(pat->D) )
+  pat->Dt = calloc(nmax+1, sizeof(pat->Dt[0]));
+  if(!(pat->Dt) )
     errorexit("out of memory for diff. matrices");
-  for(d=1; d<=nD; d++)
+  for(d=1; d<=nmax; d++)
   {
     n[0] = n[1] = d;
     n[2] = 1;
     for(i=0; i<3; i++)
-      pat->D[d][i] = alloc_array(n);
+      pat->Dt[d][i] = alloc_array(n);
   }
 
   /* Bfaces */

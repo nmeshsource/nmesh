@@ -22,9 +22,9 @@ void printpatch(tPat *pat)
   tNlist *el;
   tNode *node;
 
-  printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] nD=%d\n",
+  printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] nmax=%d\n",
          pat->p, pat->bbox[0], pat->bbox[1], pat->bbox[2], pat->bbox[3],
-         pat->bbox[4],pat->bbox[5], pat->nD);
+         pat->bbox[4],pat->bbox[5], pat->nmax);
   printf("root node:\n");
   printnode(pat->rnode);
   printf("leaf nodes:\n");
@@ -62,8 +62,8 @@ void printnode(tNode *n)
   printf(" child =");
   for(i=0; i<8; i++) printf(" %p", n->child[i]);
   printf("\n");
-  printf(" D =");
-  for(i=0; i<3; i++) printf(" %p", n->D[i]);
+  printf(" Dt =");
+  for(i=0; i<3; i++) printf(" %p", n->Dt[i]);
   printf("\n");
   printf(" datrank=%d  dat=%p\n", n->datrank, n->dat);
 

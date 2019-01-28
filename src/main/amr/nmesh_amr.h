@@ -53,7 +53,7 @@ typedef struct tNODE {
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
-  struct tARRAY *D[3];    /* differentiation matrix in all 3 dirs for [-1,1]
+  struct tARRAY *Dt[3];   /* transp. differentiation matrix in 3 dirs for [-1,1]
                              domain. This just points to an array in patch. */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
@@ -71,13 +71,14 @@ typedef struct tNLIST {
 typedef struct tPAT {
   double bbox[6];       /* bounding box (in X,Y,Z) of this patch */
   int p;                /* index of this patch */
+  int nmax ;            /* max n[0],n[1],n[2] a node in this patch can have */
   struct tMESH *mesh;   /* pointer to mesh that contains patch */
   /* funcs to compute X,Y,Z from x,y,z and vice versa: */
   int (*XYZ_Of_xyz)(struct tPAT *pat, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
   int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
   tNode *rnode;         /* root node in this patch */
-  struct tARRAY *(*D)[3]; /* list of differentiation matrices */
-  int nD;               /* number of diff matrices stored */
+  struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
+                              we store Dt[1...nmax][dir], where dir=0,1,2 */
   tNlist *lns;          /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch should have Bfaces as in sgrid. But instead of pointlists

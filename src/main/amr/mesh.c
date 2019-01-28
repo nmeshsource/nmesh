@@ -43,7 +43,7 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nD)
   for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
 
   /* set diff matrices */
-  pat->D[5][1]->a[4] = 4;
+  pat->Dt[5][1]->a[4] = 4;
 
   /* setup root node */
   pat->rnode = make_root_node(pat, nroot, 0);
