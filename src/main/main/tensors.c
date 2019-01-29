@@ -34,8 +34,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
   for (i = 0; i < 3*NINDEXLIST; i++) 
     sym[i] = 1;
 
-
-  /* now treat each case separately */
+  /* now we treat each case */
 
   /* scalar */
   if (strcmp(tensorindices, "") == 0) {
@@ -43,7 +42,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     sprintf(ilist[n++], "%s", "");
   }
   
-  /* 3d indices */
+  /* 3d indices, i,j,k,... */
   if (strcmp(tensorindices, "i") == 0) {
     for (i = 0; i < 3; i++) {
       sym[3*n+i] *= -1;
@@ -166,7 +165,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
 
-  /* 4d indices */
+  /* 4d indices, a,b,c,... */
   if (strcmp(tensorindices, "a") == 0) {
     for (i = 0; i <= 3; i++) {
       if (i > 0) sym[3*n+i-1] *= -1;
@@ -274,7 +273,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
 
-  /* 2d indices 1,2 */
+  /* 2d indices q,r,s,... \in [1,2] */
   if (strcmp(tensorindices, "q") == 0) {
     for (i = 0; i < 2; i++) {
       sym[3*n+i] *= -1;   /* FIXME: these syms probably need to be changed */
@@ -371,8 +370,8 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
 
   /* error */
   if (n == 0) {
-    printf("Error in index string %s.\n", tensorindices);
-    printf("Legal combinations besides the empty string are\n");
+    printf("Unknown tensor index string %s.\n", tensorindices);
+    printf("Implemented (besides the empty string) are:\n");
     printf("i, ij, (ij), [ij], ijk, i(jk), (ij)k [ij]k ijkl (ij)(kl)\n");
     printf("ij+ji, ij-ji, ijk+ikj, ijk+jik\n");
     printf("a, ab, ab+ba, abc+acb\n");
@@ -380,8 +379,8 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     printf("q, qr, qr+rq, qrs+rqs, qrst+qrts+rqst+rqts\n");
     printf("q, qr, (qr), (qr)s, (qr)(st)\n");
     printf("iq, iqr, i(qr)\n");
-    printf("Anything else can be easily added to main/tensors.c.\n");
-    errorexit("");
+    printf("Other combinations can be added to main/tensors.c .\n");
+    errorexits("Error in tensor index string %s", tensorindices);
   }
   
   *nilist = n;

@@ -32,6 +32,7 @@ parameter_name = parameter_value1  # this is just a comment
 /* maximum number of pars allowed */
 int npdbmax = 2000;
 
+/* functions */
 void makeparameter(tMesh *mesh, char *name, char *value, char *description);
 int findparameterindex(tMesh *mesh, char *name, int fatal);
 tParameter *findparameter(tMesh *mesh, char *name, int fatal);
@@ -67,9 +68,10 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
     if(i >= nbuffer-2)
     {
       if(nbuffer > 1000000)
-        errorexit("Sanity forbids parameter files bigger than 1MB");
+        errorexit("Parameter files bigger than 1MB are not allowed!");
       buffer = (char *) realloc(buffer, sizeof(char)*(nbuffer += 1000));
-      if(!buffer) errorexit("Out of memory while reading parameter file.");
+      if(!buffer)
+        errorexit("Out of memory for buffer while reading parameter file!");
     }
     if(i == 0) buffer[i++] = ' ';
     if((c = fgetc(fp)) == EOF) break;
@@ -154,7 +156,7 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   /* print parameters */
   if(0)
   {
-    printf("after reading the parameterfile:\n");
+    printf("parameters after reading the parameterfile:\n");
     printparameters(mesh);
   }
   free(buffer);
@@ -199,7 +201,7 @@ void makeparameter(tMesh *mesh, char *name, char *value, char *description)
   strcpy(p->description, description);
 
   if(mesh->npdb >= npdbmax)
-    errorexit("lazy coding, no more space for new parameters");
+    errorexit("no space for more parameters because npdbmax is hard coded");
 
   if(0) printparameters(mesh);
 }

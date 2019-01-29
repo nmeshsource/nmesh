@@ -63,8 +63,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   int i; 
 
   if(0) 
-    for (i = 0; i < argc; i++)
-      printf("argv[%d] = %s\n", i, argv[i]);
+    for(i = 0; i < argc; i++) printf("argv[%d] = %s\n", i, argv[i]);
 
   prdivider(0);
   printf("Welcome to nmesh, compiled on %s at %s\n", __DATE__, __TIME__);
@@ -146,6 +145,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   
   return 0;
 }
+
 
 int make_output_directory(tMesh *mesh)
 {
@@ -280,7 +280,7 @@ int parse_command_line_options(tMesh *mesh)
 } 
 
 
-/* initialize mesh */
+/* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
 {
   if (1) {
@@ -305,31 +305,29 @@ int inidata_mesh(tMesh *mesh)
   /* output for permanent variables */
   RunFun(OUTPUT);
 
-  /* checkpoint, just in case we need it here already */
+  /* checkpoint, in case we init from checkpoint files */
   //checkpoint(mesh);
 
   return 0;
 }
 
 
-
-
 /* evolve mesh */
 int evolve_mesh(tMesh *mesh)
 {
   int iterationmax = Geti(Par("iterations"));
-  double timemax = Getd(Par("finaltime"));
+  double timemax   = Getd(Par("finaltime"));
 
   prdivider(0);
 
-  if (timemax > 0)
+  if(timemax > 0)
     iterationmax = timemax/mesh->dt + 0.5;
 
-  if (iterationmax > 0) 
-    printf("Evolving mesh for %d top mesh iterations to time %.3f\n", 
+  if(iterationmax > 0) 
+    printf("Evolving mesh for %d iterations to time %g\n", 
 	   iterationmax, iterationmax * mesh->dt);
 
-  if (iterationmax <= 0) return 0;
+  if(iterationmax <= 0) return 0;
 
   /* outermost evolution loop */
   while(mesh->iteration < iterationmax)
@@ -337,24 +335,24 @@ int evolve_mesh(tMesh *mesh)
     /* pre evolve */
     RunFun(PRE_EVOLVE); 
 
-    /* evolve */
+    /* make one evolution step */
     RunFun(EVOLVE); 
 
     /* post evolve */
     RunFun(POST_EVOLVE); 
 
-    /* evolution step complete */
+    /* the evolution step is complete now */
     mesh->iteration++;
     mesh->time = mesh->iteration * mesh->dt;
 
-    /* print info */
+    /* print some info */
     printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
     fflush(stdout); 
 
-    /* analyze */
+    /* call analyze functions */
     RunFun(ANALYZE);
 
-    /* output for permanent variables */
+    /* call output functions, say for variable output */
     RunFun(OUTPUT);
 
     /* post output */

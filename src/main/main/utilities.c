@@ -19,15 +19,27 @@ double time_in_s_at_nmesh_start; /* set in main.c */
 extern tMesh *main_mesh;         /* mesh created in main */
 
 
-/* debug */
+/* quick debug */
 void Yo(double x) {fprintf(stdout, "Yo:%g\n", x);fflush(stdout);}
 
 
-
-/* output divider lines */
+/* print divider lines */
 void prdivider(int n)
 {
-  printf("------------------------------------------------------------------------------\n");
+  switch(n)
+  {
+  case 1:
+    printf("==============================================================================\n");
+    break;
+  case 2:
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+    break;
+  case 3:
+    printf("******************************************************************************\n");
+    break;
+  default:
+    printf("------------------------------------------------------------------------------\n");
+  }
   fflush(stdout);
 }
 

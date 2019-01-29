@@ -19,7 +19,7 @@ void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
 
   if(0) printf("AddVar: name %s, tensorindices %s\n", name, tensorindices);
 
-  /* construct list of tensor indices */
+  /* construct list with tensor indices */
   tensorindexlist(tensorindices, &nilist, ilist, sym);
 
   /* for each tensor index */
@@ -215,7 +215,7 @@ void MeshVarNameSetConstantFlag(tMesh *mesh, char *name)
   }
 }
 
-/* return various information, e.g. boundary information */
+/* return various pieces of information, e.g. boundary information */
 double MeshVarFallOff(tMesh *mesh, int i)
 { return mesh->vdb[i].falloff; }
 double MeshVarFarLimit(tMesh *mesh, int i)
