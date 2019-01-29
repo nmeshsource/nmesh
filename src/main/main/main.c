@@ -13,7 +13,7 @@ tMesh *main_mesh;
    the automatically generated file calls the initializers for each module */
 void initialize_libraries(struct tMESH *mesh)
 {
-  prdivider(0);
+  prdivider(1);
   printf("Initializing libraries\n");
 
 #include "nmesh_automatic_initialize.c"
@@ -65,9 +65,9 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   if(0) 
     for(i = 0; i < argc; i++) printf("argv[%d] = %s\n", i, argv[i]);
 
-  prdivider(0);
+  prdivider(1);
   printf("Welcome to nmesh, compiled on %s at %s\n", __DATE__, __TIME__);
-  prdivider(0);
+  prdivider(1);
 
   if(argc < 2)
   {
@@ -208,7 +208,7 @@ int make_output_directory(tMesh *mesh)
     char f[100];
     snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
     snprintf(so,999, f, outdir, nMPI_rank());  
-    prdivider(0);
+    prdivider(3);
     printf("*** NOTE *** : Output redirected to:\n %s\n", so);
     freopen(so, "w", stdout);
     freopen(so, "w", stderr);
@@ -217,7 +217,7 @@ int make_output_directory(tMesh *mesh)
   {
     char *opt;
     snprintf(so,999, "%s.log", outdir);
-    prdivider(0);
+    prdivider(3);
     printf("*** NOTE *** : Output redirected to:\n %s\n", so);
     if(Getv(Par("logfile_creation"),"append"))
       opt = "a";
@@ -227,7 +227,7 @@ int make_output_directory(tMesh *mesh)
     freopen(so, opt, stderr);
   }
   /* say what we have after redirection: */
-  prdivider(0);
+  prdivider(1);
   time_str[strlen(time_str)-1] = '\0';
   printf("The current time is %s\n", time_str);
   printf("nmesh was compiled on %s at %s\n", __DATE__, __TIME__);
