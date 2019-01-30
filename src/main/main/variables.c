@@ -7,17 +7,19 @@
 
 
 /* add a variable to data base that is located in mesh */
-void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
+void AddMeshVar(tMesh *mesh, char *name,
+                char *tensorindices, char *description)
 {
   tVar *newv;
-  int i, j;
   char fullname[100];
   int nilist;
   char *ilist[NINDEXLIST]; 
   int sym[3*NINDEXLIST];
-  char *symsigns[3] = {"-", "0", "+"}, **ss = symsigns+1;
+  char *symsigns[] = {"-", "0", "+"};
+  char **ss = symsigns+1;
+  int i, j;
 
-  if(0) printf("AddVar: name %s, tensorindices %s\n", name, tensorindices);
+  if(0) {PRF;printf(": name=%s tensorindices=%s\n", name, tensorindices);}
 
   /* construct list with tensor indices */
   tensorindexlist(tensorindices, &nilist, ilist, sym);
@@ -39,7 +41,7 @@ void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description)
 
     /* print name of variable */
     printf("  variable  %s\n", fullname);
-    if (0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
+    if(0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
 
     /* variable does not exist, so add a new element to data base */
     mesh->vdb = realloc(mesh->vdb, sizeof(tVar)*(mesh->nvdb+1));
