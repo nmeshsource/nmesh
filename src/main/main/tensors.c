@@ -13,9 +13,7 @@
    note that we treat 3d indices i,j,k,... and 4d indices a,b,c,...
    and 2d indices q,r,s,...
    ilist[0], ilist[1], ... need to be freed by caller
-
-   should be made automatic, but for now this is simpler 
-*/
+   we could make a real parser to avoid the "if" for each case below */
 void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
 {
   /* name of coordinates, could be made variable */
