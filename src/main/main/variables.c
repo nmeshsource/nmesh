@@ -21,7 +21,7 @@ void AddMeshVar(tMesh *mesh, char *name,
 
   if(0) {PRF;printf(": name=%s tensorindices=%s\n", name, tensorindices);}
 
-  /* construct list with tensor indices */
+  /* get list with tensor indices, this allocates mem in ilist[j] */
   tensorindexlist(tensorindices, &nilist, ilist, sym);
 
   /* for each tensor index */
@@ -37,13 +37,13 @@ void AddMeshVar(tMesh *mesh, char *name,
         break; /* this var is there already */
 
     if(i < mesh->nvdb) /* we found a var that exists already */
-      errorexits("variable \"%s\" already exists\n", fullname);
+      errorexits("variable \"%s\" exists already\n", fullname);
 
     /* print name of variable */
     printf("  variable  %s\n", fullname);
     if(0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
 
-    /* variable does not exist, so add a new element to data base */
+    /* variable does not exist, so add a new entry to data base */
     mesh->vdb = realloc(mesh->vdb, sizeof(tVar)*(mesh->nvdb+1));
 
     /* initialize and fill in structure */
