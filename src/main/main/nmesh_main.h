@@ -151,13 +151,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal);
 void tensorindexlist(char *tensorindices, int *nilist, char **ilist, int *sym);
 
 /* variables.c */
-/* variable data base structures */
-typedef struct {
-  double iotime[4];
-  int ioiter[4];
-  int ioflag[4];
-  int ioatall;
-} tIO;
+/* variable data base structure */
 typedef struct tVAR {
   char *name;
   char *tensorindices;
@@ -165,12 +159,12 @@ typedef struct tVAR {
   int index;
   int ncomponents;
   int component;
-  tIO *io;
   double farlimit;
   double falloff;
   int sym[3];
   int constant;
 } tVar;
+/* functions to create and access variables */
 void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description);
 void AddConstantMeshVar(tMesh *mesh, char *name, 
                         char *tensorindices, char *description);

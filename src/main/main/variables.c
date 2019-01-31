@@ -55,7 +55,6 @@ void AddMeshVar(tMesh *mesh, char *name,
     newv->index         = mesh->nvdb;
     newv->ncomponents   = nilist;
     newv->component     = j;
-    newv->io            = NULL;
     newv->sym[0]        = sym[3*j];
     newv->sym[1]        = sym[3*j+1];
     newv->sym[2]        = sym[3*j+2];
