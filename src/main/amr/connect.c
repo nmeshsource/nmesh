@@ -94,6 +94,8 @@ void connect8_siblings(tNode *narray[8])
 {
   int ijk;
 
+  errorexit("this function needs to be tested");
+
   /* fill in neighbor info, as far as these 8 are concerned */
   for(ijk=0; ijk<8; ijk++)
   {
@@ -201,7 +203,7 @@ tNlist *ancestors_alongBoundary(tNode *node, int dir)
 /* go back down again to find neighbor */
 void descend_alongBoundary(tNlist *anclist, int dir, tNode *nb)
 {
-  int i,j,k;
+  int i;
   int ns[] = {2,2,2};
   tNode *anc0 = anclist->node;
   tNode *anc1;
@@ -217,9 +219,10 @@ void descend_alongBoundary(tNlist *anclist, int dir, tNode *nb)
     int ijk1 = anc1->ijk;
     int k1 = kOfInd_n(ijk1, ns);
     int j1 = jOfInd_n_k(ijk1, ns,k1);
-    int i1 = iOfInd_n_jk(ijk1, ns,j1,k1);
+    //int i1 = iOfInd_n_jk(ijk1, ns,j1,k1);
 
     // X dir only!!!
+    i=0; // need to set i to in anc1 ???
     a1nb = a0nb->child[Ind_n(i,j1,k1,  ns)];
     if(a1nb->leaf)
       break; // nb = a1nb;

@@ -167,9 +167,9 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
 /* make 8 childern and return them in a short list */
 tNlist *make8_child_nodes(tNode *parent, int n[3])
 {
-  tNlist *nlist, el;
+  tNlist *nlist;
   tNlist *elem = NULL;
-  tNode *node, *onode;
+  tNode *node;
   tNode *narray[8];
   int ijk;
 
@@ -191,7 +191,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 tNode *remove8_leaf_nodes(tNode *leaf0)
 {
   tNode *parent = leaf0->parent;
-  tNode *node;
+  //tNode *node;
 
   if(!leaf0->leaf) errorexit("argument leaf0 is not a leaf node");
 
@@ -257,7 +257,7 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
 /* free pat, currently leaves mesh untouched */
 void free_patch(tPat *pat)
 {
-  int i;
+  //int i;
 
   if (!pat) return;
 
@@ -486,11 +486,11 @@ void free_nodelist(tNlist *elem)
   if(!elem) return;
 
   /* remove all after elem */
-  while(tmp=elem->next)
+  while( (tmp=elem->next) )
     remove1_in_nodelist(tmp);
 
   /* remove all before elem */
-  while(tmp=elem->prev)
+  while( (tmp=elem->prev) )
     remove1_in_nodelist(tmp);
 
   /* remove elem */
@@ -589,7 +589,6 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
   int nvdb_old = mesh->nvdb;
-  tNlist *elem;
   tNode *node;
   if(0) printf("realloc_meshvariables from %d to %d\n",
                  mesh->nvdb, nvdb_new);

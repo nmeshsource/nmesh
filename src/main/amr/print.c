@@ -19,7 +19,6 @@ void printmesh(tMesh *m)
 
 void printpatch(tPat *pat)
 {
-  tNlist *el;
   tNode *node;
 
   printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] nmax=%d\n",
@@ -73,7 +72,7 @@ void printnode(tNode *n)
 void printnode_and_neighbors(tNode *n)
 {
   tNode *n0, *n0p, *n1;
-  int i, dir, ni, count;
+  int dir, ni;
 
   for(dir=0; dir<3; dir++)
   {

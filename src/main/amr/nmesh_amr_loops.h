@@ -79,5 +79,4 @@
     for(i =((n[0])-1)*(j%2); i < (n[0]) && i >= 0; i=i+1-2*(j%2))
 
 /* loop over bfaces in a patch */
-//#define forbfaces(pat,fi) \
-//  for (fi = 0; fi < pat->nbfaces; fi++)
+//#define forbfaces(pat,fi)  for(fi = 0; fi<pat->nbfaces; fi++)

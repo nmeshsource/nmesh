@@ -641,8 +641,6 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
 {
   tMesh *mesh = r->mesh;
   tNode *node;
-  double *pr, *pa, *pb;
-  int i, n;
 
   forlnodes(mesh, node)
   {
