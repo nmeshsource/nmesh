@@ -468,12 +468,12 @@ void vlsetconstant(tVarList *u, const double c)
 {
   tMesh *mesh = u->mesh;
   tNode *node;
-  double *pu;
-  int i, n, ui;
-  int b;
 
   forlnodes(mesh, node)
   {
+    double *pu;
+    int i, n, ui;
+
     for(n=0; n<u->n; n++)
     {
       ui = u->index[n];
@@ -489,15 +489,15 @@ void vlcopy(tVarList *v, tVarList *u)
 {
   tMesh *mesh = v->mesh;
   tNode *node;
-  double *pu, *pv;
-  int i, n, vi,ui;
-  int b;
 
   /* copy time */
   v->time = u->time;
 
   forlnodes(mesh, node)
   {
+    double *pu, *pv;
+    int i, n, vi,ui;
+
     for(n=0; n<v->n; n++)
     {
       ui = u->index[n];
@@ -535,9 +535,6 @@ void vlswap(tVarList *v, tVarList *u)
 {
   tMesh *mesh = v->mesh;
   tNode *node;
-  double *pu, *pv;
-  int i, n;
-  int b;
   double temp;
 
   /* swap time */
@@ -547,6 +544,9 @@ void vlswap(tVarList *v, tVarList *u)
 
   forlnodes(mesh, node)
   {
+    double *pu, *pv;
+    int i, n;
+
     for(n=0; n<v->n; n++)
     {
       int ui = u->index[n];
@@ -580,12 +580,13 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
 {
   tMesh *mesh = r->mesh;
   tNode *node;
-  double *pr, *pa, *pb;
   double c = 0.5;
-  int i, n;
 
   forlnodes(mesh, node)
   {
+    double *pr, *pa, *pb;
+    int i, n;
+
     for(n=0; n<r->n; n++)
     {
       int ri = r->index[n];
@@ -609,11 +610,12 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
 {
   tMesh *mesh = r->mesh;
   tNode *node;
-  double *pr, *pa, *pb;
-  int i, n;
 
   forlnodes(mesh, node)
   {
+    double *pr, *pa, *pb;
+    int i, n;
+
     for(n=0; n<r->n; n++)
     {
       int ri = r->index[n];
@@ -644,6 +646,9 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
 
   forlnodes(mesh, node)
   {
+    double *pr, *pa, *pb;
+    int i, n;
+
     for(n=0; n<r->n; n++)
     {
       int ri = r->index[n];
