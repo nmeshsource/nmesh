@@ -128,10 +128,10 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   mm_array0(Ata, Ca, ACa);
 
   /* copy ACa into ABa */
-  for(k=0; k<nAB[2]; k++)
-    for(j=0; j<nAB[1]; j++)
-      for(i=0; i<nAB[0]; i++)
-        AB[Ind_n(i,j,k, nAB)] = AC[Ind_n(k,j,i, nAC)];
+  for(i=0; i<nAC[0]; i++)
+    for(j=0; j<nAC[1]; j++)
+      for(k=0; k<nAC[2]; k++)
+        AB[Ind_n(k,j,i, nAB)] = AC[Ind_n(i,j,k, nAC)];
 
   free_array(ACa);
   free_array(Ca);
