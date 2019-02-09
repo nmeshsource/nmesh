@@ -1,28 +1,42 @@
 /* nmesh_amr_loops.h */
 /* Wolfgang Tichy, 1/2019 */
 
+/****************************************************************************/
 /* Loops are performed by macros so that the user has to know very little
    about the implementation details. */
+/****************************************************************************/
 
 /****************************************************************************/
-/* loop over all patches */
-#define forpatches(mesh,patindex) \
-  for(patindex=0; patindex < mesh->npats; patindex++)
+/* loops that should be used in most modules                                */
+/****************************************************************************/
+/* loop over leaf node array on this proc */
+#define formylnodes(mesh, lni) \
+  for(lni=0; lni < mesh->nmyln; lni++)
 
-///* loop over all points in a node */
-//#define forpoints(node,ijk) \
-//  for(ijk = 0; ijk < node->np; ijk++)
-
+/* loop over array */
 #define forarray(array,k) \
   for(k=0; k<array->N; k++)
 
-#define GetVarDpointer(node, varindex) \
-  ((node->dat) ? node->dat->v[(varindex)]->a : 0)
-
+/* loop of one variable (it is in an array*/
 //#define forvari(node,varindex, k) \
 //  if(node->dat) forarray(node->dat->v[(varindex)], k)
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)
+
+/* get double pointer to data in a variable */
+#define GetVarDpointer(node, varindex) \
+  ((node->dat) ? node->dat->v[(varindex)]->a : 0)
+
+/****************************************************************************/
+/* loops that should be used only in very particular advanced cases         */
+/****************************************************************************/
+///* loop over all points in a node */
+//#define forpoints(node,ijk) \
+//  for(ijk = 0; ijk < node->np; ijk++)
+
+/* loop over all patches */
+#define forpatches(mesh,patindex) \
+  for(patindex=0; patindex < mesh->npats; patindex++)
 
 /* loop over a node list nlist (type tNlist) */
 #define fornodelist(nlist, elem) \
@@ -41,10 +55,10 @@
       elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
 #define endforlnodes }
   
-/* to loop over leaf node array on this proc */
-#define formylnodes(mesh, lni) \
-  for(lni=0; lni < mesh->nmyln; lni++)
 
+/****************************************************************************/
+/* do we need these?  */
+/****************************************************************************/
 
 /* loop over planes e.g. i=p plane */
 #define forplane1(i,j,k, n, p) \
