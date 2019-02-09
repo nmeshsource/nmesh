@@ -16,6 +16,22 @@
    Thus we simply store the transposes of diff matrices and such to speed up
    matrix multiplication!!! */
 
+/* multiply matrix in Ata with 3d array Ba in a direction,
+   store result in ABa */
+void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa)
+{
+  switch(dir)
+  {
+  case 0:
+    mm_array0(Ata, Ba, ABa);  break;
+  case 1:
+    mm_array1(Ata, Ba, ABa);  break;
+  case 2:
+    mm_array2(Ata, Ba, ABa);  break;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+}
 
 /* Multiply two matricies A and B:
    AB = A B ,   AB_ij = A_il B_lj = At_li B_lj

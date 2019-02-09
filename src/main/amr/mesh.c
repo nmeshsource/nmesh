@@ -77,7 +77,7 @@ int setup_test_mesh(tMesh *mesh)
 {
   double bbox[6] = { -4,4, -2,2, -1,1 };
   int n1max = 55;
-  int n[3] = { 9,9,9 };
+  int n[3] = { 5,5,5 };
   tNlist *nlist, *el;
   tNode *nd;
   int i;
@@ -192,6 +192,10 @@ C0[Ind_n(k,j,i, nC0)] = C2[Ind_n(i,j,k, nC2)];
 printarray_matrix0(C0a);
 printarray(C2a);
 
+printarray(mesh->pat[0]->lns->next->node->St[1]);
+printarray_matrix0(mesh->pat[0]->lns->next->node->St[1]);
+
+printarray_matrix0(mesh->pat[0]->St[5][0]);
 
 abort();
   return 0;
