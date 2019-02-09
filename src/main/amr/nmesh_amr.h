@@ -76,19 +76,19 @@ typedef struct tNLIST {
 typedef struct tPAT {
   double bbox[6];       /* bounding box (in X,Y,Z) of this patch */
   int p;                /* index of this patch */
-  int nmax ;            /* max n[0],n[1],n[2] a node in this patch can have */
   struct tMESH *mesh;   /* pointer to mesh that contains patch */
   /* funcs to compute X,Y,Z from x,y,z and vice versa: */
   int (*XYZ_Of_xyz)(struct tPAT *pat, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
   int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
   tNode *rnode;         /* root node in this patch */
+  int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
   struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
                               we store Dt[1...nmax][dir], where dir=0,1,2 */
   struct tARRAY *(*At)[3]; /* list of transposed analysis matrices */
   struct tARRAY *(*St)[3]; /* list of transposed synthesis matrices */
   struct tARRAY *(*Xb)[3]; /* list of points */
   struct tARRAY *(*Winteg)[3]; /* list of integration weights */
-  tNlist *lns;          /* start of linked list of leaf nodes in this patch */
+  //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch should have Bfaces as in sgrid. But instead of pointlists
    we can use bounding rectangles in both adjacent bfaces, because we will
@@ -107,15 +107,17 @@ typedef struct tMESH {
   double time;      /* current time */
   int iteration;    /* current iteration number */
   int npats;        /* number of patches */
-  int nvdb;         /* number of variables */
-  int npdb;         /* number of mesh parameters */
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
+  int nvdb;         /* number of variables */
   struct tVAR *vdb; /* variable data base */
+  int vdb_iStart;   /* index we start at when searching for a var */
+  int npdb;         /* number of mesh parameters */
   struct tPAR *pdb; /* parameter data base */
   int pdb_iStart;   /* index we start at when searching for a par */
-  int vdb_iStart;   /* index we start at when searching for a var */
   tPat **pat;       /* list of pointers to patches */
   tNlist *lns;      /* start of linked list of all leaf nodes */
+  int nmyln;        /* number of leaves in myln array */
+  tNode **myln;     /* array of leaf nodes owned by this proc */
 } tMesh;
 /* NOTE: the list lnodes needs to be distributed among MPI jobs:
 use space filling curve as in
@@ -188,6 +190,8 @@ tNlist *remove1_in_nodelist(tNlist *elem);
 tNlist *first_nodelist(tNlist *list);
 tNlist *last_nodelist(tNlist *list);
 void free_nodelist(tNlist *elem);
+int append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
+int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
 void enablevarcomp_innode(tNode *node, int i);

@@ -30,6 +30,7 @@ tMesh *make_empty_mesh(int pr)
 /* add apatch to the mesh */
 int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
 {
+  tNlist *nlist;
   tPat *pat;
   int p = mesh->npats;
   int i, ni, dir;
@@ -63,7 +64,9 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
 
   /* setup root node */
   pat->rnode = make_root_node(pat, nroot, 0);
-  pat->lns = alloc_nodelist(pat->rnode);
+  /* add root node to global mesh->lns list */
+  nlist = alloc_nodelist(pat->rnode);
+  append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
   free(winterp);
   return 0;
@@ -91,26 +94,26 @@ int setup_test_mesh(tMesh *mesh)
   nd = mesh->pat[0]->rnode;
   nlist = make8_child_nodes(nd, n);
 
-  mesh->pat[0]->lns = first_replace1_in_nodelist(mesh->pat[0]->lns, nlist);
+  replace1_in_mesh_lns_myln(mesh->lns, nlist);
   //printnodelist(nlist);
   printmesh(mesh);
 
-  el = mesh->pat[0]->lns;
+  el = mesh->lns;
   for(i=1; i<=1; i++) el = el->next;
   nd = el->node;
   nlist = make8_child_nodes(nd, n);
-  mesh->pat[0]->lns = first_replace1_in_nodelist(el, nlist);
+  replace1_in_mesh_lns_myln(el, nlist);
 
-  el = mesh->pat[0]->lns;
+  el = mesh->lns;
   for(i=1; i<=8+2; i++) el = el->next;
   nd = el->node;
   nlist = make8_child_nodes(nd, n);
-  mesh->pat[0]->lns = first_replace1_in_nodelist(el, nlist);
+  replace1_in_mesh_lns_myln(el, nlist);
 
   //printnodelist(nlist);
   printmesh(mesh);
 
-  printnodelist_and_neighbors(mesh->pat[0]->lns);
+  printnodelist_and_neighbors(mesh->lns);
 
 
 double  A[6] = { 1,2,
@@ -191,8 +194,8 @@ C0[Ind_n(k,j,i, nC0)] = C2[Ind_n(i,j,k, nC2)];
 printarray_matrix0(C0a);
 printarray(C2a);
 
-printarray(mesh->pat[0]->lns->next->node->St[1]);
-printarray_matrix0(mesh->pat[0]->lns->next->node->St[1]);
+printarray(mesh->lns->next->node->St[1]);
+printarray_matrix0(mesh->lns->next->node->St[1]);
 
 printarray_matrix0(mesh->pat[0]->St[5][0]);
 

@@ -464,7 +464,7 @@ tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
   for(lend=list; lend->next; lend=lend->next) ;
   for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
 
-  if(!elem) return lend;
+  if(!elem) return lbeg;
 
   left = elem->prev;
   right= elem->next;
@@ -550,6 +550,56 @@ void free_nodesinlist(tNlist *elem)
   /* free nodes in all before elem */
   for(tmp=elem->prev; tmp; tmp=tmp->prev)
     free_node(tmp->node);
+}
+
+/**********************************************************************/
+/* functions to update the nodelist and node array in mesh */
+/**********************************************************************/
+/* update array of leaf nodes on this proc */
+int update_mesh_myln(tMesh *mesh)
+{
+  tNode *node;
+  int allocd = mesh->nmyln;
+  int nmyln = 0;
+  fornodes(mesh->lns, node)
+  {
+    if(node->dat)
+    {
+      if(nmyln >= allocd)
+      {
+        mesh->myln = realloc(mesh->myln, sizeof(mesh->myln[0])*(allocd+256));
+        allocd += 256;
+      }
+      mesh->myln[nmyln++] = node;
+    }
+  } endfornodes;
+  mesh->nmyln = nmyln;
+  return allocd;
+}
+
+/* append a node list to mesh->lns and also update mesh->myln */
+int append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
+{
+  tNlist *lnl;
+  if(mesh->lns)
+  {
+    lnl = last_nodelist(mesh->lns); /* last elem. in mesh->lns */
+    lnl = insertnodelist_into_nodelist_after(lnl, list);
+  }
+  else
+    mesh->lns = first_nodelist(list);
+
+  return update_mesh_myln(mesh);
+}
+
+/* replace elem in mesh->lns by nlist*/
+int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
+{
+  tMesh *mesh = NULL;
+  if(elem) mesh = elem->node->pat->mesh;
+  else     errorexit("elem in NULL!!!");
+  mesh->lns = first_replace1_in_nodelist(elem, nlist);
+  return update_mesh_myln(mesh);
 }
 
 /**********************************************************************/
@@ -706,40 +756,48 @@ void disablevar_innode(tNode *node, int i)
 /* enable onr component of a variable on one pat */
 void enablevarcomp_inpatch(tPat *pat, int i)
 {
+  tMesh *mesh = pat->mesh;
   tNode *node;
 
-  forlnodes(pat, node) {
-    enablevarcomp_innode(node, i);
+  forlnodes(mesh, node)
+  {
+    if(node->pat == pat) enablevarcomp_innode(node, i);
   } endforlnodes;
 }
 
 /* disable one component of a variable on one pat */
 void disablevarcomp_inpatch(tPat *pat, int i)
 {
+  tMesh *mesh = pat->mesh;
   tNode *node;
 
-  forlnodes(pat, node) {
-    disablevarcomp_innode(node, i);
+  forlnodes(mesh, node)
+  {
+    if(node->pat == pat) disablevarcomp_innode(node, i);
   } endforlnodes;
 }
 
 /* enable all components of a variable on one pat */
 void enablevar_inpatch(tPat *pat, int i)
 {
+  tMesh *mesh = pat->mesh;
   tNode *node;
 
-  forlnodes(pat, node) {
-    enablevar_innode(node, i);
+  forlnodes(mesh, node)
+  {
+    if(node->pat == pat) enablevar_innode(node, i);
   } endforlnodes;
 }
 
 /* disable all components of a variable on one pat */
 void disablevar_inpatch(tPat *pat, int i)
 {
+  tMesh *mesh = pat->mesh;
   tNode *node;
 
-  forlnodes(pat, node) {
-    disablevar_innode(node, i);
+  forlnodes(mesh, node)
+  {
+    if(node->pat == pat) disablevar_innode(node, i);
   } endforlnodes;
 }
 

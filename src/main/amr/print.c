@@ -10,28 +10,26 @@
 void printmesh(tMesh *m)
 {
   int p;
+  tNode *node;
 
   printf("mesh=%p: npats=%d npdb=%d nvdb=%d dt=%g\n",
 	 m, m->npats, m->npdb, m->nvdb, m->dt);
   forpatches(m, p)
     printpatch(m->pat[p]);
+  printf("leaf nodes:\n");
+  forlnodes(m, node)
+  {
+    printnode(node);
+  } endforlnodes;
 }
 
 void printpatch(tPat *pat)
 {
-  tNode *node;
-
   printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] nmax=%d\n",
          pat->p, pat->bbox[0], pat->bbox[1], pat->bbox[2], pat->bbox[3],
          pat->bbox[4],pat->bbox[5], pat->nmax);
   printf("root node:\n");
   printnode(pat->rnode);
-  printf("leaf nodes:\n");
-  forlnodes(pat, node)
-  {
-    printnode(node);
-  } endforlnodes;
-
 /*
   printf("leaf nodes again:\n");
   fornodelist(pat->lns, el)
@@ -40,7 +38,6 @@ void printpatch(tPat *pat)
     printnode(el->node);
   }
 */
-
 }
 
 void printnode(tNode *n) 
