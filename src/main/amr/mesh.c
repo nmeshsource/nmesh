@@ -46,7 +46,6 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   /* set diff, and other matrices */
   for(ni=1; ni<=nmax; ni++)
   {
-
     for(dir=0; dir<3; dir++)
     {
       double *Xb = pat->Xb[ni][dir]->a;

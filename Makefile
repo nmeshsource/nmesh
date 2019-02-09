@@ -39,7 +39,7 @@ OFLAGS = -g
 # --------------------------------------------------------------------------
 # some libraries are currently required
 libpaths = src/main/amr
-libpaths += src/main/nMPI
+libpaths += src/main/basis src/main/nMPI
 
 
 # --------------------------------------------------------------------------

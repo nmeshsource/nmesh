@@ -9,9 +9,9 @@
 #define forpatches(mesh,patindex) \
   for(patindex=0; patindex < mesh->npats; patindex++)
 
-/* loop over all points in a node */
-#define forpoints(node,ijk) \
-  for(ijk = 0; ijk < node->np; ijk++)
+///* loop over all points in a node */
+//#define forpoints(node,ijk) \
+//  for(ijk = 0; ijk < node->np; ijk++)
 
 #define forarray(array,k) \
   for(k=0; k<array->N; k++)
