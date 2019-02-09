@@ -13,7 +13,7 @@ void AddMeshVar(tMesh *mesh, char *name,
   tVar *newv;
   char fullname[100];
   int nilist;
-  char *ilist[NINDEXLIST]; 
+  char *ilist[NINDEXLIST];
   int sym[3*NINDEXLIST];
   char *symsigns[] = {"-", "0", "+"};
   char **ss = symsigns+1;
@@ -80,7 +80,7 @@ void AddConstantMeshVar(tMesh *mesh, char *name,
 
 
 /* return index of variable or -1 if it was not found */
-int MeshVarIndLax(tMesh *mesh, char *name) 
+int MeshVarIndLax(tMesh *mesh, char *name)
 {
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
@@ -114,7 +114,7 @@ int MeshVarInd(tMesh *mesh, char *name)
 }
 
 /* return index of variable given pointer */
-int VarIndFromPtr(tNode *node, double *p) 
+int VarIndFromPtr(tNode *node, double *p)
 {
   tMesh *mesh = node->pat->mesh;
   tVar *vdb = mesh->vdb;
@@ -140,7 +140,7 @@ int Set_vdb_iStart_AtVar(tMesh *mesh, char *name)
 
 
 /* return name given index */
-char *MeshVarName(tMesh *mesh, int i) 
+char *MeshVarName(tMesh *mesh, int i)
 {
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
@@ -182,7 +182,7 @@ int MeshVarIndComponent0(tMesh *mesh, int i)
 /* return name of component 0 for a given name */
 char *MeshVarNameComponent0(tMesh *mesh, char *name)
 {
-  return MeshVarName(mesh, 
+  return MeshVarName(mesh,
                      MeshVarIndComponent0(mesh, MeshVarInd(mesh, name)));
 }
 
@@ -194,7 +194,7 @@ char *MeshVarTensorIndices(tMesh *mesh, int i)
 }
 
 /* set information on how variable behaves at Boundary*/
-void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name, 
+void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
 			        double farlimit, double falloff)
 {
   tVar *vdb = mesh->vdb;
@@ -251,11 +251,11 @@ tVarList *vlalloc(tMesh *mesh)
   tVarList *u;
 
   u = calloc(1, sizeof(tVarList));
-  
+
   if(mesh) u->time = mesh->time;
   u->vlPars = NULL; /* set special pointer to NULL */
   return u;
-} 
+}
 
 /* free a variable list */
 void vlfree(tVarList *u)
@@ -265,13 +265,13 @@ void vlfree(tVarList *u)
     if(u->index) free(u->index);
     free(u);
   }
-} 
+}
 
 /* add a variable (one component) to a variable list */
 void vlpushone(tVarList *v, int vi)
 {
   v->n += 1;
-  v->index = realloc(v->index, sizeof(int) * v->n); 
+  v->index = realloc(v->index, sizeof(int) * v->n);
   v->index[v->n-1] = vi;
 }
 
@@ -281,11 +281,11 @@ void vlpush(tVarList *v, int vi)
   tMesh *mesh = v->mesh;
   int i, n = MeshVarNComponents(mesh, vi);
 
-  if(MeshVarIndComponent0(mesh, vi)!=vi) 
+  if(MeshVarIndComponent0(mesh, vi)!=vi)
     errorexit("vi needs to be index of component 0. "
               "Consider using vlpushone.");
   v->n += n;
-  v->index = realloc(v->index, sizeof(int) * v->n); 
+  v->index = realloc(v->index, sizeof(int) * v->n);
   for(i = 0; i < n; i++)
     v->index[v->n-n+i] = vi + i;
 }
@@ -297,7 +297,7 @@ void vlpushvl(tVarList *v, tVarList *u)
 
   if(!v || !u) return;
   v->n += u->n;
-  v->index = realloc(v->index, sizeof(int) * v->n); 
+  v->index = realloc(v->index, sizeof(int) * v->n);
   for(i = 0; i < u->n; i++)
     v->index[v->n - u->n + i] = u->index[i];
 }
@@ -306,7 +306,7 @@ void vlpushvl(tVarList *v, tVarList *u)
 void vldropone(tVarList *v, int vi)
 {
   int i;
-  
+
   for(i = 0; i < v->n; i++)
     if(v->index[i] == vi)
     {
@@ -369,7 +369,7 @@ tVarList *VLPtrEnable1(tMesh *mesh, char *varname)
 {
   tVarList *vl = vlalloc(mesh);
   int i = MeshVarInd(mesh, varname);
-  
+
   enablevar(mesh, i);
   vlpush(vl, i);
   return vl;
@@ -382,11 +382,11 @@ void VLDisableFree(tVarList *vl)
   vlfree(vl);
 }
 
-/* add variables based on an existing variable list and a postfix 
+/* add variables based on an existing variable list and a postfix
    note that we add each component as a scalar but fix it later because
    we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ...
 */
-tVarList *AddDuplicate(tVarList *vl, char *postfix) 
+tVarList *AddDuplicate(tVarList *vl, char *postfix)
 {
   tMesh *mesh = vl->mesh;
   tVar *vdb = mesh->vdb;
@@ -439,19 +439,19 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
       newvar->sym[j] = var->sym[j];
   }
 
-//  /* create storage for as many variables as have been actually added 
+//  /* create storage for as many variables as have been actually added
 //     do it on all pats so that nvariables remains the same on all pats */
 //  if (vl->mesh && nadded) {
 //    int n = mesh->nvariables + nadded;
 //    realloc_meshvariables(mesh, n);
 //  }
   if (0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
-  
+
   return newvl;
 }
 
 /* add duplicate and enable variables */
-tVarList *AddDuplicateEnable(tVarList *vl, char *postfix) 
+tVarList *AddDuplicateEnable(tVarList *vl, char *postfix)
 {
   tVarList *newvl;
 
@@ -463,14 +463,15 @@ tVarList *AddDuplicateEnable(tVarList *vl, char *postfix)
 
 
 
-/* set: u = c */   
+/* set: u = c */
 void vlsetconstant(tVarList *u, const double c)
 {
   tMesh *mesh = u->mesh;
-  tNode *node;
+  int lni;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pu;
     int i, n, ui;
 
@@ -481,20 +482,21 @@ void vlsetconstant(tVarList *u, const double c)
       forvari(node, ui, i)
         pu[i] = c;
     }
-  } endforlnodes;
+  }
 }
 
-/* copy: v = u */   
+/* copy: v = u */
 void vlcopy(tVarList *v, tVarList *u)
 {
   tMesh *mesh = v->mesh;
-  tNode *node;
+  int lni;
 
   /* copy time */
   v->time = u->time;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pu, *pv;
     int i, n, vi,ui;
 
@@ -507,7 +509,7 @@ void vlcopy(tVarList *v, tVarList *u)
       forvari(node, vi, i)
         pv[i] = pu[i];
     }
-  } endforlnodes;
+  }
 }
 
 void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u)
@@ -530,11 +532,11 @@ void varcopy(tMesh *mesh, int iv, int iu)
 }
 
 
-/* swap v and u */   
+/* swap v and u */
 void vlswap(tVarList *v, tVarList *u)
 {
   tMesh *mesh = v->mesh;
-  tNode *node;
+  int lni;
   double temp;
 
   /* swap time */
@@ -542,8 +544,9 @@ void vlswap(tVarList *v, tVarList *u)
   v->time = u->time;
   u->time = temp;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pu, *pv;
     int i, n;
 
@@ -560,9 +563,9 @@ void vlswap(tVarList *v, tVarList *u)
         pu[i] = temp;
       }
     }
-  } endforlnodes;
+  }
 }
-            
+
 /* wrapper for single variable: swap u and v (iv/u is index of v/u) */
 void varswap(tMesh *mesh, int iv, int iu)
 {
@@ -575,15 +578,16 @@ void varswap(tMesh *mesh, int iv, int iu)
   vlfree(v);
 }
 
-/* average: r=(a+b)/2 */   
+/* average: r=(a+b)/2 */
 void vlaverage(tVarList *r, tVarList *a, tVarList *b)
 {
   tMesh *mesh = r->mesh;
-  tNode *node;
+  int lni;
   double c = 0.5;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pr, *pa, *pb;
     int i, n;
 
@@ -599,20 +603,21 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
       forvari(node, ri, i)
         pr[i] = c * (pa[i] + pb[i]);
     }
-  } endforlnodes;
+  }
   /* average times as well */
   r->time = c * (a->time + b->time);
 }
 
 /* subtract two var lists: r = a - b
-   can be called as vlsubtract(r,a,b); or vlsubtract(a,a,b); */   
+   can be called as vlsubtract(r,a,b); or vlsubtract(a,a,b); */
 void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
 {
   tMesh *mesh = r->mesh;
-  tNode *node;
+  int lni;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pr, *pa, *pb;
     int i, n;
 
@@ -628,7 +633,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
       forvari(node, ri, i)
         pr[i] = pa[i] - pb[i];
     }
-  } endforlnodes;
+  }
   /* subtract times as well */
   r->time = a->time - b->time;
 }
@@ -637,13 +642,14 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
    should change function name
    one function can catch several special cases like cb == 0 (unfinished)
    important: if coefficient is zero we guarantee that memory is not accessed */
-void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b) 
+void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
 {
   tMesh *mesh = r->mesh;
-  tNode *node;
+  int lni;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pr, *pa, *pb;
     int i, n;
 
@@ -673,7 +679,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
         forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
       }
     }
-  } endforlnodes;
+  }
   /* add times as well */
   if (ca == 0 && cb == 0) r->time = 0.0;
   else if (ca == 0)	  r->time = cb * b->time;
@@ -698,15 +704,16 @@ void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
 
 /* add second var list to first: r += ca*a
    special treatment for ca = 1 and ca = -1 */
-void vladdto(tVarList *r, const double ca, tVarList *a) 
+void vladdto(tVarList *r, const double ca, tVarList *a)
 {
   tMesh *mesh = r->mesh;
-  tNode *node;
+  int lni;
 
   if (ca == 0) return;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, lni)
   {
+    tNode *node = mesh->myln[lni];
     double *pr, *pa;
     int i, n;
 
@@ -730,7 +737,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
         forvari(node, ri, i) pr[i] += ca * pa[i];
       }
     }
-  } endforlnodes;
+  }
   /* add times as well */
   r->time += ca * a->time;
 }
