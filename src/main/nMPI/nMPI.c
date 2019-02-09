@@ -1,4 +1,4 @@
-/* mpi.c */
+/* nMPI.c */
 /* Wolfgang Tichy, 1/2019 */
 
 #include "nmesh.h"
