@@ -34,7 +34,7 @@
   for(elem_ = nlist,            listnode = elem_ ?  elem_->node : 0; \
       elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
 #define endfornodes }
-/* loop over nodes in a node list */
+/* loop over nodes in the node list in mesh */
 #define forlnodes(meshORpat, listnode) { \
   tNlist *elem_; \
   for(elem_ = meshORpat->lns,   listnode = elem_ ?  elem_->node : 0; \
