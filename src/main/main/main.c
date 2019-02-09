@@ -81,10 +81,10 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   }
 
   /* this par is needed here already, so that finalexit can check it */
-  printf("Adding first parameters\n");
-  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+  printf("Making first parameters\n");
+  makeparameter(mesh, "errorexit", "exit", "how we exit");
   /* this is about how we output */
-  AddPar("logfile_creation", "append", "how to create logfile [no,yes,append]");
+  makeparameter(mesh, "logfile_creation", "append", "how we create logfile");
 
   /* got two or more arguments? */
   if (argc >= 2)

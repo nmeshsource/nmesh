@@ -23,5 +23,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
 
   AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+  AddPar("logfile_creation", "append","how to create logfile [no,yes,append]");
+
   return 0;
 }
