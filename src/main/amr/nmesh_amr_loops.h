@@ -19,8 +19,10 @@
 #define GetVarDpointer(node, varindex) \
   ((node->dat) ? node->dat->v[(varindex)]->a : 0)
 
+//#define forvari(node,varindex, k) \
+//  if(node->dat) forarray(node->dat->v[(varindex)], k)
 #define forvari(node,varindex, k) \
-  if(node->dat) forarray(node->dat->v[(varindex)], k)
+  forarray(node->dat->v[(varindex)], k)
 
 /* loop over a node list nlist (type tNlist) */
 #define fornodelist(nlist, elem) \
@@ -39,6 +41,10 @@
       elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
 #define endforlnodes }
   
+/* to loop over leaf node array on this proc */
+#define formylnodes(mesh, lni) \
+  for(lni=0; lni < mesh->nmyln; lni++)
+
 
 /* loop over planes e.g. i=p plane */
 #define forplane1(i,j,k, n, p) \
