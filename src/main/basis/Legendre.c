@@ -1,4 +1,4 @@
-/* WT 2/2018 
+/* WT 2/2018
    some functions to deal with Legendre polynomials, especially at the
    Legendre Gauss-Lobatto (LGL) points.
 */
@@ -37,7 +37,7 @@ double assocLegendreP(int l, int m, double x)
   /* is this all we need? */
   if(l == (m+1)) return Pmp1_m;
 
-  /* use recursion: 
+  /* use recursion:
      P_l^m = ( x*(2*l-1)*P_{l-1}^m - (l+m-1)*P_{l-2}^m )/(l-m)   */
   for(k=m+2; k<=l; k++) /* k runs through all l we have */
   {
@@ -67,7 +67,7 @@ double LegendreP(int l, double x)
   /* is this all we need? */
   if(l == 1) return P1;
 
-  /* use recursion: 
+  /* use recursion:
      P_l = ( x*(2*l-1)*P_{l-1} - (l-1)*P_{l-2} )/l   */
   for(k=2; k<=l; k++) /* k runs through all l we have */
   {
@@ -152,5 +152,189 @@ double int_LegendreP_a_b(int k, double a, double b)
 /* ************************************************************************ */
 /* various functions needed for Legendre Gauss-Lobatto points or nodes      */
 /* ************************************************************************ */
+
+/* Legendre Gauss-Lobatto nodes x_i and integration weights w_i
+   N = degree, so there are N+1 points */
+/* LGL_x_winteg = LGLNaW */
+void LGL_x_winteg(int npoints, double *x, double *w)
+{
+  int N = npoints-1;
+  int i,j;
+  double P, dP, Q, dQ, y, dy;
+  int Newton_itmax = 100;
+  double Newton_rel_dytol = 1e-15;
+
+  if(N == 0)
+  {
+    x[N] = 0.;
+    if(w) w[N] = 2.;
+    return;
+  }
+
+  x[0] = -1.;
+  x[N] =  1.;
+  if(w)
+  {
+    w[0] = 2.0/(N*(N+1.0));
+    w[N] = w[0];
+  }
+
+  if(N == 1) return;
+
+
+  /* get nodes in (-1,0] */
+  for(j = 1; j <= N/2; j++)
+  {
+    if(j == N/2.0)  /* same as: if( (N%2==0 && j==N/2) ) */
+    {
+      y = 0.;
+    }
+    else
+    {
+      /* guess for node */
+      y = - cos(PI*(j+0.25)/N - 3/(8*N*PI*(j+0.25)));
+
+      /* find y such that Q(y) = 0,
+         use Newton method to refine guess from line above */
+      for(i = 0; i < Newton_itmax; i++)
+      {
+        Legendre_P_dP_Q_dQ(N, y, &P, &dP, &Q, &dQ);
+        dy = - Q / dQ;
+        y += dy;
+        if(fabs(dy) < fabs(Newton_rel_dytol * y)) break;
+      }
+    }
+
+    /* set x array for [-1,0] and [0,1] */
+    x[j]   =  y;
+    x[N-j] = -y;
+
+    /* really just set P as in: P =  LegendreP(N, y); */
+    Legendre_P_dP_Q_dQ(N, y, &P, &dP, &Q, &dQ);
+
+    if(w)
+    {
+      w[j] = 2.0/( (N*(N+1)) * P*P);
+      w[N-j] = w[j];
+    }
+  }
+}
+
+/* get interpolation weights w_interp from the n points,
+   this is coming from the denominator in Lagrange interpolation only */
+void Lagrange_winterp(int n, const double *x, double *w_interp)
+{
+  int m, j;
+  double denom;
+
+  for(j = 0; j < n; j++)
+  {
+    denom = 1.;
+    for(m = 0; m < n; m++)
+      if(m != j) denom *= x[j] - x[m];
+
+    w_interp[j] = 1./denom;
+  }
+}
+
+
+/* find matrix D for taking derivatives, this sets the transpose D^T
+   if DT is interpreted as stored in column-major form */
+void LGL_DT(int n, const double *x, const double *w_interp, double *DT)
+{
+  int i, j;
+  double Dii, Dij;
+
+  for(i = 0; i < n; i++)
+  {
+    Dii = 0;
+    for(j = 0; j < n; j++)
+    {
+      if(i != j)
+      {
+        Dij  = (w_interp[j] / w_interp[i]) / (x[i] - x[j]);
+        Dii -= Dij;
+        DT[j + i*n] = Dij;
+        /* NOTE: this DT is D_{ij} in row-major form or its transpose
+                 D_{ji} in column-major form */
+      }
+    }
+    DT[i*n + i] = Dii;
+  }
+}
+
+/* Gauss or Gauss-Lobatto (GL) quadrature:
+   compute I = \int_{-1}^1 dx f(x) where f(x) is known at the nodes.
+   For LGL nodes, the w[i] are the integration weights from LGL_x_winteg
+   This is accurate for polynomials up to degree 2n-3 for LGL. */
+double Gauss_integral(int n, const double *x, const double *w, const double *f)
+{
+  int i;
+  double I = 0.;
+
+  for(i = 0; i < n; i++)  I += w[i] * f[i];
+  return I;
+}
+
+
+
+/* Set analysis and synthesis matrices for expansions in Legendre polynmials
+   at Legendre Gauss-Lobatto nodes.
+
+   The usual Legendre polynomials are not normalized
+     (P_i,P_j)_N = c_i delta_{ij}
+     where:  c_i = 2/(2i+1)
+     except: c_N = 2/i       which is used for numerical integration
+
+     (P_i,P_j)_numerical = \sum_{k=0}^N w_k P_i(x_k) P_j(x_k) = c_i delta_{ij}
+
+   without normalization we would use this:
+     u_i    = S_{ij} uhat_j,  S_{ij} = P_j(x_i)
+     uhat_i = A_{ij} u_j,     A_{ij} = S^{-1}_{ij} = w_j S_{ji} / c_i
+
+   But we prefer to normalize, so with normalization:
+     u_i    = Shat_{ij} uhat_j,  Shat_{ij} = P_j(x_i)/sqrt(c_i)
+     uhat_i = Ahat_{ij} u_j,     Ahat_{ij} = Shat^{-1}_{ij} = w_j Shat_{ji}
+
+   In the function below store the transposes A^T and S^T of A and S
+   if AT and ST are interpreted as stored in column-major form */
+/* LGL_AT_ST_matrices = AS_Legendre_GL */
+void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
+{
+  int normalized = 1;
+  int N = n-1;
+  int i, j;
+  double ci, sci;
+
+  /* row-loop */
+  for(i = 0; i < n; i++)
+  {
+    ci = 2.0/(2*i+1);
+    if( (i==N) && (N!=0) ) ci = 2.0/i;
+    sci = sqrt(ci);
+
+    /* col-loop */
+    for(j = 0; j < n; j++)
+    {
+      if(normalized)
+      {
+	/* transpose of synthesis matrix Sij */
+	/* set transposed elements first because we need them below */
+	ST[i + j*n] = LegendreP(i, x[j]) / sci;
+	/* transpose of analysis matrix Aij */
+	AT[j + i*n] = w[j] * ST[i + j*n]; // AS_Legendre_GL has this wrong
+      }
+      else
+      {
+	ST[i + j*n] = LegendreP(i, x[j]);
+	AT[j + i*n] = w[j] * ST[i + j*n] / ci;
+      }
+    }
+  }
+}
+
+/* ***************************************************************** */
+/* some functions for Discontinous Galerkin (DG) method              */
+/* ***************************************************************** */
 
 /* NOTE: there is more in Legendre.c of titan:Archives/DG_test*/

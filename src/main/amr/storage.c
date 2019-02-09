@@ -62,6 +62,24 @@ void free_node(tNode *node)
   free(node);
 }
 
+
+/* set node pointers for node->Dt ... . Point them to arrays from patch */
+void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
+{
+  int *n = node->n;
+  int dir;
+  /* get node->Dt ... from patch */
+  for(dir=0; dir<3; dir++)
+  {
+    node->Dt[dir] = node->pat->Dt[n[dir]][dir];
+    node->At[dir] = node->pat->At[n[dir]][dir];
+    node->St[dir] = node->pat->St[n[dir]][dir];
+    node->Xb[dir] = node->pat->Xb[n[dir]][dir];
+    node->Winteg[dir] = node->pat->Winteg[n[dir]][dir];
+  }
+}
+
+
 /* make root node */
 tNode *make_root_node(tPat *pat, int n[3], int datrank)
 {
@@ -86,8 +104,8 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   node->leaf = 1;    /* make this a leaf node */
   nvdb = pat->mesh->nvdb;
 
-  /* get node->Dt from patch */
-  for(i=0; i<3; i++) node->Dt[i] = node->pat->Dt[n[i]][i];
+  /* get node->Dt ... from patch */
+  point_nodearrays_to_patarrays(pat, node);
 
   /* see where dat needs to be allocated */
   node->datrank = datrank;
@@ -145,8 +163,8 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   node->ijk = ijk;
   nvdb = node->pat->mesh->nvdb;
 
-  /* get node->Dt from patch */
-  for(d=0; d<3; d++) node->Dt[d] = node->pat->Dt[n[d]][d];
+  /* get node->Dt ... from patch */
+  point_nodearrays_to_patarrays(node->pat, node);
 
   /* if parent has dat the child will have it too */
   if(parent->dat)
@@ -241,12 +259,35 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
   pat->Dt = calloc(nmax+1, sizeof(pat->Dt[0]));
   if(!(pat->Dt) )
     errorexit("out of memory for diff. matrices");
+  pat->At = calloc(nmax+1, sizeof(pat->At[0]));
+  if(!(pat->At) )
+    errorexit("out of memory for ana. matrices");
+  pat->St = calloc(nmax+1, sizeof(pat->St[0]));
+  if(!(pat->St) )
+    errorexit("out of memory for syn. matrices");
+  pat->Xb = calloc(nmax+1, sizeof(pat->Xb[0]));
+  if(!(pat->Xb) )
+    errorexit("out of memory for points");
+  pat->Winteg = calloc(nmax+1, sizeof(pat->Winteg[0]));
+  if(!(pat->Winteg) )
+    errorexit("out of memory for integr. weights");
   for(d=1; d<=nmax; d++)
   {
     n[0] = n[1] = d;
     n[2] = 1;
     for(i=0; i<3; i++)
+    {
       pat->Dt[d][i] = alloc_array(n);
+      pat->At[d][i] = alloc_array(n);
+      pat->St[d][i] = alloc_array(n);
+    }
+    n[0] = d;
+    n[1] = n[2] = 1;
+    for(i=0; i<3; i++)
+    {
+      pat->Xb[d][i] = alloc_array(n);
+      pat->Winteg[d][i] = alloc_array(n);
+    }
   }
 
   /* Bfaces */

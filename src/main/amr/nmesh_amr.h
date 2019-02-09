@@ -55,6 +55,11 @@ typedef struct tNODE {
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   struct tARRAY *Dt[3];   /* transp. differentiation matrix in 3 dirs for [-1,1]
                              domain. This just points to an array in patch. */
+  struct tARRAY *At[3];   /* transp. analysis matrix in 3 dirs */
+  struct tARRAY *St[3];   /* transp. synthesis matrix in 3 dirs */
+  struct tARRAY *Xb[3];   /* points we use e.g. Gauss-Lobatto: Xb\in[-1,1].
+                             X=0.5*((a+b)+(b-a)*Xb), a=bbox[0], b=bbox[1] */
+  struct tARRAY *Winteg[3];   /* integr. weights in 3 dirs */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
 } tNode;
@@ -79,6 +84,10 @@ typedef struct tPAT {
   tNode *rnode;         /* root node in this patch */
   struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
                               we store Dt[1...nmax][dir], where dir=0,1,2 */
+  struct tARRAY *(*At)[3]; /* list of transposed analysis matrices */
+  struct tARRAY *(*St)[3]; /* list of transposed synthesis matrices */
+  struct tARRAY *(*Xb)[3]; /* list of points */
+  struct tARRAY *(*Winteg)[3]; /* list of integration weights */
   tNlist *lns;          /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch should have Bfaces as in sgrid. But instead of pointlists

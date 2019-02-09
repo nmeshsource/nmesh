@@ -28,27 +28,45 @@ tMesh *make_empty_mesh(int pr)
 }
 
 /* add apatch to the mesh */
-int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nD)
+int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
 {
   tPat *pat;
   int p = mesh->npats;
-  int i;
+  int i, ni, dir;
+  double *winterp = dmalloc(nmax);
 
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
-  pat = alloc_patch(mesh, p, nD);
+  pat = alloc_patch(mesh, p, nmax);
   mesh->pat[p] = pat;
 
   /* set bbox */
   for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
 
-  /* set diff matrices */
-  pat->Dt[5][1]->a[4] = 4;
+  /* set diff, and other matrices */
+  for(ni=1; ni<=nmax; ni++)
+  {
+
+    for(dir=0; dir<3; dir++)
+    {
+      double *Xb = pat->Xb[ni][dir]->a;
+      double *Winteg = pat->Winteg[ni][dir]->a;
+      double *DT = pat->Dt[ni][dir]->a;
+      double *AT = pat->At[ni][dir]->a;
+      double *ST = pat->St[ni][dir]->a;
+
+      LGL_x_winteg(ni, Xb, Winteg);
+      Lagrange_winterp(ni, Xb, winterp);
+      LGL_DT(ni, Xb, winterp, DT);
+      LGL_AT_ST_matrices(ni, Xb, Winteg, AT, ST);
+    }
+  }
 
   /* setup root node */
   pat->rnode = make_root_node(pat, nroot, 0);
   pat->lns = alloc_nodelist(pat->rnode);
 
+  free(winterp);
   return 0;
 }
 
