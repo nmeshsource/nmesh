@@ -154,8 +154,17 @@ double int_LegendreP_a_b(int k, double a, double b)
 /* ************************************************************************ */
 
 /* Legendre Gauss-Lobatto nodes x_i and integration weights w_i
-   N = degree, so there are N+1 points */
-/* LGL_x_winteg = LGLNaW */
+   N = degree, so there are N+1 points
+   This is based on
+    (n+1) P_{n+1} = (2n+1) x P_{n} - n P_{n-1}
+   which gives x P_{n} = \frac{n+1}{2n+1} P_{n+1} + \frac{n}{2n+1} P_{n-1}
+   when x P_{n} is inserted into
+    \frac{x^2-1}{n}\frac{d}{dx} P_{n} = x P_{n} - P_{n-1}
+   we get:
+    \frac{x^2-1}{n}\frac{d}{dx} P_{n} = \frac{n+1}{2n+1} (P_{n+1} - P_{n-1})
+   So for x\in(-1,1) we get:
+    \frac{d}{dx} P_{n}(x) = \frac{n(n+1)}{(x^2-1)(2n+1)} Q(x)
+   So \frac{d}{dx} P_{n}(x) = 0 is equivalent to: Q(x) = 0 */
 void LGL_x_winteg(int npoints, double *x, double *w)
 {
   int N = npoints-1;
@@ -298,7 +307,6 @@ double Gauss_integral(int n, const double *x, const double *w, const double *f)
 
    In the function below store the transposes A^T and S^T of A and S
    if AT and ST are interpreted as stored in column-major form */
-/* LGL_AT_ST_matrices = AS_Legendre_GL */
 void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
 {
   int normalized = 1;
