@@ -190,7 +190,7 @@ tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list);
 tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list);
 tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list);
 tNlist *first_replace1_in_nodelist(tNlist *elem, tNlist *list);
-tNlist *remove1_in_nodelist(tNlist *elem);
+tNlist *remove1_in_nodelist(tNlist *elem, int return_next);
 tNlist *first_nodelist(tNlist *list);
 tNlist *last_nodelist(tNlist *list);
 void free_nodelist(tNlist *elem);

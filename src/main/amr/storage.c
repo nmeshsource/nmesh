@@ -199,7 +199,6 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
   /* fill in neighbor info, as fas as these 8 are concerned */
-//  connect8_siblings(narray);
   connect8_with_neighbors(narray);
 
   return nlist;
@@ -376,6 +375,7 @@ void free_mesh(tMesh *mesh)
 
   /* node list in mesh */
   free_nodelist(mesh->lns);
+  free(mesh->myln);
 
   free(mesh);
 }
@@ -486,8 +486,9 @@ tNlist *first_replace1_in_nodelist(tNlist *elem, tNlist *list)
   return first_nodelist(newlist);
 }
 
-/* remove 1 element from nodelist, and return element after elem */
-tNlist *remove1_in_nodelist(tNlist *elem)
+/* remove 1 element from nodelist, and
+   return element after elem if return_next=1 */
+tNlist *remove1_in_nodelist(tNlist *elem, int return_next)
 {
   tNlist *left;
   tNlist *right;
@@ -498,7 +499,8 @@ tNlist *remove1_in_nodelist(tNlist *elem)
   if(right) right->prev = left;
   if(left)  left->next = right;
   free(elem);
-  return right;
+  if(return_next) return right;
+  else		  return left;
 }
 
 /* return 1st element in a nodelist */
@@ -527,15 +529,15 @@ void free_nodelist(tNlist *elem)
   if(!elem) return;
 
   /* remove all after elem */
-  while( (tmp=elem->next) )
-    remove1_in_nodelist(tmp);
+  for(tmp=elem->next; tmp; )
+    tmp = remove1_in_nodelist(tmp, 1);
 
   /* remove all before elem */
-  while( (tmp=elem->prev) )
-    remove1_in_nodelist(tmp);
+  for(tmp=elem->prev; tmp; )
+    tmp = remove1_in_nodelist(tmp, 0);
 
   /* remove elem */
-  remove1_in_nodelist(elem);
+  remove1_in_nodelist(elem, 0);
 }
 
 /* free all nodes in a list */
@@ -599,8 +601,18 @@ int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
 {
   tMesh *mesh = NULL;
   if(elem) mesh = elem->node->pat->mesh;
-  else     errorexit("elem in NULL!!!");
+  else     errorexit("elem is NULL!!!");
   mesh->lns = first_replace1_in_nodelist(elem, nlist);
+  return update_mesh_myln_node_nid(mesh);
+}
+
+/* replace siblings in sib by parent in mesh->lns by nlist*/
+int remove8_in_mesh_lns_myln(tNlist *sib, tNlist *nlist)
+{
+  tMesh *mesh = NULL;
+  if(sib) mesh = sib->node->pat->mesh;
+  else    errorexit("sib is NULL!!!");
+  mesh->lns = first_replace1_in_nodelist(sib, nlist);
   return update_mesh_myln_node_nid(mesh);
 }
 
