@@ -556,10 +556,11 @@ void free_nodesinlist(tNlist *elem)
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
 /* update array of leaf nodes on this proc */
-int update_mesh_myln(tMesh *mesh)
+int update_mesh_myln_node_nid(tMesh *mesh)
 {
   tNode *node;
   int allocd = mesh->nmyln;
+  int nid = 0;
   int nmyln = 0;
   fornodes(mesh->lns, node)
   {
@@ -572,9 +573,10 @@ int update_mesh_myln(tMesh *mesh)
       }
       mesh->myln[nmyln++] = node;
     }
+    node->nid = nid++;
   } endfornodes;
   mesh->nmyln = nmyln;
-  return allocd;
+  return nid;
 }
 
 /* append a node list to mesh->lns and also update mesh->myln */
@@ -589,7 +591,7 @@ int append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
   else
     mesh->lns = first_nodelist(list);
 
-  return update_mesh_myln(mesh);
+  return update_mesh_myln_node_nid(mesh);
 }
 
 /* replace elem in mesh->lns by nlist*/
@@ -599,7 +601,7 @@ int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   if(elem) mesh = elem->node->pat->mesh;
   else     errorexit("elem in NULL!!!");
   mesh->lns = first_replace1_in_nodelist(elem, nlist);
-  return update_mesh_myln(mesh);
+  return update_mesh_myln_node_nid(mesh);
 }
 
 /**********************************************************************/
