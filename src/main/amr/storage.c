@@ -199,24 +199,18 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
   /* fill in neighbor info, as fas as these 8 are concerned */
-  connect8_with_neighbors(narray);
+  connect8_with_neighbors(narray, 1);
 
   return nlist;
 }
 
-/* remove leaves */
-tNode *remove8_leaf_nodes(tNode *leaf0)
+/* remove children */
+tNode *destroy_children(tNode *parent)
 {
-  tNode *parent = leaf0->parent;
-  //tNode *node;
-
-  if(!leaf0->leaf) errorexit("argument leaf0 is not a leaf node");
+  tNode *ch0 = parent->child[0];
 
   /* parent is now a leaf node */
   parent->leaf = 1;
-
-  /* update lns lists in patch here ??? NO! make separate func */
-  //...
 
   /* update neighbor info */
   //...
@@ -613,10 +607,11 @@ int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   return update_mesh_myln_node_nid(mesh);
 }
 
-/* replace siblings at element sib of mesh->lns by parent */
-int remove8siblings_in_mesh_lns_myln(tNlist *sib)
+/* replace siblings at element sib of mesh->lns by parent,
+   node with sibling 0 is returned so we can destroy it later */
+tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
 {
-  tNode *parent;
+  tNode *parent, *node0;
   tNlist *elem, *elem0, first;
   tMesh *mesh = NULL;
   int ijk;
@@ -629,7 +624,8 @@ int remove8siblings_in_mesh_lns_myln(tNlist *sib)
   elem0=sib;
   for(ijk=sib->node->ijk; ijk>0; ijk--)
     elem0=elem0->prev;
-  if(elem0->node->parent != parent || elem0->node->ijk != 0)
+  node0 = elem0->node;
+  if(node0->parent != parent || node0->ijk != 0)
     errorexit("elem0 has wrong parent!");
 
   /* set elem to sibling 1 and remove the 7 after sibling 0 */
@@ -645,7 +641,16 @@ int remove8siblings_in_mesh_lns_myln(tNlist *sib)
 
   /* reset mesh lists */
   mesh->lns = first_nodelist(elem0);
-  return update_mesh_myln_node_nid(mesh);
+  update_mesh_myln_node_nid(mesh);
+  return node0;
+}
+
+/* replace siblings at element sib of mesh->lns by parent, and then
+   kill the siblings */
+int destroy8siblings_in_mesh_lns_myln(tNlist *sib)
+{
+  tNode *node0 = remove8siblings_in_mesh_lns_myln(sib);
+  
 }
 
 /**********************************************************************/

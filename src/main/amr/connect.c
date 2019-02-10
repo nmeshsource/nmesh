@@ -7,10 +7,13 @@
 
 
 
-/* set neighbor connection info of 8 siblings with themselves and with nodes
-   from different parents. We assume that all priorly created nodes already
-   have complete neighbor info. */
-void connect8_with_neighbors(tNode *narray[8])
+/* if connect=1:
+    we set neighbor connection info of 8 siblings with themselves and with
+    nodes from different parents. We assume that all priorly created nodes
+    already have complete neighbor info.
+   else:
+    we set the pointers to neighbors to NULL */
+void connect8_with_neighbors(tNode *narray[8], int connect)
 {
   int ind;
   int ns[] = {2,2,2};
@@ -46,8 +49,8 @@ void connect8_with_neighbors(tNode *narray[8])
     if(parentnb)
     {
       othernb = parentnb->child[Ind_n(inb,j,k, ns)];
-      node->nb[fo] = othernb;
-      if(othernb) othernb->nb[fs] = node;
+      node->nb[fo] = connect ? othernb : NULL;
+      if(othernb) othernb->nb[fs] = connect ? node : NULL;
     }
     else
       node->nb[fo] = NULL;
@@ -62,8 +65,8 @@ void connect8_with_neighbors(tNode *narray[8])
     if(parentnb)
     {
       othernb = parentnb->child[Ind_n(i,jnb,k, ns)];
-      node->nb[fo] = othernb;
-      if(othernb) othernb->nb[fs] = node;
+      node->nb[fo] = connect ? othernb : NULL;
+      if(othernb) othernb->nb[fs] = connect ? node : NULL;
     }
     else
       node->nb[fo] = NULL;
@@ -78,8 +81,8 @@ void connect8_with_neighbors(tNode *narray[8])
     if(parentnb)
     {
       othernb = parentnb->child[Ind_n(i,j,knb, ns)];
-      node->nb[fo] = othernb;
-      if(othernb) othernb->nb[fs] = node;
+      node->nb[fo] = connect ? othernb : NULL;
+      if(othernb) othernb->nb[fs] = connect ? node : NULL;
     }
     else
       node->nb[fo] = NULL;
