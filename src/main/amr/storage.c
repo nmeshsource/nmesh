@@ -408,6 +408,13 @@ tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node)
   return insertnodelist_into_nodelist_before(elem, before);
 }
 
+/* replace element elem in nodelist by node */
+tNlist *replacenode_in_nodelist(tNlist *elem, tNode *node)
+{
+  tNlist *repl = alloc_nodelist(node);
+  return replace1_in_nodelist(elem, repl);
+}
+
 /* insert nodelist "list" into another nodelist after elem,
    and return the end of "list" */
 tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list)
@@ -606,13 +613,38 @@ int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   return update_mesh_myln_node_nid(mesh);
 }
 
-/* replace siblings in sib by parent in mesh->lns by nlist*/
-int remove8_in_mesh_lns_myln(tNlist *sib, tNlist *nlist)
+/* replace siblings at element sib of mesh->lns by parent */
+int remove8siblings_in_mesh_lns_myln(tNlist *sib)
 {
+  tNode *parent;
+  tNlist *elem, *elem0, first;
   tMesh *mesh = NULL;
-  if(sib) mesh = sib->node->pat->mesh;
-  else    errorexit("sib is NULL!!!");
-  mesh->lns = first_replace1_in_nodelist(sib, nlist);
+  int ijk;
+
+  if(sib==NULL) errorexit("sib is NULL!!!");
+  mesh = sib->node->pat->mesh;
+  parent = sib->node->parent;
+
+  /* find sibling 0 */
+  elem0=sib;
+  for(ijk=sib->node->ijk; ijk>0; ijk--)
+    elem0=elem0->prev;
+  if(elem0->node->parent != parent || elem0->node->ijk != 0)
+    errorexit("elem0 has wrong parent!");
+
+  /* set elem to sibling 1 and remove the 7 after sibling 0 */
+  elem=elem0->next;
+  for(ijk=1; ijk<7; ijk++)
+  {
+    if(elem->node->parent != parent) errorexit("elem has wrong parent!");
+    elem = remove1_in_nodelist(elem, 1);
+  }
+
+  /* replace sibling 0 by parent in list */
+  elem0 = replacenode_in_nodelist(elem0, parent);
+
+  /* reset mesh lists */
+  mesh->lns = first_nodelist(elem0);
   return update_mesh_myln_node_nid(mesh);
 }
 
