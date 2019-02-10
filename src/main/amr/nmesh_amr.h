@@ -1,6 +1,9 @@
+/* nmesh_amr.h */
+/* (c) Wolfgang Tichy 2/2019 */
 
-/* declarations from main that we need here already */
+/* declarations from other parts that we need here already */
 #include "../main/skeleton.h"
+#include "../nMPI/nMPI_defs.h"
 
 
 /* Main parts of a mesh:
