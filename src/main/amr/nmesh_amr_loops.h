@@ -13,6 +13,9 @@
 #define formylnodes(mesh, lni) \
   for(lni=0; lni < mesh->nmyln; lni++)
 
+/* get node number i out of nodelist on this proc */
+#define GetMyNode(mesh, i) mesh->myln[i]->node
+
 /* loop over array */
 #define forarray(array,k) \
   for(k=0; k<array->N; k++)

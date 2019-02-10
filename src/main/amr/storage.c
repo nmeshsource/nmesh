@@ -560,23 +560,23 @@ void free_nodesinlist(tNlist *elem)
 /* update array of leaf nodes on this proc */
 int update_mesh_myln_node_nid(tMesh *mesh)
 {
-  tNode *node;
+  tNlist *elem;
   int allocd = mesh->nmyln;
   int nid = 0;
   int nmyln = 0;
-  fornodes(mesh->lns, node)
+  fornodelist(mesh->lns, elem)
   {
-    if(node->dat)
+    if(elem->node->dat)
     {
       if(nmyln >= allocd)
       {
         mesh->myln = realloc(mesh->myln, sizeof(mesh->myln[0])*(allocd+256));
         allocd += 256;
       }
-      mesh->myln[nmyln++] = node;
+      mesh->myln[nmyln++] = elem;
     }
-    node->nid = nid++;
-  } endfornodes;
+    elem->node->nid = nid++;
+  }
   mesh->nmyln = nmyln;
   return nid;
 }
@@ -712,7 +712,7 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   /* now make sure dat in nodes is also reallocated */
   formylnodes(mesh, lni)
   {
-    tNode *node = mesh->myln[lni];
+    tNode *node = mesh->myln[lni]->node;
     realloc_nodevariables(node, nvdb_new);
   }
 }

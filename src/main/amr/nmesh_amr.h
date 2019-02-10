@@ -121,7 +121,7 @@ typedef struct tMESH {
   tPat **pat;       /* list of pointers to patches */
   tNlist *lns;      /* start of linked list of all leaf nodes */
   int nmyln;        /* number of leaves in myln array */
-  tNode **myln;     /* array of leaf nodes owned by this proc */
+  tNlist **myln;    /* elements of lns owned by this proc */
 } tMesh;
 /* NOTE: the list lnodes needs to be distributed among MPI jobs:
 use space filling curve as in
