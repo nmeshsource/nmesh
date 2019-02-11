@@ -87,8 +87,8 @@ void free_node(tNode *node)
   tNode *chld;
   int ijk;
 
-//PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
-//printnode(node);
+  //PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
+  //printnode(node);
   if(!node) return;
 
   for(ijk=0; ijk<8; ijk++)
@@ -96,7 +96,7 @@ void free_node(tNode *node)
     chld = node->child[ijk];
     if(chld) free_node(chld);
   }
-PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
+  //PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
   free_this_node_only(node);
 }
 
@@ -348,7 +348,7 @@ void free_patch(tPat *pat)
 
   if (!pat) return;
 
-PRF;printf(" isn't working yet!!!\n");
+  PRFs(":\n");
 
   /* free diff matrices and such */
   for(d=1; d<=pat->nmax; d++)
@@ -367,29 +367,20 @@ PRF;printf(" isn't working yet!!!\n");
   free(pat->Winteg);
 
   //free_all_bfaces(pat);
+  PRF;printf(": implement free_all_bfaces!!!\n");
 
   /* remove all nodes from this patch from mesh->lns */
-  fornodelist(mesh->lns, elem)
-  {
-    if(elem->node == NULL) abort();
-  }
-PRF;printmesh(mesh);
   for(elem=mesh->lns; elem; )
   {
     if(elem->node->pat == pat) elem = remove1_in_nodelist(elem, 1);
     else                       elem = elem->next;
-    
-Yo(1);
-mesh->lns = first_nodelist(elem);
-printmesh(mesh);
   }
 
   mesh->lns = first_nodelist(elem);
   update_mesh_myln_node_nid(mesh);
-Yo(3);
+
   /* free root node and all its children ... */
   free_node(pat->rnode);
-Yo(9);
 
   free(pat);
 }
@@ -442,6 +433,8 @@ void free_mesh(tMesh *mesh)
   int i;
 
   if(!mesh) return;
+
+  PRFs(":\n");
 
   /* free patches */
   for(i = 0; i < mesh->npats; i++)

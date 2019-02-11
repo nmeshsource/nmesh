@@ -86,10 +86,13 @@ int setup_test_mesh(tMesh *mesh)
 
   PRFs(":\n");
 
+
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
   add_patch(mesh, bbox, n, n1max);
+
+  enablevar(mesh, Ind("X"));
 
 //  nd = mesh->pat[0]->rnode;
 //  nlist = make8_child_nodes(nd, n);
