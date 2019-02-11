@@ -54,12 +54,28 @@ tNode *alloc_node(void)
   return node;
 }
 
-/* free one node */
-void free_node(tNode *node)
+/* free one node only, leaves children hanging */
+void free_this_node_only(tNode *node)
 {
   if(!node) return;
   free_dat(node->dat);
   free(node);
+}
+
+/* free one node and all its children */
+void free_node(tNode *node)
+{
+  tNode *chld;
+  int ijk;
+
+  if(!node) return;
+
+  for(ijk=0; ijk<7; ijk++)
+  {
+    chld = node->child[ijk];
+    if(chld) free_node(chld);
+  }
+  free_this_node_only(node);
 }
 
 
@@ -166,11 +182,13 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   /* get node->Dt ... from patch */
   point_nodearrays_to_patarrays(node->pat, node);
 
+  /* default is same proc as parent */
+  node->datrank = parent->datrank;
+
   /* if parent has dat the child will have it too */
   if(parent->dat)
   {
     node->dat = alloc_dat(nvdb);
-    node->datrank = parent->datrank;
     /* enable same vars in this dat as in parent->dat */
     for(d=0; d<nvdb; d++)
       if(parent->dat->v[d])  enablevarcomp_innode(node, d);
@@ -201,6 +219,9 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   /* fill in neighbor info, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 1);
 
+  /* free all data on parent */
+  free_dat(parent->dat);
+
   return nlist;
 }
 
@@ -213,6 +234,11 @@ tNode *destroy_children(tNode *parent)
 
   for(ijk=0; ijk<8; ijk++)
     narray[ijk] = parent->child[ijk]; /* save children in an array */
+
+  /* set parents datrank to the same as child0 */
+  parent->datrank = parent->child[0]->datrank;
+  /* fill parent->dat with interpolation data from children */
+  // still TODO
 
   /* update neighbor info */
   /* set neighbor info to NULL, as far as these 8 are concerned */
@@ -294,13 +320,27 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
 /* free pat, currently leaves mesh untouched */
 void free_patch(tPat *pat)
 {
-  //int i;
+  int d, i;
 
   if (!pat) return;
 
 PRF;printf(" isn't working yet!!!\n");
 
-  /* free diff matrices */
+  /* free diff matrices and such */
+  for(d=1; d<=pat->nmax; d++)
+    for(i=0; i<3; i++)
+    {
+      free_array(pat->Dt[d][i]);
+      free_array(pat->At[d][i]);
+      free_array(pat->St[d][i]);
+      free_array(pat->Xb[d][i]);
+      free_array(pat->Winteg[d][i]);
+    }
+  free(pat->Dt);
+  free(pat->At);
+  free(pat->St);
+  free(pat->Xb);
+  free(pat->Winteg);
 
   //for (i = 0; i < pat->mesh->nvariables; i++)
   //  disablevarcomp_inpat(pat, i);
