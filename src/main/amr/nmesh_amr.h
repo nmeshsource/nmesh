@@ -170,7 +170,8 @@ tMesh *make_empty_mesh(int pr);
 
 
 /* storage.c */
-tArray *alloc_array(int n[3]); //, void *Owner, int tOwner);
+tArray *alloc_array(int n[3]);
+void point_array_a_to_data(tArray *array, void *data);
 void free_array(tArray *array);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);

@@ -142,15 +142,19 @@ B2[Ind_n(k,j,i, nB2)] = B1[Ind_n(j,i,k, nB1)] = B0[Ind_n(i,j,k, nB0)];
 
 n[0]=2; n[1]=2; n[2]=1;
 tArray *Aa = alloc_array(n);
-Aa->a = A;
+//Aa->a = A;
+point_array_a_to_data(Aa, A);
 //Aa->n[0]=3; Aa->n[1]=2; Aa->n[1]=1;
 
 tArray *B0a = alloc_array(nB0);
-B0a->a = B0;
+//B0a->a = B0;
+point_array_a_to_data(B0a, B0);
 tArray *B1a = alloc_array(nB1);
-B1a->a = B1;
+//B1a->a = B1;
+point_array_a_to_data(B1a, B1);
 tArray *B2a = alloc_array(nB2);
-B2a->a = B2;
+//B2a->a = B2;
+point_array_a_to_data(B2a, B2);
 
 
 int nC0[] = {2,3,4};
@@ -201,6 +205,14 @@ printarray(mesh->lns->next->node->St[1]);
 printarray_matrix0(mesh->lns->next->node->St[1]);
 
 printarray_matrix0(mesh->pat[0]->St[5][0]);
+
+free_array(Aa);
+free_array(B0a);
+free_array(B1a);
+free_array(B2a);
+free_array(C0a);
+free_array(C1a);
+free_array(C2a);
 
 //abort();
   return 0;

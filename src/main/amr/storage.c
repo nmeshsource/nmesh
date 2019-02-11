@@ -33,6 +33,13 @@ tArray *alloc_array(int n[3]) //, void *Owner, int tOwner)
   return array;
 }
 
+/* replace pointer to data with something else */
+void point_array_a_to_data(tArray *array, void *data)
+{
+  free(array->a);
+  array->a = data;
+}
+
 /* free an array */
 void free_array(tArray *array)
 {
