@@ -32,14 +32,31 @@ l=4        node
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
-  int nv;               /* number of vars */
-  int nvenabled;        /* number of enabled vars */
-  struct tARRAY **v;    /* list of data pointers to 3d vars */
-                        // if v[i]=NULL var v[i] and its ghosts are not enabled
+  int nv;                /* number of vars */
+  int nvenabled;         /* number of enabled vars */
+  struct tARRAY **v;     /* list of data pointers to vars, if v[i]=NULL,
+                            the var i and its surfaces are not enabled */
+  struct tSURFACE *s[6]; /* list of surfaces needed for data exchange,
+                            e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
+                            if s[6][i]=NULL var i does not need exchange */
+// OLD:
   struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
         // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
-//??? //  struct tNODE *node;   /* pointer to node where dat is in */
 } tDat;
+
+/* surface data needed for node to neighbor node communication */
+typedef struct tSURFACE {
+  struct tARRAY *mysurf;  /* array that contains values at my surface points */
+  int nnb;                /* number of neighbor nodes */
+  struct tNODE **nb;      /* list of neighbor nodes */
+  int *nblocal;           /* if nblocal[4]=1 nb[4] is on same proc */
+  struct tARRAY **nbsurf; /* list of arrays from neighb. surfaces */
+  nMPI_Req *recv_req;     /* array with MPI recv requests from each neighb. */
+  nMPI_Req *send_req;     /* array with MPI send requests to each neighb. */
+} tSurface;
+/* NOTE:
+   mysurf is allocated by this proc,
+   nbsurf[i] can just point if nb[i] is local, otherwise we need to alloc */
 
 
 /* a node */
