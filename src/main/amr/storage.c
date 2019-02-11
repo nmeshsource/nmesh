@@ -198,7 +198,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     if(ijk==0) nlist = elem; // save list head
     narray[ijk] = node; /* save nodes also in an array */
   }
-  /* fill in neighbor info, as fas as these 8 are concerned */
+  /* fill in neighbor info, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 1);
 
   return nlist;
@@ -208,26 +208,29 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 tNode *destroy_children(tNode *parent)
 {
   tNode *ch0 = parent->child[0];
+  tNode *narray[8];
+  int ijk;
+
+  for(ijk=0; ijk<8; ijk++)
+    narray[ijk] = parent->child[ijk]; /* save children in an array */
+
+  /* update neighbor info */
+  /* set neighbor info to NULL, as far as these 8 are concerned */
+  connect8_with_neighbors(narray, 0);
+
+  /* free child nodes */
+  for(ijk=0; ijk<8; ijk++)
+  {
+    if(narray[ijk]->child[0])
+      errorexit("cannot destroy child that itself has child[0]");
+    free_node(narray[ijk]);
+    parent->child[ijk] = NULL;
+  }
 
   /* parent is now a leaf node */
   parent->leaf = 1;
 
-  /* update neighbor info */
-  //...
-
-  //for node \in {parent's children}
-  //  free_node(node);
-
   return parent;
-}
-
-
-/* replace current entry in leaf node list with its 8 childern */
-void insert8_childnodes_asleaves(tNlist *elem, int n[3])
-{
-  tNode *parent = elem->node;
-  tNlist *children = make8_child_nodes(parent, n);
-  replace1_in_nodelist(elem, children);
 }
 
 /**************************************************************************/
@@ -607,6 +610,14 @@ int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   return update_mesh_myln_node_nid(mesh);
 }
 
+/* replace current entry in leaf node list with its 8 new childern */
+void make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
+{
+  tNode *parent = elem->node;
+  tNlist *children = make8_child_nodes(parent, n);
+  replace1_in_mesh_lns_myln(elem, children);
+}
+
 /* replace siblings at element sib of mesh->lns by parent,
    node with sibling 0 is returned so we can destroy it later */
 tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
@@ -642,15 +653,15 @@ tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
   /* reset mesh lists */
   mesh->lns = first_nodelist(elem0);
   update_mesh_myln_node_nid(mesh);
-  return node0;
+  return parent;
 }
 
-/* replace siblings at element sib of mesh->lns by parent, and then
-   kill the siblings */
+/* replace siblings at element sib of mesh->lns by their parent, and then
+   destroy the 8 siblings */
 int destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 {
-  tNode *node0 = remove8siblings_in_mesh_lns_myln(sib);
-  
+  tNode *parent = remove8siblings_in_mesh_lns_myln(sib);
+  destroy_children(parent);
 }
 
 /**********************************************************************/
