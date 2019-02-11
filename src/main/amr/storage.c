@@ -586,7 +586,7 @@ int update_mesh_myln_node_nid(tMesh *mesh)
 }
 
 /* append a node list to mesh->lns and also update mesh->myln */
-int append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
+tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
 {
   tNlist *lnl;
   if(mesh->lns)
@@ -597,25 +597,31 @@ int append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
   else
     mesh->lns = first_nodelist(list);
 
-  return update_mesh_myln_node_nid(mesh);
+  update_mesh_myln_node_nid(mesh);
+  return lnl;
 }
 
 /* replace elem in mesh->lns by nlist*/
-int replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
+tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
 {
+  tNlist *nlist_beg;
   tMesh *mesh = NULL;
+
   if(elem) mesh = elem->node->pat->mesh;
   else     errorexit("elem is NULL!!!");
-  mesh->lns = first_replace1_in_nodelist(elem, nlist);
-  return update_mesh_myln_node_nid(mesh);
+
+  nlist_beg = replace1_in_nodelist(elem, nlist);
+  mesh->lns = first_nodelist(nlist_beg);
+  update_mesh_myln_node_nid(mesh);
+  return nlist_beg;
 }
 
 /* replace current entry in leaf node list with its 8 new childern */
-void make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
+tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
 {
   tNode *parent = elem->node;
   tNlist *children = make8_child_nodes(parent, n);
-  replace1_in_mesh_lns_myln(elem, children);
+  return replace1_in_mesh_lns_myln(elem, children);
 }
 
 /* replace siblings at element sib of mesh->lns by parent,
@@ -658,7 +664,7 @@ tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
 
 /* replace siblings at element sib of mesh->lns by their parent, and then
    destroy the 8 siblings */
-int destroy8siblings_in_mesh_lns_myln(tNlist *sib)
+void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 {
   tNode *parent = remove8siblings_in_mesh_lns_myln(sib);
   destroy_children(parent);
