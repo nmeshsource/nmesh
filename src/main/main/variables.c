@@ -62,10 +62,24 @@ void AddMeshVar(tMesh *mesh, char *name,
     mesh->nvdb++;
   }
 
-  /* ensure that allocation also happnes in the dat structs of the nodes */
+  /* ensure that allocation also happens in the dat structs of the nodes */
   realloc_meshvariables(mesh, mesh->nvdb);
 }
 
+/* free strings in vdb */
+void free_mesh_vdb_contents(tMesh *mesh)
+{
+  tVar *var;
+  int i;
+
+  for(i = 0; i < mesh->nvdb; i++)
+  {
+    var = &(mesh->vdb[i]);
+    free(var->name);
+    free(var->tensorindices);
+    free(var->description);
+  }
+}
 
 /* add constant variable to data base */
 void AddConstantMeshVar(tMesh *mesh, char *name,

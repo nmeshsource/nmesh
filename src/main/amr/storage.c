@@ -441,6 +441,7 @@ void free_mesh(tMesh *mesh)
     free_patch(mesh->pat[i]);
 
   /* free vdb and pdb in mesh */
+  free_mesh_vdb_contents(mesh);
   free(mesh->vdb);
   free(mesh->pdb);
 
@@ -819,15 +820,24 @@ void realloc_datvariables(tDat *dat, int nv_new)
 {
   int i,j;
 
-  dat->v = realloc(dat->v, nv_new*sizeof(tArray *));
-  if(!dat->v) errorexit("out of memory for dat->v");
+  if(nv_new<dat->nv) errorexit("implement var removal");
+
+  if(nv_new)
+  {
+    dat->v = realloc(dat->v, nv_new*sizeof(tArray *));
+    if(!dat->v) errorexit("out of memory for dat->v");
+  }
+  else
+  {
+    free(dat->v);
+    return;
+  }
 
   for(j=0; j<6; j++)
   {
     dat->g[j] = realloc(dat->g, nv_new*sizeof(tArray *));
     if(!dat->g[j]) errorexit("out of memory for dat->g");
   }
-  if(nv_new<dat->nv) errorexit("implement var removal");
 
   /* set newly added var pointers to NULL */
   for(i=dat->nv; i<nv_new; i++)
@@ -850,15 +860,19 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
   int nvdb_old = mesh->nvdb;
-  int lni;;
+  int lni;
+
   if(0) printf("realloc_meshvariables from %d to %d\n",
-                 mesh->nvdb, nvdb_new);
+               mesh->nvdb, nvdb_new);
 
   /* realloc list on mesh struct */
-  mesh->vdb = realloc(mesh->vdb, sizeof(tVar)*(nvdb_new));
+  if(nvdb_new)
+    mesh->vdb = realloc(mesh->vdb, sizeof(tVar)*(nvdb_new));
+  else
+    free(mesh->vdb);
 
   /* set newly added stuff to 0 */
-  if(nvdb_new > mesh->nvdb)
+  if(nvdb_new > nvdb_old)
   {
     tVar *newv0 = &(mesh->vdb[nvdb_old]);
     memset(newv0, 0, sizeof(tVar)*(nvdb_new-nvdb_old));

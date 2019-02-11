@@ -162,10 +162,13 @@ typedef struct tVAR {
   double farlimit;
   double falloff;
   int sym[3];
+//  int ghostzones;   /* how many gostzones we have for this var on each side */
+//  int n_special[3]; /* if non-zero, use this dim in dirs 0,1,2 */
   int constant;
 } tVar;
 /* functions to create and access variables */
 void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description);
+void free_mesh_vdb_contents(tMesh *mesh);
 void AddConstantMeshVar(tMesh *mesh, char *name, 
                         char *tensorindices, char *description);
 int MeshVarIndLax(tMesh *mesh, char *name) ;
