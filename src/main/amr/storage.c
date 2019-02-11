@@ -244,7 +244,6 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 /* remove children */
 tNode *destroy_children(tNode *parent)
 {
-  tNode *ch0 = parent->child[0];
   tNode *narray[8];
   int ijk;
 
@@ -370,8 +369,8 @@ PRF;printf(" isn't working yet!!!\n");
 PRF;printmesh(mesh);
   for(elem=mesh->lns; elem; )
   {
-    if(elem->node->pat = pat) elem = remove1_in_nodelist(elem, 1);
-    else                      elem = elem->next;
+    if(elem->node->pat == pat) elem = remove1_in_nodelist(elem, 1);
+    else                       elem = elem->next;
     
 Yo(1);
 mesh->lns = first_nodelist(elem);
@@ -730,7 +729,7 @@ tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
 tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
 {
   tNode *parent, *node0;
-  tNlist *elem, *elem0, first;
+  tNlist *elem, *elem0;
   tMesh *mesh = NULL;
   int ijk;
 

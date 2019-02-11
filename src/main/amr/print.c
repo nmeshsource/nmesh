@@ -112,19 +112,11 @@ void printnodelist(tNlist *nl)
 void printvar_innode(tNode *node, char *name)
 {
   tMesh *mesh = node->pat->mesh;
-  double *v = 0; //node->v[Ind(name)];
-  int i,j,k;
-  int *n = node->n;
+  int vi = Ind(name);
+  tArray *va = node->dat->v[vi];
 
-  printf("%s, %p, Ind=%d:\n", name, v, Ind(name));
-  if(v)
-  {
-    //forallijk(i,j,k)
-    {
-      printf("%g ", v[Index(i,j,k)]);
-    }
-  }    
-  printf("%s ends here.\n", name);
+  printf("%s, Ind=%d:\n", name, vi);
+  printarray(va);
 }
 
 /* print an array */
