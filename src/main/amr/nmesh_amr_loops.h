@@ -21,8 +21,7 @@
   for(k=0; k<array->N; k++)
 
 /* loop of one variable (it is in an array*/
-//#define forvari(node,varindex, k) \
-//  if(node->dat) forarray(node->dat->v[(varindex)], k)
+//#define forvari(node,varindex, k) if(node->dat) forarray(node->dat->v[(varindex)], k)
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)
 
@@ -34,8 +33,7 @@
 /* loops that should be used only in very particular advanced cases         */
 /****************************************************************************/
 ///* loop over all points in a node */
-//#define forpoints(node,ijk) \
-//  for(ijk = 0; ijk < node->np; ijk++)
+//#define forpoints(node,ijk)  for(ijk = 0; ijk < node->np; ijk++)
 
 /* loop over all patches */
 #define forpatches(mesh,patindex) \
