@@ -164,8 +164,8 @@ typedef struct tVAR {
   double farlimit;
   double falloff;
   int sym[3];
-//  int ghostzones;   /* how many gostzones we have for this var on each side */
-//  int n_special[3]; /* if non-zero, use this dim in dirs 0,1,2 */
+  int surfacezones; /* surfacezone number we have for this var on each side */
+  //int n_special[3]; /* if non-zero, use this dim in dirs 0,1,2 */
   int constant;
 } tVar;
 /* functions to create and access variables */
@@ -185,6 +185,7 @@ char *MeshVarNameComponent0(tMesh *mesh, char *name);
 char *MeshVarTensorIndices(tMesh *mesh, int i);
 void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
 			        double farlimit, double falloff);
+void MeshVarNameSetSurfInfo(tMesh *mesh, char *name, int surfacezones);
 void MeshVarNameSetConstantFlag(tMesh *mesh, char *name);
 double MeshVarFallOff(tMesh *mesh, int i);
 double MeshVarFarLimit(tMesh *mesh, int i);
@@ -195,6 +196,8 @@ int MeshVarConstantFlag(tMesh *mesh, int i);
 #define Ind(name)  MeshVarInd(mesh, (name))
 #define AddVar(name, tensorindices, description) \
   AddMeshVar(mesh, (name), (tensorindices), (description))
+#define VarSetSurfInfo(name, surfacezones) \
+  MeshVarNameSetSurfInfo(mesh, (name), (surfacezones))
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);

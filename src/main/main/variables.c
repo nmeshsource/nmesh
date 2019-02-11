@@ -230,6 +230,14 @@ void MeshVarNameSetConstantFlag(tMesh *mesh, char *name)
   }
 }
 
+/* set information how many surface/ghost zones this var has */
+void MeshVarNameSetSurfInfo(tMesh *mesh, char *name, int surfacezones)
+{
+  tVar *vdb = mesh->vdb;
+  int i = MeshVarInd(mesh, name);
+  vdb[i].surfacezones = surfacezones;
+}
+
 /* return various pieces of information, e.g. boundary information */
 double MeshVarFallOff(tMesh *mesh, int i)
 { return mesh->vdb[i].falloff; }
