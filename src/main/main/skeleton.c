@@ -19,7 +19,7 @@ void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name)
   if(!skel[step]) skel[step] = calloc(1, sizeof(tTodo));
 
   for(t = skel[step]; t->next; t = t->next);
-  t->next = calloc(1, sizeof(tTodo));
+  t->next = calloc(1, sizeof(tTodo)); /* allocate next one for later use */
   t->f = f;
   t->name = strdup(name);
 }
@@ -33,12 +33,12 @@ void remove_all_MeshFuns(tMesh *mesh)
   {
     tTodo *t, *p=NULL;
 
-    for(t = skel[step]; t ? t->next : 0; )
+    for(t = skel[step]; t; )
     {
       //printf("step%d %p %s\n", step, t, t->name);
-      free(t->name);
       p = t;         /* previous entry */
       t = t->next;   /* get next entry */
+      free(p->name); /* free previous name */
       free(p);       /* free previous entry */
     }
   }
@@ -49,9 +49,8 @@ void RunMeshFun(tMesh *mesh, int step)
   tTodo *t;
   tTodo **skel = mesh->skel;
 
-  if (!skel[step]) return;
+  if(!skel[step]) return;
 
-  for (t = skel[step]; t->next; t = t->next) {
+  for(t = skel[step]; t->next; t = t->next)
     (*(t->f))(mesh);
-  }
 }

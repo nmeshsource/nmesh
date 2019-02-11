@@ -206,10 +206,14 @@ printarray_matrix0(mesh->lns->next->node->St[1]);
 
 printarray_matrix0(mesh->pat[0]->St[5][0]);
 
-free_array(Aa);
-free_array(B0a);
-free_array(B1a);
-free_array(B2a);
+//free_array(Aa);
+//free_array(B0a);
+//free_array(B1a);
+//free_array(B2a);
+free(Aa);
+free(B0a);
+free(B1a);
+free(B2a);
 free_array(C0a);
 free_array(C1a);
 free_array(C2a);
