@@ -14,17 +14,35 @@ void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name)
   tTodo *t;
   tTodo **skel = mesh->skel;
 
-  if (1) printf("  function  %s\n", name);
+  if(1) printf("  function  %s\n", name);
 
-  if(!skel[step]) skel[step] = (tTodo *) calloc(1, sizeof(tTodo));
+  if(!skel[step]) skel[step] = calloc(1, sizeof(tTodo));
 
-  for (t = skel[step]; t->next; t = t->next);
-  t->next = (tTodo *) calloc(1, sizeof(tTodo));
+  for(t = skel[step]; t->next; t = t->next);
+  t->next = calloc(1, sizeof(tTodo));
   t->f = f;
-  t->name = (char *) calloc(strlen(name)+1, sizeof(char));
-  strcpy(t->name, name);
+  t->name = strdup(name);
 }
 
+void remove_all_MeshFuns(tMesh *mesh)
+{
+  tTodo **skel = mesh->skel;
+  int step;
+
+  for(step=0; step<NFUNCBINS; step++)
+  {
+    tTodo *t, *p=NULL;
+
+    for(t = skel[step]; t ? t->next : 0; )
+    {
+      //printf("step%d %p %s\n", step, t, t->name);
+      free(t->name);
+      p = t;         /* previous entry */
+      t = t->next;   /* get next entry */
+      free(p);       /* free previous entry */
+    }
+  }
+}
 
 void RunMeshFun(tMesh *mesh, int step) 
 {

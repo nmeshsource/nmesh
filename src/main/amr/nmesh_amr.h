@@ -110,7 +110,6 @@ typedef struct tMESH {
   double dt;        /* time step */
   double time;      /* current time */
   int iteration;    /* current iteration number */
-  int npats;        /* number of patches */
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
   int nvdb;         /* number of variables */
   struct tVAR *vdb; /* variable data base */
@@ -118,6 +117,7 @@ typedef struct tMESH {
   int npdb;         /* number of mesh parameters */
   struct tPAR *pdb; /* parameter data base */
   int pdb_iStart;   /* index we start at when searching for a par */
+  int npats;        /* number of patches */
   tPat **pat;       /* list of pointers to patches */
   tNlist *lns;      /* start of linked list of all leaf nodes */
   int nmyln;        /* number of leaves in myln array */

@@ -35,13 +35,13 @@ int npdbmax = 2000;
 /* functions */
 void makeparameter(tMesh *mesh, char *name, char *value, char *description);
 int findparameterindex(tMesh *mesh, char *name, int fatal);
-tParameter *findparameter(tMesh *mesh, char *name, int fatal);
+tPar *findparameter(tMesh *mesh, char *name, int fatal);
 void setparameter(tMesh *mesh, int i, char *value);
-void printparameter(tParameter *p);
+void printparameter(tPar *p);
 void printparameters(tMesh *mesh);
 void translatevalue(char **value);
-int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
-int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
+int set_numericalvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
+int set_booleanvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
 
 
 
@@ -172,12 +172,12 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 /* make new parameter in parameter data base, merge if already there */
 void makeparameter(tMesh *mesh, char *name, char *value, char *description)
 {
-  tParameter *p;
+  tPar *p;
 
   if(0) {PRF;printf(" mesh=%p\n", mesh);}
   if(0) {PRF;printf(" %s = %s,  %s\n", name, value, description);}
 
-  mesh->pdb = realloc(mesh->pdb, npdbmax*sizeof(tParameter));
+  mesh->pdb = realloc(mesh->pdb, npdbmax*sizeof(tPar));
   if(!mesh->pdb) errorexit("out of memory for mesh->pdb");
 
   p = findparameter(mesh, name, 0);
@@ -206,11 +206,27 @@ void makeparameter(tMesh *mesh, char *name, char *value, char *description)
   if(0) printparameters(mesh);
 }
 
+/* free strings in vdb */
+void free_mesh_pdb_contents(tMesh *mesh)
+{
+  tPar *par;
+  int i;
+
+  for(i = 0; i < mesh->npdb; i++)
+  {
+    par = &(mesh->pdb[i]);
+    free(par->name);
+    free(par->value);
+    free(par->description);
+  }
+}
+
+
 
 /* set parameter */
 void setparameter(tMesh *mesh, int i, char *value)
 {
-  tParameter *p;
+  tPar *p;
 
   if(i<0 || i>=mesh->npdb) errorexit("this parameter index does not exist");
 
@@ -234,7 +250,7 @@ void Set_pdb_iStart(tMesh *mesh, int i)
 /* find parameter index */
 int findparameterindex(tMesh *mesh, char *name, int fatal)
 {
-  tParameter *pdb = mesh->pdb;
+  tPar *pdb = mesh->pdb;
   int npdb = mesh->npdb;
   int iS   = mesh->pdb_iStart;
   int i;
@@ -256,7 +272,7 @@ int findparameterindex(tMesh *mesh, char *name, int fatal)
   /* -1 means par was not found */
   return -1;
 }
-tParameter *parameterfromindex(tMesh *mesh, int i)
+tPar *parameterfromindex(tMesh *mesh, int i)
 {
   if(i<0 || i>=mesh->npdb)
     errorexit("parameter with this index does not exist");
@@ -264,7 +280,7 @@ tParameter *parameterfromindex(tMesh *mesh, int i)
   return &(mesh->pdb[i]);
 }
 /* find parameter */
-tParameter *findparameter(tMesh *mesh, char *name, int fatal)
+tPar *findparameter(tMesh *mesh, char *name, int fatal)
 {
   int i = findparameterindex(mesh, name, fatal);
 
@@ -300,7 +316,7 @@ void translatevalue(char **value)
 /* Write the numerical (double) value of the par with index ind into the
    par cache.
    Note: we keep the numerical (double) values of each par in a cache */
-int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
+int set_numericalvalue_byIndex(tPar *pdb1, int ind, int npdb1max)
 {
   if(pdb1!=NULL && ind>=0 && ind<npdb1max)
     pdb1[ind].numericalvalue = atof(pdb1[ind].value);
@@ -313,7 +329,7 @@ int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
 /* Write the boolean (int) value of the par with index ind into the
    par cache.
    Note: we keep the boolean values of each par in a cache */
-int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
+int set_booleanvalue_byIndex(tPar *pdb1, int ind, int npdb1max)
 {
   if(pdb1!=NULL && ind>=0 && ind<npdb1max)
   {
@@ -338,7 +354,7 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
   return 1;
 }
 
-void printparameter(tParameter *p)
+void printparameter(tPar *p)
 {
   printf("%16s = %-16s,  %s\n                 = %g  ->  %d\n",
   p->name, p->value, p->description,  p->numericalvalue, p->booleanvalue);
@@ -347,7 +363,7 @@ void printparameter(tParameter *p)
 /* print parameters */
 void printparameters(tMesh *mesh)
 {
-  tParameter *pdb = mesh->pdb;
+  tPar *pdb = mesh->pdb;
   int npdb = mesh->npdb;
   int i;
 
@@ -453,7 +469,7 @@ int MeshParGetb(tMesh *mesh, int i)
    (not equivalent to value being a substring of string parameter) */
 int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
 {
-  tParameter *p;
+  tPar *p;
   char *s=NULL;
   char *parval;
   int lv, ls, lp, startok, endok;
@@ -491,7 +507,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
 int iterate_parameters(tMesh* mesh, int next)
 {
   static int iter = 0; // should make this a value in mesh or a global var
-  tParameter *p;
+  tPar *p;
   char *list, *name, *newvalue, *value, *saveptr;
   char iterpar[100] = "iterate_parameter1";
   char newoutdir[10000], *outdirp;
@@ -587,7 +603,7 @@ int iterate_parameters(tMesh* mesh, int next)
 }
 
 /* print pars with index i1 to i2 in pdb */
-void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache)
+void print_pdb_i1_i2(tPar *pdb, int i1, int i2, int pr_ind, int pr_cache)
 {
   int i;
 
@@ -613,16 +629,16 @@ void print_parameter_database(tMesh *mesh)
 /* Create a copy of parameter database pdb1 in pdb2.
    This allocates all memory needed for pdb2.
    The caller has to free pdb2 later on its own, e.g. with free_pdb */
-/* if we have: tParameter *pdb2;
+/* if we have: tPar *pdb2;
    call like:  create_copy_of_pdb1_in_pdb2(pdb,npdb,npdbmax, &pdb2); */
-void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
-                                 tParameter **pdb2)
+void create_copy_of_pdb1_in_pdb2(tPar *pdb1, int npdb1, int npdb1max,
+                                 tPar **pdb2)
 {
   int i;
-  tParameter *p2;
+  tPar *p2;
 
   /* allocate array for p2 */
-  p2 = (tParameter *) calloc(npdb1max, sizeof(tParameter));
+  p2 = (tPar *) calloc(npdb1max, sizeof(tPar));
   if(!p2) errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
 
   /* go over pars in pdb1 and use strdup to create copies in p2 */
@@ -642,12 +658,12 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
 
 /* Make an empty par database of max length npdb1max.
    Usage: pdb2 = make_empty_pdb(npdbmax); */
-tParameter *make_empty_pdb(int npdb1max)
+tPar *make_empty_pdb(int npdb1max)
 {
   int i;
-  tParameter *pdb1;
+  tPar *pdb1;
   /* allocate array for pdb1 */
-  pdb1 = (tParameter *) calloc(npdb1max, sizeof(tParameter));
+  pdb1 = (tPar *) calloc(npdb1max, sizeof(tPar));
   if(!pdb1) errorexit("make_empty_pdb: out of memory");
 
   /* set all entries to NULL */
@@ -664,7 +680,7 @@ tParameter *make_empty_pdb(int npdb1max)
 }
 
 /* copy pdb1 into pdb2 */
-void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2)
+void copy_pdb(tPar *pdb1, int npdb1, tPar *pdb2)
 {
   int i;
 
@@ -691,7 +707,7 @@ void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2)
 }
 
 /* free the parameter database content in pdb1 */
-void free_pdb_contents(tParameter *pdb1, int npdb1)
+void free_pdb_contents(tPar *pdb1, int npdb1)
 {
   int i;
 
@@ -705,7 +721,7 @@ void free_pdb_contents(tParameter *pdb1, int npdb1)
 }
 
 /* free the parameter database pdb1 */
-void free_pdb(tParameter *pdb1, int npdb1)
+void free_pdb(tPar *pdb1, int npdb1)
 {
   free_pdb_contents(pdb1, npdb1);
   free(pdb1);

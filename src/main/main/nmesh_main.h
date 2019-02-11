@@ -96,6 +96,7 @@
 
 /* skeleton.c */
 void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name);
+void remove_all_MeshFuns(tMesh *mesh);
 void RunMeshFun(tMesh *mesh, int step);
 /* conveniece macros for functions */
 #define AddFun(step, f)  AddMeshFun(mesh, step, f, MSTR(f))
@@ -110,10 +111,11 @@ typedef struct tPAR {
   char *description;
   double numericalvalue; /* some pars are pure numbers, we cache them here */
   int booleanvalue; /* some pars are true/false, we cache them here as 1/0 */
-} tParameter;
+} tPar;
 void AddMeshPar(tMesh *mesh, char *name, char *value, char *description);
 void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description);
 void makeparameter(tMesh *mesh, char *name, char *value, char *description);
+void free_mesh_pdb_contents(tMesh *mesh);
 int findparameterindex(tMesh *mesh, char *name, int fatal);
 void MeshParSets(tMesh *mesh, int pi, char *value);
 void MeshParSeti(tMesh *mesh, int pi, int i);

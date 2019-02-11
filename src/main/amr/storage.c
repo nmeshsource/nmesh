@@ -440,14 +440,24 @@ void free_mesh(tMesh *mesh)
   for(i = 0; i < mesh->npats; i++)
     free_patch(mesh->pat[i]);
 
-  /* free vdb and pdb in mesh */
-  free_mesh_vdb_contents(mesh);
-  free(mesh->vdb);
-  free(mesh->pdb);
+  /* now patch list array */
+  free(mesh->pat);
 
   /* node list in mesh */
   free_nodelist(mesh->lns);
+  mesh->lns = NULL;
   free(mesh->myln);
+  mesh->myln = NULL;
+  mesh->nmyln = 0;
+
+  /* free vdb and pdb in mesh */
+  free_mesh_vdb_contents(mesh);
+  free(mesh->vdb);
+  free_mesh_pdb_contents(mesh);
+  free(mesh->pdb);
+
+  /* free skeleton in mesh */
+  remove_all_MeshFuns(mesh);
 
   free(mesh);
 }

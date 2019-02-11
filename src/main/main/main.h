@@ -10,5 +10,3 @@ int make_output_directory(tMesh *mesh);
 int inidata_mesh(tMesh *mesh);
 int evolve_mesh(tMesh *mesh);
 int finalize_mesh(tMesh *mesh);
-
-
