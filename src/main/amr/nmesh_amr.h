@@ -123,7 +123,7 @@ typedef struct tMESH {
   int nmyln;        /* number of leaves in myln array */
   tNlist **myln;    /* elements of lns owned by this proc */
 } tMesh;
-/* NOTE: the list lnodes needs to be distributed among MPI jobs:
+/* NOTE: the list lns needs to be distributed among MPI jobs:
 use space filling curve as in
 http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
