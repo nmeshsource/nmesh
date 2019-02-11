@@ -202,6 +202,6 @@ printarray_matrix0(mesh->lns->next->node->St[1]);
 
 printarray_matrix0(mesh->pat[0]->St[5][0]);
 
-abort();
+//abort();
   return 0;
 }

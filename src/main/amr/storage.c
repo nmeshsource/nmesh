@@ -36,6 +36,7 @@ tArray *alloc_array(int n[3]) //, void *Owner, int tOwner)
 /* free an array */
 void free_array(tArray *array)
 {
+  if(!array) return;
   free(array->a);
   free(array);
 }
@@ -57,7 +58,17 @@ tNode *alloc_node(void)
 /* free one node only, leaves children hanging */
 void free_this_node_only(tNode *node)
 {
+  tNode *parent = node->parent;
+  int ijk;
+
   if(!node) return;
+
+  /* remove parents pointer to it */
+  ijk = node->ijk;
+  if(parent) parent->child[ijk] = NULL;
+
+  /* should we also remove pointer of neighbors to it??? */
+
   free_dat(node->dat);
   free(node);
 }
@@ -68,6 +79,8 @@ void free_node(tNode *node)
   tNode *chld;
   int ijk;
 
+PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
+printnode(node);
   if(!node) return;
 
   for(ijk=0; ijk<7; ijk++)
@@ -320,6 +333,8 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
 /* free pat, currently leaves mesh untouched */
 void free_patch(tPat *pat)
 {
+  tMesh *mesh = pat->mesh;
+  tNlist *elem;
   int d, i;
 
   if (!pat) return;
@@ -342,13 +357,30 @@ PRF;printf(" isn't working yet!!!\n");
   free(pat->Xb);
   free(pat->Winteg);
 
-  //for (i = 0; i < pat->mesh->nvariables; i++)
-  //  disablevarcomp_inpat(pat, i);
-  //free(pat->v);
-
   //free_all_bfaces(pat);
 
-  //free_nodesinlist(tNlist *elem)
+  /* remove all nodes from this patch from mesh->lns */
+  fornodelist(mesh->lns, elem)
+  {
+    if(elem->node == NULL) abort();
+  }
+PRF;printmesh(mesh);
+  for(elem=mesh->lns; elem; )
+  {
+    if(elem->node->pat = pat) elem = remove1_in_nodelist(elem, 1);
+    else                      elem = elem->next;
+    
+Yo(1);
+mesh->lns = first_nodelist(elem);
+printmesh(mesh);
+  }
+
+  mesh->lns = first_nodelist(elem);
+  update_mesh_myln_node_nid(mesh);
+Yo(3);
+  /* free root node and all its children ... */
+  free_node(pat->rnode);
+Yo(9);
 
   free(pat);
 }
@@ -542,6 +574,7 @@ tNlist *remove1_in_nodelist(tNlist *elem, int return_next)
   right= elem->next;
   if(right) right->prev = left;
   if(left)  left->next = right;
+
   free(elem);
   if(return_next) return right;
   else		  return left;
@@ -551,6 +584,9 @@ tNlist *remove1_in_nodelist(tNlist *elem, int return_next)
 tNlist *first_nodelist(tNlist *list)
 {
   tNlist *lbeg;
+
+  if(!list) return NULL;
+
   /* find beginning of tNlist *list */
   for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
   return lbeg;
@@ -559,6 +595,9 @@ tNlist *first_nodelist(tNlist *list)
 tNlist *last_nodelist(tNlist *list)
 {
   tNlist *lend;
+
+  if(!list) return NULL;
+
   /* find end of tNlist *list */
   for(lend=list; lend->next; lend=lend->next) ;
   return lend;
@@ -608,9 +647,14 @@ int update_mesh_myln_node_nid(tMesh *mesh)
   int allocd = mesh->nmyln;
   int nid = 0;
   int nmyln = 0;
-  fornodelist(mesh->lns, elem)
+
+  /* go over leaves if  mesh->lns is not NULL */
+  if(mesh->lns) fornodelist(mesh->lns, elem)
   {
-    if(elem->node->dat)
+    tNode *node = elem->node;
+    tNode *parent = node->parent;
+
+    if(node->dat)
     {
       if(nmyln >= allocd)
       {
@@ -619,10 +663,23 @@ int update_mesh_myln_node_nid(tMesh *mesh)
       }
       mesh->myln[nmyln++] = elem;
     }
-    elem->node->nid = nid++;
+    /* set nid and invalidate parent's nid */
+    node->nid = nid++;
+    if(parent) parent->nid = -nid;
+  }
+  else /* mesh->lns is NULL, so free myln array */
+  {
+    free(mesh->myln);
+    mesh->myln = NULL;
   }
   mesh->nmyln = nmyln;
   return nid;
+}
+
+/* return nid or -1 */
+int get_node_nid(tNode *node)
+{
+  return node ? node->nid : -1;
 }
 
 /* append a node list to mesh->lns and also update mesh->myln */
@@ -676,6 +733,7 @@ tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
   if(sib==NULL) errorexit("sib is NULL!!!");
   mesh = sib->node->pat->mesh;
   parent = sib->node->parent;
+  if(parent==NULL) errorexit("parent is NULL!!!");
 
   /* find sibling 0 */
   elem0=sib;

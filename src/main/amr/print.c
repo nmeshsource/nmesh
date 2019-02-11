@@ -12,8 +12,8 @@ void printmesh(tMesh *m)
   int p;
   tNode *node;
 
-  printf("mesh=%p: npats=%d npdb=%d nvdb=%d dt=%g\n",
-	 m, m->npats, m->npdb, m->nvdb, m->dt);
+  printf("mesh=%p: npats=%d npdb=%d nvdb=%d nmyln=%d dt=%g\n",
+	 m, m->npats, m->npdb, m->nvdb, m->nmyln, m->dt);
   forpatches(m, p)
     printpatch(m->pat[p]);
   printf("leaf nodes:\n");
@@ -50,17 +50,17 @@ void printnode(tNode *n)
   printf(" patface=");
   for(i=0; i<6; i++) printf("%d", n->patface[i]);
   printf("\n");
-  printf(" l%d leaf=%d:  node = %p   parent = %p\n",
-          n->l, n->leaf, n, n->parent);
+  printf(" l%d leaf=%d:  nid = %d   parent->nid = %d\n",
+          n->l, n->leaf, n->nid, get_node_nid(n->parent));
   printf(" nb =");
-  for(i=0; i<6; i++) printf(" %p", n->nb[i]);
+  for(i=0; i<6; i++) printf(" %d", get_node_nid(n->nb[i]));
   printf("\n");
   printf(" child =");
-  for(i=0; i<8; i++) printf(" %p", n->child[i]);
+  for(i=0; i<8; i++) printf(" %d", get_node_nid(n->child[i]));
   printf("\n");
-  printf(" Dt =");
-  for(i=0; i<3; i++) printf(" %p", n->Dt[i]);
-  printf("\n");
+  //printf(" Dt =");
+  //for(i=0; i<3; i++) printf(" %p", n->Dt[i]);
+  //printf("\n");
   printf(" datrank=%d  dat=%p\n", n->datrank, n->dat);
 
   printf("\n");

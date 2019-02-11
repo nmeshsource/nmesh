@@ -57,7 +57,7 @@
   for(elem_ = meshORpat->lns,   listnode = elem_ ?  elem_->node : 0; \
       elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
 #define endforlnodes }
-  
+
 
 /****************************************************************************/
 /* do we need these?  */
