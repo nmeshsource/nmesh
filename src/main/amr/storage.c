@@ -63,12 +63,13 @@ void free_this_node_only(tNode *node)
 
   if(!node) return;
 
-  /* remove parents pointer to it */
+  /* remove parent's pointer to it */
   ijk = node->ijk;
   if(parent) parent->child[ijk] = NULL;
 
   /* should we also remove pointer of neighbors to it??? */
 
+  /* free variable data */
   free_dat(node->dat);
   free(node);
 }
@@ -79,15 +80,16 @@ void free_node(tNode *node)
   tNode *chld;
   int ijk;
 
-PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
-printnode(node);
+//PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
+//printnode(node);
   if(!node) return;
 
-  for(ijk=0; ijk<7; ijk++)
+  for(ijk=0; ijk<8; ijk++)
   {
     chld = node->child[ijk];
     if(chld) free_node(chld);
   }
+PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
   free_this_node_only(node);
 }
 
@@ -234,6 +236,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 
   /* free all data on parent */
   free_dat(parent->dat);
+  parent->dat = NULL;
 
   return nlist;
 }
@@ -645,6 +648,7 @@ int update_mesh_myln_node_nid(tMesh *mesh)
 {
   tNlist *elem;
   int allocd = mesh->nmyln;
+  int ainc = 256;
   int nid = 0;
   int nmyln = 0;
 
@@ -658,8 +662,8 @@ int update_mesh_myln_node_nid(tMesh *mesh)
     {
       if(nmyln >= allocd)
       {
-        mesh->myln = realloc(mesh->myln, sizeof(mesh->myln[0])*(allocd+256));
-        allocd += 256;
+        mesh->myln = realloc(mesh->myln, sizeof(mesh->myln[0])*(allocd+ainc));
+        allocd += ainc;
       }
       mesh->myln[nmyln++] = elem;
     }
@@ -745,7 +749,7 @@ tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
 
   /* set elem to sibling 1 and remove the 7 after sibling 0 */
   elem=elem0->next;
-  for(ijk=1; ijk<7; ijk++)
+  for(ijk=1; ijk<8; ijk++)
   {
     if(elem->node->parent != parent) errorexit("elem has wrong parent!");
     elem = remove1_in_nodelist(elem, 1);
@@ -781,6 +785,7 @@ tDat *alloc_dat(int nv)
   if(!dat) errorexit("out of memory for dat");
 
   dat->nv = nv;
+  if(nv==0) return dat;
 
   dat->v = calloc(nv, sizeof(tArray *));
   if(!dat->v) errorexit("out of memory for dat->v");
