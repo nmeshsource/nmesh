@@ -1,3 +1,7 @@
+*vdb and pdb leak memory if we free mesh
+ e.g. main/main/variables.c:52:     newv->name          = strdup(fullname);
+
+
 *Array ops
  matrix_times_matrix : DONE!
 
