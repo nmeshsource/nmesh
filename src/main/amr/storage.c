@@ -712,7 +712,7 @@ tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
   return lnl;
 }
 
-/* replace elem in mesh->lns by nlist*/
+/* replace elem in mesh->lns by nlist, return first of nlist */
 tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
 {
   tNlist *nlist_beg;
@@ -727,7 +727,8 @@ tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   return nlist_beg;
 }
 
-/* replace current entry in leaf node list with its 8 new childern */
+/* replace current entry in leaf node list with its 8 new childern,
+   return element with 0th child */
 tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
 {
   tNode *parent = elem->node;

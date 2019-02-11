@@ -155,11 +155,6 @@ void test_array_thingies(tMesh *mesh)
   printarray_matrix0(C0a);
   printarray(C2a);
 
-  printarray(mesh->lns->next->node->St[1]);
-  printarray_matrix0(mesh->lns->next->node->St[1]);
-
-  printarray_matrix0(mesh->pat[0]->St[5][0]);
-
   //free_array(Aa);
   //free_array(B0a);
   //free_array(B1a);
@@ -214,14 +209,27 @@ int setup_test_mesh(tMesh *mesh)
 //  nd = el->node;
 //  nlist = make8_child_nodes(nd, n);
 //  replace1_in_mesh_lns_myln(el, nlist);
-  make8children_in_mesh_lns_myln(el, n);
+  el = make8children_in_mesh_lns_myln(el, n);
 
   //printnodelist(nlist);
   printmesh(mesh);
+  printnodelist_and_neighbors(mesh->lns);
 
+  destroy8siblings_in_mesh_lns_myln(el);
+  printmesh(mesh);
   printnodelist_and_neighbors(mesh->lns);
 
   //test_array_thingies(mesh);
   //abort();
+
+  //printarray(mesh->lns->next->node->St[1]);
+  printarray_matrix0(mesh->lns->next->node->St[1]);
+  printarray_matrix0(mesh->lns->next->node->Dt[1]);
+
+  printarray(mesh->lns->next->node->Xb[1]);
+  printarray(mesh->lns->next->node->Winteg[1]);
+
+
+
   return 0;
 }
