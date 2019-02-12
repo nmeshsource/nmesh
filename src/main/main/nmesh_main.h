@@ -191,6 +191,7 @@ double MeshVarFallOff(tMesh *mesh, int i);
 double MeshVarFarLimit(tMesh *mesh, int i);
 int MeshVarSymmetry(tMesh *mesh, int i, int dir);
 int MeshVarConstantFlag(tMesh *mesh, int i);
+int MeshVarSurfacezones(tMesh *mesh, int i);
 /* conveniece macros for vars */
 #define VarName(i) MeshVarName(mesh, (i))
 #define Ind(name)  MeshVarInd(mesh, (name))

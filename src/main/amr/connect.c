@@ -90,13 +90,14 @@ void connect8_with_neighbors(tNode *narray[8], int connect)
 }
 
 
-
 /* enter neighbor info as far as the 8 children of one parent are concerned */
 /* this operates on a node array indexed by ijk */
 void connect8_siblings(tNode *narray[8])
 {
   int ijk;
 
+  errorexit("connect8_siblings is not neded it does the same as "
+            "connect8_with_neighbors");
   errorexit("this function needs to be tested");
 
   /* fill in neighbor info, as far as these 8 are concerned */
@@ -148,6 +149,118 @@ void connect8_siblings(tNode *narray[8])
     }
   }
 }
+
+/* is node on a face? */
+int node_is_at_face(tNode *node, int face)
+{
+  int ns[] = {2,2,2};
+  int ijk = node->ijk;
+  /* set node's i,j,k */
+  int k = kOfInd_n(ijk, ns);
+  int j = jOfInd_n_k(ijk, ns,k);
+  int i = iOfInd_n_jk(ijk, ns,j,k);
+
+  switch(face)
+  {
+  case 0:  return i^1;
+  case 1:  return i;
+  case 2:  return j^1;
+  case 3:  return j;
+  case 4:  return k^1;
+  case 5:  return k;
+  default: errorexit("face must be 0,1,2,3,4,5");
+  }
+  return -1;
+}
+
+/* count children of a node, should be 0 or 8 */
+int count_children(tNode *node)
+{
+  int i, nc;
+  for(nc=0, i=0; i<8; i++) if(node->child[i]) nc++;
+  return nc;
+}
+
+/* return all descendants along face */
+tNlist *all_descendants_along_face(tNlist *nl, int face)
+{
+  tNlist *elem;
+  tNlist *nl2 = copy_of_nodelist(nl);
+
+  fornodelist(nl2, elem)
+  {
+    tNlist *children = NULL;
+    tNode *node = elem->node;
+    tNode *child;
+    int i;
+
+    /* make list of children */    
+    if(node->child[0])
+    {
+      children = NULL;
+      for(i=0; i<8; i++)
+      {
+        child = node->child[i];
+        if(node_is_at_face(child, face))
+          children = addnode_to_nodelist_after(children, child);
+      }
+      /* insert children into nl2, replacing parent in elem */
+      elem = first_replace1_in_nodelist(elem, children);
+    }
+  }
+  return first_nodelist(elem);
+}
+
+
+/* find leaf node neighbors within this patch, this allocates the nodelist
+   containing them */
+tNlist *find_patch_neighbors(tNode *node, int face)
+{
+  tNlist *nbl;
+  tNlist *nblist;
+  tNode *anc, *nb;
+  int nc;
+  int nbface;
+
+  /* empty list */
+  nblist = NULL;
+
+  /* no neighb. if on patch face */
+  if(node->patface[face]) return 0;
+
+  /* find neighbor at same level or on lower level
+     note: root node has no patch neighbors */
+  for(nb=NULL, anc=node; anc->parent; anc=anc->parent)
+  {
+    nb = anc->nb[face];
+    if(nb) break;
+  }
+  /* if no neighbor at all is found return just 0 */
+  if(!nb) return NULL;
+
+  /* so now we have a neighbor, but it it childless? */
+  nc = count_children(nb);
+  if(nc==0) /* neighbor has 0 children */
+  {
+    nblist = alloc_nodelist(nb);
+    return nblist;  /* there is only one neighbor */
+  }
+  if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
+
+  /* ok so this neighbor has 8 children, who also may have children */
+  nbl = alloc_nodelist(nb);
+  nbface = face^1; /* face where neighbors are */
+  nblist = all_descendants_along_face(nbl, nbface);
+  free_nodelist(nbl);
+
+  return nblist;
+}
+
+/* find leaf node neighbors outside this patch (using bfaces) */
+//... TODO
+
+/* find all neighbors of a leaf node */
+
 
 
 /*******************************************************************/

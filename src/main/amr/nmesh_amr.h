@@ -32,13 +32,13 @@ l=4        node
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
-  int nv;                /* number of vars */
-  int nvenabled;         /* number of enabled vars */
-  struct tARRAY **v;     /* list of data pointers to vars, if v[i]=NULL,
-                            the var i and its surfaces are not enabled */
-  struct tSURFACE *s[6]; /* list of surfaces needed for data exchange,
-                            e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
-                            if s[6][i]=NULL var i does not need exchange */
+  int nv;                 /* number of vars */
+  int nvenabled;          /* number of enabled vars */
+  struct tARRAY **v;      /* list of data pointers to vars, if v[i]=NULL,
+                             the var i and its surfaces are not enabled */
+  struct tSURFACE **s[6]; /* list of surfaces needed for data exchange,
+                             e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
+                             if s[6][i]=NULL var i does not need exchange */
 // OLD:
   struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
         // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
@@ -204,6 +204,7 @@ void free_dat(tDat *dat);
 tNlist *alloc_nodelist(tNode *node);
 tNlist *addnode_to_nodelist_after(tNlist *elem, tNode *node);
 tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node);
+tNlist *copy_of_nodelist(tNlist *elem);
 tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list);
 tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list);
 tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list);

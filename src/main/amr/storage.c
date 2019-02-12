@@ -465,7 +465,9 @@ void free_mesh(tMesh *mesh)
 /**********************************************************************/
 /* storage for lists of nodes */
 /**********************************************************************/
-/* allocate an empty node list */
+/* allocate a node list with one node */
+/* NOTE: we can also add to a nodelist that is NULL, so alloc_nodelist
+   is not always needed */
 tNlist *alloc_nodelist(tNode *node)
 {
   tNlist *nlist;
@@ -488,6 +490,19 @@ tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node)
 {
   tNlist *before = alloc_nodelist(node);
   return insertnodelist_into_nodelist_before(elem, before);
+}
+
+/* make a copy */
+tNlist *copy_of_nodelist(tNlist *elem)
+{
+  tNlist *dest = NULL;
+  tNlist *src  = first_nodelist(elem);
+  tNlist *el;
+
+  for(el=src; el; el=el->next)
+    addnode_to_nodelist_after(dest, el->node);
+
+  return dest;
 }
 
 /* replace element elem in nodelist by node */
@@ -859,6 +874,48 @@ void realloc_datvariables(tDat *dat, int nv_new)
   dat->nv = nv_new;
 }
 
+/**********************************************************************/
+/* allocate and fill surfaces for vars that need it */
+/**********************************************************************/
+/* empty surface that we need to fill in */
+tSurface *alloc_empty_surface(int nnb)
+{
+  tSurface *s = calloc(1, sizeof(*s));
+  s->nnb = nnb;
+  s->nb = calloc(nnb, sizeof(s->nb[0]));
+  s->nblocal = calloc(nnb, sizeof(s->nblocal[0]));
+  s->nbsurf = calloc(nnb, sizeof(s->nbsurf[0]));
+  s->recv_req = calloc(nnb, sizeof(s->recv_req[0]));
+  s->send_req = calloc(nnb, sizeof(s->send_req[0]));
+  return s;
+}
+
+tSurface *init_surface(tNode *node, int face)
+{
+  int nnb = 00000; //??
+  tSurface *s;
+  //int
+  
+  s = alloc_empty_surface(nnb);
+  return s;
+}
+
+/* free all we need to in surface */
+void free_surface(tSurface *s)
+{
+  int i;
+
+  /* free content of lists */
+  free_array(s->mysurf);
+  for(i=0; i<s->nnb; i++) if(!s->nblocal[i]) free_array(s->nbsurf[i]);
+
+  /* free lists */
+  free(s->nb);
+  free(s->nblocal);
+  free(s->nbsurf);
+  free(s->recv_req);
+  free(s->send_req);
+}
 /**********************************************************************/
 /* storage for variable data base vdb in mesh */
 /**********************************************************************/

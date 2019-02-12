@@ -245,6 +245,8 @@ double MeshVarFarLimit(tMesh *mesh, int i)
 { return mesh->vdb[i].farlimit; }
 int MeshVarSymmetry(tMesh *mesh, int i, int dir)
 { return mesh->vdb[i].sym[dir]; }
+int MeshVarSurfacezones(tMesh *mesh, int i)
+{ return mesh->vdb[i].surfacezones; }
 int MeshVarConstantFlag(tMesh *mesh, int i)
 { return mesh->vdb[i].constant; }
 
