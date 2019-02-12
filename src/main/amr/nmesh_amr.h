@@ -47,9 +47,11 @@ typedef struct tDAT {
 
 /* surface data needed for node to neighbor node communication */
 typedef struct tSURFACE {
+  struct tDAT *dat;       /* pointer to dat the surface is in */
+  int face;               /* face surface is on */
+  int vi;                 /* var index */
   struct tARRAY *mysurf;  /* array that contains values at my surface points */
-  int nnb;                /* number of neighbor nodes */
-  struct tNODE **nb;      /* list of neighbor nodes */
+  int allocd_mysurf;      /* 1 if we need to free mysurf */
   struct tARRAY **nbsurf; /* list of arrays from neighb. surfaces */
   nMPI_Req *recv_req;     /* array with MPI recv requests from each neighb. */
   nMPI_Req *send_req;     /* array with MPI send requests to each neighb. */
@@ -66,6 +68,9 @@ typedef struct tNODE {
   struct tNODE *child[8]; /* list of pointers to childeren nodes */
   struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
+  int nfnb[6];            /* number of face neighbor nodes */
+  struct tNODE **fnb[6];  /* list of neighbor nodes on face,
+                             kept up to date by update_node_fnb */
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
   int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
   int n[3];               /* number of points in X,Y,Z-directions */

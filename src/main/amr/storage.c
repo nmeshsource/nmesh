@@ -66,9 +66,12 @@ tNode *alloc_node(void)
 void free_this_node_only(tNode *node)
 {
   tNode *parent = node->parent;
-  int ijk;
+  int ijk, face;
 
   if(!node) return;
+
+  /* free surface neigbhor list */
+  for(face=0; face<6; face++) free(node->fnb[face]);
 
   /* remove parent's pointer to it */
   ijk = node->ijk;
@@ -99,7 +102,6 @@ void free_node(tNode *node)
   //PRF;printf(": nid=%d l=%d node=%p\n", get_node_nid(node), node->l, node);
   free_this_node_only(node);
 }
-
 
 /* set node pointers for node->Dt ... . Point them to arrays from patch */
 void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
@@ -148,6 +150,9 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   node->datrank = datrank;
   if(nMPI_rank()==datrank)
     node->dat = alloc_dat(node);
+
+  /* initialize surface neigbhor list in dat */
+  update_node_and_neighbors_fnb(node);
 
   return node;
 }
@@ -240,6 +245,10 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   /* fill in neighbor info, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 1);
 
+  /* update fnb of all in narray and their neighbors */
+  for(ijk=0; ijk<8; ijk++)
+    update_node_and_neighbors_fnb(narray[ijk]);
+
   /* free all data on parent */
   free_dat(parent->dat);
   parent->dat = NULL;
@@ -285,6 +294,9 @@ tNode *destroy_children(tNode *parent)
     free_node(narray[ijk]);
     parent->child[ijk] = NULL;
   }
+
+  /* update fnb on parent and its neighbors */
+  update_node_and_neighbors_fnb(parent);
 
   /* parent is now a leaf node */
   parent->leaf = 1;
@@ -831,79 +843,114 @@ void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 tSurface *alloc_empty_surface(int nnb)
 {
   tSurface *s = calloc(1, sizeof(*s));
-  s->nnb = nnb;
-  s->nb = calloc(nnb, sizeof(s->nb[0]));
   s->nbsurf = calloc(nnb, sizeof(s->nbsurf[0]));
   s->recv_req = calloc(nnb, sizeof(s->recv_req[0]));
   s->send_req = calloc(nnb, sizeof(s->send_req[0]));
   return s;
 }
 
-/* free all we need to, in a surface */
+/* free all we need to in a surface */
 void free_surface(tSurface *s)
 {
-  int i;
+  tNode *node;
+  tDat *dat;
+  int f, i;
+
+  if(!s) return;
+  dat = s->dat;
+  f = s->face;
+  node = dat->node;
 
   /* free content of lists */
-  free_array(s->mysurf);
-  for(i=0; i<s->nnb; i++) if(!s->nb[i]->dat) free_array(s->nbsurf[i]);
+  if(s->allocd_mysurf) free_array(s->mysurf);
+  for(i=0; i<node->nfnb[f]; i++)
+    if(!node->fnb[f][i]->dat) free_array(s->nbsurf[i]);
 
   /* free lists */
-  free(s->nb);
   free(s->nbsurf);
   free(s->recv_req);
   free(s->send_req);
 }
 
 
-/* initialize a surface for var vi with neighbors at face */
-tSurface *init_surface(tNode *node, tNlist *nblist, int dir, int zones)
+/* initialize a surface for var vi at face with nnb neighbors */
+tSurface *init_surface(tNode *node, int vi, int face)
 {
-  tNlist *elem;
-  int nnb, ni, i;
+  int dir = face/2;
+  int zones;
+  tDat *dat;
+  int i;
   tSurface *s;
   int n[3];
+  int alloc_mysurf;
 
-  /* do nothing if ghost one width is 0 for this var */
+  /* do nothing if no data on this node */
+  if(!node->dat) return NULL;
+  dat = node->dat;
+
+  /* do nothing if var is not enabled */
+  if(!dat->v[vi]) return NULL;
+
+  /* do nothing if ghost zone width is 0 for this var */
+  zones = MeshVarSurfacezones(node->pat->mesh, vi);
   if(zones==0) return NULL;
 
   /* prep. */
-  nnb = count_elements_nodelist(nblist);
-  s = alloc_empty_surface(nnb);
+  s = alloc_empty_surface(node->nfnb[face]);
+  s->dat = dat;
+  s->face = face;
+  s->vi = vi;
 
   /* set n */
   for(i=0; i<3; i++) n[i] = node->n[i];
-  n[dir] = zones;
+  alloc_mysurf = 1;
+  if(n[dir] == zones) alloc_mysurf = 0;
+  else                n[dir] = zones;
 
   /* allocate my surface array */
-  s->mysurf = alloc_array(n);
+  if(alloc_mysurf) s->mysurf = alloc_array(n);
+  else             s->mysurf = dat->v[vi];
+  s->allocd_mysurf = alloc_mysurf;
 
-  /* loop over list */
-  ni = 0;
-  fornodelist(nblist, elem)
-  {
-    tNode *nb = elem->node;
-
-    /* save this neighbor */
-    s->nb[ni] = nb;
-
-    ni++; /* inc node counter */
-  }
-  
   return s;
 }
 
-void alloc_dat_surfaces(tDat *dat)
+void init_dat_fnb_and_surfaces(tNode *node)
 {
-  tMesh *mesh = dat->node->pat->mesh;
+  tDat *dat = node->dat; 
+//  tMesh *mesh = dat->node->pat->mesh;
+  tNlist *nblist, *elem;
 //  int dir = face/2;
 //  int zones = MeshVarSurfacezones(mesh, vi);
-  int j;
-  
-  for(j=0; j<6; j++)
+  int face, ni, j;
+
+  for(face=0; face<6; face++)
   {
-    dat->s[j] = calloc(dat->nv, sizeof(tSurface *));
-    if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
+    /* find neighbors */
+    nblist = make_mesh_neighbor_list(dat->node, face);
+    node->nfnb[face] = count_elements_nodelist(nblist);
+    
+
+    /* add neighbors to dat */
+    ni = 0;
+    fornodelist(nblist, elem)
+    {
+      /* save this neighbor */
+      node->fnb[face][ni] = elem->node;
+      ni++; /* inc node counter */
+    }
+    node->nfnb[face] = ni;
+  
+  
+    for(j=0; j<6; j++)
+    {
+      dat->s[j] = calloc(dat->nv, sizeof(tSurface *));
+      if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
+    }
+
+
+  //s = alloc_empty_surface(nnb);
+
   }
 
 }
@@ -923,7 +970,7 @@ tSurface *init_surface__old(tNode *node, int vi, int face)
   if(zones==0) return NULL;
 
   /* prep. */
-  nblist = find_mesh_neighbors(node, face);
+  nblist = make_mesh_neighbor_list(node, face);
   nnb = count_elements_nodelist(nblist);
   s = alloc_empty_surface(nnb);
 
@@ -941,7 +988,7 @@ tSurface *init_surface__old(tNode *node, int vi, int face)
     tNode *nb = elem->node;
 
     /* save this neighbor */
-    s->nb[ni] = nb;
+    s->dat->node->fnb[face][ni] = nb;
 
     ///* is nb a local node? */
     //if(nb->dat) s->nblocal[ni] = 1;
@@ -982,7 +1029,7 @@ tDat *alloc_dat(tNode *node)
 /* free dat and all arrays within it */
 void free_dat(tDat *dat)
 {
-  int i,j;
+  int face, i,j;
 
   if(!dat) return;
 
@@ -996,6 +1043,7 @@ void free_dat(tDat *dat)
   for(j=0; j<6; j++) free(dat->g[j]);
   free(dat);
 }
+
 
 /* change dat->nv  to  dat->nv=nv_new */
 void realloc_datvariables(tDat *dat, int nv_new)

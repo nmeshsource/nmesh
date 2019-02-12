@@ -249,8 +249,8 @@ free_nodelist(el2);
 
 Yo(4);
 //  printnodelist(el2);
-//  tNlist *find_patch_neighbors(tNode *node, int face)
-  el2 = find_mesh_neighbors(mesh->pat[0]->rnode->child[1]->child[2], 0);
+//  tNlist *make_mesh_neighbor_list(tNode *node, int face)
+  el2 = make_mesh_neighbor_list(mesh->pat[0]->rnode->child[1]->child[2], 0);
   printnodelist(el2);
 
 

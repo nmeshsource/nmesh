@@ -225,7 +225,7 @@ tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
 
 /* find leaf node neighbors within this patch, this allocates the nodelist
    containing them, which has to be freed by caller */
-tNlist *find_patch_neighbors(tNode *node, int face)
+tNlist *make_patch_neighbor_list(tNode *node, int face)
 {
   tNlist *nbl;
   tNlist *nblist;
@@ -269,12 +269,12 @@ tNlist *find_patch_neighbors(tNode *node, int face)
 
 /* find all leaf node neighbors of node in mesh, this allocates the
    nodelist containing them, which has to be freed by caller */
-tNlist *find_mesh_neighbors(tNode *node, int face)
+tNlist *make_mesh_neighbor_list(tNode *node, int face)
 {
   tNlist *nblist1;
 
   /* first find all neighbors inside patch */
-  nblist1 = find_patch_neighbors(node, face);
+  nblist1 = make_patch_neighbor_list(node, face);
 
   /* find leaf node neighbors outside this patch (using bfaces) */
   //... TODO
@@ -285,6 +285,57 @@ tNlist *find_mesh_neighbors(tNode *node, int face)
   return nblist1;
 }
 
+
+/* initialize surface neigbhor list in node:
+   save neighbors on all 6 faces in list node->fnb[face] */
+void update_node_fnb(tNode *node)
+{
+  tNlist *nblist, *elem;
+  int face, nfnb, ni;
+
+  for(face=0; face<6; face++)
+  {
+    /* find neighbors */
+    nblist = make_mesh_neighbor_list(node, face);
+    nfnb = count_elements_nodelist(nblist);
+    node->nfnb[face] = nfnb;
+
+    /* allocate room for neighbors */
+    free(node->fnb[face]);
+    if(nfnb)
+      node->fnb[face] = calloc(nfnb, sizeof(node->fnb[face][0]));
+
+    /* add neighbors to node */
+    ni = 0;
+    fornodelist(nblist, elem)
+    {
+      /* save this neighbor */
+      node->fnb[face][ni] = elem->node;
+      ni++; /* inc node counter */
+    }
+    free_nodelist(nblist);
+  }
+}
+
+/* same as update_node_fnb, but do it for neighbors as well */
+void update_node_and_neighbors_fnb(tNode *node)
+{
+  int face;
+
+  /* update this node */
+  update_node_fnb(node);
+
+  /* now update all its neighbors */
+  for(face=0; face<6; face++)
+  {
+    int ni;
+    for(ni=0; ni<node->nfnb[face]; ni++)
+    {
+      tNode *nb = node->fnb[face][ni];
+      update_node_fnb(nb);
+    }
+  }
+}
 
 
 /*******************************************************************/
