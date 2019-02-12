@@ -915,89 +915,25 @@ tSurface *init_surface(tNode *node, int vi, int face)
   return s;
 }
 
-void init_dat_fnb_and_surfaces(tNode *node)
+void init_all_surfaces(tNode *node)
 {
-  tDat *dat = node->dat; 
-//  tMesh *mesh = dat->node->pat->mesh;
-  tNlist *nblist, *elem;
-//  int dir = face/2;
-//  int zones = MeshVarSurfacezones(mesh, vi);
   int face, ni, j;
 
   for(face=0; face<6; face++)
   {
-    /* find neighbors */
-    nblist = make_mesh_neighbor_list(dat->node, face);
-    node->nfnb[face] = count_elements_nodelist(nblist);
-    
 
-    /* add neighbors to dat */
-    ni = 0;
-    fornodelist(nblist, elem)
-    {
-      /* save this neighbor */
-      node->fnb[face][ni] = elem->node;
-      ni++; /* inc node counter */
-    }
-    node->nfnb[face] = ni;
-  
-  
+  /*
     for(j=0; j<6; j++)
     {
       dat->s[j] = calloc(dat->nv, sizeof(tSurface *));
       if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
     }
-
+  */
 
   //s = alloc_empty_surface(nnb);
-
   }
-
 }
 
-/* initialize a surface for var vi with neighbors at face */
-tSurface *init_surface__old(tNode *node, int vi, int face)
-{
-  tMesh *mesh = node->pat->mesh;
-  int dir = face/2;
-  int zones = MeshVarSurfacezones(mesh, vi);
-  tNlist *nblist, *elem;
-  int nnb, ni, i;
-  tSurface *s;
-  int n[3];
-
-  /* do nothing if ghost one width is 0 for this var */
-  if(zones==0) return NULL;
-
-  /* prep. */
-  nblist = make_mesh_neighbor_list(node, face);
-  nnb = count_elements_nodelist(nblist);
-  s = alloc_empty_surface(nnb);
-
-  /* set n */
-  for(i=0; i<3; i++) n[i] = node->n[i];
-  n[dir] = zones;
-
-  /* allocate my surface array */
-  s->mysurf = alloc_array(n);
-
-  /* loop over list */
-  ni = 0;
-  fornodelist(nblist, elem)
-  {
-    tNode *nb = elem->node;
-
-    /* save this neighbor */
-    s->dat->node->fnb[face][ni] = nb;
-
-    ///* is nb a local node? */
-    //if(nb->dat) s->nblocal[ni] = 1;
-
-    ni++; /* inc node counter */
-  }
-  
-  return s;
-}
 
 /**********************************************************************/
 /* storage for dat lists in the nodes */

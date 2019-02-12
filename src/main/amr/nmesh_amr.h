@@ -57,7 +57,7 @@ typedef struct tSURFACE {
   nMPI_Req *send_req;     /* array with MPI send requests to each neighb. */
 } tSurface;
 /* NOTE:
-   mysurf is allocated by this proc,
+   mysurf comes from this proc,
    nbsurf[i] can just point if nb[i] is local, otherwise we need to alloc */
 
 
