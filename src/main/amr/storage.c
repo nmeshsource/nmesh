@@ -252,15 +252,27 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 tNode *destroy_children(tNode *parent)
 {
   tNode *narray[8];
+  tNode *child0 = parent->child[0];
   int ijk;
 
   for(ijk=0; ijk<8; ijk++)
     narray[ijk] = parent->child[ijk]; /* save children in an array */
 
   /* set parents datrank to the same as child0 */
-  parent->datrank = parent->child[0]->datrank;
-  /* fill parent->dat with interpolation data from children */
-  // still TODO
+  parent->datrank = child0->datrank;
+  if(child0->dat)
+  {
+    int nvdb = parent->pat->mesh->nvdb;
+    int d;
+
+    if(!parent->dat) parent->dat = alloc_dat(nvdb);
+    /* enable same vars in this dat as in parent->dat */
+    for(d=0; d<nvdb; d++)
+      if(child0->dat->v[d])  enablevarcomp_innode(parent, d);
+
+    /* fill node->dat with interpolation data from parent */
+    // still TODO
+  }
 
   /* update neighbor info */
   /* set neighbor info to NULL, as far as these 8 are concerned */

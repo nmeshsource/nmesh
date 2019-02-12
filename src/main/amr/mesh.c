@@ -241,6 +241,9 @@ Yo(8);
 
 //  tNlist *find_patch_neighbors(tNode *node, int face)
 //  el = 
+free_nodelist(el);
+free_nodelist(el2);
+
 
   return 0;
 }
