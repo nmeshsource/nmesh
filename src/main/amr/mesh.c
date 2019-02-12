@@ -175,7 +175,7 @@ int setup_test_mesh(tMesh *mesh)
   double bbox[6] = { -4,4, -2,2, -1,1 };
   int n1max = 55;
   int n[3] = { 5,5,5 };
-  tNlist *el;
+  tNlist *el, *el2;
   int i;
 
   PRFs(":\n");
@@ -229,7 +229,18 @@ int setup_test_mesh(tMesh *mesh)
   printarray(mesh->lns->next->node->Xb[1]);
   printarray(mesh->lns->next->node->Winteg[1]);
 
+//  el = mesh->lns;
+//  printnodelist(el);
 
+  el = alloc_nodelist(mesh->pat[0]->rnode->child[3]);
+  printnode_and_neighbors(el->node);
+
+Yo(8);
+  el2 = all_descendants_along_face(el, 3);
+  printnodelist(el2);
+
+//  tNlist *find_patch_neighbors(tNode *node, int face)
+//  el = 
 
   return 0;
 }
