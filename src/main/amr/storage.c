@@ -122,7 +122,7 @@ void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
 tNode *make_root_node(tPat *pat, int n[3], int datrank)
 {
   tNode *node = alloc_node();
-  int i, nvdb;
+  int i;
 
   /* fill in info */
   node->pat = pat;
@@ -140,7 +140,6 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   node->np = n[0] * n[1] * n[2];
   node->l = 0;
   node->leaf = 1;    /* make this a leaf node */
-  nvdb = pat->mesh->nvdb;
 
   /* get node->Dt ... from patch */
   point_nodearrays_to_patarrays(pat, node);
@@ -148,7 +147,7 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   /* see where dat needs to be allocated */
   node->datrank = datrank;
   if(nMPI_rank()==datrank)
-    node->dat = alloc_dat(nvdb);
+    node->dat = alloc_dat(node);
 
   return node;
 }
@@ -210,7 +209,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   /* if parent has dat the child will have it too */
   if(parent->dat)
   {
-    node->dat = alloc_dat(nvdb);
+    node->dat = alloc_dat(node);
     /* enable same vars in this dat as in parent->dat */
     for(d=0; d<nvdb; d++)
       if(parent->dat->v[d])  enablevarcomp_innode(node, d);
@@ -265,7 +264,7 @@ tNode *destroy_children(tNode *parent)
     int nvdb = parent->pat->mesh->nvdb;
     int d;
 
-    if(!parent->dat) parent->dat = alloc_dat(nvdb);
+    if(!parent->dat) parent->dat = alloc_dat(parent);
     /* enable same vars in this dat as in parent->dat */
     for(d=0; d<nvdb; d++)
       if(child0->dat->v[d])  enablevarcomp_innode(parent, d);
@@ -517,6 +516,19 @@ tNlist *copy_of_nodelist(tNlist *elem)
 //printnodelist(dest);
 
   return dest;
+}
+
+/* count num. of elem. in list */
+int count_elements_nodelist(tNlist *list)
+{
+  tNlist *beg = first_nodelist(list);
+  tNlist *el;
+  int count=0;
+
+  /* count elem. in list */
+  for(el=beg; el; el=el->next) count++;
+
+  return count;
 }
 
 /* replace element elem in nodelist by node */
@@ -813,17 +825,152 @@ void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 }
 
 /**********************************************************************/
+/* allocate and fill surfaces for vars that need it */
+/**********************************************************************/
+/* empty surface that we need to fill in */
+tSurface *alloc_empty_surface(int nnb)
+{
+  tSurface *s = calloc(1, sizeof(*s));
+  s->nnb = nnb;
+  s->nb = calloc(nnb, sizeof(s->nb[0]));
+  s->nblocal = calloc(nnb, sizeof(s->nblocal[0]));
+  s->nbsurf = calloc(nnb, sizeof(s->nbsurf[0]));
+  s->recv_req = calloc(nnb, sizeof(s->recv_req[0]));
+  s->send_req = calloc(nnb, sizeof(s->send_req[0]));
+  return s;
+}
+
+/* free all we need to, in a surface */
+void free_surface(tSurface *s)
+{
+  int i;
+
+  /* free content of lists */
+  free_array(s->mysurf);
+  for(i=0; i<s->nnb; i++) if(!s->nblocal[i]) free_array(s->nbsurf[i]);
+
+  /* free lists */
+  free(s->nb);
+  free(s->nblocal);
+  free(s->nbsurf);
+  free(s->recv_req);
+  free(s->send_req);
+}
+
+
+/* initialize a surface for var vi with neighbors at face */
+tSurface *init_surface(tNode *node, tNlist *nblist, int dir, int zones)
+{
+  tNlist *elem;
+  int nnb, ni, i;
+  tSurface *s;
+  int n[3];
+
+  /* do nothing if ghost one width is 0 for this var */
+  if(zones==0) return NULL;
+
+  /* prep. */
+  nnb = count_elements_nodelist(nblist);
+  s = alloc_empty_surface(nnb);
+
+  /* set n */
+  for(i=0; i<3; i++) n[i] = node->n[i];
+  n[dir] = zones;
+
+  /* allocate my surface array */
+  s->mysurf = alloc_array(n);
+
+  /* loop over list */
+  ni = 0;
+  fornodelist(nblist, elem)
+  {
+    tNode *nb = elem->node;
+
+    /* save this neighbor */
+    s->nb[ni] = nb;
+
+    /* is nb a local node? */
+    if(nb->dat) s->nblocal[ni] = 1;
+
+    ni++; /* inc node counter */
+  }
+  
+  return s;
+}
+
+void alloc_dat_surfaces(tDat *dat)
+{
+  tMesh *mesh = dat->node->pat->mesh;
+//  int dir = face/2;
+//  int zones = MeshVarSurfacezones(mesh, vi);
+  int j;
+  
+  for(j=0; j<6; j++)
+  {
+    dat->s[j] = calloc(dat->nv, sizeof(tSurface *));
+    if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
+  }
+
+}
+
+/* initialize a surface for var vi with neighbors at face */
+tSurface *init_surface__old(tNode *node, int vi, int face)
+{
+  tMesh *mesh = node->pat->mesh;
+  int dir = face/2;
+  int zones = MeshVarSurfacezones(mesh, vi);
+  tNlist *nblist, *elem;
+  int nnb, ni, i;
+  tSurface *s;
+  int n[3];
+
+  /* do nothing if ghost one width is 0 for this var */
+  if(zones==0) return NULL;
+
+  /* prep. */
+  nblist = find_mesh_neighbors(node, face);
+  nnb = count_elements_nodelist(nblist);
+  s = alloc_empty_surface(nnb);
+
+  /* set n */
+  for(i=0; i<3; i++) n[i] = node->n[i];
+  n[dir] = zones;
+
+  /* allocate my surface array */
+  s->mysurf = alloc_array(n);
+
+  /* loop over list */
+  ni = 0;
+  fornodelist(nblist, elem)
+  {
+    tNode *nb = elem->node;
+
+    /* save this neighbor */
+    s->nb[ni] = nb;
+
+    /* is nb a local node? */
+    if(nb->dat) s->nblocal[ni] = 1;
+
+    ni++; /* inc node counter */
+  }
+  
+  return s;
+}
+
+/**********************************************************************/
 /* storage for dat lists in the nodes */
 /**********************************************************************/
 /* allocate room for nv variables that can be enabled or disabled */
-tDat *alloc_dat(int nv)
+tDat *alloc_dat(tNode *node)
 {
+  int nv = node->pat->mesh->nvdb;
   tDat *dat;
   int j;
 
   dat = calloc(1, sizeof(tDat));
   if(!dat) errorexit("out of memory for dat");
 
+  dat->node = node;
   dat->nv = nv;
   if(nv==0) return dat;
 
@@ -888,48 +1035,6 @@ void realloc_datvariables(tDat *dat, int nv_new)
   dat->nv = nv_new;
 }
 
-/**********************************************************************/
-/* allocate and fill surfaces for vars that need it */
-/**********************************************************************/
-/* empty surface that we need to fill in */
-tSurface *alloc_empty_surface(int nnb)
-{
-  tSurface *s = calloc(1, sizeof(*s));
-  s->nnb = nnb;
-  s->nb = calloc(nnb, sizeof(s->nb[0]));
-  s->nblocal = calloc(nnb, sizeof(s->nblocal[0]));
-  s->nbsurf = calloc(nnb, sizeof(s->nbsurf[0]));
-  s->recv_req = calloc(nnb, sizeof(s->recv_req[0]));
-  s->send_req = calloc(nnb, sizeof(s->send_req[0]));
-  return s;
-}
-
-tSurface *init_surface(tNode *node, int face)
-{
-  int nnb = 00000; //??
-  tSurface *s;
-  //int
-  
-  s = alloc_empty_surface(nnb);
-  return s;
-}
-
-/* free all we need to in surface */
-void free_surface(tSurface *s)
-{
-  int i;
-
-  /* free content of lists */
-  free_array(s->mysurf);
-  for(i=0; i<s->nnb; i++) if(!s->nblocal[i]) free_array(s->nbsurf[i]);
-
-  /* free lists */
-  free(s->nb);
-  free(s->nblocal);
-  free(s->nbsurf);
-  free(s->recv_req);
-  free(s->send_req);
-}
 /**********************************************************************/
 /* storage for variable data base vdb in mesh */
 /**********************************************************************/

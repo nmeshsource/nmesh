@@ -280,6 +280,8 @@ tNlist *find_mesh_neighbors(tNode *node, int face)
   //... TODO
   // combine result with nblist1
 
+  nblist1 = first_nodelist(nblist1);
+
   return nblist1;
 }
 

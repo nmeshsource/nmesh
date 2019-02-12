@@ -32,6 +32,7 @@ l=4        node
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
+  struct tNODE *node;     /* pointer to node dat is in */
   int nv;                 /* number of vars */
   int nvenabled;          /* number of enabled vars */
   struct tARRAY **v;      /* list of data pointers to vars, if v[i]=NULL,
@@ -199,12 +200,13 @@ tNode *alloc_node(void);
 void free_node(tNode *node);
 tNode *make_root_node(tPat *pat, int n[3], int datrank);
 tNlist *make8_child_nodes(tNode *parent, int n[3]);
-tDat *alloc_dat(int nv);
+tDat *alloc_dat(tNode *node);
 void free_dat(tDat *dat);
 tNlist *alloc_nodelist(tNode *node);
 tNlist *addnode_to_nodelist_after(tNlist *elem, tNode *node);
 tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node);
 tNlist *copy_of_nodelist(tNlist *elem);
+int count_elements_nodelist(tNlist *list);
 tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list);
 tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list);
 tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list);
