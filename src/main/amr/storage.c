@@ -511,8 +511,10 @@ tNlist *copy_of_nodelist(tNlist *elem)
   tNlist *src  = first_nodelist(elem);
   tNlist *el;
 
+//printnodelist(src);
   for(el=src; el; el=el->next)
-    addnode_to_nodelist_after(dest, el->node);
+    dest = addnode_to_nodelist_after(dest, el->node);
+//printnodelist(dest);
 
   return dest;
 }
