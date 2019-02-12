@@ -222,11 +222,8 @@ tNlist *find_patch_neighbors(tNode *node, int face)
   int nc;
   int nbface;
 
-  /* empty list */
-  nblist = NULL;
-
   /* no neighb. if on patch face */
-  if(node->patface[face]) return 0;
+  if(node->patface[face]) return NULL;
 
   /* find neighbor at same level or on lower level
      note: root node has no patch neighbors */
@@ -238,7 +235,7 @@ tNlist *find_patch_neighbors(tNode *node, int face)
   /* if no neighbor at all is found return just 0 */
   if(!nb) return NULL;
 
-  /* so now we have a neighbor, but it it childless? */
+  /* so now we have a neighbor, but is it childless? */
   nc = count_children(nb);
   if(nc==0) /* neighbor has 0 children */
   {
