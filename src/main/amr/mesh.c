@@ -232,11 +232,17 @@ int setup_test_mesh(tMesh *mesh)
 //  el = mesh->lns;
 //  printnodelist(el);
 
-  el = alloc_nodelist(mesh->pat[0]->rnode->child[3]);
+  el = alloc_nodelist(mesh->pat[0]->rnode->child[1]);
   printnode_and_neighbors(el->node);
 
-Yo(8);
-  el2 = all_descendants_along_face(el, 3);
+Yo(1);
+  printnodelist(el);
+
+
+Yo(2);
+  el2 = all_descendants_along_face(el, 0, &i);
+Yo(3);
+  printf("i=%d\n",i);
   printnodelist(el2);
 
 //  tNlist *find_patch_neighbors(tNode *node, int face)

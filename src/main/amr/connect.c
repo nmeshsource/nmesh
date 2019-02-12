@@ -181,12 +181,16 @@ int count_children(tNode *node)
   return nc;
 }
 
-/* return all descendants along face */
-tNlist *all_descendants_along_face(tNlist *nl, int face)
+/* return all descendants along face, in ndescends we return 
+   how many times we have descended */
+tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
 {
   tNlist *elem;
   tNlist *nl2 = copy_of_nodelist(nl);
 
+  *ndescends = 0; /* number of replcements made in nl2 */
+
+  /* loop over nl2 and make replacements with children in face */
   fornodelist(nl2, elem)
   {
     tNlist *children = NULL;
@@ -205,10 +209,16 @@ tNlist *all_descendants_along_face(tNlist *nl, int face)
           children = addnode_to_nodelist_after(children, child);
       }
       /* insert children into nl2, replacing parent in elem */
-      elem = first_replace1_in_nodelist(elem, children);
+      elem = replace1_in_nodelist(elem, children);
+      if(elem->prev) elem = elem->prev;
+      nl2 = elem;
+      (*ndescends)++;
     }
   }
-  return first_nodelist(elem);
+  /* results */
+  nl2 = first_nodelist(nl2);
+
+  return nl2;
 }
 
 
@@ -219,7 +229,7 @@ tNlist *find_patch_neighbors(tNode *node, int face)
   tNlist *nbl;
   tNlist *nblist;
   tNode *anc, *nb;
-  int nc;
+  int nc, ndesc;
   int nbface;
 
   /* no neighb. if on patch face */
@@ -247,7 +257,7 @@ tNlist *find_patch_neighbors(tNode *node, int face)
   /* ok so this neighbor has 8 children, who also may have children */
   nbl = alloc_nodelist(nb);
   nbface = face^1; /* face where neighbors are */
-  nblist = all_descendants_along_face(nbl, nbface);
+  nblist = all_descendants_along_face(nbl, nbface, &ndesc);
   free_nodelist(nbl);
 
   return nblist;
