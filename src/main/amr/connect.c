@@ -182,7 +182,8 @@ int count_children(tNode *node)
 }
 
 /* return all descendants along face, in ndescends we return 
-   how many times we have descended */
+   how many times we have descended, the list it returns has to freed
+   by caller */
 tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
 {
   tNlist *elem;
@@ -223,7 +224,7 @@ tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
 
 
 /* find leaf node neighbors within this patch, this allocates the nodelist
-   containing them */
+   containing them, which has to be freed by caller */
 tNlist *find_patch_neighbors(tNode *node, int face)
 {
   tNlist *nbl;
@@ -266,7 +267,21 @@ tNlist *find_patch_neighbors(tNode *node, int face)
 /* find leaf node neighbors outside this patch (using bfaces) */
 //... TODO
 
-/* find all neighbors of a leaf node */
+/* find all leaf node neighbors of node in mesh, this allocates the
+   nodelist containing them, which has to be freed by caller */
+tNlist *find_mesh_neighbors(tNode *node, int face)
+{
+  tNlist *nblist1;
+
+  /* first find all neighbors inside patch */
+  nblist1 = find_patch_neighbors(node, face);
+
+  /* find leaf node neighbors outside this patch (using bfaces) */
+  //... TODO
+  // combine result with nblist1
+
+  return nblist1;
+}
 
 
 
