@@ -833,7 +833,6 @@ tSurface *alloc_empty_surface(int nnb)
   tSurface *s = calloc(1, sizeof(*s));
   s->nnb = nnb;
   s->nb = calloc(nnb, sizeof(s->nb[0]));
-  s->nblocal = calloc(nnb, sizeof(s->nblocal[0]));
   s->nbsurf = calloc(nnb, sizeof(s->nbsurf[0]));
   s->recv_req = calloc(nnb, sizeof(s->recv_req[0]));
   s->send_req = calloc(nnb, sizeof(s->send_req[0]));
@@ -847,11 +846,10 @@ void free_surface(tSurface *s)
 
   /* free content of lists */
   free_array(s->mysurf);
-  for(i=0; i<s->nnb; i++) if(!s->nblocal[i]) free_array(s->nbsurf[i]);
+  for(i=0; i<s->nnb; i++) if(!s->nb[i]->dat) free_array(s->nbsurf[i]);
 
   /* free lists */
   free(s->nb);
-  free(s->nblocal);
   free(s->nbsurf);
   free(s->recv_req);
   free(s->send_req);
@@ -888,9 +886,6 @@ tSurface *init_surface(tNode *node, tNlist *nblist, int dir, int zones)
 
     /* save this neighbor */
     s->nb[ni] = nb;
-
-    /* is nb a local node? */
-    if(nb->dat) s->nblocal[ni] = 1;
 
     ni++; /* inc node counter */
   }
@@ -948,8 +943,8 @@ tSurface *init_surface__old(tNode *node, int vi, int face)
     /* save this neighbor */
     s->nb[ni] = nb;
 
-    /* is nb a local node? */
-    if(nb->dat) s->nblocal[ni] = 1;
+    ///* is nb a local node? */
+    //if(nb->dat) s->nblocal[ni] = 1;
 
     ni++; /* inc node counter */
   }

@@ -50,7 +50,6 @@ typedef struct tSURFACE {
   struct tARRAY *mysurf;  /* array that contains values at my surface points */
   int nnb;                /* number of neighbor nodes */
   struct tNODE **nb;      /* list of neighbor nodes */
-  int *nblocal;           /* if nblocal[4]=1 nb[4] is on same proc */
   struct tARRAY **nbsurf; /* list of arrays from neighb. surfaces */
   nMPI_Req *recv_req;     /* array with MPI recv requests from each neighb. */
   nMPI_Req *send_req;     /* array with MPI send requests to each neighb. */
