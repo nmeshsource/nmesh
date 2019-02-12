@@ -41,8 +41,8 @@ typedef struct tDAT {
                              e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
                              if s[6][i]=NULL var i does not need exchange */
 // OLD:
-  struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
-        // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
+//  struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
+//        // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
 } tDat;
 
 /* surface data needed for node to neighbor node communication */

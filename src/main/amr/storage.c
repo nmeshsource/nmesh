@@ -957,8 +957,8 @@ tDat *alloc_dat(tNode *node)
 
   for(j=0; j<6; j++)
   {
-    dat->g[j] = calloc(nv, sizeof(tArray *));
-    if(!dat->g[j]) errorexit("out of memory for dat->g[j]");
+    dat->s[j] = calloc(nv, sizeof(tSurface *));
+    if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
   }
   return dat;
 }
@@ -972,11 +972,11 @@ void free_dat(tDat *dat)
   for(i=0; i<dat->nv; i++)
   {
     free_array(dat->v[i]);
-    for(j=0; j<6; j++) free_array(dat->g[j][i]);
+    for(j=0; j<6; j++) free_surface(dat->s[j][i]);
   }
 
   free(dat->v);
-  for(j=0; j<6; j++) free(dat->g[j]);
+  for(j=0; j<6; j++) free(dat->s[j]);
   free(dat);
 }
 
@@ -1001,15 +1001,15 @@ void realloc_datvariables(tDat *dat, int nv_new)
 
   for(j=0; j<6; j++)
   {
-    dat->g[j] = realloc(dat->g, nv_new*sizeof(tArray *));
-    if(!dat->g[j]) errorexit("out of memory for dat->g");
+    dat->s[j] = realloc(dat->s, nv_new*sizeof(tSurface *));
+    if(!dat->s[j]) errorexit("out of memory for dat->s");
   }
 
   /* set newly added var pointers to NULL */
   for(i=dat->nv; i<nv_new; i++)
   {
     dat->v[i] = NULL;
-    for(j=0; j<6; j++) dat->g[j][i] = NULL;
+    for(j=0; j<6; j++) dat->s[j][i] = NULL;
   }
   dat->nv = nv_new;
 }
