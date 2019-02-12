@@ -915,23 +915,23 @@ tSurface *init_surface(tNode *node, int vi, int face)
   return s;
 }
 
-void init_all_surfaces(tNode *node)
+/* init all sufaces of a node */
+int init_all_surfaces(tNode *node)
 {
-  int face, ni, j;
+  tDat *dat = node->dat;
+  int face, vi, cnt;
+
+  if(!dat) return 0;
 
   for(face=0; face<6; face++)
   {
-
-  /*
-    for(j=0; j<6; j++)
+    for(vi=0; vi<6; vi++)
     {
-      dat->s[j] = calloc(dat->nv, sizeof(tSurface *));
-      if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
+      dat->s[face][vi] = init_surface(node, vi, face);
+      if(dat->s[face][vi]) cnt++;
     }
-  */
-
-  //s = alloc_empty_surface(nnb);
   }
+  return cnt;
 }
 
 
@@ -965,7 +965,7 @@ tDat *alloc_dat(tNode *node)
 /* free dat and all arrays within it */
 void free_dat(tDat *dat)
 {
-  int face, i,j;
+  int i,j;
 
   if(!dat) return;
 
