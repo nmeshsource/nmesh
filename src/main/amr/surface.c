@@ -147,6 +147,8 @@ void get_nbsurf(tSurface *s, int ni, int zones)
   }
   else
   {
+    int nb_rank, s_tag, r_tag;
+    nMPI_Req *s_req, *r_req;
     int nb_dir = nb_f/2;
     int nb_n[3];
     int i;
@@ -158,7 +160,16 @@ void get_nbsurf(tSurface *s, int ni, int zones)
     /* allocate surface for neighbor */
     s->nbsurf[ni] = alloc_array(nb_n);
 
-    /* use MPI to send nb->dat->s[nb_f][vi]->mysurf */
+    /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
+       and also send s->mysurf to nb->dat->s[nb_f][vi]->nbsurf[nb_ni] */
+    nb_rank = nb->datrank;
+    s_tag = node->nid;
+    r_tag = nb->nid;
+    s_req = &(s->send_req[ni]);
+    r_req = &(s->recv_req[ni]);
+    nMPI_Isend_Irecv_double(s->mysurf->a, s->mysurf->N,
+                            s->nbsurf[ni]->a, s->nbsurf[ni]->N,
+                            nb_rank, s_tag, r_tag, s_req, r_req);
   }
 }
 

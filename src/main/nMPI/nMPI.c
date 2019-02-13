@@ -66,21 +66,21 @@ int nMPI_barrier(void)
 
 /* exchange double buffers */
 void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
-                             int dest, int s_tag, int r_tag,
-                             nMPI_Req *s_req, nMPI_Req *r_req) 
+                             int rank_other, int s_tag, int r_tag,
+                             nMPI_Req *s_req, nMPI_Req *r_req)
 {
 #ifdef USEMPI
   int errS, errR;
 
   PRF;printf(": %d to %d, ns=%d nr=%d s_tag=%d r_tag=%d\n",
-             nMPI_rank(), dest, ns, nr, s_tag, r_tag);
+             nMPI_rank(), rank_other, ns, nr, s_tag, r_tag);
   fflush(stdout);
 
-  errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, dest, s_tag,
+  errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag,
                    MPI_COMM_WORLD, s_req);
   if(errS != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
   
-  errR = MPI_Irecv(rbuf, nr, MPI_DOUBLE, dest, r_tag,
+  errR = MPI_Irecv(rbuf, nr, MPI_DOUBLE, rank_other, r_tag,
                    MPI_COMM_WORLD, r_req);
   if(errR != MPI_SUCCESS) errorexit("MPI_Irecv failed!\n");
 #endif

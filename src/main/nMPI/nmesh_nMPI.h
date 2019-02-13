@@ -10,3 +10,6 @@ int nMPI_Finalize(void);
 int nMPI_rank(void);
 int nMPI_size(void);
 int nMPI_barrier(void);
+void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
+                             int rank_other, int s_tag, int r_tag,
+                             nMPI_Req *s_req, nMPI_Req *r_req);
