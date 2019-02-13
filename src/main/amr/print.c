@@ -42,7 +42,7 @@ void printpatch(tPat *pat)
 
 void printnode(tNode *n) 
 {
-  int i;
+  int i, j;
 
   printf("ijk%d: nid%d p%d [%g,%g]x[%g,%g]x[%g,%g] np=%dx%dx%d=%d\n",
          n->ijk, n->nid, n->pat->p, n->bbox[0], n->bbox[1], n->bbox[2],
@@ -55,6 +55,13 @@ void printnode(tNode *n)
   printf(" nb =");
   for(i=0; i<6; i++) printf(" %d", get_node_nid(n->nb[i]));
   printf("   parent->nid=%d\n", get_node_nid(n->parent));
+  for(i=0; i<6; i++)
+  {
+    printf(" |fnb[%d]:", i);
+    for(j=0; j<n->nfnb[i]; j++) printf(" %d", get_node_nid(n->fnb[i][j]));
+    printf("|");
+  }
+  printf("\n");
   printf(" child =");
   for(i=0; i<8; i++) printf(" %d", get_node_nid(n->child[i]));
   //printf("\n");

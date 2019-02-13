@@ -244,8 +244,8 @@ Yo(2);
 Yo(3);
   printf("i=%d\n",i);
   printnodelist(el2);
-free_nodelist(el);
-free_nodelist(el2);
+  free_nodelist(el);
+  free_nodelist(el2);
 
 Yo(4);
 //  printnodelist(el2);
@@ -254,7 +254,7 @@ Yo(4);
   printnodelist(el2);
 
 
-free_nodelist(el2);
+  free_nodelist(el2);
 
 
   return 0;
