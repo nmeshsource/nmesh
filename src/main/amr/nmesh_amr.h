@@ -52,7 +52,8 @@ typedef struct tSURFACE {
   int vi;                 /* var index */
   struct tARRAY *mysurf;  /* array that contains values at my surface points */
   int allocd_mysurf;      /* 1 if we need to free mysurf */
-  struct tARRAY **nbsurf; /* list of arrays from neighb. surfaces */
+  struct tARRAY **nbsurf; /* list of values from neighb. surfaces, there are
+                             node->nfnb[face] nbsurf */
   nMPI_Req *recv_req;     /* array with MPI recv requests from each neighb. */
   nMPI_Req *send_req;     /* array with MPI send requests to each neighb. */
 } tSurface;
@@ -244,6 +245,7 @@ void mm_array0(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array1(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array2(tArray *Aa, tArray *Ba, tArray *ABa);
 void set_const_array(tArray *A, double c);
+void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP);
 
 /* print.c */
 void printmesh(tMesh *g);

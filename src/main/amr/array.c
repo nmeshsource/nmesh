@@ -159,3 +159,26 @@ void set_const_array(tArray *A, double c)
   int i;
   for(i=0; i<A->N; i++)  A->a[i] = c;
 }
+
+/* take plane pA with normal dir from A and copy it into P to plane pP */
+void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP)
+{
+  int i,j,k;
+  switch(dir)
+  {
+  case 0:
+    forplane0(i,j,k, A->n, pA)
+      P->a[Ind_n(pP,j,k, P->n)] = A->a[Ind_n(i,j,k, A->n)];
+    break;
+  case 1:
+    forplane1(i,j,k, A->n, pA)
+      P->a[Ind_n(i,pP,k, P->n)] = A->a[Ind_n(i,j,k, A->n)];
+    break;
+  case 2:
+    forplane2(i,j,k, A->n, pA)
+      P->a[Ind_n(i,j,pP, P->n)] = A->a[Ind_n(i,j,k, A->n)];
+    break;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+}

@@ -62,40 +62,40 @@
 /****************************************************************************/
 
 /* loop over planes e.g. i=p plane */
-#define forplane1(i,j,k, n, p) \
+#define forplane0(i,j,k, n, p) \
   for(i=(p), k = 0; k < (n[2]); k++) \
     for(     j = 0; j < (n[1]); j++)
 
-#define forplane2(i,j,k, n, p) \
+#define forplane1(i,j,k, n, p) \
   for(j=(p), k = 0; k < (n[2]); k++) \
     for(     i = 0; i < (n[0]); i++)
 
-#define forplane3(i,j,k, n, p) \
+#define forplane2(i,j,k, n, p) \
   for(k=(p), j = 0; j < (n[1]); j++) \
     for(     i = 0; i < (n[0]); i++)
 
-/* same as forplane1/2/3, but we can specify the plane number N */
+/* same as forplane0/1/2, but we can specify the plane number N */
 #define forplaneN(N, i,j,k, n, p) \
-  for(k=(p)*((N)==3); ( k<(n[2]) ) && ( ( k==(p) ) || (N)!=3 ); k++) \
-  for(j=(p)*((N)==2); ( j<(n[1]) ) && ( ( j==(p) ) || (N)!=2 ); j++) \
-  for(i=(p)*((N)==1); ( i<(n[0]) ) && ( ( i==(p) ) || (N)!=1 ); i++)
+  for(k=(p)*((N)==2); ( k<(n[2]) ) && ( ( k==(p) ) || (N)!=2 ); k++) \
+  for(j=(p)*((N)==1); ( j<(n[1]) ) && ( ( j==(p) ) || (N)!=1 ); j++) \
+  for(i=(p)*((N)==0); ( i<(n[0]) ) && ( ( i==(p) ) || (N)!=0 ); i++)
 
 /* same as forplaneN, but omit edges */
 #define forinnerplaneN(N, i,j,k, n, p) \
-  for(k=1+((p)-1)*((N)==3); ( k<(n[2])-((N)!=3) ) && ( ( k==(p) ) || (N)!=3 ); k++) \
-  for(j=1+((p)-1)*((N)==2); ( j<(n[1])-((N)!=2) ) && ( ( j==(p) ) || (N)!=2 ); j++) \
-  for(i=1+((p)-1)*((N)==1); ( i<(n[0])-((N)!=1) ) && ( ( i==(p) ) || (N)!=1 ); i++)
+  for(k=1+((p)-1)*((N)==2); ( k<(n[2])-((N)!=2) ) && ( ( k==(p) ) || (N)!=2 ); k++) \
+  for(j=1+((p)-1)*((N)==1); ( j<(n[1])-((N)!=1) ) && ( ( j==(p) ) || (N)!=1 ); j++) \
+  for(i=1+((p)-1)*((N)==0); ( i<(n[0])-((N)!=0) ) && ( ( i==(p) ) || (N)!=0 ); i++)
 
 /* loop over planes smoothly without any jumping in i,j or k */
-#define forplane1_nojump(i,j,k, n, p) \
+#define forplane0_nojump(i,j,k, n, p) \
   for(i=(p), k = 0; k < (n[2]); k++) \
     for(j =((n[1])-1)*(k%2); j < (n[1]) && j >= 0; j=j+1-2*(k%2))
 
-#define forplane2_nojump(i,j,k, n, p) \
+#define forplane1_nojump(i,j,k, n, p) \
   for(j=(p), k = 0; k < (n[2]); k++) \
     for(i =((n[0])-1)*(k%2); i < (n[0]) && i >= 0; i=i+1-2*(k%2))
 
-#define forplane3_nojump(i,j,k, n, p) \
+#define forplane2_nojump(i,j,k, n, p) \
   for(k=(p), j = 0; j < (n[1]); j++) \
     for(i =((n[0])-1)*(j%2); i < (n[0]) && i >= 0; i=i+1-2*(j%2))
 
