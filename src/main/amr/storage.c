@@ -923,6 +923,7 @@ int init_all_surfaces(tNode *node)
 
   if(!dat) return 0;
 
+  cnt=0;
   for(face=0; face<6; face++)
   {
     for(vi=0; vi<6; vi++)

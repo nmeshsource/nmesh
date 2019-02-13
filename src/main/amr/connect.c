@@ -181,8 +181,8 @@ int count_children(tNode *node)
   return nc;
 }
 
-/* return all descendants along face, in ndescends we return 
-   how many times we have descended, the list it returns has to freed
+/* return all descendants along face, in ndescends we return how many
+   times we have descended, the list it returns has to be freed
    by caller */
 tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
 {
