@@ -165,7 +165,7 @@ typedef struct tVAR {
   double falloff;
   int sym[3];
   int surfacezones; /* surfacezone number we have for this var on each side */
-  //int n_special[3]; /* if non-zero, use this dim in dirs 0,1,2 */
+  int n_special[3]; /* if non-zero, use this dim in dirs 0,1,2 */
   int constant;
 } tVar;
 /* functions to create and access variables */

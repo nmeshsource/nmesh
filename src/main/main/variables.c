@@ -459,17 +459,14 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
     newvar->farlimit      = var->farlimit;
     newvar->falloff       = var->falloff;
     newvar->constant      = var->constant;
+    newvar->surfacezones  = var->surfacezones;
     for (j = 0; j < 3; j++)
-      newvar->sym[j] = var->sym[j];
+    {
+      newvar->sym[j]       = var->sym[j];
+      newvar->n_special[j] = var->n_special[j];
+    }
   }
-
-//  /* create storage for as many variables as have been actually added
-//     do it on all pats so that nvariables remains the same on all pats */
-//  if (vl->mesh && nadded) {
-//    int n = mesh->nvariables + nadded;
-//    realloc_meshvariables(mesh, n);
-//  }
-  if (0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
+  if(0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
 
   return newvl;
 }
