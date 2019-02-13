@@ -142,11 +142,13 @@ void get_nbsurf(tSurface *s, int ni, int zones)
   /* is nb local? */
   if(nb->dat)
   {
+    /* nb is local so just point s->nbsurf[ni] to its data */
     tArray *nb_mysurf = nb->dat->s[nb_f][vi]->mysurf;
     s->nbsurf[ni] = nb_mysurf;
   }
   else
   {
+    /* nb is on other process so use MPI to exchange data */
     int nb_rank, s_tag, r_tag;
     nMPI_Req *s_req, *r_req;
     int nb_dir = nb_f/2;
@@ -157,7 +159,7 @@ void get_nbsurf(tSurface *s, int ni, int zones)
     for(i=0; i<3; i++) nb_n[i] = nb->n[i];
     nb_n[nb_dir] = zones;
 
-    /* allocate surface for neighbor */
+    /* allocate surface to recv neighbor data */
     s->nbsurf[ni] = alloc_array(nb_n);
 
     /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
