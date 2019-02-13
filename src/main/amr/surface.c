@@ -33,7 +33,9 @@ void free_surface(tSurface *s)
   node = dat->node;
 
   /* free content of lists */
+  /* free mysurf only it has allocd */
   if(s->allocd_mysurf) free_array(s->mysurf);
+  /* free nbsurf[i] only if it is not on this proc  */
   for(i=0; i<node->nfnb[f]; i++)
     if(!node->fnb[f][i]->dat) free_array(s->nbsurf[i]);
 
@@ -78,7 +80,7 @@ tSurface *init_surface(tNode *node, int vi, int face)
   if(n[dir] == zones) alloc_mysurf = 0;
   else                n[dir] = zones;
 
-  /* allocate my surface array */
+  /* allocate or point my surface array */
   if(alloc_mysurf) s->mysurf = alloc_array(n);
   else             s->mysurf = dat->v[vi];
   s->allocd_mysurf = alloc_mysurf;
@@ -126,7 +128,7 @@ void set_mysurf(tSurface *s)
 }
 
 /* put the nbsurf from neighbor with index ni in s->face */
-void get_nbsurf(tSurface *s, int ni)
+void get_nbsurf(tSurface *s, int ni, int zones)
 {
   int vi = s->vi;
   int my_f = s->face;
@@ -145,6 +147,17 @@ void get_nbsurf(tSurface *s, int ni)
   }
   else
   {
+    int nb_dir = nb_f/2;
+    int nb_n[3];
+    int i;
+
+    /* set nb_n */
+    for(i=0; i<3; i++) nb_n[i] = nb->n[i];
+    nb_n[nb_dir] = zones;
+
+    /* allocate surface for neighbor */
+    s->nbsurf[ni] = alloc_array(nb_n);
+
     /* use MPI to send nb->dat->s[nb_f][vi]->mysurf */
   }
 }
@@ -152,10 +165,12 @@ void get_nbsurf(tSurface *s, int ni)
 /* put nbsurf from all neighbors in s->face */
 void get_all_nbsurf(tSurface *s)
 {
+  tNode *node = s->dat->node;
+  int zones = MeshVarSurfacezones(node->pat->mesh, s->vi);
   int my_f = s->face;
-  int nfnb = s->dat->node->nfnb[my_f];
+  int nfnb = node->nfnb[my_f];
   int ni;
-  for(ni=0; ni<nfnb; ni++) get_nbsurf(s, ni);
+  for(ni=0; ni<nfnb; ni++) get_nbsurf(s, ni, zones);
 }
 
 
