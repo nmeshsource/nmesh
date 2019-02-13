@@ -846,7 +846,7 @@ tDat *alloc_dat(tNode *node)
 {
   int nv = node->pat->mesh->nvdb;
   tDat *dat;
-  int j;
+  int f;
 
   dat = calloc(1, sizeof(tDat));
   if(!dat) errorexit("out of memory for dat");
@@ -858,28 +858,28 @@ tDat *alloc_dat(tNode *node)
   dat->v = calloc(nv, sizeof(tArray *));
   if(!dat->v) errorexit("out of memory for dat->v");
 
-  for(j=0; j<6; j++)
+  for(f=0; f<6; f++)
   {
-    dat->s[j] = calloc(nv, sizeof(tSurface *));
-    if(!dat->s[j]) errorexit("out of memory for dat->s[j]");
+    dat->s[f] = calloc(nv, sizeof(tSurface *));
+    if(!dat->s[f]) errorexit("out of memory for dat->s[f]");
   }
   return dat;
 }
 /* free dat and all arrays within it */
 void free_dat(tDat *dat)
 {
-  int i,j;
+  int i,f;
 
   if(!dat) return;
 
   for(i=0; i<dat->nv; i++)
   {
     free_array(dat->v[i]);
-    for(j=0; j<6; j++) free_surface(dat->s[j][i]);
+    for(f=0; f<6; f++) free_surface(dat->s[f][i]);
   }
 
   free(dat->v);
-  for(j=0; j<6; j++) free(dat->s[j]);
+  for(f=0; f<6; f++) free(dat->s[f]);
   free(dat);
 }
 
@@ -887,7 +887,7 @@ void free_dat(tDat *dat)
 /* change dat->nv  to  dat->nv=nv_new */
 void realloc_datvariables(tDat *dat, int nv_new)
 {
-  int i,j;
+  int i,f;
 
   if(nv_new<dat->nv) errorexit("implement var removal");
 
@@ -902,17 +902,17 @@ void realloc_datvariables(tDat *dat, int nv_new)
     return;
   }
 
-  for(j=0; j<6; j++)
+  for(f=0; f<6; f++)
   {
-    dat->s[j] = realloc(dat->s, nv_new*sizeof(tSurface *));
-    if(!dat->s[j]) errorexit("out of memory for dat->s");
+    dat->s[f] = realloc(dat->s[f], nv_new*sizeof(tSurface *));
+    if(!dat->s[f]) errorexit("out of memory for dat->s");
   }
 
   /* set newly added var pointers to NULL */
   for(i=dat->nv; i<nv_new; i++)
   {
     dat->v[i] = NULL;
-    for(j=0; j<6; j++) dat->s[j][i] = NULL;
+    for(f=0; f<6; f++) dat->s[f][i] = NULL;
   }
   dat->nv = nv_new;
 }
