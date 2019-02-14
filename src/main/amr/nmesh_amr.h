@@ -160,8 +160,9 @@ typedef struct tARRAY {
   int n[3];    /* dims in all 3 dirs */
   int N;       /* N = n[0] * n[1] * n[2]; */
   double *a;   /* pointer to double data (could add one more for GPU data) */
-//  void *Owner; /* pointer to patch or node this array belongs to */
-//  int tOwner;  /* type of owner, e.g. NODE OR PAT */
+  int ns;      /* number of segments */
+  int si;      /* segment index */
+//  void *par;   /* pointer to some extra pars */
 } tArray;
 
 
@@ -193,7 +194,9 @@ tMesh *make_empty_mesh(int pr);
 
 
 /* storage.c */
+tArray *alloc_array_with_segs(int n[3], int ns);
 tArray *alloc_array(int n[3]);
+tArray *get_array_seg(tArray *array, int si);
 void point_array_a_to_data(tArray *array, void *data);
 void free_array(tArray *array);
 tMesh *alloc_mesh(int npats);

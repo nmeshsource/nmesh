@@ -14,8 +14,8 @@
 /**********************************************************************/
 /* storage for arrays */
 /**********************************************************************/
-/* allocate an array */
-tArray *alloc_array(int n[3]) //, void *Owner, int tOwner)
+/* allocate an array with ns segments */
+tArray *alloc_array_with_segs(int n[3], int ns)
 {
   int i;
   tArray *array = calloc(1, sizeof(tArray));
@@ -24,19 +24,33 @@ tArray *alloc_array(int n[3]) //, void *Owner, int tOwner)
   array->N = n[0] * n[1] * n[2];
   for(i=0; i<3; i++)  array->n[i] = n[i];
 
-  array->a = calloc(array->N, sizeof(array->a[0]));
+  array->ns = ns;
+  array->a = calloc(array->N * ns, sizeof(array->a[0]));
   if(!array->a) errorexit("out of memory for array->a");
 
-  //array->Owner  = Owner;
-  //array->tOwner = tOwner;
-
   return array;
+}
+
+/* allocate a standard array (with just 1 segment) */
+tArray *alloc_array(int n[3])
+{
+  return alloc_array_with_segs(n, 1);
+}
+
+/* get array that starts at segment si */
+tArray *get_array_seg(tArray *array, int si)
+{
+  tArray *as;
+  *as = *array; /* shallow copy */
+  as->si = si;
+  as->a  = array->a + array->N * si;
+  return as;
 }
 
 /* replace pointer to data with something else */
 void point_array_a_to_data(tArray *array, void *data)
 {
-  free(array->a);
+  if(array->si == 0) free(array->a);
   array->a = data;
 }
 
@@ -44,6 +58,7 @@ void point_array_a_to_data(tArray *array, void *data)
 void free_array(tArray *array)
 {
   if(!array) return;
+  if(array->si) return; /* do nothing if this is not segment 0 */
   free(array->a);
   free(array);
 }
