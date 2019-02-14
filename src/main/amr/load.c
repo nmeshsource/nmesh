@@ -54,7 +54,7 @@ void move_node_to_rank(tCom *com, tNode *node, int desrank)
   realloc_com_reqs(com, rn + 1);
   put_buffers_in_com(com, rn, sbuf,slen, rbuf,rlen);
 
-    /* now call MPI */
+  /* now call MPI */
   nMPI_Isend_Irecv_double_com(com, com->n_rq - 1,
                               desrank, node->nid, node->nid);
 }
