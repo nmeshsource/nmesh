@@ -728,7 +728,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
   int allocd = mesh->nmyln;
   int ainc = 256;
   long nid = 0;
-  int lid = 0;
+  //int lid = 0;
   int nmyln = 0;
 
   /* go over leaves if  mesh->lns is not NULL */
@@ -747,8 +747,8 @@ long update_mesh_myln_node_nid(tMesh *mesh)
       mesh->myln[nmyln++] = elem;
 
       /* set lid and invalidate parent's lid */
-      node->lid = lid++;
-      if(parent) parent->lid = -lid;
+      //node->lid = lid++;
+      //if(parent) parent->lid = -lid;
     }
     /* set nid and invalidate parent's nid */
     node->nid = nid++;

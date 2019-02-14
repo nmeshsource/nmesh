@@ -280,8 +280,8 @@ void exchange_surfaces_for_all_vars(tNode *node, int face, int ni)
     /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
        and also send s->mysurf to nb->dat->s[nb_f][vi]->nbsurf[nb_ni] */
     nb_rank = nb->datrank;
-    s_tag = node->nid;
-    r_tag = nb->nid;
+    r_tag = ((node->nid)*256 + ni)*8 + face;;
+    s_tag = ((nb->nid)*256 + nb_ni)*8 + nb_f;
 //FIXME: we need better tags!!!!
 
     n_rq = dat->n_rq[face]; /* number of MPI requests so far */
@@ -336,6 +336,7 @@ void exchange_all_surfaces(tNode *node)
   for(face=0; face<6; face++)
   {
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
+    //nb_nid0 = node->fnb[face][0];
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
       exchange_surfaces_for_all_vars(node, face, ni);

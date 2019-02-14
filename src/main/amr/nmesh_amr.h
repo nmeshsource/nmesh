@@ -80,7 +80,7 @@ typedef struct tNODE {
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
-  int lid;                /* local node ID */
+  //int lid;                /* local node ID */
   struct tARRAY *Dt[3];   /* transp. differentiation matrix in 3 dirs for [-1,1]
                              domain. This just points to an array in patch. */
   struct tARRAY *At[3];   /* transp. analysis matrix in 3 dirs */
