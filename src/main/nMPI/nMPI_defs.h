@@ -6,10 +6,12 @@
 #ifdef USEMPI
 
 #include <mpi.h>
-#define nMPI_Req MPI_Request
+#define nMPI_Req  MPI_Request
+#define nMPI_Stat MPI_Status
 
 #else
 
-#define nMPI_Req int
+#define nMPI_Req  int
+#define nMPI_Stat int
 
 #endif

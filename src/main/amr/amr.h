@@ -3,6 +3,7 @@
 
 
 /* storage.c */
+void realloc_dat_reqs(tDat *dat, int n_rq_new, int f);
 
 /* mesh.c */
 int setup_test_mesh(tMesh *mesh);

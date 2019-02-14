@@ -85,3 +85,19 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
   if(errR != MPI_SUCCESS) errorexit("MPI_Irecv failed!\n");
 #endif
 }
+
+/* check on requests */
+int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat) 
+{
+  int status = 0;
+#ifdef MPI
+  PRF;printf(": %d waiting for %d req to finish\n", nMPI_rank(), nreq);
+  fflush(stdout);
+
+  status = MPI_Waitall(nreq, req, stat);
+
+  if(status == MPI_ERR_IN_STATUS)
+    errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
+#endif
+  return status;
+}

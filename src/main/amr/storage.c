@@ -872,15 +872,73 @@ void free_dat(tDat *dat)
 
   if(!dat) return;
 
+  /* free contents */
   for(i=0; i<dat->nv; i++)
   {
     free_array(dat->v[i]);
     for(f=0; f<6; f++) free_surface(dat->s[f][i]);
   }
-
   free(dat->v);
-  for(f=0; f<6; f++) free(dat->s[f]);
+
+  for(f=0; f<6; f++)
+  {
+    free(dat->s[f]);
+    free(dat->send_rq[f]);
+    free(dat->recv_rq[f]);
+    for(i=0; i<dat->n_rq[f]; i++)
+    {
+      free(dat->send_buf[f][i]);
+      free(dat->recv_buf[f][i]);
+    }
+    free(dat->send_buf[f]);
+    free(dat->recv_buf[f]);
+  }
+
   free(dat);
+}
+
+/* alloc MPI req. places in dat for face f */
+void realloc_dat_reqs(tDat *dat, int n_rq_new, int f)
+{
+  if(!dat) return;
+
+  /* free buffer contents */
+  if(n_rq_new<dat->n_rq[f])
+  {
+    int i;
+    for(i=n_rq_new; i<dat->n_rq[f]; i++)
+    {
+      free(dat->send_buf[f][i]);
+      free(dat->recv_buf[f][i]);
+    }
+  }
+
+  if(n_rq_new)
+  {
+    dat->send_rq[f] 
+      = realloc(dat->send_rq[f], n_rq_new*sizeof(dat->send_rq[f][0]));
+    if(!dat->send_rq[f]) errorexit("out of memory for dat->send_rq[f]");
+    dat->recv_rq[f] 
+      = realloc(dat->recv_rq[f], n_rq_new*sizeof(dat->recv_rq[f][0]));
+    if(!dat->recv_rq[f]) errorexit("out of memory for dat->recv_rq[f]");
+
+    /* realloc buffer lists */
+    dat->send_buf[f] 
+      = realloc(dat->send_buf[f], n_rq_new*sizeof(dat->send_buf[f][0]));
+    if(!dat->send_buf[f]) errorexit("out of memory for dat->send_buf[f]");
+    dat->recv_buf[f] 
+      = realloc(dat->recv_buf[f], n_rq_new*sizeof(dat->recv_buf[f][0]));
+    if(!dat->recv_buf[f]) errorexit("out of memory for dat->recv_buf[f]");
+  }
+  else
+  {
+    free(dat->send_rq[f]);
+    free(dat->recv_rq[f]);
+
+    free(dat->send_buf[f]);
+    free(dat->recv_buf[f]);
+  }
+  dat->n_rq[f] = n_rq_new;
 }
 
 

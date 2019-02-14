@@ -35,14 +35,16 @@ typedef struct tDAT {
   struct tNODE *node;     /* pointer to node dat is in */
   int nv;                 /* number of vars */
   int nvenabled;          /* number of enabled vars */
-  struct tARRAY **v;      /* list of data pointers to vars, if v[i]=NULL,
-                             the var i and its surfaces are not enabled */
+  struct tARRAY **v;      /* list of data pointers to vars, if v[vi]=NULL,
+                             the var vi and its surfaces are not enabled */
   struct tSURFACE **s[6]; /* list of surfaces needed for data exchange,
                              e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
-                             if s[6][i]=NULL var i does not need exchange */
-// OLD:
-//  struct tARRAY **g[6]; /* list of data pointers to 2d ghost zones */
-//        // g[0]=ghosts in -X dir, g[3]=ghosts in +Y dir
+                             if s[6][vi]=NULL var vi does not need exchange */
+  int n_rq[6];            /* number of send/recv requests on each face */
+  nMPI_Req *send_rq[6];   /* send requests to each neighb. */
+  nMPI_Req *recv_rq[6];   /* recv req: recv_rq[2][i] is req. from nb i */
+  double **send_buf[6];   /* send buffer to neighbor */
+  double **recv_buf[6];   /* recv buffer */
 } tDat;
 
 /* surface data needed for node to neighbor node communication */
@@ -54,8 +56,6 @@ typedef struct tSURFACE {
   int allocd_mysurf;      /* 1 if we need to free mysurf */
   struct tARRAY **nbsurf; /* list of values from neighb. surfaces, there are
                              node->nfnb[face] nbsurf */
-  nMPI_Req *recv_req;     /* array with MPI recv requests from each neighb. */
-  nMPI_Req *send_req;     /* array with MPI send requests to each neighb. */
 } tSurface;
 /* NOTE:
    mysurf comes from this proc,
