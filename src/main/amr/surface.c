@@ -294,8 +294,10 @@ void exchange_surfaces_for_all_vars(tNode *node, int face, int ni)
     rbuf = calloc(nvars * nb_N, sizeof(double));
     dat->send_buf[face][n_rq] = sbuf; /* save buffers */
     dat->recv_buf[face][n_rq] = rbuf;
+    //NOTE: it may be good to use a long segmented array as rbuf
+    //      with dat->s[face][vi]->nbsurf[ni] pointing to the segments
 
-    /* fill buffer */
+    /* fill send buffer */
     for(cnt=0, vi=0; vi<node->dat->nv; vi++)
     {
       tSurface *s = dat->s[face][vi];
