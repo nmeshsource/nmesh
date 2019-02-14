@@ -217,7 +217,6 @@ int setup_test_mesh(tMesh *mesh)
 
   destroy8siblings_in_mesh_lns_myln(el);
   printmesh(mesh);
-abort();
   printnodelist_and_neighbors(mesh->lns);
 
   //test_array_thingies(mesh);

@@ -24,3 +24,7 @@ tSurface *init_surface(tNode *node, int vi, int face);
 int init_all_surfaces(tNode *node);
 void set_mysurf(tSurface *s);
 void get_all_surfaces(tNode *node);
+
+/* load.c */
+void simple_load_balance(tMesh *mesh);
+void move_node_to_rank(tCom *com, tNode *node, int desrank);

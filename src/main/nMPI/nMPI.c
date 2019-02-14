@@ -87,7 +87,7 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 }
 
 /* check on requests */
-int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat) 
+int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
 #ifdef MPI
@@ -100,4 +100,126 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
     errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
 #endif
   return status;
+}
+
+
+/**********************************************************************/
+/* deal with MPI tCom struct */
+/**********************************************************************/
+/* create a com */
+tCom *alloc_com(int entrysize, int free_buf)
+{
+  tCom *com;
+
+  com = calloc(1, sizeof(tCom));
+  if(!com) errorexit("out of memory for com");
+  com->entrysize = entrysize;
+  com->free_buf = free_buf;
+
+  return com;
+}
+
+/* free com and all within it */
+void free_com(tCom *com)
+{
+  int i;
+
+  if(!com) return;
+
+  free(com->send_rq);
+  free(com->recv_rq);
+  free(com->send_stat);
+  free(com->recv_stat);
+  if(com->free_buf)
+    for(i=0; i<com->n_rq; i++)
+    {
+      free(com->send_buf[i]);
+      free(com->recv_buf[i]);
+    }
+  free(com->send_buf);
+  free(com->recv_buf);
+
+  free(com);
+}
+
+/* alloc MPI requests */
+void realloc_com_reqs(tCom *com, int n_rq_new)
+{
+  if(!com) return;
+
+  /* free buffer contents */
+  if( (n_rq_new < com->n_rq) && (com->free_buf) )
+  {
+    int i;
+    for(i=n_rq_new; i<com->n_rq; i++)
+    {
+      free(com->send_buf[i]);
+      free(com->recv_buf[i]);
+    }
+  }
+
+  if(n_rq_new)
+  {
+    com->send_rq = realloc(com->send_rq, n_rq_new*sizeof(com->send_rq[0]));
+    if(!com->send_rq) errorexit("out of memory for com->send_rq");
+    com->recv_rq = realloc(com->recv_rq, n_rq_new*sizeof(com->recv_rq[0]));
+    if(!com->recv_rq) errorexit("out of memory for com->recv_rq");
+
+    com->send_stat = realloc(com->send_stat, n_rq_new*sizeof(com->send_stat[0]));
+    if(!com->send_stat) errorexit("out of memory for com->send_stat");
+    com->recv_stat = realloc(com->recv_stat, n_rq_new*sizeof(com->recv_stat[0]));
+    if(!com->recv_stat) errorexit("out of memory for com->recv_stat");
+
+    com->send_buflen = realloc(com->send_buflen, n_rq_new*sizeof(com->send_buflen[0]));
+    if(!com->send_buflen) errorexit("out of memory for com->send_buflen");
+    com->recv_buflen = realloc(com->recv_buflen, n_rq_new*sizeof(com->recv_buflen[0]));
+    if(!com->recv_buflen) errorexit("out of memory for com->recv_buflen");
+
+    /* realloc buffer lists */
+    com->send_buf = realloc(com->send_buf, n_rq_new*com->entrysize);
+    if(!com->send_buf) errorexit("out of memory for com->send_buf");
+    com->recv_buf = realloc(com->recv_buf, n_rq_new*com->entrysize);
+    if(!com->recv_buf) errorexit("out of memory for com->recv_buf");
+  }
+  else
+  {
+    free(com->send_rq);
+    free(com->recv_rq);
+    free(com->send_stat);
+    free(com->recv_stat);
+    free(com->send_buflen);
+    free(com->recv_buflen);
+
+    free(com->send_buf);
+    free(com->recv_buf);
+  }
+  com->n_rq = n_rq_new;
+}
+
+void put_buffers_in_com(tCom *com, int rq,
+                        void *sbuf, int slen, void *rbuf, int rlen)
+{
+  com->send_buf[rq] = sbuf;
+  com->send_buflen[rq] = slen;
+  com->recv_buf[rq] = rbuf;
+  com->recv_buflen[rq] = rlen;
+}
+
+/* wait for all requests in com */
+int nMPI_Waitall_in_com(tCom *com)
+{
+  int status;
+  status  = nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
+  status += nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
+  return status;
+}
+
+/* do requst rq of com */
+void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
+                                 int rank_other, int s_tag, int r_tag)
+{
+  nMPI_Isend_Irecv_double(com->send_buf[rq], com->send_buflen[rq],
+                          com->recv_buf[rq], com->recv_buflen[rq],
+                          rank_other, s_tag, r_tag,
+                          &(com->send_rq[rq]), &(com->recv_rq[rq]));
 }
