@@ -293,7 +293,7 @@ tNode *destroy_children(tNode *parent)
     for(d=0; d<nvdb; d++)
       if(child0->dat->v[d])  enablevarcomp_innode(parent, d);
 
-    /* fill node->dat with interpolation data from parent */
+    /* fill parent->dat with interpolation data from children */
     // still TODO
   }
 
@@ -745,6 +745,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
         allocd += ainc;
       }
       mesh->myln[nmyln++] = elem;
+      //PRF;printf(": nmyln%ld\n", nmyln);
 
       /* set lid and invalidate parent's lid */
       //node->lid = lid++;
@@ -753,6 +754,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
     /* set nid and invalidate parent's nid */
     node->nid = nid++;
     if(parent) parent->nid = -nid;
+    //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
   }
   else /* mesh->lns is NULL, so free myln array */
   {
@@ -812,7 +814,7 @@ tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
 
 /* replace siblings at element sib of mesh->lns by parent,
    node with sibling 0 is returned so we can destroy it later */
-tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
+tNode *remove8siblings_in_mesh_lns(tNlist *sib)
 {
   tNode *parent, *node0;
   tNlist *elem, *elem0;
@@ -845,7 +847,6 @@ tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
 
   /* reset mesh lists */
   mesh->lns = first_nodelist(elem0);
-  update_mesh_myln_node_nid(mesh);
   return parent;
 }
 
@@ -853,8 +854,9 @@ tNode *remove8siblings_in_mesh_lns_myln(tNlist *sib)
    destroy the 8 siblings */
 void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 {
-  tNode *parent = remove8siblings_in_mesh_lns_myln(sib);
+  tNode *parent = remove8siblings_in_mesh_lns(sib);
   destroy_children(parent);
+  update_mesh_myln_node_nid(parent->pat->mesh);
 }
 
 
