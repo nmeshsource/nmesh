@@ -721,15 +721,15 @@ void free_nodesinlist(tNlist *elem)
 /**********************************************************************/
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
-/* update array of leaf nodes on this proc */
+/* update array of leaf nodes on this proc, set nid */
 long update_mesh_myln_node_nid(tMesh *mesh)
 {
   tNlist *elem;
-  int allocd = mesh->nmyln;
+  long allocd = mesh->nmyln;
   int ainc = 256;
   long nid = 0;
   //int lid = 0;
-  int nmyln = 0;
+  long nmyln = 0;
 
   /* go over leaves if  mesh->lns is not NULL */
   if(mesh->lns) fornodelist(mesh->lns, elem)
@@ -760,6 +760,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
     mesh->myln = NULL;
   }
   mesh->nmyln = nmyln;
+  mesh->nln = nid;
   return nid;
 }
 

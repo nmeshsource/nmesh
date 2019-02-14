@@ -144,6 +144,7 @@ typedef struct tMESH {
   int npats;        /* number of patches */
   tPat **pat;       /* list of pointers to patches */
   tNlist *lns;      /* start of linked list of all leaf nodes */
+  long nln;         /* total number of leaf nodes */
   int nmyln;        /* number of leaves in myln array */
   tNlist **myln;    /* elements of lns owned by this proc */
 } tMesh;
