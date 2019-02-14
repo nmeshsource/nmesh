@@ -196,6 +196,7 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
   com->n_rq = n_rq_new;
 }
 
+/* point com buffers */
 void put_buffers_in_com(tCom *com, int rq,
                         void *sbuf, int slen, void *rbuf, int rlen)
 {
@@ -203,6 +204,16 @@ void put_buffers_in_com(tCom *com, int rq,
   com->send_buflen[rq] = slen;
   com->recv_buf[rq] = rbuf;
   com->recv_buflen[rq] = rlen;
+}
+
+/* get com buffer pointers */
+void *get_com_send_buf(tCom *com, int rq)
+{
+  return com->send_buf[rq];
+}
+void *get_com_recv_buf(tCom *com, int rq)
+{
+  return com->recv_buf[rq];
 }
 
 /* wait for all requests in com */

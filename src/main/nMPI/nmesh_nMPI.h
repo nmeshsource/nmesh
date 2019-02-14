@@ -35,6 +35,8 @@ void free_com(tCom *com);
 void realloc_com_reqs(tCom *com, int n_rq_new);
 void put_buffers_in_com(tCom *com, int rq,
                         void *sbuf, int slen, void *rbuf, int rlen);
+void *get_com_send_buf(tCom *com, int rq);
+void *get_com_recv_buf(tCom *com, int rq);
 int nMPI_Waitall_in_com(tCom *com);
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag);
