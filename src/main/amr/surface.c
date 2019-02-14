@@ -234,7 +234,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       memcpy(sbuf+cnt, s->mysurf->a, my_N);
       cnt += my_N;
     }
-    /* no call MPI */
+    /* now call MPI */
     nMPI_Isend_Irecv_double(sbuf, nvars*my_N,  rbuf, nvars*nb_N,
                             nb_rank, s_tag, r_tag, s_req, r_req);
   }
