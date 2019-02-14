@@ -43,7 +43,7 @@ void free_surface(tSurface *s)
 
 
 /* initialize a surface for var vi at face with nnb neighbors */
-tSurface *init_surface(tNode *node, int vi, int face)
+tSurface *init_surface(tNode *node, int face, int vi)
 {
   int dir = face/2;
   int zones;
@@ -97,7 +97,7 @@ int init_all_surfaces(tNode *node)
   {
     for(vi=0; vi<node->dat->nv; vi++)
     {
-      dat->s[face][vi] = init_surface(node, vi, face);
+      dat->s[face][vi] = init_surface(node, face, vi);
       if(dat->s[face][vi]) cnt++;
     }
   }
