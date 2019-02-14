@@ -280,7 +280,7 @@ void exchange_surfaces_for_all_vars(tNode *node, int face, int ni)
     /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
        and also send s->mysurf to nb->dat->s[nb_f][vi]->nbsurf[nb_ni] */
     nb_rank = nb->datrank;
-    r_tag = ((node->nid)*256 + ni)*6 + face;;
+    r_tag = ((node->nid)*256 + ni)*6 + face;
     s_tag = ((nb->nid)*256 + nb_ni)*6 + nb_f;
 //FIXME: we need better tags!!!!
 
