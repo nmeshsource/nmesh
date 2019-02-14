@@ -40,7 +40,7 @@ tArray *alloc_array(int n[3])
 /* get array that starts at segment si */
 tArray *get_array_seg(tArray *array, int si)
 {
-  tArray *as;
+  tArray *as = calloc(1, sizeof(tArray));
   *as = *array; /* shallow copy */
   as->si = si;
   as->a  = array->a + array->N * si;
@@ -58,8 +58,7 @@ void point_array_a_to_data(tArray *array, void *data)
 void free_array(tArray *array)
 {
   if(!array) return;
-  if(array->si) return; /* do nothing if this is not segment 0 */
-  free(array->a);
+  if(array->si == 0) free(array->a); /* free data only if this segm. 0 */
   free(array);
 }
 
