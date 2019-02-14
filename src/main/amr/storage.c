@@ -722,12 +722,13 @@ void free_nodesinlist(tNlist *elem)
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
 /* update array of leaf nodes on this proc */
-int update_mesh_myln_node_nid(tMesh *mesh)
+long update_mesh_myln_node_nid(tMesh *mesh)
 {
   tNlist *elem;
   int allocd = mesh->nmyln;
   int ainc = 256;
-  int nid = 0;
+  long nid = 0;
+  int lid = 0;
   int nmyln = 0;
 
   /* go over leaves if  mesh->lns is not NULL */
@@ -744,6 +745,10 @@ int update_mesh_myln_node_nid(tMesh *mesh)
         allocd += ainc;
       }
       mesh->myln[nmyln++] = elem;
+
+      /* set lid and invalidate parent's lid */
+      node->lid = lid++;
+      if(parent) parent->lid = -lid;
     }
     /* set nid and invalidate parent's nid */
     node->nid = nid++;
@@ -759,7 +764,7 @@ int update_mesh_myln_node_nid(tMesh *mesh)
 }
 
 /* return nid or -1 */
-int get_node_nid(tNode *node)
+long get_node_nid(tNode *node)
 {
   return node ? node->nid : -1;
 }

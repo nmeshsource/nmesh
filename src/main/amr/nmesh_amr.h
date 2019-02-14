@@ -79,7 +79,8 @@ typedef struct tNODE {
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
-  int32_t nid;            /* node ID, updated by update_mesh_myln_node_nid */
+  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
+  int lid;                /* local node ID */
   struct tARRAY *Dt[3];   /* transp. differentiation matrix in 3 dirs for [-1,1]
                              domain. This just points to an array in patch. */
   struct tARRAY *At[3];   /* transp. analysis matrix in 3 dirs */
@@ -223,8 +224,8 @@ tNlist *remove1_in_nodelist(tNlist *elem, int return_next);
 tNlist *first_nodelist(tNlist *list);
 tNlist *last_nodelist(tNlist *list);
 void free_nodelist(tNlist *elem);
-int update_mesh_myln_node_nid(tMesh *mesh);
-int get_node_nid(tNode *node);
+long update_mesh_myln_node_nid(tMesh *mesh);
+long get_node_nid(tNode *node);
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
 tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist);
 tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3]);
