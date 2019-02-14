@@ -5,7 +5,6 @@
 #include "nMPI.h"
 
 
-
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
 {
@@ -90,7 +89,7 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
-#ifdef MPI
+#ifdef USEMPI
   PRF;printf(": %d waiting for %d req to finish\n", nMPI_rank(), nreq);
   fflush(stdout);
 
@@ -100,6 +99,20 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
     errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
 #endif
   return status;
+}
+
+void nMPI_Isend_double(double *buf, int blen, int dest, int tag, nMPI_Req *req)
+{
+#ifdef USEMPI
+  MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD, req);
+#endif
+}
+
+void nMPI_Irecv_double(double *buf, int blen, int src, int tag, nMPI_Req *req)
+{
+#ifdef USEMPI
+  MPI_Isend(buf, blen, MPI_DOUBLE, src, tag, MPI_COMM_WORLD, req);
+#endif
 }
 
 
@@ -233,4 +246,16 @@ void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                           com->recv_buf[rq], com->recv_buflen[rq],
                           rank_other, s_tag, r_tag,
                           &(com->send_rq[rq]), &(com->recv_rq[rq]));
+}
+
+void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag)
+{
+  nMPI_Isend_double(com->send_buf[rq], com->send_buflen[rq], dest, tag,
+                    &(com->send_rq[rq]));
+}
+
+void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag)
+{
+  nMPI_Irecv_double(com->recv_buf[rq], com->recv_buflen[rq], src, tag,
+                    &(com->recv_rq[rq]));
 }

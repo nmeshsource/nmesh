@@ -19,42 +19,92 @@ void simple_load_balance(tMesh *mesh)
   tNode *node;
   int size = nMPI_size();
   double nperproc = nnodes/size;
-  int desrank;
-  tCom *com = alloc_com(sizeof(double), 1);
-
+  int desrank, rq;
+  tCom *scom = alloc_com(sizeof(double), 1);
+  tCom *rcom = alloc_com(sizeof(double), 1);
+  int rank = nMPI_rank();
+  rq = 0;
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
     nid = node->nid;
     desrank = (nid/nperproc);
     if(node->datrank != desrank)
-      move_node_to_rank(com, node, desrank);
+    {
+      move_node_to_rank(scom, rcom, rq, node, desrank);
+      rq++;
+    }
   }
-  nMPI_Waitall_in_com(com);
+  nMPI_Waitall_in_com(scom);
+  nMPI_Waitall_in_com(rcom);
   /* now unpack the buffers */
   //...
-  /* free com with all its buffers */
-  free_com(com);
+  //test:
+  rq = 0;
+  fornodelist(mesh->lns, elem)
+  {
+    node = elem->node;
+    nid = node->nid;
+    desrank = (nid/nperproc);
+    if(node->datrank != desrank)
+    {
+      double *rbuf;
+      if(rank == desrank)
+      {
+        rbuf = get_com_recv_buf(rcom, rq);
+        if(node->dat) errorexit("destination node should not have dat yet");
+        node->dat = alloc_dat(node);
+        PRF;printf(": nid%ld rank%d recv %g\n", nid, rank, rbuf[0]);
+      }
+      else
+      {
+        free_dat(node->dat);
+        node->dat = NULL;
+      }
+      node->datrank = desrank;
+      rq++;
+    }
+  }
+
+  /* free com with all their buffers */
+  free_com(scom);
+  free_com(rcom);
 }
 
-void move_node_to_rank(tCom *com, tNode *node, int desrank)
+void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
+                       tNode *node, int desrank)
 {
-  int rn;
   int slen=1, rlen=1;
-  
-  /* alloc buffers */
-  double *sbuf = calloc(slen, sizeof(double));
-  double *rbuf = calloc(rlen, sizeof(double));
+  double *sbuf, *rbuf;
+  int rank = nMPI_rank();
+  int other;
 
-  /* fill send buffer to be sent to desrank */
-  //..
-
-  /* put buffers in com */
-  rn = com->n_rq;
-  realloc_com_reqs(com, rn + 1);
-  put_buffers_in_com(com, rn, sbuf,slen, rbuf,rlen);
-
-  /* now call MPI */
-  nMPI_Isend_Irecv_double_com(com, com->n_rq - 1,
-                              desrank, node->nid, node->nid);
+  if( (rank == desrank) || (rank == node->datrank) )
+  {
+    if(rank == node->datrank)
+    {
+      /* alloc buffer */
+      sbuf = calloc(slen, sizeof(double));
+      /* fill send buffer to be sent to desrank */
+      //..
+      //test:
+      sbuf[0] = node->nid;
+      other = desrank;
+      /* put buffers in com */
+      realloc_com_reqs(scom, rq + 1);
+      put_buffers_in_com(scom, rq, sbuf,slen, NULL,0);
+      /* send */
+      nMPI_Isend_double_com(scom, rq, other, node->nid);
+    }
+    if(rank == desrank)
+    {
+      /* alloc buffer */
+      rbuf = calloc(rlen, sizeof(double));
+      other = node->datrank;
+      /* put buffers in com */
+      realloc_com_reqs(rcom, rq + 1);
+      put_buffers_in_com(rcom, rq, NULL,0, rbuf,rlen);
+      nMPI_Irecv_double_com(rcom, rq, other, node->nid);
+    }
+  }
 }

@@ -253,9 +253,12 @@ Yo(4);
   el2 = make_mesh_neighbor_list(mesh->pat[0]->rnode->child[1]->child[2], 0);
   printnodelist(el2);
 
-
   free_nodelist(el2);
 
+prdivider(2);
+simple_load_balance(mesh);
+printmesh(mesh);
+prdivider('^');
 
   return 0;
 }
