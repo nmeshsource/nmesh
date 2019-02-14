@@ -134,7 +134,7 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
   int my_dir = my_f/2;
   int nb_dir = nb_f/2;
 
-  /* count number of vars that have surfaces to exchanged and set myN */
+  /* count number of vars that have surfaces to be exchanged and set myN */
   for(nvars=0, vi=0; vi<node->dat->nv; vi++)
   {
     int zones = MeshVarSurfacezones(node->pat->mesh, vi);
@@ -149,6 +149,7 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
           my_n[i] = node->n[i];
         }
         nb_n[nb_dir] = my_n[my_dir] = zones;
+        *vind = vi;
         todo=0;
       }
       (*nvars)++;
