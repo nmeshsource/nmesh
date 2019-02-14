@@ -158,12 +158,13 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 /***********************************************************************/
 /* arrays */
 typedef struct tARRAY {
-  int n[3];    /* dims in all 3 dirs */
-  int N;       /* N = n[0] * n[1] * n[2]; */
-  double *a;   /* pointer to double data (could add one more for GPU data) */
-  int ns;      /* number of segments */
-  int si;      /* segment index */
-//  void *par;   /* pointer to some extra pars */
+  int n[3];     /* dims in all 3 dirs */
+  int N;        /* N = n[0] * n[1] * n[2]; */
+  double *a;    /* pointer to double data (could add one more for GPU data) */
+  int a_nofree; /* a_nofree=1 if free_array should not free a */
+  int ns;       /* number of segments */
+  int si;       /* segment index */
+//  void *par;    /* pointer to some extra pars */
 } tArray;
 
 

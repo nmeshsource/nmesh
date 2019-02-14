@@ -123,86 +123,6 @@ void set_mysurf(tSurface *s)
     s->mysurf = dat->v[vi];
 }
 
-/* put the nbsurf from neighbor with index ni in s->face */
-void get_nbsurf__old(tSurface *s, int ni, int zones)
-{
-  int vi = s->vi;
-  int my_f = s->face;
-  int nb_f, nb_ni;
-  tNode *node = s->dat->node;
-  tNode *nb = node->fnb[my_f][ni];
-
-  /* find face nb_f of nb that faces me */
-  locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
-
-  /* is nb local? */
-  if(nb->dat)
-  {
-    /* nb is local so just point s->nbsurf[ni] to its data */
-    tArray *nb_mysurf = nb->dat->s[nb_f][vi]->mysurf;
-    s->nbsurf[ni] = nb_mysurf;
-  }
-  else
-  {
-    /* nb is on other process so use MPI to exchange data */
-    int nb_rank, s_tag, r_tag;
-    nMPI_Req *s_req, *r_req;
-    int nb_dir = nb_f/2;
-    int nb_n[3];
-    int i;
-
-    /* set nb_n */
-    for(i=0; i<3; i++) nb_n[i] = nb->n[i];
-    nb_n[nb_dir] = zones;
-
-    /* allocate surface to recv neighbor data */
-    s->nbsurf[ni] = alloc_array(nb_n);
-
-    /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
-       and also send s->mysurf to nb->dat->s[nb_f][vi]->nbsurf[nb_ni] */
-    nb_rank = nb->datrank;
-    s_tag = node->nid;
-    r_tag = nb->nid;
-    //s_req = &(s->send_req[ni]);
-    //r_req = &(s->recv_req[ni]);
-    nMPI_Isend_Irecv_double(s->mysurf->a, s->mysurf->N,
-                            s->nbsurf[ni]->a, s->nbsurf[ni]->N,
-                            nb_rank, s_tag, r_tag, s_req, r_req);
-  }
-}
-
-/* put nbsurf from all neighbors in s->face */
-void get_all_nbsurf__old(tSurface *s)
-{
-  tNode *node = s->dat->node;
-  int zones = MeshVarSurfacezones(node->pat->mesh, s->vi);
-  int my_f = s->face;
-  int nfnb = node->nfnb[my_f];
-  int ni;
-  for(ni=0; ni<nfnb; ni++) get_nbsurf__old(s, ni, zones);
-}
-
-/* get nbsurf from all faces and variables for this node */
-void get_all_surfaces__old(tNode *node)
-{
-  tDat *dat = node->dat;
-  tSurface *s;
-  int face, vi;
-  int ns = init_all_surfaces(node);
-
-  if(!ns) return;
-
-  for(face=0; face<6; face++)
-  {
-    for(vi=0; vi<dat->nv; vi++)
-    {
-      s = dat->s[face][vi];
-      if(!s) continue;
-      get_all_nbsurf__old(s);
-    }
-  }
-}
-
 
 /* count number of vars that have surfaces to exchanged and set myN,
    input: node,my_f, nb,nb_f   output: nvars, vind, my_n, nb_n */
@@ -237,7 +157,7 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
 }
 
 /* get all surfaces from neighbor with index ni at face */
-void exchange_surfaces_for_all_vars(tNode *node, int face, int ni)
+void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
@@ -322,7 +242,7 @@ void exchange_surfaces_for_all_vars(tNode *node, int face, int ni)
 
 
 /* put nbsurf from all faces and variables for this node in buffers */
-void exchange_all_surfaces(tNode *node)
+void request_all_surfaces_exchange(tNode *node)
 {
   int face, ni;
   int ns = init_all_surfaces(node);
@@ -339,18 +259,13 @@ void exchange_all_surfaces(tNode *node)
     //nb_nid0 = node->fnb[face][0];
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
-      exchange_surfaces_for_all_vars(node, face, ni);
+      request_surfaces_exchange_for_all_vars(node, face, ni);
     }
   }
 }
 
 
-
-
-
-
-
-
+//request_surface_exchange_for_all_vars
 
 /* get all surfaces from neighbor with index ni at face */
 void get_surfaces_for_all_vars(tNode *node, int face, int ni)
@@ -416,5 +331,94 @@ void get_all_surfaces(tNode *node)
       get_surfaces_for_all_vars(node, face, ni);
     }
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
+  }
+}
+
+
+
+
+
+/*******************************************************************/
+/* Everything below this line is untested and may not work
+   Probably it should be removed !!!!! */
+/*******************************************************************/
+
+/* put the nbsurf from neighbor with index ni in s->face */
+void get_nbsurf__old(tSurface *s, int ni, int zones)
+{
+  int vi = s->vi;
+  int my_f = s->face;
+  int nb_f, nb_ni;
+  tNode *node = s->dat->node;
+  tNode *nb = node->fnb[my_f][ni];
+
+  /* find face nb_f of nb that faces me */
+  locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+
+  /* is nb local? */
+  if(nb->dat)
+  {
+    /* nb is local so just point s->nbsurf[ni] to its data */
+    tArray *nb_mysurf = nb->dat->s[nb_f][vi]->mysurf;
+    s->nbsurf[ni] = nb_mysurf;
+  }
+  else
+  {
+    /* nb is on other process so use MPI to exchange data */
+    int nb_rank, s_tag, r_tag;
+    nMPI_Req *s_req, *r_req;
+    int nb_dir = nb_f/2;
+    int nb_n[3];
+    int i;
+
+    /* set nb_n */
+    for(i=0; i<3; i++) nb_n[i] = nb->n[i];
+    nb_n[nb_dir] = zones;
+
+    /* allocate surface to recv neighbor data */
+    s->nbsurf[ni] = alloc_array(nb_n);
+
+    /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
+       and also send s->mysurf to nb->dat->s[nb_f][vi]->nbsurf[nb_ni] */
+    nb_rank = nb->datrank;
+    s_tag = node->nid;
+    r_tag = nb->nid;
+    //s_req = &(s->send_req[ni]);
+    //r_req = &(s->recv_req[ni]);
+    nMPI_Isend_Irecv_double(s->mysurf->a, s->mysurf->N,
+                            s->nbsurf[ni]->a, s->nbsurf[ni]->N,
+                            nb_rank, s_tag, r_tag, s_req, r_req);
+  }
+}
+
+/* put nbsurf from all neighbors in s->face */
+void get_all_nbsurf__old(tSurface *s)
+{
+  tNode *node = s->dat->node;
+  int zones = MeshVarSurfacezones(node->pat->mesh, s->vi);
+  int my_f = s->face;
+  int nfnb = node->nfnb[my_f];
+  int ni;
+  for(ni=0; ni<nfnb; ni++) get_nbsurf__old(s, ni, zones);
+}
+
+/* get nbsurf from all faces and variables for this node */
+void get_all_surfaces__old(tNode *node)
+{
+  tDat *dat = node->dat;
+  tSurface *s;
+  int face, vi;
+  int ns = init_all_surfaces(node);
+
+  if(!ns) return;
+
+  for(face=0; face<6; face++)
+  {
+    for(vi=0; vi<dat->nv; vi++)
+    {
+      s = dat->s[face][vi];
+      if(!s) continue;
+      get_all_nbsurf__old(s);
+    }
   }
 }

@@ -58,7 +58,8 @@ void point_array_a_to_data(tArray *array, void *data)
 void free_array(tArray *array)
 {
   if(!array) return;
-  if(array->si == 0) free(array->a); /* free data only if this segm. 0 */
+  if( (array->si == 0) && (array->a_nofree == 0) )
+    free(array->a); /* free data only if this segm. 0 and it should be freed */
   free(array);
 }
 
