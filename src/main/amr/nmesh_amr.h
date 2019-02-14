@@ -40,11 +40,12 @@ typedef struct tDAT {
   struct tSURFACE **s[6]; /* list of surfaces needed for data exchange,
                              e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
                              if s[6][vi]=NULL var vi does not need exchange */
-  int n_rq[6];            /* number of send/recv requests on each face */
-  nMPI_Req *send_rq[6];   /* send requests to each neighb. */
-  nMPI_Req *recv_rq[6];   /* recv req: recv_rq[2][i] is req. from nb i */
-  double **send_buf[6];   /* send buffer to neighbor */
-  double **recv_buf[6];   /* recv buffer */
+//  int n_rq[6];            /* number of send/recv requests on each face */
+//  nMPI_Req *send_rq[6];   /* send requests to each neighb. */
+//  nMPI_Req *recv_rq[6];   /* recv req: recv_rq[2][i] is req. from nb i */
+//  double **send_buf[6];   /* send buffer to neighbor */
+//  double **recv_buf[6];   /* recv buffer */
+  struct tCOM *com[6];    /* has com for each face */
 } tDat;
 
 /* surface data needed for node to neighbor node communication */

@@ -205,16 +205,16 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     s_tag = ((nb->nid)*256 + ni)*6 + nb_f;
     //FIXME: we need better tags!!!!
 
-    n_rq = dat->n_rq[face]; /* number of MPI requests so far */
+    n_rq = dat->com[face]->n_rq; /* number of MPI requests so far */
     /* make room for one more request */
     realloc_dat_reqs(dat, n_rq + 1, face);
-    s_req = &(dat->send_rq[face][n_rq]);
-    r_req = &(dat->recv_rq[face][n_rq]);
+    s_req = &(dat->com[face]->send_rq[n_rq]);
+    r_req = &(dat->com[face]->recv_rq[n_rq]);
     /* alloc send and recv buffers */
     sbuf = calloc(nvars * my_N, sizeof(double));
     rbuf = calloc(nvars * nb_N, sizeof(double));
-    dat->send_buf[face][n_rq] = sbuf; /* save buffers */
-    dat->recv_buf[face][n_rq] = rbuf;
+    dat->com[face]->send_buf[n_rq] = sbuf; /* save buffers */
+    dat->com[face]->recv_buf[n_rq] = rbuf;
     //NOTE: it may be good to use a long segmented array as rbuf
     //      with dat->s[face][vi]->nbsurf[ni] pointing to the segments
 
@@ -298,9 +298,9 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   /* get MPI request number */
   n_rq = dat->s[face][vi]->nbsurf[ni]->a[0];
   /* find our recv buffer */
-  rbuf = dat->recv_buf[face][n_rq];
+  rbuf = dat->com[face]->recv_buf[n_rq];
   /* wait for buffer */
-  nMPI_Waitall(1, &(dat->recv_rq[face][n_rq]), &stat);
+  nMPI_Waitall(1, &(dat->com[face]->recv_rq[n_rq]), &stat);
 
   /* get data out of recev buffer */
   for(cnt=0, vi=0; vi<node->dat->nv; vi++)
