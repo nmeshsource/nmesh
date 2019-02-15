@@ -4,6 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
+#define PR 1
 
 /* functions to move nodes between procs */
 
@@ -18,11 +19,14 @@ void simple_load_balance(tMesh *mesh)
   tNlist *elem;
   tNode *node;
   int size = nMPI_size();
-  double nperproc = nnodes/size;
+  int nperproc = nnodes/size + 1;
   int desrank, rq;
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
   int rank = nMPI_rank();
+
+  PRF;printf(": nperproc=%d\n", nperproc);
+
   rq = 0;
   fornodelist(mesh->lns, elem)
   {
@@ -35,8 +39,9 @@ void simple_load_balance(tMesh *mesh)
       rq++;
     }
   }
-  nMPI_Waitall_in_com(scom);
-  nMPI_Waitall_in_com(rcom);
+  nMPI_Waitall_com_send(scom);
+//abort();
+  nMPI_Waitall_com_recv(rcom);
   /* now unpack the buffers */
   //...
   //test:
@@ -78,6 +83,9 @@ void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
   double *sbuf, *rbuf;
   int rank = nMPI_rank();
   int other;
+
+  if(PR) printf("nid%ld datrank%d rank%d desrank%d\n",
+                node->nid, node->datrank, rank, desrank);
 
   if( (rank == desrank) || (rank == node->datrank) )
   {

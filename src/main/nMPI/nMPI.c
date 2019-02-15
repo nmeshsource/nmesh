@@ -50,6 +50,7 @@ int nMPI_size(void)
 #ifdef USEMPI
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
+//size=2;
   return size;
 }
 
@@ -91,7 +92,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
 #ifdef USEMPI
-  PRF;printf(": %d waiting for %d req to finish\n", nMPI_rank(), nreq);
+  PRF;printf(": %d waiting for %d reqs to finish\n", nMPI_rank(), nreq);
   fflush(stdout);
 
   status = MPI_Waitall(nreq, req, stat);
@@ -161,7 +162,10 @@ void free_com(tCom *com)
 /* alloc MPI requests */
 void realloc_com_reqs(tCom *com, int n_rq_new)
 {
+  int n_rq;
+
   if(!com) return;
+  n_rq = com->n_rq;
 
   /* free buffer contents */
   if( (n_rq_new < com->n_rq) && (com->free_buf) )
@@ -196,6 +200,19 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
     if(!com->send_buf) errorexit("out of memory for com->send_buf");
     com->recv_buf = realloc(com->recv_buf, n_rq_new*com->entrysize);
     if(!com->recv_buf) errorexit("out of memory for com->recv_buf");
+
+    /* zero new stuff */
+    if(n_rq_new > n_rq)
+    {
+      memset(com->send_rq + n_rq, 0, sizeof(com->send_rq[0])*(n_rq_new-n_rq));
+      memset(com->send_stat + n_rq, 0, sizeof(com->send_stat[0])*(n_rq_new-n_rq));
+      memset(com->send_buflen + n_rq, 0, sizeof(com->send_buflen[0])*(n_rq_new-n_rq));
+      memset(com->send_buf + n_rq, 0, com->entrysize*(n_rq_new-n_rq));
+      memset(com->recv_rq + n_rq, 0, sizeof(com->recv_rq[0])*(n_rq_new-n_rq));
+      memset(com->recv_stat + n_rq, 0, sizeof(com->recv_stat[0])*(n_rq_new-n_rq));
+      memset(com->recv_buflen + n_rq, 0, sizeof(com->recv_buflen[0])*(n_rq_new-n_rq));
+      memset(com->recv_buf + n_rq, 0, com->entrysize*(n_rq_new-n_rq));
+    }
   }
   else
   {
@@ -232,12 +249,25 @@ void *get_com_recv_buf(tCom *com, int rq)
   return com->recv_buf[rq];
 }
 
-/* wait for all requests in com */
-int nMPI_Waitall_in_com(tCom *com)
+/* wait for all send requests in com */
+int nMPI_Waitall_com_send(tCom *com)
 {
-  int status;
-  status  = nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
-  status += nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
+  return nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
+}
+
+/* wait for all recv requests in com */
+int nMPI_Waitall_com_recv(tCom *com)
+{
+  return nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
+}
+
+/* wait for all requests in com */
+int nMPI_Waitall_com(tCom *com)
+{
+  int status=0;
+  PRF;printf("\n");
+  status  = nMPI_Waitall_com_recv(com);
+  status += nMPI_Waitall_com_send(com);
   return status;
 }
 
