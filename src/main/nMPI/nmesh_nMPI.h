@@ -48,6 +48,8 @@ void *get_com_recv_buf(tCom *com, int rq);
 void set_com_counters(tCom *com, int i);
 void *get_next_com_send_buf(tCom *com);
 void *get_next_com_recv_buf(tCom *com);
+void free_com_send_i_buf(tCom *com);
+void free_com_recv_i_buf(tCom *com);
 int nMPI_Waitall_com_send(tCom *com);
 int nMPI_Waitall_com_recv(tCom *com);
 int nMPI_Waitall_com(tCom *com);

@@ -26,19 +26,20 @@ void simple_load_balance(tMesh *mesh)
 
   PRF;printf(": nperproc=%d\n", nperproc);
 
+  /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
     nid = node->nid;
     desrank = (nid/nperproc);
     if(node->datrank != desrank)
-    {
       move_node_to_rank(node, desrank, scom, rcom, 1);
-    }
   }
   nMPI_Waitall_com_send(scom);
+  free_com(scom);  /* free scom with all its buffers */
   nMPI_Waitall_com_recv(rcom);
 
+  /* get var data out of recv buffer */
   set_com_counters(rcom, 0);
   fornodelist(mesh->lns, elem)
   {
@@ -46,21 +47,94 @@ void simple_load_balance(tMesh *mesh)
     nid = node->nid;
     desrank = (nid/nperproc);
     if(node->datrank != desrank)
-    {
       move_node_to_rank(node, desrank, scom, rcom, 0);
-    }
   }
 
-  /* free com with all their buffers */
-  free_com(scom);
   free_com(rcom);
   update_mesh_myln_node_nid(mesh);
 }
 
+/* return: number of variables and number of doubles inside dat */
+int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
+{
+  int nvars, vi;
+
+  if(!dat)
+  {
+    *ndoubles = 0;
+    return 0;
+  }
+
+  /* find amount of data */
+  for(nvars=0, *ndoubles=0, vi=0; vi<dat->nv; vi++)
+    if(dat->v[vi]) 
+    {
+      *ndoubles += dat->v[vi]->N;
+      nvars++;
+    }
+  return nvars;
+}
+
+/* pack all of dat into a buffer which contains:
+  |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
+  here nvars is the number of variables that had storage,
+  the buffer has to be freed by caller later */
+double *buffer_forall_enabled_dat_vars(tDat *dat, int *buflen)
+{
+  int len;
+  double *buf;
+  int vi, datlen, nvars, bi, N;
+
+  /* find amount of data */
+  nvars = nvars_ndoubles_in_dat(dat, &datlen);
+
+  /* alloc buffer */
+  len = 1 + nvars*2 + datlen;
+  buf = calloc(len, sizeof(double));
+
+  /* fill buffer */
+  buf[0] = nvars;
+  for(bi=1, vi=0; vi<nvars; vi++)
+    if(dat->v[vi]) 
+    {
+      N = dat->v[vi]->N;
+      buf[bi++] = vi;
+      buf[bi++] = N;
+      memcpy(buf+bi, dat->v[vi]->a, N * sizeof(double));
+      bi += N;
+    }
+
+  /* return pointer to this buffer, and its length */
+  *buflen = bi;
+  return buf;
+}
+/* put buffer back into dat and enable all vars needed */
+int write_buffer_into_dat_vars(tDat *dat, double *buf)
+{
+  tNode *node = dat->node;
+  int i, vi, nvars, bi, N;
+
+  /* write buffer into vars */
+  nvars = buf[0];
+  for(bi=1, i=0; i<nvars; i++)
+  {
+    vi = buf[bi++];
+    N  = buf[bi++];
+    enablevarcomp_innode(node, vi);
+    memcpy(dat->v[vi]->a, buf+bi, N * sizeof(double));
+    bi += N;
+  }
+  return bi;
+}
+
+/* move data on one node between 2 ranks: the buffer we send/recv contains
+  |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
+ */
 void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs)
 {
-  int slen=1, rlen=1;
+  tDat *dat = node->dat;
+  int slen, rlen;
   double *sbuf, *rbuf;
   int rank = nMPI_rank();
   int other, rq;
@@ -71,12 +145,11 @@ void move_node_to_rank(tNode *node, int desrank,
                   node->nid, node->datrank, rank, desrank);
     if(rank == node->datrank)
     {
-      /* alloc buffer */
-      sbuf = calloc(slen, sizeof(double));
-      /* fill send buffer to be sent to desrank */
+      /* alloc and fill buffer */
+      sbuf = buffer_forall_enabled_dat_vars(dat, &slen);
       //..
       //test:
-      sbuf[0] = node->nid + 0.1234;
+      sbuf[3] = node->nid + 0.1234;
       other = desrank;
       /* put buffers in com */
       rq = append_buffers_to_com(scom, sbuf,slen, NULL,0);
@@ -87,7 +160,10 @@ void move_node_to_rank(tNode *node, int desrank,
     }
     if(rank == desrank)
     {
+      tMesh *mesh = node->pat->mesh;
+
       /* alloc buffer */
+      rlen = node->np * (mesh->nvdb); /* size to hold all vars */
       rbuf = calloc(rlen, sizeof(double));
       other = node->datrank;
       /* put buffers in com */
@@ -103,12 +179,15 @@ void move_node_to_rank(tNode *node, int desrank,
     if(rank == desrank)
     {
       /* now unpack the buffers */
-      //...
-      //test:
       rbuf = get_next_com_recv_buf(rcom);
       if(node->dat) errorexit("destination node should not have dat yet");
       node->dat = alloc_dat(node);
-      PRF;printf(": nid%ld rank%d recv %g\n", node->nid, rank, rbuf[0]);
+      write_buffer_into_dat_vars(node->dat, rbuf);
+      //test:
+      PRF;printf(": nid%ld rank%d recvd %g\n", node->nid, rank, rbuf[3]);
+      printf("rbuf=%p\n", rbuf);
+      //NOTE: could free rbuf here:
+      //free_com_recv_i_buf(rcom);
     }
     else
     {

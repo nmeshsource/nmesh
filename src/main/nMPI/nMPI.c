@@ -329,6 +329,22 @@ void *get_next_com_recv_buf(tCom *com)
   return get_com_recv_buf(com, i);
 }
 
+/* free buffers */
+void free_com_send_i_buf(tCom *com)
+{
+  int i = com->send_i;
+  free(com->send_buf[i]);
+  com->send_buf[i] = NULL;
+  com->send_buflen[i] = 0;
+}
+void free_com_recv_i_buf(tCom *com)
+{
+  int i = com->recv_i;
+  free(com->recv_buf[i]);
+  com->recv_buf[i] = NULL;
+  com->recv_buflen[i] = 0;
+}
+
 /* wait for all send requests in com */
 int nMPI_Waitall_com_send(tCom *com)
 {
