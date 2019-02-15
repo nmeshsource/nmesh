@@ -242,7 +242,7 @@ int make_output_directory(tMesh *mesh)
     char *opt;
     snprintf(so,999, "%s.log", outdir);
     prdivider(3);
-    printf("*** NOTE ***  Output redirected to:\n %s\n", so);
+    printf("*** NOTE ***  Output from proc0 redirected to:\n %s\n", so);
     prdivider(3);
     if(Getv(Par("logfile_creation"),"append"))
       opt = "a";
