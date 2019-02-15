@@ -4,6 +4,7 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
+#define PR 1
 
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
@@ -104,6 +105,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 void nMPI_Isend_double(double *buf, int blen, int dest, int tag, nMPI_Req *req)
 {
 #ifdef USEMPI
+  PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
   MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD, req);
 #endif
 }
@@ -111,7 +113,8 @@ void nMPI_Isend_double(double *buf, int blen, int dest, int tag, nMPI_Req *req)
 void nMPI_Irecv_double(double *buf, int blen, int src, int tag, nMPI_Req *req)
 {
 #ifdef USEMPI
-  MPI_Isend(buf, blen, MPI_DOUBLE, src, tag, MPI_COMM_WORLD, req);
+  PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
+  MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, MPI_COMM_WORLD, req);
 #endif
 }
 
