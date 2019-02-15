@@ -55,7 +55,7 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   char *par, *val;
   int lpar, lval;
 
-  printf("Reading parameter file \"%s\"\n", parfile);
+  if(Rank0) printf("Reading parameter file \"%s\"\n", parfile);
 
   /* read file into memory, and also add one space at end and beginning */
   fp = fopen(parfile, "r");

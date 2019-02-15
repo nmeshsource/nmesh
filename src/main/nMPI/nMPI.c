@@ -27,6 +27,8 @@ int nMPI_Init(int *pargc, char ***pargv)
 }
 int nMPI_Finalize(void)
 {
+  fclose(stderr);
+  fclose(stdout);
 #ifdef USEMPI
   return MPI_Finalize();
 #endif

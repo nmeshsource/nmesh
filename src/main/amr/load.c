@@ -26,6 +26,7 @@ void simple_load_balance(tMesh *mesh)
   int rank = nMPI_rank();
 
   PRF;printf(": nperproc=%d\n", nperproc);
+  nMPI_barrier();
 
   rq = 0;
   fornodelist(mesh->lns, elem)
@@ -74,6 +75,7 @@ void simple_load_balance(tMesh *mesh)
   free_com(scom);
   free_com(rcom);
   update_mesh_myln_node_nid(mesh);
+  nMPI_barrier();
 }
 
 void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
