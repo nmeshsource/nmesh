@@ -28,7 +28,6 @@ void simple_load_balance(tMesh *mesh)
   PRF;printf(": nperproc=%d\n", nperproc);
   nMPI_barrier();
 
-  rq = 0;
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
@@ -36,8 +35,7 @@ void simple_load_balance(tMesh *mesh)
     desrank = (nid/nperproc);
     if(node->datrank != desrank)
     {
-      move_node_to_rank(scom, rcom, rq, node, desrank);
-      rq++;
+      move_node_to_rank(scom, rcom, node, desrank);
     }
   }
   nMPI_Waitall_com_send(scom);
@@ -45,7 +43,7 @@ void simple_load_balance(tMesh *mesh)
   /* now unpack the buffers */
   //...
   //test:
-  rq = 0;
+  rq=0;
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
@@ -60,6 +58,7 @@ void simple_load_balance(tMesh *mesh)
         if(node->dat) errorexit("destination node should not have dat yet");
         node->dat = alloc_dat(node);
         PRF;printf(": nid%ld rank%d recv %g\n", nid, rank, rbuf[0]);
+        rq++;
       }
       else
       {
@@ -67,7 +66,6 @@ void simple_load_balance(tMesh *mesh)
         node->dat = NULL;
       }
       node->datrank = desrank;
-      rq++;
     }
   }
 
@@ -78,13 +76,12 @@ void simple_load_balance(tMesh *mesh)
   nMPI_barrier();
 }
 
-void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
-                       tNode *node, int desrank)
+void move_node_to_rank(tCom *scom, tCom *rcom, tNode *node, int desrank)
 {
   int slen=1, rlen=1;
   double *sbuf, *rbuf;
   int rank = nMPI_rank();
-  int other;
+  int other, rq;
 
   if(PR) printf("nid%ld datrank%d rank%d desrank%d\n",
                 node->nid, node->datrank, rank, desrank);
@@ -101,8 +98,9 @@ void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
       sbuf[0] = node->nid + 0.1234;
       other = desrank;
       /* put buffers in com */
-      realloc_com_reqs(scom, rq + 1);
-      put_buffers_in_com(scom, rq, sbuf,slen, NULL,0);
+      rq = append_buffers_to_com(scom, sbuf,slen, NULL,0);
+      print_com(scom);
+
       /* send */
       nMPI_Isend_double_com(scom, rq, other, node->nid);
     }
@@ -112,8 +110,9 @@ void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
       rbuf = calloc(rlen, sizeof(double));
       other = node->datrank;
       /* put buffers in com */
-      realloc_com_reqs(rcom, rq + 1);
-      put_buffers_in_com(rcom, rq, NULL,0, rbuf,rlen);
+      rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
+      print_com(rcom);
+
       nMPI_Irecv_double_com(rcom, rq, other, node->nid);
     }
   }

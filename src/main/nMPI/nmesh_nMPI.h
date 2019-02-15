@@ -37,8 +37,10 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
 tCom *alloc_com(int entrysize, int free_buf);
 void free_com(tCom *com);
 void realloc_com_reqs(tCom *com, int n_rq_new);
+void print_com(tCom *com);
 void put_buffers_in_com(tCom *com, int rq,
                         void *sbuf, int slen, void *rbuf, int rlen);
+int append_buffers_to_com(tCom *com, void *sbuf,int slen, void *rbuf,int rlen);
 void *get_com_send_buf(tCom *com, int rq);
 void *get_com_recv_buf(tCom *com, int rq);
 int nMPI_Waitall_com_send(tCom *com);

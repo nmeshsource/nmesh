@@ -27,5 +27,4 @@ void get_all_surfaces(tNode *node);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);
-void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
-                       tNode *node, int desrank);
+void move_node_to_rank(tCom *scom, tCom *rcom, tNode *node, int desrank);

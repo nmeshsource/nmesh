@@ -68,7 +68,6 @@ int nMPI_size(void)
 #ifdef USEMPI
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
-  //size=2;
   return size;
 }
 
@@ -82,6 +81,23 @@ int nMPI_barrier(void)
   return ret;
 }
 
+/* non-blocking send */
+void nMPI_Isend_double(double *buf, int blen, int dest, int tag, nMPI_Req *req)
+{
+  PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
+#ifdef USEMPI
+  MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD, req);
+#endif
+}
+
+/* non-blocking recv */
+void nMPI_Irecv_double(double *buf, int blen, int src, int tag, nMPI_Req *req)
+{
+  PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
+#ifdef USEMPI
+  MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, MPI_COMM_WORLD, req);
+#endif
+}
 
 /* exchange double buffers */
 void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
@@ -110,6 +126,7 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
+  if(!nreq) return 0;
   PRF;printf(": %d waiting for %d reqs to finish\n", nMPI_rank(), nreq);
 #ifdef USEMPI
   fflush(stdout);
@@ -122,25 +139,10 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   return status;
 }
 
-void nMPI_Isend_double(double *buf, int blen, int dest, int tag, nMPI_Req *req)
-{
-  PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
-#ifdef USEMPI
-  MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD, req);
-#endif
-}
-
-void nMPI_Irecv_double(double *buf, int blen, int src, int tag, nMPI_Req *req)
-{
-  PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
-#ifdef USEMPI
-  MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, MPI_COMM_WORLD, req);
-#endif
-}
 
 
 /**********************************************************************/
-/* deal with MPI tCom struct */
+/* deal with tCom struct for MPI */
 /**********************************************************************/
 /* create a com */
 tCom *alloc_com(int entrysize, int free_buf)
@@ -250,6 +252,18 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
   com->n_rq = n_rq_new;
 }
 
+void print_com(tCom *com)
+{
+  int n_rq = com->n_rq;
+  printf("com: n_rq=%d\n", n_rq);
+#ifndef USEMPI
+  for(int i=0; i<n_rq; i++)
+    printf("%d: send_rq=%d recv_rq=%d send_stat=%d recv_stat=%d\n",
+           i, com->send_rq[i], com->recv_rq[i],
+           com->send_stat[i], com->recv_stat[i]);
+#endif
+}
+
 /* point com buffers */
 void put_buffers_in_com(tCom *com, int rq,
                         void *sbuf, int slen, void *rbuf, int rlen)
@@ -258,6 +272,15 @@ void put_buffers_in_com(tCom *com, int rq,
   com->send_buflen[rq] = slen;
   com->recv_buf[rq] = rbuf;
   com->recv_buflen[rq] = rlen;
+}
+
+/* add new com entries and point its buffers to sbuf and rbuf */
+int append_buffers_to_com(tCom *com, void *sbuf,int slen, void *rbuf,int rlen)
+{
+  int rq = com->n_rq;
+  realloc_com_reqs(com, rq + 1);
+  put_buffers_in_com(com, rq, sbuf,slen, rbuf,rlen);
+  return rq;
 }
 
 /* get com buffer pointers */
@@ -292,7 +315,7 @@ int nMPI_Waitall_com(tCom *com)
   return status;
 }
 
-/* do requst rq of com */
+/* do send and recv request rq of com */
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag)
 {
@@ -301,13 +324,13 @@ void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                           rank_other, s_tag, r_tag,
                           &(com->send_rq[rq]), &(com->recv_rq[rq]));
 }
-
+/* send only */
 void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag)
 {
   nMPI_Isend_double(com->send_buf[rq], com->send_buflen[rq], dest, tag,
                     &(com->send_rq[rq]));
 }
-
+/* recv only */
 void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag)
 {
   nMPI_Irecv_double(com->recv_buf[rq], com->recv_buflen[rq], src, tag,

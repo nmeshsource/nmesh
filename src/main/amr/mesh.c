@@ -258,7 +258,7 @@ Yo(4);
 Yo(5);
 prdivider(2);
 simple_load_balance(mesh);
-printmesh(mesh);
+//printmesh(mesh);
 prdivider('^');
 //  fflush(stdout);
 //  nMPI_barrier();
