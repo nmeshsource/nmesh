@@ -138,13 +138,17 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
         snprintf(argi, 999, "nmesh_arg%d", nargs+2);
         snprintf(descr, 999, "nmesh command line argument%d", nargs+2);
         makeparameter(mesh, argi, argv[i], descr);
+        if(Rank0) printf("  %s = %s\n", argi, Gets(Par(argi)));
         nargs++;
       }
     }
     /* add nmesh command line options */
     if(nopts>0)
+    {
       makeparameter(mesh, "nmesh_options", options,
                     "nmesh command line options");
+      if(Rank0) printf("  nmesh_options = %s\n", Gets(Par("nmesh_options")));
+    }
     free(parfile);
     free(outdir);
   }
