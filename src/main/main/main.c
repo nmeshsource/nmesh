@@ -65,23 +65,30 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   if(0) 
     for(i = 0; i < argc; i++) printf("argv[%d] = %s\n", i, argv[i]);
 
-  prdivider(1);
-  printf("Welcome to nmesh, compiled on %s at %s\n", __DATE__, __TIME__);
-  prdivider(1);
+  if(Rank0)
+  {
+    prdivider(1);
+    printf("Welcome to nmesh, compiled on %s at %s\n", __DATE__, __TIME__);
+    prdivider(1);
+  }
 
   if(argc < 2)
   {
-    printf("Usage:  nmesh name.par\n");
-    printf("or:     nmesh name.par options and extra arguments\n");
-    printf("\n");
-    printf("options: --keep_previous           do not touch name_previous\n");
-    printf("         --modify-par:\"P=v\"        set par P to value v\n");
-    printf(" all options must start with --\n"); 
+    if(Rank0)
+    {
+      printf("Usage:  nmesh name.par\n");
+      printf("or:     nmesh name.par options and extra arguments\n");
+      printf("\n");
+      printf("options: --keep_previous          do not touch name_previous\n");
+      printf("         --modify-par:\"P=v\"       set par P to value v\n");
+      printf(" all options must start with --\n");
+    }
+    nMPI_Finalize();
     exit(0);
   }
 
   /* this par is needed here already, so that finalexit can check it */
-  printf("Making first parameters\n");
+  if(Rank0) printf("Making first parameters\n");
   makeparameter(mesh, "errorexit", "exit", "how we exit");
   /* this is about how we output */
   makeparameter(mesh, "logfile_creation", "append", "how we create logfile");
@@ -107,10 +114,10 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
     outdir[strlen(outdir)-4]=0; /* remove .par */
 
     /* first parameter initializes parameter data base */
-    printf("Adding command line parameters\n");
-    AddPar("outdir", outdir, "output directory");
-    AddPar("parameterfile", parfile, 
-	   "name of parameter file given on command line");
+    if(Rank0) printf("Adding command line parameters\n");
+    makeparameter(mesh, "outdir", outdir, "output directory");
+    makeparameter(mesh, "parameterfile", parfile, 
+                  "name of parameter file given on command line");
 
     /* add other args */
     nargs=nopts=0;
@@ -162,7 +169,7 @@ int make_output_directory(tMesh *mesh)
   /* check if a shell is available to execute commands later */
   /* NOTE: system2 and system3 are smart enough to do "mkdir", "rm -rf"
            and "mv" even without a shell by using POSIX calls. */
-  if(system(NULL)==0)
+  if(system(NULL)==0 && Rank0)
   {
     printf("WARNING: system(NULL)=0 => cannot execute shell commands!\n");
     printf("         Consider using system_emu.\n");
@@ -191,15 +198,22 @@ int make_output_directory(tMesh *mesh)
     free(prev);
     free(curr);
     */
-    // remove outdir_previous and move outdir to outdir_previous
-    system2("rm -rf", outdirp);
-    system3("mv", outdir, outdirp);
+    /* remove outdir_previous and move outdir to outdir_previous */
+    if(Rank0)
+    {
+      system2("rm -rf", outdirp);
+      system3("mv", outdir, outdirp);
+    }
   }
 
   /* make output directory, save parfile */
-  system2("mkdir", outdir);
-  /* system3("cp", Gets(Par("parameterfile")), outdir); */
-  copy_file_into_dir(Gets(Par("parameterfile")), outdir);
+  if(Rank0)
+  {
+    system2("mkdir", outdir);
+    copy_file_into_dir(Gets(Par("parameterfile")), outdir);
+  }
+  /* all wait here until mkdir is done. */
+  nMPI_barrier();
 
   /* redirect stdout and stderr. Do it for all MPI ranks>0
      all output is collected in outdir/stdout.001 etc  */
@@ -207,11 +221,14 @@ int make_output_directory(tMesh *mesh)
   {
     char f[100];
     snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
-    snprintf(so,999, f, outdir, nMPI_rank());  
-    prdivider(3);
-    printf("*** NOTE ***  Output from proc%d redirected to:\n %s\n",
-           nMPI_rank(), so);
-    prdivider(3);
+    snprintf(so,999, f, outdir, nMPI_rank());
+    if(nMPI_rank()==1)
+    {
+      prdivider(3);
+      printf("*** NOTE ***  Output from other procs redirected to e.g.:\n %s\n",
+             so);
+      prdivider(3);
+    }
     freopen(so, "w", stdout);
     freopen(so, "w", stderr);
   }
@@ -253,7 +270,7 @@ int parse_command_line_options(tMesh *mesh)
   //PRF;printf(":\nPar(\"nmesh_options\")=%i\n", Par("nmesh_options"));
   /* get length of nmesh_options string */
   if(GetsLax(Par("nmesh_options"))==0) return 0;
-  printf("Parsing command line options\n");
+  if(Rank0) printf("Parsing command line options\n");
 
   /* parse for all --modify-par: */
   optionstr = strdup((GetsLax(Par("nmesh_options"))));
@@ -286,7 +303,8 @@ int parse_command_line_options(tMesh *mesh)
 /* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
 {
-  if (1) {
+  if(1)
+  {
     prdivider(0);
     printf("Initializing mesh\n");
   }

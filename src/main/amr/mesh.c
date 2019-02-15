@@ -257,11 +257,11 @@ Yo(4);
 
 Yo(5);
 prdivider(2);
-//simple_load_balance(mesh);
+simple_load_balance(mesh);
 printmesh(mesh);
 prdivider('^');
-  fflush(stdout);
-  nMPI_barrier();
+//  fflush(stdout);
+//  nMPI_barrier();
 
   return 0;
 }
