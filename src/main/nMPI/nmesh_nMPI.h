@@ -51,6 +51,8 @@ void *get_next_com_recv_buf(tCom *com);
 int nMPI_Waitall_com_send(tCom *com);
 int nMPI_Waitall_com_recv(tCom *com);
 int nMPI_Waitall_com(tCom *com);
+int nMPI_Wait_com_send(tCom *com, int rq);
+int nMPI_Wait_com_recv(tCom *com, int rq);
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag);
 void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag);

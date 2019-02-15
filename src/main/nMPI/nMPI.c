@@ -127,7 +127,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
   if(!nreq) return 0;
-  PRF;printf(": %d waiting for %d reqs to finish\n", nMPI_rank(), nreq);
+  PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
 #ifdef USEMPI
   fflush(stdout);
 
@@ -135,6 +135,22 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 
   if(status == MPI_ERR_IN_STATUS)
     errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
+#endif
+  return status;
+}
+
+/* check on requests */
+int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
+{
+  int status = 0;
+  PRF;printf(": %d waiting for request to finish\n", nMPI_rank());
+#ifdef USEMPI
+  fflush(stdout);
+
+  status = MPI_Wait(req, stat);
+
+  if(status == MPI_ERR_IN_STATUS)
+    errorexit("MPI_Wait error after waiting for request");
 #endif
   return status;
 }
@@ -333,6 +349,17 @@ int nMPI_Waitall_com(tCom *com)
   status  = nMPI_Waitall_com_recv(com);
   status += nMPI_Waitall_com_send(com);
   return status;
+}
+
+/* wait for send request rq to finish */
+int nMPI_Wait_com_send(tCom *com, int rq)
+{
+  return nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
+}
+/* wait for recv request rq to finish */
+int nMPI_Wait_com_recv(tCom *com, int rq)
+{
+  return nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
 }
 
 /* do send and recv request rq of com */
