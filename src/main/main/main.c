@@ -5,7 +5,7 @@
 #include "main.h"
 #include <time.h> // for time and ctime functions
 
-/* global var that contain the mesh made in main */
+/* global var that contains the mesh made in main */
 tMesh *main_mesh;
 
 
@@ -15,7 +15,6 @@ void initialize_libraries(struct tMESH *mesh)
 {
   prdivider(1);
   printf("Initializing libraries\n");
-
 #include "nmesh_automatic_initialize.c"
 }
 
