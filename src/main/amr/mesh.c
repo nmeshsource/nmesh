@@ -257,7 +257,15 @@ Yo(4);
 
 Yo(5);
 prdivider(2);
+el = mesh->lns;
+for(i=1; i<=8+2; i++) el = el->next;
+enablevar(mesh, Ind("X"));
+
+double *d = GetVarDpointer(el->node, Ind("X"));
+if(d) d[3] = 3;
+printvar_innode(el->node, "X");
 simple_load_balance(mesh);
+printvar_innode(el->node, "X");
 //printmesh(mesh);
 prdivider('^');
 //  fflush(stdout);

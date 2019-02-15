@@ -127,7 +127,8 @@ void printvar_innode(tNode *node, char *name)
 {
   tMesh *mesh = node->pat->mesh;
   int vi = Ind(name);
-  tArray *va = node->dat->v[vi];
+  tDat *dat = node->dat;
+  tArray *va = dat ? dat->v[vi] : NULL;
 
   printf("%s, Ind=%d:\n", name, vi);
   printarray(va);
@@ -137,6 +138,11 @@ void printvar_innode(tNode *node, char *name)
 void printarray(tArray *A)
 {
   int i,j,k;
+  if(!A)
+  {
+    printf("array is NULL\n");
+    return;
+  }
   printf("->n[] = {%d,%d,%d}\n", A->n[0],A->n[1],A->n[2]);
   for(k=0; k<A->n[2]; k++)
   {

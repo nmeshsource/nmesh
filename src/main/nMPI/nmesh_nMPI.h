@@ -45,9 +45,13 @@ void put_buffers_in_com(tCom *com, int rq,
 int append_buffers_to_com(tCom *com, void *sbuf,int slen, void *rbuf,int rlen);
 void *get_com_send_buf(tCom *com, int rq);
 void *get_com_recv_buf(tCom *com, int rq);
-void set_com_counters(tCom *com, int i);
-void *get_next_com_send_buf(tCom *com);
-void *get_next_com_recv_buf(tCom *com);
+void set_com_counters(tCom *com, int si, int ri);
+void inc_com_send_i(tCom *com);
+void inc_com_recv_i(tCom *com);
+void *get_com_send_i_buf_inc_i(tCom *com);
+void *get_com_recv_i_buf_inc_i(tCom *com);
+void *get_com_send_i_buf(tCom *com);
+void *get_com_recv_i_buf(tCom *com);
 void free_com_send_i_buf(tCom *com);
 void free_com_recv_i_buf(tCom *com);
 int nMPI_Waitall_com_send(tCom *com);

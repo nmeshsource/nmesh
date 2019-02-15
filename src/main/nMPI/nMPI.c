@@ -309,24 +309,46 @@ void *get_com_recv_buf(tCom *com, int rq)
   return com->recv_buf[rq];
 }
 /* set the counter in com */
-void set_com_counters(tCom *com, int i)
+void set_com_counters(tCom *com, int si, int ri)
 {
-  com->send_i = com->recv_i = i;
+  com->send_i = si;
+  com->recv_i = ri;
 }
-/* get com buffer pointers one after the other */
-void *get_next_com_send_buf(tCom *com)
+/* increase the counters */
+void inc_com_send_i(tCom *com)
+{
+  com->send_i += 1;
+}
+void inc_com_recv_i(tCom *com)
+{
+  com->recv_i += 1;
+}
+
+/* get com buffer pointers one after the other, i.e. increase i */
+void *get_com_send_i_buf_inc_i(tCom *com)
 {
   int i = com->send_i;
   if(i >= com->n_rq) errorexit("send_i>=n_rq");
   com->send_i = i+1;
   return get_com_send_buf(com, i);
 }
-void *get_next_com_recv_buf(tCom *com)
+void *get_com_recv_i_buf_inc_i(tCom *com)
 {
   int i = com->recv_i;
   if(i >= com->n_rq) errorexit("recv_i>=n_rq");
   com->recv_i = i+1;
+  //PRF;printf(": i=%d -> recv_i=%d\n", i, com->recv_i); fflush(stdout);
   return get_com_recv_buf(com, i);
+}
+
+/* get com buffer pointers at i */
+void *get_com_send_i_buf(tCom *com)
+{
+  return com->send_buf[com->send_i];
+}
+void *get_com_recv_i_buf(tCom *com)
+{
+  return com->recv_buf[com->recv_i];
 }
 
 /* free buffers */
@@ -340,6 +362,8 @@ void free_com_send_i_buf(tCom *com)
 void free_com_recv_i_buf(tCom *com)
 {
   int i = com->recv_i;
+  //PRF;printf(": i=%d -> recv_i=%d com->recv_buf[i]=%p\n",
+  //           i, com->recv_i, com->recv_buf[i]); fflush(stdout);
   free(com->recv_buf[i]);
   com->recv_buf[i] = NULL;
   com->recv_buflen[i] = 0;
