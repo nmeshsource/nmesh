@@ -153,6 +153,8 @@ void free_com(tCom *com)
       free(com->send_buf[i]);
       free(com->recv_buf[i]);
     }
+  free(com->send_buflen);
+  free(com->recv_buflen);
   free(com->send_buf);
   free(com->recv_buf);
 

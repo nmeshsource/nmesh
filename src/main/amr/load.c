@@ -73,6 +73,7 @@ void simple_load_balance(tMesh *mesh)
   /* free com with all their buffers */
   free_com(scom);
   free_com(rcom);
+  update_mesh_myln_node_nid(mesh);
 }
 
 void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
