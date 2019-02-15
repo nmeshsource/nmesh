@@ -19,14 +19,12 @@ void simple_load_balance(tMesh *mesh)
   tNlist *elem;
   tNode *node;
   int size = nMPI_size();
-  int nperproc = nnodes/size + 1;
-  int desrank, rq;
+  int nperproc = nnodes/size +  nnodes%size;
+  int desrank;
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
-  int rank = nMPI_rank();
 
   PRF;printf(": nperproc=%d\n", nperproc);
-  nMPI_barrier();
 
   fornodelist(mesh->lns, elem)
   {
@@ -40,10 +38,8 @@ void simple_load_balance(tMesh *mesh)
   }
   nMPI_Waitall_com_send(scom);
   nMPI_Waitall_com_recv(rcom);
-  /* now unpack the buffers */
-  //...
-  //test:
-  rq=0;
+
+  set_com_counters(rcom, 0);
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
@@ -51,21 +47,7 @@ void simple_load_balance(tMesh *mesh)
     desrank = (nid/nperproc);
     if(node->datrank != desrank)
     {
-      double *rbuf;
-      if(rank == desrank)
-      {
-        rbuf = get_com_recv_buf(rcom, rq);
-        if(node->dat) errorexit("destination node should not have dat yet");
-        node->dat = alloc_dat(node);
-        PRF;printf(": nid%ld rank%d recv %g\n", nid, rank, rbuf[0]);
-        rq++;
-      }
-      else
-      {
-        free_dat(node->dat);
-        node->dat = NULL;
-      }
-      node->datrank = desrank;
+      move_node_to_rank(node, desrank, scom, rcom, 0);
     }
   }
 
@@ -73,7 +55,6 @@ void simple_load_balance(tMesh *mesh)
   free_com(scom);
   free_com(rcom);
   update_mesh_myln_node_nid(mesh);
-  nMPI_barrier();
 }
 
 void move_node_to_rank(tNode *node, int desrank,
@@ -121,11 +102,13 @@ void move_node_to_rank(tNode *node, int desrank,
     double *rbuf;
     if(rank == desrank)
     {
-      rbuf = get_com_recv_buf(rcom, rq);
+      /* now unpack the buffers */
+      //...
+      //test:
+      rbuf = get_next_com_recv_buf(rcom);
       if(node->dat) errorexit("destination node should not have dat yet");
       node->dat = alloc_dat(node);
       PRF;printf(": nid%ld rank%d recv %g\n", node->nid, rank, rbuf[0]);
-      rq++;
     }
     else
     {
