@@ -6,13 +6,18 @@
 
 #define PR 1
 
+/* my rank and size if MPI is not compiled in */
+int noMPI_rank=0, noMPI_size=1;
+
+
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
 {
 #ifdef USEMPI
   printf("MPI is compiled in.\n");
 #else
-  printf("MPI is not compiled in.\n");
+  printf("MPI is not compiled in. Posing as rank=%d and size=%d\n",
+         noMPI_rank, noMPI_size);
 #endif
   return 0;
 }
@@ -22,8 +27,19 @@ int nMPI_Init(int *pargc, char ***pargv)
 {
 #ifdef USEMPI
   return MPI_Init(pargc, pargv);
-#endif
+#else
+  /* for debugging we can start nmesh as:
+     nmesh nam.par 2 5
+     then it poses as rank=2 and size=5 */
+  if(pargc[0]==4)
+  {
+    noMPI_rank = atoi(pargv[0][2]);
+    noMPI_size = atoi(pargv[0][3]);
+    if(noMPI_rank<0) noMPI_rank=0;
+    if(noMPI_size<1) noMPI_size=1;
+  }
   return 0;
+#endif
 }
 int nMPI_Finalize(void)
 {
@@ -38,7 +54,7 @@ int nMPI_Finalize(void)
 /* return MPI rank, if MPI is not compiled in return 0 */
 int nMPI_rank(void)
 {
-  int rank=0;
+  int rank = noMPI_rank;
 #ifdef USEMPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
@@ -48,7 +64,7 @@ int nMPI_rank(void)
 /* number of processes we are running with, or 1 if no MPI */
 int nMPI_size(void)
 {
-  int size=1;
+  int size = noMPI_size;
 #ifdef USEMPI
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif

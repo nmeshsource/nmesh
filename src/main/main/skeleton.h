@@ -4,6 +4,7 @@
 /* for skeleton.c */
 enum
 {
+  FIRST,
   POST_PARAMETERS,
   INITMESH,
   PRE_COORDINATES,

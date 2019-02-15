@@ -393,7 +393,7 @@ void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description)
     makeparameter(mesh, name, value, description);
   else
     setparameter(mesh, pari, value);
-  printf("  parameter %-25s  =  %s\n", name, Gets(Par(name)));
+  if(Rank0) printf("  parameter %-25s  =  %s\n", name, Gets(Par(name)));
 }
 
 /* functions for setting pars */
