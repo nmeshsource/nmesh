@@ -35,7 +35,7 @@ void simple_load_balance(tMesh *mesh)
     desrank = (nid/nperproc);
     if(node->datrank != desrank)
     {
-      move_node_to_rank(scom, rcom, node, desrank);
+      move_node_to_rank(node, desrank, scom, rcom, 1);
     }
   }
   nMPI_Waitall_com_send(scom);
@@ -76,18 +76,18 @@ void simple_load_balance(tMesh *mesh)
   nMPI_barrier();
 }
 
-void move_node_to_rank(tCom *scom, tCom *rcom, tNode *node, int desrank)
+void move_node_to_rank(tNode *node, int desrank,
+                       tCom *scom, tCom *rcom, int setbufs)
 {
   int slen=1, rlen=1;
   double *sbuf, *rbuf;
   int rank = nMPI_rank();
   int other, rq;
 
-  if(PR) printf("nid%ld datrank%d rank%d desrank%d\n",
-                node->nid, node->datrank, rank, desrank);
-
-  if( (rank == desrank) || (rank == node->datrank) )
+  if(setbufs) /* setup buffers and fill them */
   {
+    if(PR) printf("nid%ld datrank%d rank%d desrank%d\n",
+                  node->nid, node->datrank, rank, desrank);
     if(rank == node->datrank)
     {
       /* alloc buffer */
@@ -112,8 +112,26 @@ void move_node_to_rank(tCom *scom, tCom *rcom, tNode *node, int desrank)
       /* put buffers in com */
       rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
       print_com(rcom);
-
+      /* receive */
       nMPI_Irecv_double_com(rcom, rq, other, node->nid);
     }
+  }
+  else /* retrieve data from buffers */
+  {
+    double *rbuf;
+    if(rank == desrank)
+    {
+      rbuf = get_com_recv_buf(rcom, rq);
+      if(node->dat) errorexit("destination node should not have dat yet");
+      node->dat = alloc_dat(node);
+      PRF;printf(": nid%ld rank%d recv %g\n", node->nid, rank, rbuf[0]);
+      rq++;
+    }
+    else
+    {
+      free_dat(node->dat);
+      node->dat = NULL;
+    }
+    node->datrank = desrank;
   }
 }

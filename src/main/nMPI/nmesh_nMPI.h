@@ -8,8 +8,10 @@
 
 /* for MPI communication this can help */
 typedef struct tCOM {
-  int n_rq;             /* number of send/recv requests on each face */
-  nMPI_Req *send_rq;    /* send request array */
+  int n_rq;             /* number of send/recv requests */
+  int send_i;           /* counter, can be used in loops */
+  int recv_i;           /* counter, can be used in loops */
+  nMPI_Req *send_rq;    /* list of send requests */
   nMPI_Req *recv_rq;    /* recv req: recv_rq[2] is req. 2 */
   nMPI_Stat *send_stat; /* status array for sends */
   nMPI_Stat *recv_stat; /* status array recvs*/
@@ -18,7 +20,7 @@ typedef struct tCOM {
   void **send_buf;      /* send buffer */
   void **recv_buf;      /* recv buffer */
   int entrysize;        /* size of entries in send_buf and recv_buf */
-  int free_buf;         /* do we free buffers in free_com and realloc_com_reqs */
+  int free_buf;         /* free buffers in free_com and realloc_com_reqs */
 } tCom;
 
 
@@ -43,6 +45,9 @@ void put_buffers_in_com(tCom *com, int rq,
 int append_buffers_to_com(tCom *com, void *sbuf,int slen, void *rbuf,int rlen);
 void *get_com_send_buf(tCom *com, int rq);
 void *get_com_recv_buf(tCom *com, int rq);
+void set_com_counters(tCom *com, int i);
+void *get_next_com_send_buf(tCom *com);
+void *get_next_com_recv_buf(tCom *com);
 int nMPI_Waitall_com_send(tCom *com);
 int nMPI_Waitall_com_recv(tCom *com);
 int nMPI_Waitall_com(tCom *com);

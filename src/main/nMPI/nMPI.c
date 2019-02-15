@@ -255,7 +255,7 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
 void print_com(tCom *com)
 {
   int n_rq = com->n_rq;
-  printf("com: n_rq=%d\n", n_rq);
+  printf("com: n_rq=%d send_i=%d recv_i=%d\n", n_rq, com->send_i, com->recv_i);
 #ifndef USEMPI
   for(int i=0; i<n_rq; i++)
     printf("%d: send_rq=%d recv_rq=%d send_stat=%d recv_stat=%d\n",
@@ -291,6 +291,26 @@ void *get_com_send_buf(tCom *com, int rq)
 void *get_com_recv_buf(tCom *com, int rq)
 {
   return com->recv_buf[rq];
+}
+/* set the counter in com */
+void set_com_counters(tCom *com, int i)
+{
+  com->send_i = com->recv_i = i;
+}
+/* get com buffer pointers one after the other */
+void *get_next_com_send_buf(tCom *com)
+{
+  int i = com->send_i;
+  if(i >= com->n_rq) errorexit("send_i>=n_rq");
+  com->send_i = i+1;
+  return get_com_send_buf(com, i);
+}
+void *get_next_com_recv_buf(tCom *com)
+{
+  int i = com->recv_i;
+  if(i >= com->n_rq) errorexit("recv_i>=n_rq");
+  com->recv_i = i+1;
+  return get_com_recv_buf(com, i);
 }
 
 /* wait for all send requests in com */
