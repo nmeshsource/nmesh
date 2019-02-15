@@ -3,6 +3,10 @@
 /* header file for global functions */
 
 
+/* marco to do: if(Rank0) */
+#define Rank0 (!nMPI_rank())
+
+/* for MPI communication this can help */
 typedef struct tCOM {
   int n_rq;             /* number of send/recv requests on each face */
   nMPI_Req *send_rq;    /* send request array */

@@ -209,7 +209,9 @@ int make_output_directory(tMesh *mesh)
     snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
     snprintf(so,999, f, outdir, nMPI_rank());  
     prdivider(3);
-    printf("*** NOTE *** : Output redirected to:\n %s\n", so);
+    printf("*** NOTE ***  Output from proc%d redirected to:\n %s\n",
+           nMPI_rank(), so);
+    prdivider(3);
     freopen(so, "w", stdout);
     freopen(so, "w", stderr);
   }
@@ -218,7 +220,8 @@ int make_output_directory(tMesh *mesh)
     char *opt;
     snprintf(so,999, "%s.log", outdir);
     prdivider(3);
-    printf("*** NOTE *** : Output redirected to:\n %s\n", so);
+    printf("*** NOTE ***  Output redirected to:\n %s\n", so);
+    prdivider(3);
     if(Getv(Par("logfile_creation"),"append"))
       opt = "a";
     else

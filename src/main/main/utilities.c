@@ -501,6 +501,6 @@ void errorexiti(char *file, int line, const char *func, char *s, int i)
 }
 /************************************************************************/
 /* NOTE: DO NOT WRITE ANYTHING BELOW THIS LINE!!!
-   Because the method of using macros and undef/define for the
+   Reason: The method of using macros and undef/define for the
    errorexit functions means that they have to be at the end. */
 /************************************************************************/

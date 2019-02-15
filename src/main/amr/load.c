@@ -96,7 +96,7 @@ void move_node_to_rank(tCom *scom, tCom *rcom, int rq,
       /* fill send buffer to be sent to desrank */
       //..
       //test:
-      sbuf[0] = node->nid;
+      sbuf[0] = node->nid + 0.1234;
       other = desrank;
       /* put buffers in com */
       realloc_com_reqs(scom, rq + 1);

@@ -255,6 +255,7 @@ Yo(4);
 
   free_nodelist(el2);
 
+Yo(5);
 prdivider(2);
 simple_load_balance(mesh);
 printmesh(mesh);
