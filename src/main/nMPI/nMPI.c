@@ -16,7 +16,7 @@ int nMPI_print_compile_info(tMesh *mesh)
 #ifdef USEMPI
   printf("MPI is compiled in.\n");
 #else
-  printf("MPI is not compiled in. Posing as rank=%d and size=%d\n",
+  printf("MPI is not compiled in. Posing as rank=%d and size=%d.\n",
          noMPI_rank, noMPI_size);
 #endif
   return 0;
@@ -90,11 +90,12 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 {
 #ifdef USEMPI
   int errS, errR;
+#endif
 
   PRF;printf(": %d to %d, ns=%d nr=%d s_tag=%d r_tag=%d\n",
              nMPI_rank(), rank_other, ns, nr, s_tag, r_tag);
   fflush(stdout);
-
+#ifdef USEMPI
   errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag,
                    MPI_COMM_WORLD, s_req);
   if(errS != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
@@ -109,8 +110,8 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
-#ifdef USEMPI
   PRF;printf(": %d waiting for %d reqs to finish\n", nMPI_rank(), nreq);
+#ifdef USEMPI
   fflush(stdout);
 
   status = MPI_Waitall(nreq, req, stat);
@@ -123,16 +124,16 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 
 void nMPI_Isend_double(double *buf, int blen, int dest, int tag, nMPI_Req *req)
 {
-#ifdef USEMPI
   PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
+#ifdef USEMPI
   MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD, req);
 #endif
 }
 
 void nMPI_Irecv_double(double *buf, int blen, int src, int tag, nMPI_Req *req)
 {
-#ifdef USEMPI
   PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
+#ifdef USEMPI
   MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, MPI_COMM_WORLD, req);
 #endif
 }
