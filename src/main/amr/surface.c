@@ -186,7 +186,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   else
   {
     /* nb is on other process so use MPI to exchange data */
-    int n_rq, nb_rank, s_tag, r_tag;
+    int rq, nb_rank, s_tag, r_tag;
     tCom *com = dat->com[face];
     int nb_n[3], nb_N;
     int my_n[3], my_N;
@@ -205,14 +205,11 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     s_tag = ((nb->nid)*256 + ni)*6 + nb_f;
     //FIXME: we need better tags!!!!
 
-    n_rq = com->n_rq; /* number of MPI requests so far */
-    /* make room for one more request */
-    realloc_dat_reqs(dat, n_rq + 1, face);
     /* alloc send and recv buffers */
     sbuf = calloc(nvars * my_N, sizeof(double));
     rbuf = calloc(nvars * nb_N, sizeof(double));
     /* save buffers in com */
-    put_buffers_in_com(com, n_rq, sbuf, nvars*my_N, rbuf,nvars*nb_N);
+    rq = append_buffers_to_com(com, sbuf, nvars*my_N, rbuf,nvars*nb_N);
     //NOTE: it may be good to use a long segmented array as rbuf
     //      with dat->s[face][vi]->nbsurf[ni] pointing to the segments
 
@@ -227,14 +224,14 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       /* allocate surface to later recv neighbor data */
       s->nbsurf[ni] = alloc_array(nb_n);
       /* save MPI request number in the array */
-      s->nbsurf[ni]->a[0] = n_rq;
+      s->nbsurf[ni]->a[0] = rq;
 
       /* fill buffer for MPI exchange: sbuf[] = s->mysurf->a[] */
       memcpy(sbuf+cnt, s->mysurf->a, my_N);
       cnt += my_N;
     }
     /* now call MPI */
-    nMPI_Isend_Irecv_double_com(com, com->n_rq - 1, nb_rank, s_tag, r_tag);
+    nMPI_Isend_Irecv_double_com(com, rq, nb_rank, s_tag, r_tag);
   }
 }
 
@@ -273,8 +270,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   int found, vi;
   int nb_n[3], nb_N;
   int my_n[3];
-  int zones, nvars, n_rq, cnt;
-  nMPI_Stat stat;
+  int zones, nvars, rq, cnt;
   double *rbuf;
 
   /* do nothing if this node is on other proc */
@@ -294,14 +290,14 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   nb_N = nb_n[0] * nb_n[1] * nb_n[2];
 
   /* get MPI request number */
-  n_rq = dat->s[face][vi]->nbsurf[ni]->a[0];
+  rq = dat->s[face][vi]->nbsurf[ni]->a[0];
   /* find our recv buffer */
-  rbuf = get_com_recv_buf(com, n_rq);
+  rbuf = get_com_recv_buf(com, rq);
 
   /* wait for buffer */
-  nMPI_Waitall(1, &(com->recv_rq[n_rq]), &stat);
+  nMPI_Wait_com_recv(com, rq);
 
-  /* get data out of recev buffer */
+  /* get data out of recv buffer */
   for(cnt=0, vi=0; vi<node->dat->nv; vi++)
   {
     tSurface *s = dat->s[face][vi];
