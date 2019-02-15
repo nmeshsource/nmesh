@@ -40,7 +40,6 @@ void simple_load_balance(tMesh *mesh)
     }
   }
   nMPI_Waitall_com_send(scom);
-//abort();
   nMPI_Waitall_com_recv(rcom);
   /* now unpack the buffers */
   //...

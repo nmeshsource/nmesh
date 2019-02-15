@@ -26,7 +26,7 @@ void Yo(double x) {fprintf(stdout, "Yo:%g\n", x);fflush(stdout);}
 /* print divider lines */
 void prdivider(int n)
 {
-  int i;
+  int i, c;
   switch(n)
   {
   case 1:
@@ -39,13 +39,10 @@ void prdivider(int n)
     printf("******************************************************************************\n");
     break;
   default:
-    if(n>=' ' && n<='~')
-    {
-      for(i=0; i<78; i++) printf("%c", n);
-      printf("\n");
-    }
-    else
-      printf("------------------------------------------------------------------------------\n");
+    if(n>=' ' && n<='~') c = n;
+    else                 c = '-';
+    for(i=0; i<78; i++) printf("%c", c);
+    printf("\n");
   }
   fflush(stdout);
 }

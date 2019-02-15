@@ -50,7 +50,7 @@ int nMPI_size(void)
 #ifdef USEMPI
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
-//size=2;
+  //size=2;
   return size;
 }
 
