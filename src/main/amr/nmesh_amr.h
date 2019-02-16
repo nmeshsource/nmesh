@@ -269,6 +269,7 @@ void printarray_matrix2(tArray *A);
 
 /* surface.c */
 void init_all_myln_surfaces(tMesh *mesh);
+void free_all_myln_surfaces(tMesh *mesh);
 void set_all_myln_mysurf(tMesh *mesh);
 void request_all_myln_surfaces_exchange(tMesh *mesh);
 void get_all_surfaces(tNode *node);

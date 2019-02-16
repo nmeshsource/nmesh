@@ -60,6 +60,10 @@ int SurfExchange_test(tMesh *mesh)
   /* now get the surfaces and wait for buffers if necessary */
   get_all_myln_surfaces(mesh);
 
+  init_all_myln_surfaces(mesh);
+  set_all_myln_mysurf(mesh);
+  request_all_myln_surfaces_exchange(mesh);
+
   formylnodes(mesh, li)
   {
     tNode *node = GetMyNode(mesh, li);

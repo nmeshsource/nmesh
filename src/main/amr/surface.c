@@ -44,21 +44,50 @@ void free_surface(tSurface *s)
   free(s);
 }
 
+/* free surfaces on node */
+void free_all_surfaces(tNode *node)
+{
+  tDat *dat = node->dat;
+  int vi,f;
+
+  if(!dat) return;
+
+  /* free all surfaces */
+  for(f=0; f<6; f++)
+  {
+    for(vi=0; vi<dat->nv; vi++)
+    {
+      free_surface(dat->s[f][vi]);
+      dat->s[f][vi] = NULL;
+    }
+  }
+}
+
+/* init all surfaces on all nodes in the mesh */
+void free_all_myln_surfaces(tMesh *mesh)
+{
+  int li;
+  formylnodes(mesh, li)
+  {
+    tNode *node = GetMyNode(mesh, li);
+    free_all_surfaces(node);
+  }
+}
+
 
 /* initialize a surface for var vi at face with nnb neighbors */
 tSurface *init_surface(tNode *node, int face, int vi)
 {
   int dir = face/2;
   int zones;
-  tDat *dat;
+  tDat *dat = node->dat;
   int i, nfnb;
   tSurface *s;
   int n[3];
   int alloc_mysurf;
 
   /* do nothing if no data on this node */
-  if(!node->dat) return NULL;
-  dat = node->dat;
+  if(!dat) return NULL;
   nfnb = node->nfnb[face];
 
   /* do nothing if face has no neighbors */
@@ -104,6 +133,7 @@ int init_all_surfaces(tNode *node)
   {
     for(vi=0; vi<node->dat->nv; vi++)
     {
+      free_surface(dat->s[face][vi]);
       dat->s[face][vi] = init_surface(node, face, vi);
       if(dat->s[face][vi]) cnt++;
     }
