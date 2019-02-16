@@ -23,6 +23,7 @@ void free_surface(tSurface *s);
 tSurface *init_surface(tNode *node, int vi, int face);
 int init_all_surfaces(tNode *node);
 void set_mysurf(tSurface *s);
+void request_all_surfaces_exchange(tNode *node);
 void get_all_surfaces(tNode *node);
 
 /* load.c */

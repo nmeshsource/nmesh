@@ -260,6 +260,8 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     r_tag = ((node->nid)*256 + nb_ni)*6 + face;
     s_tag = ((nb->nid)*256 + ni)*6 + nb_f;
     //FIXME: we need better tags!!!!
+//r_tag = node->nid;
+//s_tag = nb->nid;
 
     /* alloc send and recv buffers */
     sbuf = calloc(nvars * my_N, sizeof(double));
@@ -312,6 +314,17 @@ void request_all_surfaces_exchange(tNode *node)
     {
       request_surfaces_exchange_for_all_vars(node, face, ni);
     }
+  }
+}
+
+/* request surface exchanges on all nodes in the mesh */
+void request_all_myln_surfaces_exchange(tMesh *mesh)
+{
+  int li;
+  formylnodes(mesh, li)
+  {
+    tNode *node = GetMyNode(mesh, li);
+    request_all_surfaces_exchange(node);
   }
 }
 
