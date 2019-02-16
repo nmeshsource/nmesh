@@ -149,7 +149,7 @@ void printarray(tArray *A)
     for(j=0; j<A->n[1]; j++)
     {
       for(i=0; i<A->n[0]; i++)
-        printf(" %g", A->a[Ind_n(i,j,k, A->n)]);
+        printf(" %g", A->d[Ind_n(i,j,k, A->n)]);
       printf("\n");
     }
     printf("\n");
@@ -166,7 +166,7 @@ void printarray_matrix0(tArray *A)
   for(i=0; i<A->n[0]; i++)
   {
     for(J=0; J<nJ; J++)
-      printf(" %g", A->a[i + dJ*J]);
+      printf(" %g", A->d[i + dJ*J]);
     printf("\n");
   }
 }
@@ -181,7 +181,7 @@ void printarray_matrix1(tArray *A)
   for(j=0; j<A->n[1]; j++)
   {
     for(J=0; J<nJ; J++)
-      printf(" %g", A->a[j + dJ*J]);
+      printf(" %g", A->d[j + dJ*J]);
     printf("\n");
   }
 }
@@ -196,7 +196,7 @@ void printarray_matrix2(tArray *A)
   for(k=0; k<A->n[2]; k++)
   {
     for(J=0; J<nJ; J++)
-      printf(" %g", A->a[k + dJ*J]);
+      printf(" %g", A->d[k + dJ*J]);
     printf("\n");
   }
 }

@@ -25,8 +25,8 @@ tArray *alloc_array_with_segs(int n[3], int ns)
   for(i=0; i<3; i++)  array->n[i] = n[i];
 
   array->ns = ns;
-  array->a = calloc(array->N * ns, sizeof(array->a[0]));
-  if(!array->a) errorexit("out of memory for array->a");
+  array->d = calloc(array->N * ns, sizeof(array->d[0]));
+  if(!array->d) errorexit("out of memory for array->d");
 
   return array;
 }
@@ -43,23 +43,23 @@ tArray *get_array_seg(tArray *array, int si)
   tArray *as = calloc(1, sizeof(tArray));
   *as = *array; /* shallow copy */
   as->si = si;
-  as->a  = array->a + array->N * si;
+  as->d  = array->d + array->N * si;
   return as;
 }
 
 /* replace pointer to data with something else */
 void point_array_a_to_data(tArray *array, void *data)
 {
-  if(array->si == 0) free(array->a);
-  array->a = data;
+  if(array->si == 0) free(array->d);
+  array->d = data;
 }
 
 /* free an array */
 void free_array(tArray *array)
 {
   if(!array) return;
-  if( (array->si == 0) && (array->a_nofree == 0) )
-    free(array->a); /* free data only if this segm. 0 and it should be freed */
+  if( (array->si == 0) && (array->d_nofree == 0) )
+    free(array->d); /* free data only if this segm. 0 and it should be freed */
   free(array);
 }
 

@@ -226,10 +226,10 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
         /* allocate surface to later recv neighbor data */
         s->nbsurf[ni] = alloc_array(nb_n);
         /* save MPI request number in the array */
-        s->nbsurf[ni]->a[0] = rq;
+        s->nbsurf[ni]->d[0] = rq;
 
-        /* fill buffer for MPI exchange: sbuf[] = s->mysurf->a[] */
-        memcpy(sbuf+cnt, s->mysurf->a, my_N);
+        /* fill buffer for MPI exchange: sbuf[] = s->mysurf->d[] */
+        memcpy(sbuf+cnt, s->mysurf->d, my_N);
         cnt += my_N;
       }
     }
@@ -293,7 +293,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   nb_N = nb_n[0] * nb_n[1] * nb_n[2];
 
   /* get MPI request number */
-  rq = dat->s[face][vi]->nbsurf[ni]->a[0];
+  rq = dat->s[face][vi]->nbsurf[ni]->d[0];
   /* find our recv buffer */
   rbuf = get_com_recv_buf(com, rq);
 
@@ -311,7 +311,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
     if(zones && dat->v[vi])
     {
       /* get neighbor data from buffer */
-      memcpy(s->nbsurf[ni]->a, rbuf+cnt, nb_N);
+      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N);
       cnt += nb_N;
     }
   }

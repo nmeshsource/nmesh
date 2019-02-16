@@ -100,7 +100,7 @@ double *buffer_forall_enabled_dat_vars(tDat *dat, int *buflen)
       N = dat->v[vi]->N;
       buf[bi++] = vi;
       buf[bi++] = N;
-      memcpy(buf+bi, dat->v[vi]->a, N * sizeof(double));
+      memcpy(buf+bi, dat->v[vi]->d, N * sizeof(double));
       bi += N;
     }
 
@@ -121,7 +121,7 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
     vi = buf[bi++];
     N  = buf[bi++];
     enablevarcomp_innode(node, vi);
-    memcpy(dat->v[vi]->a, buf+bi, N * sizeof(double));
+    memcpy(dat->v[vi]->d, buf+bi, N * sizeof(double));
     bi += N;
   }
   return bi;

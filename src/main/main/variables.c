@@ -138,7 +138,7 @@ int VarIndFromPtr(tNode *node, double *p)
 
   if(dat)
     for(i = 0; i < nvdb; i++)
-      if(dat->v[i]->a == p)
+      if(dat->v[i]->d == p)
         return vdb[i].index;
   return -1;
 }

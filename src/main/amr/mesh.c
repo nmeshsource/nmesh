@@ -49,11 +49,11 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   {
     for(dir=0; dir<3; dir++)
     {
-      double *Xb = pat->Xb[ni][dir]->a;
-      double *Winteg = pat->Winteg[ni][dir]->a;
-      double *DT = pat->Dt[ni][dir]->a;
-      double *AT = pat->At[ni][dir]->a;
-      double *ST = pat->St[ni][dir]->a;
+      double *Xb = pat->Xb[ni][dir]->d;
+      double *Winteg = pat->Winteg[ni][dir]->d;
+      double *DT = pat->Dt[ni][dir]->d;
+      double *AT = pat->At[ni][dir]->d;
+      double *ST = pat->St[ni][dir]->d;
 
       LGL_x_winteg(ni, Xb, Winteg);
       Lagrange_winterp(ni, Xb, winterp);
@@ -98,23 +98,23 @@ void test_array_thingies(tMesh *mesh)
 
   n[0]=2; n[1]=2; n[2]=1;
   tArray *Aa = alloc_array(n);
-  //Aa->a = A;
+  //Aa->d = A;
   point_array_a_to_data(Aa, A);
   //Aa->n[0]=3; Aa->n[1]=2; Aa->n[1]=1;
 
   tArray *B0a = alloc_array(nB0);
-  //B0a->a = B0;
+  //B0a->d = B0;
   point_array_a_to_data(B0a, B0);
   tArray *B1a = alloc_array(nB1);
-  //B1a->a = B1;
+  //B1a->d = B1;
   point_array_a_to_data(B1a, B1);
   tArray *B2a = alloc_array(nB2);
-  //B2a->a = B2;
+  //B2a->d = B2;
   point_array_a_to_data(B2a, B2);
 
   int nC0[] = {2,3,4};
   tArray *C0a = alloc_array(nC0);
-  double *C0 = C0a->a;
+  double *C0 = C0a->d;
   //printarray_matrix0(Aa);
   printarray(Aa);
   //printarray_matrix0(B0a);
@@ -126,7 +126,7 @@ void test_array_thingies(tMesh *mesh)
   Yo(1);
   int nC1[] = {3,2,4};
   tArray *C1a = alloc_array(nC1);
-  double *C1 = C1a->a;
+  double *C1 = C1a->d;
   //printarray_matrix1(B1a);
   printarray(B1a);
   mm_array1(Aa,B1a, C1a);
@@ -142,7 +142,7 @@ void test_array_thingies(tMesh *mesh)
   Yo(2);
   int nC2[] = {4,3,2};
   tArray *C2a = alloc_array(nC2);
-  double *C2 = C2a->a;
+  double *C2 = C2a->d;
   //printarray_matrix2(B2a);
   printarray(B2a);
   mm_array2(Aa,B2a, C2a);

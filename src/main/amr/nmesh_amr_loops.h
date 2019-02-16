@@ -27,7 +27,11 @@
 
 /* get double pointer to data in a variable */
 #define GetVarDpointer(node, varindex) \
-  ((node->dat) ? node->dat->v[(varindex)]->a : 0)
+  ((node->dat) ? node->dat->v[(varindex)]->d : 0)
+
+/* get pointer to variable array */
+#define GetVarArray(node, varindex) \
+  ((node->dat) ? node->dat->v[(varindex)] : 0)
 
 /****************************************************************************/
 /* loops that should be used only in very particular advanced cases         */

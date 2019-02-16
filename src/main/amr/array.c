@@ -41,9 +41,9 @@ void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa)
    column major form. ABa will contain AB stored in column major form. */
 void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
 {
-  double *restrict At = Ata->a;
-  double *restrict B  =  Ba->a;
-  double *restrict AB = ABa->a;
+  double *restrict At = Ata->d;
+  double *restrict B  =  Ba->d;
+  double *restrict AB = ABa->d;
   int atn0 = Ata->n[0];
   int atn1 = Ata->n[1] * Ata->n[2];
   int bn0 = Ba->n[0];
@@ -83,10 +83,10 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { nt1, nat1, n2 };
-  double *restrict B = Ba->a;
-  double *restrict C = Ca->a;
-  double *restrict AB = ABa->a;
-  double *restrict AC = ACa->a;
+  double *restrict B = Ba->d;
+  double *restrict C = Ca->d;
+  double *restrict AB = ABa->d;
+  double *restrict AC = ACa->d;
   int i,j,k;
 
   /* copy Ba into Ca */
@@ -128,10 +128,10 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { n0, nt1, nat1 };
-  double *restrict B = Ba->a;
-  double *restrict C = Ca->a;
-  double *restrict AB = ABa->a;
-  double *restrict AC = ACa->a;
+  double *restrict B = Ba->d;
+  double *restrict C = Ca->d;
+  double *restrict AB = ABa->d;
+  double *restrict AC = ACa->d;
   int i,j,k;
 
   /* copy Ba into Ca */
@@ -157,7 +157,7 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
 void set_const_array(tArray *A, double c)
 {
   int i;
-  for(i=0; i<A->N; i++)  A->a[i] = c;
+  for(i=0; i<A->N; i++)  A->d[i] = c;
 }
 
 /* take plane pA with normal dir from A and copy it into P to plane pP */
@@ -168,15 +168,15 @@ void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP)
   {
   case 0:
     forplane0(i,j,k, A->n, pA)
-      P->a[Ind_n(pP,j,k, P->n)] = A->a[Ind_n(i,j,k, A->n)];
+      P->d[Ind_n(pP,j,k, P->n)] = A->d[Ind_n(i,j,k, A->n)];
     break;
   case 1:
     forplane1(i,j,k, A->n, pA)
-      P->a[Ind_n(i,pP,k, P->n)] = A->a[Ind_n(i,j,k, A->n)];
+      P->d[Ind_n(i,pP,k, P->n)] = A->d[Ind_n(i,j,k, A->n)];
     break;
   case 2:
     forplane2(i,j,k, A->n, pA)
-      P->a[Ind_n(i,j,pP, P->n)] = A->a[Ind_n(i,j,k, A->n)];
+      P->d[Ind_n(i,j,pP, P->n)] = A->d[Ind_n(i,j,k, A->n)];
     break;
   default:
     errorexit("dir must be 0,1,2");
