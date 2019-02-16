@@ -87,6 +87,8 @@ typedef struct tNODE {
   struct tARRAY *Winteg[3];   /* integr. weights in 3 dirs */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
+  nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
+                             where dat is and where all neighb. have dat */
 } tNode;
 
 /* a linked list of nodes */

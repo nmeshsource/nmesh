@@ -74,6 +74,10 @@ tNode *alloc_node(void)
   tNode *node = calloc(1, sizeof(*node));
   if(!node) errorexit("out of memory");
 
+  /* make node MPI communicator node->comm, for now we just duplicate
+     WORLD */
+  nMPI_Comm_dup(WORLD, &(node->comm));
+
   return node;
 }
 
@@ -94,8 +98,13 @@ void free_this_node_only(tNode *node)
 
   /* should we also remove pointer of neighbors to it??? */
 
+
   /* free variable data */
   free_dat(node->dat);
+
+  /* free node MPI communicator comm */
+  nMPI_Comm_free(&(node->comm));
+
   free(node);
 }
 

@@ -32,9 +32,8 @@ int nMPI_Finalize(void);
 int nMPI_rank(void);
 int nMPI_size(void);
 int nMPI_barrier(void);
-void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
-                             int rank_other, int s_tag, int r_tag,
-                             nMPI_Req *s_req, nMPI_Req *r_req);
+int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm);
+int nMPI_Comm_free(nMPI_Comm *comm);
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
 tCom *alloc_com(int entrysize, int free_buf);
 void free_com(tCom *com);
@@ -60,6 +59,7 @@ int nMPI_Waitall_com(tCom *com);
 int nMPI_Wait_com_send(tCom *com, int rq);
 int nMPI_Wait_com_recv(tCom *com, int rq);
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
-                                 int rank_other, int s_tag, int r_tag);
-void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag);
-void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag);
+                                 int rank_other, int s_tag, int r_tag,
+                                 nMPI_Comm s_comm, nMPI_Comm r_comm);
+void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag,nMPI_Comm comm);
+void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag,nMPI_Comm comm);

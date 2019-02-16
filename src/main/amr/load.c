@@ -153,7 +153,7 @@ void move_node_to_rank(tNode *node, int desrank,
       //print_com(scom);
 
       /* send */
-      nMPI_Isend_double_com(scom, rq, other, node->nid);
+      nMPI_Isend_double_com(scom, rq, other, node->nid, WORLD);
     }
     if(rank == desrank)
     {
@@ -167,7 +167,7 @@ void move_node_to_rank(tNode *node, int desrank,
       rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
       //print_com(rcom);
       /* receive */
-      nMPI_Irecv_double_com(rcom, rq, other, node->nid);
+      nMPI_Irecv_double_com(rcom, rq, other, node->nid, WORLD);
     }
   }
   else /* retrieve data from buffers */

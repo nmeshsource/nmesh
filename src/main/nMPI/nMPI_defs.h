@@ -6,11 +6,15 @@
 #ifdef USEMPI
 
 #include <mpi.h>
+#define WORLD MPI_COMM_WORLD
+#define nMPI_Comm MPI_Comm
 #define nMPI_Req  MPI_Request
 #define nMPI_Stat MPI_Status
 
 #else
 
+#define WORLD 0
+#define nMPI_Comm int
 #define nMPI_Req  int
 #define nMPI_Stat int
 
