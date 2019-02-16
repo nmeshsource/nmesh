@@ -2,6 +2,10 @@
 /* Wolfgang Tichy, 1/2019 */
 
 
+/* world comm from main */
+extern nMPI_Comm main_comm;
+
+
 /* storage.c */
 void realloc_dat_reqs(tDat *dat, int n_rq_new, int f);
 

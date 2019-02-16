@@ -5,6 +5,8 @@
 #include "amr.h"
 
 
+/* world comm from main */
+extern nMPI_Comm main_comm;
 
 
 /**************************************************************************/
@@ -75,8 +77,8 @@ tNode *alloc_node(void)
   if(!node) errorexit("out of memory");
 
   /* make node MPI communicator node->comm, for now we just duplicate
-     WORLD */
-  nMPI_Comm_dup(WORLD, &(node->comm));
+     main_comm from main.c */
+  nMPI_Comm_dup(main_comm, &(node->comm));
 
   return node;
 }

@@ -57,7 +57,7 @@ int nMPI_rank(void)
 {
   int rank = noMPI_rank;
 #ifdef USEMPI
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_rank(WORLD, &rank);
 #endif
   return rank;
 }
@@ -67,7 +67,7 @@ int nMPI_size(void)
 {
   int size = noMPI_size;
 #ifdef USEMPI
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_size(WORLD, &size);
 #endif
   return size;
 }
@@ -77,7 +77,7 @@ int nMPI_barrier(void)
 {
   int ret=0;
 #ifdef USEMPI
-  ret = MPI_Barrier(MPI_COMM_WORLD);
+  ret = MPI_Barrier(WORLD);
 #endif
   return ret;
 }
