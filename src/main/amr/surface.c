@@ -137,6 +137,39 @@ void set_mysurf(tSurface *s)
     s->mysurf = dat->v[vi];
 }
 
+/* set all mysurf of a node */
+int set_all_mysurf(tNode *node)
+{
+  tDat *dat = node->dat;
+  int face, vi, cnt;
+
+  if(!dat) return 0;
+
+  cnt=0;
+  for(face=0; face<6; face++)
+    for(vi=0; vi<node->dat->nv; vi++)
+    {
+      tSurface *s = dat->s[face][vi];
+      if(s)
+      {
+        set_mysurf(s);
+        cnt++;
+      }
+    }
+  return cnt;
+}
+
+/* init all surfaces on all nodes in the mesh */
+void set_all_myln_mysurf(tMesh *mesh)
+{
+  int li;
+  formylnodes(mesh, li)
+  {
+    tNode *node = GetMyNode(mesh, li);
+    set_all_mysurf(node);
+  }
+}
+
 
 /* count number of vars that have surfaces to be exchanged and set myN,
    input: node,my_f, nb,nb_f   output: nvars, vind, my_n, nb_n */

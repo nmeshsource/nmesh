@@ -51,6 +51,7 @@ int SurfExchange_test(tMesh *mesh)
   /* now exchange surfaces */
   prdivider('S');
   init_all_myln_surfaces(mesh);
+  set_all_myln_mysurf(mesh);
   PRF;printf(": exchange surfaces\n");
   // ...
   formylnodes(mesh, li)
@@ -58,18 +59,22 @@ int SurfExchange_test(tMesh *mesh)
     tNode *node = GetMyNode(mesh, li);
     if(li==7)
     {
+      printnode(node);
+      printvar_innode(node, ui);
       request_all_surfaces_exchange(node);
-      get_all_surfaces(node);
+      //get_all_surfaces(node);
+      printnode(node);
+      printvar_innode(node, ui);
     }
   }
 
   /* print var again */
-  formylnodes(mesh, li)
+/*  formylnodes(mesh, li)
   {
     tNode *node = GetMyNode(mesh, li);
     printnode(node);
     printvar_innode(node, ui);
   }
-
+*/
   return 0;
 }
