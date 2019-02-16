@@ -222,9 +222,10 @@ void MeshVarNameSetConstantFlag(tMesh *mesh, char *name)
 {
   tVar *vdb = mesh->vdb;
   int i, i0 = MeshVarIndComponent0(mesh, MeshVarInd(mesh, name));
-  int n  = MeshVarNComponents(mesh, i0);
+  int n = MeshVarNComponents(mesh, i0);
 
-  for (i = 0; i < n; i++) {
+  for(i = 0; i < n; i++)
+  {
     vdb[i+i0].constant = 1;
     if (0) printf("  setting %s constant\n", vdb[i+i0].name);
   }
@@ -234,7 +235,13 @@ void MeshVarNameSetConstantFlag(tMesh *mesh, char *name)
 void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones)
 {
   tVar *vdb = mesh->vdb;
-  vdb[i].surfacezones = surfacezones;
+  int j, i0 = MeshVarIndComponent0(mesh, i);
+  int n = MeshVarNComponents(mesh, i0);
+
+  for(j = 0; j < n; j++)
+  {
+    vdb[i0+j].surfacezones = surfacezones;
+  }
 }
 void MeshVarNameSetSurfInfo(tMesh *mesh, char *name, int surfacezones)
 {

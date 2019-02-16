@@ -348,6 +348,9 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   /* do nothing if this node is on other proc */
   if(!dat) return;
 
+  /* do nothing if com is empty */
+  if(com->n_rq == 0) return;
+
   /* find face nb_f of nb that faces me */
   found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
   if(!found) errorexit("couldn't find nb face!!!");
@@ -363,7 +366,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   /* do nothing if there are no vars that exchanged surfaces */
   if(!nvars) return;
 
-PRF;printf(": nvars=%d\n", nvars);
+  //PRF;printf(": nvars=%d\n", nvars);
 
   /* get MPI request number */
   rq = dat->s[face][vi]->nbsurf[ni]->d[0];
@@ -403,5 +406,16 @@ void get_all_surfaces(tNode *node)
       get_surfaces_for_all_vars(node, face, ni);
     }
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
+  }
+}
+
+/* get nbsurf for all nodes out of buffers and free the buffers */
+void get_all_myln_surfaces(tMesh *mesh)
+{
+  int li;
+  formylnodes(mesh, li)
+  {
+    tNode *node = GetMyNode(mesh, li);
+    get_all_surfaces(node);
   }
 }

@@ -24,7 +24,7 @@ int SurfExchange_test(tMesh *mesh)
     tNode *node = GetMyNode(mesh, li);
     tArray *ua = GetVarArray(node, ui);
 
-    /* set particular patter in u */
+    /* set particular pattern in u */
     forarray(ua, ijk)
     {
       int k = kOfInd_n(ijk, ua->n);
@@ -48,12 +48,17 @@ int SurfExchange_test(tMesh *mesh)
     printvar_innode(node, ui);
   }
 
-  /* now exchange surfaces */
+  /* exchange surfaces */
   prdivider('S');
+  PRF;printf(": exchange surfaces\n");
   init_all_myln_surfaces(mesh);
   set_all_myln_mysurf(mesh);
-  PRF;printf(": exchange surfaces\n");
   request_all_myln_surfaces_exchange(mesh);
+
+  /* Here we can do work. MPI is now busy sending buffers */
+
+  /* now get the surfaces and wait for buffers if necessary */
+  get_all_myln_surfaces(mesh);
 
   formylnodes(mesh, li)
   {
