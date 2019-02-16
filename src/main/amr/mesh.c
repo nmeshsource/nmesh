@@ -174,7 +174,7 @@ int setup_test_mesh(tMesh *mesh)
 {
   double bbox[6] = { -4,4, -2,2, -1,1 };
   int n1max = 55;
-  int n[3] = { 5,5,5 };
+  int n[3] = { 5,4,3 };
   tNlist *el, *el2;
   int i;
 
@@ -263,9 +263,9 @@ enablevar(mesh, Ind("X"));
 
 double *d = GetVarDpointer(el->node, Ind("X"));
 if(d) d[3] = 3;
-printvar_innode(el->node, "X");
+printvar_innode(el->node, Ind("X"));
 simple_load_balance(mesh);
-printvar_innode(el->node, "X");
+printvar_innode(el->node, Ind("X"));
 //printmesh(mesh);
 prdivider('^');
 //  fflush(stdout);

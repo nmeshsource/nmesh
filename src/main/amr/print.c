@@ -62,14 +62,16 @@ void printnode(tNode *n)
     printf("|");
   }
   printf("\n");
-  printf(" child =");
-  for(i=0; i<8; i++) printf(" %ld", get_node_nid(n->child[i]));
+  if(!n->leaf)
+  {
+    printf(" child =");
+    for(i=0; i<8; i++) printf(" %ld", get_node_nid(n->child[i]));
+    printf("\n");
+  }
   //printf("\n");
   //printf(" Dt =");
   //for(i=0; i<3; i++) printf(" %p", n->Dt[i]);
   //printf("\n");
-
-  printf("\n");
 }
 
 void printnode_and_neighbors(tNode *n)
@@ -123,10 +125,10 @@ void printnodelist(tNlist *nl)
 
 
 /* print a variable in a node */
-void printvar_innode(tNode *node, char *name)
+void printvar_innode(tNode *node, int vi)
 {
   tMesh *mesh = node->pat->mesh;
-  int vi = Ind(name);
+  char *name = VarName(vi);
   tDat *dat = node->dat;
   tArray *va = dat ? dat->v[vi] : NULL;
 
