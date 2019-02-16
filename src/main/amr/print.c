@@ -137,16 +137,27 @@ void printvar_innode(tNode *node, int vi)
   printf("%s Ind=%d  zones=%d Array", name, vi, zones);
   printarray(va);
 
-  if(va) for(f=0; f<6; f++)
-  {
-    tSurface *sf = dat->s[f][vi];
-    tArray *sa = sf ? sf->mysurf : NULL;
-    if(sa) 
+  if(va)
+    for(f=0; f<6; f++)
     {
-      printf("f%d mysurf", f);
-      printarray(sa);
+      tSurface *sf = dat->s[f][vi];
+      tArray *msa  = sf ? sf->mysurf : NULL;
+      tArray **nsa = sf ? sf->nbsurf : NULL;
+      if(msa)
+      {
+        printf("f%d mysurf", f);
+        printarray(msa);
+      }
+      if(nsa)
+      {
+        int ni;
+        for(ni=0; ni<sf->nnbsurf; ni++)
+        {
+          printf("f%d nbsurf[%d]", f, ni);
+          printarray(nsa[ni]);
+        }
+      }
     }
-  }
 }
 
 /* print an array */
@@ -155,7 +166,7 @@ void printarray(tArray *A)
   int i,j,k;
   if(!A)
   {
-    printf(" NULL array\n");
+    printf(" NULL array\n\n");
     return;
   }
   printf("->n[] = {%d,%d,%d}\n", A->n[0],A->n[1],A->n[2]);
