@@ -159,7 +159,7 @@ int set_all_mysurf(tNode *node)
   return cnt;
 }
 
-/* init all surfaces on all nodes in the mesh */
+/* set all surfaces on all nodes in the mesh */
 void set_all_myln_mysurf(tMesh *mesh)
 {
   int li;
