@@ -3,7 +3,7 @@
 /* header file for global defs */
 
 /* some MPI things we use in many places */
-#define WORLD main_comm
+#define WORLD main_comm /* use this, never nMPI_COMM_WORLD */
 
 /* redefine some things */
 #ifdef USEMPI
