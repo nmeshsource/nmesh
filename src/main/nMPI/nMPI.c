@@ -255,6 +255,8 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
   }
   else
   {
+    int entrysize = com->entrysize; /* save to restore later after memset 0 */
+    int free_buf  = com->free_buf;
     free(com->send_rq);
     free(com->recv_rq);
     free(com->send_stat);
@@ -267,6 +269,8 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
 
     /* zero all in com */
     memset(com, 0, sizeof(tCom));
+    com->entrysize = entrysize; /* restore */
+    com->free_buf  = free_buf;
   }
   com->n_rq = n_rq_new;
 }
