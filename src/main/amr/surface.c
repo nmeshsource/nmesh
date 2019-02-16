@@ -39,6 +39,9 @@ void free_surface(tSurface *s)
   /* free lists */
   free(s->nbsurf);
   free(s->allocd_nbsurf);
+
+  /* free surface */
+  free(s);
 }
 
 
