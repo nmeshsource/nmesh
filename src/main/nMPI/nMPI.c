@@ -4,9 +4,10 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
-#define PR 1
+#define PR 0
 
-/* my rank and size if MPI is not compiled in */
+/* my rank and size if MPI is not compiled in, look at nMPI_Init for
+   debugging help!!! */
 int noMPI_rank=0, noMPI_size=1;
 
 
@@ -105,7 +106,10 @@ int nMPI_Comm_free(nMPI_Comm *comm)
 void nMPI_Isend_double(double *buf, int blen, int dest, int tag,
                        nMPI_Comm comm, nMPI_Req *req)
 {
-  PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
+  if(PR)
+  {
+    PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
+  }
 #ifdef USEMPI
   MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
 #endif
@@ -115,7 +119,10 @@ void nMPI_Isend_double(double *buf, int blen, int dest, int tag,
 void nMPI_Irecv_double(double *buf, int blen, int src, int tag,
                        nMPI_Comm comm, nMPI_Req *req)
 {
-  PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
+  if(PR)
+  {
+    PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
+  }
 #ifdef USEMPI
   MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
 #endif
@@ -130,8 +137,11 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 #ifdef USEMPI
   int errS, errR;
 #endif
-  PRF;printf(": %d to %d, ns=%d nr=%d s_tag=%d r_tag=%d\n",
-             nMPI_rank(), rank_other, ns, nr, s_tag, r_tag);
+  if(PR)
+  {
+    PRF;printf(": %d to %d, ns=%d nr=%d s_tag=%d r_tag=%d\n",
+                nMPI_rank(), rank_other, ns, nr, s_tag, r_tag);
+  }
   //for(int i=0; i<ns; i++) printf(" %g", sbuf[i]);
   //printf("\n");
   fflush(stdout);
@@ -149,7 +159,10 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
   if(!nreq) return 0;
-  PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
+  if(PR)
+  {
+    PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
+  }
 #ifdef USEMPI
   fflush(stdout);
 
@@ -165,7 +178,10 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
-  PRF;printf(": %d waiting for request to finish\n", nMPI_rank());
+  if(PR)
+  {
+    PRF;printf(": %d waiting for request to finish\n", nMPI_rank());
+  }
 #ifdef USEMPI
   fflush(stdout);
 
@@ -414,7 +430,10 @@ int nMPI_Waitall_com_recv(tCom *com)
 int nMPI_Waitall_com(tCom *com)
 {
   int status=0;
-  PRF;printf("\n");
+  if(PR)
+  {
+    PRF;printf("\n");
+  }
   status  = nMPI_Waitall_com_recv(com);
   status += nMPI_Waitall_com_send(com);
   return status;
