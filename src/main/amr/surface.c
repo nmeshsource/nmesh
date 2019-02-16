@@ -131,6 +131,10 @@ void set_mysurf(tSurface *s)
   int dir = f/2;
   int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
   int vi = s->vi;
+
+  /* do nothing is this surface is NULL */
+  if(!s) return;
+
   if(s->allocd_mysurf)
     copy_array_plane(dat->v[vi], dir, p, s->mysurf, 0);
   else
@@ -269,7 +273,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 
       zones = MeshVarSurfacezones(node->pat->mesh, vi);
       /* do nothing if var has no zones to exchange */
-      if(zones && dat->v[vi])
+      if(s && zones && dat->v[vi])
       {
         /* allocate surface to later recv neighbor data */
         s->nbsurf[ni] = alloc_array(nb_n);
@@ -293,17 +297,13 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 void request_all_surfaces_exchange(tNode *node)
 {
   int face, ni;
-  int ns = init_all_surfaces(node);
-
-  /* do nothing if there are no surfaces */
-  if(!ns) return;
 
   /* do nothing if this node is on other proc */
   if(!node->dat) return;
 
   for(face=0; face<6; face++)
   {
-    realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
+    realloc_dat_reqs(node->dat, 0, face); /* free req, send/recv arrays */
     //nb_nid0 = node->fnb[face][0];
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
