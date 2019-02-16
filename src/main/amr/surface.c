@@ -288,7 +288,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
         s->nbsurf[ni]->d[0] = rq;
 
         /* fill buffer for MPI exchange: sbuf[] = s->mysurf->d[] */
-        memcpy(sbuf+cnt, s->mysurf->d, my_N);
+        memcpy(sbuf+cnt, s->mysurf->d, my_N * sizeof(sbuf[0]));
         cnt += my_N;
       }
     }
@@ -384,7 +384,7 @@ PRF;printf(": nvars=%d\n", nvars);
     if(zones && dat->v[vi])
     {
       /* get neighbor data from buffer */
-      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N);
+      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
       cnt += nb_N;
     }
   }

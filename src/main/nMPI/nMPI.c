@@ -107,9 +107,10 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 #ifdef USEMPI
   int errS, errR;
 #endif
-
   PRF;printf(": %d to %d, ns=%d nr=%d s_tag=%d r_tag=%d\n",
              nMPI_rank(), rank_other, ns, nr, s_tag, r_tag);
+  //for(int i=0; i<ns; i++) printf(" %g", sbuf[i]);
+  //printf("\n");
   fflush(stdout);
 #ifdef USEMPI
   errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag,
