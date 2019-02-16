@@ -229,8 +229,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       tSurface *my_s = dat->s[face][vi];
       tSurface *nb_s = nb->dat->s[nb_f][vi];
       if(!my_s) continue;
-      if(nb_s)
-      my_s->nbsurf[ni] = nb_s->mysurf;
+      if(nb_s) my_s->nbsurf[ni] = nb_s->mysurf;
     }
   }
   else
