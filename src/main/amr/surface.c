@@ -14,31 +14,31 @@
 tSurface *alloc_empty_surface(int nnb)
 {
   tSurface *s = calloc(1, sizeof(*s));
+
+  s->nnbsurf = nnb;
   s->nbsurf = calloc(nnb, sizeof(s->nbsurf[0]));
+  s->allocd_nbsurf = calloc(nnb, sizeof(s->allocd_nbsurf[0]));
+
   return s;
 }
 
 /* free all we need to in a surface */
 void free_surface(tSurface *s)
 {
-  tNode *node;
-  tDat *dat;
-  int f, i;
+  int i;
 
   if(!s) return;
-  dat = s->dat;
-  f = s->face;
-  node = dat->node;
 
   /* free content of lists */
   /* free mysurf only it has allocd */
   if(s->allocd_mysurf) free_array(s->mysurf);
-  /* free nbsurf[i] only if it is not on this proc  */
-  for(i=0; i<node->nfnb[f]; i++)
-    if(!node->fnb[f][i]->dat) free_array(s->nbsurf[i]);
+  /* free nbsurf[i] only if it is allocd  */
+  for(i=0; i<s->nnbsurf; i++)
+    if(s->allocd_nbsurf[i]) free_array(s->nbsurf[i]);
 
   /* free lists */
   free(s->nbsurf);
+  free(s->allocd_nbsurf);
 }
 
 
@@ -48,7 +48,7 @@ tSurface *init_surface(tNode *node, int face, int vi)
   int dir = face/2;
   int zones;
   tDat *dat;
-  int i;
+  int i, nfnb;
   tSurface *s;
   int n[3];
   int alloc_mysurf;
@@ -56,6 +56,10 @@ tSurface *init_surface(tNode *node, int face, int vi)
   /* do nothing if no data on this node */
   if(!node->dat) return NULL;
   dat = node->dat;
+  nfnb = node->nfnb[face];
+
+  /* do nothing if face has no neighbors */
+  if(!nfnb) return NULL;
 
   /* do nothing if var is not enabled */
   if(!dat->v[vi]) return NULL;
@@ -104,6 +108,16 @@ int init_all_surfaces(tNode *node)
   return cnt;
 }
 
+/* init all surfaces on all nodes in the mesh */
+void init_all_myln_surfaces(tMesh *mesh)
+{
+  int li;
+  formylnodes(mesh, li)
+  {
+    tNode *node = GetMyNode(mesh, li);
+    init_all_surfaces(node);
+  }
+}
 
 /**********************************************************************/
 /* get data into these surfaces */
@@ -136,7 +150,7 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
   int nb_dir = nb_f/2;
 
   /* count number of vars that have surfaces to be exchanged and set myN */
-  for(nvars=0, vi=0; vi<dat->nv; vi++)
+  for(*nvars=0, vi=0; vi<dat->nv; vi++)
   {
     int zones = MeshVarSurfacezones(node->pat->mesh, vi);
     if(zones && dat->v[vi])
@@ -179,9 +193,11 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     /* nb is local so just point s->nbsurf[ni] to its data */
     for(vi=0; vi<node->dat->nv; vi++)
     {
-      tSurface *s = dat->s[face][vi];
-      tArray *nb_mysurf = nb->dat->s[nb_f][vi]->mysurf;
-      s->nbsurf[ni] = nb_mysurf;
+      tSurface *my_s = dat->s[face][vi];
+      tSurface *nb_s = nb->dat->s[nb_f][vi];
+      if(!my_s) continue;
+      if(nb_s)
+      my_s->nbsurf[ni] = nb_s->mysurf;
     }
   }
   else
@@ -225,6 +241,8 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       {
         /* allocate surface to later recv neighbor data */
         s->nbsurf[ni] = alloc_array(nb_n);
+        s->allocd_nbsurf[ni] = 1; //flag that we allocd
+
         /* save MPI request number in the array */
         s->nbsurf[ni]->d[0] = rq;
 
@@ -288,9 +306,13 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 
   /* nb is on other process, we have used MPI to exchange data */
 
-  /* count number of vars that have surfaces to exchanged and set my_N */
+  /* count number of vars that exchanged surfaces and set my_N */
   find_nvars_vind_n_nbn(node,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
   nb_N = nb_n[0] * nb_n[1] * nb_n[2];
+  /* do nothing if there are no vars that exchanged surfaces */
+  if(!nvars) return;
+
+PRF;printf(": nvars=%d\n", nvars);
 
   /* get MPI request number */
   rq = dat->s[face][vi]->nbsurf[ni]->d[0];

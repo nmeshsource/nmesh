@@ -264,6 +264,9 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
 
     free(com->send_buf);
     free(com->recv_buf);
+
+    /* zero all in com */
+    memset(com, 0, sizeof(tCom));
   }
   com->n_rq = n_rq_new;
 }

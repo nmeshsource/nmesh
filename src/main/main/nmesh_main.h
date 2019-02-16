@@ -192,13 +192,14 @@ double MeshVarFarLimit(tMesh *mesh, int i);
 int MeshVarSymmetry(tMesh *mesh, int i, int dir);
 int MeshVarConstantFlag(tMesh *mesh, int i);
 int MeshVarSurfacezones(tMesh *mesh, int i);
+void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
 /* conveniece macros for vars */
 #define VarName(i) MeshVarName(mesh, (i))
 #define Ind(name)  MeshVarInd(mesh, (name))
 #define AddVar(name, tensorindices, description) \
   AddMeshVar(mesh, (name), (tensorindices), (description))
-#define VarSetSurfInfo(name, surfacezones) \
-  MeshVarNameSetSurfInfo(mesh, (name), (surfacezones))
+#define VarSetSurfInfo(i, surfacezones) \
+  MeshVarSetSurfInfo(mesh, (i), (surfacezones))
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);
