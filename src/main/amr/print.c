@@ -127,13 +127,26 @@ void printnodelist(tNlist *nl)
 /* print a variable in a node */
 void printvar_innode(tNode *node, int vi)
 {
+  int f;
   tMesh *mesh = node->pat->mesh;
   char *name = VarName(vi);
+  int zones =  MeshVarSurfacezones(mesh, vi);
   tDat *dat = node->dat;
   tArray *va = dat ? dat->v[vi] : NULL;
 
-  printf("%s, Ind=%d:\n", name, vi);
+  printf("%s Ind=%d  zones=%d Array", name, vi, zones);
   printarray(va);
+
+  if(va) for(f=0; f<6; f++)
+  {
+    tSurface *sf = dat->s[f][vi];
+    tArray *sa = sf ? sf->mysurf : NULL;
+    if(sa) 
+    {
+      printf("f%d mysurf", f);
+      printarray(sa);
+    }
+  }
 }
 
 /* print an array */
@@ -142,7 +155,7 @@ void printarray(tArray *A)
   int i,j,k;
   if(!A)
   {
-    printf("array is NULL\n");
+    printf(" NULL array\n");
     return;
   }
   printf("->n[] = {%d,%d,%d}\n", A->n[0],A->n[1],A->n[2]);
