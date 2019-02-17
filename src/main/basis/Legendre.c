@@ -317,7 +317,7 @@ double Gauss_integral(int n, const double *x, const double *w, const double *f)
      uhat_i = A_{ij} u_j,     A_{ij} = S^{-1}_{ij} = w_j S_{ji} / c_i
 
    Some prefer to normalize, so with normalization:
-     u_i    = Shat_{ij} uhat_j,  Shat_{ij} = P_j(x_i)/sqrt(c_i)
+     u_i    = Shat_{ij} uhat_j,  Shat_{ij} = P_j(x_i)/sqrt(c_j)
      uhat_i = Ahat_{ij} u_j,     Ahat_{ij} = Shat^{-1}_{ij} = w_j Shat_{ji}
 
    In the function below store the transposes A^T and S^T of A and S
@@ -345,7 +345,7 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
 	/* set transposed elements first because we need them below */
 	ST[i + j*n] = LegendreP(i, x[j]) / sci;
 	/* transpose of analysis matrix Aij */
-	AT[j + i*n] = w[j] * ST[i + j*n]; // AS_Legendre_GL has this wrong
+	AT[j + i*n] = w[j] * ST[i + j*n];
       }
       else
       {
