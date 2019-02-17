@@ -1,35 +1,33 @@
-*vdb and pdb leak memory if we free mesh
- e.g. main/main/variables.c:52:     newv->name          = strdup(fullname);
-
 
 *Array ops
  matrix_times_matrix : DONE!
 
 *MPI
- -synchronize ghosts
+ -synchronize ghosts : DONE!
 
-*interpolation, unless all nodes are the same
+*2d interpolation, unless all nodes are the same
 
 *refine and coarsen
- -interpolate data; from an to parent
+ -interpolate 3d data; from and to parent
   get_parent_data, get_children_data
 
 *Legendre : DONE!
+
+*some output
 
 *DG
 
 *Burgers
 
 
+MPI parallelization plans
 
 Plan1:
 ------
-*make ghosts in g[6] of dat be the values obtained from the neighbor node.
- E.g. g[i][2] may have var i from neighbor node in -Y dir.
- g[i][2] then has e.g. n[0]=n[1]=4 (if nb has 4 points in X and Z dirs) and:
- n[2] = 1 if there is only one neighbor
- n[2] = 4 if there are 4 neighbors
-*make 2d-array for u_other and use data in g to interpolate into u_other
+*make ghosts in s[6] of dat be the values obtained from the neighbor node.
+ E.g. s[2][i] may have var i from neighbor node in -Y dir.
+ s[2][i] then has e.g. n[0]=n[2]=4 (if nb has 4 points in X and Z dirs) and:
+*make 2d-array for u_other and use data in s to interpolate into u_other
 *the node and each nb has to interpolate onto 16 points, load is balanced
 *use u and u_other to set another 2d-array for flux
 *use flux for time step
@@ -40,16 +38,14 @@ Plan1:
 
 Plan0:
 ------
-*make ghosts in g[6] of dat be the values interpolated by neighbor node.
- E.g. g[i][2] may have interpolated var i from neighbor node in -Y dir.
- g[i][2] then has e.g. n[0]=n[1]=4 (if nb has 4 points in X and Z dirs) and:
- n[2] = 1 if there is only one neighbor
- n[2] = 4 if there are 4 neighbors
-*then u_other = g
+*make ghosts in s[6] of dat be the values interpolated by neighbor node.
+ E.g. s[2][i] may have INTERPOLATED var i from neighbor node in -Y dir.
+ s[2][i] then has e.g. n[0]=n[2]=4 (if nb has 4 points in X and Z dirs) and:
+*then u_other = s
 *use u and u_other to set another 2d-array for flux
 *use flux for time step
 *this way each node only sends interpolated data, if e.g. 4 nb face
- one node (and each has n[0]=n[1]=4):
+ one node (and each has n[0]=n[2]=4):
  node sends 4*16 points and 4 nb send 4*4 points
 *node needs to interpolate values to 4*16 points
 *each of the 4 nb has to interpolate only to 4 points (not balanced)
@@ -57,6 +53,7 @@ Plan0:
 
 => Plan1 is more balanced, but Plan0 sends less
 
+=> in nmesh I went for Plan1!!!
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 more:
@@ -77,8 +74,7 @@ How does EinsteinToolkit do its great AMR?
   on each proc
 
 *change node list:
- -make also an array of nodes of myrank (to be looped oever with OpenMP for)
+ -I made an array of nodes of myrank (myln to be looped over with OpenMP for)
   create this array each time nodes are created or destroyed
   arrange all VarList loops such that the outermost loop is over this new array
- -save first entry of linked node list also in tNlist structure??? NO
 
