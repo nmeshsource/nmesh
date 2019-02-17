@@ -11,6 +11,7 @@
 /* print some compile info */
 int SurfExchange_test(tMesh *mesh)
 {
+  tNode *nd;
   int ui = Ind("SurfExchange_u");
   int li;
 
@@ -48,6 +49,11 @@ int SurfExchange_test(tMesh *mesh)
     printvar_innode(node, ui);
   }
 
+  /* print var in one node again */
+  nd = GetMyNode(mesh, 0); /* my first node */
+  printnode(nd);
+  printvar_innode(nd, ui);
+
   /* exchange surfaces */
   prdivider('S');
   PRF;printf(": exchange surfaces\n");
@@ -60,30 +66,11 @@ int SurfExchange_test(tMesh *mesh)
   /* now get the surfaces and wait for buffers if necessary */
   get_all_myln_surfaces(mesh);
 
-  init_all_myln_surfaces(mesh);
-  set_all_myln_mysurf(mesh);
-  request_all_myln_surfaces_exchange(mesh);
+  /* print var in one node yet again with surfaces */
+  nd = GetMyNode(mesh, 0); /* my first node */
+  printnode(nd);
+  printvar_innode(nd, ui);
 
-  formylnodes(mesh, li)
-  {
-    tNode *node = GetMyNode(mesh, li);
-    if(li==0)
-    {
-      printnode(node);
-      printvar_innode(node, ui);
-      get_all_surfaces(node);
-      printnode(node);
-      printvar_innode(node, ui);
-    }
-  }
-
-  /* print var again */
-/*  formylnodes(mesh, li)
-  {
-    tNode *node = GetMyNode(mesh, li);
-    printnode(node);
-    printvar_innode(node, ui);
-  }
-*/
+  free_all_myln_surfaces(mesh);
   return 0;
 }
