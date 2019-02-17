@@ -20,6 +20,7 @@ enum
   POST_OUTPUT,
   AMR,
   LOADBALANCING,
+  REINIT,
   NFUNCBINS
 };
 
