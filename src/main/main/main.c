@@ -317,6 +317,9 @@ int inidata_mesh(tMesh *mesh)
     printf("Initializing mesh\n");
   }
 
+  /* setup coords */
+  RunFun(COORDINATES);
+
   /* compute initial data */
   RunFun(INITIALDATA);
 
@@ -393,6 +396,7 @@ int evolve_mesh(tMesh *mesh)
     /* AMR and load balancing */
     RunFun(AMR);
     RunFun(LOADBALANCING);
+    RunFun(REINIT);
   
     /* update since this may change during evolution, say when checkpointing */
     timemax = Getd(Par("finaltime"));

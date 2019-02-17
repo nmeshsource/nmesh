@@ -5,4 +5,3 @@
 
 
 /* coordinates.c */
-int init_coordinates(tMesh *mesh);

@@ -38,8 +38,8 @@ OFLAGS = -g
 
 # --------------------------------------------------------------------------
 # some libraries are currently required
-libpaths = src/main/amr
-libpaths += src/main/basis src/main/nMPI
+libpaths = src/main/amr src/main/nMPI
+libpaths += src/main/basis src/main/coordinates
 
 
 # --------------------------------------------------------------------------
