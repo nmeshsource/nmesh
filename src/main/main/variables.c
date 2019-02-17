@@ -99,6 +99,15 @@ void AddEvoMeshVar(tMesh *mesh, char *name,
   MeshVarSetSurfInfo(mesh, nvdb, 1);
 }
 
+/* add auxiliary variable to data base */
+void AddMeshVarDim(tMesh *mesh, char *name,
+                   char *tensorindices, char *description,
+                   int n_special0, int n_special1, int n_special2)
+{
+  int nvdb  = mesh->nvdb;
+  AddMeshVar(mesh, name, tensorindices, description);
+  MeshVarSetSpecial(mesh, nvdb, n_special0, n_special1, n_special2);
+}
 
 
 /* return index of variable or -1 if it was not found */
@@ -257,18 +266,38 @@ void MeshVarNameSetSurfInfo(tMesh *mesh, char *name, int surfacezones)
   MeshVarSetSurfInfo(mesh, i, surfacezones);
 }
 
+void MeshVarSetSpecial(tMesh *mesh, int i,  int ns0, int ns1, int ns2)
+{
+  tVar *vdb = mesh->vdb;
+  int j,d, i0 = MeshVarIndComponent0(mesh, i);
+  int n = MeshVarNComponents(mesh, i0);
+  int n_special[3] = { ns0, ns1, ns2 };
+
+  for(j = 0; j < n; j++)
+    for(d = 0; d < 3; d++)
+    {
+      vdb[i0+j].n_special[d] = n_special[d];
+    }
+}
+
 /* return various pieces of information, e.g. boundary information */
 double MeshVarFallOff(tMesh *mesh, int i)
 { return mesh->vdb[i].falloff; }
+
 double MeshVarFarLimit(tMesh *mesh, int i)
 { return mesh->vdb[i].farlimit; }
+
 int MeshVarSymmetry(tMesh *mesh, int i, int dir)
 { return mesh->vdb[i].sym[dir]; }
+
 int MeshVarSurfacezones(tMesh *mesh, int i)
 { return mesh->vdb[i].surfacezones; }
+
 int MeshVarType(tMesh *mesh, int i)
 { return mesh->vdb[i].type; }
 
+int *MeshVar_n_special(tMesh *mesh, int i)
+{ return mesh->vdb[i].n_special; }
 
 
 /************************************************************************/

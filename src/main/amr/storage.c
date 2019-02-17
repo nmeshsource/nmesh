@@ -1025,7 +1025,16 @@ void enablevarcomp_innode(tNode *node, int i)
   if(i>=dat->nv) errorexiti("var comp %i does not exist", i);
   if(!dat->v[i])
   {
-    dat->v[i] = alloc_array(node->n); //, node, NODE);
+    tMesh *mesh = node->pat->mesh;
+    int *ns = MeshVar_n_special(mesh, i);
+    int dir, n[3];
+
+    for(dir=0; dir<3; dir++)
+    {
+      n[dir] = node->n[dir];
+      if(ns[dir]>0) n[dir] = ns[dir];
+    }
+    dat->v[i] = alloc_array(n);
     dat->nvenabled++;
   }
 }

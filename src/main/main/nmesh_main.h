@@ -160,6 +160,9 @@ void AddEvoMeshVar(tMesh *mesh, char *name,
                    char *tensorindices, char *description);
 void AddAuxMeshVar(tMesh *mesh, char *name,
                    char *tensorindices, char *description);
+void AddMeshVarDim(tMesh *mesh, char *name,
+                   char *tensorindices, char *description,
+                   int n_special0, int n_special1, int n_special2);
 int MeshVarIndLax(tMesh *mesh, char *name) ;
 int MeshVarInd(tMesh *mesh, char *name);
 int Set_vdb_iStart_AtVar(tMesh *mesh, char *name);
@@ -172,20 +175,24 @@ char *MeshVarTensorIndices(tMesh *mesh, int i);
 void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
 			        double farlimit, double falloff);
 void MeshVarSetType(tMesh *mesh, int i, int type);
+void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
+void MeshVarSetSpecial(tMesh *mesh, int i,  int ns0, int ns1, int ns2);
 double MeshVarFallOff(tMesh *mesh, int i);
 double MeshVarFarLimit(tMesh *mesh, int i);
 int MeshVarSymmetry(tMesh *mesh, int i, int dir);
 int MeshVarSurfacezones(tMesh *mesh, int i);
-void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
-/* conveniece macros for vars */
+int *MeshVar_n_special(tMesh *mesh, int i);
+/* convenience macros for vars */
 #define VarName(i) MeshVarName(mesh, (i))
 #define Ind(name)  MeshVarInd(mesh, (name))
 #define AddEvoVar(name, tensorindices, description) \
   AddEvoMeshVar(mesh, (name), (tensorindices), (description))
 #define AddAuxVar(name, tensorindices, description) \
   AddAuxMeshVar(mesh, (name), (tensorindices), (description))
-#define VarSetSurfInfo(i, surfacezones) \
-  MeshVarSetSurfInfo(mesh, (i), (surfacezones))
+
+#define AddVarDim(name, tensorindices, description, ns0,ns1,ns2) \
+  AddMeshVarDim(mesh, (name), (tensorindices), (description), \
+                (ns0),(ns1),(ns2))
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);
