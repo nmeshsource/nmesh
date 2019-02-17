@@ -115,6 +115,7 @@ typedef struct tPAT {
   struct tARRAY *(*St)[3]; /* list of transposed synthesis matrices */
   struct tARRAY *(*Xb)[3]; /* list of points */
   struct tARRAY *(*Winteg)[3]; /* list of integration weights */
+  double (*basis[3])(int l, double Xb, int np); /* basis funcs */
   //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch should have Bfaces as in sgrid. But instead of pointlists

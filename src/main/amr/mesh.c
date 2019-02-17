@@ -45,9 +45,9 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
 
   /* set diff, and other matrices */
-  for(ni=1; ni<=nmax; ni++)
+  for(dir=0; dir<3; dir++)
   {
-    for(dir=0; dir<3; dir++)
+    for(ni=1; ni<=nmax; ni++)
     {
       double *Xb = pat->Xb[ni][dir]->d;
       double *Winteg = pat->Winteg[ni][dir]->d;
@@ -60,6 +60,8 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
       LGL_DT(ni, Xb, winterp, DT);
       LGL_AT_ST_matrices(ni, Xb, Winteg, AT, ST);
     }
+    /* set Legendre polys as basis */
+    pat->basis[dir] = basis_LegendreP;
   }
 
   /* setup root node */

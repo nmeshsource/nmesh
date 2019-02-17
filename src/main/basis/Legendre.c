@@ -48,14 +48,13 @@ double assocLegendreP(int l, int m, double x)
   return Pkm;
 }
 
-
+/* Legendre polynomial basis function, np is number of points (not need for
+   Legendre, but maybe for Fourier) */
 /* use recursion recommended in numrec to get P_l */
-double LegendreP(int l, double x)
+double basis_LegendreP(int l, double x, int np)
 {
   double Pk, P0, P1;
   int k;
-
-  if(fabs(x) > 1.0) errorexit("Bad arguments");
 
   /* build P_m^m */
   P0 = 1.0;
@@ -78,8 +77,12 @@ double LegendreP(int l, double x)
   return Pk;
 }
 
-
-
+/* basis_LegendreP without redundant np arg */
+double LegendreP(int l, double x)
+{
+  if(fabs(x) > 1.0) errorexit("Bad arguments");
+  return basis_LegendreP(l, x, 0);
+}
 
 /* compute the values of the Legendre polynomial P=P_l(x), dP=dP_l(x)/dx,
    Q(x) = P_{l+1}(x) - P_{l-1}(x), and of dQ=Q'(x) */
