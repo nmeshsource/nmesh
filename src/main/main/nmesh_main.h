@@ -3,7 +3,7 @@
 
 /* use MSTR(x) to transform x into a string */
 #define XMSTR(x) STRING(x)
-#define MSTR(x ) #x
+#define MSTR(x)  #x
 
 /* constants */
 #ifdef PI
@@ -12,21 +12,6 @@
 #define PI  3.14159265358979323846264338327950
 #define PIh 1.57079632679489661923132169163975
 #define PIq 0.785398163397448309615660845819876
-
-/* Indices */
-#define Index(i,j,k)   ((i)+n[0]*((j)+n[1]*(k)))
-#define Ind_n(i,j,k,n) ((i)+(n[0])*((j)+(n[1])*(k)))
-/* ijk = i + n0*j + n0*n1*k, thus:
-   ijk/(n0*n1) = k 
-   (ijk - n0*n1*k)/n0 = j
-   (ijk - n0*n1*k - n0*j ) = i   */
-#define kOfInd_n(ijk,n)        ((ijk)/((n[0])*(n[1])))
-#define jOfInd_n_k(ijk,n,k)    (((ijk) - (n[0])*(n[1])*(k))/(n[0]))
-#define iOfInd_n_jk(ijk,n,j,k) ((ijk) - (n[0])*(n[1])*(k) - (n[0])*(j))
-#define forallijk(i,j,k) \
-  for (k = 0; k < n[2]; k++) \
-  for (j = 0; j < n[1]; j++) \
-  for (i = 0; i < n[0]; i++)    
 
 
 /* NOTE: In C99 these two have the same effect:

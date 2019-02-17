@@ -84,6 +84,18 @@ double LegendreP(int l, double x)
   return basis_LegendreP(l, x, 0);
 }
 
+/* normalized Legendre poly */
+double basis_normLegendreP(int i, double x, int np)
+{
+  int N = np-1;
+  double ci, sci;
+
+  ci = 2.0/(2*i+1);
+  if( (i==N) && (N!=0) ) ci = 2.0/i;
+  sci = sqrt(ci);
+  return basis_LegendreP(i, x, 0)/sci;
+}
+
 /* compute the values of the Legendre polynomial P=P_l(x), dP=dP_l(x)/dx,
    Q(x) = P_{l+1}(x) - P_{l-1}(x), and of dQ=Q'(x) */
 void Legendre_P_dP_Q_dQ(int l, double x,
@@ -300,11 +312,11 @@ double Gauss_integral(int n, const double *x, const double *w, const double *f)
 
      (P_i,P_j)_numerical = \sum_{k=0}^N w_k P_i(x_k) P_j(x_k) = c_i delta_{ij}
 
-   without normalization we would use this:
+   Without normalization we use this:
      u_i    = S_{ij} uhat_j,  S_{ij} = P_j(x_i)
      uhat_i = A_{ij} u_j,     A_{ij} = S^{-1}_{ij} = w_j S_{ji} / c_i
 
-   But we prefer to normalize, so with normalization:
+   Some prefer to normalize, so with normalization:
      u_i    = Shat_{ij} uhat_j,  Shat_{ij} = P_j(x_i)/sqrt(c_i)
      uhat_i = Ahat_{ij} u_j,     Ahat_{ij} = Shat^{-1}_{ij} = w_j Shat_{ji}
 

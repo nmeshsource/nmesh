@@ -99,3 +99,57 @@ int basis_var_synthesis1(tNode *node, int dir, int vi, int ci)
   else
     return 0;
 }
+
+/* get coeffs c=c_ijk of array u */
+void basis_array_analysis3(tNode *node, tArray *u, tArray *c)
+{
+  basis_array_analysis1(node, 0, u, c);
+  basis_array_analysis1(node, 1, c, c); //should work because it uses mm_array1
+  basis_array_analysis1(node, 2, c, c);
+}
+
+/* get array u from coeffs c=c_ijk */
+void basis_array_synthesis3(tNode *node, tArray *u, tArray *c)
+{
+  basis_array_synthesis1(node, 0, u, c);
+  basis_array_synthesis1(node, 1, c, c); //should work because it uses mm_array1
+  basis_array_synthesis1(node, 2, c, c);
+}
+
+/***********************************************************************/
+/* interpolate */
+/***********************************************************************/
+
+/* 3d interpolation:
+   interpolate to the point (Xb[0],Xb[1],Xb[2]) using coeffs in array coef */
+double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
+{
+  tPat *pat = node->pat;
+  int *n = node->n;
+  double *B0 = dmalloc(n[0]);
+  double *B1 = dmalloc(n[1]);
+  double *B2 = dmalloc(n[2]);
+  int k;
+  double sum;
+
+  /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B0,... */
+  for(k=0; k<n[0]; k++) B0[k] = pat->basis[0](k, Xb[0], n[0]);
+  for(k=0; k<n[1]; k++) B1[k] = pat->basis[1](k, Xb[1], n[1]);
+  for(k=0; k<n[2]; k++) B2[k] = pat->basis[2](k, Xb[2], n[2]);
+
+  /* interpolate to (Xb[0],Xb[1],Xb[2]) */
+  sum = 0.;
+  //SGRID_LEVEL3_Pragma(omp parallel for reduction(+:sum))
+  for(k = n[2]-1; k >=0; k--)
+  {
+    int j,i;
+    for(j = n[1]-1; j >=0; j--)
+    for(i = n[0]-1; i >=0; i--)
+      sum += coef->d[Ind_n(i,j,k, n)] * B0[i] * B1[j] * B2[k];
+  }
+
+  free(B2);
+  free(B1);
+  free(B0);
+  return sum;
+}

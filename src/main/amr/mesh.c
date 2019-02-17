@@ -61,7 +61,7 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
       LGL_AT_ST_matrices(ni, Xb, Winteg, AT, ST);
     }
     /* set Legendre polys as basis */
-    pat->basis[dir] = basis_LegendreP;
+    pat->basis[dir] = basis_normLegendreP;
   }
 
   /* setup root node */

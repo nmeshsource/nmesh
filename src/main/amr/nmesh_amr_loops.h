@@ -16,29 +16,30 @@
 /* get node number i out of nodelist on this proc */
 #define GetMyNode(mesh, i) mesh->myln[i]->node
 
+/* loop over all points in a node */
+#define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
+
+/* get pointer to variable array */
+#define GetVarArray(node, varindex) \
+  ((node->dat) ? node->dat->v[(varindex)] : 0)
+
 /* loop over array */
 #define forarray(array,k) \
   for(k=0; k<array->N; k++)
+
+/* get double pointer to data in a variable */
+#define GetVarDpointer(node, varindex) \
+  ((node->dat) ? node->dat->v[(varindex)]->d : 0)
 
 /* loop of one variable (it is in an array*/
 //#define forvari(node,varindex, k) if(node->dat) forarray(node->dat->v[(varindex)], k)
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)
 
-/* get double pointer to data in a variable */
-#define GetVarDpointer(node, varindex) \
-  ((node->dat) ? node->dat->v[(varindex)]->d : 0)
-
-/* get pointer to variable array */
-#define GetVarArray(node, varindex) \
-  ((node->dat) ? node->dat->v[(varindex)] : 0)
 
 /****************************************************************************/
 /* loops that should be used only in very particular advanced cases         */
 /****************************************************************************/
-///* loop over all points in a node */
-//#define forpoints(node,ijk)  for(ijk = 0; ijk < node->np; ijk++)
-
 /* loop over all patches */
 #define forpatches(mesh,patindex) \
   for(patindex=0; patindex < mesh->npats; patindex++)
@@ -62,8 +63,22 @@
 
 
 /****************************************************************************/
-/* do we need these?  */
+/* useful loops over point indices */
 /****************************************************************************/
+
+/* Indices */
+#define Ind_n(i,j,k,n) ((i)+(n[0])*((j)+(n[1])*(k)))
+/* ijk = i + n0*j + n0*n1*k, thus:
+   ijk/(n0*n1) = k
+   (ijk - n0*n1*k)/n0 = j
+   (ijk - n0*n1*k - n0*j ) = i   */
+#define kOfInd_n(ijk,n)        ((ijk)/((n[0])*(n[1])))
+#define jOfInd_n_k(ijk,n,k)    (((ijk) - (n[0])*(n[1])*(k))/(n[0]))
+#define iOfInd_n_jk(ijk,n,j,k) ((ijk) - (n[0])*(n[1])*(k) - (n[0])*(j))
+#define forijk(i,j,k, n) \
+  for (k = 0; k < n[2]; k++) \
+  for (j = 0; j < n[1]; j++) \
+  for (i = 0; i < n[0]; i++)
 
 /* loop over planes e.g. i=p plane */
 #define forplane0(i,j,k, n, p) \
