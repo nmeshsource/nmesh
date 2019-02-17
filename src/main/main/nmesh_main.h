@@ -148,20 +148,21 @@ typedef struct tVAR {
   int component;
   double farlimit;
   double falloff;
-  int sym[3];
+  int sym[3];       /* var symmetries */
   int surfacezones; /* surfacezone number we have for this var on each side */
-  int n_special[3]; /* if non-zero, use this dim in dirs 0,1,2 */
-  int constant;
+  int n_special[3]; /* if >0, use this dim in dirs 0,1,2 */
+  int type;         /* 0: evo. var., 1: aux. var. no need to copy or interp. */
 } tVar;
 /* functions to create and access variables */
 void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description);
 void free_mesh_vdb_contents(tMesh *mesh);
-void AddConstantMeshVar(tMesh *mesh, char *name, 
-                        char *tensorindices, char *description);
+void AddEvoMeshVar(tMesh *mesh, char *name,
+                   char *tensorindices, char *description);
+void AddAuxMeshVar(tMesh *mesh, char *name,
+                   char *tensorindices, char *description);
 int MeshVarIndLax(tMesh *mesh, char *name) ;
 int MeshVarInd(tMesh *mesh, char *name);
 int Set_vdb_iStart_AtVar(tMesh *mesh, char *name);
-
 char *MeshVarName(tMesh *mesh, int i);
 int MeshVarNComponents(tMesh *mesh, int i);
 int MeshVarComponent(tMesh *mesh, int i);
@@ -170,19 +171,19 @@ char *MeshVarNameComponent0(tMesh *mesh, char *name);
 char *MeshVarTensorIndices(tMesh *mesh, int i);
 void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
 			        double farlimit, double falloff);
-void MeshVarNameSetSurfInfo(tMesh *mesh, char *name, int surfacezones);
-void MeshVarNameSetConstantFlag(tMesh *mesh, char *name);
+void MeshVarSetType(tMesh *mesh, int i, int type);
 double MeshVarFallOff(tMesh *mesh, int i);
 double MeshVarFarLimit(tMesh *mesh, int i);
 int MeshVarSymmetry(tMesh *mesh, int i, int dir);
-int MeshVarConstantFlag(tMesh *mesh, int i);
 int MeshVarSurfacezones(tMesh *mesh, int i);
 void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
 /* conveniece macros for vars */
 #define VarName(i) MeshVarName(mesh, (i))
 #define Ind(name)  MeshVarInd(mesh, (name))
-#define AddVar(name, tensorindices, description) \
-  AddMeshVar(mesh, (name), (tensorindices), (description))
+#define AddEvoVar(name, tensorindices, description) \
+  AddEvoMeshVar(mesh, (name), (tensorindices), (description))
+#define AddAuxVar(name, tensorindices, description) \
+  AddAuxMeshVar(mesh, (name), (tensorindices), (description))
 #define VarSetSurfInfo(i, surfacezones) \
   MeshVarSetSurfInfo(mesh, (i), (surfacezones))
 

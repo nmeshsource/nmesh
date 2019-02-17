@@ -15,11 +15,11 @@ int nmesh_amr(tMesh *mesh)
 AddFun(POST_PARAMETERS, setup_test_mesh);
 
   /* variables */
-  AddVar("X", "",
+  AddAuxVar("X", "",
   "coordinate 1 used for output and in spectral expansion e.g. rho");
-  AddVar("Y", "",
+  AddAuxVar("Y", "",
   "coordinate 2 used for output and in spectral expansion e.g. theta");
-  AddVar("Z", "",
+  AddAuxVar("Z", "",
   "coordinate 3 used for output and in spectral expansion e.g. z");
 
   /* parameters */

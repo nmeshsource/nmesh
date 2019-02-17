@@ -18,6 +18,8 @@ enum
   ANALYZE, 
   OUTPUT,
   POST_OUTPUT,
+  AMR,
+  LOADBALANCING,
   NFUNCBINS
 };
 

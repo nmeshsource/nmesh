@@ -45,6 +45,7 @@ int main(int argc, char **argv)
   {
     RunFun(POST_PARAMETERS); //hook for funs right after iterate_parameters
     RunFun(INITMESH); // here we schedule funcs to programatically set up the mesh
+    RunFun(LOADBALANCING);
     inidata_mesh(mesh);
     evolve_mesh(mesh);
     makeparameter(mesh, "outdir_previous_iteration", "",
@@ -388,6 +389,10 @@ int evolve_mesh(tMesh *mesh)
 
     /* checkpoint */
     //checkpoint(mesh);
+
+    /* AMR and load balancing */
+    RunFun(AMR);
+    RunFun(LOADBALANCING);
   
     /* update since this may change during evolution, say when checkpointing */
     timemax = Getd(Par("finaltime"));

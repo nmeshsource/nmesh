@@ -8,7 +8,7 @@
 
 
 
-/* print some compile info */
+/* exchange some surfaces for testing */
 int SurfExchange_test(tMesh *mesh)
 {
   tNode *nd;
@@ -16,7 +16,6 @@ int SurfExchange_test(tMesh *mesh)
   int li;
 
   PRF;printf(": Hmmm.\n");
-  VarSetSurfInfo(ui, 1);
   enablevar(mesh, ui);
 
   formylnodes(mesh, li)

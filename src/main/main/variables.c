@@ -81,14 +81,22 @@ void free_mesh_vdb_contents(tMesh *mesh)
   }
 }
 
-/* add constant variable to data base */
-void AddConstantMeshVar(tMesh *mesh, char *name,
-                        char *tensorindices, char *description)
+/* add auxiliary variable to data base */
+void AddAuxMeshVar(tMesh *mesh, char *name,
+                   char *tensorindices, char *description)
 {
-  tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
   AddMeshVar(mesh, name, tensorindices, description);
-  MeshVarNameSetConstantFlag(mesh, vdb[nvdb-1].name);
+  MeshVarSetType(mesh, nvdb, 1);
+}
+
+/* add variable with surfaces */
+void AddEvoMeshVar(tMesh *mesh, char *name,
+                   char *tensorindices, char *description)
+{
+  int nvdb  = mesh->nvdb;
+  AddMeshVar(mesh, name, tensorindices, description);
+  MeshVarSetSurfInfo(mesh, nvdb, 1);
 }
 
 
@@ -218,16 +226,16 @@ void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
 }
 
 /* set information on how variable behaves at Boundary*/
-void MeshVarNameSetConstantFlag(tMesh *mesh, char *name)
+void MeshVarSetType(tMesh *mesh, int i, int type)
 {
   tVar *vdb = mesh->vdb;
-  int i, i0 = MeshVarIndComponent0(mesh, MeshVarInd(mesh, name));
+  int j, i0 = MeshVarIndComponent0(mesh, i);
   int n = MeshVarNComponents(mesh, i0);
 
-  for(i = 0; i < n; i++)
+  for(j = 0; j < n; j++)
   {
-    vdb[i+i0].constant = 1;
-    if (0) printf("  setting %s constant\n", vdb[i+i0].name);
+    vdb[j+i0].type = 1;
+    if(0) printf("  setting %s type\n", vdb[j+i0].name);
   }
 }
 
@@ -258,8 +266,8 @@ int MeshVarSymmetry(tMesh *mesh, int i, int dir)
 { return mesh->vdb[i].sym[dir]; }
 int MeshVarSurfacezones(tMesh *mesh, int i)
 { return mesh->vdb[i].surfacezones; }
-int MeshVarConstantFlag(tMesh *mesh, int i)
-{ return mesh->vdb[i].constant; }
+int MeshVarType(tMesh *mesh, int i)
+{ return mesh->vdb[i].type; }
 
 
 
@@ -469,7 +477,7 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
     newvar->ncomponents   = var->ncomponents;
     newvar->farlimit      = var->farlimit;
     newvar->falloff       = var->falloff;
-    newvar->constant      = var->constant;
+    newvar->type          = var->type;
     newvar->surfacezones  = var->surfacezones;
     for (j = 0; j < 3; j++)
     {

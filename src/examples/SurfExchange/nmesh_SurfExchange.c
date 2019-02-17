@@ -13,7 +13,7 @@ int nmesh_SurfExchange(tMesh *mesh)
   AddFun(INITIALDATA, SurfExchange_test);
 
   /* variables */
-  AddVar("SurfExchange_u", "", "that needs surface exchange");
+  AddEvoVar("SurfExchange_u", "", "that needs surface exchange");
 
   /* parameters */
   //AddPar("SurfExchange_lowlatency", "no", 
