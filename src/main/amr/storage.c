@@ -763,6 +763,7 @@ int realloc_myln_nncats(tMylnodes *myln, int nncats)
     free(myln->ln);
     myln->ncat = NULL;
     myln->ln = NULL;
+    myln->nm = 0;
   }
 
   /* set new stuff to 0 */
@@ -797,14 +798,17 @@ int realloc_myln_ln_c(tMylnodes *myln, int c, int nelem)
 /* add one element to myln in cat. c */
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem)
 {
-  int nelem = myln->ncat[c];
+  int old_nelem = myln->ncat[c];
+  int nelem;
 
   /* make room for new el */
-  realloc_myln_ln_c(myln, c, nelem+1);
-  /* add elem at the end of ln[c] */
-  myln->ln[c][nelem] = elem;
-  myln->ncat[c] = nelem + 1;
+  nelem = realloc_myln_ln_c(myln, c, old_nelem+1);
+  /* reset nm in case now we have more */
+  if(nelem > myln->nm) myln->nm = nelem;
 
+  /* add elem at the end of ln[c] */
+  myln->ln[c][old_nelem] = elem;
+  myln->ncat[c] = nelem;
   //PRF;printf(": nelem=%d, myln->ncat[%d]=%d\n", nelem, c, myln->ncat[c]);
   return myln->ncat[c];
 }

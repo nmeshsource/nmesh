@@ -103,9 +103,10 @@ typedef struct tNLIST {
    should be based on the time it takes to process each in it. This can
    help with load balancing. */
 typedef struct tMYLNODES {
-  int nncats;       /* number of leaf node categories */
+  int nncats;      /* number of leaf node categories */
   int *ncat;       /* ncat[c] is number of leaves in category c */
-  tNlist ***ln;     /* ln[c][i] is leaf i of category c on this proc */
+  int nm;          /* max of all ncat[c] */
+  tNlist ***ln;    /* ln[c][i] is leaf i of category c on this proc */
 } tMylnodes;
 
 /* the nodes fill a patch */

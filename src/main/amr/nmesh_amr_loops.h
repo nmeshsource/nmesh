@@ -17,6 +17,17 @@
 /* get node number i out of nodelist on this proc */
 #define GetMyNode(mesh, cat, li) mesh->myln->ln[cat][li]->node
 
+/*
+#define formylnodes_2(mesh, myid) \
+  for(int li, cat=0; cat < mesh->myln->nncats; cat++) \
+  for(myid=max_n*cat, li=0; li < mesh->myln->ncat[cat]; myid++, li++)
+
+//cat = myid/max_n; li =  myid%max_n
+#define GetMyNode_2(mesh, myid)
+  mesh->myln->ln[myid/max_n][myid%max_n]->node
+*/
+
+
 /* loop over all points in a node */
 #define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
 
