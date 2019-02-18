@@ -83,9 +83,9 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { nt1, nat1, n2 };
-  double *restrict B = Ba->d;
+  double *B = Ba->d;
+  double *AB = ABa->d;
   double *restrict C = Ca->d;
-  double *restrict AB = ABa->d;
   double *restrict AC = ACa->d;
   int i,j,k;
 
@@ -128,9 +128,9 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { n0, nt1, nat1 };
-  double *restrict B = Ba->d;
+  double *B = Ba->d;
+  double *AB = ABa->d;
   double *restrict C = Ca->d;
-  double *restrict AB = ABa->d;
   double *restrict AC = ACa->d;
   int i,j,k;
 
