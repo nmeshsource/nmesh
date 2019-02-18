@@ -110,3 +110,67 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
   free(B0);
   return sum;
 }
+
+/* 2 interpolation:
+   interpolate to the point (Cb1, Cb2) for variable in array var
+   in plane p orthogonal to direction dir
+   NOTE: We can set node=neighbor when we call this, even if the var is not
+         on neighbor. We can use this to interpolate a surface that came from
+         a neighbor node! */
+double Lagrange_array_interpolate2d(tNode *node, tArray *var,
+                                    int dir, int p, double Cb1, double Cb2)
+{
+  int *n = node->n;
+  double *xp0 = node->Xb[0]->d; /* points */
+  double *xp1 = node->Xb[1]->d;
+  double *xp2 = node->Xb[2]->d;
+  double *w0 = node->WL[0]->d;  /* weights */
+  double *w1 = node->WL[1]->d;
+  double *w2 = node->WL[2]->d;
+  double *B1 = dmalloc(n[1]);
+  double *B2 = dmalloc(n[2]);
+  int i,j,k;
+  double sum;
+
+  switch(dir)
+  {
+  case 1:
+    /* save basis func values */
+    for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[1], xp1, w1);
+    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[2], xp2, w2);
+
+    /* interpolate */
+    sum = 0.;
+    for(k = n[2]-1; k >=0; k--)
+    for(j = n[1]-1; j >=0; j--)
+      sum += var->d[Ind_n(p,j,k, n)] * B1[j] * B2[k];
+    break;
+  case 2:
+    /* save basis func values */
+    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[0], xp0, w0);
+    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[2], xp2, w2);
+
+    /* interpolate */
+    sum = 0.;
+    for(k = n[2]-1; k >=0; k--)
+    for(i = n[0]-1; i >=0; i--)
+      sum += var->d[Ind_n(i,p,k, n)] * B1[i] * B2[k];
+    break;
+  case 3:
+    /* save basis func values */
+    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[0], xp0, w0);
+    for(k=0; k<n[1]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[1], xp1, w1);
+
+    /* interpolate */
+    sum = 0.;
+    for(j = n[1]-1; j >=0; j--)
+    for(i = n[0]-1; i >=0; i--)
+      sum += var->d[Ind_n(i,j,p, n)] * B1[i] * B2[j];
+    break;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+  free(B2);
+  free(B1);
+  return sum;
+}
