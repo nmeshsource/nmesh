@@ -2,7 +2,7 @@
 
 NAME := basis
 
-OBJS := nmesh_$(NAME).o $(NAME).o Legendre.o
+OBJS := nmesh_$(NAME).o $(NAME).o Legendre.o Lagrange.o
 
 
 include $(TOP)/Makefile.subdirs

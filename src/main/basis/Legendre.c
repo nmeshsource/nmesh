@@ -1,7 +1,7 @@
-/* WT 2/2018
+/* Legendre.c */
+/* Wolfgang Tichy, 2/2018
    some functions to deal with Legendre polynomials, especially at the
-   Legendre Gauss-Lobatto (LGL) points.
-*/
+   Legendre Gauss-Lobatto (LGL) points. */
 
 #include "nmesh.h"
 #include "basis.h"
@@ -241,49 +241,6 @@ void LGL_x_winteg(int npoints, double *x, double *w)
       w[j] = 2.0/( (N*(N+1)) * P*P);
       w[N-j] = w[j];
     }
-  }
-}
-
-/* get interpolation weights w_interp from the n points,
-   this is coming from the denominator in Lagrange interpolation only */
-void Lagrange_winterp(int n, const double *x, double *w_interp)
-{
-  int m, j;
-  double denom;
-
-  for(j = 0; j < n; j++)
-  {
-    denom = 1.;
-    for(m = 0; m < n; m++)
-      if(m != j) denom *= x[j] - x[m];
-
-    w_interp[j] = 1./denom;
-  }
-}
-
-
-/* find matrix D for taking derivatives, this sets the transpose D^T
-   if DT is interpreted as stored in column-major form */
-void LGL_DT(int n, const double *x, const double *w_interp, double *DT)
-{
-  int i, j;
-  double Dii, Dij;
-
-  for(i = 0; i < n; i++)
-  {
-    Dii = 0;
-    for(j = 0; j < n; j++)
-    {
-      if(i != j)
-      {
-        Dij  = (w_interp[j] / w_interp[i]) / (x[i] - x[j]);
-        Dii -= Dij;
-        DT[j + i*n] = Dij;
-        /* NOTE: this DT is D_{ij} in row-major form or its transpose
-                 D_{ji} in column-major form */
-      }
-    }
-    DT[i*n + i] = Dii;
   }
 }
 
