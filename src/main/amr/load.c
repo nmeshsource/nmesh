@@ -171,6 +171,11 @@ void move_node_to_rank(tNode *node, int desrank,
       //print_com(rcom);
       /* receive */
       nMPI_Irecv_double_com(rcom, rq, other, node->nid, WORLD);
+
+      /* allocate space already and init some stuff */
+      if(node->dat) errorexit("destination node should not have dat yet");
+      node->dat = alloc_dat(node);
+      coordinates_init_node(node);
     }
   }
   else /* retrieve data from buffers */
@@ -180,8 +185,6 @@ void move_node_to_rank(tNode *node, int desrank,
     {
       /* now unpack the buffers */
       rbuf = get_com_recv_i_buf(rcom);
-      if(node->dat) errorexit("destination node should not have dat yet");
-      node->dat = alloc_dat(node);
       write_buffer_into_dat_vars(node->dat, rbuf);
       /* we can free the buffer here already */
       free_com_recv_i_buf(rcom);
