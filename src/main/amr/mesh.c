@@ -57,7 +57,7 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
 
       LGL_x_winteg(ni, Xb, Winteg);
       Lagrange_winterp(ni, Xb, winterp);
-      LGL_DT(ni, Xb, winterp, DT);
+      Lagrange_DT(ni, Xb, winterp, DT);
       LGL_AT_ST_matrices(ni, Xb, Winteg, AT, ST);
     }
     /* set Legendre polys as basis */
