@@ -75,12 +75,13 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
   return nvars;
 }
 
-/* pack all of dat into a buffer which contains:
+/* pack all (non-aux) vars of dat into a buffer which contains:
   |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
-  here nvars is the number of variables that had storage,
+  here nvars is the number of variables that we send,
   the buffer has to be freed by caller later */
-double *buffer_forall_enabled_dat_vars(tDat *dat, int *buflen)
+double *buffer_forall_needed_dat_vars(tDat *dat, int *buflen)
 {
+  tMesh *mesh = dat->node->pat->mesh;
   int len;
   double *buf;
   int vi, datlen, nvars, bi, N;
@@ -95,7 +96,9 @@ double *buffer_forall_enabled_dat_vars(tDat *dat, int *buflen)
   /* fill buffer */
   buf[0] = nvars;
   for(bi=1, vi=0; vi<nvars; vi++)
-    if(dat->v[vi]) 
+
+    /* add to buffer if eneabled and not auxiliary var */
+    if(dat->v[vi] && (MeshVarType(mesh, vi)!=1))
     {
       N = dat->v[vi]->N;
       buf[bi++] = vi;
@@ -146,7 +149,7 @@ void move_node_to_rank(tNode *node, int desrank,
     if(rank == node->datrank)
     {
       /* alloc and fill buffer */
-      sbuf = buffer_forall_enabled_dat_vars(dat, &slen);
+      sbuf = buffer_forall_needed_dat_vars(dat, &slen);
       other = desrank;
       /* put buffers in com */
       rq = append_buffers_to_com(scom, sbuf,slen, NULL,0);
