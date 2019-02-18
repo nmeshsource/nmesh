@@ -11,7 +11,6 @@ int nmesh_coordinates(tMesh *mesh)
 
   /* functions */
   AddFun(COORDINATES, coordinates_init);
-  AddFun(REINIT, coordinates_reinit);
 
   /* variables */
   AddAuxVar("X", "",    "coordinate 0 in each patch e.g. lambda");

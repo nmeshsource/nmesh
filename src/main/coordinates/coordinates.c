@@ -16,8 +16,8 @@ int coordinates_init(tMesh *mesh)
   return 0;
 }
 
-/* re-initialize coordinates in each patch */
-int coordinates_reinit(tMesh *mesh)
+/* (re)initialize coordinates in a node */
+int coordinates_init_node(tNode *node)
 {
   PRF;printf(":\n");
 

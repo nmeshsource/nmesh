@@ -396,7 +396,7 @@ int evolve_mesh(tMesh *mesh)
     /* AMR and load balancing */
     RunFun(AMR);
     RunFun(LOADBALANCING);
-    RunFun(REINIT);
+    //RunFun(REINIT);
   
     /* update since this may change during evolution, say when checkpointing */
     timemax = Getd(Par("finaltime"));
