@@ -78,13 +78,14 @@ typedef struct tNODE {
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
   //int lid;                /* local node ID */
+  struct tARRAY *Xb[3];   /* points we use e.g. Gauss-Lobatto: Xb\in[-1,1].
+                             X=0.5*((a+b)+(b-a)*Xb), a=bbox[0], b=bbox[1] */
+  struct tARRAY *Wq[3];   /* integr. (or quadrature) weights in 3 dirs */
+  struct tARRAY *WL[3];   /* Lagrange interp. weights in 3 dirs */
   struct tARRAY *Dt[3];   /* transp. differentiation matrix in 3 dirs for [-1,1]
                              domain. This just points to an array in patch. */
   struct tARRAY *At[3];   /* transp. analysis matrix in 3 dirs */
   struct tARRAY *St[3];   /* transp. synthesis matrix in 3 dirs */
-  struct tARRAY *Xb[3];   /* points we use e.g. Gauss-Lobatto: Xb\in[-1,1].
-                             X=0.5*((a+b)+(b-a)*Xb), a=bbox[0], b=bbox[1] */
-  struct tARRAY *Wq[3];   /* integr. (or quadrature) weights in 3 dirs */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
   nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
@@ -121,6 +122,7 @@ typedef struct tPAT {
   int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
   struct tARRAY *(*Xb)[3]; /* list of points (ofter Gauss-Lobatto) */
   struct tARRAY *(*Wq)[3]; /* list of quadrature weights for Xb */
+  struct tARRAY *(*WL)[3]; /* list of Lagrange interp. weights */
   struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
                               we store Dt[1...nmax][dir], where dir=0,1,2 */
   struct tARRAY *(*At)[3]; /* list of transposed analysis matrices */

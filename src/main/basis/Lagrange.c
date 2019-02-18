@@ -14,16 +14,16 @@
    this is coming from the denominator in Lagrange interpolation only */
 void Lagrange_winterp(int n, const double *x, double *w_interp)
 {
-  int m, j;
+  int m, i;
   double denom;
 
-  for(j = 0; j < n; j++)
+  for(i = 0; i < n; i++)
   {
     denom = 1.;
     for(m = 0; m < n; m++)
-      if(m != j) denom *= x[j] - x[m];
+      if(m != i) denom *= (x[i] - x[m]);
 
-    w_interp[j] = 1./denom;
+    w_interp[i] = 1./denom;
   }
 }
 
@@ -52,4 +52,63 @@ void Lagrange_DT(int n, const double *x, const double *w_interp, double *DT)
     }
     DT[i*n + i] = Dii;
   }
+}
+
+/* get Lagrange basis function l_k(x),
+   her x_p are the grid points, w_interp the interp. weights */
+double Lagrange_of_x(int k, double x, int np,
+                     const double *x_p, const double *w_interp)
+{
+  int m;
+  double prod = 1.;
+
+  for(m=0; m<np; m++) if(m!=k) prod *= (x - x_p[m]);
+  return prod/w_interp[k];
+}
+
+/***********************************************************************/
+/* interpolate */
+/***********************************************************************/
+
+/* 3d interpolation:
+   interpolate to the point (Xb[0],Xb[1],Xb[2]) for variable in array var
+   Note: for Lagrange interpolation the coeffs are simply the function
+         values at grid points */
+double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
+{
+  int *n = node->n;
+  double *xp0 = node->Xb[0]->d; /* points */
+  double *xp1 = node->Xb[1]->d;
+  double *xp2 = node->Xb[2]->d;
+  double *w0 = node->WL[0]->d;  /* weights */
+  double *w1 = node->WL[1]->d;
+  double *w2 = node->WL[2]->d;
+  double *B0 = dmalloc(n[0]);   /* basis */
+  double *B1 = dmalloc(n[1]);
+  double *B2 = dmalloc(n[2]);
+  int k;
+  double sum;
+
+  /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B0,... */
+  for(k=0; k<n[0]; k++) B0[k] = Lagrange_of_x(k, Xb[0], n[0], xp0, w0);
+  for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Xb[1], n[1], xp1, w1);
+  for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Xb[2], n[2], xp2, w2);
+
+  /* interpolate to (Xb[0],Xb[1],Xb[2]) */
+  sum = 0.;
+  //SGRID_LEVEL3_Pragma(omp parallel for reduction(+:sum))
+  for(k = n[2]-1; k >=0; k--)
+  {
+    int j,i;
+    for(j = n[1]-1; j >=0; j--)
+    for(i = n[0]-1; i >=0; i--)
+      sum += var->d[Ind_n(i,j,k, n)] * B0[i] * B1[j] * B2[k];
+  }
+
+  free(B2);
+  free(B1);
+  free(B0);
+  return sum;
+
+
 }

@@ -34,7 +34,6 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   tPat *pat;
   int p = mesh->npats;
   int i, ni, dir;
-  double *winterp = dmalloc(nmax);
 
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
@@ -51,6 +50,7 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
     {
       double *Xb = pat->Xb[ni][dir]->d;
       double *Wq = pat->Wq[ni][dir]->d;
+      double *WL = pat->WL[ni][dir]->d;
       double *DT = pat->Dt[ni][dir]->d;
       double *AT = pat->At[ni][dir]->d;
       double *ST = pat->St[ni][dir]->d;
@@ -58,13 +58,13 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
       /* get Legendre Gauss-Lobatto points and integration weights */
       LGL_x_wquad(ni, Xb, Wq);
 
+      /* diff matrix DT for Lagrange interp. poly basis */
+      Lagrange_winterp(ni, Xb, WL);
+      Lagrange_DT(ni, Xb, WL, DT);
+
       /* get analysis & synthesis matrix for Legendre basis,
          could be useful for filtering, but not needed for interpolation */
       LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
-
-      /* diff matrix DT for Lagrange interp. poly basis */
-      Lagrange_winterp(ni, Xb, winterp);
-      Lagrange_DT(ni, Xb, winterp, DT);
     }
     /* set Legendre polys as basis since AT and ST are for Legendre basis */
     pat->basis[dir] = basis_normLegendreP;
@@ -76,7 +76,6 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
-  free(winterp);
   return 0;
 }
 

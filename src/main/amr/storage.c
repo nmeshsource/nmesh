@@ -137,11 +137,12 @@ void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
   /* get node->Dt ... from patch */
   for(dir=0; dir<3; dir++)
   {
+    node->Xb[dir] = node->pat->Xb[n[dir]][dir];
+    node->Wq[dir] = node->pat->Wq[n[dir]][dir];
+    node->WL[dir] = node->pat->WL[n[dir]][dir];
     node->Dt[dir] = node->pat->Dt[n[dir]][dir];
     node->At[dir] = node->pat->At[n[dir]][dir];
     node->St[dir] = node->pat->St[n[dir]][dir];
-    node->Xb[dir] = node->pat->Xb[n[dir]][dir];
-    node->Wq[dir] = node->pat->Wq[n[dir]][dir];
   }
 }
 
@@ -349,21 +350,29 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
   pat->nmax = nmax;
 
   /* get mem. for diff. matrices */
-  pat->Dt = calloc(nmax+1, sizeof(pat->Dt[0]));
-  if(!(pat->Dt) )
-    errorexit("out of memory for diff. matrices");
-  pat->At = calloc(nmax+1, sizeof(pat->At[0]));
-  if(!(pat->At) )
-    errorexit("out of memory for ana. matrices");
-  pat->St = calloc(nmax+1, sizeof(pat->St[0]));
-  if(!(pat->St) )
-    errorexit("out of memory for syn. matrices");
   pat->Xb = calloc(nmax+1, sizeof(pat->Xb[0]));
   if(!(pat->Xb) )
     errorexit("out of memory for points");
   pat->Wq = calloc(nmax+1, sizeof(pat->Wq[0]));
   if(!(pat->Wq) )
     errorexit("out of memory for integr. weights");
+
+  pat->WL = calloc(nmax+1, sizeof(pat->WL[0]));
+  if(!(pat->WL) )
+    errorexit("out of memory for Lagrange interp. weights");
+
+  pat->Dt = calloc(nmax+1, sizeof(pat->Dt[0]));
+  if(!(pat->Dt) )
+    errorexit("out of memory for diff. matrices");
+
+  pat->At = calloc(nmax+1, sizeof(pat->At[0]));
+  if(!(pat->At) )
+    errorexit("out of memory for ana. matrices");
+  pat->St = calloc(nmax+1, sizeof(pat->St[0]));
+  if(!(pat->St) )
+    errorexit("out of memory for syn. matrices");
+
+
   for(d=1; d<=nmax; d++)
   {
     n[0] = n[1] = d;
@@ -380,6 +389,7 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
     {
       pat->Xb[d][i] = alloc_array(n);
       pat->Wq[d][i] = alloc_array(n);
+      pat->WL[d][i] = alloc_array(n);
     }
   }
 
@@ -408,12 +418,14 @@ void free_patch(tPat *pat)
       free_array(pat->St[d][i]);
       free_array(pat->Xb[d][i]);
       free_array(pat->Wq[d][i]);
+      free_array(pat->WL[d][i]);
     }
   free(pat->Dt);
   free(pat->At);
   free(pat->St);
   free(pat->Xb);
   free(pat->Wq);
+  free(pat->WL);
 
   //free_all_bfaces(pat);
   PRF;printf(": implement free_all_bfaces!!!\n");
