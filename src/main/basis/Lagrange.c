@@ -115,8 +115,8 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
    interpolate to the point (Cb1, Cb2) for variable in array var
    in plane p orthogonal to direction dir
    NOTE: We can set node=neighbor when we call this, even if the var is not
-         on neighbor. We can use this to interpolate a surface that came from
-         a neighbor node! */
+         on neighbor. We can use this to interpolate on a surface that was
+         copied from a neighbor node! */
 double Lagrange_array_interpolate2d(tNode *node, tArray *var,
                                     int dir, int p, double Cb1, double Cb2)
 {
