@@ -66,10 +66,10 @@ void free_all_surfaces(tNode *node)
 /* init all surfaces on all nodes in the mesh */
 void free_all_myln_surfaces(tMesh *mesh)
 {
-  int cat,li;
-  formylnodes(mesh, cat,li)
+  int myid;
+  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, cat,li);
+    tNode *node = GetMyNode(mesh, myid);
     free_all_surfaces(node);
   }
 }
@@ -144,10 +144,10 @@ int init_all_surfaces(tNode *node)
 /* init all surfaces on all nodes in the mesh */
 void init_all_myln_surfaces(tMesh *mesh)
 {
-  int cat,li;
-  formylnodes(mesh, cat,li)
+  int myid;
+  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, cat,li);
+    tNode *node = GetMyNode(mesh, myid);
     init_all_surfaces(node);
   }
 }
@@ -199,10 +199,10 @@ int set_all_mysurf(tNode *node)
 /* set all surfaces on all nodes in the mesh */
 void set_all_myln_mysurf(tMesh *mesh)
 {
-  int cat,li;
-  formylnodes(mesh, cat,li)
+  int myid;
+  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, cat,li);
+    tNode *node = GetMyNode(mesh, myid);
     set_all_mysurf(node);
   }
 }
@@ -353,10 +353,10 @@ void request_all_surfaces_exchange(tNode *node)
    to n1 or receiving from n1 */
 void request_all_myln_surfaces_exchange(tMesh *mesh)
 {
-  int cat,li;
-  formylnodes(mesh, cat,li)
+  int myid;
+  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, cat,li);
+    tNode *node = GetMyNode(mesh, myid);
     request_all_surfaces_exchange(node);
   }
 }
@@ -442,10 +442,10 @@ void get_all_surfaces(tNode *node)
 /* get nbsurf for all nodes out of buffers and free the buffers */
 void get_all_myln_surfaces(tMesh *mesh)
 {
-  int cat,li;
-  formylnodes(mesh, cat,li)
+  int myid;
+  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, cat,li);
+    tNode *node = GetMyNode(mesh, myid);
     get_all_surfaces(node);
   }
 }

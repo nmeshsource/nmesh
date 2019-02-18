@@ -9,24 +9,16 @@
 /****************************************************************************/
 /* loops that should be used in most modules                                */
 /****************************************************************************/
-/* loop over leaf node array on this proc */
-#define formylnodes(mesh, cat, li) \
-  for(cat=0; cat < mesh->myln->nncats; cat++) \
-  for(li=0; li < mesh->myln->ncat[cat]; li++)
+/* loop over my leaf nodes on this proc */
+/* Note: for node in ln[c][i]: myid = myln->mx*c + i */
+#define formylnodes(mesh, myid) \
+  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
+  for(myid=mesh->myln->nm*cat_, li_=0; \
+      li_ < mesh->myln->ncat[cat_]; myid++, li_++)
 
-/* get node number i out of nodelist on this proc */
-#define GetMyNode(mesh, cat, li) mesh->myln->ln[cat][li]->node
-
-/*
-#define formylnodes_2(mesh, myid) \
-  for(int li, cat=0; cat < mesh->myln->nncats; cat++) \
-  for(myid=max_n*cat, li=0; li < mesh->myln->ncat[cat]; myid++, li++)
-
-//cat = myid/max_n; li =  myid%max_n
-#define GetMyNode_2(mesh, myid)
-  mesh->myln->ln[myid/max_n][myid%max_n]->node
-*/
-
+/* get node from myid */
+#define GetMyNode(mesh, myid) \
+  mesh->myln->ln[myid / mesh->myln->nm][myid % mesh->myln->nm]->node
 
 /* loop over all points in a node */
 #define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
@@ -52,6 +44,14 @@
 /****************************************************************************/
 /* loops that should be used only in very particular advanced cases         */
 /****************************************************************************/
+/* natural loop over my leaf nodes on this proc */
+#define formylnodes_cat_i(mesh, cat, i) \
+  for(cat=0; cat < mesh->myln->nncats; cat++) \
+  for(i=0; i < mesh->myln->ncat[cat]; i++)
+
+/* get node number i in cat.c out of nodelist on this proc */
+#define GetMyNode_cat_i(mesh, c, i) mesh->myln->ln[c][i]->node
+
 /* loop over all patches */
 #define forpatches(mesh,patindex) \
   for(patindex=0; patindex < mesh->npats; patindex++)

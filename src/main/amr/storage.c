@@ -1062,7 +1062,7 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
   int nvdb_old = mesh->nvdb;
-  int cat, li;
+  int myid;
 
   if(0) printf("realloc_meshvariables from %d to %d\n",
                mesh->nvdb, nvdb_new);
@@ -1082,9 +1082,9 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   mesh->nvdb = nvdb_new;
 
   /* now make sure dat in nodes is also reallocated */
-  formylnodes(mesh, cat, li)
+  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, cat, li);
+    tNode *node = GetMyNode(mesh, myid);
     realloc_nodevariables(node, nvdb_new);
   }
 }
