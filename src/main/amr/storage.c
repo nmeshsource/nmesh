@@ -446,7 +446,7 @@ tMesh *alloc_mesh(int npats)
 
   realloc_patlist_in_mesh(mesh, npats);
 
-  realloc_myln_nncats(mesh->myln, 1);
+//  realloc_myln_nncats(mesh->myln, 1);
 
   return mesh;
 }
@@ -763,6 +763,7 @@ int realloc_myln_nncats(tMylnodes *myln, int nncats)
     free(myln->ln);
     myln->ncat = NULL;
     myln->ln = NULL;
+    myln->nncats = 0;
     myln->nm = 0;
   }
 
@@ -798,10 +799,13 @@ int realloc_myln_ln_c(tMylnodes *myln, int c, int nelem)
 /* add one element to myln in cat. c */
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem)
 {
-  int old_nelem = myln->ncat[c];
-  int nelem;
+  int old_nelem, nelem;
+
+  /* if myln is empty add one category */
+  if(!myln->nncats) realloc_myln_nncats(myln, 1);
 
   /* make room for new el */
+  old_nelem = myln->ncat[c];
   nelem = realloc_myln_ln_c(myln, c, old_nelem+1);
   /* reset nm in case now we have more */
   if(nelem > myln->nm) myln->nm = nelem;
@@ -825,7 +829,6 @@ long update_mesh_myln_node_nid(tMesh *mesh)
 
   /* delete mylns contents */
   realloc_myln_nncats(mesh->myln, 0);
-  realloc_myln_nncats(mesh->myln, 1);
 
   /* go over leaves if  mesh->lns is not NULL */
   if(mesh->lns) fornodelist(mesh->lns, elem)
