@@ -180,7 +180,7 @@ double int_LegendreP_a_b(int k, double a, double b)
    So for x\in(-1,1) we get:
     \frac{d}{dx} P_{n}(x) = \frac{n(n+1)}{(x^2-1)(2n+1)} Q(x)
    So \frac{d}{dx} P_{n}(x) = 0 is equivalent to: Q(x) = 0 */
-void LGL_x_winteg(int npoints, double *x, double *w)
+void LGL_x_wquad(int npoints, double *x, double *w)
 {
   int N = npoints-1;
   int i,j;
@@ -246,7 +246,7 @@ void LGL_x_winteg(int npoints, double *x, double *w)
 
 /* Gauss or Gauss-Lobatto (GL) quadrature:
    compute I = \int_{-1}^1 dx f(x) where f(x) is known at the nodes.
-   For LGL nodes, the w[i] are the integration weights from LGL_x_winteg
+   For LGL nodes, the w[i] are the integration weights from LGL_x_wquad
    This is accurate for polynomials up to degree 2n-3 for LGL. */
 double Gauss_integral(int n, const double *x, const double *w, const double *f)
 {

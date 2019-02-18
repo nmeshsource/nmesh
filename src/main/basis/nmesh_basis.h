@@ -4,9 +4,13 @@
 
 
 /* basis.c */
+
+/* Legendre.c */
 double basis_LegendreP(int l, double x, int np);
 double basis_normLegendreP(int i, double x, int np);
-void LGL_x_winteg(int npoints, double *x, double *w);
+void LGL_x_wquad(int npoints, double *x, double *w);
+void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);
+
+/* Lagrange.c */
 void Lagrange_winterp(int n, const double *x, double *w_interp);
 void Lagrange_DT(int n, const double *x, const double *w_interp, double *DT);
-void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);

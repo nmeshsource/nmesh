@@ -50,17 +50,23 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
     for(ni=1; ni<=nmax; ni++)
     {
       double *Xb = pat->Xb[ni][dir]->d;
-      double *Winteg = pat->Winteg[ni][dir]->d;
+      double *Wq = pat->Wq[ni][dir]->d;
       double *DT = pat->Dt[ni][dir]->d;
       double *AT = pat->At[ni][dir]->d;
       double *ST = pat->St[ni][dir]->d;
 
-      LGL_x_winteg(ni, Xb, Winteg);
+      /* get Legendre Gauss-Lobatto points and integration weights */
+      LGL_x_wquad(ni, Xb, Wq);
+
+      /* get analysis & synthesis matrix for Legendre basis,
+         could be useful for filtering, but not needed for interpolation */
+      LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+
+      /* diff matrix DT for Lagrange interp. poly basis */
       Lagrange_winterp(ni, Xb, winterp);
       Lagrange_DT(ni, Xb, winterp, DT);
-      LGL_AT_ST_matrices(ni, Xb, Winteg, AT, ST);
     }
-    /* set Legendre polys as basis */
+    /* set Legendre polys as basis since AT and ST are for Legendre basis */
     pat->basis[dir] = basis_normLegendreP;
   }
 
@@ -229,7 +235,7 @@ int setup_test_mesh(tMesh *mesh)
   printarray_matrix0(mesh->lns->next->node->Dt[1]);
 
   printarray(mesh->lns->next->node->Xb[1]);
-  printarray(mesh->lns->next->node->Winteg[1]);
+  printarray(mesh->lns->next->node->Wq[1]);
 
 //  el = mesh->lns;
 //  printnodelist(el);

@@ -141,7 +141,7 @@ void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
     node->At[dir] = node->pat->At[n[dir]][dir];
     node->St[dir] = node->pat->St[n[dir]][dir];
     node->Xb[dir] = node->pat->Xb[n[dir]][dir];
-    node->Winteg[dir] = node->pat->Winteg[n[dir]][dir];
+    node->Wq[dir] = node->pat->Wq[n[dir]][dir];
   }
 }
 
@@ -361,8 +361,8 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
   pat->Xb = calloc(nmax+1, sizeof(pat->Xb[0]));
   if(!(pat->Xb) )
     errorexit("out of memory for points");
-  pat->Winteg = calloc(nmax+1, sizeof(pat->Winteg[0]));
-  if(!(pat->Winteg) )
+  pat->Wq = calloc(nmax+1, sizeof(pat->Wq[0]));
+  if(!(pat->Wq) )
     errorexit("out of memory for integr. weights");
   for(d=1; d<=nmax; d++)
   {
@@ -379,7 +379,7 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
     for(i=0; i<3; i++)
     {
       pat->Xb[d][i] = alloc_array(n);
-      pat->Winteg[d][i] = alloc_array(n);
+      pat->Wq[d][i] = alloc_array(n);
     }
   }
 
@@ -407,13 +407,13 @@ void free_patch(tPat *pat)
       free_array(pat->At[d][i]);
       free_array(pat->St[d][i]);
       free_array(pat->Xb[d][i]);
-      free_array(pat->Winteg[d][i]);
+      free_array(pat->Wq[d][i]);
     }
   free(pat->Dt);
   free(pat->At);
   free(pat->St);
   free(pat->Xb);
-  free(pat->Winteg);
+  free(pat->Wq);
 
   //free_all_bfaces(pat);
   PRF;printf(": implement free_all_bfaces!!!\n");
