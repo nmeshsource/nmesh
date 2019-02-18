@@ -12,8 +12,8 @@ void printmesh(tMesh *m)
   int p;
   tNode *node;
 
-  printf("mesh=%p: npats=%d npdb=%d nvdb=%d nln=%ld nmyln=%d dt=%g\n",
-	 m, m->npats, m->npdb, m->nvdb, m->nln, m->nmyln, m->dt);
+  printf("mesh=%p: npats=%d npdb=%d nvdb=%d nln=%ld ncat[0]=%d dt=%g\n",
+	 m, m->npats, m->npdb, m->nvdb, m->nln, m->myln->ncat[0], m->dt);
   forpatches(m, p)
     printpatch(m->pat[p]);
   printf("leaf nodes:\n");

@@ -13,15 +13,15 @@ int SurfExchange_test(tMesh *mesh)
 {
   tNode *nd;
   int ui = Ind("SurfExchange_u");
-  int li;
+  int cat,li;
 
   PRF;printf(": Hmmm.\n");
   enablevar(mesh, ui);
 
-  formylnodes(mesh, li)
+  formylnodes(mesh, cat,li)
   {
     int ijk;
-    tNode *node = GetMyNode(mesh, li);
+    tNode *node = GetMyNode(mesh, cat,li);
     tArray *ua = GetVarArray(node, ui);
 
     /* set particular pattern in u */
@@ -41,15 +41,15 @@ int SurfExchange_test(tMesh *mesh)
   }
 
   /* print var */
-  formylnodes(mesh, li)
+  formylnodes(mesh, cat,li)
   {
-    tNode *node = GetMyNode(mesh, li);
+    tNode *node = GetMyNode(mesh, cat,li);
     printnode(node);
     printvar_innode(node, ui);
   }
 
   /* print var in one node again */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = GetMyNode(mesh, 0,0); /* my first node */
   printnode(nd);
   printvar_innode(nd, ui);
 
@@ -66,12 +66,12 @@ int SurfExchange_test(tMesh *mesh)
   get_all_myln_surfaces(mesh);
 
   /* print var in one node yet again with surfaces */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = GetMyNode(mesh, 0,0); /* my first node */
   printnode(nd);
   printvar_innode(nd, ui);
 
-enablevar(mesh, Ind("SurfExchange_us"));
-printvar_innode(nd, Ind("SurfExchange_us"));
+//enablevar(mesh, Ind("SurfExchange_us"));
+//printvar_innode(nd, Ind("SurfExchange_us"));
   free_all_myln_surfaces(mesh);
   return 0;
 }

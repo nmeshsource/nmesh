@@ -98,6 +98,15 @@ typedef struct tNLIST {
   struct tNLIST *prev;
 } tNlist;
 
+/* Leaf nodes owned by this proc. Each entry is one element of the global
+   list of type tNlist. The leaves are sorted into categories that
+   should be based on the time it takes to process each in it. This can
+   help with load balancing. */
+typedef struct tMYLNODES {
+  int nncats;       /* number of leaf node categories */
+  int *ncat;       /* ncat[c] is number of leaves in category c */
+  tNlist ***ln;     /* ln[c][i] is leaf i of category c on this proc */
+} tMylnodes;
 
 /* the nodes fill a patch */
 typedef struct tPAT {
@@ -131,22 +140,21 @@ typedef struct tPAT {
 /* several patches and thus a list of leaf nodes make up the 
    computational mesh */
 typedef struct tMESH {
-  double dt;        /* time step */
-  double time;      /* current time */
-  int iteration;    /* current iteration number */
+  double dt;         /* time step */
+  double time;       /* current time */
+  int iteration;     /* current iteration number */
   tTodo *skel[NFUNCBINS]; // list of tTodo's from skeleton.c
-  int nvdb;         /* number of variables */
-  struct tVAR *vdb; /* variable data base */
-  int vdb_iStart;   /* index we start at when searching for a var */
-  int npdb;         /* number of mesh parameters */
-  struct tPAR *pdb; /* parameter data base */
-  int pdb_iStart;   /* index we start at when searching for a par */
-  int npats;        /* number of patches */
-  tPat **pat;       /* list of pointers to patches */
-  tNlist *lns;      /* start of linked list of all leaf nodes */
-  long nln;         /* total number of leaf nodes */
-  int nmyln;        /* number of leaves in myln array */
-  tNlist **myln;    /* elements of lns owned by this proc */
+  int nvdb;          /* number of variables */
+  struct tVAR *vdb;  /* variable data base */
+  int vdb_iStart;    /* index we start at when searching for a var */
+  int npdb;          /* number of mesh parameters */
+  struct tPAR *pdb;  /* parameter data base */
+  int pdb_iStart;    /* index we start at when searching for a par */
+  int npats;         /* number of patches */
+  tPat **pat;        /* list of pointers to patches */
+  tNlist *lns;       /* start of linked list of all leaf nodes */
+  long nln;          /* total number of leaf nodes */
+  tMylnodes myln[1]; /* elements of lns owned by this proc */
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:
 use space filling curve as in

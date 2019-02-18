@@ -446,6 +446,8 @@ tMesh *alloc_mesh(int npats)
 
   realloc_patlist_in_mesh(mesh, npats);
 
+  realloc_myln_nncats(mesh->myln, 1);
+
   return mesh;
 }
 
@@ -495,9 +497,7 @@ void free_mesh(tMesh *mesh)
   /* node list in mesh */
   free_nodelist(mesh->lns);
   mesh->lns = NULL;
-  free(mesh->myln);
-  mesh->myln = NULL;
-  mesh->nmyln = 0;
+  realloc_myln_nncats(mesh->myln, 0);
 
   /* free vdb and pdb in mesh */
   free_mesh_vdb_contents(mesh);
@@ -730,17 +730,98 @@ void free_nodesinlist(tNlist *elem)
 }
 
 /**********************************************************************/
+/* functions to allocate and free tMylnodes */
+/**********************************************************************/
+/* allocate or free categories in myln */
+int realloc_myln_nncats(tMylnodes *myln, int nncats)
+{
+  int nncats_old = myln->nncats;
+  int *ncat = myln->ncat;
+  tNlist ***ln = myln->ln;
+  int dc = nncats - nncats_old;
+  int c;
+
+  /* do nothing if old and new cat. numbers are the same */
+  if(nncats_old == nncats) return nncats;
+
+  /* free content of ln[c] for all c>=nncats */
+  for(c=nncats; c<nncats_old; c++) free(ln[c]);
+
+  if(nncats)
+  {
+    //Yo(1);
+    myln->ncat = realloc(ncat, sizeof(ncat[0])*nncats);
+    if(!myln->ncat) errorexit("no memory for myln->ncat");
+
+    myln->ln = realloc(ln, sizeof(ln[0])*nncats);
+    if(!myln->ln) errorexit("no memory for myln->ln");
+  }
+  else
+  {
+    //Yo(3);
+    free(myln->ncat);
+    free(myln->ln);
+    myln->ncat = NULL;
+    myln->ln = NULL;
+  }
+
+  /* set new stuff to 0 */
+  if(dc>0)
+  {
+    //Yo(4);
+    memset(myln->ncat + nncats_old, 0, sizeof(ncat[0])*dc);
+    memset(myln->ln  + nncats_old, 0, sizeof(ln[0])*dc);
+  }
+  myln->nncats = nncats;
+
+  //if(nncats) printf("myln->ncat[0]=%d\n", myln->ncat[0]);
+  return nncats;
+}
+
+/* make room for elements in category c, add cat. c if it's not existing yet */
+int realloc_myln_ln_c(tMylnodes *myln, int c, int nelem)
+{
+  int ainc = 256;
+  int chunks = 1 + nelem/ainc;
+  tNlist ***ln = myln->ln;
+  int nncats = myln->nncats;
+
+  if(c>=nncats) realloc_myln_nncats(myln, c+1);
+
+  myln->ln[c] = realloc(ln[c], sizeof(ln[0][0])*(chunks*ainc));
+  if(!myln->ln[c]) errorexit("no memory for myln->ln[c]");
+
+  return nelem;
+}
+
+/* add one element to myln in cat. c */
+int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem)
+{
+  int nelem = myln->ncat[c];
+
+  /* make room for new el */
+  realloc_myln_ln_c(myln, c, nelem+1);
+  /* add elem at the end of ln[c] */
+  myln->ln[c][nelem] = elem;
+  myln->ncat[c] = nelem + 1;
+
+  //PRF;printf(": nelem=%d, myln->ncat[%d]=%d\n", nelem, c, myln->ncat[c]);
+  return myln->ncat[c];
+}
+
+/**********************************************************************/
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
 /* update array of leaf nodes on this proc, set nid */
 long update_mesh_myln_node_nid(tMesh *mesh)
 {
   tNlist *elem;
-  long allocd = mesh->nmyln;
-  int ainc = 256;
   long nid = 0;
   //int lid = 0;
-  long nmyln = 0;
+
+  /* delete mylns contents */
+  realloc_myln_nncats(mesh->myln, 0);
+  realloc_myln_nncats(mesh->myln, 1);
 
   /* go over leaves if  mesh->lns is not NULL */
   if(mesh->lns) fornodelist(mesh->lns, elem)
@@ -750,13 +831,9 @@ long update_mesh_myln_node_nid(tMesh *mesh)
 
     if(node->dat)
     {
-      if(nmyln >= allocd)
-      {
-        mesh->myln = realloc(mesh->myln, sizeof(mesh->myln[0])*(allocd+ainc));
-        allocd += ainc;
-      }
-      mesh->myln[nmyln++] = elem;
-      //PRF;printf(": nmyln%ld\n", nmyln);
+      /* for now we all leaves in cat. 0 */
+      addto_myln_ln_c(mesh->myln, 0, elem);
+      //PRF;printf(": myln->ncat[0]=%d %p\n", mesh->myln->ncat[0], elem);
 
       /* set lid and invalidate parent's lid */
       //node->lid = lid++;
@@ -767,12 +844,9 @@ long update_mesh_myln_node_nid(tMesh *mesh)
     if(parent) parent->nid = -nid;
     //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
   }
-  else /* mesh->lns is NULL, so free myln array */
-  {
-    free(mesh->myln);
-    mesh->myln = NULL;
-  }
-  mesh->nmyln = nmyln;
+  else /* mesh->lns is NULL, so free myln */
+    realloc_myln_nncats(mesh->myln, 0);
+
   mesh->nln = nid;
   return nid;
 }
@@ -983,7 +1057,7 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
   int nvdb_old = mesh->nvdb;
-  int lni;
+  int cat, li;
 
   if(0) printf("realloc_meshvariables from %d to %d\n",
                mesh->nvdb, nvdb_new);
@@ -1003,9 +1077,9 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   mesh->nvdb = nvdb_new;
 
   /* now make sure dat in nodes is also reallocated */
-  formylnodes(mesh, lni)
+  formylnodes(mesh, cat, li)
   {
-    tNode *node = mesh->myln[lni]->node;
+    tNode *node = GetMyNode(mesh, cat, li);
     realloc_nodevariables(node, nvdb_new);
   }
 }

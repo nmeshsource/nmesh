@@ -10,11 +10,12 @@
 /* loops that should be used in most modules                                */
 /****************************************************************************/
 /* loop over leaf node array on this proc */
-#define formylnodes(mesh, lni) \
-  for(lni=0; lni < mesh->nmyln; lni++)
+#define formylnodes(mesh, cat, li) \
+  for(cat=0; cat < mesh->myln->nncats; cat++) \
+  for(li=0; li < mesh->myln->ncat[cat]; li++)
 
 /* get node number i out of nodelist on this proc */
-#define GetMyNode(mesh, i) mesh->myln[i]->node
+#define GetMyNode(mesh, cat, li) mesh->myln->ln[cat][li]->node
 
 /* loop over all points in a node */
 #define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
