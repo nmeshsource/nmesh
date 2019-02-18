@@ -20,6 +20,7 @@ int coordinates_init(tMesh *mesh)
 int coordinates_init_node(tNode *node)
 {
   PRF;printf(":\n");
-
+  // TODO: set all vars needed so can take derivs and such
+  // ...
   return 0;
 }
