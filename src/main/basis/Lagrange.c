@@ -109,6 +109,4 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
   free(B1);
   free(B0);
   return sum;
-
-
 }
