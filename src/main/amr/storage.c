@@ -446,8 +446,6 @@ tMesh *alloc_mesh(int npats)
 
   realloc_patlist_in_mesh(mesh, npats);
 
-//  realloc_myln_nncats(mesh->myln, 1);
-
   return mesh;
 }
 
