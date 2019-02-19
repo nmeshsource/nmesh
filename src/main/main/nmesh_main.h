@@ -236,5 +236,7 @@ void *pmalloc(int n);
 
 
 /* endianIO.c */
-size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp);
-size_t fread_double_little(double *buf, size_t nmemb, FILE *fp);
+size_t fread_little(double *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t fread_big(double *ptr, size_t size, size_t nmemb, FILE *fp);
