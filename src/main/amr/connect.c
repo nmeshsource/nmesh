@@ -170,7 +170,7 @@ unsigned long node_location0(tNode *node)
 void node_location0_str(tNode *node, char *s, int slen)
 {
   int n, i;
-  unsigned long loc = node_location(node);
+  unsigned long loc = node_location0(node);
   unsigned long lloc;
 
   /* n is how mant times n we can shift loc right (by 3) so that is is zero */
@@ -188,22 +188,17 @@ void node_location0_str(tNode *node, char *s, int slen)
 /* construct a unique string that describes node location in patch: 
    e.g. 743 in octal is node on level 3 that has
     ijk=7 on l1,  ijk=4 on l2,  ijk=3 on l3   */
-unsigned long node_location_str(tNode *node, char *s, int slen)
+char *node_location_str(tNode *node, char *s, int slen)
 {
   tNode *anc;
-  long loc;
-  int i = 0;
-  int l = node->l;;
+  int l = node->l;
 
   if(slen<=l) errorexit("slen is not big enough");
-  s[l+1] = 0;
-  for(loc=1, anc=node; anc->parent; anc = anc->parent)
-  {
+  s[l--] = 0;
+  for(anc=node; anc->parent; anc = anc->parent)
     s[l--] = anc->ijk + '0';
-    loc = loc<<3;
-    loc += anc->ijk;
-  }
-  return loc;
+
+  return s;
 }
 
 /* is node on a face? */

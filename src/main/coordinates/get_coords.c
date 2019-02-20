@@ -4,8 +4,6 @@
 #include "nmesh.h"
 #include "coordinates.h"
 
-#define PR 1
-
 
 
 /* get Xb from i,j,k */

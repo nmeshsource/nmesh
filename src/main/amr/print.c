@@ -43,9 +43,10 @@ void printpatch(tPat *pat)
 void printnode(tNode *n) 
 {
   int i, j;
+  char s[100];
 
-  printf("nid%ld: ijk%d %lo p%d [%g,%g]x[%g,%g]x[%g,%g] np=%dx%dx%d=%d\n",
-          n->nid, n->ijk, node_location(n),
+  printf("nid%ld: ijk%d %s p%d [%g,%g]x[%g,%g]x[%g,%g] np=%dx%dx%d=%d\n",
+          n->nid, n->ijk, node_location_str(n, s,100),
           n->pat->p, n->bbox[0], n->bbox[1], n->bbox[2],
          n->bbox[3], n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
   printf(" l%d leaf=%d: ", n->l, n->leaf);

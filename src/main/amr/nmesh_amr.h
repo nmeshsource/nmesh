@@ -288,5 +288,4 @@ void get_all_surfaces(tNode *node);
 void get_all_myln_surfaces(tMesh *mesh);
 
 /* connect.c */
-unsigned long node_location(tNode *node);
-void node_location_str(tNode *node, char *s, int slen);
+char *node_location_str(tNode *node, char *s, int slen);
