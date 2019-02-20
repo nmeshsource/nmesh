@@ -9,51 +9,50 @@
 void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
                        int Iter, double Time)
 {
-  double *p1;
-  double *p2;
+  tArray *p1;
+  tArray *p2;
   double Xb[3], X[3];
   double *pv = GetVarDpointer(node, iv);
   tArray *va = GetVarArray(node, iv);
   int i,j,k;
   int imin, jmin, kmin;
   int imax, jmax, kmax;
-  int index;
 
   if(pv==NULL) return;
 
-  fprintf(fp, "# \"time = %.16g\"", Time);
+  fprintf(fp, "# \"time = %.15g\"", Time);
   
   imin = jmin = kmin=0;
-  imax = node->n[0] - 1;
-  jmax = node->n[1] - 1;
-  kmax = node->n[2] - 1;
+  imax = va->n[0] - 1;
+  jmax = va->n[1] - 1;
+  kmax = va->n[2] - 1;
   
   if(normal==0)
   {
-    p1 = node->Xb[1]->d;
-    p2 = node->Xb[2]->d;
-    imin = imax = plane[0];
-    XbYbZb_of_ijk(node, plane[0],0,0, Xb);
-    XYZ_of_XbYbZb(node, Xb, X);
-    fprintf(fp, ", i=%d, X=%.16g\n", plane[0], X[0]);
+    p1 = node->Xb[1];
+    p2 = node->Xb[2];
+    if(plane[0]>imax) imin = imax;
+    else              imin = imax = plane[0];
+    XYZ_of_ijk(node, plane[0],0,0, X);
+    fprintf(fp, ", i=%d, X=%.15g\n", plane[0], X[0]);
   }
   else if(normal==1)
   {
-    p1 = node->Xb[0]->d;
-    p2 = node->Xb[2]->d;
-    jmin = jmax = plane[1];
-    XbYbZb_of_ijk(node, 0,plane[1],0, Xb);
-    XYZ_of_XbYbZb(node, Xb, X);
-    fprintf(fp, ", j=%d, Y=%.16g\n", plane[1], X[1]);
+    p1 = node->Xb[0];
+    p2 = node->Xb[2];
+    if(plane[1]>jmax) jmin = jmax;
+    else              jmin = jmax = plane[1];
+    XYZ_of_ijk(node, 0,plane[1],0, X);
+    fprintf(fp, ", j=%d, Y=%.15g\n", plane[1], X[1]);
   }
   else
   {
-    p1 = node->Xb[0]->d;
-    p2 = node->Xb[1]->d;
-    kmin = kmax = plane[2];
-    XbYbZb_of_ijk(node, 0,0,plane[2], Xb);
-    XYZ_of_XbYbZb(node, Xb, X);
-    fprintf(fp, ", k=%d, Z=%.16g\n", plane[2], X[2]);
+    p1 = node->Xb[0];
+    p2 = node->Xb[1];
+    if(plane[2]>kmax) kmin = kmax;
+    else              kmin = kmax = plane[2];
+    XYZ_of_ijk(node, 0,0,plane[2], X);
+    fprintf(fp, ", k=%d, Z=%.15g\n", plane[2], X[2]);
   }
 
   /* go over plane, with normal */
@@ -63,12 +62,23 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
     {
       for(i=imin; i<=imax; i++)
       {
-        index = Ind_n(i,j,k, va->n);
-        fprintf(fp, "%.16g %.16g %.16g\n", p1[index], p2[index], pv[index]);
+        int dir1 = Dir1_norm(normal);
+        int dir2 = Dir2_norm(normal);
+        int ind1 = Ind1_norm(i,j,k, normal);
+        int ind2 = Ind2_norm(i,j,k, normal);
+        int indv = Ind_n(i,j,k, va->n);
+
+        Xb[dir1] = p1->d[ind1];
+        Xb[dir2] = p2->d[ind2];
+        XYZ_of_XbYbZb(node, Xb, X);
+        //fprintf(fp, "%d %d %d: %d %d  %d %d: ", i,j,k, ind1,ind2,dir1,dir2);
+        //fprintf(fp, "%g %g  %g %g: \t\t", Xb[dir1],Xb[dir2], X[dir1],X[dir2]);
+        //fprintf(fp, "%d %d %d: %d %d: %d: ", i,j,k, ind1,ind2, indv);
+        fprintf(fp, "%.15g %.15g %.15g\n", X[dir1], X[dir2], pv[indv]);
       }
-      if(normal==3) fprintf(fp, "\n");
+      if(normal==2) fprintf(fp, "\n");
     }
-    if(normal==2 || normal==1) fprintf(fp, "\n");
+    if(normal==1 || normal==0) fprintf(fp, "\n");
   }
   fprintf(fp,"\n");
 }
@@ -83,6 +93,7 @@ void gnuplot_out2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char XYfil[1000];
   char XZfil[1000];
   char YZfil[1000];
+Yo(2);
 
   /* loop over all nodes */
   forlnodes(mesh, node)
@@ -113,7 +124,7 @@ void gnuplot_out2d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* XY-plane:  Z = Z0 */
       if(ijk[2]>=0)
       {
-        snprintf(XYfil, 999, "%s/%s_%2d.XY%s",
+        snprintf(XYfil, 999, "%s/%s_%02d.XY%s",
                  Gets(Par("outdir")),name, p, ns);
         fXY = fopen(XYfil, "a");
         if(!fXY) errorexits("failed opening %s", XYfil);
@@ -124,7 +135,7 @@ void gnuplot_out2d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* XZ-plane:  Y = Y0 */
       if(ijk[1]>=0)
       {
-        snprintf(XZfil, 999, "%s/%s_%2d.XZ%s",
+        snprintf(XZfil, 999, "%s/%s_%02d.XZ%s",
                  Gets(Par("outdir")),name, p, ns);
         fXZ = fopen(XZfil, "a");
         if(!fXZ) errorexits("failed opening %s", XZfil);
@@ -135,7 +146,7 @@ void gnuplot_out2d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* YZ-plane:  X = X0 */
       if(ijk[0]>=0)
       {
-        snprintf(YZfil, 999, "%s/%s_%2d.YZ%s",
+        snprintf(YZfil, 999, "%s/%s_%02d.YZ%s",
                  Gets(Par("outdir")),name, p, ns);
         fYZ = fopen(YZfil, "a");
         if(!fYZ) errorexits("failed opening %s", YZfil);

@@ -73,15 +73,15 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   char str[1000];
   int start;
   int d, i, vi, vi0;
-
+Yo(1);
   /* par values in strings */
   for(d = 0; d <= 3; d++)
   {
-    sprintf(s, "%ddoutiter", d);
+    snprintf(s,999, "%ddoutiter", d);
     di[d] = Geti(Par(s));
-    sprintf(s, "%ddouttime", d);
+    snprintf(s,999, "%ddouttime", d);
     dt[d] = Getd(Par(s));
-    sprintf(s, "%ddoutput", d);
+    snprintf(s,999, "%ddoutput", d);
     ou[d] = Gets(Par(s));
   }
 
@@ -103,13 +103,13 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   d = 2;
   if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
   {
-    //printf("2dout ... |%s|\n", ou[d]);
+    printf("2dout ... |%s|\n", ou[d]);
     start=0;
-    while(sscanf(ou[2]+start, "%s", str)==1)
+    while(sscanf(ou[d]+start, "%s", str)==1)
     {
       start += strlen(str);
-      if(ou[2][start]==' ') start++;
-      //printf("2dout |%s|\n", str);
+      if(ou[d][start]==' ') start++;
+      printf("2dout |%s|\n", str);
 
       /* check if str has an index that exists */
       vi = MeshVarIndLax(mesh, str);
