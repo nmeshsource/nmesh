@@ -1,4 +1,4 @@
-/* gnuplot2d.c */
+/* output2d.c */
 /* Wolfgang Tichy, Feb. 2019 */
 
 #include "nmesh.h"

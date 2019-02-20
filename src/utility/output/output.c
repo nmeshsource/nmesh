@@ -97,6 +97,22 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
   {
     errorexit("1d output not implemented");
+    //printf("2dout ... |%s|\n", ou[d]);
+    start=0;
+    while(sscanf(ou[d]+start, "%s", str)==1)
+    {
+      start += strlen(str);
+      if(ou[d][start]==' ') start++;
+      //printf("2dout |%s|\n", str);
+
+      /* check if str has an index that exists */
+      vi = MeshVarIndLax(mesh, str);
+      if(vi<0) continue;
+
+      /* we do 2doutputall */
+      vi0 = MeshVarIndComponent0(mesh, vi);
+      for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
+        output1d_meshvar(mesh, VarName(vi0+i), Iter, Time);
   }
 
   /* 2d output */
