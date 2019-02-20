@@ -150,11 +150,12 @@ void connect8_siblings(tNode *narray[8])
   }
 }
 
-/* construct a unique number that describes node location in patch: 
+/* Old version:
+   construct a unique number that describes node location in patch: 
    e.g. 1347 in octal is node on level 3 that has
    ijk=3 on l3, ijk=4 on l2, ijk=7 on l1, the leading 1 is only there to
    distinguish case like: 1000 (ijk=0 on l1-3) from 100 (ijk=0 on l1-2). */
-unsigned long node_location(tNode *node)
+unsigned long node_location0(tNode *node)
 {
   tNode *anc;
   long loc;
@@ -166,8 +167,7 @@ unsigned long node_location(tNode *node)
   }
   return loc;
 }
-
-void node_location_str(tNode *node, char *s, int slen)
+void node_location0_str(tNode *node, char *s, int slen)
 {
   int n, i;
   unsigned long loc = node_location(node);
@@ -183,6 +183,27 @@ void node_location_str(tNode *node, char *s, int slen)
     s[i-2] = (lloc & 7) + '0';
   }
   s[i-2]=0;
+}
+
+/* construct a unique string that describes node location in patch: 
+   e.g. 743 in octal is node on level 3 that has
+    ijk=7 on l1,  ijk=4 on l2,  ijk=3 on l3   */
+unsigned long node_location_str(tNode *node, char *s, int slen)
+{
+  tNode *anc;
+  long loc;
+  int i = 0;
+  int l = node->l;;
+
+  if(slen<=l) errorexit("slen is not big enough");
+  s[l+1] = 0;
+  for(loc=1, anc=node; anc->parent; anc = anc->parent)
+  {
+    s[l--] = anc->ijk + '0';
+    loc = loc<<3;
+    loc += anc->ijk;
+  }
+  return loc;
 }
 
 /* is node on a face? */
