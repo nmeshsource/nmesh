@@ -73,7 +73,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   char str[1000];
   int start;
   int d, i, vi, vi0;
-Yo(1);
+
   /* par values in strings */
   for(d = 0; d <= 3; d++)
   {
@@ -103,13 +103,13 @@ Yo(1);
   d = 2;
   if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
   {
-    printf("2dout ... |%s|\n", ou[d]);
+    //printf("2dout ... |%s|\n", ou[d]);
     start=0;
     while(sscanf(ou[d]+start, "%s", str)==1)
     {
       start += strlen(str);
       if(ou[d][start]==' ') start++;
-      printf("2dout |%s|\n", str);
+      //printf("2dout |%s|\n", str);
 
       /* check if str has an index that exists */
       vi = MeshVarIndLax(mesh, str);
@@ -118,7 +118,7 @@ Yo(1);
       /* we do 2doutputall */
       vi0 = MeshVarIndComponent0(mesh, vi);
       for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
-        gnuplot_out2d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+        output2d_meshvar(mesh, VarName(vi0+i), Iter, Time);
     }
   }
 
