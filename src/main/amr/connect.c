@@ -150,6 +150,41 @@ void connect8_siblings(tNode *narray[8])
   }
 }
 
+/* construct a unique number that describes node location in patch: 
+   e.g. 1347 in octal is node on level 3 that has
+   ijk=3 on l3, ijk=4 on l2, ijk=7 on l1, the leading 1 is only there to
+   distinguish case like: 1000 (ijk=0 on l1-3) from 100 (ijk=0 on l1-2). */
+unsigned long node_location(tNode *node)
+{
+  tNode *anc;
+  long loc;
+  
+  for(loc=1, anc=node; anc->parent; anc = anc->parent)
+  {
+    loc = loc<<3;
+    loc += anc->ijk;
+  }
+  return loc;
+}
+
+void node_location_str(tNode *node, char *s, int slen)
+{
+  int n, i;
+  unsigned long loc = node_location(node);
+  unsigned long lloc;
+
+  /* n is how mant times n we can shift loc right (by 3) so that is is zero */
+  for(n=0, lloc=loc;  lloc;  n++, lloc=lloc>>3) ;
+
+  /* shift loc and write into string s */
+  for(i=2; i<=n && i<=slen; i++)
+  {
+    lloc = loc>>(3*(n-i));
+    s[i-2] = (lloc & 7) + '0';
+  }
+  s[i-2]=0;
+}
+
 /* is node on a face? */
 int node_is_at_face(tNode *node, int face)
 {

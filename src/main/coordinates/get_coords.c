@@ -42,8 +42,16 @@ void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3])
     k = n[dir]-1;
     a = Xb[dir][i];
     b = Xb[dir][k];
-    if(Xb0[dir]>b) ijk[dir] = -k-1;
-    if(Xb0[dir]<a) ijk[dir] = -i-1;
+    if(dgreater(Xb0[dir], b))
+    {
+      ijk[dir] = -k-1;
+      continue;
+    }
+    if(dless(Xb0[dir], a))
+    {
+      ijk[dir] = -1;
+      continue;
+    }
 
     while(k-i>1)
     {
