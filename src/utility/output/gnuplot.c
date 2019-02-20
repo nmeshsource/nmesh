@@ -9,14 +9,13 @@
 
 
 /* write a single plane */
-void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
-                       int Iter, double Time)
+void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
+                       tArray *va, int Iter, double Time)
 {
   tArray *p1;
   tArray *p2;
   double Xb[3], X[3];
-  double *pv = GetVarDpointer(node, iv);
-  tArray *va = GetVarArray(node, iv);
+  double *pv = va->d;
   int i,j,k;
   int imin, jmin, kmin;
   int imax, jmax, kmax;
@@ -88,13 +87,12 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
 
 
 /* write along a line in direc. dir */
-void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[], int iv,
-                      int Iter, double Time)
+void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
+                      tArray *va, int Iter, double Time)
 {
   tArray *p1;
   double Xb[3], X[3];
-  double *pv = GetVarDpointer(node, iv);
-  tArray *va = GetVarArray(node, iv);
+  double *pv = va->d;
   int i,j,k;
   int imin, jmin, kmin;
   int imax, jmax, kmax;

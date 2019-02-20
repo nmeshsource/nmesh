@@ -52,7 +52,7 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
                    Gets(Par("outdir")),name, p, ns);
           fX = fopen(Xfil, "a");
           if(!fX) errorexits("failed opening %s", Xfil);
-          write_line_ascii(node, fX, 0, ijk, vi, It,T);
+          write_line_ascii(node, fX, 0, ijk, GetVarArray(node, vi), It,T);
           fclose(fX);
         }
       }
@@ -66,7 +66,7 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
                    Gets(Par("outdir")),name, p, ns);
           fY = fopen(Yfil, "a");
           if(!fY) errorexits("failed opening %s", Yfil);
-          write_line_ascii(node, fY, 1, ijk, vi, It,T);
+          write_line_ascii(node, fY, 1, ijk, GetVarArray(node, vi), It,T);
           fclose(fY);
         }
       }
@@ -80,7 +80,7 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
                    Gets(Par("outdir")),name, p, ns);
           fZ = fopen(Zfil, "a");
           if(!fZ) errorexits("failed opening %s", Zfil);
-          write_line_ascii(node, fZ, 2, ijk, vi, It,T);
+          write_line_ascii(node, fZ, 2, ijk, GetVarArray(node, vi), It,T);
           fclose(fZ);
         }
       }
