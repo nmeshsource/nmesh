@@ -339,7 +339,7 @@ tNode *destroy_children(tNode *parent)
 tPat *alloc_patch(tMesh *mesh, int p, int nmax)
 {
   int n[3];
-  int i, d;
+  int d, dir;
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));
@@ -377,19 +377,19 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
   {
     n[0] = n[1] = d;
     n[2] = 1;
-    for(i=0; i<3; i++)
+    for(dir=0; dir<3; dir++)
     {
-      pat->Dt[d][i] = alloc_array(n);
-      pat->At[d][i] = alloc_array(n);
-      pat->St[d][i] = alloc_array(n);
+      pat->Dt[d][dir] = alloc_array(n);
+      pat->At[d][dir] = alloc_array(n);
+      pat->St[d][dir] = alloc_array(n);
     }
     n[0] = d;
     n[1] = n[2] = 1;
-    for(i=0; i<3; i++)
+    for(dir=0; dir<3; dir++)
     {
-      pat->Xb[d][i] = alloc_array(n);
-      pat->Wq[d][i] = alloc_array(n);
-      pat->WL[d][i] = alloc_array(n);
+      pat->Xb[d][dir] = alloc_array(n);
+      pat->Wq[d][dir] = alloc_array(n);
+      pat->WL[d][dir] = alloc_array(n);
     }
   }
 

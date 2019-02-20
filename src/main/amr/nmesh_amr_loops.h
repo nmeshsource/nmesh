@@ -79,7 +79,8 @@
 /****************************************************************************/
 
 /* Indices */
-#define Ind_n(i,j,k,n) ((i)+(n[0])*((j)+(n[1])*(k)))
+#define Ind_n(i,j,k,n) ( (i) + (n[0])*( (j) + (n[1])*(k) ) )
+#define Ind_dir(i,j,k,dir) ( (i)*(dir==0) + (j)*(dir==1) + (k)*(dir==2) )
 /* ijk = i + n0*j + n0*n1*k, thus:
    ijk/(n0*n1) = k
    (ijk - n0*n1*k)/n0 = j
@@ -87,6 +88,14 @@
 #define kOfInd_n(ijk,n)        ((ijk)/((n[0])*(n[1])))
 #define jOfInd_n_k(ijk,n,k)    (((ijk) - (n[0])*(n[1])*(k))/(n[0]))
 #define iOfInd_n_jk(ijk,n,j,k) ((ijk) - (n[0])*(n[1])*(k) - (n[0])*(j))
+/* first and second index of i,j,k when we are in plane normal to norm */
+#define Ind1_norm(i,j,k,norm) ( (i)*(norm==2 || norm==1) + (j)*(norm==0) )
+#define Ind2_norm(i,j,k,norm) ( (k)*(norm==0 || norm==1) + (j)*(norm==2) )
+/* direc. 1 and 2 that are normal to norm=0,1,2 */
+#define Dir1_norm(norm) (norm==0)
+#define Dir2_norm(norm) ( (2)*(norm==0 || norm==1) + (norm==2) )
+
+/* loop over i,j,k */
 #define forijk(i,j,k, n) \
   for (k = 0; k < n[2]; k++) \
   for (j = 0; j < n[1]; j++) \

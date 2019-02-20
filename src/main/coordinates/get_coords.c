@@ -88,6 +88,13 @@ void XYZ_of_XbYbZb(tNode *node, const double Xb[3], double X[3])
   } 
 }
 
+/* get X from i,j,k */
+void XYZ_of_ijk(tNode *node, int i, int j, int k, double X[3])
+{
+  XbYbZb_of_ijk(node, i,j,k, X);
+  XYZ_of_XbYbZb(node, X, X);
+}
+
 /* get Xb from X */
 void XbYbZb_of_XYZ(tNode *node, double Xb[3], const double X[3])
 {
