@@ -40,7 +40,7 @@ OFLAGS = -g
 # some libraries are currently required
 libpaths = src/main/amr src/main/nMPI
 libpaths += src/main/basis src/main/coordinates
-
+libpaths += src/utility/output
 
 # --------------------------------------------------------------------------
 # the user chooses the libraries and some options in the file MyConfig
