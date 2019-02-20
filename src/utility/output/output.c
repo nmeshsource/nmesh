@@ -96,7 +96,6 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   d = 1;
   if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
   {
-    errorexit("1d output not implemented");
     //printf("2dout ... |%s|\n", ou[d]);
     start=0;
     while(sscanf(ou[d]+start, "%s", str)==1)
@@ -113,6 +112,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
       vi0 = MeshVarIndComponent0(mesh, vi);
       for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
         output1d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+    }
   }
 
   /* 2d output */

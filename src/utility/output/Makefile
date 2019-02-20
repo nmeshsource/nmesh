@@ -2,6 +2,6 @@
 
 NAME := output
 
-OBJS := nmesh_$(NAME).o $(NAME).o output2d.o gnuplot2d.o
+OBJS := nmesh_$(NAME).o $(NAME).o output1d.o output2d.o gnuplot.o
 
 include $(TOP)/Makefile.subdirs

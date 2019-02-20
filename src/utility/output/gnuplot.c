@@ -29,7 +29,7 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
   imax = va->n[0] - 1;
   jmax = va->n[1] - 1;
   kmax = va->n[2] - 1;
-  
+
   if(normal==0)
   {
     p1 = node->Xb[1];
@@ -82,6 +82,83 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
       if(normal==2) fprintf(fp, "\n");
     }
     if(normal==1 || normal==0) fprintf(fp, "\n");
+  }
+  fprintf(fp,"\n");
+}
+
+
+/* write along a line in direc. dir */
+void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[], int iv,
+                      int Iter, double Time)
+{
+  tArray *p1;
+  double Xb[3], X[3];
+  double *pv = GetVarDpointer(node, iv);
+  tArray *va = GetVarArray(node, iv);
+  int i,j,k;
+  int imin, jmin, kmin;
+  int imax, jmax, kmax;
+
+  if(pv==NULL) return;
+
+  fprintf(fp, "# \"time = %.15g\"", Time);
+  
+  imin = jmin = kmin=0;
+  imax = va->n[0] - 1;
+  jmax = va->n[1] - 1;
+  kmax = va->n[2] - 1;
+  
+  switch(dir)
+  {
+  case 0:
+    p1 = node->Xb[0];
+    if(axis[1]>jmax) jmin = jmax;
+    else             jmin = jmax = axis[1];
+    if(axis[2]>kmax) kmin = kmax;
+    else             kmin = kmax = axis[2];
+    XYZ_of_ijk(node, 0,jmin,kmin, X);
+    fprintf(fp, ", j=%d, k=%d, Y=%.15g, Z=%.15g\n", jmin, kmin, X[1], X[2]);
+    break;
+  case 1:
+    p1 = node->Xb[1];
+    if(axis[0]>imax) imin = imax;
+    else             imin = imax = axis[0];
+    if(axis[2]>kmax) kmin = kmax;
+    else             kmin = kmax = axis[2];
+    XYZ_of_ijk(node, imin,0,kmin, X);
+    fprintf(fp, ", i=%d, k=%d, X=%.15g, Z=%.15g\n", imin, kmin, X[0], X[2]);
+    break;
+  case 2:
+    p1 = node->Xb[2];
+    if(axis[0]>imax) imin = imax;
+    else             imin = imax = axis[0];
+    if(axis[1]>jmax) jmin = jmax;
+    else             jmin = jmax = axis[1];
+    XYZ_of_ijk(node, imin,jmin,0, X);
+    fprintf(fp, ", i=%d, j=%d, X=%.15g, Y=%.15g\n", imin, jmin, X[0], X[1]);
+    break;
+  default:
+    errorexit("dir has to be 0,1,2");
+  }
+
+  /* go over line */
+  for(k=kmin; k<=kmax; k++)
+  {
+    for(j=jmin; j<=jmax; j++)
+    {
+      for(i=imin; i<=imax; i++)
+      {
+        int ind1 = Ind_dir(i,j,k, dir);
+        int indv = Ind_n(i,j,k, va->n);
+
+        Xb[dir] = p1->d[ind1];
+        XYZ_of_XbYbZb(node, Xb, X);
+        //fprintf(fp, "%d %d %d: %d %d: ", i,j,k, ind1,dir);
+        //fprintf(fp, "%g %g: ", Xb[dir], X[dir]);
+        //fprintf(fp, "%d %d %d: %d: %d: ", i,j,k, ind1, indv);
+        fprintf(fp, "%.15g %.15g \n", X[dir], pv[indv]);
+      }
+    }
   }
   fprintf(fp,"\n");
 }
