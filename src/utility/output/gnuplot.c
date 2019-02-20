@@ -1,11 +1,14 @@
-/* gnuplot2d.c */
+/* gnuplot.c */
 /* Wolfgang Tichy, Feb. 2019 */
 
 #include "nmesh.h"
 #include "output.h"
 
+/* the functions in this file write data in a text format that is understood
+   by gnuplot and tgraph */
 
 
+/* write a single plane */
 void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[], int iv,
                        int Iter, double Time)
 {
