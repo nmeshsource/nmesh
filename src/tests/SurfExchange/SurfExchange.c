@@ -70,8 +70,7 @@ int SurfExchange_test(tMesh *mesh)
   printnode(nd);
   printvar_innode(nd, ui);
 
-//enablevar(mesh, Ind("SurfExchange_us"));
-//printvar_innode(nd, Ind("SurfExchange_us"));
+  /* after we have printed them, we no longer need the surfaces */
   free_all_myln_surfaces(mesh);
   return 0;
 }

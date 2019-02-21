@@ -63,7 +63,7 @@ void free_all_surfaces(tNode *node)
   }
 }
 
-/* init all surfaces on all nodes in the mesh */
+/* free all surfaces on all nodes in the mesh */
 void free_all_myln_surfaces(tMesh *mesh)
 {
   int myid;
