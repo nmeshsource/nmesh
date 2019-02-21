@@ -1,9 +1,6 @@
 /* output.h */
 /* Wolfgang Tichy 4/2005 */
 
-//#include <sys/stat.h>
-//#include <sys/types.h>
-
 
 /* output2d.c */
 void output2d_meshvar(tMesh *mesh, char *name, int It, double T);
