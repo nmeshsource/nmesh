@@ -147,13 +147,13 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
     fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
     fprintf(fp, "X_COORDINATES %d %s\n", n0, par->dbl ? "double" : "float");
     write_raw_vtk_data(fp, pX,n0, 1,0, par);
-    fprintf(fp, "\n");
+    fprintf(fp, "\n\n");
     fprintf(fp, "Y_COORDINATES %d %s\n", n1, par->dbl ? "double" : "float");
     write_raw_vtk_data(fp, pY,n1, 1,0, par);
-    fprintf(fp, "\n");
+    fprintf(fp, "\n\n");
     fprintf(fp, "Z_COORDINATES %d %s\n", n2, par->dbl ? "double" : "float");
     write_raw_vtk_data(fp, pZ,n2, 1,0, par);
-    fprintf(fp, "\n");
+    fprintf(fp, "\n\n");
     fprintf(fp, "POINT_DATA %d\n", n0*n1*n2);
     fprintf(fp, "SCALARS scalars %s\n", par->dbl ? "double" : "float");
     fprintf(fp, "LOOKUP_TABLE default\n");
