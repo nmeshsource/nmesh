@@ -35,3 +35,4 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
                 int p, char *nstr, int series);
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
                  int series, tOutpars *par);
+void output3d_meshvar(tMesh *mesh, char *name, int It, double T);

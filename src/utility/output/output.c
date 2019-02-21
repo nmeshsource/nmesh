@@ -85,65 +85,46 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
     ou[d] = Gets(Par(s));
   }
 
-  /* 0d output */
-  d = 0;
-  if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
+  /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
+  for(d=0; d<=3; d++)
   {
-    errorexit("0d output not implemented");
-  }
-
-  /* 1d output */
-  d = 1;
-  if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
-  {
-    //printf("2dout ... |%s|\n", ou[d]);
-    start=0;
-    while(sscanf(ou[d]+start, "%s", str)==1)
+    if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
     {
-      start += strlen(str);
-      if(ou[d][start]==' ') start++;
-      //printf("2dout |%s|\n", str);
+      //printf("2dout ... |%s|\n", ou[d]);
+      start=0;
+      while(sscanf(ou[d]+start, "%s", str)==1)
+      {
+        start += strlen(str);
+        if(ou[d][start]==' ') start++;
+        //printf("2dout |%s|\n", str);
 
-      /* check if str has an index that exists */
-      vi = MeshVarIndLax(mesh, str);
-      if(vi<0) continue;
+        /* check if str has an index that exists */
+        vi = MeshVarIndLax(mesh, str);
+        if(vi<0) continue;
 
-      /* we do 2doutputall */
-      vi0 = MeshVarIndComponent0(mesh, vi);
-      for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
-        output1d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+        /* we do ?doutputall */
+        vi0 = MeshVarIndComponent0(mesh, vi);
+        for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
+        {
+          switch(d)
+          {
+          case 0:
+            errorexit("0d output not implemented");
+            break;
+          case 1:
+            output1d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+            break;
+          case 2:
+            output2d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+            break;
+          case 3:
+            output3d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+            break;
+          }
+        }
+      } //end: while loop
     }
-  }
-
-  /* 2d output */
-  d = 2;
-  if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
-  {
-    //printf("2dout ... |%s|\n", ou[d]);
-    start=0;
-    while(sscanf(ou[d]+start, "%s", str)==1)
-    {
-      start += strlen(str);
-      if(ou[d][start]==' ') start++;
-      //printf("2dout |%s|\n", str);
-
-      /* check if str has an index that exists */
-      vi = MeshVarIndLax(mesh, str);
-      if(vi<0) continue;
-
-      /* we do 2doutputall */
-      vi0 = MeshVarIndComponent0(mesh, vi);
-      for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
-        output2d_meshvar(mesh, VarName(vi0+i), Iter, Time);
-    }
-  }
-
-  /* 3d output */
-  d = 3;
-  if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
-  {
-    errorexit("3d output not implemented");
-  }
+  } // end: for d loop
   return 0;
 }
 
