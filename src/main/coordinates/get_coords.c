@@ -88,6 +88,32 @@ void XYZ_of_XbYbZb(tNode *node, const double Xb[3], double X[3])
   } 
 }
 
+/* get one X from Xb in one direction */
+void X_of_Xb_indir(tNode *node, int dir, double Xb, double *X)
+{
+  double *nbb = node->bbox;
+  int dir;
+  int f = dir*2;
+  *X = 0.5*( (nbb[f+1] - nbb[f]) * Xb + (nbb[f+1] + nbb[f]) );
+}
+
+
+/* get X from Xb for entire arrays */
+void array_XYZ_of_XbYbZb(tNode *node, const tArray *aXb[3], tArray *aX[3])
+{
+  int dir, k;
+  for(dir; dir<2; dir++)
+  {
+    forarray(Xb[dir], k)
+    {
+      double Xb, X;
+      Xb = aXb[dir]->d[k];
+      X_of_Xb_indir(node, dir, Xb, &X);
+      aX[dir]->d[k] = X;
+    }
+  }
+}
+
 /* get X from i,j,k */
 void XYZ_of_ijk(tNode *node, int i, int j, int k, double X[3])
 {
