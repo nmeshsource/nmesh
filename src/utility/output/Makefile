@@ -3,6 +3,6 @@
 NAME := output
 
 OBJS := nmesh_$(NAME).o $(NAME).o output1d.o output2d.o gnuplot.o \
-	VTK_out.o
+	output3d.o VTK_out.o
 
 include $(TOP)/Makefile.subdirs

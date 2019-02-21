@@ -48,7 +48,7 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
       {
         if(gnuplot)
         {
-          snprintf(Xfil, 999, "%s/%s_%02d.X%s",
+          snprintf(Xfil, 999, "%s/%s.%02dX%s",
                    Gets(Par("outdir")),name, p, ns);
           fX = fopen(Xfil, "a");
           if(!fX) errorexits("failed opening %s", Xfil);
@@ -62,7 +62,7 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
       {
         if(gnuplot)
         {
-          snprintf(Yfil, 999, "%s/%s_%02d.Y%s",
+          snprintf(Yfil, 999, "%s/%s.%02dY%s",
                    Gets(Par("outdir")),name, p, ns);
           fY = fopen(Yfil, "a");
           if(!fY) errorexits("failed opening %s", Yfil);
@@ -76,7 +76,7 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
       {
         if(gnuplot)
         {
-          snprintf(Zfil, 999, "%s/%s_%02d.Z%s",
+          snprintf(Zfil, 999, "%s/%s.%02dZ%s",
                    Gets(Par("outdir")),name, p, ns);
           fZ = fopen(Zfil, "a");
           if(!fZ) errorexits("failed opening %s", Zfil);
