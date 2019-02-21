@@ -153,6 +153,7 @@ typedef struct tVAR {
   int n_special[3]; /* if >0, use this dim in dirs 0,1,2 */
   int type;         /* 0: evo. var., 1: aux. var. no need to copy or interp. */
 } tVar;
+
 /* functions to create and access variables */
 void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description);
 void free_mesh_vdb_contents(tMesh *mesh);
