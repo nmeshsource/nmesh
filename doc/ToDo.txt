@@ -13,7 +13,7 @@
 
 *Legendre : DONE!
 
-*some output
+*some output: DONE!
 
 *DG
 
