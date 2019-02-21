@@ -1,3 +1,31 @@
+2 good patch tests:
+-------------------
+1.:
+*ini. mesh
+*load balance
+*again set up data like in SurfExchange_test
+*output t=0
+*exchange surfaces
+*output t=1
+*end
+
+2.: (when iterpolation works)
+*ini. mesh
+*load balance
+*set up Gaussian profile data
+*output t=0
+*remove some nodes
+*load balance
+*add some nodes
+*load balance
+*remove some nodes
+*load balance
+*output t=1
+*end
+
+
+
+
 
 *Array ops
  matrix_times_matrix : DONE!
