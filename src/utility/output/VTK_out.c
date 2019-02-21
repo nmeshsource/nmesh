@@ -34,6 +34,8 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
   if(!fp)
     errorexits("failed opening %s", filename);
 
+  //PRF;printf(": %s", filename); fflush(stdout);
+
   /* return non-null file pointer */
   return fp;
 }
@@ -157,7 +159,6 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
     fprintf(fp, "LOOKUP_TABLE default\n");
     write_raw_vtk_data(fp, pV,n0*n1*n2, 1,0, par);
   }
-  fclose(fp);
 
   free_array(X[2]);
   free_array(X[1]);
