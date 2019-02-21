@@ -52,6 +52,17 @@ int nMPI_Finalize(void)
   return 0;
 }
 
+/* abort MPI in case of errorexit */
+int nMPI_Abort(int errorcode)
+{
+  fclose(stderr);
+  fclose(stdout);
+#ifdef USEMPI
+  return MPI_Abort(WORLD, errorcode);
+#endif
+  return errorcode;
+}
+
 /* return MPI rank, if MPI is not compiled in return 0 */
 int nMPI_rank(void)
 {

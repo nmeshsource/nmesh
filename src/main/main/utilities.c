@@ -459,7 +459,7 @@ void *pmalloc(int n)
 void finalexit(int ec)
 {
   tMesh *mesh = main_mesh;
-  nMPI_Finalize();
+  nMPI_Abort(ec);
   if(GetvLax(Par("errorexit"), "abort"))  abort();
   else                                    exit(ec);
 }
