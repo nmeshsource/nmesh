@@ -79,7 +79,7 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
   |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
   here nvars is the number of variables that we send,
   the buffer has to be freed by caller later */
-double *buffer_forall_needed_dat_vars(tDat *dat, int *buflen)
+double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
 {
   tMesh *mesh = dat->node->pat->mesh;
   int len;
@@ -149,7 +149,7 @@ void move_node_to_rank(tNode *node, int desrank,
     if(rank == node->datrank)
     {
       /* alloc and fill buffer */
-      sbuf = buffer_forall_needed_dat_vars(dat, &slen);
+      sbuf = buffer_with_all_needed_dat_vars(dat, &slen);
       other = desrank;
       /* put buffers in com */
       rq = append_buffers_to_com(scom, sbuf,slen, NULL,0);
