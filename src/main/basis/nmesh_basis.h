@@ -15,6 +15,8 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);
 void Lagrange_winterp(int n, const double *x, double *w_interp);
 void Lagrange_DT(int n, const double *x, const double *w_interp, double *DT);
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3]);
+double Lagrange_of_x(int k, double x, int np,
+                     const double *x_p, const double *w_interp);
 
 /* get_coords.c */
 void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);

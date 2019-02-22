@@ -51,6 +51,10 @@ int misc_test(tMesh *mesh)
   /* print var in one node */
   prdivider('I');
   nd = GetMyNode(mesh, 0); /* my first node */
+  printarray(nd->Xb[2]);
+  printarray(nd->WL[2]);
+
+  prdivider('I');
   printnode(nd);
   printvar_innode(nd, ui);
 
@@ -58,9 +62,18 @@ int misc_test(tMesh *mesh)
   X[0]=0.9;
   X[1]=0.8;
   X[2]=0.7;
+  f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
+  printf("f=%g\n", f);
   f = test_func(X[0],X[1],X[2]);
-  //interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
-  printf("f=%g interp=%g\n",f ,interp);
+  interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
+
+  X[0]=-0.134;
+  X[1]=-0.457;
+  X[2]=+0.666;
+  f = test_func(X[0],X[1],X[2]);
+  interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
 
   return 0;
 }

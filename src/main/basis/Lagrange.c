@@ -63,7 +63,7 @@ double Lagrange_of_x(int k, double x, int np,
   double prod = 1.;
 
   for(m=0; m<np; m++) if(m!=k) prod *= (x - x_p[m]);
-  return prod/w_interp[k];
+  return prod * w_interp[k];
 }
 
 /***********************************************************************/
