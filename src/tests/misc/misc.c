@@ -18,13 +18,16 @@ int misc_test(tMesh *mesh)
 {
   tNode *nd;
   int ui = Ind("misc_u");
+  int vi = Ind("misc_v");
   int myid, dir;
   double *Xb[3];
   double X[3];
   double f, interp;
+  tArray *coef;
 
   PRF;printf(": Hmmm.\n");
   enablevar(mesh, ui);
+  enablevar(mesh, vi);
 
   formylnodes(mesh, myid)
   {
@@ -59,13 +62,21 @@ int misc_test(tMesh *mesh)
   printvar_innode(nd, ui);
 
   /* interpolate */
+  f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
   X[0]=0.9;
   X[1]=0.8;
   X[2]=0.7;
-  f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
   printf("f=%g\n", f);
   f = test_func(X[0],X[1],X[2]);
   interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
+
+  coef = alloc_array(GetVarArray(nd, ui)->n);
+  basis_array_analysis3(nd,  GetVarArray(nd, ui), coef);
+  basis_array_synthesis3(nd, GetVarArray(nd, vi), coef);
+  //printvar_innode(nd, vi);
+  //printarray(coef);
+  interp = basis_array_interpolate(nd, coef, X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
 
   X[0]=-0.134;
@@ -75,6 +86,15 @@ int misc_test(tMesh *mesh)
   interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
 
+  coef = alloc_array(GetVarArray(nd, ui)->n);
+  basis_array_analysis3(nd,  GetVarArray(nd, ui), coef);
+  basis_array_synthesis3(nd, GetVarArray(nd, vi), coef);
+  //printvar_innode(nd, vi);
+  //printarray(coef);
+  interp = basis_array_interpolate(nd, coef, X);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
+
+  free_array(coef);
   return 0;
 }
 
