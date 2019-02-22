@@ -112,8 +112,8 @@ void basis_array_analysis3(tNode *node, tArray *u, tArray *c)
 void basis_array_synthesis3(tNode *node, tArray *u, tArray *c)
 {
   basis_array_synthesis1(node, 0, u, c);
-  basis_array_synthesis1(node, 1, c, c); //should work because it uses mm_array1
-  basis_array_synthesis1(node, 2, c, c);
+  basis_array_synthesis1(node, 1, u, u); //should work because it uses mm_array1
+  basis_array_synthesis1(node, 2, u, u);
 }
 
 /***********************************************************************/
