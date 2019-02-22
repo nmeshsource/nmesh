@@ -14,6 +14,7 @@ int nmesh_SurfExchange(tMesh *mesh)
 
   /* variables */
   AddEvoVar("SurfExchange_u", "", "that needs surface exchange");
+  AddEvoVar("SurfExchange_v", "", "that needs surface exchange");
   //AddVarDim("SurfExchange_us", "", "that needs surface exchange",7,0,6);
 
   /* parameters */
