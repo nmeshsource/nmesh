@@ -97,11 +97,11 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
   /* interpolate to (Xb[0],Xb[1],Xb[2]) */
   sum = 0.;
   //SGRID_LEVEL3_Pragma(omp parallel for reduction(+:sum))
-  for(k = n[2]-1; k >=0; k--)
+  for(k=0; k<n[2]; k++)
   {
     int j,i;
-    for(j = n[1]-1; j >=0; j--)
-    for(i = n[0]-1; i >=0; i--)
+    for(j=0; j<n[1]; j++)
+    for(i=0; i<n[0]; i++)
       sum += var->d[Ind_n(i,j,k, n)] * B0[i] * B1[j] * B2[k];
   }
 
