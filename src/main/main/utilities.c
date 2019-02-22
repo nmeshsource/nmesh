@@ -87,7 +87,7 @@ void prClockTimeIn_s(char *comment)
 }
 
 
-/* minimum and maximum funcs, works for integers id they are not too big */
+/* minimum and maximum funcs, works for integers if they are not too big */
 double min2(double x, double y)
 {
   return (x < y) ? x : y;

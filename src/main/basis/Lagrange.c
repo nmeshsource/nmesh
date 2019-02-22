@@ -127,44 +127,44 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var,
   double *w0 = node->WL[0]->d;  /* weights */
   double *w1 = node->WL[1]->d;
   double *w2 = node->WL[2]->d;
-  double *restrict B1 = dmalloc(n[1]);
-  double *restrict B2 = dmalloc(n[2]);
+  double *restrict B1 = dmalloc(max3(n[0],n[1],n[2]));
+  double *restrict B2 = dmalloc(max3(n[0],n[1],n[2]));
   int i,j,k;
   double sum;
 
   switch(dir)
   {
-  case 1:
+  case 0:
     /* save basis func values */
     for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[1], xp1, w1);
     for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[2], xp2, w2);
 
     /* interpolate */
     sum = 0.;
-    for(k = n[2]-1; k >=0; k--)
-    for(j = n[1]-1; j >=0; j--)
+    for(k=0; k<n[2]; k++)
+    for(j=0; j<n[1]; j++)
       sum += var->d[Ind_n(p,j,k, n)] * B1[j] * B2[k];
     break;
-  case 2:
+  case 1:
     /* save basis func values */
     for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[0], xp0, w0);
     for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[2], xp2, w2);
 
     /* interpolate */
     sum = 0.;
-    for(k = n[2]-1; k >=0; k--)
-    for(i = n[0]-1; i >=0; i--)
+    for(k=0; k<n[2]; k++)
+    for(i=0; i<n[0]; i++)
       sum += var->d[Ind_n(i,p,k, n)] * B1[i] * B2[k];
     break;
-  case 3:
+  case 2:
     /* save basis func values */
     for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[0], xp0, w0);
     for(k=0; k<n[1]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[1], xp1, w1);
 
     /* interpolate */
     sum = 0.;
-    for(j = n[1]-1; j >=0; j--)
-    for(i = n[0]-1; i >=0; i--)
+    for(j=0; j<n[1]; j++)
+    for(i=0; i<n[0]; i++)
       sum += var->d[Ind_n(i,j,p, n)] * B1[i] * B2[j];
     break;
   default:

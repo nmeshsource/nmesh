@@ -19,7 +19,7 @@ int misc_test(tMesh *mesh)
   tNode *nd;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid, dir;
+  int myid, dir, p;
   double *Xb[3];
   double X[3];
   double f, interp;
@@ -38,7 +38,7 @@ int misc_test(tMesh *mesh)
 
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
 
-    /* set particular pattern in u */
+    /* set u to func test_func at grid points */
     forarray(ua, ijk)
     {
       int k = kOfInd_n(ijk, ua->n);
@@ -69,7 +69,7 @@ int misc_test(tMesh *mesh)
   printvar_innode(nd, vi);
   printarray(coef);
 
-  PRF;printf(": interp. at 2 points with two methods:\n");
+  PRF;printf(": 3d interp. at 2 points with Lagrange and Legendre:\n");
   X[0]=0.9;
   X[1]=0.8;
   X[2]=0.7;
@@ -87,6 +87,28 @@ int misc_test(tMesh *mesh)
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+
+  PRF;printf(": 2d interp. in 3 dir. with Lagrange:\n");
+  dir = 0;
+  p = 1;
+  f = test_func(Xb[0][p],X[1],X[2]);
+  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui),
+                                        dir,p, X[1],X[2]);
+  printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[1],X[2], f, interp-f);
+
+  dir = 1;
+  p = 1;
+  f = test_func(X[0],Xb[1][p],X[2]);
+  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui),
+                                        dir,p, X[0],X[2]);
+  printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[2], f, interp-f);
+
+  dir = 2;
+  p = 1;
+  f = test_func(X[0],X[1],Xb[2][p]);
+  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui),
+                                        dir,p, X[0],X[1]);
+  printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[1], f, interp-f);
 
   free_array(coef);
   return 0;
