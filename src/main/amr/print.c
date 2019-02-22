@@ -133,10 +133,11 @@ void printvar_innode(tNode *node, int vi)
   tMesh *mesh = node->pat->mesh;
   char *name = VarName(vi);
   int zones =  MeshVarSurfacezones(mesh, vi);
+  int type =  MeshVarType(mesh, vi);
   tDat *dat = node->dat;
   tArray *va = dat ? dat->v[vi] : NULL;
 
-  printf("%s Ind=%d  zones=%d Array", name, vi, zones);
+  printf("%s Ind=%d type=%d zones=%d Array", name, vi, type, zones);
   printarray(va);
 
   if(va)
@@ -168,7 +169,7 @@ void printarray(tArray *A)
   int i,j,k;
   if(!A)
   {
-    printf(" NULL array\n\n");
+    printf(" <NULL array>\n\n");
     return;
   }
   printf("->n[] = {%d,%d,%d}\n", A->n[0],A->n[1],A->n[2]);

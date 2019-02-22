@@ -193,6 +193,8 @@ int setup_test_mesh(tMesh *mesh)
   //realloc_patlist_in_mesh(mesh, 1);
   add_patch(mesh, bbox, n, n1max);
 
+  enablevar(mesh, Ind("SurfExchange_u"));
+  enablevar(mesh, Ind("SurfExchange_v"));
   enablevar(mesh, Ind("X"));
 //  tNlist *nlist;
 //  tNode *nd;
@@ -266,13 +268,15 @@ Yo(5);
 prdivider(2);
 el = mesh->lns;
 for(i=1; i<=8+2; i++) el = el->next;
-enablevar(mesh, Ind("X"));
+printnode(el->node);
 
-double *d = GetVarDpointer(el->node, Ind("X"));
+double *d = GetVarDpointer(el->node, Ind("SurfExchange_u"));
 if(d) d[3] = 3;
-printvar_innode(el->node, Ind("X"));
+printvar_innode(el->node, Ind("SurfExchange_u"));
+
 simple_load_balance(mesh);
-printvar_innode(el->node, Ind("X"));
+printnode(el->node);
+printvar_innode(el->node, Ind("SurfExchange_u"));
 //printmesh(mesh);
 prdivider('^');
 //  fflush(stdout);

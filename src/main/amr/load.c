@@ -57,6 +57,7 @@ void simple_load_balance(tMesh *mesh)
 /* return: number of variables and number of doubles inside dat */
 int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
 {
+  tMesh *mesh;
   int nvars, vi;
 
   if(!dat)
@@ -64,11 +65,13 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
     *ndoubles = 0;
     return 0;
   }
+  mesh = dat->node->pat->mesh;
 
   /* find amount of data */
   for(nvars=0, *ndoubles=0, vi=0; vi<dat->nv; vi++)
-    if(dat->v[vi]) 
+    if(dat->v[vi]  && (MeshVarType(mesh, vi)!=1))
     {
+      if(PR) { PRF;printf(": vi=%d\n", vi); }
       *ndoubles += dat->v[vi]->N;
       nvars++;
     }
@@ -88,6 +91,7 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
 
   /* find amount of data */
   nvars = nvars_ndoubles_in_dat(dat, &datlen);
+  if(PR) { PRF;printf(": nvars=%d datlen=%d\n", nvars, datlen); }
 
   /* alloc buffer */
   len = 1 + nvars*2 + datlen;
@@ -95,8 +99,8 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
 
   /* fill buffer */
   buf[0] = nvars;
-  for(bi=1, vi=0; vi<nvars; vi++)
-
+  for(bi=1, vi=0; vi<dat->nv; vi++)
+  {
     /* add to buffer if eneabled and not auxiliary var */
     if(dat->v[vi] && (MeshVarType(mesh, vi)!=1))
     {
@@ -105,8 +109,9 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
       buf[bi++] = N;
       memcpy(buf+bi, dat->v[vi]->d, N * sizeof(double));
       bi += N;
+      if(PR) { PRF;printf(": vi=%d bi=%d\n", vi, bi); }
     }
-
+  }
   /* return pointer to this buffer, and its length */
   *buflen = bi;
   return buf;
@@ -144,12 +149,19 @@ void move_node_to_rank(tNode *node, int desrank,
 
   if(setbufs) /* setup buffers and fill them */
   {
-    if(PR) printf("nid%ld datrank%d rank%d desrank%d\n",
-                  node->nid, node->datrank, rank, desrank);
+    if(PR) { PRF;printf(": nid%ld datrank%d rank%d desrank%d\n",
+                        node->nid, node->datrank, rank, desrank); }
     if(rank == node->datrank)
     {
       /* alloc and fill buffer */
       sbuf = buffer_with_all_needed_dat_vars(dat, &slen);
+      if(PR)
+      {
+        PRF;printf(": sbuf =");
+        for(int i=0; i<3; i++) printf(" %g", sbuf[i]);
+        printf("\n");
+        if(node->dat) printf("nv=%d\n", node->dat->nv);
+      }
       other = desrank;
       /* put buffers in com */
       rq = append_buffers_to_com(scom, sbuf,slen, NULL,0);
