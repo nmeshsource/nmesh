@@ -9,7 +9,7 @@
 
 double test_func(double x, double y, double z)
 {
-  return pow(x,4) + pow(y,3) + pow(z,2);
+  return pow(x-0.1, 4) + pow(y+0.2, 3) + pow(z-0.3, 2);
 }
 
 
@@ -19,11 +19,11 @@ int misc_test(tMesh *mesh)
   tNode *nd;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid, dir, p;
+  int myid, dir, p, k;
   double *Xb[3];
   double X[3], Cb[2];
   double f, interp;
-  tArray *coef;
+  tArray *coef, *Xp[3], *Cp[2];
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
@@ -113,6 +113,61 @@ int misc_test(tMesh *mesh)
   interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui), dir,p, Cb);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[1], f, interp-f);
 
+  prdivider(0);
+  PRF;printf(": 3d interp. at all points with Lagrange:\n");
+  Xp[0] = alloc_array(GetVarArray(nd, ui)->n);
+  Xp[1] = alloc_array(GetVarArray(nd, ui)->n);
+  Xp[2] = alloc_array(GetVarArray(nd, ui)->n);
+  forvari(nd,vi, k) GetVarDpointer(nd,vi)[k] = 666;
+  printvar_innode(nd, vi);
+  fill_3arrays_with_nodepoints(nd, Xp);
+  Lagrange_interpolate_topoints(nd, GetVarArray(nd, ui), Xp,
+                                GetVarArray(nd, vi));
+  printf("u and v should now be the same:\n");
+  printvar_innode(nd, vi);
+  printvar_innode(nd, ui);
+
+  prdivider(0);
+  PRF;printf(": 2d interp. in plane with Lagrange:\n");
+  Cp[0] = alloc_array1d(200);
+  Cp[1] = alloc_array1d(200);
+  forvari(nd,vi, k) GetVarDpointer(nd,vi)[k] = 666;
+  //printvar_innode(nd, vi);
+  dir = 0;
+  p = 1;
+  redim_array(Cp[0], 12,0,0);
+  fill_2arrays_with_nodepoints(nd, dir,p, Cp);
+  Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
+                                  Cp, Xp[0]);
+  insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
+  //printvar_innode(nd, vi);
+  
+  dir = 1;
+  p = 1;
+  redim_array(Cp[0], 15,0,0);
+  fill_2arrays_with_nodepoints(nd, dir,p, Cp);
+  Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
+                                  Cp, Xp[0]);
+  insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
+  //printvar_innode(nd, vi);
+
+  dir = 2;
+  p = 1;
+  redim_array(Cp[0], 20,0,0);
+  fill_2arrays_with_nodepoints(nd, dir,p, Cp);
+  Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
+                                  Cp, Xp[0]);
+  insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
+  printf("u and v should now be the same in plane 1 of all 3 dirs:\n");
+  printvar_innode(nd, vi);
+  printvar_innode(nd, ui);
+
+
+  free_array(Cp[0]);
+  free_array(Cp[1]);
+  free_array(Xp[0]);
+  free_array(Xp[1]);
+  free_array(Xp[2]);
   free_array(coef);
   return 0;
 }

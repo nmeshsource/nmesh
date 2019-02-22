@@ -22,10 +22,14 @@ double Lagrange_of_x(int k, double x, int np,
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3]);
 double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
                                     double Cb[2]);
+void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3]);
+void fill_2arrays_with_nodepoints(tNode *node, int dir, int p, tArray *Cp[2]);
 void Lagrange_interpolate_topoints(tNode *node, tArray *var,
                                    tArray *Xp[3], tArray *interp);
 void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
                                      tArray *Cp[2], tArray *interp);
+void insert_array_inplane(tNode *node, tArray *var, int dir, int p,
+                          tArray *interp2d);
 
 /* get_coords.c */
 void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);

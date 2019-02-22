@@ -38,6 +38,12 @@ tArray *alloc_array(int n[3])
 {
   return alloc_array_with_segs(n, 1);
 }
+/* allocate a 1d array */
+tArray *alloc_array1d(int N)
+{
+  int n[] = { N,1,1 };
+  return alloc_array(n);
+}
 
 /* get array that starts at segment si */
 tArray *get_array_seg(tArray *array, int si)
@@ -54,6 +60,24 @@ void point_array_a_to_data(tArray *array, void *data)
 {
   if(array->si == 0) free(array->d);
   array->d = data;
+}
+
+/* re-dimension array */
+void redimension_array_with_segs(tArray *array, int n[3], int ns)
+{
+  int i;
+  for(i=0; i<3; i++) if(n[i]>0) array->n[i] = n[i];
+  array->N = array->n[0] * array->n[1] * array->n[2];
+  array->ns = ns;
+}
+void redimension_array(tArray *array, int n[3])
+{
+  redimension_array_with_segs(array, n, array->ns);
+}
+void redim_array(tArray *array, int n0, int n1, int n2)
+{
+  int n[] = { n0,n1,n2 };
+  redimension_array(array, n);
 }
 
 /* free an array */

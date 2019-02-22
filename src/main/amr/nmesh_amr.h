@@ -210,8 +210,10 @@ tMesh *make_empty_mesh(int pr);
 /* storage.c */
 tArray *alloc_array_with_segs(int n[3], int ns);
 tArray *alloc_array(int n[3]);
+tArray *alloc_array1d(int N);
 tArray *get_array_seg(tArray *array, int si);
 void point_array_a_to_data(tArray *array, void *data);
+void redim_array(tArray *array, int n0, int n1, int n2);
 void free_array(tArray *array);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
