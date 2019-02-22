@@ -25,7 +25,8 @@ int misc_test(tMesh *mesh)
   double f, interp;
   tArray *coef;
 
-  PRF;printf(": Hmmm.\n");
+  prdivider(0);
+  PRF;printf(": Starting misc. tests.\n");
   enablevar(mesh, ui);
   enablevar(mesh, vi);
 
@@ -52,47 +53,40 @@ int misc_test(tMesh *mesh)
   }
 
   /* print var in one node */
-  prdivider('I');
   nd = GetMyNode(mesh, 0); /* my first node */
   printarray(nd->Xb[2]);
   printarray(nd->WL[2]);
-
-  prdivider('I');
+  f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
+  printf("Lagrange_of_x at Zb=0: f=%g\n", f);
   printnode(nd);
   printvar_innode(nd, ui);
 
-  /* interpolate */
-  f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
+  /* interpolate in 2 ways */
+  /* get coeffs for interp. using basis, i.e. Legendre poly */
+  coef = alloc_array(GetVarArray(nd, ui)->n); /* space for coeffs */
+  basis_array_analysis3(nd,  GetVarArray(nd, ui), coef);
+  basis_array_synthesis3(nd, GetVarArray(nd, vi), coef);
+  printvar_innode(nd, vi);
+  printarray(coef);
+
+  PRF;printf(": interp. at 2 points with two methods:\n");
   X[0]=0.9;
   X[1]=0.8;
   X[2]=0.7;
-  printf("f=%g\n", f);
   f = test_func(X[0],X[1],X[2]);
   interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
-  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
-
-  coef = alloc_array(GetVarArray(nd, ui)->n);
-  basis_array_analysis3(nd,  GetVarArray(nd, ui), coef);
-  basis_array_synthesis3(nd, GetVarArray(nd, vi), coef);
-  //printvar_innode(nd, vi);
-  //printarray(coef);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
-  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
 
   X[0]=-0.134;
   X[1]=-0.457;
   X[2]=+0.666;
   f = test_func(X[0],X[1],X[2]);
   interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
-  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
-
-  coef = alloc_array(GetVarArray(nd, ui)->n);
-  basis_array_analysis3(nd,  GetVarArray(nd, ui), coef);
-  basis_array_synthesis3(nd, GetVarArray(nd, vi), coef);
-  //printvar_innode(nd, vi);
-  //printarray(coef);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
-  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f ,interp-f);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
 
   free_array(coef);
   return 0;
