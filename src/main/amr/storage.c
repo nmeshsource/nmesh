@@ -267,33 +267,36 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   if(parent->dat)
   {
     tArray *Xp[3];
-    Xp[0] = alloc_array(n); /* memory to store points of node */
+
+    /* alloc dat for child */
+    node->dat = alloc_dat(node);
+
+//    /* array memory to store points of node */
+    Xp[0] = alloc_array(n);
     Xp[1] = alloc_array(n);
     Xp[2] = alloc_array(n);
+    fill_3arrays_with_nodepoints(node, Xp);
+    /* convert from Xb of node to X to Xb of parent */
+    array_XYZ_of_XbYbZb(node, Xp, Xp);
+    array_XbYbZb_of_XYZ(parent, Xp, Xp);
 
-    node->dat = alloc_dat(node);
-    /* enable same vars in this dat as in parent->dat */
+    /* use interpolation to get vars from parent to child node */
     for(vi=0; vi<nvdb; vi++)
       if(parent->dat->v[vi])
       {
+        /* enable same vars in this dat as in parent->dat */
         enablevarcomp_innode(node, vi);
 
         /* fill node->dat with interpolation data from parent */
         if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
         {
-          fill_3arrays_with_nodepoints(node, Xp);
-          /* convert from Xb of node to X to Xb of parent */
-          // still TODO
-          array_XYZ_of_XbYbZb(node, Xp, Xp);
-          array_XbYbZb_of_XYZ(parent, Xp, Xp);
-
-//void array_XYZ_of_XbYbZb(tNode *node, tArray *aXb[3], tArray *aX[3]);
-//void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3]);
-
           Lagrange_interpolate_topoints(parent, parent->dat->v[vi],
                                         Xp, node->dat->v[vi]);
         }
-      } /* end: id parent has dat */
+      } /* end: if parent has dat */
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
   }
   return node;
 }
@@ -343,15 +346,57 @@ tNode *destroy_children(tNode *parent)
   if(child0->dat)
   {
     int nvdb = parent->pat->mesh->nvdb;
-    int d;
+    int vi;
+    tArray *Xp[3], *Xc[3];
 
     if(!parent->dat) parent->dat = alloc_dat(parent);
     /* enable same vars in this dat as in parent->dat */
-    for(d=0; d<nvdb; d++)
-      if(child0->dat->v[d])  enablevarcomp_innode(parent, d);
+    for(vi=0; vi<nvdb; vi++)
+      if(child0->dat->v[vi])  enablevarcomp_innode(parent, vi);
+
+    /* array memory to store points of parent and child */
+    Xp[0] = alloc_array(parent->n);
+    Xp[1] = alloc_array(parent->n);
+    Xp[2] = alloc_array(parent->n);
+    Xc[0] = alloc_array(child0->n);
+    Xc[1] = alloc_array(child0->n);
+    Xc[2] = alloc_array(child0->n);
+    fill_3arrays_with_nodepoints(parent, Xp);
+    /* convert from Xb of parent to X for parent,
+       these X are spread over the 8 child nodes */
+    array_XYZ_of_XbYbZb(parent, Xp, Xp);
+
 
     /* fill parent->dat with interpolation data from children */
     // still TODO
+//    for(ijk=0; ijk<8; ijk++)
+//    {
+//      tNode *child = narray[ijk];
+//
+//      array_XbYbZb_of_XYZ(child, Xc, Xp);
+//
+//      node->dat = alloc_dat(node);
+//      /* use interpolation to get vars from parent to child node */
+//      for(vi=0; vi<nvdb; vi++)
+//        if(parent->dat->v[vi])
+//        {
+//          /* enable same vars in this dat as in parent->dat */
+//          enablevarcomp_innode(node, vi);
+//
+//          /* fill node->dat with interpolation data from parent */
+//          if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
+//          {
+//            Lagrange_interpolate_topoints(parent, parent->dat->v[vi],
+//                                          Xp, node->dat->v[vi]);
+//          }
+//        } /* end: if parent has dat */
+//    }
+    free_array(Xc[2]);
+    free_array(Xc[1]);
+    free_array(Xc[0]);
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
   }
 
   /* update neighbor info */
