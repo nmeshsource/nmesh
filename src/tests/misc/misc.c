@@ -1,0 +1,67 @@
+/* misc.c */
+/* Wolfgang Tichy, 1/2019 */
+
+#include "nmesh.h"
+#include "misc.h"
+
+#define PR 1
+
+
+double test_func(double x, double y, double z)
+{
+  return pow(x,4) + pow(y,3) + pow(z,2);
+}
+
+
+/* try some things */
+int misc_test(tMesh *mesh)
+{
+  tNode *nd;
+  int ui = Ind("misc_u");
+  int myid, dir;
+  double *Xb[3];
+  double X[3];
+  double f, interp;
+
+  PRF;printf(": Hmmm.\n");
+  enablevar(mesh, ui);
+
+  formylnodes(mesh, myid)
+  {
+    int ijk;
+    tNode *node = GetMyNode(mesh, myid);
+    tArray *ua = GetVarArray(node, ui);
+
+    for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
+
+    /* set particular pattern in u */
+    forarray(ua, ijk)
+    {
+      int k = kOfInd_n(ijk, ua->n);
+      int j = jOfInd_n_k(ijk, ua->n, k);
+      int i = iOfInd_n_jk(ijk, ua->n, j,k);
+      double x = Xb[0][i];
+      double y = Xb[1][j];
+      double z = Xb[2][k];
+
+      ua->d[ijk] = test_func(x,y,z);
+    }
+  }
+
+  /* print var in one node */
+  prdivider('I');
+  nd = GetMyNode(mesh, 0); /* my first node */
+  printnode(nd);
+  printvar_innode(nd, ui);
+
+  /* interpolate */
+  X[0]=0.9;
+  X[1]=0.8;
+  X[2]=0.7;
+  f = test_func(X[0],X[1],X[2]);
+  //interp = Lagrange_array_interpolate(nd, GetVarArray(nd, ui), X);
+  printf("f=%g interp=%g\n",f ,interp);
+
+  return 0;
+}
+
