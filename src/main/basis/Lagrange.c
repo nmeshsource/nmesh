@@ -83,9 +83,9 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
   double *w0 = node->WL[0]->d;  /* weights */
   double *w1 = node->WL[1]->d;
   double *w2 = node->WL[2]->d;
-  double *B0 = dmalloc(n[0]);   /* basis */
-  double *B1 = dmalloc(n[1]);
-  double *B2 = dmalloc(n[2]);
+  double *restrict B0 = dmalloc(n[0]);   /* basis */
+  double *restrict B1 = dmalloc(n[1]);
+  double *restrict B2 = dmalloc(n[2]);
   int k;
   double sum;
 
@@ -111,7 +111,7 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
   return sum;
 }
 
-/* 2 interpolation:
+/* 2d interpolation:
    interpolate to the point (Cb1, Cb2) for variable in array var
    in plane p orthogonal to direction dir
    NOTE: We can set node=neighbor when we call this, even if the var is not
@@ -127,8 +127,8 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var,
   double *w0 = node->WL[0]->d;  /* weights */
   double *w1 = node->WL[1]->d;
   double *w2 = node->WL[2]->d;
-  double *B1 = dmalloc(n[1]);
-  double *B2 = dmalloc(n[2]);
+  double *restrict B1 = dmalloc(n[1]);
+  double *restrict B2 = dmalloc(n[2]);
   int i,j,k;
   double sum;
 
