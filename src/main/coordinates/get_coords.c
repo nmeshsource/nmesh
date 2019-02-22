@@ -96,7 +96,6 @@ void X_of_Xb_indir(tNode *node, int dir, double Xb, double *X)
   *X = 0.5*( (nbb[f+1] - nbb[f]) * Xb + (nbb[f+1] + nbb[f]) );
 }
 
-
 /* get X from Xb for entire arrays */
 void array_XYZ_of_XbYbZb(tNode *node, tArray *aXb[3], tArray *aX[3])
 {
@@ -131,4 +130,28 @@ void XbYbZb_of_XYZ(tNode *node, double Xb[3], const double X[3])
     int f = dir*2;
     Xb[dir] = ( 2.*X[dir] - (nbb[f+1] + nbb[f]) )/(nbb[f+1] - nbb[f]);
   } 
+}
+
+/* get one Xb from X in one direction */
+void Xb_of_X_indir(tNode *node, int dir, double *Xb, const double X)
+{
+  double *nbb = node->bbox;
+  int f = dir*2;
+  *Xb = ( 2.*X - (nbb[f+1] + nbb[f]) )/(nbb[f+1] - nbb[f]);
+}
+
+/* get Xb from X for entire arrays */
+void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3])
+{
+  int dir, k;
+  for(dir=0; dir<3; dir++)
+  {
+    forarray(aXb[dir], k)
+    {
+      double Xb, X;
+      X = aX[dir]->d[k];
+      Xb_of_X_indir(node, dir, &Xb, X);
+      aXb[dir]->d[k] = Xb;
+    }
+  }
 }
