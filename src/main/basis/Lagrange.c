@@ -176,6 +176,57 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
 }
 
 
+/* make 3 arrays Xp[0..2] that contain all points of a node. The
+   arrays Xp[0..2] are in Xb coords. */
+void make_3arrays_with_nodepoints(tNode *node, tArray *Xp[3])
+{
+  int i,j,k, dir, *n = node->n;
+  forijk(i,j,k, n)
+  {
+    double Xb[] = { node->Xb[0]->d[i], node->Xb[1]->d[j], node->Xb[2]->d[k] };
+    for(dir=0; dir<3; dir++)
+      Xp[dir]->d[Ind_n(i,j,k, n)] = Xb[dir];
+  }
+}
+
+/* make 2 arrays Cp[0..1] that contain all points of a node, in plane p
+   orthogonal to direction dir. The arrays Cp[0..1] are in Xb coords. */
+void make_2arrays_with_nodepoints(tNode *node, int dir, int p, tArray *Cp[2])
+{
+  int i,j,k, d0,d1, *m0,*m1, c, *n = node->n;
+
+  switch(dir)
+  {
+  case 0:
+    d0 = 1;  /* Yb */
+    d1 = 2;  /* Zb */
+    m0 = &j;
+    m1 = &k;
+    break;
+  case 1:
+    d0 = 0;  /* Xb */
+    d1 = 2;  /* Zb */
+    m0 = &i;
+    m1 = &k;
+    break;
+  case 2:
+    d0 = 0;
+    d1 = 1;
+    m0 = &i;
+    m1 = &j;
+    break;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+
+  forplaneN(dir, i,j,k, n, p)
+  {
+    double Cb[2] = { node->Xb[d0]->d[*m0], node->Xb[d1]->d[*m1] };
+    for(c=0; c<2; c++)
+      Cp[c]->d[Ind_n(i,j,k, n)] = Cb[c];
+  }
+}
+
 /* 3d interpolation from array var in node to a set of points given in
    arrays Xp[0..2]. The arrays Xp[0..2] are in Xb coords. The result will
    be written into array interp */
