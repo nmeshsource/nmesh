@@ -251,20 +251,28 @@ int remove_dir(char *which_dir)
   DIR           *d;
   struct dirent *dir;
   char file[1000];
-  
+
+  /* open the dir which_dir */
   d = opendir(which_dir);
   if(d)
   {
     while ((dir = readdir(d)) != NULL)
     {
+      DIR *sd;
+
       /* exclude . and .. directories */
-      if( strcmp( dir->d_name, "." ) == 0 || strcmp( dir->d_name, ".." ) == 0)
+      if( strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0 )
         continue;
 
       snprintf(file, 999, "./%s/%s", which_dir, dir->d_name);
       //printf("*"); //print * for every deleted file
 
-      if(opendir(file)!=NULL) remove_dir(file);
+      sd = opendir(file);
+      if(sd!=NULL)
+      {
+        remove_dir(file);
+        closedir(sd);
+      }
       else
       {
         if(remove(file) != 0)
@@ -277,6 +285,7 @@ int remove_dir(char *which_dir)
       }
     } /* end of while loop */
 
+    /* now close the dir which_dir */
     closedir(d);
 
     /* delete directory */
