@@ -20,8 +20,12 @@ void Lagrange_DT(int n, const double *x, const double *w_interp, double *DT);
 double Lagrange_of_x(int k, double x, int np,
                      const double *x_p, const double *w_interp);
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3]);
-double Lagrange_array_interpolate2d(tNode *node, tArray *var,
-                                    int dir, int p, double Cb1, double Cb2);
+double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
+                                    double Cb[2]);
+void Lagrange_interpolate_topoints(tNode *node, tArray *var,
+                                   tArray *Xp[3], tArray *interp);
+void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
+                                     tArray *Cp[2], tArray *interp);
 
 /* get_coords.c */
 void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);

@@ -21,7 +21,7 @@ int misc_test(tMesh *mesh)
   int vi = Ind("misc_v");
   int myid, dir, p;
   double *Xb[3];
-  double X[3];
+  double X[3], Cb[2];
   double f, interp;
   tArray *coef;
 
@@ -91,23 +91,26 @@ int misc_test(tMesh *mesh)
   PRF;printf(": 2d interp. in 3 dir. with Lagrange:\n");
   dir = 0;
   p = 1;
+  Cb[0] = X[1];
+  Cb[1] = X[2];
   f = test_func(Xb[0][p],X[1],X[2]);
-  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui),
-                                        dir,p, X[1],X[2]);
+  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui), dir,p, Cb);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[1],X[2], f, interp-f);
 
   dir = 1;
   p = 1;
+  Cb[0] = X[0];
+  Cb[1] = X[2];
   f = test_func(X[0],Xb[1][p],X[2]);
-  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui),
-                                        dir,p, X[0],X[2]);
+  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui), dir,p, Cb);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[2], f, interp-f);
 
   dir = 2;
   p = 1;
+  Cb[0] = X[0];
+  Cb[1] = X[1];
   f = test_func(X[0],X[1],Xb[2][p]);
-  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui),
-                                        dir,p, X[0],X[1]);
+  interp = Lagrange_array_interpolate2d(nd, GetVarArray(nd, ui), dir,p, Cb);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[1], f, interp-f);
 
   free_array(coef);

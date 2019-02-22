@@ -117,8 +117,8 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
    NOTE: We can set node=neighbor when we call this, even if the var is not
          on neighbor. We can use this to interpolate on a surface that was
          copied from a neighbor node! */
-double Lagrange_array_interpolate2d(tNode *node, tArray *var,
-                                    int dir, int p, double Cb1, double Cb2)
+double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
+                                    double Cb[2])
 {
   int *n = node->n;
   double *xp0 = node->Xb[0]->d; /* points */
@@ -136,8 +136,8 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var,
   {
   case 0:
     /* save basis func values */
-    for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[1], xp1, w1);
-    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[2], xp2, w2);
+    for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[1], xp1, w1);
+    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[2], xp2, w2);
 
     /* interpolate */
     sum = 0.;
@@ -147,8 +147,8 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var,
     break;
   case 1:
     /* save basis func values */
-    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[0], xp0, w0);
-    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[2], xp2, w2);
+    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[0], xp0, w0);
+    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[2], xp2, w2);
 
     /* interpolate */
     sum = 0.;
@@ -158,8 +158,8 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var,
     break;
   case 2:
     /* save basis func values */
-    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb1, n[0], xp0, w0);
-    for(k=0; k<n[1]; k++) B2[k] = Lagrange_of_x(k, Cb2, n[1], xp1, w1);
+    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[0], xp0, w0);
+    for(k=0; k<n[1]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[1], xp1, w1);
 
     /* interpolate */
     sum = 0.;
@@ -173,4 +173,33 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var,
   free(B2);
   free(B1);
   return sum;
+}
+
+
+/* 3d interpolation from array var in node to a set of points given in
+   arrays Xp[0..2]. The arrays Xp[0..2] are in Xb coords. The result will
+   be written into array interp */
+void Lagrange_interpolate_topoints(tNode *node, tArray *var,
+                                   tArray *Xp[3], tArray *interp)
+{
+  int k;
+  forarray(Xp[0], k)
+  {
+    double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k], Xp[2]->d[k] };
+    interp->d[k] = Lagrange_array_interpolate(node, var, Xb);
+  }
+}
+
+/* 2d interpolation from array var in node to a set of points given in
+   arrays Cp[0..1], in plane p orthogonal to direction dir. The arrays
+   Cp[0..1] are in Xb coords. The result will be written into array interp */
+void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
+                                     tArray *Cp[2], tArray *interp)
+{
+  int k;
+  forarray(Cp[0], k)
+  {
+    double Cb[]  = { Cp[0]->d[k], Cp[1]->d[k] };
+    interp->d[k] = Lagrange_array_interpolate2d(node, var, dir,p, Cb);
+  }
 }
