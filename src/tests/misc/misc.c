@@ -162,6 +162,28 @@ int misc_test(tMesh *mesh)
   printvar_innode(nd, vi);
   printvar_innode(nd, ui);
 
+  int nn[] = { 3,5,5 };
+  tNlist *el = mesh->lns;
+  tDat *d0;
+  nd = el->node;
+  d0 = nd->dat;
+  printnode(el->node);
+  printvar_innode(nd, ui);
+  if(d0) printf("1 nd %p %p %d\n", nd, d0, d0->nv);
+
+  make8children_in_mesh_lns_myln(el, nn);
+  printf("2 nd %p %p\n", nd, nd->dat);
+  if(d0) printf("2b nd %p %p %d\n", nd, d0, d0->nv);
+  el = mesh->lns;
+  printnode(el->node);
+  printvar_innode(nd->child[7], ui);
+
+  destroy8siblings_in_mesh_lns_myln(el);
+  printf("3 nd %p %p\n", nd, nd->dat);
+  if(d0) printf("4 nd %p %p %d\n", nd, d0, d0->nv);
+  el = mesh->lns;
+  printnode(el->node);
+  printvar_innode(nd, ui);
 
   free_array(Cp[0]);
   free_array(Cp[1]);

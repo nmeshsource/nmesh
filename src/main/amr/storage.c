@@ -271,7 +271,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
     /* alloc dat for child */
     node->dat = alloc_dat(node);
 
-//    /* array memory to store points of node */
+    /* array memory to store points of node */
     Xp[0] = alloc_array(n);
     Xp[1] = alloc_array(n);
     Xp[2] = alloc_array(n);
@@ -373,6 +373,7 @@ tNode *destroy_children(tNode *parent)
       tNode *child = narray[ijk];
 
       /* get arrays with points inside child node, re-dims Xc */
+//does this work???:
       array_get_XYZ_in_node(child, Xp, Xc);
       array_XbYbZb_of_XYZ(child, Xc, Xc);
 
@@ -385,6 +386,7 @@ tNode *destroy_children(tNode *parent)
           {
             Lagrange_interpolate_topoints(child, child->dat->v[vi],
                                           Xc, parent->dat->v[vi]);
+            // ^puts interp into wrong place in parent->dat->v[vi]
           }
         }
     }
