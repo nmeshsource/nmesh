@@ -27,7 +27,8 @@ tArray *alloc_array_with_segs(int n[3], int ns)
   for(i=0; i<3; i++)  array->n[i] = n[i];
 
   array->ns = ns;
-  array->d = calloc(array->N * ns, sizeof(array->d[0]));
+  array->d = calloc(array->N * ns,
+                    max2(sizeof(array->d[0]), sizeof(array->i[0])));
   if(!array->d) errorexit("out of memory for array->d");
 
   return array;

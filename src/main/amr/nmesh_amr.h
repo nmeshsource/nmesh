@@ -172,12 +172,16 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 typedef struct tARRAY {
   int n[3];     /* dims in all 3 dirs */
   int N;        /* N = n[0] * n[1] * n[2]; */
-  double *d;    /* pointer to double data (could add one more for GPU data) */
+  union {       /* anon. union with host data (add one more for GPU data) */
+    double *d;  /* pointer to double data */
+    int *i; };  /* pointer to int data using same mem as double data */
   int d_nofree; /* d_nofree=1 if free_array should not free a */
   int ns;       /* number of segments */
   int si;       /* segment index */
 //  void *par;    /* pointer to some extra pars */
 } tArray;
+/* NOTE: the anon. union is used to be able to store either double or int in
+   tArray */
 
 
 /* variable lists */
