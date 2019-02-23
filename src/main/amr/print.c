@@ -4,6 +4,9 @@
 #include "nmesh.h"
 #include "amr.h"
 
+/* mesh made in main */
+extern tMesh *main_mesh;
+
 
 /* print information about various objects */
 
@@ -12,8 +15,10 @@ void printmesh(tMesh *m)
   int p;
   tNode *node;
 
-  printf("mesh=%p: npats=%d npdb=%d nvdb=%d nln=%ld myln->nm=%d dt=%g\n",
-	 m, m->npats, m->npdb, m->nvdb, m->nln, m->myln->nm, m->dt);
+  if(m==main_mesh) printf("mesh=main_mesh: ");
+  else             printf("mesh=%p: ", m);
+  printf("npats=%d npdb=%d nvdb=%d nln=%ld myln->nm=%d dt=%g\n",
+	 m->npats, m->npdb, m->nvdb, m->nln, m->myln->nm, m->dt);
   forpatches(m, p)
     printpatch(m->pat[p]);
   printf("leaf nodes:\n");
@@ -80,6 +85,7 @@ void printnode_and_neighbors(tNode *n)
 {
   tNode *n0, *n0p, *n1;
   int dir, ni;
+  char s[100];
 
   printnode(n);
   for(dir=0; dir<3; dir++)
@@ -90,9 +96,10 @@ void printnode_and_neighbors(tNode *n)
     ni++;
     for(n1=n0p; n1; n1=n1->nb[dir*2+1], ni++)
     {
-      printf(" [%+5g,%+5g]x[%+5g,%+5g]x[%+5g,%+5g]  ni=%d, nid%ld\n",
+      printf(" [%+5g,%+5g]x[%+5g,%+5g]x[%+5g,%+5g]  ni=%d, nid%ld %s\n",
              n1->bbox[0], n1->bbox[1], n1->bbox[2], n1->bbox[3],
-             n1->bbox[4], n1->bbox[5], ni, n1->nid);
+             n1->bbox[4], n1->bbox[5], ni, n1->nid,
+             node_location_str(n1, s,99));
     }
   }
 }
