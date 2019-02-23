@@ -345,7 +345,8 @@ tNode *destroy_children(tNode *parent)
   parent->datrank = child0->datrank;
   if(child0->dat)
   {
-    int nvdb = parent->pat->mesh->nvdb;
+    tMesh *mesh = parent->pat->mesh;
+    int nvdb = mesh->nvdb;
     int vi;
     tArray *Xp[3], *Xc[3];
 
@@ -366,31 +367,27 @@ tNode *destroy_children(tNode *parent)
        these X are spread over the 8 child nodes */
     array_XYZ_of_XbYbZb(parent, Xp, Xp);
 
-
     /* fill parent->dat with interpolation data from children */
-    // still TODO
-//    for(ijk=0; ijk<8; ijk++)
-//    {
-//      tNode *child = narray[ijk];
-//
-//      array_XbYbZb_of_XYZ(child, Xc, Xp);
-//
-//      node->dat = alloc_dat(node);
-//      /* use interpolation to get vars from parent to child node */
-//      for(vi=0; vi<nvdb; vi++)
-//        if(parent->dat->v[vi])
-//        {
-//          /* enable same vars in this dat as in parent->dat */
-//          enablevarcomp_innode(node, vi);
-//
-//          /* fill node->dat with interpolation data from parent */
-//          if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
-//          {
-//            Lagrange_interpolate_topoints(parent, parent->dat->v[vi],
-//                                          Xp, node->dat->v[vi]);
-//          }
-//        } /* end: if parent has dat */
-//    }
+    for(ijk=0; ijk<8; ijk++)
+    {
+      tNode *child = narray[ijk];
+
+      /* get arrays with points inside child node, re-dims Xc */
+      array_get_XYZ_in_node(child, Xp, Xc);
+      array_XbYbZb_of_XYZ(child, Xc, Xc);
+
+      /* use interpolation to get vars from child to parent */
+      for(vi=0; vi<nvdb; vi++)
+        if(child->dat->v[vi])
+        {
+          /* fill parent->dat with interpolation data from child */
+          if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
+          {
+            Lagrange_interpolate_topoints(child, child->dat->v[vi],
+                                          Xc, parent->dat->v[vi]);
+          }
+        }
+    }
     free_array(Xc[2]);
     free_array(Xc[1]);
     free_array(Xc[0]);

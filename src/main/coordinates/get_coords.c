@@ -155,3 +155,48 @@ void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3])
     }
   }
 }
+
+/* is XYZ inside a node, also sets X to boundary value if it is very close
+   to the boundary */
+int XYZ_is_in_node(tNode *node, double X[3])
+{
+  double *nbb = node->bbox;
+  int dir;
+
+  /* return 0 if X is outside node */
+  for(dir=0; dir<3; dir++)
+  {
+    int f = dir*2;
+    if(dless(X[dir],nbb[f]))      return 0;
+    if(dgreater(X[dir],nbb[f+1])) return 0;
+  }
+
+  /* set X to boundary value if it is very close to boundary */
+  for(dir=0; dir<3; dir++)
+  {
+    int f = dir*2;
+    if(X[dir] < nbb[f])   X[dir] = nbb[f];
+    if(X[dir] > nbb[f+1]) X[dir] = nbb[f+1];
+  }
+  return 1;
+}
+
+/* write all points in aXP[0..1] within node into aX[0..2]
+   NOTE: this re-dimensions aX[0..2] !!! */
+void array_get_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aX[3])
+{
+  int dir, k, ai;
+
+  ai = 0;
+  forarray(aXP[0], k)
+  {
+    double X[] = { aXP[0]->d[k], aXP[1]->d[k], aXP[2]->d[k] };
+
+    if(XYZ_is_in_node(node, X))
+      for(dir=0; dir<3; dir++) aX[dir]->d[ai] = X[dir];
+    ai++;
+  }
+
+  /* redimension array aX to have correct number of points */
+  for(dir=0; dir<3; dir++) redim_array(aX[dir], ai,1,1);
+}
