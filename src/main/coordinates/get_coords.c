@@ -193,8 +193,10 @@ void array_get_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aX[3])
     double X[] = { aXP[0]->d[k], aXP[1]->d[k], aXP[2]->d[k] };
 
     if(XYZ_is_in_node(node, X))
+    {
       for(dir=0; dir<3; dir++) aX[dir]->d[ai] = X[dir];
-    ai++;
+      ai++;
+    }
   }
 
   /* redimension array aX to have correct number of points */

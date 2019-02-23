@@ -185,6 +185,53 @@ int misc_test(tMesh *mesh)
   printnode(el->node);
   printvar_innode(nd, ui);
 
+double XX0[] = { -4.-1e-12, -1.1, -0.01 };
+double XX1[] = { -4.-0.1,   -1.1, -0.01 };
+double XX2[] = { -2,        -1.1, -0.01 };
+tArray *Xc[3], *Xd[3];
+Xc[0] = alloc_array(nn);
+Xc[1] = alloc_array(nn);
+Xc[2] = alloc_array(nn);
+Xd[0] = alloc_array(nn);
+Xd[1] = alloc_array(nn);
+Xd[2] = alloc_array(nn);
+for(dir=0; dir<3; dir++)
+{
+Xc[dir]->d[0] = XX0[dir];
+Xc[dir]->d[1] = XX1[dir];
+Xc[dir]->d[2] = XX2[dir];
+}
+redim_array(Xc[0], 3,1,1);
+redim_array(Xc[1], 3,1,1);
+redim_array(Xc[2], 3,1,1);
+redim_array(Xd[0], 3,1,1);
+redim_array(Xd[1], 3,1,1);
+redim_array(Xd[2], 3,1,1);
+printarray(Xc[0]);
+printarray(Xc[1]);
+printarray(Xc[2]);
+
+printarray(Xd[0]);
+printarray(Xd[1]);
+printarray(Xd[2]);
+
+printnode(nd);
+array_get_XYZ_in_node(nd, Xc, Xd);
+
+//array_XbYbZb_of_XYZ(nd, Xd, Xc);
+printarray(Xc[0]);
+printarray(Xc[1]);
+printarray(Xc[2]);
+printf("in=%d: XX1 %.15e %.15e %.15e\n",XYZ_is_in_node(nd, XX1), XX1[0],XX1[1],XX1[2]);
+printarray(Xd[0]);
+printarray(Xd[1]);
+printarray(Xd[2]);
+//array_get_XYZ_in_node(nd, Xd, Xc);
+//printarray(Xc[0]);
+//printarray(Xc[1]);
+//printarray(Xc[2]);
+
+
   free_array(Cp[0]);
   free_array(Cp[1]);
   free_array(Xp[0]);
