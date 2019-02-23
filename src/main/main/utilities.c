@@ -246,17 +246,17 @@ int copy_file_into_dir(char *fname, char *dir)
 }
 
 /* use opendir to scan through dir and remove the entire dir */
-int remove_dir(char *which_dir)
+int remove_dir(char *dirname)
 {
-  DIR           *d;
+  DIR *d;
   struct dirent *dir;
   char file[1000];
 
-  /* open the dir which_dir */
-  d = opendir(which_dir);
+  /* open the dir dirname */
+  d = opendir(dirname);
   if(d)
   {
-    while ((dir = readdir(d)) != NULL)
+    while((dir = readdir(d)) != NULL)
     {
       DIR *sd;
 
@@ -264,8 +264,7 @@ int remove_dir(char *which_dir)
       if( strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0 )
         continue;
 
-      snprintf(file, 999, "./%s/%s", which_dir, dir->d_name);
-      //printf("*"); //print * for every deleted file
+      snprintf(file, 999, "./%s/%s", dirname, dir->d_name);
 
       sd = opendir(file);
       if(sd!=NULL)
@@ -277,22 +276,20 @@ int remove_dir(char *which_dir)
       {
         if(remove(file) != 0)
         {
-          //printf("\n%s\n", file);
-          //perror("Remove failed");
+          //errorexits("remove(%s) failed!", file);
           closedir(d);
           return -2;
         }
       }
     } /* end of while loop */
 
-    /* now close the dir which_dir */
+    /* now close the dir dirname */
     closedir(d);
 
-    /* delete directory */
-    if(remove(which_dir) != 0)
+    /* delete the now empty dirname directory */
+    if(remove(dirname) != 0)
     {
-      //printf("%s\n", which_dir);
-      //perror("Remove failed");
+      //errorexits("remove(%s) failed!", dirname);
       return -1;
     }
   }
