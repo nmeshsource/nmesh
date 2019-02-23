@@ -426,25 +426,25 @@ int unlock_curr_til_EOF(FILE *out)
 /* malloc memory (and check out of memory) for some simple cases */
 double *dmalloc(int n)
 {
-  double *p = (double *) malloc(sizeof(double) * n);
+  double *p = malloc(sizeof(double) * n);
   
-  if (!p) errorexiti("out of memory (%d double)", n);
+  if(!p) errorexiti("out of memory (%d double)", n);
   return p;
 }
 
 int *imalloc(int n)
 {
-  int *p = (int *) malloc(sizeof(int) * n);
+  int *p = malloc(sizeof(int) * n);
   
-  if (!p) errorexiti("out of memory (%d int)", n);
+  if(!p) errorexiti("out of memory (%d int)", n);
   return p;
 }
 
 char *cmalloc(int n)
 {
-  char *p = (char *) malloc(sizeof(char) * n);
+  char *p = malloc(sizeof(char) * n);
   
-  if (!p) errorexiti("out of memory (%d char)", n);
+  if(!p) errorexiti("out of memory (%d char)", n);
   return p;
 }
 
@@ -452,7 +452,7 @@ void *pmalloc(int n)
 {
   void *p = malloc(sizeof(void *) * n);
   
-  if (!p) errorexiti("out of memory (%d void *)", n);
+  if(!p) errorexiti("out of memory (%d void *)", n);
   return p;
 }
 
