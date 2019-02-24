@@ -53,6 +53,8 @@ typedef struct tSURFACE {
   int nnbsurf;            /* number of nbsurf */
   struct tARRAY **nbsurf; /* list of values from neighb. surfaces */
   int *allocd_nbsurf;     /* allocd_nbsurf[i]=1 if we need to free nbsurf[i] */
+  struct tARRAY *ajsurf;  /* vals from adjacent surf. interpol. to my points */
+  int allocd_ajsurf;      /* 1 if we need to free mysurf */
 } tSurface;
 /* NOTE:
    mysurf comes from this proc,
