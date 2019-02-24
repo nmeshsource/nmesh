@@ -335,14 +335,26 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 /* remove children */
 tNode *destroy_children(tNode *parent)
 {
+  tNlist *el, *clist;
   tNode *narray[8];
   tNode *child0 = parent->child[0];
   int ijk;
 
+ /* save children in an array and nodelist clist */
+  el = NULL;
   for(ijk=0; ijk<8; ijk++)
-    narray[ijk] = parent->child[ijk]; /* save children in an array */
+  {
+    narray[ijk] = parent->child[ijk];
+    el = addnode_to_nodelist_after(el, parent->child[ijk]);
+    if(ijk==0) clist = el; /* save begin of nodelist */
+  }
+  /* now move these 8 children to rank of child0.
+     This is needed so that the interpolation below can work within
+     one rank without MPI calls. */
+  move_nodelist_to_rank(clist, child0->datrank);
+  free_nodelist(clist); /* we do not need clist anymore */
 
-  /* set parents datrank to the same as child0 */
+  /* set parent's datrank to the same as child0 */
   parent->datrank = child0->datrank;
   if(child0->dat)
   {
@@ -1088,8 +1100,6 @@ tNode *remove8siblings_in_mesh_lns(tNlist *sib)
 void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 {
   tNode *parent = remove8siblings_in_mesh_lns(sib);
-  //TODO:
-  PRF;printf("us move_node_to_rank to move 7 sib to child0 rank");
   destroy_children(parent);
   update_mesh_myln_node_nid(parent->pat->mesh);
 }

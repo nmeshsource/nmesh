@@ -298,3 +298,6 @@ void get_all_myln_surfaces(tMesh *mesh);
 
 /* connect.c */
 char *node_location_str(tNode *node, char *s, int slen);
+
+/* load.c */
+void move_nodelist_to_rank(tNlist *list, int desrank);

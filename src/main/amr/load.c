@@ -210,3 +210,41 @@ void move_node_to_rank(tNode *node, int desrank,
     node->datrank = desrank;
   }
 }
+
+/* move all nodes in list to rank */
+void move_nodelist_to_rank(tNlist *list, int desrank)
+{
+  tNlist *elem, *list0;
+  tNode *node = list->node;
+  tMesh *mesh = node->pat->mesh;
+  tCom *scom = alloc_com(sizeof(double), 1);
+  tCom *rcom = alloc_com(sizeof(double), 1);
+
+  if(PR) { PRF;printf(": desrank=%d\n", desrank); }
+
+  /* find element 0 in list */
+  list0 = first_nodelist(list);
+
+  /* fill MPI send and recv buffers */
+  fornodelist(list0, elem)
+  {
+    node = elem->node;
+    if(node->datrank != desrank)
+      move_node_to_rank(node, desrank, scom, rcom, 1);
+  }
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);  /* free scom with all its buffers */
+  nMPI_Waitall_com_recv(rcom);
+
+  /* get var data out of recv buffer */
+  set_com_counters(rcom, 0,0);
+  fornodelist(list0, elem)
+  {
+    node = elem->node;
+    if(node->datrank != desrank)
+      move_node_to_rank(node, desrank, scom, rcom, 0);
+  }
+
+  free_com(rcom);
+  update_mesh_myln_node_nid(mesh);
+}
