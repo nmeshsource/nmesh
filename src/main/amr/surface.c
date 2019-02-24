@@ -527,6 +527,7 @@ void set_ajsurf(tSurface *s)
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found) errorexit("couldn't find nb face!!!");
       // TODO: case where the one neighbor is from diff patch
+      errorexit("TODO: case where the one neighbor is from diff patch");
     }
   }
 
@@ -544,10 +545,10 @@ void set_ajsurf(tSurface *s)
     else
     {
       // TODO: case where neighbors are from diff patches
+      errorexit("TODO: case where neighbors are from diff patches");
     }
 
   } 
-    
 }
 
 /* set all ajsurf of a node */
