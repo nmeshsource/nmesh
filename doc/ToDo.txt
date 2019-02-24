@@ -12,7 +12,7 @@
 2.: (when iterpolation works)
 *ini. mesh
 *load balance
-*set up Gaussian profile data
+*set up some data profile
 *output t=0
 *remove some nodes
 *load balance
@@ -33,20 +33,23 @@
 *MPI
  -synchronize ghosts : DONE!
 
-*2d interpolation, unless all nodes are the same
-
 *refine and coarsen
  -interpolate 3d data; from and to parent
-  get_parent_data, get_children_data
+  get_parent_data   : DONE!
+  get_children_data : DONE!
 
 *Legendre : DONE!
 
 *some output: DONE!
 
+*2d interpolation, unless all nodes are the same
+
 *DG
 
 *Burgers
 
+
+-----------------------------------------------------------------
 
 MPI parallelization plans
 

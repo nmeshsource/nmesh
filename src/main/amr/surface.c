@@ -30,8 +30,13 @@ void free_surface(tSurface *s)
   if(!s) return;
 
   /* free content of lists */
-  /* free mysurf only it has allocd */
+
+  /* free mysurf only if is allocd */
   if(s->allocd_mysurf) free_array(s->mysurf);
+
+  /* free ajsurf only if is allocd */
+  if(s->allocd_ajsurf) free_array(s->ajsurf);
+
   /* free nbsurf[i] only if it is allocd  */
   for(i=0; i<s->nnbsurf; i++)
     if(s->allocd_nbsurf[i]) free_array(s->nbsurf[i]);
@@ -165,7 +170,7 @@ void set_mysurf(tSurface *s)
   int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
   int vi = s->vi;
 
-  /* do nothing is this surface is NULL */
+  /* do nothing if this surface is NULL */
   if(!s) return;
 
   if(s->allocd_mysurf)
@@ -449,3 +454,121 @@ void get_all_myln_surfaces(tMesh *mesh)
     get_all_surfaces(node);
   }
 }
+
+
+/**********************************************************************/
+/* get data into adjacent surface in ajsurf */
+/**********************************************************************/
+/* do two nodes have same bounding boxes, orthogonal to dir? */
+int same_bbox_normal_to_dir(tNode *node1, tNode *node2, int dir)
+{
+  int d, samebb = 1;
+
+  for(d=0; d<3; d++)
+    if(d!=dir)
+    {
+      int ff = d*2;
+      if(!dequal(node1->bbox[ff],   node2->bbox[ff]) ||
+         !dequal(node1->bbox[ff+1], node2->bbox[ff+1])) { samebb=0; break; }
+    }
+  return samebb;
+}
+
+/* do two nodes have same point number n, orthogonal to dir? */
+int same_n_normal_to_dir(tNode *node1, tNode *node2, int dir)
+{
+  int d, samen = 1;
+
+  for(d=0; d<3; d++)
+    if(d!=dir)
+    {
+      if(node1->n[d] != node2->n[d]) { samen=0; break; }
+    }
+  return samen;
+}
+
+/* set ajsurf array from data in nbsurf */
+void set_ajsurf(tSurface *s)
+{
+  tDat *dat = s->dat;
+  tNode *node = dat->node;
+  int f = s->face;
+  int dir = f/2;
+  int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
+  int vi = s->vi;
+  tNode *nb;
+  int ni, found, nb_f, nb_ni;
+
+  /* do nothing if this surface is NULL */
+  if(!s) return;
+
+  /* if there is only 1 neighbor we may not need to interpolate */
+  if(s->nnbsurf == 1)
+  {
+    nb = node->fnb[f][0];
+    /* if we have only one neighbor on the same level in the same patch
+       we may not need interpolation */
+    if(nb->pat == node->pat)
+    {
+      if(nb->l == node->l)
+      {
+        //int same_bb = same_bbox_normal_to_dir(nb, node, dir);
+        int same_n = same_n_normal_to_dir(nb, node, dir);
+        /* if number of points is the same we can copy */
+        if(same_n)
+        {
+          s->ajsurf = s->nbsurf[0];
+          return;
+        }
+      }
+    }
+    else
+    {
+      found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+      if(!found) errorexit("couldn't find nb face!!!");
+      // TODO: case where the one neighbor is from diff patch
+    }
+  }
+
+  /* use data from all neighbors to interpolate into ajsurf */
+  for(ni=0; ni<s->nnbsurf; ni++)
+  {
+    nb = node->fnb[f][ni];
+    found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+    if(!found) errorexit("couldn't find nb face!!!");
+
+    /* interpolation within patch */
+    if(nb->pat == node->pat)
+    {
+    }
+    else
+    {
+      // TODO: case where neighbors are from diff patches
+    }
+
+  } 
+    
+}
+
+/* set all ajsurf of a node */
+int set_all_ajsurf(tNode *node)
+{
+  tDat *dat = node->dat;
+  int face, vi, cnt;
+
+  if(!dat) return 0;
+
+  cnt=0;
+  for(face=0; face<6; face++)
+    for(vi=0; vi<node->dat->nv; vi++)
+    {
+      tSurface *s = dat->s[face][vi];
+      if(s)
+      {
+        set_ajsurf(s);
+        cnt++;
+      }
+    }
+  return cnt;
+}
+
