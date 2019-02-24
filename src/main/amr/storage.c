@@ -376,6 +376,11 @@ tNode *destroy_children(tNode *parent)
 
       /* find points inside child node -> mask is returned in Ip */
       array_find_XYZ_in_node(child, Xp, Ip);      
+      // NOTE: Parent points on the boundary of child are found in several
+      // children (several ijk). parent->dat->v[vi] will contain the
+      // result interpolated from the last child. This is a problem if data
+      // in children is not smooth. We should average somehow
+
       /* convert Xp to child internal basis coords */
       array_XbYbZb_of_XYZ(child, Xc, Xp);
 
