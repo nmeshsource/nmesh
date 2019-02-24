@@ -26,6 +26,8 @@ void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3]);
 void fill_2arrays_with_nodepoints(tNode *node, int dir, int p, tArray *Cp[2]);
 void Lagrange_interpolate_topoints(tNode *node, tArray *var,
                                    tArray *Xp[3], tArray *interp);
+void Lagrange_interpolate_toIpoints(tNode *node, tArray *var,
+                                    tArray *Xp[3], tArray *Ip, tArray *interp);
 void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
                                      tArray *Cp[2], tArray *interp);
 void insert_array_inplane(tNode *node, tArray *var, int dir, int p,

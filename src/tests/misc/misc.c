@@ -162,6 +162,7 @@ int misc_test(tMesh *mesh)
   printvar_innode(nd, vi);
   printvar_innode(nd, ui);
 
+//////////////////////////////////
   int nn[] = { 3,5,5 };
   tNlist *el = mesh->lns;
   tDat *d0;
@@ -173,7 +174,7 @@ int misc_test(tMesh *mesh)
 
   make8children_in_mesh_lns_myln(el, nn);
   printf("2 nd %p %p\n", nd, nd->dat);
-  if(d0) printf("2b nd %p %p %d\n", nd, d0, d0->nv);
+  //if(d0) printf("2b nd %p %p %d\n", nd, d0, d0->nv);
   el = mesh->lns;
   printnode(el->node);
   printvar_innode(nd->child[7], ui);
@@ -184,7 +185,7 @@ int misc_test(tMesh *mesh)
   el = mesh->lns;
   printnode(el->node);
   printvar_innode(nd, ui);
-
+/*
 double XX0[] = { -4.-1e-12, -1.1, -0.01 };
 double XX1[] = { -4.-0.1,   -1.1, -0.01 };
 double XX2[] = { -2,        -1.1, -0.01 };
@@ -216,21 +217,22 @@ printarray(Xd[1]);
 printarray(Xd[2]);
 
 printnode(nd);
-array_get_XYZ_in_node(nd, Xc, Xd);
+//array_get_XYZ_in_node(nd, Xc, Xd);
+array_find_XYZ_in_node(nd, Xc, Xd[0]);
 
 //array_XbYbZb_of_XYZ(nd, Xd, Xc);
 printarray(Xc[0]);
 printarray(Xc[1]);
 printarray(Xc[2]);
 printf("in=%d: XX1 %.15e %.15e %.15e\n",XYZ_is_in_node(nd, XX1), XX1[0],XX1[1],XX1[2]);
-printarray(Xd[0]);
+printarray_int(Xd[0]);
 printarray(Xd[1]);
 printarray(Xd[2]);
 //array_get_XYZ_in_node(nd, Xd, Xc);
 //printarray(Xc[0]);
 //printarray(Xc[1]);
 //printarray(Xc[2]);
-
+*/
 
   free_array(Cp[0]);
   free_array(Cp[1]);

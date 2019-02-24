@@ -102,7 +102,8 @@ void array_XYZ_of_XbYbZb(tNode *node, tArray *aXb[3], tArray *aX[3])
   int dir, k;
   for(dir=0; dir<3; dir++)
   {
-    forarray(aXb[dir], k)
+    int Nm = min2(aXb[dir]->N, aX[dir]->N);
+    for(k=0; k<Nm; k++)
     {
       double Xb, X;
       Xb = aXb[dir]->d[k];
@@ -146,7 +147,8 @@ void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3])
   int dir, k;
   for(dir=0; dir<3; dir++)
   {
-    forarray(aXb[dir], k)
+    int Nm = min2(aXb[dir]->N, aX[dir]->N);
+    for(k=0; k<Nm; k++)
     {
       double Xb, X;
       X = aX[dir]->d[k];
@@ -181,24 +183,16 @@ int XYZ_is_in_node(tNode *node, double X[3])
   return 1;
 }
 
-/* write all points in aXP[0..1] within node into aX[0..2]
-   NOTE: this re-dimensions aX[0..2] !!! */
-void array_get_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aX[3])
+/* Mark all points in aXP[0..1] within node by writing their index into
+   aI. If a point is not in the node we write -1 into aI. I.e. we return
+   a mask of points in node in Ip. */
+void array_find_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aI)
 {
-  int dir, k, ai;
-
-  ai = 0;
+  int k;
   forarray(aXP[0], k)
   {
     double X[] = { aXP[0]->d[k], aXP[1]->d[k], aXP[2]->d[k] };
-
-    if(XYZ_is_in_node(node, X))
-    {
-      for(dir=0; dir<3; dir++) aX[dir]->d[ai] = X[dir];
-      ai++;
-    }
+    if(XYZ_is_in_node(node, X)) aI->i[k] = k;
+    else                        aI->i[k] = -1;
   }
-
-  /* redimension array aX to have correct number of points */
-  for(dir=0; dir<3; dir++) redim_array(aX[dir], ai,1,1);
 }

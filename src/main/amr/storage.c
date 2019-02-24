@@ -349,20 +349,21 @@ tNode *destroy_children(tNode *parent)
     tMesh *mesh = parent->pat->mesh;
     int nvdb = mesh->nvdb;
     int vi;
-    tArray *Xp[3], *Xc[3];
+    tArray *Xp[3], *Ip, *Xc[3];
 
     if(!parent->dat) parent->dat = alloc_dat(parent);
     /* enable same vars in this dat as in parent->dat */
     for(vi=0; vi<nvdb; vi++)
       if(child0->dat->v[vi])  enablevarcomp_innode(parent, vi);
 
-    /* array memory to store points of parent and child */
+    /* array memory to store points of parent in X and in child Xb coords */
     Xp[0] = alloc_array(parent->n);
     Xp[1] = alloc_array(parent->n);
     Xp[2] = alloc_array(parent->n);
-    Xc[0] = alloc_array(child0->n);
-    Xc[1] = alloc_array(child0->n);
-    Xc[2] = alloc_array(child0->n);
+    Ip = alloc_array(parent->n);
+    Xc[0] = alloc_array(parent->n);
+    Xc[1] = alloc_array(parent->n);
+    Xc[2] = alloc_array(parent->n);
     fill_3arrays_with_nodepoints(parent, Xp);
     /* convert from Xb of parent to X for parent,
        these X are spread over the 8 child nodes */
@@ -373,10 +374,10 @@ tNode *destroy_children(tNode *parent)
     {
       tNode *child = narray[ijk];
 
-      /* get arrays with points inside child node, re-dims Xc */
-//does this work???:
-      array_get_XYZ_in_node(child, Xp, Xc);
-      array_XbYbZb_of_XYZ(child, Xc, Xc);
+      /* find points inside child node -> mask is returned in Ip */
+      array_find_XYZ_in_node(child, Xp, Ip);      
+      /* convert Xp to child internal basis coords */
+      array_XbYbZb_of_XYZ(child, Xc, Xp);
 
       /* use interpolation to get vars from child to parent */
       for(vi=0; vi<nvdb; vi++)
@@ -385,15 +386,15 @@ tNode *destroy_children(tNode *parent)
           /* fill parent->dat with interpolation data from child */
           if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
           {
-            Lagrange_interpolate_topoints(child, child->dat->v[vi],
-                                          Xc, parent->dat->v[vi]);
-            // ^puts interp into wrong place in parent->dat->v[vi]
+            Lagrange_interpolate_toIpoints(child, child->dat->v[vi],
+                                           Xc,Ip, parent->dat->v[vi]);
           }
         }
     }
     free_array(Xc[2]);
     free_array(Xc[1]);
     free_array(Xc[0]);
+    free_array(Ip);
     free_array(Xp[2]);
     free_array(Xp[1]);
     free_array(Xp[0]);

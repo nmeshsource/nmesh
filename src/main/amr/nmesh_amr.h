@@ -279,6 +279,7 @@ void printnodelist_and_neighbors(tNlist *nl);
 void printnodelist(tNlist *nl);
 void printvar_innode(tNode *node, int vi);
 void printarray(tArray *A);
+void printarray_int(tArray *A);
 void printarray_matrix0(tArray *A);
 void printarray_matrix1(tArray *A);
 void printarray_matrix2(tArray *A);

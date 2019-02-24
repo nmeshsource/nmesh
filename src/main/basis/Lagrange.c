@@ -242,6 +242,23 @@ void Lagrange_interpolate_topoints(tNode *node, tArray *var,
   }
 }
 
+/* 3d interpolation from array var in node to a set of points indicated by
+   the arrays Xp[0..2] and Ip. Xp[0..2] has the point coords in Xb coords
+   and Ip has the index where the interpolation result is written to in
+   interp. For points where Ip<0 nothing will be written into interp. */
+void Lagrange_interpolate_toIpoints(tNode *node, tArray *var,
+                                    tArray *Xp[3], tArray *Ip, tArray *interp)
+{
+  int k;
+  forarray(Xp[0], k)
+  {
+    double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k], Xp[2]->d[k] };
+    int idx = Ip->i[k];
+    if(idx>=0)
+      interp->d[idx] = Lagrange_array_interpolate(node, var, Xb);
+  }
+}
+
 /* 2d interpolation from array var in node to a set of points given in
    arrays Cp[0..1], in plane p orthogonal to direction dir. The arrays
    Cp[0..1] are in Xb coords. The result will be written into array interp */

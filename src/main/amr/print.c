@@ -171,7 +171,7 @@ void printvar_innode(tNode *node, int vi)
 }
 
 /* print an array */
-void printarray(tArray *A)
+void printarray_sel(tArray *A, int dbl)
 {
   int i,j,k;
   if(!A)
@@ -185,11 +185,22 @@ void printarray(tArray *A)
     for(j=0; j<A->n[1]; j++)
     {
       for(i=0; i<A->n[0]; i++)
-        printf(" %g", A->d[Ind_n(i,j,k, A->n)]);
+      {
+        if(dbl) printf(" %g", A->d[Ind_n(i,j,k, A->n)]);
+        else    printf(" %d", A->i[Ind_n(i,j,k, A->n)]);
+      }
       printf("\n");
     }
     printf("\n");
   }
+}
+void printarray(tArray *A)
+{
+  printarray_sel(A, 1);
+}
+void printarray_int(tArray *A)
+{
+  printarray_sel(A, 0);
 }
 
 /* print an array */

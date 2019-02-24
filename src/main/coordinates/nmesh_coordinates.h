@@ -20,4 +20,4 @@ void XbYbZb_of_XYZ(tNode *node, double Xb[3], const double X[3]);
 void Xb_of_X_indir(tNode *node, int dir, double *Xb, const double X);
 void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3]);
 int XYZ_is_in_node(tNode *node, double X[3]);
-void array_get_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aX[3]);
+void array_find_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aI);
