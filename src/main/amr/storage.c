@@ -1088,6 +1088,8 @@ tNode *remove8siblings_in_mesh_lns(tNlist *sib)
 void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 {
   tNode *parent = remove8siblings_in_mesh_lns(sib);
+  //TODO:
+  PRF;printf("us move_node_to_rank to move 7 sib to child0 rank");
   destroy_children(parent);
   update_mesh_myln_node_nid(parent->pat->mesh);
 }
