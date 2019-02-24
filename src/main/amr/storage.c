@@ -349,7 +349,7 @@ tNode *destroy_children(tNode *parent)
     tMesh *mesh = parent->pat->mesh;
     int nvdb = mesh->nvdb;
     int vi;
-    tArray *Xp[3], *Ip[8], *Xc[8][3];
+    tArray *Xp[3], *Ip[8], *Xc[8][3], *Res[8];
 
     if(!parent->dat) parent->dat = alloc_dat(parent);
     /* enable same vars in this dat as in parent->dat */
@@ -365,7 +365,8 @@ tNode *destroy_children(tNode *parent)
        these X are spread over the 8 child nodes */
     array_XYZ_of_XbYbZb(parent, Xp, Xp);
 
-    /* set children coords within parent */
+    /* fill parent->dat with interpolation data from children */
+    /* 1. set children coords within parent */
     for(ijk=0; ijk<8; ijk++)
     {
       tNode *child = narray[ijk];
@@ -375,38 +376,60 @@ tNode *destroy_children(tNode *parent)
       Xc[ijk][0] = alloc_array(parent->n);
       Xc[ijk][1] = alloc_array(parent->n);
       Xc[ijk][2] = alloc_array(parent->n);
+      Res[ijk] = alloc_array(parent->n);
 
       /* find points inside child node -> mask is returned in Ip */
       array_find_XYZ_in_node(child, Xp, Ip[ijk]);
       // NOTE: Parent points on the boundary of child are found in several
-      // children (several ijk). parent->dat->v[vi] will contain the
-      // result interpolated from the last child. This is a problem if data
-      // in children is not smooth. We should average somehow
+      // children (several ijk). Res[ijk] will contain the result
+      // interpolated from child ijk. This is a problem if data in
+      // children is not smooth. We need to average somehow.
 
       /* convert Xp to child's internal basis coords */
       array_XbYbZb_of_XYZ(child, Xc[ijk], Xp);
     }
 
-    /* fill parent->dat with interpolation data from children */
-
-    /* use interpolation to get vars from child to parent */
+    /* 2. use interpolation to get vars from child to parent */
     for(vi=0; vi<nvdb; vi++)
+    {
+      /* fill parent->dat with interpolation data from child */
+      if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
       {
-        /* fill parent->dat with interpolation data from child */
-        if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
+        if(child0->dat->v[vi])
         {
+          int k, cnt;
+
+          /* interpolate for each child and save results in Res */
           for(ijk=0; ijk<8; ijk++)
           {
             tNode *child = narray[ijk];
-            if(child->dat->v[vi])
-              Lagrange_interpolate_toIpoints(child, child->dat->v[vi],
-                                             Xc[ijk],Ip[ijk], parent->dat->v[vi]);
+            Lagrange_interpolate_toIpoints(child, child->dat->v[vi],
+                                           Xc[ijk],Ip[ijk], Res[ijk]);
           }
-        }
+
+          /* take average of results from different child nodes */
+          forarray(parent->dat->v[vi], k)
+          {
+            cnt = 0;
+            parent->dat->v[vi]->d[k] = 0.;
+            for(ijk=0; ijk<8; ijk++)
+            {
+              if(Ip[ijk]->i[k] >= 0) /* if child has the point */
+              {
+                cnt++; /* count num of chidren who have this point */
+                parent->dat->v[vi]->d[k] += Res[ijk]->d[k];
+              }
+            }
+            /* average if there was more than one child with this point */
+            if(cnt>1) parent->dat->v[vi]->d[k] /= cnt;
+          }
+        } /* end: if(child0->dat) */
       }
-    /* free temp arrays */
+    }
+    /* 3. free temp arrays for coords */
     for(ijk=0; ijk<8; ijk++)
     {
+      free_array(Res[ijk]);
       free_array(Xc[ijk][2]);
       free_array(Xc[ijk][1]);
       free_array(Xc[ijk][0]);
