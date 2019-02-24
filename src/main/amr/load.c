@@ -187,6 +187,8 @@ void move_node_to_rank(tNode *node, int desrank,
       /* allocate space already and init some stuff */
       if(node->dat) errorexit("destination node should not have dat yet");
       node->dat = alloc_dat(node);
+
+      if(PR) { PRF;printf(": calling coordinates_init_node\n"); }
       coordinates_init_node(node);
     }
   }

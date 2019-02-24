@@ -203,23 +203,22 @@ int test_point_interpolation(tMesh *mesh)
 
 
 /* print misc_u - test_func */
-int print_u_minus_f(tNode *nd)
+int print_u_minus_f(tNode *node)
 {
-  tMesh *mesh = nd->pat->mesh;
+  tMesh *mesh = node->pat->mesh;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid, dir;
+  tArray *ua = GetVarArray(node, ui);
+  tArray *va = GetVarArray(node, vi);
+  int dir;
   double *Xb[3];
 
   prdivider(0);
   PRFs(": v = u - f:\n");
 
-  formylnodes(mesh, myid)
+  if(ua!=NULL && va!=NULL)
   {
     int ijk;
-    tNode *node = GetMyNode(mesh, myid);
-    tArray *ua = GetVarArray(node, ui);
-    tArray *va = GetVarArray(node, vi);
 
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
 
@@ -237,7 +236,7 @@ int print_u_minus_f(tNode *nd)
     }
   }
 
-  printvar_innode(nd, vi);
+  printvar_innode(node, vi);
 
   return 0;
 }
@@ -269,6 +268,14 @@ int test_parent_child_interpolation(tMesh *mesh)
   if(d0) printf("1 nd %p %p %d\n", nd, d0, d0->nv);
 
   make8children_in_mesh_lns_myln(el, nn);
+  //printmesh(mesh);
+  el = mesh->lns;
+  tNlist* l2=NULL;
+  l2 = addnode_to_nodelist_after(l2, el->next->next->node);
+  addnode_to_nodelist_after(l2, el->next->next->next->node);
+  move_nodelist_to_rank(l2, 1);
+  //printmesh(mesh);
+
   printf("2 nd %p %p\n", nd, nd->dat);
   //if(d0) printf("2b nd %p %p %d\n", nd, d0, d0->nv);
   printf("2c: test_func=%g\n", test_func(-4,-2,-1));
