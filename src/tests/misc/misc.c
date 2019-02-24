@@ -202,6 +202,45 @@ int test_point_interpolation(tMesh *mesh)
 
 
 
+/* print misc_u - test_func */
+int print_u_minus_f(tNode *nd)
+{
+  tMesh *mesh = nd->pat->mesh;
+  int ui = Ind("misc_u");
+  int vi = Ind("misc_v");
+  int myid, dir;
+  double *Xb[3];
+
+  prdivider(0);
+  PRFs(": v = u - f:\n");
+
+  formylnodes(mesh, myid)
+  {
+    int ijk;
+    tNode *node = GetMyNode(mesh, myid);
+    tArray *ua = GetVarArray(node, ui);
+    tArray *va = GetVarArray(node, vi);
+
+    for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
+
+    /* set u to func test_func at grid points */
+    forarray(ua, ijk)
+    {
+      int k = kOfInd_n(ijk, ua->n);
+      int j = jOfInd_n_k(ijk, ua->n, k);
+      int i = iOfInd_n_jk(ijk, ua->n, j,k);
+      double x = Xb[0][i];
+      double y = Xb[1][j];
+      double z = Xb[2][k];
+
+      va->d[ijk] = ua->d[ijk] - test_func(x,y,z);
+    }
+  }
+
+  printvar_innode(nd, vi);
+
+  return 0;
+}
 
 /* test interpolation inside make8children_in_mesh_lns_myln and
    destroy8siblings_in_mesh_lns_myln */
@@ -218,6 +257,8 @@ int test_parent_child_interpolation(tMesh *mesh)
   PRF;printf(": Starting misc. tests.\n");
   enablevar(mesh, ui);
   enablevar(mesh, vi);
+
+  print_u_minus_f(mesh->lns->node);
 
   /* get 1st node */
   el = mesh->lns;
@@ -238,10 +279,12 @@ int test_parent_child_interpolation(tMesh *mesh)
 
   destroy8siblings_in_mesh_lns_myln(el);
   printf("3 nd %p %p\n", nd, nd->dat);
-  if(d0) printf("4 nd %p %p %d\n", nd, d0, d0->nv);
+  //if(d0) printf("4 nd %p %p %d\n", nd, d0, d0->nv);
   el = mesh->lns;
   printnode(el->node);
   printvar_innode(nd, ui);
+
+  print_u_minus_f(el->node);
 
   return 0;
 }
