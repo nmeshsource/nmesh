@@ -512,7 +512,6 @@ void set_ajsurf(tSurface *s)
     {
       if(nb->l == node->l)
       {
-        //int same_bb = same_bbox_normal_to_dir(nb, node, dir);
         int same_n = same_n_normal_to_dir(nb, node, dir);
         /* if number of points is the same we can copy */
         if(same_n)
@@ -524,6 +523,7 @@ void set_ajsurf(tSurface *s)
     }
     else
     {
+      //int same_bb = same_bbox_normal_to_dir(nb, node, dir);
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found) errorexit("couldn't find nb face!!!");
       // TODO: case where the one neighbor is from diff patch
