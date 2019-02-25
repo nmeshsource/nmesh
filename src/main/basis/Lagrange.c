@@ -191,7 +191,7 @@ void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3])
 
 /* make 2 arrays Cp[0..1] that contain all points of a node, in plane p
    orthogonal to direction dir. The arrays Cp[0..1] are in Xb coords. */
-void fill_2arrays_with_nodepoints(tNode *node, int dir, int p, tArray *Cp[2])
+void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2])
 {
   int i,j,k, d0,d1, *m0,*m1, ai, c;
 
@@ -220,7 +220,7 @@ void fill_2arrays_with_nodepoints(tNode *node, int dir, int p, tArray *Cp[2])
   }
 
   ai = 0;
-  forplaneN(dir, i,j,k, node->n, p)
+  forplaneN(dir, i,j,k, node->n, 0)
   {
     double Cb[2] = { node->Xb[d0]->d[*m0], node->Xb[d1]->d[*m1] };
     for(c=0; c<2; c++) Cp[c]->d[ai] = Cb[c];

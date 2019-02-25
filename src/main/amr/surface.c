@@ -500,7 +500,7 @@ tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
   return s;
 }
 
-//TODO : rearrange to do a loop over all vars inside this func:
+
 /* set ajsurf array from data in nbsurf on face f for all vars */
 void set_ajsurf_forall_vars(tDat *dat, int f)
 {
@@ -561,10 +561,11 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
   /* array memory to store points of mysurf in X coords */
   Cp[0] = alloc_array(s1_n);
   Cp[1] = alloc_array(s1_n);
+  fill_2arrays_with_nodepoints(node, dir, Cp);
   /* convert Cp from Xb to X coords for node,
      these X are spread over the neighbor nodes */
   // TODO: array_XYZ_of_XbYbZb(parent, Cp, Cp);
-  
+  array_Xplane_of_Xb(node, dir, Cp, Cp);
 
   /* use data from all neighbors to interpolate into ajsurf */
   /* 1. set neighbor coords within node surface */
@@ -586,6 +587,7 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
 
     /* convert Cp to neighbor's internal basis coords */
     // TODO: array_XbYbZb_of_XYZ(nb, Cb[ijk], Cp);
+    array_Xbplane_of_X(nb, dir, Cb[ni], Cp);
   }
   /* 2. use interpolation to get vars from neigh to node */
   for(ni=0; ni<nnb; ni++)

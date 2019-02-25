@@ -113,6 +113,37 @@ void array_XYZ_of_XbYbZb(tNode *node, tArray *aXb[3], tArray *aX[3])
   }
 }
 
+/* get X from Xb for arrays in plane perp to dir */
+void array_Xplane_of_Xb(tNode *node, int dir, tArray *aCb[2], tArray *aC[2])
+{
+  int d, d3, k, Nm;
+  for(d=0; d<2; d++)
+  {
+    switch(dir)
+    {
+    case 0:
+      d3 = d+1;
+      break;
+    case 1:
+      d3 = d*2;
+      break;
+    case 2:
+      d3 = d;
+      break;
+    default:
+      errorexit("dir must be 0,1,2");
+    }
+    Nm = min2(aCb[d]->N, aC[d]->N);
+    for(k=0; k<Nm; k++)
+    {
+      double Xb, X;
+      Xb = aCb[d]->d[k];
+      X_of_Xb_indir(node, d3, Xb, &X);
+      aC[d]->d[k] = X;
+    }
+  }
+}
+
 /* get X from i,j,k */
 void XYZ_of_ijk(tNode *node, int i, int j, int k, double X[3])
 {
@@ -154,6 +185,37 @@ void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3])
       X = aX[dir]->d[k];
       Xb_of_X_indir(node, dir, &Xb, X);
       aXb[dir]->d[k] = Xb;
+    }
+  }
+}
+
+/* get Xb from X for arrays in plane perp to dir */
+void array_Xbplane_of_X(tNode *node, int dir, tArray *aCb[2], tArray *aC[2])
+{
+  int d, d3, k, Nm;
+  for(d=0; d<2; d++)
+  {
+    switch(dir)
+    {
+    case 0:
+      d3 = d+1;
+      break;
+    case 1:
+      d3 = d*2;
+      break;
+    case 2:
+      d3 = d;
+      break;
+    default:
+      errorexit("dir must be 0,1,2");
+    }
+    Nm = min2(aCb[d]->N, aC[d]->N);
+    for(k=0; k<Nm; k++)
+    {
+      double Xb, X;
+      X = aC[d]->d[k];
+      Xb_of_X_indir(node, d3, &Xb, X);
+      aCb[d]->d[k] = Xb;
     }
   }
 }
@@ -200,7 +262,7 @@ void array_find_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aI)
 
 /* is a point C (in XYZ coords) in a plane (normal to dir) inside a node,
    also sets C to boundary value if it is very close to the boundary */
-int Xplane_is_in_node(tNode *node, double C[2], int dir)
+int Xplane_is_in_node(tNode *node, int dir, double C[2])
 {
   double *nbb = node->bbox;
   int d, f;
@@ -256,7 +318,7 @@ void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI)
   {
     
     double C[]  = { aCP[0]->d[k], aCP[1]->d[k] };
-    if(Xplane_is_in_node(node, C, dir)) aI->i[k] = k;
+    if(Xplane_is_in_node(node, dir, C)) aI->i[k] = k;
     else                                aI->i[k] = -1;
   }
 }

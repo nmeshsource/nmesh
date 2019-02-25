@@ -23,7 +23,7 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3]);
 double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
                                     double Cb[2]);
 void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3]);
-void fill_2arrays_with_nodepoints(tNode *node, int dir, int p, tArray *Cp[2]);
+void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2]);
 void Lagrange_interpolate_topoints(tNode *node, tArray *var,
                                    tArray *Xp[3], tArray *interp);
 void Lagrange_interpolate_toIpoints(tNode *node, tArray *var,

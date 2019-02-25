@@ -165,7 +165,7 @@ int test_point_interpolation(tMesh *mesh)
   dir = 0;
   p = 1;
   redim_array(Cp[0], 12,0,0);
-  fill_2arrays_with_nodepoints(nd, dir,p, Cp);
+  fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
                                   Cp, Xp[0]);
   insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
@@ -174,7 +174,7 @@ int test_point_interpolation(tMesh *mesh)
   dir = 1;
   p = 1;
   redim_array(Cp[0], 15,0,0);
-  fill_2arrays_with_nodepoints(nd, dir,p, Cp);
+  fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
                                   Cp, Xp[0]);
   insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
@@ -183,7 +183,7 @@ int test_point_interpolation(tMesh *mesh)
   dir = 2;
   p = 1;
   redim_array(Cp[0], 20,0,0);
-  fill_2arrays_with_nodepoints(nd, dir,p, Cp);
+  fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
                                   Cp, Xp[0]);
   insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
