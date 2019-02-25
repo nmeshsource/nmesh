@@ -564,7 +564,6 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
   fill_2arrays_with_nodepoints(node, dir, Cp);
   /* convert Cp from Xb to X coords for node,
      these X are spread over the neighbor nodes */
-  // TODO: array_XYZ_of_XbYbZb(parent, Cp, Cp);
   array_Xplane_of_Xb(node, dir, Cp, Cp);
 
   /* use data from all neighbors to interpolate into ajsurf */
@@ -586,7 +585,6 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
     array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
 
     /* convert Cp to neighbor's internal basis coords */
-    // TODO: array_XbYbZb_of_XYZ(nb, Cb[ijk], Cp);
     array_Xbplane_of_X(nb, dir, Cb[ni], Cp);
   }
   /* 2. use interpolation to get vars from neigh to node */
