@@ -158,7 +158,7 @@ void move_node_to_rank(tNode *node, int desrank,
       if(PR)
       {
         PRF;printf(": sbuf =");
-        for(int i=0; i<3; i++) printf(" %g", sbuf[i]);
+        for(int i=0; i<min2(3, slen); i++) printf(" %g", sbuf[i]);
         printf("\n");
         if(node->dat) printf("nv=%d\n", node->dat->nv);
       }
