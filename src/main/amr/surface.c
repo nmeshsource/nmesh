@@ -617,7 +617,10 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
       for(ni=0; ni<nnb; ni++)
       {
         nb = node->fnb[f][ni];
-        Lagrange_interpolate2d_toIpoints(nb, s->nbsurf[ni], dir,0,
+        found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+        if(!found) errorexit("couldn't find nb face!!!");
+        nb_dir = nb_f/2;
+        Lagrange_interpolate2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                          Cb[ni],Ip[ni], Res[ni]);
       }
 
