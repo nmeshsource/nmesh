@@ -680,3 +680,72 @@ void set_all_myln_ajsurf(tMesh *mesh)
     set_all_ajsurf(node);
   }
 }
+
+
+/* free all nbsurf in a tSurface, this can be useful to free up memory
+   after ajsurf is constructed, and it does not touch ajsurf */
+void free_nbsurf_only(tSurface *s)
+{
+  int i;
+
+  if(!s) return;
+  if(!s->nbsurf) return;
+
+  /* free content of lists */
+  /* free nbsurf[i] only if it is allocd  */
+  for(i=0; i<s->nnbsurf; i++)
+  {
+    /* if it was allocated we free,
+       unless someone else is still pointing to it */
+    if(s->allocd_nbsurf[i])
+    {
+      /* if s->ajsurf is pointing to s->nbsurf[i] do not free the array */
+      if(s->ajsurf == s->nbsurf[i])
+      {
+        if(s->allocd_ajsurf == 1)
+          errorexit("if both s->ajsurf and s->nbsurf[i] were allocated,\n"
+                    "they shouldn't point to the same array");
+        s->allocd_ajsurf = 1;
+      }
+      else
+        free_array(s->nbsurf[i]);
+    }
+
+    /* set it to NULL */
+    s->nbsurf[i] = NULL;
+  }
+
+  /* make sure we know the s->nbsurf[i] are all gone */
+  s->nnbsurf = 0;
+
+  /* free lists */
+  free(s->nbsurf);
+  free(s->allocd_nbsurf);
+  s->nbsurf = NULL;
+  s->allocd_nbsurf = NULL;
+}
+
+/* free all nbsurf surfaces on node */
+void free_all_nbsurf_only(tNode *node)
+{
+  tDat *dat = node->dat;
+  int vi,f;
+
+  if(!dat) return;
+
+  /* free all nbsurf */
+  for(f=0; f<6; f++)
+    for(vi=0; vi<dat->nv; vi++)
+      free_nbsurf_only(dat->s[f][vi]);
+}
+
+/* free nbsurf on all nodes in the mesh */
+void free_all_myln_nbsurf_only(tMesh *mesh)
+{
+  int myid;
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    free_all_nbsurf_only(node);
+  }
+}

@@ -280,6 +280,7 @@ void printnode_and_neighbors(tNode *n);
 void printnodelist_and_neighbors(tNlist *nl);
 void printnodelist(tNlist *nl);
 void printvar_innode(tNode *node, int vi);
+void printvar_ajsurfdiff(tNode *node, int vi);
 void printarray(tArray *A);
 void printarray_int(tArray *A);
 void printarray_matrix0(tArray *A);
@@ -296,6 +297,7 @@ void request_all_myln_surfaces_exchange(tMesh *mesh);
 void get_all_surfaces(tNode *node);
 void get_all_myln_surfaces(tMesh *mesh);
 void set_all_myln_ajsurf(tMesh *mesh);
+void free_all_myln_nbsurf_only(tMesh *mesh);
 
 /* connect.c */
 char *node_location_str(tNode *node, char *s, int slen);

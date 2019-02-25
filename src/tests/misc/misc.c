@@ -10,6 +10,7 @@
 int test_point_interpolation(tMesh *mesh);
 int test_point_finders(tMesh *mesh);
 int test_parent_child_interpolation(tMesh *mesh);
+int test_ajsurf(tMesh *mesh);
 
 
 double test_func(double x, double y, double z)
@@ -56,6 +57,7 @@ int misc_test(tMesh *mesh)
   test_point_interpolation(mesh);
   test_point_finders(mesh);
   test_parent_child_interpolation(mesh);
+  test_ajsurf(mesh);
 
   return 0;
 }
@@ -274,7 +276,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   l2 = NULL;
   l2 = addnode_to_nodelist_after(l2, el->next->next->node);
   addnode_to_nodelist_after(l2, el->next->next->next->node);
-  move_nodelist_to_rank(l2, 1);
+  move_nodelist_to_rank(l2, (nMPI_size()>1));
   free_nodelist(l2);
   l2 = NULL;
   //printmesh(mesh);
@@ -367,5 +369,102 @@ int test_point_finders(tMesh *mesh)
   free_array(Xd[0]);
   free_array(Xd[1]);
   free_array(Xd[2]);
+  return 0;
+}
+
+
+/* exchange some surfaces for testing */
+int test_ajsurf(tMesh *mesh)
+{
+  tNode *nd;
+  int vi = Ind("misc_v");
+  double *Xbd[3];
+  int myid;
+
+  PRF;printf(": Hmmm.\n");
+  enablevar(mesh, vi);
+
+  formylnodes(mesh, myid)
+  {
+    int ijk, dir;
+    tNode *node = GetMyNode(mesh, myid);
+    tArray *va = GetVarArray(node, vi);
+
+    for(dir=0; dir<3; dir++) Xbd[dir] = node->Xb[dir]->d;
+
+    /* set v to func test_func at grid points */
+    forarray(va, ijk)
+    {
+      int k = kOfInd_n(ijk, va->n);
+      int j = jOfInd_n_k(ijk, va->n, k);
+      int i = iOfInd_n_jk(ijk, va->n, j,k);
+      double Xb[] = { Xbd[0][i], Xbd[1][j], Xbd[2][k] };
+      double X[3];
+
+      XYZ_of_XbYbZb(node, Xb, X);
+
+      va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
+    }
+  }
+
+  /* print var */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    printnode(node);
+    printvar_innode(node, vi);
+  }
+
+  /* print var in one node again */
+  nd = GetMyNode(mesh, 0); /* my first node */
+  printnode(nd);
+  printvar_innode(nd, vi);
+
+  /* exchange surfaces */
+  prdivider(0);
+  PRF;printf(": request_all_myln_surfaces_exchange\n");
+  init_all_myln_surfaces(mesh);
+  set_all_myln_mysurf(mesh);
+  request_all_myln_surfaces_exchange(mesh);
+
+  /* Here we can do work. MPI is now busy sending buffers */
+
+  /* now get the surfaces and wait for buffers if necessary */
+  get_all_myln_surfaces(mesh);
+
+  /* set ajsurf via interpolation */
+  PRF;printf(": set_all_myln_ajsurf\n");
+  set_all_myln_ajsurf(mesh);
+
+  /* print var in one node yet again with surfaces */
+  nd = GetMyNode(mesh, 0); /* my first node */
+  printnode(nd);
+  printvar_innode(nd, vi);
+
+  /* print var in all nodes */
+  prdivider(0);
+  PRF;printf(": ajsurf on all nodes:\n");
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    printnode(node);
+    printvar_ajsurfdiff(node, vi);
+  }
+
+  /* free redundant nbsurf stuff */
+  free_all_myln_nbsurf_only(mesh);
+
+  /* print var in all nodes again */
+  prdivider(0);
+  PRF;printf(": ajsurf on all nodes after freeing nbsurf:\n");
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    printnode(node);
+    printvar_ajsurfdiff(node, vi);
+  }
+
+  /* after we have printed them, we no longer need the surfaces */
+  free_all_myln_surfaces(mesh);
   return 0;
 }
