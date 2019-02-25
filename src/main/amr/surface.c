@@ -551,12 +551,10 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
   }
 
   /* Ok if we get here we need interpolation */
-  Ip = calloc(nnb, sizeof(Ip[0]));
-  Res = calloc(nnb, sizeof(Res[0]));
-  Cb = calloc(nnb, sizeof(Cb[0]));
-
   s1 = first_nonNULL_surf_in_dat(dat, f);
-  s1_n = s1->ajsurf->n;
+  /* do nothing if all sufaces are NULL */
+  if(!s1) return;
+  s1_n = s1->mysurf->n;
 
   /* array memory to store points of mysurf in X coords */
   Cp[0] = alloc_array(s1_n);
@@ -567,6 +565,11 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
   array_Xplane_of_Xb(node, dir, Cp, Cp);
 
   /* use data from all neighbors to interpolate into ajsurf */
+  /* storage for nb coords and interp. results */
+  Ip = calloc(nnb, sizeof(Ip[0]));
+  Cb = calloc(nnb, sizeof(Cb[0]));
+  Res = calloc(nnb, sizeof(Res[0]));
+
   /* 1. set neighbor coords within node surface */
   for(ni=0; ni<nnb; ni++)
   {
@@ -581,34 +584,62 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
     Cb[ni][1] = alloc_array(s1_n);
     Res[ni] = alloc_array(s1_n);
 
-    /* find points inside neigh. -> mask is returned in Ip */
-    array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
-
-    /* convert Cp to neighbor's internal basis coords */
-    array_Xbplane_of_X(nb, dir, Cb[ni], Cp);
-  }
-  /* 2. use interpolation to get vars from neigh to node */
-  for(ni=0; ni<nnb; ni++)
-  {
-    nb = node->fnb[f][ni];
-    found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
-    if(!found) errorexit("couldn't find nb face!!!");
-
-    /* interpolation within patch */
+    /* all X,Y,Z coords are within same patch */
     if(nb->pat == node->pat)
     {
-      // ...
+      /* find points inside neigh. -> mask is returned in Ip */
+      array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
+
+      /* convert Cp to neighbor's internal basis coords */
+      array_Xbplane_of_X(nb, dir, Cb[ni], Cp);
     }
     else
     {
       // TODO: case where neighbors are from diff patches
       errorexit("TODO: case where neighbors are from diff patches");
     }
-
   }
+
+  /* 2. use interpolation to get vars from neighbors to node */
+  for(vi=0; vi<dat->nv; vi++)
+  {
+    tSurface *s = dat->s[f][vi];
+    if(s)
+    {
+      int k, cnt;
+
+      /* get mem for ajsurf, needs to be freed later */
+      s->ajsurf = alloc_array(s->mysurf->n);
+      s->allocd_ajsurf = 1;
+
+      /* interpolation within each nb, save results in Res */
+      for(ni=0; ni<nnb; ni++)
+      {
+        nb = node->fnb[f][ni];
+        Lagrange_interpolate2d_toIpoints(nb, s->nbsurf[ni], dir,0,
+                                         Cb[ni],Ip[ni], Res[ni]);
+      }
+
+      /* take average of results from different nb */
+      forarray(s->ajsurf, k)
+      {
+        cnt = 0;
+        s->ajsurf->d[k] = 0.;
+        for(ni=0; ni<nnb; ni++)
+        {
+          if(Ip[ni]->i[k] >= 0) /* if nb ni has the point */
+          {
+            cnt++; /* count num of neigh. who have this point */
+            s->ajsurf->d[k] += Res[ni]->d[k];
+          }
+        }
+        /* average if there was more than one nb with this point */
+        if(cnt>1) s->ajsurf->d[k] /= cnt;
+      }
+    } /* end: if(s) */
+  }
+
   /* 3. free temp arrays for coords */
-  free_array(Cp[1]);
-  free_array(Cp[0]);
   for(ni=0; ni<nnb; ni++)
   {
     free_array(Res[ni]);
@@ -616,9 +647,11 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
     free_array(Cb[ni][0]);
     free_array(Ip[ni]);
   }
-  free(Cb);
   free(Res);
+  free(Cb);
   free(Ip);
+  free_array(Cp[1]);
+  free_array(Cp[0]);
 }
 
 /* set all ajsurf of a node */
