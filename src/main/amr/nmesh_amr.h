@@ -295,6 +295,7 @@ void set_all_myln_mysurf(tMesh *mesh);
 void request_all_myln_surfaces_exchange(tMesh *mesh);
 void get_all_surfaces(tNode *node);
 void get_all_myln_surfaces(tMesh *mesh);
+void set_all_myln_ajsurf(tMesh *mesh);
 
 /* connect.c */
 char *node_location_str(tNode *node, char *s, int slen);

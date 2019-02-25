@@ -666,3 +666,13 @@ void set_all_ajsurf(tNode *node)
     set_ajsurf_forall_vars(dat, face);
 }
 
+/* get nbsurf for all nodes out of buffers and free the buffers */
+void set_all_myln_ajsurf(tMesh *mesh)
+{
+  int myid;
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    set_all_ajsurf(node);
+  }
+}

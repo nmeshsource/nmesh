@@ -152,18 +152,24 @@ void printvar_innode(tNode *node, int vi)
     {
       tSurface *sf = dat->s[f][vi];
       tArray *msa  = sf ? sf->mysurf : NULL;
+      tArray *asa  = sf ? sf->ajsurf : NULL;
       tArray **nsa = sf ? sf->nbsurf : NULL;
       if(msa)
       {
-        printf("f%d mysurf", f);
+        printf("f%d allocd=%d mysurf", f, sf->allocd_mysurf);
         printarray(msa);
+      }
+      if(asa)
+      {
+        printf("f%d allocd=%d ajsurf", f, sf->allocd_ajsurf);
+        printarray(asa);
       }
       if(nsa)
       {
         int ni;
         for(ni=0; ni<sf->nnbsurf; ni++)
         {
-          printf("f%d nbsurf[%d]", f, ni);
+          printf("f%d allocd=%d nbsurf[%d]", f, sf->allocd_nbsurf[ni], ni);
           printarray(nsa[ni]);
         }
       }
