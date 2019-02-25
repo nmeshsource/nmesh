@@ -250,6 +250,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   int vi = Ind("misc_v");
   int nn[] = { 3,5,5 };
   tNlist *el = mesh->lns;
+  tNlist *l2 = NULL;
   tDat *d0;
 
   prdivider(0);
@@ -270,10 +271,12 @@ int test_parent_child_interpolation(tMesh *mesh)
   make8children_in_mesh_lns_myln(el, nn);
   //printmesh(mesh);
   el = mesh->lns;
-  tNlist* l2=NULL;
+  l2 = NULL;
   l2 = addnode_to_nodelist_after(l2, el->next->next->node);
   addnode_to_nodelist_after(l2, el->next->next->next->node);
   move_nodelist_to_rank(l2, 1);
+  free_nodelist(l2);
+  l2 = NULL;
   //printmesh(mesh);
 
   printf("2 nd %p %p\n", nd, nd->dat);

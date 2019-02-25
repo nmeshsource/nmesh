@@ -415,8 +415,10 @@ tNode *destroy_children(tNode *parent)
           for(ijk=0; ijk<8; ijk++)
           {
             tNode *child = narray[ijk];
-            Lagrange_interpolate_toIpoints(child, child->dat->v[vi],
-                                           Xc[ijk],Ip[ijk], Res[ijk]);
+            tArray *var = child->dat->v[vi];
+            if(var)
+              Lagrange_interpolate_toIpoints(child, var,
+                                             Xc[ijk],Ip[ijk], Res[ijk]);
           }
 
           /* take average of results from different child nodes */
