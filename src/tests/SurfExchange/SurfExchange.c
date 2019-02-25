@@ -66,7 +66,7 @@ int SurfExchange_test(tMesh *mesh)
   get_all_myln_surfaces(mesh);
 
   /* set ajsurf vie interpolation */
-  //set_all_myln_ajsurf(mesh);
+  set_all_myln_ajsurf(mesh);
 
   /* print var in one node yet again with surfaces */
   nd = GetMyNode(mesh, 0); /* my first node */
