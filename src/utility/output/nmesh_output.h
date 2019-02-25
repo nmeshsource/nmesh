@@ -1,5 +1,5 @@
 /* nmesh_output.h */
-/* Wolfgang Tichy, April 2005 */
+/* Wolfgang Tichy, February 2019 */
 
     
 /* output.c */
