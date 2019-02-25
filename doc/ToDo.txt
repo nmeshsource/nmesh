@@ -42,7 +42,9 @@
 
 *some output: DONE!
 
-*2d interpolation, unless all nodes are the same
+*2d interpolation
+ -interp from ghosts within patch     : DONE!
+ -interp from ghosts of other patches
 
 *DG
 
