@@ -368,7 +368,7 @@ tNode *destroy_children(tNode *parent)
     for(vi=0; vi<nvdb; vi++)
       if(child0->dat->v[vi])  enablevarcomp_innode(parent, vi);
 
-    /* array memory to store points of parent in X and in child Xb coords */
+    /* array memory to store points of parent in X coords */
     Xp[0] = alloc_array(parent->n);
     Xp[1] = alloc_array(parent->n);
     Xp[2] = alloc_array(parent->n);
