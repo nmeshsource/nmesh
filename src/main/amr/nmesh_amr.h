@@ -122,7 +122,7 @@ typedef struct tPAT {
   int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
   tNode *rnode;         /* root node in this patch */
   int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
-  struct tARRAY *(*Xb)[3]; /* list of points (ofter Gauss-Lobatto) */
+  struct tARRAY *(*Xb)[3]; /* list of points (often Gauss-Lobatto in [-1,1]) */
   struct tARRAY *(*Wq)[3]; /* list of quadrature weights for Xb */
   struct tARRAY *(*WL)[3]; /* list of Lagrange interp. weights */
   struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
