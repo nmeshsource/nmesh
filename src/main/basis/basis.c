@@ -125,7 +125,7 @@ void basis_array_synthesis3(tNode *node, tArray *u, tArray *c)
 double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 {
   tPat *pat = node->pat;
-  int *n = node->n;
+  int *n = coef->n;
   double *B0 = dmalloc(n[0]);
   double *B1 = dmalloc(n[1]);
   double *B2 = dmalloc(n[2]);

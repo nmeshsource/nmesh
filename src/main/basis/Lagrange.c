@@ -76,7 +76,7 @@ double Lagrange_of_x(int k, double x, int np,
          values at grid points */
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
 {
-  int *n = node->n;
+  int *n = var->n;
   double *xp0 = node->Xb[0]->d; /* points */
   double *xp1 = node->Xb[1]->d;
   double *xp2 = node->Xb[2]->d;
@@ -120,7 +120,7 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
 double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
                                     double Cb[2])
 {
-  int *n = node->n;
+  int *n = var->n;
   double *xp0 = node->Xb[0]->d; /* points */
   double *xp1 = node->Xb[1]->d;
   double *xp2 = node->Xb[2]->d;
@@ -296,7 +296,7 @@ void Lagrange_interpolate2d_toIpoints(tNode *node, tArray *var, int dir,int p,
 void insert_array_inplane(tNode *node, tArray *var, int dir, int p,
                           tArray *interp2d)
 {
-  int i,j,k, *n = node->n;
+  int i,j,k, *n = var->n;
   int ai = 0;
   forplaneN(dir, i,j,k, n, p)
     var->d[Ind_n(i,j,k, n)] = interp2d->d[ai++];
