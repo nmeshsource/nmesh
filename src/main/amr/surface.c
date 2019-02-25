@@ -487,27 +487,36 @@ int same_n_normal_to_dir(tNode *node1, tNode *node2, int dir)
   return samen;
 }
 
-//TODO : rearrange to do a loop over all vars inside this func:
-//void set_ajsurf_forall_vars(tDat *dat, int face)
-/* set ajsurf array from data in nbsurf */
-void set_ajsurf(tSurface *s)
+/* return the first surface tht is not NULL */
+tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 {
-  tDat *dat = s->dat;
+  int vi;
+  tSurface *s = NULL;
+  for(vi=0; vi<dat->nv; vi++)
+  {
+    s = dat->s[f][vi];
+    if(s) break;
+  }
+  return s;
+}
+
+//TODO : rearrange to do a loop over all vars inside this func:
+/* set ajsurf array from data in nbsurf on face f for all vars */
+void set_ajsurf_forall_vars(tDat *dat, int f)
+{
   tNode *node = dat->node;
-  int f = s->face;
+  int nnb = node->nfnb[f];
   int dir = f/2;
   //int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
-  //int vi = s->vi;
+  tSurface *s1;
+  int *s1_n;
   tNode *nb;
-  int ni, found, nb_f, nb_ni, nb_dir;
-  struct tARRAY *Cp[2], **Ip, **Res;
-  struct tARRAY *(*Cb)[2];
-
-  /* do nothing if this surface is NULL */
-  if(!s) return;
+  int vi, ni, found, nb_f, nb_ni, nb_dir;
+  tArray *Cp[2], **Ip, **Res;
+  tArray *(*Cb)[2];
 
   /* if there is only 1 neighbor we may not need to interpolate */
-  if(s->nnbsurf == 1)
+  if(nnb == 1)
   {
     nb = node->fnb[f][0];
     /* if we have only one neighbor on the same level in the same patch
@@ -517,10 +526,16 @@ void set_ajsurf(tSurface *s)
       if(nb->l == node->l)
       {
         int same_n = same_n_normal_to_dir(nb, node, dir);
-        /* if number of points is the same we can copy */
+        /* if number of points is the same we can copy or just point
+           ajsurf to nbsurf[0] */
         if(same_n)
         {
-          s->ajsurf = s->nbsurf[0];
+          for(vi=0; vi<dat->nv; vi++)
+          {
+            tSurface *s = dat->s[f][vi];
+            /* do nothing if this surface is NULL */
+            if(s) s->ajsurf = s->nbsurf[0];
+          }
           return;
         }
       }
@@ -536,13 +551,16 @@ void set_ajsurf(tSurface *s)
   }
 
   /* Ok if we get here we need interpolation */
-  Ip = calloc(s->nnbsurf, sizeof(Ip[0]));
-  Res = calloc(s->nnbsurf, sizeof(Res[0]));
-  Cb = calloc(s->nnbsurf, sizeof(Cb[0]));
+  Ip = calloc(nnb, sizeof(Ip[0]));
+  Res = calloc(nnb, sizeof(Res[0]));
+  Cb = calloc(nnb, sizeof(Cb[0]));
+
+  s1 = first_nonNULL_surf_in_dat(dat, f);
+  s1_n = s1->ajsurf->n;
 
   /* array memory to store points of mysurf in X coords */
-  Cp[0] = alloc_array(s->ajsurf->n);
-  Cp[1] = alloc_array(s->ajsurf->n);
+  Cp[0] = alloc_array(s1_n);
+  Cp[1] = alloc_array(s1_n);
   /* convert Cp from Xb to X coords for node,
      these X are spread over the neighbor nodes */
   // TODO: array_XYZ_of_XbYbZb(parent, Cp, Cp);
@@ -550,7 +568,7 @@ void set_ajsurf(tSurface *s)
 
   /* use data from all neighbors to interpolate into ajsurf */
   /* 1. set neighbor coords within node surface */
-  for(ni=0; ni<s->nnbsurf; ni++)
+  for(ni=0; ni<nnb; ni++)
   {
     nb = node->fnb[f][ni];
     found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
@@ -558,10 +576,10 @@ void set_ajsurf(tSurface *s)
     nb_dir = nb_f/2;
 
     /* array memory to store points of neighbors in Xb coords */
-    Ip[ni] = alloc_array(s->ajsurf->n);
-    Cb[ni][0] = alloc_array(s->ajsurf->n);
-    Cb[ni][1] = alloc_array(s->ajsurf->n);
-    Res[ni] = alloc_array(s->ajsurf->n);
+    Ip[ni] = alloc_array(s1_n);
+    Cb[ni][0] = alloc_array(s1_n);
+    Cb[ni][1] = alloc_array(s1_n);
+    Res[ni] = alloc_array(s1_n);
 
     /* find points inside neigh. -> mask is returned in Ip */
     array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
@@ -570,7 +588,7 @@ void set_ajsurf(tSurface *s)
     // TODO: array_XbYbZb_of_XYZ(nb, Cb[ijk], Cp);
   }
   /* 2. use interpolation to get vars from neigh to node */
-  for(ni=0; ni<s->nnbsurf; ni++)
+  for(ni=0; ni<nnb; ni++)
   {
     nb = node->fnb[f][ni];
     found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
@@ -579,6 +597,7 @@ void set_ajsurf(tSurface *s)
     /* interpolation within patch */
     if(nb->pat == node->pat)
     {
+      // ...
     }
     else
     {
@@ -590,7 +609,7 @@ void set_ajsurf(tSurface *s)
   /* 3. free temp arrays for coords */
   free_array(Cp[1]);
   free_array(Cp[0]);
-  for(ni=0; ni<s->nnbsurf; ni++)
+  for(ni=0; ni<nnb; ni++)
   {
     free_array(Res[ni]);
     free_array(Cb[ni][1]);
@@ -603,24 +622,14 @@ void set_ajsurf(tSurface *s)
 }
 
 /* set all ajsurf of a node */
-int set_all_ajsurf(tNode *node)
+void set_all_ajsurf(tNode *node)
 {
   tDat *dat = node->dat;
-  int face, vi, cnt;
+  int face;
 
-  if(!dat) return 0;
+  if(!dat) return;
 
-  cnt=0;
   for(face=0; face<6; face++)
-    for(vi=0; vi<node->dat->nv; vi++)
-    {
-      tSurface *s = dat->s[face][vi];
-      if(s)
-      {
-        set_ajsurf(s);
-        cnt++;
-      }
-    }
-  return cnt;
+    set_ajsurf_forall_vars(dat, face);
 }
 
