@@ -168,7 +168,7 @@ int test_point_interpolation(tMesh *mesh)
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
                                   Cp, Xp[0]);
-  insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
+  insert_array_inplane(GetVarArray(nd, vi), dir,p, Xp[0]);
   //printvar_innode(nd, vi);
 
   dir = 1;
@@ -177,7 +177,7 @@ int test_point_interpolation(tMesh *mesh)
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
                                   Cp, Xp[0]);
-  insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
+  insert_array_inplane(GetVarArray(nd, vi), dir,p, Xp[0]);
   //printvar_innode(nd, vi);
 
   dir = 2;
@@ -186,7 +186,7 @@ int test_point_interpolation(tMesh *mesh)
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, GetVarArray(nd, ui), dir,p,
                                   Cp, Xp[0]);
-  insert_array_inplane(nd, GetVarArray(nd, vi), dir,p, Xp[0]);
+  insert_array_inplane(GetVarArray(nd, vi), dir,p, Xp[0]);
   printf("u and v should now be the same in plane 1 of all 3 dirs:\n");
   printvar_innode(nd, vi);
   printvar_innode(nd, ui);

@@ -293,8 +293,7 @@ void Lagrange_interpolate2d_toIpoints(tNode *node, tArray *var, int dir,int p,
 
 
 /* insert the values in interp2d into plane p of var */
-void insert_array_inplane(tNode *node, tArray *var, int dir, int p,
-                          tArray *interp2d)
+void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d)
 {
   int i,j,k, *n = var->n;
   int ai = 0;

@@ -33,8 +33,7 @@ void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
 void Lagrange_interpolate2d_toIpoints(tNode *node, tArray *var, int dir,int p,
                                       tArray *Cp[2], tArray *Ip,
                                       tArray *interp);
-void insert_array_inplane(tNode *node, tArray *var, int dir, int p,
-                          tArray *interp2d);
+void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d);
 
 /* get_coords.c */
 void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);
