@@ -30,6 +30,9 @@ void Lagrange_interpolate_toIpoints(tNode *node, tArray *var,
                                     tArray *Xp[3], tArray *Ip, tArray *interp);
 void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
                                      tArray *Cp[2], tArray *interp);
+void Lagrange_interpolate2d_toIpoints(tNode *node, tArray *var, int dir,int p,
+                                      tArray *Cp[2], tArray *Ip,
+                                      tArray *interp);
 void insert_array_inplane(tNode *node, tArray *var, int dir, int p,
                           tArray *interp2d);
 

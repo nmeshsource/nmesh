@@ -487,6 +487,8 @@ int same_n_normal_to_dir(tNode *node1, tNode *node2, int dir)
   return samen;
 }
 
+//TODO : rearrange to do a loop over all vars inside this func:
+//void set_ajsurf_forall_vars(tDat *dat, int face)
 /* set ajsurf array from data in nbsurf */
 void set_ajsurf(tSurface *s)
 {
@@ -494,10 +496,12 @@ void set_ajsurf(tSurface *s)
   tNode *node = dat->node;
   int f = s->face;
   int dir = f/2;
-  int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
-  int vi = s->vi;
+  //int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
+  //int vi = s->vi;
   tNode *nb;
-  int ni, found, nb_f, nb_ni;
+  int ni, found, nb_f, nb_ni, nb_dir;
+  struct tARRAY *Cp[2], **Ip, **Res;
+  struct tARRAY *(*Cb)[2];
 
   /* do nothing if this surface is NULL */
   if(!s) return;
@@ -531,7 +535,41 @@ void set_ajsurf(tSurface *s)
     }
   }
 
+  /* Ok if we get here we need interpolation */
+  Ip = calloc(s->nnbsurf, sizeof(Ip[0]));
+  Res = calloc(s->nnbsurf, sizeof(Res[0]));
+  Cb = calloc(s->nnbsurf, sizeof(Cb[0]));
+
+  /* array memory to store points of mysurf in X coords */
+  Cp[0] = alloc_array(s->ajsurf->n);
+  Cp[1] = alloc_array(s->ajsurf->n);
+  /* convert Cp from Xb to X coords for node,
+     these X are spread over the neighbor nodes */
+  // TODO: array_XYZ_of_XbYbZb(parent, Cp, Cp);
+  
+
   /* use data from all neighbors to interpolate into ajsurf */
+  /* 1. set neighbor coords within node surface */
+  for(ni=0; ni<s->nnbsurf; ni++)
+  {
+    nb = node->fnb[f][ni];
+    found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+    if(!found) errorexit("couldn't find nb face!!!");
+    nb_dir = nb_f/2;
+
+    /* array memory to store points of neighbors in Xb coords */
+    Ip[ni] = alloc_array(s->ajsurf->n);
+    Cb[ni][0] = alloc_array(s->ajsurf->n);
+    Cb[ni][1] = alloc_array(s->ajsurf->n);
+    Res[ni] = alloc_array(s->ajsurf->n);
+
+    /* find points inside neigh. -> mask is returned in Ip */
+    array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
+
+    /* convert Cp to neighbor's internal basis coords */
+    // TODO: array_XbYbZb_of_XYZ(nb, Cb[ijk], Cp);
+  }
+  /* 2. use interpolation to get vars from neigh to node */
   for(ni=0; ni<s->nnbsurf; ni++)
   {
     nb = node->fnb[f][ni];
@@ -548,7 +586,20 @@ void set_ajsurf(tSurface *s)
       errorexit("TODO: case where neighbors are from diff patches");
     }
 
-  } 
+  }
+  /* 3. free temp arrays for coords */
+  free_array(Cp[1]);
+  free_array(Cp[0]);
+  for(ni=0; ni<s->nnbsurf; ni++)
+  {
+    free_array(Res[ni]);
+    free_array(Cb[ni][1]);
+    free_array(Cb[ni][0]);
+    free_array(Ip[ni]);
+  }
+  free(Cb);
+  free(Res);
+  free(Ip);
 }
 
 /* set all ajsurf of a node */

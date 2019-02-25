@@ -183,7 +183,7 @@ int XYZ_is_in_node(tNode *node, double X[3])
   return 1;
 }
 
-/* Mark all points in aXP[0..1] within node by writing their index into
+/* Mark all points in aXP[0..2] within node by writing their index into
    aI. If a point is not in the node we write -1 into aI. I.e. we return
    a mask of points in node in Ip. */
 void array_find_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aI)
@@ -194,5 +194,69 @@ void array_find_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aI)
     double X[] = { aXP[0]->d[k], aXP[1]->d[k], aXP[2]->d[k] };
     if(XYZ_is_in_node(node, X)) aI->i[k] = k;
     else                        aI->i[k] = -1;
+  }
+}
+
+
+/* is a point C (in XYZ coords) in a plane (normal to dir) inside a node,
+   also sets C to boundary value if it is very close to the boundary */
+int Xplane_is_in_node(tNode *node, double C[2], int dir)
+{
+  double *nbb = node->bbox;
+  int d, f;
+
+  /* return 0 if C is outside node */
+  for(d=0; d<2; d++)
+  {
+    switch(dir)
+    {
+    case 0:
+      f = 2*d + 2;
+      break;
+    case 1:
+      f = 4*d;
+      break;
+    case 2:
+      f = 2*d;
+      break;
+    default:
+      errorexit("dir has to be 0,1,2");
+    }
+    if(dless(C[d],nbb[f]))      return 0;
+    if(dgreater(C[d],nbb[f+1])) return 0;
+  }
+
+  /* set X to boundary value if it is very close to boundary */
+  for(d=0; d<2; d++)
+  {
+    switch(dir)
+    {
+    case 0:
+      f = 2*d + 2;
+      break;
+    case 1:
+      f = 4*d;
+      break;
+    case 2:
+      f = 2*d;
+    }
+    if(C[d] < nbb[f])   C[d] = nbb[f];
+    if(C[d] > nbb[f+1]) C[d] = nbb[f+1];
+  }
+  return 1;
+}
+
+/* Mark all points in aCP[0..1] in plane p normal to dir within node by
+   writing their index into aI. If a point is not in the node we write -1
+   into aI. I.e. we return a mask of points in node in Ip. */
+void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI)
+{
+  int k;
+  forarray(aCP[0], k)
+  {
+    
+    double C[]  = { aCP[0]->d[k], aCP[1]->d[k] };
+    if(Xplane_is_in_node(node, C, dir)) aI->i[k] = k;
+    else                                aI->i[k] = -1;
   }
 }
