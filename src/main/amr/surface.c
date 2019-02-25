@@ -569,6 +569,7 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
   Ip = calloc(nnb, sizeof(Ip[0]));
   Cb = calloc(nnb, sizeof(Cb[0]));
   Res = calloc(nnb, sizeof(Res[0]));
+  if(!Ip || !Cb || !Res) errorexit("no memory for Ip, Cb, Res");
 
   /* 1. set neighbor coords within node surface */
   for(ni=0; ni<nnb; ni++)
