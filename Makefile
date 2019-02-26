@@ -100,7 +100,6 @@ export
 # --------------------------------------------------------------------------
 # default target
 nmesh: $(autoinclude) $(autoinitial)
-	@echo ======================= Compiling nmesh =======================
 	@echo CC=$(CC)
 	@echo CXX=$(CXX)
 	@echo CLINKER=$(CLINKER)
@@ -115,10 +114,12 @@ nmesh: $(autoinclude) $(autoinitial)
 MyConfig:
 	-if test ! -f MyConfig; then cp doc/MyConfig.example MyConfig; fi
 
+
 # automatic configuration files
 $(autoinclude): MyConfig
+	@echo ======================= Compiling nmesh =======================
 	@echo $(autotext) > $(autoinclude)
-	@for X in $(libincludes); do \
+	for X in $(libincludes); do \
 	  echo \#include \"$(TOP)/$$X\" >> $(autoinclude); \
 	done
 
@@ -128,7 +129,7 @@ $(autoinitial): MyConfig
 	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinitial); \
 	done
 	@echo "/* call nmesh initialization functions: */" >> $(autoinitial);
-	@for X in $(libnames); do \
+	for X in $(libnames); do \
 	  echo nmesh\_$$X\(mesh\)\; >> $(autoinitial); \
 	done
 
