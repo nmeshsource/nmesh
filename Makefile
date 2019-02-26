@@ -100,6 +100,8 @@ export
 # --------------------------------------------------------------------------
 # default target
 nmesh: $(autoinclude) $(autoinitial)
+	@echo
+	@echo ======================= Compiling nmesh =======================
 	@echo CC=$(CC)
 	@echo CXX=$(CXX)
 	@echo CLINKER=$(CLINKER)
@@ -117,7 +119,7 @@ MyConfig:
 
 # automatic configuration files
 $(autoinclude): MyConfig
-	@echo ======================= Compiling nmesh =======================
+	@echo ===================== Auto generate files =====================
 	@echo $(autotext) > $(autoinclude)
 	for X in $(libincludes); do \
 	  echo \#include \"$(TOP)/$$X\" >> $(autoinclude); \
