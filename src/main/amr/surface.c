@@ -457,6 +457,7 @@ void get_all_surfaces(tNode *node)
     set_ajsurf_forall_vars(node, face);
 
     /* Now we could free nbsurf already */
+    //FIXME: to conserve memory we should free nbsurf here!!!
     //free_nbsurf_only_forall_vars(node, face);
 
     /* wait until all has been sent, then free all buffers for this face */
