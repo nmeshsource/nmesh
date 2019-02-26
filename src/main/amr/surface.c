@@ -213,6 +213,10 @@ void set_all_myln_mysurf(tMesh *mesh)
 }
 
 
+/***************************************************************************/
+/* put mysurf into buffers and start MPI send/recv to get data into nbsurf */
+/***************************************************************************/
+
 /* count number of vars that have surfaces to be exchanged and set myN,
    input: node,my_f, nb,nb_f   output: nvars, vind, my_n, nb_n */
 void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
@@ -367,6 +371,10 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
 }
 
 
+/**********************************************************************/
+/* get the nbsurf data out of the MPI buffers */
+/**********************************************************************/
+
 /* get all surfaces from neighbor with index ni at face */
 void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 {
@@ -457,7 +465,7 @@ void get_all_myln_surfaces(tMesh *mesh)
 
 
 /**********************************************************************/
-/* get data into adjacent surface in ajsurf */
+/* set adjacent surface in ajsurf using data in nbsurf */
 /**********************************************************************/
 /* do two nodes have same bounding boxes, orthogonal to dir? */
 int same_bbox_normal_to_dir(tNode *node1, tNode *node2, int dir)
