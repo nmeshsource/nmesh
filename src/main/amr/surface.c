@@ -441,18 +441,26 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 void get_all_surfaces(tNode *node)
 {
   int face, ni;
+  tDat *dat = node->dat;
+
+  if(!dat) return;
 
   for(face=0; face<6; face++)
   {
+    /* get nbsurf for each neighbor */
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
       get_surfaces_for_all_vars(node, face, ni);
     }
-//    set_ajsurf_forall_vars
 
-//void set_ajsurf_forall_vars(tDat *dat, int f);
+    /* set ajsurf on this nodeface via interpolation */
+    set_ajsurf_forall_vars(node, face);
 
+    /* Now we could free nbsurf already */
+    //free_nbsurf_only_forall_vars(node, face);
 
+    /* wait until all has been sent, then free all buffers for this face */
+    nMPI_Waitall_com_send(dat->com[face]);
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
   }
 }
@@ -738,6 +746,19 @@ void free_nbsurf_only(tSurface *s)
   free(s->allocd_nbsurf);
   s->nbsurf = NULL;
   s->allocd_nbsurf = NULL;
+}
+
+/* free all nbsurf on face f of node */
+void free_nbsurf_only_forall_vars(tNode *node, int f)
+{
+  tDat *dat = node->dat;
+  int vi;
+
+  if(!dat) return;
+
+  /* free all nbsurf on face f */
+  for(vi=0; vi<dat->nv; vi++)
+    free_nbsurf_only(dat->s[f][vi]);
 }
 
 /* free all nbsurf surfaces on node */
