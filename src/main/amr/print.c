@@ -214,6 +214,7 @@ void printvar_ajsurfdiff(tNode *node, int vi)
         printf("f%d allocd=%d ajsurf\n", f, sf->allocd_ajsurf);
         forarray(diff, k) diff->d[k] = asa->d[k] - msa->d[k];
         printarray(diff);
+        free_array(diff);
       }
     }
 }

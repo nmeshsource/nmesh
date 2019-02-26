@@ -344,6 +344,9 @@ tNode *destroy_children(tNode *parent)
   tNode *child0 = parent->child[0];
   int ijk;
 
+  /* set parent time to the same as child0 */
+  parent->time = child0->time;
+
  /* save children in an array and nodelist clist */
   el = NULL;
   for(ijk=0; ijk<8; ijk++)
@@ -476,9 +479,6 @@ tNode *destroy_children(tNode *parent)
 
   /* parent is now a leaf node */
   parent->leaf = 1;
-
-  /* set parent time to the same as child0 */
-  parent->time = child0->time;
 
   return parent;
 }

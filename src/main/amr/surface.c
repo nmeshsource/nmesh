@@ -632,9 +632,13 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     {
       int k, cnt;
 
-      /* get mem for ajsurf, needs to be freed later */
-      s->ajsurf = alloc_array(s->mysurf->n);
-      s->allocd_ajsurf = 1;
+      /* unless it has mem already, get mem for ajsurf */
+      if(s->allocd_ajsurf==0 || s->ajsurf==NULL)
+      {
+        /* get mem for ajsurf, needs to be freed later */
+        s->ajsurf = alloc_array(s->mysurf->n);
+        s->allocd_ajsurf = 1;
+      }
 
       /* interpolation within each nb, save results in Res */
       for(ni=0; ni<nnb; ni++)
