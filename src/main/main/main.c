@@ -258,7 +258,8 @@ int make_output_directory(tMesh *mesh)
   prdivider(1);
   time_str[strlen(time_str)-1] = '\0';
   printf("The current time is %s\n", time_str);
-  printf("nmesh was compiled on %s at %s\n", __DATE__, __TIME__);
+  printf("nmesh (rev " MSTR_OFVAL(MAINREV)
+         ") was compiled on %s at %s\n", __DATE__, __TIME__);
   printf("  outdir = %s \n", outdir);
 
   free(outdirp);

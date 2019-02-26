@@ -25,7 +25,7 @@ $(EXECDIR)/$(EXEC): $(OBJSWITHPATH) $(wildcard $(LIBDIR)/*)
 # note that $@ is the matched target, 
 # $* is the stem of the target defined by %
 $(OBJDIR)/%.o: %.c nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CFLAGS) -o $@ -c $*.c
+	$(CC) $(CFLAGS) -o $@ -c $*.c -DMAINREV="$$(git rev-parse --short HEAD)"
 
 
 # dependencies for automatic files
