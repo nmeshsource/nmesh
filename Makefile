@@ -95,10 +95,12 @@ autotext    = \/\* automatically generated from Makefile and MyConfig \*\/
 CFLAGS = $(DFLAGS) $(OFLAGS) $(WARN) $(INCS) $(MPIDIRI) $(HDF5DIRI) $(SPECIALINCS)
 export
 
-
+# --------------------------------------------------------------------------
+# Make Targets
 # --------------------------------------------------------------------------
 # default target
 nmesh: $(autoinclude) $(autoinitial)
+	@echo ======================= Compiling nmesh =======================
 	@echo CC=$(CC)
 	@echo CXX=$(CXX)
 	@echo CLINKER=$(CLINKER)
@@ -115,18 +117,18 @@ MyConfig:
 
 # automatic configuration files
 $(autoinclude): MyConfig
-	echo $(autotext) > $(autoinclude)
-	for X in $(libincludes); do \
+	@echo $(autotext) > $(autoinclude)
+	@for X in $(libincludes); do \
 	  echo \#include \"$(TOP)/$$X\" >> $(autoinclude); \
 	done
 
 $(autoinitial): MyConfig
-	echo $(autotext) > $(autoinitial)
-	for X in $(libnames); do \
+	@echo $(autotext) > $(autoinitial)
+	@for X in $(libnames); do \
 	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinitial); \
 	done
-	echo "/* call nmesh initialization functions: */" >> $(autoinitial); \
-	for X in $(libnames); do \
+	@echo "/* call nmesh initialization functions: */" >> $(autoinitial);
+	@for X in $(libnames); do \
 	  echo nmesh\_$$X\(mesh\)\; >> $(autoinitial); \
 	done
 
