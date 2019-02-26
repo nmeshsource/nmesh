@@ -432,9 +432,8 @@ int test_ajsurf(tMesh *mesh)
   /* now get the surfaces and wait for buffers if necessary */
   get_all_myln_surfaces(mesh);
 
-  /* set ajsurf via interpolation */
-  PRF;printf(": set_all_myln_ajsurf\n");
-  set_all_myln_ajsurf(mesh);
+  /* get_all_myln_surfaces sets ajsurf via interpolation */
+  PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
 
   /* print var in one node yet again with surfaces */
   nd = GetMyNode(mesh, 0); /* my first node */
@@ -443,7 +442,7 @@ int test_ajsurf(tMesh *mesh)
 
   /* print var in all nodes */
   prdivider(0);
-  PRF;printf(": ajsurf on all nodes:\n");
+  PRF;printf(": ajsurfdiff on all nodes:\n");
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
@@ -456,7 +455,7 @@ int test_ajsurf(tMesh *mesh)
 
   /* print var in all nodes again */
   prdivider(0);
-  PRF;printf(": ajsurf on all nodes after freeing nbsurf:\n");
+  PRF;printf(": ajsurfdiff on all nodes after freeing nbsurf:\n");
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
