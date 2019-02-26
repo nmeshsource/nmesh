@@ -43,7 +43,7 @@ $(OBJDIR)/%.o: %.c $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefi
 $(OBJDIR)/%.o: %.cc $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
 	$(CXX) $(CFLAGS) -o $@ -c $*.cc
 
-## First try for c and c++:
+## First try for C and C++:
 ## [ Note: $(wildcard %.c*) should be the same as %.c*, but is not ]
 #$(OBJDIR)/%.o: %.c* $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
 #	@if [ -f $*.cc ]; \
