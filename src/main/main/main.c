@@ -71,7 +71,8 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   if(Rank0)
   {
     prdivider(1);
-    printf("Welcome to nmesh, compiled on %s at %s\n", __DATE__, __TIME__);
+    printf("Welcome to nmesh (rev " MSTR_OFVAL(MAINREV)
+           "), compiled on %s at %s\n", __DATE__, __TIME__);
     prdivider(1);
   }
 
