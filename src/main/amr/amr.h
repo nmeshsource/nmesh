@@ -31,6 +31,7 @@ int init_all_surfaces(tNode *node);
 void set_mysurf(tSurface *s);
 void request_all_surfaces_exchange(tNode *node);
 void get_all_surfaces(tNode *node);
+void set_ajsurf_forall_vars(tNode *node, int f);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);

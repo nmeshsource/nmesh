@@ -448,6 +448,11 @@ void get_all_surfaces(tNode *node)
     {
       get_surfaces_for_all_vars(node, face, ni);
     }
+//    set_ajsurf_forall_vars
+
+//void set_ajsurf_forall_vars(tDat *dat, int f);
+
+
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
   }
 }
@@ -510,9 +515,8 @@ tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 
 
 /* set ajsurf array from data in nbsurf on face f for all vars */
-void set_ajsurf_forall_vars(tDat *dat, int f)
+void set_ajsurf_forall_vars(tNode *node, int f)
 {
-  tNode *node = dat->node;
   int nnb = node->nfnb[f];
   int dir = f/2;
   //int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
@@ -522,6 +526,9 @@ void set_ajsurf_forall_vars(tDat *dat, int f)
   int vi, ni, found, nb_f, nb_ni, nb_dir;
   tArray *Cp[2], **Ip, **Res;
   tArray *(*Cb)[2];
+  tDat *dat = node->dat;
+
+  if(!dat) return;
 
   /* if there is only 1 neighbor we may not need to interpolate */
   if(nnb == 1)
@@ -675,7 +682,7 @@ void set_all_ajsurf(tNode *node)
   if(!dat) return;
 
   for(face=0; face<6; face++)
-    set_ajsurf_forall_vars(dat, face);
+    set_ajsurf_forall_vars(node, face);
 }
 
 /* get nbsurf for all nodes out of buffers and free the buffers */
