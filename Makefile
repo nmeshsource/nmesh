@@ -142,9 +142,9 @@ tar:
 
 # take a fresh look at things
 clean:
-	-rm -r lib
-	-rm $(autoinclude)
-	-rm $(autoinitial)
+	-rm -rf lib
+	-rm -f $(autoinclude)
+	-rm -f $(autoinitial)
 
 # remove emacs backup files
 cleantilde:
