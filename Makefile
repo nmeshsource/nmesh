@@ -1,53 +1,45 @@
 # Makefile
 # Wolfgang Tichy 1/2019
-# Builds the nmesh executable based on the file MyConfig
+# Builds the nmesh executable by including the file MyConfig
 # See http://www.gnu.org/software/make/manual for the manual of GNU make
 
-# where am I
-UNAME := $(shell uname)
-TOP   := $(shell pwd)
+# top level dir
+TOP := $(shell pwd)
 
-# name the fruit of our labor
+# name of program and location where executable goes
 EXEC = nmesh
 EXECDIR = $(TOP)/exe
 
-
-# variables common to all setups
+# default for variables used in all cases
 CC = gcc	# gcc or icc
 CXX =		# g++ or icc
 CLINKER =	# will be used only in src/main/main/Makefile for linking
 AR = ar		# ar command we use to build library from object files
 
+# defaults for option and defined flags for compiler
+OFLAGS = -g
+WARN = -Wall
+DFLAGS =
+
+# include and library defaults
 INCS = -I$(TOP)/src/main/main
 LIBS = -L$(TOP)/lib
 SPECIALINCS =
 SPECIALLIBS =
 libsys = -lm
 
-DFLAGS =
-OFLAGS =
-WARN = # -Wall
-
-
 # --------------------------------------------------------------------------
-# different machines and environments
-
-# Linux
-OFLAGS = -g
-
-
-# --------------------------------------------------------------------------
-# some libraries are currently required
+# some nmesh libraries are required
 libpaths = src/main/amr src/main/nMPI
 libpaths += src/main/basis src/main/coordinates
 libpaths += src/utility/output
 
 # --------------------------------------------------------------------------
-# the user chooses the libraries and some options in the file MyConfig
+# we can choose more libraries and options in the file MyConfig
 include MyConfig
 
 # --------------------------------------------------------------------------
-# some more libraries are currently required, those need to be last
+# some more required libraries that need to be last
 #libpaths += src/utility/NumericUtils
 
 # --------------------------------------------------------------------------
@@ -61,10 +53,10 @@ CLINKER = $(CC)
 endif
 
 # --------------------------------------------------------------------------
-# manage how the nmesh sources are compiled
+# manage how the nmesh sources are compiled and linked
 
 # note that the order matters, e.g.
-# main has to go last since it has to be compiled last
+# main has to be last since it has to be linked last
 libpaths += src/main/main
 
 # extract the list of directory names
@@ -94,18 +86,16 @@ libincludes := $(foreach libpath,$(libpaths),\
 # define the automatic configuration files
 autoinclude = src/main/main/nmesh_automatic_include.h
 autoinitial = src/main/main/nmesh_automatic_initialize.c
-autotext    = \/\* automatically generated from MyConfig \*\/
-
+autotext    = \/\* automatically generated from Makefile and MyConfig \*\/
 
 
 # --------------------------------------------------------------------------
-# some of the above variables are meant to be global, so pass them on
-# to the shell 
-CFLAGS = $(DFLAGS) $(OFLAGS) $(INCS) $(MPIDIRI) $(HDF5DIRI) $(SPECIALINCS) $(WARN)
+# some of the above variables are meant to be global, so we pass them on
+# to the shell with export
+CFLAGS = $(DFLAGS) $(OFLAGS) $(WARN) $(INCS) $(MPIDIRI) $(HDF5DIRI) $(SPECIALINCS)
 export
 
 
-# --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 # default target
 nmesh: $(autoinclude) $(autoinitial)
@@ -117,21 +107,21 @@ nmesh: $(autoinclude) $(autoinitial)
 
 
 # --------------------------------------------------------------------------
-# other targets 
+# other targets
 
 # if there is no MyConfig file, use the example provided in doc
 MyConfig:
-	-if test ! -f MyConfig; then cp doc/MyConfig.example MyConfig; fi 
+	-if test ! -f MyConfig; then cp doc/MyConfig.example MyConfig; fi
 
 # automatic configuration files
 $(autoinclude): MyConfig
-	echo $(autotext) > $(autoinclude) 
+	echo $(autotext) > $(autoinclude)
 	for X in $(libincludes); do \
 	  echo \#include \"$(TOP)/$$X\" >> $(autoinclude); \
 	done
 
 $(autoinitial): MyConfig
-	echo $(autotext) > $(autoinitial) 
+	echo $(autotext) > $(autoinitial)
 	for X in $(libnames); do \
 	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinitial); \
 	done
