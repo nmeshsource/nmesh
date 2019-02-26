@@ -1,4 +1,5 @@
 # Makefile.subdirs
+# Wolfgang Tichy 1/2019
 # The commands in here are used in all standard source subdirectories.
 # For example, in the coordinates directory there is a Makefile containing the
 # lines:
