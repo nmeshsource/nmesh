@@ -771,6 +771,37 @@ void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
   vlfree(r);
 }
 
+/* add second var list to first on one node: r += ca*a
+   with special treatment for ca = 1 and ca = -1 */
+void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a)
+{
+  int i, n;
+
+  if (ca == 0) return;
+
+  /* loop over vars in varlists */
+  for(n=0; n<r->n; n++)
+  {
+    int ri = r->index[n];
+    int ai = a->index[n];
+    double *pr = GetVarDpointer(node, ri);
+    double *pa = GetVarDpointer(node, ai);
+
+    if (ca == 1)
+    {
+      forvari(node, ri, i) pr[i] += pa[i];
+    }
+    else if(ca == -1)
+    {
+      forvari(node, ri, i) pr[i] -= pa[i];
+    }
+    else
+    {
+      forvari(node, ri, i) pr[i] += ca * pa[i];
+    }
+  }
+}
+
 /* add second var list to first: r += ca*a
    special treatment for ca = 1 and ca = -1 */
 void vladdto(tVarList *r, const double ca, tVarList *a)
@@ -783,30 +814,9 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
-    double *pr, *pa;
-    int i, n;
-
-    for(n=0; n<r->n; n++)
-    {
-      int ri = r->index[n];
-      int ai = a->index[n];
-      pr = GetVarDpointer(node, ri);
-      pa = GetVarDpointer(node, ai);
-
-      if (ca == 1)
-      {
-        forvari(node, ri, i) pr[i] += pa[i];
-      }
-      else if(ca == -1)
-      {
-        forvari(node, ri, i) pr[i] -= pa[i];
-      }
-      else
-      {
-        forvari(node, ri, i) pr[i] += ca * pa[i];
-      }
-    }
+    vladdto_node(node, r, ca, a);
   }
+
   /* add times as well */
   r->time += ca * a->time;
 }

@@ -218,6 +218,10 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   int i,j,k, d, vi,nvdb;
   int ns[] = {2,2,2};
 
+  /* transfer parent time info */
+  node->time = parent->time;
+  node->dt = parent->dt;  // FIXME: For now all nodes have same dt
+
   /* register this child with the parent */
   parent->child[ijk] = node;
   parent->leaf = 0;  /* parent is now no longer a leaf node */
@@ -472,6 +476,9 @@ tNode *destroy_children(tNode *parent)
 
   /* parent is now a leaf node */
   parent->leaf = 1;
+
+  /* set parent time to the same as child0 */
+  parent->time = child0->time;
 
   return parent;
 }

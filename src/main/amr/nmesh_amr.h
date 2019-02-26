@@ -63,6 +63,8 @@ typedef struct tSURFACE {
 
 /* a node */
 typedef struct tNODE {
+  double dt;              /* time step in node */
+  double time;            /* current time in node */
   struct tPAT *pat;       /* pointer to patch that contains node */
   struct tNODE *parent;   /* pointer to parent node */
   struct tNODE *child[8]; /* list of pointers to childeren nodes */

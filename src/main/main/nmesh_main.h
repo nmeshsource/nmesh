@@ -196,6 +196,8 @@ int *MeshVar_n_special(tMesh *mesh, int i);
 #define AddVarDim(name, tensorindices, description, ns0,ns1,ns2) \
   AddMeshVarDim(mesh, (name), (tensorindices), (description), \
                 (ns0),(ns1),(ns2))
+/* variable lists in variables.c*/
+void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a);
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);
