@@ -1,9 +1,10 @@
 /* nmesh_main.h */
 /* Wolfgang Tichy, 1/2019 */
 
-/* use MSTR(x) to transform x into a string */
-#define XMSTR(x) STRING(x)
-#define MSTR(x)  #x
+/* use MSTR(x) to transform x into a string, MSTR_OFVAL(x) first evaluates x
+   and then makes the result into a string */
+#define MSTR(x) #x
+#define MSTR_OFVAL(x) MSTR(x)
 
 /* constants */
 #ifdef PI
