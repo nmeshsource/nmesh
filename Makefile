@@ -16,17 +16,22 @@ CXX =		# g++ or icc
 CLINKER =	# will be used only in src/main/main/Makefile for linking
 AR = ar		# ar command we use to build library from object files
 
-# defaults for option and defined flags for compiler
+# defaults for option-flags and defined-flags for compiler
 OFLAGS = -g
 WARN = -Wall
 DFLAGS =
 
-# include and library defaults
+# some include and library defaults
 INCS = -I$(TOP)/src/main/main
 LIBS = -L$(TOP)/lib
 SPECIALINCS =
 SPECIALLIBS =
 libsys = -lm
+
+# dirs for MPI given with -L and -I to compiler, and MPI lib given with -l
+MPIDIRL =
+MPIDIRI =
+MPILIBS = -lmpi
 
 # --------------------------------------------------------------------------
 # some nmesh libraries are required
@@ -72,7 +77,7 @@ liblist := $(foreach libname,$(libnames),-l$(libname))
 liblist := $(subst -lmain,,$(liblist))
 
 # make final list of libraries that is passed to the linker
-# uses standard hack to resolve interdependencies by repeating the libraries
+# we resolve library interdependencies by repeating the libraries
 # system libraries go in the end
 LIBS += $(MPIDIRL) $(liblist) $(liblist)
 LIBS += $(SPECIALLIBS) $(libsys) $(MPILIBS)
