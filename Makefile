@@ -28,10 +28,10 @@ SPECIALINCS =
 SPECIALLIBS =
 libsys = -lm
 
-# dirs for MPI given with -L and -I to compiler, and MPI lib given with -l
-MPIDIRL =
-MPIDIRI =
-MPILIBS = -lmpi
+# dirs for MPI given with -I and -L to compiler, and MPI lib given with -l
+MPIDIRI =	# -I/usr/lib/x86_64-linux-gnu/openmpi/include	#for openmpi
+MPIDIRL =	# -L/usr/lib/x86_64-linux-gnu/openmpi/lib	#for openmpi
+MPILIBS =	# -lmpi						#for openmpi
 
 # --------------------------------------------------------------------------
 # some nmesh libraries are required
