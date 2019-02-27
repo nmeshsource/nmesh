@@ -363,7 +363,7 @@ void request_all_surfaces_exchange(tNode *node)
 void request_all_myln_surfaces_exchange(tMesh *mesh)
 {
   int myid;
-  formylnodes(mesh, myid)
+  formylnodes_noomp(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
     request_all_surfaces_exchange(node);
@@ -470,7 +470,7 @@ void get_all_surfaces(tNode *node)
 void get_all_myln_surfaces(tMesh *mesh)
 {
   int myid;
-  formylnodes(mesh, myid)
+  formylnodes_noomp(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
     get_all_surfaces(node);
