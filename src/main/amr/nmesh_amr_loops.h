@@ -10,11 +10,15 @@
 /* loops that should be used in most modules                                */
 /****************************************************************************/
 /* loop over my leaf nodes on this proc */
-/* Note: for node in ln[c][i]: myid = myln->mx*c + i */
-#define formylnodes(mesh, myid) \
+/* Note: for node in ln[c][i]: myid = myln->nm*c + i */
+#define formylnodes_noomp(mesh, myid) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   for(myid=mesh->myln->nm*cat_, li_=0; \
       li_ < mesh->myln->ncat[cat_]; myid++, li_++)
+
+/* we could use OpenMP to parallelize the 2nd loop in formylnodes_noomp,
+   but for now formylnodes and formylnodes_noomp do the same: */
+#define formylnodes(mesh, myid) formylnodes_noomp(mesh, myid)
 
 /* get node from myid */
 #define GetMyNode(mesh, myid) \
