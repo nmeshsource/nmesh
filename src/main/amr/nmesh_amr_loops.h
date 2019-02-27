@@ -9,7 +9,7 @@
 /****************************************************************************/
 /* loops that should be used in most modules                                */
 /****************************************************************************/
-/* loop over my leaf nodes on this proc */
+/* loop over my leaf nodes on this proc without OpenMP */
 /* Note: for node in ln[c][i]: myid = myln->nm*c + i */
 #define formylnodes_noomp(mesh, myid) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
