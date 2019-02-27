@@ -485,8 +485,6 @@ void get_all_surfaces(tNode *node)
     //FIXME: to conserve memory we should free nbsurf here!!!
     //free_nbsurf_only_forall_vars(node, face);
   }
-  /* postpone Waitall until we have finished all nodefaces: */
-  free_dat_reqs_after_Waitall_com_send(node);
 }
 
 /* get nbsurf for all nodes out of buffers and free the buffers */
@@ -504,13 +502,11 @@ void get_all_myln_surfaces(tMesh *mesh)
 
   /* postpone Waitall until we have finished all nodefaces. This could have
      been already called in get_all_surfaces to free mem earlier.*/
-/*
   formylnodes_noomp(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
     free_dat_reqs_after_Waitall_com_send(node);
   }
-*/
 }
 
 
