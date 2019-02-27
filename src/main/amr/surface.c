@@ -458,11 +458,17 @@ void get_all_surfaces(tNode *node)
 
     /* set ajsurf on this nodeface via interpolation */
     set_ajsurf_forall_vars(node, face);
+    /* FIXME: if we use formylnodes_noomp to call get_all_surfaces, it might
+       be better to later call set_all_myln_ajsurf instead of using
+       set_ajsurf_forall_vars above. */
 
-    /* Now we could free nbsurf already */
+    /* After set_ajsurf_forall_vars we could free nbsurf already */
     //FIXME: to conserve memory we should free nbsurf here!!!
     //free_nbsurf_only_forall_vars(node, face);
-
+  }
+  /* postpone Waitall until we have finished all nodefaces: */
+  for(face=0; face<6; face++)
+  {
     /* wait until all has been sent, then free all buffers for this face */
     nMPI_Waitall_com_send(dat->com[face]);
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
