@@ -50,6 +50,14 @@ int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi);
 int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi);
 int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
                              int (*prop)(TYP vi, void *p), void *pars);
+void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
+                               void (*copy)(TYP d, TYP s));
+void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+                       double cb, LIST(TYP) *b,
+                       void (*add)(TYP r, double ca, TYP a, double cb, TYP b));
+void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+                         void (*addto)(TYP r, double ca, TYP a));
+
 /* e.g.: if TYP = int 
    LIST(TYP) FN(alloc,LIST(TYP))(void)
    becomes

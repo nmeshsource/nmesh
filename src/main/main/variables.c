@@ -455,16 +455,14 @@ void VLDisableFree(tVarList *vl)
 }
 
 /* add variables based on an existing variable list and a postfix
-   note that we add each component as a scalar but fix it later because
-   we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ...
-*/
+   note that we add each component as a scalar first but then fix it because
+   we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ... */
 tVarList *AddDuplicate(tVarList *vl, char *postfix)
 {
   tMesh *mesh = vl->mesh;
   tVar *vdb = mesh->vdb;
   char name[1000];
   int i, j;
-  int nadded = 0;
   tVarList *newvl;
   tVar *var, *newvar;
 
@@ -490,7 +488,6 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
 
     /* add scalar variable with new name to variable database */
     AddMeshVar(mesh, name, "", var->description);
-    nadded++;
 
     /* get index of new variable and overwrite index in duplicate */
     newvl->index[i] = MeshVarInd(mesh, name);
@@ -554,6 +551,23 @@ void vlsetconstant(tVarList *u, const double c)
   }
 }
 
+/* copy: v = u on one node */
+void vlcopy_node(tNode *node, tVarList *v, tVarList *u)
+{
+  double *pu, *pv;
+  int i, n, vi,ui;
+
+  for(n=0; n<v->n; n++)
+  {
+    ui = u->index[n];
+    vi = v->index[n];
+    pu = GetVarDpointer(node, ui);
+    pv = GetVarDpointer(node, vi);
+    forvari(node, vi, i)
+      pv[i] = pu[i];
+  }
+}
+
 /* copy: v = u */
 void vlcopy(tVarList *v, tVarList *u)
 {
@@ -566,18 +580,7 @@ void vlcopy(tVarList *v, tVarList *u)
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
-    double *pu, *pv;
-    int i, n, vi,ui;
-
-    for(n=0; n<v->n; n++)
-    {
-      ui = u->index[n];
-      vi = v->index[n];
-      pu = GetVarDpointer(node, ui);
-      pv = GetVarDpointer(node, vi);
-      forvari(node, vi, i)
-        pv[i] = pu[i];
-    }
+    vlcopy_node(node, v, u);
   }
 }
 
@@ -708,9 +711,43 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
 }
 
 /* linear combination of two var lists: r = ca*a + cb*b
-   should change function name
-   one function can catch several special cases like cb == 0 (unfinished)
-   important: if coefficient is zero we guarantee that memory is not accessed */
+   catch special cases like ca=0 or cb=0
+   if coefficient is zero memory is not accessed */
+void vladd_node(tNode *node,
+                tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
+{
+  double *pr, *pa, *pb;
+  int i, n;
+
+  for(n=0; n<r->n; n++)
+  {
+    int ri = r->index[n];
+    int ai = a->index[n];
+    int bi = b->index[n];
+    pr = GetVarDpointer(node, ri);
+    if(ca!=0)  pa = GetVarDpointer(node, ai);
+    if(cb!=0)  pb = GetVarDpointer(node, bi);
+
+    if (ca == 0 && cb == 0)
+    {
+      forvari(node, ri, i) pr[i] = 0;
+    }
+    else if(ca == 0)
+    {
+      forvari(node, ri, i) pr[i] = cb * pb[i];
+    }
+    else if(cb == 0)
+    {
+      forvari(node, ri, i) pr[i] = ca * pa[i];
+    }
+    else
+    {
+      forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
+    }
+  }
+}
+
+/* add for all my leaf nodes */
 void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
 {
   tMesh *mesh = r->mesh;
@@ -719,35 +756,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
-    double *pr, *pa, *pb;
-    int i, n;
-
-    for(n=0; n<r->n; n++)
-    {
-      int ri = r->index[n];
-      int ai = a->index[n];
-      int bi = b->index[n];
-      pr = GetVarDpointer(node, ri);
-      if(ca!=0)  pa = GetVarDpointer(node, ai);
-      if(cb!=0)  pb = GetVarDpointer(node, bi);
-
-      if (ca == 0 && cb == 0)
-      {
-        forvari(node, ri, i) pr[i] = 0;
-      }
-      else if(ca == 0)
-      {
-        forvari(node, ri, i) pr[i] = cb * pb[i];
-      }
-      else if(cb == 0)
-      {
-        forvari(node, ri, i) pr[i] = ca * pa[i];
-      }
-      else
-      {
-        forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
-      }
-    }
+    vladd_node(node, r, ca,a, cb,b);
   }
   /* add times as well */
   if (ca == 0 && cb == 0) r->time = 0.0;
@@ -755,6 +764,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
   else if (cb == 0)	  r->time = ca * a->time;
   else			  r->time = ca * a->time + cb * b->time;
 }
+
 
 /* wrapper for single variable: r = ca*a + cb*b (ia/b/r is index of a/b/r) */
 void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)

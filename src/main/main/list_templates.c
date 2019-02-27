@@ -199,6 +199,39 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
   return in;
 }
 
+/* copy contents of src into dest, so that dest = src
+   We need to pass in a func copy that know how to copy list elements.
+   e.g. for ints it could be just: 
+   void copy(int d, int s){ d = s; }
+*/
+void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
+                        void (*copy)(TYP d, TYP s))
+{
+  int i;
+  for(i=0; i<dest->n; i++)
+    copy(dest->e[i], src->e[i]); /* func that know how to copy */
+}
+
+/* add contents: r = ca*a + cb*b */
+void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+                       double cb, LIST(TYP) *b,
+                       void (*add)(TYP r, double ca, TYP a, double cb, TYP b))
+{
+  int i;
+  for(i=0; i<r->n; i++)
+    add(r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
+}
+
+/* add to contents: r += ca*a */
+void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+                         void (*addto)(TYP r, double ca, TYP a))
+{
+  int i;
+  for(i=0; i<r->n; i++)
+    addto(r->e[i], ca,a->e[i]); /* func that adds to r */
+}
+
+
 /***************************************************************************/
 /* undef all from list_templates.h */
 #undef DUMMY
