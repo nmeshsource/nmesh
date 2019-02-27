@@ -244,3 +244,17 @@ size_t fread_little(double *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fread_big(double *ptr, size_t size, size_t nmemb, FILE *fp);
+
+
+/**************************************************************************/
+/* lists.c */
+/**************************************************************************/
+/* use lists with int entries */
+#define TYP int
+#include "list_templates.h"
+#undef TYP
+/* use lists with (tVarList *) entries */
+typedef tVarList *pVL;        /* list_templates.h only works with numbers */
+#define TYP pVL               /* the pointer pVL is a number */
+#include "list_templates.h"
+#undef TYP

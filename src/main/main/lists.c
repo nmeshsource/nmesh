@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+/***************************************************************************/
+/* enable lists of type int */
+/***************************************************************************/
 /* compile list functions with lists of type int
    e.g. intList *alloc_intList(void);  */
 #define TYP int
@@ -15,9 +19,17 @@
 #undef TYP
 to this file. */
 
-
 /* if we need the same lists but with double entries, do this:
 #define TYP double
 #include "list_templates.c"
 #undef TYP
 */
+
+/***************************************************************************/
+/* enable lists of type (tVarList *) */
+/***************************************************************************/
+#include "../amr/nmesh_amr.h" /* get def of tVarList */
+typedef tVarList *pVL;        /* list_templates.h only works with numbers */
+#define TYP pVL               /* the pointer pVL is a number */
+#include "list_templates.c"
+#undef TYP

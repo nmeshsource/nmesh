@@ -15,6 +15,12 @@ To use them in another file we need to add
 #undef TYP
 to this file. */
 
+/* If we need list of pointers do e.g. this for a list of pointers to tVarList:
+typedef tVarList *pVL;        // list_templates.h only works with numbers
+#define TYP pVL               // the pointer pVL is a number
+#include "list_templates.c"
+#undef TYP
+*/
 
 /************************************************************************/
 /* utility functions for these lists */
@@ -55,9 +61,13 @@ void FN(clear,LIST(TYP))(LIST(TYP) *u)
 void FN(pr,LIST(TYP))(LIST(TYP) *u)
 {
   int i;
-  double ui;
+  long ui;
   printf("n=%d  e =", u->n);
-  for(i=0; i<u->n; i++) { ui=u->e[i]; printf(" %g" , ui); }
+  for(i=0; i<u->n; i++)
+  {
+    ui = (long) u->e[i];
+    printf(" %ld" , ui);
+  }
   printf("\n");
 }
 
@@ -188,3 +198,13 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
   for(i=i0; i<v->n; i++) if(prop(v->e[i], pars)) { in=i; break; }
   return in;
 }
+
+/***************************************************************************/
+/* undef all from list_templates.h */
+#undef DUMMY
+#undef PASTE
+#undef PASTE_
+#undef FN
+#undef LIST
+#undef typedefLIST
+#undef TYP
