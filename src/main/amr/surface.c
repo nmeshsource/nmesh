@@ -348,7 +348,10 @@ void request_all_surfaces_exchange(tNode *node)
   for(face=0; face<6; face++)
   {
     realloc_dat_reqs(node->dat, 0, face); /* free req, send/recv arrays */
-    //nb_nid0 = node->fnb[face][0];
+
+    /* FIXME: set sendbuffer sbuf here already because
+       request_surfaces_exchange_for_all_vars sends the some sbuf for all ni */
+
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
       request_surfaces_exchange_for_all_vars(node, face, ni);
