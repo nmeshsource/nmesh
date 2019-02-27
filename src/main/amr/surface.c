@@ -289,7 +289,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     double *sbuf, *rbuf; /* buffers for MPI */
     int zones, nvars, cnt;
 
-    /* count number of vars that have surfaces to exchanged and set my_N */
+    /* count number of vars that have surfaces to exchange and set my_N */
     find_nvars_vind_n_nbn(node,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
     nb_N = nb_n[0] * nb_n[1] * nb_n[2];
     my_N = my_n[0] * my_n[1] * my_n[2];
