@@ -443,6 +443,22 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 }
 
 
+/* free req and send arrays after all has been sent */
+void free_dat_reqs_after_Waitall_com_send(tNode *node)
+{
+  int face;
+  tDat *dat = node->dat;
+
+  if(!dat) return;
+
+  for(face=0; face<6; face++)
+  {
+    /* wait until all has been sent, then free all buffers for this face */
+    nMPI_Waitall_com_send(dat->com[face]);
+    realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
+  }
+}
+
 /* get nbsurf from all faces and variables for this node out of buffers */
 void get_all_surfaces(tNode *node)
 {
@@ -462,7 +478,7 @@ void get_all_surfaces(tNode *node)
     /* set ajsurf on this nodeface via interpolation */
     set_ajsurf_forall_vars(node, face);
     /* FIXME: if we use formylnodes_noomp to call get_all_surfaces, it might
-       be better to later call set_all_myln_ajsurf instead of using
+       be better to later call set_all_myln_ajsurf instead of using the
        set_ajsurf_forall_vars above. */
 
     /* After set_ajsurf_forall_vars we could free nbsurf already */
@@ -470,12 +486,7 @@ void get_all_surfaces(tNode *node)
     //free_nbsurf_only_forall_vars(node, face);
   }
   /* postpone Waitall until we have finished all nodefaces: */
-  for(face=0; face<6; face++)
-  {
-    /* wait until all has been sent, then free all buffers for this face */
-    nMPI_Waitall_com_send(dat->com[face]);
-    realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
-  }
+  free_dat_reqs_after_Waitall_com_send(node);
 }
 
 /* get nbsurf for all nodes out of buffers and free the buffers */
@@ -490,6 +501,16 @@ void get_all_myln_surfaces(tMesh *mesh)
     tNode *node = GetMyNode(mesh, myid);
     get_all_surfaces(node);
   }
+
+  /* postpone Waitall until we have finished all nodefaces. This could have
+     been already called in get_all_surfaces to free mem earlier.*/
+/*
+  formylnodes_noomp(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    free_dat_reqs_after_Waitall_com_send(node);
+  }
+*/
 }
 
 
