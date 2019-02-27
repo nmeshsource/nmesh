@@ -4,6 +4,7 @@
 /* declarations from other parts that we need here already */
 #include "../main/skeleton.h"
 #include "../nMPI/nMPI_defs.h"
+#include "../evolve/evosys.h"
 
 
 /* Main parts of a mesh:
@@ -157,6 +158,7 @@ typedef struct tMESH {
   int npdb;          /* number of mesh parameters */
   struct tPAR *pdb;  /* parameter data base */
   int pdb_iStart;    /* index we start at when searching for a par */
+  tEvoSys evosys[1]; /* contains lists of VarLists and RHS for evolve */
   int npats;         /* number of patches */
   tPat **pat;        /* list of pointers to patches */
   tNlist *lns;       /* start of linked list of all leaf nodes */
