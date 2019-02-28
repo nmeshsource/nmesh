@@ -63,6 +63,8 @@ void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
                          void (*addto)(), //(void *obj, TYP r, double ca, TYP a),
                          void *obj);
+void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj);
+void FN(freeall,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj);
 
 /* e.g.: if TYP = int 
    LIST(TYP) FN(alloc,LIST(TYP))(void)

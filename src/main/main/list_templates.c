@@ -33,23 +33,23 @@ LIST(TYP) *FN(alloc,LIST(TYP))(void)
 
   u = calloc(1, sizeof(LIST(TYP)));
   return u;
-} 
+}
 
 /* free a list */
 void FN(free,LIST(TYP))(LIST(TYP) *u)
 {
-  if (u)
+  if(u)
   {
-    if (u->e) free(u->e);
+    if(u->e) free(u->e);
     free(u);
     u = NULL;
   }
-} 
+}
 
 /* clear a list */
 void FN(clear,LIST(TYP))(LIST(TYP) *u)
 {
-  if (u)
+  if(u)
   {
     if(u->e) free(u->e);
     u->e = NULL;
@@ -75,7 +75,7 @@ void FN(pr,LIST(TYP))(LIST(TYP) *u)
 void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi)
 {
   v->n += 1;
-  v->e = realloc(v->e, sizeof(TYP) * v->n); 
+  v->e = realloc(v->e, sizeof(TYP) * v->n);
   v->e[v->n-1] = vi;
 }
 
@@ -84,9 +84,9 @@ void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
 {
   int i;
 
-  if (!v || !u) return;
+  if(!v || !u) return;
   v->n += u->n;
-  v->e = realloc(v->e, sizeof(TYP) * v->n); 
+  v->e = realloc(v->e, sizeof(TYP) * v->n);
   for (i = 0; i < u->n; i++)
     v->e[v->n - u->n + i] = u->e[i];
 }
@@ -121,8 +121,8 @@ void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind)
 void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi)
 {
   int i;
-  
-  for (i = 0; i < v->n; i++)
+
+  for(i = 0; i < v->n; i++)
     if (v->e[i] == vi)
     {
       v->n -= 1;
@@ -135,9 +135,9 @@ void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi)
 /* drop last n entries from a list */
 void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n)
 {
-  if (n <= 0) 
+  if(n <= 0)
     return;
-  if (n >= v->n) 
+  if(n >= v->n)
     v->n = 0;
   else
     v->n -= n;
@@ -156,7 +156,7 @@ LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v)
   int i;
   LIST(TYP) *u = FN(alloc,LIST(TYP))();
 
-  for (i = 0; i < v->n; i++)
+  for(i = 0; i < v->n; i++)
     FN(push,LIST(TYP))(u, v->e[i]);
 
   return u;
@@ -202,7 +202,7 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
 
 /* copy contents of src into dest, so that dest = src
    We need to pass in a func copy that know how to copy list elements.
-   e.g. for ints it could be just: 
+   e.g. for ints it could be just:
    void copy(int d, int s){ d = s; }
 */
 void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
@@ -235,6 +235,27 @@ void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
     addto(obj, r->e[i], ca,a->e[i]); /* func that adds to r */
 }
 
+/* free contents of r */
+void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj)
+{
+  if(Free)
+  {
+    int i;
+    for(i=0; i<r->n; i++)
+    {
+      if(obj) Free(obj, r->e[i]); /* func that frees r */
+      else    Free(r->e[i]);
+    }
+  }
+  FN(clear,LIST(TYP))(r);
+}
+
+/* free contents of r and then r itself */
+void FN(freeall,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj)
+{
+  FN(freeclear,LIST(TYP))(r, Free, obj);
+  FN(free,LIST(TYP))(r);
+}
 
 /***************************************************************************/
 /* undef all from list_templates.h */
