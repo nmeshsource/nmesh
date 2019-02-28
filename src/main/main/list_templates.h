@@ -51,16 +51,22 @@ LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v);
 int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi);
 int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi);
 int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
-                             int (*prop)(TYP vi, void *p), void *pars);
+                             int (*prop)(void *obj, TYP vi), void *obj);
 void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
-                               void (*copy)(TYP d, TYP s));
+                        void (*copy)(void *obj, TYP d, TYP s), void *obj);
 void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
-                       void (*add)(TYP r, double ca, TYP a, double cb, TYP b));
+                       void (*add)(void *obj, TYP r, double ca, TYP a,
+                                   double cb, TYP b), void *obj);
 void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
-                         void (*addto)(TYP r, double ca, TYP a));
+                         void (*addto)(void *obj, TYP r, double ca, TYP a),
+                         void *obj);
 
 /* e.g.: if TYP = int 
    LIST(TYP) FN(alloc,LIST(TYP))(void)
    becomes
    intList alloc_intList(void) */
+
+/************************************************************************/
+/* macros to do things with lists like looping */
+#include "list_loops.h"

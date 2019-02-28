@@ -14,10 +14,10 @@ struct tNODE;   /* nodes are defined in main/amr/nmesh_amr.h */
 #define pVLL struct pVLLIST
 typedef struct tEVOSYS {
   pVLL *u;            /* list of VarLists with evo vars of entire system */
-  pVLL *w;            /* work list, needs to be an EvoVar just like u */
+  pVLL *w;            /* temp work list, needs to be an EvoVar just like u */
   pVLL *rhs;          /* RHS in du/dt = func(u, t) */
   pVLL *u_p;          /* u at previous time */
-  pVLL *uk[NUTEMP];   /* temp. storage for say RK stages */
+  pVLL *s[NUTEMP];    /* temp. storage for say RK stages */
   void (*setrhs)(struct tNODE *node, pVLL *rhs, pVLL *u, double time);
 } tEvoSys;
 #undef pVLL

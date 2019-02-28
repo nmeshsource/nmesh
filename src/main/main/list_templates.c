@@ -183,19 +183,19 @@ int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi)
 /* return index of first element in list v that has prop returning 1,
    we start checking with element i0, returns -1 if prop returns 0 for all in v */
 /* the function prop could be as simple as:
-   int prop(int vi, void *p)
+   int prop(void *p, int vi)
    {
      int *pi = (int *) p;
      return (vi == *pi);
    }
 */
 int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
-                             int (*prop)(TYP vi, void *p), void *pars)
+                             int (*prop)(void *obj, TYP vi), void *obj)
 {
   int i;
   int in=-1; /* is not in list */
   if(i0<0) i0=0;
-  for(i=i0; i<v->n; i++) if(prop(v->e[i], pars)) { in=i; break; }
+  for(i=i0; i<v->n; i++) if(prop(obj, v->e[i])) { in=i; break; }
   return in;
 }
 
@@ -205,30 +205,32 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
    void copy(int d, int s){ d = s; }
 */
 void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
-                        void (*copy)(TYP d, TYP s))
+                        void (*copy)(void *obj, TYP d, TYP s), void *obj)
 {
   int i;
   for(i=0; i<dest->n; i++)
-    copy(dest->e[i], src->e[i]); /* func that know how to copy */
+    copy(obj, dest->e[i], src->e[i]); /* func that know how to copy */
 }
 
 /* add contents: r = ca*a + cb*b */
 void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
-                       void (*add)(TYP r, double ca, TYP a, double cb, TYP b))
+                       void (*add)(void *obj, TYP r, double ca, TYP a,
+                                   double cb, TYP b), void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
-    add(r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
+    add(obj, r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
 }
 
 /* add to contents: r += ca*a */
 void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
-                         void (*addto)(TYP r, double ca, TYP a))
+                         void (*addto)(void *obj, TYP r, double ca, TYP a),
+                         void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
-    addto(r->e[i], ca,a->e[i]); /* func that adds to r */
+    addto(obj, r->e[i], ca,a->e[i]); /* func that adds to r */
 }
 
 
