@@ -43,11 +43,10 @@ int main(int argc, char **argv)
   iterate_parameters(mesh, 0); /* start of new iteration */
   while(iterate_parameters(mesh, 1))
   {
-    RunFun(POST_PARAMETERS); //hook for funs right after iterate_parameters
-    RunFun(INITMESH); // here we schedule funcs to programatically set up the mesh
-    RunFun(LOADBALANCING);
     inidata_mesh(mesh);
     evolve_mesh(mesh);
+
+    /* set a par so we can find output from previous par iteration */
     makeparameter(mesh, "outdir_previous_iteration", "",
                   "outdir of previous iteration");
     Sets(Par("outdir_previous_iteration"), Gets(Par("outdir")));
@@ -318,6 +317,15 @@ int inidata_mesh(tMesh *mesh)
     prdivider(0);
     printf("Initializing mesh\n");
   }
+
+  /* hook for funs right after iterate_parameters */
+  RunFun(POST_PARAMETERS);
+
+  /* here we schedule funcs to programatically set up the mesh */
+  RunFun(INITMESH);
+
+  /* move nodes to differnt procs */
+  RunFun(LOADBALANCING);
 
   /* setup coords */
   RunFun(COORDINATES);
