@@ -17,20 +17,20 @@ void evolve_RK4(tNode *node)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
 
-  copy_pVLList(u_p, u, vlcopy, node);              /* u_p = u */
+  copy_pVLList(u_p, u, vlcopy_node, node);             // u_p = u
 
-  evosys->setrhs(node, r, u, t);                   /* r  = RHS(u, t)       */
-  addto_pVLList(u, dt/6.0, r, vladdto, node);      /* u += r dt/6          */
+  evosys->setrhs(node, r, u, t);                       // r  = RHS(u, t)
+  addto_pVLList(u, dt/6.0, r, vladdto_node, node);     // u += r dt/6
 
-  add_pVLList(w, 1., u_p, dt/2., r, vladd, node);  /* w  = u_p + r dt/2    */
-  evosys->setrhs(node, r, w, t+0.5*dt);            /* r  = RHS(w, t+dt/2)  */
-  addto_pVLList(u, dt/3., r, vladdto, node);       /* u += r dt/3          */
+  add_pVLList(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
+  evosys->setrhs(node, r, w, t+0.5*dt);                // r  = RHS(w, t+dt/2)
+  addto_pVLList(u, dt/3., r, vladdto_node, node);      // u += r dt/3
 
-  add_pVLList(w, 1., u_p, dt/2., r, vladd, node);  /* w  = u_p + r dt/2    */
-  evosys->setrhs(node, r, w, t+0.5*dt);            /* r  = RHS(w, t+dt/2)  */
-  addto_pVLList(u, dt/3., r, vladdto, node);       /* u += r dt/3          */
- 
-  add_pVLList(w, 1., u_p, dt, r, vladd, node);     /* w  = u_p + r dt      */
-  evosys->setrhs(node, r, w, t+dt);                /* r  = RHS(w, t+dt)    */
-  addto_pVLList(u, dt/6., r, vladdto, node);       /* u += r dt/6          */
+  add_pVLList(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
+  evosys->setrhs(node, r, w, t+0.5*dt);                // r  = RHS(w, t+dt/2)
+  addto_pVLList(u, dt/3., r, vladdto_node, node);      // u += r dt/3
+
+  add_pVLList(w, 1., u_p, dt, r, vladd_node, node);    // w  = u_p + r dt
+  evosys->setrhs(node, r, w, t+dt);                    // r  = RHS(w, t+dt)
+  addto_pVLList(u, dt/6., r, vladdto_node, node);      // u += r dt/6
 }

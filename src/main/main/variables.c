@@ -526,8 +526,10 @@ tVarList *AddDuplicateEnable(tVarList *vl, char *postfix)
   return newvl;
 }
 
-
-
+/********************************************************************/
+/* functions to deal with the var contents within the VarLists,
+   some are node based, some work on the entire mesh */
+/********************************************************************/
 
 /* set: u = c */
 void vlsetconstant(tVarList *u, const double c)
