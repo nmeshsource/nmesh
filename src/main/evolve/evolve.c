@@ -17,14 +17,14 @@ void evolve_register_u(tMesh *mesh, pVLList *u)
 
 /* register a RHS with evosys */
 void evolve_register_u(tMesh *mesh,
-                       void (*rhs)(pVLList *rhs, pVLList *u, double time))
+                       void (*rhs)(tNode *node, pVLList *rhs, pVLList *u)
 {
   mesh->evosys->setrhs = rhs;
 }
 
 
 
-
+/* evolve the entire mesh one time step forward */
 int evolve_mesh(tMesh *mesh)                  
 {
   tEvoSys *evosys = mesh->evosys;
@@ -54,25 +54,27 @@ int evolve_mesh(tMesh *mesh)
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
+
+    /* FIXME: for now all nodes use the same time step */
+    node->dt = mesh->dt;
+    node->time = mesh->time;
+
     evolve(node);
   }
 
 }
 
-/*  */
-int evolve(tNode *node)
+/* evolve one node */
+void evolve(tNode *node)
 {
-  tMesh *mesh = node->pat->mesh;
-  tEvoSys *evosys = mesh->evosys;
-
-  
-  return 0;
+  evolve_RK4(node);
 }
 
-
+/*
 junk:
       tVarList *w   = ListEntry(evosys->w, i);
       tVarList *rhs = ListEntry(evosys->rhs, i);
       tVarList *u_p = ListEntry(evosys->u_p, i);
       tVarList *s0  = ListEntry(evosys->s[0], i);
       tVarList *s1  = ListEntry(evosys->s[1], i);
+*/

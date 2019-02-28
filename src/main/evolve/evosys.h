@@ -18,7 +18,7 @@ typedef struct tEVOSYS {
   pVLL *rhs;          /* RHS in du/dt = func(u, t) */
   pVLL *u_p;          /* u at previous time */
   pVLL *s[NUTEMP];    /* temp. storage for say RK stages */
-  void (*setrhs)(struct tNODE *node, pVLL *rhs, pVLL *u, double time);
+  void (*setrhs)(struct tNODE *node, pVLL *rhs, pVLL *u);
 } tEvoSys;
 #undef pVLL
 #undef NUTEMP
