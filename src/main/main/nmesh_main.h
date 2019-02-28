@@ -198,6 +198,9 @@ int *MeshVar_n_special(tMesh *mesh, int i);
                 (ns0),(ns1),(ns2))
 /* variable lists in variables.c*/
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
+void vlcopy_node(tNode *node, tVarList *v, tVarList *u);
+void vladd_node(tNode *node,
+                tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
 void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a);
 
 /* utilities.c */

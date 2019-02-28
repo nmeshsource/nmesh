@@ -42,11 +42,11 @@ int evolve_mesh(tMesh *mesh)
     forList(evosys->u, i)
     {
       tVarList *u   = ListEntry(evosys->u, i);
-      ListEntry(evosys->w  , i) = AddDuplicate(u, "_w");
-      ListEntry(evosys->rhs, i) = AddDuplicate(u, "_r");
-      ListEntry(evosys->u_p, i) = AddDuplicate(u, "_p");
-      //ListEntry(evosys->s0 , i) = AddDuplicate(u, "_s0");
-      //ListEntry(evosys->s1 , i) = AddDuplicate(u, "_s1");
+      ListEntry(evosys->w  , i) = AddDuplicate(u, "_w", -1,-1);
+      ListEntry(evosys->rhs, i) = AddDuplicate(u, "_r", 1,0);
+      ListEntry(evosys->u_p, i) = AddDuplicate(u, "_p", 1,0);
+      //ListEntry(evosys->s0 , i) = AddDuplicate(u, "_s0", 1,0);
+      //ListEntry(evosys->s1 , i) = AddDuplicate(u, "_s1", 1,0);
     }
   }
 
