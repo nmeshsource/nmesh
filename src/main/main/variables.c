@@ -456,8 +456,10 @@ void VLDisableFree(tVarList *vl)
 
 /* add variables based on an existing variable list and a postfix
    note that we add each component as a scalar first but then fix it because
-   we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ... */
-tVarList *AddDuplicate(tVarList *vl, char *postfix)
+   we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ...
+   We copy all properties if type<0, surfacezones<0, but if one is
+   non-negative we set it this this value. */
+tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
 {
   tMesh *mesh = vl->mesh;
   tVar *vdb = mesh->vdb;
@@ -510,6 +512,9 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix)
       newvar->sym[j]       = var->sym[j];
       newvar->n_special[j] = var->n_special[j];
     }
+    /* set particular properties */
+    if(type>=0)         newvar->type         = type;
+    if(surfacezones>=0) newvar->surfacezones = surfacezones;
   }
   if(0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
 
@@ -521,7 +526,7 @@ tVarList *AddDuplicateEnable(tVarList *vl, char *postfix)
 {
   tVarList *newvl;
 
-  newvl = AddDuplicate(vl, postfix);
+  newvl = AddDuplicate(vl, postfix, -1, -1);
   enablevarlist(newvl);
   return newvl;
 }
