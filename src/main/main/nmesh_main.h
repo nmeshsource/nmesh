@@ -197,6 +197,7 @@ int *MeshVar_n_special(tMesh *mesh, int i);
   AddMeshVarDim(mesh, (name), (tensorindices), (description), \
                 (ns0),(ns1),(ns2))
 /* variable lists in variables.c*/
+void vlfree(tVarList *u);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 void vlcopy_node(tNode *node, tVarList *v, tVarList *u);
 void vladd_node(tNode *node,

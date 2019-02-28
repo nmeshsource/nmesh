@@ -6,7 +6,9 @@
 
 
 /* evolve.c */
+int evolve_myln(tMesh *mesh);
 void evolve(tNode *node);
+int evolve_finalize(tMesh *mesh);
 
 int evolve_test(tMesh *mesh);
 

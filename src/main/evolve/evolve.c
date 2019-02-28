@@ -17,15 +17,26 @@ void evolve_register_u(tMesh *mesh, pVLList *u)
 
 /* register a RHS with evosys */
 void evolve_register_rhs(tMesh *mesh,
-                         void (*rhs)(tNode *node, pVLList *rhs, pVLList *u))
+                         void (*setrhs)(tNode *node, pVLList *rhs, pVLList *u))
 {
-  mesh->evosys->setrhs = rhs;
+  mesh->evosys->setrhs = setrhs;
 }
 
+/*
+void std_setrhs(tNode *node, pVLList *rhs, pVLList *u)
+{
+  tMesh *mesh = node->pat->mesh;
+  tEvoSys *evosys = mesh->evosys;
+
+  //forList(evosys->u, i)
+  geom_rhs(node, ListEntry(evosys->rhs,0), ListEntry(evosys->u,0));
+  matter_rhs(node, ListEntry(evosys->rhs,1), ListEntry(evosys->u,1));
+}
+*/
 
 
-/* evolve the entire mesh one time step forward */
-int evolve_mesh(tMesh *mesh)                  
+/* evolve the entire leaf node mesh one time step forward */
+int evolve_myln(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
   int i, myid;
@@ -70,11 +81,25 @@ void evolve(tNode *node)
   evolve_RK4(node);
 }
 
-/*
-junk:
-      tVarList *w   = ListEntry(evosys->w, i);
-      tVarList *rhs = ListEntry(evosys->rhs, i);
-      tVarList *u_p = ListEntry(evosys->u_p, i);
-      tVarList *s0  = ListEntry(evosys->s[0], i);
-      tVarList *s1  = ListEntry(evosys->s[1], i);
-*/
+
+
+/* free extra VarLists */
+int evolve_finalize(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int i;
+
+  /* do nothing if we have no vars to evolve */
+  if(!evosys->u) return 0;
+
+  /* free memory */
+  printf("Freeing extra variable lists for evolution:\n");
+  free_pVLList(evosys->u); /* free list only, not content */
+  freeall_pVLList(evosys->w, vlfree,0); /* free list and its content */
+  freeall_pVLList(evosys->rhs, vlfree,0);
+  freeall_pVLList(evosys->u_p, vlfree,0);
+  for(i=0; i<NUTEMP; i++)
+    freeall_pVLList(evosys->s[i], vlfree,0);
+
+  return 0;
+}
