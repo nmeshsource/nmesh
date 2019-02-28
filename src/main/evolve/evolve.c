@@ -61,7 +61,7 @@ int evolve_mesh(tMesh *mesh)
 
     evolve(node);
   }
-
+  return 0;
 }
 
 /* evolve one node */
