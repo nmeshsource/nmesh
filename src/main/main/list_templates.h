@@ -20,7 +20,9 @@
 #define LIST(TYP) PASTE(TYP,List)
 
 /* define a new list with entries of a certain type TYP, 
-   e.g. typedefLIST(double); */
+   e.g. typedefLIST(double);
+   would be expanded to:
+   typedef struct doubleLIST {int n; double *e;} doubleList */
 #define typedefLIST(TYP) typedef struct PASTE(TYP,LIST) { \
   int n;      /* number of entries */ \
   TYP *e;     /* array of list entries */ \
