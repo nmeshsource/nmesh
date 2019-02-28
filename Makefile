@@ -36,7 +36,7 @@ MPILIBS =	# -lmpi						#for openmpi
 # --------------------------------------------------------------------------
 # some nmesh libraries are required
 libpaths = src/main/amr src/main/nMPI
-libpaths += src/main/basis src/main/coordinates
+libpaths += src/main/basis src/main/coordinates src/main/evolve
 libpaths += src/utility/output
 
 # --------------------------------------------------------------------------
