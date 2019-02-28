@@ -190,7 +190,8 @@ int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi)
    }
 */
 int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
-                             int (*prop)(void *obj, TYP vi), void *obj)
+                             int (*prop)(), //(void *obj, TYP vi),
+                             void *obj)
 {
   int i;
   int in=-1; /* is not in list */
@@ -205,7 +206,8 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
    void copy(int d, int s){ d = s; }
 */
 void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
-                        void (*copy)(void *obj, TYP d, TYP s), void *obj)
+                        void (*copy)(), //(void *obj, TYP d, TYP s),
+                        void *obj)
 {
   int i;
   for(i=0; i<dest->n; i++)
@@ -215,8 +217,8 @@ void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
 /* add contents: r = ca*a + cb*b */
 void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
-                       void (*add)(void *obj, TYP r, double ca, TYP a,
-                                   double cb, TYP b), void *obj)
+                       void (*add)(), //(void *obj, TYP r, double ca, TYP a, double cb, TYP b),
+                       void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
@@ -225,7 +227,7 @@ void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 
 /* add to contents: r += ca*a */
 void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
-                         void (*addto)(void *obj, TYP r, double ca, TYP a),
+                         void (*addto)(), //(void *obj, TYP r, double ca, TYP a),
                          void *obj)
 {
   int i;

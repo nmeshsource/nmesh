@@ -16,8 +16,8 @@ void evolve_register_u(tMesh *mesh, pVLList *u)
 }
 
 /* register a RHS with evosys */
-void evolve_register_u(tMesh *mesh,
-                       void (*rhs)(tNode *node, pVLList *rhs, pVLList *u)
+void evolve_register_rhs(tMesh *mesh,
+                         void (*rhs)(tNode *node, pVLList *rhs, pVLList *u))
 {
   mesh->evosys->setrhs = rhs;
 }

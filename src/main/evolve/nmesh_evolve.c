@@ -10,7 +10,7 @@ int nmesh_evolve(tMesh *mesh)
   printf("Adding evolve\n");
 
   /* functions */
-  AddFun(INITIALDATA, evolve_test);
+  //AddFun(INITIALDATA, evolve_test);
 
   /* variables */
   AddEvoVar("evolve_u", "", "some var");

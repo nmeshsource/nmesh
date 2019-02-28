@@ -7,12 +7,15 @@
 #define PR 1
 
 
+
 /* Runge-Kutta 4 */
 void evolve_RK4(tNode *node)
 {
   tMesh *mesh = node->pat->mesh;
+  tEvoSys *evosys = mesh->evosys;
   double  t = mesh->time;
   double dt = mesh->dt;
+  pVLList *u   = evosys->u;
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
