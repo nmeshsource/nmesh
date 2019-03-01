@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "evolve.h"
 
-#define PR 1
+#define PR 0
 
 /* The functions below are a little complex because they deal with lists of
    variable lists and a list of RHSs (one for each VarList). The was done to
@@ -43,6 +43,7 @@ int evolve_finalize(tMesh *mesh)
 
   /* free memory in varlists */
   printf("Freeing extra variable lists for evolution:\n");
+  freeall_pVLList(evosys->u, vlfree,0); /* free list and its content */
   freeall_pVLList(evosys->w, vlfree,0); /* free list and its content */
   freeall_pVLList(evosys->rhs, vlfree,0);
   freeall_pVLList(evosys->u_p, vlfree,0);
@@ -50,8 +51,8 @@ int evolve_finalize(tMesh *mesh)
     freeall_pVLList(evosys->s[i], vlfree,0);
 
   /* free Lists */
-  printf("Freeing extra variable lists for evolution:\n");
-  free_pVLList(evosys->u); /* free list only, not content */
+  printf("Freeing rhs lists for evolution:\n");
+  //free_pVLList(evosys->u); /* free list only, not content */
   free_FuncPointerList(evosys->setrhs);
   free_FuncPointerList(evosys->setsrc);
 
@@ -106,10 +107,10 @@ int evolve_myln(tMesh *mesh)
   tEvoSys *evosys = mesh->evosys;
   int i, myid;
 
-  PRFs(":\n");
-
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
+
+  if(PR) PRFs(":\n");
 
   if(!evosys->setrhs) errorexit("no RHS!");
 
@@ -126,14 +127,12 @@ int evolve_myln(tMesh *mesh)
     {
       tVarList *u   = ListEntry(evosys->u, i);
 
-      push_pVLList(evosys->w,   AddDuplicateEnable(u, "_w", -1,-1));
+      push_pVLList(evosys->w,   AddDuplicateEnable(u, "_w", 1,-1));
       push_pVLList(evosys->rhs, AddDuplicateEnable(u, "_r", 1,0));
       push_pVLList(evosys->u_p, AddDuplicateEnable(u, "_p", 1,0));
-      //ListEntry(evosys->s[0] , i) = AddDuplicate(u, "_s0", 1,0);
-      //ListEntry(evosys->s[1] , i) = AddDuplicate(u, "_s1", 1,0);
+      //push_pVLList(evosys->s[0], AddDuplicateEnable(u, "_s0", 1,0));
     }
     //printf("evosys->w = %p\n", evosys->w);
-    //abort();
   }
 
   /* evolve each node */
