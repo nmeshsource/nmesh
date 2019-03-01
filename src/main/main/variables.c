@@ -463,7 +463,6 @@ void VLDisableFree(tVarList *vl)
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
 {
   tMesh *mesh = vl->mesh;
-  tVar *vdb = mesh->vdb;
   char name[1000];
   int i, j;
   tVarList *newvl;
@@ -478,7 +477,7 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
   for(i = 0; i < vl->n; i++)
   {
     /* construct new name */
-    var = &vdb[vl->index[i]];
+    var = &(mesh->vdb[vl->index[i]]);
     snprintf(name, 1000, "%s%s", var->name, postfix);
 
     /* if variable already exists, don't add it again */
@@ -496,10 +495,10 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
     newvl->index[i] = MeshVarInd(mesh, name);
 
     /* get pointer to old variable again since AddMeshVar reallocates vdb */
-    var = &vdb[vl->index[i]];
+    var = &(mesh->vdb[vl->index[i]]);
 
     /* set structure in variable data base */
-    newvar = &vdb[newvl->index[i]];
+    newvar = &(mesh->vdb[newvl->index[i]]);
     free(newvar->tensorindices);
     newvar->tensorindices = strdup(var->tensorindices);
     newvar->component     = var->component;
@@ -523,11 +522,12 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
 }
 
 /* add duplicate and enable variables */
-tVarList *AddDuplicateEnable(tVarList *vl, char *postfix)
+tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
+                             int type, int surfacezones)
 {
   tVarList *newvl;
 
-  newvl = AddDuplicate(vl, postfix, -1, -1);
+  newvl = AddDuplicate(vl, postfix, type, surfacezones);
   enablevarlist(newvl);
   return newvl;
 }

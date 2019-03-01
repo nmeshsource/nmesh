@@ -51,6 +51,8 @@ int evolve_test_init(tMesh *mesh)
   tVarList *vlv = vlalloc(mesh);
   int myid;
 
+  PRFs(":\n");
+
   /* two varlists */
   vlpush(vlu, iu);
   vlpush(vlv, iv);
@@ -76,6 +78,7 @@ int evolve_test_init(tMesh *mesh)
                                    evolve_test_rhs_u, evolve_test_src_u);
   evolve_register_subsys_u_rhs_src(mesh, vlv,
                                    evolve_test_rhs_v, NULL);
+  evolve_print_evosys(mesh);
   return 0;
 } 
 
@@ -87,6 +90,8 @@ int evolve_test_analyze(tMesh *mesh)
   int iue = Ind("evolve_test_u_err");
   int ive = Ind("evolve_test_v_err");
   int myid;
+
+  PRFs("\n");
 
   /*  compute errors */
   formylnodes(mesh, myid)

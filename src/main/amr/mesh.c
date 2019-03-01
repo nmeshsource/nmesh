@@ -187,6 +187,7 @@ int setup_test_mesh(tMesh *mesh)
 
   PRFs(":\n");
 
+  mesh->dt = Getd(Par("dt"));
 
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;
