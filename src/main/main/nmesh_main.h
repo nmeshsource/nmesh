@@ -197,6 +197,7 @@ int *MeshVar_n_special(tMesh *mesh, int i);
   AddMeshVarDim(mesh, (name), (tensorindices), (description), \
                 (ns0),(ns1),(ns2))
 /* variable lists in variables.c*/
+void prvarlist(tVarList *v);
 tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
 void vlpush(tVarList *v, int vi);

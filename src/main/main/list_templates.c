@@ -62,7 +62,7 @@ void FN(pr,LIST(TYP))(LIST(TYP) *u)
 {
   int i;
   long ui;
-  printf("n=%d  e =", u->n);
+  printf("%s: n=%d  e =", __func__, u->n);
   for(i=0; i<u->n; i++)
   {
     ui = (long) u->e[i];
