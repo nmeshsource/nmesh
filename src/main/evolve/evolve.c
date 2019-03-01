@@ -21,6 +21,11 @@ void evolve_register_subsys_u_rhs_src(tMesh *mesh, tVarList *u,
 {
   tEvoSys *evosys = mesh->evosys;
 
+  /* allocate lists in evosys */
+  evosys->u      = alloc_pVLList();
+  evosys->setrhs = alloc_FuncPointerList();
+  evosys->setsrc = alloc_FuncPointerList();
+
   /* add u, rhs, src to lists in evosys */
   push_pVLList(evosys->u, u);
   push_FuncPointerList(evosys->setrhs, rhs);
@@ -87,18 +92,26 @@ int evolve_myln(tMesh *mesh)
   if(!evosys->setrhs) errorexit("no RHS!");
 
   /* if there are no aux vars add them */
-  if(!evosys->u_p)
+  if(!evosys->rhs)
   {
+    /* add lists */
+    evosys->w   = alloc_pVLList();
+    evosys->rhs = alloc_pVLList();
+    evosys->u_p = alloc_pVLList();
+
     printf("Adding variables for RK4 evolution:\n");
     forList(evosys->u, i)
     {
       tVarList *u   = ListEntry(evosys->u, i);
-      ListEntry(evosys->w  , i) = AddDuplicate(u, "_w", -1,-1);
-      ListEntry(evosys->rhs, i) = AddDuplicate(u, "_r", 1,0);
-      ListEntry(evosys->u_p, i) = AddDuplicate(u, "_p", 1,0);
+
+      push_pVLList(evosys->w,   AddDuplicate(u, "_w", -1,-1));
+      push_pVLList(evosys->rhs, AddDuplicate(u, "_r", 1,0));
+      push_pVLList(evosys->u_p, AddDuplicate(u, "_p", 1,0));
       //ListEntry(evosys->s[0] , i) = AddDuplicate(u, "_s0", 1,0);
       //ListEntry(evosys->s[1] , i) = AddDuplicate(u, "_s1", 1,0);
     }
+    //printf("evosys->w = %p\n", evosys->w);
+    //abort();
   }
 
   /* evolve each node */

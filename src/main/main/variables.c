@@ -324,6 +324,7 @@ tVarList *vlalloc(tMesh *mesh)
 
   u = calloc(1, sizeof(tVarList));
 
+  u->mesh = mesh;
   if(mesh) u->time = mesh->time;
   u->vlPars = NULL; /* set special pointer to NULL */
   return u;

@@ -238,7 +238,7 @@ void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 /* free contents of r */
 void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj)
 {
-  if(Free)
+  if(Free && r)
   {
     int i;
     for(i=0; i<r->n; i++)

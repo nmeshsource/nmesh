@@ -1318,66 +1318,76 @@ void disablevar_innode(tNode *node, int i)
 void enablevarcomp_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  tNode *node;
+  int myid;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, myid)
   {
+    tNode *node = GetMyNode(mesh, myid);
     if(node->pat == pat) enablevarcomp_innode(node, i);
-  } endforlnodes;
+  }
 }
 
 /* disable one component of a variable on one pat */
 void disablevarcomp_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  tNode *node;
+  int myid;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, myid)
   {
+    tNode *node = GetMyNode(mesh, myid);
     if(node->pat == pat) disablevarcomp_innode(node, i);
-  } endforlnodes;
+  }
 }
 
 /* enable all components of a variable on one pat */
 void enablevar_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  tNode *node;
+  int myid;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, myid)
   {
+    tNode *node = GetMyNode(mesh, myid);
     if(node->pat == pat) enablevar_innode(node, i);
-  } endforlnodes;
+  }
 }
 
 /* disable all components of a variable on one pat */
 void disablevar_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  tNode *node;
+  int myid;
 
-  forlnodes(mesh, node)
+  formylnodes(mesh, myid)
   {
+    tNode *node = GetMyNode(mesh, myid);
     if(node->pat == pat) disablevar_innode(node, i);
-  } endforlnodes;
+  }
 }
 
 /* enable all components of a variable on one mesh */
 void enablevar(tMesh *mesh, int i)
 {
-  int pi;
+  int myid;
 
-  forpatches(mesh, pi)
-    enablevar_inpatch(mesh->pat[pi], i);
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    enablevar_innode(node, i);
+  }
 }
 
 /* disable all components of a variable on one mesh */
 void disablevar(tMesh *mesh, int i)
 {
-  int pi;
+  int myid;
 
-  forpatches(mesh, pi)
-    disablevar_inpatch(mesh->pat[pi], i);
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+    disablevar_innode(node, i);
+  }
 }
 
 
@@ -1399,12 +1409,14 @@ void disablevarlist_innode(tNode *node, tVarList *vl)
 void enablevarlist(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
-  int i, pi;
-  if(vl)
+  int myid;
+  if(vl && mesh)
   {
-    for(i=0; i<vl->n; i++)
-      forpatches(mesh, pi)
-        enablevarcomp_inpatch(mesh->pat[pi], vl->index[i]);
+    formylnodes(mesh, myid)
+    {
+      tNode *node = GetMyNode(mesh, myid);
+      enablevarlist_innode(node, vl);
+    }
   }
 }
 
@@ -1412,12 +1424,14 @@ void enablevarlist(tVarList *vl)
 void disablevarlist(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
-  int i, pi;
+  int myid;
   if(vl)
   {
-    for(i=0; i<vl->n; i++)
-      forpatches(mesh, pi)
-        disablevarcomp_inpatch(mesh->pat[pi], vl->index[i]);
+    formylnodes(mesh, myid)
+    {
+      tNode *node = GetMyNode(mesh, myid);
+      disablevarlist_innode(node, vl);
+    }
   }
 }
 
