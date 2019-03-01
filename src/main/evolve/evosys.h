@@ -10,15 +10,17 @@ struct tNODE;   /* nodes are defined in main/amr/nmesh_amr.h */
 
 /* to evolve e.g. gravity + matter we need at least 2 evolution subsystems
    that are coupled via source terms in their RHSs */
-#define NUTEMP 6
+#define NEVOTEMP 6
 #define pVLL struct pVLLIST
+#define pFL struct FuncPointerLIST
 typedef struct tEVOSYS {
   pVLL *u;            /* list of VarLists with evo vars of entire system */
   pVLL *rhs;          /* RHS in du/dt = func(u, t), rhs is AuxVar */
   pVLL *w;            /* temp work list, needs to be an EvoVar just like u */
   pVLL *u_p;          /* u at previous time */
-  pVLL *s[NUTEMP];    /* temp. storage for say RK stages */
-  void (*setrhs)(struct tNODE *node, pVLL *rhs, pVLL *u);
+  pVLL *s[NEVOTEMP];  /* temp. storage for say RK stages */
+  pFL *setsrc;        /* set some source terms, is called first */
+  pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
 } tEvoSys;
 #undef pVLL
-//#undef NUTEMP
+//#undef NEVOTEMP

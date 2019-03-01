@@ -197,7 +197,9 @@ int *MeshVar_n_special(tMesh *mesh, int i);
   AddMeshVarDim(mesh, (name), (tensorindices), (description), \
                 (ns0),(ns1),(ns2))
 /* variable lists in variables.c*/
+tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
+void vlpush(tVarList *v, int vi);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 void vlcopy_node(tNode *node, tVarList *v, tVarList *u);
 void vladd_node(tNode *node,
@@ -261,5 +263,10 @@ size_t fread_big(double *ptr, size_t size, size_t nmemb, FILE *fp);
 /* use lists with (tVarList *) entries */
 typedef tVarList *pVL;        /* list_templates.h only works with numbers */
 #define TYP pVL               /* the pointer pVL is a number */
+#include "list_templates.h"
+#undef TYP
+/* use lists with entries of type func. pointer */
+typedef void (*FuncPointer)();  /* a func. pointer */
+#define TYP FuncPointer         /* the pointer FuncPointer is a number */
 #include "list_templates.h"
 #undef TYP

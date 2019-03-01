@@ -14,13 +14,21 @@ int nmesh_evolve(tMesh *mesh)
   AddFun(FINALIZEMESH, evolve_finalize);
 
   /* variables */
-  AddEvoVar("evolve_u", "", "some var");
-  AddEvoVar("evolve_v", "", "another var");
-  //AddVarDim("evolve_us", "", "that needs surface exchange",7,0,6);
 
   /* parameters */
-  //AddPar("evolve_lowlatency", "no", 
-  //       "send many small rather than few large messages");
+  //AddPar("evolve_beans", "no", "[no,yes]");
+
+  /* just a test, not needed for anything else */
+  if(Getv(Par("physics"), "evolve_test"))
+  {
+    AddFun(INITIALDATA, evolve_test_init);
+    AddFun(ANALYZE, evolve_test_analyze);
+    AddEvoVar("evolve_u", "", "test var1");
+    AddEvoVar("evolve_v", "", "test var2");
+    AddEvoVar("evolve_s", "", "source in v eqn");
+    AddAuxVar("evolve_u_err", "", "error in var1");
+    AddAuxVar("evolve_v_err", "", "error in var2");
+  }
 
   return 0;
 }

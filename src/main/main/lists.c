@@ -6,7 +6,7 @@
 
 
 /***************************************************************************/
-/* enable lists of type int */
+/* compile lists with entries of type int */
 /***************************************************************************/
 /* compile list functions with lists of type int
    e.g. intList *alloc_intList(void);  */
@@ -26,10 +26,18 @@ to this file. */
 */
 
 /***************************************************************************/
-/* enable lists of type (tVarList *) */
+/* compile lists with entries of type (tVarList *) */
 /***************************************************************************/
 #include "../amr/nmesh_amr.h" /* get def of tVarList */
 typedef tVarList *pVL;        /* list_templates.h only works with numbers */
 #define TYP pVL               /* the pointer pVL is a number */
+#include "list_templates.c"
+#undef TYP
+
+/***************************************************************************/
+/* compile lists with entries of type func. pointer */
+/***************************************************************************/
+typedef void (*FuncPointer)();  /* a func. pointer */
+#define TYP FuncPointer         /* the pointer FuncPointer is a number */
 #include "list_templates.c"
 #undef TYP
