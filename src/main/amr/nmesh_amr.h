@@ -5,6 +5,7 @@
 #include "../main/skeleton.h"
 #include "../nMPI/nMPI_defs.h"
 #include "../evolve/evosys.h"
+#include "../coordinates/CI.h"
 
 
 /* Main parts of a mesh:
@@ -120,9 +121,12 @@ typedef struct tPAT {
   double bbox[6];       /* bounding box (in X,Y,Z) of this patch */
   int p;                /* index of this patch */
   struct tMESH *mesh;   /* pointer to mesh that contains patch */
-  /* funcs to compute X,Y,Z from x,y,z and vice versa: */
-  int (*XYZ_Of_xyz)(struct tPAT *pat, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
-  int (*xyz_Of_XYZ)(struct tPAT *pat, double X, double Y, double Z, double *x, double *y, double *z);  /* func to compute x,y,z from X,Y,Z */
+  /* funcs to compute x,y,z from X,Y,Z and vice versa: */
+  int (*xyz_of_XYZ)(tNode *node, int ind, const double X[3], double x[3]); /* func to compute x,y,z from X,Y,Z */
+  int (*XYZ_of_xyz)(tNode *node, int ind, double X[3], const double x[3]); /* func to compute X,Y,Z from x,y,z */
+  int (*dXYZ_dxyz)(tNode *node, int ind, const double X[3],
+                   double x[3], double dXYZdxyz[3][3]);
+  tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
   tNode *rnode;         /* root node in this patch */
   int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
   struct tARRAY *(*Xb)[3]; /* list of points (often Gauss-Lobatto in [-1,1]) */
