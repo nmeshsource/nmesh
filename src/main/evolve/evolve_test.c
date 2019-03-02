@@ -14,6 +14,12 @@ void evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
   double *u = GetVarDpointer(node, vlu->index[0]);
   double *r = GetVarDpointer(node, vlr->index[0]);
   int i;
+
+  /* get surfaces so that we can compute fluxes */
+  get_all_surfaces(node);
+  free_dat_reqs_after_Waitall_com_send(node);
+
+  /* RHS at each point */
   forpoints(node, i) r[i] = -u[i];
 }
 
@@ -25,6 +31,12 @@ void evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
   double *r = GetVarDpointer(node, vlr->index[0]);
   double *s = GetVarDpointer(node, Ind("evolve_test_s"));
   int i;
+
+  /* get surfaces so that we can compute fluxes */
+  get_all_surfaces(node);
+  free_dat_reqs_after_Waitall_com_send(node);
+
+  /* RHS at each point */
   forpoints(node, i) r[i] = s[i];
 }
 

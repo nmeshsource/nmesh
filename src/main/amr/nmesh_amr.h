@@ -298,6 +298,7 @@ int init_all_surfaces(tNode *node);
 int set_all_mysurf(tNode *node);
 void request_all_surfaces_exchange(tNode *node);
 void get_all_surfaces(tNode *node);
+void free_dat_reqs_after_Waitall_com_send(tNode *node);
 void init_all_myln_surfaces(tMesh *mesh);
 void free_all_myln_surfaces(tMesh *mesh);
 void set_all_myln_mysurf(tMesh *mesh);
