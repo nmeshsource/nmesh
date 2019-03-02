@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "evolve.h"
 
-
+#define PR 0
 
 
 /* RHS of: d_t u = -u */
@@ -91,7 +91,7 @@ int evolve_test_analyze(tMesh *mesh)
   int ive = Ind("evolve_test_v_err");
   int myid;
 
-  PRFs("\n");
+  if(PR) PRFs("\n");
 
   /*  compute errors */
   formylnodes(mesh, myid)

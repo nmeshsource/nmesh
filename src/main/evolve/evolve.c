@@ -99,11 +99,14 @@ void evolve_request_surfaces(tNode *node, pVLList *u)
   tVarList *allu = vlalloc(mesh);
   int i;
 
+  if(PR) PRFs(":\n");
+
   /* 1. make varlist with all in u */
   forList(u, i)
     vlpushvl(allu, ListEntry(u,i));
 
   /* 2. now start surface requests */
+  set_all_vl_mysurf(node, allu);
   request_all_vl_surfaces(node, allu);
 
   /* we don't need allu anymore */
@@ -116,6 +119,8 @@ void evolve_free_surfaces(tNode *node, pVLList *u)
   tMesh *mesh = node->pat->mesh;
   tVarList *allu = vlalloc(mesh);
   int i;
+
+  if(PR) PRFs(":\n");
 
   /* 1. make varlist with all in u */
   forList(u, i)
@@ -136,6 +141,8 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
   tEvoSys *evosys = mesh->evosys;
   int i;
 
+  if(PR) PRFs(":\n");
+
   /* request all surfaces on node for all vars in u */
   if(request_surfs)
     evolve_request_surfaces(node, u);
@@ -150,14 +157,22 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
     if(ListEntry(evosys->setrhs,i))
       ListEntry(evosys->setrhs,i)(node, ListEntry(rhs,i), ListEntry(u,i));
 
-  /* free all surface info */
-  evolve_free_surfaces(node, u);
+  //Test:  get_all_surfaces(node);
+
+  /* do not free all surface info, because we call evolve_setrhs repeatedly */
+  //if(0) evolve_free_surfaces(node, u);
 }
 
 /* do evolve_setrhs, but loop over mesh */
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
   int myid;
+
+  /* do surface exchange on entire mesh */
+  set_all_myln_mysurf(mesh);
+  request_all_myln_surfaces_exchange(mesh);
+
+  /* now use RHS on all nodes */
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
@@ -213,7 +228,8 @@ int evolve_myln(tMesh *mesh)
   void (*Evolve)(tNode *node); /* func pointer for evo method */
   void (*Evolve_mesh)(tMesh *mesh); /* func pointer for evo method */
   int allnodes = 1;
-  int myid;
+  tVarList *allu = vlalloc(mesh);
+  int i, myid;
 
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
@@ -235,7 +251,13 @@ int evolve_myln(tMesh *mesh)
     Evolve_mesh = evolve_Euler_mesh;
   }
 
-  /* how evolve the mesh */
+  /* make varlist with all in u */
+  forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
+
+  /* initialize surfaces for exchange */
+  init_all_vl_surfaces(mesh, allu);
+
+  /* how we evolve the mesh */
   if(allnodes)
   {
     Evolve_mesh(mesh);
@@ -254,5 +276,12 @@ int evolve_myln(tMesh *mesh)
       Evolve(node);
     }
   }
+
+  /* free all surfaces */
+  free_all_myln_surfaces(mesh);
+
+  /* we don't need allu anymore */
+  vlfree(allu);
+
   return 0;
 }
