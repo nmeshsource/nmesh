@@ -320,8 +320,11 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       if(s && zones && dat->v[vi])
       {
         /* allocate surface to later recv neighbor data */
-        s->nbsurf[ni] = alloc_array(nb_n);
-        s->allocd_nbsurf[ni] = 1; //flag that we allocd
+        if(!s->nbsurf[ni])
+        {
+          s->nbsurf[ni] = alloc_array(nb_n);
+          s->allocd_nbsurf[ni] = 1; //flag that we allocd
+        }
 
         /* save MPI request number in the array */
         s->nbsurf[ni]->d[0] = rq;
@@ -851,19 +854,30 @@ void free_all_myln_nbsurf_only(tMesh *mesh)
 
 /* we need the functions below, but they are UNFINISHED!!! */
 
+
+/* init surfaces for a VarList */
+void init_all_vl_surfaces(tMesh *mesh, tVarList *vl)
+{
+  //FIXME: we should loop over vl only, but for now we just request
+  //       surfaces for all vars and do this:
+  init_all_myln_surfaces(mesh);
+}
+
+/* set mysurf for one node and a VarList */
+void set_all_vl_mysurf(tNode *node, tVarList *vl)
+{
+  //FIXME: we should loop over vl only, but for now we just set
+  //       surfaces for all vars and do this:
+  set_all_mysurf(node);
+}
+
 /* request surface exchange for one node and a VarList */
 void request_all_vl_surfaces(tNode *node, tVarList *vl)
 {
   //FIXME: we should loop over vl only, but for now we just request
   //       surfaces for all vars and do this:
-  // NOTE: request_all_surfaces_exchange(node); will not work here,
-  //       because it sends to neighbors. We only want to receive.
-
-  /* need to do stuff like:
-     init_all_myln_surfaces(mesh);
-     set_all_myln_mysurf(mesh);
-     request_all_myln_surfaces_exchange(mesh);
-     but with MPI Windows */
+  request_all_surfaces_exchange(node);
+  /* ^-We should really adapt this to using MPI Windows */
 }
 
 /* get surfaces on one node for a varlist */
@@ -872,7 +886,6 @@ void get_all_vl_surfaces(tNode *node, tVarList *vl)
   //FIXME: we should loop over vl only, but for now we just get
   //       surfaces for all vars and do this:
   get_all_surfaces(node);
-  free_all_nbsurf_only(node);
   free_dat_reqs_after_Waitall_com_send(node); //not needed if we use MPI windows
 }
 
