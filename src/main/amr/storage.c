@@ -632,10 +632,19 @@ void realloc_patlist_in_mesh(tMesh *mesh, int npats)
   if(npats < opats)
   {
     int p;
-    for(p=npats; p<opats; p++)
-      free_patch(mesh->pat[p]);
-    mesh->pat = realloc(mesh->pat, npats*sizeof(mesh->pat[0]));
-    if(!mesh->pat) errorexit("cannot shrink mesh->pat");
+
+    for(p=npats; p<opats; p++) free_patch(mesh->pat[p]);
+
+    if(npats>0)
+    {
+      mesh->pat = realloc(mesh->pat, npats*sizeof(mesh->pat[0]));
+      if(!mesh->pat) errorexit("shrinking mesh->pat failed");
+    }
+    else
+    {
+      free(mesh->pat);
+      mesh->pat = NULL;
+    }
   }
   mesh->npats = npats;
 }

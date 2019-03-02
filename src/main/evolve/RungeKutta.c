@@ -41,3 +41,20 @@ void evolve_RK4(tNode *node)
   evolve_setrhs(node, r, w);                           // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto_node, node);      // u += r dt/6
 }
+
+/* Euler step */
+void evolve_Euler(tNode *node)
+{
+  tMesh *mesh = node->pat->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  double  t = mesh->time;
+  double dt = mesh->dt;
+  pVLList *u   = evosys->u;
+  pVLList *r   = evosys->rhs;
+  //pVLList *w   = evosys->w;
+  //pVLList *u_p = evosys->u_p;
+
+  node->time = t;
+  evolve_setrhs(node, r, u);                       // r  = RHS(u, t)
+  addto_pVLList(u, dt, r, vladdto_node, node);     // u += r dt
+}

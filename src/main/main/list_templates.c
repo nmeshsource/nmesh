@@ -62,13 +62,17 @@ void FN(pr,LIST(TYP))(LIST(TYP) *u)
 {
   int i;
   long ui;
-  printf("%s: n=%d  e =", __func__, u->n);
-  for(i=0; i<u->n; i++)
+
+  if(u)
   {
-    ui = (long) u->e[i];
-    printf(" %ld" , ui);
+    printf("%s: n=%d  e =", __func__, u->n);
+    for(i=0; i<u->n; i++)
+    {
+      ui = (long) u->e[i];
+      printf(" %ld" , ui);
+    }
+    printf("\n");
   }
-  printf("\n");
 }
 
 /* add an entry to a list */

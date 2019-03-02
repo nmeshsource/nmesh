@@ -150,7 +150,8 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
     {
       makeparameter(mesh, "nmesh_options", options,
                     "nmesh command line options");
-      if(Rank0) printf("  nmesh_options = %s\n", Gets(Par("nmesh_options")));
+      if(Rank0)
+        printf("  nmesh_options = %s\n", Gets(Par("nmesh_options")));
     }
     free(parfile);
     free(outdir);
@@ -184,7 +185,7 @@ int make_output_directory(tMesh *mesh)
   }
 
   /* check if we remove outdir_previous */
-  if(!GetvLax(Par("nmesh_options"), "--keep_previous"))
+  if(!GetvLax(ParLax("nmesh_options"), "--keep_previous"))
   {
     /*
     char *prev = checkpoint_filename("_previous", "");
@@ -278,11 +279,11 @@ int parse_command_line_options(tMesh *mesh)
 
   //PRF;printf(":\nPar(\"nmesh_options\")=%i\n", Par("nmesh_options"));
   /* get length of nmesh_options string */
-  if(GetsLax(Par("nmesh_options"))==0) return 0;
+  if(GetsLax(ParLax("nmesh_options"))==0) return 0;
   if(Rank0) printf("Parsing command line options\n");
 
   /* parse for all --modify-par: */
-  optionstr = strdup((GetsLax(Par("nmesh_options"))));
+  optionstr = strdup((GetsLax(ParLax("nmesh_options"))));
   str1 = optionstr;
   while( (str1=strstr(str1, "--modify-par:"))!=NULL )
   {

@@ -79,6 +79,13 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   return 0;
 }
 
+/* remove all patches from mesh */
+void remove_all_patches(tMesh *mesh)
+{
+  realloc_patlist_in_mesh(mesh, 0);
+}
+
+
 void test_array_thingies(tMesh *mesh)
 {
   int n[3];
@@ -188,6 +195,10 @@ int setup_test_mesh(tMesh *mesh)
   PRFs(":\n");
 
   mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  remove_all_patches(mesh);
 
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;

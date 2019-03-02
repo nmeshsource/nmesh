@@ -41,6 +41,8 @@ int evolve_finalize(tMesh *mesh)
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
 
+  PRFs(":\n");
+
   /* free memory in varlists */
   printf("Freeing extra variable lists for evolution:\n");
   freeall_pVLList(evosys->u, vlfree,0); /* free list and its content */
@@ -56,6 +58,11 @@ int evolve_finalize(tMesh *mesh)
   free_FuncPointerList(evosys->setrhs);
   free_FuncPointerList(evosys->setsrc);
 
+  /* now set all of evosys to zero */
+//evolve_print_evosys(mesh);
+  memset(evosys, 0, sizeof(evosys[0]));
+evolve_print_evosys(mesh);
+
   return 0;
 }
 
@@ -66,16 +73,22 @@ void evolve_print_evosys(tMesh *mesh)
   int i;
 
   PRFs(":\n");
-  pr_pVLList(evosys->u);
-  forList(evosys->u, i)
+  if(evosys->u)
   {
-    printf("%d: ", i);
-    prvarlist(ListEntry(evosys->u,i));
+    pr_pVLList(evosys->u);
+    forList(evosys->u, i)
+    {
+      printf("%d: ", i);
+      prvarlist(ListEntry(evosys->u,i));
+    }
   }
-  forList(evosys->setrhs, i)
-    if(ListEntry(evosys->setrhs,i)) printf("%d: setrhs: yes\n", i);
-  forList(evosys->setsrc, i)
-    if(ListEntry(evosys->setsrc,i)) printf("%d: setsrc: yes\n", i);
+  if(evosys->setrhs)
+  {
+    forList(evosys->setrhs, i)
+      if(ListEntry(evosys->setrhs,i)) printf("%d: setrhs: yes\n", i);
+    forList(evosys->setsrc, i)
+      if(ListEntry(evosys->setsrc,i)) printf("%d: setsrc: yes\n", i);
+  }
 }
 
 
@@ -88,15 +101,15 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u)
   int i;
 
   /* set all sources */
-  forList(evosys->u, i)
+  forList(u, i)
     if(ListEntry(evosys->setsrc,i))
-      ListEntry(evosys->setsrc,i)(node, ListEntry(evosys->u,i));
+      ListEntry(evosys->setsrc,i)(node, ListEntry(u,i));
 
   /* set all RHSs */
-  forList(evosys->u, i)
+  forList(u, i)
     if(ListEntry(evosys->setrhs,i))
-      ListEntry(evosys->setrhs,i)(node, ListEntry(evosys->rhs,i),
-                                        ListEntry(evosys->u,i));
+      ListEntry(evosys->setrhs,i)(node, ListEntry(rhs,i),
+                                        ListEntry(u,i));
 }
 
 
@@ -152,5 +165,11 @@ int evolve_myln(tMesh *mesh)
 /* evolve one node */
 void evolve(tNode *node)
 {
-  evolve_RK4(node);
+  tMesh *mesh = node->pat->mesh;
+  int em = Par("evolve_method");
+
+  if(Getv(em, "RK"))
+    evolve_RK4(node);
+  else if(Getv(em, "Euler"))
+    evolve_Euler(node);
 }

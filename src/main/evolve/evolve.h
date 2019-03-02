@@ -20,3 +20,4 @@ int evolve_test_analyze(tMesh *mesh);
 
 /* RungeKutta.c */
 void evolve_RK4(tNode *node);
+void evolve_Euler(tNode *node);

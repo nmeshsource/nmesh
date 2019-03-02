@@ -51,7 +51,7 @@ int evolve_test_init(tMesh *mesh)
   tVarList *vlv = vlalloc(mesh);
   int myid;
 
-  PRFs(":\n");
+  PRF;printf(": dt = %g\n", mesh->dt);
 
   /* two varlists */
   vlpush(vlu, iu);
@@ -98,9 +98,10 @@ int evolve_test_analyze(tMesh *mesh)
   {
     tNode *node = GetMyNode(mesh, myid);
     double *u = GetVarDpointer(node, iu);
-    double *ue = GetVarDpointer(node, iue);
     double *v = GetVarDpointer(node, iv);
+    double *ue = GetVarDpointer(node, iue);
     double *ve = GetVarDpointer(node, ive);
+    double c = pow(node->dt, Getd(Par("evolve_method_order")));
     double t = mesh->time;
     double ua = exp(-t);       /* analytic soln for u */
     double va = 1. - exp(-t);  /* analytic soln for v */
@@ -108,8 +109,8 @@ int evolve_test_analyze(tMesh *mesh)
 
     forpoints(node, i)
     {
-      ue[i] = fabs(u[i]/ua - 1.);
-      ve[i] = fabs(v[i]/va - 1.);
+      ue[i] = fabs(u[i]/ua - 1.)/c; //fabs(u[i] - ua)/c;
+      ve[i] = fabs(v[i]/va - 1.)/c; //fabs(v[i] - va)/c;
     }
   }
   return 0;

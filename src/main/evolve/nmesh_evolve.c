@@ -12,11 +12,12 @@ int nmesh_evolve(tMesh *mesh)
   /* functions */
   AddFun(EVOLVE, evolve_myln);
   AddFun(FINALIZEMESH, evolve_finalize);
+  AddFun(POST_PARAMETERS, evolve_finalize);
 
   /* variables */
 
   /* parameters */
-  //AddPar("evolve_beans", "no", "[no,yes]");
+  AddPar("evolve_method", "RK", "[Euler,RK]");
 
   /* just a test, not needed for anything else */
   if(Getv(Par("physics"), "evolve_test"))
@@ -28,6 +29,7 @@ int nmesh_evolve(tMesh *mesh)
     AddEvoVar("evolve_test_s", "", "source in v eqn");
     AddAuxVar("evolve_test_u_err", "", "error in var1");
     AddAuxVar("evolve_test_v_err", "", "error in var2");
+    AddPar("evolve_method_order", "0", "expected order of convergence");
   }
 
   return 0;
