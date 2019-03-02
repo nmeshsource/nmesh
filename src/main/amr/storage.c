@@ -371,9 +371,9 @@ tNode *destroy_children(tNode *parent)
     tArray *Xp[3], *Ip[8], *Xc[8][3], *Res[8];
 
     if(!parent->dat) parent->dat = alloc_dat(parent);
-    /* enable same vars in this dat as in parent->dat */
+    /* enable same vars in parent->dat as in child0->dat */
     for(vi=0; vi<nvdb; vi++)
-      if(child0->dat->v[vi])  enablevarcomp_innode(parent, vi);
+      if(child0->dat->v[vi]) enablevarcomp_innode(parent, vi);
 
     /* array memory to store points of parent in X coords */
     Xp[0] = alloc_array(parent->n);
