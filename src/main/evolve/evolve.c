@@ -118,6 +118,8 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u)
 int evolve_myln(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
+  int evolve_method = Par("evolve_method");
+  void (*evolve)(tNode *node); /* func pointer for evo method */
   int i, myid;
 
   /* do nothing if we have no vars to evolve */
@@ -148,6 +150,12 @@ int evolve_myln(tMesh *mesh)
     //printf("evosys->w = %p\n", evosys->w);
   }
 
+  /* select evo method */
+  if(Getv(evolve_method, "RK"))
+    evolve = evolve_RK4;
+  else if(Getv(evolve_method, "Euler"))
+    evolve = evolve_Euler;
+
   /* evolve each node */
   formylnodes(mesh, myid)
   {
@@ -160,16 +168,4 @@ int evolve_myln(tMesh *mesh)
     evolve(node);
   }
   return 0;
-}
-
-/* evolve one node */
-void evolve(tNode *node)
-{
-  tMesh *mesh = node->pat->mesh;
-  int em = Par("evolve_method");
-
-  if(Getv(em, "RK"))
-    evolve_RK4(node);
-  else if(Getv(em, "Euler"))
-    evolve_Euler(node);
 }
