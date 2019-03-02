@@ -822,3 +822,25 @@ void free_all_myln_nbsurf_only(tMesh *mesh)
     free_all_nbsurf_only(node);
   }
 }
+
+
+/*************************************************************************/
+/*************************************************************************/
+
+/* NOTE:
+   If we do non-uniform timestepping, each node needs to get surface info
+   only from its neighbors. I.e. only the neighbors need to send data
+   to the node (equiv. to MPI_Irecv without MPI_Isend on the node).
+   Each node also only needs info for a VarList not all vars.
+   So we should make functions that:
+   1.: -create mysurf info for a VarList on one face of one node
+   2.: -put these mysurf in a MPI window for one-sided communication
+        (maybe use segmented array)
+       -this needs to be done for all in VarList and on one face
+       -we then use this func in a loop over all neighbor nodefaces
+   3.: -create funcs that read from MPI windows (with mysurf) of all
+        neighbor nodefaces to set nbsurf
+*/
+
+/*************************************************************************/
+/*************************************************************************/
