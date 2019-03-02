@@ -878,6 +878,10 @@ void request_all_vl_surfaces(tNode *node, tVarList *vl)
   //       surfaces for all vars and do this:
   request_all_surfaces_exchange(node);
   /* ^-We should really adapt this to using MPI Windows */
+
+  // NOTE: request_all_surfaces_exchange has a Waitall in
+  // free_dat_reqs_after_Waitall_com_send that leads to a deadlock when it
+  // is called repeatedly from the same node, as I would like to do in RK4.
 }
 
 /* get surfaces on one node for a varlist */
