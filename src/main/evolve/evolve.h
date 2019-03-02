@@ -10,7 +10,8 @@ void evolve_register_subsys_u_rhs_src(tMesh *mesh, tVarList *u,
                                       FuncPointer rhs, FuncPointer src);
 int evolve_free_evosys(tMesh *mesh);
 void evolve_print_evosys(tMesh *mesh);
-void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u);
+void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs);
+void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u);
 int evolve_myln(tMesh *mesh);
 void evolve(tNode *node);
 
@@ -21,3 +22,5 @@ int evolve_test_analyze(tMesh *mesh);
 /* RungeKutta.c */
 void evolve_RK4(tNode *node);
 void evolve_Euler(tNode *node);
+void evolve_RK4_mesh(tMesh *mesh);
+void evolve_Euler_mesh(tMesh *mesh);

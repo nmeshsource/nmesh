@@ -92,13 +92,53 @@ void evolve_print_evosys(tMesh *mesh)
 }
 
 
+/* request all surfaces on node for all vars in u */
+void evolve_request_surfaces(tNode *node, pVLList *u)
+{
+  tMesh *mesh = node->pat->mesh;
+  tVarList *allu = vlalloc(mesh);
+  int i;
+
+  /* 1. make varlist with all in u */
+  forList(u, i)
+    vlpushvl(allu, ListEntry(u,i));
+
+  /* 2. now start surface requests */
+  request_all_vl_surfaces(node, allu);
+
+  /* we don't need allu anymore */
+  vlfree(allu);
+}
+
+/* free all surfaces */
+void evolve_free_surfaces(tNode *node, pVLList *u)
+{
+  tMesh *mesh = node->pat->mesh;
+  tVarList *allu = vlalloc(mesh);
+  int i;
+
+  /* 1. make varlist with all in u */
+  forList(u, i)
+    vlpushvl(allu, ListEntry(u,i));
+
+  /* 2. now free */
+  free_all_vl_surfaces(node, allu);
+
+  /* we don't need allu anymore */
+  vlfree(allu);
+}
+
 /* set RHS of all evo subsystems. This first also calls the setsrc
    functions in case some sources in the RHSs have to be set. */
-void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u)
+void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
 {
   tMesh *mesh = node->pat->mesh;
   tEvoSys *evosys = mesh->evosys;
   int i;
+
+  /* request all surfaces on node for all vars in u */
+  if(request_surfs)
+    evolve_request_surfaces(node, u);
 
   /* set all sources */
   forList(u, i)
@@ -109,8 +149,24 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u)
   forList(u, i)
     if(ListEntry(evosys->setrhs,i))
       ListEntry(evosys->setrhs,i)(node, ListEntry(rhs,i), ListEntry(u,i));
+
+  /* free all surface info */
+  evolve_free_surfaces(node, u);
 }
 
+/* do evolve_setrhs, but loop over mesh */
+void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
+{
+  int myid;
+  formylnodes(mesh, myid)
+  {
+    tNode *node = GetMyNode(mesh, myid);
+
+    node->time = mesh->time;
+    node->dt   = mesh->dt;
+    evolve_setrhs(node, rhs, u, 0);
+  }
+}
 
 /* make some vars and put them in evosys */
 int evolve_init_evosys(tMesh *mesh)
@@ -149,14 +205,14 @@ int evolve_init_evosys(tMesh *mesh)
 }
 
 
-
-
 /* evolve the entire leaf node mesh one time step forward */
 int evolve_myln(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
   int evolve_method = Par("evolve_method");
-  void (*evolve)(tNode *node); /* func pointer for evo method */
+  void (*Evolve)(tNode *node); /* func pointer for evo method */
+  void (*Evolve_mesh)(tMesh *mesh); /* func pointer for evo method */
+  int allnodes = 1;
   int myid;
 
   /* do nothing if we have no vars to evolve */
@@ -169,20 +225,34 @@ int evolve_myln(tMesh *mesh)
 
   /* select evo method */
   if(Getv(evolve_method, "RK"))
-    evolve = evolve_RK4;
-  else if(Getv(evolve_method, "Euler"))
-    evolve = evolve_Euler;
-
-  /* evolve each node */
-  formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    Evolve = evolve_RK4;
+    Evolve_mesh = evolve_RK4_mesh;
+  }
+  else if(Getv(evolve_method, "Euler"))
+  {
+    Evolve = evolve_Euler;
+    Evolve_mesh = evolve_Euler_mesh;
+  }
 
-    /* FIXME: for now all nodes use the same time step */
-    node->dt = mesh->dt;
-    node->time = mesh->time;
+  /* how evolve the mesh */
+  if(allnodes)
+  {
+    Evolve_mesh(mesh);
+  }
+  else /* evolve each node on its own */
+  {
+    /* evolve each node */
+    formylnodes(mesh, myid)
+    {
+      tNode *node = GetMyNode(mesh, myid);
 
-    evolve(node);
+      /* FIXME: for now all nodes use the same time step */
+      node->dt = mesh->dt;
+      node->time = mesh->time;
+
+      Evolve(node);
+    }
   }
   return 0;
 }

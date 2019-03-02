@@ -201,13 +201,17 @@ void prvarlist(tVarList *v);
 tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
 void vlpush(tVarList *v, int vi);
+void vlpushvl(tVarList *v, tVarList *u);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
                              int type, int surfacezones);
 void vlcopy_node(tNode *node, tVarList *v, tVarList *u);
+void vlcopy(tVarList *v, tVarList *u);
 void vladd_node(tNode *node,
                 tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
+void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
 void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a);
+void vladdto(tVarList *r, const double ca, tVarList *a);
 
 /* utilities.c */
 void  errorexit(char *file, int line, const char *func, char *s);

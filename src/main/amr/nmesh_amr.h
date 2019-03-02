@@ -301,6 +301,9 @@ void request_all_myln_surfaces_exchange(tMesh *mesh);
 void get_all_surfaces(tNode *node);
 void get_all_myln_surfaces(tMesh *mesh);
 void free_all_myln_nbsurf_only(tMesh *mesh);
+void request_all_vl_surfaces(tNode *node, tVarList *vl);
+void get_all_vl_surfaces(tNode *node, tVarList *vl);
+void free_all_vl_surfaces(tNode *node, tVarList *vl);
 
 /* connect.c */
 char *node_location_str(tNode *node, char *s, int slen);

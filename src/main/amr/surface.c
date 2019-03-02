@@ -844,3 +844,40 @@ void free_all_myln_nbsurf_only(tMesh *mesh)
 
 /*************************************************************************/
 /*************************************************************************/
+
+/* we need the functions below, but they are UNFINISHED!!! */
+
+/* request surface exchange for one node and a VarList */
+void request_all_vl_surfaces(tNode *node, tVarList *vl)
+{
+  //FIXME: we should loop over vl only, but for now we just request
+  //       surfaces for all vars and do this:
+  // NOTE: request_all_surfaces_exchange(node); will not work here,
+  //       because it sends to neighbors. We only want to receive.
+
+  /* need to do stuff like:
+     init_all_myln_surfaces(mesh);
+     set_all_myln_mysurf(mesh);
+     request_all_myln_surfaces_exchange(mesh);
+     but with MPI Windows */
+}
+
+/* get surfaces on one node for a varlist */
+void get_all_vl_surfaces(tNode *node, tVarList *vl)
+{
+  //FIXME: we should loop over vl only, but for now we just get
+  //       surfaces for all vars and do this:
+  get_all_surfaces(node);
+  free_all_nbsurf_only(node);
+  free_dat_reqs_after_Waitall_com_send(node); //not needed if we use MPI windows
+}
+
+/* free all surfaces on one node for a varlist */
+void free_all_vl_surfaces(tNode *node, tVarList *vl)
+{
+  //FIXME: not needed if we use MPI windows
+  free_dat_reqs_after_Waitall_com_send(node);
+
+  //FIXME: we could free only the surfaces associated with vl, but for now:
+  free_all_surfaces(node);
+}

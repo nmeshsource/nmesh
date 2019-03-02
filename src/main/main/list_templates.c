@@ -215,7 +215,10 @@ void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
 {
   int i;
   for(i=0; i<dest->n; i++)
-    copy(obj, dest->e[i], src->e[i]); /* func that know how to copy */
+  {
+    if(obj) copy(obj, dest->e[i], src->e[i]); /* func that knows how to copy */
+    else    copy(dest->e[i], src->e[i]);
+  }
 }
 
 /* add contents: r = ca*a + cb*b */
@@ -226,7 +229,10 @@ void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 {
   int i;
   for(i=0; i<r->n; i++)
-    add(obj, r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
+  {
+    if(obj) add(obj, r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
+    else    add(r->e[i], ca,a->e[i], cb,b->e[i]);
+  }
 }
 
 /* add to contents: r += ca*a */
@@ -236,7 +242,10 @@ void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 {
   int i;
   for(i=0; i<r->n; i++)
-    addto(obj, r->e[i], ca,a->e[i]); /* func that adds to r */
+  {
+    if(obj) addto(obj, r->e[i], ca,a->e[i]); /* func that adds to r */
+    else    addto(r->e[i], ca,a->e[i]);
+  }
 }
 
 /* free contents of r */
