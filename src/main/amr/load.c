@@ -69,10 +69,10 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
 
   /* find amount of data */
   for(nvars=0, *ndoubles=0, vi=0; vi<dat->nv; vi++)
-    if(dat->v[vi]  && (MeshVarType(mesh, vi)!=1))
+    if(dat->v[vi])
     {
-      if(PR) { PRF;printf(": vi=%d\n", vi); }
-      *ndoubles += dat->v[vi]->N;
+      *ndoubles += (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=1);
+      if(PR) { PRF;printf(": vi=%d ndoubles=%d\n", vi, *ndoubles); }
       nvars++;
     }
   return nvars;
@@ -102,9 +102,9 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
   for(bi=1, vi=0; vi<dat->nv; vi++)
   {
     /* add to buffer if eneabled and not auxiliary var */
-    if(dat->v[vi] && (MeshVarType(mesh, vi)!=1))
+    if(dat->v[vi])
     {
-      N = dat->v[vi]->N;
+      N = (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=1);
       buf[bi++] = vi;
       buf[bi++] = N;
       memcpy(buf+bi, dat->v[vi]->d, N * sizeof(double));
@@ -131,6 +131,7 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
     enablevarcomp_innode(node, vi);
     memcpy(dat->v[vi]->d, buf+bi, N * sizeof(double));
     bi += N;
+    if(PR) { PRF;printf(": vi=%d bi=%d\n", vi, bi); }
   }
   return bi;
 }
