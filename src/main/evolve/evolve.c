@@ -33,7 +33,7 @@ void evolve_register_subsys_u_rhs_src(tMesh *mesh, tVarList *u,
 }
 
 /* free extra VarLists and other Lists */
-int evolve_finalize(tMesh *mesh)
+int evolve_free_evosys(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
   int i;
@@ -108,8 +108,7 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u)
   /* set all RHSs */
   forList(u, i)
     if(ListEntry(evosys->setrhs,i))
-      ListEntry(evosys->setrhs,i)(node, ListEntry(rhs,i),
-                                        ListEntry(u,i));
+      ListEntry(evosys->setrhs,i)(node, ListEntry(rhs,i), ListEntry(u,i));
 }
 
 

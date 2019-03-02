@@ -11,8 +11,8 @@ int nmesh_evolve(tMesh *mesh)
 
   /* functions */
   AddFun(EVOLVE, evolve_myln);
-  AddFun(FINALIZEMESH, evolve_finalize);
-  AddFun(POST_PARAMETERS, evolve_finalize);
+  AddFun(FINALIZEMESH, evolve_free_evosys);
+  AddFun(POST_PARAMETERS, evolve_free_evosys);
 
   /* variables */
 
