@@ -46,11 +46,10 @@
  -interp from ghosts within patch     : DONE!
  -interp from ghosts of other patches
 
-*evolve module in main
+*evolve module in main: DONE!
 -struct with slots for evo varlists & RHSs for several systems (Z4 + grhd)
 -allow explicit time dependence in RHS
 -keep open mind about node dependent dt
--make func for one RK substep?
 
 *advection Eqn
 
