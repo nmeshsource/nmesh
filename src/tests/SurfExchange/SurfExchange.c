@@ -13,7 +13,7 @@ int SurfExchange_test(tMesh *mesh)
 {
   tNode *nd;
   int ui = Ind("SurfExchange_u");
-  int myid;
+  int myid, l;
 
   PRF;printf(": Hmmm.\n");
   enablevar(mesh, ui);
@@ -57,13 +57,33 @@ int SurfExchange_test(tMesh *mesh)
   prdivider('S');
   PRF;printf(": exchange surfaces\n");
   init_all_myln_surfaces(mesh);
-  set_all_myln_mysurf(mesh);
-  request_all_myln_surfaces_exchange(mesh);
+  /* instead of:
+       set_all_myln_mysurf(mesh);
+       request_all_myln_surfaces_exchange(mesh);
+       get_all_myln_surfaces(mesh);
+     we do the exchange nodewise */
 
-  /* Here we can do work. MPI is now busy sending buffers */
+  /* do exchange 4 times similar to RK4 */
+  for(l=0; l<4; l++)
+  {
+    formylnodes(mesh, myid)
+    {
+      tNode *node = GetMyNode(mesh, myid);
 
-  /* now get the surfaces and wait for buffers if necessary */
-  get_all_myln_surfaces(mesh);
+      set_all_mysurf(node);
+      request_all_surfaces_exchange(node);
+    }
+
+    /* Here we can do work. MPI is now busy sending buffers */
+
+    /* now get the surfaces and wait for buffers if necessary */
+    formylnodes(mesh, myid)
+    {
+      tNode *node = GetMyNode(mesh, myid);
+
+      get_all_surfaces(node);
+    }
+  }
 
   /* get_all_myln_surfaces sets ajsurf via interpolation */
 
