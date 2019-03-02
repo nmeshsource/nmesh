@@ -350,6 +350,8 @@ void request_all_surfaces_exchange(tNode *node)
 
   /* free req, send/recv arrays */
   free_dat_reqs_after_Waitall_com_send(node);
+  // NOTE: This Waitall in leads to a deadlock when it is called repeatedly
+  // from the same node, as I would like to do in RK4.
 
   for(face=0; face<6; face++)
   {
