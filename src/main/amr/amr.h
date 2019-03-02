@@ -30,6 +30,7 @@ tSurface *init_surface(tNode *node, int vi, int face);
 int init_all_surfaces(tNode *node);
 void set_mysurf(tSurface *s);
 void request_all_surfaces_exchange(tNode *node);
+void free_dat_reqs_after_Waitall_com_send(tNode *node);
 void get_all_surfaces(tNode *node);
 void set_ajsurf_forall_vars(tNode *node, int f);
 void free_nbsurf_only_forall_vars(tNode *node, int f);

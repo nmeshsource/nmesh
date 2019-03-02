@@ -345,10 +345,11 @@ void request_all_surfaces_exchange(tNode *node)
   /* do nothing if this node is on other proc */
   if(!node->dat) return;
 
+  /* free req, send/recv arrays */
+  free_dat_reqs_after_Waitall_com_send(node);
+
   for(face=0; face<6; face++)
   {
-    realloc_dat_reqs(node->dat, 0, face); /* free req, send/recv arrays */
-
     /* FIXME: set sendbuffer sbuf here already because
        request_surfaces_exchange_for_all_vars sends the some sbuf for all ni */
 
@@ -453,6 +454,9 @@ void free_dat_reqs_after_Waitall_com_send(tNode *node)
 
   for(face=0; face<6; face++)
   {
+    /* to be sure, wait again for all recvs */
+    nMPI_Waitall_com_recv(dat->com[face]);
+
     /* wait until all has been sent, then free all buffers for this face */
     nMPI_Waitall_com_send(dat->com[face]);
     realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
