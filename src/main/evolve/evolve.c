@@ -59,9 +59,9 @@ int evolve_free_evosys(tMesh *mesh)
   free_FuncPointerList(evosys->setsrc);
 
   /* now set all of evosys to zero */
-//evolve_print_evosys(mesh);
+  //evolve_print_evosys(mesh);
   memset(evosys, 0, sizeof(evosys[0]));
-evolve_print_evosys(mesh);
+  //evolve_print_evosys(mesh);
 
   return 0;
 }
@@ -112,14 +112,11 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u)
 }
 
 
-
-/* evolve the entire leaf node mesh one time step forward */
-int evolve_myln(tMesh *mesh)
+/* make some vars and put them in evosys */
+int evolve_init_evosys(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
-  int evolve_method = Par("evolve_method");
-  void (*evolve)(tNode *node); /* func pointer for evo method */
-  int i, myid;
+  int i;
 
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
@@ -148,6 +145,27 @@ int evolve_myln(tMesh *mesh)
     }
     //printf("evosys->w = %p\n", evosys->w);
   }
+  return 0;
+}
+
+
+
+
+/* evolve the entire leaf node mesh one time step forward */
+int evolve_myln(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int evolve_method = Par("evolve_method");
+  void (*evolve)(tNode *node); /* func pointer for evo method */
+  int myid;
+
+  /* do nothing if we have no vars to evolve */
+  if(!evosys->u) return 0;
+
+  if(PR) PRFs(":\n");
+
+  /* make aux vars if needed */
+  evolve_init_evosys(mesh);
 
   /* select evo method */
   if(Getv(evolve_method, "RK"))
