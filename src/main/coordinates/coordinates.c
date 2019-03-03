@@ -17,7 +17,11 @@ int coordinates_coordvars_enabled(tNode *node)
   int idXd = Ind("dXdx");
   int ix   = Ind("x");
 
+  /* do nothing if this is not my node */
   if(!node->dat) return 0;
+
+  /* if coords are set already do nothing */
+  if(node->dat->coords_set) return 1;
 
   /* give all these memory */
   enablevar_innode(node, iX);
@@ -49,8 +53,12 @@ int coordinates_init_node(tNode *node)
             = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
                 {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
                 {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
-  PRF;printf(":\n");
+
+  /* do nothing if coords are set already or if vars are off */
+  if(node->dat->coords_set) return 0;
   if(!vars_on) return 0;
+
+  PRF;printf(":\n");
 
   /* set coords */
   forijk(i,j,k, n)
@@ -82,6 +90,9 @@ int coordinates_init_node(tNode *node)
       }
     }
   }
+
+  /* mark coords as set */
+  node->dat->coords_set = 1;
 
   return 0;
 }

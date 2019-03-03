@@ -37,6 +37,7 @@ typedef struct tDAT {
   struct tNODE *node;     /* pointer to node dat is in */
   int nv;                 /* number of vars */
   int nvenabled;          /* number of enabled vars */
+  int coords_set;         /* whether coord vars are enabled and set */
   struct tARRAY **v;      /* list of data pointers to vars, if v[vi]=NULL,
                              the var vi and its surfaces are not enabled */
   struct tSURFACE **s[6]; /* list of surfaces needed for data exchange,
