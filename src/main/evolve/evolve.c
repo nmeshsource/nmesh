@@ -133,8 +133,10 @@ void evolve_free_surfaces(tNode *node, pVLList *u)
   vlfree(allu);
 }
 
+
 /* set RHS of all evo subsystems. This first also calls the setsrc
    functions in case some sources in the RHSs have to be set. */
+/* Version for just one node: */
 void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
 {
   tMesh *mesh = node->pat->mesh;
@@ -163,25 +165,40 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
   //if(0) evolve_free_surfaces(node, u);
 }
 
-/* do evolve_setrhs, but loop over mesh */
+/* set RHS of all evo subsystems. This first also calls the setsrc
+   functions in case some sources in the RHSs have to be set. */
+/* Version for entire mesh: */
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
-  int myid;
+  tEvoSys *evosys = mesh->evosys;
+  int i, myid;
+
+  if(PR) PRFs(":\n");
 
   /* do surface exchange on entire mesh */
   set_all_myln_mysurf(mesh);
   request_all_myln_surfaces_exchange(mesh);
 
-  /* now use RHS on all nodes */
+  /* set time on all nodes */
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
 
     node->time = mesh->time;
     node->dt   = mesh->dt;
-    evolve_setrhs(node, rhs, u, 0);
   }
+
+  /* set all sources */
+  forList(u, i)
+    if(ListEntry(evosys->setsrc,i))
+      ListEntry(evosys->setsrc,i)(mesh, ListEntry(u,i));
+
+  /* set all RHSs */
+  forList(u, i)
+    if(ListEntry(evosys->setrhs,i))
+      ListEntry(evosys->setrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 }
+
 
 /* make some vars and put them in evosys */
 int evolve_init_evosys(tMesh *mesh)

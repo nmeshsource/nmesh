@@ -8,46 +8,66 @@
 
 
 /* RHS of: d_t u = -u */
-void evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+void evolve_test_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
-  //tMesh *mesh = node->pat->mesh;
-  double *u = Vard(node, vlu->index[0]);
-  double *r = Vard(node, vlr->index[0]);
-  int i;
+  int myid;
 
   /* get surfaces so that we can compute fluxes */
-  get_all_surfaces(node);
-  free_dat_reqs_after_Waitall_com_send(node);
+  get_all_myln_surfaces(mesh);
 
-  /* RHS at each point */
-  forpoints(node, i) r[i] = -u[i];
+  /* RHS */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    double *u = Vard(node, vlu->index[0]);
+    double *r = Vard(node, vlr->index[0]);
+    int i;
+
+    /* RHS at each point */
+    forpoints(node, i) r[i] = -u[i];
+  }
 }
 
 /* RHS of: d_t v = s */
-void evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
+void evolve_test_rhs_v(tMesh *mesh, tVarList *vlr, tVarList *vlv)
 {
-  tMesh *mesh = node->pat->mesh;
-  //double *v = Vard(node, vlu->index[0]);
-  double *r = Vard(node, vlr->index[0]);
-  double *s = Vard(node, Ind("evolve_test_s"));
-  int i;
+  int myid;
 
   /* get surfaces so that we can compute fluxes */
-  get_all_surfaces(node);
-  free_dat_reqs_after_Waitall_com_send(node);
+  get_all_myln_surfaces(mesh);
 
-  /* RHS at each point */
-  forpoints(node, i) r[i] = s[i];
+  /* RHS */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    //double *v = Vard(node, vlv->index[0]);
+    double *r = Vard(node, vlr->index[0]);
+    double *s = Vard(node, Ind("evolve_test_s"));
+    int i;
+
+    /* RHS at each point */
+    forpoints(node, i) r[i] = s[i];
+  }
 }
 
 /* set source s for v: s = u */
-void evolve_test_src_u(tNode *node, tVarList *vlu)
+void evolve_test_src_u(tMesh *mesh, tVarList *vlu)
 {
-  tMesh *mesh = node->pat->mesh;
-  double *u = Vard(node, vlu->index[0]);
-  double *s = Vard(node, Ind("evolve_test_s"));
-  int i;
-  forpoints(node, i) s[i] = u[i];
+  int myid;
+
+  /* get surfaces so that we can compute fluxes */
+  get_all_myln_surfaces(mesh);
+
+  /* Source */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    double *u = Vard(node, vlu->index[0]);
+    double *s = Vard(node, Ind("evolve_test_s"));
+    int i;
+
+    forpoints(node, i) s[i] = u[i];
+  }
 }
 
 
