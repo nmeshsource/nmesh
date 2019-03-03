@@ -12,6 +12,8 @@ int realloc_myln_nncats(tMylnodes *myln, int nncats);
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 
 /* mesh.c */
+int setup_mesh(tMesh *mesh);
+int setup_l2_mesh(tMesh *mesh);
 int setup_test_mesh(tMesh *mesh);
 
 /* connect.c */

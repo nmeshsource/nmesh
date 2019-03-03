@@ -11,8 +11,7 @@ int nmesh_amr(tMesh *mesh)
   printf("Adding amr\n");
 
   /* functions */
-/* for testing */
-AddFun(POST_PARAMETERS, setup_test_mesh);
+  AddFun(POST_PARAMETERS, setup_mesh);
 
   /* variables */
   //AddAuxVar("Xb", "", "coord0 inside each node"); // we may not need these???
@@ -20,7 +19,9 @@ AddFun(POST_PARAMETERS, setup_test_mesh);
   //AddAuxVar("Zb", "", "coord2 inside each node");
 
   /* parameters */
-  AddPar("storage_verbose", "no", 
-	 "verbose mode for memory allocation [no,yes]");
+  AddPar("storage_verbose", "no",
+         "verbose mode for memory allocation [no,yes]");
+  AddPar("amr_mesh_type", "test_mesh",
+	 "mesh we start with [test_mesh,l2_mesh]");
   return 0;
 }

@@ -85,6 +85,53 @@ void remove_all_patches(tMesh *mesh)
   realloc_patlist_in_mesh(mesh, 0);
 }
 
+/* select mesh */
+int setup_mesh(tMesh *mesh)
+{
+  int mesh_type = Par("amr_mesh_type");
+
+  if(Getv(mesh_type, "l2_mesh"))
+    return setup_l2_mesh(mesh);
+  else
+    return setup_test_mesh(mesh);
+}
+
+/* set up a mesh with 2 levels  */
+int setup_l2_mesh(tMesh *mesh)
+{
+  double bbox[6] = { -4,4, -2,2, -1,1 };
+  int n1max = 55;
+  int n[3] = { 5,4,3 };
+  tNlist *el, *en;
+
+  PRFs(":\n");
+
+  mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  remove_all_patches(mesh);
+  add_patch(mesh, bbox, n, n1max);
+
+  make8children_in_mesh_lns_myln(mesh->lns, n);
+
+  el = mesh->lns;
+  for(en = el->next; el; en = el ? el->next : 0)
+  {
+    if(el->node->l < 2)
+    {
+      make8children_in_mesh_lns_myln(el, n);
+      el = en;
+    }
+  }
+
+  simple_load_balance(mesh);
+  printmesh(mesh);
+
+  return 0;
+}
+
+
 
 void test_array_thingies(tMesh *mesh)
 {
