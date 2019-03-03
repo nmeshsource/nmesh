@@ -36,7 +36,7 @@
   for(k=0; k<array->N; k++)
 
 /* get double pointer to data in a variable */
-#define GetVarDpointer(node, varindex) \
+#define Vard(node, varindex) \
   ((node->dat) ? node->dat->v[(varindex)]->d : 0)
 
 /* loop of one variable (it is in an array*/

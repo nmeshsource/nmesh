@@ -31,13 +31,13 @@ int TestDerivs_startup(tMesh *mesh)
   {  
     tNode *node = GetMyNode(mesh,myid);
     int i;
-    //double *pX = GetVarDpointer(node,Ind("X"));
-    //double *pY = GetVarDpointer(node,Ind("Y"));
-    //double *pZ = GetVarDpointer(node,Ind("Z"));
-    double *px = GetVarDpointer(node,Ind("x"));
-    double *py = GetVarDpointer(node,Ind("y"));
-    double *pz = GetVarDpointer(node,Ind("z"));
-    double *u = GetVarDpointer(node,Ind("TestDerivs_u"));
+    //double *pX = Vard(node,Ind("X"));
+    //double *pY = Vard(node,Ind("Y"));
+    //double *pZ = Vard(node,Ind("Z"));
+    double *px = Vard(node,Ind("x"));
+    double *py = Vard(node,Ind("y"));
+    double *pz = Vard(node,Ind("z"));
+    double *u = Vard(node,Ind("TestDerivs_u"));
 
     forpoints(node,i)
     {
@@ -75,22 +75,22 @@ int TestDerivs_analyze(tMesh *mesh)
   {  
     tNode *node = GetMyNode(mesh,myid);
     int i;
-    //double *pX = GetVarDpointer(node,Ind("X"));
-    //double *pY = GetVarDpointer(node,Ind("Y"));
-    //double *pZ = GetVarDpointer(node,Ind("Z"));
-    double *px = GetVarDpointer(node,Ind("x"));
-    double *py = GetVarDpointer(node,Ind("y"));
-    double *pz = GetVarDpointer(node,Ind("z"));
-    double *u  = GetVarDpointer(node,Ind("TestDerivs_u"));
-    double *ux = GetVarDpointer(node,Ind("TestDerivs_Err_dux"));
-    double *uy = GetVarDpointer(node,Ind("TestDerivs_Err_duy"));
-    double *uz = GetVarDpointer(node,Ind("TestDerivs_Err_duz"));
-    double *uxx= GetVarDpointer(node,Ind("TestDerivs_Err_dduxx"));
-    double *uxy= GetVarDpointer(node,Ind("TestDerivs_Err_dduxx")+1);
-    double *uxz= GetVarDpointer(node,Ind("TestDerivs_Err_dduxx")+2);
-    double *uyy= GetVarDpointer(node,Ind("TestDerivs_Err_dduxx")+3);
-    double *uyz= GetVarDpointer(node,Ind("TestDerivs_Err_dduxx")+4);
-    double *uzz= GetVarDpointer(node,Ind("TestDerivs_Err_dduxx")+5);
+    //double *pX = Vard(node,Ind("X"));
+    //double *pY = Vard(node,Ind("Y"));
+    //double *pZ = Vard(node,Ind("Z"));
+    double *px = Vard(node,Ind("x"));
+    double *py = Vard(node,Ind("y"));
+    double *pz = Vard(node,Ind("z"));
+    double *u  = Vard(node,Ind("TestDerivs_u"));
+    double *ux = Vard(node,Ind("TestDerivs_Err_dux"));
+    double *uy = Vard(node,Ind("TestDerivs_Err_duy"));
+    double *uz = Vard(node,Ind("TestDerivs_Err_duz"));
+    double *uxx= Vard(node,Ind("TestDerivs_Err_dduxx"));
+    double *uxy= Vard(node,Ind("TestDerivs_Err_dduxx")+1);
+    double *uxz= Vard(node,Ind("TestDerivs_Err_dduxx")+2);
+    double *uyy= Vard(node,Ind("TestDerivs_Err_dduxx")+3);
+    double *uyz= Vard(node,Ind("TestDerivs_Err_dduxx")+4);
+    double *uzz= Vard(node,Ind("TestDerivs_Err_dduxx")+5);
 
     /* compute the derivs */
     cart_partials(node, Ind("TestDerivs_u"), Ind("TestDerivs_Err_dux"));

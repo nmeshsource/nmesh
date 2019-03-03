@@ -5,7 +5,6 @@
 #include "coordinates.h"
 
 #define PR 1
-#define Vd(node,i) GetVarDpointer(node,i)
 
 
 
@@ -44,11 +43,12 @@ int coordinates_init_node(tNode *node)
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int ix   = Ind("x");
-  double *pX[] = { Vd(node,iX), Vd(node,iX+1), Vd(node,iX+2) };
-  double *px[] = { Vd(node,ix), Vd(node,ix+1), Vd(node,ix+2) };
-  double *pdXd[3][3] = { {Vd(node,idXd),   Vd(node,idXd+1), Vd(node,idXd+2)},
-                         {Vd(node,idXd+3), Vd(node,idXd+4), Vd(node,idXd+5)},
-                         {Vd(node,idXd+6), Vd(node,idXd+7), Vd(node,idXd+8)} };
+  double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
+  double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+  double *pdXd[3][3]
+            = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
+                {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
+                {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
   PRF;printf(":\n");
   if(!vars_on) return 0;
 

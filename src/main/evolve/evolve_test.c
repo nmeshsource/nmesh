@@ -11,8 +11,8 @@
 void evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
   //tMesh *mesh = node->pat->mesh;
-  double *u = GetVarDpointer(node, vlu->index[0]);
-  double *r = GetVarDpointer(node, vlr->index[0]);
+  double *u = Vard(node, vlu->index[0]);
+  double *r = Vard(node, vlr->index[0]);
   int i;
 
   /* get surfaces so that we can compute fluxes */
@@ -27,9 +27,9 @@ void evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 void evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
 {
   tMesh *mesh = node->pat->mesh;
-  //double *v = GetVarDpointer(node, vlu->index[0]);
-  double *r = GetVarDpointer(node, vlr->index[0]);
-  double *s = GetVarDpointer(node, Ind("evolve_test_s"));
+  //double *v = Vard(node, vlu->index[0]);
+  double *r = Vard(node, vlr->index[0]);
+  double *s = Vard(node, Ind("evolve_test_s"));
   int i;
 
   /* get surfaces so that we can compute fluxes */
@@ -44,8 +44,8 @@ void evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
 void evolve_test_src_u(tNode *node, tVarList *vlu)
 {
   tMesh *mesh = node->pat->mesh;
-  double *u = GetVarDpointer(node, vlu->index[0]);
-  double *s = GetVarDpointer(node, Ind("evolve_test_s"));
+  double *u = Vard(node, vlu->index[0]);
+  double *s = Vard(node, Ind("evolve_test_s"));
   int i;
   forpoints(node, i) s[i] = u[i];
 }
@@ -80,7 +80,7 @@ int evolve_test_init(tMesh *mesh)
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
-    double *u = GetVarDpointer(node, iu);
+    double *u = Vard(node, iu);
     int i;
     forpoints(node, i) u[i] = 1.;
   }
@@ -109,10 +109,10 @@ int evolve_test_analyze(tMesh *mesh)
   formylnodes(mesh, myid)
   {
     tNode *node = GetMyNode(mesh, myid);
-    double *u = GetVarDpointer(node, iu);
-    double *v = GetVarDpointer(node, iv);
-    double *ue = GetVarDpointer(node, iue);
-    double *ve = GetVarDpointer(node, ive);
+    double *u = Vard(node, iu);
+    double *v = Vard(node, iv);
+    double *ue = Vard(node, iue);
+    double *ve = Vard(node, ive);
     double c = pow(node->dt, Getd(Par("evolve_method_order")));
     double t = mesh->time;
     double ua = exp(-t);       /* analytic soln for u */

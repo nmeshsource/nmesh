@@ -282,7 +282,7 @@ el = mesh->lns;
 for(i=1; i<=8+2; i++) el = el->next;
 printnode(el->node);
 
-double *d = GetVarDpointer(el->node, Ind("SurfExchange_u"));
+double *d = Vard(el->node, Ind("SurfExchange_u"));
 if(d) d[3] = 3;
 printvar_innode(el->node, Ind("SurfExchange_u"));
 

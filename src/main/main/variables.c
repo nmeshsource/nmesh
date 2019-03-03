@@ -552,7 +552,7 @@ void vlsetconstant(tVarList *u, const double c)
     for(n=0; n<u->n; n++)
     {
       ui = u->index[n];
-      pu = GetVarDpointer(node, ui);
+      pu = Vard(node, ui);
       forvari(node, ui, i)
         pu[i] = c;
     }
@@ -569,8 +569,8 @@ void vlcopy_node(tNode *node, tVarList *v, tVarList *u)
   {
     ui = u->index[n];
     vi = v->index[n];
-    pu = GetVarDpointer(node, ui);
-    pv = GetVarDpointer(node, vi);
+    pu = Vard(node, ui);
+    pv = Vard(node, vi);
     forvari(node, vi, i)
       pv[i] = pu[i];
   }
@@ -634,8 +634,8 @@ void vlswap(tVarList *v, tVarList *u)
     {
       int ui = u->index[n];
       int vi = v->index[n];
-      pu = GetVarDpointer(node, ui);
-      pv = GetVarDpointer(node, vi);
+      pu = Vard(node, ui);
+      pv = Vard(node, vi);
       forvari(node, vi, i)
       {
         temp  = pv[i];
@@ -676,9 +676,9 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
       int ri = r->index[n];
       int ai = a->index[n];
       int bi = b->index[n];
-      pr = GetVarDpointer(node, ri);
-      pa = GetVarDpointer(node, ai);
-      pb = GetVarDpointer(node, bi);
+      pr = Vard(node, ri);
+      pa = Vard(node, ai);
+      pb = Vard(node, bi);
 
       forvari(node, ri, i)
         pr[i] = c * (pa[i] + pb[i]);
@@ -706,9 +706,9 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
       int ri = r->index[n];
       int ai = a->index[n];
       int bi = b->index[n];
-      pr = GetVarDpointer(node, ri);
-      pa = GetVarDpointer(node, ai);
-      pb = GetVarDpointer(node, bi);
+      pr = Vard(node, ri);
+      pa = Vard(node, ai);
+      pb = Vard(node, bi);
 
       forvari(node, ri, i)
         pr[i] = pa[i] - pb[i];
@@ -732,9 +732,9 @@ void vladd_node(tNode *node,
     int ri = r->index[n];
     int ai = a->index[n];
     int bi = b->index[n];
-    pr = GetVarDpointer(node, ri);
-    if(ca!=0)  pa = GetVarDpointer(node, ai);
-    if(cb!=0)  pb = GetVarDpointer(node, bi);
+    pr = Vard(node, ri);
+    if(ca!=0)  pa = Vard(node, ai);
+    if(cb!=0)  pb = Vard(node, bi);
 
     if (ca == 0 && cb == 0)
     {
@@ -802,8 +802,8 @@ void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a)
   {
     int ri = r->index[n];
     int ai = a->index[n];
-    double *pr = GetVarDpointer(node, ri);
-    double *pa = GetVarDpointer(node, ai);
+    double *pr = Vard(node, ri);
+    double *pa = Vard(node, ai);
 
     if (ca == 1)
     {

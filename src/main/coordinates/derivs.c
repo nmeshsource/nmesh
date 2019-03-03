@@ -5,7 +5,6 @@
 #include "coordinates.h"
 
 
-#define Vd(node,i) GetVarDpointer(node,i)
 
 
 /* compute Cart. derivs, put du/dx^m into vars with index dui */
@@ -13,7 +12,7 @@ int cart_partials(tNode *node, int ui, int dui)
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
-  double *du[] = { Vd(node,dui), Vd(node,dui+1), Vd(node,dui+2) };
+  double *du[] = { Vard(node,dui), Vard(node,dui+1), Vard(node,dui+2) };
   double dXbdX[3];
   int ret, ind, m,i;
 
@@ -32,9 +31,9 @@ int cart_partials(tNode *node, int ui, int dui)
   {
     int idXd = Ind("dXdx");
     double *dXdx[3][3]
-              = { {Vd(node,idXd),   Vd(node,idXd+1), Vd(node,idXd+2)},
-                  {Vd(node,idXd+3), Vd(node,idXd+4), Vd(node,idXd+5)},
-                  {Vd(node,idXd+6), Vd(node,idXd+7), Vd(node,idXd+8)} };
+              = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
+                  {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
+                  {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
     /* compute Cartesian derivs at all points */
     forpoints(node,ind)
     {

@@ -149,7 +149,7 @@ int test_point_interpolation(tMesh *mesh)
   Xp[0] = alloc_array(GetVarArray(nd, ui)->n);
   Xp[1] = alloc_array(GetVarArray(nd, ui)->n);
   Xp[2] = alloc_array(GetVarArray(nd, ui)->n);
-  forvari(nd,vi, k) GetVarDpointer(nd,vi)[k] = 666;
+  forvari(nd,vi, k) Vard(nd,vi)[k] = 666;
   printvar_innode(nd, vi);
   fill_3arrays_with_nodepoints(nd, Xp);
   Lagrange_interpolate_topoints(nd, GetVarArray(nd, ui), Xp,
@@ -162,7 +162,7 @@ int test_point_interpolation(tMesh *mesh)
   PRF;printf(": 2d interp. in plane with Lagrange:\n");
   Cp[0] = alloc_array1d(200);
   Cp[1] = alloc_array1d(200);
-  forvari(nd,vi, k) GetVarDpointer(nd,vi)[k] = 666;
+  forvari(nd,vi, k) Vard(nd,vi)[k] = 666;
   //printvar_innode(nd, vi);
   dir = 0;
   p = 1;
