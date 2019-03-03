@@ -200,11 +200,11 @@ typedef struct tBFACE {
   struct tBFACE *next; // next bface in this patch
   struct tBFACE *prev; // previous bface in this patch
 } tBface;
-/* The flags sameoX/Y/Z refer to the X,Y,Z-coords of the neighboring pat op,
+/* The flags sameoX/Y/Z refer to the X,Y,Z-coords of the neighboring patch,
    not the coords of pat p the bface is on! E.g. if the points on the
    touching face of pat op have the same Y and Z coords (of pat op) as the
-   points in our bface from pat b we set sameY=sameZ=1. This means once we
-   find the X,Y,Z-coords (of pat op) of any point in our bface in pat b,
+   points in our bface from pat p we set sameY=sameZ=1. This means once we
+   find the X,Y,Z-coords (of pat op) of any point in our bface in pat p,
    there is a coordinate line (with Y=const1, Z=const2) on which this point
    is located. Then we can later do 1D interpolation in pat op along its
    X-direction in some BC. */
