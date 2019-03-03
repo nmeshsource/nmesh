@@ -61,7 +61,7 @@ int coordinates_init_node(tNode *node)
 
     /* get X from Xb */
     XYZ_of_XbYbZb(node, Xb, X);
-    for(d=0; d<3; d++) px[d][ijk] = pX[d][ijk] = X[d];
+    for(d=0; d<3; d++) pX[d][ijk] = X[d];
 
     /* now set x, dXdx */
     if(pat->dXYZ_dxyz)
@@ -71,6 +71,14 @@ int coordinates_init_node(tNode *node)
       {
         px[d][ijk] = x[d];
         for(e=0; e<3; e++) pdXd[d][e][ijk] = dXd[d][e];
+      }
+    }
+    else /* assume X,Y,Z are Cartesian*/
+    {
+      for(d=0; d<3; d++)
+      {
+        px[d][ijk] = pX[d][ijk];
+        pdXd[d][d][ijk] = 1.;
       }
     }
   }

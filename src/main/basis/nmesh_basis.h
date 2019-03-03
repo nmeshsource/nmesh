@@ -4,6 +4,7 @@
 
 
 /* basis.c */
+int basis_var_derivs(tNode *node, int vi, int dvi);
 
 /* Legendre.c */
 double basis_LegendreP(int l, double x, int np);

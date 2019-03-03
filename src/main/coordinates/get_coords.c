@@ -88,6 +88,31 @@ void XYZ_of_XbYbZb(tNode *node, const double Xb[3], double X[3])
   } 
 }
 
+/* get dX/dXb */
+void dXYZ_dXbYbZb(tNode *node, double dXdXb[3])
+{
+  double *nbb = node->bbox;
+  int dir;
+
+  for(dir=0; dir<3; dir++)
+  {
+    int f = dir*2;
+    dXdXb[dir] = 0.5*( nbb[f+1] - nbb[f] );
+  } 
+}
+/* get dX/dXb */
+void dXbYbZb_dXYZ(tNode *node, double dXbdX[3])
+{
+  double *nbb = node->bbox;
+  int dir;
+
+  for(dir=0; dir<3; dir++)
+  {
+    int f = dir*2;
+    dXbdX[dir] = 2./( nbb[f+1] - nbb[f] );
+  } 
+}
+
 /* get one X from Xb in one direction */
 void X_of_Xb_indir(tNode *node, int dir, double Xb, double *X)
 {
