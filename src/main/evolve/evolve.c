@@ -175,7 +175,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   /* now use RHS on all nodes */
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
 
     node->time = mesh->time;
     node->dt   = mesh->dt;
@@ -267,7 +267,7 @@ int evolve_myln(tMesh *mesh)
     /* evolve each node */
     formylnodes(mesh, myid)
     {
-      tNode *node = GetMyNode(mesh, myid);
+      tNode *node = MyNode(mesh, myid);
 
       /* FIXME: for now all nodes use the same time step */
       node->dt = mesh->dt;

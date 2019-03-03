@@ -79,7 +79,7 @@ int evolve_test_init(tMesh *mesh)
   /* at t=0: set u=1, leave v=0 */
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     double *u = Vard(node, iu);
     int i;
     forpoints(node, i) u[i] = 1.;
@@ -108,7 +108,7 @@ int evolve_test_analyze(tMesh *mesh)
   /*  compute errors */
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     double *u = Vard(node, iu);
     double *v = Vard(node, iv);
     double *ue = Vard(node, iue);

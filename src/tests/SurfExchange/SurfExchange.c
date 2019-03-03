@@ -21,7 +21,7 @@ int SurfExchange_test(tMesh *mesh)
   formylnodes(mesh, myid)
   {
     int ijk;
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     tArray *ua = VarA(node, ui);
 
     /* set particular pattern in u */
@@ -43,13 +43,13 @@ int SurfExchange_test(tMesh *mesh)
   /* print var */
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     printnode(node);
     printvar_innode(node, ui);
   }
 
   /* print var in one node again */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = MyNode(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, ui);
 
@@ -68,7 +68,7 @@ int SurfExchange_test(tMesh *mesh)
   {
     formylnodes(mesh, myid)
     {
-      tNode *node = GetMyNode(mesh, myid);
+      tNode *node = MyNode(mesh, myid);
 
       set_all_mysurf(node);
       request_all_surfaces_exchange(node);
@@ -79,7 +79,7 @@ int SurfExchange_test(tMesh *mesh)
     /* now get the surfaces and wait for buffers if necessary */
     formylnodes(mesh, myid)
     {
-      tNode *node = GetMyNode(mesh, myid);
+      tNode *node = MyNode(mesh, myid);
 
       get_all_surfaces(node);
     }
@@ -88,7 +88,7 @@ int SurfExchange_test(tMesh *mesh)
   /* get_all_myln_surfaces sets ajsurf via interpolation */
 
   /* print var in one node yet again with surfaces */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = MyNode(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, ui);
 

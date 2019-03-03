@@ -74,7 +74,7 @@ void free_all_myln_surfaces(tMesh *mesh)
   int myid;
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     free_all_surfaces(node);
   }
 }
@@ -152,7 +152,7 @@ void init_all_myln_surfaces(tMesh *mesh)
   int myid;
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     init_all_surfaces(node);
   }
 }
@@ -207,7 +207,7 @@ void set_all_myln_mysurf(tMesh *mesh)
   int myid;
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     set_all_mysurf(node);
   }
 }
@@ -377,7 +377,7 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
   formylnodes_noomp(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     request_all_surfaces_exchange(node);
   }
 }
@@ -505,7 +505,7 @@ void get_all_myln_surfaces(tMesh *mesh)
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
   formylnodes_noomp(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     get_all_surfaces(node);
   }
 
@@ -513,7 +513,7 @@ void get_all_myln_surfaces(tMesh *mesh)
      been already called in get_all_surfaces to free mem earlier.*/
   formylnodes_noomp(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     free_dat_reqs_after_Waitall_com_send(node);
   }
 }
@@ -745,7 +745,7 @@ void set_all_myln_ajsurf(tMesh *mesh)
   int myid;
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     set_all_ajsurf(node);
   }
 }
@@ -827,7 +827,7 @@ void free_all_myln_nbsurf_only(tMesh *mesh)
   int myid;
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     free_all_nbsurf_only(node);
   }
 }

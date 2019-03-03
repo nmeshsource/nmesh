@@ -29,7 +29,7 @@ int TestDerivs_startup(tMesh *mesh)
   /* set initial data in nodees */
   formylnodes(mesh,myid)
   {  
-    tNode *node = GetMyNode(mesh,myid);
+    tNode *node = MyNode(mesh,myid);
     int i;
     //double *pX = Vard(node,Ind("X"));
     //double *pY = Vard(node,Ind("Y"));
@@ -73,7 +73,7 @@ int TestDerivs_analyze(tMesh *mesh)
   /* set initial data in nodees */
   formylnodes(mesh,myid)
   {  
-    tNode *node = GetMyNode(mesh,myid);
+    tNode *node = MyNode(mesh,myid);
     int i;
     //double *pX = Vard(node,Ind("X"));
     //double *pY = Vard(node,Ind("Y"));

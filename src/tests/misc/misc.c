@@ -35,7 +35,7 @@ int misc_test(tMesh *mesh)
   formylnodes(mesh, myid)
   {
     int ijk;
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     tArray *ua = VarA(node, ui);
 
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
@@ -79,12 +79,12 @@ int test_point_interpolation(tMesh *mesh)
   PRF;printf(": Starting misc. tests.\n");
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
   }
 
   /* print var in one node */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = MyNode(mesh, 0); /* my first node */
   printarray(nd->Xb[2]);
   printarray(nd->WL[2]);
   f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
@@ -387,7 +387,7 @@ int test_ajsurf(tMesh *mesh)
   formylnodes(mesh, myid)
   {
     int ijk, dir;
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     tArray *va = VarA(node, vi);
 
     for(dir=0; dir<3; dir++) Xbd[dir] = node->Xb[dir]->d;
@@ -410,13 +410,13 @@ int test_ajsurf(tMesh *mesh)
   /* print var */
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     printnode(node);
     printvar_innode(node, vi);
   }
 
   /* print var in one node again */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = MyNode(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, vi);
 
@@ -436,7 +436,7 @@ int test_ajsurf(tMesh *mesh)
   PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
 
   /* print var in one node yet again with surfaces */
-  nd = GetMyNode(mesh, 0); /* my first node */
+  nd = MyNode(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, vi);
 
@@ -445,7 +445,7 @@ int test_ajsurf(tMesh *mesh)
   PRF;printf(": ajsurfdiff on all nodes:\n");
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     printnode(node);
     printvar_ajsurfdiff(node, vi);
   }
@@ -458,7 +458,7 @@ int test_ajsurf(tMesh *mesh)
   PRF;printf(": ajsurfdiff on all nodes after freeing nbsurf:\n");
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     printnode(node);
     printvar_ajsurfdiff(node, vi);
   }

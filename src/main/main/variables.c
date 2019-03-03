@@ -545,7 +545,7 @@ void vlsetconstant(tVarList *u, const double c)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     double *pu;
     int i, n, ui;
 
@@ -587,7 +587,7 @@ void vlcopy(tVarList *v, tVarList *u)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     vlcopy_node(node, v, u);
   }
 }
@@ -626,7 +626,7 @@ void vlswap(tVarList *v, tVarList *u)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     double *pu, *pv;
     int i, n;
 
@@ -667,7 +667,7 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     double *pr, *pa, *pb;
     int i, n;
 
@@ -697,7 +697,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     double *pr, *pa, *pb;
     int i, n;
 
@@ -763,7 +763,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     vladd_node(node, r, ca,a, cb,b);
   }
   /* add times as well */
@@ -831,7 +831,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     vladdto_node(node, r, ca, a);
   }
 

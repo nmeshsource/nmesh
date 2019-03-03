@@ -1257,7 +1257,7 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   /* now make sure dat in nodes is also reallocated */
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     realloc_nodevariables(node, nvdb_new);
   }
 }
@@ -1331,7 +1331,7 @@ void enablevarcomp_inpatch(tPat *pat, int i)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     if(node->pat == pat) enablevarcomp_innode(node, i);
   }
 }
@@ -1344,7 +1344,7 @@ void disablevarcomp_inpatch(tPat *pat, int i)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     if(node->pat == pat) disablevarcomp_innode(node, i);
   }
 }
@@ -1357,7 +1357,7 @@ void enablevar_inpatch(tPat *pat, int i)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     if(node->pat == pat) enablevar_innode(node, i);
   }
 }
@@ -1370,7 +1370,7 @@ void disablevar_inpatch(tPat *pat, int i)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     if(node->pat == pat) disablevar_innode(node, i);
   }
 }
@@ -1382,7 +1382,7 @@ void enablevar(tMesh *mesh, int i)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     enablevar_innode(node, i);
   }
 }
@@ -1394,7 +1394,7 @@ void disablevar(tMesh *mesh, int i)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     disablevar_innode(node, i);
   }
 }
@@ -1423,7 +1423,7 @@ void enablevarlist(tVarList *vl)
   {
     formylnodes(mesh, myid)
     {
-      tNode *node = GetMyNode(mesh, myid);
+      tNode *node = MyNode(mesh, myid);
       enablevarlist_innode(node, vl);
     }
   }
@@ -1438,7 +1438,7 @@ void disablevarlist(tVarList *vl)
   {
     formylnodes(mesh, myid)
     {
-      tNode *node = GetMyNode(mesh, myid);
+      tNode *node = MyNode(mesh, myid);
       disablevarlist_innode(node, vl);
     }
   }

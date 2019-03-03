@@ -21,7 +21,7 @@
 #define formylnodes(mesh, myid) formylnodes_noomp(mesh, myid)
 
 /* get node from myid */
-#define GetMyNode(mesh, myid) \
+#define MyNode(mesh, myid) \
   mesh->myln->ln[myid / mesh->myln->nm][myid % mesh->myln->nm]->node
 
 /* loop over all points in a node */

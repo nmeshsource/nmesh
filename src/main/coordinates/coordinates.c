@@ -95,7 +95,7 @@ int coordinates_init(tMesh *mesh)
 
   formylnodes(mesh, myid)
   {
-    tNode *node = GetMyNode(mesh, myid);
+    tNode *node = MyNode(mesh, myid);
     coordinates_init_node(node);
   }
 
