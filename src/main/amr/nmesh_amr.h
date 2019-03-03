@@ -15,10 +15,10 @@ tPat:     |-----patch0-----|-------patch1-------|--patch2----|...
 tNode:     node node ...     node node node ...  node node ...
                    ^
   The nodes shown here are the leaf nodes. They are kept in 
-  linked lists (tNlist *lnodes).
+  linked lists in tMylnodes.
 
   Each node has a tDat struct that can be empty if the data is on another
-  proc. The tDat struct contain lists of arrays, one for each variable.
+  proc. The tDat struct contains lists of arrays, one for each variable.
 
   Also, each node is part of an oct-tree. Here we only show 2 instead of 8:
 level
@@ -177,7 +177,6 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
 
 
-
 /***********************************************************************/
 /* Bfaces */
 /***********************************************************************/
@@ -187,20 +186,19 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 where tBface is a part of a patch face that touches at most one
 other patch. We use the same BC on all of tBface. */
 typedef struct tBFACE {
-  tPat *pat;   // patch in which our patchface is
-  int f;       // face, runs from 0 to 5 like bbox (for each pat)
-  struct tBFACE *next;   // next bface in this patch
-  struct tBFACE *prev;   // previous bface in this patch
+  tPat *pat;      // patch in which our patchface is
+  int f;          // face, runs from 0 to 5 (for each pat)
+  double bbox[4]; // bound. box of bface in the 2 coords perp. to face f
    // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
    // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
   struct tBFACE *obface; // pointer to other bface that touches
-  int oXi,oYi,oZi;       // ind of vars in this node that contain coords in other pat
-  unsigned sameoX         : 1; // 1 if X-coord of points in neighboring faces is same
-  unsigned sameoY         : 1; // 1 if Y-ccord of points in neighboring faces is same
-  unsigned sameoZ         : 1; // 1 if Z-ccord of points in neighboring faces is same
-  unsigned face2          : 1; // 1 if we set normal derivs of field and not field itself
-  unsigned innerbound     : 1; // 1 if bface is inner boundary (e.g. horizon)
-  unsigned outerbound     : 1; // 1 if bface is outer mesh boundary (e.g. infinity)
+  int ioX[3];     // ind of vars in this node that contain coords in other pat
+  int sameoX[3];  // sameoX[d]=1 if X[d]-coord of points in neighboring faces is same
+  int face2;      // 1 if we set normal derivs of field and not field itself
+  int innerbound; // 1 if bface is inner boundary (e.g. horizon)
+  int outerbound; // 1 if bface is outer mesh boundary (e.g. infinity)
+  struct tBFACE *next; // next bface in this patch
+  struct tBFACE *prev; // previous bface in this patch
 } tBface;
 /* The flags sameoX/Y/Z refer to the X,Y,Z-coords of the neighboring pat op,
    not the coords of pat p the bface is on! E.g. if the points on the
@@ -216,6 +214,7 @@ typedef struct tBFACE {
    vars. Probably we just need the 3 vars oX,oY,oZ in each pat. We can then
    loop over all bfaces of a pat and set oX,oY,oZ to whatever they need
    to be. If edges or corners belong to several bfaces, the last bface wins. */
+
 
 /***********************************************************************/
 /* other useful objects */

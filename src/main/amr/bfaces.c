@@ -6,12 +6,9 @@
 
 
 
-
-
 /*************************************************************************/
 /* funcs to add and remove bfaces */
 /*************************************************************************/
-
 
 /* get mem for 1 bface */
 tBface *alloc_bface(tPat *pat, int f)
@@ -42,9 +39,9 @@ tBface *add_empty_bface(tPat *pat, int f)
     bface0 = bface;
 
   /* set some bface info */
-  bface->oXi  = -1; /* var indices of other coords not known yet */
-  bface->oYi  = -1; /* var indices of other coords not known yet */
-  bface->oZi  = -1; /* var indices of other coords not known yet */
+  bface->ioX[0] = -1; /* var indices of other coords not known yet */
+  bface->ioX[1] = -1; /* var indices of other coords not known yet */
+  bface->ioX[2] = -1; /* var indices of other coords not known yet */
   return bface;
 }
 
@@ -85,3 +82,8 @@ void remove_all_bfaces(tPat *pat)
     remove_bface(bft);
   }
 }
+
+/*************************************************************************/
+/* funcs to set bface info */
+/*************************************************************************/
+
