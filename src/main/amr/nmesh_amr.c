@@ -23,5 +23,6 @@ int nmesh_amr(tMesh *mesh)
          "verbose mode for memory allocation [no,yes]");
   AddPar("amr_mesh_type", "test_mesh",
 	 "mesh we start with [test_mesh,l2_mesh]");
+  AddPar("amr_n", "5", "number of points in all 3 dir. in one node");
   return 0;
 }

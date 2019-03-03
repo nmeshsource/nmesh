@@ -99,9 +99,10 @@ int setup_mesh(tMesh *mesh)
 /* set up a mesh with 2 levels  */
 int setup_l2_mesh(tMesh *mesh)
 {
+  int amr_n = Geti(Par("amr_n"));
   double bbox[6] = { -4,4, -2,2, -1,1 };
   int n1max = 55;
-  int n[3] = { 5,4,3 };
+  int n[3] = { amr_n,amr_n,amr_n };
   tNlist *el, *en;
 
   PRFs(":\n");
