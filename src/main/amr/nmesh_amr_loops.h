@@ -28,7 +28,7 @@
 #define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
 
 /* get pointer to variable array */
-#define GetVarArray(node, varindex) \
+#define VarA(node, varindex) \
   ((node->dat) ? node->dat->v[(varindex)] : 0)
 
 /* loop over array */

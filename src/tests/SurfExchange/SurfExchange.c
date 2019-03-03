@@ -22,7 +22,7 @@ int SurfExchange_test(tMesh *mesh)
   {
     int ijk;
     tNode *node = GetMyNode(mesh, myid);
-    tArray *ua = GetVarArray(node, ui);
+    tArray *ua = VarA(node, ui);
 
     /* set particular pattern in u */
     forarray(ua, ijk)

@@ -51,7 +51,7 @@ void output3d_meshvar(tMesh *mesh, char *name, int It, double T)
       {
         /* VTK output: one file per time step in separate subdirectories */
         fp = fopen_vtk(name, outdir, "XYZ", p, ns, nseries-1);
-        write3d_vtk(node, fp, GetVarArray(node, vi), It,T, nseries-1, par);
+        write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
         fclose(fp);
       }
     }

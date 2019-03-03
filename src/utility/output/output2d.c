@@ -59,7 +59,7 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
                    Gets(Par("outdir")),name, p, ns);
           fXY = fopen(XYfil, "a");
           if(!fXY) errorexits("failed opening %s", XYfil);
-          write_plane_ascii(node, fXY, 2, ijk, GetVarArray(node, vi), It,T);
+          write_plane_ascii(node, fXY, 2, ijk, VarA(node, vi), It,T);
           fclose(fXY);
         }
       }
@@ -73,7 +73,7 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
                    Gets(Par("outdir")),name, p, ns);
           fXZ = fopen(XZfil, "a");
           if(!fXZ) errorexits("failed opening %s", XZfil);
-          write_plane_ascii(node, fXZ, 1, ijk, GetVarArray(node, vi), It,T);
+          write_plane_ascii(node, fXZ, 1, ijk, VarA(node, vi), It,T);
           fclose(fXZ);
         }
       }
@@ -87,7 +87,7 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
                    Gets(Par("outdir")),name, p, ns);
           fYZ = fopen(YZfil, "a");
           if(!fYZ) errorexits("failed opening %s", YZfil);
-          write_plane_ascii(node, fYZ, 0, ijk, GetVarArray(node, vi), It,T);
+          write_plane_ascii(node, fYZ, 0, ijk, VarA(node, vi), It,T);
           fclose(fYZ);
         }
       }
