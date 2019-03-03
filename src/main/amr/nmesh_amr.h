@@ -128,6 +128,7 @@ typedef struct tPAT {
   int (*dXYZ_dxyz)(tNode *node, int ind, const double X[3],
                    double x[3], double dXYZdxyz[3][3]);
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
+  struct tBFACE *bface0; /* 1st bface of this patch */
   tNode *rnode;         /* root node in this patch */
   int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
   struct tARRAY *(*Xb)[3]; /* list of points (often Gauss-Lobatto in [-1,1]) */
@@ -175,6 +176,46 @@ use space filling curve as in
 http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
 
+
+
+/***********************************************************************/
+/* Bfaces */
+/***********************************************************************/
+/* Note: To include info about which patches touch, tPat also contains
+         info about BCs for patches:
+  struct tBFACE *bface0;
+where tBface is a part of a patch face that touches at most one
+other patch. We use the same BC on all of tBface. */
+typedef struct tBFACE {
+  tPat *pat;   // patch in which our patchface is
+  int f;       // face, runs from 0 to 5 like bbox (for each pat)
+  struct tBFACE *next;   // next bface in this patch
+  struct tBFACE *prev;   // previous bface in this patch
+   // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
+   // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
+  struct tBFACE *obface; // pointer to other bface that touches
+  int oXi,oYi,oZi;       // ind of vars in this node that contain coords in other pat
+  unsigned sameoX         : 1; // 1 if X-coord of points in neighboring faces is same
+  unsigned sameoY         : 1; // 1 if Y-ccord of points in neighboring faces is same
+  unsigned sameoZ         : 1; // 1 if Z-ccord of points in neighboring faces is same
+  unsigned face2          : 1; // 1 if we set normal derivs of field and not field itself
+  unsigned innerbound     : 1; // 1 if bface is inner boundary (e.g. horizon)
+  unsigned outerbound     : 1; // 1 if bface is outer mesh boundary (e.g. infinity)
+} tBface;
+/* The flags sameoX/Y/Z refer to the X,Y,Z-coords of the neighboring pat op,
+   not the coords of pat p the bface is on! E.g. if the points on the
+   touching face of pat op have the same Y and Z coords (of pat op) as the
+   points in our bface from pat b we set sameY=sameZ=1. This means once we
+   find the X,Y,Z-coords (of pat op) of any point in our bface in pat b,
+   there is a coordinate line (with Y=const1, Z=const2) on which this point
+   is located. Then we can later do 1D interpolation in pat op along its
+   X-direction in some BC. */
+/* NOTE: oXi,oYi,oZi are all set to -1 when a bface is allocated with
+   add_empty_bface. So -1 means we do not know it yet. */
+/* ALSO: We need a function that sets oXi,oYi,oZi and sets the corresponding
+   vars. Probably we just need the 3 vars oX,oY,oZ in each pat. We can then
+   loop over all bfaces of a pat and set oX,oY,oZ to whatever they need
+   to be. If edges or corners belong to several bfaces, the last bface wins. */
 
 /***********************************************************************/
 /* other useful objects */

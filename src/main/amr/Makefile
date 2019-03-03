@@ -3,6 +3,6 @@
 NAME := amr
 
 OBJS := nmesh_amr.o mesh.o storage.o connect.o print.o array.o \
-	surface.o load.o
+	surface.o load.o bfaces.o
 
 include $(TOP)/Makefile.subdirs
