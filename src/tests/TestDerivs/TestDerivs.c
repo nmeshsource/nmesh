@@ -22,11 +22,12 @@ int TestDerivs_startup(tMesh *mesh)
   printf("Initializing TestDerivs:\n");
 
   /* enable all vars */
+  coordinates_init(mesh);
   enablevar(mesh, Ind("TestDerivs_u"));
   enablevar(mesh, Ind("TestDerivs_Err_dux"));
   enablevar(mesh, Ind("TestDerivs_Err_dduxx"));
-  
-  /* set initial data in nodees */
+
+  /* set initial data in nodes */
   formylnodes(mesh,myid)
   {  
     tNode *node = MyNode(mesh,myid);

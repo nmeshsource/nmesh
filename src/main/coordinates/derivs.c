@@ -12,9 +12,15 @@ int cart_partials(tNode *node, int ui, int dui)
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
+  tDat *dat = node->dat;
   double *du[] = { Vard(node,dui), Vard(node,dui+1), Vard(node,dui+2) };
   double dXbdX[3];
   int ret, ind, m,i;
+
+  if(!dat) return 0;
+
+  /* do we need to init. coords? */
+  if(!(dat->coords_set)) coordinates_init_node(node);
 
   /* take derivs with respect to Xb: du/dXb */
   ret = basis_var_derivs(node, ui, dui);
