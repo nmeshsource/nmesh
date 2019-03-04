@@ -22,21 +22,20 @@ void patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
 
     /* set dXYZdxyz */
     pat->dXYZ_dxyz(pat, NULL,-1, X, x, dXYZdxyz);
- 
     for(j=0; j<3; j++) n[j] = dXYZdxyz[dir][j];
   }
   else  /* use Cartesian normal */
   {
-    n[1] = n[2] = n[3] = 0.0;
+    n[0] = n[1] = n[2] = 0.0;
     n[dir] = 1.0;
   }
 
   /* normalize and set sign from sig */
-  smag = sig * sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]);
+  smag = sig * sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
   if(smag == 0.0) smag = sig;
+  n[0] /= smag;
   n[1] /= smag;
   n[2] /= smag;
-  n[3] /= smag;
 }
 
 /* find pat size L of pat */
