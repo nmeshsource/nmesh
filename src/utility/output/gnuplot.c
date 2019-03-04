@@ -146,14 +146,14 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     {
       for(i=imin; i<=imax; i++)
       {
-        int ind1 = Ind_dir(i,j,k, dir);
+        int i0 = i0_norm(i,j,k, dir);
         int indv = Ind_n(i,j,k, va->n);
 
-        Xb[dir] = p1->d[ind1];
+        Xb[dir] = p1->d[i0];
         XYZ_of_XbYbZb(node, Xb, X);
-        //fprintf(fp, "%d %d %d: %d %d: ", i,j,k, ind1,dir);
+        //fprintf(fp, "%d %d %d: %d %d: ", i,j,k, i0,dir);
         //fprintf(fp, "%g %g: ", Xb[dir], X[dir]);
-        //fprintf(fp, "%d %d %d: %d: %d: ", i,j,k, ind1, indv);
+        //fprintf(fp, "%d %d %d: %d: %d: ", i,j,k, i0, indv);
         fprintf(fp, "%.15g %.15g \n", X[dir], pv[indv]);
       }
     }

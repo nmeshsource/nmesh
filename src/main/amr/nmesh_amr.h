@@ -365,3 +365,6 @@ char *node_location_str(tNode *node, char *s, int slen);
 
 /* load.c */
 void move_nodelist_to_rank(tNlist *list, int desrank);
+
+/* amr.c */
+int Ind_n_norm(int i, int j, int k, int n[3], int norm);

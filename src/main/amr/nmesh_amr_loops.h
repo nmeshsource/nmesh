@@ -88,7 +88,7 @@
 
 /* Indices */
 #define Ind_n(i,j,k,n) ( (i) + (n[0])*( (j) + (n[1])*(k) ) )
-#define Ind_dir(i,j,k,dir) ( (i)*(dir==0) + (j)*(dir==1) + (k)*(dir==2) )
+#define i0_norm(i,j,k,norm) ( (i)*(norm==0) + (j)*(norm==1) + (k)*(norm==2) )
 /* ijk = i + n0*j + n0*n1*k, thus:
    ijk/(n0*n1) = k
    (ijk - n0*n1*k)/n0 = j
