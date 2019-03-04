@@ -39,6 +39,10 @@
 #define Vard(node, varindex) \
   ((node->dat) ? node->dat->v[(varindex)]->d : 0)
 
+/* get double pointer to surface data in a variable */
+#define Varaj(node, varindex, face) \
+  ((node->dat) ? node->dat->s[(face)][(varindex)]->ajsurf->d : 0)
+
 /* loop of one variable (it is in an array*/
 //#define forvari(node,varindex, k) if(node->dat) forarray(node->dat->v[(varindex)], k)
 #define forvari(node,varindex, k) \
@@ -93,8 +97,8 @@
 #define jOfInd_n_k(ijk,n,k)    (((ijk) - (n[0])*(n[1])*(k))/(n[0]))
 #define iOfInd_n_jk(ijk,n,j,k) ((ijk) - (n[0])*(n[1])*(k) - (n[0])*(j))
 /* first and second index of i,j,k when we are in plane normal to norm */
-#define Ind1_norm(i,j,k,norm) ( (i)*(norm==2 || norm==1) + (j)*(norm==0) )
-#define Ind2_norm(i,j,k,norm) ( (k)*(norm==0 || norm==1) + (j)*(norm==2) )
+#define i1_norm(i,j,k,norm) ( (i)*(norm==2 || norm==1) + (j)*(norm==0) )
+#define i2_norm(i,j,k,norm) ( (k)*(norm==0 || norm==1) + (j)*(norm==2) )
 /* direc. 1 and 2 that are normal to norm=0,1,2 */
 #define Dir1_norm(norm) (norm==0)
 #define Dir2_norm(norm) ( (2)*(norm==0 || norm==1) + (norm==2) )
