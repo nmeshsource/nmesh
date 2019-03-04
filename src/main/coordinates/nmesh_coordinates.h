@@ -29,3 +29,6 @@ void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui);
+
+/* utilities.c */
+double patface_normal_at_ijk(tNode *node, int f, int ijk, double n[3]);

@@ -7,7 +7,7 @@
 
 
 /* find normal vector (n[0],n[1],n[2]) of patch face f at X,Y,Z */
-void patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
+double patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
 {
   int dir = f/2;         /* get direction */
   int sig = 2*(f%2) - 1; /* get sign for outward direction */
@@ -36,7 +36,47 @@ void patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
   n[0] /= smag;
   n[1] /= smag;
   n[2] /= smag;
+  return smag;
 }
+
+/* find normal vector (n[0],n[1],n[2]) of pat face f at point ijk */
+double patface_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
+{
+  tPat *pat = node->pat;
+  tMesh *mesh = pat->mesh;
+  tDat *dat = node->dat;
+  int dir = f/2;     /* get direction */
+  int sig = 2*(f%2) - 1; /* get sign for outward direction */
+  int idXd = Ind("dXdx");
+  double smag;
+
+  if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
+
+  if(!dat) return 0.;
+
+  /* do we need to init. coords? */
+  if(!(dat->coords_set)) coordinates_init_node(node);
+
+  /* get normal from derivs */
+  {
+    double *pdXd[3][3]
+            = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
+                {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
+                {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
+    n[0] = pdXd[dir][0][ijk];
+    n[1] = pdXd[dir][1][ijk];
+    n[2] = pdXd[dir][2][ijk];
+  }
+
+  /* normalize and set sign from sig */
+  smag = sig * sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+  if(smag == 0.0) smag = sig;
+  n[0] /= smag;
+  n[1] /= smag;
+  n[2] /= smag;
+  return smag;
+}
+
 
 /* find pat size L of pat */
 double find_pat_size(tPat *pat)
