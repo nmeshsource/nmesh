@@ -152,17 +152,17 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       p = (face%2)*(n[dir] - 1);
 
       if(node->patface[face])
-      forplaneN(dir, i,j,k, n, p)
-      {
-        ijk = Ind_n(i,j,k, n);
-        node_normal_at_ijk(node, face, ijk, norm);
-
-        /* if stuff is coming in */
-        if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
+        forplaneN(dir, i,j,k, n, p)
         {
-          r[ijk] = -cos(x[ijk] - node->time);
+          ijk = Ind_n(i,j,k, n);
+          node_normal_at_ijk(node, face, ijk, norm);
+
+          /* if stuff is coming in */
+          if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
+          {
+            r[ijk] = -cos(x[ijk] - node->time);
+          }
         }
-      }
     }
   }
 }

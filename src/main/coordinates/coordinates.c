@@ -16,6 +16,7 @@ int coordinates_coordvars_enabled(tNode *node)
   tDat *dat = node->dat;
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
+  int idet_dXbdx = Ind("det_dXbdx");
   int ix   = Ind("x");
 
   /* do nothing if this is not my node */
@@ -31,6 +32,7 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, idXd);
   enablevar_innode(node, idXd+3);
   enablevar_innode(node, idXd+6);
+  enablevar_innode(node, idet_dXbdx);
   enablevar_innode(node, ix);
   enablevar_innode(node, ix+1);
   enablevar_innode(node, ix+2);
