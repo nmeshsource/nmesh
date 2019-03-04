@@ -19,6 +19,7 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("dXd", "i", "coord derivative dX/dx^i"); // don't put any-
   AddAuxVar("dYd", "i", "coord derivative dY/dx^i"); // thing in between
   AddAuxVar("dZd", "i", "coord derivative dZ/dx^i"); // these 3 lines
+  AddAuxVar("det_dXbdx", "", "determinant of dXb/dx");
   AddAuxVar("x", "", "Cartesian x coordinate"); // don't put any-
   AddAuxVar("y", "", "Cartesian y coordinate"); // thing in between
   AddAuxVar("z", "", "Cartesian z coordinate"); // these 3 lines

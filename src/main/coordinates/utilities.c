@@ -77,6 +77,71 @@ double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
   return smag;
 }
 
+/* get transpose of a 3x3 matrix. */
+void transp3Dmat_from_3Dmat(const double M[3][3], double transpM[3][3])
+{
+  transpM[0][0] = M[0][0];
+  transpM[0][1] = M[1][0];
+  transpM[0][2] = M[2][0];
+  transpM[1][0] = M[0][1];
+  transpM[1][1] = M[1][1];
+  transpM[1][2] = M[2][1];
+  transpM[2][0] = M[0][2];
+  transpM[2][1] = M[1][2];
+  transpM[2][2] = M[2][2];
+}
+
+/* determinant of 3x3 matrix */
+double det_3Dmatrix(const double M[3][3])
+{
+  /* M = {{m11,m12,m13},{m21,m22,m23},{m31,m32,m33}}
+     Det[M] = m11*m22*m33 - m13*m22*m31 + m12*m23*m31 +
+              m13*m21*m32 - m11*m23*m32 - m12*m21*m33   */
+  LDOUBLE DetM =M[0][0]*M[1][1]*M[2][2] -
+                M[0][2]*M[1][1]*M[2][0] +
+                M[0][1]*M[1][2]*M[2][0] +
+                M[0][2]*M[1][0]*M[2][1] -
+                M[0][0]*M[1][2]*M[2][1] -
+                M[0][1]*M[1][0]*M[2][2];
+  return DetM;
+}
+
+/* 3d matrix inverse and return det. */
+double inv3Dmat_from_3Dmat(const double M[3][3], double invM[3][3])
+{
+  /* M = {{m11,m12,m13},{m21,m22,m23},{m31,m32,m33}}
+     Det[M] = m11*m22*m33 - m13*m22*m31 + m12*m23*m31 +
+              m13*m21*m32 - m11*m23*m32 - m12*m21*m33
+     Inverse[M]*Det[M] =
+       {{-(m23*m32) + m22*m33, m13*m32 - m12*m33, -(m13*m22) + m12*m23},
+        {m23*m31 - m21*m33, -(m13*m31) + m11*m33, m13*m21 - m11*m23},
+        {-(m22*m31) + m21*m32, m12*m31 - m11*m32, -(m12*m21) + m11*m22}}  */
+  LDOUBLE DetM = det_3Dmatrix(M);
+  LDOUBLE sum;
+  if(DetM==0.0) DetM=dequaleps*dequaleps*dequaleps;
+  sum        = (-(M[1][2]*M[2][1]) + M[1][1]*M[2][2])/DetM;
+  invM[0][0] = sum;
+  sum        = (  M[0][2]*M[2][1]  - M[0][1]*M[2][2])/DetM;
+  invM[0][1] = sum;
+  sum        = (-(M[0][2]*M[1][1]) + M[0][1]*M[1][2])/DetM;
+  invM[0][2] = sum;
+  sum        = (  M[1][2]*M[2][0]  - M[1][0]*M[2][2])/DetM;
+  invM[1][0] = sum;
+  sum        = (-(M[0][2]*M[2][0]) + M[0][0]*M[2][2])/DetM;
+  invM[1][1] = sum;
+  sum        = (  M[0][2]*M[1][0]  - M[0][0]*M[1][2])/DetM;
+  invM[1][2] = sum;
+  sum        = (-(M[1][1]*M[2][0]) + M[1][0]*M[2][1])/DetM;
+  invM[2][0] = sum;
+  sum        = (  M[0][1]*M[2][0]  - M[0][0]*M[2][1])/DetM;
+  invM[2][1] = sum;
+  sum        = (-(M[0][1]*M[1][0]) + M[0][0]*M[1][1])/DetM;
+  invM[2][2] = sum;
+
+  return DetM;
+}
+
+
 
 /* find pat size L of pat */
 double find_pat_size(tPat *pat)

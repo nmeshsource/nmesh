@@ -55,6 +55,9 @@ int coordinates_init_node(tNode *node)
             = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
                 {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
                 {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
+  double *det_dXbdx = Vard(node, Ind("det_dXbdx"));
+  double dXbdX[3];
+  double det_dXbYbZb_dXYZ;
 
   /* do nothing if coords are set already or if vars are off */
   if(!dat) return 0;
@@ -62,6 +65,10 @@ int coordinates_init_node(tNode *node)
   if(!vars_on) return 0;
 
   PRF;printf(":\n");
+
+  /* get det of dXb/dX */
+  dXbYbZb_dXYZ(node, dXbdX);
+  det_dXbYbZb_dXYZ = dXbdX[0] * dXbdX[1] * dXbdX[2];
 
   /* set coords */
   forijk(i,j,k, n)
@@ -74,7 +81,7 @@ int coordinates_init_node(tNode *node)
     XYZ_of_XbYbZb(node, Xb, X);
     for(d=0; d<3; d++) pX[d][ijk] = X[d];
 
-    /* now set x, dXdx */
+    /* now set x, dXdx, det(dXb/dx) */
     if(pat->dXYZ_dxyz)
     {
       pat->dXYZ_dxyz(pat, node, -1, X, x, dXd);
@@ -83,6 +90,7 @@ int coordinates_init_node(tNode *node)
         px[d][ijk] = x[d];
         for(e=0; e<3; e++) pdXd[d][e][ijk] = dXd[d][e];
       }
+      det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXd);
     }
     else /* assume X,Y,Z are Cartesian*/
     {
@@ -91,6 +99,7 @@ int coordinates_init_node(tNode *node)
         px[d][ijk] = pX[d][ijk];
         pdXd[d][d][ijk] = 1.;
       }
+      det_dXbdx[ijk] = det_dXbYbZb_dXYZ;
     }
   }
 
