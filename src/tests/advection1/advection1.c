@@ -196,6 +196,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
+
   /* get flux terms on boundary */
   advection1_F(mesh, vlu);
 
@@ -209,7 +210,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     double dXbdX[3];
     int face;
 
-    /* get dXb/dX needed for induces 2-metric 2gam */
+    /* get dXb/dX needed for induced 2-metric 2gam */
     dXbYbZb_dXYZ(node, dXbdX);
 
     for(face=0; face<6; face++)
