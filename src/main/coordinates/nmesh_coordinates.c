@@ -13,15 +13,15 @@ int nmesh_coordinates(tMesh *mesh)
   AddFun(COORDINATES, coordinates_init);
 
   /* variables */
-  AddAuxVar("X", "",    "coordinate 0 in each patch e.g. lambda");
-  AddAuxVar("Y", "",    "coordinate 1 in each patch e.g. A");
-  AddAuxVar("Z", "",    "coordinate 2 in each patch e.g. B");
-  AddAuxVar("dXd", "i", "coordinate derivative dX/dx^i"); // don't put any-
-  AddAuxVar("dYd", "i", "coordinate derivative dY/dx^i"); // thing in between
-  AddAuxVar("dZd", "i", "coordinate derivative dZ/dx^i"); // these 3 lines
-  AddAuxVar("x", "", "Cartesian x coordinate");
-  AddAuxVar("y", "", "Cartesian y coordinate");
-  AddAuxVar("z", "", "Cartesian z coordinate");
+  AddAuxVar("X", "",    "coord0 in each patch e.g. lam"); // don't put any-
+  AddAuxVar("Y", "",    "coord1 in each patch e.g. A");   // thing in between
+  AddAuxVar("Z", "",    "coord2 in each patch e.g. B");   // these 3 lines
+  AddAuxVar("dXd", "i", "coord derivative dX/dx^i"); // don't put any-
+  AddAuxVar("dYd", "i", "coord derivative dY/dx^i"); // thing in between
+  AddAuxVar("dZd", "i", "coord derivative dZ/dx^i"); // these 3 lines
+  AddAuxVar("x", "", "Cartesian x coordinate"); // don't put any-
+  AddAuxVar("y", "", "Cartesian y coordinate"); // thing in between
+  AddAuxVar("z", "", "Cartesian z coordinate"); // these 3 lines
  
   /* parameters */
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
