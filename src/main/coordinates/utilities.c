@@ -7,8 +7,7 @@
 
 
 /* find normal vector (n[0],n[1],n[2]) of patch face f at X,Y,Z */
-void patface_normal_at_XYZ(tPat *pat, int f, const double X[3],
-                           double n[3])
+void patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
 {
   int dir = f/2;         /* get direction */
   int sig = 2*(f%2) - 1; /* get sign for outward direction */
