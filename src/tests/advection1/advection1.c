@@ -173,7 +173,8 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int ifxx = Ind("advection1_fxx");
-  int iF  = Ind("advection1_F0");
+  int iF   = Ind("advection1_F0");
+  int iooJ = Ind("det_dXbdx");
   int myid;
 
   /* compute flux */
@@ -211,6 +212,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       int dir = face/2;
       int p = (face%2)*(n[dir] - 1);
       double sig = 2*(face%2) - 1;
+      double *ooJ = Vard(node, iooJ);
       double *F = Vard(node, iF+face);
       double *w = node->Wq[dir]->d;
       int i,j,k, ijk, IJ;
@@ -220,7 +222,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         ijk = Ind_n(i,j,k, n);
         IJ = Ind_n_norm(i,j,k, n, dir);
 
-        r[ijk] -= sig*F[IJ]/w[i0_norm(i,j,k, dir)];
+        r[ijk] += sig*F[IJ]*ooJ[ijk]/w[i0_norm(i,j,k, dir)];
       }
     }
   }
@@ -293,7 +295,7 @@ int advection1_analyze(tMesh *mesh)
     forpoints(node, i)
     {
       double ua = sin(x[i]-t);
-      ue[i] = fabs(u[i]/ua - 1.);
+      ue[i] = fabs(u[i]- ua);
     }
   }
   return 0;
