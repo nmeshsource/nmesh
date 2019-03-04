@@ -12,7 +12,7 @@
 /* use recursion recommended in numrec to get P_l^m for positive m */
 double assocLegendreP(int l, int m, double x)
 {
-  double fact, Pkm, Pmm, Pmp1_m, somx2;
+  double fact, Pkm=0., Pmm, Pmp1_m, somx2;
   int i, k;
 
   if(m < 0 || m > l || fabs(x) > 1.0) errorexit("Bad arguments");
@@ -53,7 +53,7 @@ double assocLegendreP(int l, int m, double x)
 /* use recursion recommended in numrec to get P_l */
 double basis_LegendreP(int l, double x, int np)
 {
-  double Pk, P0, P1;
+  double Pk=0., P0, P1;
   int k;
 
   /* build P_m^m */
@@ -103,7 +103,7 @@ void Legendre_P_dP_Q_dQ(int l, double x,
 {
   int k;
   double P0 = 1., P1 = x,  dP0 = 0., dP1 = 1.;
-  double Pk, dPk;
+  double Pk=0., dPk=0.;
 
   if(l==0)
   {

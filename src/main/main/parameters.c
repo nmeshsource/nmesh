@@ -508,7 +508,7 @@ int iterate_parameters(tMesh* mesh, int next)
 {
   static int iter = 0; // should make this a value in mesh or a global var
   tPar *p;
-  char *list, *name, *newvalue, *value, *saveptr;
+  char *list, *name, *newvalue=NULL, *value, *saveptr;
   char iterpar[100] = "iterate_parameter1";
   char newoutdir[10000], *outdirp;
   int i, j, l;

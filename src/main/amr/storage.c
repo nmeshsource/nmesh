@@ -309,7 +309,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
 /* make 8 childern and return them in a short list */
 tNlist *make8_child_nodes(tNode *parent, int n[3])
 {
-  tNlist *nlist;
+  tNlist *nlist = NULL;
   tNlist *elem = NULL;
   tNode *node;
   tNode *narray[8];
@@ -339,7 +339,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 /* remove children */
 tNode *destroy_children(tNode *parent)
 {
-  tNlist *el, *clist;
+  tNlist *el, *clist = NULL;
   tNode *narray[8];
   tNode *child0 = parent->child[0];
   int ijk;
@@ -1038,7 +1038,7 @@ long get_node_nid(tNode *node)
 /* append a node list to mesh->lns and also update mesh->myln */
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
 {
-  tNlist *lnl;
+  tNlist *lnl = NULL;
   if(mesh->lns)
   {
     lnl = last_nodelist(mesh->lns); /* last elem. in mesh->lns */

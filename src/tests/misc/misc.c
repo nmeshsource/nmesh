@@ -70,7 +70,7 @@ int test_point_interpolation(tMesh *mesh)
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int myid, dir, p, k;
-  double *Xb[3];
+  double *Xb[] = { NULL, NULL, NULL };
   double X[3], Cb[2];
   double f, interp;
   tArray *coef, *Xp[3], *Cp[2];

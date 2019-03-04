@@ -755,23 +755,25 @@ void vladd_node(tNode *node,
     int ai = a->index[n];
     int bi = b->index[n];
     pr = Vard(node, ri);
-    if(ca!=0)  pa = Vard(node, ai);
-    if(cb!=0)  pb = Vard(node, bi);
 
-    if (ca == 0 && cb == 0)
+    if(ca == 0 && cb == 0)
     {
       forvari(node, ri, i) pr[i] = 0;
     }
     else if(ca == 0)
     {
+      pb = Vard(node, bi);
       forvari(node, ri, i) pr[i] = cb * pb[i];
     }
     else if(cb == 0)
     {
+      pa = Vard(node, ai);
       forvari(node, ri, i) pr[i] = ca * pa[i];
     }
     else
     {
+      pa = Vard(node, ai);
+      pb = Vard(node, bi);
       forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
     }
   }

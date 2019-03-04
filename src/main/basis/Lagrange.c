@@ -168,6 +168,7 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
       sum += var->d[Ind_n(i,j,p, n)] * B1[i] * B2[j];
     break;
   default:
+    sum=0.;
     errorexit("dir must be 0,1,2");
   }
   free(B2);
@@ -216,6 +217,7 @@ void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2])
     m1 = &j;
     break;
   default:
+    d0=d1=0; m0=m1=NULL;
     errorexit("dir must be 0,1,2");
   }
 

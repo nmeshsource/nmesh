@@ -242,8 +242,8 @@ int evolve_myln(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
   int evolve_method = Par("evolve_method");
-  void (*Evolve)(tNode *node); /* func pointer for evo method */
-  void (*Evolve_mesh)(tMesh *mesh); /* func pointer for evo method */
+  void (*Evolve)(tNode *node) = NULL;      /* func pointer for evo method */
+  void (*Evolve_mesh)(tMesh *mesh) = NULL; /* func pointer for evo method */
   int allnodes = 1;
   tVarList *allu = vlalloc(mesh);
   int i, myid;
@@ -267,6 +267,7 @@ int evolve_myln(tMesh *mesh)
     Evolve = evolve_Euler;
     Evolve_mesh = evolve_Euler_mesh;
   }
+
 
   /* make varlist with all in u */
   forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));

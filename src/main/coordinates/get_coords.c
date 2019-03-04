@@ -156,6 +156,7 @@ void array_Xplane_of_Xb(tNode *node, int dir, tArray *aCb[2], tArray *aC[2])
       d3 = d;
       break;
     default:
+      d3=-1;
       errorexit("dir must be 0,1,2");
     }
     Nm = min2(aCb[d]->N, aC[d]->N);
@@ -232,6 +233,7 @@ void array_Xbplane_of_X(tNode *node, int dir, tArray *aCb[2], tArray *aC[2])
       d3 = d;
       break;
     default:
+      d3=-1;
       errorexit("dir must be 0,1,2");
     }
     Nm = min2(aCb[d]->N, aC[d]->N);
@@ -307,6 +309,7 @@ int Xplane_is_in_node(tNode *node, int dir, double C[2])
       f = 2*d;
       break;
     default:
+      f=0;
       errorexit("dir has to be 0,1,2");
     }
     if(dless(C[d],nbb[f]))      return 0;

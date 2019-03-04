@@ -136,6 +136,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     fprintf(fp, ", i=%d, j=%d, X=%.15g, Y=%.15g\n", imin, jmin, X[0], X[1]);
     break;
   default:
+    p1=NULL;
     errorexit("dir has to be 0,1,2");
   }
 
