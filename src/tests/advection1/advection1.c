@@ -27,9 +27,6 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     cart_partials(node, iu, iux);
   }
 
-  /* get surfaces so that we can compute fluxes */
-  get_all_myln_surfaces(mesh);
-
   /* RHS */
   formylnodes(mesh, myid)
   {
@@ -43,6 +40,11 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     /* RHS at each point */
     forpoints(node, i) r[i] = -(nx*ux[i] + ny*uy[i] + nz*uz[i]);
   }
+
+  /* get surfaces so that we can compute fluxes */
+  get_all_myln_surfaces(mesh);
+
+  //FIXME: add flux terms
 }
 
 
