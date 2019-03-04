@@ -32,5 +32,5 @@ int cart_partials(tNode *node, int ui, int dui);
 
 /* utilities.c */
 double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3]);
-double det_3Dmatrix(const double M[4][4]);
-double inv3Dmat_from_3Dmat(const double M[4][4], double invM[4][4]);
+double det_3Dmatrix(const double M[3][3]);
+double inv3Dmat_from_3Dmat(const double M[3][3], double invM[3][3]);
