@@ -74,7 +74,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     double *fy = Vard(node, ifx+1);
     double *fz = Vard(node, ifx+2);
     double FNx,FNy,FNz, norm[3];
-    int face, dir, p, i,j,k, ijk, IJ;
+    int face, dir, p, i,j,k, ijk, JK;
 
 //printvar_innode(node, iu);
 
@@ -89,7 +89,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
       forplaneN(dir, i,j,k, n, p)
       {
         ijk = Ind_n(i,j,k, n);
-        IJ = Ind_n_norm(i,j,k, n, dir);
+        JK = Ind_n_norm(i,j,k, n, dir);
         node_normal_at_ijk(node, face, ijk, norm);
 
         /* if stuff is coming in */
@@ -98,9 +98,9 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
           /* if there is an adjacent surface */
           if(uaj)
           {
-            FNx = uaj[IJ] * nx;
-            FNy = uaj[IJ] * ny;
-            FNz = uaj[IJ] * nz;
+            FNx = uaj[JK] * nx;
+            FNy = uaj[JK] * ny;
+            FNz = uaj[JK] * nz;
           }
           else
           {
@@ -114,7 +114,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
           FNz = fz[ijk];
         }
 
-        F[IJ] = (FNx - fx[ijk])*norm[0] +
+        F[JK] = (FNx - fx[ijk])*norm[0] +
                 (FNy - fy[ijk])*norm[1] +
                 (FNz - fz[ijk])*norm[2];
       }
@@ -205,24 +205,41 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     tNode *node = MyNode(mesh, myid);
     int *n = node->n;
     double *r  = Vard(node, ir);
+    double *ooJ = Vard(node, iooJ);
+    double dXbdX[3];
     int face;
+
+    /* get dXb/dX needed for induces 2-metric 2gam */
+    dXbYbZb_dXYZ(node, dXbdX);
 
     for(face=0; face<6; face++)
     {
       int dir = face/2;
       int p = (face%2)*(n[dir] - 1);
       double sig = 2*(face%2) - 1;
-      double *ooJ = Vard(node, iooJ);
       double *F = Vard(node, iF+face);
-      double *w = node->Wq[dir]->d;
-      int i,j,k, ijk, IJ;
+      double *w = Wquad(node, dir);
+      double sqrtdet2gam, det2dXdXb, det2dxdXb;
+      int i,j,k, ijk, JK, i0;
+
+      /* get 2d Jacobian of dX/dXb */
+      switch(dir)
+      {
+      case 0:  det2dXdXb = 1./(dXbdX[1]*dXbdX[2]);  break;
+      case 1:  det2dXdXb = 1./(dXbdX[0]*dXbdX[2]);  break;
+      case 2:  det2dXdXb = 1./(dXbdX[0]*dXbdX[1]);  break;
+      }
+      /* get 2d Jacobian of dx/dXb */
+      det2dxdXb = det2dXdXb * 1.;   // for now assume dx/dX = 1
+      sqrtdet2gam = det2dxdXb * 1.; // for now assume gam = flat
 
       forplaneN(dir, i,j,k, n, p)
       {
         ijk = Ind_n(i,j,k, n);
-        IJ = Ind_n_norm(i,j,k, n, dir);
+        JK = Ind_n_norm(i,j,k, n, dir);
+        i0 = i0_norm(i,j,k, dir);
 
-        r[ijk] += sig*F[IJ]*ooJ[ijk]/w[i0_norm(i,j,k, dir)];
+        r[ijk] += sig * F[JK] * sqrtdet2gam * ooJ[ijk] / w[i0];
       }
     }
   }

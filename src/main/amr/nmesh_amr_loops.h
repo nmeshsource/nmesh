@@ -48,6 +48,8 @@
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)
 
+/* get integration weights for direc. dir on node */
+#define Wquad(node, dir) node->Wq[dir]->d
 
 /****************************************************************************/
 /* loops that should be used only in very particular advanced cases         */
