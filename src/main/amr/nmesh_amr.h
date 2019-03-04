@@ -128,6 +128,7 @@ typedef struct tPAT {
   int (*dXYZ_dxyz)(tNode *node, int ind, const double X[3],
                    double x[3], double dXYZdxyz[3][3]);
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
+  int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bface0; /* 1st bface of this patch */
   tNode *rnode;         /* root node in this patch */
   int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
