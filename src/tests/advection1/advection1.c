@@ -7,12 +7,17 @@
 #define PR 1
 
 
-/* RHS of: d_t u = - n_i d_i u */
-void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+
+/* flux and its derivs for adv. eqn: f^i = n^i u */
+void advection1_f_df(tMesh *mesh, tVarList *vlu)
 {
-  int ir = vlr->index[0];
   int iu = vlu->index[0];
-  int iux = Ind("advection1_ux");
+  int ifx  = Ind("advection1_fx");
+  int ify = ifx+1;
+  int ifz = ifx+2;
+  int ifxx = Ind("advection1_fxx");
+  int ifyx = ifxx+3;
+  int ifzx = ifxx+6;
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz;
   int myid;
@@ -24,27 +29,150 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
-    cart_partials(node, iu, iux);
+    double *u = Vard(node, iu);
+    double *fx = Vard(node, ifx);
+    double *fy = Vard(node, ifx+1);
+    double *fz = Vard(node, ifx+2);
+    int i;
+
+    /* flux at each point */
+    forpoints(node, i)
+    {
+      double up = u[i];
+      fx[i] = nx*up;
+      fy[i] = ny*up;
+      fz[i] = nz*up;
+    }
+
+   /* flux derivs */
+   cart_partials(node, ifx, ifxx);
+   cart_partials(node, ify, ifyx);
+   cart_partials(node, ifz, ifzx);
   }
+}
+
+
+/* use numerical flux FN^i to set F */
+void advection1_F(tMesh *mesh, tVarList *vlu)
+{
+  int iu = vlu->index[0];
+  int ifx = Ind("advection1_fx");
+  int iF  = Ind("advection1_F0");
+  char *advdir = Gets(Par("advection1_direction"));
+  double nx,ny,nz;
+  int myid;
+
+  /* prop. dir.*/
+  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
+
+  /* compute boundary flux terms */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    int *n = node->n;
+    double *fx = Vard(node, ifx);
+    double *fy = Vard(node, ifx+1);
+    double *fz = Vard(node, ifx+2);
+    double FNx,FNy,FNz, norm[3];
+    int face, dir, p, i,j,k, ijk, IJ;
+
+    /* set F on each face */
+    for(face=0; face<6; face++)
+    {
+      double *F = Vard(node, iF+face);
+      double *uaj = Varaj(node, iu, face);
+
+      dir = face/2;
+      p = (face%2)*(n[dir] - 1);
+      forplaneN(dir, i,j,k, n, p)
+      {
+        ijk = Ind_n(i,j,k, n);
+        IJ = Ind_n_norm(i,j,k, n, dir);
+        patface_normal_at_ijk(node, face, ijk, norm);
+
+        /* if stuff is coming in */
+        if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
+        {
+          FNx = uaj[IJ] * nx;
+          FNy = uaj[IJ] * ny;
+          FNz = uaj[IJ] * nz;
+        }
+        else
+        {
+          FNx = fx[ijk];
+          FNy = fy[ijk];
+          FNz = fz[ijk];
+        }
+
+        F[IJ] = (FNx - fx[ijk])*norm[0] +
+                (FNy - fy[ijk])*norm[1] +
+                (FNz - fz[ijk])*norm[2];
+      }
+    }
+  }
+}
+
+
+/* RHS of: d_t u = - d_i f^i */
+void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+{
+  int ir = vlr->index[0];
+  //int iu = vlu->index[0];
+  int ifxx = Ind("advection1_fxx");
+  int iF  = Ind("advection1_F0");
+  int myid;
+
+  /* compute flux */
+  advection1_f_df(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
     double *r  = Vard(node, ir);
-    double *ux = Vard(node, iux);
-    double *uy = Vard(node, iux+1);
-    double *uz = Vard(node, iux+2);
+    double *fxx = Vard(node, ifxx);
+    double *fyy = Vard(node, ifxx+4);
+    double *fzz = Vard(node, ifxx+8);
     int i;
 
     /* RHS at each point */
-    forpoints(node, i) r[i] = -(nx*ux[i] + ny*uy[i] + nz*uz[i]);
+    forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
   }
 
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
 
-  //FIXME: add flux terms
+  /* get flux terms on boundary */
+  advection1_F(mesh, vlu);
+
+  //FIXME: add boundary flux terms
+  /* add boundary flux terms */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    int *n = node->n;
+    double *r  = Vard(node, ir);
+    int face;
+
+    for(face=0; face<6; face++)
+    {
+      int dir = face/2;
+      int p = (face%2)*(n[dir] - 1);
+      double *F = Vard(node, iF+face);
+      double *w = node->Wq[dir]->d;
+      int i,j,k, ijk, IJ;
+
+      dir = face/2;
+      p = (face%2)*(n[dir] - 1);
+      forplaneN(dir, i,j,k, n, p)
+      {
+        ijk = Ind_n(i,j,k, n);
+        IJ = Ind_n_norm(i,j,k, n, dir);
+
+        r[ijk] += F[IJ]/w[i0_norm(i,j,k, dir)];
+      }
+    }
+  }
 }
 
 
@@ -52,7 +180,8 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 int advection1_init(tMesh *mesh)
 {
   int iu  = Ind("advection1_u");
-  int iux = Ind("advection1_ux");
+  int ifx = Ind("advection1_fx");
+  int ifxx = Ind("advection1_fxx");
   int ix =  Ind("x");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
@@ -65,7 +194,8 @@ int advection1_init(tMesh *mesh)
 
   /* enable all needed vars */
   enablevar(mesh, iu);
-  enablevar(mesh, iux);
+  enablevar(mesh, ifx);
+  enablevar(mesh, ifxx);
   enablevar(mesh, iue);
 
   /* at t=0: set u=sin(x) */
