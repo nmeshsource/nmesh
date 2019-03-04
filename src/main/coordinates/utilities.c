@@ -7,7 +7,7 @@
 
 
 /* find normal vector (n[0],n[1],n[2]) of patch face f at X,Y,Z */
-double patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
+double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
 {
   int dir = f/2;         /* get direction */
   int sig = 2*(f%2) - 1; /* get sign for outward direction */
@@ -40,7 +40,7 @@ double patface_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
 }
 
 /* find normal vector (n[0],n[1],n[2]) of pat face f at point ijk */
-double patface_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
+double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;

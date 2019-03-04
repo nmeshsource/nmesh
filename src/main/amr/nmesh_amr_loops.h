@@ -40,8 +40,8 @@
   ((node->dat) ? node->dat->v[(varindex)]->d : 0)
 
 /* get double pointer to surface data in a variable */
-#define Varaj(node, varindex, face) \
-  ((node->dat) ? node->dat->s[(face)][(varindex)]->ajsurf->d : 0)
+#define Varaj(node, varindex, face)  ( (node->dat->s[(face)][(varindex)]) ? \
+  node->dat->s[(face)][(varindex)]->ajsurf->d : 0 )
 
 /* loop of one variable (it is in an array*/
 //#define forvari(node,varindex, k) if(node->dat) forarray(node->dat->v[(varindex)], k)
