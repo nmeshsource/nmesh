@@ -66,12 +66,12 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
       {
         int dir1 = Dir1_norm(normal);
         int dir2 = Dir2_norm(normal);
-        int ind1 = Ind1_norm(i,j,k, normal);
-        int ind2 = Ind2_norm(i,j,k, normal);
+        int i1 = i1_norm(i,j,k, normal);
+        int i2 = i2_norm(i,j,k, normal);
         int indv = Ind_n(i,j,k, va->n);
 
-        Xb[dir1] = p1->d[ind1];
-        Xb[dir2] = p2->d[ind2];
+        Xb[dir1] = p1->d[i1];
+        Xb[dir2] = p2->d[i2];
         XYZ_of_XbYbZb(node, Xb, X);
         //fprintf(fp, "%d %d %d: %d %d  %d %d: ", i,j,k, ind1,ind2,dir1,dir2);
         //fprintf(fp, "%g %g  %g %g: \t\t", Xb[dir1],Xb[dir2], X[dir1],X[dir2]);
