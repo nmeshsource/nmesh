@@ -29,7 +29,6 @@ void AddMeshVar(tMesh *mesh, char *name,
   {
     /* construct name of variable */
     snprintf(fullname, 100, "%s%s", name, ilist[j]);
-    free(ilist[j]); /* free string allocated in tensorindexlist */
 
     /* make sure that this variable does not exist yet */
     for(i = 0; i < mesh->nvdb; i++)
@@ -59,7 +58,19 @@ void AddMeshVar(tMesh *mesh, char *name,
     newv->sym[1]        = sym[3*j+1];
     newv->sym[2]        = sym[3*j+2];
 
+    /* if this var lives only on one face, it needs special dimensions */
+    if(tensorindices[0]=='f')
+    {
+      int face = ilist[j][0] - '0';
+      int dir = face/2;
+      newv->n_special[dir] = 1;
+    }
+
+    /* keep mesh up to date */
     mesh->nvdb++;
+
+    /* free string allocated in tensorindexlist */
+    free(ilist[j]);
   }
 
   /* ensure that allocation also happens in the dat structs of the nodes */
@@ -99,13 +110,24 @@ void AddEvoMeshVar(tMesh *mesh, char *name,
   MeshVarSetSurfInfo(mesh, nvdb, 1);
 }
 
-/* add auxiliary variable to data base */
+/* add dimensioned variable to data base */
 void AddMeshVarDim(tMesh *mesh, char *name,
                    char *tensorindices, char *description,
                    int n_special0, int n_special1, int n_special2)
 {
   int nvdb  = mesh->nvdb;
   AddMeshVar(mesh, name, tensorindices, description);
+  MeshVarSetSpecial(mesh, nvdb, n_special0, n_special1, n_special2);
+}
+
+/* add dimensioned aux variable to data base */
+void AddAuxMeshVarDim(tMesh *mesh, char *name,
+                      char *tensorindices, char *description,
+                      int n_special0, int n_special1, int n_special2)
+{
+  int nvdb  = mesh->nvdb;
+  AddMeshVar(mesh, name, tensorindices, description);
+  MeshVarSetType(mesh, nvdb, 1);
   MeshVarSetSpecial(mesh, nvdb, n_special0, n_special1, n_special2);
 }
 

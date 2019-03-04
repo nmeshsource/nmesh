@@ -165,7 +165,10 @@ void AddAuxMeshVar(tMesh *mesh, char *name,
 void AddMeshVarDim(tMesh *mesh, char *name,
                    char *tensorindices, char *description,
                    int n_special0, int n_special1, int n_special2);
-int MeshVarIndLax(tMesh *mesh, char *name) ;
+void AddAuxMeshVarDim(tMesh *mesh, char *name,
+                      char *tensorindices, char *description,
+                      int n_special0, int n_special1, int n_special2);
+int MeshVarIndLax(tMesh *mesh, char *name);
 int MeshVarInd(tMesh *mesh, char *name);
 int Set_vdb_iStart_AtVar(tMesh *mesh, char *name);
 char *MeshVarName(tMesh *mesh, int i);
@@ -196,6 +199,9 @@ int *MeshVar_n_special(tMesh *mesh, int i);
 #define AddVarDim(name, tensorindices, description, ns0,ns1,ns2) \
   AddMeshVarDim(mesh, (name), (tensorindices), (description), \
                 (ns0),(ns1),(ns2))
+#define AddAuxVarDim(name, tensorindices, description, ns0,ns1,ns2) \
+  AddAuxMeshVarDim(mesh, (name), (tensorindices), (description), \
+                  (ns0),(ns1),(ns2))
 /* variable lists in variables.c*/
 void prvarlist(tVarList *v);
 tVarList *vlalloc(tMesh *mesh);
