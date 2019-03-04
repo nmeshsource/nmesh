@@ -123,10 +123,12 @@ typedef struct tPAT {
   int p;                /* index of this patch */
   struct tMESH *mesh;   /* pointer to mesh that contains patch */
   /* funcs to compute x,y,z from X,Y,Z and vice versa: */
-  int (*xyz_of_XYZ)(tNode *node, int ind, const double X[3], double x[3]); /* func to compute x,y,z from X,Y,Z */
-  int (*XYZ_of_xyz)(tNode *node, int ind, double X[3], const double x[3]); /* func to compute X,Y,Z from x,y,z */
-  int (*dXYZ_dxyz)(tNode *node, int ind, const double X[3],
-                   double x[3], double dXYZdxyz[3][3]);
+  int (*xyz_of_XYZ)(struct tPAT *pat, tNode *node, int ind,
+                    const double X[3], double x[3]); /* func to compute x,y,z from X,Y,Z */
+  int (*XYZ_of_xyz)(struct tPAT *pat, tNode *node, int ind,
+                    double X[3], const double x[3]); /* func to compute X,Y,Z from x,y,z */
+  int (*dXYZ_dxyz)(struct tPAT *pat, tNode *node, int ind,
+                   const double X[3], double x[3], double dXYZdxyz[3][3]);
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bface0; /* 1st bface of this patch */

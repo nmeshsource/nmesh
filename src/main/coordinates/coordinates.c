@@ -77,7 +77,7 @@ int coordinates_init_node(tNode *node)
     /* now set x, dXdx */
     if(pat->dXYZ_dxyz)
     {
-      pat->dXYZ_dxyz(node, -1, X, x, dXd);
+      pat->dXYZ_dxyz(pat, node, -1, X, x, dXd);
       for(d=0; d<3; d++)
       {
         px[d][ijk] = x[d];

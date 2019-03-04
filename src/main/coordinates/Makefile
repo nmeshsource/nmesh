@@ -2,7 +2,7 @@
 
 NAME := coordinates
 
-OBJS := nmesh_$(NAME).o $(NAME).o get_coords.o derivs.o
+OBJS := nmesh_$(NAME).o $(NAME).o get_coords.o derivs.o utilities.o
 
 
 include $(TOP)/Makefile.subdirs
