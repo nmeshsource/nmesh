@@ -289,10 +289,7 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
         X[dir] = pat->bbox[f];
 
         /* get x from X */
-        if(pat->xyz_of_XYZ)
-          pat->xyz_of_XYZ(pat, NULL,-1, X, x);
-        else
-          { x[0]=X[0]; x[1]=X[1]; x[2]=X[2]; }
+        set_xyz(pat, NULL,-1, X, x);
 
         /* use normal vector to find point ox slightly outside pat */
         patch_normal_at_XYZ(pat, f, X, Ndir);
@@ -422,10 +419,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
 
     /* get x,y,z of point from which we move out, sometimes this is
        one point in from the edge */
-    if(pat->xyz_of_XYZ)
-      pat->xyz_of_XYZ(pat, NULL,-1, X, x);
-    else
-      { x[0]=X[0]; x[1]=X[1]; x[2]=X[2]; }
+    set_xyz(pat, NULL,-1, X, x);
 
     /* get outward vector N[0],N[1],N[2] */
     patch_normal_at_XYZ(pat, f, X, N);

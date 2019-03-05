@@ -421,3 +421,45 @@ int XYZ_on_face(tPat *pat, int *face, const double X[3])
 {
   return XYZ_on_face_tol(pat, face, X, 1e-10);
 }
+
+
+/* set x at X */
+int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3])
+{
+  /* now set x, dXb/dx */
+  if(pat->xyz_of_XYZ)
+  {
+    return pat->xyz_of_XYZ(pat, node, ind, X, x);
+  }
+  else /* assume X,Y,Z are Cartesian*/
+  {
+    int d;
+
+    for(d=0; d<3; d++)
+      x[d] = X[d];
+    return 0;
+  }
+}
+
+/* set x and dXYZ/dxyz at X */
+int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
+                     const double X[3], double x[3], double dXYZdxyz[3][3])
+{
+  /* now set x, dXdx, det(dXb/dx) */
+  if(pat->dXYZ_dxyz)
+  {
+    return pat->dXYZ_dxyz(pat, node, ind, X, x, dXYZdxyz);
+  }
+  else /* assume X,Y,Z are Cartesian*/
+  {
+    int d, e;
+
+    for(d=0; d<3; d++)
+    {
+      x[d] = X[d];
+      for(e=0; e<3; e++)
+        dXYZdxyz[d][e] = (d==e);
+    }
+    return 0;
+  }
+}

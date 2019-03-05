@@ -164,7 +164,7 @@ double find_pat_size(tPat *pat)
 
   /* x at max and min X */
   for(i=0; i<8; i++)
-    pat->xyz_of_XYZ(pat, NULL,-1, X[i], x[i]);
+    set_xyz(pat, NULL,-1, X[i], x[i]);
 
   sum=0.0;
   n=0;
