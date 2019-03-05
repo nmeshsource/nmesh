@@ -151,7 +151,7 @@ tBface *first_with_op_f(tPat *pat, int op, int f)
 
 /* set bfaces for each box on the mesh with old algorithm.
    This one is not general and fails in many cases. */
-int Coordinates_set_bfaces_WT(tMesh *mesh)
+int amr_set_all_bfaces(tMesh *mesh)
 {
   int inclOuterBound = 1;
   int pr=1, p;

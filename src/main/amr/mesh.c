@@ -173,6 +173,10 @@ int setup_3patchl2_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   printmesh(mesh);
 
+amr_set_all_bfaces(mesh);
+printallbfaces(mesh);
+errorexit("stop");
+
   return 0;
 }
 

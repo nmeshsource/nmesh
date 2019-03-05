@@ -343,6 +343,7 @@ void printarray_matrix2(tArray *A);
 void printthisbface(tBface *bface, char *s);
 void printbface(tBface *bface);
 void printbfaces(tPat *pat);
+void printallbfaces(tMesh *mesh);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);

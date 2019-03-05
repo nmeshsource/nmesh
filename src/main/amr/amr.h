@@ -41,5 +41,5 @@ void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs);
 
 /* bfaces.c */
-int Coordinates_set_bfaces_WT(tMesh *mesh);
+int amr_set_all_bfaces(tMesh *mesh);
 int set_bfaces_on_patface(tPat *pat, int f);

@@ -314,7 +314,7 @@ void printbface(tBface *bface)
   printthisbface(bface, "0");
   printthisbface(bface->obface, "1");
 }
-/* print all bfaces */
+/* print all patch bfaces */
 void printbfaces(tPat *pat)
 {
   tBface *bface0 = pat->bface0;
@@ -323,4 +323,11 @@ void printbfaces(tPat *pat)
   printf("pat->p=%d\n", pat->p);
   for(bf=bface0; bf; bf  = bf->next)
     printbface(bf);
+}
+
+void printallbfaces(tMesh *mesh)
+{
+  int p;
+  forpatches(mesh, p)
+    printbfaces(mesh->pat[p]);
 }
