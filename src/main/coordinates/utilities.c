@@ -308,9 +308,7 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
         }
 
         /* find point in other pates */
-//FIXME!!!!!!
-//        op = p_XYZ_of_xyz_inpatlist(mesh, opl, oX, x);
-op=7;
+        op = p_XYZ_of_xyz_inpatlist(mesh, opl, oX, x);
 
         /* if we find one point in another pat this face is external */
         if(op>=0) break; /* leave plane loop if face is external*/

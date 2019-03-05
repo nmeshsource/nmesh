@@ -64,3 +64,11 @@ void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  nMPI_Comm s_comm, nMPI_Comm r_comm);
 void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag,nMPI_Comm comm);
 void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag,nMPI_Comm comm);
+
+
+
+/**************************************************************************/
+/* insert lists.h here because nMPI is the 2nd module,
+   so all after will see the lists types and such */
+/**************************************************************************/
+#include "../main/lists.h"

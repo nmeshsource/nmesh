@@ -27,8 +27,8 @@ int XYZ_is_in_node(tNode *node, double X[3]);
 void array_find_XYZ_in_node(tNode *node, tArray *aXP[3], tArray *aI);
 void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI);
 int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3]);
-//int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
-//                           double X[3], const double x[3]);
+int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
+                           double X[3], const double x[3]);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui);
