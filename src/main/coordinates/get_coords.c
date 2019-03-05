@@ -395,3 +395,29 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
   }
   return p;
 }
+
+
+/* find the faces a point X is on within tol, face[2]=1 if X is on face2  */
+int XYZ_on_face_tol(tPat *pat, int *face, const double X[3], double tol)
+{
+  double *bb=pat->bbox;
+  int f;
+  int nf;
+
+  /* init */
+  for(f=0; f<6; f++) face[f]=0;
+
+  /* find all faces we are on */
+  for(nf=0, f=0; f<6; f++)
+  {
+    int d=f/2;
+    if(dequal_tol(X[d], bb[f], tol)) { face[f]=1; nf++; }
+  }
+  return nf; /* number of faces point is on */
+}
+
+/* find the faces a point X is on, face[2]=1 if X is on face2  */
+int XYZ_on_face(tPat *pat, int *face, const double X[3])
+{
+  return XYZ_on_face_tol(pat, face, X, 1e-10);
+}

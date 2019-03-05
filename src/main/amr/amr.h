@@ -38,3 +38,6 @@ void free_nbsurf_only_forall_vars(tNode *node, int f);
 void simple_load_balance(tMesh *mesh);
 void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs);
+
+/* bfaces.c */
+int set_bfaces_on_patface(tPat *pat, int f);

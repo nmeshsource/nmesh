@@ -29,11 +29,14 @@ void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI);
 int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3]);
 int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
                            double X[3], const double x[3]);
+int XYZ_on_face(tPat *pat, int *face, const double X[3]);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui);
 
 /* utilities.c */
+double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);
 double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3]);
 double det_3Dmatrix(const double M[3][3]);
 double inv3Dmat_from_3Dmat(const double M[3][3], double invM[3][3]);
+double smallest_pat_size(tMesh *mesh);

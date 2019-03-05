@@ -297,35 +297,30 @@ void printarray_matrix2(tArray *A)
   }
 }
 
-
-/*
+/* print one bface */
+void printthisbface(tBface *bface, char *s)
+{
+  if(!bface) return;
+  printf(" %s: p%d f%d  obface=%s oXi= {%d %d %d}  ", s,
+         bface->pat->p,bface->f, bface->obface ? "yes" : "no",
+         bface->ioX[0],bface->ioX[1],bface->ioX[2]);
+  printf("bits=%1d%1d%1d,%1d,%1d%1d\n",
+         bface->sameoX[0], bface->sameoX[1], bface->sameoX[2],
+         bface->face2, bface->innerbound,  bface->outerbound);
+}
+/* print one bface and its pair */
 void printbface(tBface *bface)
 {
-  int np;
-  printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d  ",
-          bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
-          bface->oXi,bface->oYi,bface->oZi);
-  printf("bits=%u%u%u%u%u%u,%u,%u%u",
-         bface->touch,
-         bface->sameX, bface->sameY, bface->sameZ,  bface->same_fpts,
-         bface->fpts_off_face,
-         bface->setnormalderiv, bface->innerbound,  bface->outerbound);
-  if(bface->fpts==NULL) np = 0;
-  else                  np = bface->fpts->npoints[bface->b];
-  printf("  (%d points)\n", np);
-  //prPointList(bface->fpts);
-  //prPointList_ijk_inbox(bface->fpts, bface->b);
+  printthisbface(bface, "0");
+  printthisbface(bface->obface, "1");
 }
-
+/* print all bfaces */
 void printbfaces(tPat *pat)
 {
-  int i;
-  printf("pat->b=%d\n", pat->b);
-  for(i=0; i<pat->nbfaces; i++)
-  {
-    tBface *bface = pat->bface[i];
-    printf("bface[%d]: ", i);
-    printbface(bface);
-  }
+  tBface *bface0 = pat->bface0;
+  tBface *bf;
+
+  printf("pat->p=%d\n", pat->p);
+  for(bf=bface0; bf; bf  = bf->next)
+    printbface(bf);
 }
-*/

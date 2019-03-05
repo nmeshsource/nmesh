@@ -191,9 +191,11 @@ other patch. We use the same BC on all of tBface. */
 typedef struct tBFACE {
   tPat *pat;      // patch in which our patchface is
   int f;          // face, runs from 0 to 5 (for each pat)
-  double bbox[4]; // bound. box of bface in the 2 coords perp. to face f
    // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
    // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
+  double brct[4]; // bound. rectangle of bface in the 2 coords perp. to face f
+  int brct_isset; // whether bounding rectangle brct is set
+  int op;         // ind. of other pat that touches or overlaps, -1 if none
   struct tBFACE *obface; // pointer to other bface that touches
   int ioX[3];     // ind of vars in this node that contain coords in other pat
   int sameoX[3];  // sameoX[d]=1 if X[d]-coord of points in neighboring faces is same
@@ -338,8 +340,9 @@ void printarray_int(tArray *A);
 void printarray_matrix0(tArray *A);
 void printarray_matrix1(tArray *A);
 void printarray_matrix2(tArray *A);
-//void printbface(tBface *bface);
-//void printbfaces(tPat *pat);
+void printthisbface(tBface *bface, char *s);
+void printbface(tBface *bface);
+void printbfaces(tPat *pat);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);
@@ -368,3 +371,6 @@ void move_nodelist_to_rank(tNlist *list, int desrank);
 
 /* amr.c */
 int Ind_n_norm(int i, int j, int k, int n[3], int norm);
+
+/* bfaces.c */
+void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound);
