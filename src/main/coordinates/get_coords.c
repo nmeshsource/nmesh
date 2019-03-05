@@ -38,8 +38,9 @@ void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3])
   {
     i = 0;
     k = n[dir]-1;
-    a = Xb[dir][i];
-    b = Xb[dir][k];
+    /* set a, b */
+    Xb_of_X_indir(node, dir, &a, node->bbox[2*dir]);
+    Xb_of_X_indir(node, dir, &b, node->bbox[2*dir + 1]);
     if(dgreater(Xb0[dir], b))
     {
       ijk[dir] = -k-1;
