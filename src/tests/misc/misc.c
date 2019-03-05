@@ -67,6 +67,7 @@ int misc_test(tMesh *mesh)
 int test_point_interpolation(tMesh *mesh)
 {
   tNode *nd;
+  int n2;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int myid, dir, p, k;
@@ -87,7 +88,8 @@ int test_point_interpolation(tMesh *mesh)
   nd = MyNode(mesh, 0); /* my first node */
   printarray(nd->Xb[2]);
   printarray(nd->WL[2]);
-  f = Lagrange_of_x(1, 0., 3, nd->Xb[2]->d, nd->WL[2]->d);
+  n2 = nd->n[2];
+  f = Lagrange_of_x(n2/2, 0., n2, nd->Xb[2]->d, nd->WL[2]->d);
   printf("Lagrange_of_x at Zb=0: f=%g\n", f);
   printnode(nd);
   printvar_innode(nd, ui);
@@ -121,7 +123,7 @@ int test_point_interpolation(tMesh *mesh)
 
   PRF;printf(": 2d interp. in 3 dir. with Lagrange:\n");
   dir = 0;
-  p = 1;
+  p = (n2>1);
   Cb[0] = X[1];
   Cb[1] = X[2];
   f = test_func(Xb[0][p],X[1],X[2]);
@@ -129,7 +131,7 @@ int test_point_interpolation(tMesh *mesh)
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[1],X[2], f, interp-f);
 
   dir = 1;
-  p = 1;
+  p = (n2>1);
   Cb[0] = X[0];
   Cb[1] = X[2];
   f = test_func(X[0],Xb[1][p],X[2]);
@@ -137,7 +139,7 @@ int test_point_interpolation(tMesh *mesh)
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[2], f, interp-f);
 
   dir = 2;
-  p = 1;
+  p = (n2>1);
   Cb[0] = X[0];
   Cb[1] = X[1];
   f = test_func(X[0],X[1],Xb[2][p]);
@@ -165,8 +167,8 @@ int test_point_interpolation(tMesh *mesh)
   forvari(nd,vi, k) Vard(nd,vi)[k] = 666;
   //printvar_innode(nd, vi);
   dir = 0;
-  p = 1;
-  redim_array(Cp[0], 12,0,0);
+  p = (n2>1);
+  redim_array(Cp[0], 11*p+1,0,0);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, VarA(nd, ui), dir,p,
                                   Cp, Xp[0]);
@@ -174,8 +176,8 @@ int test_point_interpolation(tMesh *mesh)
   //printvar_innode(nd, vi);
 
   dir = 1;
-  p = 1;
-  redim_array(Cp[0], 15,0,0);
+  p = (n2>1);
+  redim_array(Cp[0], 14*p+1,0,0);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, VarA(nd, ui), dir,p,
                                   Cp, Xp[0]);
@@ -183,8 +185,8 @@ int test_point_interpolation(tMesh *mesh)
   //printvar_innode(nd, vi);
 
   dir = 2;
-  p = 1;
-  redim_array(Cp[0], 20,0,0);
+  p = (n2>1);
+  redim_array(Cp[0], 19*p+1,0,0);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   Lagrange_interpolate2d_topoints(nd, VarA(nd, ui), dir,p,
                                   Cp, Xp[0]);
