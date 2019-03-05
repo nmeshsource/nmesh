@@ -351,3 +351,47 @@ void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI)
     else                                aI->i[k] = -1;
   }
 }
+
+
+/* return patch index if x is inside this patch, if not return -1 */
+int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3])
+{
+  int d, stat=0;
+
+  /* get X */
+  if(pat->XYZ_of_xyz)
+    stat = pat->XYZ_of_xyz(pat, 0,-1, X, x);
+  else
+    for(d=0; d<3; d++) X[d] = x[d];
+
+  if(stat) return -1;
+
+  for(d=0; d<3; d++)
+    if(dless(X[d],pat->bbox[2*d]) || dless(pat->bbox[2*d+1],X[d]))
+      return -1;
+
+  /* round X to inside box */
+  for(d=0; d<3; d++)
+  {
+    if(X[d] < pat->bbox[2*d])   X[d] = pat->bbox[2*d];
+    if(X[d] > pat->bbox[2*d+1]) X[d] = pat->bbox[2*d+1];
+  }
+  return pat->p;
+}
+
+/* go over pat list and find the one that contains x */
+int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
+                           double X[3], const double x[3])
+{
+  tPat *pat;
+  int i, p=-1;
+
+  for(i=0; i<pl->n; i++)
+  {
+    p = pl->e[i];
+    pat = mesh->pat[p];
+    p = p_XYZ_of_xyz(pat, X, x);
+    if(p>0) break;
+  }
+  return p;
+}

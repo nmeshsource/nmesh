@@ -196,3 +196,143 @@ double smallest_pat_size(tMesh *mesh)
   }
   return L;
 }
+
+/* determine which patch faces touch or overlap other patches,
+   or touch the outside of our pat, returns extface */
+/* extface[f]=1 means face f is external, i.e. needs BC */
+/* Faces with e.g. periodic coordinates are marked as extface[f]=0. */
+/* If inclOuterBound=1 we mark faces that are not in contact with any other
+   pat as external (because they probably need an outer BC) */
+void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
+{
+  tMesh *mesh = pat->mesh;
+  int n[] = { 16,16,16 };     /* we use 16 points */
+  double X0[3], LX[3], dX[3]; /* grid of points */
+  int nd, dir, dd;
+  int i,j,k, pl, f;
+  intList *opl; /* list that contains other patches */
+  int op;
+  double oX[3];
+  double L;
+  double EPS = 1e-5;
+
+  /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
+  for(f=0; f<6; f++)
+  {
+    if(pat->periodic[f/2]) extface[f] = 0;
+    else                   extface[f] = 1;
+  }
+
+  if(pat->dXYZ_dxyz==NULL) /* Cartesian pat */
+  {
+    if(inclOuterBound) return; /* do nothing else for a Cartesian pat */
+  }
+
+  /* find pat size L of smallest pat */
+  L = smallest_pat_size(mesh);
+
+  opl = alloc_intList(); /* list that will contain other patches */
+
+  /* make opl that contains all pats except this one */
+  forpatches(mesh, i) if(i!=pat->p) unionpush_intList(opl, i);
+
+  /* make a grid of points, that excludes endpoints */
+  for(dir=0; dir<3; dir++)
+  {
+    X0[dir] = pat->bbox[2*dir];
+    LX[dir] = pat->bbox[2*dir+1] - X0[dir];
+    dX[dir] = LX[dir]/(n[dir]);
+    X0[dir] += dX[dir] * 0.5;
+  }
+
+  /* go over directions */
+  for(dir=0; dir<3; dir++)
+  {
+    nd = n[dir];
+
+    /* go over faces, but not edges */
+    for(pl=0; pl<nd; pl+=nd-1)
+    {
+      /* pick face index */
+      if(pl==0) f=2*dir;
+      else      f=2*dir+1;
+
+      /* do nothing if not an external face */
+      if(!extface[f]) continue;
+
+      /* look for points in other pates just outside this pat */
+      forinnerplaneN(dir, i,j,k, n, pl)
+      {
+        double X[3], x[3];
+        double Ndir[3];
+        double ox[3], dx[3], d0, ret;
+
+        /* point grid */
+        X[0] = X0[0] + dX[0] * i;
+        X[1] = X0[1] + dX[1] * j;
+        X[2] = X0[2] + dX[2] * k;
+
+        /* pick one of X,Y,Z on boundary */
+        X[dir] = pat->bbox[f];
+
+        /* get x from X */
+        if(pat->xyz_of_XYZ)
+          pat->xyz_of_XYZ(pat, NULL,-1, X, x);
+        else
+          { x[0]=X[0]; x[1]=X[1]; x[2]=X[2]; }
+
+        /* use normal vector to find point ox slightly outside pat */
+        patch_normal_at_XYZ(pat, f, X, Ndir);
+        for(d0=0., dd=0; dd<3; dd++) d0 += x[dd]*x[dd];
+        d0 = sqrt(d0);
+        for(dd=0; dd<3; dd++)
+        {
+          dx[dd] = Ndir[dd]*(L+d0)*EPS;
+          ox[dd] = x[dd] + dx[dd];
+        }
+
+        /* find point in this pat */
+        ret = p_XYZ_of_xyz(pat, oX, ox);
+        if(ret>=0)
+          for(dd=0; dd<3; dd++)
+          {
+            if(!(pat->periodic[dd]))
+              if(oX[dd] < pat->bbox[2*dd] || pat->bbox[2*dd+1] < oX[dd])
+                ret=-1;
+          }
+        if(ret>=0 && d0<1e60) /* point is in this pat and x,y,z is not inf  */
+        {
+          extface[f]=0; /* mark face as not external */
+          //if(extface[f]==0) errorexit("1");
+          goto endplaneloop; /* break; does not work for nested loop */
+        }
+
+        /* find point in other pates */
+//FIXME!!!!!!
+//        op = p_XYZ_of_xyz_inpatlist(mesh, opl, oX, x);
+op=7;
+
+        /* if we find one point in another pat this face is external */
+        if(op>=0) break; /* leave plane loop if face is external*/
+      } endplaneloop:
+
+      /* check about including outer boundaries */
+      if(inclOuterBound)
+      {
+        /* if op=p the other pat is the pat itself,
+           so it's not an external face */
+        if(op==pat->p) extface[f]=0;
+        /* NOTE currently opl does not contain b, so ob=b cannot happen!!! */
+        //if(extface[f]==0) errorexit("2");
+      }
+      else
+      {
+        /* if op<0, we found no other pat face and f is not external */
+        if(op<0) extface[f]=0;
+        //if(extface[f]==0) errorexit("3");
+      }
+    }
+  } /* end loop over directions */
+
+  free_intList(opl);
+}
