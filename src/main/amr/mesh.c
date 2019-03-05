@@ -156,9 +156,10 @@ int setup_3patchl2_mesh(tMesh *mesh)
   add_patch(mesh, bbox1, n, n1max);
   add_patch(mesh, bbox2, n, n1max);
 
+  /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
 
-/*
+  /* 8 more in each patch */
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
@@ -168,7 +169,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
       el = en;
     }
   }
-*/
+
   simple_load_balance(mesh);
   printmesh(mesh);
 
