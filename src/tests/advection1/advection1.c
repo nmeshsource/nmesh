@@ -217,7 +217,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     {
       int dir = face/2;
       int p = (face%2)*(n[dir] - 1);
-      double sig = 2*(face%2) - 1;
+      //double sig = 2*(face%2) - 1;
       double *F = Vard(node, iF+face);
       double *w = Wquad(node, dir);
       double sqrtdet2gam, det2dXdXb, det2dxdXb;
@@ -240,7 +240,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         JK = Ind_n_norm(i,j,k, n, dir);
         i0 = i0_norm(i,j,k, dir);
 
-        r[ijk] += sig * F[JK] * sqrtdet2gam * ooJ[ijk] / w[i0];
+        r[ijk] -= F[JK] * sqrtdet2gam * ooJ[ijk] / w[i0];
       }
     }
   }
