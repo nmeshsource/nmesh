@@ -14,6 +14,7 @@ int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 /* mesh.c */
 int setup_mesh(tMesh *mesh);
 int setup_l2_mesh(tMesh *mesh);
+int setup_3patchl2_mesh(tMesh *mesh);
 int setup_test_mesh(tMesh *mesh);
 
 /* connect.c */
@@ -40,4 +41,5 @@ void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs);
 
 /* bfaces.c */
+int Coordinates_set_bfaces_WT(tMesh *mesh);
 int set_bfaces_on_patface(tPat *pat, int f);

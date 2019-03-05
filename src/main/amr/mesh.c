@@ -92,6 +92,8 @@ int setup_mesh(tMesh *mesh)
 
   if(Getv(mesh_type, "l2_mesh"))
     return setup_l2_mesh(mesh);
+  else if(Getv(mesh_type, "3patchl2_mesh"))
+    return setup_3patchl2_mesh(mesh);
   else
     return setup_test_mesh(mesh);
 }
@@ -126,6 +128,47 @@ int setup_l2_mesh(tMesh *mesh)
     }
   }
 
+  simple_load_balance(mesh);
+  printmesh(mesh);
+
+  return 0;
+}
+
+/* set up a mesh with 2 levels  */
+int setup_3patchl2_mesh(tMesh *mesh)
+{
+  int amr_n = Geti(Par("amr_n"));
+  double bbox0[6] = { -4,4, -2,2, -1,1 };
+  double bbox1[6] = { -4,0,  2,4, -1,1 };
+  double bbox2[6] = {  0,4,  2,4, -1,1 };
+  int n1max = 55;
+  int n[3] = { amr_n,amr_n,amr_n };
+  tNlist *el, *en;
+
+  PRFs(":\n");
+
+  mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  remove_all_patches(mesh);
+  add_patch(mesh, bbox0, n, n1max);
+  add_patch(mesh, bbox1, n, n1max);
+  add_patch(mesh, bbox2, n, n1max);
+
+  make8children_in_mesh_lns_myln(mesh->lns, n);
+
+/*
+  el = mesh->lns;
+  for(en = el->next; el; en = el ? el->next : 0)
+  {
+    if(el->node->l < 2)
+    {
+      make8children_in_mesh_lns_myln(el, n);
+      el = en;
+    }
+  }
+*/
   simple_load_balance(mesh);
   printmesh(mesh);
 
