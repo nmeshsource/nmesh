@@ -755,6 +755,9 @@ tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list)
   tNlist *lend;
   tNlist *lbeg;
 
+  /* if "list" is empty do nothing */
+  if(!list) return elem;
+
   /* find end and beginning of tNlist *list */
   for(lend=list; lend->next; lend=lend->next) ;
   for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;
@@ -776,6 +779,9 @@ tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list)
   tNlist *elem2;
   tNlist *lend;
   tNlist *lbeg;
+
+  /* if "list" is empty do nothing */
+  if(!list) return elem;
 
   /* find end and beginning of tNlist *list */
   for(lend=list; lend->next; lend=lend->next) ;

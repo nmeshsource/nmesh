@@ -322,8 +322,8 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
 {
   tPat *pat = node->pat;
   tBface *bface;
-  tNlist *nblist = NULL;
-  tNlist *nbl, *nblist1;
+  tNlist *nblist;
+  tNlist *nbl, *nblist1, *elem;
   tNode *nb;
   int nc, ndesc, nb_f;
   double brct[4]; // bound. rect. of node
@@ -335,10 +335,15 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   brct_nodeface(node, face/2, brct);
 
   /* loop over all bfaces on face and find nb */
+  nblist = NULL;
   forbfacesonface(pat, face, bface)
   {
     tBface *obface = bface->obface;
-    if(!obface) continue; /* do nothing if no other patch face */
+    double nbrct[4]; // bound. rect. of nb
+    double irct[4];
+
+    /* do nothing if no other patch face */
+    if(!obface) continue;
 
     /* root node in other patch */
     nb = obface->pat->rnode;
@@ -359,41 +364,64 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
       nblist1 = all_descendants_along_face(nbl, nb_f, &ndesc);
       free_nodelist(nbl);
     }
-    /* go to beginning of nblist1 */
-    nblist1 = first_nodelist(nblist1);
 
-    /* go over nblist1 and remove all whose face does not intersect
+    /* beginning of nblist1 */
+    nbl = first_nodelist(nblist1);
+
+    /* go over nbl and remove all whose face does not intersect
        with the node bounding rectangle brct */
-    // FIXME :finish!!! ...
-    // ...
+    nblist1 = NULL;
+    fornodelist(nbl, elem)
+    {
+    nbl_loop_start:
+
+      /* get neigh. bound. rect. in its own X coords */
+      nb = elem->node;
+      brct_nodeface(nb, nb_f, nbrct);
+
+      /* transform nbrct from nb coords to node coords */
+      brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
+                           node->pat, face, nbrct);
+
+      /* does brct intersect nbrct? */
+      if(intersection_brct1_brct2(brct, nbrct, irct))
+      {
+        nblist1 = elem; /* save elem that touches our node */
+        continue;
+      }
+
+      /* remove nb=elem->node from nbl */
+      elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
+      if(elem) goto nbl_loop_start;
+      else     break;
+    }
 
     /* add nblist1 to nblist */
-    insertnodelist_into_nodelist_after(nblist, nblist1);
+    nblist = insertnodelist_into_nodelist_after(nblist, nblist1);
   }
 
   return nblist;
 }
 
 
-
-
-
 /* find all leaf node neighbors of node in mesh, this allocates the
    nodelist containing them, which has to be freed by caller */
 tNlist *make_mesh_neighbor_list(tNode *node, int face)
 {
-  tNlist *nblist1;
+  tNlist *nblist, *nblist1;
 
   /* first find all neighbors inside patch */
   nblist1 = make_patch_neighbor_list(node, face);
 
   /* find leaf node neighbors outside this patch (using bfaces) */
-  //... TODO
-  // combine result with nblist1
+  nblist = make_outside_neighbor_list(node, face);
 
-  nblist1 = first_nodelist(nblist1);
+  /* combine result with nblist1, i.e add nblist to nblist1 */
+  nblist = insertnodelist_into_nodelist_before(nblist1, nblist);
 
-  return nblist1;
+  nblist = first_nodelist(nblist);
+
+  return nblist;
 }
 
 

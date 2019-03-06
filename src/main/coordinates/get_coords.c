@@ -426,6 +426,8 @@ int XYZ_on_face(tPat *pat, int *face, const double X[3])
 /* set x at X */
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3])
 {
+  if(!pat) pat = node ? node->pat : NULL;
+
   /* now set x, dXb/dx */
   if(pat->xyz_of_XYZ)
   {
@@ -444,6 +446,8 @@ int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3])
 /* set X at x */
 int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3])
 {
+  if(!pat) pat = node ? node->pat : NULL;
+
   /* now set x, dXb/dx */
   if(pat->XYZ_of_xyz)
   {
@@ -545,4 +549,80 @@ int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
       }
   
   return isec;
+}
+
+/* transform XYZ from patch1 to XYZ of other patch2 */
+void XYZpat2_of_XYZpat1(tPat *pat1, const double X1[3],
+                        tPat *pat2, double X2[3])
+{
+  double x[3];
+
+  set_xyz(pat1, NULL, -1, X1, x);
+  set_XYZ(pat2, NULL, -1, X2, x);
+}
+
+/* get Coords on face from X */
+void C_from_X_on_face(const double X[3], int face, double C[2])
+{
+  switch(face/2)
+  {
+  case 0:
+    C[0] = X[1];
+    C[1] = X[2];
+    break;
+  case 1:
+    C[0] = X[0];
+    C[1] = X[2];
+    break;
+  case 2:
+    C[0] = X[0];
+    C[1] = X[1];
+    break;
+  default:
+    errorexit("face/2 must be 0,1,2");
+  }
+}
+
+/* get X from Coords on face */
+void X_from_C_on_face(tPat *pat, int face, const double C[2], double X[3])
+{
+  switch(face/2)
+  {
+  case 0:
+    X[0] = pat->bbox[face];
+    X[1] = C[0];
+    X[2] = C[1];
+    break;
+  case 1:
+    X[0] = C[0];
+    X[1] = pat->bbox[face];
+    X[2] = C[1];
+    break;
+  case 2:
+    X[0] = C[0];
+    X[1] = C[1];
+    X[2] = pat->bbox[face];
+    break;
+  default:
+    errorexit("face/2 must be 0,1,2");
+  }
+}
+
+/* transform point C1 on face f1 of pat1 to point C2 on face2 of pat2 */
+void Cpat2_of_Cpat1(tPat *pat1, int f1, const double C1[2],
+                    tPat *pat2, int f2, double C2[2])
+{
+  double X1[3], X2[3];
+
+  X_from_C_on_face(pat1,f1, C1, X1);
+  XYZpat2_of_XYZpat1(pat1, X1, pat2, X2);
+  C_from_X_on_face(X2,f2, C2);
+}
+
+/* transform brct from face f1 of patch1 to brct of face f2 on patch2 */
+void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
+                          tPat *pat2, int f2, double brct2[4])
+{
+  Cpat2_of_Cpat1(pat1,f1,brct1,   pat2,f2,brct2);
+  Cpat2_of_Cpat1(pat1,f1,brct1+2, pat2,f2,brct2+2);
 }

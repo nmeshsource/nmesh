@@ -49,6 +49,14 @@ int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
 void brct_nodeface(tNode *node, int norm, double brct[4]);
 int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
                              double brct[4]);
+void XYZpat2_of_XYZpat1(tPat *pat1, const double X1[3],
+                        tPat *pat2, double X2[3]);
+void C_from_X_on_face(const double X[3], int face, double C[2]);
+void X_from_C_on_face(tPat *pat, int face, const double C[2], double X[3]);
+void Cpat2_of_Cpat1(tPat *pat1, int f1, const double C1[2],
+                    tPat *pat2, int f2, double C2[2]);
+void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
+                          tPat *pat2, int f2, double brct2[4]);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui);
