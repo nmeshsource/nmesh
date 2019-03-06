@@ -1,3 +1,11 @@
+replace calls to pat->xyz_of_XYZ(pat, NULL,-1, X[i], x[i]);
+with another funtion
+
+or make xyz_of_XYZ also for Cartesian
+int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
+int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
+                     const double X[3], double x[3], double dXYZdxyz[3][3]);
+
 2 good patch tests:
 -------------------
 1.:

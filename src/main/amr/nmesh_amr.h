@@ -198,27 +198,20 @@ typedef struct tBFACE {
   int op;         // ind. of other pat that touches or overlaps, -1 if none
   struct tBFACE *obface; // pointer to other bface that touches
   int ioX[3];     // ind of vars in this node that contain coords in other pat
-  //int sameoX[3];  // sameoX[d]=1 if X[d]-coord of points in neighboring faces is same
   int face2;      // 1 if we set normal derivs of field and not field itself
   int innerbound; // 1 if bface is inner boundary (e.g. horizon)
   int outerbound; // 1 if bface is outer mesh boundary (e.g. infinity)
   struct tBFACE *next; // next bface in this patch
   struct tBFACE *prev; // previous bface in this patch
 } tBface;
-/* The flags sameoX/Y/Z refer to the X,Y,Z-coords of the neighboring patch,
-   not the coords of pat p the bface is on! E.g. if the points on the
-   touching face of pat op have the same Y and Z coords (of pat op) as the
-   points in our bface from pat p we set sameY=sameZ=1. This means once we
-   find the X,Y,Z-coords (of pat op) of any point in our bface in pat p,
-   there is a coordinate line (with Y=const1, Z=const2) on which this point
-   is located. Then we can later do 1D interpolation in pat op along its
-   X-direction in some BC. */
-/* NOTE: oXi,oYi,oZi are all set to -1 when a bface is allocated with
+/* NOTE: ioX,ioY,ioZ are all set to -1 when a bface is allocated with
    add_empty_bface. So -1 means we do not know it yet. */
-/* ALSO: We need a function that sets oXi,oYi,oZi and sets the corresponding
+/* ALSO: We need a function that sets ioX,ioY,ioZ and sets the corresponding
    vars. Probably we just need the 3 vars oX,oY,oZ in each pat. We can then
    loop over all bfaces of a pat and set oX,oY,oZ to whatever they need
-   to be. If edges or corners belong to several bfaces, the last bface wins. */
+   to be. If edges or corners belong to several bfaces, the last bface wins.
+   I could use face vars for this ..., but maybe arrays that live in
+   the patch could work??? */
 
 
 /***********************************************************************/

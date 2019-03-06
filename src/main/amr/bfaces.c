@@ -267,7 +267,7 @@ int amr_set_all_bfaces(tMesh *mesh)
         set_bfaces_on_patface(pat, f);
       }
     }
-    if(1) printbfaces(pat);
+    if(0) printbfaces(pat);
   }
 
   /* now expand bfaces to cover the edges as well */
