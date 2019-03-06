@@ -286,9 +286,6 @@ int amr_set_all_bfaces(tMesh *mesh)
 //  /* fix some issues */
 //  if(remove_bfacepoints_that_cause_inconsistent_touch_bits(mesh))
 //    set_bits_in_all_bfaces(mesh);
-//
-//  /* set outer boundary flag */
-//  mark_all_bfaces_without_ob_as_outerbound(mesh);
 
 
   /* this sets the setnormalderiv again */
