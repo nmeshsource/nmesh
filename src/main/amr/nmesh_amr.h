@@ -191,8 +191,7 @@ other patch. We use the same BC on all of tBface. */
 typedef struct tBFACE {
   tPat *pat;      // patch in which our patchface is
   int f;          // face, runs from 0 to 5 (for each pat)
-   // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
-   // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
+   // The normal vector is n^i_{a}=dX^a/dx^i, e.g. X^1=const face has n^i_{1}
   double brct[4]; // bound. rectangle of bface in the 2 coords perp. to face f
   int brct_isset; // whether bounding rectangle brct is set
   int op;         // ind. of other pat that touches or overlaps, -1 if none
