@@ -242,6 +242,34 @@ tBface *first_bface_with_op_f(tPat *pat, int op, int f)
   return NULL;
 }
 
+/* find ith bface on face f with an obface, the first one has i=0 */
+tBface *ith_bface_on_f_with_obface(tPat *pat, int f, int i)
+{
+  tBface *bf;
+  int k = 0;
+
+  for(bf=pat->bfaces[f]; bf; bf=bf->next)
+    if(bf->obface)
+    {
+      if(k==i) return bf;
+      k++;
+    }
+
+  return NULL;
+}
+
+/* find number of bfaces on face f with an obface */
+int nbfaces_on_f_with_obface(tPat *pat, int f)
+{
+  tBface *bf;
+  int k = 0;
+
+  for(bf=pat->bfaces[f]; bf; bf=bf->next)
+    if(bf->obface) k++;
+
+  return k;
+}
+
 /*************************************************************************/
 /* funcs to set bface info */
 /*************************************************************************/

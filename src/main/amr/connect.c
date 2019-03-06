@@ -96,7 +96,7 @@ void connect8_siblings(tNode *narray[8])
 {
   int ijk;
 
-  errorexit("connect8_siblings is not neded it does the same as "
+  errorexit("connect8_siblings is not needed because it does the same as "
             "connect8_with_neighbors");
   errorexit("this function needs to be tested");
 
@@ -316,7 +316,66 @@ tNlist *make_patch_neighbor_list(tNode *node, int face)
 }
 
 /* find leaf node neighbors outside this patch (using bfaces) */
-//... TODO
+/* this allocates the nodelist containing them, which has to be freed by
+   caller */
+tNlist *make_outside_neighbor_list(tNode *node, int face)
+{
+  tPat *pat = node->pat;
+  tBface *bface;
+  tNlist *nblist = NULL;
+  tNlist *nbl, *nblist1;
+  tNode *nb;
+  int nc, ndesc, nb_f;
+  double brct[4]; // bound. rect. of node
+
+  /* no outside neighb. if not on patch face */
+  if(!node->patface[face]) return NULL;
+
+  /* set bound. rect. of node */
+  brct_nodeface(node, face/2, brct);
+
+  /* loop over all bfaces on face and find nb */
+  forbfacesonface(pat, face, bface)
+  {
+    tBface *obface = bface->obface;
+    if(!obface) continue; /* do nothing if no other patch face */
+
+    /* root node in other patch */
+    nb = obface->pat->rnode;
+    nb_f = obface->f;
+
+    /* so now we have a neighbor, but is it childless? */
+    nc = count_children(nb);
+    if(nc==0) /* neighbor has 0 children */
+    {
+      nblist1 = alloc_nodelist(nb);
+    }
+    else
+    {
+      if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
+
+      /* find nblist1 with all leaves on face nb_f */
+      nbl = alloc_nodelist(nb);
+      nblist1 = all_descendants_along_face(nbl, nb_f, &ndesc);
+      free_nodelist(nbl);
+    }
+    /* go to beginning of nblist1 */
+    nblist1 = first_nodelist(nblist1);
+
+    /* go over nblist1 and remove all whose face does not intersect
+       with the node bounding rectangle brct */
+    // FIXME :finish!!! ...
+
+    /* add nblist1 to nblist */
+    insertnodelist_into_nodelist_after(nblist, nblist1);
+  }
+
+  return nblist;
+}
+
+
+
+
 
 /* find all leaf node neighbors of node in mesh, this allocates the
    nodelist containing them, which has to be freed by caller */

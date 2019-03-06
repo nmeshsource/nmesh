@@ -481,3 +481,68 @@ int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
     return 0;
   }
 }
+
+/* get the bounding rectangle of a nodeface, norm = face/2 */
+void brct_nodeface(tNode *node, int norm, double brct[4])
+{
+  int i;
+  switch(norm)
+  {
+  case 0:
+    for(i=0; i<4; i++) brct[i] = node->bbox[i+2];
+    break;
+  case 1:
+    for(i=0; i<2; i++) brct[i] = node->bbox[i];
+    for(i=0; i<2; i++) brct[i] = node->bbox[i+4];
+    break;
+  case 2:
+    for(i=0; i<4; i++) brct[i] = node->bbox[i];
+    break;
+  default:
+    errorexit("norm must be 0,1,2");
+  }
+}
+
+/* put intersection of 2 bounding rectangles into brct, if intersection
+  is empty return 0 */
+int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
+                             double brct[4])
+{
+  int d, isec=1;
+
+  for(d=0; d<2; d++)
+  {
+    if((brct1[2*d] >= brct2[2*d]) && (brct1[2*d] <= brct2[2*d+1]))
+    {
+      brct[2*d] = brct1[2*d];
+      if(brct1[2*d+1] < brct2[2*d+1])
+        brct[2*d+1] = brct1[2*d+1];
+      else
+        brct[2*d+1] = brct2[2*d+1];
+    }
+    else if((brct2[2*d] >= brct1[2*d]) && (brct2[2*d] <= brct1[2*d+1]))
+    {
+      brct[2*d] = brct2[2*d];
+      if(brct2[2*d+1] < brct1[2*d+1])
+        brct[2*d+1] = brct2[2*d+1];
+      else
+        brct[2*d+1] = brct1[2*d+1];
+    }
+    else
+    {
+      isec = 0;
+      break;
+    }
+  }
+  
+  /* test if the intersection empty */
+  if(isec)
+    for(d=0; d<2; d++)
+      if(dequal(brct[2*d], brct[2*d+1]))
+      {
+        isec = 0;
+        break;
+      }
+  
+  return isec;
+}

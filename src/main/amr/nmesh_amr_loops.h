@@ -71,6 +71,10 @@
   for(int face_=0; face_<6; face_++) \
   for(bface=pat->bfaces[face_]; bface; bface=bface->next)
 
+/* loop over all bfaces in a patch on face f */
+#define forbfacesonface(pat, f, bface) \
+  for(bface=pat->bfaces[f]; bface; bface=bface->next)
+
 /* loop over a node list nlist (type tNlist) */
 #define fornodelist(nlist, elem) \
   for(elem=(nlist); elem; elem=elem->next)
