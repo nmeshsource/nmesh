@@ -166,9 +166,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   //FIXME:
   update_all_rnode_fnb(mesh);
   printmesh(mesh);
-//printnode(pat->rnode);
 
-  
 
   /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
