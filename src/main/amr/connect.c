@@ -365,6 +365,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
     /* go over nblist1 and remove all whose face does not intersect
        with the node bounding rectangle brct */
     // FIXME :finish!!! ...
+    // ...
 
     /* add nblist1 to nblist */
     insertnodelist_into_nodelist_after(nblist, nblist1);
