@@ -289,10 +289,11 @@ int amr_set_all_bfaces(tMesh *mesh)
 //
 //  /* set outer boundary flag */
 //  mark_all_bfaces_without_ob_as_outerbound(mesh);
-//
-//  /* this sets the setnormalderiv again */
-//  set_consistent_flags_in_all_bfaces(mesh);
-//
+
+
+  /* this sets the setnormalderiv again */
+  set_consistent_flags_in_all_bfaces(mesh);
+
 //  /* set some var indices if we need to interpolate */
 //  set_oXi_oYi_oZi_in_all_bfaces(mesh);
 
@@ -624,4 +625,205 @@ void mark_all_bfaces_without_op_as_outerbound(tMesh *mesh)
         bface->outerbound = 1;
     }
   }
+}
+
+/* make sure bit fields in all bfaces are consitent.
+   Right now we just set bface->face2, which has the same meaning as sgrid's
+   setnormalderiv */
+int set_consistent_flags_in_all_bfaces(tMesh *mesh)
+{
+  int p;
+  int bface_options = Par("bface_options");
+  int forder1 = Getv(bface_options,"face2_order1");
+  int forder2 = Getv(bface_options,"face2_order2");
+  int forder3 = Getv(bface_options,"face2_order3");
+  int forder4 = Getv(bface_options,"face2_order4");
+
+  /* face2_order4 implies face2_order3 */
+  forder3 = forder3 || forder4;
+
+  /* set face2=0 in all bfaces if we want a particluar order */
+  if(forder1 || forder2 || forder3)
+    zero_face2_flag_in_all_bfaces(mesh);
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    forbfaces(pat, bface)
+    {
+      tBface *obface = bface->obface;
+      //tPat *opat;
+      //int op  = bface->op;
+      //int f = bface->f;
+      //int of;
+
+       /* do nothing if there no other bface */
+      if(!obface) continue;
+
+      /* other pat on corresponding bface */
+      //opat = obface->pat;
+      //of = obface->f;
+
+      /* unlike in sgrid, the two bfaces are always touching */
+      if(obface->obface == bface) /* we have 2 paired bfaces */
+      {
+        /* set consistent face2 flag */
+        if(forder2)
+        {
+        /* note forder2 makes templates_GMRES_with_BlockJacobi_precon fail
+             with 6 or more cubed spheres */
+          if(obface->face2 == 0) bface->face2 = 1;
+          else                   bface->face2 = 0;
+        }
+        else /* use forder1 */
+        {
+          if(bface->face2 == 0) obface->face2 = 1;
+          else                  obface->face2 = 0;
+        }
+      }
+      else /* obface doesn't refer to this bface */
+      {
+        if(obface->face2 == 0) bface->face2 = 1;
+        else                   bface->face2 = 0;
+      }
+    } /* end forbfaces */
+  }
+  /* Note: forder3 it supposed to fix failures in 
+     templates_GMRES_with_BlockJacobi_precon. It fails if there is a Neumann
+     BC on all faces of a pat. This can happen on pat0 with forder2.
+     Or it can happen on pat5&6 with forder1 if the BC on face1 of pat5
+     or 6 is also a Neumann BC. The corresponding block is then a singular
+     matrix, as can be seen with GridIterators_verbose = yes */
+  if(forder3) toggle_face2_flag_in_faces4_5_of_cubes(mesh);
+
+  /* Note: forder4 it supposed to fix more failures in 
+     templates_GMRES_with_BlockJacobi_precon. It fails for an odd number of
+     points in pates 11,12 and 24,25, i.e. CubSph domains 4,5. Presumably this
+     happens because even with forder3 dom 4 and 5 have Neuman BCs
+     everywhere except for face1. */
+  if(forder4) toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(mesh);
+
+  return 0;
+}
+
+/* set face2=0 in all bfaces */
+int zero_face2_flag_in_all_bfaces(tMesh *mesh)
+{
+  int p;
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    forbfaces(pat, bface) bface->face2 = 0;
+  }
+  return 0;
+}
+
+/* Toggle face2 flag of face 4 & 5 in all Cartesian cubes.
+   We want to avoid that BCs are the same on all sides of the cube. */
+int toggle_face2_flag_in_faces4_5_of_cubes(tMesh *mesh)
+{
+  int p;
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    /* look at cubes only */
+    if(pat->CI->type == 0)
+    {
+      /* loop over bfaces */
+      forbfaces(pat, bface)
+      {
+        int f = bface->f;
+        //int op  = bface->op;
+        //tPat *opat;
+        tBface *obface = bface->obface;
+
+        /* do something only on face 4 and 5 */
+        if((f == 4) || (f == 5))
+        {
+          if(bface->face2) bface->face2 = 0;
+          else             bface->face2 = 1;
+        }
+        else /* otherwise go to next bface */
+          continue;
+
+        /* do nothing more if there is no other bface */
+        if(!obface) continue;
+
+        /* other pat from corresponding bface */
+        //opat = obface->pat;
+
+        /* the 2 are always touching */
+        if(obface->obface == bface) /* we have 2 paired bfaces */
+        {
+          /* set consistent face2 flag */
+          if(bface->face2 == 0) obface->face2 = 1;
+          else                  obface->face2 = 0;
+        }
+      } /* end forbfaces */
+    } /* end cube case */
+  }
+  return 0;
+}
+
+/* Toggle face2 flag between pat->CI->dom=0 and pat->CI->dom=4
+   patches, as well between pat->CI->dom=1 and pat->CI->dom=5 patches in
+   all types of cubed spheres.
+   We want to avoid too many Neuman BCs in dom 4 and 5. */
+int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh)
+{
+  int p;
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+    int domain = pat->CI->dom;
+
+    /* look at cubed spheres only */
+    if( (0 < pat->CI->type) && (pat->CI->type <= CubedShell) )
+    {
+      /* loop over bfaces */
+      forbfaces(pat, bface)
+      {
+        //int f = bface->f;
+        //int op  = bface->op;
+        tPat *opat = NULL;
+        tBface *obface = bface->obface;
+        int odomain = -1;
+
+        /* do nothing more if there is no other bface */
+        if(!obface) continue;
+
+        /* other pat from corresponding bface */
+        opat = obface->pat;
+        odomain = opat->CI->dom;
+
+        /* do something only if domain,odomain is 0,4 or 1,5 */
+        if((domain == 0 && odomain == 4) || (domain == 1 && odomain == 5))
+        {
+          if(bface->face2) bface->face2 = 0;
+          else             bface->face2 = 1;
+        }
+        else /* otherwise go to next bface */
+          continue;
+
+        /* the 2 are always touching */
+        if(obface->obface == bface) /* we have 2 paired bfaces */
+        {
+          /* set consistent face2 flag */
+          if(bface->face2 == 0) obface->face2 = 1;
+          else                  obface->face2 = 0;
+        }
+      } /* end forbfaces */
+    } /* end cubed sph. case */
+  }
+  return 0;
 }

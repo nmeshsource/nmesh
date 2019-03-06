@@ -4,6 +4,18 @@
 
 
 
+/* For coordtrans_CubedSphere.c :
+   Type of cubed sphere or rather sphered cube coord transform */
+enum
+{
+  CoordInfoNotSet,  /* if box->CI->type is not set, box->CI->type=0 */
+  PyramidFrustum,   /* both inner & outer surfaces are flat */  
+  innerCubedSphere, /* inner surface is curved, but outer surface is flat */
+  outerCubedSphere, /* outer surface is curved, but inner surface is flat */
+  CubedShell        /* both inner & outer surfaces are curved */
+};
+
+
 /* coordinates.c */
 int coordinates_init(tMesh *mesh);
 int coordinates_init_node(tNode *node);

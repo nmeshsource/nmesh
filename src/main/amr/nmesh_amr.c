@@ -24,5 +24,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_mesh_type", "test_mesh",
 	 "mesh we start with [test_mesh,l2_mesh]");
   AddPar("amr_n", "5", "number of points in all 3 dir. in one node");
+  AddPar("bface_options", "face2_order3", "how we set some bface flags "
+         "[none,face2_order0,face2_order1,face2_order2,face2_order3]");
   return 0;
 }

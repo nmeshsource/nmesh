@@ -45,3 +45,7 @@ int amr_set_all_bfaces(tMesh *mesh);
 int set_bfaces_on_patface(tPat *pat, int f);
 void expand_bfaces_to_patch_edges(tMesh *mesh);
 void mark_all_bfaces_without_op_as_outerbound(tMesh *mesh);
+int set_consistent_flags_in_all_bfaces(tMesh *mesh);
+int zero_face2_flag_in_all_bfaces(tMesh *mesh);
+int toggle_face2_flag_in_faces4_5_of_cubes(tMesh *mesh);
+int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh);
