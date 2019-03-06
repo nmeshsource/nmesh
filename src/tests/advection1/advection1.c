@@ -145,7 +145,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     double norm[3];
     int face, dir, p, i,j,k, ijk;
 
-    /* set go over each face */
+    /* go over each face */
     for(face=0; face<6; face++)
     {
       dir = face/2;

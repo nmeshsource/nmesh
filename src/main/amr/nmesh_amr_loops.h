@@ -68,7 +68,8 @@
 
 /* loop over all bfaces in a patch */
 #define forbfaces(pat, bface) \
-  for(bface=pat->bface0; bface; bface=bface->next)
+  for(int face_=0; face_<6; face_++) \
+  for(bface=pat->bfaces[face_]; bface; bface=bface->next)
 
 /* loop over a node list nlist (type tNlist) */
 #define fornodelist(nlist, elem) \

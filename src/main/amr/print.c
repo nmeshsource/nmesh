@@ -322,11 +322,10 @@ void printbface(tBface *bface)
 /* print all patch bfaces */
 void printbfaces(tPat *pat)
 {
-  tBface *bface0 = pat->bface0;
   tBface *bf;
 
   printf("pat->p=%d\n", pat->p);
-  for(bf=bface0; bf; bf  = bf->next)
+  forbfaces(pat, bf)
     printbface(bf);
 }
 

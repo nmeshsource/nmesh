@@ -27,7 +27,7 @@ tBface *alloc_bface(tPat *pat, int f)
 tBface *add_empty_bface(tPat *pat, int f)
 {
   tBface *bface = alloc_bface(pat, f);
-  tBface *bface0 = pat->bface0;
+  tBface *bface0 = pat->bfaces[f];
   tBface *bf;
 
   /* add bface to end of list in pat */
@@ -38,7 +38,7 @@ tBface *add_empty_bface(tPat *pat, int f)
     bface->prev = bf;
   }
   else
-    pat->bface0 = bface;
+    pat->bfaces[f] = bface;
 
   /* set some bface info */
   bface->op = -1; /* other patch not known yet */
@@ -53,18 +53,20 @@ int remove_bface(tBface *bface)
 {
   tPat *pat;
   tBface *obface, *bn, *bp;
+  int f;
 
   if(!bface) return 0;
 
   pat = bface->pat;
   obface = bface->obface;
+  f = bface->f;
 
   /* remove bface from list */
   bp = bface->prev;
   bn = bface->next;
   if(bn) bn->prev = bp;
   if(bp) bp->next = bn;
-  else   pat->bface0 = bn;
+  else   pat->bfaces[f] = bn;
 
   /* now free bface */
   free(bface);
@@ -77,28 +79,38 @@ int remove_bface(tBface *bface)
 /* free all bfaces in pat */
 void remove_all_bfaces(tPat *pat)
 {
-  tBface *bface0 = pat->bface0;
-  tBface *bf, *bft;
+  int f;
 
-  for(bf=bface0; bf;)
+  for(f=0; f<6; f++)
   {
-    bft = bf;
-    bf  = bf->next;
-    remove_bface(bft);
+    tBface *bface0 = pat->bfaces[f];
+    tBface *bf, *bft;
+
+    for(bf=bface0; bf;)
+    {
+      bft = bf;
+      bf  = bf->next;
+      remove_bface(bft);
+    }
   }
 }
 
 /* remove all bfaces without bounding rectangle */
 void remove_bfaces_without_brct(tPat *pat)
 {
-  tBface *bface0 = pat->bface0;
-  tBface *bf, *bft;
+  int f;
 
-  for(bf=bface0; bf;)
+  for(f=0; f<6; f++)
   {
-    bft = bf;
-    bf  = bf->next;
-    if(!bft->brct_isset) remove_bface(bft);
+    tBface *bface0 = pat->bfaces[f];
+    tBface *bf, *bft;
+
+    for(bf=bface0; bf;)
+    {
+      bft = bf;
+      bf  = bf->next;
+      if(!bft->brct_isset) remove_bface(bft);
+    }
   }
 }
 
@@ -213,7 +225,7 @@ tBface *first_bface_with_op(tPat *pat, int op)
 {
   tBface *bf;
 
-  for(bf=pat->bface0; bf; bf=bf->next)
+  forbfaces(pat, bf)
     if(bf->op == op) return bf;
 
   return NULL;
@@ -224,8 +236,8 @@ tBface *first_bface_with_op_f(tPat *pat, int op, int f)
 {
   tBface *bf;
 
-  for(bf=pat->bface0; bf; bf=bf->next)
-    if(bf->op == op && bf->f == f) return bf;
+  for(bf=pat->bfaces[f]; bf; bf=bf->next)
+    if(bf->op == op) return bf;
 
   return NULL;
 }
@@ -582,7 +594,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
 
   /* count num of bfaces */
   nbfaces = 0;
-  for(bface=pat->bface0; bface; bface=bface->next) nbfaces++;
+  for(bface=pat->bfaces[f]; bface; bface=bface->next) nbfaces++;
 
   free_intList(opl);
 
