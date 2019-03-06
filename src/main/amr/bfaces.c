@@ -271,16 +271,11 @@ int amr_set_all_bfaces(tMesh *mesh)
   }
 
   /* now expand bfaces to cover the edges as well */
-  forpatches(mesh, p)
-  {
-    tPat *pat = mesh->pat[p];
-    tBface *bface;
+  expand_bfaces_to_patch_edges(mesh);
 
-    forbfaces(pat, bface)
-      expand_bface_to_pat_bbox(bface);
-  }
-
-//expand_bface_to_pat_bbox(mesh->pat[1]->bface0->next);
+  /* if there is no other patch on the other side of a bface, mark it as
+     outer boundary */
+  mark_all_bfaces_without_op_as_outerbound(mesh);
 
 //  /* set ofi and bit fields for all bfaces */
 //  if(pr)
@@ -594,4 +589,39 @@ int set_bfaces_on_patface(tPat *pat, int f)
   free_intList(opl);
 
   return nbfaces;
+}
+
+/* expand all bfaces to cover patch edges */
+void expand_bfaces_to_patch_edges(tMesh *mesh)
+{
+  int p;
+
+  /* now expand bfaces to cover the edges as well */
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    forbfaces(pat, bface)
+      expand_bface_to_pat_bbox(bface);
+  }
+}
+
+/* mark all bfaces that have no other patch as outer boundary */
+void mark_all_bfaces_without_op_as_outerbound(tMesh *mesh)
+{
+  int p;
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    forbfaces(pat, bface)
+    {
+      /* if op=-1 there is no other box, mark as outer boundary */
+      if(bface->op == -1)
+        bface->outerbound = 1;
+    }
+  }
 }
