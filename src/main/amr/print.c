@@ -301,19 +301,24 @@ void printarray_matrix2(tArray *A)
 void printthisbface(tBface *bface, char *s)
 {
   if(!bface) return;
-  printf(" %s: p%d f%d  obface=%s oXi= {%d %d %d}  ", s,
-         bface->pat->p,bface->f, bface->obface ? "yes" : "no",
-         bface->ioX[0],bface->ioX[1],bface->ioX[2]);
-  printf("bits=%1d%1d%1d,%1d,%1d%1d\n",
-         bface->sameoX[0], bface->sameoX[1], bface->sameoX[2],
+  printf(" %s: p%d f%d op%d", s, bface->pat->p,bface->f, bface->op);
+  if(bface->brct_isset)
+    printf(" [%g,%g]x[%g,%g]",
+           bface->brct[0], bface->brct[1], bface->brct[2], bface->brct[3]);
+  else
+    printf(" [ , ]x[ , ]");
+  printf(" ioX={%d,%d,%d} bits=%1d%1d%1d\n",
+         bface->ioX[0],bface->ioX[1],bface->ioX[2],
          bface->face2, bface->innerbound,  bface->outerbound);
 }
+
 /* print one bface and its pair */
 void printbface(tBface *bface)
 {
-  printthisbface(bface, "0");
-  printthisbface(bface->obface, "1");
+  printthisbface(bface, "A");
+  printthisbface(bface->obface, "B");
 }
+
 /* print all patch bfaces */
 void printbfaces(tPat *pat)
 {
@@ -325,9 +330,25 @@ void printbfaces(tPat *pat)
     printbface(bf);
 }
 
+/* print all bfaces in mesh */
 void printallbfaces(tMesh *mesh)
 {
   int p;
   forpatches(mesh, p)
     printbfaces(mesh->pat[p]);
+}
+
+/* print 3-vec */
+void pr3v(char *s, double x[3])
+{
+  printf("%s=%g %g %g ", s, x[0],x[1],x[2]);
+}
+
+void prbbox(double *bb, int dim)
+{
+  int d;
+  printf("[%g,%g]", bb[0], bb[1]);
+  for(d=1; d<dim; d++)
+    printf("x[%g,%g]", bb[2*d], bb[2*d+1]);
+  printf(" ");
 }

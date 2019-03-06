@@ -66,6 +66,10 @@
 #define forpatches(mesh,patindex) \
   for(patindex=0; patindex < mesh->npats; patindex++)
 
+/* loop over all bfaces in a patch */
+#define forbfaces(pat, bface) \
+  for(bface=pat->bface0; bface; bface=bface->next)
+
 /* loop over a node list nlist (type tNlist) */
 #define fornodelist(nlist, elem) \
   for(elem=(nlist); elem; elem=elem->next)
@@ -148,6 +152,3 @@
 #define forplane2_nojump(i,j,k, n, p) \
   for(k=(p), j = 0; j < (n[1]); j++) \
     for(i =((n[0])-1)*(j%2); i < (n[0]) && i >= 0; i=i+1-2*(j%2))
-
-/* loop over bfaces in a patch */
-//#define forbfaces(pat,fi)  for(fi = 0; fi<pat->nbfaces; fi++)

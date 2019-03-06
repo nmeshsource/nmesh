@@ -31,6 +31,7 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
                            double X[3], const double x[3]);
 int XYZ_on_face(tPat *pat, int *face, const double X[3]);
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
+int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3]);
 int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
                      const double X[3], double x[3], double dXYZdxyz[3][3]);
 

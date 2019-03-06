@@ -4,6 +4,8 @@
 #include "nmesh.h"
 #include "amr.h"
 
+#define EPS 1e-5
+#define NPOINTS 16
 
 
 /*************************************************************************/
@@ -36,7 +38,7 @@ tBface *add_empty_bface(tPat *pat, int f)
     bface->prev = bf;
   }
   else
-    bface0 = bface;
+    pat->bface0 = bface;
 
   /* set some bface info */
   bface->op = -1; /* other patch not known yet */
@@ -46,14 +48,16 @@ tBface *add_empty_bface(tPat *pat, int f)
   return bface;
 }
 
-/* remove a bface with index fi from a pat, return number of bfaces removed */
-void remove_bface(tBface *bface)
+/* remove a bface from a pat, return number of bfaces removed */
+int remove_bface(tBface *bface)
 {
-  tPat *pat = bface->pat;
-  tBface *obface = bface->obface;
-  tBface *bn, *bp;
+  tPat *pat;
+  tBface *obface, *bn, *bp;
 
-  if(!bface) return;
+  if(!bface) return 0;
+
+  pat = bface->pat;
+  obface = bface->obface;
 
   /* remove bface from list */
   bp = bface->prev;
@@ -67,7 +71,7 @@ void remove_bface(tBface *bface)
 
   /* remove pointer to this bface in other bface */
   if(obface) obface->obface = NULL;
-  remove_bface(obface);
+  return 1 + remove_bface(obface);
 }
 
 /* free all bfaces in pat */
@@ -84,13 +88,30 @@ void remove_all_bfaces(tPat *pat)
   }
 }
 
+/* remove all bfaces without bounding rectangle */
+void remove_bfaces_without_brct(tPat *pat)
+{
+  tBface *bface0 = pat->bface0;
+  tBface *bf, *bft;
+
+  for(bf=bface0; bf;)
+  {
+    bft = bf;
+    bf  = bf->next;
+    if(!bft->brct_isset) remove_bface(bft);
+  }
+}
+
 /* make bounding rectangle large enough to fit the point X[3] */
 void expand_bface_to_include_X(tBface *bface, const double X[3])
 {
-  int f = bface->f;
-  int dir = f/2;
+  int f, dir, d;
   double C[2]; /* point coords in face */
-  int d;
+
+  if(!bface) return;
+
+  f = bface->f;
+  dir = f/2;
 
   switch(dir)
   {
@@ -121,8 +142,74 @@ void expand_bface_to_include_X(tBface *bface, const double X[3])
    } 
 }
 
+/* expand bface to cover face edges */
+void expand_bface_to_pat_bbox(tBface *bface)
+{
+  tPat *pat;
+  tBface *obface;
+  int f,dir, d[2], dd;
+  double A[2],B[2], L[2], C, X[3], x[3], oX[3];
+
+  if(!bface) return;
+
+  pat = bface->pat;
+  obface = bface->obface;
+  f = bface->f;
+  dir = f/2;
+  d[0] = Dir1_norm(dir);
+  d[1] = Dir2_norm(dir);
+
+  /* adjust rectangle of bface */
+  for(dd=0; dd<2; dd++)
+  {
+    A[dd] = pat->bbox[2*d[dd]];
+    B[dd] = pat->bbox[2*d[dd]+1];
+    L[dd] = B[dd] - A[dd];
+
+    if(bface->brct[2*dd] - A[dd] < L[dd]/NPOINTS)
+      bface->brct[2*dd] = A[dd];
+
+    if(B[dd] - bface->brct[2*dd+1] < L[dd]/NPOINTS)
+      bface->brct[2*dd+1] = B[dd];
+  }
+
+  /* expand other bface to same point */
+  if(obface)
+  {
+    tPat *opat = obface->pat;
+    int j;
+
+    C = pat->bbox[f];
+    for(j=0; j<2; j++)
+    {
+      switch(dir)
+      {
+      case 0:
+        X[0] = C;
+        X[1] = bface->brct[j];
+        X[2] = bface->brct[2+j];
+        break;
+      case 1:
+        X[0] = bface->brct[j];
+        X[1] = C;
+        X[2] = bface->brct[2+j];
+        break;
+      case 2:
+        X[0] = bface->brct[j];
+        X[1] = bface->brct[2+j];
+        X[2] = C;
+        break;
+      }
+      set_xyz(pat, 0,-1, X, x);
+      set_XYZ(opat, 0,-1, oX, x);
+      //pr3v("X",X);pr3v("x",x);pr3v("oX",oX);
+      expand_bface_to_include_X(obface, oX);
+    }
+  }
+}
+
 /* find first bface with a particular op */
-tBface *first_with_op(tPat *pat, int op)
+tBface *first_bface_with_op(tPat *pat, int op)
 {
   tBface *bf;
 
@@ -133,7 +220,7 @@ tBface *first_with_op(tPat *pat, int op)
 }
 
 /* find first bface with a particular op and f */
-tBface *first_with_op_f(tPat *pat, int op, int f)
+tBface *first_bface_with_op_f(tPat *pat, int op, int f)
 {
   tBface *bf;
 
@@ -146,8 +233,6 @@ tBface *first_with_op_f(tPat *pat, int op, int f)
 /*************************************************************************/
 /* funcs to set bface info */
 /*************************************************************************/
-#define EPS 1e-5
-#define NPOINTS 16
 
 /* set bfaces for each box on the mesh with old algorithm.
    This one is not general and fails in many cases. */
@@ -179,15 +264,23 @@ int amr_set_all_bfaces(tMesh *mesh)
     {
       if(extface[f])
       {
-        int ret = set_bfaces_on_patface(pat, f);
-        //printf("f=%d, ret=%d\n", f, ret);
-if(ret==0)
-PRF;printf("do we need: add_patface_as_outerbound_bface???\n");
-//if(ret==0) add_patface_as_outerbound_bface(pat, f);
+        set_bfaces_on_patface(pat, f);
       }
     }
     if(1) printbfaces(pat);
   }
+
+  /* now expand bfaces to cover the edges as well */
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    forbfaces(pat, bface)
+      expand_bface_to_pat_bbox(bface);
+  }
+
+//expand_bface_to_pat_bbox(mesh->pat[1]->bface0->next);
 
 //  /* set ofi and bit fields for all bfaces */
 //  if(pr)
@@ -378,13 +471,13 @@ int set_bfaces_on_patface(tPat *pat, int f)
   forpatches(mesh, op) if(op!=p)
   {
     /* we want one bface for each other pat */
-    bface = first_with_op_f(pat, op, f);
+    bface = first_bface_with_op_f(pat, op, f);
     /* add empty bface for each other pat where we don't have one already */
     if(!bface)
     {
       bface = add_empty_bface(pat, f);
       bface->op = op;
-    } 
+    }
     unionpush_intList(opl, op);
   }
   /* add one more empty bface for outer boundary points that
@@ -444,11 +537,15 @@ int set_bfaces_on_patface(tPat *pat, int f)
 
       /* check if point is in opat */
       ret = p_XYZ_of_xyz(opat, oX, ox);
+      //printf("p=%d f=%d: opat->p=%d", p,f,opat->p);
+      //prbbox(opat->bbox,3);pr3v("X",X);
+      //pr3v("oX",oX);pr3v("ox",ox);
+      //printf(": ret=%d\n", ret);
       if(ret>=0)
         for(dd=0; dd<3; dd++)
         {
           if(!(pat->periodic[dd]))
-            if(oX[dd] < pat->bbox[2*dd] || pat->bbox[2*dd+1] < oX[dd])
+            if(oX[dd] < opat->bbox[2*dd] || opat->bbox[2*dd+1] < oX[dd])
               ret=-1;
         }
       if(ret>=0)
@@ -459,19 +556,19 @@ int set_bfaces_on_patface(tPat *pat, int f)
     }
 
     /* add point to the bface with the correct op and f */
-    bface = first_with_op_f(pat, op, f);
+    bface = first_bface_with_op_f(pat, op, f);
     expand_bface_to_include_X(bface, X);
 
     /* now try to put this also in the other bface */
     if(op>=0)
     {
       /* get ox very close to face of opat and recalc oX */
-      for(dd=0; dd<3; dd++)  ox[dd] = x[dd] + dx[dd]*1e-7;
+      for(dd=0; dd<3; dd++)  ox[dd] = x[dd] + dx[dd]*1e-8;
       ret = p_XYZ_of_xyz(opat, oX, ox);
       ret = XYZ_on_face(opat, face, oX);
       if(ret!=1) errorexit("oX was supposed to be on one face...");
       for(of=0; face[of]==0; of++) ;
-      obface = first_with_op_f(opat, p, of);
+      obface = first_bface_with_op_f(opat, p, of);
       if(!obface)
       {
         obface = add_empty_bface(opat, of);
@@ -486,6 +583,9 @@ int set_bfaces_on_patface(tPat *pat, int f)
       if(obface->obface != bface) errorexit("what happened???");
     }
   }
+
+  /* remove empty bfaces */
+  remove_bfaces_without_brct(pat);
 
   /* count num of bfaces */
   nbfaces = 0;

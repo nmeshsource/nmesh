@@ -441,6 +441,24 @@ int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3])
   }
 }
 
+/* set X at x */
+int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3])
+{
+  /* now set x, dXb/dx */
+  if(pat->XYZ_of_xyz)
+  {
+    return pat->XYZ_of_xyz(pat, node, ind, X, x);
+  }
+  else /* assume X,Y,Z are Cartesian*/
+  {
+    int d;
+
+    for(d=0; d<3; d++)
+      X[d] = x[d];
+    return 0;
+  }
+}
+
 /* set x and dXYZ/dxyz at X */
 int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
                      const double X[3], double x[3], double dXYZdxyz[3][3])
