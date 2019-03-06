@@ -377,7 +377,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
 
       /* get neigh. bound. rect. in its own X coords */
       nb = elem->node;
-      brct_nodeface(nb, nb_f, nbrct);
+      brct_nodeface(nb, nb_f/2, nbrct);
 
       /* transform nbrct from nb coords to node coords */
       brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
@@ -476,6 +476,13 @@ void update_node_and_neighbors_fnb(tNode *node)
   }
 }
 
+/* init surface neighbor list for all root nodes in th e mesh */
+void update_all_rnode_fnb(tMesh *mesh)
+{
+  int p;
+  forpatches(mesh, p)
+    update_node_and_neighbors_fnb(mesh->pat[p]->rnode);
+}
 
 /* find node facenb in the node->fnb lists, returns 1  if it is there
    returns face and nb index in vars: face and ni */

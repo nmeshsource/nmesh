@@ -156,6 +156,20 @@ int setup_3patchl2_mesh(tMesh *mesh)
   add_patch(mesh, bbox1, n, n1max);
   add_patch(mesh, bbox2, n, n1max);
 
+  /* setup all bfaces */
+  amr_set_all_bfaces(mesh);
+  printallbfaces(mesh);
+
+  /* now setup root node connections */
+
+  /* setup neighbors of root node */
+  //FIXME:
+  update_all_rnode_fnb(mesh);
+  printmesh(mesh);
+//printnode(pat->rnode);
+
+  
+
   /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
 
@@ -173,9 +187,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   printmesh(mesh);
 
-amr_set_all_bfaces(mesh);
-printallbfaces(mesh);
-errorexit("stop");
+//errorexit("stop");
 
   return 0;
 }

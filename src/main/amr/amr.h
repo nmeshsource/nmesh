@@ -25,6 +25,7 @@ tNlist *make_patch_neighbor_list(tNode *node, int face);
 tNlist *make_mesh_neighbor_list(tNode *node, int face);
 void update_node_fnb(tNode *node);
 void update_node_and_neighbors_fnb(tNode *node);
+void update_all_rnode_fnb(tMesh *mesh);
 int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
 
 /* surface.c */
