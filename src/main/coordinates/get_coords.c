@@ -497,7 +497,7 @@ void brct_nodeface(tNode *node, int norm, double brct[4])
     break;
   case 1:
     for(i=0; i<2; i++) brct[i] = node->bbox[i];
-    for(i=0; i<2; i++) brct[i] = node->bbox[i+4];
+    for(i=2; i<4; i++) brct[i] = node->bbox[i+2];
     break;
   case 2:
     for(i=0; i<4; i++) brct[i] = node->bbox[i];
