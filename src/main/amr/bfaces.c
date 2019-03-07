@@ -136,6 +136,9 @@ void expand_bface_to_include_X(tBface *bface, const double X[3])
   case 2:
     C[0] = X[0];  C[1] = X[1];
     break;
+  default:
+    C[0] = X[0];  C[1] = X[1];
+    errorexit("f/2 must be 0,1,2");
   }
   if(bface->brct_isset)
   {
@@ -389,9 +392,11 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
   {
     nd = n[dir];
 
-    /* go over faces, but not edges */
+    /* go over faces, but not edges, because our grid doesn't contain edges */
     for(pl=0; pl<nd; pl+=nd-1)
     {
+      op = -2; /* -2 means op is not set */
+
       /* pick face index */
       if(pl==0) f=2*dir;
       else      f=2*dir+1;
@@ -399,7 +404,7 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
       /* do nothing if not an external face */
       if(!extface[f]) continue;
 
-      /* look for points in other pates just outside this pat */
+      /* look for points in other patches just outside this pat */
       forinnerplaneN(dir, i,j,k, n, pl)
       {
         double X[3], x[3];
@@ -561,6 +566,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
 
     /* mark other pat as non-existent by default */
     op = -1;
+    opat = NULL;
 
     /* find point in other patches */
     for(li=0; li<opl->n; li++)
