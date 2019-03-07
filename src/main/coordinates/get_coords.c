@@ -623,6 +623,31 @@ void Cpat2_of_Cpat1(tPat *pat1, int f1, const double C1[2],
 void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
                           tPat *pat2, int f2, double brct2[4])
 {
-  Cpat2_of_Cpat1(pat1,f1,brct1,   pat2,f2,brct2);
-  Cpat2_of_Cpat1(pat1,f1,brct1+2, pat2,f2,brct2+2);
+  double C1[2], C2[2], sw;
+
+  C1[0] = brct1[0];
+  C1[1] = brct1[2];
+  Cpat2_of_Cpat1(pat1,f1,C1,   pat2,f2,C2);
+  brct2[0] = C2[0];
+  brct2[2] = C2[1];
+
+  C1[0] = brct1[1];
+  C1[1] = brct1[3];
+  Cpat2_of_Cpat1(pat1,f1,C1, pat2,f2,C2);
+  brct2[1] = C2[0];
+  brct2[3] = C2[1];
+
+  /* swap brct2 entries to have min in brct2[0], brct2[2] */
+  if(brct2[1] < brct2[0])
+  {
+    sw = brct2[1];
+    brct2[1] = brct2[0];
+    brct2[0] = sw;
+  }
+  if(brct2[3] < brct2[2])
+  {
+    sw = brct2[3];
+    brct2[3] = brct2[2];
+    brct2[2] = sw;
+  }
 }
