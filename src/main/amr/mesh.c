@@ -163,13 +163,15 @@ int setup_3patchl2_mesh(tMesh *mesh)
   /* now setup root node connections */
 
   /* setup neighbors of root node */
-  //FIXME:
   update_all_rnode_fnb(mesh);
   printmesh(mesh);
 
 
   /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
+Yo(7);
+  printmesh(mesh);
+
 
   /* 8 more in each patch */
   el = mesh->lns;
