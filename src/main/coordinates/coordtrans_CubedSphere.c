@@ -69,7 +69,7 @@ int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, A,B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * pat->CI->s[1];
   }
@@ -78,14 +78,14 @@ int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     a0 = pm * pat->CI->s[0];
-    sigma1 = CubedSphere_sigma(pat, 1, ind, A,B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
     a1 = pm * sigma1/sqrt_1_A2_B2;
   }
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, A,B);
-    sigma1 = CubedSphere_sigma(pat, 1, ind, A,B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
   }
@@ -171,19 +171,19 @@ int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   }
 
   /* check if A is out of range */
-  if( *A < pat->bpat[2] || pat->bpat[3] < *A )
+  if( *A < pat->bbox[2] || pat->bbox[3] < *A )
   {
     /* put A within range if we are just a bit out */
-    if(dequal(*A,pat->bpat[2]))      *A = pat->bpat[2];
-    else if(dequal(*A,pat->bpat[3])) *A = pat->bpat[3];
+    if(dequal(*A,pat->bbox[2]))      *A = pat->bbox[2];
+    else if(dequal(*A,pat->bbox[3])) *A = pat->bbox[3];
     else stat=-1;
   }
   /* check if B is out of range */
-  if( *B < pat->bpat[4] || pat->bpat[5] < *B )
+  if( *B < pat->bbox[4] || pat->bbox[5] < *B )
   {
     /* put B within range if we are just a bit out */
-    if(dequal(*B,pat->bpat[4]))      *B = pat->bpat[4];
-    else if(dequal(*B,pat->bpat[5])) *B = pat->bpat[5];
+    if(dequal(*B,pat->bbox[4]))      *B = pat->bbox[4];
+    else if(dequal(*B,pat->bbox[5])) *B = pat->bbox[5];
     else stat=-1;
   }
 
@@ -198,7 +198,7 @@ int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, *A,*B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * pat->CI->s[1];
     if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
@@ -208,15 +208,15 @@ int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     a0 = pm * pat->CI->s[0];
-    sigma1 = CubedSphere_sigma(pat, 1, ind, *A,*B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, *A,*B);
     a1 = pm * sigma1*oosqrt_1_A2_B2;
     if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
   }
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, *A,*B);
-    sigma1 = CubedSphere_sigma(pat, 1, ind, *A,*B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, *A,*B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * sigma1*oosqrt_1_A2_B2;
     if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
@@ -305,9 +305,9 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, A,B);
-    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(pat, 0, ind, A,B)/sigma0;
-    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(pat, 0, ind, A,B)/sigma0;
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
+    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(pat, node, 0, ind, A,B)/sigma0;
+    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(pat, node, 0, ind, A,B)/sigma0;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     dsigma_dA_osigma1 = 0.0;
     dsigma_dB_osigma1 = 0.0;
@@ -326,9 +326,9 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
     a0 = pm * pat->CI->s[0];
     dsigma_dA_osigma0 = 0.0;
     dsigma_dB_osigma0 = 0.0;
-    sigma1 = CubedSphere_sigma(pat, 1, ind, A,B);
-    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(pat, 1, ind, A,B)/sigma1;
-    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(pat, 1, ind, A,B)/sigma1;
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
+    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(pat, node, 1, ind, A,B)/sigma1;
+    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(pat, node, 1, ind, A,B)/sigma1;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = 0.0;
     da0_dy = 0.0;
@@ -340,12 +340,12 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, A,B);
-    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(pat, 0, ind, A,B)/sigma0;
-    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(pat, 0, ind, A,B)/sigma0;
-    sigma1 = CubedSphere_sigma(pat, 1, ind, A,B);
-    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(pat, 1, ind, A,B)/sigma1;
-    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(pat, 1, ind, A,B)/sigma1;
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
+    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(pat, node, 0, ind, A,B)/sigma0;
+    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(pat, node, 0, ind, A,B)/sigma0;
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
+    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(pat, node, 1, ind, A,B)/sigma1;
+    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(pat, node, 1, ind, A,B)/sigma1;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = a0; /* mark as non-zero */
@@ -497,22 +497,25 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
    They use pat->CI->FSurf[si] to get sigma. */
 double CubedSphere_sigma_AB(tPat *pat, int si, double A, double B)
 {
+  double AB[] = { A, B };
   tCoordInfo *CI = pat->CI;
 
-  return CI->FSurf[si](pat, si, A,B);
+  return CI->FSurf[si](pat, si, AB);
 }
 /* dsigma/dA and dsigma/dB are derivs of sigma. */
 double CubedSphere_dsigma_dA_AB(tPat *pat, int si, double A, double B)
 {
+  double AB[] = { A, B };
   tCoordInfo *CI = pat->CI;
 
-  return CI->dFSurfdX[si][2](pat, si, A,B);
+  return CI->dFSurfdX[si][2](pat, si, AB);
 }
 double CubedSphere_dsigma_dB_AB(tPat *pat, int si, double A, double B)
 {
+  double AB[] = { A, B };
   tCoordInfo *CI = pat->CI;
 
-  return CI->dFSurfdX[si][3](pat, si, A,B);
+  return CI->dFSurfdX[si][3](pat, si, AB);
 }
 
 /* Functions to get sigma0/1 for cubed spheres from pat->CI->iSurf[0/1].
@@ -524,21 +527,19 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
                          double A, double B)
 {
   int isig = pat->CI->iSurf[si]; /* get index of var with sigma */
-  int p, n1;
 
   /* if var index does not seem set, use sigma = pat->CI->s[si] */
   if(isig<1) return pat->CI->s[si];
 
-  n1 = pat->n1;
-  p = (n1-1) * (si==1);   /* set plane index p */
-
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
   if(ind>=0)
   {
-    int n2= pat->n2;
-    int k = kOfInd_n1n2(ind,n1,n2);
-    int j = jOfInd_n1n2_k(ind,n1,n2,k);
-    int ijk = Index(p,j,k);
+    int *n = node->n;    
+    int k = kOfInd_n(ind,n);
+    int j = jOfInd_n_k(ind,n,k);
+    tArray *sig = VarA(node, isig);
+    int *nA = sig->n;
+    int ijk = Ind_n(0,j,k, nA);
     return Vard(node, isig)[ijk];
   }
   else /* we need value between grid points */
@@ -548,22 +549,20 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
 double CubedSphere_dsigma_dA(tPat *pat, tNode *node, int si, int ind,
                              double A, double B)
 {
-  int isig = pat->CI->idSurfdX[si][2]; /* get index of var with dsigma/dA */
-  int p, n1;
+  int isig = pat->CI->idSurfdX[si][1]; /* get index of var with dsigma/dA */
 
   /* if var index does not seem set, use dsigma = 0 */
   if(isig<1) return 0.0;
 
-  n1 = pat->n1;
-  p = (n1-1) * (si==1);   /* set plane index p */
-
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
   if(ind>=0)
   {
-    int n2= pat->n2;
-    int k = kOfInd_n1n2(ind,n1,n2);
-    int j = jOfInd_n1n2_k(ind,n1,n2,k);
-    int ijk = Index(p,j,k);
+    int *n = node->n;    
+    int k = kOfInd_n(ind,n);
+    int j = jOfInd_n_k(ind,n,k);
+    tArray *sig = VarA(node, isig);
+    int *nA = sig->n;
+    int ijk = Ind_n(0,j,k, nA);
     return Vard(node, isig)[ijk];
   }
   else /* we need value between grid points */
@@ -572,22 +571,20 @@ double CubedSphere_dsigma_dA(tPat *pat, tNode *node, int si, int ind,
 double CubedSphere_dsigma_dB(tPat *pat, tNode *node, int si, int ind,
                              double A, double B)
 {
-  int isig = pat->CI->idSurfdX[si][3]; /* get index of var with dsigma/dB */
-  int p, n1;
+  int isig = pat->CI->idSurfdX[si][2]; /* get index of var with dsigma/dB */
 
   /* if var index does not seem set, use dsigma = 0 */
   if(isig<1) return 0.0;
 
-  n1 = pat->n1;
-  p = (n1-1) * (si==1);   /* set plane index p */
-
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
   if(ind>=0)
   {
-    int n2= pat->n2;
-    int k = kOfInd_n1n2(ind,n1,n2);
-    int j = jOfInd_n1n2_k(ind,n1,n2,k);
-    int ijk = Index(p,j,k);
+    int *n = node->n;    
+    int k = kOfInd_n(ind,n);
+    int j = jOfInd_n_k(ind,n,k);
+    tArray *sig = VarA(node, isig);
+    int *nA = sig->n;
+    int ijk = Ind_n(0,j,k, nA);
     return Vard(node, isig)[ijk];
   }
   else /* we need value between grid points */
@@ -650,7 +647,7 @@ int r_dr_dlam_of_lamAB_CubSph(tPat *pat, tNode *node, int ind, double lam,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sig0 = CubedSphere_sigma(pat, 0, ind, A,B);
+    sig0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
     a1 = pat->CI->s[1];
     sig1 = a1 * sqrt_1_A2_B2;
   }
@@ -660,13 +657,13 @@ int r_dr_dlam_of_lamAB_CubSph(tPat *pat, tNode *node, int ind, double lam,
        and the inner one is flat */
     a0 = pat->CI->s[0];
     sig0 = a0 * sqrt_1_A2_B2;
-    sig1 = CubedSphere_sigma(pat, 1, ind, A,B);
+    sig1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sig0 = CubedSphere_sigma(pat, 0, ind, A,B);
-    sig1 = CubedSphere_sigma(pat, 1, ind, A,B);
+    sig0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
+    sig1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
   else errorexit("unknown type");
 
@@ -877,8 +874,8 @@ int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
   if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, A,B);
-    sigma1 = CubedSphere_sigma(pat, 1, ind, A,B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
   else errorexit("xyz_of_rhoAB_CubSph works only with CubedShell");
 
@@ -887,7 +884,7 @@ int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
   lamAB[0] = lam;
   lamAB[1] = A;
   lamAB[2] = B;
-  return xyz_of_lamAB_CubSph(pat, ind, lamAB, xyz);
+  return xyz_of_lamAB_CubSph(pat, node, ind, lamAB, xyz);
 }
 
 /* inverse (x,y,z) -> (rho,A,B) */
@@ -902,15 +899,15 @@ int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   double sigma0,sigma1, lam;
 
   /* get lam,A,B from x,y,z */
-  stat = lamAB_of_xyz_CubSph(pat, ind, rhoAB, xyz);
+  stat = lamAB_of_xyz_CubSph(pat, node, ind, rhoAB, xyz);
   lam = rhoAB[0]; /* we wrote lamAB into rhoAB here */
 
   /* check type of trafo */
   if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, *A,*B);
-    sigma1 = CubedSphere_sigma(pat, 1, ind, *A,*B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, *A,*B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, *A,*B);
   }
   else errorexit("works only for CubedShell");
 
@@ -948,8 +945,8 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
       errorexit("drhoAB_dxyz_CubSph works only with constant sigmas");
 
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, 0, ind, A,B);
-    sigma1 = CubedSphere_sigma(pat, 1, ind, A,B);
+    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
+    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
   else errorexit("works only for CubedShell");
 
@@ -958,10 +955,10 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
   lamAB[0] = lam;
   lamAB[1] = A;
   lamAB[2] = B;
-  dlamAB_dxyz_CubSph(pat, ind, lamAB, xyz, drhoABdxyz);
+  dlamAB_dxyz_CubSph(pat, node, ind, lamAB, xyz, drhoABdxyz);
   dlamdx = drhoABdxyz[0][0]; /* we wrote dlamABdxyz into drhoABdxyz */
-  dlamdx = drhoABdxyz[0][1];
-  dlamdx = drhoABdxyz[0][2];
+  dlamdy = drhoABdxyz[0][1];
+  dlamdz = drhoABdxyz[0][2];
 
   /* get drho_dlam */
   drho_dlam = drho_dlam_of_rho_sig0sig1(rho, sigma0,sigma1);

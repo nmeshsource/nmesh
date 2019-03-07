@@ -6,3 +6,12 @@
 
 
 /* coordinates.c */
+
+
+/* coordtrans_CubedSphere.c */
+double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
+                         double A, double B);
+double CubedSphere_dsigma_dA(tPat *pat, tNode *node, int si, int ind,
+                             double A, double B);
+double CubedSphere_dsigma_dB(tPat *pat, tNode *node, int si, int ind,
+                             double A, double B);
