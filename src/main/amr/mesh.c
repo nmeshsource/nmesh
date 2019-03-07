@@ -160,12 +160,37 @@ int setup_3patchl2_mesh(tMesh *mesh)
   amr_set_all_bfaces(mesh);
   printallbfaces(mesh);
 
-  /* now setup root node connections */
-
-  /* setup neighbors of root node */
+  /* now setup root node connections, i.e. setup neighbors of root nodes */
   update_all_rnode_fnb(mesh);
   printmesh(mesh);
 
+
+int i;
+double nbrct[4], brct[4], irct[4];
+brct_nodeface(mesh->lns->next->node, 0, nbrct);
+prbbox(nbrct,2);
+brct_nodeface(mesh->lns->next->node, 1, nbrct);
+prbbox(nbrct,2);
+brct_nodeface(mesh->lns->next->node, 2, nbrct);
+prbbox(nbrct,2);
+
+//brct_nodeface(mesh->lns->next->node, 1, nbrct);
+//brct_nodeface(mesh->lns->node, 1, brct);
+
+
+brctpat2_of_brctpat1(mesh->pat[1], 2, nbrct,
+                     mesh->pat[0], 3, nbrct);
+prbbox(nbrct,2);
+
+brct[0]=-7; brct[1]=-3;
+brct[2]=3; brct[3]=8;
+
+i=intersection_brct1_brct2(brct, nbrct, irct);
+printf("\n i=%d: ", i);
+prbbox(brct,2);
+prbbox(nbrct,2);
+prbbox(irct,2);
+exit(9);
 
   /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
