@@ -35,6 +35,11 @@
 #define forarray(array,k) \
   for(k=0; k<array->N; k++)
 
+/* access Array */
+#define Arrd(Arr) ((Arr) ? Arr->d : 0)
+#define Arrn(Arr) ((Arr) ? Arr->n : 0)
+#define ArrN(Arr) ((Arr) ? Arr->N : 0)
+
 /* get double pointer to data in a variable */
 #define Vard(node, varindex) \
   ((node->dat) ? node->dat->v[(varindex)]->d : 0)

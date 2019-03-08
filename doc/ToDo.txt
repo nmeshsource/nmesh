@@ -1,11 +1,3 @@
-replace calls to pat->xyz_of_XYZ(pat, NULL,-1, X[i], x[i]);
-with another funtion
-
-or make xyz_of_XYZ also for Cartesian
-int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
-int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
-                     const double X[3], double x[3], double dXYZdxyz[3][3]);
-
 2 good patch tests:
 -------------------
 1.:
@@ -59,7 +51,11 @@ int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
 -allow explicit time dependence in RHS
 -keep open mind about node dependent dt
 
-*advection Eqn
+*advection Eqn: ???
+
+*flux integral conservation
+ -make integrals
+ -make 3d vol int.
 
 *DG
 
@@ -120,9 +116,4 @@ How does EinsteinToolkit do its great AMR?
 *OpenMP:
  -give many nodes to each MPI proc, use OpenMP loops over these loops
   on each proc
-
-*change node list:
- -I made an array of nodes of myrank (myln to be looped over with OpenMP for)
-  create this array each time nodes are created or destroyed
-  arrange all VarList loops such that the outermost loop is over this new array
-
+ -use OpenMP in formylnodes
