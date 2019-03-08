@@ -23,9 +23,20 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("x", "", "Cartesian x coordinate"); // don't put any-
   AddAuxVar("y", "", "Cartesian y coordinate"); // thing in between
   AddAuxVar("z", "", "Cartesian z coordinate"); // these 3 lines
- 
+
+  /* create vars that contain cub. sph. sigma_{0/1} and their derivs */
+  AddAuxVarDim("CubedSphere_sigma01",     "", "sigma_{0/1}", 2,-1,-1);
+  AddAuxVarDim("CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}", 2,-1,-1);
+  AddAuxVarDim("CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}", 2,-1,-1);
+  /* we should not set the above three explicitly, rather set this one: */
+  AddAuxVarDim("CubedSphere_sigma01_def", "", "var we use to define and "
+               "set the sigma_{0/1} in CubedSphere_sigma01", 2,-1,-1);
+
   /* parameters */
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
+  AddPar("CubedSphere_sigma01_lmax", "from_n1", "lmax for Ylm's "
+         "used in FSurf_CubSph_sigma01_func [#,from_n1,sqrt(n2*n3)/4+1,"
+         "sqrt(n2*n3)/4,sqrt(n2*n3)/2,sqrt(n2*n3)]");
 
   return 0;
 }
