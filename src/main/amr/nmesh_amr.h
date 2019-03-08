@@ -321,6 +321,7 @@ void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP);
 /* print.c */
 void printmesh(tMesh *g);
 void printpatch(tPat *box);
+void printCI(tPat *pat);
 void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);
 void printnodelist_and_neighbors(tNlist *nl);

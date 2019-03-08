@@ -364,11 +364,15 @@ int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3])
   else
     for(d=0; d<3; d++) X[d] = x[d];
 
+  //pr3v("1",X);
+
   if(stat) return -1;
 
   for(d=0; d<3; d++)
     if(dless(X[d],pat->bbox[2*d]) || dless(pat->bbox[2*d+1],X[d]))
       return -1;
+
+  //prbbox(pat->bbox,3);
 
   /* round X to inside box */
   for(d=0; d<3; d++)
@@ -404,14 +408,12 @@ int XYZ_on_face_tol(tPat *pat, int *face, const double X[3], double tol)
   int f;
   int nf;
 
-  /* init */
-  for(f=0; f<6; f++) face[f]=0;
-
   /* find all faces we are on */
   for(nf=0, f=0; f<6; f++)
   {
     int d=f/2;
     if(dequal_tol(X[d], bb[f], tol)) { face[f]=1; nf++; }
+    else                             { face[f]=0; }
   }
   return nf; /* number of faces point is on */
 }

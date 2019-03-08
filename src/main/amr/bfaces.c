@@ -578,7 +578,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
       ret = p_XYZ_of_xyz(opat, oX, ox);
       //printf("p=%d f=%d: opat->p=%d", p,f,opat->p);
       //prbbox(opat->bbox,3);pr3v("X",X);
-      //pr3v("oX",oX);pr3v("ox",ox);
+      //pr3v("ox",ox);pr3v("oX",oX);
       //printf(": ret=%d\n", ret);
       if(ret>=0)
         for(dd=0; dd<3; dd++)
@@ -605,7 +605,24 @@ int set_bfaces_on_patface(tPat *pat, int f)
       for(dd=0; dd<3; dd++)  ox[dd] = x[dd] + dx[dd]*1e-8;
       ret = p_XYZ_of_xyz(opat, oX, ox);
       ret = XYZ_on_face(opat, face, oX);
-      if(ret!=1) errorexit("oX was supposed to be on one face...");
+      if(ret!=1)
+      {
+        int i;
+        printpatch(pat);
+        printCI(pat);
+        pr3v("X", X);
+        pr3v("x", x);
+        printf("\n");
+        printpatch(opat);
+        printCI(opat);
+        pr3v("ox", ox);
+        pr3v("oX", oX);
+        printf("\n");
+        printf("face=");
+        for(i=0; i<6; i++) printf("%d ", face[i]);
+        printf("-> ret=%d\n", ret);
+        errorexit("oX was supposed to be on one face...");
+      }
       for(of=0; face[of]==0; of++) ;
       obface = first_bface_with_op_f(opat, p, of);
       if(!obface)

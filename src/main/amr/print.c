@@ -45,6 +45,54 @@ void printpatch(tPat *pat)
 */
 }
 
+void printCI(tPat *pat)
+{
+  tCoordInfo *CI = pat->CI;
+  int i, j, p;
+
+  printf("p%d: CI->dom=%d CI->type=%d\n",
+         pat->p, CI->dom, CI->type);
+
+  /* s, xc */
+  printf("CI->s[] = [ ");
+  for(i=0;i<6;i++) printf("%g ", CI->s[i]);
+  printf("]\n");
+  printf("CI->xc[] = [ ");
+  for(i=0;i<4;i++) printf("%g ", CI->xc[i]);
+  printf("]\n");
+
+  /* iFS, iSurf */
+  for(i=p=0; i<6; i++) if(CI->iFS[i]) p++;
+  if(p)
+  {
+    printf("CI->iFS[] = [ ");
+    for(i=0;i<6;i++) printf("%d ", CI->iFS[i]);
+    printf("]\n");
+    printf("CI->iSurf[] = [ ");
+    for(i=0;i<6;i++) printf("%d ", CI->iSurf[i]);
+    printf("]\n");
+    printf("idSurfdX[][] = [");
+    for(i=0;i<6;i++)
+    {
+      for(j=1;j<4;j++) printf(" %d", CI->idSurfdX[i][j]);
+      printf(";");
+    }
+    printf("]\n");
+  }
+
+  /* FSurf */
+  printf("CI->FSurf[] = [ ");
+  for(i=0;i<6;i++) printf("%p ", CI->FSurf[i]);
+  printf("]\n");
+  for(i=p=0; i<6; i++) if(CI->dFSurfdC[i]) p++;
+  if(p)
+  {
+    printf("dFSurfdC[] = [");
+    for(i=0;i<6;i++) printf(" %p", CI->dFSurfdC[i]);
+    printf("]\n");
+  }
+}
+
 void printnode(tNode *n) 
 {
   int i, j;
@@ -342,7 +390,7 @@ void printallbfaces(tMesh *mesh)
 /* print 3-vec */
 void pr3v(char *s, double x[3])
 {
-  printf("%s=%g %g %g ", s, x[0],x[1],x[2]);
+  printf("%s=%g %g %g  ", s, x[0],x[1],x[2]);
 }
 
 void prbbox(double *bb, int dim)

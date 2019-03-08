@@ -279,12 +279,6 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
     pat->CI->dom = i;
     pat->CI->type= type;
 
-    /* default surface functions */
-    pat->CI->FSurf[0] = FSurf_is_CI_s;
-    pat->CI->FSurf[1] = FSurf_is_CI_s;
-    pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-    pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-
     /* set sigma vars and iSurf, idSurfdX for them */
     if( (stretch==0) )
     {
@@ -296,6 +290,9 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
           pat->CI->iSurf[0] = isigma;
           pat->CI->idSurfdX[0][1] = isigma_dA;
           pat->CI->idSurfdX[0][2] = isigma_dB;
+          /* default surface functions */
+          pat->CI->FSurf[0] = FSurf_is_CI_s;
+          pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
           break;
       
         case outerCubedSphere:
@@ -304,6 +301,9 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
           pat->CI->iSurf[1] = isigma;
           pat->CI->idSurfdX[1][1] = isigma_dA;
           pat->CI->idSurfdX[1][2] = isigma_dB;
+          /* default surface functions */
+          pat->CI->FSurf[1] = FSurf_is_CI_s;
+          pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
           break;
       
         case CubedShell:
@@ -316,6 +316,11 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
           pat->CI->iSurf[1] = isigma;
           pat->CI->idSurfdX[1][1] = isigma_dA;
           pat->CI->idSurfdX[1][2] = isigma_dB;
+          /* default surface functions */
+          pat->CI->FSurf[0] = FSurf_is_CI_s;
+          pat->CI->FSurf[1] = FSurf_is_CI_s;
+          pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
+          pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
           break;
 
         default:

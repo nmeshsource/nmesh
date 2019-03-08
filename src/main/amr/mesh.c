@@ -90,13 +90,107 @@ int setup_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
 
-  if(Getv(mesh_type, "l2_mesh"))
+  if(Getv(mesh_type, "CubedSpheres"))
+    return setup_CubedSphere_mesh(mesh);
+  else if(Getv(mesh_type, "l2_mesh"))
     return setup_l2_mesh(mesh);
   else if(Getv(mesh_type, "3patchl2_mesh"))
     return setup_3patchl2_mesh(mesh);
   else
     return setup_test_mesh(mesh);
 }
+
+/* a mesh with a number of cubed spheres */
+int setup_CubedSphere_mesh(tMesh *mesh)
+{
+  int amr_n = Geti(Par("amr_n"));
+  double bbox[6] = { -11,11, -22,22, -33,33 };
+  int n1max = 55;
+  int n[3] = { amr_n,amr_n,amr_n };
+  int mesh_type = Par("amr_mesh_type");
+  int npats = Geti(mesh_type);
+  int i;
+  double rf_surf1 = 10;
+  double rf_surf2 = 10;
+  double dc = 20;
+  double csize = 0.375;
+  double ssfac = 4.;
+  double obfac = 10000;
+  double xc[4];
+  tNlist *el, *en;
+
+  PRFs(":\n");
+
+  mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  /* add patches to mesh */
+  remove_all_patches(mesh);
+  for(i=0; i<npats; i++)
+    add_patch(mesh, bbox, n, n1max);
+
+  /* setup cubed spheres */
+  switch(npats)
+  {
+    case 13:
+      xc[2] = xc[3] = 0.0;
+      xc[1] = dc;
+      arrange_1pat12CubSph_into_full_cube(mesh, 0, xc,
+                                          csize*rf_surf1, rf_surf1, dc);
+      break;
+    case 26:
+      two_full_cubes_touching_at_x0(mesh, 0, dc,
+                                    csize*rf_surf1, rf_surf1,
+                                    csize*rf_surf2, rf_surf2);
+      break;
+    case 32:
+      sphere_around_two_full_cubes_touching_at_x0(mesh, 0, dc,
+                                                  csize*rf_surf1, rf_surf1,
+                                                  csize*rf_surf2, rf_surf2,
+                                                  ssfac*dc);
+      break;
+    case 38:
+      two_spheres_around_two_full_cubes(mesh, 0, dc,
+                                        csize*rf_surf1, rf_surf1,
+                                        csize*rf_surf2, rf_surf2,
+                                        ssfac*dc, obfac*dc);
+      break;
+    default:
+      errorexiti("npats=%d not implemented", npats);
+  }
+
+  /* setup all bfaces */
+  amr_set_all_bfaces(mesh);
+  printallbfaces(mesh);
+
+  /* now setup root node connections, i.e. setup neighbors of root nodes */
+  update_all_rnode_fnb(mesh);
+  printmesh(mesh);
+
+  /* 8 children in patch1 */
+  make8children_in_mesh_lns_myln(mesh->lns->next, n);
+  printmesh(mesh);
+
+  /* 8 more in each patch */
+  el = mesh->lns;
+  for(en = el->next; el; en = el ? el->next : 0)
+  {
+    if(el->node->l < 2)
+    {
+      make8children_in_mesh_lns_myln(el, n);
+      el = en;
+    }
+  }
+
+  simple_load_balance(mesh);
+  printmesh(mesh);
+
+errorexit("stop");
+
+  return 0;
+}
+
 
 /* set up a mesh with 2 levels  */
 int setup_l2_mesh(tMesh *mesh)
