@@ -15,9 +15,9 @@ void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
                             double A, double B, double dSig[2]);
 
 /* setup_CubedSpheres.c */
-int convert_1pat_to_cube(tMesh *mesh, int b0, double *xc, double dout);
-int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
-                                  double *xc, double *Din, double *Dout);
+int add_1cube_pat(tMesh *mesh, double *xc, double dout);
+int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
+                          double *xc, double *Din, double *Dout);
 void set_AB_min_max_from_Din(int dom, double *Din,
                              double *Amin, double *Amax,
                              double *Bmin, double *Bmax);

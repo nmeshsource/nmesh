@@ -37,10 +37,8 @@ int arrange_12CubSph_into_empty_cube(tMesh *mesh, int p0, double *xc,
     Dout[i]= dout;
   }
   /* convert the 12 pats */
-  pl = convert_6pats_to_CubedSphere(mesh, pl, outerCubedSphere,0,
-                                    xc, Din,Dmid);
-  pl = convert_6pats_to_CubedSphere(mesh, pl, innerCubedSphere,0,
-                                    xc, Dmid,Dout);
+  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0, xc, Din,Dmid);
+  pl = add_6CubedSphere_pats(mesh, innerCubedSphere,0, xc, Dmid,Dout);
   return pl;
 }
 
@@ -49,7 +47,7 @@ int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int p0, double *xc,
                                         double din, double dmid, double dout)
 {
   int pl=p0;
-  pl = convert_1pat_to_cube(mesh, pl, xc, din);
+  pl = add_1cube_pat(mesh, xc, din);
   pl = arrange_12CubSph_into_empty_cube(mesh, pl, xc, din,dmid,dout);
   return pl;
 }
@@ -122,8 +120,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int p0,
     Dout[i] = r0;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  pl = convert_6pats_to_CubedSphere(mesh, pl, outerCubedSphere,0,
-                                     xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0, xc, Din,Dout);
   return pl;
 }
 
@@ -168,7 +165,7 @@ int two_spheres_around_two_full_cubes(tMesh *mesh, int p0,
     Dout[i] = r1;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  pl = convert_6pats_to_CubedSphere(mesh, pl, CubedShell,1, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, CubedShell,1, xc, Din,Dout);
   return pl;
 }
 
@@ -187,72 +184,72 @@ int dFSurfdC_is_zero(tPat *pat, int si, double C[2], double dF[2])
 }
 
 
-/* convert 1 pat to a cube centered at xc[i],
-   returns the index of the pat right after the last converted pat */
-int convert_1pat_to_cube(tMesh *mesh, int p0, double *xc, double dout)
+/* add 1 pat as a cube centered at xc[i], returns the index of the pat */
+int add_1cube_pat(tMesh *mesh, double *xc, double dout)
 {
-  tPat *pat = mesh->pat[p0];
+  int amr_n = Geti(Par("amr_n"));
+  int n1max = Geti(Par("amr_nmax"));
+  int n[3] = { amr_n,amr_n,amr_n };
+  double bbox[6];
+  tPat *pat;
   int d;
-
-  if(p0+1 > mesh->npats)
-  {
-    printf("npats is too small\n");
-    return p0;
-  }
 
   /* set min/max in each direction */
   for(d=0; d<3; d++)
   {
-    pat->bbox[2*d]   = xc[d] - dout;
-    pat->bbox[2*d+1] = xc[d] + dout;
+    bbox[2*d]   = xc[d] - dout;
+    bbox[2*d+1] = xc[d] + dout;
   }
+
+  /* make new patch */
+  pat = add_patch(mesh, bbox, n, n1max);
 
   ///* erase all bface info in this pat */
   //remove_all_bfaces(pat);
 
-  return p0+1; /* return pat index right after last added pat */
+  return pat->p; /* return pat index */
 }
 
 
-/* convert 6 pats starting with p0 to some kind of cubed spheres */
-/* call this after all pats exist already, so at POST_GRID */
+/* add 6 pats with some kind of cubed spheres */
+/* call this before any pats exist already */
 /* type can be "PyramidFrustum", "innerCubedSphere", "outerCubedSphere",
    "CubedShell"
-   xc[1..3] = (x,y,z) of coord center for the 6 cubed spheres
+   xc[0..2] = (x,y,z) of coord center for the 6 cubed spheres
    Din[0...5] inner distance from center for cubed sph. domain 0-5
    Dout[0...5] outer distance from center for cubed sph. domain 0-5 */
-/* It returns the index of the pat right after the last converted pat */
-int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
-                                  double *xc, double *Din, double *Dout)
+/* It returns the index of the last added pat */
+int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
+                          double *xc, double *Din, double *Dout)
 {
+  int amr_n = Geti(Par("amr_n"));
+  int n1max = Geti(Par("amr_nmax"));
+  int n[3] = { amr_n,amr_n,amr_n };
+  double bbox[6];
+  tPat *pat;
   int isigma    = Ind("CubedSphere_sigma01");
   int isigma_dA = Ind("CubedSphere_dsigma01_dA");
   int isigma_dB = Ind("CubedSphere_dsigma01_dB");
   int isigdef   = Ind("CubedSphere_sigma01_def");
   int i;
 
-  if(p0+6 > mesh->npats)
-    printf("npats is too small\n");
-
   /* set pat CI struct */
   for(i=0; i<6; i++)
   {
-    tPat *pat;
     int d;
     double Amin,Amax, Bmin,Bmax;
 
-    /* break i-loop if we do not have enough pats */
-    if(p0+i >= mesh->npats) break;
-    pat = mesh->pat[p0+i];
-
     /* set min/max in each direction */
     set_AB_min_max_from_Din(i, Din, &Amin,&Amax, &Bmin,&Bmax);
-    pat->bbox[0] = 0.;
-    pat->bbox[1] = 1.;
-    pat->bbox[2] = Amin;
-    pat->bbox[3] = Amax;
-    pat->bbox[4] = Bmin;
-    pat->bbox[5] = Bmax;
+    bbox[0] = 0.;
+    bbox[1] = 1.;
+    bbox[2] = Amin;
+    bbox[3] = Amax;
+    bbox[4] = Bmin;
+    bbox[5] = Bmax;
+
+    /* make new patch */
+    pat = add_patch(mesh, bbox, n, n1max);
 
     /* set coords trafos */
     if(stretch==0)
@@ -345,7 +342,7 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
     //remove_all_bfaces(pat);
   }
 
-  return p0+i; /* return pat index right after last added pat */
+  return pat->p; /* return pat index of last added pat */
 }
 
 

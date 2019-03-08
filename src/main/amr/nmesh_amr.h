@@ -257,7 +257,7 @@ typedef struct tVARLIST {
 
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
-
+tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 
 /* storage.c */
 tArray *alloc_array_with_segs(int n[3], int ns);

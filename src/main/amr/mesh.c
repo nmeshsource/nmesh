@@ -28,7 +28,7 @@ tMesh *make_empty_mesh(int pr)
 }
 
 /* add apatch to the mesh */
-int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
+tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
 {
   tNlist *nlist;
   tPat *pat;
@@ -76,7 +76,7 @@ int add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
-  return 0;
+  return pat;
 }
 
 /* remove all patches from mesh */
@@ -103,13 +103,8 @@ int setup_mesh(tMesh *mesh)
 /* a mesh with a number of cubed spheres */
 int setup_CubedSphere_mesh(tMesh *mesh)
 {
-  int amr_n = Geti(Par("amr_n"));
-  double bbox[6] = { -11,11, -22,22, -33,33 };
-  int n1max = 55;
-  int n[3] = { amr_n,amr_n,amr_n };
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  int i;
   double rf_surf1 = 10;
   double rf_surf2 = 10;
   double dc = 20;
@@ -118,6 +113,8 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double obfac = 10000;
   double xc[4];
   tNlist *el, *en;
+  int amr_n = Geti(Par("amr_n"));
+  int n[3] = { amr_n,amr_n,amr_n };
 
   PRFs(":\n");
 
@@ -125,10 +122,8 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  /* add patches to mesh */
+  /* remove all patches to mesh, so we can just ad new pristine ones */
   remove_all_patches(mesh);
-  for(i=0; i<npats; i++)
-    add_patch(mesh, bbox, n, n1max);
 
   /* setup cubed spheres */
   switch(npats)
@@ -157,7 +152,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
                                         ssfac*dc, obfac*dc);
       break;
     default:
-      errorexiti("npats=%d not implemented", npats);
+      errorexiti("amr_mesh_type = %d CubedSpheres  <--not implemented", npats);
   }
 
   /* setup all bfaces */
@@ -197,7 +192,7 @@ int setup_l2_mesh(tMesh *mesh)
 {
   int amr_n = Geti(Par("amr_n"));
   double bbox[6] = { -4,4, -2,2, -1,1 };
-  int n1max = 55;
+  int n1max = Geti(Par("amr_nmax"));
   int n[3] = { amr_n,amr_n,amr_n };
   tNlist *el, *en;
 
@@ -235,7 +230,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
-  int n1max = 55;
+  int n1max = Geti(Par("amr_nmax"));
   int n[3] = { amr_n,amr_n,amr_n };
   tNlist *el, *en;
 
@@ -414,7 +409,7 @@ void test_array_thingies(tMesh *mesh)
 int setup_test_mesh(tMesh *mesh)
 {
   double bbox[6] = { -4,4, -2,2, -1,1 };
-  int n1max = 55;
+  int n1max = Geti(Par("amr_nmax"));
   int n[3] = { 5,4,3 };
   tNlist *el, *el2;
   int i;
