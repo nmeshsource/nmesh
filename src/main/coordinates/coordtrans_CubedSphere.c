@@ -89,7 +89,11 @@ int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
   }
-  else errorexit("unknown type");
+  else
+  {
+    a0 = a1 = -1.;
+    errorexit("unknown type");
+  }
 
   /* compute coord trafo for each domain */
   if(dir==0)
@@ -221,7 +225,11 @@ int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
     a1 = pm * sigma1*oosqrt_1_A2_B2;
     if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
   }
-  else errorexit("unknown type");
+  else
+  {
+    a0 = a1 = -1.;
+    errorexit("unknown type");
+  }
 
   /* complete coord trafo for each domain and get lam */
   if(dir==0)
@@ -360,7 +368,14 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
     da1_dy = a1; /* mark as non-zero */
     da1_dz = a1; /* mark as non-zero */
   }
-  else errorexit("unknown type");
+  else
+  {
+    a0 = a1 = -1.;
+    dsigma_dA_osigma0 = dsigma_dA_osigma1 = 0.;
+    dsigma_dB_osigma0 = dsigma_dB_osigma1 = 0.;
+    da0_dx = da0_dy = da0_dz = da1_dx = da1_dy = da1_dz = 0.;
+    errorexit("unknown type");
+  }
 
   /* compute coord trafo for each domain */
   if(dir==0)
@@ -646,7 +661,11 @@ int r_dr_dlam_of_lamAB_CubSph(tPat *pat, tNode *node, int ind, double lam,
     sig0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
     sig1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
-  else errorexit("unknown type");
+  else
+  {
+    sig0 = sig1 = -1;
+    errorexit("unknown type");
+  }
 
   /* set r and dr/dlam */
   *r      = r_of_lam_sig0sig1(lam, sig0, sig1);
@@ -858,7 +877,11 @@ int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
     sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
     sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
-  else errorexit("xyz_of_rhoAB_CubSph works only with CubedShell");
+  else
+  {
+    sigma0 = sigma1 = 0.;
+    errorexit("xyz_of_rhoAB_CubSph works only with CubedShell");
+  }
 
   /* get lam, and then set x,y,z */
   lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
@@ -890,7 +913,11 @@ int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
     sigma0 = CubedSphere_sigma(pat, node, 0, ind, *A,*B);
     sigma1 = CubedSphere_sigma(pat, node, 1, ind, *A,*B);
   }
-  else errorexit("works only for CubedShell");
+  else
+  {
+    sigma0 = sigma1 = 0.;
+    errorexit("works only for CubedShell");
+  }
 
   /* get rho from lambda */
   *rho = rho_of_lam_sig0sig1(lam, sigma0,sigma1);
@@ -929,7 +956,11 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
     sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
     sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
   }
-  else errorexit("works only for CubedShell");
+  else
+  {
+    sigma0 = sigma1 = 0.;
+    errorexit("works only for CubedShell");
+  }
 
   /* get lam and derivs of lam */
   lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);

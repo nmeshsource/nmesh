@@ -58,7 +58,7 @@ void printCI(tPat *pat)
   for(i=0;i<6;i++) printf("%g ", CI->s[i]);
   printf("]\n");
   printf("CI->xc[] = [ ");
-  for(i=0;i<4;i++) printf("%g ", CI->xc[i]);
+  for(i=0;i<3;i++) printf("%g ", CI->xc[i]);
   printf("]\n");
 
   /* iFS, iSurf */
@@ -74,7 +74,7 @@ void printCI(tPat *pat)
     printf("idSurfdX[][] = [");
     for(i=0;i<6;i++)
     {
-      for(j=1;j<4;j++) printf(" %d", CI->idSurfdX[i][j]);
+      for(j=1;j<3;j++) printf(" %d", CI->idSurfdX[i][j]);
       printf(";");
     }
     printf("]\n");
