@@ -7,7 +7,7 @@
 #define PR 0
 
 /* The functions below are a little complex because they deal with lists of
-   variable lists and a list of RHSs (one for each VarList). The was done to
+   variable lists and a list of RHSs (one for each VarList). This was done to
    be able to couple two systems such as e.g. Z4 and matter. Each have their
    own vars, but to compute the Z4 RHS one needs the stress-energy tensor T
    (a src) that depends on the matter, while the matter RHS needs the ADM
