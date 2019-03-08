@@ -174,6 +174,19 @@ int two_spheres_around_two_full_cubes(tMesh *mesh, int b0,
 
 
 
+/* primitive default forconstant FSurf funcs */
+int FSurf_is_CI_s(tPat *pat, int si, double C[2], double *F)
+{
+  *F = pat->CI->s[si];
+  return 0;
+}
+int dFSurfdC_is_zero(tPat *pat, int si, double C[2], double dF[2])
+{
+  dF[0] = dF[1] = 0.;
+  return 0;
+}
+
+
 /* convert 1 pat to a cube centered at xc[i],
    returns the index of the pat right after the last converted pat */
 int convert_1pat_to_cube(tMesh *mesh, int b0, double *xc, double dout)
@@ -265,6 +278,12 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
     /* set domain index and type */
     pat->CI->dom = i;
     pat->CI->type= type;
+
+    /* default surface functions */
+    pat->CI->FSurf[0] = FSurf_is_CI_s;
+    pat->CI->FSurf[1] = FSurf_is_CI_s;
+    pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
+    pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
 
     /* set sigma vars and iSurf, idSurfdX for them */
     if( (stretch==0) )
