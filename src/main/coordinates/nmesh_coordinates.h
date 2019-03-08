@@ -77,3 +77,32 @@ double dArgdy(double x, double y);
 double ddArgdxdx(double x, double y);
 double ddArgdxdy(double x, double y);
 double ddArgdydy(double x, double y);
+
+/* setup_CubedSpheres.c */
+int arrange_12CubSph_into_empty_cube(tMesh *mesh, int b0, double *xc,
+                                     double din, double dmid, double dout);
+int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int b0, double *xc,
+                                        double din, double dmid, double dout);
+int two_full_cubes_touching_at_x0(tMesh *mesh, int b0, double dc,
+                                  double din1, double dmid1,
+                                  double din2, double dmid2);
+int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int b0,
+        double dc, double din1, double dmid1, double din2, double dmid2,
+        double r0);
+int two_spheres_around_two_full_cubes(tMesh *mesh, int b0,
+        double dc, double din1, double dmid1, double din2, double dmid2,
+        double r0, double r1);
+
+/* coordtrans_CubedSphere.c */
+int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
+                        const double lamAB[3], double xyz[3]);
+int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
+                        double lamAB[3], const double xyz[3]);
+int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
+                       double xyz[3], double dlamABdxyz[3][3]);
+int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
+                        const double rhoAB[3], double xyz[3]);
+int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
+                        double rhoAB[3], const double xyz[3]);
+int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
+                       double xyz[3], double drhoABdxyz[3][3]);

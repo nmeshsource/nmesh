@@ -18,7 +18,7 @@ typedef struct tCOORDINFO {
   double xc[3];       /* xc[0..2] = (x,y,z) of coord center for this box */
   int dom;    /* domain index, e.g. 0-5 to indicate cubed sphere wedge */
   int type;   /* coordinate type, e.g. outerCubedSphere */
-  double (*FSurf[6])(struct tPAT *pat, int f, double C[2]); /* 6 funcs that return surface val, e.g. FSurf[0]=sigma */
-  double (*dFSurfdX[6][3])(struct tPAT *pat, int f, double C[2]); /* funcs that return derivs of FSurf, dFSurfdX[0][1]=dSurf[0]/dY */
+  int (*FSurf[6])(struct tPAT *pat, int f, double C[2], double *F); /* 6 funcs that set surface val, e.g. FSurf[0] -> F=sigma */
+  int (*dFSurfdC[6])(struct tPAT *pat, int f, double C[2], double dFdC[2]); /* set derivs of FSurf, dFSurfdC[4] -> dFdC[0]=dFSurf[4]/dC0 */
   struct tARRAY *Fcoef[6]; /* coeffs that FSurf might need */
 } tCoordInfo;

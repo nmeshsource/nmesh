@@ -11,10 +11,8 @@
 /* coordtrans_CubedSphere.c */
 double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
                          double A, double B);
-double CubedSphere_dsigma_dA(tPat *pat, tNode *node, int si, int ind,
-                             double A, double B);
-double CubedSphere_dsigma_dB(tPat *pat, tNode *node, int si, int ind,
-                             double A, double B);
+void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
+                            double A, double B, double dSig[2]);
 
 /* setup_CubedSpheres.c */
 int convert_1pat_to_cube(tMesh *mesh, int b0, double *xc, double dout);

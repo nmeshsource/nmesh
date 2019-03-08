@@ -241,6 +241,20 @@ int convert_6pats_to_CubedSphere(tMesh *mesh, int p0, int type, int stretch,
     pat->bbox[4] = Bmin;
     pat->bbox[5] = Bmax;
 
+    /* set coords trafos */
+    if(stretch==0)
+    {
+      pat->xyz_of_XYZ = xyz_of_lamAB_CubSph;
+      pat->XYZ_of_xyz = lamAB_of_xyz_CubSph;
+      pat->dXYZ_dxyz  = dlamAB_dxyz_CubSph;
+    }
+    else
+    {
+      pat->xyz_of_XYZ = xyz_of_rhoAB_CubSph;
+      pat->XYZ_of_xyz = rhoAB_of_xyz_CubSph;
+      pat->dXYZ_dxyz  = drhoAB_dxyz_CubSph;
+    }
+
     /* set center */
     for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];
 

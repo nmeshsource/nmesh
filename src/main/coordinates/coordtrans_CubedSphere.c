@@ -273,6 +273,7 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
   double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
   double mx,my,mz, da0_dx,da0_dy,da0_dz, da1_dx,da1_dy,da1_dz;
   double mx0,my0,mz0, mx1,my1,mz1;
+  double dsig_dAB[2];
   double dsigma_dA_osigma0, dsigma_dB_osigma0;
   double dsigma_dA_osigma1, dsigma_dB_osigma1;
 
@@ -306,8 +307,9 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
     sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
-    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(pat, node, 0, ind, A,B)/sigma0;
-    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(pat, node, 0, ind, A,B)/sigma0;
+    CubedSphere_dsigma_dAB(pat, node, 0, ind, A,B, dsig_dAB);
+    dsigma_dA_osigma0 = dsig_dAB[0]/sigma0;
+    dsigma_dB_osigma0 = dsig_dAB[1]/sigma0;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     dsigma_dA_osigma1 = 0.0;
     dsigma_dB_osigma1 = 0.0;
@@ -327,8 +329,9 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
     dsigma_dA_osigma0 = 0.0;
     dsigma_dB_osigma0 = 0.0;
     sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
-    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(pat, node, 1, ind, A,B)/sigma1;
-    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(pat, node, 1, ind, A,B)/sigma1;
+    CubedSphere_dsigma_dAB(pat, node, 1, ind, A,B, dsig_dAB);
+    dsigma_dA_osigma1 = dsig_dAB[0]/sigma1;
+    dsigma_dB_osigma1 = dsig_dAB[1]/sigma1;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = 0.0;
     da0_dy = 0.0;
@@ -341,11 +344,13 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
     sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
-    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(pat, node, 0, ind, A,B)/sigma0;
-    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(pat, node, 0, ind, A,B)/sigma0;
+    CubedSphere_dsigma_dAB(pat, node, 0, ind, A,B, dsig_dAB);
+    dsigma_dA_osigma0 = dsig_dAB[0]/sigma0;
+    dsigma_dB_osigma0 = dsig_dAB[1]/sigma0;
     sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
-    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(pat, node, 1, ind, A,B)/sigma1;
-    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(pat, node, 1, ind, A,B)/sigma1;
+    CubedSphere_dsigma_dAB(pat, node, 1, ind, A,B, dsig_dAB);
+    dsigma_dA_osigma1 = dsig_dAB[0]/sigma1;
+    dsigma_dB_osigma1 = dsig_dAB[1]/sigma1;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = a0; /* mark as non-zero */
@@ -497,25 +502,20 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
    They use pat->CI->FSurf[si] to get sigma. */
 double CubedSphere_sigma_AB(tPat *pat, int si, double A, double B)
 {
-  double AB[] = { A, B };
+  double AB[] = { A, B }, Sig;
   tCoordInfo *CI = pat->CI;
 
-  return CI->FSurf[si](pat, si, AB);
+  CI->FSurf[si](pat, si, AB, &Sig);
+  return Sig;
 }
 /* dsigma/dA and dsigma/dB are derivs of sigma. */
-double CubedSphere_dsigma_dA_AB(tPat *pat, int si, double A, double B)
+void CubedSphere_dsigma_dAB_AB(tPat *pat, int si, double A, double B,
+                               double dSig[2])
 {
   double AB[] = { A, B };
   tCoordInfo *CI = pat->CI;
 
-  return CI->dFSurfdX[si][2](pat, si, AB);
-}
-double CubedSphere_dsigma_dB_AB(tPat *pat, int si, double A, double B)
-{
-  double AB[] = { A, B };
-  tCoordInfo *CI = pat->CI;
-
-  return CI->dFSurfdX[si][3](pat, si, AB);
+  CI->dFSurfdC[si](pat, si, AB, dSig);
 }
 
 /* Functions to get sigma0/1 for cubed spheres from pat->CI->iSurf[0/1].
@@ -529,7 +529,7 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
   int isig = pat->CI->iSurf[si]; /* get index of var with sigma */
 
   /* if var index does not seem set, use sigma = pat->CI->s[si] */
-  if(isig<1) return pat->CI->s[si];
+  if(isig<=0) return pat->CI->s[si];
 
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
   if(ind>=0)
@@ -546,13 +546,15 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
     return CubedSphere_sigma_AB(pat, si, A,B);
 }
 /* dsigma/dA and dsigma/dB are derivs of sigma. */
-double CubedSphere_dsigma_dA(tPat *pat, tNode *node, int si, int ind,
-                             double A, double B)
+void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
+                            double A, double B, double dSig[2])
 {
-  int isig = pat->CI->idSurfdX[si][1]; /* get index of var with dsigma/dA */
+  int isig0 = pat->CI->idSurfdX[si][1]; /* get index of var with dsigma/dA */
+  int isig1 = pat->CI->idSurfdX[si][2]; /* get index of var with dsigma/dB */
 
   /* if var index does not seem set, use dsigma = 0 */
-  if(isig<1) return 0.0;
+  if(isig0<=0)
+    dSig[0] = dSig[1] = 0.;
 
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
   if(ind>=0)
@@ -560,35 +562,14 @@ double CubedSphere_dsigma_dA(tPat *pat, tNode *node, int si, int ind,
     int *n = node->n;    
     int k = kOfInd_n(ind,n);
     int j = jOfInd_n_k(ind,n,k);
-    tArray *sig = VarA(node, isig);
+    tArray *sig = VarA(node, isig0);
     int *nA = sig->n;
     int ijk = Ind_n(si,j,k, nA);
-    return Vard(node, isig)[ijk];
+    dSig[0] = Vard(node, isig0)[ijk];
+    dSig[1] = Vard(node, isig1)[ijk];
   }
   else /* we need value between grid points */
-    return CubedSphere_dsigma_dA_AB(pat, si, A,B);
-}
-double CubedSphere_dsigma_dB(tPat *pat, tNode *node, int si, int ind,
-                             double A, double B)
-{
-  int isig = pat->CI->idSurfdX[si][2]; /* get index of var with dsigma/dB */
-
-  /* if var index does not seem set, use dsigma = 0 */
-  if(isig<1) return 0.0;
-
-  /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
-  if(ind>=0)
-  {
-    int *n = node->n;    
-    int k = kOfInd_n(ind,n);
-    int j = jOfInd_n_k(ind,n,k);
-    tArray *sig = VarA(node, isig);
-    int *nA = sig->n;
-    int ijk = Ind_n(si,j,k, nA);
-    return Vard(node, isig)[ijk];
-  }
-  else /* we need value between grid points */
-    return CubedSphere_dsigma_dB_AB(pat, si, A,B);
+    CubedSphere_dsigma_dAB_AB(pat, si, A,B, dSig);
 }
 
 
