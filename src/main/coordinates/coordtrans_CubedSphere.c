@@ -51,12 +51,12 @@ int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
   double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
 
   /* get direction, pm, and center */
-  dir = domain/2 + 1;
+  dir = domain/2;
   p  = 2*(domain%2) - 1; /* p  = +/- 1 */
   pm = p;                /* pm = +/- 1.0 */
-  xc = pat->CI->xc[1];
-  yc = pat->CI->xc[2];
-  zc = pat->CI->xc[3];
+  xc = pat->CI->xc[0];
+  yc = pat->CI->xc[1];
+  zc = pat->CI->xc[2];
 
   /* check type of trafo */
   if(type==PyramidFrustum)
@@ -92,21 +92,21 @@ int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
   else errorexit("unknown type");
 
   /* compute coord trafo for each domain */
-  if(dir==1)
+  if(dir==0)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc) */
     rx = (a1-a0)*lam + a0;
     *x = xc + rx;
     *y = yc + A*rx;
     *z = zc + B*rx;
   }
-  else if(dir==2)
+  else if(dir==1)
   {
     ry = (a1-a0)*lam + a0;
     *y = yc + ry;
     *x = xc + A*ry;
     *z = zc + B*ry;
   }
-  else /* dir==3 */
+  else /* dir==2 */
   {
     rz = (a1-a0)*lam + a0;
     *z = zc + rz;
@@ -135,36 +135,36 @@ int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   int stat=0;
 
   /* get direction, pm, and center */
-  dir = domain/2 + 1;
+  dir = domain/2;
   p  = 2*(domain%2) - 1; /* p  = +/- 1 */
   pm = p;                /* pm = +/- 1.0 */
-  xc = pat->CI->xc[1];
-  yc = pat->CI->xc[2];
-  zc = pat->CI->xc[3];
+  xc = pat->CI->xc[0];
+  yc = pat->CI->xc[1];
+  zc = pat->CI->xc[2];
 
   /* get d=istance from center, and sqrt_1_A2_B2 */
   rx = x-xc;
   ry = y-yc;
   rz = z-zc;
   rc = sqrt(rx*rx + ry*ry + rz*rz);
-  if(dir==1)       oosqrt_1_A2_B2 = fabs(rx)/rc;
-  else if(dir==2)  oosqrt_1_A2_B2 = fabs(ry)/rc;
+  if(dir==0)       oosqrt_1_A2_B2 = fabs(rx)/rc;
+  else if(dir==1)  oosqrt_1_A2_B2 = fabs(ry)/rc;
   else             oosqrt_1_A2_B2 = fabs(rz)/rc;
 
   /* get A,B for each domain */
-  if(dir==1)
+  if(dir==0)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
        (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
        1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
     *A   = ry/rx;
     *B   = rz/rx;
   }
-  else if(dir==2)
+  else if(dir==1)
   {
     *A   = rx/ry;
     *B   = rz/ry;
   }
-  else /* dir==3 */
+  else /* dir==2 */
   {
     *A   = ry/rz;
     *B   = rx/rz;
@@ -224,17 +224,17 @@ int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   else errorexit("unknown type");
 
   /* complete coord trafo for each domain and get lam */
-  if(dir==1)
+  if(dir==0)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
        (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
        1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
     *lam = (rx-a0)/(a1-a0);
   }
-  else if(dir==2)
+  else if(dir==1)
   {
     *lam = (ry-a0)/(a1-a0); 
   }
-  else /* dir==3 */
+  else /* dir==2 */
   {
     *lam = (rz-a0)/(a1-a0);
   }
@@ -278,12 +278,12 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
   double dsigma_dA_osigma1, dsigma_dB_osigma1;
 
   /* get direction, pm, and center */
-  dir = domain/2 + 1;
+  dir = domain/2;
   p  = 2*(domain%2) - 1; /* p  = +/- 1 */
   pm = p;                /* pm = +/- 1.0 */
-  xc = pat->CI->xc[1];
-  yc = pat->CI->xc[2];
-  zc = pat->CI->xc[3];
+  xc = pat->CI->xc[0];
+  yc = pat->CI->xc[1];
+  zc = pat->CI->xc[2];
 
   /* check type of trafo */
   if(type==PyramidFrustum)
@@ -363,7 +363,7 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
   else errorexit("unknown type");
 
   /* compute coord trafo for each domain */
-  if(dir==1)
+  if(dir==0)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
        (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
        1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
@@ -410,7 +410,7 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
     *dBdy = 0.0;
     *dBdz = *dAdy;
   }
-  else if(dir==2)
+  else if(dir==1)
   {
     ry = (a1-a0)*lam + a0;
     *y = yc + ry;
@@ -450,7 +450,7 @@ int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
     *dBdy = -rz/ry2;
     *dBdz = *dAdx;
   }
-  else /* dir==3 */
+  else /* dir==2 */
   {
     rz = (a1-a0)*lam + a0;
     *z = zc + rz;
@@ -668,12 +668,12 @@ int ThetaPhi_of_AB_CubSph(tPat *pat, double A, double B,
   double pm;
 
   /* get direction, pm */
-  dir = domain/2 + 1;
+  dir = domain/2;
   p  = 2*(domain%2) - 1; /* p  = +/- 1 */
   pm = p;                /* pm = +/- 1.0 */
   //z1 = (1. - pm)*0.5;  /* z1 = 0 or 1 */
 
-  if(dir==1)
+  if(dir==0)
   { /* A = ry/rx;   B = rz/rx;
        rx = r*cos(Phi)*sin(Theta)
        ry = r*sin(Phi)*sin(Theta)
@@ -686,12 +686,12 @@ int ThetaPhi_of_AB_CubSph(tPat *pat, double A, double B,
     *Phi = Arg_plus(pm, pm*A);
     *Theta = Arg_plus(B*cos(*Phi), 1.);
   }
-  else if(dir==2)
+  else if(dir==1)
   { /* A = rx/ry;   B = rz/ry; */
     *Phi = Arg_plus(pm*A, pm);
     *Theta = Arg_plus(B*sin(*Phi), 1.);
   }
-  else /* dir==3 */
+  else /* dir==2 */
   { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx;
        A = sin(Phi)*tan(Theta)
        B = cos(Phi)*tan(Theta)  => A/B = tan(Phi) => Phi = atan(A/B)= Arg(B,A)
@@ -725,12 +725,12 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tPat *pat, double A, double B,
   double pm;
 
   /* get direction, pm */
-  dir = domain/2 + 1;
+  dir = domain/2;
   p  = 2*(domain%2) - 1; /* p  = +/- 1 */
   pm = p;                /* pm = +/- 1.0 */
   //z1 = (1. - pm)*0.5;  /* z1 = 0 or 1 */
 
-  if(dir==1)
+  if(dir==0)
   { /* A = ry/rx;   B = rz/rx;
        rx = r*cos(Phi)*sin(Theta)
        ry = r*sin(Phi)*sin(Theta)
@@ -751,7 +751,7 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tPat *pat, double A, double B,
     *dThetadB = dArgdx(B*cos(*Phi), 1.) *
                 ( cos(*Phi) + B*(-sin(*Phi)) * (*dPhidB) );
   }
-  else if(dir==2)
+  else if(dir==1)
   { /* A = rx/ry;   B = rz/ry; */
     *Phi = Arg_plus(pm*A, pm);
     *Theta = Arg_plus(B*sin(*Phi), 1.);
@@ -763,7 +763,7 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tPat *pat, double A, double B,
     *dThetadB = dArgdx(B*sin(*Phi), 1.) *
                 ( sin(*Phi) + B*(cos(*Phi)) * (*dPhidB) );
   }
-  else /* dir==3 */
+  else /* dir==2 */
   { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx;
        A = sin(Phi)*tan(Theta)
        B = cos(Phi)*tan(Theta)  => A/B = tan(Phi) => Phi = atan(A/B)= Arg(B,A)
