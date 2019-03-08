@@ -24,9 +24,8 @@
 *end
 
 
-
-
-
+Thing that need to be done urgently:
+====================================
 *Array ops
  matrix_times_matrix : DONE!
 
@@ -41,6 +40,8 @@
 *Legendre : DONE!
 
 *some output: DONE!
+
+*test bfaces & fnb:
 
 *2d interpolation
  -interp from ghosts within patch     : DONE!
