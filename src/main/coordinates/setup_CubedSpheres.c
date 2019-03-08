@@ -20,10 +20,10 @@
    |/________\|
 
    returns the index of the pat right after the last converted pat */
-int arrange_12CubSph_into_empty_cube(tMesh *mesh, int b0, double *xc,
+int arrange_12CubSph_into_empty_cube(tMesh *mesh, int p0, double *xc,
                                      double din, double dmid, double dout)
 {
-  int bl=b0;
+  int pl=p0;
   int i;
   double Din[6];
   double Dmid[6];
@@ -37,21 +37,21 @@ int arrange_12CubSph_into_empty_cube(tMesh *mesh, int b0, double *xc,
     Dout[i]= dout;
   }
   /* convert the 12 pats */
-  bl = convert_6pats_to_CubedSphere(mesh, bl, outerCubedSphere,0,
+  pl = convert_6pats_to_CubedSphere(mesh, pl, outerCubedSphere,0,
                                     xc, Din,Dmid);
-  bl = convert_6pats_to_CubedSphere(mesh, bl, innerCubedSphere,0,
+  pl = convert_6pats_to_CubedSphere(mesh, pl, innerCubedSphere,0,
                                     xc, Dmid,Dout);
-  return bl;
+  return pl;
 }
 
 /* same as arrange_12CubSph_into_empty_cube, but add one cube at the center */
-int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int b0, double *xc,
+int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int p0, double *xc,
                                         double din, double dmid, double dout)
 {
-  int bl=b0;
-  bl = convert_1pat_to_cube(mesh, bl, xc, din);
-  bl = arrange_12CubSph_into_empty_cube(mesh, bl, xc, din,dmid,dout);
-  return bl;
+  int pl=p0;
+  pl = convert_1pat_to_cube(mesh, pl, xc, din);
+  pl = arrange_12CubSph_into_empty_cube(mesh, pl, xc, din,dmid,dout);
+  return pl;
 }
 
 
@@ -67,11 +67,11 @@ int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int b0, double *xc,
    | /      \ | /      \ |
    |/________\|/________\|
 */
-int two_full_cubes_touching_at_x0(tMesh *mesh, int b0, double dc,
+int two_full_cubes_touching_at_x0(tMesh *mesh, int p0, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2)
 {
-  int bl=b0;
+  int pl=p0;
   double xc[4];
 
   /* put centers on x-axis */
@@ -79,13 +79,13 @@ int two_full_cubes_touching_at_x0(tMesh *mesh, int b0, double dc,
 
   /* full cube 1 is centered at xc[1]=dc and has width 2dc */
   xc[1] = dc;
-  bl = arrange_1pat12CubSph_into_full_cube(mesh, bl, xc, din1,dmid1, dc);
+  pl = arrange_1pat12CubSph_into_full_cube(mesh, pl, xc, din1,dmid1, dc);
 
   /* full cube 2 is centered at xc[1]=-dc and has width 2dc */
   xc[1] = -dc;
-  bl = arrange_1pat12CubSph_into_full_cube(mesh, bl, xc, din2,dmid2, dc);
+  pl = arrange_1pat12CubSph_into_full_cube(mesh, pl, xc, din2,dmid2, dc);
 
-  return bl;
+  return pl;
 }
 
 
@@ -103,16 +103,16 @@ int two_full_cubes_touching_at_x0(tMesh *mesh, int b0, double dc,
      \__         __/
         \_______/ 
 */
-int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int b0,
+int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int p0,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0)
 {
-  int bl=b0;
+  int pl=p0;
   double xc[4], Din[6], Dout[6];
   int i;
 
   /* make the 2 full cubes */
-  bl = two_full_cubes_touching_at_x0(mesh, b0, dc, din1,dmid1, din2,dmid2);
+  pl = two_full_cubes_touching_at_x0(mesh, p0, dc, din1,dmid1, din2,dmid2);
 
   /* set distances to make 6 more cubed spheres around these 2 full cubes */
   for(i=0; i<6; i++)
@@ -122,9 +122,9 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int b0,
     Dout[i] = r0;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  bl = convert_6pats_to_CubedSphere(mesh, bl, outerCubedSphere,0,
+  pl = convert_6pats_to_CubedSphere(mesh, pl, outerCubedSphere,0,
                                      xc, Din,Dout);
-  return bl;
+  return pl;
 }
 
 
@@ -150,16 +150,16 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int b0,
        -_ /
          \      ...
 */
-int two_spheres_around_two_full_cubes(tMesh *mesh, int b0,
+int two_spheres_around_two_full_cubes(tMesh *mesh, int p0,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1)
 {
-  int bl=b0;
+  int pl=p0;
   double xc[4], Din[6], Dout[6];
   int i;
 
   /* make the 2 full cubes and sphere0 around them */
-  bl = sphere_around_two_full_cubes_touching_at_x0(mesh, b0, dc,
+  pl = sphere_around_two_full_cubes_touching_at_x0(mesh, p0, dc,
                                                    din1,dmid1, din2,dmid2, r0);
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
@@ -168,8 +168,8 @@ int two_spheres_around_two_full_cubes(tMesh *mesh, int b0,
     Dout[i] = r1;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  bl = convert_6pats_to_CubedSphere(mesh, bl, CubedShell,1, xc, Din,Dout);
-  return bl;
+  pl = convert_6pats_to_CubedSphere(mesh, pl, CubedShell,1, xc, Din,Dout);
+  return pl;
 }
 
 
@@ -189,15 +189,15 @@ int dFSurfdC_is_zero(tPat *pat, int si, double C[2], double dF[2])
 
 /* convert 1 pat to a cube centered at xc[i],
    returns the index of the pat right after the last converted pat */
-int convert_1pat_to_cube(tMesh *mesh, int b0, double *xc, double dout)
+int convert_1pat_to_cube(tMesh *mesh, int p0, double *xc, double dout)
 {
-  tPat *pat = mesh->pat[b0];
+  tPat *pat = mesh->pat[p0];
   int d;
 
-  if(b0+1 > mesh->npats)
+  if(p0+1 > mesh->npats)
   {
     printf("npats is too small\n");
-    return b0;
+    return p0;
   }
 
   /* set min/max in each direction */
@@ -210,7 +210,7 @@ int convert_1pat_to_cube(tMesh *mesh, int b0, double *xc, double dout)
   ///* erase all bface info in this pat */
   //remove_all_bfaces(pat);
 
-  return b0+1; /* return pat index right after last added pat */
+  return p0+1; /* return pat index right after last added pat */
 }
 
 
