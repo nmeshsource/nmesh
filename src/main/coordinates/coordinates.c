@@ -14,10 +14,12 @@ int coordinates_coordvars_enabled(tNode *node)
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
+  tCoordInfo *CI = pat->CI;
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx");
   int ix   = Ind("x");
+  int f, d;
 
   /* do nothing if this is not my node */
   if(!dat) return 0;
@@ -36,6 +38,17 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, ix);
   enablevar_innode(node, ix+1);
   enablevar_innode(node, ix+2);
+
+  /* enable extra vars for cubed spheres */
+  for(f=0; f<6; f++)
+    if(CI->iSurf[f] > 0)
+    {
+      enablevar_innode(node, CI->iSurf[f]);
+      for(d=0; d<3; d++)
+        if(CI->idSurfdX[f][d] > 0)
+          enablevar_innode(node, CI->idSurfdX[f][d]);
+    }
+
   return 1;
 }
 
@@ -45,8 +58,9 @@ int coordinates_init_node(tNode *node)
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
+  tCoordInfo *CI = pat->CI;
   int *n = node->n;
-  int i,j,k, d,e;
+  int i,j,k, d,e, f;
   int vars_on = coordinates_coordvars_enabled(node);
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
@@ -104,6 +118,43 @@ int coordinates_init_node(tNode *node)
       det_dXbdx[ijk] = det_dXbYbZb_dXYZ;
     }
   }
+
+  /* set surface vars */
+  for(f=0; f<6; f++)
+    if(CI->iSurf[f] > 0)
+    {
+      int dir = f/2;
+      int d1  = Dir1_norm(dir);
+      int d2  = Dir2_norm(dir);
+      int ijk;
+      double *sig = Vard(node, CI->iSurf[f]);
+      double C[2], F;
+
+      forpoints(node, ijk)
+      {
+        C[0] = pX[d1][ijk];
+        C[1] = pX[d2][ijk];
+        CI->FSurf[f](pat, f, C, &F);
+        sig[ijk] = F;
+      }
+
+      /* and their derivs */
+      if(CI->idSurfdX[f][d1] > 0)
+      {
+        double *dsig1 = Vard(node, CI->idSurfdX[f][d1]);
+        double *dsig2 = Vard(node, CI->idSurfdX[f][d2]);
+        double dF[2];
+
+        forpoints(node, ijk)
+        {
+          C[0] = pX[d1][ijk];
+          C[1] = pX[d2][ijk];
+          CI->dFSurfdC[f](pat, f, C, dF);
+          dsig1[ijk] = dF[0];
+          dsig2[ijk] = dF[1];
+        }
+      }
+    }
 
   /* mark coords as set */
   dat->coords_set = 1;

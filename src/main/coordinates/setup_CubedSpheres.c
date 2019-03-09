@@ -230,7 +230,7 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
   int isigma    = Ind("CubedSphere_sigma01");
   int isigma_dA = Ind("CubedSphere_dsigma01_dA");
   int isigma_dB = Ind("CubedSphere_dsigma01_dB");
-  int isigdef   = Ind("CubedSphere_sigma01_def");
+  //int isigdef   = Ind("CubedSphere_sigma01_def");
   int i;
 
   /* set pat CI struct */

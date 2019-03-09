@@ -28,9 +28,6 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVarDim("CubedSphere_sigma01",     "", "sigma_{0/1}", 2,-1,-1);
   AddAuxVarDim("CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}", 2,-1,-1);
   AddAuxVarDim("CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}", 2,-1,-1);
-  /* we should not set the above three explicitly, rather set this one: */
-  AddAuxVarDim("CubedSphere_sigma01_def", "", "var we use to define and "
-               "set the sigma_{0/1} in CubedSphere_sigma01", 2,-1,-1);
 
   /* parameters */
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");

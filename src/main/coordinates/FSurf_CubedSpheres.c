@@ -42,9 +42,8 @@ int FSurf_CubSph_sigma01_func(tPat *pat, int si, double AB[2], double *sig)
 
   /* get func val fv at Theta,Phi */
   fv = 0.;
-  ijk=0;
-  if(nYs>=N/2) errorexit("decrease global lmax in FSurf_CubedSpheres.c!");
   /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
+  ijk=0;
   for(l=0; l<=lmax; l++)
     for(sm=1., m=0;  m<=l;  m++, sm=-sm)
     {
@@ -204,11 +203,12 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
   tCoordInfo *CI = pat->CI;
-  double *Yp = Vard(node, Ind("Y"));
-  double *Zp = Vard(node, Ind("Z"));
+  int iX = Ind("X");
+  double *Yp = Vard(node, iX+1);
+  double *Zp = Vard(node, iX+2);
   int isigma    = CI->iSurf[si];
-  int isigma_dA = CI->idSurfdX[si][0];
-  int isigma_dB = CI->idSurfdX[si][1];
+  int isigma_dA = CI->idSurfdX[si][1];
+  int isigma_dB = CI->idSurfdX[si][2];
   double *sigma    = Vard(node, isigma);
   double *sigma_dA = Vard(node, isigma_dA);
   double *sigma_dB = Vard(node, isigma_dB);
@@ -217,7 +217,7 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
   int *ns = Varn(node, isigma);
   int i,j,k, ijk, sjk;
 
-  forplane0(i,j,k, n, (n[2]-1)*(si==1))
+  forplane0(i,j,k, n, (n[0]-1)*(si==1))
   {
     /* get A,B at point ijk */
     ijk = Ind_n(i,j,k, n);
