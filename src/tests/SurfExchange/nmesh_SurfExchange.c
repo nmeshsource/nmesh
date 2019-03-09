@@ -7,6 +7,8 @@
 
 int nmesh_SurfExchange(tMesh *mesh)
 {
+  if(!Getv(Par("physics"), "SurfExchange")) return 0;
+
   printf("Adding SurfExchange\n");
 
   /* functions */

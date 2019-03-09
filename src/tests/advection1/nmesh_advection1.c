@@ -7,6 +7,8 @@
 
 int nmesh_advection1(tMesh *mesh)
 {
+  if(!Getv(Par("physics"), "advection1")) return 0;
+
   printf("Adding advection1\n");
 
   /* functions */

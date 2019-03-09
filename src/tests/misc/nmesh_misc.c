@@ -7,6 +7,8 @@
 
 int nmesh_misc(tMesh *mesh)
 {
+  if(!Getv(Par("physics"), "misc")) return 0;
+
   printf("Adding misc\n");
 
   /* functions */

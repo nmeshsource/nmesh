@@ -111,7 +111,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double csize = 0.375;
   double ssfac = 4.;
   double obfac = 10000;
-  double xc[4];
+  double xc[3];
   tNlist *el, *en;
   int amr_n = Geti(Par("amr_n"));
   int n[3] = { amr_n,amr_n,amr_n };
@@ -128,9 +128,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   /* setup cubed spheres */
   switch(npats)
   {
+    case 3:
+      two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
+      break;
     case 13:
-      xc[2] = xc[3] = 0.0;
-      xc[1] = dc;
+      xc[1] = xc[2] = 0.0;
+      xc[0] = dc;
       arrange_1pat12CubSph_into_full_cube(mesh, xc,
                                           csize*rf_surf1, rf_surf1, dc);
       break;
@@ -181,7 +184,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   printmesh(mesh);
 
-errorexit("stop");
+//errorexit("stop");
 
   return 0;
 }

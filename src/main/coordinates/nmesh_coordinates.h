@@ -92,6 +92,10 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
 int two_spheres_around_two_full_cubes(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1);
+int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
+                                 double r0, double r1);
+int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1);
+
 
 /* coordtrans_CubedSphere.c */
 int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,

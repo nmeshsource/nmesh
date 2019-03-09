@@ -569,7 +569,10 @@ void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
 
   /* if var index does not seem set, use dsigma = 0 */
   if(isig0<=0)
+  {
     dSig[0] = dSig[1] = 0.;
+    return;
+  }
 
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
   if(ind>=0)
