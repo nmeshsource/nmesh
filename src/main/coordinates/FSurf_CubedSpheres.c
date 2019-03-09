@@ -6,12 +6,6 @@
 #include "coordinates.h"
 
 
-/* global vars in this file */
-int lmax;        /* max l in Ylm expansion */
-
-/* funcs in this file */
-int FSurf_CubSph_sigma01_func(tPat *pat, int si, double AB[2], double *sig);
-
 
 
 /* return value of surface function sigma01 */
@@ -33,6 +27,8 @@ int FSurf_CubSph_sigma01_func(tPat *pat, int si, double AB[2], double *sig)
   double fv, Theta,Phi;
   double *ReYtab = alloc_Plm_Tab(lmax);
   double *ImYtab = alloc_Plm_Tab(lmax);
+
+  errorexit("this function needs to be tested!!!");
 
   /* get Theta,Phi from A,B */
   ThetaPhi_of_AB_CubSph(pat, AB[0],AB[1], &Theta,&Phi);
@@ -103,6 +99,8 @@ int FSurf_CubSph_sigma01_derivs(tPat *pat, int si, double AB[2],
   double *csdth = calloc(nYs*2, sizeof(double));
   double *cdphi = calloc(nYs*2, sizeof(double));
   double A=AB[0], B=AB[1];
+
+  errorexit("this function needs to be tested!!!");
 
   /* regularize case where A=B=0 <==> Theta=0:
      Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
@@ -217,6 +215,8 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
   int *ns = Varn(node, isigma);
   int i,j,k, ijk, sjk;
 
+  errorexit("this function may not be needed and it needs to be tested!!!");
+
   forplane0(i,j,k, n, (n[0]-1)*(si==1))
   {
     /* get A,B at point ijk */
@@ -245,6 +245,9 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
   int dom  = pat->CI->dom;
   int i, si, si0, si1;
   int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
+  int lmax;
+
+  errorexit("this function needs to be tested!!!");
 
   if(dom!=0) return -1; /* do nothing if this is not dom0 */
 
