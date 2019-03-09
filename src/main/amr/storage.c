@@ -19,17 +19,20 @@ extern nMPI_Comm main_comm;
 /* allocate an array with ns segments */
 tArray *alloc_array_with_segs(int n[3], int ns)
 {
+  tArray *array;
+  int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
   int i;
-  tArray *array = calloc(1, sizeof(tArray));
+
+  array = calloc(1, sizeof(tArray));
   if(!array) errorexit("out of memory");
 
   array->N = n[0] * n[1] * n[2];
   for(i=0; i<3; i++)  array->n[i] = n[i];
 
   array->ns = ns;
-  array->d = calloc(array->N * ns,
-                    max2(sizeof(array->d[0]), sizeof(array->i[0])));
+  array->d = calloc(array->N * ns, size1);
   if(!array->d) errorexit("out of memory for array->d");
+  array->size = array->N * ns * size1;
 
   return array;
 }
@@ -64,21 +67,32 @@ void point_array_a_to_data(tArray *array, void *data)
 }
 
 /* re-dimension array */
-void redimension_array_with_segs(tArray *array, int n[3], int ns)
+tArray *redimension_array_with_segs(tArray *array, int n[3], int ns)
 {
+  int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
+  size_t size_new;
   int i;
+
   for(i=0; i<3; i++) if(n[i]>0) array->n[i] = n[i];
   array->N = array->n[0] * array->n[1] * array->n[2];
   array->ns = ns;
+
+  size_new = array->N * ns * size1;
+  if(size_new > array->size)
+  {
+    array = realloc(array, size_new);
+    array->size = size_new;
+  }
+  return array;
 }
-void redimension_array(tArray *array, int n[3])
+tArray *redimension_array(tArray *array, int n[3])
 {
-  redimension_array_with_segs(array, n, array->ns);
+  return redimension_array_with_segs(array, n, array->ns);
 }
-void redim_array(tArray *array, int n0, int n1, int n2)
+tArray *redim_array(tArray *array, int n0, int n1, int n2)
 {
   int n[] = { n0,n1,n2 };
-  redimension_array(array, n);
+  return redimension_array(array, n);
 }
 
 /* free an array */
