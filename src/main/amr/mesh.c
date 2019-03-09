@@ -131,22 +131,22 @@ int setup_CubedSphere_mesh(tMesh *mesh)
     case 13:
       xc[2] = xc[3] = 0.0;
       xc[1] = dc;
-      arrange_1pat12CubSph_into_full_cube(mesh, 0, xc,
+      arrange_1pat12CubSph_into_full_cube(mesh, xc,
                                           csize*rf_surf1, rf_surf1, dc);
       break;
     case 26:
-      two_full_cubes_touching_at_x0(mesh, 0, dc,
+      two_full_cubes_touching_at_x0(mesh, dc,
                                     csize*rf_surf1, rf_surf1,
                                     csize*rf_surf2, rf_surf2);
       break;
     case 32:
-      sphere_around_two_full_cubes_touching_at_x0(mesh, 0, dc,
+      sphere_around_two_full_cubes_touching_at_x0(mesh, dc,
                                                   csize*rf_surf1, rf_surf1,
                                                   csize*rf_surf2, rf_surf2,
                                                   ssfac*dc);
       break;
     case 38:
-      two_spheres_around_two_full_cubes(mesh, 0, dc,
+      two_spheres_around_two_full_cubes(mesh, dc,
                                         csize*rf_surf1, rf_surf1,
                                         csize*rf_surf2, rf_surf2,
                                         ssfac*dc, obfac*dc);

@@ -20,10 +20,10 @@
    |/________\|
 
    returns the index of the pat right after the last converted pat */
-int arrange_12CubSph_into_empty_cube(tMesh *mesh, int p0, double *xc,
+int arrange_12CubSph_into_empty_cube(tMesh *mesh, double *xc,
                                      double din, double dmid, double dout)
 {
-  int pl=p0;
+  int pl;
   int i;
   double Din[6];
   double Dmid[6];
@@ -43,12 +43,12 @@ int arrange_12CubSph_into_empty_cube(tMesh *mesh, int p0, double *xc,
 }
 
 /* same as arrange_12CubSph_into_empty_cube, but add one cube at the center */
-int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int p0, double *xc,
+int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, double *xc,
                                         double din, double dmid, double dout)
 {
-  int pl=p0;
+  int pl;
   pl = add_1cube_pat(mesh, xc, din);
-  pl = arrange_12CubSph_into_empty_cube(mesh, pl, xc, din,dmid,dout);
+  pl = arrange_12CubSph_into_empty_cube(mesh, xc, din,dmid,dout);
   return pl;
 }
 
@@ -65,11 +65,11 @@ int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int p0, double *xc,
    | /      \ | /      \ |
    |/________\|/________\|
 */
-int two_full_cubes_touching_at_x0(tMesh *mesh, int p0, double dc,
+int two_full_cubes_touching_at_x0(tMesh *mesh, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2)
 {
-  int pl=p0;
+  int pl;
   double xc[4];
 
   /* put centers on x-axis */
@@ -77,11 +77,11 @@ int two_full_cubes_touching_at_x0(tMesh *mesh, int p0, double dc,
 
   /* full cube 1 is centered at xc[1]=dc and has width 2dc */
   xc[1] = dc;
-  pl = arrange_1pat12CubSph_into_full_cube(mesh, pl, xc, din1,dmid1, dc);
+  pl = arrange_1pat12CubSph_into_full_cube(mesh, xc, din1,dmid1, dc);
 
   /* full cube 2 is centered at xc[1]=-dc and has width 2dc */
   xc[1] = -dc;
-  pl = arrange_1pat12CubSph_into_full_cube(mesh, pl, xc, din2,dmid2, dc);
+  pl = arrange_1pat12CubSph_into_full_cube(mesh, xc, din2,dmid2, dc);
 
   return pl;
 }
@@ -101,16 +101,16 @@ int two_full_cubes_touching_at_x0(tMesh *mesh, int p0, double dc,
      \__         __/
         \_______/ 
 */
-int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int p0,
+int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0)
 {
-  int pl=p0;
+  int pl;
   double xc[4], Din[6], Dout[6];
   int i;
 
   /* make the 2 full cubes */
-  pl = two_full_cubes_touching_at_x0(mesh, p0, dc, din1,dmid1, din2,dmid2);
+  pl = two_full_cubes_touching_at_x0(mesh, dc, din1,dmid1, din2,dmid2);
 
   /* set distances to make 6 more cubed spheres around these 2 full cubes */
   for(i=0; i<6; i++)
@@ -147,16 +147,16 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int p0,
        -_ /
          \      ...
 */
-int two_spheres_around_two_full_cubes(tMesh *mesh, int p0,
+int two_spheres_around_two_full_cubes(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1)
 {
-  int pl=p0;
+  int pl;
   double xc[4], Din[6], Dout[6];
   int i;
 
   /* make the 2 full cubes and sphere0 around them */
-  pl = sphere_around_two_full_cubes_touching_at_x0(mesh, p0, dc,
+  pl = sphere_around_two_full_cubes_touching_at_x0(mesh, dc,
                                                    din1,dmid1, din2,dmid2, r0);
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)

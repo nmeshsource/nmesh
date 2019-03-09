@@ -79,17 +79,17 @@ double ddArgdxdy(double x, double y);
 double ddArgdydy(double x, double y);
 
 /* setup_CubedSpheres.c */
-int arrange_12CubSph_into_empty_cube(tMesh *mesh, int b0, double *xc,
+int arrange_12CubSph_into_empty_cube(tMesh *mesh, double *xc,
                                      double din, double dmid, double dout);
-int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int b0, double *xc,
+int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, double *xc,
                                         double din, double dmid, double dout);
-int two_full_cubes_touching_at_x0(tMesh *mesh, int b0, double dc,
+int two_full_cubes_touching_at_x0(tMesh *mesh, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2);
-int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int b0,
+int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0);
-int two_spheres_around_two_full_cubes(tMesh *mesh, int b0,
+int two_spheres_around_two_full_cubes(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1);
 
