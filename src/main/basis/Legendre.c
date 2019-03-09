@@ -8,48 +8,8 @@
 
 
 
-/* associated Legendre polynomial (not really needed here) */
-/* use recursion recommended in numrec to get P_l^m for positive m */
-double assocLegendreP(int l, int m, double x)
-{
-  double fact, Pkm=0., Pmm, Pmp1_m, somx2;
-  int i, k;
-
-  if(m < 0 || m > l || fabs(x) > 1.0) errorexit("Bad arguments");
-
-  /* build P_m^m */
-  Pmm = 1.0;
-  if(m > 0)
-  {
-    somx2 = sqrt((1.0-x)*(1.0+x));
-    fact=1.0;
-    for(i=1; i<=m; i++)
-    {
-      Pmm *= -fact*somx2;
-      fact += 2.0;
-    }
-  }
-  /* are we done? */
-  if(l == m) return Pmm;
-
-  /* set P_{m+1}^m = x*(2*m+1) P_m^m */
-  Pmp1_m = x*(2*m+1)*Pmm;
-  /* is this all we need? */
-  if(l == (m+1)) return Pmp1_m;
-
-  /* use recursion:
-     P_l^m = ( x*(2*l-1)*P_{l-1}^m - (l+m-1)*P_{l-2}^m )/(l-m)   */
-  for(k=m+2; k<=l; k++) /* k runs through all l we have */
-  {
-    Pkm    = (x*(2*k-1)*Pmp1_m - (k+m-1)*Pmm)/(k-m);
-    Pmm    = Pmp1_m;
-    Pmp1_m = Pkm;
-  } /* now k=l */
-  return Pkm;
-}
-
 /* Legendre polynomial basis function, np is number of points (not need for
-   Legendre, but maybe for Fourier) */
+   basis_LegendreP, unless we normalize as in basis_normLegendreP) */
 /* use recursion recommended in numrec to get P_l */
 double basis_LegendreP(int l, double x, int np)
 {
