@@ -37,8 +37,8 @@ int arrange_12CubSph_into_empty_cube(tMesh *mesh, double *xc,
     Dout[i]= dout;
   }
   /* convert the 12 pats */
-  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0, xc, Din,Dmid);
-  pl = add_6CubedSphere_pats(mesh, innerCubedSphere,0, xc, Dmid,Dout);
+  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0,0, xc, Din,Dmid);
+  pl = add_6CubedSphere_pats(mesh, innerCubedSphere,0,0, xc, Dmid,Dout);
   return pl;
 }
 
@@ -120,7 +120,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
     Dout[i] = r0;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0,1, xc, Din,Dout);
   return pl;
 }
 
@@ -165,7 +165,7 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
     Dout[i] = r1;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  pl = add_6CubedSphere_pats(mesh, CubedShell,1, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
   return pl;
 }
 
@@ -219,7 +219,7 @@ int add_1cube_pat(tMesh *mesh, double *xc, double dout)
    Din[0...5] inner distance from center for cubed sph. domain 0-5
    Dout[0...5] outer distance from center for cubed sph. domain 0-5 */
 /* It returns the index of the last added pat */
-int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
+int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch, int r_is_const,
                           double *xc, double *Din, double *Dout)
 {
   int amr_n = Geti(Par("amr_n"));
@@ -277,7 +277,7 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
     pat->CI->type= type;
 
     /* set sigma vars and iSurf, idSurfdX for them */
-    if( (stretch==0) )
+    if( (stretch==0) && (!r_is_const) )
     {
       switch(type)
       {
