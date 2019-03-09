@@ -184,8 +184,8 @@ int dFSurfdC_is_zero(tPat *pat, int si, double C[2], double dF[2])
 }
 
 
-/* add 1 pat as a cube centered at xc[i], returns the index of the pat */
-int add_1cube_pat(tMesh *mesh, double *xc, double dout)
+/* add 1 pat as a box centered at xc[i], returns the index of the pat */
+int add_1box_pat(tMesh *mesh, double xc[3], double dout[3])
 {
   int amr_n = Geti(Par("amr_n"));
   int n1max = Geti(Par("amr_nmax"));
@@ -197,14 +197,21 @@ int add_1cube_pat(tMesh *mesh, double *xc, double dout)
   /* set min/max in each direction */
   for(d=0; d<3; d++)
   {
-    bbox[2*d]   = xc[d] - dout;
-    bbox[2*d+1] = xc[d] + dout;
+    bbox[2*d]   = xc[d] - dout[d];
+    bbox[2*d+1] = xc[d] + dout[d];
   }
 
   /* make new patch */
   pat = add_patch(mesh, bbox, n, n1max);
 
   return pat->p; /* return pat index */
+}
+
+/* add 1 pat as a cube centered at xc[i], returns the index of the pat */
+int add_1cube_pat(tMesh *mesh, double *xc, double rout)
+{
+  double dout[] = { rout, rout, rout };
+  return add_1box_pat(mesh, xc, dout);
 }
 
 
