@@ -59,7 +59,7 @@ double basis_normLegendreP(int i, double x, int np)
 /* compute the values of the Legendre polynomial P=P_l(x), dP=dP_l(x)/dx,
    Q(x) = P_{l+1}(x) - P_{l-1}(x), and of dQ=Q'(x) */
 void Legendre_P_dP_Q_dQ(int l, double x,
-                       double *P, double *dP, double *Q, double *dQ)
+                        double *P, double *dP, double *Q, double *dQ)
 {
   int k;
   double P0 = 1., P1 = x,  dP0 = 0., dP1 = 1.;
@@ -103,7 +103,7 @@ void Legendre_P_dP_Q_dQ(int l, double x,
    \frac{d}{dx}[(1-x^{2})\frac{dP_k}{dx}] + k(k+1) P_k(x) = 0 */
 double int_LegendreP_x_1(int k, double x)
 {
-  double I, P,dP, q,e;
+  double I, P,dP, Q,dQ;
 
   if(k == 0)
   {
@@ -111,7 +111,7 @@ double int_LegendreP_x_1(int k, double x)
   }
   else
   {
-    Legendre_P_dP_Q_dQ(k,x, &P,&dP, &q,&e);
+    Legendre_P_dP_Q_dQ(k,x, &P,&dP, &Q,&dQ);
     I = dP * (1. - x*x) / (k*(k+1));
   }
   return I;
