@@ -204,9 +204,6 @@ int add_1cube_pat(tMesh *mesh, double *xc, double dout)
   /* make new patch */
   pat = add_patch(mesh, bbox, n, n1max);
 
-  ///* erase all bface info in this pat */
-  //remove_all_bfaces(pat);
-
   return pat->p; /* return pat index */
 }
 
@@ -337,9 +334,6 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch, int r_is_const,
 //          init_6CubedSphereBoxes_from_CI_iFS(mesh, p0);
 //      }
     }
-
-    ///* erase all bface info in this pat */
-    //remove_all_bfaces(pat);
   }
 
   return pat->p; /* return pat index of last added pat */
