@@ -283,7 +283,7 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
       {
         case innerCubedSphere:
           /* now set coord. info structure */
-          pat->CI->iFS[0] = isigdef;
+          //pat->CI->iFS[0] = isigdef;
           pat->CI->iSurf[0] = isigma;
           pat->CI->idSurfdX[0][1] = isigma_dA;
           pat->CI->idSurfdX[0][2] = isigma_dB;
@@ -294,7 +294,7 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
       
         case outerCubedSphere:
           /* now set coord. info structure */
-          pat->CI->iFS[1] = isigdef;
+          //pat->CI->iFS[1] = isigdef;
           pat->CI->iSurf[1] = isigma;
           pat->CI->idSurfdX[1][1] = isigma_dA;
           pat->CI->idSurfdX[1][2] = isigma_dB;
@@ -305,11 +305,11 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch,
       
         case CubedShell:
           /* now set coord. info structure */
-          pat->CI->iFS[0] = isigdef;
+          //pat->CI->iFS[0] = isigdef;
           pat->CI->iSurf[0] = isigma;
           pat->CI->idSurfdX[0][1] = isigma_dA;
           pat->CI->idSurfdX[0][2] = isigma_dB;
-          pat->CI->iFS[1] = isigdef;
+          //pat->CI->iFS[1] = isigdef;
           pat->CI->iSurf[1] = isigma;
           pat->CI->idSurfdX[1][1] = isigma_dA;
           pat->CI->idSurfdX[1][2] = isigma_dB;

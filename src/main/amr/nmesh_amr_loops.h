@@ -44,6 +44,10 @@
 #define Vard(node, varindex) \
   ((node->dat) ? node->dat->v[(varindex)]->d : 0)
 
+/* get n of a variable */
+#define Varn(node, varindex) \
+  ((node->dat) ? node->dat->v[(varindex)]->n : 0)
+
 /* get double pointer to surface data in a variable */
 #define Varaj(node, varindex, face)  ( (node->dat->s[(face)][(varindex)]) ? \
   node->dat->s[(face)][(varindex)]->ajsurf->d : 0 )

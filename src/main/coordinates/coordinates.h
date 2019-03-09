@@ -13,6 +13,12 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
                          double A, double B);
 void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
                             double A, double B, double dSig[2]);
+int ThetaPhi_of_AB_CubSph(tPat *pat, double A, double B,
+                          double *Theta, double *Phi);
+int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tPat *pat, double A, double B,
+                                       double *Theta,    double *Phi,
+                                       double *dThetadA, double *dThetadB,
+                                       double *dPhidA,   double *dPhidB);
 
 /* setup_CubedSpheres.c */
 int add_1cube_pat(tMesh *mesh, double *xc, double dout);

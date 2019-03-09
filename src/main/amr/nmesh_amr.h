@@ -266,6 +266,7 @@ tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);
 tArray *get_array_seg(tArray *array, int si);
 void point_array_a_to_data(tArray *array, void *data);
+tArray *redimension_array(tArray *array, int n[3]);
 tArray *redim_array(tArray *array, int n0, int n1, int n2);
 void free_array(tArray *array);
 tMesh *alloc_mesh(int npats);

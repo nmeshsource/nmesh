@@ -61,13 +61,13 @@ void printCI(tPat *pat)
   for(i=0;i<3;i++) printf("%g ", CI->xc[i]);
   printf("]\n");
 
-  /* iFS, iSurf */
-  for(i=p=0; i<6; i++) if(CI->iFS[i]) p++;
+  /* iSurf */
+  for(i=p=0; i<6; i++) if(CI->iSurf[i]) p++;
   if(p)
   {
-    printf("CI->iFS[] = [ ");
-    for(i=0;i<6;i++) printf("%d ", CI->iFS[i]);
-    printf("]\n");
+    //printf("CI->iFS[] = [ ");
+    //for(i=0;i<6;i++) printf("%d ", CI->iFS[i]);
+    //printf("]\n");
     printf("CI->iSurf[] = [ ");
     for(i=0;i<6;i++) printf("%d ", CI->iSurf[i]);
     printf("]\n");
