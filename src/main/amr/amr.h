@@ -43,6 +43,7 @@ void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs);
 
 /* bfaces.c */
+void remove_all_bfaces(tPat *pat);
 int amr_set_all_bfaces(tMesh *mesh);
 int set_bfaces_on_patface(tPat *pat, int f);
 void expand_bfaces_to_patch_edges(tMesh *mesh);

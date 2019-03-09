@@ -564,6 +564,14 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
   return pat;
 }
 
+/* free arrays in pat->CI*/
+void free_pat_CI(tPat *pat)
+{
+  int d;
+
+  for(d=0; d<6; d++) free_array(pat->CI->Fcoef[d]);
+}
+
 /* free pat, currently leaves mesh untouched */
 void free_patch(tPat *pat)
 {
@@ -593,8 +601,9 @@ void free_patch(tPat *pat)
   free(pat->Wq);
   free(pat->WL);
 
-  //free_all_bfaces(pat);
-  PRF;printf(": implement free_all_bfaces!!!\n");
+  /* free all in CI coordinfo, and also all bfaces  */
+  free_pat_CI(pat);
+  remove_all_bfaces(pat);
 
   /* remove all nodes from this patch from mesh->lns */
   for(elem=mesh->lns; elem; )
