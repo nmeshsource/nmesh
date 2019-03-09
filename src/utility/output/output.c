@@ -5,23 +5,23 @@
 #include "output.h"
 
 
-/* file extensions to indice various types of output*/
-char *extn0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
-char *extn1d[] = {"X", "Y", "Z"};
-char *extn2d[] = {"XY", "XZ", "YZ"};
-char *extn3d[] = {"XYZ"};
+/* various types of output */
+char *out0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
+char *out1d[] = {"X", "Y", "Z"};
+char *out2d[] = {"XY", "XZ", "YZ"};
+char *out3d[] = {"XYZ"};
 
-#define LEN0d sizeof(extn0d)/sizeof(extn0d[0])
-#define LEN1d sizeof(extn1d)/sizeof(extn1d[0])
-#define LEN2d sizeof(extn2d)/sizeof(extn2d[0])
-#define LEN3d sizeof(extn1d)/sizeof(extn1d[0])
+#define LEN0d sizeof(out0d)/sizeof(out0d[0])
+#define LEN1d sizeof(out1d)/sizeof(out1d[0])
+#define LEN2d sizeof(out2d)/sizeof(out2d[0])
+#define LEN3d sizeof(out1d)/sizeof(out1d[0])
 
-/* number of extensions */
-int Nextn0d = LEN0d;
-int Nextn1d = LEN1d;
-int Nextn2d = LEN2d;
-int Nextn3d = LEN3d;
-int NextAll = LEN0d + LEN1d + LEN2d + LEN3d;
+/* number of output types */
+int Nout0d = LEN0d;
+int Nout1d = LEN1d;
+int Nout2d = LEN2d;
+int Nout3d = LEN3d;
+int NoutAll = LEN0d + LEN1d + LEN2d + LEN3d;
 
 
 
