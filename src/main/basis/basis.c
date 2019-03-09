@@ -153,3 +153,58 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
   free(B0);
   return sum;
 }
+
+
+/***********************************************************************/
+/* integrate using Gauss-Lobatto points */
+/***********************************************************************/
+
+/* get integral in direction dir of array var, result goes into Ivar */
+void array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
+{
+  tArray *Wq = node->Wq[dir];
+  tArray *Ivar_new;
+
+  mm_array_indir(Wq, var, dir, Ivar);
+
+  /* re-dim Ivar array to 1 in the direction we just integrated */
+  Ivar_new = redim_array(Ivar, dir==0, dir==1, dir==2);
+  if(Ivar_new != Ivar) errorexit("Ivar was too small");
+}
+
+/* put 2d integral in directions perpendicular to norm into Ivar */
+void array_2dGLquadrature(tNode *node, int norm, tArray *var, tArray *Ivar)
+{
+  switch(norm)
+  {
+  case 0:
+    array_GLquadrature1(node, 1, var, Ivar);
+    array_GLquadrature1(node, 2, Ivar, Ivar);
+    break;
+  case 1:
+    array_GLquadrature1(node, 0, var, Ivar);
+    array_GLquadrature1(node, 2, Ivar, Ivar);
+    break;
+  case 2:
+    array_GLquadrature1(node, 0, var, Ivar);
+    array_GLquadrature1(node, 1, Ivar, Ivar);
+    break;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+}
+
+/* compute 3d integral of var */
+double array_3dGLquadrature(tNode *node, tArray *var)
+{
+  double I;
+  tArray *Ivar = alloc_array(node->n);
+
+  array_GLquadrature1(node, 0, var, Ivar);
+  array_GLquadrature1(node, 1, var, Ivar);
+  array_GLquadrature1(node, 2, var, Ivar);
+  I = Ivar->d[0];
+  free_array(Ivar);
+
+  return I;
+}
