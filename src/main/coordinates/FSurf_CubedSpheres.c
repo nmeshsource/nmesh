@@ -213,11 +213,12 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
   double AB[2], dsig[2], sig[1];
   int *n  = node->n;
   int *ns = Varn(node, isigma);
-  int i,j,k, ijk, sjk;
+  int i,j,k, ijk, pl, sjk;
 
   errorexit("this function may not be needed and it needs to be tested!!!");
 
-  forplane0(i,j,k, n, (n[0]-1)*(si==1))
+  pl = (n[0]-1)*(si==1);
+  forplane0(i,j,k, n, pl)
   {
     /* get A,B at point ijk */
     ijk = Ind_n(i,j,k, n);
@@ -225,7 +226,7 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
     AB[1] = Zp[ijk];
 
     /* set sigma01 var and derivs */
-    sjk = Ind_n(si,j,k, ns);
+    sjk = Ind_n(0,j,k, ns);
     CI->FSurf[si](pat,si, AB, sig);
     sigma[sjk] = sig[0];
     CI->dFSurfdC[si](pat,si, AB, dsig);

@@ -18,6 +18,7 @@ int coordinates_coordvars_enabled(tNode *node)
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx");
+  int ioX0 = Ind("oX0");
   int ix   = Ind("x");
   int f, d;
 
@@ -38,6 +39,18 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, ix);
   enablevar_innode(node, ix+1);
   enablevar_innode(node, ix+2);
+
+  /* give oX surface coords memory if node has corresponding surface */
+  for(f=0; f<6; f++)
+  {
+    int nnb = node->nfnb[f];
+    if(node->patface[f] && nnb)
+    {
+      enablevarcomp_innode(node, ioX0+f);
+      enablevarcomp_innode(node, ioX0+6+f);
+      enablevarcomp_innode(node, ioX0+12+f);
+    }
+  }
 
   /* enable extra vars for cubed spheres */
   for(f=0; f<6; f++)
@@ -64,6 +77,7 @@ int coordinates_init_node(tNode *node)
   int vars_on = coordinates_coordvars_enabled(node);
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
+  int ioX0 = Ind("oX0");
   int ix   = Ind("x");
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -119,23 +133,52 @@ int coordinates_init_node(tNode *node)
     }
   }
 
+  /* set oX surface coords */
+  for(f=0; f<6; f++)
+  {
+    int nnb = node->nfnb[f];
+    if(node->patface[f] && nnb>0)
+    {
+      tNode *nb0 = node->fnb[f][0];
+      tPat *nbpat = nb0->pat;
+      //int *ns = Varn(node,ioX0+f);
+      int dir = f/2;
+      int pl = (n[dir]-1)*(f%2);
+      double *oX[] = { Vard(node,ioX0+f), Vard(node,ioX0+6+f),
+                       Vard(node,ioX0+12+f) };
+      forplaneN(dir, i,j,k, n, pl)
+      {
+        int ijk = Ind_n(i,j,k, n);
+        int ind = Ind_n_norm(i,j,k, n, dir);
+        double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
+        double nbX[3];
+
+        set_XYZ(nbpat, NULL,-1, nbX, x);
+        for(d=0; d<3; d++) oX[d][ind] = nbX[d];
+      }
+    }
+  }
+
   /* set surface vars */
   for(f=0; f<6; f++)
     if(CI->iSurf[f] > 0)
     {
       int dir = f/2;
+      int pl = (n[dir]-1)*(f%2);
       int d1  = Dir1_norm(dir);
       int d2  = Dir2_norm(dir);
-      int ijk;
       double *sig = Vard(node, CI->iSurf[f]);
       double C[2], F;
 
-      forpoints(node, ijk)
+      forplaneN(dir, i,j,k, n, pl)
       {
+        int ijk = Ind_n(i,j,k, n);
+        int ind = Ind_n_norm(i,j,k, n, dir);
+
         C[0] = pX[d1][ijk];
         C[1] = pX[d2][ijk];
         CI->FSurf[f](pat, f, C, &F);
-        sig[ijk] = F;
+        sig[ind] = F;
       }
 
       /* and their derivs */
@@ -145,13 +188,16 @@ int coordinates_init_node(tNode *node)
         double *dsig2 = Vard(node, CI->idSurfdX[f][d2]);
         double dF[2];
 
-        forpoints(node, ijk)
+        forplaneN(dir, i,j,k, n, pl)
         {
+          int ijk = Ind_n(i,j,k, n);
+          int ind = Ind_n_norm(i,j,k, n, dir);
+
           C[0] = pX[d1][ijk];
           C[1] = pX[d2][ijk];
           CI->dFSurfdC[f](pat, f, C, dF);
-          dsig1[ijk] = dF[0];
-          dsig2[ijk] = dF[1];
+          dsig1[ind] = dF[0];
+          dsig2[ind] = dF[1];
         }
       }
     }

@@ -554,7 +554,7 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
     int j = jOfInd_n_k(ind,n,k);
     tArray *sig = VarA(node, isig);
     int *nA = sig->n;
-    int ijk = Ind_n(si,j,k, nA);
+    int ijk = Ind_n(0,j,k, nA);
     return Vard(node, isig)[ijk];
   }
   else /* we need value between grid points */
@@ -582,7 +582,7 @@ void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
     int j = jOfInd_n_k(ind,n,k);
     tArray *sig = VarA(node, isig0);
     int *nA = sig->n;
-    int ijk = Ind_n(si,j,k, nA);
+    int ijk = Ind_n(0,j,k, nA);
     dSig[0] = Vard(node, isig0)[ijk];
     dSig[1] = Vard(node, isig1)[ijk];
   }
