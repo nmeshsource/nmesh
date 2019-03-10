@@ -617,11 +617,20 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     }
     else
     {
-      //int same_bb = same_bbox_normal_to_dir(nb, node, dir);
+      //int d1 = Dir1_norm(dir);
+      //int d2 = Dir2_norm(dir);
+      //int odir, od1, od2;
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found) errorexit("couldn't find nb face!!!");
+      //odir = nb_f/2;
+      //od1 = Dir1_norm(odir);
+      //od2 = Dir2_norm(odir);
+
       // TODO: case where the one neighbor is from diff patch
-      errorexit("TODO: case where the one neighbor is from diff patch");
+      //       figure out if we can copy!!!
+      //errorexit("TODO: case where the one neighbor is from diff patch");
+
+      // For now we just interpolate ... :(
     }
   }
 
@@ -676,19 +685,32 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       int ioC0 = bface0->ioC0_0;
       tArray *oC[] = { VarA(node,ioC0+f), VarA(node,ioC0+6+f) };
 
+      if(Cp[0]->N != oC[0]->N)
+        errorexit("Cp[0]->N != oC[0]->N");
 
-//???:
+      //printarray(Cp[0]);
+      //printarray(Cp[1]);
+      //printarray(oC[0]);
+      //printarray(oC[1]);
+
+      //???:
+
       /* find points inside neigh. -> mask is returned in Ip */
-      mark_points_in_fnb_f_ni(node,f,ni, oC, Ip[ni]);
+      mark_points_in_fnb_f_ni(node,f,ni, Cp, oC, Ip[ni]);
 
+      //printarray_int(Ip[ni]);
 
+      // Is this ok???:
 
-// Is this ok???:
       /* convert Cp to neighbor's internal basis coords */
       array_Xbplane_of_X(nb,nb_dir, Cb[ni], oC);
 
+      //printarray(Cb[ni][0]);
+      //printarray(Cb[ni][1]);
+
       // TODO: case where neighbors are from diff patches
-      errorexit("TODO: case where neighbors are from diff patches");
+      //errorexit("TODO: case where neighbors are from diff patches");
+      //Maybe now it works???
     }
   }
 
