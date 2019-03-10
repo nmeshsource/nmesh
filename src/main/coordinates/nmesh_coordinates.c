@@ -20,14 +20,20 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("dYd", "i", "coord derivative dY/dx^i"); // thing in between
   AddAuxVar("dZd", "i", "coord derivative dZ/dx^i"); // these 3 lines
   AddAuxVar("det_dXbdx", "", "determinant of dXb/dx");
+  AddAuxVar("oX", "f", "coord0 on faces"); // don't put any-
+  AddAuxVar("oY", "f", "coord1 on faces"); // thing in between
+  AddAuxVar("oZ", "f", "coord2 on faces"); // these 3 lines
   AddAuxVar("x", "", "Cartesian x coordinate"); // don't put any-
   AddAuxVar("y", "", "Cartesian y coordinate"); // thing in between
   AddAuxVar("z", "", "Cartesian z coordinate"); // these 3 lines
 
   /* create vars that contain cub. sph. sigma_{0/1} and their derivs */
-  AddAuxVarDim("CubedSphere_sigma01",     "", "sigma_{0/1}", 2,-1,-1);
-  AddAuxVarDim("CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}", 2,-1,-1);
-  AddAuxVarDim("CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}", 2,-1,-1);
+  AddAuxVarDim("CubedSphere_sigma0",     "", "sigma_{0}", 1,-1,-1);
+  AddAuxVarDim("CubedSphere_dsigma0_dA", "", "d/dA sigma_{0}", 1,-1,-1);
+  AddAuxVarDim("CubedSphere_dsigma0_dB", "", "d/dB sigma_{0}", 1,-1,-1);
+  AddAuxVarDim("CubedSphere_sigma1",     "", "sigma_{1}", 1,-1,-1);
+  AddAuxVarDim("CubedSphere_dsigma1_dA", "", "d/dA sigma_{1}", 1,-1,-1);
+  AddAuxVarDim("CubedSphere_dsigma1_dB", "", "d/dB sigma_{1}", 1,-1,-1);
 
   /* parameters */
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");

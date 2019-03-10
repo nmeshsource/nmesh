@@ -360,9 +360,12 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
   int n[3] = { amr_n,amr_n,amr_n };
   double bbox[6];
   tPat *pat;
-  int isigma    = Ind("CubedSphere_sigma01");
-  int isigma_dA = Ind("CubedSphere_dsigma01_dA");
-  int isigma_dB = Ind("CubedSphere_dsigma01_dB");
+  int isigma0    = Ind("CubedSphere_sigma0");
+  int isigma0_dA = Ind("CubedSphere_dsigma0_dA");
+  int isigma0_dB = Ind("CubedSphere_dsigma0_dB");
+  int isigma1    = Ind("CubedSphere_sigma1");
+  int isigma1_dA = Ind("CubedSphere_dsigma1_dA");
+  int isigma1_dB = Ind("CubedSphere_dsigma1_dB");
   //int isigdef   = Ind("CubedSphere_sigma01_def");
   int i;
 
@@ -416,47 +419,47 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
     {
       switch(type)
       {
-        case innerCubedSphere:
-          /* now set coord. info structure */
-          //pat->CI->iFS[0] = isigdef;
-          pat->CI->iSurf[0] = isigma;
-          pat->CI->idSurfdX[0][1] = isigma_dA;
-          pat->CI->idSurfdX[0][2] = isigma_dB;
-          /* default surface functions */
-          pat->CI->FSurf[0] = FSurf_is_CI_s;
-          pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-          break;
+      case innerCubedSphere:
+        /* now set coord. info structure */
+        //pat->CI->iFS[0] = isigdef;
+        pat->CI->iSurf[0] = isigma0;
+        pat->CI->idSurfdX[0][1] = isigma0_dA;
+        pat->CI->idSurfdX[0][2] = isigma0_dB;
+        /* default surface functions */
+        pat->CI->FSurf[0] = FSurf_is_CI_s;
+        pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
+        break;
 
-        case outerCubedSphere:
-          /* now set coord. info structure */
-          //pat->CI->iFS[1] = isigdef;
-          pat->CI->iSurf[1] = isigma;
-          pat->CI->idSurfdX[1][1] = isigma_dA;
-          pat->CI->idSurfdX[1][2] = isigma_dB;
-          /* default surface functions */
-          pat->CI->FSurf[1] = FSurf_is_CI_s;
-          pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-          break;
+      case outerCubedSphere:
+        /* now set coord. info structure */
+        //pat->CI->iFS[1] = isigdef;
+        pat->CI->iSurf[1] = isigma1;
+        pat->CI->idSurfdX[1][1] = isigma1_dA;
+        pat->CI->idSurfdX[1][2] = isigma1_dB;
+        /* default surface functions */
+        pat->CI->FSurf[1] = FSurf_is_CI_s;
+        pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
+        break;
 
-        case CubedShell:
-          /* now set coord. info structure */
-          //pat->CI->iFS[0] = isigdef;
-          pat->CI->iSurf[0] = isigma;
-          pat->CI->idSurfdX[0][1] = isigma_dA;
-          pat->CI->idSurfdX[0][2] = isigma_dB;
-          //pat->CI->iFS[1] = isigdef;
-          pat->CI->iSurf[1] = isigma;
-          pat->CI->idSurfdX[1][1] = isigma_dA;
-          pat->CI->idSurfdX[1][2] = isigma_dB;
-          /* default surface functions */
-          pat->CI->FSurf[0] = FSurf_is_CI_s;
-          pat->CI->FSurf[1] = FSurf_is_CI_s;
-          pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-          pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-          break;
+      case CubedShell:
+        /* now set coord. info structure */
+        //pat->CI->iFS[0] = isigdef;
+        pat->CI->iSurf[0] = isigma0;
+        pat->CI->idSurfdX[0][1] = isigma0_dA;
+        pat->CI->idSurfdX[0][2] = isigma0_dB;
+        //pat->CI->iFS[1] = isigdef;
+        pat->CI->iSurf[1] = isigma1;
+        pat->CI->idSurfdX[1][1] = isigma1_dA;
+        pat->CI->idSurfdX[1][2] = isigma1_dB;
+        /* default surface functions */
+        pat->CI->FSurf[0] = FSurf_is_CI_s;
+        pat->CI->FSurf[1] = FSurf_is_CI_s;
+        pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
+        pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
+        break;
 
-        default:
-          errorexit("not sure what to do...");
+      default:
+        errorexit("not sure what to do...");
       }
       /* compute sigma derivs */
 //      if(pat->v[isigdef]!=NULL)
@@ -542,9 +545,12 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
   int n[3] = { amr_n,amr_n,amr_n };
   double bbox[6];
   tPat *pat;
-  int isigma    = Ind("CubedSphere_sigma01");
-  int isigma_dA = Ind("CubedSphere_dsigma01_dA");
-  int isigma_dB = Ind("CubedSphere_dsigma01_dB");
+  int isigma0    = Ind("CubedSphere_sigma0");
+  int isigma0_dA = Ind("CubedSphere_dsigma0_dA");
+  int isigma0_dB = Ind("CubedSphere_dsigma0_dB");
+  int isigma1    = Ind("CubedSphere_sigma1");
+  int isigma1_dA = Ind("CubedSphere_dsigma1_dA");
+  int isigma1_dB = Ind("CubedSphere_dsigma1_dB");
   int d;
 
   /* set min/max in each direction */
@@ -589,47 +595,47 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
   {
     switch(type)
     {
-      case innerCubedSphere:
-        /* now set coord. info structure */
-        //pat->CI->iFS[0] = isigdef;
-        pat->CI->iSurf[0] = isigma;
-        pat->CI->idSurfdX[0][1] = isigma_dA;
-        pat->CI->idSurfdX[0][2] = isigma_dB;
-        /* default surface functions */
-        pat->CI->FSurf[0] = FSurf_is_CI_s;
-        pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-        break;
+    case innerCubedSphere:
+      /* now set coord. info structure */
+      //pat->CI->iFS[0] = isigdef;
+      pat->CI->iSurf[0] = isigma0;
+      pat->CI->idSurfdX[0][1] = isigma0_dA;
+      pat->CI->idSurfdX[0][2] = isigma0_dB;
+      /* default surface functions */
+      pat->CI->FSurf[0] = FSurf_is_CI_s;
+      pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
+      break;
 
-      case outerCubedSphere:
-        /* now set coord. info structure */
-        //pat->CI->iFS[1] = isigdef;
-        pat->CI->iSurf[1] = isigma;
-        pat->CI->idSurfdX[1][1] = isigma_dA;
-        pat->CI->idSurfdX[1][2] = isigma_dB;
-        /* default surface functions */
-        pat->CI->FSurf[1] = FSurf_is_CI_s;
-        pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-        break;
+    case outerCubedSphere:
+      /* now set coord. info structure */
+      //pat->CI->iFS[1] = isigdef;
+      pat->CI->iSurf[1] = isigma1;
+      pat->CI->idSurfdX[1][1] = isigma1_dA;
+      pat->CI->idSurfdX[1][2] = isigma1_dB;
+      /* default surface functions */
+      pat->CI->FSurf[1] = FSurf_is_CI_s;
+      pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
+      break;
 
-      case CubedShell:
-        /* now set coord. info structure */
-        //pat->CI->iFS[0] = isigdef;
-        pat->CI->iSurf[0] = isigma;
-        pat->CI->idSurfdX[0][1] = isigma_dA;
-        pat->CI->idSurfdX[0][2] = isigma_dB;
-        //pat->CI->iFS[1] = isigdef;
-        pat->CI->iSurf[1] = isigma;
-        pat->CI->idSurfdX[1][1] = isigma_dA;
-        pat->CI->idSurfdX[1][2] = isigma_dB;
-        /* default surface functions */
-        pat->CI->FSurf[0] = FSurf_is_CI_s;
-        pat->CI->FSurf[1] = FSurf_is_CI_s;
-        pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-        pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-        break;
+    case CubedShell:
+      /* now set coord. info structure */
+      //pat->CI->iFS[0] = isigdef;
+      pat->CI->iSurf[0] = isigma0;
+      pat->CI->idSurfdX[0][1] = isigma0_dA;
+      pat->CI->idSurfdX[0][2] = isigma0_dB;
+      //pat->CI->iFS[1] = isigdef;
+      pat->CI->iSurf[1] = isigma1;
+      pat->CI->idSurfdX[1][1] = isigma1_dA;
+      pat->CI->idSurfdX[1][2] = isigma1_dB;
+      /* default surface functions */
+      pat->CI->FSurf[0] = FSurf_is_CI_s;
+      pat->CI->FSurf[1] = FSurf_is_CI_s;
+      pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
+      pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
+      break;
 
-      default:
-        errorexit("not sure what to do...");
+    default:
+      errorexit("not sure what to do...");
     }
   }
   return pat->p; /* return pat index of last added pat */
