@@ -246,14 +246,14 @@ int setup_3patchl2_mesh(tMesh *mesh)
   remove_all_patches(mesh);
   add_patch(mesh, bbox0, n, n1max);
   add_patch(mesh, bbox1, n, n1max);
-//  add_patch(mesh, bbox2, n, n1max);
+  add_patch(mesh, bbox2, n, n1max);
 
   /* setup all bfaces */
   amr_set_all_bfaces(mesh);
   printallbfaces(mesh);
 
   /* now setup root node connections, i.e. setup neighbors of root nodes */
-//  update_all_rnode_fnb(mesh);
+  update_all_rnode_fnb(mesh);
   printmesh(mesh);
 
 /*
@@ -282,16 +282,15 @@ printf("\n i=%d: ", i);
 prbbox(brct,2);
 prbbox(nbrct,2);
 prbbox(irct,2);
-//exit(9);
+exit(9);
 */
   /* 8 children in patch0 */
-//  make8children_in_mesh_lns_myln(mesh->lns, n);
+  make8children_in_mesh_lns_myln(mesh->lns, n);
 Yo(7);
   printmesh(mesh);
 
 
   /* 8 more in each patch */
-/*
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
@@ -301,7 +300,7 @@ Yo(7);
       el = en;
     }
   }
-*/
+
   simple_load_balance(mesh);
   printmesh(mesh);
 
