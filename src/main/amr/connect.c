@@ -277,6 +277,30 @@ tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
   return nl2;
 }
 
+/* return all leaf descendants of node along face. Call it like this:
+   leafdesc = leafdescendants_along_face(node, f, NULL);
+   the list leafdesc it returns has to be freed by caller */
+tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
+{
+  tNode *child;
+  int i;
+
+  /* check if node has children */
+  if(node->child[0])
+  {
+    for(i=0; i<8; i++)
+    {
+      child = node->child[i];
+      if(node_is_at_face(child, face))
+        leafdesc = leafdescendants_along_face(child, face, leafdesc);
+    }
+  }
+  else /* no children, so add the node to leaf descendants list */
+    leafdesc = addnode_to_nodelist_after(leafdesc, node);
+
+  return leafdesc;
+}
+
 
 /* find leaf node neighbors within this patch, this allocates the nodelist
    containing them, which has to be freed by caller */
