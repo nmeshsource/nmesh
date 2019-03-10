@@ -161,15 +161,16 @@ void printnodelist_and_neighbors_flag(tNlist *nl, int pr_nb)
 
   fornodelist(first_nodelist(nl), el)
   {
-    printf("nid%ld loc%s: ",
-           get_node_nid(el->node), node_location_str(el->node, s,100));
+    printf("nid%ld p%d_%s: ",
+           get_node_nid(el->node), el->node->pat->p,
+           node_location_str(el->node, s,100));
     if(el->prev)
-      printf(" prev=%ld loc%s ",
-             get_node_nid(el->prev->node),
+      printf(" prev=nid%ld p%d_%s ",
+             get_node_nid(el->prev->node), el->prev->node->pat->p,
              node_location_str(el->prev->node, s,100));
     if(el->next)
-      printf(" next=%ld loc%s\n",
-             get_node_nid(el->next->node),
+      printf(" next=nid%ld p%d_%s\n",
+             get_node_nid(el->next->node), el->next->node->pat->p,
              node_location_str(el->next->node, s,100));
     else
       printf("\n");
