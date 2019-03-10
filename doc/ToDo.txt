@@ -1,3 +1,5 @@
+find mem leak with bfaces
+
 2 good patch tests:
 -------------------
 1.:
@@ -41,7 +43,7 @@ Thing that need to be done urgently:
 
 *some output: DONE!
 
-*test bfaces & fnb:
+*test bfaces & fnb:  may be ok!
 
 *2d interpolation
  -interp from ghosts within patch     : DONE!
