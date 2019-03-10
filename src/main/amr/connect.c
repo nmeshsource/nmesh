@@ -335,7 +335,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   /* no outside neighb. if not on patch face */
   if(!node->patface[face]) return NULL;
 
-//PRF;printf(": WARNING: there is a bug in here!!!!\n");
+  //PRF;printf(":\n");
 
   /* set bound. rect. of node */
   brct_nodeface(node, face/2, brct);
@@ -373,20 +373,20 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
 
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
-
+/*
 if(node->nid==3)
 {
 Yo(1);
 printnodelist(nbl);
 }
-
+*/
     /* go over nbl and remove all whose face does not intersect
        with the node bounding rectangle brct */
     nblist1 = NULL;
     fornodelist(nbl, elem)
     {
     nbl_loop_start:
-
+/*
 if(node->nid==3)
 {
 Yo(2.1);
@@ -394,6 +394,7 @@ printnodelist(nblist1);
 //printnode(node);
 //printnode(nb);
 }
+*/
       /* get neigh. bound. rect. in its own X coords */
       nb = elem->node;
       brct_nodeface(nb, nb_f/2, nbrct);
@@ -408,7 +409,7 @@ printnodelist(nblist1);
         nblist1 = elem; /* save elem that touches our node */
         continue;
       }
-
+/*
 if(node->nid==3)
 {
 Yo(2.2);
@@ -418,19 +419,19 @@ prbbox(brct,2);
 prbbox(nbrct,2);
 prbbox(irct,2);
 }
-
+*/
       /* remove nb=elem->node from nbl */
       elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
       if(elem) goto nbl_loop_start;
       else     break;
     }
-
+/*
 if(node->nid==3)
 {
 Yo(2.9);
 printnodelist(nblist1);
 }
-
+*/
     /* add nblist1 to nblist */
     nblist = insertnodelist_into_nodelist_after(nblist, nblist1);
   }
