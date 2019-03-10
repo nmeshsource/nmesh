@@ -666,7 +666,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
 
       /* convert Cp to neighbor's internal basis coords */
-      array_Xbplane_of_X(nb, dir, Cb[ni], Cp);
+      array_Xbplane_of_X(nb,nb_dir, Cb[ni], Cp);
     }
     else
     {
