@@ -566,6 +566,7 @@ int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni)
   return found;
 }
 
+
 /*******************************************************************/
 /* Everything below this line is untested and may not work
    Probably it should be removed !!!!! */

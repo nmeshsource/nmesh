@@ -576,6 +576,7 @@ tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 /* set ajsurf array from data in nbsurf on face f for all vars */
 void set_ajsurf_forall_vars(tNode *node, int f)
 {
+  tPat *pat = node->pat;
   int nnb = node->nfnb[f];
   int dir = f/2;
   //int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
@@ -595,7 +596,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     nb = node->fnb[f][0];
     /* if we have only one neighbor on the same level in the same patch
        we may not need interpolation */
-    if(nb->pat == node->pat)
+    if(nb->pat == pat)
     {
       if(nb->l == node->l)
       {
@@ -660,7 +661,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     Res[ni] = alloc_array(s1_n);
 
     /* all X,Y,Z coords are within same patch */
-    if(nb->pat == node->pat)
+    if(nb->pat == pat)
     {
       /* find points inside neigh. -> mask is returned in Ip */
       array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
@@ -670,6 +671,22 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     }
     else
     {
+      /* get node points in neighbor coords */
+      tBface *bface0 = pat->bfaces[f];
+      int ioC0 = bface0->ioC0_0;
+      tArray *oC[] = { VarA(node,ioC0+f), VarA(node,ioC0+6+f) };
+
+
+//???:
+      /* find points inside neigh. -> mask is returned in Ip */
+      mark_points_in_fnb_f_ni(node,f,ni, oC, Ip[ni]);
+
+
+
+// Is this ok???:
+      /* convert Cp to neighbor's internal basis coords */
+      array_Xbplane_of_X(nb,nb_dir, Cb[ni], oC);
+
       // TODO: case where neighbors are from diff patches
       errorexit("TODO: case where neighbors are from diff patches");
     }

@@ -135,12 +135,12 @@ int coordinates_init_node(tNode *node)
   /* set oC surface coords */
   for(f=0; f<6; f++)
   {
+    tPat *opat;
+    tBface *obface;
     int nnb = node->nfnb[f];
+
     if(node->patface[f] && nnb>0)
     {
-      tNode *nb0 = node->fnb[f][0];
-      tPat *nbpat = nb0->pat;
-      //int *ns = Varn(node,ioC0+f);
       int dir = f/2;
       int pl = (n[dir]-1)*(f%2);
       int d1 = Dir1_norm(dir);
@@ -152,13 +152,21 @@ int coordinates_init_node(tNode *node)
         int ijk = Ind_n(i,j,k, n);
         int ind = Ind_n_norm(i,j,k, n, dir);
         double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
-        double nbX[3];
-        int pi;
+        double X[] = { pX[0][ijk], pX[1][ijk], pX[2][ijk] };
+        double C[] = { X[d1], X[d2] };
+        double oX[3];
+        int odir, od1, od2, pi;
 
-        pi = p_XYZ_of_xyz(nbpat, nbX, x);
-        if(pi<0) errorexit("x should be be in nbpat!!!");
-        oC[0][ind] = nbX[d1];
-        oC[1][ind] = nbX[d2];
+        obface = obface_of_bface_containing_point(pat, f, C);
+        opat = obface->pat;
+        odir = obface->f/2;
+        od1 = Dir1_norm(odir);
+        od2 = Dir2_norm(odir);
+
+        pi = p_XYZ_of_xyz(opat, oX, x);
+        if(pi<0) errorexit("x should be be in opat!!!");
+        oC[0][ind] = oX[od1];
+        oC[1][ind] = oX[od2];
       }
     }
   }

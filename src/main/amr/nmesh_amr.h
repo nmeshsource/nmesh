@@ -373,3 +373,5 @@ int Ind_n_norm(int i, int j, int k, int n[3], int norm);
 
 /* bfaces.c */
 void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound);
+tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);
+tBface *obface_of_bface_containing_point(tPat *pat, int f, double C[2]);

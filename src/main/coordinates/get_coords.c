@@ -12,10 +12,10 @@ void XbYbZb_of_ijk(tNode *node, int i, int j, int k, double Xb[3])
   tArray *A[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
   int m[] = { i,j,k };
   int dir;
-  
+
   for(dir=0; dir<3; dir++) Xb[dir] = A[dir]->d[m[dir]];
 }
-/* get Xb from index ind */ 
+/* get Xb from index ind */
 void XbYbZb_of_ind(tNode *node, int ind, double Xb[3])
 {
   int *n = node->n;
@@ -86,7 +86,7 @@ void XYZ_of_XbYbZb(tNode *node, const double Xb[3], double X[3])
   {
     int f = dir*2;
     X[dir] = 0.5*( (nbb[f+1] - nbb[f]) * Xb[dir] + (nbb[f+1] + nbb[f]) );
-  } 
+  }
 }
 
 /* get dX/dXb */
@@ -99,7 +99,7 @@ void dXYZ_dXbYbZb(tNode *node, double dXdXb[3])
   {
     int f = dir*2;
     dXdXb[dir] = 0.5*( nbb[f+1] - nbb[f] );
-  } 
+  }
 }
 /* get dX/dXb */
 void dXbYbZb_dXYZ(tNode *node, double dXbdX[3])
@@ -111,7 +111,7 @@ void dXbYbZb_dXYZ(tNode *node, double dXbdX[3])
   {
     int f = dir*2;
     dXbdX[dir] = 2./( nbb[f+1] - nbb[f] );
-  } 
+  }
 }
 
 /* get one X from Xb in one direction */
@@ -188,7 +188,7 @@ void XbYbZb_of_XYZ(tNode *node, double Xb[3], const double X[3])
   {
     int f = dir*2;
     Xb[dir] = ( 2.*X[dir] - (nbb[f+1] + nbb[f]) )/(nbb[f+1] - nbb[f]);
-  } 
+  }
 }
 
 /* get one Xb from X in one direction */
@@ -345,10 +345,87 @@ void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI)
   int k;
   forarray(aCP[0], k)
   {
-    
     double C[]  = { aCP[0]->d[k], aCP[1]->d[k] };
     if(Xplane_is_in_node(node, dir, C)) aI->i[k] = k;
     else                                aI->i[k] = -1;
+  }
+}
+
+
+/* find index of nb node in the node->fnb[f] list that contains
+   the surface point C on face o_f of patch o_pat,
+   return index of nb in fnb, or -1 if not found */
+int fnb_containing_point(tNode *node, int f,
+                         tPat *o_pat, int o_f, double C[2])
+{
+  int odir = o_f/2;
+  int od1 = Dir1_norm(odir);
+  int od2 = Dir2_norm(odir);
+  int nfnb = node->nfnb[f];
+  int i;
+
+  for(i=0; i<nfnb; i++)
+  {
+    tNode *nb = node->fnb[f][i];
+    double nbrct[] = { nb->bbox[2*od1], nb->bbox[2*od1+1],
+                       nb->bbox[2*od2], nb->bbox[2*od2+1] };
+
+    if(nb->pat != o_pat) continue;
+
+    if(C_in_brct(nbrct , C)) return i;
+  }
+  return -1;
+}
+
+
+/* Mark all points in aCP[0..1] that are in node->fnb[f][ni] by writing
+   their index into aI. If a point is not in the node we write -1
+   into aI. I.e. we return a mask of points in node in Ip. */
+void mark_points_in_fnb_f_ni(tNode *node, int f, int ni,
+                             tArray *aCP[2], tArray *aI)
+{
+  tPat *pat = node->pat;
+  tNode *nb = node->fnb[f][ni];
+  tBface *obface;
+  tPat *opat;
+  int odir, od1, od2;
+  double nbrct[4];
+  int k;
+
+  forarray(aCP[0], k)
+  {
+    double C[]  = { aCP[0]->d[k], aCP[1]->d[k] };
+
+    /* find bface on other side with C */
+    obface = obface_of_bface_containing_point(pat, f, C);
+    if(!obface)
+    {
+      aI->i[k] = -1;
+      continue;
+    }
+
+    /* get patch on other side */
+    opat = obface->pat;
+    if(!opat)
+    {
+      aI->i[k] = -1;
+      continue;
+    }
+
+    /* get bounding rectangle of the node nb */
+    odir = obface->f/2;
+    od1 = Dir1_norm(odir);
+    od2 = Dir2_norm(odir);
+    nbrct[0] = nb->bbox[2*od1];
+    nbrct[1] = nb->bbox[2*od1+1];
+    nbrct[2] = nb->bbox[2*od2];
+    nbrct[3] = nb->bbox[2*od2+1];
+
+    /* check if C from opat is within bounding rectangle of nb */
+    if( (nb->pat == opat) && (C_in_brct(nbrct , C)) )
+      aI->i[k] = k;
+    else
+      aI->i[k] = -1;
   }
 }
 
@@ -540,7 +617,7 @@ int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
       break;
     }
   }
-  
+
   /* test if the intersection empty */
   if(isec)
     for(d=0; d<2; d++)
@@ -549,7 +626,7 @@ int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
         isec = 0;
         break;
       }
-  
+
   return isec;
 }
 
@@ -652,4 +729,26 @@ void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
     brct2[3] = brct2[2];
     brct2[2] = sw;
   }
+}
+
+/* check if a point is in brct,
+   also sets C to boundary value if it is very close to the boundary */
+int C_in_brct(const double brct[4], double C[2])
+{
+  int d;
+
+  /* return 0 if C is clearly outside */
+  for(d=0; d<2; d++)
+  {
+    if(dless(C[d],    brct[2*d]))   return 0;
+    if(dgreater(C[d], brct[2*d+1])) return 0;
+  }
+
+  /* set C to boundary value if it is very close to boundary */
+  for(d=0; d<2; d++)
+  {
+    if(C[d] < brct[2*d])   C[d] = brct[2*d];
+    if(C[d] > brct[2*d+1]) C[d] = brct[2*d+1];
+  }
+  return 1;
 }

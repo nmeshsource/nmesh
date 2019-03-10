@@ -153,7 +153,7 @@ void expand_bface_to_include_X(tBface *bface, const double X[3])
     bface->brct[1] = bface->brct[0] = C[0];
     bface->brct[3] = bface->brct[2] = C[1];
     bface->brct_isset = 1;
-   } 
+   }
 }
 
 /* expand bface to cover face edges */
@@ -273,6 +273,34 @@ int nbfaces_on_f_with_obface(tPat *pat, int f)
 
   return k;
 }
+
+/* find first bface on face f that contains a point C */
+tBface *first_bface_containing_point(tPat *pat, int f, double C[2])
+{
+  tBface *bf;
+
+  forbfacesonface(pat, f, bf)
+    if(C_in_brct(bf->brct , C)) return bf;
+
+  return NULL;
+}
+
+/* find obface on other side of face f that contains a point C */
+tBface *obface_of_bface_containing_point(tPat *pat, int f, double C[2])
+{
+  tBface *bf, *obf;
+
+  forbfacesonface(pat, f, bf)
+    if(C_in_brct(bf->brct , C))
+    {
+      obf = bf->obface;
+      if(obf)
+        if(obf->pat) return obf;
+    }
+
+  return NULL;
+}
+
 
 /*************************************************************************/
 /* funcs to set bface info */
@@ -751,7 +779,7 @@ int set_consistent_flags_in_all_bfaces(tMesh *mesh)
       }
     } /* end forbfaces */
   }
-  /* Note: forder3 it supposed to fix failures in 
+  /* Note: forder3 it supposed to fix failures in
      templates_GMRES_with_BlockJacobi_precon. It fails if there is a Neumann
      BC on all faces of a pat. This can happen on pat0 with forder2.
      Or it can happen on pat5&6 with forder1 if the BC on face1 of pat5
@@ -759,7 +787,7 @@ int set_consistent_flags_in_all_bfaces(tMesh *mesh)
      matrix, as can be seen with GridIterators_verbose = yes */
   if(forder3) toggle_face2_flag_in_faces4_5_of_cubes(mesh);
 
-  /* Note: forder4 it supposed to fix more failures in 
+  /* Note: forder4 it supposed to fix more failures in
      templates_GMRES_with_BlockJacobi_precon. It fails for an odd number of
      points in pates 11,12 and 24,25, i.e. CubSph domains 4,5. Presumably this
      happens because even with forder3 dom 4 and 5 have Neuman BCs
