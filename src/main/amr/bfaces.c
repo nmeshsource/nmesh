@@ -26,6 +26,7 @@ tBface *alloc_bface(tPat *pat, int f)
    return the new bface */
 tBface *add_empty_bface(tPat *pat, int f)
 {
+  tMesh *mesh = pat->mesh;
   tBface *bface = alloc_bface(pat, f);
   tBface *bface0 = pat->bfaces[f];
   tBface *bf;
@@ -42,9 +43,7 @@ tBface *add_empty_bface(tPat *pat, int f)
 
   /* set some bface info */
   bface->op = -1; /* other patch not known yet */
-  bface->ioX[0] = -1; /* var indices of other coords not known yet */
-  bface->ioX[1] = -1; /* var indices of other coords not known yet */
-  bface->ioX[2] = -1; /* var indices of other coords not known yet */
+  bface->ioC0_0 = Ind("oC0_0"); /* var indices of other coords */
   return bface;
 }
 

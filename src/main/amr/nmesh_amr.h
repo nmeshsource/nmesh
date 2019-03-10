@@ -196,7 +196,7 @@ typedef struct tBFACE {
   int brct_isset; // whether bounding rectangle brct is set
   int op;         // ind. of other pat that touches or overlaps, -1 if none
   struct tBFACE *obface; // pointer to other bface that touches
-  int ioX[3];     // ind of vars in this node that contain coords in other pat
+  int ioC0_0;     // ind of vars in this node that contain coords in other pat
   int face2;      // 1 if we set normal derivs of field and not field itself
   int innerbound; // 1 if bface is inner boundary (e.g. horizon)
   int outerbound; // 1 if bface is outer mesh boundary (e.g. infinity)

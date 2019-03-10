@@ -365,8 +365,8 @@ void printthisbface(tBface *bface, char *s)
            bface->brct[0], bface->brct[1], bface->brct[2], bface->brct[3]);
   else
     printf(" [ , ]x[ , ]");
-  printf(" ioX={%d,%d,%d} bits=%1d%1d%1d\n",
-         bface->ioX[0],bface->ioX[1],bface->ioX[2],
+  printf(" ioC0_0=%d bits=%1d%1d%1d\n",
+         bface->ioC0_0,
          bface->face2, bface->innerbound,  bface->outerbound);
 }
 
