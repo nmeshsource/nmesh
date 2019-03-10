@@ -154,34 +154,41 @@ void printnode_and_neighbors(tNode *n)
   }
 }
 
-void printnodelist_and_neighbors(tNlist *nl)
+void printnodelist_and_neighbors_flag(tNlist *nl, int pr_nb)
 {
   tNlist *el;
+  char s[100];
+
   fornodelist(first_nodelist(nl), el)
   {
-    printf("nid%ld: ", get_node_nid(el->node));
-    if(el->prev) printf("prev=%ld ", get_node_nid(el->prev->node));
-    if(el->next) printf("next=%ld\n", get_node_nid(el->next->node));
-    else         printf("\n");
-    printnode_and_neighbors(el->node);
+    printf("nid%ld loc%s: ",
+           get_node_nid(el->node), node_location_str(el->node, s,100));
+    if(el->prev)
+      printf(" prev=%ld loc%s ",
+             get_node_nid(el->prev->node),
+             node_location_str(el->prev->node, s,100));
+    if(el->next)
+      printf(" next=%ld loc%s\n",
+             get_node_nid(el->next->node),
+             node_location_str(el->next->node, s,100));
+    else
+      printf("\n");
+    //printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
+    //printnode(el->node);
+    if(pr_nb) printnode_and_neighbors(el->node);
   }
+  if(!nl) printf("<empty nodelist>\n");
 }
 
 void printnodelist(tNlist *nl)
 {
-  tNlist *el;
-  fornodelist(first_nodelist(nl), el)
-  {
-    printf("nid%ld: ", get_node_nid(el->node));
-    if(el->prev) printf("prev=%ld ", get_node_nid(el->prev->node));
-    if(el->next) printf("next=%ld\n", get_node_nid(el->next->node));
-    else         printf("\n");
-    //printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
-    //printnode(el->node);
-  }
-  if(!nl) printf("<empty nodelist>\n");
-} 
+  printnodelist_and_neighbors_flag(nl, 0);
+}
 
+void printnodelist_and_neighbors(tNlist *nl)
+{
+  printnodelist_and_neighbors_flag(nl, 1);
+}
 
 /* print a variable in a node */
 void printvar_innode(tNode *node, int vi)
