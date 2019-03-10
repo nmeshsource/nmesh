@@ -605,14 +605,20 @@ void free_patch(tPat *pat)
   free_pat_CI(pat);
   remove_all_bfaces(pat);
 
-  /* remove all nodes from this patch from mesh->lns */
-  for(elem=mesh->lns; elem; )
+  /* remove all nodes in this patch from mesh->lns */
+  /* 1. look at all except the head mesh->lns */
+  for(elem=mesh->lns->next; elem; )
   {
     if(elem->node->pat == pat) elem = remove1_in_nodelist(elem, 1);
     else                       elem = elem->next;
   }
-
+  /* 2. now examine the head */
+  elem = mesh->lns;
+  if(elem->node->pat == pat) elem = remove1_in_nodelist(elem, 1);
+  /* and update the head */
   mesh->lns = first_nodelist(elem);
+
+  /* update myln lists */
   update_mesh_myln_node_nid(mesh);
 
   /* free root node and all its children ... */
