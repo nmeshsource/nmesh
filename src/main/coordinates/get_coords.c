@@ -378,11 +378,13 @@ int fnb_containing_point(tNode *node, int f,
 }
 
 
-/* Mark all points in aCP[0..1] that are in node->fnb[f][ni] by writing
+/* Mark all points in aC[0..1] that are in node->fnb[f][ni] by writing
    their index into aI. If a point is not in the node we write -1
-   into aI. I.e. we return a mask of points in node in Ip. */
-void mark_points_in_fnb_f_ni(tNode *node, int f, int ni,
-                             tArray *aCP[2], tArray *aI)
+   into aI. I.e. we return a mask of points in node in Ip.
+   Note that aC and aoC contain the same points but in different coords.
+   aC in X coords of the node and aoC in X coords of the neighbor. */
+void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
+                             tArray *aoC[2], tArray *aI)
 {
   tPat *pat = node->pat;
   tNode *nb = node->fnb[f][ni];
@@ -392,9 +394,10 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni,
   double nbrct[4];
   int k;
 
-  forarray(aCP[0], k)
+  forarray(aC[0], k)
   {
-    double C[]  = { aCP[0]->d[k], aCP[1]->d[k] };
+    double C[]  = {  aC[0]->d[k],  aC[1]->d[k] };
+    double oC[] = { aoC[0]->d[k], aoC[1]->d[k] };
 
     /* find bface on other side with C */
     obface = obface_of_bface_containing_point(pat, f, C);
@@ -422,7 +425,7 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni,
     nbrct[3] = nb->bbox[2*od2+1];
 
     /* check if C from opat is within bounding rectangle of nb */
-    if( (nb->pat == opat) && (C_in_brct(nbrct , C)) )
+    if( (nb->pat == opat) && (C_in_brct(nbrct , oC)) )
       aI->i[k] = k;
     else
       aI->i[k] = -1;

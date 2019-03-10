@@ -60,8 +60,8 @@ void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
 int C_in_brct(const double brct[4], double C[2]);
 int fnb_containing_point(tNode *node, int f,
                          tPat *o_pat, int o_f, double C[2]);
-void mark_points_in_fnb_f_ni(tNode *node, int f, int ni,
-                             tArray *aC[2], tArray *aI);
+void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
+                             tArray *aoC[2], tArray *aI);
 
 
 /* derivs.c */
