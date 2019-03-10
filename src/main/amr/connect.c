@@ -232,10 +232,11 @@ int count_children(tNode *node)
   return nc;
 }
 
-/* return all descendants along face, in ndescends we return how many
+/* return all leaf descendants along face, in ndescends we return how many
    times we have descended, the list it returns has to be freed
    by caller */
-tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
+/* DO NOT USE THIS. Instead use: leafdescendants_along_face */
+tNlist *ldescendants_along_face(tNlist *nl, int face, int *ndescends)
 {
   tNlist *elem;
   tNlist *nl2 = copy_of_nodelist(nl);
@@ -335,10 +336,11 @@ tNlist *make_patch_neighbor_list(tNode *node, int face)
   if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
 
   /* ok so this neighbor has 8 children, who also may have children */
-  nbl = alloc_nodelist(nb);
+  //nbl = alloc_nodelist(nb);
   nbface = face^1; /* face where neighbors are */
-  nblist = all_descendants_along_face(nbl, nbface, &ndesc);
-  free_nodelist(nbl);
+  //nblist = ldescendants_along_face(nbl, nbface, &ndesc);
+  nblist = leafdescendants_along_face(nb, nbface, NULL);
+  //free_nodelist(nbl);
 
   return nblist;
 }
@@ -390,9 +392,10 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
       if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
 
       /* find nblist1 with all leaves on face nb_f */
-      nbl = alloc_nodelist(nb);
-      nblist1 = all_descendants_along_face(nbl, nb_f, &ndesc);
-      free_nodelist(nbl);
+      //nbl = alloc_nodelist(nb);
+      //nblist1 = ldescendants_along_face(nbl, nb_f, &ndesc);
+      nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
+      //free_nodelist(nbl);
     }
 
     /* beginning of nblist1 */

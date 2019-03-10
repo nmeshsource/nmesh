@@ -486,7 +486,7 @@ Yo(1);
 
 
 Yo(2);
-  el2 = all_descendants_along_face(el, 0, &i);
+  el2 = ldescendants_along_face(el, 0, &i);
 Yo(3);
   printf("i=%d\n",i);
   printnodelist(el2);
