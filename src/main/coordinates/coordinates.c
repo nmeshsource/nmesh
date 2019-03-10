@@ -18,7 +18,7 @@ int coordinates_coordvars_enabled(tNode *node)
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx");
-  int ioX0 = Ind("oX0");
+  int ioC0 = Ind("oC0_0");
   int ix   = Ind("x");
   int f, d;
 
@@ -40,15 +40,14 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, ix+1);
   enablevar_innode(node, ix+2);
 
-  /* give oX surface coords memory if node has corresponding surface */
+  /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
   {
     int nnb = node->nfnb[f];
     if(node->patface[f] && nnb)
     {
-      enablevarcomp_innode(node, ioX0+f);
-      enablevarcomp_innode(node, ioX0+6+f);
-      enablevarcomp_innode(node, ioX0+12+f);
+      enablevarcomp_innode(node, ioC0+f);
+      enablevarcomp_innode(node, ioC0+6+f);
     }
   }
 
@@ -77,7 +76,7 @@ int coordinates_init_node(tNode *node)
   int vars_on = coordinates_coordvars_enabled(node);
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
-  int ioX0 = Ind("oX0");
+  int ioC0 = Ind("oC0_0");
   int ix   = Ind("x");
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -133,7 +132,7 @@ int coordinates_init_node(tNode *node)
     }
   }
 
-  /* set oX surface coords */
+  /* set oC surface coords */
   for(f=0; f<6; f++)
   {
     int nnb = node->nfnb[f];
@@ -141,11 +140,13 @@ int coordinates_init_node(tNode *node)
     {
       tNode *nb0 = node->fnb[f][0];
       tPat *nbpat = nb0->pat;
-      //int *ns = Varn(node,ioX0+f);
+      //int *ns = Varn(node,ioC0+f);
       int dir = f/2;
       int pl = (n[dir]-1)*(f%2);
-      double *oX[] = { Vard(node,ioX0+f), Vard(node,ioX0+6+f),
-                       Vard(node,ioX0+12+f) };
+      int d1 = Dir1_norm(dir);
+      int d2 = Dir2_norm(dir);
+      double *oC[] = { Vard(node,ioC0+f), Vard(node,ioC0+6+f) };
+
       forplaneN(dir, i,j,k, n, pl)
       {
         int ijk = Ind_n(i,j,k, n);
@@ -156,7 +157,8 @@ int coordinates_init_node(tNode *node)
 
         pi = p_XYZ_of_xyz(nbpat, nbX, x);
         if(pi<0) errorexit("x should be be in nbpat!!!");
-        for(d=0; d<3; d++) oX[d][ind] = nbX[d];
+        oC[0][ind] = nbX[d1];
+        oC[1][ind] = nbX[d2];
       }
     }
   }
