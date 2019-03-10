@@ -216,7 +216,9 @@ void expand_bface_to_pat_bbox(tBface *bface)
         break;
       }
       set_xyz(pat, 0,-1, X, x);
-      set_XYZ(opat, 0,-1, oX, x);
+      /* we use p_XYZ_of_xyz not set_XYZ(opat, 0,-1, oX, x); because
+         p_XYZ_of_xyz also rounds oX te be inside opat) */
+      p_XYZ_of_xyz(opat, oX, x);
       //pr3v("X",X);pr3v("x",x);pr3v("oX",oX);
       expand_bface_to_include_X(obface, oX);
     }
