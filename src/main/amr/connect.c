@@ -336,11 +336,8 @@ tNlist *make_patch_neighbor_list(tNode *node, int face)
   if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
 
   /* ok so this neighbor has 8 children, who also may have children */
-  //nbl = alloc_nodelist(nb);
   nbface = face^1; /* face where neighbors are */
-  //nblist = ldescendants_along_face(nbl, nbface, &ndesc);
   nblist = leafdescendants_along_face(nb, nbface, NULL);
-  //free_nodelist(nbl);
 
   return nblist;
 }
@@ -392,10 +389,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
       if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
 
       /* find nblist1 with all leaves on face nb_f */
-      //nbl = alloc_nodelist(nb);
-      //nblist1 = ldescendants_along_face(nbl, nb_f, &ndesc);
       nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
-      //free_nodelist(nbl);
     }
 
     /* beginning of nblist1 */
