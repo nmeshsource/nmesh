@@ -1,5 +1,3 @@
-find mem leak with bfaces
-
 2 good patch tests:
 -------------------
 1.:
@@ -26,8 +24,8 @@ find mem leak with bfaces
 *end
 
 
-Thing that need to be done urgently:
-====================================
+Things that need to be done urgently:
+=====================================
 *Array ops
  matrix_times_matrix : DONE!
 
