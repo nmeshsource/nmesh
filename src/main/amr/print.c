@@ -369,6 +369,16 @@ void printbface(tBface *bface)
   printthisbface(bface->obface, "B");
 }
 
+/* print bfaces on face f */
+void printbfaces_on_f(tPat *pat, int f)
+{
+  tBface *bf;
+
+  printf("pat->p=%d f=%d\n", pat->p, f);
+  forbfacesonface(pat, f, bf)
+    printbface(bf);
+}
+
 /* print all patch bfaces */
 void printbfaces(tPat *pat)
 {

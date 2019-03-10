@@ -828,6 +828,9 @@ tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
   tNlist *lend;
   tNlist *lbeg;
 
+  /* when list is NULL do nothing */
+  if(!list) return elem;
+
   /* find end and beginning of tNlist *list */
   for(lend=list; lend->next; lend=lend->next) ;
   for(lbeg=list; lbeg->prev; lbeg=lbeg->prev) ;

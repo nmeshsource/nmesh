@@ -337,6 +337,7 @@ void printarray_matrix1(tArray *A);
 void printarray_matrix2(tArray *A);
 void printthisbface(tBface *bface, char *s);
 void printbface(tBface *bface);
+void printbfaces_on_f(tPat *pat, int f);
 void printbfaces(tPat *pat);
 void printallbfaces(tMesh *mesh);
 void pr3v(char *s, double x[3]);

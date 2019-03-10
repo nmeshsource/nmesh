@@ -264,7 +264,16 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 
   /* find face nb_f of nb that faces me */
   found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
-  if(!found) errorexit("couldn't find nb face!!!");
+  if(!found)
+  {
+    printf("node:\n");
+    printnode(node);
+    printbfaces_on_f(node->pat, face);
+    printf("neighbor node:\n");
+    printnode(nb);
+    printbfaces_on_f(nb->pat, nb_f);
+    errorexit("couldn't find nb face!!!");
+  }
 
   /* is nb local? */
   if(nb->dat)

@@ -239,20 +239,23 @@ tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
 {
   tNlist *elem;
   tNlist *nl2 = copy_of_nodelist(nl);
+  tNlist *children;
+  tNode *node, *child;
 
   *ndescends = 0; /* number of replcements made in nl2 */
 
   /* loop over nl2 and make replacements with children in face */
   fornodelist(nl2, elem)
   {
-    tNlist *children = NULL;
-    tNode *node = elem->node;
-    tNode *child;
-    int i;
+  nl2_loop_start:
+    children = NULL;
+    node = elem->node;
 
     /* make list of children */    
     if(node->child[0])
     {
+      int i;
+
       children = NULL;
       for(i=0; i<8; i++)
       {
@@ -262,9 +265,10 @@ tNlist *all_descendants_along_face(tNlist *nl, int face, int *ndescends)
       }
       /* insert children into nl2, replacing parent in elem */
       elem = replace1_in_nodelist(elem, children);
-      if(elem->prev) elem = elem->prev;
       nl2 = elem;
       (*ndescends)++;
+      if(elem) goto nl2_loop_start;
+      else     errorexit("elem should not be NULL after inserting children");
     }
   }
   /* results */
@@ -331,7 +335,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   /* no outside neighb. if not on patch face */
   if(!node->patface[face]) return NULL;
 
-PRF;printf(": WARNING: there is a bug in here!!!!\n");
+//PRF;printf(": WARNING: there is a bug in here!!!!\n");
 
   /* set bound. rect. of node */
   brct_nodeface(node, face/2, brct);
@@ -370,9 +374,9 @@ PRF;printf(": WARNING: there is a bug in here!!!!\n");
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
 
-if(node->nid==2)
+if(node->nid==3)
 {
-Yo(2);
+Yo(1);
 printnodelist(nbl);
 }
 
@@ -383,7 +387,7 @@ printnodelist(nbl);
     {
     nbl_loop_start:
 
-if(node->nid==2)
+if(node->nid==3)
 {
 Yo(2.1);
 printnodelist(nblist1);
@@ -405,7 +409,7 @@ printnodelist(nblist1);
         continue;
       }
 
-if(node->nid==2)
+if(node->nid==3)
 {
 Yo(2.2);
 printnodelist(nblist1);
@@ -421,7 +425,7 @@ prbbox(irct,2);
       else     break;
     }
 
-if(node->nid==2)
+if(node->nid==3)
 {
 Yo(2.9);
 printnodelist(nblist1);
@@ -470,8 +474,9 @@ void update_node_fnb(tNode *node)
     nfnb = count_elements_nodelist(nblist);
     node->nfnb[face] = nfnb;
 
-    /* allocate room for neighbors */
+    /* first free and then allocate room for neighbors */
     free(node->fnb[face]);
+    node->fnb[face] = NULL;
     if(nfnb)
       node->fnb[face] = calloc(nfnb, sizeof(node->fnb[face][0]));
 
