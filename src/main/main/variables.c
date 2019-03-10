@@ -39,7 +39,7 @@ void AddMeshVar(tMesh *mesh, char *name,
       errorexits("variable \"%s\" exists already\n", fullname);
 
     /* print name of variable */
-    printf("  variable  %s\n", fullname);
+    printf("  var_%04d  %s\n", i, fullname);
     if(0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
 
     /* variable does not exist, so add a new entry to data base */

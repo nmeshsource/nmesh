@@ -381,8 +381,11 @@ void printparameters(tMesh *mesh)
 /* creation functions */
 void AddMeshPar(tMesh *mesh, char *name, char *value, char *description)
 {
+  int i;
+
   makeparameter(mesh, name, value, description);
-  printf("  parameter %-25s  =  %s\n", name, Gets(Par(name)));
+  i = Par(name);
+  printf("  par_%04d  %-25s  =  %s\n", i, name, Gets(i));
 }
 
 void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description)

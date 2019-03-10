@@ -14,7 +14,7 @@ void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name)
   tTodo *t;
   tTodo **skel = mesh->skel;
 
-  if(1) printf("  func_%03d  %s\n", step, name);
+  if(1) printf("  func_T%02d  %s\n", step, name);
 
   if(!skel[step]) skel[step] = calloc(1, sizeof(tTodo));
 
