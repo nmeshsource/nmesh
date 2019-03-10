@@ -307,10 +307,9 @@ tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
    containing them, which has to be freed by caller */
 tNlist *make_patch_neighbor_list(tNode *node, int face)
 {
-  tNlist *nbl;
   tNlist *nblist;
   tNode *anc, *nb;
-  int nc, ndesc;
+  int nc;
   int nbface;
 
   /* no neighb. if on patch face */
@@ -352,7 +351,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   tNlist *nblist;
   tNlist *nbl, *nblist1, *elem;
   tNode *nb;
-  int nc, ndesc, nb_f;
+  int nc, nb_f;
   double brct[4]; // bound. rect. of node
 
   /* no outside neighb. if not on patch face */
@@ -474,7 +473,7 @@ tNlist *make_mesh_neighbor_list(tNode *node, int face)
   nblist = make_outside_neighbor_list(node, face);
 
   /* combine result with nblist1, i.e add nblist to nblist1 */
-  nblist = insertnodelist_into_nodelist_before(nblist1, nblist);
+  nblist = insertnodelist_into_nodelist_after(nblist1, nblist);
 
   nblist = first_nodelist(nblist);
 
