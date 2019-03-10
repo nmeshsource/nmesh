@@ -152,8 +152,10 @@ int coordinates_init_node(tNode *node)
         int ind = Ind_n_norm(i,j,k, n, dir);
         double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
         double nbX[3];
+        int pi;
 
-        set_XYZ(nbpat, NULL,-1, nbX, x);
+        pi = p_XYZ_of_xyz(nbpat, nbX, x);
+        if(pi<0) errorexit("x should be be in nbpat!!!");
         for(d=0; d<3; d++) oX[d][ind] = nbX[d];
       }
     }
