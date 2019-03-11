@@ -195,7 +195,7 @@ double Lp_norm_array(tArray *A, double p)
 }
 
 /* D = A - B */
-void subtract_arrays(tArray *A, tArray *B, tArray *D)
+void subtract_arrays(tArray *D, tArray *A, tArray *B)
 {
   int i;
   for(i=0; i<D->N; i++) D->d[i] = A->d[i] - B->d[i];
