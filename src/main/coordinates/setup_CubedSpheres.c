@@ -308,9 +308,11 @@ int dFSurfdC_is_zero(tPat *pat, int si, double C[2], double dF[2])
 /* add 1 pat as a box centered at xc[i], returns the index of the pat */
 int add_1box_pat(tMesh *mesh, double xc[3], double dout[3])
 {
-  int amr_n = Geti(Par("amr_n"));
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
   int n1max = Geti(Par("amr_nmax"));
-  int n[3] = { amr_n,amr_n,amr_n };
   double bbox[6];
   tPat *pat;
   int d;
@@ -355,9 +357,11 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double *xc, double *Din, double *Dout)
 {
-  int amr_n = Geti(Par("amr_n"));
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
   int n1max = Geti(Par("amr_nmax"));
-  int n[3] = { amr_n,amr_n,amr_n };
   double bbox[6];
   tPat *pat;
   int isigma0    = Ind("CubedSphere_sigma0");
@@ -540,9 +544,11 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
                           int stretch, int SigFunc, double *xc,
                           double Din, double Dout, double ABrct[4])
 {
-  int amr_n = Geti(Par("amr_n"));
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
   int n1max = Geti(Par("amr_nmax"));
-  int n[3] = { amr_n,amr_n,amr_n };
   double bbox[6];
   tPat *pat;
   int isigma0    = Ind("CubedSphere_sigma0");

@@ -113,8 +113,10 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double obfac = 10000;
   double xc[3];
   tNlist *el, *en;
-  int amr_n = Geti(Par("amr_n"));
-  int n[3] = { amr_n,amr_n,amr_n };
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
 
   PRFs(":\n");
 
@@ -193,10 +195,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
 /* set up a mesh with 2 levels  */
 int setup_l2_mesh(tMesh *mesh)
 {
-  int amr_n = Geti(Par("amr_n"));
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
   double bbox[6] = { -4,4, -2,2, -1,1 };
   int n1max = Geti(Par("amr_nmax"));
-  int n[3] = { amr_n,amr_n,amr_n };
   tNlist *el, *en;
 
   PRFs(":\n");
@@ -229,12 +233,14 @@ int setup_l2_mesh(tMesh *mesh)
 /* set up a mesh with 2 levels  */
 int setup_3patchl2_mesh(tMesh *mesh)
 {
-  int amr_n = Geti(Par("amr_n"));
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
   int n1max = Geti(Par("amr_nmax"));
-  int n[3] = { amr_n,amr_n,amr_n };
   tNlist *el, *en;
 
   PRFs(":\n");

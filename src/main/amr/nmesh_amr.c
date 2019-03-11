@@ -21,9 +21,12 @@ int nmesh_amr(tMesh *mesh)
   /* parameters */
   AddPar("amr_mesh_type", "test_mesh",
 	 "mesh we start with [test_mesh,l2_mesh]");
-  AddPar("amr_n", "5", "number of points in all 3 dir. in one node");
+  AddPar("amr_n0", "5", "number of points in dir. 0 in one node");
+  AddPar("amr_n1", "5", "number of points in dir. 1 in one node");
+  AddPar("amr_n2", "5", "number of points in dir. 2 in one node");
   AddPar("amr_nmax", "55", "max number of points in all 3 dir. in one node");
   AddPar("bface_options", "face2_order3", "how we set some bface flags "
          "[none,face2_order0,face2_order1,face2_order2,face2_order3]");
+
   return 0;
 }
