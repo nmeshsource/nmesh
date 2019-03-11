@@ -380,32 +380,44 @@ int test_ajsurf(tMesh *mesh)
 {
   tNode *nd;
   int vi = Ind("misc_v");
-  double *Xbd[3];
+  //int iX = Ind("X");
+  int ix = Ind("x");
+  //double *Xbd[3];
   int myid;
+  double sum;
 
   PRF;printf(": Hmmm.\n");
   enablevar(mesh, vi);
 
+  /* above we messed with all kinds of things,
+     so make sure all coords are set again */
+  coordinates_init(mesh);
+
   formylnodes(mesh, myid)
   {
-    int ijk, dir;
+    int ijk;
+    //int dir;
     tNode *node = MyNode(mesh, myid);
     tArray *va = VarA(node, vi);
 
-    for(dir=0; dir<3; dir++) Xbd[dir] = node->Xb[dir]->d;
+    //for(dir=0; dir<3; dir++) Xbd[dir] = node->Xb[dir]->d;
 
     /* set v to func test_func at grid points */
     forarray(va, ijk)
     {
-      int k = kOfInd_n(ijk, va->n);
-      int j = jOfInd_n_k(ijk, va->n, k);
-      int i = iOfInd_n_jk(ijk, va->n, j,k);
-      double Xb[] = { Xbd[0][i], Xbd[1][j], Xbd[2][k] };
-      double X[3];
+      //int k = kOfInd_n(ijk, va->n);
+      //int j = jOfInd_n_k(ijk, va->n, k);
+      //int i = iOfInd_n_jk(ijk, va->n, j,k);
+      //double Xb[] = { Xbd[0][i], Xbd[1][j], Xbd[2][k] };
+      //double X[3];
+      //double X[] = { Vard(node, iX)[ijk],
+      //               Vard(node, iX+1)[ijk], Vard(node, iX+2)[ijk] };
+      double x[] = { Vard(node, ix)[ijk],
+                     Vard(node, ix+1)[ijk], Vard(node, ix+2)[ijk] };
 
-      XYZ_of_XbYbZb(node, Xb, X);
-
-      va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
+      //XYZ_of_XbYbZb(node, Xb, X);
+      va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
+      //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
     }
   }
 
@@ -464,6 +476,28 @@ int test_ajsurf(tMesh *mesh)
     printnode(node);
     printvar_ajsurfdiff(node, vi);
   }
+
+  PRF;printf(": L2 norm of ajsurfdiff:\n");
+  sum = 0.;
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    int f;
+    double norm_n_f;
+    char s[100];
+
+    for(f=0; f<6; f++)
+    {
+      tSurface *sf = node->dat->s[f][vi];
+      if(!sf) continue;
+
+      norm_n_f = Lp_norm_array_diff(sf->ajsurf, sf->mysurf, 2);
+      printf("  %d %ld p%d_%s %d: %g\n", myid, node->nid,
+             node->pat->p, node_location_str(node,s,99), f, norm_n_f);
+      sum += pow(norm_n_f, 2);
+    }
+  }
+  printf("total %g\n", sqrt(sum));
 
   /* after we have printed them, we no longer need the surfaces */
   free_all_myln_surfaces(mesh);
