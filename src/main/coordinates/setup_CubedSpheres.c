@@ -373,7 +373,7 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
   //int isigdef   = Ind("CubedSphere_sigma01_def");
   int i;
 
-  if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
+  if(N<1 || N>6) { errorexit("N must be 1,2,3,4,5,6"); return 0; }
 
   /* set pat CI struct */
   for(i=0; i<N; i++)
