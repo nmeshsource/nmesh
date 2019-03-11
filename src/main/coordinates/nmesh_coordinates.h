@@ -62,7 +62,8 @@ int fnb_containing_point(tNode *node, int f,
                          tPat *o_pat, int o_f, double C[2]);
 void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
                              tArray *aoC[2], tArray *aI);
-
+void array_nbXface_of_Xface(tNode *node, int f,
+                            tNode *nb, tArray *nbC[2]);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui);

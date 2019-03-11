@@ -685,31 +685,28 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       int ioC0 = bface0->ioC0_0;
       tArray *oC[2];
 
+      /* check if the neighbor coords are saved in ioC0... */
       if(ioC0>0)
       {
         oC[0] = VarA(node,ioC0+f);
         oC[1] = VarA(node,ioC0+6+f);
       }
-      else
+      else /* compute oC from Cp */
       {
-        errorexit("ioC0<=0");
+        /* point oC to Cb[ni], to save oC in there */
+        oC[0] = Cb[ni][0];
+        oC[1] = Cb[ni][1];
+        array_nbXface_of_Xface(node,f, nb, oC);
       }
 
       if(Cp[0]->N != oC[0]->N)
         errorexit("Cp[0]->N != oC[0]->N");
 
-      //printarray(Cp[0]);
-      //printarray(Cp[1]);
-      //printarray(oC[0]);
-      //printarray(oC[1]);
-
-      //???:
-
       /* find points inside neigh. -> mask is returned in Ip */
       mark_points_in_fnb_f_ni(node,f,ni, Cp, oC, Ip[ni]);
 
       //printarray_int(Ip[ni]);
-      if(f==1 && node->nid==1)
+      if(0) //if(f==1 && node->nid==1)
       {
         printf("ni=%d:\n", ni);
         printnode(node);
@@ -721,17 +718,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         printarray(oC[0]);
       }
 
-      // Is this ok???:
-
       /* convert Cp to neighbor's internal basis coords */
       array_Xbplane_of_X(nb,nb_dir, Cb[ni], oC);
-
-      //printarray(Cb[ni][0]);
-      //printarray(Cb[ni][1]);
-
-      // TODO: case where neighbors are from diff patches
-      //errorexit("TODO: case where neighbors are from diff patches");
-      //Maybe now it works???
     }
   }
 

@@ -424,19 +424,18 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
     nbrct[2] = nb->bbox[2*od2];
     nbrct[3] = nb->bbox[2*od2+1];
 
-    if(f==1 && node->nid==1)
-      {
-        char s[100], snb[100];
-        printf("ni=%d: %s  %s ", ni, nodename(node,s,99), nodename(nb,snb,99));
-        prbbox(nbrct,2);printf("\n");
-        printf("nb->pat=%d opat=%d  oC=%g %g  in=%d\n",
-        nb->pat->p, opat->p, oC[0],oC[1], C_in_brct(nbrct , oC));
-        //printnode(node);
-        //printbfaces_on_f(node->pat, f);
-        //printnode(nb);
-        //printbfaces_on_f(nb->pat, nb_f);
-      }
-
+    if(0) //(f==1 && node->nid==1)
+    {
+      char s[100], snb[100];
+      printf("ni=%d: %s  %s ", ni, nodename(node,s,99), nodename(nb,snb,99));
+      prbbox(nbrct,2);printf("\n");
+      printf("nb->pat=%d opat=%d  oC=%g %g  in=%d\n",
+      nb->pat->p, opat->p, oC[0],oC[1], C_in_brct(nbrct , oC));
+      //printnode(node);
+      //printbfaces_on_f(node->pat, f);
+      //printnode(nb);
+      //printbfaces_on_f(nb->pat, nb_f);
+    }
 
     /* check if C from opat is within bounding rectangle of nb */
     if( (nb->pat == opat) && (C_in_brct(nbrct , oC)) )
@@ -768,4 +767,48 @@ int C_in_brct(const double brct[4], double C[2])
     if(C[d] > brct[2*d+1]) C[d] = brct[2*d+1];
   }
   return 1;
+}
+
+
+/* convert X-coords on face f of node to X-coords of neighboring node */
+void array_nbXface_of_Xface(tNode *node, int f,
+                            tNode *nb, tArray *nbC[2])
+{
+  tPat *pat = node->pat;
+  tMesh *mesh = pat->mesh;
+  int *n = node->n;
+  int dir = f/2;
+  int pl = (n[dir]-1)*(f%2);
+  int d1 = Dir1_norm(dir);
+  int d2 = Dir2_norm(dir);
+  int iX = Ind("X");
+  int ix = Ind("x");
+  double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
+  double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+  double *oC[] = { Arrd(nbC[0]), Arrd(nbC[1]) };
+  int i,j,k;
+  tPat *opat;
+  tBface *obface;
+  int odir, od1, od2, p;
+
+  forplaneN(dir, i,j,k, n, pl)
+  {
+    int ijk = Ind_n(i,j,k, n);
+    int ind = Ind_n_norm(i,j,k, n, dir);
+    double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
+    double X[] = { pX[0][ijk], pX[1][ijk], pX[2][ijk] };
+    double C[] = { X[d1], X[d2] };
+    double oX[3];
+
+    obface = nbbface_of_bface_containing_point(nb, pat, f, C);
+    opat = obface->pat;
+    odir = obface->f/2;
+    od1 = Dir1_norm(odir);
+    od2 = Dir2_norm(odir);
+
+    p = p_XYZ_of_xyz(opat, oX, x);
+    if(p<0) errorexit("x should be be in opat!!!");
+    oC[0][ind] = oX[od1];
+    oC[1][ind] = oX[od2];
+  }
 }
