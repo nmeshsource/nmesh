@@ -149,7 +149,7 @@ void printnode_and_neighbors(tNode *n)
       printf(" [%+5g,%+5g]x[%+5g,%+5g]x[%+5g,%+5g]  ni=%d, nid%ld %s\n",
              n1->bbox[0], n1->bbox[1], n1->bbox[2], n1->bbox[3],
              n1->bbox[4], n1->bbox[5], ni, n1->nid,
-             node_location_str(n1, s,99));
+             nodename(n1, s,99));
     }
   }
 }
