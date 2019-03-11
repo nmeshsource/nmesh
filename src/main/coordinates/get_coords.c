@@ -400,7 +400,7 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
     double oC[] = { aoC[0]->d[k], aoC[1]->d[k] };
 
     /* find bface on other side with C */
-    obface = first_obface_of_bface_containing_point(pat, f, C);
+    obface = nbbface_of_bface_containing_point(nb, pat, f, C);
     if(!obface)
     {
       aI->i[k] = -1;
