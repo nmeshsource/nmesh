@@ -157,7 +157,7 @@ int coordinates_init_node(tNode *node)
         double oX[3];
         int odir, od1, od2, pi;
 
-        obface = obface_of_bface_containing_point(pat, f, C);
+        obface = first_obface_of_bface_containing_point(pat, f, C);
         opat = obface->pat;
         odir = obface->f/2;
         od1 = Dir1_norm(odir);

@@ -699,6 +699,17 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       mark_points_in_fnb_f_ni(node,f,ni, Cp, oC, Ip[ni]);
 
       //printarray_int(Ip[ni]);
+      if(f==1 && node->nid==1)
+      {
+        printf("ni=%d:\n", ni);
+        printnode(node);
+        printbfaces_on_f(node->pat, f);
+        printnode(nb);
+        printbfaces_on_f(nb->pat, nb_f);
+        printarray_int(Ip[ni]);
+        printarray(Cp[0]);
+        printarray(oC[0]);
+      }
 
       // Is this ok???:
 

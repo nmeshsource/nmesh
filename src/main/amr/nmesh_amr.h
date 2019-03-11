@@ -367,6 +367,7 @@ void free_all_vl_surfaces(tNode *node, tVarList *vl);
 
 /* connect.c */
 char *node_location_str(tNode *node, char *s, int slen);
+char *nodename(tNode *node, char *s, int slen);
 
 /* load.c */
 void move_nodelist_to_rank(tNlist *list, int desrank);
@@ -377,4 +378,6 @@ int Ind_n_norm(int i, int j, int k, int n[3], int norm);
 /* bfaces.c */
 void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound);
 tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);
-tBface *obface_of_bface_containing_point(tPat *pat, int f, double C[2]);
+tBface *first_obface_of_bface_containing_point(tPat *pat, int f, double C[2]);
+tBface *nbbface_of_bface_containing_point(tNode *nb,
+                                          tPat *pat, int f, double C[2]);

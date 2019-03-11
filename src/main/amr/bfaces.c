@@ -285,8 +285,8 @@ tBface *first_bface_containing_point(tPat *pat, int f, double C[2])
   return NULL;
 }
 
-/* find obface on other side of face f that contains a point C */
-tBface *obface_of_bface_containing_point(tPat *pat, int f, double C[2])
+/* find first obface on other side of face f that contains a point C */
+tBface *first_obface_of_bface_containing_point(tPat *pat, int f, double C[2])
 {
   tBface *bf, *obf;
 
@@ -296,6 +296,24 @@ tBface *obface_of_bface_containing_point(tPat *pat, int f, double C[2])
       obf = bf->obface;
       if(obf)
         if(obf->pat) return obf;
+    }
+
+  return NULL;
+}
+
+/* find bface of the neighbor node nb on the other side of face f,
+   that contains a point described by pat,f,C */
+tBface *nbbface_of_bface_containing_point(tNode *nb,
+                                          tPat *pat, int f, double C[2])
+{
+  tBface *bf, *obf;
+
+  forbfacesonface(pat, f, bf)
+    if(C_in_brct(bf->brct , C))
+    {
+      obf = bf->obface;
+      if(obf)
+        if(obf->pat == nb->pat) return obf;
     }
 
   return NULL;

@@ -400,7 +400,7 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
     double oC[] = { aoC[0]->d[k], aoC[1]->d[k] };
 
     /* find bface on other side with C */
-    obface = obface_of_bface_containing_point(pat, f, C);
+    obface = first_obface_of_bface_containing_point(pat, f, C);
     if(!obface)
     {
       aI->i[k] = -1;
@@ -423,6 +423,20 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
     nbrct[1] = nb->bbox[2*od1+1];
     nbrct[2] = nb->bbox[2*od2];
     nbrct[3] = nb->bbox[2*od2+1];
+
+    if(f==1 && node->nid==1)
+      {
+        char s[100], snb[100];
+        printf("ni=%d: %s  %s ", ni, nodename(node,s,99), nodename(nb,snb,99));
+        prbbox(nbrct,2);printf("\n");
+        printf("nb->pat=%d opat=%d  oC=%g %g  in=%d\n",
+        nb->pat->p, opat->p, oC[0],oC[1], C_in_brct(nbrct , oC));
+        //printnode(node);
+        //printbfaces_on_f(node->pat, f);
+        //printnode(nb);
+        //printbfaces_on_f(nb->pat, nb_f);
+      }
+
 
     /* check if C from opat is within bounding rectangle of nb */
     if( (nb->pat == opat) && (C_in_brct(nbrct , oC)) )
