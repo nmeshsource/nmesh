@@ -162,8 +162,8 @@ int test_point_interpolation(tMesh *mesh)
 
   prdivider(0);
   PRF;printf(": 2d interp. in plane with Lagrange:\n");
-  Cp[0] = alloc_array1d(200);
-  Cp[1] = alloc_array1d(200);
+  Cp[0] = alloc_array1d(2000);
+  Cp[1] = alloc_array1d(2000);
   forvari(nd,vi, k) Vard(nd,vi)[k] = 666;
   //printvar_innode(nd, vi);
   dir = 0;
@@ -452,6 +452,9 @@ int test_ajsurf(tMesh *mesh)
   /* print var in one node yet again with surfaces */
   nd = MyNode(mesh, 0); /* my first node */
   printnode(nd);
+  //printvar_innode(nd, ix);
+  //printvar_innode(nd, Ind("oC0_1"));
+  //printvar_innode(nd, Ind("oC1_1"));
   printvar_innode(nd, vi);
 
   /* print var in all nodes */
