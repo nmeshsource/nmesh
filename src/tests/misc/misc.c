@@ -380,7 +380,7 @@ int test_ajsurf(tMesh *mesh)
 {
   tNode *nd;
   int vi = Ind("misc_v");
-  //int iX = Ind("X");
+  int iX = Ind("X");
   int ix = Ind("x");
   //double *Xbd[3];
   int myid;
@@ -410,14 +410,16 @@ int test_ajsurf(tMesh *mesh)
       //int i = iOfInd_n_jk(ijk, va->n, j,k);
       //double Xb[] = { Xbd[0][i], Xbd[1][j], Xbd[2][k] };
       //double X[3];
-      //double X[] = { Vard(node, iX)[ijk],
-      //               Vard(node, iX+1)[ijk], Vard(node, iX+2)[ijk] };
+      double X[] = { Vard(node, iX)[ijk],
+                     Vard(node, iX+1)[ijk], Vard(node, iX+2)[ijk] };
       double x[] = { Vard(node, ix)[ijk],
                      Vard(node, ix+1)[ijk], Vard(node, ix+2)[ijk] };
+      double dlam = (node->pat->p != 0);
 
       //XYZ_of_XbYbZb(node, Xb, X);
       va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
-      //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
+      va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
+      va->d[ijk] = test_func(X[0] + dlam,X[1],X[2]);
     }
   }
 
