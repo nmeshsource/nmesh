@@ -18,7 +18,6 @@ int coordinates_coordvars_enabled(tNode *node)
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx");
-  int ioC0 = Ind("oC0_0");
   int ix   = Ind("x");
   int f, d;
 
@@ -43,8 +42,11 @@ int coordinates_coordvars_enabled(tNode *node)
   /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
   {
+    tBface *bface0 = node->pat->bfaces[f];
+    int ioC0 = bface0->ioC0_0;
     int nnb = node->nfnb[f];
-    if(node->patface[f] && nnb)
+
+    if(ioC0>0 && node->patface[f] && nnb)
     {
       enablevarcomp_innode(node, ioC0+f);
       enablevarcomp_innode(node, ioC0+6+f);
@@ -76,7 +78,6 @@ int coordinates_init_node(tNode *node)
   int vars_on = coordinates_coordvars_enabled(node);
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
-  int ioC0 = Ind("oC0_0");
   int ix   = Ind("x");
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -132,14 +133,16 @@ int coordinates_init_node(tNode *node)
     }
   }
 
-  /* set oC surface coords */
+  /* set oC surface coords, for now this is off */
   for(f=0; f<6; f++)
   {
+    tBface *bface0 = node->pat->bfaces[f];
+    int ioC0 = bface0->ioC0_0;
     tPat *opat;
     tBface *obface;
     int nnb = node->nfnb[f];
 
-    if(node->patface[f] && nnb>0)
+    if(ioC0>0 && node->patface[f] && nnb>0)
     {
       int dir = f/2;
       int pl = (n[dir]-1)*(f%2);

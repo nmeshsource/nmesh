@@ -683,7 +683,17 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       /* get node points in neighbor coords */
       tBface *bface0 = pat->bfaces[f];
       int ioC0 = bface0->ioC0_0;
-      tArray *oC[] = { VarA(node,ioC0+f), VarA(node,ioC0+6+f) };
+      tArray *oC[2];
+
+      if(ioC0>0)
+      {
+        oC[0] = VarA(node,ioC0+f);
+        oC[1] = VarA(node,ioC0+6+f);
+      }
+      else
+      {
+        errorexit("ioC0<=0");
+      }
 
       if(Cp[0]->N != oC[0]->N)
         errorexit("Cp[0]->N != oC[0]->N");
