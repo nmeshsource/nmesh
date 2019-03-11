@@ -207,7 +207,7 @@ double Lp_norm_array_diff(tArray *A, tArray *B, double p)
   tArray *D = alloc_array(A->n);
   double norm;
 
-  subtract_arrays(A, B, D);
+  subtract_arrays(D, A, B);
   norm = Lp_norm_array(D, p);
   free_array(D);
   return norm;
