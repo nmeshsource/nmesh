@@ -670,7 +670,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
         printf("face=");
         for(i=0; i<6; i++) printf("%d ", face[i]);
         printf("-> ret=%d\n", ret);
-        errorexit("oX was supposed to be on one face...");
+        errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
       }
       for(of=0; face[of]==0; of++) ;
       obface = first_bface_with_op_f(opat, p, of);
