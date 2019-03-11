@@ -131,7 +131,10 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   switch(npats)
   {
     case 3:
-      two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
+      if(Getv(mesh_type, "dom1"))
+        two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
+      else
+        two_diff_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
       break;
     case 13:
       xc[1] = xc[2] = 0.0;

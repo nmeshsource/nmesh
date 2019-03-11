@@ -270,8 +270,8 @@ int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
    __--    \   dom1 \          e.g. p0 has A = [-1, 1]
   |   p0    |________|         p1/2 A = [0, 1] / A = [-1, 0]
   |__ dom1  |  p2    |
-     -- ___/   dom1 /           r0 is radius of inner sphere
-           ---____ /            r1 is radius of outer sphere
+     -- ___/   dom1 /          r0 is radius of inner sphere
+           ---____ /           r1 is radius of outer sphere
 */
 int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1)
 {
@@ -287,6 +287,36 @@ int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1)
 
   return pl;
 }
+
+/* one wedge that touches two others, where different domain types are
+   involved  ___
+            /   \__
+           /       \_           e.g.:
+          /   p2     \          p0 has A = [0, 2]
+         __   dom3    |         p1 has A = [0, 1]
+        /  \_       _/ \        p2 has A = [1, 2]
+       /     \    _/    \_
+      /       \__/        \     r0 is radius of inner sphere
+     /   p0    |    p1     \    r1 is radius of outer sphere
+    |    dom1   |   dom1    |
+    |___________|___________|
+*/
+int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
+                                     double r0, double r1)
+{
+  double xc[] = { 0., 0., 0. };
+  double ABrct0[] = { 0., 2., -1., 1. };
+  double ABrct1[] = { 0., 1., -1., 1. };
+  double ABrct2[] = { 0.5, 1., -1., 1. };
+  int pl;
+
+  add_1_CubedSphere_pat(mesh, 1, outerCubedSphere,0,0, xc, dc,r0, ABrct0);
+  add_1_CubedSphere_pat(mesh, 1, CubedShell,0,0, xc, r0,r1, ABrct1);
+  pl = add_1_CubedSphere_pat(mesh, 3, CubedShell,0,0, xc, r0,r1, ABrct2);
+
+  return pl;
+}
+
 
 /************************************************************************/
 /* basic functions to make one box or a cubed sphere shell */
