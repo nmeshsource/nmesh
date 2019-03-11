@@ -201,6 +201,16 @@ char *node_location_str(tNode *node, char *s, int slen)
   return s;
 }
 
+/* use node_location_str to make a unique node name that also contains the
+   patch number */
+char *nodename(tNode *node, char *s, int slen)
+{
+  char loc[100];
+  node_location_str(node, loc,99);
+  snprintf(s,slen, "p%d_%s", node->pat->p, loc);
+  return s;
+}
+
 /* is node on a face? */
 int node_is_at_face(tNode *node, int face)
 {
