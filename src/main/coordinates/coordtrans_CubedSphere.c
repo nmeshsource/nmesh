@@ -592,7 +592,7 @@ void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
 
 
 /************************************************************************/
-/* some functions to relate r and lam                                   */
+/* some functions to relate r and lam inside cubed shells               */
 /************************************************************************/
 /*
 This is for a trafo from (lam,A,B) to (r,A,B):
