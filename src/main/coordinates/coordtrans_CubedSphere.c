@@ -598,7 +598,7 @@ void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
 This is for a trafo from (lam,A,B) to (r,A,B):
 Recall in e.g. dom1: 
 x = (a1-a0)*lam + a0,  y = A*x,  z = B*x
-==> r^2 = (1 + A^2 + B^2)*x^2 = (1 + A^2 + B^2) * ((a1-a0)*lam + a0)
+==> r^2 = (1 + A^2 + B^2)*x^2 = (1 + A^2 + B^2) * ((a1-a0)*lam + a0)^2
 def: sig1 = a1 * sqrt(1 + A^2 + B^2),  sig0 = a0 * sqrt(1 + A^2 + B^2),  
 Thus:  r = (sig1-sig0)*lam + sig0
 Def: L = sig1-sig0,   so: r = L lam + sig0
