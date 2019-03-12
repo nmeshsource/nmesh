@@ -821,7 +821,7 @@ void array_nbXface_of_Xface(tNode *node, int f,
       pr3v("oX", oX);
       printf("\nopat:  ");
       printpatch(opat);
-      errorexit("x should be be in opat!!!");
+      errorexit("x should be in opat!!!");
     }
     oC[0][ind] = oX[od1];
     oC[1][ind] = oX[od2];
