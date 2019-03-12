@@ -8,6 +8,7 @@
 #define NPOINTS 16
 
 
+
 /*************************************************************************/
 /* funcs to add and remove bfaces */
 /*************************************************************************/
@@ -225,12 +226,14 @@ void expand_bface_to_pat_bbox(tBface *bface)
         prdivider(0);
         printf("pat:\n");
         printpatch(pat);
+        printCI(pat);
         printf("bface:\n");
         printbface(bface);
-        printf("*** looked for oX(x(X)) on f=%d -> ret=%d:\n", f, ret);
         pr3v("X",X); pr3v("x",x); pr3v("oX",oX);
-        printf("\nopat:\n");
+        printf("\n*** looked for oX(x(X)) on f=%d -> ret=%d:\n", f, ret);
+        printf("opat:\n");
         printpatch(opat);
+        printCI(opat);
         printf("obface:\n");
         printbface(obface);
         errorexit("x is not in opat!!!");
@@ -375,6 +378,13 @@ int amr_set_all_bfaces(tMesh *mesh)
       }
     }
     if(0) printbfaces(pat);
+  }
+
+  if(pr)
+  {
+    printf("------before expand_bfaces_to_patch_edges:\n");
+    printallbfaces(mesh);
+    printf("------\n");
   }
 
   /* now expand bfaces to cover the edges as well */
@@ -558,7 +568,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
   int n[] = { NPOINTS,NPOINTS,NPOINTS };     /* we use NPOINTS points */
   double X0[3], LX[3], dX[3]; /* grid of points */
   int dd;
-  int i,j,k, plane, li, ret, of;
+  int i,j,k, plane, li, ret0, ret, of;
   int face[6];
   intList *opl = alloc_intList(); /* list that contains other pates*/
   int op, nbfaces;
@@ -658,22 +668,69 @@ int set_bfaces_on_patface(tPat *pat, int f)
       }
     }
 
-    /* add point to the bface with the correct op and f */
+    /* the bface that should have this point has other patch op and face f */
     bface = first_bface_with_op_f(pat, op, f);
-    expand_bface_to_include_X(bface, X);
 
-    /* now try to put this also in the other bface */
+    /* now try to find this point also in the other bface */
     if(op>=0)
     {
+      /* if we get here the point is also in the other patch opat */
+
       /* get ox very close to face of opat and recalc oX */
       for(dd=0; dd<3; dd++)  ox[dd] = x[dd] + dx[dd]*1e-8;
-      ret = p_XYZ_of_xyz(opat, oX, ox);
+      ret0 = p_XYZ_of_xyz(opat, oX, ox);
+      //printf("ret0=%d oX[2]=%.15g\n", ret0, oX[2]);
+
+      /* find point in other bface and see what face it is on */
       ret = XYZ_on_face(opat, face, oX);
-      if(ret!=1)
+      /* if point is only on one face of the other patch, we add it
+         to the other bface */
+      if(ret==1)
       {
-        int i;
+        for(of=0; face[of]==0; of++) ;
+        obface = first_bface_with_op_f(opat, p, of);
+        if(!obface)
+        {
+          obface = add_empty_bface(opat, of);
+          obface->op = p;
+        }
+
+        expand_bface_to_include_X(obface, oX);
+
+        /* link bface and obface */
+        if(!bface->obface)
+          bface->obface = obface;
+        if(bface->obface != obface)
+        {
+          printf("bface=%p  bface->obface=%p\n", bface, bface->obface);
+          printbface(bface);
+          printf("obface=%p  obface->obface=%p\n", obface, obface->obface);
+          printbface(obface);
+          errorexit("what happened???");
+        }
+        if(!obface->obface)
+          obface->obface = bface;
+        if(obface->obface != bface)
+        {
+          printf("bface=%p  bface->obface=%p\n", bface, bface->obface);
+          printbface(bface);
+          printf("obface=%p  obface->obface=%p\n", obface, obface->obface);
+          printbface(obface);
+          errorexit("what happened???");
+        }
+      }
+      else if(ret>1)
+      {
+        continue; /* do not use this point as it lies on two faces of opat */
+      }
+      if(ret==0)
+      {
+        int fi;
+        printf("dir=%d plane=%d i,j,k=%d,%d,%d ret0=%d\n",
+               dir, plane, i,j,k, ret0);
         printpatch(pat);
         printCI(pat);
+        printbface(bface);
         pr3v("X", X);
         pr3v("x", x);
         printf("\n");
@@ -683,25 +740,14 @@ int set_bfaces_on_patface(tPat *pat, int f)
         pr3v("oX", oX);
         printf("\n");
         printf("face=");
-        for(i=0; i<6; i++) printf("%d ", face[i]);
+        for(fi=0; fi<6; fi++) printf("%d ", face[fi]);
         printf("-> ret=%d\n", ret);
         errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
       }
-      for(of=0; face[of]==0; of++) ;
-      obface = first_bface_with_op_f(opat, p, of);
-      if(!obface)
-      {
-        obface = add_empty_bface(opat, of);
-        obface->op = p;
-      }
-      expand_bface_to_include_X(obface, oX);
-
-      /* link bface and obface */
-      if(!bface->obface)          bface->obface = obface;
-      if(bface->obface != obface) errorexit("what happened???");
-      if(!obface->obface)         obface->obface = bface;
-      if(obface->obface != bface) errorexit("what happened???");
     }
+
+    /* add point to the bface with the correct op and f */
+    expand_bface_to_include_X(bface, X);
   }
 
   /* remove empty bfaces */
