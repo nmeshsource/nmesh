@@ -457,7 +457,8 @@ int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3])
   else
     for(d=0; d<3; d++) X[d] = x[d];
 
-  //pr3v("1",X);
+  //pr3v("|x",x);
+  //pr3v("X",X);
 
   if(stat) return -1;
 

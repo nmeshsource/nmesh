@@ -355,7 +355,7 @@ void printarray_matrix2(tArray *A)
 void printthisbface(tBface *bface, char *s)
 {
   if(!bface) return;
-  printf(" %s: p%d f%d op%d", s, bface->pat->p,bface->f, bface->op);
+  printf(" %s p%d f%d op%d", s, bface->pat->p,bface->f, bface->op);
   if(bface->brct_isset)
     printf(" [%g,%g]x[%g,%g]",
            bface->brct[0], bface->brct[1], bface->brct[2], bface->brct[3]);
@@ -369,8 +369,31 @@ void printthisbface(tBface *bface, char *s)
 /* print one bface and its pair */
 void printbface(tBface *bface)
 {
-  printthisbface(bface, "A");
-  printthisbface(bface->obface, "B");
+  tBface *obface;
+
+  if(!bface) return;
+
+  obface = bface->obface;
+
+  if(!obface)
+  {
+    printthisbface(bface, " ");
+    return;
+  }
+
+  if(obface->obface == bface)
+  {
+    printthisbface(bface, "/");
+    printthisbface(obface, "\\");
+  }
+  else
+  {
+    printf("  WARNING: bfaces are not properly linked!!\n");
+    printf("  bface=%p bface->obface=%p:\n", bface, bface->obface);
+    printthisbface(bface, " ");
+    printf("  obface=%p obface->obface%p:\n", obface, obface->obface);
+    printthisbface(obface, " ");
+  }
 }
 
 /* print bfaces on face f */
