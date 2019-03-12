@@ -770,7 +770,8 @@ int C_in_brct(const double brct[4], double C[2])
 }
 
 
-/* convert X-coords on face f of node to X-coords of neighboring node */
+/* convert X-coords on face f of node to X-coords of neighboring node,
+   and write them into nbC */
 void array_nbXface_of_Xface(tNode *node, int f,
                             tNode *nb, tArray *nbC[2])
 {
@@ -807,7 +808,21 @@ void array_nbXface_of_Xface(tNode *node, int f,
     od2 = Dir2_norm(odir);
 
     p = p_XYZ_of_xyz(opat, oX, x);
-    if(p<0) errorexit("x should be be in opat!!!");
+    if(p<0)
+    {
+      printnode(node);
+      printf("f=%d  ", f);
+      pr3v("X", X);
+      pr3v("x", x);
+      printf("\n");
+      printnode(nb);
+      printbface(obface);
+      printf("obface->f=%d  ", obface->f);
+      pr3v("oX", oX);
+      printf("\nopat:  ");
+      printpatch(opat);
+      errorexit("x should be be in opat!!!");
+    }
     oC[0][ind] = oX[od1];
     oC[1][ind] = oX[od2];
   }
