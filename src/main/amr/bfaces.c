@@ -193,7 +193,7 @@ void expand_bface_to_pat_bbox(tBface *bface)
   if(obface)
   {
     tPat *opat = obface->pat;
-    int j;
+    int j, ret;
 
     C = pat->bbox[f];
     for(j=0; j<2; j++)
@@ -219,7 +219,22 @@ void expand_bface_to_pat_bbox(tBface *bface)
       set_xyz(pat, 0,-1, X, x);
       /* we use p_XYZ_of_xyz not set_XYZ(opat, 0,-1, oX, x); because
          p_XYZ_of_xyz also rounds oX te be inside opat) */
-      p_XYZ_of_xyz(opat, oX, x);
+      ret = p_XYZ_of_xyz(opat, oX, x);
+      if(ret<0)
+      {
+        prdivider(0);
+        printf("pat:\n");
+        printpatch(pat);
+        printf("bface:\n");
+        printbface(bface);
+        printf("*** looked for oX(x(X)) on f=%d -> ret=%d:\n", f, ret);
+        pr3v("X",X); pr3v("x",x); pr3v("oX",oX);
+        printf("\nopat:\n");
+        printpatch(opat);
+        printf("obface:\n");
+        printbface(obface);
+        errorexit("x is not in opat!!!");
+      }
       //pr3v("X",X);pr3v("x",x);pr3v("oX",oX);
       expand_bface_to_include_X(obface, oX);
     }
