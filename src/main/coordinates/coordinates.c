@@ -43,8 +43,11 @@ int coordinates_coordvars_enabled(tNode *node)
   for(f=0; f<6; f++)
   {
     tBface *bface0 = node->pat->bfaces[f];
-    int ioC0 = bface0->ioC0_0;
     int nnb = node->nfnb[f];
+    int ioC0;
+
+    if(bface0) ioC0 = bface0->ioC0_0;
+    else       ioC0 = -1;
 
     if(ioC0>0 && node->patface[f] && nnb)
     {
@@ -137,10 +140,13 @@ int coordinates_init_node(tNode *node)
   for(f=0; f<6; f++)
   {
     tBface *bface0 = node->pat->bfaces[f];
-    int ioC0 = bface0->ioC0_0;
     tPat *opat;
     tBface *obface;
     int nnb = node->nfnb[f];
+    int ioC0;
+
+    if(bface0) ioC0 = bface0->ioC0_0;
+    else       ioC0 = -1;
 
     if(ioC0>0 && node->patface[f] && nnb>0)
     {

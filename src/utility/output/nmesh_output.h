@@ -13,3 +13,6 @@ void quick_Array_output(tBox *box, double *Ar, char *name,
                         double fake_t, int fake_i);
 void quick_VarList_output(tBox *box, tVarList *vl, double fake_t, int fake_i);
 */
+
+/* output2d.c */
+void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T);

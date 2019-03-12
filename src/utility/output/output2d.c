@@ -97,3 +97,59 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
     nMPI_barrier();
   } endforlnodes;
 }
+
+
+/* output on patch planes */
+void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
+{
+  tNode *node;
+  int gnuplot = Getv(Par("2dformat"), "gnuplot");
+/*
+  int vtk     = Getv(Par("2dformat"), "vtk");
+  int text    = Getv(Par("2dformat"), "text");
+  int binary  = Getv(Par("2dformat"), "binary");
+  int flt     = Getv(Par("2dformat"), "float");
+  int dbl     = Getv(Par("2dformat"), "double");
+*/
+  int vi = Ind(name);
+  FILE *fpl;
+  char plfil[1000];
+
+  /* loop over all nodes */
+  forlnodes(mesh, node)
+  {
+    if(node->dat)
+    if(node->dat->v[vi])
+    {
+      int p = node->pat->p;
+      char ns[100];
+      int ijk[3];
+      int f;
+
+      /* find string that idetifies node */
+      node_location_str(node, ns,100);
+
+      /* write files */
+      /* pl-plane:  Z = Z0 */
+      for(f=0; f<6; f++)
+      {
+        int norm = f/2;
+
+        ijk[norm] = (node->n[norm]-1)*(f%2);
+
+        if(gnuplot)
+        {
+          snprintf(plfil, 999, "%s/%s.%02df%d_%s",
+                   Gets(Par("outdir")),name, p, f, ns);
+          fpl = fopen(plfil, "a");
+          if(!fpl) errorexits("failed opening %s", plfil);
+          write_plane_ascii(node, fpl, norm, ijk, VarA(node, vi), It,T);
+          fclose(fpl);
+        }
+      }
+    }
+
+    /* sysnchronize, so that we write only one node at a time */
+    nMPI_barrier();
+  } endforlnodes;
+}

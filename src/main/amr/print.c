@@ -438,3 +438,41 @@ void prbbox(double *bb, int dim)
     printf("x[%g,%g]", bb[2*d], bb[2*d+1]);
   printf(" ");
 }
+
+/* print corners of patch */
+void printcorners(tPat *pat)
+{
+  double *bb = pat->bbox;
+  int n[] = { 2,2,2 };
+  int i,j,k;
+
+  printf(" p%d\n", pat->p);
+  forijk(i,j,k, n)
+  {
+    double X[] = { bb[i], bb[2+j], bb[4+k] };
+    double x[3];
+
+    set_xyz(pat, 0,-1, X, x);
+    printf("   ijk%d%d%d", i,j,k); pr3v("x",x); pr3v("X",X);
+    printf("\n");
+  }
+}
+
+void printfacecorners(tPat *pat, int  f)
+{
+  double *bb = pat->bbox;
+  int n[] = { 2,2,2 };
+  int dir = f/2;
+  int pl  = f%2;
+  int i,j,k;
+
+  printf("# p%d  f%d\n", pat->p, f);
+  forplaneN(dir, i,j,k, n, pl)
+  {
+    double X[] = { bb[i], bb[2+j], bb[4+k] };
+    double x[3];
+
+    set_xyz(pat, 0,-1, X, x);
+    printf("%g %g %g    %g %g %g\n", x[0],x[1],x[2], X[0],X[1],X[2]);
+  }
+}
