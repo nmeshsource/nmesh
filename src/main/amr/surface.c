@@ -707,7 +707,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
 
       //printarray_int(Ip[ni]);
-      if(0) //if(f==1 && node->nid==1)
+      if(0 && f==1 && node->nid==7)
       {
         printf("ni=%d:\n", ni);
         printnode(node);
@@ -717,6 +717,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         printarray_int(Ip[ni]);
         printarray(Cp[0]);
         printarray(oC[0]);
+        printarray(Cp[1]);
+        printarray(oC[1]);
       }
 
       /* convert oC to neighbor's internal basis coords */
