@@ -13,12 +13,20 @@
 /**********************************************************************/
 
 /* compute desired rank */
-int desiredrank(int nid, int nnodes, int size)
+int desiredrank0(int nid, int nnodes, int size)
 {
   int rest = nnodes%size;
   int nperproc = nnodes/size + (rest>0);
-  int shft = ((rest+1)/2)*(rest>0);
+  int shft = ((size-rest+1)/2)*(rest>0);
   int desrank = (nid + shft)/nperproc;
+  return desrank;
+}
+int desiredrank(int nid, int nnodes, int size)
+{
+  double N = nnodes;
+  double s = size;
+  double nperproc = N/s;
+  double desrank = nid/nperproc;
   return desrank;
 }
 
