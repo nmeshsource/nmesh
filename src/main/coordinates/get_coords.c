@@ -910,6 +910,7 @@ void array_nbXface_of_Xface(tNode *node, int f,
   int odir = nb_f/2;
   int od1 = Dir1_norm(odir);
   int od2 = Dir2_norm(odir);
+  double nbrct[4];
 
   forplaneN(dir, i,j,k, n, pl)
   {
@@ -923,14 +924,24 @@ void array_nbXface_of_Xface(tNode *node, int f,
     p = p_XYZ_of_xyz(opat, oX, x);
     if(p<0)
     {
-      /* we couldn't find, the nb point oX, so just use something
-         outside the nb's bound. rect., to signal to e.g.
-         mark_points_in_nb_f that this is not be used */
-      oX[0] = nb->bbox[1] * 2.;
-      oX[1] = nb->bbox[3] * 2.;
-      oX[2] = nb->bbox[5] * 2.;
+      /* we couldn't find, the nb point oX, but maybe the two coords on the
+         face are ok? */
+      double oCl[] = { oX[od1], oX[od2] };
+
+      brct_nodeface(nb, odir, nbrct);
+      if(!C_in_brct(nbrct, oCl))
+      {
+        /* just use something outside the nb's bound. rect., to signal to
+           e.g. mark_points_in_nb_f that this is not be used */
+        oX[0] = nb->bbox[1] * 2.;
+        oX[1] = nb->bbox[3] * 2.;
+        oX[2] = nb->bbox[5] * 2.;
+      }
     }
-    if(0) // (p<0)
+    oC[0][ind] = oX[od1];
+    oC[1][ind] = oX[od2];
+
+    if(0) // if(p<0)
     {
       printnode(node);
       printf("f=%d  ", f);
@@ -945,7 +956,5 @@ void array_nbXface_of_Xface(tNode *node, int f,
       printpatch(opat);
       errorexit("x should be in opat!!!");
     }
-    oC[0][ind] = oX[od1];
-    oC[1][ind] = oX[od2];
   }
 }
