@@ -457,19 +457,19 @@ int test_ajsurf(tMesh *mesh)
   PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
 
   /* print var in one node yet again with surfaces */
-  nd = MyNode(mesh, 7);
-  printnode(nd);
+//  nd = MyNode(mesh, 7);
+//  printnode(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));
   //printvar_innode(nd, Ind("oC1_1"));
-  printvar_innode(nd, vi);
+//  printvar_innode(nd, vi);
 
-  nd = MyNode(mesh, 78);
-  printnode(nd);
+//  nd = MyNode(mesh, 78);
+//  printnode(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));
   //printvar_innode(nd, Ind("oC1_1"));
-  printvar_innode(nd, vi);
+//  printvar_innode(nd, vi);
 
   /* print var in all nodes */
   prdivider(0);
