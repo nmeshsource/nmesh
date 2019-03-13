@@ -197,6 +197,7 @@ void printvar_innode(tNode *node, int vi)
   int type =  MeshVarType(mesh, vi);
   tDat *dat = node->dat;
   tArray *va = dat ? dat->v[vi] : NULL;
+  char s[100];
 
   printf("%s Ind=%d type=%d zones=%d Array", name, vi, type, zones);
   printarray(va);
@@ -223,7 +224,9 @@ void printvar_innode(tNode *node, int vi)
         int ni;
         for(ni=0; ni<sf->nnbsurf; ni++)
         {
-          printf("f%d allocd=%d nbsurf[%d]", f, sf->allocd_nbsurf[ni], ni);
+          printf("f%d fnb[f][%d]=%s allocd=%d nbsurf[%d]",
+                 f, ni, nodename(node->fnb[f][ni],s,99),
+                 sf->allocd_nbsurf[ni], ni);
           printarray(nsa[ni]);
         }
       }
@@ -239,6 +242,7 @@ void printvar_ajsurfdiff(tNode *node, int vi)
   int type =  MeshVarType(mesh, vi);
   tDat *dat = node->dat;
   tArray *va = dat ? dat->v[vi] : NULL;
+  char s[100];
 
   printf("%s Ind=%d type=%d zones=%d\n", name, vi, type, zones);
 
@@ -258,7 +262,9 @@ void printvar_ajsurfdiff(tNode *node, int vi)
         int ni;
         for(ni=0; ni<sf->nnbsurf; ni++)
         {
-          printf("f%d allocd=%d nbsurf[%d]\n", f, sf->allocd_nbsurf[ni], ni);
+          printf("f%d fnb[f][%d]=%s allocd=%d nbsurf[%d]",
+                 f, ni, nodename(node->fnb[f][ni],s,99),
+                 sf->allocd_nbsurf[ni], ni);
         }
       }
       if(asa)
