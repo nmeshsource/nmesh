@@ -12,6 +12,17 @@
 /*  */
 /**********************************************************************/
 
+/* compute desired rank */
+int desiredrank(int nid, int nnodes, int size)
+{
+  int rest = nnodes%size;
+  int nperproc = nnodes/size + (rest>0);
+  int shft = ((rest+1)/2)*(rest>0);
+  int desrank = (nid + shft)/nperproc;
+  return desrank;
+}
+
+/* simplistic load balancing */
 void simple_load_balance(tMesh *mesh)
 {
   long nnodes = mesh->nln;
@@ -19,19 +30,18 @@ void simple_load_balance(tMesh *mesh)
   tNlist *elem;
   tNode *node;
   int size = nMPI_size();
-  int nperproc = nnodes/size +  nnodes%size;
   int desrank;
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
 
-  PRF;printf(": nperproc=%d\n", nperproc);
+  PRF;printf(": nnodes=%ld\n", nnodes);
 
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
     nid = node->nid;
-    desrank = (nid/nperproc);
+    desrank = desiredrank(nid, nnodes, size);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 1);
   }
@@ -45,7 +55,7 @@ void simple_load_balance(tMesh *mesh)
   {
     node = elem->node;
     nid = node->nid;
-    desrank = (nid/nperproc);
+    desrank = desiredrank(nid, nnodes, size);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
   }
@@ -189,9 +199,15 @@ void move_node_to_rank(tNode *node, int desrank,
       if(node->dat) errorexit("destination node should not have dat yet");
       node->dat = alloc_dat(node);
 
+      if(0)
+      {
+        PRF;printf(": nid%ld rank%d node->dat=%p\n",
+                   node->nid, rank, node->dat);
+      }
       if(PR) { PRF;printf(": calling coordinates_init_node\n"); }
       coordinates_init_node(node);
     }
+    if(PR) fflush(stdout);
   }
   else /* retrieve data from buffers */
   {
@@ -211,6 +227,7 @@ void move_node_to_rank(tNode *node, int desrank,
       node->dat = NULL;
     }
     node->datrank = desrank;
+    if(PR) fflush(stdout);
   }
 }
 
