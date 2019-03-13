@@ -393,7 +393,7 @@ int amr_set_all_bfaces(tMesh *mesh)
     if(0) printbfaces(pat);
   }
 
-  if(pr)
+  if(0)
   {
     printf("------before expand_bfaces_to_patch_edges:\n");
     printallbfaces(mesh);
