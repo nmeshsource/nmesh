@@ -119,44 +119,23 @@ void remove_bfaces_without_brct(tPat *pat)
 /* make bounding rectangle large enough to fit the point X[3] */
 void expand_bface_to_include_X(tBface *bface, const double X[3])
 {
-  int f, dir, d;
-  double C[2]; /* point coords in face */
+  int f, dir;
 
   if(!bface) return;
 
   f = bface->f;
   dir = f/2;
 
-  switch(dir)
-  {
-  case 0:
-    C[0] = X[1];  C[1] = X[2];
-    break;
-  case 1:
-    C[0] = X[0];  C[1] = X[2];
-    break;
-  case 2:
-    C[0] = X[0];  C[1] = X[1];
-    break;
-  default:
-    C[0] = X[0];  C[1] = X[1];
-    errorexit("f/2 must be 0,1,2");
-  }
   if(bface->brct_isset)
   {
     /* expand rectangle */
-    for(d=0; d<2; d++)
-    {
-      if(C[d] < bface->brct[2*d])   bface->brct[2*d]   = C[d];
-      if(C[d] > bface->brct[2*d+1]) bface->brct[2*d+1] = C[d];
-    }
+    expand_brct_to_include_X(bface->brct, dir, X, 1);
   }
   else
   {
-    bface->brct[1] = bface->brct[0] = C[0];
-    bface->brct[3] = bface->brct[2] = C[1];
+    expand_brct_to_include_X(bface->brct, dir, X, 0);
     bface->brct_isset = 1;
-   }
+  }
 }
 
 /* expand bface to cover face edges */

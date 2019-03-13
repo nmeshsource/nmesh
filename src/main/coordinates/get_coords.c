@@ -639,8 +639,68 @@ void brct_nodeface(tNode *node, int norm, double brct[4])
   }
 }
 
+/* get the bounding rectangle of a patchface, norm = face/2 */
+void brct_patface(tPat *pat, int norm, double brct[4])
+{
+  int i;
+  switch(norm)
+  {
+  case 0:
+    for(i=0; i<4; i++) brct[i] = pat->bbox[i+2];
+    break;
+  case 1:
+    for(i=0; i<2; i++) brct[i] = pat->bbox[i];
+    for(i=2; i<4; i++) brct[i] = pat->bbox[i+2];
+    break;
+  case 2:
+    for(i=0; i<4; i++) brct[i] = pat->bbox[i];
+    break;
+  default:
+    errorexit("norm must be 0,1,2");
+  }
+}
+
+/* make bounding rectangle large enough to fit the point X[3],
+   if expand=0, include just this one point */
+void expand_brct_to_include_X(double brct[4], int norm,
+                              const double X[3], int expand)
+{
+  int d;
+  double C[2]; /* point coords in face */
+
+  switch(norm)
+  {
+  case 0:
+    C[0] = X[1];  C[1] = X[2];
+    break;
+  case 1:
+    C[0] = X[0];  C[1] = X[2];
+    break;
+  case 2:
+    C[0] = X[0];  C[1] = X[1];
+    break;
+  default:
+    C[0] = X[0];  C[1] = X[1];
+    errorexit("norm must be 0,1,2");
+  }
+  if(expand)
+  {
+    /* expand rectangle */
+    for(d=0; d<2; d++)
+    {
+      if(C[d] < brct[2*d])   brct[2*d]   = C[d];
+      if(C[d] > brct[2*d+1]) brct[2*d+1] = C[d];
+    }
+  }
+  else
+  {
+    brct[1] = brct[0] = C[0];
+    brct[3] = brct[2] = C[1];
+   }
+}
+
 /* put intersection of 2 bounding rectangles into brct, if intersection
-  is empty return 0 */
+   is empty return 0 */
 int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
                              double brct[4])
 {
@@ -684,13 +744,15 @@ int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
 }
 
 /* transform XYZ from patch1 to XYZ of other patch2 */
-void XYZpat2_of_XYZpat1(tPat *pat1, const double X1[3],
+int XYZpat2_of_XYZpat1(tPat *pat1, const double X1[3],
                         tPat *pat2, double X2[3])
 {
   double x[3];
+  int p2;
 
   set_xyz(pat1, NULL, -1, X1, x);
-  set_XYZ(pat2, NULL, -1, X2, x);
+  p2 = p_XYZ_of_xyz(pat2, X2, x);
+  return p2;
 }
 
 /* get Coords on face from X */
@@ -741,33 +803,51 @@ void X_from_C_on_face(tPat *pat, int face, const double C[2], double X[3])
 }
 
 /* transform point C1 on face f1 of pat1 to point C2 on face2 of pat2 */
-void Cpat2_of_Cpat1(tPat *pat1, int f1, const double C1[2],
+int Cpat2_of_Cpat1(tPat *pat1, int f1, const double C1[2],
                     tPat *pat2, int f2, double C2[2])
 {
   double X1[3], X2[3];
+  int p2;
 
   X_from_C_on_face(pat1,f1, C1, X1);
-  XYZpat2_of_XYZpat1(pat1, X1, pat2, X2);
+  p2 = XYZpat2_of_XYZpat1(pat1, X1, pat2, X2);
+  /* if(p2<0) X2 is not within pat2 or NAN */
+
   C_from_X_on_face(X2,f2, C2);
+
+  return p2;
 }
 
 /* transform brct from face f1 of patch1 to brct of face f2 on patch2 */
-void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
-                          tPat *pat2, int f2, double brct2[4])
+int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
+                         tPat *pat2, int f2, double brct2[4])
 {
   double C1[2], C2[2], sw;
+  int p2_1, p2_2, problem = 0;
 
   C1[0] = brct1[0];
   C1[1] = brct1[2];
-  Cpat2_of_Cpat1(pat1,f1,C1,   pat2,f2,C2);
+  p2_1 = Cpat2_of_Cpat1(pat1,f1,C1,   pat2,f2,C2);
+  /* set lower bounds of brct2 */
   brct2[0] = C2[0];
   brct2[2] = C2[1];
 
+
   C1[0] = brct1[1];
   C1[1] = brct1[3];
-  Cpat2_of_Cpat1(pat1,f1,C1, pat2,f2,C2);
+  p2_2 = Cpat2_of_Cpat1(pat1,f1,C1, pat2,f2,C2);
+  /* set upper bounds of brct2 */
   brct2[1] = C2[0];
   brct2[3] = C2[1];
+
+  /* check if C2 is not NAN */
+  if(p2_1<0 || p2_2<0)
+  {
+    int j;
+
+    /* check if all is ok, or if there is a NAN */
+    for(j=0; j<4; j++) if(isnan(brct2[j])) problem = 1;
+  }
 
   /* swap brct2 entries to have min in brct2[0], brct2[2] */
   if(brct2[1] < brct2[0])
@@ -782,6 +862,7 @@ void brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
     brct2[3] = brct2[2];
     brct2[2] = sw;
   }
+  return problem;
 }
 
 /* check if a point is in brct,

@@ -378,6 +378,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   {
     tBface *obface = bface->obface;
     double nbrct[4]; // bound. rect. of nb
+    int problem;     // is set to 1 if there is a problem finding nbrct
     double irct[4];
 
     /* do nothing if no other patch face */
@@ -430,11 +431,11 @@ printnodelist(nblist1);
       brct_nodeface(nb, nb_f/2, nbrct);
 
       /* transform nbrct from nb coords to node coords */
-      brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
-                           node->pat, face, nbrct);
+      problem = brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
+                                     node->pat, face, nbrct);
 
       /* does brct intersect nbrct? */
-      if(intersection_brct1_brct2(brct, nbrct, irct))
+      if(intersection_brct1_brct2(brct, nbrct, irct) && !problem)
       {
         nblist1 = elem; /* save elem that touches our node */
         continue;
