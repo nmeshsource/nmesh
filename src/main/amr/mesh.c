@@ -110,7 +110,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double dc = 20;
   double csize = 0.375;
   double ssfac = 4.;
-  double obfac = 10000;
+  double obfac = 10; // 10000 in DNSdata
   double xc[3];
   tNlist *el, *en;
   int amr_n0 = Geti(Par("amr_n0"));
@@ -135,6 +135,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
         two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
       else
         two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
+      break;
+    case 12:
+      xc[1] = xc[2] = dc*0.5;
+      xc[0] = dc;
+      two_spheres_around_empty_box_at_x0(mesh, xc,
+                                         ssfac*dc, ssfac*obfac*dc);
       break;
     case 13:
       xc[1] = xc[2] = 0.0;

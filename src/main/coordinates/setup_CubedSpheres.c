@@ -246,8 +246,30 @@ int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
   double xc[3], Din[6], Dout[6];
   int i;
 
-  /* make the 2 full cubes and sphere0 around them */
+  /* make the full box and sphere0 around them */
   pl = sphere_around_full_box_at_x0(mesh, dc, r0);
+
+  /* set distances to make 6 more stretched cubed shells around sphere0 */
+  for(i=0; i<6; i++)
+  {
+    Din[i]  = r0;
+    Dout[i] = r1;
+  }
+  xc[0] = xc[1] = xc[2] = 0.0;
+  pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
+  return pl;
+}
+
+/* same as two_spheres_around_box_at_x0, but put no box at center */
+int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
+                                       double r0, double r1)
+{
+  int pl;
+  double xc[3], Din[6], Dout[6];
+  int i;
+
+  /* make sphere0 around empty box */
+  pl = sphere_around_empty_box_at_x0(mesh, dc, r0);
 
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
