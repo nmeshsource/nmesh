@@ -731,7 +731,7 @@ int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
     }
   }
 
-  /* test if the intersection empty */
+  /* test if the intersection is empty */
   if(isec)
     for(d=0; d<2; d++)
       if(dequal(brct[2*d], brct[2*d+1]))
@@ -819,7 +819,7 @@ int Cpat2_of_Cpat1(tPat *pat1, int f1, const double C1[2],
 }
 
 /* transform brct from face f1 of patch1 to brct of face f2 on patch2 */
-int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
+int brctpat2_of_brctpat1__old(tPat *pat1, int f1, const double brct1[4],
                          tPat *pat2, int f2, double brct2[4])
 {
   double C1[2], C2[2], sw;
@@ -862,6 +862,54 @@ int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
     brct2[3] = brct2[2];
     brct2[2] = sw;
   }
+  return problem;
+}
+
+/* transform brct from face f1 of patch1 to brct of face f2 on patch2 */
+int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
+                         tPat *pat2, int f2, double brct2[4])
+{
+  double C1[4][2]; /* 4 points, 3rd one is (C1[2][0],C1[2][1]) */
+  double C2[4][2]; /* 4 points, 3rd one is (C2[2][0],C2[2][1]) */
+  double f[4];
+  int i, im[4], p2[4], problem = 0;
+
+  C1[0][0] = brct1[0];
+  C1[0][1] = brct1[2];
+  C1[1][0] = brct1[1];
+  C1[1][1] = brct1[2];
+  C1[2][0] = brct1[0];
+  C1[2][1] = brct1[3];
+  C1[3][0] = brct1[1];
+  C1[3][1] = brct1[3];
+
+  for(i=0; i<4; i++)
+    p2[i] = Cpat2_of_Cpat1(pat1,f1,C1[i],   pat2,f2,C2[i]);
+
+  /* check if C2 is not NAN */
+  if(p2[0]<0 || p2[1]<0 || p2[2]<0 || p2[3]<0)
+  {
+    int j;
+
+    /* check if all is ok, or if there is a NAN */
+    for(i=0; i<4; i++)
+      for(j=0; j<2; j++)
+        if(isnan(C2[i][j])) problem = 1;
+  }
+
+  /* find min and max in coords */
+  for(i=0; i<4; i++) f[i] = C2[i][0];
+  brct2[0] = min_in_1d_array(f,4, im);
+
+  for(i=0; i<4; i++) f[i] = C2[i][0];
+  brct2[1] = max_in_1d_array(f,4, im);
+
+  for(i=0; i<4; i++) f[i] = C2[i][1];
+  brct2[2] = min_in_1d_array(f,4, im);
+
+  for(i=0; i<4; i++) f[i] = C2[i][1];
+  brct2[3] = max_in_1d_array(f,4, im);
+
   return problem;
 }
 

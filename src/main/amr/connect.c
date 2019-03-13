@@ -380,6 +380,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
     double nbrct[4]; // bound. rect. of nb
     int problem;     // is set to 1 if there is a problem finding nbrct
     double irct[4];
+    int isec;
 
     /* do nothing if no other patch face */
     if(!obface) continue;
@@ -405,7 +406,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
 /*
-if(node->nid==3)
+if(node->nid==28)
 {
 Yo(1);
 printnodelist(nbl);
@@ -418,7 +419,7 @@ printnodelist(nbl);
     {
     nbl_loop_start:
 /*
-if(node->nid==3)
+if(node->nid==28)
 {
 Yo(2.1);
 printnodelist(nblist1);
@@ -429,19 +430,28 @@ printnodelist(nblist1);
       /* get neigh. bound. rect. in its own X coords */
       nb = elem->node;
       brct_nodeface(nb, nb_f/2, nbrct);
-
+/*
+if(node->nid==28)
+{
+Yo(2.12);
+prbbox(brct,2);
+prbbox(nbrct,2);
+printf("\n");
+}
+*/
       /* transform nbrct from nb coords to node coords */
       problem = brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
                                      node->pat, face, nbrct);
 
       /* does brct intersect nbrct? */
-      if(intersection_brct1_brct2(brct, nbrct, irct) && !problem)
+      isec = intersection_brct1_brct2(brct, nbrct, irct);
+      if(isec && !problem)
       {
         nblist1 = elem; /* save elem that touches our node */
         continue;
       }
 /*
-if(node->nid==3)
+if(node->nid==28)
 {
 Yo(2.2);
 printnodelist(nblist1);
@@ -449,6 +459,7 @@ printnodelist(elem);
 prbbox(brct,2);
 prbbox(nbrct,2);
 prbbox(irct,2);
+printf("isec=%d problem=%d\n", isec, problem);
 }
 */
       /* remove nb=elem->node from nbl */
@@ -457,7 +468,7 @@ prbbox(irct,2);
       else     break;
     }
 /*
-if(node->nid==3)
+if(node->nid==28)
 {
 Yo(2.9);
 printnodelist(nblist1);
