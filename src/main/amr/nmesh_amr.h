@@ -144,14 +144,15 @@ typedef struct tPAT {
   double (*basis[3])(int l, double Xb, int np); /* basis related to At,St */
   //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
-/* Note: each patch should have Bfaces as in sgrid. But instead of pointlists
-   we can use bounding rectangles in both adjacent bfaces, because we will
-   only allow patches that are touching cubed spheres. So when a node needs
-   data from the other side of a patch boundary, it can:
-   1. figure out its bounding rectangle on the other side
-   2. ask all nodes on the other side within the rectangle on the other side
-      for data
-   For this we need a node list of all leaf nodes on all faces. */
+/* Note: each patch has Bfaces as in sgrid. But instead of pointlists we use
+   bounding rectangles in both adjacent bfaces. These rectangles (brct) are
+   not exact but simply contain some of the region where two faces meet. In
+   case the two faces are two rectangles brct is the excat intersection of
+   the face rectangles. But this does not happen with e.g. the 38 cubed
+   spheres from sgrid, because of the extended ranges in the A-coord lead to
+   overlapping faces that are not simple rectangles. So when we connect
+   nodes and set node->fnb we use bfaces only to see if both nodes are in a
+   patch that share bfaces on the two node faces. */
 
 
 /* several patches and thus a list of leaf nodes make up the 
