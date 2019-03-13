@@ -414,12 +414,17 @@ int test_ajsurf(tMesh *mesh)
                      Vard(node, iX+1)[ijk], Vard(node, iX+2)[ijk] };
       double x[] = { Vard(node, ix)[ijk],
                      Vard(node, ix+1)[ijk], Vard(node, ix+2)[ijk] };
-      double dlam = (node->pat->p != 0);
+      tPat *pat = node->pat;
+      int p = pat->p;
+      int dom = pat->CI->dom;
+      double dlam = (p != 0);
+      double lam = X[0] + dlam;
+      double A =  dom!=3 ? X[1] : 2.*(1.-X[1]) + 1.;
 
       //XYZ_of_XbYbZb(node, Xb, X);
       va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
-      va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
-      va->d[ijk] = test_func(X[0] + dlam,X[1],X[2]);
+      //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
+      //va->d[ijk] = test_func(lam,A,X[2]);
     }
   }
 
@@ -452,7 +457,14 @@ int test_ajsurf(tMesh *mesh)
   PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
 
   /* print var in one node yet again with surfaces */
-  nd = MyNode(mesh, 0); /* my first node */
+  nd = MyNode(mesh, 7);
+  printnode(nd);
+  //printvar_innode(nd, ix);
+  //printvar_innode(nd, Ind("oC0_1"));
+  //printvar_innode(nd, Ind("oC1_1"));
+  printvar_innode(nd, vi);
+
+  nd = MyNode(mesh, 78);
   printnode(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));

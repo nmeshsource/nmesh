@@ -41,11 +41,11 @@ Things that need to be done urgently:
 
 *some output: DONE!
 
-*test bfaces & fnb:  may be ok!
+*test bfaces & fnb:  bfaces seem ok, fnb is missing some nb
 
 *2d interpolation
  -interp from ghosts within patch     : DONE!
- -interp from ghosts of other patches
+ -interp from ghosts of other patches : Why is interp not correct for poly?
 
 *evolve module in main: DONE!
 -struct with slots for evo varlists & RHSs for several systems (Z4 + grhd)
