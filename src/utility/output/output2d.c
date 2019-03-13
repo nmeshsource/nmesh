@@ -121,13 +121,12 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
     if(node->dat)
     if(node->dat->v[vi])
     {
-      int p = node->pat->p;
       char ns[100];
       int ijk[3];
       int f;
 
       /* find string that idetifies node */
-      node_location_str(node, ns,100);
+      nodename(node, ns,100);
 
       /* write files */
       /* pl-plane:  Z = Z0 */
@@ -139,8 +138,8 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
 
         if(gnuplot)
         {
-          snprintf(plfil, 999, "%s/%s.%02df%d_%s",
-                   Gets(Par("outdir")),name, p, f, ns);
+          snprintf(plfil, 999, "%s/%s.%sf%d",
+                   Gets(Par("outdir")),name, ns, f);
           fpl = fopen(plfil, "a");
           if(!fpl) errorexits("failed opening %s", plfil);
           write_plane_ascii(node, fpl, norm, ijk, VarA(node, vi), It,T);
