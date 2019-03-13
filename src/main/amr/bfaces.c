@@ -164,8 +164,9 @@ void expand_bface_to_pat_bbox(tBface *bface)
 {
   tPat *pat;
   tBface *obface;
-  int f,dir, d[2], dd;
+  int f,dir, d[2], dd, j;
   double A[2],B[2], L[2], C, X[3], x[3], oX[3];
+  double rct[4];
 
   if(!bface) return;
 
@@ -176,25 +177,25 @@ void expand_bface_to_pat_bbox(tBface *bface)
   d[0] = Dir1_norm(dir);
   d[1] = Dir2_norm(dir);
 
-  /* adjust rectangle of bface */
+  /* copy rectangle of bface */
+  for(j=0; j<4; j++)  rct[j] = bface->brct[j];
+
+  /* save adjusted rectangle of bface in rct */
   for(dd=0; dd<2; dd++)
   {
     A[dd] = pat->bbox[2*d[dd]];
     B[dd] = pat->bbox[2*d[dd]+1];
     L[dd] = B[dd] - A[dd];
 
-    if(bface->brct[2*dd] - A[dd] < L[dd]/NPOINTS)
-      bface->brct[2*dd] = A[dd];
-
-    if(B[dd] - bface->brct[2*dd+1] < L[dd]/NPOINTS)
-      bface->brct[2*dd+1] = B[dd];
+    if(bface->brct[2*dd] - A[dd] < L[dd]/NPOINTS)   rct[2*dd] = A[dd];
+    if(B[dd] - bface->brct[2*dd+1] < L[dd]/NPOINTS) rct[2*dd+1] = B[dd];
   }
 
   /* expand other bface to same point */
   if(obface)
   {
     tPat *opat = obface->pat;
-    int j, ret;
+    int ret;
 
     C = pat->bbox[f];
     for(j=0; j<2; j++)
@@ -203,17 +204,17 @@ void expand_bface_to_pat_bbox(tBface *bface)
       {
       case 0:
         X[0] = C;
-        X[1] = bface->brct[j];
-        X[2] = bface->brct[2+j];
+        X[1] = rct[j];
+        X[2] = rct[2+j];
         break;
       case 1:
-        X[0] = bface->brct[j];
+        X[0] = rct[j];
         X[1] = C;
-        X[2] = bface->brct[2+j];
+        X[2] = rct[2+j];
         break;
       case 2:
-        X[0] = bface->brct[j];
-        X[1] = bface->brct[2+j];
+        X[0] = rct[j];
+        X[1] = rct[2+j];
         X[2] = C;
         break;
       }
@@ -221,7 +222,12 @@ void expand_bface_to_pat_bbox(tBface *bface)
       /* we use p_XYZ_of_xyz not set_XYZ(opat, 0,-1, oX, x); because
          p_XYZ_of_xyz also rounds oX te be inside opat) */
       ret = p_XYZ_of_xyz(opat, oX, x);
-      if(ret<0)
+      if(ret>=0)
+      {
+        expand_bface_to_include_X(bface, X);
+        expand_bface_to_include_X(obface, oX);
+      }
+      if(0)
       {
         prdivider(0);
         printf("pat:\n");
@@ -239,8 +245,12 @@ void expand_bface_to_pat_bbox(tBface *bface)
         errorexit("x is not in opat!!!");
       }
       //pr3v("X",X);pr3v("x",x);pr3v("oX",oX);
-      expand_bface_to_include_X(obface, oX);
     }
+  }
+  else /* if there is no obface we can just expand the bface */
+  {
+    /* put expanded rectangle into bface */
+    for(j=0; j<4; j++)  bface->brct[j] = rct[j];
   }
 }
 
