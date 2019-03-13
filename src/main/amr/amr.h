@@ -54,3 +54,5 @@ int set_consistent_flags_in_all_bfaces(tMesh *mesh);
 int zero_face2_flag_in_all_bfaces(tMesh *mesh);
 int toggle_face2_flag_in_faces4_5_of_cubes(tMesh *mesh);
 int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh);
+int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
+                           int ofaces[6], double oX[3]);

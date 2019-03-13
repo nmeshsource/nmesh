@@ -383,8 +383,8 @@ int fnb_containing_point(tNode *node, int f,
    into aI. I.e. we return a mask of points in node in Ip.
    Note that aC and aoC contain the same points but in different coords.
    aC in X coords of the node and aoC in X coords of the neighbor. */
-void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
-                             tArray *aoC[2], tArray *aI)
+void brct_mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
+                                  tArray *aoC[2], tArray *aI)
 {
   tPat *pat = node->pat;
   tNode *nb = node->fnb[f][ni];
@@ -439,6 +439,42 @@ void mark_points_in_fnb_f_ni(tNode *node, int f, int ni, tArray *aC[2],
 
     /* check if C from opat is within bounding rectangle of nb */
     if( (nb->pat == opat) && (C_in_brct(nbrct , oC)) )
+      aI->i[k] = k;
+    else
+      aI->i[k] = -1;
+  }
+}
+
+/* Mark all points in aC[0..1] of node that are in node nb by writing
+   their index into aI. If a point is not in the node we write -1
+   into aI. I.e. we return a mask of points in node in Ip.
+   Note that aC and aoC contain the same points but in different coords.
+   aC in X coords of the node and aoC in X coords of the neighbor nb. */
+void mark_points_in_nb_f(tNode *node, int f, tArray *aC[2],
+                         tNode *nb, int nb_f, tArray *aoC[2], tArray *aI)
+{
+  //tPat *pat = node->pat;
+  //tPat *opat = nb->pat;
+  int odir, od1, od2;
+  double nbrct[4];
+  int k;
+
+  /* get bounding rectangle of the node nb */
+  odir = nb_f/2;
+  od1 = Dir1_norm(odir);
+  od2 = Dir2_norm(odir);
+  nbrct[0] = nb->bbox[2*od1];
+  nbrct[1] = nb->bbox[2*od1+1];
+  nbrct[2] = nb->bbox[2*od2];
+  nbrct[3] = nb->bbox[2*od2+1];
+
+  forarray(aC[0], k)
+  {
+    //double C[]  = {  aC[0]->d[k],  aC[1]->d[k] };
+    double oC[] = { aoC[0]->d[k], aoC[1]->d[k] };
+
+    /* check if oC from opat is within bounding rectangle of nb */
+    if( C_in_brct(nbrct, oC) )
       aI->i[k] = k;
     else
       aI->i[k] = -1;
@@ -774,24 +810,25 @@ int C_in_brct(const double brct[4], double C[2])
 /* convert X-coords on face f of node to X-coords of neighboring node,
    and write them into nbC */
 void array_nbXface_of_Xface(tNode *node, int f,
-                            tNode *nb, tArray *nbC[2])
+                            tNode *nb, int nb_f, tArray *nbC[2])
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
   int *n = node->n;
   int dir = f/2;
   int pl = (n[dir]-1)*(f%2);
-  int d1 = Dir1_norm(dir);
-  int d2 = Dir2_norm(dir);
+  //int d1 = Dir1_norm(dir);
+  //int d2 = Dir2_norm(dir);
   int iX = Ind("X");
   int ix = Ind("x");
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   double *oC[] = { Arrd(nbC[0]), Arrd(nbC[1]) };
-  int i,j,k;
-  tPat *opat;
-  tBface *obface;
-  int odir, od1, od2, p;
+  int i,j,k, p;
+  tPat *opat = nb->pat;
+  int odir = nb_f/2;
+  int od1 = Dir1_norm(odir);
+  int od2 = Dir2_norm(odir);
 
   forplaneN(dir, i,j,k, n, pl)
   {
@@ -799,17 +836,20 @@ void array_nbXface_of_Xface(tNode *node, int f,
     int ind = Ind_n_norm(i,j,k, n, dir);
     double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
     double X[] = { pX[0][ijk], pX[1][ijk], pX[2][ijk] };
-    double C[] = { X[d1], X[d2] };
+    //double C[] = { X[d1], X[d2] };
     double oX[3];
-
-    obface = nbbface_of_bface_containing_point(nb, pat, f, C);
-    opat = obface->pat;
-    odir = obface->f/2;
-    od1 = Dir1_norm(odir);
-    od2 = Dir2_norm(odir);
 
     p = p_XYZ_of_xyz(opat, oX, x);
     if(p<0)
+    {
+      /* we couldn't find, the nb point oX, so just use something
+         outside the nb's bound. rect., to signal to e.g.
+         mark_points_in_nb_f that this is not be used */
+      oX[0] = nb->bbox[1] * 2.;
+      oX[1] = nb->bbox[3] * 2.;
+      oX[2] = nb->bbox[5] * 2.;
+    }
+    if(0) // (p<0)
     {
       printnode(node);
       printf("f=%d  ", f);
@@ -817,8 +857,8 @@ void array_nbXface_of_Xface(tNode *node, int f,
       pr3v("x", x);
       printf("\n");
       printnode(nb);
-      printbface(obface);
-      printf("obface->f=%d  ", obface->f);
+      //printbface(obface);
+      //printf("obface->f=%d  ", obface->f);
       pr3v("oX", oX);
       printf("\nopat:  ");
       printpatch(opat);

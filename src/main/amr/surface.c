@@ -693,17 +693,18 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       }
       else /* compute oC from Cp */
       {
-        /* point oC to Cb[ni], to save oC in there */
+        /* point oC to Cb[ni], to save oC in Cb[ni] */
         oC[0] = Cb[ni][0];
         oC[1] = Cb[ni][1];
-        array_nbXface_of_Xface(node,f, nb, oC);
+        /* compute oC in node plane */
+        array_nbXface_of_Xface(node,f, nb,nb_f, oC);
       }
 
       if(Cp[0]->N != oC[0]->N)
         errorexit("Cp[0]->N != oC[0]->N");
 
       /* find points inside neigh. -> mask is returned in Ip */
-      mark_points_in_fnb_f_ni(node,f,ni, Cp, oC, Ip[ni]);
+      mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
 
       //printarray_int(Ip[ni]);
       if(0) //if(f==1 && node->nid==1)
@@ -718,7 +719,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         printarray(oC[0]);
       }
 
-      /* convert Cp to neighbor's internal basis coords */
+      /* convert oC to neighbor's internal basis coords */
       array_Xbplane_of_X(nb,nb_dir, Cb[ni], oC);
     }
   }

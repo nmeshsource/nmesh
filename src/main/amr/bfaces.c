@@ -323,18 +323,42 @@ tBface *first_obface_of_bface_containing_point(tPat *pat, int f, double C[2])
 
 /* find bface of the neighbor node nb on the other side of face f,
    that contains a point described by pat,f,C */
+tBface *brct_nbbface_of_bface_containing_point(tNode *nb,
+                                               tPat *pat, int f, double C[2])
+{
+  tBface *bf, *obf;
+
+  forbfacesonface(pat, f, bf)
+    if(C_in_brct(bf->brct, C))
+    {
+      obf = bf->obface;
+      if(obf)
+        if(obf->pat == nb->pat) return obf;
+    }
+
+  return NULL;
+}
+
+/* find bface of the neighbor node nb on the other side of face f,
+   that contains a point described by pat,f,C */
 tBface *nbbface_of_bface_containing_point(tNode *nb,
                                           tPat *pat, int f, double C[2])
 {
   tBface *bf, *obf;
 
   forbfacesonface(pat, f, bf)
-    if(C_in_brct(bf->brct , C))
-    {
-      obf = bf->obface;
-      if(obf)
-        if(obf->pat == nb->pat) return obf;
-    }
+  {
+    obf = bf->obface;
+    if(obf)
+      if(obf->pat == nb->pat)
+      {
+        int ofaces[6];
+        double oX[3];
+
+        if(facepoint_in_bfacepair(bf, NULL,-1, C, ofaces, oX))
+          return obf;
+      }
+  }
 
   return NULL;
 }
@@ -761,6 +785,87 @@ int set_bfaces_on_patface(tPat *pat, int f)
 
   return nbfaces;
 }
+
+
+/* find point pat,f,C in opat, computes ofaces and oX,
+   returns -1 if point is not in opat, otherwise it returns
+   the number of opat faces the point is on */
+int facepoint_in_opat(tPat *pat, int f, double C[2],
+                      tPat *opat, int ofaces[6], double oX[3])
+{
+  int dir = f/2;
+  int od0 = Dir1_norm(dir);
+  int od1 = Dir2_norm(dir);
+  int op, j, nofaces;
+  double X[3], x[3];
+
+  /* pick one of X,Y,Z on pat boundary, and the other two are from C */
+  X[dir] = pat->bbox[f];
+  X[od0] = C[0];
+  X[od1] = C[1];
+
+  /* find X in Cart coords */
+  set_xyz(pat, NULL,-1, X, x);
+
+  /* check if point is in opat */
+  op = p_XYZ_of_xyz(opat, oX, x);
+
+  /* now try to find this point also on a face of opat */
+  if(op>=0)
+    nofaces = XYZ_on_face(opat, ofaces, oX);
+  else
+  {
+    for(j=0; j<6; j++) ofaces[j] = 0;
+    nofaces = -1;
+  }
+
+  return nofaces;
+}
+
+/* check if the point bface,node,ijk,C is in a bface pair,
+   returns 0 if no, or number of other faces if yes,
+   it also writes the point in opat coords into oX */
+int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
+                           int ofaces[6], double oX[3])
+{
+  tMesh *mesh;
+  tPat *pat, *opat;
+  tBface *obface;
+  int f, op, of;
+
+  if(!bface) return 0;
+
+  pat = bface->pat;
+  mesh = pat->mesh;
+  f = bface->f;
+  obface = bface->obface;
+
+  if(!obface) return 0;
+
+  opat = obface->pat;
+  of = obface->f;
+
+  /* if we do not have a grid point, transform from C to x to oX */
+  if(node==NULL || ijk<0)
+    facepoint_in_opat(pat,f,C, opat,ofaces,oX);
+  else
+  {
+    int ix = Ind("x");
+    double x[] = { Vard(node,ix)[ijk],
+                   Vard(node,ix+1)[ijk], Vard(node,ix+2)[ijk] };
+
+    /* check if point is in opat */
+    op = p_XYZ_of_xyz(opat, oX, x);
+
+    /* now try to find this point also on a face of opat */
+    if(op>=0)
+      XYZ_on_face(opat, ofaces, oX);
+    else
+      ofaces[of] = 0;
+  }
+  return ofaces[of];
+}
+
 
 /* expand all bfaces to cover patch edges */
 void expand_bfaces_to_patch_edges(tMesh *mesh)
