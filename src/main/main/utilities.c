@@ -7,11 +7,11 @@
 #include "main.h"
 
 /* for POSIX.1-2001 mkdir, opendir, fork, wait functions */
-#include <unistd.h>     /* for fork */
+#include <unistd.h>      /* for fork */
 #include <sys/stat.h>
-#include <sys/types.h>  /* for pid_t */
-#include <sys/wait.h>   /* for wait */
-#include <dirent.h>     /* for opendir */
+#include <sys/types.h>   /* for pid_t */
+#include <sys/wait.h>    /* for wait */
+#include <dirent.h>      /* for opendir */
 
 
 /* global vars for timing */
@@ -462,7 +462,7 @@ void *pmalloc(int n)
 /********************************************/
 
 /* function that selects how we exit inside errorexit */
-void finalexit(int ec)
+NORET void finalexit(int ec)
 {
   tMesh *mesh = main_mesh;
   nMPI_Abort(ec);
@@ -478,7 +478,8 @@ void finalexit(int ec)
 #undef errorexits
 #undef errorexiti
 
-void errorexit(char *file, int line, const char *func, char *s)
+NORET void errorexit(const char *file, int line, const char *func,
+                     const char *s)
 {
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: %s\n", s);
@@ -486,7 +487,8 @@ void errorexit(char *file, int line, const char *func, char *s)
   finalexit(1);
 }
 
-void errorexits(char *file, int line, const char *func, char *s, char *t)
+NORET void errorexits(const char *file, int line, const char *func,
+                      const char *s, const char *t)
 {
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: ");
@@ -496,7 +498,8 @@ void errorexits(char *file, int line, const char *func, char *s, char *t)
   finalexit(1);
 }
 
-void errorexiti(char *file, int line, const char *func, char *s, int i)
+NORET void errorexiti(const char *file, int line, const char *func,
+                      const char *s, int i)
 {
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: ");
