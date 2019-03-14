@@ -14,6 +14,8 @@
 #define PIh 1.57079632679489661923132169163975
 #define PIq 0.785398163397448309615660845819876
 
+/* _Noreturn */
+#define NORET _Noreturn
 
 /* NOTE: In C99 these two have the same effect:
    #pragma omp parallel for
@@ -83,7 +85,7 @@
 
 
 /* skeleton.c */
-void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name);
+void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), const char *name);
 void remove_all_MeshFuns(tMesh *mesh);
 void RunMeshFun(tMesh *mesh, int step);
 /* conveniece macros for functions */
@@ -100,21 +102,24 @@ typedef struct tPAR {
   double numericalvalue; /* some pars are pure numbers, we cache them here */
   int booleanvalue; /* some pars are true/false, we cache them here as 1/0 */
 } tPar;
-void AddMeshPar(tMesh *mesh, char *name, char *value, char *description);
-void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description);
-void makeparameter(tMesh *mesh, char *name, char *value, char *description);
+void AddMeshPar(tMesh *mesh, const char *name, const char *value,
+                const char *description);
+void AddOrModifyMeshPar(tMesh *mesh, const char *name, const char *value,
+                        const char *description);
+void makeparameter(tMesh *mesh, const char *name, const char *value,
+                   const char *description);
 void free_mesh_pdb_contents(tMesh *mesh);
-int findparameterindex(tMesh *mesh, char *name, int fatal);
-void MeshParSets(tMesh *mesh, int pi, char *value);
+int findparameterindex(tMesh *mesh, const char *name, int fatal);
+void MeshParSets(tMesh *mesh, int pi, const char *value);
 void MeshParSeti(tMesh *mesh, int pi, int i);
 void MeshParSetd(tMesh *mesh, int pi, double d);
-void MeshParAppends(tMesh *mesh, int pi, char *value);
+void MeshParAppends(tMesh *mesh, int pi, const char *value);
 char *MeshParGets(tMesh *mesh, int i);
 char *MeshParGetsLax(tMesh *mesh, int i);
 int MeshParGeti(tMesh *mesh, int i);
 double MeshParGetd(tMesh *mesh, int i);
 int MeshParGetb(tMesh *mesh, int i);
-int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal);
+int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal);
 /* conveniece macros to query and set  pars */
 #define AddPar(name, val, desc) AddMeshPar(mesh, (name), (val), (desc))
 #define AddOrModifyPar(name, val, desc) AddOrModifyMeshPar(mesh, (name), \
@@ -138,7 +143,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal);
 
 /* tensors.c */
 #define NINDEXLIST 100
-void tensorindexlist(char *tensorindices, int *nilist, char **ilist, int *sym);
+void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym);
 
 /* variables.c */
 /* variable data base structure */
@@ -158,28 +163,29 @@ typedef struct tVAR {
 } tVar;
 
 /* functions to create and access variables */
-void AddMeshVar(tMesh *mesh, char *name, char *tensorindices, char *description);
+void AddMeshVar(tMesh *mesh, const char *name, const char *tensorindices,
+                const char *description);
 void free_mesh_vdb_contents(tMesh *mesh);
-void AddEvoMeshVar(tMesh *mesh, char *name,
-                   char *tensorindices, char *description);
-void AddAuxMeshVar(tMesh *mesh, char *name,
-                   char *tensorindices, char *description);
-void AddMeshVarDim(tMesh *mesh, char *name,
-                   char *tensorindices, char *description,
+void AddEvoMeshVar(tMesh *mesh, const char *name,
+                   const char *tensorindices, const char *description);
+void AddAuxMeshVar(tMesh *mesh, const char *name,
+                   const char *tensorindices, const char *description);
+void AddMeshVarDim(tMesh *mesh, const char *name,
+                   const char *tensorindices, const char *description,
                    int n_special0, int n_special1, int n_special2);
-void AddAuxMeshVarDim(tMesh *mesh, char *name,
-                      char *tensorindices, char *description,
+void AddAuxMeshVarDim(tMesh *mesh, const char *name,
+                      const char *tensorindices, const char *description,
                       int n_special0, int n_special1, int n_special2);
-int MeshVarIndLax(tMesh *mesh, char *name);
-int MeshVarInd(tMesh *mesh, char *name);
-int Set_vdb_iStart_AtVar(tMesh *mesh, char *name);
+int MeshVarIndLax(tMesh *mesh, const char *name);
+int MeshVarInd(tMesh *mesh, const char *name);
+int Set_vdb_iStart_AtVar(tMesh *mesh, const char *name);
 char *MeshVarName(tMesh *mesh, int i);
 int MeshVarNComponents(tMesh *mesh, int i);
 int MeshVarComponent(tMesh *mesh, int i);
 int MeshVarIndComponent0(tMesh *mesh, int i);
-char *MeshVarNameComponent0(tMesh *mesh, char *name);
+char *MeshVarNameComponent0(tMesh *mesh, const char *name);
 char *MeshVarTensorIndices(tMesh *mesh, int i);
-void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
+void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
 			        double farlimit, double falloff);
 void MeshVarSetType(tMesh *mesh, int i, int type);
 void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
@@ -222,9 +228,12 @@ void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a);
 void vladdto(tVarList *r, const double ca, tVarList *a);
 
 /* utilities.c */
-void  errorexit(char *file, int line, const char *func, char *s);
-void errorexits(char *file, int line, const char *func, char *s, char *t);
-void errorexiti(char *file, int line, const char *func, char *s, int i);
+NORET void  errorexit(const char *file, int line, const char *func,
+                      const char *s);
+NORET void errorexits(const char *file, int line, const char *func,
+                      const char *s, const char *t);
+NORET void errorexiti(const char *file, int line, const char *func,
+                      const char *s, int i);
 #define errorexit(s)     errorexit(__FILE__, __LINE__, __func__, (s))
 #define errorexits(s,t) errorexits(__FILE__, __LINE__, __func__, (s), (t))
 #define errorexiti(s,i) errorexiti(__FILE__, __LINE__, __func__, (s), (i))
