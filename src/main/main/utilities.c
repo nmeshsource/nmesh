@@ -1,10 +1,10 @@
 /* utilities.c */
 /* Wolfgang Tichy, 1/2019 */
 
-#include <time.h>
-
 #include "nmesh.h"
 #include "main.h"
+
+#include <time.h>
 
 /* for POSIX.1-2001 mkdir, opendir, fork, wait functions */
 #include <unistd.h>      /* for fork */

@@ -25,8 +25,8 @@ parameter_name = parameter_value1  # this is just a comment
 */
 
 
-#include <ctype.h>  // needed for isspace
 #include "nmesh.h"
+#include <ctype.h>  // needed for isspace
 
 
 /* maximum number of pars allowed */
