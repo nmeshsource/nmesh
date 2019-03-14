@@ -33,10 +33,11 @@ parameter_name = parameter_value1  # this is just a comment
 int npdbmax = 2000;
 
 /* functions */
-void makeparameter(tMesh *mesh, char *name, char *value, char *description);
-int findparameterindex(tMesh *mesh, char *name, int fatal);
-tPar *findparameter(tMesh *mesh, char *name, int fatal);
-void setparameter(tMesh *mesh, int i, char *value);
+void makeparameter(tMesh *mesh, const char *name, const char *value,
+                   const char *description);
+int findparameterindex(tMesh *mesh, const char *name, int fatal);
+tPar *findparameter(tMesh *mesh, const char *name, int fatal);
+void setparameter(tMesh *mesh, int i, const char *value);
 void printparameter(tPar *p);
 void printparameters(tMesh *mesh);
 void translatevalue(char **value);
@@ -170,7 +171,8 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 /* parameter data base */
 
 /* make new parameter in parameter data base, merge if already there */
-void makeparameter(tMesh *mesh, char *name, char *value, char *description)
+void makeparameter(tMesh *mesh, const char *name, const char *value,
+                   const char *description)
 {
   tPar *p;
 
@@ -224,7 +226,7 @@ void free_mesh_pdb_contents(tMesh *mesh)
 
 
 /* set parameter */
-void setparameter(tMesh *mesh, int i, char *value)
+void setparameter(tMesh *mesh, int i, const char *value)
 {
   tPar *p;
 
@@ -248,7 +250,7 @@ void Set_pdb_iStart(tMesh *mesh, int i)
 
 
 /* find parameter index */
-int findparameterindex(tMesh *mesh, char *name, int fatal)
+int findparameterindex(tMesh *mesh, const char *name, int fatal)
 {
   tPar *pdb = mesh->pdb;
   int npdb = mesh->npdb;
@@ -280,7 +282,7 @@ tPar *parameterfromindex(tMesh *mesh, int i)
   return &(mesh->pdb[i]);
 }
 /* find parameter */
-tPar *findparameter(tMesh *mesh, char *name, int fatal)
+tPar *findparameter(tMesh *mesh, const char *name, int fatal)
 {
   int i = findparameterindex(mesh, name, fatal);
 
@@ -379,7 +381,8 @@ void printparameters(tMesh *mesh)
    instead of AddMeshPar(mesh, name, value, description); */
 
 /* creation functions */
-void AddMeshPar(tMesh *mesh, char *name, char *value, char *description)
+void AddMeshPar(tMesh *mesh, const char *name, const char *value,
+                const char *description)
 {
   int i;
 
@@ -388,7 +391,8 @@ void AddMeshPar(tMesh *mesh, char *name, char *value, char *description)
   printf("  par_%04d  %-25s  =  %s\n", i, name, Gets(i));
 }
 
-void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description)
+void AddOrModifyMeshPar(tMesh *mesh, const char *name, const char *value,
+                        const char *description)
 {
   int pari = findparameterindex(mesh, name, 0);
 
@@ -400,7 +404,7 @@ void AddOrModifyMeshPar(tMesh *mesh, char *name, char *value, char *description)
 }
 
 /* functions for setting pars */
-void MeshParSets(tMesh *mesh, int pi, char *value)
+void MeshParSets(tMesh *mesh, int pi, const char *value)
 {
   setparameter(mesh, pi, value);
 }
@@ -419,7 +423,7 @@ void MeshParSetd(tMesh *mesh, int pi, double d)
   setparameter(mesh, pi, value);
 }
 
-void MeshParAppends(tMesh *mesh, int pi, char *value)
+void MeshParAppends(tMesh *mesh, int pi, const char *value)
 {
   if(MeshParGetv_fatal(mesh, pi, value, 1)) return;
   {
@@ -470,7 +474,7 @@ int MeshParGetb(tMesh *mesh, int i)
 
 /* "get value?" returns 1 if value is in the list of values and 0 else
    (not equivalent to value being a substring of string parameter) */
-int MeshParGetv_fatal(tMesh *mesh, int i, char *value, int fatal)
+int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal)
 {
   tPar *p;
   char *s=NULL;

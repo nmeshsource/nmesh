@@ -7,8 +7,8 @@
 
 
 /* add a variable to data base that is located in mesh */
-void AddMeshVar(tMesh *mesh, char *name,
-                char *tensorindices, char *description)
+void AddMeshVar(tMesh *mesh, const char *name,
+                const char *tensorindices, const char *description)
 {
   tVar *newv;
   char fullname[100];
@@ -93,8 +93,8 @@ void free_mesh_vdb_contents(tMesh *mesh)
 }
 
 /* add auxiliary variable to data base */
-void AddAuxMeshVar(tMesh *mesh, char *name,
-                   char *tensorindices, char *description)
+void AddAuxMeshVar(tMesh *mesh, const char *name,
+                   const char *tensorindices, const char *description)
 {
   int nvdb  = mesh->nvdb;
   AddMeshVar(mesh, name, tensorindices, description);
@@ -102,8 +102,8 @@ void AddAuxMeshVar(tMesh *mesh, char *name,
 }
 
 /* add variable with surfaces */
-void AddEvoMeshVar(tMesh *mesh, char *name,
-                   char *tensorindices, char *description)
+void AddEvoMeshVar(tMesh *mesh, const char *name,
+                   const char *tensorindices, const char *description)
 {
   int nvdb  = mesh->nvdb;
   AddMeshVar(mesh, name, tensorindices, description);
@@ -111,8 +111,8 @@ void AddEvoMeshVar(tMesh *mesh, char *name,
 }
 
 /* add dimensioned variable to data base */
-void AddMeshVarDim(tMesh *mesh, char *name,
-                   char *tensorindices, char *description,
+void AddMeshVarDim(tMesh *mesh, const char *name,
+                   const char *tensorindices, const char *description,
                    int n_special0, int n_special1, int n_special2)
 {
   int nvdb  = mesh->nvdb;
@@ -121,8 +121,8 @@ void AddMeshVarDim(tMesh *mesh, char *name,
 }
 
 /* add dimensioned aux variable to data base */
-void AddAuxMeshVarDim(tMesh *mesh, char *name,
-                      char *tensorindices, char *description,
+void AddAuxMeshVarDim(tMesh *mesh, const char *name,
+                      const char *tensorindices, const char *description,
                       int n_special0, int n_special1, int n_special2)
 {
   int nvdb  = mesh->nvdb;
@@ -133,7 +133,7 @@ void AddAuxMeshVarDim(tMesh *mesh, char *name,
 
 
 /* return index of variable or -1 if it was not found */
-int MeshVarIndLax(tMesh *mesh, char *name)
+int MeshVarIndLax(tMesh *mesh, const char *name)
 {
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
@@ -159,7 +159,7 @@ int MeshVarIndLax(tMesh *mesh, char *name)
 }
 
 /* return index of variable */
-int MeshVarInd(tMesh *mesh, char *name)
+int MeshVarInd(tMesh *mesh, const char *name)
 {
   int i = MeshVarIndLax(mesh, name);
   if(i<0) errorexits("variable \"%s\" does not exist\n", name);
@@ -183,7 +183,7 @@ int VarIndFromPtr(tNode *node, double *p)
 }
 
 /* set the global var vdb_iStart to the index of variable "name" */
-int Set_vdb_iStart_AtVar(tMesh *mesh, char *name)
+int Set_vdb_iStart_AtVar(tMesh *mesh, const char *name)
 {
   int i = MeshVarIndLax(mesh, name);
   if(i<0) errorexits("Ind: variable \"%s\" does not exist\n", name);
@@ -233,7 +233,7 @@ int MeshVarIndComponent0(tMesh *mesh, int i)
 }
 
 /* return name of component 0 for a given name */
-char *MeshVarNameComponent0(tMesh *mesh, char *name)
+char *MeshVarNameComponent0(tMesh *mesh, const char *name)
 {
   return MeshVarName(mesh,
                      MeshVarIndComponent0(mesh, MeshVarInd(mesh, name)));
@@ -247,7 +247,7 @@ char *MeshVarTensorIndices(tMesh *mesh, int i)
 }
 
 /* set information on how variable behaves at Boundary*/
-void MeshVarNameSetBoundaryInfo(tMesh *mesh, char *name,
+void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
 			        double farlimit, double falloff)
 {
   tVar *vdb = mesh->vdb;
@@ -282,7 +282,7 @@ void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones)
     vdb[i0+j].surfacezones = surfacezones;
   }
 }
-void MeshVarNameSetSurfInfo(tMesh *mesh, char *name, int surfacezones)
+void MeshVarNameSetSurfInfo(tMesh *mesh, const char *name, int surfacezones)
 {
   int i = MeshVarInd(mesh, name);
   MeshVarSetSurfInfo(mesh, i, surfacezones);

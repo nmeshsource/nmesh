@@ -9,7 +9,7 @@
 extern int nmesh_restarts;
 
 
-void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), char *name)
+void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), const char *name)
 {
   tTodo *t;
   tTodo **skel = mesh->skel;

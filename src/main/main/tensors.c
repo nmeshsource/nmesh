@@ -14,7 +14,7 @@
    and 2d indices q,r,s,...
    ilist[0], ilist[1], ... need to be freed by caller
    we could make a real parser to avoid the "if" for each case below */
-void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
+void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
 {
   /* name of coordinates, could be made variable */
   char *coord[]  = {"x", "y", "z"};
@@ -23,7 +23,8 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
   char *face[] = {"0","1","2","3","4","5"}; /* for tensors on node faces */
   int i, j, k, l, f;
   int n = 0;
-  char *tensorindices = strdup(t);
+  char *tensorindices = strdup(tensind);
+  char *t;
 
   /* convert local copy to lower case since we ignore co/contra-variance */
   for(t = tensorindices; *t; t++)
