@@ -265,8 +265,8 @@ void MeshVarSetType(tMesh *mesh, int i, int type)
 
   for(j = 0; j < n; j++)
   {
-    vdb[j+i0].type = 1;
-    if(0) printf("  setting %s type\n", vdb[j+i0].name);
+    vdb[j+i0].type = type;
+    if(0) printf("  setting type=%d\n", vdb[j+i0].type);
   }
 }
 
