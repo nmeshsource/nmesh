@@ -424,7 +424,7 @@ int test_ajsurf(tMesh *mesh)
       //XYZ_of_XbYbZb(node, Xb, X);
       va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
       //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
-      //va->d[ijk] = test_func(lam,A,X[2]);
+      va->d[ijk] = test_func(lam,A,X[2]);
     }
   }
 
