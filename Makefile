@@ -124,17 +124,17 @@ MyConfig:
 
 # automatic configuration files
 $(autoinclude): MyConfig
-	@echo ===================== Auto generate files =====================
+	@echo ==================== Auto generating files ====================
 	@echo $(autotext) > $(autoinclude)
 	for X in $(libincludes); do \
 	  echo \#include \"$(TOP)/$$X\" >> $(autoinclude); \
 	done
+	@for X in $(libnames); do \
+	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinclude); \
+	done
 
 $(autoinitial): MyConfig
 	@echo $(autotext) > $(autoinitial)
-	@for X in $(libnames); do \
-	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinitial); \
-	done
 	@echo "/* call nmesh initialization functions: */" >> $(autoinitial);
 	for X in $(libnames); do \
 	  echo nmesh\_$$X\(mesh\)\; >> $(autoinitial); \
