@@ -1,5 +1,5 @@
 # Makefile
-# Wolfgang Tichy 1/2019
+# Wolfgang Tichy 1/2019, Bernd Bruegmann 5/02
 # Builds the nmesh executable by including the file MyConfig
 # See http://www.gnu.org/software/make/manual for the manual of GNU make
 
