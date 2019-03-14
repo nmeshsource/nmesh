@@ -13,7 +13,7 @@ void LGL_x_wquad(int npoints, double *x, double *w);
 void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);
 void basis_array_analysis3(tNode *node, tArray *u, tArray *c);
 void basis_array_synthesis3(tNode *node, tArray *u, tArray *c);
-double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3]);;
+double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3]);
 
 /* Lagrange.c */
 void Lagrange_winterp(int n, const double *x, double *w_interp);
