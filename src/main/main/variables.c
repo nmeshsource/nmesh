@@ -1,5 +1,5 @@
 /* variables.c */
-/* Wolfgang Tichy, 1/2019 */
+/* Wolfgang Tichy, 1/2019 & Bernd Bruegmann, 12/99 */
 
 #include "nmesh.h"
 

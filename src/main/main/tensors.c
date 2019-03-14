@@ -1,5 +1,5 @@
 /* tensors.c */
-/* Wolfgang Tichy, 1/2019 */
+/* Wolfgang Tichy, 1/2019 & Bernd Bruegmann, 11/02 */
 
 #include "nmesh.h"
 #include <ctype.h>
@@ -433,6 +433,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     printf("q, qr, qr+rq, qrs+rqs, qrst+qrts+rqst+rqts\n");
     printf("q, qr, (qr), (qr)s, (qr)(st)\n");
     printf("iq, iqr, i(qr)\n");
+    printf("fi, fij, f(ij), f[ij]\n");
     printf("Other combinations can be added to main/tensors.c .\n");
     errorexits("Error in tensor index string %s", tensorindices);
   }
