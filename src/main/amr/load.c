@@ -219,7 +219,6 @@ void move_node_to_rank(tNode *node, int desrank,
   }
   else /* retrieve data from buffers */
   {
-    double *rbuf;
     if(rank == desrank)
     {
       /* now unpack the buffers */
