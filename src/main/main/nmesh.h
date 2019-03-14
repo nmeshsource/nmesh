@@ -3,6 +3,8 @@
 
 /* _XOPEN_SOURCE>=500 needed for strdup */
 #define _XOPEN_SOURCE 500
+/* to use _XOPEN_SOURCE we need to include nmesh.h before all other headers
+   in files such as main/main/utilities.c or main/main/parameters.c */
 
 #include <math.h>
 #include <float.h>
