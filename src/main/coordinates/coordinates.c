@@ -97,7 +97,7 @@ int coordinates_init_node(tNode *node)
   if(dat->coords_set) return 0;
   if(!vars_on) return 0;
 
-  PRF;printf(":\n");
+  PRF;printf(": nid%ld\n", node->nid);
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);

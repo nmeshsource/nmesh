@@ -322,7 +322,9 @@ void set_const_array(tArray *A, double c);
 void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP);
 double Lp_norm_array(tArray *A, double p);
 void array_diff(tArray *D, tArray *A, tArray *B);
+void array_reldiff(tArray *D, tArray *A, tArray *B);
 double Lp_norm_array_diff(tArray *A, tArray *B, double p);
+double Lp_norm_array_reldiff(tArray *A, tArray *B, double p);
 
 /* print.c */
 void printmesh(tMesh *g);

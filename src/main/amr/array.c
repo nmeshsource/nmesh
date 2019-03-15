@@ -201,6 +201,18 @@ void array_diff(tArray *D, tArray *A, tArray *B)
   for(i=0; i<D->N; i++) D->d[i] = A->d[i] - B->d[i];
 }
 
+/* D = (A - B)/B */
+void array_reldiff(tArray *D, tArray *A, tArray *B)
+{
+  int i;
+  for(i=0; i<D->N; i++)
+  {
+    double b = B->d[i];
+    if(b!=0.) D->d[i] = (A->d[i] - b)/b;
+    else      D->d[i] = (A->d[i] - b);
+  }
+}
+
 /* norm of A-B */
 double Lp_norm_array_diff(tArray *A, tArray *B, double p)
 {
@@ -208,6 +220,18 @@ double Lp_norm_array_diff(tArray *A, tArray *B, double p)
   double norm;
 
   array_diff(D, A, B);
+  norm = Lp_norm_array(D, p);
+  free_array(D);
+  return norm;
+}
+
+/* norm of (A-B)/B */
+double Lp_norm_array_reldiff(tArray *A, tArray *B, double p)
+{
+  tArray *D = alloc_array(A->n);
+  double norm;
+
+  array_reldiff(D, A, B);
   norm = Lp_norm_array(D, p);
   free_array(D);
   return norm;
