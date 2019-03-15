@@ -162,8 +162,8 @@ int test_point_interpolation(tMesh *mesh)
 
   prdivider(0);
   PRF;printf(": 2d interp. in plane with Lagrange:\n");
-  Cp[0] = alloc_array1d(2000);
-  Cp[1] = alloc_array1d(2000);
+  Cp[0] = alloc_array1d(100*n2*n2);
+  Cp[1] = alloc_array1d(100*n2*n2);
   forvari(nd,vi, k) Vard(nd,vi)[k] = 666;
   //printvar_innode(nd, vi);
   dir = 0;
@@ -386,12 +386,15 @@ int test_ajsurf(tMesh *mesh)
   int myid;
   double sum;
 
+  prdivider(0);
   PRF;printf(": Hmmm.\n");
   enablevar(mesh, vi);
 
   /* above we messed with all kinds of things,
      so make sure all coords are set again */
   coordinates_init(mesh);
+//nd = MyNode(mesh, 1);
+//printvar_innode(nd, ix);
 
   formylnodes(mesh, myid)
   {
@@ -418,13 +421,14 @@ int test_ajsurf(tMesh *mesh)
       int p = pat->p;
       int dom = pat->CI->dom;
       double dlam = (p != 0);
+      //double dlam = (p > 5);
       double lam = X[0] + dlam;
       double A =  dom!=3 ? X[1] : 2.*(1.-X[1]) + 1.;
 
       //XYZ_of_XbYbZb(node, Xb, X);
       va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
       //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
-      va->d[ijk] = test_func(lam,A,X[2]);
+      //va->d[ijk] = test_func(lam,A,X[2]);
     }
   }
 
@@ -508,7 +512,7 @@ int test_ajsurf(tMesh *mesh)
       tSurface *sf = node->dat->s[f][vi];
       if(!sf) continue;
 
-      norm_n_f = Lp_norm_array_diff(sf->ajsurf, sf->mysurf, 2);
+      norm_n_f = Lp_norm_array_reldiff(sf->ajsurf, sf->mysurf, 2);
       printf("  %d %ld p%d_%s %d: %g\n", myid, node->nid,
              node->pat->p, node_location_str(node,s,99), f, norm_n_f);
       sum += pow(norm_n_f, 2);

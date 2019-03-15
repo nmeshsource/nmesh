@@ -45,7 +45,10 @@ Things that need to be done urgently:
 
 *2d interpolation
  -interp from ghosts within patch     : DONE!
- -interp from ghosts of other patches : Why is interp not correct for poly?
+ -interp from ghosts of other patches :
+  Q: Why is interp not correct for poly?
+  A: We cannot have poly in lam,A,B on all patches because coords in diff
+     patches are non-linear funcs of each other!
 
 *evolve module in main: DONE!
 -struct with slots for evo varlists & RHSs for several systems (Z4 + grhd)
