@@ -262,7 +262,7 @@ void printvar_ajsurfdiff(tNode *node, int vi)
         int ni;
         for(ni=0; ni<sf->nnbsurf; ni++)
         {
-          printf("f%d fnb[f][%d]=%s allocd=%d nbsurf[%d]",
+          printf("f%d fnb[f][%d]=%s allocd=%d nbsurf[%d]\n",
                  f, ni, nodename(node->fnb[f][ni],s,99),
                  sf->allocd_nbsurf[ni], ni);
         }
@@ -271,8 +271,8 @@ void printvar_ajsurfdiff(tNode *node, int vi)
       {
         tArray *diff = alloc_array(asa->n);
         int k;
-        printf("f%d allocd=%d ajsurf\n", f, sf->allocd_ajsurf);
-        forarray(diff, k) diff->d[k] = asa->d[k] - msa->d[k];
+        printf("f%d allocd=%d ajsurf,  diff\n", f, sf->allocd_ajsurf);
+        array_diff(diff, asa, msa);
         printarray(diff);
         free_array(diff);
       }

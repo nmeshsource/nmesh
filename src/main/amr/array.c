@@ -195,7 +195,7 @@ double Lp_norm_array(tArray *A, double p)
 }
 
 /* D = A - B */
-void subtract_arrays(tArray *D, tArray *A, tArray *B)
+void array_diff(tArray *D, tArray *A, tArray *B)
 {
   int i;
   for(i=0; i<D->N; i++) D->d[i] = A->d[i] - B->d[i];
@@ -207,7 +207,7 @@ double Lp_norm_array_diff(tArray *A, tArray *B, double p)
   tArray *D = alloc_array(A->n);
   double norm;
 
-  subtract_arrays(D, A, B);
+  array_diff(D, A, B);
   norm = Lp_norm_array(D, p);
   free_array(D);
   return norm;
