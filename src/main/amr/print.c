@@ -271,7 +271,7 @@ void printvar_ajsurfdiff(tNode *node, int vi)
       {
         tArray *diff = alloc_array(asa->n);
         int k;
-        printf("f%d allocd=%d ajsurf,  diff\n", f, sf->allocd_ajsurf);
+        printf("f%d allocd=%d ajsurf, diff", f, sf->allocd_ajsurf);
         array_diff(diff, asa, msa);
         printarray(diff);
         free_array(diff);
