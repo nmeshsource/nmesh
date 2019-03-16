@@ -527,6 +527,35 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
   return p;
 }
 
+/* return node location if x is inside this patch, if not return -1 */
+long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3])
+{
+  tPat *pat = node->pat;
+  int d, stat=0;
+  long loc = node_location(node); /* get node location */
+
+  /* get X */
+  if(pat->XYZ_of_xyz)
+    stat = pat->XYZ_of_xyz(pat, node,ind, X, x);
+  else
+    for(d=0; d<3; d++) X[d] = x[d];
+
+  if(stat) return -1;
+
+  for(d=0; d<3; d++)
+    if(dless(X[d],node->bbox[2*d]) || dless(node->bbox[2*d+1],X[d]))
+      return -1;
+
+  /* round X to inside box */
+  for(d=0; d<3; d++)
+  {
+    if(X[d] < node->bbox[2*d])   X[d] = node->bbox[2*d];
+    if(X[d] > node->bbox[2*d+1]) X[d] = node->bbox[2*d+1];
+  }
+
+  return loc;
+}
+
 
 /* find the faces a point X is on within tol, face[2]=1 if X is on face2  */
 int XYZ_on_face_tol(tPat *pat, int *face, const double X[3], double tol)
@@ -1018,8 +1047,8 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   double *oC[] = { Arrd(nbC[0]), Arrd(nbC[1]) };
   int *oI = Arri(nbI);
-  int i,j,k, p;
-  tPat *opat = nb->pat;
+  int i,j,k;
+  long loc;
   int odir = nb_f/2;
   int od1 = Dir1_norm(odir);
   int od2 = Dir2_norm(odir);
@@ -1031,9 +1060,9 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
     double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
     double oX[3];
 
-    /* find point x in opat */
-    p = p_XYZ_of_xyz(opat, oX, x);
-    if(p>=0) /* point was found inside opat */
+    /* find point x in nb */
+    loc = l_XYZ_of_xyz(nb,-1, oX, x);
+    if(loc>=0) /* point was found inside nb */
     {
       oC[0][ind] = oX[od1];
       oC[1][ind] = oX[od2];
