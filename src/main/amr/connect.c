@@ -216,6 +216,9 @@ long node_location(tNode *node)
   /* add a leading 1 for the root node */
   loc |= (1)<<(il*3);
 
+  /* in case overflow occurred in bit shifts */
+  if(loc<0) loc=0;
+
   return loc;
 }
 
