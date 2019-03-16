@@ -201,6 +201,24 @@ char *node_location_str(tNode *node, char *s, int slen)
   return s;
 }
 
+/* convert string from node_location_str into a long int */
+long node_location(tNode *node)
+{
+  tNode *anc;
+  int il;
+  long loc = 0;
+
+  for(il=0, anc=node; anc->parent; anc = anc->parent)
+  {
+    loc |= (anc->ijk)<<(il*3);
+    il++;
+  }
+  /* add a leading 1 for the root node */
+  loc |= (1)<<(il*3);
+
+  return loc;
+}
+
 /* use node_location_str to make a unique node name that also contains the
    patch number */
 char *nodename(tNode *node, char *s, int slen)
