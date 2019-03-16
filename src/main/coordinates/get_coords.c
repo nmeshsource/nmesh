@@ -1002,3 +1002,44 @@ void array_nbXface_of_Xface(tNode *node, int f,
     }
   }
 }
+
+
+/* convert X-coords on face f of node to X-coords of neighboring node,
+   write them into nbC, and mark points outside nb with -1 in nb I */
+void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
+                                 tArray *nbC[2], tArray *nbI)
+{
+  tPat *pat = node->pat;
+  tMesh *mesh = pat->mesh;
+  int *n = node->n;
+  int dir = f/2;
+  int pl = (n[dir]-1)*(f%2);
+  int ix = Ind("x");
+  double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+  double *oC[] = { Arrd(nbC[0]), Arrd(nbC[1]) };
+  int *oI = Arri(nbI);
+  int i,j,k, p;
+  tPat *opat = nb->pat;
+  int odir = nb_f/2;
+  int od1 = Dir1_norm(odir);
+  int od2 = Dir2_norm(odir);
+
+  forplaneN(dir, i,j,k, n, pl)
+  {
+    int ijk = Ind_n(i,j,k, n);
+    int ind = Ind_n_norm(i,j,k, n, dir);
+    double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
+    double oX[3];
+
+    /* find point x in opat */
+    p = p_XYZ_of_xyz(opat, oX, x);
+    if(p>=0) /* point was found inside opat */
+    {
+      oC[0][ind] = oX[od1];
+      oC[1][ind] = oX[od2];
+      oI[ind] = ind;
+    }
+    else /* point is not inside opat */
+      oI[ind] = -1;
+  }
+}
