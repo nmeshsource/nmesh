@@ -584,6 +584,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   int *s1_n;
   tNode *nb;
   int vi, ni, found, nb_f, nb_ni, nb_dir;
+  int Cp_is_set;
   tArray *Cp[2], **Ip, **Res;
   tArray *(*Cb)[2];
   tDat *dat = node->dat;
@@ -643,6 +644,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   /* array memory to store points of mysurf in X coords */
   Cp[0] = alloc_array(s1_n);
   Cp[1] = alloc_array(s1_n);
+  Cp_is_set = 0;
+//FIXME: remove next two func calls:
   fill_2arrays_with_nodepoints(node, dir, Cp);
   /* convert Cp from Xb to X coords for node,
      these X are spread over the neighbor nodes */
@@ -672,6 +675,15 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     /* all X,Y,Z coords are within same patch */
     if(nb->pat == pat)
     {
+      if(!Cp_is_set)
+      {
+        /* points of mysurf */
+        fill_2arrays_with_nodepoints(node, dir, Cp);
+        /* convert Cp from Xb to X coords for node,
+           these X are spread over the neighbor nodes */
+        array_Xplane_of_Xb(node, dir, Cp, Cp);
+        Cp_is_set = 1;
+      }
       /* find points inside neigh. -> mask is returned in Ip */
       array_find_Xplane_in_node(nb,nb_dir, Cp, Ip[ni]);
 
@@ -690,6 +702,9 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       {
         oC[0] = VarA(node,ioC0+f);
         oC[1] = VarA(node,ioC0+6+f);
+        /* find points inside neigh. -> mask is returned in Ip */
+        mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
+        errorexit("mark_points_in_nb_f checks only 2 out of 3 coords!!!");
       }
       else /* compute oC from Cp */
       {
@@ -697,14 +712,18 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         oC[0] = Cb[ni][0];
         oC[1] = Cb[ni][1];
         /* compute oC in node plane */
-        array_nbXface_of_Xface(node,f, nb,nb_f, oC);
+        //array_nbXface_of_Xface(node,f, nb,nb_f, oC);
+
+        /* compute oC in node plane and find points inside neigh.
+           -> mask is returned in Ip */
+        array_find_nbXface_of_Xface(node,f, nb,nb_f, oC, Ip[ni]);
       }
 
       if(Cp[0]->N != oC[0]->N)
         errorexit("Cp[0]->N != oC[0]->N");
 
       /* find points inside neigh. -> mask is returned in Ip */
-      mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
+      //mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
 
       //printarray_int(Ip[ni]);
       if(0 && f==1 && node->nid==7)
@@ -751,6 +770,75 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         nb_dir = nb_f/2;
         Lagrange_interpolate2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                          Cb[ni],Ip[ni], Res[ni]);
+/*
+if(1 && node->nid==11 && nb->nid==5 && vi==35)
+{
+tMesh *mesh = node->pat->mesh;
+int ll;
+printnode(node);
+printnode(nb);
+printf("nb_f=%d nb_ni=%d nb_dir=%d    f=%d ni=%d\n",
+        nb_f, nb_ni, nb_dir, f,ni);
+printf("%s\n", VarName(vi));
+
+forarray(Ip[ni], ll)
+{
+if(Ip[ni]->i[ll]>=0)
+{
+int iX = Ind("X");
+double *pX[] = { Vard(node, iX), Vard(node, iX+1), Vard(node, iX+2) };
+double nbCb[] = { Cb[ni][0]->d[ll], Cb[ni][1]->d[ll]};
+double nbC[2], nbX[3], nbx[3], X[3], x[3];
+int nbd1 = Dir1_norm(nb_dir);
+int nbd2 = Dir2_norm(nb_dir);
+X_of_Xb_indir(nb, nbd1, nbCb[0], &(nbC[0]));
+X_of_Xb_indir(nb, nbd2, nbCb[1], &(nbC[1]));
+
+X_from_C_on_face(nb->pat, nb_dir*2 , nbC, nbX);
+set_xyz(nb->pat,0,-1, nbX, nbx);
+
+// coords of point ll in face f:
+int i,j,k, ijk;
+switch(dir)
+{
+case 0:
+k = kOfInd_n(ll, s->ajsurf->n);
+j = jOfInd_n_k(ll, s->ajsurf->n, k);
+i = (f%2)* (node->n[0]-1);
+break;
+default:
+errorexit("arrgh. I thought we have only dir0 in our tests!!!");
+}
+ijk = Ind_n(i,j,k, node->n);
+X[0] = pX[0][ijk];
+X[1] = pX[1][ijk];
+X[2] = pX[2][ijk];
+set_xyz(node->pat,0,-1, X, x);
+
+double res = Res[ni]->d[ll];
+double mys = s->mysurf->d[ll];
+if(fabs((res-mys)/mys) >1e-4)
+{
+printf("node->pat->p=%d ", node->pat->p);
+pr3v("  X", X);
+pr3v("     x", x);
+printf("\n");
+printf("nb->pat->p=%d   ", nb->pat->p);
+pr3v("nbX", nbX);
+pr3v("nbx", nbx);
+printf("\n");
+printf("ll=%d  i,j,k=%d %d %d   Ip=%d\n", ll, i,j,k, Ip[ni]->i[ll]);
+printf("Res[ni]->d[ll]=%g s->mysurf->d[ll]=%g\n",
+Res[ni]->d[ll], s->mysurf->d[ll]);
+//exit(8);
+}
+}
+}
+//printarray(s->mysurf);
+//printarray(s->nbsurf[ni]);
+//exit(9);
+}
+*/
       }
 
       /* take average of results from different nb */

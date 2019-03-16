@@ -1,3 +1,10 @@
+remove:
+array_nbXface_of_Xface
+mark_points_in_nb_f
+brct_mark_points_in_fnb_f_ni
+
+
+
 2 good patch tests:
 -------------------
 1.:
@@ -64,6 +71,13 @@ Things that need to be done urgently:
 *DG
 
 *Burgers
+
+
+Things that should be done:
+===========================
+*give bfaces "orientation" and "can_copy" flags to avoid 2d interpolation
+ if we can copy and just the order of points is different
+
 
 
 -----------------------------------------------------------------
