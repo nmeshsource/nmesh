@@ -55,16 +55,36 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
       double *AT = pat->At[ni][dir]->d;
       double *ST = pat->St[ni][dir]->d;
 
-      /* get Legendre Gauss-Lobatto points and integration weights */
-      LGL_x_wquad(ni, Xb, Wq);
+      /* since we currently use Legendre Gauss-Lobatto in all 3 dirs
+         we do not need e.g. pat->Xb[ni] 3 times */
+      if(dir==0) /* set them only for dir0 */
+      {
+        /* get Legendre Gauss-Lobatto points and integration weights */
+        LGL_x_wquad(ni, Xb, Wq);
 
-      /* diff matrix DT for Lagrange interp. poly basis */
-      Lagrange_winterp(ni, Xb, WL);
-      Lagrange_DT(ni, Xb, WL, DT);
+        /* diff matrix DT for Lagrange interp. poly basis */
+        Lagrange_winterp(ni, Xb, WL);
+        Lagrange_DT(ni, Xb, WL, DT);
 
-      /* get analysis & synthesis matrix for Legendre basis,
-         could be useful for filtering, but not needed for interpolation */
-      LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+        /* get analysis & synthesis matrix for Legendre basis,
+           could be useful for filtering, but not needed for interpolation */
+        LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+      }
+      else /* point dir1 & 2 arrays to the same mem as dir1 arrays */
+      {
+        free_array(pat->Xb[ni][dir]);
+        free_array(pat->Wq[ni][dir]);
+        free_array(pat->WL[ni][dir]);
+        free_array(pat->Dt[ni][dir]);
+        free_array(pat->At[ni][dir]);
+        free_array(pat->St[ni][dir]);
+        pat->Xb[ni][dir] = pat->Xb[ni][0];
+        pat->Wq[ni][dir] = pat->Wq[ni][0];
+        pat->WL[ni][dir] = pat->WL[ni][0];
+        pat->Dt[ni][dir] = pat->Dt[ni][0];
+        pat->At[ni][dir] = pat->At[ni][0];
+        pat->St[ni][dir] = pat->St[ni][0];
+      }
     }
     /* set Legendre polys as basis since AT and ST are for Legendre basis */
     pat->basis[dir] = basis_normLegendreP;
