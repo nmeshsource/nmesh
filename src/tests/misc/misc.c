@@ -518,8 +518,8 @@ int test_ajsurf(tMesh *mesh)
       if(!sf) continue;
 
       norm_n_f = Lp_norm_array_reldiff(sf->ajsurf, sf->mysurf, 2);
-      printf("  %d %ld p%d_%s %d: %g\n", myid, node->nid,
-             node->pat->p, node_location_str(node,s,99), f, norm_n_f);
+      printf("  %d nid%ld %s f%d: %g\n", myid, node->nid,
+             nodename(node,s,99), f, norm_n_f);
       sum += pow(norm_n_f, 2);
     }
   }
