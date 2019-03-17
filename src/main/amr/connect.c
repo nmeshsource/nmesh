@@ -191,7 +191,15 @@ void node_location0_str(tNode *node, char *s, int slen)
 char *node_location_str(tNode *node, char *s, int slen)
 {
   tNode *anc;
-  int l = node->l;
+  int l;
+
+  if(!node)
+  {
+    if(slen>0) s[0] = 0;
+    return s;
+  }
+
+  l = node->l;
 
   if(slen<=l) errorexit("slen is not big enough");
   s[l--] = 0;
@@ -207,6 +215,8 @@ long node_location(tNode *node)
   tNode *anc;
   int il;
   long loc = 0;
+
+  if(!node) return 0;
 
   for(il=0, anc=node; anc->parent; anc = anc->parent)
   {
@@ -227,8 +237,13 @@ long node_location(tNode *node)
 char *nodename(tNode *node, char *s, int slen)
 {
   char loc[100];
-  node_location_str(node, loc,99);
-  snprintf(s,slen, "p%d_%s", node->pat->p, loc);
+  if(node)
+  {
+    node_location_str(node, loc,99);
+    snprintf(s,slen, "%d_%s", node->pat->p, loc);
+  }
+  else
+    snprintf(s,slen, "-");
   return s;
 }
 
@@ -426,13 +441,13 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
 
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
-/*
-if(node->nid==28)
+
+if(node->nid==17)
 {
 Yo(1);
 printnodelist(nbl);
 }
-*/
+
     /* go over nbl and remove all whose face does not intersect
        with the node bounding rectangle brct */
     nblist1 = NULL;
@@ -440,7 +455,7 @@ printnodelist(nbl);
     {
     nbl_loop_start:
 /*
-if(node->nid==28)
+if(node->nid==17)
 {
 Yo(2.1);
 printnodelist(nblist1);
@@ -451,28 +466,38 @@ printnodelist(nblist1);
       /* get neigh. bound. rect. in its own X coords */
       nb = elem->node;
       brct_nodeface(nb, nb_f/2, nbrct);
-/*
-if(node->nid==28)
+      /* shrink rectangle by 0.5% to avoid boundary points */
+      resize_brct(nbrct, 0.005);
+
+if(node->nid==17)
 {
 Yo(2.12);
+printf("nid%ld nbnid%ld ", node->nid, nb->nid);
 prbbox(brct,2);
 prbbox(nbrct,2);
 printf("\n");
 }
-*/
+
       /* transform nbrct from nb coords to node coords */
       problem = brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
                                      node->pat, face, nbrct);
-
+if(node->nid==17)
+{
+Yo(2.13);
+printf("nid%ld nbnid%ld ", node->nid, nb->nid);
+prbbox(brct,2);
+prbbox(nbrct,2);
+printf("\n");
+}
       /* does brct intersect nbrct? */
       isec = intersection_brct1_brct2(brct, nbrct, irct);
-      if(isec && !problem)
+      if(isec)// && !problem)
       {
         nblist1 = elem; /* save elem that touches our node */
         continue;
       }
-/*
-if(node->nid==28)
+
+if(node->nid==17)
 {
 Yo(2.2);
 printnodelist(nblist1);
@@ -482,14 +507,14 @@ prbbox(nbrct,2);
 prbbox(irct,2);
 printf("isec=%d problem=%d\n", isec, problem);
 }
-*/
+
       /* remove nb=elem->node from nbl */
       elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
       if(elem) goto nbl_loop_start;
       else     break;
     }
 /*
-if(node->nid==28)
+if(node->nid==17)
 {
 Yo(2.9);
 printnodelist(nblist1);
@@ -556,6 +581,38 @@ void update_node_fnb(tNode *node)
   }
 }
 
+/* remove nb on face f with index ni from node->fnb */
+void remove_node_fnb(tNode *node, int f, int ni)
+{
+  int nfnb = node->nfnb[f];
+  int i;
+
+  for(i=ni+1; i<nfnb; i++) node->fnb[f][i-1] = node->fnb[f][i];
+  node->nfnb[f] = nfnb - 1;
+}
+
+/* remove nb on face f with index ni from node->fnb */
+void remove_unpaired_node_fnbs(tNode *node)
+{
+  int f, ni;
+
+  for(f=0; f<6; f++)
+    for(ni=0; ni<node->nfnb[f]; ni++)
+    {
+      tNode *nb = node->fnb[f][ni];
+      int found, nb_f, nb_ni;
+
+      /* remove nb with index ni if it does not also have node as neighb. */
+      found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+      if(!found)
+      {
+        remove_node_fnb(node, f, ni);
+        ni--;
+      }
+    }
+}
+
+
 /* same as update_node_fnb, but do it for neighbors as well */
 void update_node_and_neighbors_fnb(tNode *node)
 {
@@ -572,6 +629,20 @@ void update_node_and_neighbors_fnb(tNode *node)
     {
       tNode *nb = node->fnb[face][ni];
       update_node_fnb(nb);
+    }
+  }
+
+  /* remove all that is not paired on this node */
+  remove_unpaired_node_fnbs(node);
+
+  /* now  remove all that is not paired on neighbors */
+  for(face=0; face<6; face++)
+  {
+    int ni;
+    for(ni=0; ni<node->nfnb[face]; ni++)
+    {
+      tNode *nb = node->fnb[face][ni];
+      remove_unpaired_node_fnbs(nb);
     }
   }
 }
