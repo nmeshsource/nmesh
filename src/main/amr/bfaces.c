@@ -1155,7 +1155,12 @@ int find_nodefacepoints_in_nbface(tNode *node, int f, tNode *nb, int nb_f)
    since res in find_nodefacepoints_in_nbface is low, try it both ways */
 int common_facepoints(tNode *node, int f, tNode *nb, int nb_f)
 {
-  int r1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
-  int r2 = find_nodefacepoints_in_nbface(nb,nb_f, node,f);
-  return r1 || r2;
+  int f1, f2;
+
+  f1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
+  if(f1) return 1;
+
+  f2 = find_nodefacepoints_in_nbface(nb,nb_f, node,f);
+
+  return f2 || f1;
 }
