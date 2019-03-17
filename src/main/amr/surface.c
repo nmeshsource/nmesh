@@ -770,8 +770,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         nb_dir = nb_f/2;
         Lagrange_interpolate2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                          Cb[ni],Ip[ni], Res[ni]);
-/*
-if(1 && node->nid==11 && nb->nid==5 && vi==35)
+
+if(1 && node->nid==17 && nb->nid==64 && vi==35)
 {
 tMesh *mesh = node->pat->mesh;
 int ll;
@@ -821,7 +821,7 @@ if(fabs((res-mys)/mys) >1e-4)
 {
 printf("node->pat->p=%d ", node->pat->p);
 pr3v("  X", X);
-pr3v("     x", x);
+pr3v("  x", x);
 printf("\n");
 printf("nb->pat->p=%d   ", nb->pat->p);
 pr3v("nbX", nbX);
@@ -838,7 +838,7 @@ Res[ni]->d[ll], s->mysurf->d[ll]);
 //printarray(s->nbsurf[ni]);
 //exit(9);
 }
-*/
+
       }
 
       /* take average of results from different nb */

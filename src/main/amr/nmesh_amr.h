@@ -330,6 +330,7 @@ double Lp_norm_array_reldiff(tArray *A, tArray *B, double p);
 void printmesh(tMesh *g);
 void printpatch(tPat *box);
 void printCI(tPat *pat);
+void printnd(tNode *n) ;
 void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);
 void printnodelist_and_neighbors(tNlist *nl);
@@ -387,3 +388,4 @@ tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);
 tBface *first_obface_of_bface_containing_point(tPat *pat, int f, double C[2]);
 tBface *nbbface_of_bface_containing_point(tNode *nb,
                                           tPat *pat, int f, double C[2]);
+int common_facepoints(tNode *node, int f, tNode *nb, int nb_f);

@@ -413,10 +413,7 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   forbfacesonface(pat, face, bface)
   {
     tBface *obface = bface->obface;
-    double nbrct[4]; // bound. rect. of nb
-    int problem;     // is set to 1 if there is a problem finding nbrct
-    double irct[4];
-    int isec;
+    int touch;
 
     /* do nothing if no other patch face */
     if(!obface) continue;
@@ -441,80 +438,50 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
 
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
-
-if(node->nid==17)
+/*
+if(node->nid==41)
 {
 Yo(1);
+printnd(node);
 printnodelist(nbl);
 }
-
+*/
     /* go over nbl and remove all whose face does not intersect
        with the node bounding rectangle brct */
     nblist1 = NULL;
     fornodelist(nbl, elem)
     {
     nbl_loop_start:
-/*
-if(node->nid==17)
-{
-Yo(2.1);
-printnodelist(nblist1);
-//printnode(node);
-//printnode(nb);
-}
-*/
-      /* get neigh. bound. rect. in its own X coords */
+
+      /* get neigh. and check if node and nb have common points */
       nb = elem->node;
-      brct_nodeface(nb, nb_f/2, nbrct);
-      /* shrink rectangle by 0.5% to avoid boundary points */
-      resize_brct(nbrct, 0.005);
-
-if(node->nid==17)
-{
-Yo(2.12);
-printf("nid%ld nbnid%ld ", node->nid, nb->nid);
-prbbox(brct,2);
-prbbox(nbrct,2);
-printf("\n");
-}
-
-      /* transform nbrct from nb coords to node coords */
-      problem = brctpat2_of_brctpat1(nb->pat, nb_f, nbrct,
-                                     node->pat, face, nbrct);
-if(node->nid==17)
-{
-Yo(2.13);
-printf("nid%ld nbnid%ld ", node->nid, nb->nid);
-prbbox(brct,2);
-prbbox(nbrct,2);
-printf("\n");
-}
-      /* does brct intersect nbrct? */
-      isec = intersection_brct1_brct2(brct, nbrct, irct);
-      if(isec)// && !problem)
+      touch = common_facepoints(node,face, nb,nb_f);
+      if(touch)
       {
         nblist1 = elem; /* save elem that touches our node */
         continue;
       }
-
-if(node->nid==17)
+/*
+if(node->nid==41)
 {
 Yo(2.2);
-printnodelist(nblist1);
-printnodelist(elem);
+//printnodelist(nblist1);
+//printnodelist(elem);
 prbbox(brct,2);
 prbbox(nbrct,2);
 prbbox(irct,2);
-printf("isec=%d problem=%d\n", isec, problem);
+printf("\n");
+printf("touch=%d problem=%d\n", touch, problem);
+printf("remove:"); printnd(nb);
 }
-
+*/
       /* remove nb=elem->node from nbl */
       elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
       if(elem) goto nbl_loop_start;
       else     break;
     }
 /*
-if(node->nid==17)
+if(node->nid==41)
 {
 Yo(2.9);
 printnodelist(nblist1);
@@ -608,6 +575,14 @@ void remove_unpaired_node_fnbs(tNode *node)
       {
         remove_node_fnb(node, f, ni);
         ni--;
+
+if(node->nid==72)
+{
+Yo(3.0);
+printnode(node);
+printnode(nb);
+printf("remove:"); printnd(nb);
+}
       }
     }
 }
@@ -631,20 +606,20 @@ void update_node_and_neighbors_fnb(tNode *node)
       update_node_fnb(nb);
     }
   }
+  // no unpaired nodes should exist!!!
+  // /* remove all that is not paired on this node */
+  // remove_unpaired_node_fnbs(node);
 
-  /* remove all that is not paired on this node */
-  remove_unpaired_node_fnbs(node);
-
-  /* now  remove all that is not paired on neighbors */
-  for(face=0; face<6; face++)
-  {
-    int ni;
-    for(ni=0; ni<node->nfnb[face]; ni++)
-    {
-      tNode *nb = node->fnb[face][ni];
-      remove_unpaired_node_fnbs(nb);
-    }
-  }
+  // /* now  remove all that is not paired on neighbors */
+  // for(face=0; face<6; face++)
+  // {
+  //   int ni;
+  //   for(ni=0; ni<node->nfnb[face]; ni++)
+  //   {
+  //     tNode *nb = node->fnb[face][ni];
+  //     remove_unpaired_node_fnbs(nb);
+  //   }
+  // }
 }
 
 /* init surface neighbor list for all root nodes in th e mesh */

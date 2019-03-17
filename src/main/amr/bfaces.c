@@ -1091,3 +1091,71 @@ int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh)
   }
   return 0;
 }
+
+
+/* find out if any node points on face f are on face nb_f of node nb */
+int find_nodefacepoints_in_nbface(tNode *node, int f, tNode *nb, int nb_f)
+{
+  int dir = f/2;
+  int n[] = { 3,3,3 };        /* we use 3 points */
+  double X0[3], LX[3], dX[3]; /* grid of points */
+  int dd;
+  int i,j,k, plane, ret0, ret;
+
+  /* make a grid of points, that excludes endpoints */
+  for(dd=0; dd<3; dd++)
+  {
+    X0[dd] = node->bbox[2*dd];
+    LX[dd] = node->bbox[2*dd+1] - X0[dd];
+    dX[dd] = LX[dd]/(n[dd]);
+    X0[dd] += dX[dd] * 0.5;
+  }
+
+  /* loop over points */
+  plane = (n[dir] - 1) * (f%2);
+  forplaneN(dir, i,j,k, n, plane)
+  {
+    double X[3], x[3], oX[3];
+    int nbface[6];
+
+    /* point grid, that never includes edges */
+    X[0] = X0[0] + dX[0] * i;
+    X[1] = X0[1] + dX[1] * j;
+    X[2] = X0[2] + dX[2] * k;
+
+    /* pick one of X,Y,Z on boundary */
+    X[dir] = node->bbox[f];
+
+    /* get x,y,z of X,Y,Z and then oX,oY,oZ in nb */
+    set_xyz(NULL, node,-1, X, x);
+    ret0 = l_XYZ_of_xyz(nb,-1, oX, x);
+
+    /* try another point, if this one is not in nb */
+    if(ret0<0) continue;
+
+    /* check if this point is on nb face */
+    ret = XYZ_on_face(nb->pat, nbface, oX);
+
+    /* if this point is only in face nb_f of nb we are done */
+    if(ret==1 && nbface[nb_f]) return 1;
+
+    /* if this point is in several faces try another point */
+    if(ret>1) continue;
+
+    if(ret==0)
+    {
+      errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
+    }
+  }
+
+  return 0;
+}
+
+/* check if node and nb has common points on faces f and nb_f
+   since res in find_nodefacepoints_in_nbface is low, try it both ways */
+int common_facepoints(tNode *node, int f, tNode *nb, int nb_f)
+{
+  int r1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
+  int r2 = find_nodefacepoints_in_nbface(nb,nb_f, node,f);
+  return r1 || r2;
+}
