@@ -581,7 +581,7 @@ void free_patch(tPat *pat)
 
   if (!pat) return;
 
-  PRFs(":\n");
+  //PRFs(":\n");
 
   /* free diff matrices and such */
   for(d=1; d<=pat->nmax; d++)
