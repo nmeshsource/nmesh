@@ -167,6 +167,11 @@ int coordinates_init_node(tNode *node)
         int odir, od1, od2, pi;
 
         obface = first_obface_of_bface_containing_point(pat, f, C);
+        errorexit("Wrong strategy: We should find neighbors from node->fnb "
+                  "and not use bfaces. We should then save oC as well as the "
+                  "neighbor index in gridvars on this node. But even then we "
+                  "still haven't solved the case where the point is in two or "
+                  "more nighbors... So let's give up on saving oC!!!");
         opat = obface->pat;
         odir = obface->f/2;
         od1 = Dir1_norm(odir);
