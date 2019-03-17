@@ -2,7 +2,6 @@ remove:
 array_nbXface_of_Xface
 mark_points_in_nb_f
 brct_mark_points_in_fnb_f_ni
-address this: //FIXME: remove next two func calls:
 
 
 

@@ -645,11 +645,6 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   Cp[0] = alloc_array(s1_n);
   Cp[1] = alloc_array(s1_n);
   Cp_is_set = 0;
-//FIXME: remove next two func calls:
-  fill_2arrays_with_nodepoints(node, dir, Cp);
-  /* convert Cp from Xb to X coords for node,
-     these X are spread over the neighbor nodes */
-  array_Xplane_of_Xb(node, dir, Cp, Cp);
 
   /* use data from all neighbors to interpolate into ajsurf */
   /* storage for nb coords and interp. results */
@@ -711,9 +706,6 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         /* point oC to Cb[ni], to save oC in Cb[ni] */
         oC[0] = Cb[ni][0];
         oC[1] = Cb[ni][1];
-        /* compute oC in node plane */
-        //array_nbXface_of_Xface(node,f, nb,nb_f, oC);
-
         /* compute oC in node plane and find points inside neigh.
            -> mask is returned in Ip */
         array_find_nbXface_of_Xface(node,f, nb,nb_f, oC, Ip[ni]);
@@ -721,9 +713,6 @@ void set_ajsurf_forall_vars(tNode *node, int f)
 
       if(Cp[0]->N != oC[0]->N)
         errorexit("Cp[0]->N != oC[0]->N");
-
-      /* find points inside neigh. -> mask is returned in Ip */
-      //mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
 
       //printarray_int(Ip[ni]);
       if(0 && f==1 && node->nid==7)
@@ -771,7 +760,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         Lagrange_interpolate2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                          Cb[ni],Ip[ni], Res[ni]);
 
-if(1 && node->nid==17 && nb->nid==64 && vi==35)
+if(0 && node->nid==17 && nb->nid==64 && vi==35)
 {
 tMesh *mesh = node->pat->mesh;
 int ll;
