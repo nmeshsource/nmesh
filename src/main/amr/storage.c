@@ -104,6 +104,21 @@ void free_array(tArray *array)
   free(array);
 }
 
+/* free 3 arrays that might point to same mem */
+void free_3_arrays(tArray *array[3])
+{
+  int free1, free2;
+
+  free2 = free1 = 1;
+
+  if(array[2] == array[1] || array[2] == array[0]) free2 = 0;
+  if(array[1] == array[0]) free1 = 0;
+
+  if(free2) free_array(array[2]);
+  if(free1) free_array(array[1]);
+  free_array(array[0]);
+}
+
 
 /**************************************************************************/
 /* node storage */
@@ -585,15 +600,14 @@ void free_patch(tPat *pat)
 
   /* free diff matrices and such */
   for(ni=1; ni<=pat->nmax; ni++)
-    for(dir=0; dir<3; dir++)
-    {
-      free_array(pat->Dt[ni][dir]);
-      free_array(pat->At[ni][dir]);
-      free_array(pat->St[ni][dir]);
-      free_array(pat->Xb[ni][dir]);
-      free_array(pat->Wq[ni][dir]);
-      free_array(pat->WL[ni][dir]);
-    }
+  {
+    free_3_arrays(pat->Dt[ni]);
+    free_3_arrays(pat->At[ni]);
+    free_3_arrays(pat->St[ni]);
+    free_3_arrays(pat->Xb[ni]);
+    free_3_arrays(pat->Wq[ni]);
+    free_3_arrays(pat->WL[ni]);
+  }
   free(pat->Dt);
   free(pat->At);
   free(pat->St);
