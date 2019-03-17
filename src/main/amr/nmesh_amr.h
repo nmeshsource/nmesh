@@ -204,14 +204,8 @@ typedef struct tBFACE {
   struct tBFACE *next; // next bface in this patch
   struct tBFACE *prev; // previous bface in this patch
 } tBface;
-/* NOTE: ioX,ioY,ioZ are all set to -1 when a bface is allocated with
+/* NOTE: ioC0_0 is set to -1 when a bface is allocated with
    add_empty_bface. So -1 means we do not know it yet. */
-/* ALSO: We need a function that sets ioX,ioY,ioZ and sets the corresponding
-   vars. Probably we just need the 3 vars oX,oY,oZ in each pat. We can then
-   loop over all bfaces of a pat and set oX,oY,oZ to whatever they need
-   to be. If edges or corners belong to several bfaces, the last bface wins.
-   I could use face vars for this ..., but maybe arrays that live in
-   the patch could work??? */
 
 
 /***********************************************************************/
