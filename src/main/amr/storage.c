@@ -577,22 +577,22 @@ void free_patch(tPat *pat)
 {
   tMesh *mesh = pat->mesh;
   tNlist *elem;
-  int d, i;
+  int ni, dir;
 
-  if (!pat) return;
+  if(!pat) return;
 
   //PRFs(":\n");
 
   /* free diff matrices and such */
-  for(d=1; d<=pat->nmax; d++)
-    for(i=0; i<3; i++)
+  for(ni=1; ni<=pat->nmax; ni++)
+    for(dir=0; dir<3; dir++)
     {
-      free_array(pat->Dt[d][i]);
-      free_array(pat->At[d][i]);
-      free_array(pat->St[d][i]);
-      free_array(pat->Xb[d][i]);
-      free_array(pat->Wq[d][i]);
-      free_array(pat->WL[d][i]);
+      free_array(pat->Dt[ni][dir]);
+      free_array(pat->At[ni][dir]);
+      free_array(pat->St[ni][dir]);
+      free_array(pat->Xb[ni][dir]);
+      free_array(pat->Wq[ni][dir]);
+      free_array(pat->WL[ni][dir]);
     }
   free(pat->Dt);
   free(pat->At);

@@ -559,6 +559,22 @@ int same_n_normal_to_dir(tNode *node1, tNode *node2, int dir)
   return samen;
 }
 
+/* do two nodes have same point number n, orthogonal to norm1 and norm2? */
+int same_node_n_normal_to_norm1_2(tNode *node1, int norm1,
+                                  tNode *node2, int norm2)
+{
+  int d1 = Dir1_norm(norm1);
+  int d2 = Dir2_norm(norm1);
+  int od1 = Dir1_norm(norm2);
+  int od2 = Dir2_norm(norm2);
+
+  if(node1->n[d1] != node2->n[od1])  return 0;
+  if(node1->n[d2] != node2->n[od2])  return 0;
+
+  return 1;
+}
+
+
 /* return the first surface tht is not NULL */
 tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 {
