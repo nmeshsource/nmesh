@@ -585,6 +585,7 @@ int XYZ_on_face(tPat *pat, int *face, const double X[3])
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3])
 {
   if(!pat) pat = node ? node->pat : NULL;
+  if(!pat) errorexit("pat and node must not both be NULL");
 
   /* now set x, dXb/dx */
   if(pat->xyz_of_XYZ)
