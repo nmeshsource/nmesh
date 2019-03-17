@@ -108,21 +108,25 @@ void printnode(tNode *n)
   for(i=0; i<6; i++) printf("%d", n->patface[i]);
   printf("\n");
   printf(" nb =");
-  for(i=0; i<6; i++) printf(" %ld", get_node_nid(n->nb[i]));
-  printf("   parent->nid=%ld\n", get_node_nid(n->parent));
+  //for(i=0; i<6; i++) printf(" %ld", get_node_nid(n->nb[i]));
+  for(i=0; i<6; i++) printf(" %s", nodename(n->nb[i],s,99));
+  //printf("   parent->nid=%ld\n", get_node_nid(n->parent));
+  printf("   parent->nid=%s\n", nodename(n->parent,s,99));
   printf(" fnb =");
   for(i=0; i<6; i++)
   {
     //printf(" %d:{", i);
     printf(" {");
-    for(j=0; j<n->nfnb[i]; j++) printf(" %ld", get_node_nid(n->fnb[i][j]));
+    //for(j=0; j<n->nfnb[i]; j++) printf(" %ld", get_node_nid(n->fnb[i][j]));
+    for(j=0; j<n->nfnb[i]; j++) printf(" %s", nodename(n->fnb[i][j],s,99));
     printf(" }");
   }
   printf("\n");
   if(!n->leaf)
   {
     printf(" child =");
-    for(i=0; i<8; i++) printf(" %ld", get_node_nid(n->child[i]));
+    //for(i=0; i<8; i++) printf(" %ld", get_node_nid(n->child[i]));
+    for(i=0; i<8; i++) printf(" %s", nodename(n->child[i],s,99));
     printf("\n");
   }
   //printf("\n");

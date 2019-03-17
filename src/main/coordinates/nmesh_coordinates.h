@@ -48,6 +48,7 @@ int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3]);
 int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
                      const double X[3], double x[3], double dXYZdxyz[3][3]);
 void brct_nodeface(tNode *node, int norm, double brct[4]);
+void resize_brct(double brct[4], double eps);
 void expand_brct_to_include_X(double brct[4], int norm,
                               const double X[3], int expand);
 int intersection_brct1_brct2(const double brct1[4], const double brct2[4],

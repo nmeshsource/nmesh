@@ -686,6 +686,20 @@ void brct_patface(tPat *pat, int norm, double brct[4])
   }
 }
 
+/* change brct by an amount eps */
+void resize_brct(double brct[4], double eps)
+{
+  double L0 = brct[1] - brct[0];
+  double L1 = brct[3] - brct[2];
+  double dL0 = L0 * eps * 0.5;
+  double dL1 = L1 * eps * 0.5;
+
+  brct[0] = brct[0] + dL0;
+  brct[1] = brct[1] - dL0;
+  brct[2] = brct[2] + dL1;
+  brct[3] = brct[3] - dL1;
+}
+
 /* make bounding rectangle large enough to fit the point X[3],
    if expand=0, include just this one point */
 void expand_brct_to_include_X(double brct[4], int norm,
@@ -894,10 +908,10 @@ int brctpat2_of_brctpat1__old(tPat *pat1, int f1, const double brct1[4],
 int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
                          tPat *pat2, int f2, double brct2[4])
 {
-  double C1[4][2]; /* 4 points, 3rd one is (C1[2][0],C1[2][1]) */
-  double C2[4][2]; /* 4 points, 3rd one is (C2[2][0],C2[2][1]) */
-  double f[4];
-  int i, im[4], p2[4], problem = 0;
+  double C1[5][2]; /* 5 points, 3rd one is (C1[2][0],C1[2][1]) */
+  double C2[5][2]; /* 5 points, 3rd one is (C2[2][0],C2[2][1]) */
+  double f[5];
+  int i,j, im[5], p2[5], prob[5], problem = 0;
 
   C1[0][0] = brct1[0];
   C1[0][1] = brct1[2];
@@ -907,33 +921,40 @@ int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
   C1[2][1] = brct1[3];
   C1[3][0] = brct1[1];
   C1[3][1] = brct1[3];
+  C1[4][0] = 0.5*(brct1[0] + brct1[1]);
+  C1[4][1] = 0.5*(brct1[2] + brct1[3]);
 
-  for(i=0; i<4; i++)
+  for(i=0; i<5; i++)
     p2[i] = Cpat2_of_Cpat1(pat1,f1,C1[i],   pat2,f2,C2[i]);
 
   /* check if C2 is not NAN */
-  if(p2[0]<0 || p2[1]<0 || p2[2]<0 || p2[3]<0)
+  if(p2[0]<0 || p2[1]<0 || p2[2]<0 || p2[3]<0 ||  p2[4]<0)
   {
-    int j;
-
     /* check if all is ok, or if there is a NAN */
-    for(i=0; i<4; i++)
+    for(i=0; i<5; i++)
+    {
+      prob[i] = 0;
+
       for(j=0; j<2; j++)
-        if(isnan(C2[i][j])) problem = 1;
+      {
+        if(isinf(C2[i][j]))      prob[i] = problem = 1;
+        else if(isnan(C2[i][j])) prob[i] = problem = 10;
+      }
+    }
   }
 
   /* find min and max in coords */
-  for(i=0; i<4; i++) f[i] = C2[i][0];
-  brct2[0] = min_in_1d_array(f,4, im);
+  for(j=0, i=0; i<5; i++) if(!prob[i]) f[j++] = C2[i][0];
+  brct2[0] = min_in_1d_array(f,j, im);
 
-  for(i=0; i<4; i++) f[i] = C2[i][0];
-  brct2[1] = max_in_1d_array(f,4, im);
+  for(j=0, i=0; i<5; i++) if(!prob[i]) f[j++] = C2[i][0];
+  brct2[1] = max_in_1d_array(f,j, im);
 
-  for(i=0; i<4; i++) f[i] = C2[i][1];
-  brct2[2] = min_in_1d_array(f,4, im);
+  for(j=0, i=0; i<5; i++) if(!prob[i]) f[j++] = C2[i][1];
+  brct2[2] = min_in_1d_array(f,j, im);
 
-  for(i=0; i<4; i++) f[i] = C2[i][1];
-  brct2[3] = max_in_1d_array(f,4, im);
+  for(j=0, i=0; i<5; i++) if(!prob[i]) f[j++] = C2[i][1];
+  brct2[3] = max_in_1d_array(f,j, im);
 
   return problem;
 }
