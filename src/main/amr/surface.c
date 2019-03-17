@@ -700,6 +700,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         /* find points inside neigh. -> mask is returned in Ip */
         mark_points_in_nb_f(node,f,Cp, nb,nb_f,oC, Ip[ni]);
         errorexit("mark_points_in_nb_f checks only 2 out of 3 coords!!!");
+        if(Cp[0]->N != oC[0]->N)
+          errorexit("Cp[0]->N != oC[0]->N");
       }
       else /* compute oC from Cp */
       {
@@ -710,9 +712,6 @@ void set_ajsurf_forall_vars(tNode *node, int f)
            -> mask is returned in Ip */
         array_find_nbXface_of_Xface(node,f, nb,nb_f, oC, Ip[ni]);
       }
-
-      if(Cp[0]->N != oC[0]->N)
-        errorexit("Cp[0]->N != oC[0]->N");
 
       //printarray_int(Ip[ni]);
       if(0 && f==1 && node->nid==7)
