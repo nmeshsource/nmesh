@@ -27,7 +27,6 @@ int nmesh_TestDerivs(tMesh *mesh)
   AddPar("TestDerivs_x0",    "1",   "x-location of Gaussian wavepacket");
   AddPar("TestDerivs_y0",    "0.3", "y-location of Gaussian wavepacket");
   AddPar("TestDerivs_z0",    "0.1", "z-location of Gaussian wavepacket");
-  AddPar("TestDerivs_mesh",  "",    "mesh we use [CubedSpheres]");
 	     	   	   	 
   return 0;
 }
