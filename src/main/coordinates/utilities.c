@@ -196,3 +196,109 @@ double smallest_pat_size(tMesh *mesh)
   }
   return L;
 }
+
+
+/* put dX^i/dx^j at point ind into array 3x3 aJ */
+void array_dXdx(tNode *node, int ind, tArray *aJ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int idXdx = Ind("dXdx");
+  double val;
+  int i,j;
+
+  for(i=0; i<3; i++)
+  for(j=0; j<3; j++)
+  {
+    val = Vard_(node, idXdx + 3*i + j)[ind];
+    Arrd_(aJ)[i + 3*j] = val; /* aJ is stored in column major form */
+  }
+}
+
+/* put dx^i/dX^j at point ind into 3x3 array aJ */
+void array_dxdX(tNode *node, int ind, tArray *aJ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int idXdx = Ind("dXdx");
+  double M[3][3], invM[3][3];
+  int i,j;
+
+  for(i=0; i<3; i++)
+  for(j=0; j<3; j++)
+    M[i][j] = Vard_(node, idXdx + 3*i + j)[ind];
+
+  inv3Dmat_from_3Dmat(M, invM);
+
+  for(i=0; i<3; i++)
+  for(j=0; j<3; j++)
+    Arrd_(aJ)[i + 3*j] = invM[i][j];
+}
+
+/* put dx^i/dX^A and dx^i/dX^B at point ind into 3x2 array aJ,
+   A,B are e.g. 0,2 if norm=1 */
+void array_2dxdX(tNode *node, int ind, int norm, tArray *aJ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int idXdx = Ind("dXdx");
+  double M[3][3], invM[3][3];
+  int i,j, J;
+
+  for(i=0; i<3; i++)
+  for(j=0; j<3; j++)
+    M[i][j] = Vard_(node, idXdx + 3*i + j)[ind];
+
+  inv3Dmat_from_3Dmat(M, invM);
+
+  for(J=0, j=0; j<3; j++)
+    if(j!=norm)
+    {
+      for(i=0; i<3; i++) Arrd_(aJ)[i + 3*J] = invM[i][j];
+      J++;
+    }
+}
+
+/* put dx^i/dXb^A and dx^i/dXb^B at point ind into 3x2 array aJ,
+   A,B are e.g. 0,2 if norm=1 */
+void array_2dxdXb(tNode *node, int ind, int norm, tArray *aJ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int idXdx = Ind("dXdx");
+  double M[3][3], invM[3][3];
+  double dXbdX[3];
+  int i,j, J;
+
+  /* get dXb/dX */
+  dXbYbZb_dXYZ(node, dXbdX);
+
+  /* set M = dX^i/dx^j */
+  for(i=0; i<3; i++)
+  for(j=0; j<3; j++)
+    M[i][j] = Vard_(node, idXdx + 3*i + j)[ind];
+
+  /* set invM = dx^i/dX^j */
+  inv3Dmat_from_3Dmat(M, invM);
+
+  /* save dx^i/dXb^j = dx^i/dX^j / (dXb^j/dX^j) in array aJ */
+  for(J=0, j=0; j<3; j++)
+    if(j!=norm)
+    {
+      for(i=0; i<3; i++) Arrd_(aJ)[i + 3*J] = invM[i][j]/dXbdX[j];
+      J++;
+    }
+}
+
+/* put 3x3 matrix M in array aM */
+void array_3Dmat(double M[3][3], tArray *aM)
+{
+  int i,j;
+
+  for(i=0; i<3; i++)
+  for(j=0; j<3; j++)
+    Arrd_(aM)[i + 3*j] = M[i][j];
+}
+
+/* get determinant of a 2x2 array */
+double det_2_2array(tArray *aM)
+{
+  double *d = Arrd_(aM);
+  return d[0]*d[3] - d[1]*d[2];
+}

@@ -48,6 +48,12 @@ tArray *alloc_array1d(int N)
   int n[] = { N,1,1 };
   return alloc_array(n);
 }
+/* allocate a 2d array */
+tArray *alloc_array2d(int n0, int n1)
+{
+  int n[] = { n0,n1,1 };
+  return alloc_array(n);
+}
 
 /* get array that starts at segment si */
 tArray *get_array_seg(tArray *array, int si)

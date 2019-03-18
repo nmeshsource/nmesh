@@ -259,6 +259,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 tArray *alloc_array_with_segs(int n[3], int ns);
 tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);
+tArray *alloc_array2d(int n0, int n1);
 tArray *get_array_seg(tArray *array, int si);
 void point_array_a_to_data(tArray *array, void *data);
 tArray *redimension_array(tArray *array, int n[3]);
@@ -309,6 +310,7 @@ void disablevarlist(tVarList *vl);
 
 /* array.c */
 void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa);
+void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa);
 void mm_array0(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array1(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array2(tArray *Aa, tArray *Ba, tArray *ABa);

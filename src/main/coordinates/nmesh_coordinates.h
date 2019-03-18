@@ -79,6 +79,12 @@ double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3]);
 double det_3Dmatrix(double M[3][3]);
 double inv3Dmat_from_3Dmat(double M[3][3], double invM[3][3]);
 double smallest_pat_size(tMesh *mesh);
+void array_dXdx(tNode *node, int ind, tArray *aJ);
+void array_dxdX(tNode *node, int ind, tArray *aJ);
+void array_2dxdX(tNode *node, int ind, int norm, tArray *aJ);
+void array_2dxdXb(tNode *node, int ind, int norm, tArray *aJ);
+void array_3Dmat(double M[3][3], tArray *aM);
+double det_2_2array(tArray *aM);
 
 /* ComplexFunctions.c */
 double BaseAngle(double p, double peri, double p0);

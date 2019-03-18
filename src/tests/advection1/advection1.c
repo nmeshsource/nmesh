@@ -175,6 +175,8 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ifxx = Ind("advection1_fxx");
   int iF   = Ind("advection1_F0");
   int iooJ = Ind("det_dXbdx");
+  tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
+  tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
   int myid;
 
   /* compute flux */
@@ -220,25 +222,21 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       //double sig = 2*(face%2) - 1;
       double *F = Vard(node, iF+face);
       double *w = Wquad(node, dir);
-      double sqrtdet2gam, det2dXdXb, det2dxdXb;
+      double sqrtdet2gam, det2dxdXb;
       int i,j,k, ijk, JK, i0;
-
-      /* get 2d Jacobian of dX/dXb */
-      switch(dir)
-      {
-      case 0:  det2dXdXb = 1./(dXbdX[1]*dXbdX[2]);  break;
-      case 1:  det2dXdXb = 1./(dXbdX[0]*dXbdX[2]);  break;
-      case 2:  det2dXdXb = 1./(dXbdX[0]*dXbdX[1]);  break;
-      }
-      /* get 2d Jacobian of dx/dXb */
-      det2dxdXb = det2dXdXb * 1.;   // for now assume dx/dX = 1
-      sqrtdet2gam = det2dxdXb * 1.; // for now assume gam = flat
 
       forplaneN(dir, i,j,k, n, p)
       {
         ijk = Ind_n(i,j,k, n);
         JK = Ind_n_norm(i,j,k, n, dir);
         i0 = i0_norm(i,j,k, dir);
+
+        /* get 2d Jacobian of dx/dXb */
+        array_2dxdXb(node, ijk, dir, a2J);
+        /* compute 2-metric from a2J^T a2J */
+        mm_array0_norestrict(a2J,a2J, a2gam); // for now assume gam = flat
+        det2dxdXb = det_2_2array(a2gam);
+        sqrtdet2gam = sqrt(det2dxdXb);
 
         r[ijk] -= F[JK] * sqrtdet2gam * ooJ[ijk] / w[i0];
       }
@@ -247,6 +245,10 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
   /* impose outer BC */
   advection1_u_BC(mesh, vlr, vlu);
+
+  /* free arrays */
+  free_array(a2gam);
+  free_array(a2J);
 }
 
 

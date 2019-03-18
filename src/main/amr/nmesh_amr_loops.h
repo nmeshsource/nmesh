@@ -61,9 +61,15 @@
 /* get integration weights for direc. dir on node */
 #define Wquad(node, dir) node->Wq[dir]->d
 
-/****************************************************************************/
-/* loops that should be used only in very particular advanced cases         */
-/****************************************************************************/
+/***************************************************************************/
+/* macros that should be used only in very particular advanced cases       */
+/***************************************************************************/
+/* get double pointer to data in a variable without checking if node has dat */
+#define Vard_(node, varindex) node->dat->v[(varindex)]->d
+
+/* access Array, without check */
+#define Arrd_(Arr) (Arr->d)
+
 /* natural loop over my leaf nodes on this proc */
 #define formylnodes_cat_i(mesh, cat, i) \
   for(cat=0; cat < mesh->myln->nncats; cat++) \

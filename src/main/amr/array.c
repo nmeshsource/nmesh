@@ -62,6 +62,30 @@ void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
       AB[i + atn1*j] = sum; // AB is col major
     }
 }
+/* same as mm_array0 but without restrict */
+void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa)
+{
+  double *At = Ata->d;
+  double *B  =  Ba->d;
+  double *AB = ABa->d;
+  int atn0 = Ata->n[0];
+  int atn1 = Ata->n[1] * Ata->n[2];
+  int bn0 = Ba->n[0];
+  int bn1 = Ba->n[1] * Ba->n[2];
+  int i,l,j;
+
+  if(atn0 != bn0) errorexit("Ata->n[0] != Ba->n[0]");
+
+  for(j=0; j<bn1; j++)
+    for(i=0; i<atn1; i++)
+    {
+      double sum=0.0;
+      for(l=0; l<atn0; l++)
+        sum += At[l + atn0*i] * B[l + atn0*j];
+        // At is col major transpose of A, and B is col major
+      AB[i + atn1*j] = sum; // AB is col major
+    }
+}
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
    Ata contains an (Ata->n[0]) x (Ata->n[1]) matrix stored in row-major
