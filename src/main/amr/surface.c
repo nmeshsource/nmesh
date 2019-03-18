@@ -632,22 +632,168 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         }
       }
     }
-    else
+    else /* neighbor is from diff patch */
     {
-      //int d1 = Dir1_norm(dir);
-      //int d2 = Dir2_norm(dir);
-      //int odir, od1, od2;
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found) errorexit("couldn't find nb face!!!");
-      //odir = nb_f/2;
-      //od1 = Dir1_norm(odir);
-      //od2 = Dir2_norm(odir);
 
-      // TODO: case where the one neighbor is from diff patch
-      //       figure out if we can copy!!!
-      //errorexit("TODO: case where the one neighbor is from diff patch");
+      /* if nb has only node as neighbor we may not need to interpolate */
+      if(nb->nfnb[nb_f] == 1)
+      {
+        tMesh *mesh = node->pat->mesh;
+        int ix = Ind("x");
+        double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+        int *n = node->n;
+        int pl = (n[dir]-1)* f%2;
+        int d1 = Dir1_norm(dir);
+        int d2 = Dir2_norm(dir);
+        int n1 = n[d1];
+        int n2 = n[d2];
+        int i,j,k, ind;
+        int *nb_n = nb->n;
+        int inb[3][3];
+        double x0[3], dist[3], mx0;
+        int odir = nb_f/2;
+        int opl = (nb_n[odir]-1)* nb_f%2;
+        int od1 = Dir1_norm(odir);
+        int od2 = Dir2_norm(odir);
+        int on1 = nb_n[od1];
+        int on2 = nb_n[od2];
 
-      // For now we just interpolate ... :(
+        /* 3 points: */
+        /* point 1 */
+        ijk_inplaneN(dir, i,j,k, 0,0,pl);
+        ind = Ind_n(i,j,k, n);
+        x0[0] = px[0][ind];
+        x0[1] = px[1][ind];
+        x0[2] = px[2][ind];
+        dist[0] = nearest_ijk_of_xyz_inplaneN(nb, odir, opl, inb[0], x0);
+        mx0 = magnitude_xyz(x0);
+        if(mx0>0.) dist[0] = dist[0]/mx0; /* normalize dist */
+
+        /* point 2 */
+        ijk_inplaneN(dir, i,j,k, n1-1,0,pl);
+        ind = Ind_n(i,j,k, n);
+        x0[0] = px[0][ind];
+        x0[1] = px[1][ind];
+        x0[2] = px[2][ind];
+        dist[1] = nearest_ijk_of_xyz_inplaneN(nb, odir, opl, inb[1], x0);
+        mx0 = magnitude_xyz(x0);
+        if(mx0>0.) dist[1] = dist[1]/mx0; /* normalize dist */
+
+        /* point 3 */
+        ijk_inplaneN(dir, i,j,k, 0,n2-1,pl);
+        ind = Ind_n(i,j,k, n);
+        x0[0] = px[0][ind];
+        x0[1] = px[1][ind];
+        x0[2] = px[2][ind];
+        dist[2] = nearest_ijk_of_xyz_inplaneN(nb, odir, opl, inb[2], x0);
+        mx0 = magnitude_xyz(x0);
+        if(mx0>0.) dist[2] = dist[2]/mx0; /* normalize dist */
+
+        /* if all 3 points coincide with grid points of nb we can copy */
+        if(dist[0]<=dequaleps && dist[1]<=dequaleps && dist[2]<=dequaleps)
+        {
+          /* if axis are aligned in both nodes */
+          if(inb[0][od1] == 0 && inb[0][od2] == 0)
+          {
+            if(inb[1][od1] == on1-1 && inb[1][od2] == 0)
+            {
+              if(inb[2][od1] == 0 && inb[2][od2] == on2-1)
+              {
+                /* just copy by pointing to same array */
+                for(vi=0; vi<dat->nv; vi++)
+                {
+                  tSurface *s = dat->s[f][vi];
+                  /* do nothing if this surface is NULL */
+                  if(s) s->ajsurf = s->nbsurf[0];
+                }
+                return;
+              }
+            }
+            if(inb[1][od1] == 0 && inb[1][od2] == on2-1)
+            {
+              if(inb[2][od1] == on1-1 && inb[2][od2] == 0)
+              {
+                /* copy with two axis interchanged */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,0);
+                return;
+              }
+            }
+          }
+
+          /* if axis1 reversed */
+          if(inb[0][od1] == on1-1 && inb[0][od2] == 0)
+          {
+            if(inb[1][od1] == 0 && inb[1][od2] == 0)
+            {
+              if(inb[2][od1] == on1-1 && inb[2][od2] == on2-1)
+              {
+                /* copy with axis1 reversed */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,0);
+                return;
+              }
+            }
+            if(inb[1][od1] == on1-1 && inb[1][od2] == on2-1)
+            {
+              if(inb[2][od1] == 0 && inb[2][od2] == 0)
+              {
+                /* copy with two axis interchanged and axis1 reversed */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,0);
+                return;
+              }
+            }
+          }
+
+          /* if axis2 reversed */
+          if(inb[0][od1] == 0 && inb[0][od2] == on2-1)
+          {
+            if(inb[1][od1] == on1-1 && inb[1][od2] == on2-1)
+            {
+              if(inb[2][od1] == 0 && inb[2][od2] == 0)
+              {
+                /* copy with axis2 reversed */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,0,1);
+                return;
+              }
+            }
+            if(inb[1][od1] == 0 && inb[1][od2] == 0)
+            {
+              if(inb[2][od1] == on1-1 && inb[2][od2] == on2-1)
+              {
+                /* copy with two axis interchanged and axis2 reversed */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,1);
+                return;
+              }
+            }
+          }
+
+          /* if axis1 & 2 reversed */
+          if(inb[0][od1] == on1-1 && inb[0][od2] == on2-1)
+          {
+            if(inb[1][od1] == 0 && inb[1][od2] == on2-1)
+            {
+              if(inb[2][od1] == on1-1 && inb[2][od2] == 0)
+              {
+                /* copy with both axis reversed */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,1);
+                return;
+              }
+            }
+            if(inb[1][od1] == on1-1 && inb[1][od2] == 0)
+            {
+              if(inb[2][od1] == 0 && inb[2][od2] == on2-1)
+              {
+                /* copy with two axis interchanged and both reversed */
+                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,1);
+                return;
+              }
+            }
+          }
+        }
+        /* nothing matches if we get here and we need to interpolate */
+      }
+      /* go on to interpolation ... */
     }
   }
 
@@ -878,6 +1024,109 @@ Res[ni]->d[ll], s->mysurf->d[ll]);
   free_array(Cp[1]);
   free_array(Cp[0]);
 }
+
+
+/* copy from nbsurf[0] to ajsurf.  */
+void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
+                              int intrch, int rev1, int rev2)
+{
+  tDat *dat = node->dat;
+  int dir = f/2;
+  //int d1 = Dir1_norm(dir);
+  //int d2 = Dir2_norm(dir);
+  int vi;
+  int i,j,k;
+  int odir = nb_f/2;
+  //int od1 = Dir1_norm(odir);
+  //int od2 = Dir2_norm(odir);
+  //int on1 = nb_n[od1];
+  //int on2 = nb_n[od2];
+  int oi,oj,ok;
+
+  for(vi=0; vi<dat->nv; vi++)
+  {
+    tSurface *s = dat->s[f][vi];
+    if(s)
+    {
+      int *n, *nn;
+
+      /* unless it has mem already, get mem for ajsurf */
+      if(s->allocd_ajsurf==0 || s->ajsurf==NULL)
+      {
+        /* get mem for ajsurf, needs to be freed later */
+        s->ajsurf = alloc_array(s->mysurf->n);
+        s->allocd_ajsurf = 1;
+      }
+
+      n  = s->ajsurf->n;
+      nn = s->nbsurf[0]->n;
+
+      /* now copy s->nbsurf[0] into s->ajsurf */
+      forplaneN(dir, i,j,k, n, 0)
+      {
+        int ind1 = Ind_n(i,j,k, s->ajsurf->n);
+        int I1 = i1_norm(i,j,k, dir);
+        int I2 = i2_norm(i,j,k, dir);
+        int i2,j2,k2, ind2;
+
+        switch(odir)
+        {
+        case 0:  oi = 0;   oj = I1;  ok = I2;  break;
+        case 1:  oi = I1;  oj = 0;   ok = I2;  break;
+        case 2:  oi = I1;  oj = I2;  ok = 0;   break;
+        default: errorexit("dir must be 0,1,2");
+        }
+
+        i2 = oi;  j2 = oj;  k2 = ok;
+
+        switch(odir)
+        {
+        case 0:
+          if(!intrch)
+          {
+            if(rev1) { j2 = nn[1]-1 - oj; }
+            if(rev2) { k2 = nn[2]-1 - ok; }
+          }
+          else
+          {
+            if(rev1) { j2 = nn[1]-1 - ok; }
+            if(rev2) { k2 = nn[2]-1 - oj; }
+          }
+          break;
+        case 1:
+          if(!intrch)
+          {
+            if(rev1) { i2 = nn[0]-1 - oi; }
+            if(rev2) { k2 = nn[2]-1 - ok; }
+          }
+          else
+          {
+            if(rev1) { i2 = nn[0]-1 - ok; }
+            if(rev2) { k2 = nn[2]-1 - oi; }
+          }
+          break;
+        case 2:
+          if(!intrch)
+          {
+            if(rev1) { i2 = nn[0]-1 - oi; }
+            if(rev2) { j2 = nn[1]-1 - oj; }
+          }
+          else
+          {
+            if(rev1) { i2 = nn[0]-1 - oj; }
+            if(rev2) { j2 = nn[1]-1 - oi; }
+          }
+          break;
+        }
+        ind2 = Ind_n(i2,j2,k2, nn);
+
+        s->ajsurf->d[ind1] = s->nbsurf[0]->d[ind2];
+      }
+    }
+  }
+  return;
+}
+
 
 /* set all ajsurf of a node */
 void set_all_ajsurf(tNode *node)

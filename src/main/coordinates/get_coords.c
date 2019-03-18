@@ -76,6 +76,96 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
   nearest_ijk_of_XbYbZb(node, ijk, Xb);
 }
 
+/* find i,j,k closest to x0 in plane pl normal to N, return distance */
+double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
+                                   int ijk[3], const double x0[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int ix = Ind("x");
+  double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+  tArray *Cp[2];
+  int *n = node->n;
+  int n2[3];
+  int dir1 = Dir1_norm(N);
+  int dir2 = Dir2_norm(N);
+  double Xpl=0, X[3], x[3];
+  int dir, i,j,k, ind;
+  double d1, d2, dist2 = 1e300;
+
+  /* if this node has no dat we need to compute x for each point from Xb */
+  if(!px[0])
+  {
+    double Xb = node->Xb[N]->d[pl]; /* Xb coord in plane pl */
+
+    /* convert Xb to X coords */
+    X_of_Xb_indir(node, N, Xb, &Xpl);
+
+    /* make 2d n2 */
+    for(dir=0; dir<3; dir++) n2[dir] = node->n[dir];
+    n2[N] = 1;
+
+    /* set X-coords in plane */
+    Cp[0] = alloc_array(n2);
+    Cp[1] = alloc_array(n2);
+    fill_2arrays_with_nodepoints(node, N, Cp);
+    /* convert Cp from Xb to X coords for node,
+       these X are spread over the neighbor nodes */
+    array_Xplane_of_Xb(node, N, Cp, Cp);
+  }
+
+  forplaneN(N, i,j,k, n, pl)
+  {
+    /* check if we have x on this node */
+    if(!px[0])
+    {
+      ind = Ind_n_norm(i,j,k, n, N);
+      /* set X and then get x */
+      X[dir1] = Cp[0]->d[ind];
+      X[dir2] = Cp[1]->d[ind];
+      X[N]    = Xpl;
+      set_xyz(0, node,-1, X, x);
+    }
+    else
+    {
+      ind = Ind_n(i,j,k, n);
+      for(dir=0; dir<3; dir++) x[dir] = px[dir][ind];
+    }
+
+    for(d2=0., dir=0; dir<3; dir++)
+    {
+      d1 = x[dir] - x0[dir];
+      d2 += d1*d1;
+    }
+    if(d2<dist2)
+    {
+      ijk[0] = i;
+      ijk[1] = j;
+      ijk[2] = k;
+      dist2 = d2;
+    }
+  }
+
+  /* free mem */
+  if(!px[0])
+  {
+    free_array(Cp[1]);
+    free_array(Cp[0]);
+  }
+
+  return sqrt(dist2);
+}
+
+/* |\vec{x}| */
+double magnitude_xyz(const double x[3])
+{
+  double d2;
+  int dir;
+
+  for(d2=0., dir=0; dir<3; dir++) d2 += x[dir] * x[dir];
+  return sqrt(d2);
+}
+
+
 /* get X from Xb */
 void XYZ_of_XbYbZb(tNode *node, const double Xb[3], double X[3])
 {

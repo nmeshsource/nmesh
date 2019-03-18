@@ -28,6 +28,8 @@ void update_node_fnb(tNode *node);
 void update_node_and_neighbors_fnb(tNode *node);
 void update_all_rnode_fnb(tMesh *mesh);
 int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
+void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
+                              int intrch, int rev1, int rev2);
 
 /* surface.c */
 void free_surface(tSurface *s);

@@ -124,6 +124,13 @@
 #define Dir1_norm(norm) (norm==0)
 #define Dir2_norm(norm) ( (2)*(norm==0 || norm==1) + (norm==2) )
 
+#define ijk_inplaneN(N, i,j,k, i1,i2,pl) \
+  switch((N)) { \
+    case 0:  i=(pl); j=(i1); k=(i2); break; \
+    case 1:  i=(i1); j=(pl); k=(i2); break; \
+    case 2:  i=(i1); j=(i2); k=(pl); break; \
+    default: errorexit("N has to be 0,1,2");  }
+
 /* loop over i,j,k */
 #define forijk(i,j,k, n) \
   for (k = 0; k < n[2]; k++) \

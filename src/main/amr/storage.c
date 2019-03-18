@@ -592,7 +592,7 @@ void free_patch(tPat *pat)
 {
   tMesh *mesh = pat->mesh;
   tNlist *elem;
-  int ni, dir;
+  int ni;
 
   if(!pat) return;
 
