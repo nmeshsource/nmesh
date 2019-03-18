@@ -33,7 +33,7 @@ int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt)
   double dT = fabs(mesh->dt);
   long Iter = mesh->iteration;
 
-  /* Note: this function could if all nodes are aligned in time and then
+  /* Note: this function could check if all nodes are aligned in time and then
      call TimeForNodeOutput_di_dt to test if all nodes want to output */
 
   /* time for output based on number of iterations */
