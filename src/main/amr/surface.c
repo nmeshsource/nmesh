@@ -638,7 +638,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       if(!found) errorexit("couldn't find nb face!!!");
 
       /* if nb has only node as neighbor we may not need to interpolate */
-      if(nb->nfnb[nb_f] == 1)
+      if(0 && nb->nfnb[nb_f] == 1)
       {
         tMesh *mesh = node->pat->mesh;
         int ix = Ind("x");
