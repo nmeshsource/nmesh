@@ -321,11 +321,9 @@ int parse_command_line_options(tMesh *mesh)
 /* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
 {
-  if(1)
-  {
-    prdivider(0);
-    printf("Initializing mesh\n");
-  }
+  prdivider(0);
+  printf("Initializing mesh\n");
+  prTimeIn_s("WallTime at beginning of inidata_mesh: ");
 
   /* hook for funs right after iterate_parameters */
   RunFun(POST_PARAMETERS);
@@ -370,6 +368,7 @@ int evolve_mesh(tMesh *mesh)
   double timemax   = Getd(Par("finaltime"));
 
   prdivider(0);
+  prTimeIn_s("WallTime at beginning of evolve_mesh: ");
 
   if(timemax > 0)
     iterationmax = timemax/mesh->dt + 0.5;
@@ -422,6 +421,9 @@ int evolve_mesh(tMesh *mesh)
     iterationmax
       = (timemax > 0) ? timemax/mesh->dt + 0.5 : Geti(Par("iterations"));
   }
+
+  prTimeIn_s("WallTime at end of evolve_mesh: ");
+
   return 0;
 }
 
@@ -432,5 +434,6 @@ int finalize_mesh(tMesh *mesh)
 {
   RunFun(FINALIZEMESH);
   free_mesh(mesh);
+  prTimeIn_s("WallTime at end of finalize_mesh: ");
   return 0;
 }
