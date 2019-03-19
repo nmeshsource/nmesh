@@ -4,7 +4,6 @@
 
 #include "nmesh.h"
 
-#define PR 0
 
 extern tMesh *main_mesh;
 
@@ -50,8 +49,8 @@ tTimer *timer_get(char *name)
   /* alloc and set new timer */
   tdb[i] = calloc(1, sizeof(*tdb[0]));
   tdb[i]->name  = strdup(name);
-  tdb[i]->start = -1;
-  tdb[i]->time  = 0;
+  tdb[i]->start = -1.;
+  tdb[i]->time  = 0.;
   tdb[i]->n     = 0;
 
   return tdb[i];
@@ -73,6 +72,7 @@ void timer_start(char *name)
       timer_MPI_barrier = Getv(Par("timer_MPI_barrier"), "yes");
     }
 
+    /* get timer and save current time in it */
     t = timer_get(name);
     if(timer_MPI_barrier) nMPI_barrier();
     t->start = getTimeIn_s();
