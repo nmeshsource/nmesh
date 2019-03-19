@@ -16,7 +16,7 @@ int coordinates_coordvars_enabled(tNode *node)
   tDat *dat = node->dat;
   tCoordInfo *CI = pat->CI;
   int iX   = Ind("X");
-  int idXd = Ind("dXdx");
+  int idXdx = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx");
   int ix   = Ind("x");
   int f, d;
@@ -31,9 +31,9 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, iX);
   enablevar_innode(node, iX+1);
   enablevar_innode(node, iX+2);
-  enablevar_innode(node, idXd);
-  enablevar_innode(node, idXd+3);
-  enablevar_innode(node, idXd+6);
+  enablevar_innode(node, idXdx);
+  enablevar_innode(node, idXdx+3);
+  enablevar_innode(node, idXdx+6);
   enablevar_innode(node, idet_dXbdx);
   enablevar_innode(node, ix);
   enablevar_innode(node, ix+1);
@@ -80,14 +80,14 @@ int coordinates_init_node(tNode *node)
   int i,j,k, d,e, f;
   int vars_on = coordinates_coordvars_enabled(node);
   int iX   = Ind("X");
-  int idXd = Ind("dXdx");
+  int idXdx = Ind("dXdx");
   int ix   = Ind("x");
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
-  double *pdXd[3][3]
-            = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
-                {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
-                {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
+  double *pdXdx[3][3]
+            = { {Vard(node,idXdx),   Vard(node,idXdx+1), Vard(node,idXdx+2)},
+                {Vard(node,idXdx+3), Vard(node,idXdx+4), Vard(node,idXdx+5)},
+                {Vard(node,idXdx+6), Vard(node,idXdx+7), Vard(node,idXdx+8)} };
   double *det_dXbdx = Vard(node, Ind("det_dXbdx"));
   double dXbdX[3];
   double det_dXbYbZb_dXYZ;
@@ -107,7 +107,7 @@ int coordinates_init_node(tNode *node)
   forijk(i,j,k, n)
   {
     double Xb[] = { node->Xb[0]->d[i], node->Xb[1]->d[j], node->Xb[2]->d[k] };
-    double X[3], x[3], dXd[3][3];
+    double X[3], x[3], dXdx[3][3];
     int ijk = Ind_n(i,j,k, n);
 
     /* get X from Xb */
@@ -117,20 +117,20 @@ int coordinates_init_node(tNode *node)
     /* now set x, dXdx, det(dXb/dx) */
     if(pat->dXYZ_dxyz)
     {
-      pat->dXYZ_dxyz(pat, node, -1, X, x, dXd);
+      pat->dXYZ_dxyz(pat, node, -1, X, x, dXdx);
       for(d=0; d<3; d++)
       {
         px[d][ijk] = x[d];
-        for(e=0; e<3; e++) pdXd[d][e][ijk] = dXd[d][e];
+        for(e=0; e<3; e++) pdXdx[d][e][ijk] = dXdx[d][e];
       }
-      det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXd);
+      det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
     }
     else /* assume X,Y,Z are Cartesian*/
     {
       for(d=0; d<3; d++)
       {
         px[d][ijk] = pX[d][ijk];
-        pdXd[d][d][ijk] = 1.;
+        pdXdx[d][d][ijk] = 1.;
       }
       det_dXbdx[ijk] = det_dXbYbZb_dXYZ;
     }
