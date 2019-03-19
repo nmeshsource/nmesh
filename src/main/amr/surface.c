@@ -638,7 +638,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       if(!found) errorexit("couldn't find nb face!!!");
 
       /* if nb has only node as neighbor we may not need to interpolate */
-      if(0 && nb->nfnb[nb_f] == 1)
+      if(1 && nb->nfnb[nb_f] == 1)
       {
         tMesh *mesh = node->pat->mesh;
         int ix = Ind("x");
@@ -667,7 +667,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         x0[0] = px[0][ind];
         x0[1] = px[1][ind];
         x0[2] = px[2][ind];
-        dist[0] = nearest_ijk_of_xyz_inplaneN(nb, odir, opl, inb[0], x0);
+        dist[0] = nearest_corner_of_xyz_inplaneN(nb, odir, opl, inb[0], x0);
         mx0 = magnitude_xyz(x0);
         if(mx0>0.) dist[0] = dist[0]/mx0; /* normalize dist */
 
@@ -677,7 +677,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         x0[0] = px[0][ind];
         x0[1] = px[1][ind];
         x0[2] = px[2][ind];
-        dist[1] = nearest_ijk_of_xyz_inplaneN(nb, odir, opl, inb[1], x0);
+        dist[1] = nearest_corner_of_xyz_inplaneN(nb, odir, opl, inb[1], x0);
         mx0 = magnitude_xyz(x0);
         if(mx0>0.) dist[1] = dist[1]/mx0; /* normalize dist */
 
@@ -687,7 +687,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         x0[0] = px[0][ind];
         x0[1] = px[1][ind];
         x0[2] = px[2][ind];
-        dist[2] = nearest_ijk_of_xyz_inplaneN(nb, odir, opl, inb[2], x0);
+        dist[2] = nearest_corner_of_xyz_inplaneN(nb, odir, opl, inb[2], x0);
         mx0 = magnitude_xyz(x0);
         if(mx0>0.) dist[2] = dist[2]/mx0; /* normalize dist */
 

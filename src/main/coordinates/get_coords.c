@@ -99,6 +99,7 @@ double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
 
     /* convert Xb to X coords */
     X_of_Xb_indir(node, N, Xb, &Xpl);
+    X[N]    = Xpl;
 
     /* make 2d n2 */
     for(dir=0; dir<3; dir++) n2[dir] = node->n[dir];
@@ -122,7 +123,6 @@ double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
       /* set X and then get x */
       X[dir1] = Cp[0]->d[ind];
       X[dir2] = Cp[1]->d[ind];
-      X[N]    = Xpl;
       set_xyz(0, node,-1, X, x);
     }
     else
@@ -154,6 +154,72 @@ double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
 
   return sqrt(dist2);
 }
+
+/* find i,j,k of corner closest to x0 in plane pl normal to N,
+   return distance */
+double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
+                                      int ijk[3], const double x0[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int ix = Ind("x");
+  double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+  int *n = node->n;
+  int dir1 = Dir1_norm(N);
+  int dir2 = Dir2_norm(N);
+  double Xpl=0, X[3], x[3];
+  int dir, i,j,k, ind;
+  double d1, d2, dist2 = 1e300;
+
+  /* if this node has no dat we need to compute x from Xb for each point */
+  if(!px[0])
+  {
+    double Xb = node->Xb[N]->d[pl]; /* Xb coord in plane pl */
+
+    /* convert Xb to X coords */
+    X_of_Xb_indir(node, N, Xb, &Xpl);
+    X[N] = Xpl;
+  }
+
+  forcornersN(N, i,j,k, n, pl)
+  {
+    /* check if we have x on this node */
+    if(!px[0])
+    {
+      int i1 = i1_norm(i,j,k, N);
+      int i2 = i2_norm(i,j,k, N);
+      double Xb;
+
+      /* set X */
+      Xb = node->Xb[dir1]->d[i1];
+      X_of_Xb_indir(node, dir1, Xb, &(X[dir1]));
+      Xb = node->Xb[dir2]->d[i2];
+      X_of_Xb_indir(node, dir2, Xb, &(X[dir2]));
+      /* get x from X */
+      set_xyz(0, node,-1, X, x);
+    }
+    else
+    {
+      ind = Ind_n(i,j,k, n);
+      for(dir=0; dir<3; dir++) x[dir] = px[dir][ind];
+    }
+
+    for(d2=0., dir=0; dir<3; dir++)
+    {
+      d1 = x[dir] - x0[dir];
+      d2 += d1*d1;
+    }
+    if(d2<dist2)
+    {
+      ijk[0] = i;
+      ijk[1] = j;
+      ijk[2] = k;
+      dist2 = d2;
+    }
+  }
+
+  return sqrt(dist2);
+}
+
 
 /* |\vec{x}| */
 double magnitude_xyz(const double x[3])

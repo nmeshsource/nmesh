@@ -162,6 +162,12 @@
   for(j=(p)*((N)==1); ( j<(n[1]) ) && ( ( j==(p) ) || (N)!=1 ); j++) \
   for(i=(p)*((N)==0); ( i<(n[0]) ) && ( ( i==(p) ) || (N)!=0 ); i++)
 
+/* like forplaneN but loop only over 4 corners */
+#define forcornersN(N, i,j,k, n, p) \
+  for(k=(p)*((N)==2); ( k<(n[2]) ) && ( ( k==(p) ) || (N)!=2 ); k+=(n[2])-1) \
+  for(j=(p)*((N)==1); ( j<(n[1]) ) && ( ( j==(p) ) || (N)!=1 ); j+=(n[1])-1) \
+  for(i=(p)*((N)==0); ( i<(n[0]) ) && ( ( i==(p) ) || (N)!=0 ); i+=(n[0])-1)
+
 /* same as forplaneN, but omit edges */
 #define forinnerplaneN(N, i,j,k, n, p) \
   for(k=1+((p)-1)*((N)==2); ( k<(n[2])-((N)!=2) ) && ( ( k==(p) ) || (N)!=2 ); k++) \

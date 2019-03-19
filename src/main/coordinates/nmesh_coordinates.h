@@ -24,6 +24,8 @@ int coordinates_init_node(tNode *node);
 void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3]);
 double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
                                    int ijk[3], const double x0[3]);
+double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
+                                      int ijk[3], const double x0[3]);
 double magnitude_xyz(const double x[3]);
 void XbYbZb_of_ijk(tNode *node, int i, int j, int k, double Xb[3]);
 void XbYbZb_of_ind(tNode *node, int ind, double Xb[3]);
