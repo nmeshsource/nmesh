@@ -38,10 +38,10 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
     /* flux at each point */
     forpoints(node, i)
     {
-      double up = u[i];
-      fx[i] = nx*up;
-      fy[i] = ny*up;
-      fz[i] = nz*up;
+      double u_i = u[i];
+      fx[i] = nx*u_i;
+      fy[i] = ny*u_i;
+      fz[i] = nz*u_i;
     }
 
    /* flux derivs */
@@ -129,29 +129,35 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   //int iu = vlu->index[0];
   int ix = Ind("x");
   char *advdir = Gets(Par("advection1_direction"));
-  double nx,ny,nz;
+  double nx,ny,nz, nmag;
   int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
+  nmag = (nx*nx + ny*ny + nz*nz);
 
   /* compute boundary flux terms */
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
+    tPat *pat = node->pat;
     int *n = node->n;
     double *r = Vard(node, ir);
     double *x = Vard(node, ix);
+    double *y = Vard(node, ix+1);
+    double *z = Vard(node, ix+2);
+    double t = node->time;
     double norm[3];
     int face, dir, p, i,j,k, ijk;
 
     /* go over each face */
     for(face=0; face<6; face++)
     {
+      tBface *bfaces = pat->bfaces[face];
       dir = face/2;
       p = (face%2)*(n[dir] - 1);
 
-      if(node->patface[face]) // && pat->bfaces[face]->outerbound ???
+      if(node->patface[face] && bfaces && bfaces->outerbound)
         forplaneN(dir, i,j,k, n, p)
         {
           ijk = Ind_n(i,j,k, n);
@@ -160,7 +166,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           /* if stuff is coming in */
           if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
           {
-            r[ijk] = -cos(x[ijk] - node->time);
+            r[ijk] = -nmag*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag*t);
           }
         }
     }
@@ -262,7 +268,12 @@ int advection1_init(tMesh *mesh)
   int ix =  Ind("x");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
+  char *advdir = Gets(Par("advection1_direction"));
+  double nx,ny,nz;
   int myid;
+
+  /* prop. dir.*/
+  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
 
   PRF;printf(": dt = %g\n", mesh->dt);
 
@@ -282,8 +293,10 @@ int advection1_init(tMesh *mesh)
     tNode *node = MyNode(mesh, myid);
     double *u = Vard(node, iu);
     double *x = Vard(node, ix);
+    double *y = Vard(node, ix+1);
+    double *z = Vard(node, ix+2);
     int i;
-    forpoints(node, i) u[i] = sin(x[i]);
+    forpoints(node, i) u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i]);
   }
 
   /* register u and its RHS with evolve */
@@ -298,7 +311,13 @@ int advection1_analyze(tMesh *mesh)
   int iu  = Ind("advection1_u");
   int iue = Ind("advection1_u_err");
   int ix =  Ind("x");
+  char *advdir = Gets(Par("advection1_direction"));
+  double nx,ny,nz, nmag;
   int myid;
+
+  /* prop. dir.*/
+  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
+  nmag = (nx*nx + ny*ny + nz*nz);
 
   if(PR) PRFs("\n");
 
@@ -309,12 +328,14 @@ int advection1_analyze(tMesh *mesh)
     double *u = Vard(node, iu);
     double *ue = Vard(node, iue);
     double *x = Vard(node, ix);
+    double *y = Vard(node, ix+1);
+    double *z = Vard(node, ix+2);
     double t = mesh->time;
     int i;
 
     forpoints(node, i)
     {
-      double ua = sin(x[i]-t);
+      double ua = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag*t);
       ue[i] = fabs(u[i]- ua);
     }
   }

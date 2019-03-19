@@ -389,6 +389,25 @@ int add_1cube_pat(tMesh *mesh, double *xc, double rout)
   return add_1box_pat(mesh, xc, dout);
 }
 
+/* add N box patches in a line in dir */
+int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
+                        int N, int dir)
+{
+  double x[] = { xc[0], xc[1], xc[2] };
+  double mid = xc[dir];
+  double L = 2.*(dout[dir] - mid);
+  double c = 0.5 * (!(N%2));
+  int s = N/2;
+  int i, ret=-1;
+
+  for(i=0; i<N; i++)
+  {
+    x[dir] = mid + L*(i - s + c);
+    ret = add_1box_pat(mesh, x, dout);
+  }
+  return ret;
+}
+
 
 /* add 6 pats with some kind of cubed spheres */
 /* call this before any pats exist already */

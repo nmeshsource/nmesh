@@ -117,6 +117,8 @@ int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
 int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1);
 int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
                                      double r0, double r1);
+int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
+                        int N, int dir);
 
 /* coordtrans_CubedSphere.c */
 int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,

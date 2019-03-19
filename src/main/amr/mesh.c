@@ -110,7 +110,9 @@ int setup_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
 
-  if(Getv(mesh_type, "CubedSpheres"))
+  if(Getv(mesh_type, "BoxMesh"))
+    return setup_box_mesh(mesh);
+  else if(Getv(mesh_type, "CubedSpheres"))
     return setup_CubedSphere_mesh(mesh);
   else if(Getv(mesh_type, "l2_mesh"))
     return setup_l2_mesh(mesh);
@@ -118,6 +120,60 @@ int setup_mesh(tMesh *mesh)
     return setup_3patchl2_mesh(mesh);
   else
     return setup_test_mesh(mesh);
+}
+
+/* setup mesh made out of boxes */
+int setup_box_mesh(tMesh *mesh)
+{
+  int mesh_type = Par("amr_mesh_type");
+  int npats = Geti(mesh_type);
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
+  double xc[]   = { 0.,0.,0. };
+  double dout[] = { 1.,1.,1. };
+  tNlist *el, *en;
+
+  PRFs(":\n");
+
+  mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  /* remove all patches to mesh, so we can just ad new pristine ones */
+  remove_all_patches(mesh);
+
+  /* put npats boxes in x-dir */
+  add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
+
+  /* setup all bfaces */
+  amr_set_all_bfaces(mesh);
+  printallbfaces(mesh);
+
+  /* now setup root node connections, i.e. setup neighbors of root nodes */
+  update_all_rnode_fnb(mesh);
+  printmesh(mesh);
+
+  /* 8 children in patch1 */
+  //make8children_in_mesh_lns_myln(mesh->lns->next, n);
+  //printmesh(mesh);
+
+  /* 8 more in each patch */
+  el = mesh->lns;
+  for(en = el->next; el; en = el ? el->next : 0)
+  {
+    if(el->node->l < 2)
+    {
+      make8children_in_mesh_lns_myln(el, n);
+      el = en;
+    }
+  }
+
+  simple_load_balance(mesh);
+  printmesh(mesh);
+
+  return 0;
 }
 
 /* a mesh with a number of cubed spheres */
