@@ -654,6 +654,7 @@ long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3])
 int XYZ_on_face_tol(tPat *pat, int *face, const double X[3], double tol)
 {
   double *bb=pat->bbox;
+  double diag = pat->bbdiag;
   int f;
   int nf;
 
@@ -661,8 +662,8 @@ int XYZ_on_face_tol(tPat *pat, int *face, const double X[3], double tol)
   for(nf=0, f=0; f<6; f++)
   {
     int d=f/2;
-    if(dequal_tol(X[d], bb[f], tol)) { face[f]=1; nf++; }
-    else                             { face[f]=0; }
+    if(dequal_tol(X[d], bb[f], tol*diag)) { face[f]=1; nf++; }
+    else                                  { face[f]=0; }
   }
   return nf; /* number of faces point is on */
 }

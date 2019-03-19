@@ -33,6 +33,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   tNlist *nlist;
   tPat *pat;
   int p = mesh->npats;
+  double dg;
   int i, ni, dir;
 
   /* make room for new patch in mesh and then add an empty patch */
@@ -40,8 +41,15 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   pat = alloc_patch(mesh, p, nmax);
   mesh->pat[p] = pat;
 
-  /* set bbox */
+  /* set bbox and bbdiag */
   for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
+  pat->bbdiag = 0.;
+  for(i=0; i<3; i++)
+  {
+    dg = bbox[2*i+1] - bbox[2*i];
+    pat->bbdiag += dg*dg;
+  }
+  pat->bbdiag = sqrt(pat->bbdiag);
 
   /* set diff, and other matrices */
   for(dir=0; dir<3; dir++)

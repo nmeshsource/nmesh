@@ -120,6 +120,7 @@ typedef struct tMYLNODES {
 /* the nodes fill a patch */
 typedef struct tPAT {
   double bbox[6];       /* bounding box (in X,Y,Z) of this patch */
+  double bbdiag;        /* length (in X,Y,Z-coords) of 3D-diagonal in bbox */
   int p;                /* index of this patch */
   struct tMESH *mesh;   /* pointer to mesh that contains patch */
   /* funcs to compute x,y,z from X,Y,Z and vice versa: */
