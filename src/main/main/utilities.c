@@ -65,7 +65,7 @@ double getTimeIn_s(void)
 void prTimeIn_s(char *comment)
 {
   double t_in_s = time(NULL) - time_in_s_at_nmesh_start;
-  printf("%s%.2fs\n", comment, t_in_s);
+  printf("%s%gs\n", comment, t_in_s);
   fflush(stdout);
 }
 

@@ -28,12 +28,14 @@ int main(int argc, char **argv)
   nMPI_Init(&argc, &argv);
   nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
 
+  /* set time when nmesh was started */
+  initTimeIn_s();
+
   /* make first mesh in which we store pars, vars and funs */
   mesh = make_empty_mesh(0);
   main_mesh = mesh; /* save this mesh in a global var as well */
 
   /* start the main parts of nmesh: */
-  initTimeIn_s();
   read_command_line(mesh, argc, argv);
   parse_parameter_file(mesh, Gets(Par("parameterfile")));
   parse_command_line_options(mesh);
@@ -167,6 +169,7 @@ int make_output_directory(tMesh *mesh)
 {
   char *outdir  = Gets(Par("outdir"));
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
+  char f[100];
   char so[1000];
   time_t mytime = time(NULL);       // get time
   char *time_str = ctime(&mytime);
@@ -224,24 +227,8 @@ int make_output_directory(tMesh *mesh)
   /* all wait here until mkdir is done. */
   nMPI_barrier();
 
-  /* redirect stdout and stderr. Do it for all MPI ranks>0
-     all output is collected in outdir/stdout.001 etc  */
-  if(nMPI_rank()>0)
-  {
-    char f[100];
-    snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
-    snprintf(so,999, f, outdir, nMPI_rank());
-    if(nMPI_rank()==1)
-    {
-      prdivider(3);
-      printf("*** NOTE ***  Output from other procs redirected to e.g.:\n %s\n",
-             so);
-      prdivider(3);
-    }
-    freopen(so, "w", stdout);
-    freopen(so, "w", stderr);
-  }
-  else if(!Getv(Par("logfile_creation"),"no"))
+  /* redirect stdout and stderr for rank0 */
+  if(Rank0 && !Getv(Par("logfile_creation"),"no"))
   {
     char *opt;
     snprintf(so,999, "%s.log", outdir);
@@ -255,6 +242,27 @@ int make_output_directory(tMesh *mesh)
     freopen(so, opt, stdout);
     freopen(so, opt, stderr);
   }
+
+  /* rank0 announces that others will be redirected as well */
+  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
+  if(Rank0 && nMPI_size()>1)
+  {
+    snprintf(so,999, f, outdir, 1);
+    prdivider(3);
+    printf("*** NOTE ***  Output from other procs redirected to e.g.:\n %s\n",
+           so);
+    prdivider(3);
+  }
+
+  /* redirect stdout and stderr. Do it for all MPI ranks>0
+     all output is collected in e.g. outdir/stdout.001 ... */
+  if(nMPI_rank()>0)
+  {
+    snprintf(so,999, f, outdir, nMPI_rank());
+    freopen(so, "w", stdout);
+    freopen(so, "w", stderr);
+  }
+
   /* say what we have after redirection: */
   prdivider(1);
   time_str[strlen(time_str)-1] = '\0';
