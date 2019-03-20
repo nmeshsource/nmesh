@@ -280,11 +280,11 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
   printmesh(mesh);
 
   /* 8 children in patch1 */
-  make8children_in_mesh_lns_myln(mesh->lns->next, n);
-  printmesh(mesh);
+//  make8children_in_mesh_lns_myln(mesh->lns->next, n);
+//  printmesh(mesh);
 
   /* 8 more in each patch */
-
+/*
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
@@ -294,7 +294,7 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
       el = en;
     }
   }
-
+*/
   simple_load_balance(mesh);
   printmesh(mesh);
 
