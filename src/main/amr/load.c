@@ -166,6 +166,8 @@ void move_node_to_rank(tNode *node, int desrank,
   int rank = nMPI_rank();
   int other, rq;
 
+  TIMER_START;
+
   if(setbufs) /* setup buffers and fill them */
   {
     if(PR) { PRF;printf(": nid%ld datrank%d rank%d desrank%d\n",
@@ -236,6 +238,8 @@ void move_node_to_rank(tNode *node, int desrank,
     node->datrank = desrank;
     if(PR) fflush(stdout);
   }
+
+  TIMER_STOP;
 }
 
 /* move all nodes in list to rank */

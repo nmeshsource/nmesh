@@ -364,6 +364,7 @@ int amr_set_all_bfaces(tMesh *mesh)
   int inclOuterBound = 1;
   int pr=1, p;
 
+  TIMER_START;
   PRFs(":\n");
 
   forpatches(mesh, p)
@@ -424,6 +425,7 @@ int amr_set_all_bfaces(tMesh *mesh)
 //  /* set some var indices if we need to interpolate */
 //  set_oXi_oYi_oZi_in_all_bfaces(mesh);
 
+  TIMER_STOP;
   return 0;
 }
 
