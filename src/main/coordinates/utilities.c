@@ -141,7 +141,16 @@ double inv3Dmat_from_3Dmat(double M[3][3], double invM[3][3])
   return DetM;
 }
 
-
+/* print 3x3 matrix */
+void print3Dmat(double M[3][3])
+{
+  int i,j;
+  for(i=0; i<3; i++)
+  {
+    for(j=0; j<3; j++) printf("%15g", M[i][j]);
+    printf("\n");
+  }
+}
 
 /* find pat size L of pat */
 double find_pat_size(tPat *pat)
@@ -276,7 +285,24 @@ void array_2dxdXb(tNode *node, int ind, int norm, tArray *aJ)
 
   /* set invM = dx^i/dX^j */
   inv3Dmat_from_3Dmat(M, invM);
+/*
+print3Dmat(M);
 
+//printnode(node);
+//printvar_innode(node, Ind("Y"));
+//printvar_innode(node, Ind("x"));
+//printvar_innode(node, Ind("y"));
+//printvar_innode(node, Ind("z"));
+tArray *A = alloc_array2d(3,3);
+point_array_a_to_data(A, M, 1);
+printarray(A);
+
+print3Dmat(invM);
+point_array_a_to_data(A, invM, 1);
+printarray(A);
+for(i=0; i<3; i++) printf("invM[i][1]=%g\n" , invM[i][1]);
+for(i=0; i<3; i++) printf("invM[i][2]=%g\n" , invM[i][2]);
+*/
   /* save dx^i/dXb^j = dx^i/dX^j / (dXb^j/dX^j) in array aJ */
   for(J=0, j=0; j<3; j++)
     if(j!=norm)
