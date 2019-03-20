@@ -957,7 +957,7 @@ X_from_C_on_face(nb->pat, nb_dir*2 , nbC, nbX);
 set_xyz(nb->pat,0,-1, nbX, nbx);
 
 // coords of point ll in face f:
-int i,j,k, ijk;
+int i,j, ijk;
 switch(dir)
 {
 case 0:
