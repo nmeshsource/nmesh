@@ -637,7 +637,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
             /* do nothing if this surface is NULL */
             if(s) s->ajsurf = s->nbsurf[0];
           }
-          return;
+          goto end_set_ajsurf_forall_vars;
         }
       }
     }
@@ -717,7 +717,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   /* do nothing if this surface is NULL */
                   if(s) s->ajsurf = s->nbsurf[0];
                 }
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
             if(inb[1][od1] == 0 && inb[1][od2] == on2-1)
@@ -726,7 +726,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with two axis interchanged */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,0);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
           }
@@ -740,7 +740,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with axis1 reversed */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,0);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
             if(inb[1][od1] == on1-1 && inb[1][od2] == on2-1)
@@ -749,7 +749,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with two axis interchanged and axis1 reversed */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,0);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
           }
@@ -763,7 +763,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with axis2 reversed */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,0,1);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
             if(inb[1][od1] == 0 && inb[1][od2] == 0)
@@ -772,7 +772,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with two axis interchanged and axis2 reversed */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,1);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
           }
@@ -786,7 +786,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with both axis reversed */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,1);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
             if(inb[1][od1] == on1-1 && inb[1][od2] == 0)
@@ -795,7 +795,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
               {
                 /* copy with two axis interchanged and both reversed */
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,1);
-                return;
+                goto end_set_ajsurf_forall_vars;
               }
             }
           }
@@ -809,7 +809,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   /* Ok if we get here we need interpolation */
   s1 = first_nonNULL_surf_in_dat(dat, f);
   /* do nothing if all sufaces are NULL */
-  if(!s1) return;
+  if(!s1) goto end_set_ajsurf_forall_vars;
   s1_n = s1->mysurf->n;
 
   /* array memory to store points of mysurf in X coords */
@@ -1033,6 +1033,7 @@ Res[ni]->d[ll], s->mysurf->d[ll]);
   free_array(Cp[1]);
   free_array(Cp[0]);
 
+end_set_ajsurf_forall_vars:
   TIMER_STOP;
 }
 

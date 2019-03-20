@@ -76,6 +76,7 @@ tTimer *timer_start(const char *name)
     t = timer_get(name);
     if(timer_MPI_barrier) nMPI_barrier();
     t->start = getTimeIn_s();
+    t->n += 1; /* func now has been called */
   }
   return t;
 }
@@ -96,7 +97,6 @@ tTimer *timer_stop(const char *name)
 
     /* save timing info */
     t->time += getTimeIn_s() - t->start;
-    t->n    += 1;
 
     /* t->start = -1 marks that timer is stopped now */
     t->start = -1.;
@@ -175,7 +175,6 @@ int write_all_timers(tMesh *mesh)
 
   /* read timer for main() */
   t = timer_update("main");
-  t->n = 1;
   total = t->time;
 
   /* open file */
