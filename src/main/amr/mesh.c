@@ -221,6 +221,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
         two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
       break;
     case 12:
+      dc = 1.0;
       xc[1] = xc[2] = dc*0.5;
       xc[0] = dc;
       two_spheres_around_empty_box_at_x0(mesh, xc, ssfac*dc, ssfac*obfac*dc);
