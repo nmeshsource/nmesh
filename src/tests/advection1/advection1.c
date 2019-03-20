@@ -185,6 +185,8 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
   int myid;
 
+  TIMER_START;
+
   /* compute flux */
   advection1_f_df(mesh, vlu);
 
@@ -255,6 +257,8 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   /* free arrays */
   free_array(a2gam);
   free_array(a2J);
+
+  TIMER_STOP;
 }
 
 
