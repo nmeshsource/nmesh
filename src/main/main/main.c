@@ -55,8 +55,8 @@ int main(int argc, char **argv)
     Sets(Par("outdir_previous_iteration"), Gets(Par("outdir")));
   }
 
-  finalize_mesh(mesh);
   TIMER_STOP;
+  finalize_mesh(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
   return 0;
