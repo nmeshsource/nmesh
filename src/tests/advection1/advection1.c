@@ -217,11 +217,11 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     int *n = node->n;
     double *r  = Vard(node, ir);
     double *ooJ = Vard(node, iooJ);
-    double dXbdX[3];
+    //double dXbdX[3];
     int face;
 
-    /* get dXb/dX needed for induced 2-metric 2gam */
-    dXbYbZb_dXYZ(node, dXbdX);
+    ///* get dXb/dX needed for induced 2-metric 2gam */
+    //dXbYbZb_dXYZ(node, dXbdX);
 
     for(face=0; face<6; face++)
     {
@@ -245,7 +245,27 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         mm_array0_norestrict(a2J,a2J, a2gam); // for now assume gam = flat
         det2dxdXb = det_2_2array(a2gam);
         sqrtdet2gam = sqrt(det2dxdXb);
+/*
+if(face==1 && j==1 && k==2 && myid==5)
+{
+printf("nid%ld l%d i=%d ", node->nid, node->l, i);
+printarray_matrix0(a2J);
+printarray_matrix0(a2gam);
 
+
+printnode(node);
+double dXbdX[3];
+dXbYbZb_dXYZ(node, dXbdX);
+for(int l=0; l<3; l++) printf("WWWWW %g\n", dXbdX[l]);
+
+
+double det_dXbYbZb_dXYZ = dXbdX[0] * dXbdX[1] * dXbdX[2];
+printf("det_dXbYbZb_dXYZ=%g\n", det_dXbYbZb_dXYZ);
+
+printf("det_dXbdx = ooJ[ijk]=%g\n", ooJ[ijk]);
+exit(8);
+}
+*/
         r[ijk] -= F[JK] * sqrtdet2gam * ooJ[ijk] / w[i0];
       }
     }
