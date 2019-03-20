@@ -120,7 +120,7 @@ void printnode(tNode *n)
   //for(i=0; i<6; i++) printf(" %ld", get_node_nid(n->nb[i]));
   for(i=0; i<6; i++) printf(" %s", nodename(n->nb[i],s,99));
   //printf("   parent->nid=%ld\n", get_node_nid(n->parent));
-  printf("   parent->nid=%s\n", nodename(n->parent,s,99));
+  printf("    parent=%s\n", nodename(n->parent,s,99));
   printf(" fnb =");
   for(i=0; i<6; i++)
   {

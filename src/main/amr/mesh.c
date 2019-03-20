@@ -442,18 +442,18 @@ void test_array_thingies(tMesh *mesh)
   n[0]=2; n[1]=2; n[2]=1;
   tArray *Aa = alloc_array(n);
   //Aa->d = A;
-  point_array_a_to_data(Aa, A);
+  point_array_a_to_data(Aa, A, 1);
   //Aa->n[0]=3; Aa->n[1]=2; Aa->n[1]=1;
 
   tArray *B0a = alloc_array(nB0);
   //B0a->d = B0;
-  point_array_a_to_data(B0a, B0);
+  point_array_a_to_data(B0a, B0, 1);
   tArray *B1a = alloc_array(nB1);
   //B1a->d = B1;
-  point_array_a_to_data(B1a, B1);
+  point_array_a_to_data(B1a, B1, 1);
   tArray *B2a = alloc_array(nB2);
   //B2a->d = B2;
-  point_array_a_to_data(B2a, B2);
+  point_array_a_to_data(B2a, B2, 1);
 
   int nC0[] = {2,3,4};
   tArray *C0a = alloc_array(nC0);
