@@ -275,3 +275,11 @@ size_t fread_little(double *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fread_big(double *ptr, size_t size, size_t nmemb, FILE *fp);
+
+/* timer.c */
+int write_all_timers(tMesh *mesh);
+int free_all_timers(tMesh *mesh);
+struct tTIMER *timer_start(const char *name);
+struct tTIMER *timer_stop(const char *name);
+#define TIMER_START timer_start(__func__)
+#define TIMER_STOP  timer_stop(__func__)

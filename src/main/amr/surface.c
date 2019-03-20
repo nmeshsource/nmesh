@@ -382,6 +382,8 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
 {
   int myid;
 
+  TIMER_START;
+
   /* If we want threads in this loop, we need MPI_Init_thread with
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
   formylnodes_noomp(mesh, myid)
@@ -389,6 +391,7 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
     tNode *node = MyNode(mesh, myid);
     request_all_surfaces_exchange(node);
   }
+  TIMER_STOP;
 }
 
 
@@ -510,6 +513,8 @@ void get_all_myln_surfaces(tMesh *mesh)
 {
   int myid;
 
+  TIMER_START;
+
   /* If we want threads in this loop, we need MPI_Init_thread with
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
   formylnodes_noomp(mesh, myid)
@@ -525,6 +530,8 @@ void get_all_myln_surfaces(tMesh *mesh)
     tNode *node = MyNode(mesh, myid);
     free_dat_reqs_after_Waitall_com_send(node);
   }
+
+  TIMER_STOP;
 }
 
 
@@ -606,6 +613,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tDat *dat = node->dat;
 
   if(!dat) return;
+
+  TIMER_START;
 
   /* if there is only 1 neighbor we may not need to interpolate */
   if(nnb == 1)
@@ -1023,6 +1032,8 @@ Res[ni]->d[ll], s->mysurf->d[ll]);
   free(Ip);
   free_array(Cp[1]);
   free_array(Cp[0]);
+
+  TIMER_STOP;
 }
 
 

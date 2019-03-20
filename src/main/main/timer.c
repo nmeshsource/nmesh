@@ -9,7 +9,7 @@ extern tMesh *main_mesh;
 
 
 /* timer data base */
-typedef struct {
+typedef struct tTIMER {
   char *name;    /* name of function we time */
   double start;  /* time when timer was started */
   double time;   /* time in s spent in this func */
@@ -29,7 +29,7 @@ static int timer_MPI_barrier = 0;
 
 /* get or make a new timer for the function named "name",
    returns pointer to entry for name */
-tTimer *timer_get(char *name)
+tTimer *timer_get(const char *name)
 {
   int i;
 
@@ -58,12 +58,12 @@ tTimer *timer_get(char *name)
 
 
 /* start a timer */
-void timer_start(char *name)
+tTimer *timer_start(const char *name)
 {
+  tTimer *t = 0;
+
   if(timer_on)
   {
-    tTimer *t;
-
     /* is this the first time we start a timer? */
     if(timer_on == -1)
     {
@@ -77,17 +77,20 @@ void timer_start(char *name)
     if(timer_MPI_barrier) nMPI_barrier();
     t->start = getTimeIn_s();
   }
+  return t;
 }
 
 /* stop timer */
-void timer_stop(char *name)
+tTimer *timer_stop(const char *name)
 {
+  tTimer *t = 0;
+
   if(timer_on)
   {
-    tTimer *t = timer_get(name);
+    t = timer_get(name);
 
     /* t->start = -1 marks that timer is stopped already */
-    if(t->start < 0.) return;
+    if(t->start < 0.) return t;
 
     if(timer_MPI_barrier) nMPI_barrier();
 
@@ -98,10 +101,25 @@ void timer_stop(char *name)
     /* t->start = -1 marks that timer is stopped now */
     t->start = -1.;
   }
+  return t;
+}
+
+/* update time field of timer without stopping it */
+tTimer *timer_update(const char *name)
+{
+  tTimer *t = 0;
+
+  if(timer_on)
+  {
+    timer_stop(name);
+    t = timer_start(name);
+    t->n -= 1;
+  }
+  return t;
 }
 
 /* read out timer without stopping it */
-double timer_read(char *name)
+double timer_read(const char *name)
 {
   if(timer_on)
   {
@@ -110,7 +128,7 @@ double timer_read(char *name)
     /* t->start = -1 marks that timer is stopped already */
     if(t->start < 0) return -1.;
 
-    return getTimeIn_s() - t->start;
+    return getTimeIn_s() - t->start + t->time;
   }
   return -1.;
 }
@@ -137,8 +155,8 @@ int timer_compar(const void *x1, const void *x2)
   tTimer *const *t1 = x1;
   tTimer *const *t2 = x2;
 
-  if(t1[0]->time < t2[0]->time) return -1;
-  if(t1[0]->time > t2[0]->time) return  1;
+  if(t1[0]->time < t2[0]->time) return 1;
+  if(t1[0]->time > t2[0]->time) return -1;
   return 0;
 }
 
@@ -156,15 +174,22 @@ int write_all_timers(tMesh *mesh)
   if (!timer_on) return 0;
 
   /* read timer for main() */
-  total = timer_read("main");
+  t = timer_update("main");
+  t->n = 1;
+  total = t->time;
 
   /* open file */
   snprintf(f, 100, "%%s/timer.%%0%dd", (int) log10(nMPI_size())+1);
   snprintf(s, 1000, f, outdir, nMPI_rank());
   fp = fopen(s, "a");
   if(!fp) errorexits("could not open %s", s);
-  fprintf(fp, "Timers at iteration %d, time %g\n",
-          mesh->iteration, mesh->time);
+  fprintf(fp, "---------------------------------------------------------"
+          "---------------------\n");
+  fprintf(fp, "iteration %d, time %g\n", mesh->iteration, mesh->time);
+  fprintf(fp, "Function calls                                      %%"
+          "        time/s     calls\n");
+  fprintf(fp, "---------------------------------------------------------"
+          "---------------------\n");
 
   /* sort according to time spent */
   qsort(tdb, ntimers, sizeof(tdb[0]), timer_compar);
@@ -174,9 +199,9 @@ int write_all_timers(tMesh *mesh)
   {
     t   = tdb[i];
     pct = 100. * t->time/total;
-    fprintf(fp, "%-24s %5.1f  %10.3f %7ld\n", t->name, pct, t->time, t->n);
+    fprintf(fp, "%-49s %6.2f %11.3f %8ld\n", t->name, pct, t->time, t->n);
   }
-  fprintf(fp,"\n");
+  fprintf(fp, "\n\n");
   fclose(fp);
   return 0;
 }

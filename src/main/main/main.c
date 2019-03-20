@@ -41,6 +41,7 @@ int main(int argc, char **argv)
   parse_command_line_options(mesh);
   make_output_directory(mesh);
   initialize_libraries(mesh);
+  TIMER_START;
 
   iterate_parameters(mesh, 0); /* start of new iteration */
   while(iterate_parameters(mesh, 1))
@@ -55,6 +56,7 @@ int main(int argc, char **argv)
   }
 
   finalize_mesh(mesh);
+  TIMER_STOP;
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
   return 0;
