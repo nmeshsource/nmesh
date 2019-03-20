@@ -187,7 +187,7 @@ int write_all_timers(tMesh *mesh)
           "---------------------\n");
   fprintf(fp, "iteration %d, time %g\n", mesh->iteration, mesh->time);
   fprintf(fp, "Function calls                                      %%"
-          "        time/s     calls\n");
+          "      time/s       calls\n");
   fprintf(fp, "---------------------------------------------------------"
           "---------------------\n");
 
@@ -199,7 +199,7 @@ int write_all_timers(tMesh *mesh)
   {
     t   = tdb[i];
     pct = 100. * t->time/total;
-    fprintf(fp, "%-49s %6.2f %11.3f %8ld\n", t->name, pct, t->time, t->n);
+    fprintf(fp, "%-49s %6.2f %9.2e %10ld\n", t->name, pct, t->time, t->n);
   }
   fprintf(fp, "\n\n");
   fclose(fp);
