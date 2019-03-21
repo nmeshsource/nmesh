@@ -194,7 +194,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double dc = 0.5;
   double csize = 0.375;
   double ssfac = 4.;
-  double obfac = 4.; // 10000 in DNSdata
+  double obfac = 6.; // 10000 in DNSdata
   double xc[3], rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
   tNlist *el, *en;
@@ -239,7 +239,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
       break;
     case 12:
-      rc[1] = rc[2] = dc*0.5;
+      rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
       two_spheres_around_empty_box_at_x0(mesh, rc, ssfac*dc, ssfac*obfac*dc);
       break;
@@ -284,11 +284,11 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
   printmesh(mesh);
 
   /* 8 children in patch1 */
-//  make8children_in_mesh_lns_myln(mesh->lns->next, n);
-//  printmesh(mesh);
+  make8children_in_mesh_lns_myln(mesh->lns->next, n);
+  printmesh(mesh);
 
   /* 8 more in each patch */
-/*
+
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
@@ -298,7 +298,7 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
       el = en;
     }
   }
-*/
+
   simple_load_balance(mesh);
   printmesh(mesh);
 /*
