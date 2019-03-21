@@ -647,13 +647,13 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       if(!found) errorexit("couldn't find nb face!!!");
 
       /* if nb has only node as neighbor we may not need to interpolate */
-      if(1 && nb->nfnb[nb_f] == 1)
+      if(0 && nb->nfnb[nb_f] == 1)
       {
         tMesh *mesh = node->pat->mesh;
         int ix = Ind("x");
         double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
         int *n = node->n;
-        int pl = (n[dir]-1)* f%2;
+        int pl = (n[dir]-1)*(f%2);
         int d1 = Dir1_norm(dir);
         int d2 = Dir2_norm(dir);
         int n1 = n[d1];
@@ -663,7 +663,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         int inb[3][3];
         double x0[3], dist[3], mx0;
         int odir = nb_f/2;
-        int opl = (nb_n[odir]-1)* nb_f%2;
+        int opl = (nb_n[odir]-1)*(nb_f%2);
         int od1 = Dir1_norm(odir);
         int od2 = Dir2_norm(odir);
         int on1 = nb_n[od1];
@@ -699,6 +699,10 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         dist[2] = nearest_corner_of_xyz_inplaneN(nb, odir, opl, inb[2], x0);
         mx0 = magnitude_xyz(x0);
         if(mx0>0.) dist[2] = dist[2]/mx0; /* normalize dist */
+
+pr3v("dist", dist);
+printf("f%d i,j,k: %d %d %d dir%d pl%d nb_f%d odir%d opl%d\n",
+f, i,j,k, dir,pl, nb_f,odir,opl);
 
         /* if all 3 points coincide with grid points of nb we can copy */
         if(dist[0]<=dequaleps && dist[1]<=dequaleps && dist[2]<=dequaleps)
