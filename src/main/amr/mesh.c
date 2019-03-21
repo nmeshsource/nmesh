@@ -189,12 +189,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  double rf_surf1 = 0.5;
-  double rf_surf2 = 0.5;
-  double dc = 1.0;
+  double rf_surf1 = 0.25;
+  double rf_surf2 = 0.25;
+  double dc = 0.5;
   double csize = 0.375;
   double ssfac = 4.;
-  double obfac = 10; // 10000 in DNSdata
+  double obfac = 4.; // 10000 in DNSdata
   double xc[3], rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
   tNlist *el, *en;
@@ -234,7 +234,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
         two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
       break;
     case 6:
-      rc[1] = rc[2] = dc; //dc*0.5;
+      rc[1] = rc[2] = dc*0.5;
       rc[0] = dc;
       sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
       break;
