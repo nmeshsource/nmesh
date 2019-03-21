@@ -4,6 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
+#define PR 0
 
 /* functions to exchange surface data */
 
@@ -700,9 +701,11 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         mx0 = magnitude_xyz(x0);
         if(mx0>0.) dist[2] = dist[2]/mx0; /* normalize dist */
 
-pr3v("dist", dist);
-printf("f%d i,j,k: %d %d %d dir%d pl%d nb_f%d odir%d opl%d\n",
-f, i,j,k, dir,pl, nb_f,odir,opl);
+        //pr3v("dist", dist);
+        //printf("f%d i,j,k: %d %d %d dir%d pl%d nb_f%d odir%d opl%d\n",
+        //       f, i,j,k, dir,pl, nb_f,odir,opl);
+        if(PR) { PRF;printf(": node->nid=%ld nb->nid=%ld  f%d nb_f=%d\n",
+                            node->nid, nb->nid, f, nb_f); }
 
         /* if all 3 points coincide with grid points of nb we can copy */
         if(dist[0]<=dequaleps && dist[1]<=dequaleps && dist[2]<=dequaleps)
@@ -715,6 +718,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == 0 && inb[2][od2] == on2-1)
               {
                 /* just copy by pointing to same array */
+                if(PR) printf("  point ajsurf to nbsurf[0]\n");
                 for(vi=0; vi<dat->nv; vi++)
                 {
                   tSurface *s = dat->s[f][vi];
@@ -729,6 +733,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == on1-1 && inb[2][od2] == 0)
               {
                 /* copy with two axis interchanged */
+                if(PR) printf("  copy from nbsurf[0] with two axis interchanged\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,0);
                 goto end_set_ajsurf_forall_vars;
               }
@@ -743,6 +748,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == on1-1 && inb[2][od2] == on2-1)
               {
                 /* copy with axis1 reversed */
+                if(PR) printf("  copy from nbsurf[0] with axis1 reversed\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,0);
                 goto end_set_ajsurf_forall_vars;
               }
@@ -752,6 +758,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == 0 && inb[2][od2] == 0)
               {
                 /* copy with two axis interchanged and axis1 reversed */
+                if(PR) printf("  copy from nbsurf[0] with two axis interchanged and axis1 reversed\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,0);
                 goto end_set_ajsurf_forall_vars;
               }
@@ -766,6 +773,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == 0 && inb[2][od2] == 0)
               {
                 /* copy with axis2 reversed */
+                if(PR) printf("  copy from nbsurf[0] with axis2 reversed\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,0,1);
                 goto end_set_ajsurf_forall_vars;
               }
@@ -775,6 +783,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == on1-1 && inb[2][od2] == on2-1)
               {
                 /* copy with two axis interchanged and axis2 reversed */
+                if(PR) printf("  copy from nbsurf[0] with two axis interchanged and axis2 reversed\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,1);
                 goto end_set_ajsurf_forall_vars;
               }
@@ -789,6 +798,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == on1-1 && inb[2][od2] == 0)
               {
                 /* copy with both axis reversed */
+                if(PR) printf("  copy from nbsurf[0] with both axis reversed\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,1);
                 goto end_set_ajsurf_forall_vars;
               }
@@ -798,6 +808,7 @@ f, i,j,k, dir,pl, nb_f,odir,opl);
               if(inb[2][od1] == 0 && inb[2][od2] == on2-1)
               {
                 /* copy with two axis interchanged and both reversed */
+                if(PR) printf("  copy from nbsurf[0] with both axis interchanged and both reversed\n");
                 copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,1);
                 goto end_set_ajsurf_forall_vars;
               }
