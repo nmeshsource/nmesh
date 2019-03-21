@@ -83,7 +83,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     {
       double *F = Vard(node, iF+face);
       double *uaj = Varaj(node, iu, face);
-
+tArray *aua  = alloc_array2d(5,5);
       dir = face/2;
       p = (face%2)*(n[dir] - 1);
       forplaneN(dir, i,j,k, n, p)
@@ -101,6 +101,26 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
             FNx = uaj[JK] * nx;
             FNy = uaj[JK] * ny;
             FNz = uaj[JK] * nz;
+
+double nmag = (nx*nx + ny*ny + nz*nz);
+int ix = Ind("x");
+double *x = Vard(node, ix);
+double *y = Vard(node, ix+1);
+double *z = Vard(node, ix+2);
+double t = mesh->time;
+double ua = sin(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag*t);
+aua->d[JK] = ua;
+FNx = ua * nx;
+FNy = ua * ny;
+FNz = ua * nz;
+if(0)// && i==0 && k==0)
+{
+printf("i,j,k: %d %d %d face%d nid%ld  ", i,j,k, face, node->nid);
+pr3v("norm",norm);printf("\n");
+//printvar_innode(node, iu);
+//printvar_innode(node->fnb[face][0], iu);
+//printvar_ajsurfdiff(node, iu);
+}
           }
           else
           {
@@ -118,6 +138,20 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
                 (FNy - fy[ijk])*norm[1] +
                 (FNz - fz[ijk])*norm[2];
       }
+if(face==3 && node->nid==0 && VarAaj(node, iu, face))
+{
+double rdif = Lp_norm_array_diff(VarAaj(node, iu, face), aua, 2.);
+printf("rdif=%g\n", rdif);
+if(0 && rdif>0.2)
+{
+array_diff(aua, VarAaj(node, iu, face),aua);
+//printarray(VarAaj(node, iu, face));
+printarray(aua);
+rdif = Lp_norm_array(aua, 2);
+printf("rdif2=%g\n", rdif);
+}
+}
+free_array(aua);
     }
   }
 }
@@ -167,6 +201,8 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
           {
             r[ijk] = -nmag*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag*t);
+//printf("i,j,k: %d %d %d face%d nid%ld  ", i,j,k, face, node->nid);
+//pr3v("norm",norm);printf("\n");
           }
         }
     }
@@ -246,7 +282,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         det2dxdXb = det_2_2array(a2gam);
         sqrtdet2gam = sqrt(det2dxdXb);
 /*
-if(face==1 && j==1 && k==2 && myid==5)
+if(face==1 && j==1 && k==2 && myid==0)
 {
 printf("nid%ld l%d i=%d ", node->nid, node->l, i);
 printarray_matrix0(a2J);
@@ -263,6 +299,11 @@ double det_dXbYbZb_dXYZ = dXbdX[0] * dXbdX[1] * dXbdX[2];
 printf("det_dXbYbZb_dXYZ=%g\n", det_dXbYbZb_dXYZ);
 
 printf("det_dXbdx = ooJ[ijk]=%g\n", ooJ[ijk]);
+
+double norm[3];
+node_normal_at_ijk(node, face, ijk, norm);
+printf("i,j,k: %d %d %d face%d norm[0]=%g\n", i,j,k, face, norm[0]);
+
 exit(8);
 }
 */
