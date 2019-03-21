@@ -240,9 +240,12 @@ void array_reldiff(tArray *D, tArray *A, tArray *B)
 /* norm of A-B */
 double Lp_norm_array_diff(tArray *A, tArray *B, double p)
 {
-  tArray *D = alloc_array(A->n);
+  tArray *D;
   double norm;
 
+  if(!A) errorexit("A is NULL");
+
+  D = alloc_array(A->n);
   array_diff(D, A, B);
   norm = Lp_norm_array(D, p);
   free_array(D);
@@ -252,9 +255,12 @@ double Lp_norm_array_diff(tArray *A, tArray *B, double p)
 /* norm of (A-B)/B */
 double Lp_norm_array_reldiff(tArray *A, tArray *B, double p)
 {
-  tArray *D = alloc_array(A->n);
+  tArray *D;
   double norm;
 
+  if(!A) errorexit("A is NULL");
+
+  D = alloc_array(A->n);
   array_reldiff(D, A, B);
   norm = Lp_norm_array(D, p);
   free_array(D);
