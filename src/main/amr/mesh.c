@@ -221,6 +221,14 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
                             xc, dc, ssfac*dc, ABrct);
       break;
+    case 2:
+      dc = 1.0;
+      xc[0] = xc[1] = xc[2] = 0.0;
+      add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
+                            xc, dc, ssfac*dc, ABrct);
+      add_1_CubedSphere_pat(mesh, 2, outerCubedSphere,0,0,
+                            xc, dc, ssfac*dc, ABrct);
+      break;
     case 3:
       if(Getv(mesh_type, "dom1"))
         two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
@@ -297,9 +305,31 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
 */
   simple_load_balance(mesh);
   printmesh(mesh);
-
-//errorexit("stop");
-
+/*
+{
+tNode *node = mesh->lns->node;
+tNode *nb = mesh->lns->next->node;
+int *n = node->n;
+int f,i,j,k, dir, pl, ind;
+int odir, opl, inb[3];
+int ix = Ind("x");
+double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+double x0[3], dist[3], mx0;
+f=3;
+dir =f/2;
+pl= 4;
+ijk_inplaneN(dir, i,j,k, 0,0,pl);
+ind = Ind_n(i,j,k, n);
+x0[0] = px[0][ind];
+x0[1] = px[1][ind];
+x0[2] = px[2][ind];
+dist[2] = nearest_corner_of_xyz_inplaneN(nb, odir, opl, inb, x0);
+mx0 = magnitude_xyz(x0);
+if(mx0>0.) dist[2] = dist[2]/mx0;
+pr3v("x0",x0);
+errorexit("we stop now");
+}
+*/
   return 0;
 }
 
