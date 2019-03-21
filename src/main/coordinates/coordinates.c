@@ -118,6 +118,16 @@ int coordinates_init_node(tNode *node)
     if(pat->dXYZ_dxyz)
     {
       pat->dXYZ_dxyz(pat, node, -1, X, x, dXdx);
+      if(0) if( !isfinite(x[0]) || !isfinite(x[1]) || !isfinite(x[2]) )
+      {
+        printpatch(pat);
+        printCI(pat);
+        printnode(node);
+        pr3v("X", X);
+        pr3v("x", x);
+        errorexit("x is NAN");
+      }
+
       for(d=0; d<3; d++)
       {
         px[d][ijk] = x[d];
