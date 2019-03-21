@@ -1,5 +1,5 @@
 rename nmag in advection.c into nmag2
-
+check if copy works across patch boundaries
 
 2 good patch tests:
 -------------------

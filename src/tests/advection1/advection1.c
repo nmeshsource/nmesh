@@ -83,7 +83,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     {
       double *F = Vard(node, iF+face);
       double *uaj = Varaj(node, iu, face);
-tArray *aua  = alloc_array2d(5,5);
+tArray *aua  = alloc_array2d(9,9);
       dir = face/2;
       p = (face%2)*(n[dir] - 1);
       forplaneN(dir, i,j,k, n, p)
@@ -110,9 +110,9 @@ double *z = Vard(node, ix+2);
 double t = mesh->time;
 double ua = sin(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag*t);
 aua->d[JK] = ua;
-FNx = ua * nx;
-FNy = ua * ny;
-FNz = ua * nz;
+//FNx = ua * nx;
+//FNy = ua * ny;
+//FNz = ua * nz;
 if(0)// && i==0 && k==0)
 {
 printf("i,j,k: %d %d %d face%d nid%ld  ", i,j,k, face, node->nid);
@@ -305,9 +305,12 @@ node_normal_at_ijk(node, face, ijk, norm);
 printf("i,j,k: %d %d %d face%d norm[0]=%g\n", i,j,k, face, norm[0]);
 
 exit(8);
+//printf("i0=%d w[i0]=%g\n", i0, w[i0]);
+//printf("sqrtdet2gam=%g\n", sqrtdet2gam);
+//if(face==3 && node->nid==0) printf("ooJ[ijk]=%g\n", ooJ[ijk]);
 }
 */
-        r[ijk] -= F[JK] * sqrtdet2gam * ooJ[ijk] / w[i0];
+        r[ijk] -= F[JK] * sqrtdet2gam * fabs(ooJ[ijk])/ w[i0];
       }
     }
   }
