@@ -1,3 +1,6 @@
+rename nmag in advection.c into nmag2
+
+
 2 good patch tests:
 -------------------
 1.:
