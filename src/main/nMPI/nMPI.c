@@ -364,6 +364,17 @@ void *get_com_recv_buf(tCom *com, int rq)
 {
   return com->recv_buf[rq];
 }
+
+/* set com buffer pointers */
+void set_com_send_buf(tCom *com, int rq, void *send_buf)
+{
+  com->send_buf[rq] = send_buf;
+}
+void set_com_recv_buf(tCom *com, int rq, void *recv_buf)
+{
+  com->recv_buf[rq] = recv_buf;
+}
+
 /* set the counter in com */
 void set_com_counters(tCom *com, int si, int ri)
 {
