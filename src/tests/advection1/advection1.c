@@ -253,11 +253,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     int *n = node->n;
     double *r  = Vard(node, ir);
     double *ooJ = Vard(node, iooJ);
-    //double dXbdX[3];
     int face;
-
-    ///* get dXb/dX needed for induced 2-metric 2gam */
-    //dXbYbZb_dXYZ(node, dXbdX);
 
     for(face=0; face<6; face++)
     {
