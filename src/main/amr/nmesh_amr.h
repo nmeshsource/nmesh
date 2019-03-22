@@ -223,6 +223,7 @@ typedef struct tARRAY {
   int d_nofree; /* d_nofree=1 if free_array should not free d */
   int ns;       /* number of segments */
   int si;       /* segment index */
+  int info;     /* space to save extra info, e.g. MPI req. numbers or tags */
 //  void *par;    /* pointer to some extra pars */
 } tArray;
 /* NOTE: the anon. union is used to be able to store either double or int in
@@ -257,6 +258,7 @@ tMesh *make_empty_mesh(int pr);
 tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 
 /* storage.c */
+tArray *alloc_empty_array_with_segs(int n[3], int ns);
 tArray *alloc_array_with_segs(int n[3], int ns);
 tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);

@@ -177,7 +177,7 @@ void set_mysurf(tSurface *s)
   if(s->allocd_mysurf)
     copy_array_plane(dat->v[vi], dir, p, s->mysurf, 0);
   else
-    s->mysurf = dat->v[vi];
+    s->mysurf = dat->v[vi]; //FIXME: this should be set only in init_surface
 }
 
 /* set all mysurf of a node */
@@ -337,7 +337,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
         }
 
         /* save MPI request number in the array */
-        s->nbsurf[ni]->d[0] = rq;
+        s->nbsurf[ni]->info = rq;
 
         /* fill buffer for MPI exchange: sbuf[] = s->mysurf->d[] */
         memcpy(sbuf+cnt, s->mysurf->d, my_N * sizeof(sbuf[0]));
@@ -437,7 +437,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   //PRF;printf(": nvars=%d\n", nvars);
 
   /* get MPI request number */
-  rq = dat->s[face][vi]->nbsurf[ni]->d[0];
+  rq = dat->s[face][vi]->nbsurf[ni]->info;
   /* find our recv buffer */
   rbuf = get_com_recv_buf(com, rq);
 
