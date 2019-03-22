@@ -51,21 +51,34 @@ Things that need to be done urgently:
      patches are non-linear funcs of each other!
  -check if copy works across patch boundaries: seems ok
 
-
 *evolve module in main: DONE!
 -struct with slots for evo varlists & RHSs for several systems (Z4 + grhd)
 -allow explicit time dependence in RHS
 -keep open mind about node dependent dt
 
-*advection Eqn: DONE!
+*advection Eqn with DG: DONE!
+ -check error:
+
+*some timing to see what needs to be optimized
 
 *flux integral conservation
  -make integrals
  -make 3d vol int.
 
-*DG
-
 *Burgers
+
+*good 2d qnd 3d output
+ -What hdf5? format can be used, that VisIt reads directly, without storing
+  all x,y,z coords in the file for each field???
+
+*DG with 3-metric
+ -I think node_normal_at_ijk then is just n_i. Need metric to get n^i...
+ -Is this needed? Can we redefine \sqrt{\gamma} u -> u ?
+
+*DG and metric identities
+ -do we need a non-diagonal mass matrix?
+   In Teukolsky there is no big diff.,
+   but in Bugner's thesis mass cons improves... ???
 
 
 Things that should be done:
@@ -78,7 +91,8 @@ Things that should be done:
 
 Cleanup:
 ========
-remove/fix/replace: mark_points_in_nb_f
+-remove/fix/replace: mark_points_in_nb_f
+-remove some comment and if(0) blocks
 
 -----------------------------------------------------------------
 
@@ -111,7 +125,7 @@ Plan0:
  node sends 4*16 points and 4 nb send 4*4 points
 *node needs to interpolate values to 4*16 points
 *each of the 4 nb has to interpolate only to 4 points (not balanced)
--> load is not balanced, node interpolats and sends more, 5*16 points are sent
+-> load is not balanced, node interpolates and sends more, 5*16 points are sent
 
 => Plan1 is more balanced, but Plan0 sends less
 
@@ -130,6 +144,9 @@ How does EinsteinToolkit do its great AMR?
  -if we add other stuff like neutrino transport, e.g. Blotzmann eqn we can
   1. add more entries to tNode regarding extra things
   2. add new struct for Boltzmann and distribute it
+
+*If we ever regret using MPI, as opposed to e.g. Chram++
+ +consider: AMPI - Adaptive Message Passing Interface
 
 *OpenMP:
  -give many nodes to each MPI proc, use OpenMP loops over these loops

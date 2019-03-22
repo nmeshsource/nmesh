@@ -1132,9 +1132,19 @@ tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
    return element with 0th child */
 tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
 {
-  tNode *parent = elem->node;
-  tNlist *children = make8_child_nodes(parent, n);
-  return replace1_in_mesh_lns_myln(elem, children);
+  tNode *parent;
+  tNlist *children;
+  tNlist *children0;
+
+  TIMER_START;
+
+  parent = elem->node;
+  children = make8_child_nodes(parent, n);
+  children0 = replace1_in_mesh_lns_myln(elem, children);
+
+  TIMER_STOP;
+
+  return children0;
 }
 
 /* replace siblings at element sib of mesh->lns by parent,
@@ -1179,9 +1189,15 @@ tNode *remove8siblings_in_mesh_lns(tNlist *sib)
    destroy the 8 siblings */
 void destroy8siblings_in_mesh_lns_myln(tNlist *sib)
 {
-  tNode *parent = remove8siblings_in_mesh_lns(sib);
+  tNode *parent;
+
+  TIMER_START;
+
+  parent = remove8siblings_in_mesh_lns(sib);
   destroy_children(parent);
   update_mesh_myln_node_nid(parent->pat->mesh);
+
+  TIMER_STOP;
 }
 
 
