@@ -17,6 +17,8 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
   char Yfil[1000];
   char Zfil[1000];
 
+  TIMER_START;
+
   /* loop over all nodes */
   forlnodes(mesh, node)
   {
@@ -89,4 +91,6 @@ void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
+
+  TIMER_STOP;
 }

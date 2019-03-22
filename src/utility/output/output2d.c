@@ -24,6 +24,8 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char XZfil[1000];
   char YZfil[1000];
 
+  TIMER_START;
+
   /* loop over all nodes */
   forlnodes(mesh, node)
   {
@@ -96,6 +98,8 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
+
+  TIMER_STOP;
 }
 
 
@@ -114,6 +118,8 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
   int vi = Ind(name);
   FILE *fpl;
   char plfil[1000];
+
+  TIMER_START;
 
   /* loop over all nodes */
   forlnodes(mesh, node)
@@ -151,4 +157,6 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
+
+  TIMER_STOP;
 }

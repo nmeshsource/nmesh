@@ -19,6 +19,8 @@ void output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
 
+  TIMER_START;
+
   /* pars we may need for vtk or others */
   par->name          = name;
   par->text          = Getv(Par("3dformat"), "text");
@@ -58,4 +60,6 @@ void output3d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
+
+  TIMER_STOP;
 }
