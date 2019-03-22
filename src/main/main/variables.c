@@ -331,11 +331,12 @@ void prvarlist(tVarList *v)
   tMesh *mesh = v->mesh;
   int i, j;
 
-  printf("VarList=%p  time=%g  n=%d\n", v, v->time, v->n);
+  //printf("VarList=%p  time=%g  n=%d\n", v, v->time, v->n);
+  PRF;printf(": time=%g n=%d\n", v->time, v->n);
   for(i=0; i<v->n; i++)
   {
     j = v->index[i];
-    printf(" %d  VarIndex=%d  %s\n", i, j, VarName(j));
+    printf("   %d  VarIndex=%d  %s\n", i, j, VarName(j));
   }
 }
 

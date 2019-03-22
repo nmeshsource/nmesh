@@ -75,7 +75,7 @@ void evolve_print_evosys(tMesh *mesh)
   PRFs(":\n");
   if(evosys->u)
   {
-    pr_pVLList(evosys->u);
+    //pr_pVLList(evosys->u);
     forList(evosys->u, i)
     {
       printf("%d: ", i);
