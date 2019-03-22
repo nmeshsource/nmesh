@@ -36,7 +36,7 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       char ns[100];
       int ijk[3];
       
-      //TODO: use diffferent Xb0 for diff patches
+      //TODO: use different Xb0 for diff patches
       double X0[] = { Getd(Par("outputX0")),
                       Getd(Par("outputY0")),
                       Getd(Par("outputZ0")) };
