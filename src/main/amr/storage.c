@@ -16,11 +16,10 @@ extern nMPI_Comm main_comm;
 /**********************************************************************/
 /* storage for arrays */
 /**********************************************************************/
-/* allocate an array with ns segments */
-tArray *alloc_array_with_segs(int n[3], int ns)
+/* allocate an empty array with ns segments */
+tArray *alloc_empty_array_with_segs(int n[3], int ns)
 {
   tArray *array;
-  int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
   int i;
 
   if(!n) return NULL;
@@ -32,6 +31,22 @@ tArray *alloc_array_with_segs(int n[3], int ns)
   for(i=0; i<3; i++)  array->n[i] = n[i];
 
   array->ns = ns;
+  array->size = 0;
+
+  return array;
+}
+
+/* allocate an array with ns segments */
+tArray *alloc_array_with_segs(int n[3], int ns)
+{
+  tArray *array;
+  int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
+
+  if(!n) return NULL;
+
+  array = alloc_empty_array_with_segs(n, ns);
+
+  /* memory for data */
   array->d = calloc(array->N * ns, size1);
   if(!array->d) errorexit("out of memory for array->d");
   array->size = array->N * ns * size1;
