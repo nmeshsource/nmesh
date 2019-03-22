@@ -220,7 +220,7 @@ typedef struct tARRAY {
   union {       /* anon. union with host data (add one more for GPU data) */
     double *d;  /* pointer to double data */
     int *i; };  /* pointer to int data using same mem as double data */
-  int d_nofree; /* d_nofree=1 if free_array should not free a */
+  int d_nofree; /* d_nofree=1 if free_array should not free d */
   int ns;       /* number of segments */
   int si;       /* segment index */
 //  void *par;    /* pointer to some extra pars */
