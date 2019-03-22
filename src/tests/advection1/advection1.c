@@ -102,13 +102,13 @@ tArray *aua  = alloc_array2d(9,9);
             FNy = uaj[JK] * ny;
             FNz = uaj[JK] * nz;
 
-double nmag = (nx*nx + ny*ny + nz*nz);
+double nmag2 = (nx*nx + ny*ny + nz*nz);
 int ix = Ind("x");
 double *x = Vard(node, ix);
 double *y = Vard(node, ix+1);
 double *z = Vard(node, ix+2);
 double t = mesh->time;
-double ua = sin(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag*t);
+double ua = sin(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
 aua->d[JK] = ua;
 //FNx = ua * nx;
 //FNy = ua * ny;
@@ -163,12 +163,12 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   //int iu = vlu->index[0];
   int ix = Ind("x");
   char *advdir = Gets(Par("advection1_direction"));
-  double nx,ny,nz, nmag;
+  double nx,ny,nz, nmag2;
   int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-  nmag = (nx*nx + ny*ny + nz*nz);
+  nmag2 = (nx*nx + ny*ny + nz*nz);
 
   /* compute boundary flux terms */
   formylnodes(mesh, myid)
@@ -200,7 +200,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           /* if stuff is coming in */
           if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
           {
-            r[ijk] = -nmag*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag*t);
+            r[ijk] = -nmag2*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
 //printf("i,j,k: %d %d %d face%d nid%ld  ", i,j,k, face, node->nid);
 //pr3v("norm",norm);printf("\n");
           }
@@ -266,7 +266,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       //double sig = 2*(face%2) - 1;
       double *F = Vard(node, iF+face);
       double *w = Wquad(node, dir);
-      double sqrtdet2gam, det2dxdXb;
+      double sqrtdet2gam, det2gam;
       int i,j,k, ijk, JK, i0;
 
       forplaneN(dir, i,j,k, n, p)
@@ -279,8 +279,8 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         array_2dxdXb(node, ijk, dir, a2J);
         /* compute 2-metric from a2J^T a2J */
         mm_array0_norestrict(a2J,a2J, a2gam); // for now assume gam = flat
-        det2dxdXb = det_2_2array(a2gam);
-        sqrtdet2gam = sqrt(det2dxdXb);
+        det2gam = det_2_2array(a2gam);
+        sqrtdet2gam = sqrt(det2gam);
 /*
 if(face==1 && j==1 && k==2 && myid==0)
 {
@@ -380,12 +380,12 @@ int advection1_analyze(tMesh *mesh)
   int iue = Ind("advection1_u_err");
   int ix =  Ind("x");
   char *advdir = Gets(Par("advection1_direction"));
-  double nx,ny,nz, nmag;
+  double nx,ny,nz, nmag2;
   int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-  nmag = (nx*nx + ny*ny + nz*nz);
+  nmag2 = (nx*nx + ny*ny + nz*nz);
 
   if(PR) PRFs("\n");
 
@@ -403,7 +403,7 @@ int advection1_analyze(tMesh *mesh)
 
     forpoints(node, i)
     {
-      double ua = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag*t);
+      double ua = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
       ue[i] = fabs(u[i]- ua);
     }
   }

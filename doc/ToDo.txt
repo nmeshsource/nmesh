@@ -1,6 +1,3 @@
-rename nmag in advection.c into nmag2
-check if copy works across patch boundaries
-
 2 good patch tests:
 -------------------
 1.:
@@ -48,17 +45,19 @@ Things that need to be done urgently:
 
 *2d interpolation
  -interp from ghosts within patch     : DONE!
- -interp from ghosts of other patches :
+ -interp from ghosts of other patches : DONE!
   Q: Why is interp not correct for poly?
   A: We cannot have poly in lam,A,B on all patches because coords in diff
      patches are non-linear funcs of each other!
+ -check if copy works across patch boundaries: seems ok
+
 
 *evolve module in main: DONE!
 -struct with slots for evo varlists & RHSs for several systems (Z4 + grhd)
 -allow explicit time dependence in RHS
 -keep open mind about node dependent dt
 
-*advection Eqn: ???
+*advection Eqn: DONE!
 
 *flux integral conservation
  -make integrals
@@ -71,8 +70,10 @@ Things that need to be done urgently:
 
 Things that should be done:
 ===========================
-*give bfaces "orientation" and "can_copy" flags to avoid 2d interpolation
- if we can copy and just the order of points is different
+*node->fnb is an array, a nodelist may have been better
+ +Then common_facepoints would not have to be called from both node and its
+  neighbor. If they have common points both could be added at the same time.
+  This could speed make_outside_neighbor_list by a factor of 2.
 
 
 Cleanup:
