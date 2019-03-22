@@ -612,7 +612,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tArray *Cp[2], **Ip, **Res;
   tArray *(*Cb)[2];
   tDat *dat = node->dat;
-  char s[100];
+  char str[100];
 
   if(!dat) return;
 
@@ -715,8 +715,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         {
           //PRF;printf(": node->nid=%ld nb->nid=%ld  f%d nb_f=%d\n",
           //           node->nid, nb->nid, f, nb_f);
-          PRF;printf(": %s ", nodename(node,s,99));
-          printf("%s  f%d nb_f%d:", nodename(nb,s,99), f, nb_f);
+          PRF;printf(": %s ", nodename(node,str,99));
+          printf("%s  f%d nb_f%d:", nodename(nb,str,99), f, nb_f);
         }
 
         /* if all 3 points coincide with grid points of nb we can copy */
