@@ -296,8 +296,10 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     tCom *com = dat->com[face];
     int nb_n[3], nb_N;
     int my_n[3], my_N;
-    double *sbuf, *rbuf; /* buffers for MPI */
-    int zones, nvars, cnt;
+    double *sbuf, *rbuf;  /* buffers for MPI */
+    tArray *nbsurfs_f_ni; /* segmented array containing nbsurf[ni] for all vi */
+    tSurface *s;
+    int zones, nvars, cnt, si;
 
     /* count number of vars that have surfaces to exchange and set my_N */
     find_nvars_vind_n_nbn(node,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
@@ -312,28 +314,38 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     r_comm = nb->comm;
     s_comm = node->comm;
 
+    /* alloc one segmented array for nbsurf of all nvars variables needed */
+    s = dat->s[face][vi]; /* surface of 1st var that needs it on this face */
+    if(!s) errorexit("1st var that needs surfaces, has no surface mem!");
+    if(!s->nbsurf[ni])
+      nbsurfs_f_ni = alloc_array_with_segs(nb_n, nvars);
+    else
+      nbsurfs_f_ni = s->nbsurf[ni];
+
     /* alloc send and recv buffers */
     sbuf = calloc(nvars * my_N, sizeof(double));
-    rbuf = calloc(nvars * nb_N, sizeof(double));
+    rbuf = nbsurfs_f_ni->d; /* use segmented array as rbuf */
+    // it is good to use a long segmented array as rbuf
+    // with dat->s[face][vi]->nbsurf[ni] pointing to the segments
+
     /* save buffers in com */
     rq = append_buffers_to_com(com, sbuf, nvars*my_N, rbuf,nvars*nb_N);
-    //NOTE: it may be good to use a long segmented array as rbuf
-    //      with dat->s[face][vi]->nbsurf[ni] pointing to the segments
 
     /* fill send buffer */
-    for(cnt=0, vi=0; vi<node->dat->nv; vi++)
+    for(cnt=0, si=0, vi=0; vi<node->dat->nv; vi++)
     {
-      tSurface *s = dat->s[face][vi];
-
+      s = dat->s[face][vi];
       zones = MeshVarSurfacezones(node->pat->mesh, vi);
       /* do nothing if var has no zones to exchange */
       if(s && zones && dat->v[vi])
       {
-        /* allocate surface to later recv neighbor data */
+        /* point surface data to nbsurfs_f_ni=rbuf to later recv
+           neighbor data */
         if(!s->nbsurf[ni])
         {
-          s->nbsurf[ni] = alloc_array(nb_n);
-          s->allocd_nbsurf[ni] = 1; //flag that we allocd
+          s->nbsurf[ni] = get_array_seg(nbsurfs_f_ni, si);
+          si++;                     // inc segment index
+          s->allocd_nbsurf[ni] = 1; // flag that we allocd
         }
 
         /* save MPI request number in the array */
@@ -408,10 +420,10 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   tCom *com = dat->com[face];
   int nb_f, nb_ni;
   int found, vi;
-  int nb_n[3], nb_N;
-  int my_n[3];
-  int zones, nvars, rq, cnt;
-  double *rbuf;
+  int nb_n[3], my_n[3];
+  int nvars, rq;
+  //int nb_N, zones, cnt;
+  //double *rbuf;
 
   /* do nothing if this node is on other proc */
   if(!dat) return;
@@ -430,7 +442,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 
   /* count number of vars that exchanged surfaces and set my_N */
   find_nvars_vind_n_nbn(node,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
-  nb_N = nb_n[0] * nb_n[1] * nb_n[2];
+  //nb_N = nb_n[0] * nb_n[1] * nb_n[2];
   /* do nothing if there are no vars that exchanged surfaces */
   if(!nvars) return;
 
@@ -438,27 +450,30 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 
   /* get MPI request number */
   rq = dat->s[face][vi]->nbsurf[ni]->info;
-  /* find our recv buffer */
-  rbuf = get_com_recv_buf(com, rq);
 
-  /* wait for buffer */
+  /* wait for MPI buffer */
   nMPI_Wait_com_recv(com, rq);
 
-  /* get data out of recv buffer */
-  for(cnt=0, vi=0; vi<node->dat->nv; vi++)
-  {
-    tSurface *s = dat->s[face][vi];
+  /* find our recv buffer, and set it to NULL.
+     We do this because s->nbsurf[ni]->d already points there, and because
+     then realloc_com_reqs or free_com will not free s->nbsurf[ni]->d */
+  set_com_recv_buf(com, rq, NULL);
 
-    zones = MeshVarSurfacezones(node->pat->mesh, vi);
-    if(!zones) continue; /* do nothing if var has no zones to exchange */
-    /* do nothing if var has no zones to exchange */
-    if(zones && dat->v[vi])
-    {
-      /* get neighbor data from buffer */
-      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
-      cnt += nb_N;
-    }
-  }
+//  /* get data out of recv buffer */
+//  for(cnt=0, vi=0; vi<node->dat->nv; vi++)
+//  {
+//    tSurface *s = dat->s[face][vi];
+//
+//    zones = MeshVarSurfacezones(node->pat->mesh, vi);
+//    if(!zones) continue; /* do nothing if var has no zones to exchange */
+//    /* do nothing if var has no zones to exchange */
+//    if(zones && dat->v[vi])
+//    {
+//      /* get neighbor data from buffer */
+//      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
+//      cnt += nb_N;
+//    }
+//  }
 }
 
 
