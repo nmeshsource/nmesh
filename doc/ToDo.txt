@@ -60,16 +60,23 @@ Things that need to be done urgently:
  -check error:
 
 *some timing to see what needs to be optimized
+ -make timer_get s.t. "name" gets appended by threadID
 
 *flux integral conservation
  -make integrals
  -make 3d vol int.
+
+*DG with 2nd oder wave eqn
 
 *Burgers
 
 *good 2d qnd 3d output
  -What hdf5? format can be used, that VisIt reads directly, without storing
   all x,y,z coords in the file for each field???
+
+*check if set_ajsurf_forall_vars should be called in get_all_surfaces
+ or if we should rather call set_all_myln_ajsurf in an OpenMP loop
+ afterwards
 
 *DG with 3-metric
  -I think node_normal_at_ijk then is just n_i. Need metric to get n^i...
@@ -80,6 +87,11 @@ Things that need to be done urgently:
    In Teukolsky there is no big diff.,
    but in Bugner's thesis mass cons improves... ???
 
+*set sqrt(det2gamma)*ooJ already in coordinates?
+ -could have a par that says which var has 3-metric
+ -need surface var in each node for that...
+ -or set sqrt(det2gamma)*ooJ while waiting for MPI (but not all nodes wait
+  for MPI)
 
 Things that should be done:
 ===========================
