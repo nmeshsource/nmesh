@@ -139,3 +139,8 @@ int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
                         double rhoAB[3], const double xyz[3]);
 int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
                        double xyz[3], double drhoABdxyz[3][3]);
+
+/* pointlists.c */
+intList *pointindexList_line(tNode *node, int dir, int axis[]);
+intList *pointindexList_plane(tNode *node, int normal, int plane[]);
+intList *pointindexList_node(tNode *node);

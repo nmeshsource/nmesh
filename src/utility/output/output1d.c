@@ -7,7 +7,7 @@
 
 
 /* 1d output */
-void output1d_meshvar(tMesh *mesh, char *name, int It, double T)
+void output1d_meshvar(tMesh *mesh, char *name, int It, double T, int wr_xyz)
 {
   tNode *node;
   int gnuplot = 1; /* we always use the same format in 1d */

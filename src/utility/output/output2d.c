@@ -7,16 +7,20 @@
 
 
 /* 2d output */
-void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
+void output2d_meshvar(tMesh *mesh, char *name, int It, double T, int wr_xyz)
 {
   tNode *node;
-  int gnuplot = Getv(Par("2dformat"), "gnuplot");
+  int outd = Par("outdir");
+  char *outdir = Gets(outd);
+  int fmt = Par("2dformat");
+  int gnuplot = Getv(fmt, "gnuplot");
+  int xdmf    = Getv(fmt, "xdmf");
 /*
-  int vtk     = Getv(Par("2dformat"), "vtk");
-  int text    = Getv(Par("2dformat"), "text");
-  int binary  = Getv(Par("2dformat"), "binary");
-  int flt     = Getv(Par("2dformat"), "float");
-  int dbl     = Getv(Par("2dformat"), "double");
+  int vtk     = Getv(fmt, "vtk");
+  int text    = Getv(fmt, "text");
+  int binary  = Getv(fmt, "binary");
+  int flt     = Getv(fmt, "float");
+  int dbl     = Getv(fmt, "double");
 */
   int vi = Ind(name);
   FILE *fXY, *fXZ, *fYZ;
@@ -58,11 +62,16 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
         if(gnuplot)
         {
           snprintf(XYfil, 999, "%s/%s.%02dXY%s",
-                   Gets(Par("outdir")),name, p, ns);
+                   outdir,name, p, ns);
           fXY = fopen(XYfil, "a");
           if(!fXY) errorexits("failed opening %s", XYfil);
           write_plane_ascii(node, fXY, 2, ijk, VarA(node, vi), It,T);
           fclose(fXY);
+        }
+        else if(xdmf)
+        {
+          write_plane_xdmf(node, 2, ijk, VarA(node, vi), VarName(vi),
+                           outdir, "XY", T, wr_xyz);
         }
       }
 
@@ -72,7 +81,7 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
         if(gnuplot)
         {
           snprintf(XZfil, 999, "%s/%s.%02dXZ%s",
-                   Gets(Par("outdir")),name, p, ns);
+                   outdir,name, p, ns);
           fXZ = fopen(XZfil, "a");
           if(!fXZ) errorexits("failed opening %s", XZfil);
           write_plane_ascii(node, fXZ, 1, ijk, VarA(node, vi), It,T);
@@ -86,7 +95,7 @@ void output2d_meshvar(tMesh *mesh, char *name, int It, double T)
         if(gnuplot)
         {
           snprintf(YZfil, 999, "%s/%s.%02dYZ%s",
-                   Gets(Par("outdir")),name, p, ns);
+                   outdir,name, p, ns);
           fYZ = fopen(YZfil, "a");
           if(!fYZ) errorexits("failed opening %s", YZfil);
           write_plane_ascii(node, fYZ, 0, ijk, VarA(node, vi), It,T);

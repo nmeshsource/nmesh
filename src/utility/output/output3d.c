@@ -9,7 +9,7 @@
 
 
 /* 3d output */
-void output3d_meshvar(tMesh *mesh, char *name, int It, double T)
+void output3d_meshvar(tMesh *mesh, char *name, int It, double T, int wr_xyz)
 {
   tNode *node;
   int vi = Ind(name);

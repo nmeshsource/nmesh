@@ -71,7 +71,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   char *ou[4];
   char s[32];
   char str[1000];
-  int start;
+  int start, write_xyz;
   int d, i, vi, vi0;
 
   /* par values in strings */
@@ -88,6 +88,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
   for(d=0; d<=3; d++)
   {
+    write_xyz = 1; /* add xyz output */
     if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
     {
       //printf("2dout ... |%s|\n", ou[d]);
@@ -112,18 +113,19 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
             errorexit("0d output not implemented");
             break;
           case 1:
-            output1d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+            output1d_meshvar(mesh, VarName(vi0+i), Iter, Time, write_xyz);
             break;
           case 2:
-            output2d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+            output2d_meshvar(mesh, VarName(vi0+i), Iter, Time, write_xyz);
             break;
           case 3:
-            output3d_meshvar(mesh, VarName(vi0+i), Iter, Time);
+            output3d_meshvar(mesh, VarName(vi0+i), Iter, Time, write_xyz);
             break;
           }
         }
       } //end: while loop
     }
+    write_xyz = 0; /* write xyz only once */
   } // end: for d loop
   return 0;
 }
