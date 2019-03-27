@@ -5,9 +5,23 @@
 #include "output.h"
 
 
+/* VisIt and others (maybe paraview) can read XDMF format.
+   Our output in XDMF format consists of a .xml file and a .bin file. The
+   actual data is in the .bin file, while the .xml file only contains a
+   description of the data in XML format.
 
-/* XML format strings to make .xmf files using printf,
-   based on bamps and Paraview */
+   Some description about XDMF is on
+   http://www.xdmf.org
+   http://www.xdmf.org/index.php/XDMF_Model_and_Format
+   http://www.paraview.org/Wiki/ParaView/Data_formats
+
+   What we have here is very similar to what is in bamps 4.0. It seems that
+   VisIt can load and animate it, but paraview shows only t=0... */
+
+
+
+/* XML format strings to make .xmf files using fprintf,
+   based on bamps and https://www.paraview.org/Wiki/ParaView/Data_formats */
 char *B_head =
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   "<Xdmf xmlns:xi=\"http://www.w3.org/2001/XInclude\" Version=\"2.1\">\n"
@@ -84,7 +98,6 @@ FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix)
 
   return fp;
 }
-
 
 /* write ends and close .xmf file */
 void fclose_xdmf_xmf(FILE *fp)
@@ -372,7 +385,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
 
 
 /******************************************************************/
-/* General functions to do outpoint for an entire buffer */
+/* General functions to do output for an entire buffer */
 /******************************************************************/
 
 /* write a double buffer as double or float */
@@ -431,7 +444,7 @@ size_t write_3buffers(const double *b1, const double *b2, const double *b3,
 
 
 /******************************************************************/
-/* General functions to do outpoint for a point index list */
+/* General functions to do output for a point index list */
 /******************************************************************/
 
 /* write a buffer at all indices in idx */
