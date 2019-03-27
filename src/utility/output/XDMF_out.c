@@ -172,7 +172,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
                   Getd(Par("outputZ0")) };
   int vli;
 
-
+  /* loop over varlist */
   for(vli=0; vli<vl->n; vli++)
   {
     int vi = vl->index[vli];
@@ -182,8 +182,10 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
     fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm]);
     fpbin = fopen_bin(vname, outdir, suffix[norm]);
 
+    /* loop over all leaf nodes */
     forlnodes(mesh, node)
     {
+      /* do something only if this proc has dat */
       if(node->dat)
       if(node->dat->v[vi])
       {
