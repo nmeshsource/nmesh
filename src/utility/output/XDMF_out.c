@@ -281,6 +281,159 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
 }
 
 
+/* output varlist in XDMF form for the entire volume */
+void output3d_xdmf(tVarList *vl, int It, double Time)
+{
+  tMesh *mesh = vl->mesh;
+  int outd = Par("outdir");
+  char *outdir = Gets(outd);
+  int bin = 1; /* we can only do binary output right now */
+  int dbl = 0; /* we output float not double */
+  int voffset, xyzoffset;
+  FILE *fpxmf, *fpbin;
+  char ndname[100];
+  char *suffix = "xyz";
+  int vli;
+
+  /* loop over varlist */
+  for(vli=0; vli<vl->n; vli++)
+  {
+    int vi = vl->index[vli];
+    char *vname = VarName(vi);
+    int rk;
+    int myid;
+
+    /* MPI motivated loop to assign work */
+    for(rk=0; rk<nMPI_size(); rk++)
+    {
+      /* do work when it is my turn */
+      if(rk == nMPI_rank())
+      {
+        if(Rank0) /* open xmf to start a new spatial series */
+          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix);
+        else /* just add to the same spatial series */
+          fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix);
+
+        /* open binary file */
+        fpbin = fopen_bin(vname, outdir, suffix);
+
+        /* loop over all leaf nodes */
+        formylnodes_noomp(mesh, myid)
+        {
+          tNode *node = MyNode(mesh, myid);
+
+          /* do something only if this proc has dat */
+          if(node->dat)
+          if(node->dat->v[vi])
+          {
+            int np = node->np;
+            int n[] = { node->n[0], node->n[1], node->n[2] };
+
+            {
+              /* node name and n for plane */
+              nodename(node, ndname,99);
+
+              /* write binary data in var */
+              voffset = ftell(fpbin);
+              write_buffer(Vard(node,vi), np, dbl, fpbin);
+
+              /* write point's x,y,z coordinates */
+              if(vli==0) /* write xyz only for first var in list */
+              {
+                int ix = Ind("x");
+                double *px = Vard(node, ix);
+                double *py = Vard(node, ix+1);
+                double *pz = Vard(node, ix+2);
+                FILE *fpxyz = fopen_bin("xyz", outdir, suffix);
+
+                write_3buffers(px,py,pz, np, dbl, fpxyz);
+                fclose(fpxyz);
+              }
+
+              /* we wrote 3 things (x,y,z) for each var */
+              xyzoffset = 3 * voffset;
+
+              /* write grid information into xmf file */
+              write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix,
+                             ndname, Time, n, bin, dbl);
+            }
+          }
+        }
+        /* close files on this proc now */
+        fclose(fpbin);
+        fclose_xdmf_xmf(fpxmf);
+      }
+      /* wait until everyone is here */
+      nMPI_barrier();
+    } /* end rk-loop */
+  }
+}
+
+
+
+/******************************************************************/
+/* General functions to do outpoint for an entire buffer */
+/******************************************************************/
+
+/* write a double buffer as double or float */
+size_t write_buffer(const double *buf, int buflen, int dbl, FILE *fp)
+{
+  int i;
+  size_t cnt;
+
+  if(dbl)
+    cnt = fwrite(buf, sizeof(double), buflen, fp);
+  else
+  {
+    cnt = 0;
+    for(i=0; i<buflen; i++)
+    {
+      float fval = buf[i];
+      cnt += fwrite(&fval, sizeof(float), 1, fp);
+    }
+  }
+  return cnt;
+}
+
+/* write 3 double buffers as double or float */
+size_t write_3buffers(const double *b1, const double *b2, const double *b3,
+                      int buflen, int dbl, FILE *fp)
+{
+  int i;
+  size_t cnt;
+
+  cnt = 0;
+  for(i=0; i<buflen; i++)
+  {
+    if(dbl)
+    {
+      double dval;
+      dval = b1[i];
+      cnt += fwrite(&dval, sizeof(double), 1, fp);
+      dval = b2[i];
+      cnt += fwrite(&dval, sizeof(double), 1, fp);
+      dval = b3[i];
+      cnt += fwrite(&dval, sizeof(double), 1, fp);
+    }
+    else
+    {
+      float fval;
+      fval = b1[i];
+      cnt += fwrite(&fval, sizeof(float), 1, fp);
+      fval = b2[i];
+      cnt += fwrite(&fval, sizeof(float), 1, fp);
+      fval = b3[i];
+      cnt += fwrite(&fval, sizeof(float), 1, fp);
+    }
+  }
+  return cnt;
+}
+
+
+/******************************************************************/
+/* General functions to do outpoint for a point index list */
+/******************************************************************/
+
 /* write a buffer at all indices in idx */
 size_t write_buffer_idx(const double *buf, intList *idx, int dbl, FILE *fp)
 {

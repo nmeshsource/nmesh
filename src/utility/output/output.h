@@ -45,6 +45,10 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T);
 /* XDMF_out.c */
 void output2d_xdmf(tVarList *vl, int It, double T);
 void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time);
+void output3d_xdmf(tVarList *vl, int It, double Time);
+size_t write_buffer(const double *buf, int buflen, int dbl, FILE *fp);
+size_t write_3buffers(const double *b1, const double *b2, const double *b3,
+                      int buflen, int dbl, FILE *fp);
 size_t write_buffer_idx(const double *buf, intList *idx, int dbl, FILE *fp);
 size_t write_3buffers_idx(const double *b1, const double *b2, const double *b3,
                           intList *idx, int dbl, FILE *fp);

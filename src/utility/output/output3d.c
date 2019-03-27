@@ -36,7 +36,7 @@ void output3d_vl(tVarList *vl, int It, double T)
   }
   if(xdmf)
   {
-    //....
+    output3d_xdmf(vl, It, T);
   }
 
   TIMER_STOP;
