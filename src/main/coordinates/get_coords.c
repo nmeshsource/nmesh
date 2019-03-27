@@ -111,6 +111,38 @@ void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
   }
 }
 
+/* find i,j,k closest to x0, return distance */
+double nearest_ijk_of_xyz(tNode *node, int ijk[3], const double x0[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int ix = Ind("x");
+  double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
+  int *n = node->n;
+  int i,j,k, dir, ind;
+  double d1, d2, dist2 = 1e300;
+
+  /* if this node has no dat we need to compute x for each point from Xb */
+  if(!px[0]) errorexit("we need x,y,z in this node");
+
+  forijk(i,j,k, n)
+  {
+    ind = Ind_n(i,j,k, n);
+    for(d2=0., dir=0; dir<3; dir++)
+    {
+      d1 = px[dir][ind] - x0[dir];
+      d2 += d1*d1;
+    }
+    if(d2<dist2)
+    {
+      ijk[0] = i;
+      ijk[1] = j;
+      ijk[2] = k;
+      dist2 = d2;
+    }
+  }
+  return sqrt(dist2);
+}
+
 /* find i,j,k closest to x0 in plane pl normal to N, return distance */
 double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
                                    int ijk[3], const double x0[3])
