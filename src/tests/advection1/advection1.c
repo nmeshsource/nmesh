@@ -76,14 +76,11 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     double FNx,FNy,FNz, norm[3];
     int face, dir, p, i,j,k, ijk, JK;
 
-//printvar_innode(node, iu);
-
     /* set F on each face */
     for(face=0; face<6; face++)
     {
       double *F = Vard(node, iF+face);
       double *uaj = Varaj(node, iu, face);
-tArray *aua  = alloc_array2d(9,9);
       dir = face/2;
       p = (face%2)*(n[dir] - 1);
       forplaneN(dir, i,j,k, n, p)
@@ -101,26 +98,6 @@ tArray *aua  = alloc_array2d(9,9);
             FNx = uaj[JK] * nx;
             FNy = uaj[JK] * ny;
             FNz = uaj[JK] * nz;
-
-double nmag2 = (nx*nx + ny*ny + nz*nz);
-int ix = Ind("x");
-double *x = Vard(node, ix);
-double *y = Vard(node, ix+1);
-double *z = Vard(node, ix+2);
-double t = mesh->time;
-double ua = sin(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
-aua->d[JK] = ua;
-//FNx = ua * nx;
-//FNy = ua * ny;
-//FNz = ua * nz;
-if(0)// && i==0 && k==0)
-{
-printf("i,j,k: %d %d %d face%d nid%ld  ", i,j,k, face, node->nid);
-pr3v("norm",norm);printf("\n");
-//printvar_innode(node, iu);
-//printvar_innode(node->fnb[face][0], iu);
-//printvar_ajsurfdiff(node, iu);
-}
           }
           else
           {
@@ -138,20 +115,6 @@ pr3v("norm",norm);printf("\n");
                 (FNy - fy[ijk])*norm[1] +
                 (FNz - fz[ijk])*norm[2];
       }
-if(face==3 && node->nid==0 && VarAaj(node, iu, face))
-{
-double rdif = Lp_norm_array_diff(VarAaj(node, iu, face), aua, 2.);
-printf("rdif=%g\n", rdif);
-if(0 && rdif>0.2)
-{
-array_diff(aua, VarAaj(node, iu, face),aua);
-//printarray(VarAaj(node, iu, face));
-printarray(aua);
-rdif = Lp_norm_array(aua, 2);
-printf("rdif2=%g\n", rdif);
-}
-}
-free_array(aua);
     }
   }
 }
