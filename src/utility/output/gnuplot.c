@@ -173,8 +173,6 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
   char Yfil[1000];
   char Zfil[1000];
 
-  TIMER_START;
-
   /* loop over all nodes */
   forlnodes(mesh, node)
   {
@@ -238,8 +236,6 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
-
-  TIMER_STOP;
 }
 
 /* 2d output in gnuplot format for one var */
@@ -253,8 +249,6 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char XYfil[1000];
   char XZfil[1000];
   char YZfil[1000];
-
-  TIMER_START;
 
   /* loop over all nodes */
   forlnodes(mesh, node)
@@ -319,8 +313,6 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
-
-  TIMER_STOP;
 }
 
 /* output on patch planes */
@@ -338,8 +330,6 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
   int vi = Ind(name);
   FILE *fpl;
   char plfil[1000];
-
-  TIMER_START;
 
   /* loop over all nodes */
   forlnodes(mesh, node)
@@ -377,6 +367,4 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
     /* sysnchronize, so that we write only one node at a time */
     nMPI_barrier();
   } endforlnodes;
-
-  TIMER_STOP;
 }
