@@ -8,7 +8,7 @@
 
 /* XML format strings to make .xmf files using printf,
    based on bamps and Paraview */
-char *B_head = 
+char *B_head =
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   "<Xdmf xmlns:xi=\"http://www.w3.org/2001/XInclude\" Version=\"2.1\">\n"
   "  <Domain>\n";
@@ -16,18 +16,18 @@ char *E_head =
   "  </Domain>\n"
   "</Xdmf>\n";
 
-char *B_temporal = 
+char *B_temporal =
   "    <Grid CollectionType=\"Temporal\" GridType=\"Collection\" Name=\"Collection\">\n"
   "      <Geometry Type=\"None\"/>\n"
   "      <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-char *E_temporal = 
+char *E_temporal =
   "    </Grid>\n";
 
 char *B_spatial =
   "      <Grid CollectionType=\"None\" GridType=\"Collection\" Name=\"Collection\">\n"
   "        <Geometry Type=\"None\"/>\n"
   "        <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-char *E_spatial = 
+char *E_spatial =
   "      </Grid>\n";
 
 char *B_E_grid =
@@ -72,9 +72,9 @@ FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix)
     fprintf(fp, "%s", B_temporal);
     fprintf(fp, "%s", E_temporal);
     fprintf(fp, "%s", E_head);
-  } 
+  }
 
-  /* we want to append more data, which requires us overwrite to remove
+  /* we want to append more data, which requires us to remove
      the last E_temporal and E_head */
   offset = strlen(E_temporal) + strlen(E_head);
   fseek(fp, -offset, SEEK_END);
@@ -104,7 +104,7 @@ FILE *fopen_bin(char *varname, char *outdir, char *suffix)
   char fname[1000];
   snprintf(fname, 1000, "%s/%s.%s.bin", outdir, varname, suffix);
 
-  fp = fopen(fname, "a"); 
+  fp = fopen(fname, "a");
   if(!fp) errorexits("Cannot open %s for writing", fname);
 
   return fp;
@@ -144,56 +144,98 @@ void write_xdmf_xmf(FILE *fp, int voffset, int xyzoffset,
 }
 
 
-/* output in XDMF in one plane */
-void write_plane_xdmf(tNode *node, int normal, int plane[], tArray *va,
-                      char *vname, char *outdir, char *suffix, double Time,
-                      int write_xyz)
+/* 2d output */
+void output2d_xdmf(tVarList *vl, int It, double T)
 {
-  tMesh *mesh = node->pat->mesh;
-  intList *plist = pointindexList_plane(node, normal, plane);
+  tMesh *mesh = vl->mesh;
+  int outd = Par("outdir");
+  char *outdir = Gets(outd);
+
+  write_plane_xdmf(vl, 0, outdir, T);
+  write_plane_xdmf(vl, 1, outdir, T);
+  write_plane_xdmf(vl, 2, outdir, T);
+}
+
+/* output varlist in XDMF format in one plane */
+void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
+{
+  tMesh *mesh = vl->mesh;
+  tNode *node;
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
   int voffset, xyzoffset;
   FILE *fpxmf, *fpbin;
   char ndname[100];
-  int n[] = { node->n[0], node->n[1], node->n[2] };
+  char *suffix[] = { "YZ", "XZ", "XY" };
+  double X0[] = { Getd(Par("outputX0")),
+                  Getd(Par("outputY0")),
+                  Getd(Par("outputZ0")) };
+  int vli;
 
-  /* open xmf and bin files */
-  fpxmf = fopen_xdmf_xmf(vname, outdir, suffix);
-  fpbin = fopen_bin(vname, outdir, suffix);
 
-  /* write data in array va */
-  voffset = ftell(fpbin);
-  write_buffer_idx(Arrd(va), plist, dbl, fpbin);  
-
-  /* node name and n for plane */
-  nodename(node, ndname,99);
-  n[normal] = 1;
-
-  /* write point's x,y,z coordinates */
-  if(write_xyz)
+  for(vli=0; vli<vl->n; vli++)
   {
-    int ix = Ind("x");
-    double *px = Vard(node, ix);
-    double *py = Vard(node, ix+1);
-    double *pz = Vard(node, ix+2);
-    FILE *fpxyz = fopen_bin("xyz", outdir, suffix);
+    int vi = vl->index[vli];
+    char *vname = VarName(vi);
 
-    write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
-    fclose(fpxyz);
+    /* open xmf and bin files */
+    fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm]);
+    fpbin = fopen_bin(vname, outdir, suffix[norm]);
+
+    forlnodes(mesh, node)
+    {
+      if(node->dat)
+      if(node->dat->v[vi])
+      {
+        int n[] = { node->n[0], node->n[1], node->n[2] };
+        int plane[3];
+        intList *plist;
+
+        /* find indices of nearest, if all are negative, node does not have
+           outputX0, outputY0, outputZ0 */
+        nearest_lowernode_ijk_of_XYZ(node, plane, X0);
+        if(plane[norm]<0) continue;
+
+        /* node name and n for plane */
+        nodename(node, ndname,99);
+        n[norm] = 1;
+
+        /* list of points in plane */
+        plist = pointindexList_plane(node, norm, plane);
+
+        /* write binary data in var */
+        voffset = ftell(fpbin);
+        write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+
+        /* write point's x,y,z coordinates */
+        if(vli==0) /* write xyz only for first var in list */
+        {
+          int ix = Ind("x");
+          double *px = Vard(node, ix);
+          double *py = Vard(node, ix+1);
+          double *pz = Vard(node, ix+2);
+          FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm]);
+
+          write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
+          fclose(fpxyz);
+        }
+
+        /* we wrote 3 things (x,y,z) for each var */
+        xyzoffset = 3 * voffset;
+
+        /* write grid information into xmf file */
+        write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
+                       ndname, Time, n, bin, dbl);
+
+        free_intList(plist);
+      }
+      nMPI_barrier();
+    } endforlnodes;
+
+    /* close files and free list */
+    fclose(fpbin);
+    fclose_xdmf_xmf(fpxmf);
   }
-
-  /* we write 3 things (x,y,z) for each var */
-  xyzoffset = 3 * voffset;
-
-  /* write grid information into xmf file */
-  write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix, ndname, Time,
-                 n, bin, dbl);
-
-  /* close files and free list */
-  fclose(fpbin);
-  fclose_xdmf_xmf(fpxmf);
-  free_intList(plist);
 }
 
 
@@ -254,13 +296,12 @@ size_t write_3buffers_idx(const double *b1, const double *b2, const double *b3,
 }
 
 
-
 /******************************************************************/
 /* not needed ??? */
 /******************************************************************/
 
 /* write a buffer at all indices in idx */
-size_t fwrite_buffer_idx(const void *ptr, size_t size, 
+size_t fwrite_buffer_idx(const void *ptr, size_t size,
                          intList *idx, FILE *fp)
 {
   const char *buf = ptr;

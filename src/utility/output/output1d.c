@@ -7,90 +7,36 @@
 
 
 /* 1d output */
-void output1d_meshvar(tMesh *mesh, char *name, int It, double T, int wr_xyz)
+void output1d_vl(tVarList *vl, int It, double T)
 {
-  tNode *node;
-  int gnuplot = 1; /* we always use the same format in 1d */
-  int vi = Ind(name);
-  FILE *fX, *fY, *fZ;
-  char Xfil[1000];
-  char Yfil[1000];
-  char Zfil[1000];
+  tMesh *mesh = vl->mesh;
+  int fmt = Par("2dformat");
+  int gnuplot = Getv(fmt, "gnuplot");
+  int xdmf    = Getv(fmt, "xdmf");
+/*
+  int vtk     = Getv(fmt, "vtk");
+  int text    = Getv(fmt, "text");
+  int binary  = Getv(fmt, "binary");
+  int flt     = Getv(fmt, "float");
+  int dbl     = Getv(fmt, "double");
+*/
 
   TIMER_START;
 
-  /* loop over all nodes */
-  forlnodes(mesh, node)
+  if(gnuplot)
   {
-    if(node->dat)
-    if(node->dat->v[vi])
+    int vli;
+    for(vli=0; vli<vl->n; vli++)
     {
-      int p = node->pat->p;
-      char ns[100];
-      int ijk[3];
-      
-      //TODO: use diffferent Xb0 for diff patches
-      double X0[] = { Getd(Par("outputX0")),
-                      Getd(Par("outputY0")),
-                      Getd(Par("outputZ0")) };
-      
-      /* find indices of nearest, if all are negative, node does not have
-         outputX0, outputY0, outputZ0 */
-      if(Getv(Par("outputX0Y0Z0coord"), "Xb"))
-        nearest_ijk_of_XbYbZb(node, ijk, X0);
-      else
-        nearest_ijk_of_XYZ(node, ijk, X0);
-
-      /* find string that idetifies node */
-      node_location_str(node, ns,100);
-
-      /* write files */
-      /* X-axis:  Y = Y0, Z = Z0 */
-      if(ijk[1]>=0 && ijk[2]>=0)
-      {
-        if(gnuplot)
-        {
-          snprintf(Xfil, 999, "%s/%s.%02dX%s",
-                   Gets(Par("outdir")),name, p, ns);
-          fX = fopen(Xfil, "a");
-          if(!fX) errorexits("failed opening %s", Xfil);
-          write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T);
-          fclose(fX);
-        }
-      }
-
-      /* Y-axis:  X = X0, Z = Z0 */
-      if(ijk[0]>=0 && ijk[2]>=0)
-      {
-        if(gnuplot)
-        {
-          snprintf(Yfil, 999, "%s/%s.%02dY%s",
-                   Gets(Par("outdir")),name, p, ns);
-          fY = fopen(Yfil, "a");
-          if(!fY) errorexits("failed opening %s", Yfil);
-          write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T);
-          fclose(fY);
-        }
-      }
-
-      /* Z-axis:  X = X0, Y = Y0 */
-      if(ijk[0]>=0 && ijk[1]>=0)
-      {
-        if(gnuplot)
-        {
-          snprintf(Zfil, 999, "%s/%s.%02dZ%s",
-                   Gets(Par("outdir")),name, p, ns);
-          fZ = fopen(Zfil, "a");
-          if(!fZ) errorexits("failed opening %s", Zfil);
-          write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T);
-          fclose(fZ);
-        }
-      }
+      int vi = vl->index[vli];
+      char *vname = VarName(vi);
+      gnuplot_output1d_meshvar(mesh, vname, It, T);
     }
-
-    /* sysnchronize, so that we write only one node at a time */
-    nMPI_barrier();
-  } endforlnodes;
+  }
+  if(xdmf)
+  {
+    //....
+  }
 
   TIMER_STOP;
 }

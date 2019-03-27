@@ -76,6 +76,41 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
   nearest_ijk_of_XbYbZb(node, ijk, Xb);
 }
 
+/* find i,j,k closest to X0, but discard ijk[d]=0 in upper nodes */
+void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
+{
+  int nd_ijk = node->ijk;
+  tNode *nb;
+  int ijk2[3];
+
+  nearest_ijk_of_XYZ(node, ijk, X0);
+
+  /* invalidate ijk if node->ijk=nd_ijk is in the upper part of 0,1 or 2
+     dirs, and neighbor in lower part has an ijk as well, i.e. if X0 is in
+     the surface between both upper and lower nodes */
+  if(ijk[0]==0 && nd_ijk%2)
+  {
+    nb = node->parent->child[nd_ijk-1];
+    nearest_ijk_of_XYZ(nb, ijk2, X0);
+    if(ijk2[0]==nb->n[0]-1)
+      ijk[0] = -1;
+  }
+  if(ijk[1]==0 && (nd_ijk/2)%2)
+  {
+    nb = node->parent->child[nd_ijk-2];
+    nearest_ijk_of_XYZ(nb, ijk2, X0);
+    if(ijk2[1]==nb->n[1]-1)
+      ijk[1] = -1;
+  }
+  if(ijk[2]==0 && nd_ijk>=4)
+  {
+    nb = node->parent->child[nd_ijk-4];
+    nearest_ijk_of_XYZ(nb, ijk2, X0);
+    if(ijk2[2]==nb->n[2]-1)
+      ijk[2] = -1;
+  }
+}
+
 /* find i,j,k closest to x0 in plane pl normal to N, return distance */
 double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
                                    int ijk[3], const double x0[3])

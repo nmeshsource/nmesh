@@ -7,59 +7,37 @@
 
 
 
-
 /* 3d output */
-void output3d_meshvar(tMesh *mesh, char *name, int It, double T, int wr_xyz)
+void output3d_vl(tVarList *vl, int It, double T)
 {
-  tNode *node;
-  int vi = Ind(name);
-  FILE *fp;
-  int nseries;
-  int vtk      = Getv(Par("3dformat"), "vtk");
-  char *outdir = Gets(Par("outdir"));
-  tOutpars par[1];
+  tMesh *mesh = vl->mesh;
+  int fmt = Par("3dformat");
+  int xdmf    = Getv(fmt, "xdmf");
+  int vtk     = Getv(fmt, "vtk");
+/*
+  int gnuplot = Getv(fmt, "gnuplot");
+  int text    = Getv(fmt, "text");
+  int binary  = Getv(fmt, "binary");
+  int flt     = Getv(fmt, "float");
+  int dbl     = Getv(fmt, "double");
+*/
 
   TIMER_START;
 
-  /* pars we may need for vtk or others */
-  par->name          = name;
-  par->text          = Getv(Par("3dformat"), "text");
-  par->binary        = Getv(Par("3dformat"), "binary");
-  par->arrange_as_1d = Getv(Par("3dformat"), "arrange_as_1d");
-  par->flt           = Getv(Par("3dformat"), "float");
-  par->dbl           = Getv(Par("3dformat"), "double");
-
-  /* a number that counts the output */
-  nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("3doutiter")),
-                                    Getd(Par("3douttime")));
-  /* loop over all nodes */
-  forlnodes(mesh, node)
+  if(vtk)
   {
-    if(node->dat)
-    if(node->dat->v[vi])
+    int vli;
+    for(vli=0; vli<vl->n; vli++)
     {
-      int p = node->pat->p;
-      char ns[100];
-      
-      /* find string that identifies node */
-      node_location_str(node, ns,100);
-
-      /* set some more pars */
-      par->nodeloc = ns;
-      par->p       = p;
-
-      /* write files */
-      if(vtk || 1) /* can do only VTK right now */
-      {
-        /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XYZ", p, ns, nseries-1);
-        write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
-        fclose(fp);
-      }
+      int vi = vl->index[vli];
+      char *vname = VarName(vi);
+      vtk_output3d_meshvar(mesh, vname, It, T);
     }
-    /* sysnchronize, so that we write only one node at a time */
-    nMPI_barrier();
-  } endforlnodes;
+  }
+  if(xdmf)
+  {
+    //....
+  }
 
   TIMER_STOP;
 }

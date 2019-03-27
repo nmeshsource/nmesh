@@ -56,7 +56,7 @@
 #define VarAaj(node, varindex, face)  ( (node->dat->s[(face)][(varindex)]) ? \
   node->dat->s[(face)][(varindex)]->ajsurf : 0 )
 
-/* loop of one variable (it is in an array*/
+/* loop over one variable (it is in an array) */
 //#define forvari(node,varindex, k) if(node->dat) forarray(node->dat->v[(varindex)], k)
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)

@@ -71,8 +71,12 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   char *ou[4];
   char s[32];
   char str[1000];
-  int start, write_xyz;
-  int d, i, vi, vi0;
+  int start;
+  int d, vi, vi0;
+  tVarList *vl[4];    /* varlists for 0d,1d,2d,3d */
+
+  /* varlists of 0d,1d,2d,3d output */  
+  for(d = 0; d <= 3; d++) vl[d] = vlalloc(mesh);
 
   /* par values in strings */
   for(d = 0; d <= 3; d++)
@@ -88,7 +92,6 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
   for(d=0; d<=3; d++)
   {
-    write_xyz = 1; /* add xyz output */
     if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
     {
       //printf("2dout ... |%s|\n", ou[d]);
@@ -105,28 +108,21 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
 
         /* we do ?doutputall */
         vi0 = MeshVarIndComponent0(mesh, vi);
-        for(i=0; i<MeshVarNComponents(mesh, vi0); i++)
-        {
-          switch(d)
-          {
-          case 0:
-            errorexit("0d output not implemented");
-            break;
-          case 1:
-            output1d_meshvar(mesh, VarName(vi0+i), Iter, Time, write_xyz);
-            break;
-          case 2:
-            output2d_meshvar(mesh, VarName(vi0+i), Iter, Time, write_xyz);
-            break;
-          case 3:
-            output3d_meshvar(mesh, VarName(vi0+i), Iter, Time, write_xyz);
-            break;
-          }
-        }
+        vlpush(vl[d], vi0);
+
       } //end: while loop
     }
-    write_xyz = 0; /* write xyz only once */
   } // end: for d loop
+
+  /* output the varlists we just created */
+  //TODO: implement 0d output
+  output1d_vl(vl[1], Iter, Time);
+  output2d_vl(vl[2], Iter, Time);
+  output3d_vl(vl[3], Iter, Time);
+
+  /* free varlists */
+  for(d = 0; d <= 3; d++) vlfree(vl[d]);
+
   return 0;
 }
 
