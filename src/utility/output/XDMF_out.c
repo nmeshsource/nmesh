@@ -96,6 +96,26 @@ void fclose_xdmf_xmf(FILE *fp)
   fclose(fp);
 }
 
+/* open file to add more nodes still with the same Time Value */
+FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix)
+{
+  FILE *fp;
+  char fname[1000];
+  long offset;
+
+  /* name of XML file */
+  snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
+
+  /* open file such that we can append and seek backwards */
+  fp = fopen(fname, "r+");
+  if(!fp) errorexit("cannot add if file was never created with fopen_xdmf_xmf");
+
+  /* remove E_spatial, E_temporal, E_head */
+  offset = strlen(E_spatial) + strlen(E_temporal) + strlen(E_head);
+  fseek(fp, -offset, SEEK_END);
+
+  return fp;
+}
 
 /* open a .bin file with raw binary data */
 FILE *fopen_bin(char *varname, char *outdir, char *suffix)
@@ -160,7 +180,6 @@ void output2d_xdmf(tVarList *vl, int It, double T)
 void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
 {
   tMesh *mesh = vl->mesh;
-  tNode *node;
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
   int voffset, xyzoffset;
@@ -177,71 +196,87 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
   {
     int vi = vl->index[vli];
     char *vname = VarName(vi);
+    int rk;
+    int myid;
 
-    /* open xmf and bin files */
-    fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm]);
-    fpbin = fopen_bin(vname, outdir, suffix[norm]);
-
-    /* loop over all leaf nodes */
-    forlnodes(mesh, node)
+    /* MPI motivated loop to assign work */
+    for(rk=0; rk<nMPI_size(); rk++)
     {
-      /* do something only if this proc has dat */
-      if(node->dat)
-      if(node->dat->v[vi])
+      /* do work when it is my turn */
+      if(rk == nMPI_rank())
       {
-        int n[] = { node->n[0], node->n[1], node->n[2] };
-        int plane[3];
-        intList *plist;
-        int normal;
+        if(Rank0) /* open xmf to start a new spatial series */
+          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm]);
+        else /* just add to the same spatial series */
+          fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix[norm]);
 
-        /* find indices of nearest, if all are negative, node does not have
-           outputX0, outputY0, outputZ0 */
-        nearest_lowernode_ijk_of_XYZ(node, plane, X0);
-        normal = approxXYZnormal_of_xyznormal(node, norm);
+        /* open binary file */
+        fpbin = fopen_bin(vname, outdir, suffix[norm]);
 
-        if(normal>=0)
-        if(plane[normal]>=0)
+        /* loop over all leaf nodes */
+        formylnodes_noomp(mesh, myid)
         {
-          /* node name and n for plane */
-          nodename(node, ndname,99);
-          n[normal] = 1;
+          tNode *node = MyNode(mesh, myid);
 
-          /* list of points in plane */
-          plist = pointindexList_plane(node, normal, plane);
-
-          /* write binary data in var */
-          voffset = ftell(fpbin);
-          write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
-
-          /* write point's x,y,z coordinates */
-          if(vli==0) /* write xyz only for first var in list */
+          /* do something only if this proc has dat */
+          if(node->dat)
+          if(node->dat->v[vi])
           {
-            int ix = Ind("x");
-            double *px = Vard(node, ix);
-            double *py = Vard(node, ix+1);
-            double *pz = Vard(node, ix+2);
-            FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm]);
+            int n[] = { node->n[0], node->n[1], node->n[2] };
+            int plane[3];
+            intList *plist;
+            int normal;
 
-            write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
-            fclose(fpxyz);
+            /* find indices of nearest, if all are negative, node does not have
+               outputX0, outputY0, outputZ0 */
+            nearest_lowernode_ijk_of_XYZ(node, plane, X0);
+            normal = approxXYZnormal_of_xyznormal(node, norm);
+
+            if(normal>=0)
+            if(plane[normal]>=0)
+            {
+              /* node name and n for plane */
+              nodename(node, ndname,99);
+              n[normal] = 1;
+
+              /* list of points in plane */
+              plist = pointindexList_plane(node, normal, plane);
+
+              /* write binary data in var */
+              voffset = ftell(fpbin);
+              write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+
+              /* write point's x,y,z coordinates */
+              if(vli==0) /* write xyz only for first var in list */
+              {
+                int ix = Ind("x");
+                double *px = Vard(node, ix);
+                double *py = Vard(node, ix+1);
+                double *pz = Vard(node, ix+2);
+                FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm]);
+
+                write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
+                fclose(fpxyz);
+              }
+
+              /* we wrote 3 things (x,y,z) for each var */
+              xyzoffset = 3 * voffset;
+
+              /* write grid information into xmf file */
+              write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
+                             ndname, Time, n, bin, dbl);
+
+              free_intList(plist);
+            }
           }
-
-          /* we wrote 3 things (x,y,z) for each var */
-          xyzoffset = 3 * voffset;
-
-          /* write grid information into xmf file */
-          write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
-                         ndname, Time, n, bin, dbl);
-
-          free_intList(plist);
         }
+        /* close files on this proc now */
+        fclose(fpbin);
+        fclose_xdmf_xmf(fpxmf);
       }
+      /* wait until everyone is here */
       nMPI_barrier();
-    } endforlnodes;
-
-    /* close files and free list */
-    fclose(fpbin);
-    fclose_xdmf_xmf(fpxmf);
+    } /* end rk-loop */
   }
 }
 
