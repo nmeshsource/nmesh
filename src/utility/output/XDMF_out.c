@@ -196,40 +196,41 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
         /* find indices of nearest, if all are negative, node does not have
            outputX0, outputY0, outputZ0 */
         nearest_lowernode_ijk_of_XYZ(node, plane, X0);
-        if(plane[norm]<0) continue;
-
-        /* node name and n for plane */
-        nodename(node, ndname,99);
-        n[norm] = 1;
-
-        /* list of points in plane */
-        plist = pointindexList_plane(node, norm, plane);
-
-        /* write binary data in var */
-        voffset = ftell(fpbin);
-        write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
-
-        /* write point's x,y,z coordinates */
-        if(vli==0) /* write xyz only for first var in list */
+        if(plane[norm]>=0)
         {
-          int ix = Ind("x");
-          double *px = Vard(node, ix);
-          double *py = Vard(node, ix+1);
-          double *pz = Vard(node, ix+2);
-          FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm]);
+          /* node name and n for plane */
+          nodename(node, ndname,99);
+          n[norm] = 1;
 
-          write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
-          fclose(fpxyz);
+          /* list of points in plane */
+          plist = pointindexList_plane(node, norm, plane);
+
+          /* write binary data in var */
+          voffset = ftell(fpbin);
+          write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+
+          /* write point's x,y,z coordinates */
+          if(vli==0) /* write xyz only for first var in list */
+          {
+            int ix = Ind("x");
+            double *px = Vard(node, ix);
+            double *py = Vard(node, ix+1);
+            double *pz = Vard(node, ix+2);
+            FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm]);
+
+            write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
+            fclose(fpxyz);
+          }
+
+          /* we wrote 3 things (x,y,z) for each var */
+          xyzoffset = 3 * voffset;
+
+          /* write grid information into xmf file */
+          write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
+                         ndname, Time, n, bin, dbl);
+
+          free_intList(plist);
         }
-
-        /* we wrote 3 things (x,y,z) for each var */
-        xyzoffset = 3 * voffset;
-
-        /* write grid information into xmf file */
-        write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
-                       ndname, Time, n, bin, dbl);
-
-        free_intList(plist);
       }
       nMPI_barrier();
     } endforlnodes;
