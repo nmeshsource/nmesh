@@ -8,7 +8,7 @@
    Type of cubed sphere or rather sphered cube coord transform */
 enum
 {
-  CoordInfoNotSet,  /* if box->CI->type is not set, box->CI->type=0 */
+  Cartesian,        /* box->CI->type=0 means Cartesian */
   PyramidFrustum,   /* both inner & outer surfaces are flat */  
   innerCubedSphere, /* inner surface is curved, but outer surface is flat */
   outerCubedSphere, /* outer surface is curved, but inner surface is flat */
@@ -29,6 +29,7 @@ double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
                                    int ijk[3], const double x0[3]);
 double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
                                       int ijk[3], const double x0[3]);
+int approxXYZnormal_of_xyznormal(tNode *node, int cartN);
 double magnitude_xyz(const double x[3]);
 void XbYbZb_of_ijk(tNode *node, int i, int j, int k, double Xb[3]);
 void XbYbZb_of_ind(tNode *node, int ind, double Xb[3]);

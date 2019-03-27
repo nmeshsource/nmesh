@@ -287,6 +287,39 @@ double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
   return sqrt(dist2);
 }
 
+/* return an XYZ nomrmal direction that is in a similar direction as the
+   Cartesion normal direction cartN, returns -1 if not found */
+int approxXYZnormal_of_xyznormal(tNode *node, int cartN)
+{
+  tPat *pat = node->pat;
+  tCoordInfo *CI = pat->CI;
+
+  switch(CI->type)
+  {
+  case PyramidFrustum:
+  case innerCubedSphere:
+  case outerCubedSphere:
+  case CubedShell:
+    if(cartN==2)
+    {
+      if(CI->dom<4) return 2;
+      else          return -1;
+    }
+    else if(cartN==1)
+    {
+      if(CI->dom>=4 || CI->dom<=1) return 1;
+      else                         return -1;
+    }
+    else if(cartN==0)
+    {
+      if(CI->dom>=4) return 2;
+      if(CI->dom>=2) return 1;
+      else           return -1;
+    }
+  default:
+    return cartN; /* assume Cartesian coords */
+  }
+}
 
 /* |\vec{x}| */
 double magnitude_xyz(const double x[3])

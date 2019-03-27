@@ -166,7 +166,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
   int voffset, xyzoffset;
   FILE *fpxmf, *fpbin;
   char ndname[100];
-  char *suffix[] = { "YZ", "XZ", "XY" };
+  char *suffix[] = { "yz", "xz", "xy" };
   double X0[] = { Getd(Par("outputX0")),
                   Getd(Par("outputY0")),
                   Getd(Par("outputZ0")) };
@@ -192,18 +192,22 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
         int n[] = { node->n[0], node->n[1], node->n[2] };
         int plane[3];
         intList *plist;
+        int normal;
 
         /* find indices of nearest, if all are negative, node does not have
            outputX0, outputY0, outputZ0 */
         nearest_lowernode_ijk_of_XYZ(node, plane, X0);
-        if(plane[norm]>=0)
+        normal = approxXYZnormal_of_xyznormal(node, norm);
+
+        if(normal>=0)
+        if(plane[normal]>=0)
         {
           /* node name and n for plane */
           nodename(node, ndname,99);
-          n[norm] = 1;
+          n[normal] = 1;
 
           /* list of points in plane */
-          plist = pointindexList_plane(node, norm, plane);
+          plist = pointindexList_plane(node, normal, plane);
 
           /* write binary data in var */
           voffset = ftell(fpbin);
