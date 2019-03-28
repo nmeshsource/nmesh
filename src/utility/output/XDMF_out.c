@@ -15,8 +15,9 @@
    http://www.xdmf.org/index.php/XDMF_Model_and_Format
    http://www.paraview.org/Wiki/ParaView/Data_formats
 
-   What we have here is very similar to what is in bamps 4.0. It seems that
-   VisIt can load and animate it, but paraview shows only t=0... */
+   What we have here is quite similar to what is in bamps 4.0. But I added
+   "Time Value" and "Spatial" to B_spatial. Now VisIt shows the correct time
+   and paraview can show more than t=0. */
 
 
 
