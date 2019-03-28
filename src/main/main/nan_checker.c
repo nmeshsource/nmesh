@@ -14,9 +14,9 @@ int array_finite(tArray *a, char *name, int ijk[3])
 
   if(!d) return -1;
 
-  printf("%s  %p", name, a->d);
-  printarray(a);
-  printf("\n");
+  //printf("%s  %p", name, a->d);
+  ////printarray(a);
+  //printf("\n");
 
   forarray(a, ind)
   {
