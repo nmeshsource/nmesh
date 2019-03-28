@@ -283,3 +283,7 @@ struct tTIMER *timer_start(const char *name);
 struct tTIMER *timer_stop(const char *name);
 #define TIMER_START timer_start(__func__)
 #define TIMER_STOP  timer_stop(__func__)
+
+/* nan_checker.c */
+int array_finite(tArray *a, char *name, int ijk[3]);
+int var_finite(tNode *node, int vi);

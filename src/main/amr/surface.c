@@ -660,11 +660,13 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     }
     else /* neighbor is from diff patch */
     {
+      tSurface *s0 = first_nonNULL_surf_in_dat(dat, f);
+
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found) errorexit("couldn't find nb face!!!");
 
       /* if nb has only node as neighbor we may not need to interpolate */
-      if(1 && nb->nfnb[nb_f] == 1)
+      if(1 && nb->nfnb[nb_f] == 1 && s0->nbsurf[0]->N == s0->mysurf->N)
       {
         tMesh *mesh = node->pat->mesh;
         int ix = Ind("x");
@@ -744,25 +746,31 @@ void set_ajsurf_forall_vars(tNode *node, int f)
             {
               if(inb[2][od1] == 0 && inb[2][od2] == on2-1)
               {
-                /* just copy by pointing to same array */
-                if(PR) printf(" point ajsurf to nbsurf[0]\n");
-                for(vi=0; vi<dat->nv; vi++)
+                if(on1==n1 && on2==n2)
                 {
-                  tSurface *s = dat->s[f][vi];
-                  /* do nothing if this surface is NULL */
-                  if(s) s->ajsurf = s->nbsurf[0];
+                  /* just copy by pointing to same array */
+                  if(PR) printf(" point ajsurf to nbsurf[0]\n");
+                  for(vi=0; vi<dat->nv; vi++)
+                  {
+                    tSurface *s = dat->s[f][vi];
+                    /* do nothing if this surface is NULL */
+                    if(s) s->ajsurf = s->nbsurf[0];
+                  }
+                  goto end_set_ajsurf_forall_vars;
                 }
-                goto end_set_ajsurf_forall_vars;
               }
             }
             if(inb[1][od1] == 0 && inb[1][od2] == on2-1)
             {
               if(inb[2][od1] == on1-1 && inb[2][od2] == 0)
               {
-                /* copy with two axis interchanged */
-                if(PR) printf(" copy from nbsurf[0] with two axis interchanged\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,0);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n2 && on2==n1)
+                {
+                  /* copy with two axis interchanged */
+                  if(PR) printf(" copy from nbsurf[0] with two axis interchanged\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,0);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
           }
@@ -774,20 +782,26 @@ void set_ajsurf_forall_vars(tNode *node, int f)
             {
               if(inb[2][od1] == on1-1 && inb[2][od2] == on2-1)
               {
-                /* copy with axis1 reversed */
-                if(PR) printf(" copy from nbsurf[0] with axis1 reversed\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,0);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n1 && on2==n2)
+                {
+                  /* copy with axis1 reversed */
+                  if(PR) printf(" copy from nbsurf[0] with axis1 reversed\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,0);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
             if(inb[1][od1] == on1-1 && inb[1][od2] == on2-1)
             {
               if(inb[2][od1] == 0 && inb[2][od2] == 0)
               {
-                /* copy with two axis interchanged and axis1 reversed */
-                if(PR) printf(" copy from nbsurf[0] with two axis interchanged and axis1 reversed\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,0);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n2 && on2==n1)
+                {
+                  /* copy with two axis interchanged and axis1 reversed */
+                  if(PR) printf(" copy from nbsurf[0] with two axis interchanged and axis1 reversed\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,0);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
           }
@@ -799,20 +813,26 @@ void set_ajsurf_forall_vars(tNode *node, int f)
             {
               if(inb[2][od1] == 0 && inb[2][od2] == 0)
               {
-                /* copy with axis2 reversed */
-                if(PR) printf(" copy from nbsurf[0] with axis2 reversed\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,0,1);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n1 && on2==n2)
+                {
+                  /* copy with axis2 reversed */
+                  if(PR) printf(" copy from nbsurf[0] with axis2 reversed\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,0,1);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
             if(inb[1][od1] == 0 && inb[1][od2] == 0)
             {
               if(inb[2][od1] == on1-1 && inb[2][od2] == on2-1)
               {
-                /* copy with two axis interchanged and axis2 reversed */
-                if(PR) printf(" copy from nbsurf[0] with two axis interchanged and axis2 reversed\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,1);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n2 && on2==n1)
+                {
+                  /* copy with two axis interchanged and axis2 reversed */
+                  if(PR) printf(" copy from nbsurf[0] with two axis interchanged and axis2 reversed\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,1);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
           }
@@ -824,20 +844,26 @@ void set_ajsurf_forall_vars(tNode *node, int f)
             {
               if(inb[2][od1] == on1-1 && inb[2][od2] == 0)
               {
-                /* copy with both axis reversed */
-                if(PR) printf(" copy from nbsurf[0] with both axis reversed\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,1);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n1 && on2==n2)
+                {
+                  /* copy with both axis reversed */
+                  if(PR) printf(" copy from nbsurf[0] with both axis reversed\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,1);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
             if(inb[1][od1] == on1-1 && inb[1][od2] == 0)
             {
               if(inb[2][od1] == 0 && inb[2][od2] == on2-1)
               {
-                /* copy with two axis interchanged and both reversed */
-                if(PR) printf(" copy from nbsurf[0] with both axis interchanged and both reversed\n");
-                copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,1);
-                goto end_set_ajsurf_forall_vars;
+                if(on1==n2 && on2==n1)
+                {
+                  /* copy with two axis interchanged and both reversed */
+                  if(PR) printf(" copy from nbsurf[0] with both axis interchanged and both reversed\n");
+                  copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,1);
+                  goto end_set_ajsurf_forall_vars;
+                }
               }
             }
           }

@@ -14,8 +14,8 @@ int array_finite(tArray *a, char *name, int ijk[3])
 
   if(!d) return -1;
 
-  printf("%s", name);
-  //printarray(a);
+  printf("%s  %p", name, a->d);
+  printarray(a);
   printf("\n");
 
   forarray(a, ind)
@@ -25,8 +25,10 @@ int array_finite(tArray *a, char *name, int ijk[3])
       int k = kOfInd_n(ind,n);
       int j = jOfInd_n_k(ind,n,k);
       int i = iOfInd_n_jk(ind,n,j,k);
-      PRF;printf("->n[] = {%d,%d,%d}\n", n[0],n[1],n[2]);
+      PRF;printf(":  %s->n[] = {%d,%d,%d}\n", name, n[0],n[1],n[2]);
       printf("d=%g at ind=%d i,j,k = %d %d %d\n", d[ind], ind, i,j,k);
+      printf("%s", name);
+      printarray(a);
       //errorexiti("not finite at %d", ind);
       ijk[0] = i;
       ijk[1] = j;
@@ -99,12 +101,16 @@ int var_finite(tNode *node, int vi)
   tArray *a = VarA(node, vi);
   if(!a) return -1;
 
+  /* set nname */
+  nodename(node,nname,99);
+
   /* first check main array of var */
-  ind = array_in_var_finite(node, a, vname, ijk);
+  snprintf(str,999, "%s: %s", nname, vname);
+  ind = array_in_var_finite(node, a, str, ijk);
   if(ind>=0)
   {
-    printf("node: %s,  Var: %s, Ind%d\n",
-           nodename(node,nname,99), vname, vi);
+    printf("node: %s,  var%d %s\n",
+           nname, vi, vname);
     errorexiti("not finite at ind=%d", ind);
   }
 
@@ -118,12 +124,12 @@ int var_finite(tNode *node, int vi)
     tArray **nsa = sf ? sf->nbsurf : NULL;
     if(msa)
     {
-      ind = array_in_var_finite(node, msa, vname, ijk);
+      snprintf(str,999, "%s: %s:f%d:%s", nname, vname, f, "mysurf");
+      ind = array_in_var_finite(node, msa, str, ijk);
       if(ind>=0)
       {
-        snprintf(str,999, "%s%s", vname, ":mysurf");
-        printf("node: %s,  Var: %s, Ind%d, f%d mysurf\n",
-               nodename(node,nname,99), str, vi, f);
+        printf("node: %s,  var%d %s, f%d mysurf\n",
+               nname, vi, vname, f);
         errorexiti("not finite at ind=%d", ind);
       }
     }
@@ -132,24 +138,24 @@ int var_finite(tNode *node, int vi)
       int ni;
       for(ni=0; ni<sf->nnbsurf; ni++)
       {
-        ind = array_in_var_finite(node, nsa[ni], vname, ijk);
+        snprintf(str,999, "%s: %s:f%d:%s[%d]", nname, vname, f, "nbsurf", ni);
+        ind = array_in_var_finite(node, nsa[ni], str, ijk);
         if(ind>=0)
         {
-          snprintf(str,999, "%s%s[%d]", vname, ":mysurf", ni);
-          printf("node: %s,  Var: %s, Ind%d, f%d mysurf[%d]\n",
-                 nodename(node,nname,99), str, vi, f, ni);
+          printf("node: %s,  var%d %s, f%d nbsurf[%d]\n",
+                 nname, vi, vname, f, ni);
           errorexiti("not finite at ind=%d", ind);
         }
       }
     }
     if(asa)
     {
-      ind = array_in_var_finite(node, asa, vname, ijk);
+      snprintf(str,999, "%s: %s:f%d:%s", nname, vname, f, "ajsurf");
+      ind = array_in_var_finite(node, asa, str, ijk);
       if(ind>=0)
       {
-        snprintf(str,999, "%s%s", vname, ":ajsurf");
-        printf("node: %s,  Var: %s, Ind%d, f%d ajsurf\n",
-               nodename(node,nname,99), str, vi, f);
+        printf("node: %s,  var%d %s, f%d ajsurf\n",
+               nname, vi, vname, f);
         errorexiti("not finite at ind=%d", ind);
       }
     }
