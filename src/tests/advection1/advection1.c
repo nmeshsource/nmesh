@@ -98,6 +98,15 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
             FNx = uaj[JK] * nx;
             FNy = uaj[JK] * ny;
             FNz = uaj[JK] * nz;
+//var_finite(node, iu);
+if(0) if(!isfinite(uaj[JK]))
+{
+var_finite(node, iu);
+printf("uaj = %p JK = %d uaj[JK] = %g\n", uaj, JK, uaj[JK]);
+printf("face%d dir%d p%d %d %d %d: %d\n", face, dir, p, i,j,k, ijk);
+printarray( VarAaj(node, iu, face) );
+errorexit("nan uaj");
+}
           }
           else
           {
