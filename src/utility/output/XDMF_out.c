@@ -31,14 +31,15 @@ char *E_head =
   "</Xdmf>\n";
 
 char *B_temporal =
-  "    <Grid CollectionType=\"Temporal\" GridType=\"Collection\" Name=\"Collection\">\n"
+  "    <Grid CollectionType=\"Temporal\" GridType=\"Collection\" Name=\"TCollection\">\n"
   "      <Geometry Type=\"None\"/>\n"
   "      <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
 char *E_temporal =
   "    </Grid>\n";
 
 char *B_spatial =
-  "      <Grid CollectionType=\"None\" GridType=\"Collection\" Name=\"Collection\">\n"
+  "      <Grid CollectionType=\"Spatial\" GridType=\"Collection\" Name=\"SCollection\">\n"
+  "        <Time Value=\"%.9f\"/>\n"
   "        <Geometry Type=\"None\"/>\n"
   "        <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
 char *E_spatial =
@@ -63,7 +64,7 @@ char *B_E_grid =
 
 
 /* open file xmf file with XML description and position file pointer */
-FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix)
+FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time)
 {
   FILE *fp;
   char fname[1000];
@@ -94,7 +95,7 @@ FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix)
   fseek(fp, -offset, SEEK_END);
 
   /* start new collection of nodes */
-  fprintf(fp, "%s", B_spatial);
+  fprintf(fp, B_spatial, time);
 
   return fp;
 }
@@ -219,7 +220,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
       if(rk == nMPI_rank())
       {
         if(Rank0) /* open xmf to start a new spatial series */
-          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm]);
+          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm], Time);
         else /* just add to the same spatial series */
           fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix[norm]);
 
@@ -323,7 +324,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
       if(rk == nMPI_rank())
       {
         if(Rank0) /* open xmf to start a new spatial series */
-          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix);
+          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix, Time);
         else /* just add to the same spatial series */
           fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix);
 
