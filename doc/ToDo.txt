@@ -33,15 +33,17 @@ Things that need to be done urgently:
  -synchronize ghosts : DONE!
 
 *refine and coarsen
- -interpolate 3d data; from and to parent
+ -interpolate 3d data from and to parent
   get_parent_data   : DONE!
   get_children_data : DONE!
+ -interpolate 3d data from and to higher level ancestor. We would need this
+  if we add several levels with few points to catch a shock...
 
 *Legendre : DONE!
 
 *some output: DONE!
 
-*test bfaces & fnb:  bfaces seem ok, fnb is missing some nb
+*test bfaces & fnb:  bfaces seem ok, fnb was missing some nb, but maybe ok now
 
 *2d interpolation
  -interp from ghosts within patch     : DONE!
@@ -56,11 +58,12 @@ Things that need to be done urgently:
 -allow explicit time dependence in RHS
 -keep open mind about node dependent dt
 
+*decent 2d qnd 3d output: Bernd's XDMF: DONE!
+
 *advection Eqn with DG: DONE!
  -check error:
-
-*some timing to see what needs to be optimized
- -make timer_get s.t. "name" gets appended by threadID
+ -run with several different n[0],n[1],n[2]:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 *flux integral conservation
  -make integrals
@@ -69,10 +72,6 @@ Things that need to be done urgently:
 *DG with 2nd oder wave eqn
 
 *Burgers
-
-*good 2d qnd 3d output
- -What hdf5? format can be used, that VisIt reads directly, without storing
-  all x,y,z coords in the file for each field???
 
 *check if set_ajsurf_forall_vars should be called in get_all_surfaces
  or if we should rather call set_all_myln_ajsurf in an OpenMP loop
@@ -93,12 +92,17 @@ Things that need to be done urgently:
  -or set sqrt(det2gamma)*ooJ while waiting for MPI (but not all nodes wait
   for MPI)
 
+
 Things that should be done:
 ===========================
 *node->fnb is an array, a nodelist may have been better
  +Then common_facepoints would not have to be called from both node and its
   neighbor. If they have common points both could be added at the same time.
   This could speed make_outside_neighbor_list by a factor of 2.
+
+*we have timer.c to see what needs to be optimized
+ -make timer_get s.t. "name" gets appended by threadID
+  -use gettid? or some openMP call with #ifdef around it???
 
 
 Cleanup:
