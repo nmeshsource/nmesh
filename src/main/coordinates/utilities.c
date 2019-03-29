@@ -323,7 +323,7 @@ void array_3Dmat(double M[3][3], tArray *aM)
 }
 
 /* get determinant of a 2x2 array */
-double det_2_2array(tArray *aM)
+double det_2_2_array(tArray *aM)
 {
   double *d = Arrd_(aM);
   return d[0]*d[3] - d[1]*d[2];

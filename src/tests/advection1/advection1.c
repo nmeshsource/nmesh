@@ -189,8 +189,7 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ifxx = Ind("advection1_fxx");
   int iF   = Ind("advection1_F0");
   int iooJ = Ind("det_dXbdx");
-  tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
-  tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int myid;
 
   TIMER_START;
@@ -232,9 +231,9 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       int dir = face/2;
       int p = (face%2)*(n[dir] - 1);
       //double sig = 2*(face%2) - 1;
+      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
       double *F = Vard(node, iF+face);
       double *w = Wquad(node, dir);
-      double sqrtdet2gam, det2gam;
       int i,j,k, ijk, JK, i0;
 
       forplaneN(dir, i,j,k, n, p)
@@ -243,52 +242,13 @@ void advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         JK = Ind_n_norm(i,j,k, n, dir);
         i0 = i0_norm(i,j,k, dir);
 
-        /* get 2d Jacobian of dx/dXb */
-        array_2dxdXb(node, ijk, dir, a2J);
-        /* compute 2-metric from a2J^T a2J */
-        mm_array0_norestrict(a2J,a2J, a2gam); // for now assume gam = flat
-        det2gam = det_2_2array(a2gam);
-        sqrtdet2gam = sqrt(det2gam);
-/*
-if(face==1 && j==1 && k==2 && myid==0)
-{
-printf("nid%ld l%d i=%d ", node->nid, node->l, i);
-printarray_matrix0(a2J);
-printarray_matrix0(a2gam);
-
-
-printnode(node);
-double dXbdX[3];
-dXbYbZb_dXYZ(node, dXbdX);
-for(int l=0; l<3; l++) printf("WWWWW %g\n", dXbdX[l]);
-
-
-double det_dXbYbZb_dXYZ = dXbdX[0] * dXbdX[1] * dXbdX[2];
-printf("det_dXbYbZb_dXYZ=%g\n", det_dXbYbZb_dXYZ);
-
-printf("det_dXbdx = ooJ[ijk]=%g\n", ooJ[ijk]);
-
-double norm[3];
-node_normal_at_ijk(node, face, ijk, norm);
-printf("i,j,k: %d %d %d face%d norm[0]=%g\n", i,j,k, face, norm[0]);
-
-exit(8);
-//printf("i0=%d w[i0]=%g\n", i0, w[i0]);
-//printf("sqrtdet2gam=%g\n", sqrtdet2gam);
-//if(face==3 && node->nid==0) printf("ooJ[ijk]=%g\n", ooJ[ijk]);
-}
-*/
-        r[ijk] -= F[JK] * sqrtdet2gam * fabs(ooJ[ijk])/ w[i0];
+        r[ijk] -= F[JK] * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
       }
     }
   }
 
   /* impose outer BC */
   advection1_u_BC(mesh, vlr, vlu);
-
-  /* free arrays */
-  free_array(a2gam);
-  free_array(a2J);
 
   TIMER_STOP;
 }

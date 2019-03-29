@@ -23,6 +23,8 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("dYd", "i", "coord derivative dY/dx^i"); // thing in between
   AddAuxVar("dZd", "i", "coord derivative dZ/dx^i"); // these 3 lines
   AddAuxVar("det_dXbdx", "", "determinant of dXb/dx");
+  AddAuxVar("sqrtdet2gamma","f", "sqrt(det(2gamma)), here 2gamma is 2-metric"
+            "induced on surface_f of node in Xb-coords");
   //AddAuxVar("oC0_", "f", "coord0 on faces"); // don't put anything
   //AddAuxVar("oC1_", "f", "coord1 on faces"); // between these 2 lines
 

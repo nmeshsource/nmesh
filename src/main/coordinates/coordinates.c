@@ -15,10 +15,11 @@ int coordinates_coordvars_enabled(tNode *node)
   tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
   tCoordInfo *CI = pat->CI;
-  int iX   = Ind("X");
+  int iX = Ind("X");
+  int ix = Ind("x");
   int idXdx = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx");
-  int ix   = Ind("x");
+  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int f, d;
 
   /* do nothing if this is not my node */
@@ -27,17 +28,18 @@ int coordinates_coordvars_enabled(tNode *node)
   /* if coords are set already do nothing */
   if(dat->coords_set) return 1;
 
-  /* give all these memory */
+  /* give all these memory: */
   enablevar_innode(node, iX);
   enablevar_innode(node, iX+1);
   enablevar_innode(node, iX+2);
+  enablevar_innode(node, ix);
+  enablevar_innode(node, ix+1);
+  enablevar_innode(node, ix+2);
   enablevar_innode(node, idXdx);
   enablevar_innode(node, idXdx+3);
   enablevar_innode(node, idXdx+6);
   enablevar_innode(node, idet_dXbdx);
-  enablevar_innode(node, ix);
-  enablevar_innode(node, ix+1);
-  enablevar_innode(node, ix+2);
+  enablevar_innode(node, isqrtdet2gamma0);
 
   /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
@@ -79,9 +81,10 @@ int coordinates_init_node(tNode *node)
   int *n = node->n;
   int i,j,k, d,e, f;
   int vars_on = coordinates_coordvars_enabled(node);
-  int iX   = Ind("X");
+  int iX = Ind("X");
+  int ix = Ind("x");
   int idXdx = Ind("dXdx");
-  int ix   = Ind("x");
+  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   double *pdXdx[3][3]
@@ -144,6 +147,34 @@ int coordinates_init_node(tNode *node)
       }
       det_dXbdx[ijk] = det_dXbYbZb_dXYZ;
     }
+  }
+
+  /* set sqrtdet2gamma on node faces */
+  for(f=0; f<6; f++)
+  {
+    int dir = f/2;
+    int p = (f%2)*(n[dir] - 1);
+    double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
+    tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
+    tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+
+    forplaneN(dir, i,j,k, n, p)
+    {
+      double det2gam;
+      int ijk = Ind_n(i,j,k, n);
+      int JK = Ind_n_norm(i,j,k, n, dir);
+
+      /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
+      array_2dxdXb(node, ijk, dir, a2J);
+
+      /* compute 2-metric from a2J^T a2J */
+      mm_array0_norestrict(a2J,a2J, a2gam); // for now assume gamma = flat
+      det2gam = det_2_2_array(a2gam);
+      sqrtdet2gam[JK] = sqrt(det2gam);
+    }
+    /* free arrays */
+    free_array(a2gam);
+    free_array(a2J);
   }
 
   /* set oC surface coords, for now this is off */
