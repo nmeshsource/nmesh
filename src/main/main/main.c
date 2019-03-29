@@ -26,6 +26,7 @@ int main(int argc, char **argv)
   tMesh *mesh;
   
   nMPI_Init(&argc, &argv);
+  wait_for_debugger_if_NMESH_MPI_DEBUG();
   nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
 
   /* set time when nmesh was started */

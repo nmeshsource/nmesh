@@ -245,6 +245,7 @@ void prdivider(int n);
 void initTimeIn_s(void);
 double getTimeIn_s(void);
 void prTimeIn_s(char *comment);
+void wait_for_debugger_if_NMESH_MPI_DEBUG(void);
 double min2(double x, double y);
 double min3(double x, double y, double z);
 double max2(double x, double y);

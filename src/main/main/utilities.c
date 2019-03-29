@@ -94,6 +94,44 @@ void prClockTimeIn_s(char *comment)
   fflush(stdout);
 }
 
+/* for MPI debugging */
+/* wait until var i is set to 1 in debugger */
+void wait_for_debugger_if_NMESH_MPI_DEBUG(void)
+{
+#ifdef USEMPI
+  if(getenv("NMESH_MPI_DEBUG") != NULL)
+  {
+    long pid = getpid();
+    int rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if(rank==0)
+    {
+      volatile int i=0;
+
+      sleep(4);
+      printf("nmesh rank%d has pid %ld and is waiting for debugger.\n",
+             rank, pid);
+      printf("Use the following commands in gdb to stop waiting:\n");
+      printf(" attach %ld\n", pid);
+      printf(" set var i=1\n");
+      fflush(stdout);
+
+      /* infinite loop */
+      while(i==0) { /* set var i=1 to leave this infinite loop */ }
+    }
+    else
+    {
+      printf("nmesh rank%d has pid %ld.\n", rank, pid);
+      fflush(stdout);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
+#endif
+}
+
 
 /* minimum and maximum funcs, works for integers if they are not too big */
 double min2(double x, double y)
