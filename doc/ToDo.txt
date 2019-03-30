@@ -60,14 +60,16 @@ Things that need to be done urgently:
 
 *decent 2d qnd 3d output: Bernd's XDMF: DONE!
 
-*advection Eqn with DG: DONE!
- -check error:
- -run with several different n[0],n[1],n[2]:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*set sqrt(det2gamma) already in coordinates: DONE!
 
 *flux integral conservation
  -make integrals
  -make 3d vol int.
+
+*advection Eqn with DG: DONE!
+ -check error:
+ -run with several different n[0],n[1],n[2]:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 *DG with 2nd oder wave eqn
 
@@ -85,12 +87,6 @@ Things that need to be done urgently:
  -do we need a non-diagonal mass matrix?
    In Teukolsky there is no big diff.,
    but in Bugner's thesis mass cons improves... ???
-
-*set sqrt(det2gamma)*ooJ already in coordinates?
- -could have a par that says which var has 3-metric
- -need surface var in each node for that...
- -or set sqrt(det2gamma)*ooJ while waiting for MPI (but not all nodes wait
-  for MPI)
 
 
 Things that should be done:
