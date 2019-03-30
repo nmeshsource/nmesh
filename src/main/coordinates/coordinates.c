@@ -95,6 +95,8 @@ int coordinates_init_node(tNode *node)
   double *det_dXbdx = Vard(node, Ind("det_dXbdx"));
   double dXbdX[3];
   double det_dXbYbZb_dXYZ;
+  double *gxx, *gxy, *gxz, *gyy, *gyz, *gzz;
+  tArray *a3gamT, *a2J, *a2gam, *tmp;
 
   /* do nothing if coords are set already or if vars are off */
   if(!dat) return 0;
@@ -102,6 +104,25 @@ int coordinates_init_node(tNode *node)
   if(!vars_on) return 0;
 
   PRF;printf(": nid%ld\n", node->nid);
+
+  /* pointers to 3 metric */
+  if(i3metric>=0)
+  {
+    gxx = Vard(node, i3metric);
+    gxy = Vard(node, i3metric+1);
+    gxz = Vard(node, i3metric+2);
+    gyy = Vard(node, i3metric+3);
+    gyz = Vard(node, i3metric+4);
+    gzz = Vard(node, i3metric+5);
+  }
+  else
+  { gxx = gxy = gxz = gyy = gyz = gzz = NULL; }
+
+  /* arrays to compute 2 metric on faces */
+  a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
+  a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
+  a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+  tmp = alloc_array2d(3,2);
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
@@ -156,10 +177,6 @@ int coordinates_init_node(tNode *node)
     int dir = f/2;
     int p = (f%2)*(n[dir] - 1);
     double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
-    tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
-    tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
-    tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
-    tArray *tmp = alloc_array2d(3,2);
 
     forplaneN(dir, i,j,k, n, p)
     {
@@ -170,8 +187,7 @@ int coordinates_init_node(tNode *node)
       /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
       array_2dxdXb(node, ijk, dir, a2J);
 
-printf("i3metric=%d\n",i3metric);
-      /* no is 3-metric specifieed, so we assume it is flat */
+      /* if no 3-metric is specified, we assume it is flat */
       if(i3metric<0)
       {
         /* compute 2-metric from a2J^T a2J */
@@ -180,25 +196,19 @@ printf("i3metric=%d\n",i3metric);
       else
       {
         /* compute 2-metric from a2J^T a3gam a2J, where a3gam is 3x3 */
-
+        double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
+                           { gxy[ijk], gyy[ijk], gyz[ijk] },
+                           { gxz[ijk], gyz[ijk], gzz[ijk] } };
         /* Put transpose of 3-metric into a3gamT.
            Trick here is that C-arrays are row major. So when we put this
            into the col. major a3gamT, we get the transpose automatically! */
-        //double M[][] = {...}
-        //void point_array_a_to_data(tArray *array, void *data, int nofree)
-        //point_array_a_to_data(a3gamT, M, 1);
-        // get a3gamT from C-matrix of 3-metric and point array
+        point_array_a_to_data(a3gamT, M, 1);
         mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
         mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
       }
       det2gam = det_2_2_array(a2gam);
       sqrtdet2gam[JK] = sqrt(det2gam);
     }
-    /* free arrays */
-    free_array(tmp);
-    free_array(a2gam);
-    free_array(a2J);
-    free_array(a3gamT);
   }
 
   /* set oC surface coords, for now this is off */
@@ -292,6 +302,12 @@ printf("i3metric=%d\n",i3metric);
         }
       }
     }
+
+  /* free arrays */
+  free_array(tmp);
+  free_array(a2gam);
+  free_array(a2J);
+  free_array(a3gamT);
 
   /* mark coords as set */
   dat->coords_set = 1;
