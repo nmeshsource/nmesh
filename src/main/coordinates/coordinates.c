@@ -85,6 +85,7 @@ int coordinates_init_node(tNode *node)
   int ix = Ind("x");
   int idXdx = Ind("dXdx");
   int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
+  int i3metric = MeshVarIndLax(mesh, Gets(Par("Coordinates_3metric")));
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   double *pdXdx[3][3]
@@ -155,8 +156,10 @@ int coordinates_init_node(tNode *node)
     int dir = f/2;
     int p = (f%2)*(n[dir] - 1);
     double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
+    tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
     tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
     tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+    tArray *tmp = alloc_array2d(3,2);
 
     forplaneN(dir, i,j,k, n, p)
     {
@@ -167,14 +170,35 @@ int coordinates_init_node(tNode *node)
       /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
       array_2dxdXb(node, ijk, dir, a2J);
 
-      /* compute 2-metric from a2J^T a2J */
-      mm_array0_norestrict(a2J,a2J, a2gam); // for now assume gamma = flat
+printf("i3metric=%d\n",i3metric);
+      /* no is 3-metric specifieed, so we assume it is flat */
+      if(i3metric<0)
+      {
+        /* compute 2-metric from a2J^T a2J */
+        mm_array0_norestrict(a2J,a2J, a2gam);
+      }
+      else
+      {
+        /* compute 2-metric from a2J^T a3gam a2J, where a3gam is 3x3 */
+
+        /* Put transpose of 3-metric into a3gamT.
+           Trick here is that C-arrays are row major. So when we put this
+           into the col. major a3gamT, we get the transpose automatically! */
+        //double M[][] = {...}
+        //void point_array_a_to_data(tArray *array, void *data, int nofree)
+        //point_array_a_to_data(a3gamT, M, 1);
+        // get a3gamT from C-matrix of 3-metric and point array
+        mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
+        mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
+      }
       det2gam = det_2_2_array(a2gam);
       sqrtdet2gam[JK] = sqrt(det2gam);
     }
     /* free arrays */
+    free_array(tmp);
     free_array(a2gam);
     free_array(a2J);
+    free_array(a3gamT);
   }
 
   /* set oC surface coords, for now this is off */
