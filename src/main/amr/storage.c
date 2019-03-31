@@ -81,11 +81,16 @@ tArray *alloc_empty_array2d(int n0, int n1)
 /* get array that starts at segment si */
 tArray *get_array_seg(tArray *array, int si)
 {
-  tArray *as = calloc(1, sizeof(tArray));
-  *as = *array; /* shallow copy */
-  as->si = si;
-  as->d  = array->d + array->N * si;
-  return as;
+  if(si>0)
+  {
+    tArray *as = calloc(1, sizeof(tArray));
+    *as = *array; /* shallow copy */
+    as->si = si;
+    as->d  = array->d + array->N * si;
+    return as;
+  }
+  else /* if si=0 we just return the array without allocating a new array */
+    return array;
 }
 
 /* replace pointer to data with something else */
