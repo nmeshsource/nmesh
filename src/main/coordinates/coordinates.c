@@ -207,6 +207,8 @@ int coordinates_init_node(tNode *node)
         mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
       }
       det2gam = det_2_2_array(a2gam);
+      //NOTE: there should be a faster way to get det2gam. There should
+      //      be an analogue to \det(g)=\alpha^2\det(\gamma)
       sqrtdet2gam[JK] = sqrt(det2gam);
     }
   }
