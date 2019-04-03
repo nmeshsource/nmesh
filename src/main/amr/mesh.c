@@ -224,24 +224,6 @@ int setup_box_mesh(tMesh *mesh)
   update_all_rnode_fnb(mesh);
   printmesh(mesh);
 
-  /* 8 children in patch1 */
-  //make8children_in_mesh_lns_myln(mesh->lns->next, n);
-  //printmesh(mesh);
-
-  /* 8 more in each patch */
-  el = mesh->lns;
-  for(en = el->next; el; en = el ? el->next : 0)
-  {
-    if(el->node->l < 2)
-    {
-      make8children_in_mesh_lns_myln(el, n);
-      el = en;
-    }
-  }
-
-  simple_load_balance(mesh);
-  printmesh(mesh);
-
   return 0;
 }
 
@@ -344,51 +326,6 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
   update_all_rnode_fnb(mesh);
   printmesh(mesh);
 
-  /* 8 children in patch1 */
-//  make8children_in_mesh_lns_myln(mesh->lns->next, n);
-//  printmesh(mesh);
-
-  /* 8 more in each patch */
-/*
-  el = mesh->lns;
-  for(en = el->next; el; en = el ? el->next : 0)
-  {
-    if(el->node->l < 2)
-    {
-      make8children_in_mesh_lns_myln(el, n);
-      el = en;
-    }
-  }
-  simple_load_balance(mesh);
-  printmesh(mesh);
-*/
-
-
-/*
-{
-tNode *node = mesh->lns->node;
-tNode *nb = mesh->lns->next->node;
-int *n = node->n;
-int f,i,j,k, dir, pl, ind;
-int odir, opl, inb[3];
-int ix = Ind("x");
-double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
-double x0[3], dist[3], mx0;
-f=3;
-dir =f/2;
-pl= 4;
-ijk_inplaneN(dir, i,j,k, 0,0,pl);
-ind = Ind_n(i,j,k, n);
-x0[0] = px[0][ind];
-x0[1] = px[1][ind];
-x0[2] = px[2][ind];
-dist[2] = nearest_corner_of_xyz_inplaneN(nb, odir, opl, inb, x0);
-mx0 = magnitude_xyz(x0);
-if(mx0>0.) dist[2] = dist[2]/mx0;
-pr3v("x0",x0);
-errorexit("we stop now");
-}
-*/
   return 0;
 }
 
@@ -463,39 +400,9 @@ int setup_3patchl2_mesh(tMesh *mesh)
   update_all_rnode_fnb(mesh);
   printmesh(mesh);
 
-/*
-int i;
-double nbrct[4], brct[4], irct[4];
-brct_nodeface(mesh->lns->next->node, 0, nbrct);
-prbbox(nbrct,2);
-brct_nodeface(mesh->lns->next->node, 1, nbrct);
-prbbox(nbrct,2);
-brct_nodeface(mesh->lns->next->node, 2, nbrct);
-prbbox(nbrct,2);
-
-//brct_nodeface(mesh->lns->next->node, 1, nbrct);
-//brct_nodeface(mesh->lns->node, 1, brct);
-
-
-brctpat2_of_brctpat1(mesh->pat[1], 2, nbrct,
-                     mesh->pat[0], 3, nbrct);
-prbbox(nbrct,2);
-
-brct[0]=-7; brct[1]=-3;
-brct[2]=3; brct[3]=8;
-
-i=intersection_brct1_brct2(brct, nbrct, irct);
-printf("\n i=%d: ", i);
-prbbox(brct,2);
-prbbox(nbrct,2);
-prbbox(irct,2);
-exit(9);
-*/
   /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
-Yo(7);
   printmesh(mesh);
-
 
   /* 8 more in each patch */
   el = mesh->lns;
@@ -510,8 +417,6 @@ Yo(7);
 
   simple_load_balance(mesh);
   printmesh(mesh);
-
-//errorexit("stop");
 
   return 0;
 }
