@@ -62,6 +62,8 @@ Things that need to be done urgently:
 
 *set sqrt(det2gamma) already in coordinates: DONE!
 
+*make some pars to decide what mesh we use
+
 *flux integral conservation
  -make integrals
  -make 3d vol int.
