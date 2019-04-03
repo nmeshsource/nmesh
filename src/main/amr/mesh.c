@@ -196,13 +196,8 @@ int setup_box_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  int amr_n0 = Geti(Par("amr_n0"));
-  int amr_n1 = Geti(Par("amr_n1"));
-  int amr_n2 = Geti(Par("amr_n2"));
-  int n[] = { amr_n0, amr_n1, amr_n2 };
   double xc[]   = { 0.,0.,0. };
   double dout[] = { 1.,1.,1. };
-  tNlist *el, *en;
 
   PRFs(":\n");
 
@@ -240,11 +235,6 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double obfac = 6.; // 10000 in DNSdata
   double xc[3], rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
-  tNlist *el, *en;
-  int amr_n0 = Geti(Par("amr_n0"));
-  int amr_n1 = Geti(Par("amr_n1"));
-  int amr_n2 = Geti(Par("amr_n2"));
-  int n[] = { amr_n0, amr_n1, amr_n2 };
 
   PRFs(":\n");
 
