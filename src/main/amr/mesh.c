@@ -113,21 +113,82 @@ void remove_all_patches(tMesh *mesh)
   realloc_patlist_in_mesh(mesh, 0);
 }
 
+
+/* refine all nodes up to level l */
+void refine_mesh_to_level(tMesh *mesh, int l)
+{
+  tNlist *el;
+
+  for(el=mesh->lns; el; el = el->next)
+  {
+    while(el->node->l < l)
+      el = make8children_in_mesh_lns_myln(el, el->node->n);
+  }
+}
+
+/* refine patch number p in mesh */
+void refine_pat(tMesh *mesh, int p)
+{
+  tPat *pat = mesh->pat[p];
+  tNlist *el, *en;
+
+  el = mesh->lns;
+  for(en = el->next; el; en = el ? el->next : 0)
+  {
+    if(el->node->pat == pat)
+      make8children_in_mesh_lns_myln(el, el->node->n);
+    el = en;
+  }
+}
+
+/* refine node with nid */
+void refine_node(tMesh *mesh, long nid)
+{
+  tNlist *elem;
+
+  fornodelist(mesh->lns, elem)
+  {
+    if(elem->node->nid == nid)
+    {
+      make8children_in_mesh_lns_myln(elem, elem->node->n);
+      return;
+    }
+  }
+}
+
+
 /* select mesh */
 int setup_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
+  int luni = Geti(Par("amr_luni"));
+  int refp = Geti(Par("amr_refine_p"));
+  int ret;
 
   if(Getv(mesh_type, "BoxMesh"))
-    return setup_box_mesh(mesh);
+    ret = setup_box_mesh(mesh);
   else if(Getv(mesh_type, "CubedSpheres"))
-    return setup_CubedSphere_mesh(mesh);
+    ret = setup_CubedSphere_mesh(mesh);
   else if(Getv(mesh_type, "l2_mesh"))
-    return setup_l2_mesh(mesh);
+    ret = setup_l2_mesh(mesh);
   else if(Getv(mesh_type, "3patchl2_mesh"))
-    return setup_3patchl2_mesh(mesh);
+    ret = setup_3patchl2_mesh(mesh);
   else
-    return setup_test_mesh(mesh);
+    ret = setup_test_mesh(mesh);
+
+  /* load balance root nodes */
+  simple_load_balance(mesh);
+  //printmesh(mesh);
+
+  /* refine mesh */
+  refine_mesh_to_level(mesh, luni);
+  if(refp >= 0) refine_pat(mesh, refp);
+
+  /* load balance full mesh */
+  simple_load_balance(mesh);
+  printmesh(mesh);
+
+  return ret;
 }
 
 /* setup mesh made out of boxes */
@@ -284,11 +345,11 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
   printmesh(mesh);
 
   /* 8 children in patch1 */
-  make8children_in_mesh_lns_myln(mesh->lns->next, n);
-  printmesh(mesh);
+//  make8children_in_mesh_lns_myln(mesh->lns->next, n);
+//  printmesh(mesh);
 
   /* 8 more in each patch */
-
+/*
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
@@ -298,9 +359,11 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
       el = en;
     }
   }
-
   simple_load_balance(mesh);
   printmesh(mesh);
+*/
+
+
 /*
 {
 tNode *node = mesh->lns->node;

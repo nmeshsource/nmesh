@@ -1097,7 +1097,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
 
     if(node->dat)
     {
-      /* for now we all leaves in cat. 0 */
+      /* for now we put all leaves in cat. 0 */
       addto_myln_ln_c(mesh->myln, 0, elem);
       //PRF;printf(": myln->ncat[0]=%d %p\n", mesh->myln->ncat[0], elem);
 
