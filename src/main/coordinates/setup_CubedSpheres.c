@@ -395,7 +395,7 @@ int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
 {
   double x[] = { xc[0], xc[1], xc[2] };
   double mid = xc[dir];
-  double L = 2.*(dout[dir] - mid);
+  double L = 2.*(dout[dir]);
   double c = 0.5 * (!(N%2));
   int s = N/2;
   int i, ret=-1;
