@@ -196,8 +196,10 @@ int setup_box_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  double xc[]   = { 0.,0.,0. };
-  double dout[] = { 1.,1.,1. };
+  double c = Getd(Par("amr_BoxMesh_xc"));
+  double d = Getd(Par("amr_BoxMesh_dout"));
+  double xc[]   = { c, 0., 0. };
+  double dout[] = { d, d, d };
 
   PRFs(":\n");
 
