@@ -37,8 +37,8 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVarDim("CubedSphere_dsigma1_dB", "", "d/dB sigma_{1}", 1,-1,-1);
 
   /* parameters */
-  AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
-  AddPar("Coordinates_3metric", "", "[flat,any var name]");
+  AddPar("coordinates_verbose", "yes", "verbose [yes,no]");
+  AddPar("coordinates_3metric", "", "[flat,any var name]");
   AddPar("CubedSphere_sigma01_lmax", "8", "lmax for Ylm's "
          "used in FSurf_CubSph_sigma01_func");
 

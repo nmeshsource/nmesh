@@ -85,7 +85,7 @@ int coordinates_init_node(tNode *node)
   int ix = Ind("x");
   int idXdx = Ind("dXdx");
   int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
-  int i3metric = MeshVarIndLax(mesh, Gets(Par("Coordinates_3metric")));
+  int i3metric = MeshVarIndLax(mesh, Gets(Par("coordinates_3metric")));
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   double *pdXdx[3][3]
