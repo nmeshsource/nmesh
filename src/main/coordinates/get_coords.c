@@ -1177,6 +1177,22 @@ int C_in_brct(const double brct[4], double C[2])
 }
 
 
+/* set x,y,z in face-plane */
+void set_xyz_in_face(tNode *node, int face, int i, int j, int k, double x[3])
+{
+  int dir = face/2;
+  double Xb[3], X[3];
+
+  /* get Xb and then X of i,j,k */
+  XbYbZb_of_ijk(node, i,j,k, Xb);
+  XYZ_of_XbYbZb(node, Xb, X);
+
+  /* set one X to value on face and then get x */
+  X[dir] = node->bbox[face];
+  set_xyz(NULL, node, -1, X, x);
+}
+
+
 /* convert X-coords on face f of node to X-coords of neighboring node,
    write them into nbC, and mark points outside nb with -1 in nb I */
 void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
@@ -1186,7 +1202,8 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
   tMesh *mesh = pat->mesh;
   int *n = node->n;
   int dir = f/2;
-  int pl = (n[dir]-1)*(f%2);
+  int n_dir = n[dir];
+  int pl = (n_dir-1)*(f%2);
   int ix = Ind("x");
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   double *oC[] = { Arrd(nbC[0]), Arrd(nbC[1]) };
@@ -1203,6 +1220,10 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
     int ind = Ind_n_norm(i,j,k, n, dir);
     double x[] = { px[0][ijk], px[1][ijk], px[2][ijk] };
     double oX[3];
+
+    /* if n_dir=1 the x above is not on the face,
+       so we set it the a value on face f */
+    if(n_dir<2) set_xyz_in_face(node, f, i,j,k, x);
 
     /* find point x in nb */
     loc = l_XYZ_of_xyz(nb,-1, oX, x);
