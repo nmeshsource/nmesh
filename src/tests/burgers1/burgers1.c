@@ -75,7 +75,7 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
 void burgers1_F(tMesh *mesh, tVarList *vlu)
 {
   int iu = vlu->index[0];
-  //int ifx = Ind("burgers1_fx");
+  int ifx = Ind("burgers1_fx");
   int iF  = Ind("burgers1_F0");
   char *advdir = Gets(Par("burgers1_direction"));
   double nx,ny,nz;
@@ -90,11 +90,11 @@ void burgers1_F(tMesh *mesh, tVarList *vlu)
     tNode *node = MyNode(mesh, myid);
     int *n = node->n;
     double *u = Vard(node, iu);
-    //double *fx = Vard(node, ifx);
-    //double *fy = Vard(node, ifx+1);
-    //double *fz = Vard(node, ifx+2);
+    double *fx = Vard(node, ifx);
+    double *fy = Vard(node, ifx+1);
+    double *fz = Vard(node, ifx+2);
     double norm[3];
-    //double FNx,FNy,FNz;
+    double F_int, FNx,FNy,FNz;
     int face, dir, isP, p, i,j,k, ijk, JK;
 
     /* set F on each face */
@@ -128,15 +128,16 @@ void burgers1_F(tMesh *mesh, tVarList *vlu)
           if(uaj) ul = uaj[JK];
           else    ul = ur;
         }
-        ///* set numerical flux */
-        //F_int  = F_interface(ul, ur);
-        //FNx = F_int * nx + fx[ijk];
-        //FNy = F_int * ny + fy[ijk];
-        //FNz = F_int * nz + fz[ijk];
+        /* set numerical flux */
+        F_int  = F_interface(ul, ur);
+        FNx = F_int * nx;
+        FNy = F_int * ny;
+        FNz = F_int * nz;
 
-        /* interface flux is Fx = F_interface * nx, ... */
         /* project flux onto boundary normal norm[i] */
-        F[JK] = F_interface(ul, ur)*(nx*norm[0] + ny*norm[1] + nz*norm[2]);
+        F[JK] = (FNx - fx[ijk])*norm[0] +
+                (FNy - fy[ijk])*norm[1] +
+                (FNz - fz[ijk])*norm[2];
       }
     }
   }
