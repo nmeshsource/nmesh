@@ -216,6 +216,7 @@ typedef struct tBFACE {
 typedef struct tARRAY {
   int n[3];     /* dims in all 3 dirs */
   int N;        /* N = n[0] * n[1] * n[2]; */
+  int Ne;       /* extra space in array beyond the N entries (usually 0) */
   size_t size;  /* size of allocated space in bytes */
   union {       /* anon. union with host data (add one more for GPU data) */
     double *d;  /* pointer to double data */
@@ -258,8 +259,8 @@ tMesh *make_empty_mesh(int pr);
 tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 
 /* storage.c */
-tArray *alloc_empty_array_with_segs(int n[3], int ns);
-tArray *alloc_array_with_segs(int n[3], int ns);
+tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);
+tArray *alloc_array_with_segs(int n[3], int Ne, int ns);
 tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);
 tArray *alloc_array2d(int n0, int n1);

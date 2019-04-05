@@ -16,8 +16,8 @@ extern nMPI_Comm main_comm;
 /**********************************************************************/
 /* storage for arrays */
 /**********************************************************************/
-/* allocate an empty array with ns segments */
-tArray *alloc_empty_array_with_segs(int n[3], int ns)
+/* allocate an empty array with ns segments, and extra space of size Ne */
+tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns)
 {
   tArray *array;
   int i;
@@ -30,34 +30,37 @@ tArray *alloc_empty_array_with_segs(int n[3], int ns)
   array->N = n[0] * n[1] * n[2];
   for(i=0; i<3; i++)  array->n[i] = n[i];
 
+  array->Ne = Ne;
   array->ns = ns;
   array->size = 0;
 
   return array;
 }
 
-/* allocate an array with ns segments */
-tArray *alloc_array_with_segs(int n[3], int ns)
+/* allocate an array with ns segments, and extra space of size Ne */
+tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
 {
   tArray *array;
+  int Nt;
   int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
 
   if(!n) return NULL;
 
-  array = alloc_empty_array_with_segs(n, ns);
+  array = alloc_empty_array_with_segs(n, Ne, ns);
 
   /* memory for data */
-  array->d = calloc(array->N * ns, size1);
+  Nt = array->N + array->Ne;
+  array->d = calloc(Nt * ns, size1);
   if(!array->d) errorexit("out of memory for array->d");
-  array->size = array->N * ns * size1;
+  array->size = Nt * ns * size1;
 
   return array;
 }
 
-/* allocate a standard array (with just 1 segment) */
+/* allocate a standard array (without extra space and just 1 segment) */
 tArray *alloc_array(int n[3])
 {
-  return alloc_array_with_segs(n, 1);
+  return alloc_array_with_segs(n, 0, 1);
 }
 /* allocate a 1d array */
 tArray *alloc_array1d(int N)
@@ -75,7 +78,7 @@ tArray *alloc_array2d(int n0, int n1)
 tArray *alloc_empty_array2d(int n0, int n1)
 {
   int n[] = { n0,n1,1 };
-  return alloc_empty_array_with_segs(n, 1);
+  return alloc_empty_array_with_segs(n, 0, 1);
 }
 
 /* get array that starts at segment si */
@@ -83,10 +86,11 @@ tArray *get_array_seg(tArray *array, int si)
 {
   if(si>0)
   {
+    int Nt = array->N + array->Ne;
     tArray *as = calloc(1, sizeof(tArray));
     *as = *array; /* shallow copy */
     as->si = si;
-    as->d  = array->d + array->N * si;
+    as->d  = array->d + Nt * si;
     return as;
   }
   else /* if si=0 we just return the array without allocating a new array */
@@ -103,17 +107,20 @@ void point_array_a_to_data(tArray *array, void *data, int nofree)
 }
 
 /* re-dimension array */
-tArray *redimension_array_with_segs(tArray *array, int n[3], int ns)
+tArray *redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
 {
   int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
+  int Nt;
   size_t size_new;
   int i;
 
   for(i=0; i<3; i++) if(n[i]>0) array->n[i] = n[i];
   array->N = array->n[0] * array->n[1] * array->n[2];
+  array->Ne = Ne;
   array->ns = ns;
 
-  size_new = array->N * ns * size1;
+  Nt = array->N + array->Ne;
+  size_new = Nt * ns * size1;
   if(size_new > array->size)
   {
     array = realloc(array, size_new);
@@ -123,7 +130,7 @@ tArray *redimension_array_with_segs(tArray *array, int n[3], int ns)
 }
 tArray *redimension_array(tArray *array, int n[3])
 {
-  return redimension_array_with_segs(array, n, array->ns);
+  return redimension_array_with_segs(array, n, array->Ne, array->ns);
 }
 tArray *redim_array(tArray *array, int n0, int n1, int n2)
 {

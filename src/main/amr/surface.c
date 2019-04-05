@@ -318,7 +318,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     s = dat->s[face][vi]; /* surface of 1st var that needs it on this face */
     if(!s) errorexit("1st var that needs surfaces, has no surface mem!");
     if(!s->nbsurf[ni])
-      nbsurfs_f_ni = alloc_array_with_segs(nb_n, nvars);
+      nbsurfs_f_ni = alloc_array_with_segs(nb_n, 0, nvars);
     else
       nbsurfs_f_ni = s->nbsurf[ni];
 
