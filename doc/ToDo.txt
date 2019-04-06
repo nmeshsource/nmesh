@@ -1,8 +1,3 @@
-+fix bug showing up in planes.par
- introduced when going from 7847f1050943 to 9561beb5ffc254
-+fix misc.par crash
-
-
 2 good patch tests:
 -------------------
 1.:
