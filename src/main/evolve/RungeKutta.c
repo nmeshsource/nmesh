@@ -6,63 +6,6 @@
 
 #define PR 1
 
-/*************************************************************************/
-/* functions to evolve on just one node
-   we work only once request_all_vl_surfaces and such in 
-   main/amr/surface.c start working
-*/
-/*************************************************************************/
-
-/* Runge-Kutta 4 */
-void evolve_RK4(tNode *node)
-{
-  tMesh *mesh = node->pat->mesh;
-  tEvoSys *evosys = mesh->evosys;
-  double  t = mesh->time;
-  double dt = mesh->dt;
-  pVLList *u   = evosys->u;
-  pVLList *u_p = evosys->u_p;
-  pVLList *r   = evosys->rhs;
-  pVLList *w   = evosys->w;
-
-  copy_pVLList(u_p, u, vlcopy_node, node);             // u_p = u
-  node->time = t;
-  evolve_setrhs(node, r, u, 1);                        // r  = RHS(u, t)
-  addto_pVLList(u, dt/6.0, r, vladdto_node, node);     // u += r dt/6
-
-  add_pVLList(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
-  node->time = t+0.5*dt;
-  evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt/2)
-  addto_pVLList(u, dt/3., r, vladdto_node, node);      // u += r dt/3
-
-  add_pVLList(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
-  node->time = t+0.5*dt;
-  evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt/2)
-  addto_pVLList(u, dt/3., r, vladdto_node, node);      // u += r dt/3
-
-  add_pVLList(w, 1., u_p, dt, r, vladd_node, node);    // w  = u_p + r dt
-  node->time = t+dt;
-  evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt)
-  addto_pVLList(u, dt/6., r, vladdto_node, node);      // u += r dt/6
-}
-
-/* Euler step */
-void evolve_Euler(tNode *node)
-{
-  tMesh *mesh = node->pat->mesh;
-  tEvoSys *evosys = mesh->evosys;
-  double  t = mesh->time;
-  double dt = mesh->dt;
-  pVLList *u   = evosys->u;
-  pVLList *r   = evosys->rhs;
-  //pVLList *w   = evosys->w;
-  //pVLList *u_p = evosys->u_p;
-
-  node->time = t;
-  evolve_setrhs(node, r, u, 1);                    // r  = RHS(u, t)
-  addto_pVLList(u, dt, r, vladdto_node, node);     // u += r dt
-}
-
 
 /*************************************************************************/
 /* functions to evolve all the mesh with a uniform time step
@@ -115,4 +58,66 @@ void evolve_Euler_mesh(tMesh *mesh)
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   addto_pVLList(u, dt, r, vladdto,0);     // u += r dt
+}
+
+
+/*************************************************************************/
+/* NOTE: functions below do not work yet !!! */
+/*************************************************************************/
+
+/*************************************************************************/
+/* functions to evolve on just one node
+   will work only once request_all_vl_surfaces and such in
+   main/amr/surface.c start working
+*/
+/*************************************************************************/
+
+/* Runge-Kutta 4 */
+void evolve_RK4(tNode *node)
+{
+  tMesh *mesh = node->pat->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  double  t = mesh->time;
+  double dt = mesh->dt;
+  pVLList *u   = evosys->u;
+  pVLList *u_p = evosys->u_p;
+  pVLList *r   = evosys->rhs;
+  pVLList *w   = evosys->w;
+
+  copy_pVLList(u_p, u, vlcopy_node, node);             // u_p = u
+  node->time = t;
+  evolve_setrhs(node, r, u, 1);                        // r  = RHS(u, t)
+  addto_pVLList(u, dt/6.0, r, vladdto_node, node);     // u += r dt/6
+
+  add_pVLList(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
+  node->time = t+0.5*dt;
+  evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt/2)
+  addto_pVLList(u, dt/3., r, vladdto_node, node);      // u += r dt/3
+
+  add_pVLList(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
+  node->time = t+0.5*dt;
+  evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt/2)
+  addto_pVLList(u, dt/3., r, vladdto_node, node);      // u += r dt/3
+
+  add_pVLList(w, 1., u_p, dt, r, vladd_node, node);    // w  = u_p + r dt
+  node->time = t+dt;
+  evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt)
+  addto_pVLList(u, dt/6., r, vladdto_node, node);      // u += r dt/6
+}
+
+/* Euler step */
+void evolve_Euler(tNode *node)
+{
+  tMesh *mesh = node->pat->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  double  t = mesh->time;
+  double dt = mesh->dt;
+  pVLList *u   = evosys->u;
+  pVLList *r   = evosys->rhs;
+  //pVLList *w   = evosys->w;
+  //pVLList *u_p = evosys->u_p;
+
+  node->time = t;
+  evolve_setrhs(node, r, u, 1);                    // r  = RHS(u, t)
+  addto_pVLList(u, dt, r, vladdto_node, node);     // u += r dt
 }
