@@ -13,14 +13,6 @@
 /**********************************************************************/
 
 /* compute desired rank */
-int desiredrank0(int nid, int nnodes, int size)
-{
-  int rest = nnodes%size;
-  int nperproc = nnodes/size + (rest>0);
-  int shft = ((size-rest+1)/2)*(rest>0);
-  int desrank = (nid + shft)/nperproc;
-  return desrank;
-}
 int desiredrank(int nid, int nnodes, int size)
 {
   double N = nnodes;
@@ -73,6 +65,7 @@ void simple_load_balance(tMesh *mesh)
 }
 
 /* return: number of variables and number of doubles inside dat */
+/* NOTE: this does not take the extra space in some vars into account */
 int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
 {
   tMesh *mesh;
@@ -100,6 +93,7 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
   |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
   here nvars is the number of variables that we send,
   the buffer has to be freed by caller later */
+/* NOTE: this does not take the extra space in some vars into account */
 double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
 {
   tMesh *mesh = dat->node->pat->mesh;
@@ -155,8 +149,8 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
 }
 
 /* move data on one node between 2 ranks: the buffer we send/recv contains
-  |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
- */
+  |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||... */
+/* NOTE: this does not take the extra space in some vars into account */
 void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs)
 {
