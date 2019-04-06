@@ -57,6 +57,12 @@ tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
   return array;
 }
 
+/* allocate an array with extra space but just 1 segment */
+tArray *alloc_array_extra(int n[3], int Ne)
+{
+  return alloc_array_with_segs(n, Ne, 1);
+}
+
 /* allocate a standard array (without extra space and just 1 segment) */
 tArray *alloc_array(int n[3])
 {
@@ -1390,6 +1396,7 @@ void enablevarcomp_innode(tNode *node, int i)
   {
     tMesh *mesh = node->pat->mesh;
     int *ns = MeshVar_n_special(mesh, i);
+    int Ne = MeshVar_Nextra(mesh, i);
     int dir, n[3];
 
     for(dir=0; dir<3; dir++)
@@ -1397,7 +1404,7 @@ void enablevarcomp_innode(tNode *node, int i)
       n[dir] = node->n[dir];
       if(ns[dir]>0) n[dir] = ns[dir];
     }
-    dat->v[i] = alloc_array(n);
+    dat->v[i] = alloc_array_extra(n, Ne);
     dat->nvenabled++;
   }
 }

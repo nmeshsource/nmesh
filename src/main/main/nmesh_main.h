@@ -160,6 +160,7 @@ typedef struct tVAR {
   int surfacezones; /* surfacezone number we have for this var on each side */
   int n_special[3]; /* if >0, use this dim in dirs 0,1,2 */
   int type;         /* 0: evo. var., 1: aux. var. no need to copy or interp. */
+  int Nextra;       /* extra space allocated in var array */
 } tVar;
 
 /* functions to create and access variables */
@@ -190,12 +191,14 @@ void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
 void MeshVarSetType(tMesh *mesh, int i, int type);
 void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
 void MeshVarSetSpecial(tMesh *mesh, int i,  int ns0, int ns1, int ns2);
+void MeshVarSetNextra(tMesh *mesh, int i, int Nextra);
 double MeshVarFallOff(tMesh *mesh, int i);
 double MeshVarFarLimit(tMesh *mesh, int i);
 int MeshVarSymmetry(tMesh *mesh, int i, int dir);
 int MeshVarSurfacezones(tMesh *mesh, int i);
 int MeshVarType(tMesh *mesh, int i);
 int *MeshVar_n_special(tMesh *mesh, int i);
+int MeshVar_Nextra(tMesh *mesh, int i);
 /* convenience macros for vars */
 #define VarName(i) MeshVarName(mesh, (i))
 #define Ind(name)  MeshVarInd(mesh, (name))

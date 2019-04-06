@@ -106,8 +106,11 @@ void AddEvoMeshVar(tMesh *mesh, const char *name,
                    const char *tensorindices, const char *description)
 {
   int nvdb  = mesh->nvdb;
+  int Nextra = 3; // space for 3 extra numbers: min,max,average
+
   AddMeshVar(mesh, name, tensorindices, description);
   MeshVarSetSurfInfo(mesh, nvdb, 1);
+  MeshVarSetNextra(mesh, nvdb, Nextra);
 }
 
 /* add dimensioned variable to data base */
@@ -246,7 +249,7 @@ char *MeshVarTensorIndices(tMesh *mesh, int i)
   return vdb[i].tensorindices;
 }
 
-/* set information on how variable behaves at Boundary*/
+/* set information on how variable behaves at Boundary */
 void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
 			        double farlimit, double falloff)
 {
@@ -256,7 +259,7 @@ void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
   vdb[i].falloff = falloff;
 }
 
-/* set information on how variable behaves at Boundary*/
+/* set information on type of variable */
 void MeshVarSetType(tMesh *mesh, int i, int type)
 {
   tVar *vdb = mesh->vdb;
@@ -302,6 +305,20 @@ void MeshVarSetSpecial(tMesh *mesh, int i,  int ns0, int ns1, int ns2)
     }
 }
 
+/* set information on how much extra space this var has in its array */
+void MeshVarSetNextra(tMesh *mesh, int i, int Nextra)
+{
+  tVar *vdb = mesh->vdb;
+  int j, i0 = MeshVarIndComponent0(mesh, i);
+  int n = MeshVarNComponents(mesh, i0);
+
+  for(j = 0; j < n; j++)
+  {
+    vdb[j+i0].Nextra = Nextra;
+    if(0) printf("  setting Nextra=%d\n", vdb[j+i0].Nextra);
+  }
+}
+
 /* return various pieces of information, e.g. boundary information */
 double MeshVarFallOff(tMesh *mesh, int i)
 { return mesh->vdb[i].falloff; }
@@ -320,6 +337,9 @@ int MeshVarType(tMesh *mesh, int i)
 
 int *MeshVar_n_special(tMesh *mesh, int i)
 { return mesh->vdb[i].n_special; }
+
+int MeshVar_Nextra(tMesh *mesh, int i)
+{ return mesh->vdb[i].Nextra; }
 
 
 /************************************************************************/
@@ -529,6 +549,7 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
     newvar->farlimit      = var->farlimit;
     newvar->falloff       = var->falloff;
     newvar->type          = var->type;
+    newvar->Nextra        = var->Nextra;
     newvar->surfacezones  = var->surfacezones;
     for (j = 0; j < 3; j++)
     {

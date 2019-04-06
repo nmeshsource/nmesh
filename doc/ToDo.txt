@@ -62,9 +62,18 @@ Things that need to be done urgently:
 
 *set sqrt(det2gamma) already in coordinates: DONE!
 
-*fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
+*make some pars to decide what mesh we use: DONE!
 
-*make some pars to decide what mesh we use
+*decide which pieces of the RK substep need to be limited!!!
+ -in bamps it seems what I call w (and Bernd v) is limited after each
+  substep BUT u itself is limited only at the very end!!!
+ ==> for now proceed as in bamps as this looks very reasonable.
+
+*update set_all_myln_mysurf and request_all_myln_surfaces_exchange
+ so that we also have min/max or averages in extra space of mysurf
+ and nbsurf arrays
+
+*fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
 
 *flux integral conservation
  -make integrals

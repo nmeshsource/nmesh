@@ -261,6 +261,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);
 tArray *alloc_array_with_segs(int n[3], int Ne, int ns);
+tArray *alloc_array_extra(int n[3], int Ne);
 tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);
 tArray *alloc_array2d(int n0, int n1);
