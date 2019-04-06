@@ -20,8 +20,8 @@ int nmesh_misc(tMesh *mesh)
   //AddVarDim("misc_us", "", "that needs surface exchange",7,0,6);
 
   /* parameters */
-  //AddPar("misc_lowlatency", "no", 
-  //       "send many small rather than few large messages");
+  AddPar("misc_ajsurf_v_init", "test_func(x,y,z)", "how we init v test_ajsurf"
+         "[test_func(x,y,z),test_func(lam,A,B)]");
 
   return 0;
 }

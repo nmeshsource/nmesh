@@ -385,6 +385,7 @@ int test_ajsurf(tMesh *mesh)
   //double *Xbd[3];
   int myid;
   double sum;
+  int test_func_lamAB = Getv(Par("misc_ajsurf_v_init"), "test_func(lam,A,B)");
 
   prdivider(0);
   PRF;printf(": Hmmm.\n");
@@ -419,20 +420,20 @@ int test_ajsurf(tMesh *mesh)
                      Vard(node, ix+1)[ijk], Vard(node, ix+2)[ijk] };
       tPat *pat = node->pat;
       int p = pat->p;
-      int dom = pat->CI->dom;
       double dlam = (p != 0);
       //double dlam = (p > 5);
       double lam = X[0] + dlam;
       //double A = dom!=3 ? X[1] : 2.*(1.-X[1]) + 1.;
       //double A = dom/2 ? X[1] : -X[1];
       double A = X[1];
+      double B = X[2];
+      //int dom = pat->CI->dom;
       //double B = dom/2 ? X[2] : -X[2];
 
       //XYZ_of_XbYbZb(node, Xb, X);
       va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
       //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
-      //va->d[ijk] = test_func(lam,A,X[2]);
-      //va->d[ijk] = test_func(lam,A,B);
+      if(test_func_lamAB) va->d[ijk] = test_func(lam,A,B);
       //va->d[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
     }
   }
