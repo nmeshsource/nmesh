@@ -57,6 +57,13 @@ tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
   return array;
 }
 
+/* allocate a 1d array */
+tArray *alloc_array1d_with_segs(int N, int Ne, int ns)
+{
+  int n[] = { N,1,1 };
+  return alloc_array_with_segs(n, Ne, 1);
+}
+
 /* allocate an array with extra space but just 1 segment */
 tArray *alloc_array_extra(int n[3], int Ne)
 {

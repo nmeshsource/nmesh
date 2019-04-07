@@ -336,6 +336,12 @@ void print_com(tCom *com)
 #endif
 }
 
+/* set free_buf flag in com */
+void set_free_buf_in_com(tCom *com, int free_buf)
+{
+  com->free_buf  = free_buf;
+}
+
 /* point com buffers */
 void put_buffers_in_com(tCom *com, int rq,
                         void *sbuf, int slen, void *rbuf, int rlen)

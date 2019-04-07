@@ -44,6 +44,9 @@ typedef struct tDAT {
                              e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
                              if s[6][vi]=NULL var vi does not need exchange */
   struct tCOM *com[6];    /* com for each face */
+  struct tINDIC **ic;     /* indicators such as min/max for each var,
+                             e.g. ic[vi] has indicators for var vi  */
+  struct tCOM *icom;      /* com for indc */
 } tDat;
 
 /* surface data needed for node to neighbor node communication */
@@ -62,6 +65,20 @@ typedef struct tSURFACE {
 /* NOTE:
    mysurf comes from this proc,
    nbsurf[i] can just point if nb[i] is local, otherwise we need to alloc */
+
+/* indicator data for node to neighbor node communication */
+typedef struct tINDIC {
+  struct tDAT *dat;          /* pointer to dat the indicator is in */
+  int vi;                    /* var index */
+  int nvals;                 /* number of indic. vals, e.g. 2 for min,max */
+  struct tARRAY *myindc;     /* array that contains values for my var */
+  struct tARRAY **nbindc[6]; /* list of values from neighb. indicators, e.g.
+                                nbindc[f][i] is indic of nb i on face f */
+  int *allocd_nbindc[6]; // allocd_nbindc[f][i]=1 if need to free nbindc[f][i]
+} tIndic;
+/* NOTE:
+   myindc comes from this proc,
+   nbindc[i] can just point if nb[i] is local, otherwise we need to alloc */
 
 
 /* a node */
@@ -261,7 +278,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);
 tArray *alloc_array_with_segs(int n[3], int Ne, int ns);
-tArray *alloc_array_extra(int n[3], int Ne);
+tArray *alloc_array1d_with_segs(int N, int Ne, int ns);
 tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);
 tArray *alloc_array2d(int n0, int n1);
