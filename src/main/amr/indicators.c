@@ -136,7 +136,7 @@ int init_myindc_for_vl(tNode *node, tVarList  *vl, int nvals)
 }
 
 /* init all indc on all nodes in the mesh for a varlist */
-void init_all_myln_myindc(tMesh *mesh, tVarList  *vl, int nvals)
+void init_all_myln_myindc_for_vl(tMesh *mesh, tVarList  *vl, int nvals)
 {
   int myid;
   formylnodes(mesh, myid)
@@ -261,7 +261,7 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
    Note: We need to call this! If we call request_all_indc_exchange(n1)
    for only node n1, MPI deadlocks because the other nodes are not sending
    to n1 or receiving from n1 */
-void request_all_myln_indc_exchange(tMesh *mesh, tVarList  *vl)
+void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl)
 {
   int myid;
 
