@@ -356,6 +356,7 @@ void printnodelist_and_neighbors(tNlist *nl);
 void printnodelist(tNlist *nl);
 void printvar_innode(tNode *node, int vi);
 void printvar_ajsurfdiff(tNode *node, int vi);
+void printvar_indc(tNode *node, int vi);
 void printarray(tArray *A);
 void printarray_int(tArray *A);
 void printarray_matrix0(tArray *A);

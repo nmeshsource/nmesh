@@ -573,8 +573,6 @@ int test_indc(tMesh *mesh)
     tNode *node = MyNode(mesh, myid);
     node->dat->ic[vi]->myindc->d[0] = node->nid; 
     node->dat->ic[vi]->myindc->d[1] = -node->nid; 
-    printnode(node);
-    printvar_innode(node, vi);
   }
   request_all_myln_indc_exchange_for_vl(mesh, vl);
 
@@ -588,12 +586,12 @@ int test_indc(tMesh *mesh)
 
   /* print var in all nodes */
   prdivider(0);
-  PRF;printf(": print the var on all nodes:\n");
+  PRF;printf(": print the var indc on all nodes:\n");
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
     printnode(node);
-    printvar_innode(node, vi);
+    printvar_indc(node, vi);
   }
 
   /* after we have printed them, we no longer need the indicators */

@@ -291,6 +291,46 @@ void printvar_ajsurfdiff(tNode *node, int vi)
     }
 }
 
+void printvar_indc(tNode *node, int vi)
+{
+  int f;
+  tMesh *mesh = node->pat->mesh;
+  char *name = VarName(vi);
+  int zones =  MeshVarSurfacezones(mesh, vi);
+  int type =  MeshVarType(mesh, vi);
+  tDat *dat = node->dat;
+  tArray *va = dat ? dat->v[vi] : NULL;
+  char s[100];
+
+  printf("%s Ind=%d type=%d zones=%d\n", name, vi, type, zones);
+
+  if(va)
+  {
+    tIndic *ic = dat->ic[vi];
+    tArray *mia  = ic ? ic->myindc : NULL;
+    if(mia)
+    {
+      printf("myindc");
+      printarray(mia);
+    }
+    for(f=0; f<6; f++)
+    {
+      tArray **nia = ic ? ic->nbindc[f] : NULL;
+      if(nia)
+      {
+        int ni;
+        for(ni=0; ni<node->nfnb[f]; ni++)
+        {
+          printf("f%d fnb[f][%d]=%s allocd=%d nbindc[%d][%d]",
+                 f, ni, nodename(node->fnb[f][ni],s,99),
+                 ic->allocd_nbindc[f][ni], f, ni);
+          printarray(nia[ni]);
+        }
+      }
+    }
+  }
+}
+
 /* print an array */
 void printarray_sel(tArray *A, int dbl)
 {
