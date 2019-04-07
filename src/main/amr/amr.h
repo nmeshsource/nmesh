@@ -7,7 +7,6 @@ extern nMPI_Comm main_comm;
 
 
 /* storage.c */
-void realloc_dat_reqs(tDat *dat, int n_rq_new, int f);
 int realloc_myln_nncats(tMylnodes *myln, int nncats);
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 

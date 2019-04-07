@@ -1304,16 +1304,6 @@ void free_dat(tDat *dat)
   free(dat);
 }
 
-/* alloc MPI req. places in dat for face f */
-void realloc_dat_reqs(tDat *dat, int n_rq_new, int f)
-{
-  if(!dat) return;
-
-  /* free buffer contents */
-  realloc_com_reqs(dat->com[f], n_rq_new);
-}
-
-
 /* change dat->nv  to  dat->nv=nv_new */
 void realloc_datvariables(tDat *dat, int nv_new)
 {
