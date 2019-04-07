@@ -370,7 +370,7 @@ void request_all_surfaces_exchange(tNode *node)
   /* do nothing if this node is on other proc */
   if(!node->dat) return;
 
-  /* free req, send/recv arrays */
+  /* free req, send/recv arrays, before we start any send/recv */
   free_dat_reqs_after_Waitall_com_send(node);
   // NOTE: This Waitall in leads to a deadlock when it is called repeatedly
   // from the same node, as I would like to do in RK4.
