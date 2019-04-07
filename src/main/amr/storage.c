@@ -61,7 +61,7 @@ tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
 tArray *alloc_array1d_with_segs(int N, int Ne, int ns)
 {
   int n[] = { N,1,1 };
-  return alloc_array_with_segs(n, Ne, 1);
+  return alloc_array_with_segs(n, Ne, ns);
 }
 
 /* allocate an array with extra space but just 1 segment */
@@ -1278,6 +1278,11 @@ tDat *alloc_dat(tNode *node)
     dat->com[f] = alloc_com(sizeof(double), 1);
   }
 
+  dat->ic = calloc(nv, sizeof(dat->ic[0]));
+  if(!dat->ic) errorexit("out of memory for dat->ic");
+
+  dat->icom = alloc_com(sizeof(double), 1);
+
   return dat;
 }
 /* free dat and all arrays within it */
@@ -1292,14 +1297,18 @@ void free_dat(tDat *dat)
   {
     free_array(dat->v[i]);
     for(f=0; f<6; f++) free_surface(dat->s[f][i]);
+    free_indc(dat->ic[i]);
   }
   free(dat->v);
+  free(dat->ic);
 
   for(f=0; f<6; f++)
   {
     free(dat->s[f]);
     free_com(dat->com[f]);
   }
+
+  free_com(dat->icom);
 
   free(dat);
 }
@@ -1315,10 +1324,14 @@ void realloc_datvariables(tDat *dat, int nv_new)
   {
     dat->v = realloc(dat->v, nv_new*sizeof(tArray *));
     if(!dat->v) errorexit("out of memory for dat->v");
+
+    dat->ic = realloc(dat->ic, nv_new*sizeof(dat->ic[0]));
+    if(!dat->ic) errorexit("out of memory for dat->ic");
   }
   else
   {
     free(dat->v);
+    free(dat->ic);
     return;
   }
 
@@ -1333,6 +1346,7 @@ void realloc_datvariables(tDat *dat, int nv_new)
   {
     dat->v[i] = NULL;
     for(f=0; f<6; f++) dat->s[f][i] = NULL;
+    dat->ic[i] = NULL;
   }
   dat->nv = nv_new;
 }
