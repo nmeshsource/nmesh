@@ -435,7 +435,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
   if(!found) errorexit("couldn't find nb face!!!");
 
-  /* is nb is local we have already exchanged info  */
+  /* if nb is local we have already exchanged info  */
   if(nb->dat) return;
 
   /* nb is on other process, we have used MPI to exchange data */
