@@ -328,7 +328,7 @@ void free_dat_icom_reqs_after_Waitall_com_send(tNode *node)
 
   /* wait until all has been sent, then free all buffers for this face */
   nMPI_Waitall_com_send(dat->icom);
-  realloc_dat_icom_reqs(node->dat, 0); /* free req and send arrays */
+  realloc_com_reqs(dat->icom, 0); /* free req and send arrays */
 }
 
 /* get nbindc from all faces and variables for this node out of buffers */
