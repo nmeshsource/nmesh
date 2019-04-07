@@ -6,3 +6,8 @@
 
 /* misc.c */
 int misc_test(tMesh *mesh);
+int test_point_interpolation(tMesh *mesh);
+int test_point_finders(tMesh *mesh);
+int test_parent_child_interpolation(tMesh *mesh);
+int test_ajsurf(tMesh *mesh);
+int test_indc(tMesh *mesh);

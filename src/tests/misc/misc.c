@@ -7,10 +7,6 @@
 #define PR 1
 
 
-int test_point_interpolation(tMesh *mesh);
-int test_point_finders(tMesh *mesh);
-int test_parent_child_interpolation(tMesh *mesh);
-int test_ajsurf(tMesh *mesh);
 
 
 double test_func(double x, double y, double z)
@@ -58,6 +54,7 @@ int misc_test(tMesh *mesh)
   test_point_finders(mesh);
   test_parent_child_interpolation(mesh);
   test_ajsurf(mesh);
+  test_indc(mesh);
 
   return 0;
 }
@@ -528,5 +525,80 @@ int test_ajsurf(tMesh *mesh)
 
   /* after we have printed them, we no longer need the surfaces */
   free_all_myln_surfaces(mesh);
+  return 0;
+}
+
+/* exchange some indicators for testing */
+int test_indc(tMesh *mesh)
+{
+  tNode *nd;
+  int ui = Ind("misc_u");
+  int vi = Ind("misc_v");
+  int myid;
+  tVarList *vl;
+
+  /* varlist with ui and vi */
+  vl = vlalloc(mesh);
+  vlpush(vl, ui);
+  vlpush(vl, vi);
+
+  prdivider(0);
+  PRF;printf(": indc.\n");
+  enablevar(mesh, vi);
+
+  /* above we messed with all kinds of things,
+     so make sure all coords are set again */
+  coordinates_init(mesh);
+
+  /* print var */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    printnode(node);
+    printvar_innode(node, vi);
+  }
+
+  /* print var in one node again */
+  nd = MyNode(mesh, 0); /* my first node */
+  printnode(nd);
+  printvar_innode(nd, vi);
+
+  /* exchange indc */
+  prdivider(0);
+  PRF;printf(": request_all_myln_indc_exchange_for_vl\n");
+  init_all_myln_myindc_for_vl(mesh, vl, 3);
+  /* set indc to something ... */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    node->dat->ic[vi]->myindc->d[0] = node->nid; 
+    node->dat->ic[vi]->myindc->d[1] = -node->nid; 
+    printnode(node);
+    printvar_innode(node, vi);
+  }
+  request_all_myln_indc_exchange_for_vl(mesh, vl);
+
+  /* Here we can do work. MPI is now busy sending buffers */
+
+  /* now get the indicators and wait for MPI buffers if necessary */
+  get_all_myln_indc_for_vl(mesh, vl);
+
+  /* nbindc should be set now */
+  PRF;printf(": get_all_myln_surfaces has set nbindc\n");
+
+  /* print var in all nodes */
+  prdivider(0);
+  PRF;printf(": print the var on all nodes:\n");
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    printnode(node);
+    printvar_innode(node, vi);
+  }
+
+  /* after we have printed them, we no longer need the indicators */
+  free_all_myln_indc(mesh);
+
+  vlfree(vl);
   return 0;
 }

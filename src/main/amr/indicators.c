@@ -20,8 +20,11 @@ tIndic *alloc_empty_indc(tNode *node)
   for(f=0; f<6; f++)
   {
     int nnb = node->nfnb[f];
-    ic->nbindc[f] = calloc(nnb, sizeof(ic->nbindc[0][0]));
-    ic->allocd_nbindc[f] = calloc(nnb, sizeof(ic->allocd_nbindc[0][0]));
+    if(nnb)
+    {
+      ic->nbindc[f] = calloc(nnb, sizeof(ic->nbindc[0][0]));
+      ic->allocd_nbindc[f] = calloc(nnb, sizeof(ic->allocd_nbindc[0][0]));
+    }
   }
 
   return ic;
