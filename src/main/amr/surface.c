@@ -477,15 +477,6 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 }
 
 
-/* alloc MPI req. places in dat for face f */
-void realloc_dat_reqs(tDat *dat, int n_rq_new, int f)
-{
-  if(!dat) return;
-
-  /* free buffer contents */
-  realloc_com_reqs(dat->com[f], n_rq_new);
-}
-
 /* free req and send arrays after all has been sent */
 void free_dat_reqs_after_Waitall_com_send(tNode *node)
 {
@@ -501,7 +492,7 @@ void free_dat_reqs_after_Waitall_com_send(tNode *node)
 
     /* wait until all has been sent, then free all buffers for this face */
     nMPI_Waitall_com_send(dat->com[face]);
-    realloc_dat_reqs(node->dat, 0, face); /* free req and send arrays */
+    realloc_com_reqs(dat->com[face], 0); /* free req and send arrays */
   }
 }
 
