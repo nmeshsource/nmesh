@@ -69,7 +69,7 @@ Things that need to be done urgently:
   substep BUT u itself is limited only at the very end!!!
  ==> for now proceed as in bamps as this looks very reasonable.
 
-*extend evolve with limiters that transmit info in array's extra space
+*extend evolve with limiters that transmit info in indicators
 
 *update set_all_myln_mysurf and request_all_myln_surfaces_exchange
  so that we also have min/max or averages in extra space of mysurf
