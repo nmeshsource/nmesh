@@ -8,7 +8,7 @@
 
 
 /* RHS of: d_t u = -u */
-void evolve_test_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int evolve_test_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int myid;
 
@@ -26,10 +26,11 @@ void evolve_test_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     /* RHS at each point */
     forpoints(node, i) r[i] = -u[i];
   }
+  return 0;
 }
 
 /* RHS of: d_t v = s */
-void evolve_test_rhs_v(tMesh *mesh, tVarList *vlr, tVarList *vlv)
+int evolve_test_rhs_v(tMesh *mesh, tVarList *vlr, tVarList *vlv)
 {
   int myid;
 
@@ -48,10 +49,11 @@ void evolve_test_rhs_v(tMesh *mesh, tVarList *vlr, tVarList *vlv)
     /* RHS at each point */
     forpoints(node, i) r[i] = s[i];
   }
+  return 0;
 }
 
 /* set source s for v: s = u */
-void evolve_test_src_u(tMesh *mesh, tVarList *vlu)
+int evolve_test_src_u(tMesh *mesh, tVarList *vlu)
 {
   int myid;
 
@@ -68,6 +70,7 @@ void evolve_test_src_u(tMesh *mesh, tVarList *vlu)
 
     forpoints(node, i) s[i] = u[i];
   }
+  return 0;
 }
 
 

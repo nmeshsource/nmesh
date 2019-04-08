@@ -192,7 +192,7 @@ void burgers1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 }
 
 /* RHS of: d_t u = - d_i f^i */
-void burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
@@ -261,6 +261,7 @@ void burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   burgers1_u_BC(mesh, vlr, vlu);
 
   TIMER_STOP;
+  return 0;
 }
 
 
