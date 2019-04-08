@@ -5,6 +5,8 @@
 #include "amr.h"
 
 
+#define PR 0
+
 /* NOTE about nmesh variables and arrays:
    var arrays a[ind] = v_{ijk} are indexed like this:
    ind = i + n[0]*(j + n[1]*k)
@@ -20,6 +22,13 @@
    store result in ABa */
 void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa)
 {
+  if(PR)
+  {
+    PRF;printf(": dir=%d\n", dir);
+    printf("Ata");printarray(Ata);
+    printf("Ba");printarray(Ba);
+  }
+
   switch(dir)
   {
   case 0:
@@ -50,7 +59,13 @@ void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
   int bn1 = Ba->n[1] * Ba->n[2];
   int i,l,j;
 
-  if(atn0 != bn0) errorexit("Ata->n[0] != Ba->n[0]");
+  if(atn0 != bn0)
+  {
+    printf("cannot multiply a %dx%d with %dx%d matrix:\n", atn1,atn0, bn0,bn1);
+    printf("Ata");printarray(Ata);
+    printf("Ba");printarray(Ba);
+    errorexit("Ata->n[0] != Ba->n[0]");
+  }
 
   for(j=0; j<bn1; j++)
     for(i=0; i<atn1; i++)
@@ -74,7 +89,13 @@ void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa)
   int bn1 = Ba->n[1] * Ba->n[2];
   int i,l,j;
 
-  if(atn0 != bn0) errorexit("Ata->n[0] != Ba->n[0]");
+  if(atn0 != bn0)
+  {
+    printf("cannot multiply a %dx%d with %dx%d matrix:\n", atn1,atn0, bn0,bn1);
+    printf("Ata");printarray(Ata);
+    printf("Ba");printarray(Ba);
+    errorexit("Ata->n[0] != Ba->n[0]");
+  }
 
   for(j=0; j<bn1; j++)
     for(i=0; i<atn1; i++)
@@ -118,6 +139,13 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
     for(i=0; i<n0; i++)
       for(j=0; j<n1; j++)
         C[Ind_n(j,i,k, nC)] = B[Ind_n(i,j,k, nB)];
+
+  if(PR)
+  {
+    PRFs(":\n");
+    printf("Ba");printarray(Ba);
+    printf("Ca");printarray(Ca);
+  }
 
   /* now multiply */
   mm_array0(Ata, Ca, ACa);
@@ -163,6 +191,13 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
     for(j=0; j<n1; j++)
       for(k=0; k<n2; k++)
         C[Ind_n(k,j,i, nC)] = B[Ind_n(i,j,k, nB)];
+
+  if(PR)
+  {
+    PRFs(":\n");
+    printf("Ba");printarray(Ba);
+    printf("Ca");printarray(Ca);
+  }
 
   /* now multiply */
   mm_array0(Ata, Ca, ACa);
