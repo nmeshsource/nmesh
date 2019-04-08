@@ -125,6 +125,55 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
       ListEntry(evosys->setrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 }
 
+/* apply limiters to evo subsystems. */
+/* Version for entire mesh: */
+void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int i, myid;
+
+  if(PR) PRFs(":\n");
+
+  /* loop over list of varlists */
+  forList(u, i)
+  {
+    tVarList *vl = ListEntry(u,i);
+
+    if(ListEntry(evosys->limdata,i))
+    {
+      init_all_myln_myindc_for_vl(mesh, vl, 3);
+
+      /* set data limiter needs in myindc arrays of each node */
+      formylnodes(mesh, myid)
+      {
+        tNode *node = MyNode(mesh, myid);
+        ListEntry(evosys->limdata,i)(node, vl);
+      }
+
+      /* initiate indc exchange */
+      request_all_myln_indc_exchange_for_vl(mesh, vl);
+      /* After this we could do work. MPI is now busy sending buffers */
+
+      /* now get the indicators and wait for MPI buffers if necessary */
+      get_all_myln_indc_for_vl(mesh, vl);
+
+      /* use limiter on each node */
+      formylnodes(mesh, myid)
+      {
+        tNode *node = MyNode(mesh, myid);
+
+        /* apply limiter */
+        if(ListEntry(evosys->limiter,i))
+          ListEntry(evosys->limiter,i)(node, vl);
+      }
+
+      /* free indicators again */
+      free_all_myln_indc_for_vl(mesh, vl);
+    }
+
+  } /* end loop over varlists */
+}
+
 
 /* make some vars and put them in evosys */
 int evolve_init_evosys(tMesh *mesh)

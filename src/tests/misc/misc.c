@@ -595,7 +595,7 @@ int test_indc(tMesh *mesh)
   }
 
   /* after we have printed them, we no longer need the indicators */
-  free_all_myln_indc(mesh);
+  free_all_myln_indc_for_vl(mesh, vl);
 
   vlfree(vl);
   return 0;

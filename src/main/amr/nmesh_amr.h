@@ -413,6 +413,6 @@ int common_facepoints(tNode *node, int f, tNode *nb, int nb_f);
 /* indicators.c */
 void init_all_myln_myindc_for_vl(tMesh *mesh, tVarList  *vl, int nvals);
 void free_indc(tIndic *ic);
-void free_all_myln_indc(tMesh *mesh);
+void free_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl);
 void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);

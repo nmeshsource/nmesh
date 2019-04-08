@@ -62,7 +62,7 @@ void free_indc(tIndic *ic)
 }
 
 /* free indc on node */
-void free_all_indc(tNode *node)
+void free_all_indc_for_vl(tNode *node, tVarList  *vl)
 {
   tDat *dat = node->dat;
   int vi;
@@ -78,13 +78,13 @@ void free_all_indc(tNode *node)
 }
 
 /* free all indc on all nodes in the mesh */
-void free_all_myln_indc(tMesh *mesh)
+void free_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl)
 {
   int myid;
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
-    free_all_indc(node);
+    free_all_indc_for_vl(node, vl);
   }
 }
 

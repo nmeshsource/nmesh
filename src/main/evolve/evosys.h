@@ -21,6 +21,8 @@ typedef struct tEVOSYS {
   pVLL *s[NEVOTEMP];  /* temp. storage for say RK stages */
   pFL *setsrc;        /* set some source terms, is called first */
   pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
+  pFL *limdata;       /* produce data such as min,max on each node */
+  pFL *limiter;       /* apply limiter on node using data from limdata */
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP
