@@ -301,3 +301,15 @@ double Lp_norm_array_reldiff(tArray *A, tArray *B, double p)
   free_array(D);
   return norm;
 }
+
+/* max in an array */
+double max_array(tArray *A, int *ind)
+{
+  return max_in_1d_array(A->d, A->N, ind);
+}
+
+/* min in an array */
+double min_array(tArray *A, int *ind)
+{
+  return min_in_1d_array(A->d, A->N, ind);
+}

@@ -11,3 +11,4 @@ int test_point_finders(tMesh *mesh);
 int test_parent_child_interpolation(tMesh *mesh);
 int test_ajsurf(tMesh *mesh);
 int test_indc(tMesh *mesh);
+int test_node_av(tMesh *mesh);

@@ -53,8 +53,9 @@ int misc_test(tMesh *mesh)
   test_point_interpolation(mesh);
   test_point_finders(mesh);
   test_parent_child_interpolation(mesh);
-  test_ajsurf(mesh);
   test_indc(mesh);
+  test_node_av(mesh);
+  test_ajsurf(mesh);
 
   return 0;
 }
@@ -582,7 +583,7 @@ int test_indc(tMesh *mesh)
   get_all_myln_indc_for_vl(mesh, vl);
 
   /* nbindc should be set now */
-  PRF;printf(": get_all_myln_surfaces has set nbindc\n");
+  PRF;printf(": get_all_myln_indc_for_vl has set nbindc\n");
 
   /* print var in all nodes */
   prdivider(0);
@@ -598,5 +599,38 @@ int test_indc(tMesh *mesh)
   free_all_myln_indc_for_vl(mesh, vl);
 
   vlfree(vl);
+  return 0;
+}
+
+/* exchange some indicators for testing */
+int test_node_av(tMesh *mesh)
+{
+  int ui = Ind("misc_u");
+  int vi = Ind("misc_v");
+  int myid;
+
+  prdivider(0);
+  PRF;printf(": node average\n");
+  enablevar(mesh, vi);
+
+  /* above we messed with all kinds of things,
+     so make sure all coords are set again */
+  coordinates_init(mesh);
+
+  /* print var and its average */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+
+    prdivider(0);
+    printnode(node);
+    printvar_innode(node, vi);
+    basis_var_analysis3(node, vi, ui);
+    printf("c_{000}*sqrt(2)^3 of vi / 8  = %g\n",
+           Vard(node, ui)[0] * pow(sqrt(2.),3.)/8.);
+    printf("var_GLquadrature3 of vi / 8  = %g\n",
+           var_GLquadrature3(node, vi)/8.);
+  }
+
   return 0;
 }

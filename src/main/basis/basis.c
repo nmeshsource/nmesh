@@ -225,7 +225,7 @@ tArray *array_GLquadrature2(tNode *node, int norm, tArray *var, tArray *Ivar)
   return Ivar;
 }
 
-/* compute 3d integral of array var */
+/* compute 3d integral (\int d^3Xb var) of array var */
 double array_GLquadrature3(tNode *node, tArray *var)
 {
   double I;
@@ -240,7 +240,15 @@ double array_GLquadrature3(tNode *node, tArray *var)
   return I;
 }
 
-/* compute 3d integral of var ui*/
+/* compute 3d integral (\int d^3X var) of array var */
+double array_GLquadratureXYZ3(tNode *node, tArray *var)
+{
+  double dXdXb[3];
+  dXYZ_dXbYbZb(node, dXdXb);
+  return array_GLquadrature3(node, var) * fabs(dXdXb[0]*dXdXb[1]*dXdXb[2]);
+}
+
+/* compute 3d integral (\int d^3Xb u) of var ui */
 double var_GLquadrature3(tNode *node, int ui)
 {
   tArray *u;
@@ -252,4 +260,19 @@ double var_GLquadrature3(tNode *node, int ui)
   }
   else
     errorexit("no dat on this node");
+}
+
+/* compute average of var ui */
+double var_nodeaverage(tNode *node, int ui)
+{
+  /* in Xb coords node volume is 2*2*2=8, so divide by 8 */
+  return var_GLquadrature3(node, ui) * 0.125;
+}
+
+/* compute 3d integral (\int d^3X u) of var ui */
+double var_GLquadratureXYZ3(tNode *node, int ui)
+{
+  double dXdXb[3];
+  dXYZ_dXbYbZb(node, dXdXb);
+  return var_GLquadrature3(node, ui) * fabs(dXdXb[0]*dXdXb[1]*dXdXb[2]);
 }
