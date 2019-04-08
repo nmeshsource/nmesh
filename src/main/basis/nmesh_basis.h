@@ -5,6 +5,9 @@
 
 /* basis.c */
 int basis_var_derivs(tNode *node, int vi, int dvi);
+int basis_var_analysis3(tNode *node, int ui, int ci);
+tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar);
+double var_GLquadrature3(tNode *node, int ui);
 
 /* Legendre.c */
 double basis_LegendreP(int l, double x, int np);

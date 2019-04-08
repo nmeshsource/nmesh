@@ -5,6 +5,7 @@
 #include "basis.h"
 
 
+#define PR 0
 
 /***********************************************************************/
 /* get derivatives of a variable */
@@ -116,6 +117,22 @@ void basis_array_synthesis3(tNode *node, tArray *u, tArray *c)
   basis_array_synthesis1(node, 2, u, u);
 }
 
+/* get coeffs c=c_ijk of var ui into var ci */
+int basis_var_analysis3(tNode *node, int ui, int ci)
+{
+  tArray *u, *c;
+  tDat *dat = node->dat;
+  if(dat)
+  {
+    u = dat->v[ui];
+    c = dat->v[ci];
+    basis_array_analysis3(node, u, c);
+    return 1;
+  }
+  else
+    return 0;
+}
+
 /***********************************************************************/
 /* interpolate */
 /***********************************************************************/
@@ -160,51 +177,79 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 /***********************************************************************/
 
 /* get integral in direction dir of array var, result goes into Ivar */
-void array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
+tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
 {
   tArray *Wq = node->Wq[dir];
   tArray *Ivar_new;
 
+  if(PR)
+  {
+    PRF;printf(": dir=%d\n", dir);
+    printf("Wq");printarray(Wq);
+    printf("var");printarray(var);
+  }
+
+  Ivar_new = redimension_array(Ivar, Arrn(var));
+  if(Ivar_new != Ivar) errorexit("Ivar was too small");
+
+  /* multiply weights Wq and var */
   mm_array_indir(Wq, var, dir, Ivar);
 
   /* re-dim Ivar array to 1 in the direction we just integrated */
   Ivar_new = redim_array(Ivar, dir==0, dir==1, dir==2);
   if(Ivar_new != Ivar) errorexit("Ivar was too small");
+
+  return Ivar;
 }
 
 /* put 2d integral in directions perpendicular to norm into Ivar */
-void array_2dGLquadrature(tNode *node, int norm, tArray *var, tArray *Ivar)
+tArray *array_GLquadrature2(tNode *node, int norm, tArray *var, tArray *Ivar)
 {
   switch(norm)
   {
   case 0:
     array_GLquadrature1(node, 1, var, Ivar);
-    array_GLquadrature1(node, 2, Ivar, Ivar);
+    array_GLquadrature1(node, 2, Ivar, Ivar); //should work because it uses mm_array2
     break;
   case 1:
     array_GLquadrature1(node, 0, var, Ivar);
-    array_GLquadrature1(node, 2, Ivar, Ivar);
+    array_GLquadrature1(node, 2, Ivar, Ivar); //should work because it uses mm_array2
     break;
   case 2:
     array_GLquadrature1(node, 0, var, Ivar);
-    array_GLquadrature1(node, 1, Ivar, Ivar);
+    array_GLquadrature1(node, 1, Ivar, Ivar); //should work because it uses mm_array1
     break;
   default:
     errorexit("dir must be 0,1,2");
   }
+  return Ivar;
 }
 
-/* compute 3d integral of var */
-double array_3dGLquadrature(tNode *node, tArray *var)
+/* compute 3d integral of array var */
+double array_GLquadrature3(tNode *node, tArray *var)
 {
   double I;
   tArray *Ivar = alloc_array(node->n);
 
   array_GLquadrature1(node, 0, var, Ivar);
-  array_GLquadrature1(node, 1, var, Ivar);
-  array_GLquadrature1(node, 2, var, Ivar);
+  array_GLquadrature1(node, 1, Ivar, Ivar); //should work because it uses mm_array1
+  array_GLquadrature1(node, 2, Ivar, Ivar);
   I = Ivar->d[0];
   free_array(Ivar);
 
   return I;
+}
+
+/* compute 3d integral of var ui*/
+double var_GLquadrature3(tNode *node, int ui)
+{
+  tArray *u;
+  tDat *dat = node->dat;
+  if(dat)
+  {
+    u = dat->v[ui];
+    return array_GLquadrature3(node, u);
+  }
+  else
+    errorexit("no dat on this node");
 }
