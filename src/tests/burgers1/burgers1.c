@@ -268,7 +268,7 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 int burgers1_limdata(tNode *node, tVarList *vlu)
 {
   int iu = vlu->index[0];
-  double *u  = Vard(node, iu);
+  double *u;
   tDat *dat;
   int np, im;
   int nvals = 2;
@@ -277,6 +277,8 @@ int burgers1_limdata(tNode *node, tVarList *vlu)
 
   dat = node->dat;
   if(!dat) return nvals;
+
+  u  = Vard(node, iu);
 
   /* find min and max in u in this node, and write it into indicator */
   np = node->np;
@@ -291,27 +293,38 @@ double phiy(double y)
 { return min2(y/1.1, 1.); }
 
 double theta_Mm(double Mi, double qbar, double qMi)
-{ return phiy((Mi-qbar)/(qMi-qbar)); }
+{
+  double r;
+  double num = Mi - qbar;
+  double den = qMi - qbar;
+  if(den != 0.) r = num/den;
+  if(r<0.) return 0.;
+  return phiy(r);
+}
 
 /* limiter: limit u using data in dat->ic */
 int burgers1_limiter(tNode *node, tVarList *vlu)
 {
   int iu = vlu->index[0];
   double *u  = Vard(node, iu);
+  double *bb = node->bbox;
   tDat *dat;
   int f, ni, i;
   double qbar, qMi, qmi, Mi, mi, theta_Mi, theta_mi, theta_i;
-  double alpha, alpha_h;
+  double alpha, h, alpha_h;
 
   dat = node->dat;
   if(!dat) return 0;
 
   /* set alpha_h */
-  alpha = 500.;
-  alpha_h = alpha * 0.;
+  alpha = 5.0;
+  h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
+  alpha_h = alpha * pow(h, 1.5);
 
   /* find node average qbar */
   qbar = var_nodeaverage(node, iu);
+//printf("qbar=%g theta_i=%g\n", qbar, theta_i);
+//exit(88);
 
   /* get min, max on node */
   qmi = dat->ic[iu]->myindc->d[0];
@@ -330,7 +343,7 @@ int burgers1_limiter(tNode *node, tVarList *vlu)
       if(Ma > Mi) Mi = Ma;
     }
   }
-  mi = max2(qbar - alpha_h, mi);
+  mi = min2(qbar - alpha_h, mi);
   Mi = max2(qbar + alpha_h, Mi);
 
   /* set thetas */
@@ -338,6 +351,12 @@ int burgers1_limiter(tNode *node, tVarList *vlu)
   theta_mi = theta_Mm(mi, qbar, qmi);
   theta_i = min3(1., theta_mi, theta_Mi);
 
+if(!isfinite(qbar) || !isfinite(theta_i))
+{
+printf("qbar=%g theta_i=%g\n", qbar, theta_i);
+abort();
+exit(8);
+}
   /* now limit u */
   forpoints(node, i) u[i] = qbar + theta_i*(u[i] - qbar);
 
@@ -391,7 +410,8 @@ int burgers1_init(tMesh *mesh)
   }
 
   /* register u and its RHS with evolve */
-  evolve_register_subsys_u_rhs_src_lim(mesh, vlu, burgers1_rhs_u, 0, 0,0);
+  evolve_register_subsys_u_rhs_src_lim(mesh, vlu, burgers1_rhs_u, 0,
+                                       burgers1_limdata, burgers1_limiter);
   evolve_print_evosys(mesh);
   return 0;
 } 
