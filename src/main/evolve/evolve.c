@@ -143,7 +143,11 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 
     if(ListEntry(evosys->limdata,i))
     {
-      init_all_myln_myindc_for_vl(mesh, vl, 3);
+      /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
+               must return number of data vals we need */
+      int nvals = ListEntry(evosys->limdata,i)(NULL, vl);
+
+      init_all_myln_myindc_for_vl(mesh, vl, nvals);
 
       /* set data limiter needs in myindc arrays of each node */
       formylnodes(mesh, myid)

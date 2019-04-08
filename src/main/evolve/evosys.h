@@ -22,6 +22,8 @@ typedef struct tEVOSYS {
   pFL *setsrc;        /* set some source terms, is called first */
   pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
   pFL *limdata;       /* produce data such as min,max on each node */
+                      /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
+                               must return number of data vals we need */
   pFL *limiter;       /* apply limiter on node using data from limdata */
 } tEvoSys;
 #undef pVLL

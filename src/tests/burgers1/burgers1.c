@@ -264,6 +264,86 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   return 0;
 }
 
+/* set data for limiter */
+int burgers1_limdata(tNode *node, tVarList *vlu)
+{
+  int iu = vlu->index[0];
+  double *u  = Vard(node, iu);
+  tDat *dat;
+  int np, im;
+  int nvals = 2;
+
+  if(!node) return nvals; /* we need 2 data values per var */
+
+  dat = node->dat;
+  if(!dat) return nvals;
+
+  /* find min and max in u in this node, and write it into indicator */
+  np = node->np;
+  dat->ic[iu]->myindc->d[0] = min_in_1d_array(u, np, &im);
+  dat->ic[iu]->myindc->d[1] = max_in_1d_array(u, np, &im);
+
+  return nvals;
+}
+
+/* funcs in MRS limiter */
+double phiy(double y)
+{ return min2(y/1.1, 1.); }
+
+double theta_Mm(double Mi, double qbar, double qMi)
+{ return phiy((Mi-qbar)/(qMi-qbar)); }
+
+/* limiter: limit u using data in dat->ic */
+int burgers1_limiter(tNode *node, tVarList *vlu)
+{
+  int iu = vlu->index[0];
+  double *u  = Vard(node, iu);
+  tDat *dat;
+  int f, ni, i;
+  double qbar, qMi, qmi, Mi, mi, theta_Mi, theta_mi, theta_i;
+  double alpha, alpha_h;
+
+  dat = node->dat;
+  if(!dat) return 0;
+
+  /* set alpha_h */
+  alpha = 500.;
+  alpha_h = alpha * 0.;
+
+  /* find node average qbar */
+  //...TODO !!!
+  qbar = 0;
+
+  /* get min, max on node */
+  qmi = dat->ic[iu]->myindc->d[0];
+  qMi = dat->ic[iu]->myindc->d[1];
+
+  /* find min and max of u in neighbors */
+  Mi = -1e300;
+  mi = 1e300;
+  for(f=0; f<6; f++)
+  {
+    for(ni=0; ni<node->nfnb[f]; ni++)
+    {
+      int ma = dat->ic[iu]->nbindc[f][ni]->d[0];
+      int Ma = dat->ic[iu]->nbindc[f][ni]->d[1];
+      if(ma < mi) mi = ma;
+      if(Ma > Mi) Mi = Ma;
+    }
+  }
+  mi = max2(qbar - alpha_h, mi);
+  Mi = max2(qbar + alpha_h, Mi);
+
+  /* set thetas */
+  theta_Mi = theta_Mm(Mi, qbar, qMi);
+  theta_mi = theta_Mm(mi, qbar, qmi);
+  theta_i = min3(1., theta_mi, theta_Mi);
+
+  /* now limit u */
+  forpoints(node, i) u[i] = qbar + theta_i*(u[i] - qbar);
+
+  return 0;
+}
 
 /* initialize test */
 int burgers1_init(tMesh *mesh)
