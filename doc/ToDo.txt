@@ -61,6 +61,7 @@ Things that need to be done urgently:
 *decent 2d qnd 3d output: Bernd's XDMF: DONE!
 
 *set sqrt(det2gamma) already in coordinates: DONE!
+ -BUT there should be a faster way to get det2gam:
 
 *make some pars to decide what mesh we use: DONE!
 
@@ -71,15 +72,15 @@ Things that need to be done urgently:
 
 *extend evolve with limiters that transmit info in indicators
 
+*flux integral conservation
+ -make integrals
+ -make 3d vol int.
+
 *update set_all_myln_mysurf and request_all_myln_surfaces_exchange
  so that we also have min/max or averages in extra space of mysurf
  and nbsurf arrays <-- will NOT work!!!
 
 *fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
-
-*flux integral conservation
- -make integrals
- -make 3d vol int.
 
 *advection Eqn with DG: DONE!
  -check error:
