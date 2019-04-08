@@ -29,19 +29,23 @@ void evolve_RK4_mesh(tMesh *mesh)
   addto_pVLList(u, dt/6.0, r, vladdto,0);     // u += r dt/6
 
   add_pVLList(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
+  evolve_limiter_mesh(mesh, w);
   mesh->time = t+0.5*dt;
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt/3., r, vladdto,0);      // u += r dt/3
 
   add_pVLList(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
+  evolve_limiter_mesh(mesh, w);
   mesh->time = t+0.5*dt;
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt/3., r, vladdto,0);      // u += r dt/3
 
   add_pVLList(w, 1., u_p, dt, r, vladd,0);    // w  = u_p + r dt
+  evolve_limiter_mesh(mesh, w);
   mesh->time = t+dt;
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);      // u += r dt/6
+  evolve_limiter_mesh(mesh, u);
 }
 
 /* Euler step */

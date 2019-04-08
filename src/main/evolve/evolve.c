@@ -24,14 +24,18 @@ void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
   tEvoSys *evosys = mesh->evosys;
 
   /* allocate lists in evosys */
-  if(!evosys->u)      evosys->u      = alloc_pVLList();
-  if(!evosys->setrhs) evosys->setrhs = alloc_FuncPointerList();
-  if(!evosys->setsrc) evosys->setsrc = alloc_FuncPointerList();
+  if(!evosys->u)       evosys->u       = alloc_pVLList();
+  if(!evosys->setrhs)  evosys->setrhs  = alloc_FuncPointerList();
+  if(!evosys->setsrc)  evosys->setsrc  = alloc_FuncPointerList();
+  if(!evosys->limdata) evosys->limdata = alloc_FuncPointerList();
+  if(!evosys->limiter) evosys->limiter = alloc_FuncPointerList();
 
-  /* add u, rhs, src to lists in evosys */
+  /* add u, rhs, src, ... to lists in evosys */
   push_pVLList(evosys->u, u);
   push_FuncPointerList(evosys->setrhs, rhs);
   push_FuncPointerList(evosys->setsrc, src);
+  push_FuncPointerList(evosys->limdata, limdata);
+  push_FuncPointerList(evosys->limiter, limiter);
 }
 
 /* free extra VarLists and other Lists */
@@ -59,6 +63,8 @@ int evolve_free_evosys(tMesh *mesh)
   //free_pVLList(evosys->u); /* free list only, not content */
   free_FuncPointerList(evosys->setrhs);
   free_FuncPointerList(evosys->setsrc);
+  free_FuncPointerList(evosys->limdata);
+  free_FuncPointerList(evosys->limiter);
 
   /* now set all of evosys to zero */
   //evolve_print_evosys(mesh);
@@ -90,6 +96,13 @@ void evolve_print_evosys(tMesh *mesh)
       if(ListEntry(evosys->setrhs,i)) printf("%d: setrhs: yes\n", i);
     forList(evosys->setsrc, i)
       if(ListEntry(evosys->setsrc,i)) printf("%d: setsrc: yes\n", i);
+  }
+  if(evosys->limdata)
+  {
+    forList(evosys->limiter, i)
+      if(ListEntry(evosys->limiter,i)) printf("%d: limiter: yes\n", i);
+    forList(evosys->limdata, i)
+      if(ListEntry(evosys->limdata,i)) printf("%d: limdata: yes\n", i);
   }
 }
 
