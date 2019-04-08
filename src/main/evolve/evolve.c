@@ -14,10 +14,12 @@
    metric (another src) that depends on Z4. */
 
 
-/* register a list of variable lists and its RHS and source functions
-   in evosys */
-void evolve_register_subsys_u_rhs_src(tMesh *mesh, tVarList *u,
-                                      FuncPointer rhs, FuncPointer src)
+/* register a list of variable lists and its RHS, source functions and
+   limiters in evosys */
+void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
+                                          FuncPointer rhs, FuncPointer src,
+                                          FuncPointer limdata,
+                                          FuncPointer limiter)
 {
   tEvoSys *evosys = mesh->evosys;
 

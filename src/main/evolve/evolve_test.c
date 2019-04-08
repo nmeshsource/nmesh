@@ -106,10 +106,11 @@ int evolve_test_init(tMesh *mesh)
   }
 
   /* register u,v and their RHS with evolve */
-  evolve_register_subsys_u_rhs_src(mesh, vlu,
-                                   evolve_test_rhs_u, evolve_test_src_u);
-  evolve_register_subsys_u_rhs_src(mesh, vlv,
-                                   evolve_test_rhs_v, NULL);
+  evolve_register_subsys_u_rhs_src_lim(mesh, vlu,
+                                       evolve_test_rhs_u, evolve_test_src_u,
+                                       NULL, NULL);
+  evolve_register_subsys_u_rhs_src_lim(mesh, vlv,
+                                       evolve_test_rhs_v, NULL, NULL, NULL);
   evolve_print_evosys(mesh);
   return 0;
 } 

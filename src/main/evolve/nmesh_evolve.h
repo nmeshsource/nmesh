@@ -5,6 +5,8 @@
 
 
 /* evolve.c */
-void evolve_register_subsys_u_rhs_src(tMesh *mesh, tVarList *u,
-                                      void (*rhs)(), void (*src)());
+void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
+                                          FuncPointer rhs, FuncPointer src,
+                                          FuncPointer limdata,
+                                          FuncPointer limiter);
 void evolve_print_evosys(tMesh *mesh);
