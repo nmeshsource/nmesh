@@ -602,7 +602,7 @@ int test_indc(tMesh *mesh)
   return 0;
 }
 
-/* exchange some indicators for testing */
+/* compute some node avrages */
 int test_node_av(tMesh *mesh)
 {
   int ui = Ind("misc_u");
@@ -624,12 +624,13 @@ int test_node_av(tMesh *mesh)
 
     prdivider(0);
     printnode(node);
-    printvar_innode(node, vi);
+    //printvar_innode(node, vi);
     basis_var_analysis3(node, vi, ui);
     printf("c_{000}*sqrt(2)^3 of vi / 8  = %g\n",
            Vard(node, ui)[0] * pow(sqrt(2.),3.)/8.);
     printf("var_GLquadrature3 of vi / 8  = %g\n",
            var_GLquadrature3(node, vi)/8.);
+    printf("var_nodeaverage of vi        = %g\n", var_nodeaverage(node, vi));
   }
 
   return 0;
