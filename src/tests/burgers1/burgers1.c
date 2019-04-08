@@ -311,8 +311,7 @@ int burgers1_limiter(tNode *node, tVarList *vlu)
   alpha_h = alpha * 0.;
 
   /* find node average qbar */
-  //...TODO !!!
-  qbar = 0;
+  qbar = var_nodeaverage(node, iu);
 
   /* get min, max on node */
   qmi = dat->ic[iu]->myindc->d[0];
