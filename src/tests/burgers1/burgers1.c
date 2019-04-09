@@ -314,7 +314,6 @@ int burgers1_init(tMesh *mesh)
   /* register u and its RHS with evolve */
   evolve_register_subsys_u_rhs_src_lim(mesh, vlu, burgers1_rhs_u, 0,
                                        limdata_MRS, limiter_MRS);
-//                                       burgers1_limdata, burgers1_limiter);
   evolve_print_evosys(mesh);
   return 0;
 } 
