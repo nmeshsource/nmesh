@@ -215,6 +215,13 @@ int setup_box_mesh(tMesh *mesh)
     /* put npats boxes in x-dir */
     add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
   }
+  else if(Getv(mesh_type, "Plane"))
+  {
+    /* arrange npats into one plane */
+    int rnpats = pow(npats, 0.5);
+    int N[] = { rnpats, rnpats, 1 };
+    arrange_box_pats_inBox(mesh, xc, dout, N);
+  }
   else
   {
     /* arrange npats into one big box */
