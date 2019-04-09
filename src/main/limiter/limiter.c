@@ -11,13 +11,13 @@
    from main/amr/indicators.c to do the exchange. */
 
 
-/* set data for MRS limiter */
+/* set data for MRS limiter. This one uses the cons vars in vl */
 int limdata_MRS(tNode *node, tVarList *vl)
 {
   int np;
   int vli;
   tDat *dat;
-  int nvals = 2; /* we need 2 data values per var */
+  int nvals = 3; /* we need 3 data values per var: min, max, node-average */
 
   if(!node || !vl) return nvals;
 
@@ -35,6 +35,8 @@ int limdata_MRS(tNode *node, tVarList *vl)
     /* find min and max in q in this node, and write it into indicator */
     dat->ic[iq]->myindc->d[0] = min_in_1d_array(q, np, &im);
     dat->ic[iq]->myindc->d[1] = max_in_1d_array(q, np, &im);
+    /* also save node average */
+    dat->ic[iq]->myindc->d[2] = var_nodeaverage(node, iq);
   }
   return nvals;
 }
@@ -46,11 +48,11 @@ double phiy(double y)
   return min2(y/1.1, 1.);
 }
 
-double theta_Mm(double Mi, double qbar, double qMi)
+double theta_Mml(double Mi, double wbar, double wMi)
 {
   double r;
-  double num = Mi - qbar;
-  double den = qMi - qbar;
+  double num = Mi - wbar;
+  double den = wMi - wbar;
   if(den != 0.) r = num/den;
   else          return 1.;  // what should this be 0 or 1???
   return phiy(r);
@@ -62,8 +64,8 @@ int limiter_MRS(tNode *node, tVarList *vl)
   double *bb = node->bbox;
   tDat *dat;
   int vli, f, ni, ijk;
-  double qbar, qMi, qmi, Mi, mi, theta_Mi, theta_mi, theta_i;
-  double alpha, h, alpha_h;
+  double alpha, h, alpha_h, theta_i;
+  double theta_Mi, theta_mi;
 
   dat = node->dat;
   if(!dat) return 0;
@@ -73,19 +75,17 @@ int limiter_MRS(tNode *node, tVarList *vl)
   h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   alpha_h = alpha * pow(h, 1.5);
 
+  /* set thetas */
+  theta_Mi = theta_mi = 1e300;
   forvl(vl, vli)
   {
     int iq = Vind(vl, vli);
-    double *q = Vard(node, iq);
+    double wbar, wMi, wmi, Mi, mi, thM, thm;
 
-    /* find node average qbar */
-    qbar = var_nodeaverage(node, iq);
-//printf("qbar=%g theta_i=%g\n", qbar, theta_i);
-//exit(88);
-
-    /* get min, max on node */
-    qmi = dat->ic[iq]->myindc->d[0];
-    qMi = dat->ic[iq]->myindc->d[1];
+    /* get min, max and av on node */
+    wmi = dat->ic[iq]->myindc->d[0];
+    wMi = dat->ic[iq]->myindc->d[1];
+    wbar = dat->ic[iq]->myindc->d[2];
 
     /* find min and max of q in neighbors */
     Mi = -1e300;
@@ -99,14 +99,30 @@ int limiter_MRS(tNode *node, tVarList *vl)
         if(Ma > Mi) Mi = Ma;
       }
 
-    mi = min2(qbar - alpha_h, mi);
-    Mi = max2(qbar + alpha_h, Mi);
+    mi = min2(wbar - alpha_h, mi);
+    Mi = max2(wbar + alpha_h, Mi);
 
-    /* set thetas */
-    theta_Mi = theta_Mm(Mi, qbar, qMi);
-    theta_mi = theta_Mm(mi, qbar, qmi);
-    theta_i = min3(1., theta_mi, theta_Mi);
+    /* find min thetas among all vl */
+    thM = theta_Mml(Mi, wbar, wMi);
+    thm = theta_Mml(mi, wbar, wmi);
+    if(thM < theta_Mi) theta_Mi = thM;
+    if(thm < theta_mi) theta_mi = thm;
+  }
 
+  /* set the theta_i we use for limiting vars in vl */
+  theta_i = min3(1., theta_mi, theta_Mi);
+
+  /* limit all cons vars q in vl */
+  forvl(vl, vli)
+  {
+    int iq = Vind(vl, vli);
+    double *q = Vard(node, iq);
+    double qbar;
+
+    /* find node average qbar */
+    qbar = var_nodeaverage(node, iq);
+//printf("qbar=%g theta_i=%g\n", qbar, theta_i);
+//exit(88);
 if(!isfinite(qbar) || !isfinite(theta_i))
 {
 printf("qbar=%g theta_i=%g\n", qbar, theta_i);
