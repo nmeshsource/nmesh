@@ -21,8 +21,6 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tPat *pat, double A, double B,
                                        double *dPhidA,   double *dPhidB);
 
 /* setup_CubedSpheres.c */
-int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
-int add_1cube_pat(tMesh *mesh, double *xc, double dout);
 int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch, int r_is_const,
                           double *xc, double *Din, double *Dout);
 int add_N_CubedSphere_pats(tMesh *mesh, int N,
@@ -34,3 +32,7 @@ void set_AB_min_max_from_Din(int dom, double *Din,
 int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
                           int stretch, int r_is_const, double *xc,
                           double Din, double Dout, double ABrct[4]);
+
+/* setup_Boxes.c */
+int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
+int add_1cube_pat(tMesh *mesh, double *xc, double dout);

@@ -124,8 +124,6 @@ int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
 int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1);
 int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
                                      double r0, double r1);
-int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
-                        int N, int dir);
 int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
                           int stretch, int SigFunc, double *xc,
                           double Din, double Dout, double ABrct[4]);
@@ -143,6 +141,10 @@ int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
                         double rhoAB[3], const double xyz[3]);
 int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
                        double xyz[3], double drhoABdxyz[3][3]);
+
+/* setup_Boxes.c */
+int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
+                        int N, int dir);
 
 /* pointlists.c */
 intList *pointindexList_line(tNode *node, int dir, int axis[]);
