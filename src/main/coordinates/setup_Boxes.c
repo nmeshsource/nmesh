@@ -1,5 +1,5 @@
 /* setup_Boxes.c */
-/* Wolfgang Tichy, Nov 2017 */
+/* Wolfgang Tichy, April 2019 */
 /* create various arrangements of Cartesian boxes */
 
 #include "nmesh.h"
@@ -54,6 +54,37 @@ int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
   {
     x[dir] = mid + L*(i - s + c);
     ret = add_1box_pat(mesh, x, dout);
+  }
+  return ret;
+}
+
+/* arrange N[0]*N[1]*N[2] box patches into a bigger box, centered on xc
+   with side lengths dout[0], dout[1], dout[2] */
+int arrange_box_pats_inBox(tMesh *mesh, double xc[3], double dout[3],
+                           int N[3])
+{
+  double x[] = { xc[0], xc[1], xc[2] };
+  double d[] = { dout[0], dout[1]/N[1], dout[2]/N[2] };
+  int j, k, ret=-1;
+
+  for(k = 0; k < N[2]; k++)
+  {
+    double L2 = 2.*(dout[2]);
+    double c2 = 0.5 * (!(N[2]%2));
+    int s2 = N[2]/2;
+
+    x[2] = xc[2] + L2*(k - s2 + c2);
+
+    for(j = 0; j < N[1]; j++)
+    {
+      double L1 = 2.*(dout[1]);
+      double c1 = 0.5 * (!(N[1]%2));
+      int s1 = N[1]/2;
+
+      x[1] = xc[1] + L1*(j - s1 + c1);
+
+      ret = add_Nbox_pats_indir(mesh, x, d, N[0], 0);
+    }
   }
   return ret;
 }
