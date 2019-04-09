@@ -62,6 +62,12 @@
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)
 
+/* loop over var indices of a var list */
+#define forvl(vl, vli) \
+  for(vli=0; vli<vl->n; vli++)
+
+#define Vind(vl, vli) vl->index[vli]
+
 /* get integration weights for direc. dir on node */
 #define Wquad(node, dir) node->Wq[dir]->d
 
