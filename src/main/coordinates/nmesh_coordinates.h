@@ -145,6 +145,7 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
 /* setup_Boxes.c */
 int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
                         int N, int dir);
+int arrange_box_pats_inBox(tMesh *mesh, double xc[3], double dout[3], int N[3]);
 
 /* pointlists.c */
 intList *pointindexList_line(tNode *node, int dir, int axis[]);

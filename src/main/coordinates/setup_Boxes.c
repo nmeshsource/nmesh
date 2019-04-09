@@ -60,8 +60,7 @@ int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
 
 /* arrange N[0]*N[1]*N[2] box patches into a bigger box, centered on xc
    with side lengths dout[0], dout[1], dout[2] */
-int arrange_box_pats_inBox(tMesh *mesh, double xc[3], double dout[3],
-                           int N[3])
+int arrange_box_pats_inBox(tMesh *mesh, double xc[3], double dout[3], int N[3])
 {
   double x[] = { xc[0], xc[1], xc[2] };
   double d[] = { dout[0], dout[1]/N[1], dout[2]/N[2] };

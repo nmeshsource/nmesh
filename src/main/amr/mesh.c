@@ -210,8 +210,18 @@ int setup_box_mesh(tMesh *mesh)
   /* remove all patches to mesh, so we can just ad new pristine ones */
   remove_all_patches(mesh);
 
-  /* put npats boxes in x-dir */
-  add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
+  if(Getv(mesh_type, "Line"))
+  {
+    /* put npats boxes in x-dir */
+    add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
+  }
+  else
+  {
+    /* arrange npats into one big box */
+    int crnpats = pow(npats, 0.3333333333334);
+    int N[] = { crnpats, crnpats, crnpats };
+    arrange_box_pats_inBox(mesh, xc, dout, N);
+  }
 
   /* setup all bfaces */
   amr_set_all_bfaces(mesh);
