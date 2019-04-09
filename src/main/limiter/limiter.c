@@ -42,20 +42,20 @@ int limdata_MRS(tNode *node, tVarList *vl)
 }
 
 /* funcs in MRS limiter */
-double phiy(double y)
+double MRS_phiy(double y)
 {
   if(y<0.) return 0.;      // is this correct??? Read papers!
   return min2(y/1.1, 1.);
 }
 
-double theta_Mml(double Mi, double wbar, double wMi)
+double MRS_theta_Mml(double Mi, double wbar, double wMi)
 {
   double r;
   double num = Mi - wbar;
   double den = wMi - wbar;
   if(den != 0.) r = num/den;
   else          return 1.;  // what should this be 0 or 1???
-  return phiy(r);
+  return MRS_phiy(r);
 }
 
 /* limiter: limit u using data in dat->ic */
@@ -103,8 +103,8 @@ int limiter_MRS(tNode *node, tVarList *vl)
     Mi = max2(wbar + alpha_h, Mi);
 
     /* find min thetas among all vl */
-    thM = theta_Mml(Mi, wbar, wMi);
-    thm = theta_Mml(mi, wbar, wmi);
+    thM = MRS_theta_Mml(Mi, wbar, wMi);
+    thm = MRS_theta_Mml(mi, wbar, wmi);
     if(thM < theta_Mi) theta_Mi = thM;
     if(thm < theta_mi) theta_mi = thm;
   }
