@@ -298,7 +298,8 @@ double theta_Mm(double Mi, double qbar, double qMi)
   double num = Mi - qbar;
   double den = qMi - qbar;
   if(den != 0.) r = num/den;
-  if(r<0.) return 0.;
+  else          return 1.;  // what should this be 0 or 1???
+  if(r<0.) return 0.;       // what should this be???
   return phiy(r);
 }
 
