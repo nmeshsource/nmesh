@@ -30,7 +30,7 @@ double F_interface(double ul, double ur)
 void burgers1_f_df(tMesh *mesh, tVarList *vlu)
 {
   int iu = vlu->index[0];
-  int ifx  = Ind("burgers1_fx");
+  int ifx = Ind("burgers1_fx");
   int ify = ifx+1;
   int ifz = ifx+2;
   int ifxx = Ind("burgers1_fxx");
