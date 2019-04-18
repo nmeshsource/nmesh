@@ -23,14 +23,14 @@ double numflux1d_scalarGodunov(int nf, double *f,
     double ur = uR[i];
     double fi;
 
-    if(ul >= 0.0 && ur >= 0.0)      fi = fL[i];
-    else if(ul <= 0.0 && ur <= 0.0) fi = fR[i];
-    else if(ul  < 0.0 && ur >= 0.0) fi = 0.;
+    if(ul >= 0. && ur >= 0.)      fi = fL[i];
+    else if(ul <= 0. && ur <= 0.) fi = fR[i];
+    else if(ul  < 0. && ur >= 0.) fi = 0.;
     else
     {
       double s2 = ul + ur;
-      if(s2 > 0) fi = fL[i];
-      else       fi = fR[i];
+      if(s2 > 0.) fi = fL[i];
+      else        fi = fR[i];
     }
     f[i] = fi;
   }
