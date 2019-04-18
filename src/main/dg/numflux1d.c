@@ -10,18 +10,10 @@
 
 
 
-
-/* flux function f in Burgers eqn */
-double burgers1_f(double u)
-{
-  return 0.5*u*u;
-}
-
-/* flux at interface for 1d Godunov method */
-double numflux1d_???(double ul, double ur)
-double numflux1d_???((int nf, double *f,
-                   double *uL, double *uR, double *fL, double *fR, 
-                   double *lamL, double *lamR)
+/* flux at interface of 1d scalar Godunov method for Burgers eqn */
+double numflux1d_scalarGodunov(int nf, double *f,
+                               double *uL, double *uR, double *fL, double *fR,
+                               double *lamL, double *lamR)
 {
   int i;
 
@@ -29,27 +21,20 @@ double numflux1d_???((int nf, double *f,
   {
     double ul = uL[i];
     double ur = uR[i];
-    double f;
-    
-  
-    if(ul >= 0.0 && ur >= 0.0) f = fL[i];
-    if(ul <= 0.0 && ur <= 0.0) f = fR[i];
-    if(ul  < 0.0 && ur >= 0.0) f = 0.; ????
-     return burgers1_f(0.0);
+    double fi;
+
+    if(ul >= 0.0 && ur >= 0.0)      fi = fL[i];
+    else if(ul <= 0.0 && ur <= 0.0) fi = fR[i];
+    else if(ul  < 0.0 && ur >= 0.0) fi = 0.;
     else
     {
       double s2 = ul + ur;
-      if(s2 > 0)
-       return burgers1_f(ul);
-      else      
-       return burgers1_f(ur);
+      if(s2 > 0) fi = fL[i];
+      else       fi = fR[i];
     }
-
-    f[i] = 0.5*( fR[i] +  fL[i] - amax*(uR[i] -  uL[i]) );
-
+    f[i] = fi;
   }
 }
-
 
 
 /* LLF flux */ 
