@@ -114,7 +114,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     int *n = node->n;
     double *u  = Vard(node, iu);
     double *fl[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
-    double FNx,FNy,FNz, norm[3];
+    double fln, FN, norm[3];
     int face, dir, p, i,j,k, ijk, JK;
 
     /* set F on each face */
@@ -130,37 +130,26 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
         JK = Ind_n_norm(i,j,k, n, dir);
         node_normal_at_ijk(node, face, ijk, norm);
 
+        /* flux times normal vector */
+        fln = (norm[0]*fl[0][ijk] + norm[1]*fl[1][ijk] + norm[2]*fl[2][ijk]);
+
         /* if stuff is coming in */
         if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
         {
           /* if there is an adjacent surface */
           if(uaj)
           {
-            double no[3] = { 0., 0., 0. };
-            no[0] = 1.;
-            advection1_flux1d(mesh,1, &FNx,no, &(uaj[JK]));
-            no[0] = 0;
-
-            no[1] = 1.;
-            advection1_flux1d(mesh,1, &FNy,no, &(uaj[JK]));
-            no[1] = 0.;
-
-            no[2] = 1.;
-            advection1_flux1d(mesh,1, &FNz,no, &(uaj[JK]));
-            no[2] = 0.;
+            advection1_flux1d(mesh,1, &FN,norm, &(uaj[JK]));
           }
           else
           {
-            FNx = FNy = FNz = 0;
+            FN = 0;
           }
         }
         else
         {
-          FNx = fl[0][ijk];
-          FNy = fl[1][ijk];
-          FNz = fl[2][ijk];
+          FN = fln;
         }
-
 
         /* set physical fluxes on left and right */
 /*
@@ -193,9 +182,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
 
 
 
-        F[JK] = (FNx - fl[0][ijk])*norm[0] +
-                (FNy - fl[1][ijk])*norm[1] +
-                (FNz - fl[2][ijk])*norm[2];
+        F[JK] = FN - fln;
       }
     }
   }
