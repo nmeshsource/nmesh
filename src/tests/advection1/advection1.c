@@ -115,7 +115,8 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     double *u  = Vard(node, iu);
     double *fl[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
     double fln, FN, lam, norm[3];
-    int face, dir, p, i,j,k, ijk, JK;
+    double uL, uR, fL, fR, lamL, lamR;
+    int face, dir, plus, p, i,j,k, ijk, JK;
 
     /* set F on each face */
     for(face=0; face<6; face++)
@@ -123,7 +124,8 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
       double *F = Vard(node, iF+face);
       double *uaj = Varaj(node, iu, face);
       dir = face/2;
-      p = (face%2)*(n[dir] - 1);
+      plus = (face%2);
+      p = plus*(n[dir] - 1);
       forplaneN(dir, i,j,k, n, p)
       {
         ijk = Ind_n(i,j,k, n);
@@ -146,7 +148,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
           }
           else
           {
-            FN = 0;
+            FN = 0.;
           }
         }
         else
@@ -154,34 +156,45 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
           FN = fln;
         }
 
-        /* set physical fluxes on left and right */
-/*
-        cdir = 0;
-        if(norm[cdir]>=0.)
-        {
-          uL = u[ijk];
-          fL = fl[cdir][ijk];
-          advection1_eigenval1d(mesh,1, &lamL,cdir);
-
-          uR = uaj[JK];
-          advection1_flux1d(mesh,1, &fR,cdir, &uR);
-          advection1_eigenval1d(mesh,1, &lamR,cdir);
-        }
-        else
-        {
-          uR = u[ijk];
-          fR = fl[cdir][ijk];
-          advection1_eigenval1d(mesh,1, &lamR,cdir);
-
-          uL = uaj[JK];
-          advection1_flux1d(mesh,1, &fL,cdir, &uL);
-          advection1_eigenval1d(mesh,1, &lamL,cdir);
-        }
-
-        numflux1d_LLF(mesh,1, &(FN[cdir]), &uL, &uR, &fL, &fR, &lamL, &lamR);
-
-
-*/
+//        /* set physical fluxes and eigenvalues on left and right */
+//        if(lam < 0.) // if(plus)
+//        {
+//          uL = u[ijk];
+//          fL = fln;
+//          advection1_eigenval1d(mesh,1, &lamL,norm);
+//
+//          if(uaj)
+//          {
+//            uR = uaj[JK];
+//            advection1_flux1d(mesh,1, &fR,norm, &uR);
+//            advection1_eigenval1d(mesh,1, &lamR,norm);
+//
+//            // use LLF
+//            numflux1d_LLF(mesh,1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
+//          }
+//          else
+//            FN = 0.;
+//        }
+//        else
+//        {
+//          uR = u[ijk];
+//          fR = fln;
+//          advection1_eigenval1d(mesh,1, &lamR,norm);
+//
+//          if(uaj)
+//          {
+//            uL = uaj[JK];
+//            advection1_flux1d(mesh,1, &fL,norm, &uL);
+//            advection1_eigenval1d(mesh,1, &lamL,norm);
+//
+//            // use LLF
+//            numflux1d_LLF(mesh,1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
+//          }
+//          else
+//            FN = 0.;
+//
+//          FN = fln;
+//        }
 
 
 

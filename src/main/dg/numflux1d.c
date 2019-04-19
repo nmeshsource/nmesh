@@ -11,9 +11,9 @@
 
 
 /* flux at interface of 1d scalar Godunov method for Burgers eqn */
-double numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
-                               double *uL, double *uR, double *fL, double *fR,
-                               double *lamL, double *lamR)
+void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
+                             double *uL, double *uR, double *fL, double *fR,
+                             double *lamL, double *lamR)
 {
   int i;
 
