@@ -91,5 +91,5 @@ void numflux1d_HLL(tMesh *mesh, int nf, double *fnum,
 
   /* build fluxes */
   for(i=0; i<nf; i++) 
-    fnum[i] = oda * ( apl * fL[i] + ami * fR[i] - apm * ( uR[i] -  uL[i]) );
+    fnum[i] = oda * ( apl * fL[i] + ami * fR[i] - apm * (uR[i] -  uL[i]) );
 }
