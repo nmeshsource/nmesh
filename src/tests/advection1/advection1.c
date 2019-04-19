@@ -8,6 +8,24 @@
 
 
 
+/* flux in direction dir */
+void advection1_flux1d(tMesh *mesh, int ncons, double *u, int dir, double *f)
+{
+  static int firstcall = 1;
+  static double nvec[3];
+
+  if(firstcall)
+  {
+    char *advdir = Gets(Par("advection1_direction"));
+    /* prop. dir.*/
+    sscanf(advdir, "%lg %lg %lg", &(nvec[0]), &(nvec[1]), &(nvec[2]));
+    firstcall = 0;
+  }
+
+  /* flux */
+  f[0] = nvec[dir] * u[0];
+}
+
 /* flux and its derivs for adv. eqn: f^i = n^i u */
 void advection1_f_df(tMesh *mesh, tVarList *vlu)
 {
@@ -18,12 +36,7 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
   int ifxx = Ind("advection1_fxx");
   int ifyx = ifxx+3;
   int ifzx = ifxx+6;
-  char *advdir = Gets(Par("advection1_direction"));
-  double nx,ny,nz;
   int myid;
-
-  /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
 
   /* compute derivs */
   formylnodes(mesh, myid)
@@ -39,9 +52,10 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
     forpoints(node, i)
     {
       double u_i = u[i];
-      fx[i] = nx*u_i;
-      fy[i] = ny*u_i;
-      fz[i] = nz*u_i;
+
+      advection1_flux1d(mesh, 1, &u_i, 0, &(fx[i]));
+      advection1_flux1d(mesh, 1, &u_i, 1, &(fy[i]));
+      advection1_flux1d(mesh, 1, &u_i, 2, &(fz[i]));
     }
 
    /* flux derivs */
@@ -95,6 +109,10 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
           /* if there is an adjacent surface */
           if(uaj)
           {
+            advection1_flux1d(mesh, 1, &(uaj[JK]), 0, &FNx);
+            advection1_flux1d(mesh, 1, &(uaj[JK]), 1, &FNy);
+            advection1_flux1d(mesh, 1, &(uaj[JK]), 2, &FNz);
+/*
             FNx = uaj[JK] * nx;
             FNy = uaj[JK] * ny;
             FNz = uaj[JK] * nz;
@@ -107,6 +125,7 @@ printf("face%d dir%d p%d %d %d %d: %d\n", face, dir, p, i,j,k, ijk);
 printarray( VarAaj(node, iu, face) );
 errorexit("nan uaj");
 }
+*/
           }
           else
           {
