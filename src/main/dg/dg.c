@@ -121,13 +121,33 @@ int iF   = Ind("advection1_F0");
 
       forplaneN(dir, i,j,k, n, p)
       {
+        double FNx,FNy,FNz, norm[3];
+
         ijk = Ind_n(i,j,k, n);
         JK = Ind_n_norm(i,j,k, n, dir);
         i0 = i0_norm(i,j,k, dir);
 
+        /* get face normal at point ijk */
+        node_normal_at_ijk(node, face, ijk, norm);
+
+
+        //numflux1d_LLF(vlr->n, &FNx, uL, uR, fL, fR, lamL, lamR);
+/*
+void numflux1d_LLF(int nf, double *f,
+                   double *uL, double *uR, double *fL, double *fR,
+                   double *lamL, double *lamR)
+*/
+
+
         forvl(vlr, ir)
         {
           double *r = Vard(node, ir);
+/*
+          F[JK] = (FNx - fx[ijk])*norm[0] +
+                  (FNy - fy[ijk])*norm[1] +
+                  (FNz - fz[ijk])*norm[2];
+*/
+
           r[ijk] -= F[JK] * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
         }
       }

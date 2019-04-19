@@ -11,7 +11,7 @@
 
 
 /* flux at interface of 1d scalar Godunov method for Burgers eqn */
-double numflux1d_scalarGodunov(int nf, double *f,
+double numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
                                double *uL, double *uR, double *fL, double *fR,
                                double *lamL, double *lamR)
 {
@@ -32,13 +32,13 @@ double numflux1d_scalarGodunov(int nf, double *f,
       if(s2 > 0.) fi = fL[i];
       else        fi = fR[i];
     }
-    f[i] = fi;
+    fnum[i] = fi;
   }
 }
 
 
-/* LLF flux for nf fields. Numerical flux is written in f[nf] */
-void numflux1d_LLF(int nf, double *f,
+/* LLF flux for nf fields. Numerical flux is written in fnum[i] */
+void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR)
 {
@@ -60,14 +60,14 @@ void numflux1d_LLF(int nf, double *f,
 
   /* build fluxes */
   for(i=0; i<nf; i++) 
-    f[i] = 0.5*( fR[i] +  fL[i] - amax*(uR[i] -  uL[i]) );
+    fnum[i] = 0.5*( fR[i] +  fL[i] - amax*(uR[i] -  uL[i]) );
 }
 
 
 #define TINY 1e-32
 
 /* HLL flux */
-void numflux1d_HLL(int nf, double *f,
+void numflux1d_HLL(tMesh *mesh, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR, 
                    double *lamL, double *lamR)
 {
@@ -91,5 +91,5 @@ void numflux1d_HLL(int nf, double *f,
 
   /* build fluxes */
   for(i=0; i<nf; i++) 
-    f[i] = oda * ( apl * fL[i] + ami * fR[i] - apm * ( uR[i] -  uL[i]) );
+    fnum[i] = oda * ( apl * fL[i] + ami * fR[i] - apm * ( uR[i] -  uL[i]) );
 }
