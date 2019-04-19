@@ -8,22 +8,41 @@
 
 
 
-/* flux in direction dir */
-void advection1_flux1d(tMesh *mesh, int ncons, double *u, int dir, double *f)
+/* flux in direction norm */
+void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
+                       double *u)
 {
   static int firstcall = 1;
-  static double nvec[3];
+  static double nd[3];
 
   if(firstcall)
   {
     char *advdir = Gets(Par("advection1_direction"));
     /* prop. dir.*/
-    sscanf(advdir, "%lg %lg %lg", &(nvec[0]), &(nvec[1]), &(nvec[2]));
+    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
     firstcall = 0;
   }
 
-  /* flux */
-  f[0] = nvec[dir] * u[0];
+  /* flux times norm */
+  f[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * u[0];
+}
+
+/* eigenvalue in direction norm */
+void advection1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
+{
+  static int firstcall = 1;
+  static double nd[3];
+
+  if(firstcall)
+  {
+    char *advdir = Gets(Par("advection1_direction"));
+    /* prop. dir.*/
+    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
+    firstcall = 0;
+  }
+
+  /* eigenvalue */
+  lam[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]);
 }
 
 /* flux and its derivs for adv. eqn: f^i = n^i u */
@@ -52,10 +71,19 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
     forpoints(node, i)
     {
       double u_i = u[i];
+      double no[3] = { 0., 0., 0. };
 
-      advection1_flux1d(mesh, 1, &u_i, 0, &(fx[i]));
-      advection1_flux1d(mesh, 1, &u_i, 1, &(fy[i]));
-      advection1_flux1d(mesh, 1, &u_i, 2, &(fz[i]));
+      no[0] = 1.;
+      advection1_flux1d(mesh,1, &(fx[i]),no, &u_i);
+      no[0] = 0;
+
+      no[1] = 1.;
+      advection1_flux1d(mesh,1, &(fy[i]),no, &u_i);
+      no[1] = 0.;
+
+      no[2] = 1.;
+      advection1_flux1d(mesh,1, &(fz[i]),no, &u_i);
+      no[2] = 0.;
     }
 
    /* flux derivs */
@@ -84,9 +112,8 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
   {
     tNode *node = MyNode(mesh, myid);
     int *n = node->n;
-    double *fx = Vard(node, ifx);
-    double *fy = Vard(node, ifx+1);
-    double *fz = Vard(node, ifx+2);
+    double *u  = Vard(node, iu);
+    double *fl[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
     double FNx,FNy,FNz, norm[3];
     int face, dir, p, i,j,k, ijk, JK;
 
@@ -109,23 +136,18 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
           /* if there is an adjacent surface */
           if(uaj)
           {
-            advection1_flux1d(mesh, 1, &(uaj[JK]), 0, &FNx);
-            advection1_flux1d(mesh, 1, &(uaj[JK]), 1, &FNy);
-            advection1_flux1d(mesh, 1, &(uaj[JK]), 2, &FNz);
-/*
-            FNx = uaj[JK] * nx;
-            FNy = uaj[JK] * ny;
-            FNz = uaj[JK] * nz;
-//var_finite(node, iu);
-if(0) if(!isfinite(uaj[JK]))
-{
-var_finite(node, iu);
-printf("uaj = %p JK = %d uaj[JK] = %g\n", uaj, JK, uaj[JK]);
-printf("face%d dir%d p%d %d %d %d: %d\n", face, dir, p, i,j,k, ijk);
-printarray( VarAaj(node, iu, face) );
-errorexit("nan uaj");
-}
-*/
+            double no[3] = { 0., 0., 0. };
+            no[0] = 1.;
+            advection1_flux1d(mesh,1, &FNx,no, &(uaj[JK]));
+            no[0] = 0;
+
+            no[1] = 1.;
+            advection1_flux1d(mesh,1, &FNy,no, &(uaj[JK]));
+            no[1] = 0.;
+
+            no[2] = 1.;
+            advection1_flux1d(mesh,1, &FNz,no, &(uaj[JK]));
+            no[2] = 0.;
           }
           else
           {
@@ -134,14 +156,46 @@ errorexit("nan uaj");
         }
         else
         {
-          FNx = fx[ijk];
-          FNy = fy[ijk];
-          FNz = fz[ijk];
+          FNx = fl[0][ijk];
+          FNy = fl[1][ijk];
+          FNz = fl[2][ijk];
         }
 
-        F[JK] = (FNx - fx[ijk])*norm[0] +
-                (FNy - fy[ijk])*norm[1] +
-                (FNz - fz[ijk])*norm[2];
+
+        /* set physical fluxes on left and right */
+/*
+        cdir = 0;
+        if(norm[cdir]>=0.)
+        {
+          uL = u[ijk];
+          fL = fl[cdir][ijk];
+          advection1_eigenval1d(mesh,1, &lamL,cdir);
+
+          uR = uaj[JK];
+          advection1_flux1d(mesh,1, &fR,cdir, &uR);
+          advection1_eigenval1d(mesh,1, &lamR,cdir);
+        }
+        else
+        {
+          uR = u[ijk];
+          fR = fl[cdir][ijk];
+          advection1_eigenval1d(mesh,1, &lamR,cdir);
+
+          uL = uaj[JK];
+          advection1_flux1d(mesh,1, &fL,cdir, &uL);
+          advection1_eigenval1d(mesh,1, &lamL,cdir);
+        }
+
+        numflux1d_LLF(mesh,1, &(FN[cdir]), &uL, &uR, &fL, &fR, &lamL, &lamR);
+
+
+*/
+
+
+
+        F[JK] = (FNx - fl[0][ijk])*norm[0] +
+                (FNy - fl[1][ijk])*norm[1] +
+                (FNz - fl[2][ijk])*norm[2];
       }
     }
   }
