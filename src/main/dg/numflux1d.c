@@ -37,9 +37,9 @@ double numflux1d_scalarGodunov(int nf, double *f,
 }
 
 
-/* LLF flux */ 
+/* LLF flux for nf fields. Numerical flux is written in f[nf] */
 void numflux1d_LLF(int nf, double *f,
-                   double *uL, double *uR, double *fL, double *fR, 
+                   double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR)
 {
   double amax;
