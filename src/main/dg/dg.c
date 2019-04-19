@@ -12,126 +12,126 @@
 
 
 /* set data for MRS dg. This one uses the cons vars in vl */
-int limdata_MRS(tNode *node, tVarList *vl)
+
+
+
+
+/* use numerical flux FN^i to set F */
+void dg_advection1_F(tMesh *mesh, tVarList *vlu)
 {
-  int np;
-  int vli;
-  tDat *dat;
-  int nvals = 3; /* we need 3 data values per var: min, max, node-average */
+  int iu = vlu->index[0];
+  int ifx = Ind("advection1_fx");
+  int iF  = Ind("advection1_F0");
+  char *advdir = Gets(Par("advection1_direction"));
+  double nx,ny,nz;
+  int myid;
 
-  if(!node || !vl) return nvals;
+  /* prop. dir.*/
+  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
 
-  dat = node->dat;
-  if(!dat) return nvals;
-
-  np = node->np;
-
-  forvl(vl, vli)
+  /* compute boundary flux terms */
+  formylnodes(mesh, myid)
   {
-    int iq = Vind(vl, vli);
-    double *q = Vard(node, iq);
-    int im;
+    tNode *node = MyNode(mesh, myid);
+    int *n = node->n;
+    double *fx = Vard(node, ifx);
+    double *fy = Vard(node, ifx+1);
+    double *fz = Vard(node, ifx+2);
+    double FNx,FNy,FNz, norm[3];
+    int face, dir, p, i,j,k, ijk, JK;
 
-    /* find min and max in q in this node, and write it into indicator */
-    dat->ic[iq]->myindc->d[0] = min_in_1d_array(q, np, &im);
-    dat->ic[iq]->myindc->d[1] = max_in_1d_array(q, np, &im);
-    /* also save node average */
-    dat->ic[iq]->myindc->d[2] = var_nodeaverage(node, iq);
-  }
-  return nvals;
-}
-
-/* funcs in MRS dg */
-double MRS_phiy(double y)
-{
-  if(y<0.) return 0.;      // is this correct??? Read papers!
-  return min2(y/1.1, 1.);
-}
-
-double MRS_theta_Mml(double Mi, double wbar, double wMi)
-{
-  double r;
-  double num = Mi - wbar;
-  double den = wMi - wbar;
-  if(den != 0.) r = num/den;
-  else          return 1.;  // what should this be 0 or 1???
-  return MRS_phiy(r);
-}
-
-/* dg: limit u using data in dat->ic */
-int dg_MRS(tNode *node, tVarList *vl)
-{
-  double *bb = node->bbox;
-  tDat *dat;
-  int vli, f, ni, ijk;
-  double alpha, h, alpha_h, theta_i;
-  double theta_Mi, theta_mi;
-
-  dat = node->dat;
-  if(!dat) return 0;
-
-  /* set alpha_h */
-  alpha = 5.0;
-  h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
-  alpha_h = alpha * pow(h, 1.5);
-
-  /* set thetas */
-  theta_Mi = theta_mi = 1e300;
-  forvl(vl, vli)
-  {
-    int iq = Vind(vl, vli);
-    double wbar, wMi, wmi, Mi, mi, thM, thm;
-
-    /* get min, max and av on node */
-    wmi = dat->ic[iq]->myindc->d[0];
-    wMi = dat->ic[iq]->myindc->d[1];
-    wbar = dat->ic[iq]->myindc->d[2];
-
-    /* find min and max of q in neighbors */
-    Mi = -1e300;
-    mi = 1e300;
-    for(f=0; f<6; f++)
-      for(ni=0; ni<node->nfnb[f]; ni++)
+    /* set F on each face */
+    for(face=0; face<6; face++)
+    {
+      double *F = Vard(node, iF+face);
+      double *uaj = Varaj(node, iu, face);
+      dir = face/2;
+      p = (face%2)*(n[dir] - 1);
+      forplaneN(dir, i,j,k, n, p)
       {
-        int ma = dat->ic[iq]->nbindc[f][ni]->d[0];
-        int Ma = dat->ic[iq]->nbindc[f][ni]->d[1];
-        if(ma < mi) mi = ma;
-        if(Ma > Mi) Mi = Ma;
+        ijk = Ind_n(i,j,k, n);
+        JK = Ind_n_norm(i,j,k, n, dir);
+        node_normal_at_ijk(node, face, ijk, norm);
+
+        /* if stuff is coming in */
+        if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
+        {
+          /* if there is an adjacent surface */
+          if(uaj)
+          {
+            FNx = uaj[JK] * nx;
+            FNy = uaj[JK] * ny;
+            FNz = uaj[JK] * nz;
+          }
+          else
+          {
+            FNx = FNy = FNz = 0;
+          }
+        }
+        else
+        {
+          FNx = fx[ijk];
+          FNy = fy[ijk];
+          FNz = fz[ijk];
+        }
+
+        F[JK] = (FNx - fx[ijk])*norm[0] +
+                (FNy - fy[ijk])*norm[1] +
+                (FNz - fz[ijk])*norm[2];
       }
-
-    mi = min2(wbar - alpha_h, mi);
-    Mi = max2(wbar + alpha_h, Mi);
-
-    /* find min thetas among all vl */
-    thM = MRS_theta_Mml(Mi, wbar, wMi);
-    thm = MRS_theta_Mml(mi, wbar, wmi);
-    if(thM < theta_Mi) theta_Mi = thM;
-    if(thm < theta_mi) theta_mi = thm;
+    }
   }
-
-  /* set the theta_i we use for limiting vars in vl */
-  theta_i = min3(1., theta_mi, theta_Mi);
-
-  /* limit all cons vars q in vl */
-  forvl(vl, vli)
-  {
-    int iq = Vind(vl, vli);
-    double *q = Vard(node, iq);
-    double qbar;
-
-    /* find node average qbar */
-    qbar = var_nodeaverage(node, iq);
-//printf("qbar=%g theta_i=%g\n", qbar, theta_i);
-//exit(88);
-if(!isfinite(qbar) || !isfinite(theta_i))
-{
-printf("qbar=%g theta_i=%g\n", qbar, theta_i);
-abort();
-exit(8);
 }
-    /* now limit q */
-    forpoints(node, ijk)
-      q[ijk] = qbar + theta_i*(q[ijk] - qbar);
+
+
+/* add surface flux terms */
+int dg_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+{
+  int ir = vlr->index[0];
+  //int iu = vlu->index[0];
+  int iooJ = Ind("det_dXbdx");
+  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
+  int myid;
+
+  /* get surfaces so that we can compute fluxes */
+  get_all_myln_surfaces(mesh);
+
+  /* get flux terms on boundary */
+  dg_advection1_F(mesh, vlu);
+
+int iF   = Ind("advection1_F0");
+
+  /* add boundary flux terms */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    int *n = node->n;
+    double *ooJ = Vard(node, iooJ);
+    int face;
+
+    for(face=0; face<6; face++)
+    {
+      int dir = face/2;
+      int p = (face%2)*(n[dir] - 1);
+      //double sig = 2*(face%2) - 1;
+      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
+      double *F = Vard(node, iF+face);
+      double *w = Wquad(node, dir);
+      int i,j,k, ijk, JK, i0;
+
+      forplaneN(dir, i,j,k, n, p)
+      {
+        ijk = Ind_n(i,j,k, n);
+        JK = Ind_n_norm(i,j,k, n, dir);
+        i0 = i0_norm(i,j,k, dir);
+
+        forvl(vlr, ir)
+        {
+          double *r = Vard(node, ir);
+          r[ijk] -= F[JK] * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
+        }
+      }
+    }
   }
 
   return 0;
