@@ -114,7 +114,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     int *n = node->n;
     double *u  = Vard(node, iu);
     double *fl[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
-    double fln, FN, norm[3];
+    double fln, FN, lam, norm[3];
     int face, dir, p, i,j,k, ijk, JK;
 
     /* set F on each face */
@@ -133,8 +133,11 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
         /* flux times normal vector */
         fln = (norm[0]*fl[0][ijk] + norm[1]*fl[1][ijk] + norm[2]*fl[2][ijk]);
 
+        /* eigenval in dir norm */
+        advection1_eigenval1d(mesh,1, &lam,norm);
+
         /* if stuff is coming in */
-        if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
+        if(lam < 0.)
         {
           /* if there is an adjacent surface */
           if(uaj)
