@@ -114,7 +114,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
     int *n = node->n;
     double *u  = Vard(node, iu);
     double *fl[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
-    double fln, FN, lam, norm[3];
+    double fln, FN, norm[3];
     double uL, uR, fL, fR, lamL, lamR;
     int face, dir, plus, p, i,j,k, ijk, JK;
 
@@ -136,10 +136,12 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
         fln = (norm[0]*fl[0][ijk] + norm[1]*fl[1][ijk] + norm[2]*fl[2][ijk]);
 
         /* eigenval in dir norm */
-        advection1_eigenval1d(mesh,1, &lam,norm);
+        advection1_eigenval1d(mesh,1, &lamL,norm);
 
+if(1)
+{
         /* if stuff is coming in */
-        if(lam < 0.)
+        if(lamL < 0.)
         {
           /* if there is an adjacent surface */
           if(uaj)
@@ -155,48 +157,31 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
         {
           FN = fln;
         }
+}
+if(0)
+{
+        /* set physical fluxes and eigenvalues on left and right */
+        uL = u[ijk];
+        fL = fln;
+        advection1_eigenval1d(mesh,1, &lamL,norm);
+        /* if there is a neighbor and an adjacent surface */
+        if(uaj)
+        {
+          uR = uaj[JK];
+          advection1_flux1d(mesh,1, &fR,norm, &uR);
+          advection1_eigenval1d(mesh,1, &lamR,norm);
 
-//        /* set physical fluxes and eigenvalues on left and right */
-//        if(lam < 0.) // if(plus)
-//        {
-//          uL = u[ijk];
-//          fL = fln;
-//          advection1_eigenval1d(mesh,1, &lamL,norm);
-//
-//          if(uaj)
-//          {
-//            uR = uaj[JK];
-//            advection1_flux1d(mesh,1, &fR,norm, &uR);
-//            advection1_eigenval1d(mesh,1, &lamR,norm);
-//
-//            // use LLF
-//            numflux1d_LLF(mesh,1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
-//          }
-//          else
-//            FN = 0.;
-//        }
-//        else
-//        {
-//          uR = u[ijk];
-//          fR = fln;
-//          advection1_eigenval1d(mesh,1, &lamR,norm);
-//
-//          if(uaj)
-//          {
-//            uL = uaj[JK];
-//            advection1_flux1d(mesh,1, &fL,norm, &uL);
-//            advection1_eigenval1d(mesh,1, &lamL,norm);
-//
-//            // use LLF
-//            numflux1d_LLF(mesh,1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
-//          }
-//          else
-//            FN = 0.;
-//
-//          FN = fln;
-//        }
-
-
+          // use LLF
+          numflux1d_LLF(mesh,1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
+        }
+        else /* do something special on outer boundary */
+        {
+          if(lamL < 0.)
+            FN = 0.;
+          else
+            FN = fln;
+        }
+}
 
         F[JK] = FN - fln;
       }
