@@ -71,19 +71,14 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
     forpoints(node, i)
     {
       double u_i = u[i];
-      double no[3] = { 0., 0., 0. };
-
-      no[0] = 1.;
+      double no[3] = { 1., 0., 0. };
       advection1_flux1d(mesh,1, &(fx[i]),no, &u_i);
       no[0] = 0;
-
       no[1] = 1.;
       advection1_flux1d(mesh,1, &(fy[i]),no, &u_i);
       no[1] = 0.;
-
       no[2] = 1.;
       advection1_flux1d(mesh,1, &(fz[i]),no, &u_i);
-      no[2] = 0.;
     }
 
    /* flux derivs */
@@ -91,6 +86,95 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
    cart_partials(node, ify, ifyx);
    cart_partials(node, ifz, ifzx);
   }
+}
+
+
+/* function that set flux array lists and eigenval array lists on both
+   sides of the node surfaces */
+void advection1_fluxarrays(tNode *node, tVarList *vlu,
+                           pArrList *Afn[6],  pArrList *Afnaj[6],
+                           pArrList *Alam[6], pArrList *Alamaj[6])
+{
+  tMesh *mesh = node->pat->mesh;
+  int *n = node->n;
+  int nvars = vlu->n;
+  double *ui   = dmalloc(nvars);
+  double *fi   = dmalloc(nvars);
+  double *lami = dmalloc(nvars);
+  double *ua   = dmalloc(nvars);
+  double *fa   = dmalloc(nvars);
+  double *lama = dmalloc(nvars);
+  int ifx = Ind("advection1_fx");
+  int face;
+
+  /* set fluxes on both sides of each face */
+  for(face=0; face<6; face++)
+  {
+    int dir = face/2;
+    int p = (face%2)*(n[dir] - 1);
+    int i,j,k;
+
+    forplaneN(dir, i,j,k, n, p)
+    {
+      int ijk = Ind_n(i,j,k, n);
+      int JK = Ind_n_norm(i,j,k, n, dir);
+      double norm[3];
+      int l;
+
+      /* outward pointing normal */
+      node_normal_at_ijk(node, face, ijk, norm);
+
+      /* loop over vars and set ui, ua, as well as fi */
+      forvl(vlu, l)
+      {
+        double *u = Vard(node, l);
+        double *uaj = Varaj(node, l, face);
+        double *f[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
+
+        /* cons var and normal flux inside node */
+        ui[l] = u[ijk];
+        fi[l] = ( norm[0]*f[0][ijk] + norm[1]*f[1][ijk] + norm[2]*f[2][ijk] );
+
+        /* cons var on adjacent side */
+        ua[l] = uaj[JK];
+      }
+
+      /* eigenval in dir norm */
+      advection1_eigenval1d(mesh,nvars, lami,norm);
+      lama[0] = lami[0]; // eigenval is same on both sides
+
+      /* get adjcent flux fa. fi was set earlier */
+      advection1_flux1d(mesh,nvars, fa,norm, ua);
+
+      forvl(vlu, l)
+      {
+        tArray *afn    = ListEntry(Afn[face], l);
+        tArray *afnaj  = ListEntry(Afnaj[face], l);
+        tArray *alam   = ListEntry(Alam[face], l);
+        tArray *alamaj = ListEntry(Alamaj[face], l);
+        double *fn    = Arrd_(afn);
+        double *fnaj  = Arrd_(afnaj);
+        double *lam   = Arrd_(alam);
+        double *lamaj = Arrd_(alamaj);
+
+        /* set flux arrays */
+        fn[JK]   = fi[l];
+        fnaj[JK] = fa[l];
+
+        /* set eigenval arrays */
+        lam[JK]   = lami[l];
+        lamaj[JK] = lama[l];
+      }
+
+    } /* end plane loop */
+  }
+
+  free(lama);
+  free(fa);
+  free(ua);
+  free(lami);
+  free(fi);
+  free(ui);
 }
 
 

@@ -124,6 +124,8 @@ Things that should be done:
  -make timer_get s.t. "name" gets appended by threadID
   -use gettid? or some openMP call with #ifdef around it???
 
+*investigate: MPI_Test and MPI_Probe as alt. for MPI_Wait
+
 
 Cleanup:
 ========
