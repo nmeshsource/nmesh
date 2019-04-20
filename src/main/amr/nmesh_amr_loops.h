@@ -80,6 +80,9 @@
 /* access Array, without check */
 #define Arrd_(Arr) (Arr->d)
 
+/* get double pointer to surface data in a variable, without check */
+#define Varaj_(node,varindex,face)  node->dat->s[(face)][(varindex)]->ajsurf->d
+
 /* natural loop over my leaf nodes on this proc */
 #define formylnodes_cat_i(mesh, cat, i) \
   for(cat=0; cat < mesh->myln->nncats; cat++) \
