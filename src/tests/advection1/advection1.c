@@ -135,11 +135,11 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
         /* flux times normal vector */
         fln = (norm[0]*fl[0][ijk] + norm[1]*fl[1][ijk] + norm[2]*fl[2][ijk]);
 
+if(1)
+{
         /* eigenval in dir norm */
         advection1_eigenval1d(mesh,1, &lamL,norm);
 
-if(1)
-{
         /* if stuff is coming in */
         if(lamL < 0.)
         {
@@ -158,7 +158,7 @@ if(1)
           FN = fln;
         }
 }
-if(0)
+else
 {
         /* set physical fluxes and eigenvalues on left and right */
         uL = u[ijk];
