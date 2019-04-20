@@ -37,6 +37,22 @@ void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
 }
 
 
+/* Upwind flux: Numerical flux is written in fnum[i] */
+void numflux1d_upwind(tMesh *mesh, int nf, double *fnum,
+                      double *uL, double *uR, double *fL, double *fR,
+                      double *lamL, double *lamR)
+{
+  int i;
+
+  /* build fluxes */
+  for(i=0; i<nf; i++)
+  {
+    if(lamL[i] < 0.) fnum[i] = fR[i];
+    else             fnum[i] = fL[i];
+  }
+}
+
+
 /* LLF flux for nf fields. Numerical flux is written in fnum[i] */
 void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,

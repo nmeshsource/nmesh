@@ -18,6 +18,12 @@ typedef tVarList *pVL;        /* list_templates.h only works with numbers */
 
 /* use lists with entries of type func. pointer */
 typedef int (*FuncPointer)();  /* a func. pointer */
-#define TYP FuncPointer         /* the pointer FuncPointer is a number */
+#define TYP FuncPointer        /* the pointer FuncPointer is a number */
+#include "list_templates.h"
+#undef TYP
+
+/* use lists with (tArray *) entries */
+typedef tArray *pAr;        /* list_templates.h only works with numbers */
+#define TYP pAr             /* the pointer pAr is a number */
 #include "list_templates.h"
 #undef TYP

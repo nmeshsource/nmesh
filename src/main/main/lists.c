@@ -28,7 +28,7 @@ to this file. */
 /***************************************************************************/
 /* compile lists with entries of type (tVarList *) */
 /***************************************************************************/
-#include "../amr/nmesh_amr.h" /* get def of tVarList */
+#include "../amr/nmesh_amr.h" /* get def of tVarList and tArray */
 typedef tVarList *pVL;        /* list_templates.h only works with numbers */
 #define TYP pVL               /* the pointer pVL is a number */
 #include "list_templates.c"
@@ -37,7 +37,15 @@ typedef tVarList *pVL;        /* list_templates.h only works with numbers */
 /***************************************************************************/
 /* compile lists with entries of type func. pointer */
 /***************************************************************************/
-typedef void (*FuncPointer)();  /* a func. pointer */
-#define TYP FuncPointer         /* the pointer FuncPointer is a number */
+typedef int (*FuncPointer)();  /* a func. pointer */
+#define TYP FuncPointer        /* the pointer FuncPointer is a number */
+#include "list_templates.c"
+#undef TYP
+
+/***************************************************************************/
+/* compile lists with entries of type (tArray *) */
+/***************************************************************************/
+typedef tArray *pAr;        /* list_templates.h only works with numbers */
+#define TYP pAr             /* the pointer pAr is a number */
 #include "list_templates.c"
 #undef TYP
