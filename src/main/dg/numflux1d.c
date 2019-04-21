@@ -21,18 +21,18 @@ void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
   {
     double ul = uL[i];
     double ur = uR[i];
-    double fi;
+    double fn;
 
-    if(ul >= 0. && ur >= 0.)      fi = fL[i];
-    else if(ul <= 0. && ur <= 0.) fi = fR[i];
-    else if(ul  < 0. && ur >= 0.) fi = 0.;
+    if(ul >= 0. && ur >= 0.)      fn = fL[i];
+    else if(ul <= 0. && ur <= 0.) fn = fR[i];
+    else if(ul  < 0. && ur >= 0.) fn = 0.;
     else
     {
       double s2 = ul + ur;
-      if(s2 > 0.) fi = fL[i];
-      else        fi = fR[i];
+      if(s2 > 0.) fn = fL[i];
+      else        fn = fR[i];
     }
-    fnum[i] = fi;
+    fnum[i] = fn;
   }
 }
 
