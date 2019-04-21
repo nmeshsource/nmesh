@@ -126,7 +126,7 @@ void burgers1_fluxes_pt(tNode *node, int face, int i, int j, int k,
     if(uaj)
       ua[l] = uaj[JK];
     else /* do something special on outer boundary */
-      ua[l] = 0.;
+      ua[l] = ui[l];
   }
 
   /* get face normal at point ijk */
