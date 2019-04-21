@@ -19,8 +19,6 @@ int nmesh_advection1(tMesh *mesh)
   AddEvoVar("advection1_u", "",     "field we advect");
   AddAuxVar("advection1_f", "I",    "f^i = n^i u");
   AddAuxVar("advection1_f", "Ij",   "d_j f^i");
-  AddAuxVar("advection1_F", "f",
-            "normal comp. of numerical flux F = (f^{i*} - f^i) n^i");
   AddAuxVar("advection1_u_err", "", "error in u");
 
   /* parameters */

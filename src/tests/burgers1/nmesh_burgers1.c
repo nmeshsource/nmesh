@@ -19,8 +19,6 @@ int nmesh_burgers1(tMesh *mesh)
   AddEvoVar("burgers1_u", "",     "field we advect");
   AddAuxVar("burgers1_f", "I",    "f^i = n^i u");
   AddAuxVar("burgers1_f", "Ij",   "d_j f^i");
-  AddAuxVar("burgers1_F", "f",
-            "normal comp. of numerical flux F = (f^{i*} - f^i) n^i");
   AddAuxVar("burgers1_u_err", "", "error in u");
 
   /* parameters */

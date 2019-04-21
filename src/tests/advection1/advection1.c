@@ -232,7 +232,6 @@ int advection1_init(tMesh *mesh)
   int iu  = Ind("advection1_u");
   int ifx = Ind("advection1_fx");
   int ifxx = Ind("advection1_fxx");
-  int iF  = Ind("advection1_F0");
   int ix =  Ind("x");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
@@ -253,7 +252,6 @@ int advection1_init(tMesh *mesh)
   enablevar(mesh, iu);
   enablevar(mesh, ifx);
   enablevar(mesh, ifxx);
-  enablevar(mesh, iF);
   enablevar(mesh, iue);
 
   /* at t=0: set u=sin(x) */

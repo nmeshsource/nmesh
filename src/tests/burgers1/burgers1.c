@@ -233,7 +233,6 @@ int burgers1_init(tMesh *mesh)
   int iu  = Ind("burgers1_u");
   int ifx = Ind("burgers1_fx");
   int ifxx = Ind("burgers1_fxx");
-  int iF  = Ind("burgers1_F0");
   int ix =  Ind("x");
   int iue = Ind("burgers1_u_err");
   tVarList *vlu = vlalloc(mesh);
@@ -253,7 +252,6 @@ int burgers1_init(tMesh *mesh)
   enablevar(mesh, iu);
   enablevar(mesh, ifx);
   enablevar(mesh, ifxx);
-  enablevar(mesh, iF);
   enablevar(mesh, iue);
 
   /* at t=0: set u=sin(x) */
