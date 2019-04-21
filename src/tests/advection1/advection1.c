@@ -7,6 +7,11 @@
 #define PR 1
 
 
+/* func pointer for numerical flux */
+void (*adevection1_numflux)(tMesh *mesh, int nf, double *fnum,
+                            double *uL, double *uR, double *fL, double *fR,
+                            double *lamL, double *lamR);
+
 
 /* flux in direction norm */
 void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
@@ -441,7 +446,8 @@ if(0)
 }
 else
 {
-  dg_add_surface_fluxes(mesh, vlr, vlu, advection1_fluxes_pt, numflux1d_LLF);
+  dg_add_surface_fluxes(mesh, vlr, vlu,
+                        advection1_fluxes_pt, adevection1_numflux);
 }
 
   /* impose outer BC */
@@ -496,6 +502,10 @@ int advection1_init(tMesh *mesh)
   /* register u and its RHS with evolve */
   evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0, 0,0);
   evolve_print_evosys(mesh);
+
+  /* choose numerical flux */
+  adevection1_numflux = numflux1d_LLF;
+
   return 0;
 } 
 
