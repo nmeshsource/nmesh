@@ -61,6 +61,9 @@ double MRS_theta_Mml(double Mi, double wbar, double wMi)
 /* limiter: limit u using data in dat->ic */
 int limiter_MRS(tNode *node, tVarList *vl)
 {
+  static int firstcall = 1;
+  static int limiter_alpha;
+  tMesh *mesh = node->pat->mesh;
   double *bb = node->bbox;
   tDat *dat;
   int vli, f, ni, ijk;
@@ -70,8 +73,14 @@ int limiter_MRS(tNode *node, tVarList *vl)
   dat = node->dat;
   if(!dat) return 0;
 
+  if(firstcall)
+  {
+    limiter_alpha = Par("limiter_alpha");
+    firstcall = 0;
+  }
+
   /* set alpha_h from alpha (smaller alpha makes MRS more agressive) */
-  alpha = 0.; //0.1; //5.0;
+  alpha = Getd(limiter_alpha); //0.1; //5.0;
   h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   alpha_h = alpha * pow(h, 1.5);
 

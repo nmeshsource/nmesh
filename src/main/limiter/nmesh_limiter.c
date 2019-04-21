@@ -18,6 +18,7 @@ int nmesh_limiter(tMesh *mesh)
    
   /* parameters */
   AddPar("limiter_name", "MRS", "name of limiter");
+  AddPar("limiter_alpha", "5", "for MRS: [0,inf], 0 is most aggressive");
 	     	   	   	 
   return 0;
 }
