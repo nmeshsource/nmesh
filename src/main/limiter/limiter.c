@@ -70,8 +70,8 @@ int limiter_MRS(tNode *node, tVarList *vl)
   dat = node->dat;
   if(!dat) return 0;
 
-  /* set alpha_h */
-  alpha = 5.0;
+  /* set alpha_h from alpha (smaller alpha makes MRS more agressive) */
+  alpha = 0.; //0.1; //5.0;
   h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   alpha_h = alpha * pow(h, 1.5);
 
