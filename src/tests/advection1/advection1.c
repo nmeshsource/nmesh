@@ -137,101 +137,6 @@ void advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
 }
 
 
-/* use numerical flux FN^i to set F */
-void advection1_F(tMesh *mesh, tVarList *vlu)
-{
-  int iu = vlu->index[0];
-  int ifx = Ind("advection1_fx");
-  int iF  = Ind("advection1_F0");
-  char *advdir = Gets(Par("advection1_direction"));
-  double nx,ny,nz;
-  int myid;
-
-  /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-
-  /* compute boundary flux terms */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    int *n = node->n;
-    double *u  = Vard(node, iu);
-    double *fl[] = { Vard(node, ifx), Vard(node, ifx+1), Vard(node, ifx+2) };
-    double fln, FN, norm[3];
-    double uL, uR, fL, fR, lamL, lamR;
-    int face, dir, plus, p, i,j,k, ijk, JK;
-
-    /* set F on each face */
-    for(face=0; face<6; face++)
-    {
-      double *F = Vard(node, iF+face);
-      double *uaj = Varaj(node, iu, face);
-      dir = face/2;
-      plus = (face%2);
-      p = plus*(n[dir] - 1);
-      forplaneN(dir, i,j,k, n, p)
-      {
-        ijk = Ind_n(i,j,k, n);
-        JK = Ind_n_norm(i,j,k, n, dir);
-        node_normal_at_ijk(node, face, ijk, norm);
-
-        /* flux times normal vector */
-        fln = (norm[0]*fl[0][ijk] + norm[1]*fl[1][ijk] + norm[2]*fl[2][ijk]);
-
-if(1)
-{
-        /* eigenval in dir norm */
-        advection1_eigenval1d(mesh,1, &lamL,norm);
-
-        /* if stuff is coming in */
-        if(lamL < 0.)
-        {
-          /* if there is an adjacent surface */
-          if(uaj)
-          {
-            advection1_flux1d(mesh,1, &FN,norm, &(uaj[JK]));
-          }
-          else
-          {
-            FN = 0.;
-          }
-        }
-        else
-        {
-          FN = fln;
-        }
-}
-else
-{
-        /* set physical fluxes and eigenvalues on left and right */
-        uL = u[ijk];
-        fL = fln;
-        advection1_eigenval1d(mesh,1, &lamL,norm);
-        /* if there is a neighbor and an adjacent surface */
-        if(uaj)
-        {
-          uR = uaj[JK];
-          advection1_flux1d(mesh,1, &fR,norm, &uR);
-          advection1_eigenval1d(mesh,1, &lamR,norm);
-
-          // use LLF
-          numflux1d_LLF(node,face, 1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
-        }
-        else /* do something special on outer boundary */
-        {
-          if(lamL < 0.)
-            FN = 0.;
-          else
-            FN = fln;
-        }
-}
-
-        F[JK] = FN - fln;
-      }
-    }
-  }
-}
-
 /* set a BC on patch boundary */
 void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
@@ -291,9 +196,6 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int ifxx = Ind("advection1_fxx");
-  int iF   = Ind("advection1_F0");
-  int iooJ = Ind("det_dXbdx");
-  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int myid;
 
   TIMER_START;
@@ -315,49 +217,9 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
   }
 
-if(0)
-{
-  /* get surfaces so that we can compute fluxes */
-  get_all_myln_surfaces(mesh);
-
   /* get flux terms on boundary */
-  advection1_F(mesh, vlu);
-
-  /* add boundary flux terms */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    int *n = node->n;
-    double *r  = Vard(node, ir);
-    double *ooJ = Vard(node, iooJ);
-    int face;
-
-    for(face=0; face<6; face++)
-    {
-      int dir = face/2;
-      int p = (face%2)*(n[dir] - 1);
-      //double sig = 2*(face%2) - 1;
-      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
-      double *F = Vard(node, iF+face);
-      double *w = Wquad(node, dir);
-      int i,j,k, ijk, JK, i0;
-
-      forplaneN(dir, i,j,k, n, p)
-      {
-        ijk = Ind_n(i,j,k, n);
-        JK = Ind_n_norm(i,j,k, n, dir);
-        i0 = i0_norm(i,j,k, dir);
-
-        r[ijk] -= F[JK] * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
-      }
-    }
-  }
-}
-else
-{
   dg_add_surface_fluxes(mesh, vlr, vlu,
                         advection1_fluxes_pt, advection1_numflux);
-}
 
   /* impose outer BC */
   advection1_u_BC(mesh, vlr, vlu);
