@@ -10,7 +10,13 @@
 
 
 /* add surface flux terms */
-int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+                          int (*u_f_lam)(tNode *node, int face,
+                                         int i, int j, int k,
+                                         tVarList *vlu,
+                                         double *ui, double *ua,
+                                         double *fi,  double *fa,
+                                         double *lami, double *lama))
 {
   int nvars = vlu->n;
   double *ui   = dmalloc(nvars); /* cons. vars inside this node */
@@ -52,8 +58,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu)
         int l;
 
         /* set vars, fluxes and eigenvals on both sides */
-        advection1_fluxes_pt(node, face, i,j,k, vlu,
-                             ui,ua, fi,fa, lami,lama);
+        u_f_lam(node, face, i,j,k, vlu, ui,ua, fi,fa, lami,lama);
 
         /* compute numerical flux */
         numflux1d_LLF(mesh, nvars, fnum, ui,ua, fi,fa, lami,lama);

@@ -5,5 +5,10 @@
 
 
 /* advection1.c */
+int advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
+                         tVarList *vlu,
+                         double *ui, double *ua,
+                         double *fi,  double *fa,
+                         double *lami, double *lama);
 int advection1_init(tMesh *mesh);
 int advection1_analyze(tMesh *mesh);

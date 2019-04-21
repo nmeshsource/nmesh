@@ -8,4 +8,10 @@ void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
                    double *lamL, double *lamR);
 
 /* dg.c */
-int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu);
+int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+                          int (*u_f_lam)(tNode *node, int face,
+                                         int i, int j, int k,
+                                         tVarList *vlu,
+                                         double *ui, double *ua,
+                                         double *fi,  double *fa,
+                                         double *lami, double *lama));
