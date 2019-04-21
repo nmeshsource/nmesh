@@ -570,7 +570,7 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
 /* The idea is to loop over the pat faces and then move out using the Cartesian
    normal vectors. Then we check if we are in an other pat. */
 /* This only creates a bface if there is some contact with another pat,
-   or if we seemto be at an other boundary.
+   or if we seem to be at an other boundary.
    It returns the number of new bfaces made for face f in this pat. So if it
    returns 0 nothing was done at all. */
 int set_bfaces_on_patface(tPat *pat, int f)
