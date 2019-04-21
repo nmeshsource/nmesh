@@ -11,7 +11,7 @@
 
 
 /* flux at interface of 1d scalar Godunov method for Burgers eqn */
-void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
+void numflux1d_scalarGodunov(tNode *node, int face, int nf, double *fnum,
                              double *uL, double *uR, double *fL, double *fR,
                              double *lamL, double *lamR)
 {
@@ -38,7 +38,7 @@ void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
 
 
 /* Upwind flux: Numerical flux is written in fnum[i] */
-void numflux1d_upwind(tMesh *mesh, int nf, double *fnum,
+void numflux1d_upwind(tNode *node, int face, int nf, double *fnum,
                       double *uL, double *uR, double *fL, double *fR,
                       double *lamL, double *lamR)
 {
@@ -54,7 +54,7 @@ void numflux1d_upwind(tMesh *mesh, int nf, double *fnum,
 
 
 /* LLF flux for nf fields. Numerical flux is written in fnum[i] */
-void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
+void numflux1d_LLF(tNode *node, int face, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR)
 {
@@ -83,7 +83,7 @@ void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
 #define TINY 1e-32
 
 /* HLL flux */
-void numflux1d_HLL(tMesh *mesh, int nf, double *fnum,
+void numflux1d_HLL(tNode *node, int face, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR)
 {

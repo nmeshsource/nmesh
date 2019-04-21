@@ -8,7 +8,7 @@
 
 
 /* func pointer for numerical flux */
-void (*advection1_numflux)(tMesh *mesh, int nf, double *fnum,
+void (*advection1_numflux)(tNode *node, int face, int nf, double *fnum,
                            double *uL, double *uR, double *fL, double *fR,
                            double *lamL, double *lamR);
 
@@ -215,7 +215,7 @@ else
           advection1_eigenval1d(mesh,1, &lamR,norm);
 
           // use LLF
-          numflux1d_LLF(mesh,1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
+          numflux1d_LLF(node,face, 1, &FN, &uL, &uR, &fL, &fR, &lamL, &lamR);
         }
         else /* do something special on outer boundary */
         {

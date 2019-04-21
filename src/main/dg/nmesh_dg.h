@@ -3,16 +3,16 @@
 
 
 /* numflux1d.c */
-void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
+void numflux1d_scalarGodunov(tNode *node, int face, int nf, double *fnum,
                              double *uL, double *uR, double *fL, double *fR,
                              double *lamL, double *lamR);
-void numflux1d_upwind(tMesh *mesh, int nf, double *fnum,
+void numflux1d_upwind(tNode *node, int face, int nf, double *fnum,
                       double *uL, double *uR, double *fL, double *fR,
                       double *lamL, double *lamR);
-void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
+void numflux1d_LLF(tNode *node, int face, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR);
-void numflux1d_HLL(tMesh *mesh, int nf, double *fnum,
+void numflux1d_HLL(tNode *node, int face, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR);
 
@@ -24,7 +24,8 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                                           double *ui, double *ua,
                                           double *fi,  double *fa,
                                           double *lami, double *lama),
-                          void (*numflux)(tMesh *mesh, int nf, double *fnum,
+                          void (*numflux)(tNode *node, int face,
+                                          int nf, double *fnum,
                                           double *uL, double *uR,
                                           double *fL, double *fR,
                                           double *lamL, double *lamR));
