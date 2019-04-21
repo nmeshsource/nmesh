@@ -62,6 +62,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   addto_pVLList(u, dt, r, vladdto,0);     // u += r dt
+  evolve_limiter_mesh(mesh, u);
 }
 
 
