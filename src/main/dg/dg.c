@@ -57,25 +57,30 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
         /* compute numerical flux */
         numflux1d_LLF(mesh, nvars, fnum, ui,ua, fi,fa, lami,lama);
+        //numflux1d_upwind(mesh, nvars, fnum, ui,ua, fi,fa, lami,lama);
 
+if(0 && myid==4 && face==1)
+{
+printf("fnum=%g: ui=%g ua=%g fi=%g fa=%g lami=%g lama=%g\n",
+*fnum, *ui,*ua, *fi,*fa, *lami,*lama);
+}
         /* add boundary flux terms to RHS */
         forvl(vlr, l)
         {
-          double *r = Vard(node, l);
-          double *uaj = Varaj(node, l, face);
+          int ir = Vind(vlr,l);
+          double *r = Vard_(node, ir);
           double F;
+          //int iu = Vind(vlu,l);
+          //double *uaj = Varaj(node, iu, face);
 
-          /* is there a neighbor? */
-          if(uaj)
-          {
-            F = fnum[l] - fi[l];
-          }
-          else /* do something special on outer boundary */
-          {
-            if(lami[l] < 0.) F = -fi[l];
-            else             F = 0.;
-          }
+          /* do something special on outer boundary */
+          //if(!uaj)
+          //{
+          //  if(lami[l] < 0.) fnum[l] = 0.;
+          //  else             fnum[l] = fi[l];
+          //}
 
+          F = fnum[l] - fi[l];
           r[ijk] -= F * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
         }
       }

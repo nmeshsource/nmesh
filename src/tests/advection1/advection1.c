@@ -198,8 +198,9 @@ void advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
 
   forvl(vlu, l)
   {
-    double *u = Vard_(node, l);
-    double *uaj = Varaj(node, l, face);
+    int vi = Vind(vlu,l);
+    double *u = Vard_(node, vi);
+    double *uaj = Varaj(node, vi, face);
 
     /* cons var inside node, and cons var on adjacent side */
     ui[l] = u[ijk];
@@ -263,7 +264,7 @@ void advection1_F(tMesh *mesh, tVarList *vlu)
         /* flux times normal vector */
         fln = (norm[0]*fl[0][ijk] + norm[1]*fl[1][ijk] + norm[2]*fl[2][ijk]);
 
-if(0)
+if(1)
 {
         /* eigenval in dir norm */
         advection1_eigenval1d(mesh,1, &lamL,norm);
