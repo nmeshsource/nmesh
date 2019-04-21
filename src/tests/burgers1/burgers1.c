@@ -8,7 +8,7 @@
 
 
 /* func pointer for numerical flux */
-void (*burgers1_numflux)(tMesh *mesh, int nf, double *fnum,
+void (*burgers1_numflux)(tNode *node, int face, int nf, double *fnum,
                          double *uL, double *uR, double *fL, double *fR,
                          double *lamL, double *lamR);
 
