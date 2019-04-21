@@ -977,6 +977,89 @@ int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
   return isec;
 }
 
+/* put intersection of 2 bounding boxes into bb, if intersection
+   is empty return 0 */
+int intersection_bb1_bb2(const double bb1[6], const double bb2[6],
+                         double bb[6])
+{
+  int d, isec=1;
+
+  for(d=0; d<3; d++)
+  {
+    if((bb1[2*d] >= bb2[2*d]) && (bb1[2*d] <= bb2[2*d+1]))
+    {
+      bb[2*d] = bb1[2*d];
+      if(bb1[2*d+1] < bb2[2*d+1])
+        bb[2*d+1] = bb1[2*d+1];
+      else
+        bb[2*d+1] = bb2[2*d+1];
+    }
+    else if((bb2[2*d] >= bb1[2*d]) && (bb2[2*d] <= bb1[2*d+1]))
+    {
+      bb[2*d] = bb2[2*d];
+      if(bb2[2*d+1] < bb1[2*d+1])
+        bb[2*d+1] = bb2[2*d+1];
+      else
+        bb[2*d+1] = bb1[2*d+1];
+    }
+    else
+    {
+      isec = 0;
+      break;
+    }
+  }
+
+  /* test if the intersection is empty */
+  if(isec)
+    for(d=0; d<3; d++)
+      if(dequal(bb[2*d], bb[2*d+1]))
+      {
+        isec = 0;
+        break;
+      }
+
+  return isec;
+}
+
+
+/* put intersection of 2 bounding boxes into bb, if intersection
+   is empty return 0. But return 1 if they touch approximately. */
+int touch_or_intersect_bb1_bb2(const double bb1[6], const double bb2[6],
+                               double bb[6])
+{
+  int d, isec=1;
+
+  for(d=0; d<3; d++)
+  {
+    //if((bb1[2*d] >= bb2[2*d]) && (bb1[2*d] <= bb2[2*d+1]))
+    if(dgreatereq(bb1[2*d], bb2[2*d]) && dlesseq(bb1[2*d], bb2[2*d+1]))
+    {
+      bb[2*d] = bb1[2*d];
+      if(bb1[2*d+1] < bb2[2*d+1])
+        bb[2*d+1] = bb1[2*d+1];
+      else
+        bb[2*d+1] = bb2[2*d+1];
+    }
+    //else if((bb2[2*d] >= bb1[2*d]) && (bb2[2*d] <= bb1[2*d+1]))
+    else if(dgreatereq(bb2[2*d], bb1[2*d]) && dlesseq(bb2[2*d], bb1[2*d+1]))
+    {
+      bb[2*d] = bb2[2*d];
+      if(bb2[2*d+1] < bb1[2*d+1])
+        bb[2*d+1] = bb2[2*d+1];
+      else
+        bb[2*d+1] = bb1[2*d+1];
+    }
+    else
+    {
+      isec = 0;
+      break;
+    }
+  }
+
+  return isec;
+}
+
+
 /* transform XYZ from patch1 to XYZ of other patch2 */
 int XYZpat2_of_XYZpat1(tPat *pat1, const double X1[3],
                         tPat *pat2, double X2[3])
