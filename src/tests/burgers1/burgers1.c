@@ -142,98 +142,6 @@ void burgers1_fluxes_pt(tNode *node, int face, int i, int j, int k,
 }
 
 
-/* flux function f in Burgers eqn */
-double burgers1_f(double u)
-{
-  return 0.5*u*u;
-}
-
-/* flux at interface for 1d Godunov method */
-double F_interface(double ul, double ur)
-{
-  if(ul >= 0.0 && ur >= 0.0) return burgers1_f(ul);
-  if(ul <= 0.0 && ur <= 0.0) return burgers1_f(ur);
-  if(ul  < 0.0 && ur >= 0.0) return burgers1_f(0.0);
-  else
-  {
-     double s2 = ul + ur;
-     if(s2 > 0) return burgers1_f(ul);
-     else       return burgers1_f(ur);
-  }
-}
-
-/* use numerical flux FN^i to set F */
-void burgers1_F(tMesh *mesh, tVarList *vlu)
-{
-  int iu = vlu->index[0];
-  int ifx = Ind("burgers1_fx");
-  int iF  = Ind("burgers1_F0");
-  char *advdir = Gets(Par("burgers1_direction"));
-  double nx,ny,nz;
-  int myid;
-
-  /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-
-  /* compute boundary flux terms */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    int *n = node->n;
-    double *u = Vard(node, iu);
-    double *fx = Vard(node, ifx);
-    double *fy = Vard(node, ifx+1);
-    double *fz = Vard(node, ifx+2);
-    double norm[3];
-    double F_int, FNx,FNy,FNz;
-    int face, dir, isP, p, i,j,k, ijk, JK;
-
-    /* set F on each face */
-    for(face=0; face<6; face++)
-    {
-      double *F = Vard(node, iF+face);
-      double *uaj = Varaj(node, iu, face);
-      dir = face/2;
-      isP = face%2;
-      p = isP*(n[dir] - 1);
-      forplaneN(dir, i,j,k, n, p)
-      {
-        double ul, ur; //, F_int;
-        ijk = Ind_n(i,j,k, n);
-        JK = Ind_n_norm(i,j,k, n, dir);
-        node_normal_at_ijk(node, face, ijk, norm);
-
-        /* set ul, ur. Depends on if we are at upper (plus) or lower
-           end of domain */
-        if(isP)
-        {
-          ul = u[ijk];
-          /* if there is an adjacent surface */
-          if(uaj) ur = uaj[JK];
-          else    ur = ul;
-        }
-        else
-        {
-          ur = u[ijk];
-          /* if there is an adjacent surface */
-          if(uaj) ul = uaj[JK];
-          else    ul = ur;
-        }
-        /* set numerical flux */
-        F_int  = F_interface(ul, ur);
-        FNx = F_int * nx;
-        FNy = F_int * ny;
-        FNz = F_int * nz;
-
-        /* project flux onto boundary normal norm[i] */
-        F[JK] = (FNx - fx[ijk])*norm[0] +
-                (FNy - fy[ijk])*norm[1] +
-                (FNz - fz[ijk])*norm[2];
-      }
-    }
-  }
-}
-
 /* set a BC on patch boundary */
 void burgers1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
@@ -288,9 +196,6 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int ifxx = Ind("burgers1_fxx");
-  int iF   = Ind("burgers1_F0");
-  int iooJ = Ind("det_dXbdx");
-  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int myid;
 
   TIMER_START;
@@ -312,48 +217,9 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
   }
 
-if(0)
-{
-  /* get surfaces so that we can compute fluxes */
-  get_all_myln_surfaces(mesh);
-
-  /* get flux terms on boundary */
-  burgers1_F(mesh, vlu);
-
   /* add boundary flux terms */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    int *n = node->n;
-    double *r  = Vard(node, ir);
-    double *ooJ = Vard(node, iooJ);
-    int face;
-
-    for(face=0; face<6; face++)
-    {
-      int dir = face/2;
-      int p = (face%2)*(n[dir] - 1);
-      //double sig = 2*(face%2) - 1;
-      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
-      double *F = Vard(node, iF+face);
-      double *w = Wquad(node, dir);
-      int i,j,k, ijk, JK, i0;
-
-      forplaneN(dir, i,j,k, n, p)
-      {
-        ijk = Ind_n(i,j,k, n);
-        JK = Ind_n_norm(i,j,k, n, dir);
-        i0 = i0_norm(i,j,k, dir);
-
-        r[ijk] -= F[JK] * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
-      }
-    }
-  }
-}
-else
-{
   dg_add_surface_fluxes(mesh, vlr, vlu, burgers1_fluxes_pt, burgers1_numflux);
-}
+
   /* impose outer BC */
   burgers1_u_BC(mesh, vlr, vlu);
 
