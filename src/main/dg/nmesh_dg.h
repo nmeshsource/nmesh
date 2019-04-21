@@ -3,7 +3,16 @@
 
 
 /* numflux1d.c */
+void numflux1d_scalarGodunov(tMesh *mesh, int nf, double *fnum,
+                             double *uL, double *uR, double *fL, double *fR,
+                             double *lamL, double *lamR);
+void numflux1d_upwind(tMesh *mesh, int nf, double *fnum,
+                      double *uL, double *uR, double *fL, double *fR,
+                      double *lamL, double *lamR);
 void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
+                   double *uL, double *uR, double *fL, double *fR,
+                   double *lamL, double *lamR);
+void numflux1d_HLL(tMesh *mesh, int nf, double *fnum,
                    double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR);
 

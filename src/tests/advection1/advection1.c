@@ -468,6 +468,7 @@ int advection1_init(tMesh *mesh)
   int ix =  Ind("x");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
+  int numflux = Par("advection1_numflux");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz;
   int myid;
@@ -504,7 +505,10 @@ int advection1_init(tMesh *mesh)
   evolve_print_evosys(mesh);
 
   /* choose numerical flux */
-  adevection1_numflux = numflux1d_LLF;
+  if(Getv(numflux, "LLF"))
+    adevection1_numflux = numflux1d_LLF;
+  else
+    adevection1_numflux = numflux1d_upwind;
 
   return 0;
 } 

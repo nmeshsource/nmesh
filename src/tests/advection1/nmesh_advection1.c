@@ -25,6 +25,7 @@ int nmesh_advection1(tMesh *mesh)
 
   /* parameters */
   AddPar("advection1_direction", "1 0 0", "propagation direction n^i");
+  AddPar("advection1_numflux", "upwind", "numerical flux [LLF,upwind]");
 
   return 0;
 }

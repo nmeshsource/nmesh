@@ -84,7 +84,7 @@ void numflux1d_LLF(tMesh *mesh, int nf, double *fnum,
 
 /* HLL flux */
 void numflux1d_HLL(tMesh *mesh, int nf, double *fnum,
-                   double *uL, double *uR, double *fL, double *fR, 
+                   double *uL, double *uR, double *fL, double *fR,
                    double *lamL, double *lamR)
 {
   double oda, apm;
