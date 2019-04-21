@@ -49,17 +49,8 @@ void free_DGinfo(tDGinfo *dgi)
 
 /* add surface flux terms */
 int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
-                          void (*u_f_lam)(tNode *node, int face,
-                                          int i, int j, int k,
-                                          tVarList *vlu,
-                                          double *ui, double *ua,
-                                          double *fi,  double *fa,
-                                          double *lami, double *lama),
-                          void (*numflux)(tNode *node, int face,
-                                          int nf, double *fnum,
-                                          double *uL, double *uR,
-                                          double *fL, double *fR,
-                                          double *lamL, double *lamR))
+                          void (*u_f_lam)(tDGinfo *d),
+                          void (*numflux)(tDGinfo *d))
 {
   tDGinfo *dgi = alloc_DGinfo(vlu);
   int nvars = vlu->n;
@@ -113,13 +104,10 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         dgi->k = k;
 
         /* set vars, fluxes and eigenvals on both sides */
-        u_f_lam(dgi->node, dgi->face, dgi->i,dgi->j,dgi->k,
-                dgi->vlu, dgi->ui,dgi->ua, dgi->fi,dgi->fa,
-                dgi->lami,dgi->lama);
+        u_f_lam(dgi);
 
         /* compute numerical flux */
-        numflux(dgi->node,dgi->face, dgi->vlu->n, dgi->fnum,
-                dgi->ui,dgi->ua, dgi->fi,dgi->fa, dgi->lami,dgi->lama);
+        numflux(dgi);
 
 if(0 && myid==4 && face==1)
 {

@@ -8,9 +8,7 @@
 
 
 /* func pointer for numerical flux */
-void (*burgers1_numflux)(tNode *node, int face, int nf, double *fnum,
-                         double *uL, double *uR, double *fL, double *fR,
-                         double *lamL, double *lamR);
+void (*burgers1_numflux)(tDGinfo *d);
 
 
 /* flux in direction norm */
@@ -102,15 +100,16 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
    In: vlu. Out: ui,ua, fi,fa, lami,lama */
-void burgers1_fluxes_pt(tNode *node, int face, int i, int j, int k,
-                        tVarList *vlu, double *ui, double *ua,
-                        double *fi,  double *fa, double *lami, double *lama)
+void burgers1_fluxes_pt(tDGinfo *d)
 {
+  tVarList *vlu = d->vlu;
+  tNode *node = d->node;
   tMesh *mesh = node->pat->mesh;
   int *n = node->n;
-  int dir = face/2;
-  int ijk = Ind_n(i,j,k, n);
-  int JK = Ind_n_norm(i,j,k, n, dir);
+  int f = d->face;
+  int dir = f/2;
+  int ijk = Ind_n(d->i,d->j,d->k, n);
+  int JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
   int nvars = vlu->n;
   double norm[3];
   int l;
@@ -119,26 +118,26 @@ void burgers1_fluxes_pt(tNode *node, int face, int i, int j, int k,
   {
     int vi = Vind(vlu,l);
     double *u = Vard_(node, vi);
-    double *uaj = Varaj(node, vi, face);
+    double *uaj = Varaj(node, vi, f);
 
     /* cons var inside node, and cons var on adjacent side */
-    ui[l] = u[ijk];
+    d->ui[l] = u[ijk];
     if(uaj)
-      ua[l] = uaj[JK];
+      d->ua[l] = uaj[JK];
     else /* do something special on outer boundary */
-      ua[l] = ui[l];
+      d->ua[l] = d->ui[l];
   }
 
   /* get face normal at point ijk */
-  node_normal_at_ijk(node, face, ijk, norm);
+  node_normal_at_ijk(node, f, ijk, norm);
 
   /* eigenval in dir norm */
-  burgers1_eigenval1d(mesh,nvars, lami,norm, ui);
-  burgers1_eigenval1d(mesh,nvars, lama,norm, ua);
+  burgers1_eigenval1d(mesh,nvars, d->lami,norm, d->ui);
+  burgers1_eigenval1d(mesh,nvars, d->lama,norm, d->ua);
 
   /* get inner and adjacent fluxes fi, fa */
-  burgers1_flux1d(mesh,nvars, fi,norm, ui);
-  burgers1_flux1d(mesh,nvars, fa,norm, ua);
+  burgers1_flux1d(mesh,nvars, d->fi,norm, d->ui);
+  burgers1_flux1d(mesh,nvars, d->fa,norm, d->ua);
 }
 
 

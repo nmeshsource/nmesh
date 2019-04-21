@@ -8,9 +8,7 @@
 
 
 /* func pointer for numerical flux */
-void (*advection1_numflux)(tNode *node, int face, int nf, double *fnum,
-                           double *uL, double *uR, double *fL, double *fR,
-                           double *lamL, double *lamR);
+void (*advection1_numflux)(tDGinfo *d);
 
 
 /* flux in direction norm */
@@ -95,17 +93,16 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
    In: vlu. Out: ui,ua, fi,fa, lami,lama */
-void advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
-                          tVarList *vlu,
-                          double *ui, double *ua,
-                          double *fi,  double *fa,
-                          double *lami, double *lama)
+void advection1_fluxes_pt(tDGinfo *d)
 {
+  tVarList *vlu = d->vlu;
+  tNode *node = d->node;
   tMesh *mesh = node->pat->mesh;
   int *n = node->n;
-  int dir = face/2;
-  int ijk = Ind_n(i,j,k, n);
-  int JK = Ind_n_norm(i,j,k, n, dir);
+  int f = d->face;
+  int dir = f/2;
+  int ijk = Ind_n(d->i,d->j,d->k, n);
+  int JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
   int nvars = vlu->n;
   double norm[3];
   int l;
@@ -114,26 +111,26 @@ void advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
   {
     int vi = Vind(vlu,l);
     double *u = Vard_(node, vi);
-    double *uaj = Varaj(node, vi, face);
+    double *uaj = Varaj(node, vi, f);
 
     /* cons var inside node, and cons var on adjacent side */
-    ui[l] = u[ijk];
+    d->ui[l] = u[ijk];
     if(uaj)
-      ua[l] = uaj[JK];
+      d->ua[l] = uaj[JK];
     else /* do something special on outer boundary */
-      ua[l] = 0.;
+      d->ua[l] = 0.;
   }
 
   /* get face normal at point ijk */
-  node_normal_at_ijk(node, face, ijk, norm);
+  node_normal_at_ijk(node, f, ijk, norm);
 
   /* eigenval in dir norm */
-  advection1_eigenval1d(mesh,nvars, lami,norm);
-  lama[0] = lami[0]; // eigenval is same on both sides
+  advection1_eigenval1d(mesh,nvars, d->lami,norm);
+  d->lama[0] = d->lami[0]; // eigenval is same on both sides
 
   /* get inner and adjacent fluxes fi, fa */
-  advection1_flux1d(mesh,nvars, fi,norm, ui);
-  advection1_flux1d(mesh,nvars, fa,norm, ua);
+  advection1_flux1d(mesh,nvars, d->fi,norm, d->ui);
+  advection1_flux1d(mesh,nvars, d->fa,norm, d->ua);
 }
 
 
