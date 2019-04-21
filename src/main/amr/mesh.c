@@ -27,7 +27,7 @@ tMesh *make_empty_mesh(int pr)
   return mesh;
 }
 
-/* add apatch to the mesh */
+/* add a patch to the mesh */
 tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
 {
   tNlist *nlist;
@@ -35,6 +35,11 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
   int p = mesh->npats;
   double dg;
   int i, ni, dir;
+
+  /* check if we have enough space for diff. and other matrices */
+  for(dir=0; dir<3; dir++)
+    if(nroot[dir] > nmax)
+      errorexiti("nmax=%d is too small. Maybe increase par amr_nmax.", nmax);
 
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
