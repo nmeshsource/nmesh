@@ -6,24 +6,49 @@
 
 #define PR 1
 
-/* flux function f in Burgers eqn */
-double burgers1_f(double u)
+
+/* func pointer for numerical flux */
+void (*burgers1_numflux)(tMesh *mesh, int nf, double *fnum,
+                         double *uL, double *uR, double *fL, double *fR,
+                         double *lamL, double *lamR);
+
+
+/* flux in direction norm */
+void burgers1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
+                     double *u)
 {
-  return 0.5*u*u;
+  static int firstcall = 1;
+  static double nd[3];
+
+  if(firstcall)
+  {
+    char *advdir = Gets(Par("burgers1_direction"));
+    /* prop. dir.*/
+    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
+    firstcall = 0;
+  }
+
+  /* flux times norm */
+  f[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * 0.5*u[0]*u[0];
 }
 
-/* flux at interface for 1d Godunov method */
-double F_interface(double ul, double ur)
+/* eigenvalue in direction norm */
+void burgers1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3],
+                         double *u)
 {
-  if(ul >= 0.0 && ur >= 0.0) return burgers1_f(ul);
-  if(ul <= 0.0 && ur <= 0.0) return burgers1_f(ur);
-  if(ul  < 0.0 && ur >= 0.0) return burgers1_f(0.0);
-  else
+  static int firstcall = 1;
+  static double nd[3];
+
+  if(firstcall)
   {
-     double s2 = ul + ur;
-     if(s2 > 0) return burgers1_f(ul);
-     else       return burgers1_f(ur);
+    char *advdir = Gets(Par("burgers1_direction"));
+    /* prop. dir.*/
+    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
+    firstcall = 0;
   }
+
+  /* eigenvalue */
+  lam[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * u[0];
 }
 
 /* flux and its derivs for adv. eqn: f^i = n^i u */
@@ -57,10 +82,14 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
     forpoints(node, i)
     {
       double u_i = u[i];
-      double f = burgers1_f(u_i);
-      fx[i] = nx*f;
-      fy[i] = ny*f;
-      fz[i] = nz*f;
+      double no[3] = { 1., 0., 0. };
+      burgers1_flux1d(mesh,1, &(fx[i]),no, &u_i);
+      no[0] = 0;
+      no[1] = 1.;
+      burgers1_flux1d(mesh,1, &(fy[i]),no, &u_i);
+      no[1] = 0.;
+      no[2] = 1.;
+      burgers1_flux1d(mesh,1, &(fz[i]),no, &u_i);
     }
 
    /* flux derivs */
@@ -70,6 +99,68 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
   }
 }
 
+
+/* function that sets fluxes and eigenvals on both sides of a node surface.
+   In: vlu. Out: ui,ua, fi,fa, lami,lama */
+void burgers1_fluxes_pt(tNode *node, int face, int i, int j, int k,
+                        tVarList *vlu, double *ui, double *ua,
+                        double *fi,  double *fa, double *lami, double *lama)
+{
+  tMesh *mesh = node->pat->mesh;
+  int *n = node->n;
+  int dir = face/2;
+  int ijk = Ind_n(i,j,k, n);
+  int JK = Ind_n_norm(i,j,k, n, dir);
+  int nvars = vlu->n;
+  double norm[3];
+  int l;
+
+  forvl(vlu, l)
+  {
+    int vi = Vind(vlu,l);
+    double *u = Vard_(node, vi);
+    double *uaj = Varaj(node, vi, face);
+
+    /* cons var inside node, and cons var on adjacent side */
+    ui[l] = u[ijk];
+    if(uaj)
+      ua[l] = uaj[JK];
+    else /* do something special on outer boundary */
+      ua[l] = 0.;
+  }
+
+  /* get face normal at point ijk */
+  node_normal_at_ijk(node, face, ijk, norm);
+
+  /* eigenval in dir norm */
+  burgers1_eigenval1d(mesh,nvars, lami,norm, ui);
+  burgers1_eigenval1d(mesh,nvars, lama,norm, ua);
+
+  /* get inner and adjacent fluxes fi, fa */
+  burgers1_flux1d(mesh,nvars, fi,norm, ui);
+  burgers1_flux1d(mesh,nvars, fa,norm, ua);
+}
+
+
+/* flux function f in Burgers eqn */
+double burgers1_f(double u)
+{
+  return 0.5*u*u;
+}
+
+/* flux at interface for 1d Godunov method */
+double F_interface(double ul, double ur)
+{
+  if(ul >= 0.0 && ur >= 0.0) return burgers1_f(ul);
+  if(ul <= 0.0 && ur <= 0.0) return burgers1_f(ur);
+  if(ul  < 0.0 && ur >= 0.0) return burgers1_f(0.0);
+  else
+  {
+     double s2 = ul + ur;
+     if(s2 > 0) return burgers1_f(ul);
+     else       return burgers1_f(ur);
+  }
+}
 
 /* use numerical flux FN^i to set F */
 void burgers1_F(tMesh *mesh, tVarList *vlu)
@@ -221,6 +312,8 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
   }
 
+if(1)
+{
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
 
@@ -256,7 +349,12 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       }
     }
   }
-
+}
+else
+{
+  dg_add_surface_fluxes(mesh, vlr, vlu,
+                        burgers1_fluxes_pt, burgers1_numflux);
+}
   /* impose outer BC */
   burgers1_u_BC(mesh, vlr, vlu);
 
@@ -315,6 +413,10 @@ int burgers1_init(tMesh *mesh)
   evolve_register_subsys_u_rhs_src_lim(mesh, vlu, burgers1_rhs_u, 0,
                                        limdata_MRS, limiter_MRS);
   evolve_print_evosys(mesh);
+
+  /* choose numerical flux */
+  burgers1_numflux = numflux1d_scalarGodunov;
+
   return 0;
 } 
 
