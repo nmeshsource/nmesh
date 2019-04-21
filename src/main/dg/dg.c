@@ -53,14 +53,6 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                           void (*numflux)(tDGinfo *d))
 {
   tDGinfo *dgi = alloc_DGinfo(vlu);
-  int nvars = vlu->n;
-  double *ui   = dmalloc(nvars); /* cons. vars inside this node */
-  double *fi   = dmalloc(nvars);
-  double *lami = dmalloc(nvars);
-  double *ua   = dmalloc(nvars); /* cons. vars on adjacent side */
-  double *fa   = dmalloc(nvars);
-  double *lama = dmalloc(nvars);
-  double *fnum = dmalloc(nvars);
   int iooJ = Ind("det_dXbdx");
   int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int myid;
@@ -109,11 +101,6 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         /* compute numerical flux */
         numflux(dgi);
 
-if(0 && myid==4 && face==1)
-{
-printf("fnum=%g: ui=%g ua=%g fi=%g fa=%g lami=%g lama=%g\n",
-*fnum, *ui,*ua, *fi,*fa, *lami,*lama);
-}
         /* add boundary flux terms to RHS */
         forvl(vlr, l)
         {
@@ -137,13 +124,6 @@ printf("fnum=%g: ui=%g ua=%g fi=%g fa=%g lami=%g lama=%g\n",
     }
   }
 
-  free(fnum);
-  free(lama);
-  free(fa);
-  free(ua);
-  free(lami);
-  free(fi);
-  free(ui);
   free_DGinfo(dgi);
 
   return 0;
