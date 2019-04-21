@@ -8,9 +8,9 @@
 
 
 /* func pointer for numerical flux */
-void (*adevection1_numflux)(tMesh *mesh, int nf, double *fnum,
-                            double *uL, double *uR, double *fL, double *fR,
-                            double *lamL, double *lamR);
+void (*advection1_numflux)(tMesh *mesh, int nf, double *fnum,
+                           double *uL, double *uR, double *fL, double *fR,
+                           double *lamL, double *lamR);
 
 
 /* flux in direction norm */
@@ -356,7 +356,7 @@ if(0)
 else
 {
   dg_add_surface_fluxes(mesh, vlr, vlu,
-                        advection1_fluxes_pt, adevection1_numflux);
+                        advection1_fluxes_pt, advection1_numflux);
 }
 
   /* impose outer BC */
@@ -415,9 +415,9 @@ int advection1_init(tMesh *mesh)
 
   /* choose numerical flux */
   if(Getv(numflux, "LLF"))
-    adevection1_numflux = numflux1d_LLF;
+    advection1_numflux = numflux1d_LLF;
   else
-    adevection1_numflux = numflux1d_upwind;
+    advection1_numflux = numflux1d_upwind;
 
   return 0;
 } 
