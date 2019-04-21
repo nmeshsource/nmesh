@@ -12,25 +12,39 @@
 
 /* flux at interface of 1d scalar Godunov method for Burgers eqn */
 void numflux1d_scalarGodunov(tNode *node, int face, int nf, double *fnum,
-                             double *uL, double *uR, double *fL, double *fR,
-                             double *lamL, double *lamR)
+                             double *ui, double *ua, double *fi, double *fa,
+                             double *lami, double *lama)
 {
+  int isP = face%2;
   int i;
 
   for(i=0; i<nf; i++)
   {
-    double ul = uL[i];
-    double ur = uR[i];
-    double fn;
+    double ul,ur, fl,fr, fn;
 
-    if(ul >= 0. && ur >= 0.)      fn = fL[i];
-    else if(ul <= 0. && ur <= 0.) fn = fR[i];
+    if(isP)
+    {
+      ul = ui[i];
+      ur = ua[i];
+      fl = fi[i];
+      fr = fa[i];
+    }
+    else
+    {
+      ul = ua[i];
+      ur = ui[i];
+      fl = fa[i];
+      fr = fi[i];
+    }
+
+    if(ul >= 0. && ur >= 0.)      fn = fl;
+    else if(ul <= 0. && ur <= 0.) fn = fr;
     else if(ul  < 0. && ur >= 0.) fn = 0.;
     else
     {
       double s2 = ul + ur;
-      if(s2 > 0.) fn = fL[i];
-      else        fn = fR[i];
+      if(s2 > 0.) fn = fl;
+      else        fn = fr;
     }
     fnum[i] = fn;
   }
