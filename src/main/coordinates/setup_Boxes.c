@@ -63,7 +63,8 @@ int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
 int arrange_box_pats_inBox(tMesh *mesh, double xc[3], double dout[3], int N[3])
 {
   double x[] = { xc[0], xc[1], xc[2] };
-  double d[] = { dout[0], dout[1]/N[1], dout[2]/N[2] };
+  double d[] = { dout[0], dout[1], dout[2] };
+  //{ dout[0], dout[1]/N[1], dout[2]/N[2] };
   int j, k, ret=-1;
 
   for(k = 0; k < N[2]; k++)
