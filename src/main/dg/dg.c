@@ -8,6 +8,44 @@
 
 /* some funcions to add boundary fluxes of discontinous Galerkin (dg) */
 
+/* allocate DGinfo structure */
+tDGinfo *alloc_DGinfo(tVarList *vlu)
+{
+  tDGinfo *dgi = calloc(1, sizeof(dgi[0]));
+  int nvars = vlu->n;
+
+  /* set varlist */
+  dgi->vlu  = vlu;
+
+  /* alloc mem for vars at point i,j,k */
+  dgi->ui   = dmalloc(nvars); /* cons. vars inside this node */
+  dgi->fi   = dmalloc(nvars);
+  dgi->lami = dmalloc(nvars);
+  dgi->ua   = dmalloc(nvars); /* cons. vars on adjacent side */
+  dgi->fa   = dmalloc(nvars);
+  dgi->lama = dmalloc(nvars);
+
+  dgi->fnum = dmalloc(nvars);
+
+  return dgi;
+}
+
+/* free DGinfo structure */
+void free_DGinfo(tDGinfo *dgi)
+{
+  /* free contents */
+  free(dgi->ui);
+  free(dgi->fi);
+  free(dgi->lami);
+  free(dgi->ua);
+  free(dgi->fa);
+  free(dgi->lama);
+  free(dgi->fnum);
+
+  /* free dgi */
+  free(dgi);
+}
+
 
 /* add surface flux terms */
 int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
@@ -23,6 +61,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                                           double *fL, double *fR,
                                           double *lamL, double *lamR))
 {
+  tDGinfo *dgi = alloc_DGinfo(vlu);
   int nvars = vlu->n;
   double *ui   = dmalloc(nvars); /* cons. vars inside this node */
   double *fi   = dmalloc(nvars);
@@ -46,6 +85,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
     double *ooJ = Vard(node, iooJ);
     int face;
 
+    /* set DG info */
+    dgi->node = node;
+
     for(face=0; face<6; face++)
     {
       int dir = face/2;
@@ -55,6 +97,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
       double *w = Wquad(node, dir);
       int i,j,k;
 
+      /* set DG info */
+      dgi->face = face;
+
       forplaneN(dir, i,j,k, n, p)
       {
         int ijk = Ind_n(i,j,k, n);
@@ -62,11 +107,19 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         int i0 = i0_norm(i,j,k, dir);
         int l;
 
+        /* set DG info */
+        dgi->i = i;
+        dgi->j = j;
+        dgi->k = k;
+
         /* set vars, fluxes and eigenvals on both sides */
-        u_f_lam(node, face, i,j,k, vlu, ui,ua, fi,fa, lami,lama);
+        u_f_lam(dgi->node, dgi->face, dgi->i,dgi->j,dgi->k,
+                dgi->vlu, dgi->ui,dgi->ua, dgi->fi,dgi->fa,
+                dgi->lami,dgi->lama);
 
         /* compute numerical flux */
-        numflux(node,face, nvars, fnum, ui,ua, fi,fa, lami,lama);
+        numflux(dgi->node,dgi->face, dgi->vlu->n, dgi->fnum,
+                dgi->ui,dgi->ua, dgi->fi,dgi->fa, dgi->lami,dgi->lama);
 
 if(0 && myid==4 && face==1)
 {
@@ -85,11 +138,11 @@ printf("fnum=%g: ui=%g ua=%g fi=%g fa=%g lami=%g lama=%g\n",
           /* do something special on outer boundary */
           //if(!uaj)
           //{
-          //  if(lami[l] < 0.) fnum[l] = 0.;
-          //  else             fnum[l] = fi[l];
+          //  if(dgi->lami[l] < 0.) dgi->fnum[l] = 0.;
+          //  else                  dgi->fnum[l] = dgi->fi[l];
           //}
 
-          F = fnum[l] - fi[l];
+          F = dgi->fnum[l] - dgi->fi[l];
           r[ijk] -= F * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
         }
       }
@@ -103,6 +156,7 @@ printf("fnum=%g: ui=%g ua=%g fi=%g fa=%g lami=%g lama=%g\n",
   free(lami);
   free(fi);
   free(ui);
+  free_DGinfo(dgi);
 
   return 0;
 }
