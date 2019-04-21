@@ -181,11 +181,11 @@ void advection1_fluxarrays(tNode *node, tVarList *vlu,
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
    In: ui, ua, norm. Out: fi,fa, lami,lama */
-int advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
-                         tVarList *vlu,
-                         double *ui, double *ua,
-                         double *fi,  double *fa,
-                         double *lami, double *lama)
+void advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
+                          tVarList *vlu,
+                          double *ui, double *ua,
+                          double *fi,  double *fa,
+                          double *lami, double *lama)
 {
   tMesh *mesh = node->pat->mesh;
   int *n = node->n;
@@ -220,8 +220,6 @@ int advection1_fluxes_pt(tNode *node, int face, int i, int j, int k,
   /* get inner and adjacent fluxes fi, fa */
   advection1_flux1d(mesh,nvars, fi,norm, ui);
   advection1_flux1d(mesh,nvars, fa,norm, ua);
-
-  return 0;
 }
 
 
@@ -443,7 +441,7 @@ if(0)
 }
 else
 {
-  dg_add_surface_fluxes(mesh, vlr, vlu, advection1_fluxes_pt);
+  dg_add_surface_fluxes(mesh, vlr, vlu, advection1_fluxes_pt, numflux1d_LLF);
 }
 
   /* impose outer BC */

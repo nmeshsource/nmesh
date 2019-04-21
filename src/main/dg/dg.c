@@ -11,12 +11,16 @@
 
 /* add surface flux terms */
 int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
-                          int (*u_f_lam)(tNode *node, int face,
-                                         int i, int j, int k,
-                                         tVarList *vlu,
-                                         double *ui, double *ua,
-                                         double *fi,  double *fa,
-                                         double *lami, double *lama))
+                          void (*u_f_lam)(tNode *node, int face,
+                                          int i, int j, int k,
+                                          tVarList *vlu,
+                                          double *ui, double *ua,
+                                          double *fi,  double *fa,
+                                          double *lami, double *lama),
+                          void (*numflux)(tMesh *mesh, int nf, double *fnum,
+                                          double *uL, double *uR,
+                                          double *fL, double *fR,
+                                          double *lamL, double *lamR))
 {
   int nvars = vlu->n;
   double *ui   = dmalloc(nvars); /* cons. vars inside this node */
@@ -61,8 +65,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         u_f_lam(node, face, i,j,k, vlu, ui,ua, fi,fa, lami,lama);
 
         /* compute numerical flux */
-        numflux1d_LLF(mesh, nvars, fnum, ui,ua, fi,fa, lami,lama);
-        //numflux1d_upwind(mesh, nvars, fnum, ui,ua, fi,fa, lami,lama);
+        numflux(mesh, nvars, fnum, ui,ua, fi,fa, lami,lama);
 
 if(0 && myid==4 && face==1)
 {
