@@ -70,12 +70,12 @@ Things that need to be done urgently:
   substep BUT u itself is limited only at the very end!!!
  ==> for now proceed as in bamps as this looks very reasonable.
 
-*make main/DG
+*make main/dg
  -should contain numerical fluxes (e.g. LLF and HLL from 
   projects/matter/hrsc_numflx1d.c)
  -should also contain DG surface flux F = (FN - f) * norm
 
-*use main/DG with new tests/advection2 or update advection1??
+*use main/dg with updated advection1
 
 *extend evolve with limiters that transmit info in indicators
  -check if MRS limiter works:
