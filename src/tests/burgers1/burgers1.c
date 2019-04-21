@@ -312,7 +312,7 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
   }
 
-if(1)
+if(0)
 {
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
@@ -352,8 +352,7 @@ if(1)
 }
 else
 {
-  dg_add_surface_fluxes(mesh, vlr, vlu,
-                        burgers1_fluxes_pt, burgers1_numflux);
+  dg_add_surface_fluxes(mesh, vlr, vlu, burgers1_fluxes_pt, burgers1_numflux);
 }
   /* impose outer BC */
   burgers1_u_BC(mesh, vlr, vlu);
