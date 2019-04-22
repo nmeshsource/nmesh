@@ -62,6 +62,8 @@ void expand_brct_to_include_X(double brct[4], int norm,
                               const double X[3], int expand);
 int intersection_brct1_brct2(const double brct1[4], const double brct2[4],
                              double brct[4]);
+int touch_or_intersect_bb1_bb2(const double bb1[6], const double bb2[6],
+                               double bb[6]);
 void C_from_X_on_face(const double X[3], int face, double C[2]);
 void X_from_C_on_face(tPat *pat, int face, const double C[2], double X[3]);
 int brctpat2_of_brctpat1(tPat *pat1, int f1, const double brct1[4],
