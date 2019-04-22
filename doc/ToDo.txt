@@ -118,7 +118,7 @@ Things that should be done:
 *node->fnb is an array, a nodelist may have been better
  +Then common_facepoints would not have to be called from both node and its
   neighbor. If they have common points both could be added at the same time.
-  This could speed make_outside_neighbor_list by a factor of 2.
+  This could speed up make_outside_neighbor_list by a factor of 2.
 
 *we have timer.c to see what needs to be optimized
  -make timer_get s.t. "name" gets appended by threadID
@@ -126,9 +126,14 @@ Things that should be done:
 
 *investigate: MPI_Test and MPI_Probe as alt. for MPI_Wait
 
+*investigate: Adams-Bashforth methods. Then we need e.g. 3 timelevels.
+              Spectre uses this so local timesteps are easier.
+
 
 Cleanup:
 ========
+-cleanup make_outside_neighbor_list 
+  don't need:  brct_nodeface(node, face/2, brct); and many debug lines
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
 
