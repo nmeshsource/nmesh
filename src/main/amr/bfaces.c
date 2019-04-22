@@ -599,9 +599,6 @@ int set_bfaces_on_patface(tPat *pat, int f)
   {
     opat = mesh->pat[op];
 
-    /* we want one bface for each other pat */
-    bface = first_bface_with_op_f(pat, op, f);
-
     /* if pat and other pat are Cartesian, we can know already if
        if they touch or not */
     if( (pat->dXYZ_dxyz==NULL) && (opat->dXYZ_dxyz==NULL) )
@@ -612,6 +609,8 @@ int set_bfaces_on_patface(tPat *pat, int f)
       if(!touch) continue;
     }
 
+    /* we want one bface for each other pat */
+    bface = first_bface_with_op_f(pat, op, f);
     /* add empty bface for each other pat where we don't have one already */
     if(!bface)
     {
