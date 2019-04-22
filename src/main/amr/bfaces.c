@@ -439,7 +439,7 @@ int amr_set_all_bfaces(tMesh *mesh)
 /* Faces with e.g. periodic coordinates are marked as extface[f]=0. */
 /* If inclOuterBound=1 we mark faces that are not in contact with any other
    pat as external (because they probably need an outer BC) */
-void find_external_faces_of_pat(tPat *pat, double Lmin,
+void find_external_faces_of_pat(tPat *pat, double L,
                                 int *extface, int inclOuterBound)
 {
   tMesh *mesh = pat->mesh;
@@ -450,7 +450,6 @@ void find_external_faces_of_pat(tPat *pat, double Lmin,
   intList *opl; /* list that contains other patches */
   int op;
   double oX[3];
-  double L;
 
   /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
   for(f=0; f<6; f++)
@@ -464,10 +463,8 @@ void find_external_faces_of_pat(tPat *pat, double Lmin,
     if(inclOuterBound) return; /* do nothing else for a Cartesian pat */
   }
 
-  /* find pat size L of smallest pat */
-  L = smallest_pat_size(mesh);
-
-  opl = alloc_intList(); /* list that will contain other patches */
+  /* list that will contain other patches */
+  opl = alloc_intList();
 
   /* make opl that contains all pats except this one */
   forpatches(mesh, i) if(i!=pat->p) unionpush_intList(opl, i);
@@ -578,7 +575,7 @@ void find_external_faces_of_pat(tPat *pat, double Lmin,
    or if we seem to be at an other boundary.
    It returns the number of new bfaces made for face f in this pat. So if it
    returns 0 nothing was done at all. */
-int set_bfaces_on_patface(tPat *pat, double Lmin, int f)
+int set_bfaces_on_patface(tPat *pat, double L, int f)
 {
   tMesh *mesh = pat->mesh;
   int p = pat->p;
@@ -593,10 +590,6 @@ int set_bfaces_on_patface(tPat *pat, double Lmin, int f)
   intList *opl = alloc_intList(); /* list that contains other patches*/
   int op, nbfaces;
   double oX[3];
-  double L;
-
-  /* find pat size L of smallest pat */
-  L = smallest_pat_size(mesh);
 
   /* make opl that contains all patches except p,
      and add one bface for each of the other patches */
