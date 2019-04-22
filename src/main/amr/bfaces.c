@@ -604,7 +604,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
 
     /* if pat and other pat are Cartesian, we can know already if
        if they touch or not */
-    if( 0 && (pat->dXYZ_dxyz==NULL) && (opat->dXYZ_dxyz==NULL) )
+    if( (pat->dXYZ_dxyz==NULL) && (opat->dXYZ_dxyz==NULL) )
     {
       double bb[6];
       int touch = touch_or_intersect_bb1_bb2(pat->bbox, opat->bbox, bb);
