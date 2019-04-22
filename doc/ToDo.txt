@@ -70,12 +70,11 @@ Things that need to be done urgently:
   substep BUT u itself is limited only at the very end!!!
  ==> for now proceed as in bamps as this looks very reasonable.
 
-*make main/dg
- -should contain numerical fluxes (e.g. LLF and HLL from 
-  projects/matter/hrsc_numflx1d.c)
- -should also contain DG surface flux F = (FN - f) * norm
+*make main/dg: DONE!
+ -contains numerical fluxes (e.g. LLF and HLL from hrsc_numflx1d.c)
+ -contains DG surface flux F = (f^* - f) * norm
 
-*use main/dg with updated advection1
+*use main/dg with updated advection1: DONE!
 
 *extend evolve with limiters that transmit info in indicators
  -check if MRS limiter works:
@@ -124,7 +123,12 @@ Things that should be done:
  -make timer_get s.t. "name" gets appended by threadID
   -use gettid? or some openMP call with #ifdef around it???
 
-*investigate: MPI_Test and MPI_Probe as alt. for MPI_Wait
+*compare with: http://www.cfca.nao.ac.jp/files/um2014_tomida.pdf
+
+*investigate: MPI_Test and MPI_Iprobe as alt. for MPI_Wait (as in Athena++)
+
+*investigate: tasks within each node using OpenMP:
+              https://openmp.org/wp-content/uploads/sc13.tasking.ruud.pdf
 
 *investigate: Adams-Bashforth methods. Then we need e.g. 3 timelevels.
               Spectre uses this so local timesteps are easier.
