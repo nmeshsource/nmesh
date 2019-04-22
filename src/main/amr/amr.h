@@ -47,7 +47,9 @@ void move_node_to_rank(tNode *node, int desrank,
 /* bfaces.c */
 void remove_all_bfaces(tPat *pat);
 int amr_set_all_bfaces(tMesh *mesh);
-int set_bfaces_on_patface(tPat *pat, int f);
+void find_external_faces_of_pat(tPat *pat, double Lmin,
+                                int *extface, int inclOuterBound);
+int set_bfaces_on_patface(tPat *pat, double Lmin, int f);
 void expand_bfaces_to_patch_edges(tMesh *mesh);
 tBface *ith_bface_on_f_with_obface(tPat *pat, int f, int i);
 int nbfaces_on_f_with_obface(tPat *pat, int f);

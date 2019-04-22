@@ -361,11 +361,15 @@ tBface *nbbface_of_bface_containing_point(tNode *nb,
    This one is not general and fails in many cases. */
 int amr_set_all_bfaces(tMesh *mesh)
 {
+  double Lmin;
   int inclOuterBound = 1;
   int pr=1, p;
 
   TIMER_START;
   PRFs(":\n");
+
+  /* find pat size L of smallest pat */
+  Lmin = smallest_pat_size(mesh);
 
   forpatches(mesh, p)
   {
@@ -376,7 +380,7 @@ int amr_set_all_bfaces(tMesh *mesh)
     remove_all_bfaces(pat);
 
     /* find all external faces of pat */
-    find_external_faces_of_pat(pat, extface, inclOuterBound);
+    find_external_faces_of_pat(pat, Lmin, extface, inclOuterBound);
     if(pr)
     {
       printf("external faces on pat%d: ", p);
@@ -388,7 +392,7 @@ int amr_set_all_bfaces(tMesh *mesh)
     {
       if(extface[f])
       {
-        set_bfaces_on_patface(pat, f);
+        set_bfaces_on_patface(pat, Lmin, f);
       }
     }
     if(0) printbfaces(pat);
@@ -435,7 +439,8 @@ int amr_set_all_bfaces(tMesh *mesh)
 /* Faces with e.g. periodic coordinates are marked as extface[f]=0. */
 /* If inclOuterBound=1 we mark faces that are not in contact with any other
    pat as external (because they probably need an outer BC) */
-void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
+void find_external_faces_of_pat(tPat *pat, double Lmin,
+                                int *extface, int inclOuterBound)
 {
   tMesh *mesh = pat->mesh;
   int n[] = { NPOINTS,NPOINTS,NPOINTS };     /* we use NPOINTS points */
@@ -537,7 +542,7 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
           goto endplaneloop; /* break; does not work for nested loop */
         }
 
-        /* find point in other pates */
+        /* find point in other patches */
         op = p_XYZ_of_xyz_inpatlist(mesh, opl, oX, x);
 
         /* if we find one point in another pat this face is external */
@@ -573,7 +578,7 @@ void find_external_faces_of_pat(tPat *pat, int *extface, int inclOuterBound)
    or if we seem to be at an other boundary.
    It returns the number of new bfaces made for face f in this pat. So if it
    returns 0 nothing was done at all. */
-int set_bfaces_on_patface(tPat *pat, int f)
+int set_bfaces_on_patface(tPat *pat, double Lmin, int f)
 {
   tMesh *mesh = pat->mesh;
   int p = pat->p;
@@ -585,7 +590,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
   int dd;
   int i,j,k, plane, li, ret0, ret, of;
   int face[6];
-  intList *opl = alloc_intList(); /* list that contains other pates*/
+  intList *opl = alloc_intList(); /* list that contains other patches*/
   int op, nbfaces;
   double oX[3];
   double L;
@@ -594,7 +599,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
   L = smallest_pat_size(mesh);
 
   /* make opl that contains all patches except p,
-     and add one bface for each of the other pates */
+     and add one bface for each of the other patches */
   forpatches(mesh, op) if(op!=p)
   {
     opat = mesh->pat[op];
@@ -633,7 +638,7 @@ int set_bfaces_on_patface(tPat *pat, int f)
     X0[dd] += dX[dd] * 0.5;
   }
 
-  /* look for points in other pates just outside this pat */
+  /* look for points in other patches just outside this pat */
   plane = (n[dir] - 1) * (f%2);
   forplaneN(dir, i,j,k, n, plane)
   {
@@ -978,8 +983,8 @@ int set_consistent_flags_in_all_bfaces(tMesh *mesh)
 
   /* Note: forder4 it supposed to fix more failures in
      templates_GMRES_with_BlockJacobi_precon. It fails for an odd number of
-     points in pates 11,12 and 24,25, i.e. CubSph domains 4,5. Presumably this
-     happens because even with forder3 dom 4 and 5 have Neuman BCs
+     points in patches 11,12 and 24,25, i.e. CubSph domains 4,5. Presumably
+     this happens because even with forder3 dom 4 and 5 have Neuman BCs
      everywhere except for face1. */
   if(forder4) toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(mesh);
 
