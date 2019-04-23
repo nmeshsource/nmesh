@@ -203,6 +203,16 @@ int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
   return status;
 }
 
+/* reduction */
+int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
+                   nMPI_Datatype datatype, nMPI_Op op)
+{
+  int status = 0;
+#ifdef USEMPI
+  status = MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, WORLD);
+#endif
+  return status;
+}
 
 
 /**********************************************************************/
