@@ -36,6 +36,9 @@ int nMPI_barrier(void);
 int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm);
 int nMPI_Comm_free(nMPI_Comm *comm);
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
+int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
+                   nMPI_Datatype datatype, nMPI_Op op);
+
 tCom *alloc_com(int entrysize, int free_buf);
 void free_com(tCom *com);
 void realloc_com_reqs(tCom *com, int n_rq_new);
