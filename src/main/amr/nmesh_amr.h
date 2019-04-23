@@ -344,6 +344,8 @@ void array_diff(tArray *D, tArray *A, tArray *B);
 void array_reldiff(tArray *D, tArray *A, tArray *B);
 double Lp_norm_array_diff(tArray *A, tArray *B, double p);
 double Lp_norm_array_reldiff(tArray *A, tArray *B, double p);
+double max_array(tArray *A, int *ind);
+double min_array(tArray *A, int *ind);
 
 /* print.c */
 void printmesh(tMesh *g);
