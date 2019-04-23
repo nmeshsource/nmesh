@@ -5,17 +5,16 @@
 #include "coordinates.h"
 
 
-
+enum { ASIS=0, ABS=1 };
 
 /* compute volume integral \int dx dy dz v(x,y,z) of var v with
    index vind in a node. Here volume Jacobian is included. */
-double NodeVolumeIntegral(tNode *node, int vind)
+double NodeVolumeIntegral(tNode *node, int vind, double power, int mode)
 {
   tPat *pat = node->pat;
   double *var = Vard(node,vind);
   double VolInt;
 
-  if(pat->dXYZ_dxyz) /* not Cartesian coords */
   {
     tMesh *mesh = pat->mesh;
     int i;
@@ -35,14 +34,21 @@ double NodeVolumeIntegral(tNode *node, int vind)
 
       /* include Jacobian in integrand */
       Integ[i] = var[i] * jac;
+
+      /* transform integrand */
+      switch(mode)
+      {
+      case ABS:
+        Integ[i] = fabs(Integ[i]);
+      }
+      Integ[i] = pow(Integ[i], power);
     }
+
     /* integrate with Jac. */
     VolInt = array_GLquadrature3(node, IntegA);
 
     free_array(IntegA);
   }
-  else /* integrate without jac */
-    VolInt = var_GLquadratureXYZ3(node, vind);
 
   return VolInt;
 }

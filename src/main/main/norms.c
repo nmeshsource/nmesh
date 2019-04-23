@@ -5,9 +5,10 @@
 
 
 
-/* compute volume integral \int dx dy dz v(x,y,z) of var v with
+/* compute volume integral  \int dx dy dz v(x,y,z)^power  of var v with
    index vind over a patch, or the entire mesh if pat=0 */
-double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind)
+double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
+                          double power, int mode)
 {
   double sum, VolInt = 0.;
   int myid;
@@ -19,7 +20,7 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind)
     if(pat && node->pat != pat) continue;
 
     node = MyNode(mesh, myid);
-    VolInt += NodeVolumeIntegral(node, vind);
+    VolInt += NodeVolumeIntegral(node, vind, power, mode);
   }
   sum = VolInt;
   nMPI_Allreduce(&VolInt, &sum, 1, nMPI_DOUBLE, nMPI_SUM);

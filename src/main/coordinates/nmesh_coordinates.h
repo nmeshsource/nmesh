@@ -155,4 +155,4 @@ intList *pointindexList_plane(tNode *node, int normal, int plane[]);
 intList *pointindexList_node(tNode *node);
 
 /* integrals.c */
-double NodeVolumeIntegral(tNode *node, int vind);
+double NodeVolumeIntegral(tNode *node, int vind, double power, int mode);
