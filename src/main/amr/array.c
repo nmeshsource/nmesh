@@ -242,14 +242,33 @@ void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP)
   }
 }
 
-/* norm of array */
-double Lp_norm_array(tArray *A, double p)
+
+/* sum of array */
+double sum_array(tArray *A, double p)
+{
+  int i;
+  double sum = 0.;
+
+  for(i=0; i<A->N; i++) sum += A->d[i];
+
+  return sum;
+}
+
+/* sum of abs(array)^p */
+double abs_p_sum_array(tArray *A, double p)
 {
   int i;
   double sum = 0.;
 
   for(i=0; i<A->N; i++) sum += pow(fabs(A->d[i]), p);
 
+  return sum;
+}
+
+/* norm of array */
+double Lp_norm_array(tArray *A, double p)
+{
+  double sum = abs_p_sum_array(A, p);
   return pow(sum, 1./p);
 }
 

@@ -153,3 +153,6 @@ int arrange_box_pats_inBox(tMesh *mesh, double xc[3], double dout[3], int N[3]);
 intList *pointindexList_line(tNode *node, int dir, int axis[]);
 intList *pointindexList_plane(tNode *node, int normal, int plane[]);
 intList *pointindexList_node(tNode *node);
+
+/* integrals.c */
+double NodeVolumeIntegral(tNode *node, int vind);
