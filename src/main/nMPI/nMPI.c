@@ -152,10 +152,11 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
   {
     PRF;printf(": %d to %d, ns=%d nr=%d s_tag=%d r_tag=%d\n",
                 nMPI_rank(), rank_other, ns, nr, s_tag, r_tag);
+    fflush(stdout);
   }
   //for(int i=0; i<ns; i++) printf(" %g", sbuf[i]);
   //printf("\n");
-  fflush(stdout);
+  //fflush(stdout);
 #ifdef USEMPI
   errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag, s_comm, s_req);
   if(errS != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
@@ -173,10 +174,9 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   if(PR)
   {
     PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
+    fflush(stdout);
   }
 #ifdef USEMPI
-  fflush(stdout);
-
   status = MPI_Waitall(nreq, req, stat);
 
   if(status == MPI_ERR_IN_STATUS)
@@ -192,10 +192,9 @@ int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
   if(PR)
   {
     PRF;printf(": %d waiting for request to finish\n", nMPI_rank());
+    fflush(stdout);
   }
 #ifdef USEMPI
-  fflush(stdout);
-
   status = MPI_Wait(req, stat);
 
   if(status == MPI_ERR_IN_STATUS)
