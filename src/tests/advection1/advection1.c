@@ -138,8 +138,10 @@ void advection1_fluxes_pt(tDGinfo *d)
 void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
-  //int iu = vlu->index[0];
+  int iu = vlu->index[0];
   int ix = Ind("x");
+  int sin_profile    = Getv(Par("advection1_profile"),"sin");
+  int square_profile = Getv(Par("advection1_profile"),"square");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz, nmag2;
   int myid;
@@ -155,6 +157,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     tPat *pat = node->pat;
     int *n = node->n;
     double *r = Vard(node, ir);
+    double *u = Vard(node, iu);
     double *x = Vard(node, ix);
     double *y = Vard(node, ix+1);
     double *z = Vard(node, ix+2);
@@ -178,9 +181,10 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           /* if stuff is coming in */
           if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
           {
-            r[ijk] = -nmag2*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
-//printf("i,j,k: %d %d %d face%d nid%ld  ", i,j,k, face, node->nid);
-//pr3v("norm",norm);printf("\n");
+            if(sin_profile)
+              r[ijk] = -nmag2*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
+            if(square_profile)
+              r[ijk] = -u[ijk];
           }
         }
     }
