@@ -60,9 +60,6 @@ Things that need to be done urgently:
 
 *decent 2d qnd 3d output: Bernd's XDMF: DONE!
 
-*set sqrt(det2gamma) already in coordinates: DONE!
- -BUT there should be a faster way to get det2gam:
-
 *make some pars to decide what mesh we use: DONE!
 
 *decide which pieces of the RK substep need to be limited!!!
@@ -76,27 +73,26 @@ Things that need to be done urgently:
 
 *use main/dg with updated advection1: DONE!
 
+*advection Eqn with DG: DONE!
+ -check error: adv_conv_*/advection1_u_err_rms.t goes down increasing n
+
+*advect square profile and check for flux integral conservation
+
+*flux integral conservation
+ -make integrals: DONE!
+ -make 3d vol int.: DONE!
+
 *extend evolve with limiters that transmit info in indicators
  -check if MRS limiter works:
 
-*flux integral conservation
- -make integrals
- -make 3d vol int.
-
-*update set_all_myln_mysurf and request_all_myln_surfaces_exchange
- so that we also have min/max or averages in extra space of mysurf
- and nbsurf arrays <-- will NOT work!!!
-
 *fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
-
-*advection Eqn with DG: DONE!
- -check error:
- -run with several different n[0],n[1],n[2]:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 *Burgers
 
 *DG with 2nd oder wave eqn
+
+*set sqrt(det2gamma) already in coordinates is done.
+ -BUT there should be a faster way to get det2gam:
 
 *check if set_ajsurf_forall_vars should be called in get_all_surfaces
  or if we should rather call set_all_myln_ajsurf in an OpenMP loop
@@ -132,6 +128,11 @@ Things that should be done:
 
 *investigate: Adams-Bashforth methods. Then we need e.g. 3 timelevels.
               Spectre uses this so local timesteps are easier.
+
+*update set_all_myln_mysurf and request_all_myln_surfaces_exchange
+ so that we also have min/max or averages in extra space of mysurf
+ and nbsurf arrays <-- will NOT work!!! Because in a RK substep we need
+ to limit w = u_p + r dt and not r or u_p.
 
 
 Cleanup:
