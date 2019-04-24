@@ -32,8 +32,8 @@ double NodeVolumeIntegral(tNode *node, int vind, double power, int mode)
          goes to zero quickly enough that jac=0 makes no difference! */
       else jac = 0.0;
 
-      /* include Jacobian in integrand */
-      Integ[i] = var[i] * jac;
+      /* integrand without Jacobian */
+      Integ[i] = var[i];
 
       /* transform integrand */
       switch(mode)
@@ -42,6 +42,9 @@ double NodeVolumeIntegral(tNode *node, int vind, double power, int mode)
         Integ[i] = fabs(Integ[i]);
       }
       Integ[i] = pow(Integ[i], power);
+
+      /* include Jacobian in integrand */
+      Integ[i] = Integ[i] * jac;
     }
 
     /* integrate with Jac. */

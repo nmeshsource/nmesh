@@ -291,3 +291,9 @@ struct tTIMER *timer_stop(const char *name);
 /* nan_checker.c */
 int array_finite(tArray *a, char *name, int ijk[3]);
 int var_finite(tNode *node, int vi);
+
+/* norms.c */
+double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
+                          double power, int mode);
+double MeshMax(tMesh *mesh, tPat *pat, int vind);
+double MeshMin(tMesh *mesh, tPat *pat, int vind);

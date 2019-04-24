@@ -56,3 +56,9 @@ size_t fwrite_buffer_idx(const void *ptr, size_t size,
                          intList *idx, FILE *fp);
 size_t fwrite_3buffers_idx(const void *p1, const void *p2, const void *p3,
                            size_t size, intList *idx, FILE *fp);
+
+/* output0d.c */
+void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T);
+void output0d_filename(char *filename, int len,
+                       char *name, char *type, tPat *pat);
+void output0d_value(char *filename, double time, double val);
