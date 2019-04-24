@@ -115,7 +115,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   } // end: for d loop
 
   /* output the varlists we just created */
-  //TODO: implement 0d output
+  output0d_vl(vl[0], Iter, Time);
   output1d_vl(vl[1], Iter, Time);
   output2d_vl(vl[2], Iter, Time);
   output3d_vl(vl[3], Iter, Time);

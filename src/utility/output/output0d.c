@@ -53,32 +53,31 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     if(Rank0)
     {
       /* output max, min, maxAbs, rms, mean, VolInt */
-      output0d_filename(filename,999, name, "VolInt.t", pat);
+      output0d_filename(mesh, filename,999, name, "VolInt.t", pat);
       output0d_value(filename, T, VolInt);
 
-      output0d_filename(filename,999, name, "mean.t", pat);
+      output0d_filename(mesh, filename,999, name, "mean.t", pat);
       output0d_value(filename, T, mean);
 
-      output0d_filename(filename,999, name, "rms.t", pat);
+      output0d_filename(mesh, filename,999, name, "rms.t", pat);
       output0d_value(filename, T, rms);
 
-      output0d_filename(filename,999, name, "min.t", pat);
+      output0d_filename(mesh, filename,999, name, "min.t", pat);
       output0d_value(filename, T, min);
 
-      output0d_filename(filename,999, name, "max.t", pat);
+      output0d_filename(mesh, filename,999, name, "max.t", pat);
       output0d_value(filename, T, max);
 
-      output0d_filename(filename,999, name, "maxAbs.t", pat);
+      output0d_filename(mesh, filename,999, name, "maxAbs.t", pat);
       output0d_value(filename, T, maxAbs);
     }
   }
 }
 
 /* filename for 0d output */
-void output0d_filename(char *filename, int len,
+void output0d_filename(tMesh *mesh, char *filename, int len,
                        char *name, char *type, tPat *pat)
 {
-  tMesh *mesh = pat->mesh;
   char *outdir = Gets(Par("outdir"));
 
   if(pat)

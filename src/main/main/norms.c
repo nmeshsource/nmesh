@@ -15,12 +15,12 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 
   formylnodes(mesh, myid)
   {
-    tNode *node;
+    tNode *node = MyNode(mesh, myid);
 
     if(pat && node->pat != pat) continue;
 
-    node = MyNode(mesh, myid);
     VolInt += NodeVolumeIntegral(node, vind, power, mode);
+
   }
   sum = VolInt;
   nMPI_Allreduce(&VolInt, &sum, 1, nMPI_DOUBLE, nMPI_SUM);
@@ -37,16 +37,14 @@ double MeshMax(tMesh *mesh, tPat *pat, int vind)
 
   formylnodes(mesh, myid)
   {
-    tNode *node;
+    tNode *node = MyNode(mesh, myid);
     double nmax;
     int ijk;
 
     if(pat && node->pat != pat) continue;
 
-    node = MyNode(mesh, myid);
-
     nmax = max_array(VarA(node,vind), &ijk);
-    if(nmax>max) max = nmax;
+    if(nmax > max) max = nmax;
   }
   Max = max;
   nMPI_Allreduce(&max, &Max, 1, nMPI_DOUBLE, nMPI_MAX);
@@ -63,16 +61,14 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
 
   formylnodes(mesh, myid)
   {
-    tNode *node;
+    tNode *node = MyNode(mesh, myid);
     double nmin;
     int ijk;
 
     if(pat && node->pat != pat) continue;
 
-    node = MyNode(mesh, myid);
-
     nmin = min_array(VarA(node,vind), &ijk);
-    if(nmin>min) min = nmin;
+    if(nmin < min) min = nmin;
   }
   Min = min;
   nMPI_Allreduce(&min, &Min, 1, nMPI_DOUBLE, nMPI_MIN);
