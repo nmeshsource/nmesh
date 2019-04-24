@@ -1,0 +1,30 @@
+physics = TestDerivs
+
+TestDerivs_sigmax = 10
+TestDerivs_sigmay = 13
+TestDerivs_sigmaz = 7
+
+TestDerivs_x0 = 4
+TestDerivs_y0 = 2
+TestDerivs_z0 = 1
+
+errorexit = abort
+logfile_creation = no
+
+amr_mesh_type = 38 CubedSpheres
+
+iterate_parameters = yes
+iterate_parameter1 = amr_n0  3 5 7  9 11
+iterate_parameter2 = amr_n1  4 6 8 10 12
+iterate_parameter3 = amr_n2  5 7 9 11 13
+
+#outputX0Y0Z0coord = Xb
+
+0doutiter = 1
+0doutput = TestDerivs_Err_dux TestDerivs_Err_dduxx
+
+#1doutiter = 1
+#1doutput = X TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+
+#2doutiter = 1
+#2doutput = X TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
