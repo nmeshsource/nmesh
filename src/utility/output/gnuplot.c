@@ -172,6 +172,9 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
   char Xfil[1000];
   char Yfil[1000];
   char Zfil[1000];
+  char fmt[100];
+
+  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s%%s", (int) log10(mesh->npats)+1);
 
   /* loop over all nodes */
   forlnodes(mesh, node)
@@ -202,8 +205,7 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* X-axis:  Y = Y0, Z = Z0 */
       if(ijk[1]>=0 && ijk[2]>=0)
       {
-        snprintf(Xfil, 999, "%s/%s.%02dX%s",
-                 Gets(Par("outdir")),name, p, ns);
+        snprintf(Xfil, 999, fmt, Gets(Par("outdir")),name, p, "X", ns);
         fX = fopen(Xfil, "a");
         if(!fX) errorexits("failed opening %s", Xfil);
         write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T);
@@ -213,8 +215,7 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* Y-axis:  X = X0, Z = Z0 */
       if(ijk[0]>=0 && ijk[2]>=0)
       {
-        snprintf(Yfil, 999, "%s/%s.%02dY%s",
-                 Gets(Par("outdir")),name, p, ns);
+        snprintf(Yfil, 999, fmt, Gets(Par("outdir")),name, p, "Y", ns);
         fY = fopen(Yfil, "a");
         if(!fY) errorexits("failed opening %s", Yfil);
         write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T);
@@ -224,8 +225,7 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* Z-axis:  X = X0, Y = Y0 */
       if(ijk[0]>=0 && ijk[1]>=0)
       {
-        snprintf(Zfil, 999, "%s/%s.%02dZ%s",
-                 Gets(Par("outdir")),name, p, ns);
+        snprintf(Zfil, 999, fmt, Gets(Par("outdir")),name, p, "Z", ns);
         fZ = fopen(Zfil, "a");
         if(!fZ) errorexits("failed opening %s", Zfil);
         write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T);
@@ -249,6 +249,9 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char XYfil[1000];
   char XZfil[1000];
   char YZfil[1000];
+  char fmt[100];
+
+  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s%%s", (int) log10(mesh->npats)+1);
 
   /* loop over all nodes */
   forlnodes(mesh, node)
@@ -279,8 +282,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* XY-plane:  Z = Z0 */
       if(ijk[2]>=0)
       {
-        snprintf(XYfil, 999, "%s/%s.%02dXY%s",
-                 outdir,name, p, ns);
+        snprintf(XYfil, 999, fmt, outdir,name, p, "XY", ns);
         fXY = fopen(XYfil, "a");
         if(!fXY) errorexits("failed opening %s", XYfil);
         write_plane_ascii(node, fXY, 2, ijk, VarA(node, vi), It,T);
@@ -290,8 +292,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* XZ-plane:  Y = Y0 */
       if(ijk[1]>=0)
       {
-        snprintf(XZfil, 999, "%s/%s.%02dXZ%s",
-                 outdir,name, p, ns);
+        snprintf(XZfil, 999, fmt, outdir,name, p, "XZ", ns);
         fXZ = fopen(XZfil, "a");
         if(!fXZ) errorexits("failed opening %s", XZfil);
         write_plane_ascii(node, fXZ, 1, ijk, VarA(node, vi), It,T);
@@ -301,8 +302,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       /* YZ-plane:  X = X0 */
       if(ijk[0]>=0)
       {
-        snprintf(YZfil, 999, "%s/%s.%02dYZ%s",
-                 outdir,name, p, ns);
+        snprintf(YZfil, 999, fmt, outdir,name, p, "YZ", ns);
         fYZ = fopen(YZfil, "a");
         if(!fYZ) errorexits("failed opening %s", YZfil);
         write_plane_ascii(node, fYZ, 0, ijk, VarA(node, vi), It,T);

@@ -56,6 +56,7 @@ int misc_test(tMesh *mesh)
   test_indc(mesh);
   test_node_av(mesh);
   test_ajsurf(mesh);
+  test_0doutput(mesh);
 
   return 0;
 }
@@ -634,6 +635,35 @@ int test_node_av(tMesh *mesh)
     printf("var_GLquadrature3 of vi / 8  = %g\n",
            var_GLquadrature3(node, vi)/8.);
     printf("var_nodeaverage of vi        = %g\n", var_nodeaverage(node, vi));
+  }
+
+  return 0;
+}
+
+/* 0d output */
+int test_0doutput(tMesh *mesh)
+{
+  int ui = Ind("misc_u");
+  int myid;
+
+  prdivider(0);
+  PRF;printf(":\n");
+  enablevar(mesh, ui);
+
+  /* above we messed with all kinds of things,
+     so make sure all coords are set again */
+  coordinates_init(mesh);
+
+  /* print var and its average */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    double *u = Vard(node, ui);
+    int ijk;
+
+    forpoints(node, ijk) u[ijk] = 1.0; //node_location(node);
+
+    printf("var_GLquadrature3 of ui = %g\n", var_GLquadrature3(node, ui));
   }
 
   return 0;

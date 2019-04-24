@@ -53,22 +53,22 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     if(Rank0)
     {
       /* output max, min, maxAbs, rms, mean, VolInt */
-      output0d_filename(mesh, filename,999, name, "VolInt.t", pat);
+      output0d_filename(mesh, filename,999, name, "VolInt", pat);
       output0d_value(filename, T, VolInt);
 
-      output0d_filename(mesh, filename,999, name, "mean.t", pat);
+      output0d_filename(mesh, filename,999, name, "mean", pat);
       output0d_value(filename, T, mean);
 
-      output0d_filename(mesh, filename,999, name, "rms.t", pat);
+      output0d_filename(mesh, filename,999, name, "rms", pat);
       output0d_value(filename, T, rms);
 
-      output0d_filename(mesh, filename,999, name, "min.t", pat);
+      output0d_filename(mesh, filename,999, name, "min", pat);
       output0d_value(filename, T, min);
 
-      output0d_filename(mesh, filename,999, name, "max.t", pat);
+      output0d_filename(mesh, filename,999, name, "max", pat);
       output0d_value(filename, T, max);
 
-      output0d_filename(mesh, filename,999, name, "maxAbs.t", pat);
+      output0d_filename(mesh, filename,999, name, "maxAbs", pat);
       output0d_value(filename, T, maxAbs);
     }
   }
@@ -81,9 +81,15 @@ void output0d_filename(tMesh *mesh, char *filename, int len,
   char *outdir = Gets(Par("outdir"));
 
   if(pat)
-    snprintf(filename,len, "%s/%s_%s%02d", outdir, name, type, pat->p);
+  {
+    char fmt[100];
+    snprintf(fmt,99, "%%s/%%s_%%s.%%0%ddt", (int) log10(mesh->npats)+1);
+    snprintf(filename,len, fmt, outdir, name, type, pat->p);
+  }
   else
-    snprintf(filename,len, "%s/%s_%s", outdir, name, type);
+  {
+    snprintf(filename,len, "%s/%s_%s.t", outdir, name, type);
+  }
 }
 
 /* output one value */
