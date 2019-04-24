@@ -662,8 +662,6 @@ int test_0doutput(tMesh *mesh)
     int ijk;
 
     forpoints(node, ijk) u[ijk] = 1.0; //node_location(node);
-
-    printf("var_GLquadrature3 of ui = %g\n", var_GLquadrature3(node, ui));
   }
 
   return 0;
