@@ -522,10 +522,10 @@ int test_ajsurf(tMesh *mesh)
       sum += pow(norm_n_f, 2);
     }
   }
-  printf("on this proc: total %g\n", sqrt(sum));
+  printf("on this proc: total %.15g\n", sqrt(sum));
   Sum = sum;
   nMPI_Allreduce(&sum, &Sum, 1, nMPI_DOUBLE, nMPI_SUM);
-  printf("on all procs: total %g\n", sqrt(Sum));
+  printf("on all procs: total %.15g\n", sqrt(Sum));
 
   /* after we have printed them, we no longer need the surfaces */
   free_all_myln_surfaces(mesh);
