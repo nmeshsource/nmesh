@@ -22,6 +22,7 @@ int nmesh_advection1(tMesh *mesh)
   AddAuxVar("advection1_u_err", "", "error in u");
 
   /* parameters */
+  AddPar("advection1_profile", "sin", "initial profile [sin,square]");
   AddPar("advection1_direction", "1 0 0", "propagation direction n^i");
   AddPar("advection1_numflux", "upwind", "numerical flux [LLF,upwind]");
 

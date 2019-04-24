@@ -235,6 +235,8 @@ int advection1_init(tMesh *mesh)
   int ix =  Ind("x");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
+  int sin_profile    = Getv(Par("advection1_profile"),"sin");
+  int square_profile = Getv(Par("advection1_profile"),"square");
   int numflux = Par("advection1_numflux");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz;
@@ -263,7 +265,16 @@ int advection1_init(tMesh *mesh)
     double *y = Vard(node, ix+1);
     double *z = Vard(node, ix+2);
     int i;
-    forpoints(node, i) u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i]);
+
+    /* initial profile */
+    if(sin_profile)
+      forpoints(node, i) u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i]);
+    if(square_profile)
+      forpoints(node, i)
+      {
+        if(x[i]>=-0.7 && x[i]<=-0.3) u[i] = 1.;
+        else                         u[i] = 0.;
+      }
   }
 
   /* register u and its RHS with evolve */
@@ -285,6 +296,8 @@ int advection1_analyze(tMesh *mesh)
   int iu  = Ind("advection1_u");
   int iue = Ind("advection1_u_err");
   int ix =  Ind("x");
+  int sin_profile    = Getv(Par("advection1_profile"),"sin");
+  int square_profile = Getv(Par("advection1_profile"),"square");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz, nmag2;
   int myid;
@@ -307,11 +320,21 @@ int advection1_analyze(tMesh *mesh)
     double t = mesh->time;
     int i;
 
-    forpoints(node, i)
-    {
-      double ua = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
-      ue[i] = fabs(u[i]- ua);
-    }
+    /* profile */
+    if(sin_profile)
+      forpoints(node, i)
+      {
+        double ua = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
+        ue[i] = u[i]- ua;
+      }
+    if(square_profile)
+      forpoints(node, i)
+      {
+        double ua;
+        if(x[i]>=(-0.7 + nx*t) && x[i]<=(-0.3 + nx*t)) ua = 1.;
+        else                                           ua = 0.;
+        ue[i] = u[i]- ua;
+      }
   }
   return 0;
 }
