@@ -60,72 +60,73 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   get_all_myln_surfaces(mesh);
 
   /* loop over nodes so we can add boundary flux terms */
-  //FIXME: start parallel region here, e.g.: #pragma omp parallel
+  //FIXME: start parallel region here, e.g.:
+  //#pragma omp parallel
   {
-  tDGinfo *dgi = alloc_DGinfo(vlu); /* each task needs its own dgi */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    int *n = node->n;
-    double *ooJ = Vard(node, iooJ);
-    int face;
-
-    /* set DG info */
-    dgi->node = node;
-
-    for(face=0; face<6; face++)
+    tDGinfo *dgi = alloc_DGinfo(vlu); /* each task needs its own dgi */
+    formylnodes_ompfor(mesh, myid)
     {
-      int dir = face/2;
-      int p = (face%2)*(n[dir] - 1);
-      //double sig = 2*(face%2) - 1;
-      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
-      double *w = Wquad(node, dir);
-      int i,j,k;
+      tNode *node = MyNode(mesh, myid);
+      int *n = node->n;
+      double *ooJ = Vard(node, iooJ);
+      int face;
 
       /* set DG info */
-      dgi->face = face;
+      dgi->node = node;
 
-      forplaneN(dir, i,j,k, n, p)
+      for(face=0; face<6; face++)
       {
-        int ijk = Ind_n(i,j,k, n);
-        int JK = Ind_n_norm(i,j,k, n, dir);
-        int i0 = i0_norm(i,j,k, dir);
-        int l;
+        int dir = face/2;
+        int p = (face%2)*(n[dir] - 1);
+        //double sig = 2*(face%2) - 1;
+        double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
+        double *w = Wquad(node, dir);
+        int i,j,k;
 
         /* set DG info */
-        dgi->i = i;
-        dgi->j = j;
-        dgi->k = k;
+        dgi->face = face;
 
-        /* set vars, fluxes and eigenvals on both sides */
-        u_f_lam(dgi);
-
-        /* compute numerical flux */
-        numflux(dgi);
-
-        /* add boundary flux terms to RHS */
-        forvl(vlr, l)
+        forplaneN(dir, i,j,k, n, p)
         {
-          int ir = Vind(vlr,l);
-          double *r = Vard_(node, ir);
-          double F;
-          //int iu = Vind(vlu,l);
-          //double *uaj = Varaj(node, iu, face);
+          int ijk = Ind_n(i,j,k, n);
+          int JK = Ind_n_norm(i,j,k, n, dir);
+          int i0 = i0_norm(i,j,k, dir);
+          int l;
 
-          /* do something special on outer boundary */
-          //if(!uaj)
-          //{
-          //  if(dgi->lami[l] < 0.) dgi->fnum[l] = 0.;
-          //  else                  dgi->fnum[l] = dgi->fi[l];
-          //}
+          /* set DG info */
+          dgi->i = i;
+          dgi->j = j;
+          dgi->k = k;
 
-          F = dgi->fnum[l] - dgi->fi[l];
-          r[ijk] -= F * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
+          /* set vars, fluxes and eigenvals on both sides */
+          u_f_lam(dgi);
+
+          /* compute numerical flux */
+          numflux(dgi);
+
+          /* add boundary flux terms to RHS */
+          forvl(vlr, l)
+          {
+            int ir = Vind(vlr,l);
+            double *r = Vard_(node, ir);
+            double F;
+            //int iu = Vind(vlu,l);
+            //double *uaj = Varaj(node, iu, face);
+
+            /* do something special on outer boundary */
+            //if(!uaj)
+            //{
+            //  if(dgi->lami[l] < 0.) dgi->fnum[l] = 0.;
+            //  else                  dgi->fnum[l] = dgi->fi[l];
+            //}
+
+            F = dgi->fnum[l] - dgi->fi[l];
+            r[ijk] -= F * sqrtdet2gam[JK] * fabs(ooJ[ijk])/ w[i0];
+          }
         }
-      }
+      } /* end loop over faces */
     }
-  }
-  free_DGinfo(dgi);
+    free_DGinfo(dgi);
   }
 
   return 0;
