@@ -52,7 +52,6 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                           void (*u_f_lam)(tDGinfo *d),
                           void (*numflux)(tDGinfo *d))
 {
-  tDGinfo *dgi = alloc_DGinfo(vlu);
   int iooJ = Ind("det_dXbdx");
   int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int myid;
@@ -61,6 +60,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   get_all_myln_surfaces(mesh);
 
   /* loop over nodes so we can add boundary flux terms */
+  //FIXME: start parallel region here, e.g.: #pragma omp parallel
+  {
+  tDGinfo *dgi = alloc_DGinfo(vlu); /* each task needs its own dgi */
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
@@ -123,8 +125,8 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
       }
     }
   }
-
   free_DGinfo(dgi);
+  }
 
   return 0;
 }

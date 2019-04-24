@@ -19,6 +19,12 @@
 /* we could use OpenMP to parallelize the 2nd loop in formylnodes_noomp,
    but for now formylnodes and formylnodes_noomp do the same: */
 #define formylnodes(mesh, myid) formylnodes_noomp(mesh, myid)
+/* this is what we need in formylnodes:
+  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
+  #pragma omp for
+  for(myid=mesh->myln->nm*cat_, li_=0; \
+      li_ < mesh->myln->ncat[cat_]; myid++, li_++) */
+/* to start tasks formylnodes has to be inside a:  #pragma omp parallel {  } */
 
 /* get node from myid */
 #define MyNode(mesh, myid) \
