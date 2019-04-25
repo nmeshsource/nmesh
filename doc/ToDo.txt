@@ -85,6 +85,10 @@ Things that need to be done urgently:
 *extend evolve with limiters that transmit info in indicators
  -check if MRS limiter works:
 
+*try SSP RK3 from F. Hebert
+
+*try minmod and minmodB from K. Schaal
+
 *fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
 
 *Burgers
