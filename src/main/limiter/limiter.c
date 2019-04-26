@@ -10,6 +10,9 @@
    between neighbors. The exchange is done in evolve, which calls functions
    from main/amr/indicators.c to do the exchange. */
 
+/*********************************************************************/
+/* funcs for MRS limiter arXiv:1507.03024v1 [math.NA] */
+/*********************************************************************/
 
 /* set data for MRS limiter. This one uses the cons vars in vl */
 int limdata_MRS(tNode *node, tVarList *vl)
@@ -59,7 +62,7 @@ double MRS_theta_Mml(double Mi, double wbar, double wMi)
   return MRS_phiy(r);
 }
 
-/* limiter: limit u using data in dat->ic */
+/* MRS limiter: limit u using data in dat->ic */
 int limiter_MRS(tNode *node, tVarList *vl)
 {
   static int firstcall = 1;
@@ -103,8 +106,8 @@ int limiter_MRS(tNode *node, tVarList *vl)
     for(f=0; f<6; f++)
       for(ni=0; ni<node->nfnb[f]; ni++)
       {
-        int ma = dat->ic[iq]->nbindc[f][ni]->d[1];
-        int Ma = dat->ic[iq]->nbindc[f][ni]->d[2];
+        double ma = dat->ic[iq]->nbindc[f][ni]->d[1];
+        double Ma = dat->ic[iq]->nbindc[f][ni]->d[2];
         if(ma < mi) mi = ma;
         if(Ma > Mi) Mi = Ma;
       }
@@ -142,6 +145,157 @@ printf("qbar=%g theta_i=%g\n", qbar, theta_i);
 abort();
 exit(8);
 }
+    /* now limit q */
+    forpoints(node, ijk)
+      q[ijk] = qbar + theta_i*(q[ijk] - qbar);
+  }
+
+  return 0;
+}
+
+
+/*********************************************************************/
+/* funcs for minmodB limiter arXiv:1506.06140v2 [astro-ph.CO] */
+/*********************************************************************/
+
+/* set data for average, and Xb-slopes. We actually save the
+   coeffs c000, c100, c010, c001 in the basis expansion.
+   This one uses the cons vars in vl */
+int limdata_c000_100_010_001(tNode *node, tVarList *vl)
+{
+  tArray *Ac;
+  double *c;
+  int iX, iY, iZ;
+  int *n;
+  int vli;
+  tDat *dat;
+  int nvals = 4; /* we need 4 data values per var: node-av + 3 slopes */
+
+  if(!node || !vl) return nvals;
+
+  dat = node->dat;
+  if(!dat) return nvals;
+
+  /* array for coeffs */
+  n = node->n;
+  Ac = alloc_array(n);
+  c = Arrd(Ac);
+
+  if(n[0]>1) iX = Ind_n(1,0,0,n);
+  else       iX = 0;
+  if(n[1]>1) iY = Ind_n(0,1,0,n);
+  else       iY = 0;
+  if(n[2]>1) iZ = Ind_n(0,0,1,n);
+  else       iZ = 0;
+
+  forvl(vl, vli)
+  {
+    int iq = Vind(vl, vli);
+    tArray *Aq = VarA(node, iq);
+
+    basis_array_analysis3(node, Aq, Ac);
+
+    /* save c000 which has average info */
+    dat->ic[iq]->myindc->d[0] = c[0];
+
+    /* save c100,c010,c001 which have slope info */
+    dat->ic[iq]->myindc->d[1] = c[iX] * (iX>0);
+    dat->ic[iq]->myindc->d[2] = c[iY] * (iY>0);
+    dat->ic[iq]->myindc->d[3] = c[iZ] * (iZ>0);
+  }
+
+  free_array(Ac);
+  return nvals;
+}
+
+
+/* return min. modulus times sign, or 0 if signs differ */
+double minmod3(double a, double b, double c)
+{
+  if(a*b>=0 && b*c>=0)
+    return (a>0. ? 1. : -1.) * min3(fabs(a),fabs(b),fabs(c));
+  else
+    return 0.;
+}
+
+
+/* minmodB slope limiter as in : limit u using data in dat->ic */
+int limiter_minmodB(tNode *node, tVarList *vl)
+{
+  static int firstcall = 1;
+  static int limiter_alpha, limiter_beta;
+  tMesh *mesh = node->pat->mesh;
+  double *bb = node->bbox;
+  tDat *dat;
+  int vli, f, ni, ijk;
+  double alpha, h, alpha_h, theta_i;
+  double theta_Mi, theta_mi;
+
+  dat = node->dat;
+  if(!dat) return 0;
+
+  if(firstcall)
+  {
+    limiter_alpha = Par("limiter_alpha");
+    limiter_beta  = Par("limiter_beta");
+    firstcall = 0;
+  }
+
+  /* set alpha_h from alpha (smaller alpha makes MRS more agressive) */
+  alpha = Getd(limiter_alpha); //0.1; //5.0;
+  h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
+  alpha_h = alpha * pow(h, 1.5);
+
+  /* set thetas */
+  theta_Mi = theta_mi = 1e300;
+  forvl(vl, vli)
+  {
+    int iq = Vind(vl, vli);
+    double wbar, wMi, wmi, Mi, mi, thM, thm;
+
+    /* get min, max and av on node */
+    wmi = dat->ic[iq]->myindc->d[1];
+    wMi = dat->ic[iq]->myindc->d[2];
+    wbar = dat->ic[iq]->myindc->d[0];
+
+    /* find min and max of q in neighbors */
+    Mi = -1e300;
+    mi = 1e300;
+    for(f=0; f<6; f++)
+      for(ni=0; ni<node->nfnb[f]; ni++)
+      {
+        doouble ma = dat->ic[iq]->nbindc[f][ni]->d[1];
+        double Ma = dat->ic[iq]->nbindc[f][ni]->d[2];
+        if(ma < mi) mi = ma;
+        if(Ma > Mi) Mi = Ma;
+      }
+
+    //printf("nid%ld: alpha_h=%g  mi=%g Mi=%g\n", node->nid, alpha_h, mi,Mi);
+    mi = min2(wbar - alpha_h, mi);
+    Mi = max2(wbar + alpha_h, Mi);
+
+    /* find min thetas among all vl */
+    thM = MRS_theta_Mml(Mi, wbar, wMi);
+    thm = MRS_theta_Mml(mi, wbar, wmi);
+     if(thM < theta_Mi) theta_Mi = thM;
+    if(thm < theta_mi) theta_mi = thm;
+    //printf("  wbar=%g  wmi=%g wMi=%g  mi=%g Mi=%g\n", wbar, wmi,wMi, mi,Mi);
+  }
+
+  /* set the theta_i we use for limiting vars in vl */
+  theta_i = min3(1., theta_mi, theta_Mi);
+  //printf("  theta_mi=%g theta_Mi=%g  theta_i=%g\n", theta_mi,theta_Mi, theta_i);
+
+  /* limit all cons vars q in vl */
+  forvl(vl, vli)
+  {
+    int iq = Vind(vl, vli);
+    double *q = Vard(node, iq);
+     double qbar;
+
+    /* find node average qbar */
+    qbar = var_nodeaverage(node, iq);
+
     /* now limit q */
     forpoints(node, ijk)
       q[ijk] = qbar + theta_i*(q[ijk] - qbar);
