@@ -17,7 +17,7 @@ int nmesh_evolve(tMesh *mesh)
   /* variables */
 
   /* parameters */
-  AddPar("evolve_method", "RK", "[Euler,RK]");
+  AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
 
   /* just a test, not needed for anything else */
   if(Getv(Par("physics"), "evolve_test"))

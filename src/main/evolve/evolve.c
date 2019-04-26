@@ -251,7 +251,7 @@ int evolve_myln(tMesh *mesh)
   evolve_init_evosys(mesh);
 
   /* select evo method */
-  if(Getv(evolve_method, "RK"))
+  if(Getv(evolve_method, "RK4"))
   {
     Evolve = evolve_RK4;
     Evolve_mesh = evolve_RK4_mesh;
@@ -261,7 +261,13 @@ int evolve_myln(tMesh *mesh)
     Evolve = evolve_Euler;
     Evolve_mesh = evolve_Euler_mesh;
   }
-
+  else if(Getv(evolve_method, "sspRK3"))
+  {
+    Evolve = evolve_Euler;
+    Evolve_mesh = evolve_sspRK3_mesh;
+  }
+  else
+    errorexits("unknown: evolve_method = ", Gets(evolve_method));
 
   /* make varlist with all in u */
   forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
