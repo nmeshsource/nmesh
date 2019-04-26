@@ -165,7 +165,7 @@ int limdata_c000_100_010_001(tNode *node, tVarList *vl)
 {
   tArray *Ac;
   double *c;
-  int iX, iY, iZ;
+  int i100, i010, i001;
   int *n;
   int vli;
   tDat *dat;
@@ -181,12 +181,12 @@ int limdata_c000_100_010_001(tNode *node, tVarList *vl)
   Ac = alloc_array(n);
   c = Arrd(Ac);
 
-  if(n[0]>1) iX = Ind_n(1,0,0,n);
-  else       iX = 0;
-  if(n[1]>1) iY = Ind_n(0,1,0,n);
-  else       iY = 0;
-  if(n[2]>1) iZ = Ind_n(0,0,1,n);
-  else       iZ = 0;
+  if(n[0]>1) i100 = Ind_n(1,0,0,n);
+  else       i100 = 0;
+  if(n[1]>1) i010 = Ind_n(0,1,0,n);
+  else       i010 = 0;
+  if(n[2]>1) i001 = Ind_n(0,0,1,n);
+  else       i001 = 0;
 
   forvl(vl, vli)
   {
@@ -199,9 +199,9 @@ int limdata_c000_100_010_001(tNode *node, tVarList *vl)
     dat->ic[iq]->myindc->d[0] = c[0];
 
     /* save c100,c010,c001 which have slope info */
-    dat->ic[iq]->myindc->d[1] = c[iX] * (iX>0);
-    dat->ic[iq]->myindc->d[2] = c[iY] * (iY>0);
-    dat->ic[iq]->myindc->d[3] = c[iZ] * (iZ>0);
+    dat->ic[iq]->myindc->d[1] = c[i100] * (i100>0);
+    dat->ic[iq]->myindc->d[2] = c[i010] * (i010>0);
+    dat->ic[iq]->myindc->d[3] = c[i001] * (i001>0);
   }
 
   free_array(Ac);
@@ -237,7 +237,7 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   int vli, f, ni;
   double alpha, beta, bos3, h, Mt_h;
   const double sqrt3 = sqrt(3.);
-  int iX, iY, iZ;
+  int i100, i010, i001;
   tArray *Ac = alloc_array(n);
 
   dat = node->dat;
@@ -258,12 +258,12 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   bos3 = beta/sqrt3;
 
   /* locations of coeffs */
-  if(n[0]>1) iX = Ind_n(1,0,0,n);
-  else       iX = 0;
-  if(n[1]>1) iY = Ind_n(0,1,0,n);
-  else       iY = 0;
-  if(n[2]>1) iZ = Ind_n(0,0,1,n);
-  else       iZ = 0;
+  if(n[0]>1) i100 = Ind_n(1,0,0,n);
+  else       i100 = 0;
+  if(n[1]>1) i010 = Ind_n(0,1,0,n);
+  else       i010 = 0;
+  if(n[2]>1) i001 = Ind_n(0,0,1,n);
+  else       i001 = 0;
 
   /* set weights */
   forvl(vl, vli)
@@ -308,9 +308,9 @@ int limiter_minmodB(tNode *node, tVarList *vl)
 
       /* set non-zero coeffs */
       c[0] = w0c;
-      if(iX>0) c[iX] = wl100;
-      if(iY>0) c[iY] = wl010;
-      if(iZ>0) c[iZ] = wl001;
+      if(i100>0) c[i100] = wl100;
+      if(i010>0) c[i010] = wl010;
+      if(i001>0) c[i001] = wl001;
       basis_array_synthesis3(node, Aq, Ac);
     }
   }
