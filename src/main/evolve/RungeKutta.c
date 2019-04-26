@@ -65,6 +65,39 @@ void evolve_Euler_mesh(tMesh *mesh)
   evolve_limiter_mesh(mesh, u);
 }
 
+/* third order strong stability preserving Runge-Kutta scheme from
+   arXiv:1804.02003v2 */
+void evolve_sspRK3_mesh(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  double  t = mesh->time;
+  double dt = mesh->dt;
+  pVLList *u   = evosys->u;
+  pVLList *u_p = evosys->u_p;
+  pVLList *r   = evosys->rhs;
+  pVLList *w   = evosys->w;
+
+  copy_pVLList(u_p, u, vlcopy,0);              // u_p = u
+  mesh->time = t;
+  evolve_setrhs_mesh(mesh, r, u);              // r  = RHS(u, t)
+  addto_pVLList(u, dt/6., r, vladdto,0);       // u += r dt/6
+
+  add_pVLList(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
+  evolve_limiter_mesh(mesh, w);
+  mesh->time = t+0.5*dt; // <-- correct ???
+  evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
+  addto_pVLList(u, dt/6., r, vladdto,0);       // u += r dt/6
+
+  addto_pVLList(w, dt, r, vladdto,0);          // w += w + r dt
+  add_pVLList(w, 0.75, u_p, 0.25, w, vladd,0); // w = 0.75*u_p + 0.25*w
+  evolve_limiter_mesh(mesh, w);
+  mesh->time = t+0.5*dt; // <-- correct ???
+  evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
+  addto_pVLList(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
+  evolve_limiter_mesh(mesh, u);
+}
+
+
 
 /*************************************************************************/
 /* NOTE: functions below do not work yet !!! */
