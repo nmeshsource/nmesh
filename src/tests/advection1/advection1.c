@@ -286,7 +286,7 @@ int advection1_init(tMesh *mesh)
   if(Getv(limiter, "MRS"))
     evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0,
                                          limdata_MRS, limiter_MRS);
-  if(Getv(limiter, "minmodB"))
+  else if(Getv(limiter, "minmodB"))
     evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0,
                                          limdata_c000_100_010_001,
                                          limiter_minmodB);
