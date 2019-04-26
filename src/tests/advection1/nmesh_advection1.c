@@ -25,7 +25,7 @@ int nmesh_advection1(tMesh *mesh)
   AddPar("advection1_profile", "sin", "initial profile [sin,square]");
   AddPar("advection1_direction", "1 0 0", "propagation direction n^i");
   AddPar("advection1_numflux", "upwind", "numerical flux [LLF,upwind]");
-  AddPar("advection1_limiter", "none", "limiter [none,MRS]");
+  AddPar("advection1_limiter", "none", "limiter [none,MRS,minmodB]");
 
   return 0;
 }

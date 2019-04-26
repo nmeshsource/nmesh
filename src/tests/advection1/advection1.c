@@ -286,6 +286,10 @@ int advection1_init(tMesh *mesh)
   if(Getv(limiter, "MRS"))
     evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0,
                                          limdata_MRS, limiter_MRS);
+  if(Getv(limiter, "minmodB"))
+    evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0,
+                                         limdata_c000_100_010_001,
+                                         limiter_minmodB);
   else
     evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0, 0,0);
 
@@ -296,6 +300,47 @@ int advection1_init(tMesh *mesh)
     advection1_numflux = numflux1d_LLF;
   else
     advection1_numflux = numflux1d_upwind;
+
+  /* test */
+  init_all_myln_myindc_for_vl(mesh, vlu, 3);
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    limdata_MRS(node, vlu);
+  }
+  request_all_myln_indc_exchange_for_vl(mesh, vlu);
+
+  get_all_myln_indc_for_vl(mesh, vlu);
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    //limiter_MRS(node, vlu);
+  }
+
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    printvar_innode(node, iu);
+    printvar_indc(node, iu);
+  }
+
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    limiter_MRS(node, vlu);
+  }
+
+  free_all_myln_indc_for_vl(mesh, vlu);
+
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    printvar_innode(node, iu);
+    printvar_indc(node, iu);
+  }
+
+
+//  exit(9);
 
   return 0;
 } 

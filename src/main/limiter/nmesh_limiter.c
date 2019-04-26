@@ -17,8 +17,10 @@ int nmesh_limiter(tMesh *mesh)
   //AddAuxVar("limiter_u",      "",    "test function");
    
   /* parameters */
-  AddPar("limiter_name", "MRS", "name of limiter");
-  AddPar("limiter_alpha", "5", "for MRS: [0,inf], 0 is most aggressive");
+  AddPar("limiter_name", "MRS", "name of limiter [MRS,minmodB]");
+  AddPar("limiter_alpha", "5", "for MRS and also minmodB: [0,inf], "
+         "0 is most aggressive");
+  AddPar("limiter_beta", "0.5", "for minmod: [0.5,1], 0.5 is TVD");
 	     	   	   	 
   return 0;
 }
