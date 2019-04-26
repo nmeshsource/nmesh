@@ -137,16 +137,22 @@ int evolve_test_analyze(tMesh *mesh)
     double *v = Vard(node, iv);
     double *ue = Vard(node, iue);
     double *ve = Vard(node, ive);
-    double c = pow(node->dt, Getd(Par("evolve_method_order")));
     double t = mesh->time;
     double ua = exp(-t);       /* analytic soln for u */
     double va = 1. - exp(-t);  /* analytic soln for v */
+    double c;
     int i;
+
+    if(node->dt>0.)
+      c = pow(node->dt, Getd(Par("evolve_method_order")));
+     else
+      c = pow(mesh->dt, Getd(Par("evolve_method_order")));
 
     forpoints(node, i)
     {
-      ue[i] = fabs(u[i]/ua - 1.)/c; //fabs(u[i] - ua)/c;
-      ve[i] = fabs(v[i]/va - 1.)/c; //fabs(v[i] - va)/c;
+      ue[i] = fabs(u[i] - ua)/c; //fabs(u[i]/ua - 1.)/c;
+      ve[i] = fabs(v[i] - va)/c; //fabs(v[i]/va - 1.)/c;
+      //printf("c=%g u[i]=%g ua=%g ue[i]=%g\n", c, u[i], ua, ue[i]);
     }
   }
   return 0;
