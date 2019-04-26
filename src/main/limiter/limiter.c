@@ -32,11 +32,12 @@ int limdata_MRS(tNode *node, tVarList *vl)
     double *q = Vard(node, iq);
     int im;
 
-    /* find min and max in q in this node, and write it into indicator */
-    dat->ic[iq]->myindc->d[0] = min_in_1d_array(q, np, &im);
-    dat->ic[iq]->myindc->d[1] = max_in_1d_array(q, np, &im);
     /* also save node average */
-    dat->ic[iq]->myindc->d[2] = var_nodeaverage(node, iq);
+    dat->ic[iq]->myindc->d[0] = var_nodeaverage(node, iq);
+
+    /* find min and max in q in this node, and write it into indicator */
+    dat->ic[iq]->myindc->d[1] = min_in_1d_array(q, np, &im);
+    dat->ic[iq]->myindc->d[2] = max_in_1d_array(q, np, &im);
   }
   return nvals;
 }
@@ -92,9 +93,9 @@ int limiter_MRS(tNode *node, tVarList *vl)
     double wbar, wMi, wmi, Mi, mi, thM, thm;
 
     /* get min, max and av on node */
-    wmi = dat->ic[iq]->myindc->d[0];
-    wMi = dat->ic[iq]->myindc->d[1];
-    wbar = dat->ic[iq]->myindc->d[2];
+    wmi = dat->ic[iq]->myindc->d[1];
+    wMi = dat->ic[iq]->myindc->d[2];
+    wbar = dat->ic[iq]->myindc->d[0];
 
     /* find min and max of q in neighbors */
     Mi = -1e300;

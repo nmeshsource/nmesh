@@ -212,7 +212,8 @@ void printvar_innode(tNode *node, int vi)
   tArray *va = dat ? dat->v[vi] : NULL;
   char s[100];
 
-  printf("%s Ind=%d type=%d zones=%d Array", name, vi, type, zones);
+  printf("%s %s Ind=%d type=%d zones=%d Array",
+         nodename(node,s,99), name, vi, type, zones);
   printarray(va);
 
   if(va)
