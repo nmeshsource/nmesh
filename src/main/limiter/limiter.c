@@ -311,6 +311,8 @@ int limiter_minmodB(tNode *node, tVarList *vl)
       if(i100>0) c[i100] = wl100;
       if(i010>0) c[i010] = wl010;
       if(i001>0) c[i001] = wl001;
+
+      /* set q from coeffs */
       basis_array_synthesis3(node, Aq, Ac);
     }
   }
