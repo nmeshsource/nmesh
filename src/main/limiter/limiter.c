@@ -103,12 +103,13 @@ int limiter_MRS(tNode *node, tVarList *vl)
     for(f=0; f<6; f++)
       for(ni=0; ni<node->nfnb[f]; ni++)
       {
-        int ma = dat->ic[iq]->nbindc[f][ni]->d[0];
-        int Ma = dat->ic[iq]->nbindc[f][ni]->d[1];
+        int ma = dat->ic[iq]->nbindc[f][ni]->d[1];
+        int Ma = dat->ic[iq]->nbindc[f][ni]->d[2];
         if(ma < mi) mi = ma;
         if(Ma > Mi) Mi = Ma;
       }
 
+printf("nid%ld: alpha_h=%g  mi=%g Mi=%g\n", node->nid, alpha_h, mi,Mi);
     mi = min2(wbar - alpha_h, mi);
     Mi = max2(wbar + alpha_h, Mi);
 
@@ -117,10 +118,14 @@ int limiter_MRS(tNode *node, tVarList *vl)
     thm = MRS_theta_Mml(mi, wbar, wmi);
     if(thM < theta_Mi) theta_Mi = thM;
     if(thm < theta_mi) theta_mi = thm;
+printf("  wbar=%g  wmi=%g wMi=%g  mi=%g Mi=%g\n", wbar, wmi,wMi, mi,Mi);
   }
 
   /* set the theta_i we use for limiting vars in vl */
   theta_i = min3(1., theta_mi, theta_Mi);
+
+printf("  theta_mi=%g theta_Mi=%g  theta_i=%g\n",
+       theta_mi,theta_Mi, theta_i);
 
   /* limit all cons vars q in vl */
   forvl(vl, vli)
