@@ -81,9 +81,10 @@ Things that need to be done urgently:
 *flux integral conservation
  -make integrals: DONE!
  -make 3d vol int.: DONE!
+ -check flux cons in advection:
 
 *extend evolve with limiters that transmit info in indicators
- -check if MRS limiter works:
+ -check if MRS limiter works: seems ok.
 
 *try SSP RK3 from F. Hebert
 
