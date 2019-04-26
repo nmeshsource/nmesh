@@ -32,7 +32,7 @@ int limdata_MRS(tNode *node, tVarList *vl)
     double *q = Vard(node, iq);
     int im;
 
-    /* also save node average */
+    /* save node average in 1st indicator */
     dat->ic[iq]->myindc->d[0] = var_nodeaverage(node, iq);
 
     /* find min and max in q in this node, and write it into indicator */
