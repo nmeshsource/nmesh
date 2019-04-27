@@ -16,8 +16,8 @@ int coordinates_coordvars_enabled(tNode *node)
   tDat *dat = node->dat;
   tCoordInfo *CI = pat->CI;
   int iX, ix, idXdx, idet_dXbdx;
-  int isqrtdet2gamma0, igammadiagx;
-  int surface_metric, sqrtdet2gamma, gammadiag;
+  int isqrtdet2gamma0, isqrtgdiagx;
+  int surface_metric, sqrtdet2gamma, sqrtgdiag;
   int f, d;
 
   /* do nothing if this is not my node */
@@ -32,12 +32,12 @@ int coordinates_coordvars_enabled(tNode *node)
   idXdx = Ind("dXdx");
   idet_dXbdx = Ind("det_dXbdx");
   isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
-  igammadiagx = Ind("gammadiagx");
+  isqrtgdiagx = Ind("sqrtgdiagx");
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
   sqrtdet2gamma  = Getv(surface_metric, "sqrtdet2gamma");
-  gammadiag      = Getv(surface_metric, "gammadiag");
+  sqrtgdiag      = Getv(surface_metric, "sqrtgdiag");
 
   /* give all these memory: */
   enablevar_innode(node, iX);
@@ -50,8 +50,8 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, idXdx+3);
   enablevar_innode(node, idXdx+6);
   enablevar_innode(node, idet_dXbdx);
-  if(sqrtdet2gamma) enablevar_innode(node, isqrtdet2gamma0);
-  if(gammadiag)     enablevar_innode(node, igammadiagx);
+  if(1 || sqrtdet2gamma) enablevar_innode(node, isqrtdet2gamma0);
+  if(1 || sqrtgdiag)     enablevar_innode(node, isqrtgdiagx);
 
   /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
@@ -96,7 +96,7 @@ int coordinates_init_node(tNode *node)
   int iX = Ind("X");
   int ix = Ind("x");
   int idXdx = Ind("dXdx");
-  int surface_metric, sqrtdet2gamma, gammadiag;
+  int surface_metric, sqrtdet2gamma, sqrtgdiag;
   int i3metric = MeshVarIndLax(mesh, Gets(Par("coordinates_3metric")));
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -132,7 +132,7 @@ int coordinates_init_node(tNode *node)
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
   sqrtdet2gamma  = Getv(surface_metric, "sqrtdet2gamma");
-  gammadiag      = Getv(surface_metric, "gammadiag");
+  sqrtgdiag      = Getv(surface_metric, "sqrtgdiag");
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
@@ -238,10 +238,10 @@ int coordinates_init_node(tNode *node)
     free_array(a3gamT);
   }
 
-  /* set gammadiag */
-  if(gammadiag)
+  /* set sqrtgdiag */
+  if(sqrtgdiag)
   {
-    /* arrays to compute gammadiag */
+    /* arrays to compute sqrtgdiag */
     tArray *adXdxT = alloc_empty_array2d(3,3); /* 3x3 for coord. transf. */
     tArray *ainvM  = alloc_empty_array2d(3,3); /* 3x3 for inv. metric */
     tArray *agam = alloc_array2d(3,3); /* 3x3 for transf. inv. metric */
@@ -249,10 +249,10 @@ int coordinates_init_node(tNode *node)
     double dXdx[3][3]; /* coord. transf. */
     double invM[3][3]; /* inverse metric in x-coords  */
     double *gam = Arrd(agam);
-    int igammadiagx = Ind("gammadiagx");
-    double *gammadiagx = Vard(node, igammadiagx);
-    double *gammadiagy = Vard(node, igammadiagx+1);
-    double *gammadiagz = Vard(node, igammadiagx+2);
+    int isqrtgdiagx = Ind("sqrtgdiagx");
+    double *sqrtgdiagx = Vard(node, isqrtgdiagx);
+    double *sqrtgdiagy = Vard(node, isqrtgdiagx+1);
+    double *sqrtgdiagz = Vard(node, isqrtgdiagx+2);
     int ijk;
 
     /* Put coord. transf. into adXdx.
@@ -290,9 +290,9 @@ int coordinates_init_node(tNode *node)
       }
 
       /* go from X to Xb coords */
-      gammadiagx[ijk] = dXbdX[0] * dXbdX[0] * gam[0];
-      gammadiagy[ijk] = dXbdX[1] * dXbdX[1] * gam[4];
-      gammadiagz[ijk] = dXbdX[2] * dXbdX[2] * gam[8];
+      sqrtgdiagx[ijk] = dXbdX[0] * sqrt(gam[0]);
+      sqrtgdiagy[ijk] = dXbdX[1] * sqrt(gam[4]);
+      sqrtgdiagz[ijk] = dXbdX[2] * sqrt(gam[8]);
     }
     free_array(tmp);
     free_array(agam);
