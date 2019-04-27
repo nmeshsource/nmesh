@@ -1,0 +1,19 @@
+physics = evolve_test
+
+evolve_method       = sspRK3
+evolve_method_order = 3
+
+finaltime = 5
+
+iterate_parameters = yes
+iterate_parameter1 = dt 0.2 0.1 0.05 0.025 0.0125
+
+amr_mesh_type = 1 BoxMesh Line 
+amr_luni = 0
+
+0doutiter = 1
+0doutput = evolve_test_u_err evolve_test_v_err
+
+1doutiter = 1
+1doutput = evolve_test_u evolve_test_u_err
+           evolve_test_v evolve_test_v_err
