@@ -18,6 +18,7 @@ int nmesh_dg(tMesh *mesh)
    
   /* parameters */
   AddPar("dg_numerical_flux", "LLF", "numerical flux [LLF]");
-	     	   	   	 
+  AddPar("dg_surface_flux_form", "from2gamma", " [from2gamma,from3guu]");
+
   return 0;
 }

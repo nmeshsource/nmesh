@@ -15,11 +15,9 @@ int coordinates_coordvars_enabled(tNode *node)
   tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
   tCoordInfo *CI = pat->CI;
-  int iX = Ind("X");
-  int ix = Ind("x");
-  int idXdx = Ind("dXdx");
-  int idet_dXbdx = Ind("det_dXbdx");
-  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
+  int iX, ix, idXdx, idet_dXbdx;
+  int isqrtdet2gamma0, igammadiagx;
+  int surface_metric, sqrtdet2gamma, gammadiag;
   int f, d;
 
   /* do nothing if this is not my node */
@@ -27,6 +25,19 @@ int coordinates_coordvars_enabled(tNode *node)
 
   /* if coords are set already do nothing */
   if(dat->coords_set) return 1;
+
+  /* set some indices */
+  iX = Ind("X");
+  ix = Ind("x");
+  idXdx = Ind("dXdx");
+  idet_dXbdx = Ind("det_dXbdx");
+  isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
+  igammadiagx = Ind("gammadiagx");
+
+  /* which surface info do we set */
+  surface_metric = Par("coordinates_surface_metric");
+  sqrtdet2gamma  = Getv(surface_metric, "sqrtdet2gamma");
+  gammadiag      = Getv(surface_metric, "gammadiag");
 
   /* give all these memory: */
   enablevar_innode(node, iX);
@@ -39,7 +50,8 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, idXdx+3);
   enablevar_innode(node, idXdx+6);
   enablevar_innode(node, idet_dXbdx);
-  enablevar_innode(node, isqrtdet2gamma0);
+  if(sqrtdet2gamma) enablevar_innode(node, isqrtdet2gamma0);
+  if(gammadiag) enablevar_innode(node, igammadiagx);
 
   /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
@@ -84,7 +96,9 @@ int coordinates_init_node(tNode *node)
   int iX = Ind("X");
   int ix = Ind("x");
   int idXdx = Ind("dXdx");
+  int surface_metric, sqrtdet2gamma, gammadiag;
   int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
+  int igammadiagx = Ind("gammadiagx");
   int i3metric = MeshVarIndLax(mesh, Gets(Par("coordinates_3metric")));
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -96,7 +110,6 @@ int coordinates_init_node(tNode *node)
   double dXbdX[3];
   double det_dXbYbZb_dXYZ;
   double *gxx, *gxy, *gxz, *gyy, *gyz, *gzz;
-  tArray *a3gamT, *a2J, *a2gam, *tmp;
 
   /* do nothing if coords are set already or if vars are off */
   if(!dat) return 0;
@@ -118,11 +131,10 @@ int coordinates_init_node(tNode *node)
   else
   { gxx = gxy = gxz = gyy = gyz = gzz = NULL; }
 
-  /* arrays to compute 2 metric on faces */
-  a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
-  a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
-  a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
-  tmp = alloc_array2d(3,2);
+  /* which surface info do we set */
+  surface_metric = Par("coordinates_surface_metric");
+  sqrtdet2gamma  = Getv(surface_metric, "sqrtdet2gamma");
+  gammadiag      = Getv(surface_metric, "gammadiag");
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
@@ -172,45 +184,120 @@ int coordinates_init_node(tNode *node)
   }
 
   /* set sqrtdet2gamma on node faces */
-  for(f=0; f<6; f++)
+  if(sqrtdet2gamma)
   {
-    int dir = f/2;
-    int p = (f%2)*(n[dir] - 1);
-    double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
+    /* arrays to compute 2 metric sqrtdet2gamma on faces */
+    tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
+    tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
+    tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+    tArray *tmp = alloc_array2d(3,2);
 
-    forplaneN(dir, i,j,k, n, p)
+    for(f=0; f<6; f++)
     {
-      double det2gam;
-      int ijk = Ind_n(i,j,k, n);
-      int JK = Ind_n_norm(i,j,k, n, dir);
+      int dir = f/2;
+      int p = (f%2)*(n[dir] - 1);
+      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
 
-      /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
-      array_2dxdXb(node, ijk, dir, a2J);
+      forplaneN(dir, i,j,k, n, p)
+      {
+        double det2gam;
+        int ijk = Ind_n(i,j,k, n);
+        int JK = Ind_n_norm(i,j,k, n, dir);
+
+        /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
+        array_2dxdXb(node, ijk, dir, a2J);
+
+        /* if no 3-metric is specified, we assume it is flat */
+        if(i3metric<0)
+        {
+          /* compute 2-metric from a2J^T a2J */
+          mm_array0_norestrict(a2J,a2J, a2gam);
+        }
+        else
+        {
+          /* compute 2-metric from a2J^T a3gam a2J, where a3gam is 3x3 */
+          double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
+                             { gxy[ijk], gyy[ijk], gyz[ijk] },
+                             { gxz[ijk], gyz[ijk], gzz[ijk] } };
+          /* Put transpose of 3-metric into a3gamT.
+             Trick here is that C-arrays are row major. So when we put this
+             into the col. major a3gamT, we get the transpose automatically! */
+          point_array_a_to_data(a3gamT, M, 1);
+          mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
+          mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
+        }
+        det2gam = det_2_2_array(a2gam);
+        //NOTE: there should be a faster way to get det2gam. There should
+        //      be an analogue to \det(g)=\alpha^2\det(\gamma)
+        sqrtdet2gam[JK] = sqrt(det2gam);
+      }
+    }
+    /* free arrays */
+    free_array(tmp);
+    free_array(a2gam);
+    free_array(a2J);
+    free_array(a3gamT);
+  }
+
+  /* set gammadiag */
+  if(gammadiag)
+  {
+    /* arrays to compute gammadiag */
+    tArray *adXdxT = alloc_empty_array2d(3,3); /* 3x3 for coord. transf. */
+    tArray *ainvM  = alloc_empty_array2d(3,3); /* 3x3 for inv. metric */
+    tArray *agam = alloc_array2d(3,3); /* 3x3 for transf. inv. metric */
+    tArray *tmp  = alloc_array2d(3,3);
+    double dXdx[3][3]; /* coord. transf. */
+    double invM[3][3]; /* inverse metric in x-coords  */
+    double *gam = Arrd(agam);
+    double *gammadiagx = Vard(node, igammadiagx);
+    double *gammadiagy = Vard(node, igammadiagx+1);
+    double *gammadiagz = Vard(node, igammadiagx+2);
+    int ijk;
+
+    /* Put coord. transf. into adXdx.
+       Trick here is that C-arrays are row major. So when we put dXdx
+       into the col. major adXdxT, we automatically take the transpose! */
+    point_array_a_to_data(adXdxT, dXdx, 1);
+
+    /* Put inv. of 3-metric into ainvM. */
+    point_array_a_to_data(ainvM, invM, 1);
+
+    forpoints(node, ijk)
+    {
+      /* set transpose of coord. transf. */
+      for(d=0; d<3; d++)
+        for(e=0; e<3; e++)
+          dXdx[d][e] = pdXdx[d][e][ijk];
 
       /* if no 3-metric is specified, we assume it is flat */
       if(i3metric<0)
       {
-        /* compute 2-metric from a2J^T a2J */
-        mm_array0_norestrict(a2J,a2J, a2gam);
+        /* transform flat metric to X coords */
+        mm_array0_norestrict(adXdxT,adXdxT, agam);
       }
       else
       {
-        /* compute 2-metric from a2J^T a3gam a2J, where a3gam is 3x3 */
         double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
                            { gxy[ijk], gyy[ijk], gyz[ijk] },
                            { gxz[ijk], gyz[ijk], gzz[ijk] } };
-        /* Put transpose of 3-metric into a3gamT.
-           Trick here is that C-arrays are row major. So when we put this
-           into the col. major a3gamT, we get the transpose automatically! */
-        point_array_a_to_data(a3gamT, M, 1);
-        mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
-        mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
+
+        /* get inverse metric and multiply with dX/dx */
+        inv3Dmat_from_3Dmat(M, invM); /* ainvM points to invM */
+        /* gam = dX/dx invM (dX/dx)^T */
+        mm_array0(ainvM,adXdxT, tmp); /* ainvM adXdxT -> tmp */
+        mm_array0(adXdxT,tmp, agam);  /* adXdx tmp    -> agam */
       }
-      det2gam = det_2_2_array(a2gam);
-      //NOTE: there should be a faster way to get det2gam. There should
-      //      be an analogue to \det(g)=\alpha^2\det(\gamma)
-      sqrtdet2gam[JK] = sqrt(det2gam);
+
+      /* go from X to Xb coords */
+      gammadiagx[ijk] = dXbdX[0] * dXbdX[0] * gam[0];
+      gammadiagy[ijk] = dXbdX[1] * dXbdX[1] * gam[4];
+      gammadiagz[ijk] = dXbdX[2] * dXbdX[2] * gam[8];
     }
+    free_array(tmp);
+    free_array(agam);
+    free_array(ainvM);
+    free_array(adXdxT);
   }
 
   /* set oC surface coords, for now this is off */
@@ -304,12 +391,6 @@ int coordinates_init_node(tNode *node)
         }
       }
     }
-
-  /* free arrays */
-  free_array(tmp);
-  free_array(a2gam);
-  free_array(a2J);
-  free_array(a3gamT);
 
   /* mark coords as set */
   dat->coords_set = 1;
