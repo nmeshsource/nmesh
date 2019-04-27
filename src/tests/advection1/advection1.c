@@ -230,17 +230,62 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 }
 
 
+/* set profile in var with index iu */
+int advection1_set_profile(tMesh *mesh, int iu)
+{
+  int ix =  Ind("x");
+  int sin_profile    = Getv(Par("advection1_profile"),"sin");
+  int square_profile = Getv(Par("advection1_profile"),"square");
+  char *advdir = Gets(Par("advection1_direction"));
+  double nx,ny,nz, nmag2;
+  int myid;
+
+  /* prop. dir.*/
+  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
+  nmag2 = (nx*nx + ny*ny + nz*nz);
+
+  //if(PR) PRFs("\n");
+
+  /* profile */
+  formylnodes(mesh, myid)
+  {
+    tNode *node = MyNode(mesh, myid);
+    double *u = Vard(node, iu);
+    double *x = Vard(node, ix);
+    double *y = Vard(node, ix+1);
+    double *z = Vard(node, ix+2);
+    double t = mesh->time;
+    int i;
+
+    /* profile */
+    if(sin_profile)
+      forpoints(node, i)
+      {
+        u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
+      }
+    if(square_profile)
+      forpoints(node, i)
+      {
+        double inx, iny;
+        if(x[i]>=(-0.7 + nx*t) && x[i]<=(-0.3 + nx*t)) inx = 1.;
+        else                                           inx = 0.;
+        if(y[i]>=(-0.2 + ny*t) && y[i]<=(-0.2 + ny*t)) iny = 1.;
+        else                                           iny = 0.;
+        u[i] = inx*iny;
+      }
+  }
+  return 0;
+}
+
+
 /* initialize test */
 int advection1_init(tMesh *mesh)
 {
   int iu  = Ind("advection1_u");
   int ifx = Ind("advection1_fx");
   int ifxx = Ind("advection1_fxx");
-  int ix =  Ind("x");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
-  int sin_profile    = Getv(Par("advection1_profile"),"sin");
-  int square_profile = Getv(Par("advection1_profile"),"square");
   int numflux = Par("advection1_numflux");
   int limiter = Par("advection1_limiter");
   char *advdir = Gets(Par("advection1_direction"));
@@ -261,26 +306,8 @@ int advection1_init(tMesh *mesh)
   enablevar(mesh, ifxx);
   enablevar(mesh, iue);
 
-  /* at t=0: set u=sin(x) */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    double *u = Vard(node, iu);
-    double *x = Vard(node, ix);
-    double *y = Vard(node, ix+1);
-    double *z = Vard(node, ix+2);
-    int i;
-
-    /* initial profile */
-    if(sin_profile)
-      forpoints(node, i) u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i]);
-    if(square_profile)
-      forpoints(node, i)
-      {
-        if(x[i]>=-0.7 && x[i]<=-0.3) u[i] = 1.;
-        else                         u[i] = 0.;
-      }
-  }
+  /* set initial profile, e.g. at t=0: set u=sin(x) */
+  advection1_set_profile(mesh, iu);
 
   /* register u and its RHS with evolve */
   if(Getv(limiter, "MRS"))
@@ -350,46 +377,23 @@ int advection1_analyze(tMesh *mesh)
 {
   int iu  = Ind("advection1_u");
   int iue = Ind("advection1_u_err");
-  int ix =  Ind("x");
-  int sin_profile    = Getv(Par("advection1_profile"),"sin");
-  int square_profile = Getv(Par("advection1_profile"),"square");
-  char *advdir = Gets(Par("advection1_direction"));
-  double nx,ny,nz, nmag2;
   int myid;
-
-  /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-  nmag2 = (nx*nx + ny*ny + nz*nz);
 
   if(PR) PRFs("\n");
 
-  /*  compute errors */
+  /* set correct profile in advection1_u_err */
+  advection1_set_profile(mesh, iue);
+
+  /*  compute errors: u_err = u - u_correct */
   formylnodes(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
-    double *u = Vard(node, iu);
+    double *u  = Vard(node, iu);
     double *ue = Vard(node, iue);
-    double *x = Vard(node, ix);
-    double *y = Vard(node, ix+1);
-    double *z = Vard(node, ix+2);
-    double t = mesh->time;
     int i;
 
-    /* profile */
-    if(sin_profile)
-      forpoints(node, i)
-      {
-        double ua = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
-        ue[i] = u[i]- ua;
-      }
-    if(square_profile)
-      forpoints(node, i)
-      {
-        double ua;
-        if(x[i]>=(-0.7 + nx*t) && x[i]<=(-0.3 + nx*t)) ua = 1.;
-        else                                           ua = 0.;
-        ue[i] = u[i]- ua;
-      }
+    forpoints(node, i)
+      ue[i] = u[i]- ue[i];
   }
   return 0;
 }
