@@ -74,7 +74,7 @@ Things that need to be done urgently:
 *use main/dg with updated advection1: DONE!
 
 *advection Eqn with DG: DONE!
- -check error: adv_conv_*/advection1_u_err_rms.t goes down increasing n
+ -check error: adv_conv_*/advection1_u_err_rms.t goes down with increasing n
 
 *advect square profile and check for flux integral conservation
 
