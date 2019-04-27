@@ -51,7 +51,7 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, idXdx+6);
   enablevar_innode(node, idet_dXbdx);
   if(sqrtdet2gamma) enablevar_innode(node, isqrtdet2gamma0);
-  if(gammadiag) enablevar_innode(node, igammadiagx);
+  if(gammadiag)     enablevar_innode(node, igammadiagx);
 
   /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
@@ -97,8 +97,6 @@ int coordinates_init_node(tNode *node)
   int ix = Ind("x");
   int idXdx = Ind("dXdx");
   int surface_metric, sqrtdet2gamma, gammadiag;
-  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
-  int igammadiagx = Ind("gammadiagx");
   int i3metric = MeshVarIndLax(mesh, Gets(Par("coordinates_3metric")));
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -186,6 +184,7 @@ int coordinates_init_node(tNode *node)
   /* set sqrtdet2gamma on node faces */
   if(sqrtdet2gamma)
   {
+    int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
     /* arrays to compute 2 metric sqrtdet2gamma on faces */
     tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
     tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
@@ -250,6 +249,7 @@ int coordinates_init_node(tNode *node)
     double dXdx[3][3]; /* coord. transf. */
     double invM[3][3]; /* inverse metric in x-coords  */
     double *gam = Arrd(agam);
+    int igammadiagx = Ind("gammadiagx");
     double *gammadiagx = Vard(node, igammadiagx);
     double *gammadiagy = Vard(node, igammadiagx+1);
     double *gammadiagz = Vard(node, igammadiagx+2);
