@@ -269,7 +269,7 @@ int advection1_set_profile(tMesh *mesh, int iu)
         double inx, iny;
         if(x[i]>=(-0.7 + nx*t) && x[i]<=(-0.3 + nx*t)) inx = 1.;
         else                                           inx = 0.;
-        if(y[i]>=(-0.2 + ny*t) && y[i]<=(-0.2 + ny*t)) iny = 1.;
+        if(y[i]>=(-0.2 + ny*t) && y[i]<=(+0.2 + ny*t)) iny = 1.;
         else                                           iny = 0.;
         u[i] = inx*iny;
       }
