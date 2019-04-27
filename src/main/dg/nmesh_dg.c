@@ -18,6 +18,6 @@ int nmesh_dg(tMesh *mesh)
    
   /* parameters */
   AddPar("dg_numerical_flux", "LLF", "numerical flux [LLF]");
-	     	   	   	 
+
   return 0;
 }
