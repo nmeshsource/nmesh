@@ -215,6 +215,19 @@ int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
 }
 
 
+/* non-blocking reduction */
+int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
+                    nMPI_Datatype datatype, nMPI_Op op, nMPI_Req *request)
+{
+  int status = 0;
+#ifdef USEMPI
+  status = MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, WORLD,
+                          request);
+#endif
+  return status;
+}
+
+
 /**********************************************************************/
 /* deal with tCom struct for MPI */
 /**********************************************************************/

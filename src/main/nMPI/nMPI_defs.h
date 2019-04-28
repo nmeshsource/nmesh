@@ -17,6 +17,8 @@
 #define nMPI_MAX  MPI_MAX
 #define nMPI_MIN  MPI_MIN
 #define nMPI_SUM  MPI_SUM
+#define nMPI_LAND MPI_LAND
+#define nMPI_LOR  MPI_LOR
 #define nMPI_Datatype MPI_Datatype
 #define nMPI_INT      MPI_INT
 #define nMPI_DOUBLE   MPI_DOUBLE
@@ -31,6 +33,8 @@
 #define nMPI_MAX  0
 #define nMPI_MIN  0
 #define nMPI_SUM  0
+#define nMPI_LAND 0
+#define nMPI_LOR  0
 #define nMPI_Datatype int
 #define nMPI_INT      0
 #define nMPI_DOUBLE   0
