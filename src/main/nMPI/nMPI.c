@@ -214,7 +214,6 @@ int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
   return status;
 }
 
-
 /* non-blocking reduction */
 int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
                     nMPI_Datatype datatype, nMPI_Op op, nMPI_Req *request)
@@ -223,6 +222,18 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 #ifdef USEMPI
   status = MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, WORLD,
                           request);
+#endif
+  return status;
+}
+
+
+/* non-blocking broadcast from rank root to all others in MPI_Comm WORLD */
+int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
+                int root, nMPI_Req *request)
+{
+  int status = 0;
+#ifdef USEMPI
+  MPI_Ibcast(buffer, count, datatype, root, WORLD, request);
 #endif
   return status;
 }
