@@ -154,6 +154,22 @@ Cleanup:
 
 -----------------------------------------------------------------
 
+Parallelization:
+================
+1. use MPI for communication between nodes
+
+2. use OpenMP within each node
+*use "omp parallel for" for some loops, mainly in formylnodes
+*use "omp task" as in wolfGIT/c/tasktest_omp2.c inside loops like fornodelist
+ -most interpolations are local and can be indpendent tasks
+ -calls to coordinates_init_node can be always made omp tasks
+ -setting ajsurf could be a task or be inside an omp loop
+ -is omp loops don't scale in formylnodes, we can try one task per node...
+
+
+
+-----------------------------------------------------------------
+
 MPI parallelization plans
 
 Plan1:
