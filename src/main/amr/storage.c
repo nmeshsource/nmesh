@@ -407,12 +407,19 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     if(ijk==0) nlist = elem; // save list head
     narray[ijk] = node; /* save nodes also in an array */
   }
+
+  /* aquire lock for change of connections */
+  node_and_fnbs_lock(parent);
+
   /* fill in neighbor info, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 1);
 
   /* update fnb of all in narray and their neighbors */
   for(ijk=0; ijk<8; ijk++)
     update_node_and_neighbors_fnb(narray[ijk]);
+
+  /* release locks */
+  node_and_fnbs_unlock(parent);
 
   /* free all data on parent */
   free_dat(parent->dat);
@@ -546,24 +553,33 @@ tNode *destroy_children(tNode *parent)
     free_array(Xp[0]);
   }
 
+  /* obtain lock on face neighbors of narray in name of parent */
+  fnbs_lock(narray, parent);
+
   /* update neighbor info */
   /* set neighbor info to NULL, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 0);
 
-  /* free child nodes */
+  /* orphan child nodes */
   for(ijk=0; ijk<8; ijk++)
   {
     if(narray[ijk]->child[0])
-      errorexit("cannot destroy child that itself has child[0]");
-    free_node(narray[ijk]);
+      errorexit("cannot orphan child that itself has child[0]");
     parent->child[ijk] = NULL;
   }
+  /* the narray is disconnected now, but still has lock on face neighbors */
 
   /* update fnb on parent and its neighbors */
   update_node_and_neighbors_fnb(parent);
 
   /* parent is now a leaf node */
   parent->leaf = 1;
+
+  /* release lock on face neighbors */
+  fnbs_unlock(narray, parent);
+
+  /* free child nodes */
+  for(ijk=0; ijk<8; ijk++) free_node(narray[ijk]);
 
   return parent;
 }
