@@ -28,8 +28,10 @@ void update_node_fnb(tNode *node);
 void update_node_and_neighbors_fnb(tNode *node);
 void update_all_rnode_fnb(tMesh *mesh);
 int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
-void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
-                              int intrch, int rev1, int rev2);
+void node_and_fnbs_lock(tNode *node);
+void node_and_fnbs_unlock(tNode *node);
+void fnbs_lock(tNode *narray[8], tNode *locker);
+void fnbs_unlock(tNode *narray[8], tNode *locker);
 
 /* surface.c */
 void free_surface(tSurface *s);
@@ -38,6 +40,8 @@ void set_mysurf(tSurface *s);
 void free_dat_reqs_after_Waitall_com_send(tNode *node);
 void set_ajsurf_forall_vars(tNode *node, int f);
 void free_nbsurf_only_forall_vars(tNode *node, int f);
+void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
+                              int intrch, int rev1, int rev2);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);

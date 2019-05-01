@@ -657,6 +657,201 @@ int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni)
 
 
 /*******************************************************************/
+/* nc_lock helper functions */
+/*******************************************************************/
+
+/* return first locker on node and neighbors */
+tNode *node_and_fnbs_nc_locked(tNode *node)
+{
+  int face;
+
+  /* is this node locked */
+  if(node->nc_lock) return node->nc_lock;
+
+  /* are any neighbors locked */
+  for(face=0; face<6; face++)
+  {
+    int ni;
+    for(ni=0; ni<node->nfnb[face]; ni++)
+    {
+      tNode *nb = node->fnb[face][ni];
+      if(nb->nc_lock) return nb->nc_lock;
+    }
+  }
+
+  return NULL;
+}
+
+/* set nc_lock on node and its fnb neighbors to nc_lock = locker */
+void set_nc_lock_on_node_and_fnbs(tNode *node, tNode *locker)
+{
+  int face;
+
+  /* mark node as locked by locker */
+  node->nc_lock = locker;
+
+  /* mark neighbors as locked by locker */
+  for(face=0; face<6; face++)
+  {
+    int ni;
+    for(ni=0; ni<node->nfnb[face]; ni++)
+    {
+      tNode *nb = node->fnb[face][ni];
+      nb->nc_lock = locker;
+    }
+  }
+}
+
+/* return first locker on neighbors of a nodearray */
+tNode *fnbs_nc_locked(tNode *narray[8])
+{
+  int ns[] = {2,2,2};
+  int ind;
+
+  for(ind=0; ind<8; ind++)
+  {
+    int ni;
+    int fo;   /* other face index */
+    tNode *node = narray[ind];
+    int ijk = node->ijk;
+    /* set node's i,j,k */
+    int k = kOfInd_n(ijk, ns);
+    int j = jOfInd_n_k(ijk, ns,k);
+    int i = iOfInd_n_jk(ijk, ns,j,k);
+
+    /* return locker of 1st nodearray neighbor that is locked */
+    /* X-dir: */
+    fo = i;   /* face index in direction of other neighbor */
+    for(ni=0; ni<node->nfnb[fo]; ni++)
+    {
+      tNode *nb = node->fnb[fo][ni];
+      if(nb->nc_lock) return nb->nc_lock;
+    }
+
+    /* Y-dir: */
+    fo = 2 + j;   /* face index in direction of other neighbor */
+    for(ni=0; ni<node->nfnb[fo]; ni++)
+    {
+      tNode *nb = node->fnb[fo][ni];
+      if(nb->nc_lock) return nb->nc_lock;
+    }
+
+    /* Z-dir: */
+    fo = 4 + k;   /* face index in direction of other neighbor */
+    for(ni=0; ni<node->nfnb[fo]; ni++)
+    {
+      tNode *nb = node->fnb[fo][ni];
+      if(nb->nc_lock) return nb->nc_lock;
+    }
+  }
+
+  return NULL;
+}
+
+/* set nc_lock on neighbors of narray to nc_lock = locker */
+void set_nc_lock_on_fnbs_of_nodearray(tNode *narray[8], tNode *locker)
+{
+  int ns[] = {2,2,2};
+  int ind;
+
+  for(ind=0; ind<8; ind++)
+  {
+    int ni;
+    int fo;   /* other face index */
+    tNode *node = narray[ind];
+    int ijk = node->ijk;
+    /* set node's i,j,k */
+    int k = kOfInd_n(ijk, ns);
+    int j = jOfInd_n_k(ijk, ns,k);
+    int i = iOfInd_n_jk(ijk, ns,j,k);
+
+    /* mark nodearray neighbors as locked by locker */
+    /* X-dir: */
+    fo = i;   /* face index in direction of other neighbor */
+    for(ni=0; ni<node->nfnb[fo]; ni++)
+    {
+      tNode *nb = node->fnb[fo][ni];
+      nb->nc_lock = locker;
+    }
+
+    /* Y-dir: */
+    fo = 2 + j;   /* face index in direction of other neighbor */
+    for(ni=0; ni<node->nfnb[fo]; ni++)
+    {
+      tNode *nb = node->fnb[fo][ni];
+      nb->nc_lock = locker;
+    }
+
+    /* Z-dir: */
+    fo = 4 + k;   /* face index in direction of other neighbor */
+    for(ni=0; ni<node->nfnb[fo]; ni++)
+    {
+      tNode *nb = node->fnb[fo][ni];
+      nb->nc_lock = locker;
+    }
+  }
+}
+
+/*******************************************************************/
+/* lock or unlock */
+/*******************************************************************/
+
+/* wait until exclusive lock is acquired by node */
+void node_and_fnbs_lock(tNode *node)
+{
+  TASK_CRITICAL(acquire_nc_lock)
+  {
+    /* if node is locked by another node or not locked at all */
+    if(node->nc_lock != node)
+    {
+      /* wait until node and nbs are no longer locked */
+      while(node_and_fnbs_nc_locked(node))
+      {
+        /* if node cannot get the lock yield */
+        TASK_YIELD
+      }
+    }
+    /* lock this node and its nbs */
+    set_nc_lock_on_node_and_fnbs(node, node);
+  }
+}
+/* unlock node and its neighbors if node locked it */
+void node_and_fnbs_unlock(tNode *node)
+{
+  /* unlock this node and its nbs */
+  if(node->nc_lock == node)
+    set_nc_lock_on_node_and_fnbs(node, NULL);
+}
+
+/* wait until exclusive lock is acquired on fnbs of narray */
+void fnbs_lock(tNode *narray[8], tNode *locker)
+{
+  TASK_CRITICAL(acquire_nc_lock)
+  {
+    if(fnbs_nc_locked(narray) != locker)
+    {
+      /* wait until nbs are no longer locked */
+      while(fnbs_nc_locked(narray))
+      {
+        /* if node cannot get the lock yield */
+        TASK_YIELD
+      }
+    }
+    /* lock nbs */
+    set_nc_lock_on_fnbs_of_nodearray(narray, locker);
+  }
+}
+
+/* unlock fnbs if locker locked it */
+void fnbs_unlock(tNode *narray[8], tNode *locker)
+{
+  /* unlock fnbs */
+  if(fnbs_nc_locked(narray) == locker)
+    set_nc_lock_on_fnbs_of_nodearray(narray, NULL);
+}
+
+
+/*******************************************************************/
 /* Everything below this line is untested and may not work
    Probably it should be removed !!!!! */
 /*******************************************************************/

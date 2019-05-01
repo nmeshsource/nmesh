@@ -21,6 +21,15 @@
    #pragma omp parallel for
    _Pragma ( "omp parallel for" )
 */
+/* to use OpenMP taks we have these macros */
+#ifdef OMPTASKS
+#define TASK_CRITICAL(x) _Pragma ( MSTR(omp critical x) )
+#define TASK_YIELD       _Pragma ( "omp taskyield" )
+#else
+#define TASK_CRITICAL(x)
+#define TASK_YIELD
+#endif
+
 /* To parallelize with OpenMP we need _Pragma ( "omp parallel for" ) 
    in many places. But for different applications we want to switch 
    them on or off depending on where they are.
