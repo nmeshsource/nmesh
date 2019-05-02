@@ -732,6 +732,9 @@ tMesh *alloc_mesh(int npats)
 
   realloc_patlist_in_mesh(mesh, npats);
 
+  /* init mesh mutex */
+  MUTEX_INIT(mesh->mutex);
+
   return mesh;
 }
 
@@ -800,6 +803,9 @@ void free_mesh(tMesh *mesh)
 
   /* free skeleton in mesh */
   remove_all_MeshFuns(mesh);
+
+  /* init mesh mutex */
+  MUTEX_DESTROY(mesh->mutex);
 
   free(mesh);
 }

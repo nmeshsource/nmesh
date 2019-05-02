@@ -13,18 +13,19 @@
 #define DECL_MESH_MUTEX(node, mutex) \
   tMesh *mesh = (node)->pat->mesh; \
   tMUTEX *mutex = mesh->mutex;
-#define MUTEX_INIT(x)   omp_init_lock(x)
-#define MUTEX_LOCK(x)   omp_set_lock(x)
-#define MUTEX_UNLOCK(x) omp_unset_lock(x)
-#define T_CRITICAL(x)   _Pragma ( MSTR(omp critical x) )
-#define TASK_YIELD      _Pragma ( "omp taskyield" )
+#define MUTEX_INIT(x)    omp_init_lock(x)
+#define MUTEX_LOCK(x)    omp_set_lock(x)
+#define MUTEX_UNLOCK(x)  omp_unset_lock(x)
+#define MUTEX_DESTROY(x) omp_destroy_lock(x)
+#define T_CRITICAL(x )   _Pragma ( MSTR(omp critical x) )
+#define TASK_YIELD       _Pragma ( "omp taskyield" )
 #else
 #define tMUTEX int
 #define DECL_MESH_MUTEX(node, mutex)
 #define MUTEX_INIT(x)
 #define MUTEX_LOCK(x)
 #define MUTEX_UNLOCK(x)
-#define T_CRITICAL(x)
+#define MUTEX_DESTROY(x)
 #define T_CRITICAL(x)
 #define TASK_YIELD
 #endif
