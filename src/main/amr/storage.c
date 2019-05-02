@@ -872,7 +872,7 @@ int count_elements_nodelist(tNlist *list)
 tNlist *replacenode_in_nodelist(tNlist *elem, tNode *node)
 {
   tNlist *repl = alloc_nodelist(node);
-  return replace1_in_nodelist(elem, repl);
+  return replace1_in_nodelist(elem, repl, 0);
 }
 
 /* insert nodelist "list" into another nodelist after elem,
@@ -926,7 +926,7 @@ tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list)
 }
 
 /* replace 1 element in a nodelist by a list and then free the element */
-tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
+tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list, int return_lend)
 {
   tNlist *left;
   tNlist *right;
@@ -951,14 +951,16 @@ tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list)
   if(left)  left->next = lbeg;
 
   free(elem);
-  return lbeg;
+
+  if(return_lend) return lend;
+  else            return lbeg;
 }
 
 /* replace 1 element in a nodelist by a list, then free the element,
    return the very first element of the new list */
 tNlist *first_replace1_in_nodelist(tNlist *elem, tNlist *list)
 {
-  tNlist *newlist = replace1_in_nodelist(elem, list);
+  tNlist *newlist = replace1_in_nodelist(elem, list, 0);
   return first_nodelist(newlist);
 }
 
@@ -1197,7 +1199,7 @@ tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   if(elem) mesh = elem->node->pat->mesh;
   else     errorexit("elem is NULL!!!");
 
-  nlist_beg = replace1_in_nodelist(elem, nlist);
+  nlist_beg = replace1_in_nodelist(elem, nlist, 0);
   mesh->lns = first_nodelist(nlist_beg);
   update_mesh_myln_node_nid(mesh);
   return nlist_beg;

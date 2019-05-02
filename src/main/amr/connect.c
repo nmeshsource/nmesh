@@ -311,7 +311,7 @@ tNlist *ldescendants_along_face(tNlist *nl, int face, int *ndescends)
           children = addnode_to_nodelist_after(children, child);
       }
       /* insert children into nl2, replacing parent in elem */
-      elem = replace1_in_nodelist(elem, children);
+      elem = replace1_in_nodelist(elem, children, 0);
       nl2 = elem;
       (*ndescends)++;
       if(elem) goto nl2_loop_start;
