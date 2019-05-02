@@ -809,7 +809,7 @@ void set_nc_lock_on_parent_and_fnbs_of_nodearray(tNode *narray[8],
 /* wait until exclusive lock is acquired by node */
 void node_and_fnbs_lock(tNode *node)
 {
-  TASK_CRITICAL(acquire_nc_lock)
+  TASK_CRITICAL(modify_or_check_nc_lock)
   {
     /* if node is locked by another node or not locked at all */
     if(node->nc_lock != node)
@@ -825,18 +825,22 @@ void node_and_fnbs_lock(tNode *node)
     set_nc_lock_on_node_and_fnbs(node, node);
   }
 }
+
 /* unlock node and its neighbors if node locked it */
 void node_and_fnbs_unlock(tNode *node)
 {
-  /* unlock this node and its nbs */
-  if(node->nc_lock == node)
-    set_nc_lock_on_node_and_fnbs(node, NULL);
+  TASK_CRITICAL(modify_or_check_nc_lock)
+  {
+    /* unlock this node and its nbs */
+    if(node->nc_lock == node)
+      set_nc_lock_on_node_and_fnbs(node, NULL);
+  }
 }
 
 /* wait until exclusive lock is acquired on fnbs of narray */
 void parent_and_fnbs_lock(tNode *narray[8], tNode *locker)
 {
-  TASK_CRITICAL(acquire_nc_lock)
+  TASK_CRITICAL(modify_or_check_nc_lock)
   {
     if(parent_and_fnbs_nc_locked(narray) != locker)
     {
@@ -855,9 +859,12 @@ void parent_and_fnbs_lock(tNode *narray[8], tNode *locker)
 /* unlock fnbs if locker locked it */
 void parent_and_fnbs_unlock(tNode *narray[8], tNode *locker)
 {
-  /* unlock fnbs */
-  if(parent_and_fnbs_nc_locked(narray) == locker)
-    set_nc_lock_on_parent_and_fnbs_of_nodearray(narray, NULL);
+  TASK_CRITICAL(modify_or_check_nc_lock)
+  {
+    /* unlock fnbs */
+    if(parent_and_fnbs_nc_locked(narray) == locker)
+      set_nc_lock_on_parent_and_fnbs_of_nodearray(narray, NULL);
+  }
 }
 
 
