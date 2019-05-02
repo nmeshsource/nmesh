@@ -114,8 +114,8 @@ typedef struct tNODE {
   int datrank;            /* rank of proc that rightfully has data */
   nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
                              where dat is and where all neighb. have dat */
-  struct tNODE *nc_lock;  /* if not NULL, the connections of node nc_lock and
-                             its neighbors are currently being updated */
+  struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
+                                     and its nbs are currently being updated */
 } tNode;
 
 /* a linked list of nodes */
