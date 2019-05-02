@@ -2,6 +2,7 @@
 /* (c) Wolfgang Tichy 2/2019 */
 
 /* declarations from other parts that we need here already */
+#include "thread_defs.h"
 #include "../main/skeleton.h"
 #include "../nMPI/nMPI_defs.h"
 #include "../evolve/evosys.h"
@@ -194,6 +195,7 @@ typedef struct tMESH {
   tNlist *lns;       /* start of linked list of all leaf nodes */
   long nln;          /* total number of leaf nodes */
   tMylnodes myln[1]; /* elements of lns owned by this proc */
+  tMUTEX mutex[1];   /* mutex for mesh */
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:
 use space filling curve as in

@@ -809,7 +809,9 @@ void set_nc_lock_on_parent_and_fnbs_of_nodearray(tNode *narray[8],
 /* wait until exclusive lock is acquired by node */
 void node_and_fnbs_lock(tNode *node)
 {
-  TASK_CRITICAL(modify_or_check_nc_lock)
+  DECL_MESH_MUTEX(node, mutex);
+
+  MUTEX_LOCK(mutex);
   {
     /* if node is locked by another node or not locked at all */
     if(node->nc_lock != node)
@@ -817,54 +819,72 @@ void node_and_fnbs_lock(tNode *node)
       /* wait until node and nbs are no longer locked */
       while(node_and_fnbs_nc_locked(node))
       {
-        /* if node cannot get the lock yield */
-        TASK_YIELD
+        /* if node cannot get the nc_lock release mutex and yield */
+        MUTEX_UNLOCK(mutex);
+        TASK_YIELD;
+
+        /* get mutex back */
+        MUTEX_LOCK(mutex);
       }
     }
     /* lock this node and its nbs */
     set_nc_lock_on_node_and_fnbs(node, node);
   }
+  MUTEX_UNLOCK(mutex);
 }
 
 /* unlock node and its neighbors if node locked it */
 void node_and_fnbs_unlock(tNode *node)
 {
-  TASK_CRITICAL(modify_or_check_nc_lock)
+  DECL_MESH_MUTEX(node, mutex);
+
+  MUTEX_LOCK(mutex);
   {
     /* unlock this node and its nbs */
     if(node->nc_lock == node)
       set_nc_lock_on_node_and_fnbs(node, NULL);
   }
+  MUTEX_UNLOCK(mutex);
 }
 
 /* wait until exclusive lock is acquired on fnbs of narray */
 void parent_and_fnbs_lock(tNode *narray[8], tNode *locker)
 {
-  TASK_CRITICAL(modify_or_check_nc_lock)
+  DECL_MESH_MUTEX(locker, mutex);
+
+  MUTEX_LOCK(mutex);
   {
     if(parent_and_fnbs_nc_locked(narray) != locker)
     {
       /* wait until nbs are no longer locked */
       while(parent_and_fnbs_nc_locked(narray))
       {
-        /* if node cannot get the lock yield */
-        TASK_YIELD
+        /* if locker cannot get the nc_lock release mutex and yield */
+        MUTEX_UNLOCK(mutex);
+        TASK_YIELD;
+
+        /* get mutex back */
+        MUTEX_LOCK(mutex);
       }
     }
     /* lock nbs */
     set_nc_lock_on_parent_and_fnbs_of_nodearray(narray, locker);
   }
+  MUTEX_UNLOCK(mutex);
 }
 
 /* unlock fnbs if locker locked it */
 void parent_and_fnbs_unlock(tNode *narray[8], tNode *locker)
 {
-  TASK_CRITICAL(modify_or_check_nc_lock)
+  DECL_MESH_MUTEX(locker, mutex);
+
+  MUTEX_LOCK(mutex);
   {
     /* unlock fnbs */
     if(parent_and_fnbs_nc_locked(narray) == locker)
       set_nc_lock_on_parent_and_fnbs_of_nodearray(narray, NULL);
   }
+  MUTEX_UNLOCK(mutex);
 }
 
 
