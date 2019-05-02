@@ -554,7 +554,7 @@ tNode *destroy_children(tNode *parent)
   }
 
   /* obtain lock on face neighbors of narray in name of parent */
-  fnbs_lock(narray, parent);
+  parent_and_fnbs_lock(narray, parent);
 
   /* update neighbor info */
   /* set neighbor info to NULL, as far as these 8 are concerned */
@@ -576,7 +576,7 @@ tNode *destroy_children(tNode *parent)
   parent->leaf = 1;
 
   /* release lock on face neighbors */
-  fnbs_unlock(narray, parent);
+  parent_and_fnbs_unlock(narray, parent);
 
   /* free child nodes */
   for(ijk=0; ijk<8; ijk++) free_node(narray[ijk]);

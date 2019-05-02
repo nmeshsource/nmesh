@@ -30,8 +30,8 @@ void update_all_rnode_fnb(tMesh *mesh);
 int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
 void node_and_fnbs_lock(tNode *node);
 void node_and_fnbs_unlock(tNode *node);
-void fnbs_lock(tNode *narray[8], tNode *locker);
-void fnbs_unlock(tNode *narray[8], tNode *locker);
+void parent_and_fnbs_lock(tNode *narray[8], tNode *locker);
+void parent_and_fnbs_unlock(tNode *narray[8], tNode *locker);
 
 /* surface.c */
 void free_surface(tSurface *s);
