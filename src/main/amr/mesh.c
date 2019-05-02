@@ -146,8 +146,9 @@ void refine_pat(tMesh *mesh, int p)
   }
 }
 
-/* refine nodes with nids in array, we do not update nid's  in here */
-void refine_nodes(tMesh *mesh, long nnodes, long *nid)
+/* refine nodes with nids in array, we assume long *nid is sorted in ascending
+   order. We do not update nid's in here */
+void refine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid)
 {
   tNlist *elem = mesh->lns;
   long i;
