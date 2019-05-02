@@ -288,8 +288,15 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   if(nMPI_rank()==datrank)
     node->dat = alloc_dat(node);
 
-  /* initialize surface neigbhor list in dat */
+  /* lock new node and its face nbs, to do so first initialize fnb */
+  update_node_fnb(node);
+  node_and_fnbs_lock(node);
+
+  /* initialize surface neigbhor list in node and it neighbors */
   update_node_and_neighbors_fnb(node);
+
+  /* unlock new node and its face nbs */
+  node_and_fnbs_unlock(node);
 
   return node;
 }
