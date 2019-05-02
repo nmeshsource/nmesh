@@ -146,18 +146,33 @@ void refine_pat(tMesh *mesh, int p)
   }
 }
 
-/* refine node with nid */
-void refine_node(tMesh *mesh, long nid)
+/* refine nodes with nids in array, we do not update nid's  in here */
+void refine_nodes(tMesh *mesh, long nnodes, long *nid)
 {
-  tNlist *elem;
+  tNlist *elem = mesh->lns;
+  long i;
 
-  fornodelist(mesh->lns, elem)
+  for(i=0; i<nnodes; i++)
   {
-    if(elem->node->nid == nid)
-    {
-      make8children_in_mesh_lns_myln(elem, elem->node->n);
-      return;
-    }
+    tNode *parent;
+    tNlist *children;
+    tNlist *lastchild;
+    int *n;
+
+    /* forward to node with nid[i] */
+    for(; elem->node->nid != nid[i]; elem = elem->next) ;
+
+    /* make children */
+    parent = elem->node;
+    n = elem->node->n; /* pick n */
+    children = make8_child_nodes(parent, n);
+
+    /* update mesh->lns if needed and add children to list */
+    if(elem == mesh->lns) mesh->lns = first_nodelist(children);
+    lastchild = replace1_in_nodelist(elem, children, 1);
+
+    /* set elem to last child we added */
+    elem = lastchild;
   }
 }
 

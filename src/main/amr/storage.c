@@ -279,6 +279,7 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   node->np = n[0] * n[1] * n[2];
   node->l = 0;
   node->leaf = 1;    /* make this a leaf node */
+  node->nid = -1;    /* mark nid as not set */
 
   /* get node->Dt ... from patch */
   point_nodearrays_to_patarrays(pat, node);
@@ -313,6 +314,9 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   /* transfer parent time info */
   node->time = parent->time;
   node->dt = parent->dt;  // FIXME: For now all nodes have same dt
+
+  /* mark nid as not set */
+  node->nid = -1;
 
   /* register this child with the parent */
   parent->child[ijk] = node;
