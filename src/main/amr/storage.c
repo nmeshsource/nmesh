@@ -398,6 +398,9 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
     free_array(Xp[2]);
     free_array(Xp[1]);
     free_array(Xp[0]);
+
+    /* init coords in this new node */
+    coordinates_init_node(node);
   }
   return node;
 }
@@ -562,6 +565,9 @@ tNode *destroy_children(tNode *parent)
     free_array(Xp[2]);
     free_array(Xp[1]);
     free_array(Xp[0]);
+
+    /* init coords in parent */
+    coordinates_init_node(parent);
   }
 
   /* obtain lock on face neighbors of narray in name of parent */
