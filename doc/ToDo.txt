@@ -121,6 +121,10 @@ Things that need to be done urgently:
    In Teukolsky there is no big diff.,
    but in Bugner's thesis mass cons improves... ???
 
+*in main/amr/connect.c we set and read ->nc_lock. Do we need a omp flush
+ before every read and a omp flush after every write, even though we are
+ in omp_set_lock region???
+
 
 Things that should be done:
 ===========================
