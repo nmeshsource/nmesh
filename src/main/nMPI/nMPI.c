@@ -227,6 +227,16 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 }
 
 
+/* blocking broadcast from rank root to all others in MPI_Comm WORLD */
+int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root)
+{
+  int status = 0;
+#ifdef USEMPI
+  MPI_Bcast(buffer, count, datatype, root, WORLD);
+#endif
+  return status;
+}
+
 /* non-blocking broadcast from rank root to all others in MPI_Comm WORLD */
 int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
                 int root, nMPI_Req *request)
@@ -238,6 +248,16 @@ int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
   return status;
 }
 
+
+/* Test for the completion of a specific send or receive. */
+int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
+{
+  int status = 0;
+#ifdef USEMPI
+  MPI_Test(request, flag, stat);
+#endif
+  return status;
+}
 
 /**********************************************************************/
 /* deal with tCom struct for MPI */

@@ -94,12 +94,15 @@ typedef struct tNODE {
   int nfnb[6];            /* number of face neighbor nodes */
   struct tNODE **fnb[6];  /* list of neighbor nodes on face,
                              kept up to date by update_node_fnb */
+  struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
+                                     and its nbs are currently being updated */
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
   int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
   int n[3];               /* number of points in X,Y,Z-directions */
   int np;                 /* np = n[0] * n[1] * n[2]; */
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
+  int refine;             /* flag for refining node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
   //int lid;                /* local node ID */
@@ -115,8 +118,6 @@ typedef struct tNODE {
   int datrank;            /* rank of proc that rightfully has data */
   nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
                              where dat is and where all neighb. have dat */
-  struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
-                                     and its nbs are currently being updated */
 } tNode;
 
 /* a linked list of nodes */

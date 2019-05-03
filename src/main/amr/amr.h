@@ -2,6 +2,15 @@
 /* Wolfgang Tichy, 1/2019 */
 
 
+
+/* refinement methods: i.e. vals for var ref_method */
+enum
+{
+  PARENT_n,     /* use same n as parent */
+  PARENT_n_O2   /* use parent->n/2 */
+};
+
+
 /* world comm from main */
 extern nMPI_Comm main_comm;
 
