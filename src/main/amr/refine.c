@@ -194,26 +194,34 @@ void refine_all_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
 void unrefine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid0,
                                        int ref_method)
 {
-  tNlist **replace  = calloc(nnodes, sizeof(replace[0]));
-  tNlist **children = calloc(nnodes, sizeof(children[0]));
+  tNlist **elem_parent = calloc(nnodes, sizeof(elem_parent[0]));
   long i;
 
-  if(!replace || !children) errorexit("no memory for replace, children");
+  if(!elem_parent) errorexit("no memory for replace, children");
 
-  /* update mesh->lns by removing all  in nid0 and their siblings */
+  /* update mesh->lns by removing all in nid0 and their siblings */
   for(i=0; i<nnodes; i++)
   {
     tNlist *elem;
+    int update_lns;
 
     /* forward to node with nid0[i] */
     for(; elem->node->nid != nid0[i]; elem = elem->next) ;
 
     /* update mesh->lns if needed and add children to list */
-    if(elem == mesh->lns) mesh->lns = first_nodelist(children[i]);
-    replace1_in_nodelist(elem, children[i], 1); // can return last child
+    if(elem == mesh->lns)
+      update_lns = 1;
+    else
+      update_lns = 0;
+
+    elem_parent[i] = remove8siblings_in_mesh_lns(elem);
+    if(update_lns) mesh->lns = elem_parent[i];
+
+    /* set elem to parent */
+    elem = elem_parent[i];
   }
 
-
+  /* Now mesh->lns is up to date, next destroy the children */
   FORNODES_Pragma(omp parallel)
   {
     tNlist *elem = mesh->lns;
@@ -221,21 +229,11 @@ void unrefine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid0,
     FORNODES_Pragma(omp for)
     for(i=0; i<nnodes; i++)
     {
-      tNode *parent;
-      int nc[3], *n, d;
-
-      /* forward to node with nid0[i] */
-      for(; elem->node->nid != nid0[i]; elem = elem->next) ;
-
-      /* destroy 8 siblings */
-      parent = elem->node->parent;
+      tNode *parent = elem_parent[i]->node;
+      /* destroy 8 children */
       destroy_children(parent);
-
-      /* save elem that has to be replaced by children[i] later */
-      replace[i] = elem;
     }
   }
 
-  free(children);
-  free(replace);
+  free(elem_parent);
 }
