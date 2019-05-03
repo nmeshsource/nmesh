@@ -622,7 +622,7 @@ void update_node_and_neighbors_fnb(tNode *node)
   // }
 }
 
-/* init surface neighbor list for all root nodes in th e mesh */
+/* init surface neighbor list for all root nodes in the mesh */
 void update_all_rnode_fnb(tMesh *mesh)
 {
   int p;
