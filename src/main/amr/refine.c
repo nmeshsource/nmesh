@@ -67,7 +67,8 @@ void refine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid,
 
       /* make children */
       parent = elem->node;
-      n = elem->node->n; /* pick n */
+
+      /* pick n */
       switch(ref_method)
       {
       case PARENT_n_O2:
@@ -114,6 +115,9 @@ void refine_all_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
   nMPI_Req *req  = calloc(size, sizeof(req[0]));
   int *nn        = calloc(size, sizeof(nn[0]));
   long **ref_nid = calloc(size, sizeof(ref_nid[0]));
+
+  if(!my_nid || !req || !nn || !ref_nid)
+    errorexit("no memory for my_nid, req, nn, ref_nid");
 
   /* record which nodes we want to refine */
   formylnodes(mesh, myid)
@@ -181,4 +185,57 @@ void refine_all_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
   free(ref_nid);
   free(nn);
   free(req);
+}
+
+
+/* remove nodes with nids in array nid0 and their 7 other siblings,
+   we assume long *nid0 is sorted in ascending order.
+   We do not update nid's in here */
+void unrefine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid0,
+                                       int ref_method)
+{
+  tNlist **replace  = calloc(nnodes, sizeof(replace[0]));
+  tNlist **children = calloc(nnodes, sizeof(children[0]));
+  long i;
+
+  if(!replace || !children) errorexit("no memory for replace, children");
+
+  /* update mesh->lns by removing all  in nid0 and their siblings */
+  for(i=0; i<nnodes; i++)
+  {
+    tNlist *elem;
+
+    /* forward to node with nid0[i] */
+    for(; elem->node->nid != nid0[i]; elem = elem->next) ;
+
+    /* update mesh->lns if needed and add children to list */
+    if(elem == mesh->lns) mesh->lns = first_nodelist(children[i]);
+    replace1_in_nodelist(elem, children[i], 1); // can return last child
+  }
+
+
+  FORNODES_Pragma(omp parallel)
+  {
+    tNlist *elem = mesh->lns;
+
+    FORNODES_Pragma(omp for)
+    for(i=0; i<nnodes; i++)
+    {
+      tNode *parent;
+      int nc[3], *n, d;
+
+      /* forward to node with nid0[i] */
+      for(; elem->node->nid != nid0[i]; elem = elem->next) ;
+
+      /* destroy 8 siblings */
+      parent = elem->node->parent;
+      destroy_children(parent);
+
+      /* save elem that has to be replaced by children[i] later */
+      replace[i] = elem;
+    }
+  }
+
+  free(children);
+  free(replace);
 }
