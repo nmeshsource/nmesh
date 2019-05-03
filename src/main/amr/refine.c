@@ -60,7 +60,7 @@ void refine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid,
     for(i=0; i<nnodes; i++)
     {
       tNode *parent;
-      int *n, d;
+      int nc[3], *n, d;
 
       /* forward to node with nid[i] */
       for(; elem->node->nid != nid[i]; elem = elem->next) ;
@@ -71,7 +71,12 @@ void refine_nodes_without_nid_update(tMesh *mesh, long nnodes, long *nid,
       switch(ref_method)
       {
       case PARENT_n_O2:
-        for(d=0; d<3; d++) n[d] = parent->n[d] / 2;
+        for(d=0; d<3; d++)
+        {
+          nc[d] = parent->n[d] / 2;
+          if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
+          n = nc;
+        }
         break;
       case PARENT_n:
       default:

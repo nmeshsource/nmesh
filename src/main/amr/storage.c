@@ -394,7 +394,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
           Lagrange_interpolate_topoints(parent, parent->dat->v[vi],
                                         Xp, node->dat->v[vi]);
         }
-      } /* end: if parent has dat */
+      } /* end: if parent has dat->v[vi] */
     free_array(Xp[2]);
     free_array(Xp[1]);
     free_array(Xp[0]);
