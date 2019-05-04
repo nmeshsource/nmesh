@@ -16,6 +16,8 @@ extern nMPI_Comm main_comm;
 
 
 /* storage.c */
+tNode *destroy_children(tNode *parent);
+tNlist *remove8siblings_in_mesh_lns(tNlist *sib);
 int realloc_myln_nncats(tMylnodes *myln, int nncats);
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 
@@ -73,3 +75,7 @@ int toggle_face2_flag_in_faces4_5_of_cubes(tMesh *mesh);
 int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh);
 int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
                            int ofaces[6], double oX[3]);
+
+/* refine .c */
+long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b);
+
