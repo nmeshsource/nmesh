@@ -146,7 +146,7 @@ void refine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
       ref_nid[r] = calloc(nn[r], sizeof(ref_nid[r][0]));
   }
 
-  /* broadcast my_nid to all MPI jobs */
+  /* broadcast ref_nid to all MPI jobs */
   for(r=0; r<size; r++)
   {
     nMPI_Ibcast(&(ref_nid[r]), nn[r], nMPI_LONG, r, &(req[r]));
@@ -263,7 +263,7 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
     tNode *node = MyNode(mesh, myid);
     tNode *sib[8];
     int ijk = node->ijk;
-    int i,j,k, ref;
+    int i,j,k, uref;
     long nid0;
 
     /* do nothing id not sibling0 */
@@ -277,18 +277,19 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
     sib[5] = sib[4]->nb[1];
     sib[6] = sib[4]->nb[3];
     sib[7] = sib[3]->nb[5];
-    ref = 0;
-    for(ijk = 0; ijk<8; ijk++)
+    uref = 0;
+    for(ijk=0; ijk<8; ijk++)
     {
-      if(!(sib[ijk]->refine)) break;
+      if(sib[ijk]->dat && !(sib[ijk]->refine))
+        goto continue_with_next_node;
     }
-    if(ijk<8) continue;
 
     /* get nid */
     nid0 = node->nid;
+    my_nid[nnodes++] = node->nid;
 
-    if(node->refine)
-      my_nid[nnodes++] = node->nid;
+  continue_with_next_node:
+    ;
   }
   nn[rank] = nnodes;
 
@@ -302,7 +303,7 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
       ref_nid[r] = calloc(nn[r], sizeof(ref_nid[r][0]));
   }
 
-  /* broadcast my_nid to all MPI jobs */
+  /* broadcast ref_nid to all MPI jobs */
   for(r=0; r<size; r++)
   {
     nMPI_Ibcast(&(ref_nid[r]), nn[r], nMPI_LONG, r, &(req[r]));
