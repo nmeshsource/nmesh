@@ -42,8 +42,8 @@ tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
 {
   tArray *array;
   int Nt;
-  int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
-
+  int size1 = max3(sizeof(array->d[0]), sizeof(array->i[0]),
+                   sizeof(array->l[0]));
   if(!n) return NULL;
 
   array = alloc_empty_array_with_segs(n, Ne, ns);
@@ -122,7 +122,8 @@ void point_array_a_to_data(tArray *array, void *data, int nofree)
 /* re-dimension array */
 tArray *redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
 {
-  int size1 = max2(sizeof(array->d[0]), sizeof(array->i[0]));
+  int size1 = max3(sizeof(array->d[0]), sizeof(array->i[0]),
+                   sizeof(array->l[0]));
   int Nt;
   size_t size_new;
   int i;

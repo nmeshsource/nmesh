@@ -242,6 +242,7 @@ typedef struct tARRAY {
   size_t size;  /* size of allocated space in bytes */
   union {       /* anon. union with host data (add one more for GPU data) */
     double *d;  /* pointer to double data */
+    long *l;    /* pointer to long data using same mem as double data */
     int *i; };  /* pointer to int data using same mem as double data */
   int d_nofree; /* d_nofree=1 if free_array should not free d */
   int ns;       /* number of segments */
