@@ -9,9 +9,9 @@
 
 
 
-/* refine nodes with nids in array, we assume long *nid is sorted in ascending
+/* h-refine nodes with nids in array, we assume long *nid is sorted in ascending
    order. We do not update nid's in here */
-void refine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
+void hrefine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
 {
   tNlist *elem = mesh->lns;
   long i;
@@ -41,10 +41,10 @@ void refine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
 }
 
 
-/* refine nodes with nids in array, we assume long *nid is sorted in ascending
-   order. We do not update nid's in here */
-void create_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid,
-                                     int ref_method)
+/* h-refine nodes with nids in array, we assume nid[] is sorted in ascending
+   order. We do not update nids in here */
+void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
+                                   int ref_method)
 {
   tNlist **replace  = calloc(nnodes, sizeof(replace[0]));
   tNlist **children = calloc(nnodes, sizeof(children[0]));
@@ -103,9 +103,9 @@ void create_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid,
   free(replace);
 }
 
-/* Refine all nodes on all MPI procs if indicated by func needs_refine. */
-void refine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
-                            int ref_method)
+/* h-refine all nodes on all MPI procs if indicated by func needs_refine. */
+void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
+                             int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
@@ -153,7 +153,7 @@ void refine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
   }
 
   /* refine my_nid */
-  create_nodes_no_nid_update(mesh, nnodes, my_nid, PARENT_n_O2);
+  create_children_no_nid_update(mesh, nnodes, my_nid, PARENT_n_O2);
   nn[rank] = 0;
   done = 1;
 
@@ -165,7 +165,7 @@ void refine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
     if(flag && nn[r]>0)
     {
       /* work on ref_nid[r] */
-      create_nodes_no_nid_update(mesh, nn[r], ref_nid[r], PARENT_n_O2);
+      create_children_no_nid_update(mesh, nn[r], ref_nid[r], PARENT_n_O2);
       nn[r] = 0;
       done++;
     }
@@ -190,10 +190,11 @@ void refine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
 
 /* remove nodes with nids in array nid0 and their 7 other siblings,
    We assume long *nid0 is sorted in ascending order.
-   nid0[2*i]   has the node id, 
+   nid0[2*i]   has the node id of sibling0, 
    nid0[2*i+1] has the number of siblings that need unrefinement
-   We do not update nid's in here, but we change nid0 and return
-   what is left to process */
+   We do not update node->nid in here, but we change nid0 and return
+   what is left to process, i.e. all nid0 where we had less than 8 siblings
+   in this MPI proc. */
 long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
 {
   tNlist **elem_parent = calloc(nnodes, sizeof(elem_parent[0]));
@@ -251,6 +252,39 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
 
   /* return number of nid0s not destroyed yet */
   return n_remain;
+}
+
+/* merge nid0-list in nid0b into nid0-list in nid0, the allocated size
+   of nid0 has to be 2*(n+nb) */
+long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
+{
+  long i, j, nn=n;
+  for(i=0; i<nn; i++)
+  {
+    long nid0_2i = nid0[2*i];
+
+    /* find nid0_2i in nid0b */
+    for(j=0; j<nb; j++)
+      if(nid0b[2*j] == nid0_2i) break;
+
+    if(j<nb) /* found nid0_2i in nid0b */
+      nid0[2*i+1] += nid0b[2*j+1];
+    else     /* append nid0b to nid0 */
+      { nid0[2*nn] = nid0b[2*j];  nid0[2*nn+1] = nid0b[2*j+1];  nn++; }
+  }
+  /* return new length of nid0 */
+  return nn;
+}
+
+/* compare nid0 numbers for qsort */
+int nid0_compar(const void *x1, const void *x2)
+{
+  long *const *n1 = x1;
+  long *const *n2 = x2;
+
+  if(n1 < n2) return -1;
+  if(n1 > n2) return 1;
+  return 0;
 }
 
 /* Unrefine all nodes on all MPI procs if indicated by func needs_refine. */
@@ -394,14 +428,11 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
   }
 
   /* sort new longer unref[rank] with left over nid0s */
-  //...
+  qsort(unref[rank], nn[rank], 2*sizeof(unref[rank][0]), nid0_compar);
 
   /* finally remove the stuff in unref[rank] */
   nn[rank] = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
   if(nn[rank]) errorexit("nn[rank] is supposed to be 0 now!");
-
-  //free nid0[r]
-
 
   /* free unref content */
   for(r=0; r<size; r++)
@@ -409,34 +440,10 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
     free(unref[r]);
     unref[r] = NULL;
   }
-  /* my_unr was freed as one of unref */
+  /* old my_unr is freed as one of unref */
 
   /* free rest */
   free(unref);
   free(nn);
   free(req);
-
-}
-
-
-/* merge nid0-list in nid0b into nid0-list in nid0, the allocated size
-   of nid0 has to be 2*(n+nb) */
-long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
-{
-  long i, j, nn=n;
-  for(i=0; i<nn; i++)
-  {
-    long nid0_2i = nid0[2*i];
-
-    /* find nid0_2i in nid0b */
-    for(j=0; j<nb; j++)
-      if(nid0b[2*j] == nid0_2i) break;
-
-    if(j<nb) /* found */
-      nid0[2*i+1] += nid0b[2*j+1];
-    else     /* append */
-      { nid0[2*nn] = nid0b[2*j];  nid0[2*nn+1] = nid0b[2*j+1];  nn++; }
-  }
-  /* return new length of nid0 */
-  return nn;
 }

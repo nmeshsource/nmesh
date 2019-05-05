@@ -76,6 +76,8 @@ int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh);
 int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
                            int ofaces[6], double oX[3]);
 
-/* refine .c */
-long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b);
-
+/* refine.c */
+void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
+                             int ref_method);
+void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
+                            int ref_method);
