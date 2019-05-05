@@ -183,7 +183,13 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 
         /* apply limiter */
         if(ListEntry(evosys->limiter,i))
-          ListEntry(evosys->limiter,i)(node, vl);
+        {
+          int ret = ListEntry(evosys->limiter,i)(node, vl);
+
+          /* increase nlim if limiter was active, otherwise reset nlim */
+          if(ret) node->dat->nlim += 1;
+          else    node->dat->nlim = 0;
+        }
       }
 
       /* free indicators again */
@@ -263,7 +269,7 @@ int evolve_myln(tMesh *mesh)
   }
   else if(Getv(evolve_method, "sspRK3"))
   {
-    Evolve = evolve_Euler;
+    Evolve = NULL;
     Evolve_mesh = evolve_sspRK3_mesh;
   }
   else
