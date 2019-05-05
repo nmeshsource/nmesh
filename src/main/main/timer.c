@@ -149,7 +149,7 @@ int free_all_timers(tMesh *mesh)
 }
 
 
-/* compare times for qsort_r */
+/* compare times for qsort */
 int timer_compar(const void *x1, const void *x2)
 {
   tTimer *const *t1 = x1;
