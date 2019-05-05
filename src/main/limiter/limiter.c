@@ -73,6 +73,7 @@ int limiter_MRS(tNode *node, tVarList *vl)
   int vli, f, ni, ijk;
   double alpha, h, alpha_h, theta_i;
   double theta_Mi, theta_mi;
+  int ret = 0;
 
   dat = node->dat;
   if(!dat) return 0;
@@ -148,9 +149,12 @@ exit(8);
     /* now limit q */
     forpoints(node, ijk)
       q[ijk] = qbar + theta_i*(q[ijk] - qbar);
+
+    /* set non-zero ret if limiting occured */
+    if(theta_i < 1.) ret++;
   }
 
-  return 0;
+  return ret;
 }
 
 
@@ -238,6 +242,7 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   double alpha, beta, bos3, h, Mt_h;
   const double sqrt3 = sqrt(3.);
   int i100, i010, i001;
+  int ret;
   tArray *Ac = alloc_array(n);
 
   dat = node->dat;
@@ -264,6 +269,9 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   else       i010 = 0;
   if(n[2]>1) i001 = Ind_n(0,0,1,n);
   else       i001 = 0;
+
+  /* default return value */
+  ret = 0;
 
   /* set weights */
   forvl(vl, vli)
@@ -314,10 +322,13 @@ int limiter_minmodB(tNode *node, tVarList *vl)
 
       /* set q from coeffs */
       basis_array_synthesis3(node, Aq, Ac);
+
+      /* make ret non-zero if limiting occurs */
+      ret++;
     }
   }
 
   free_array(Ac);
 
-  return 0;
+  return ret;
 }

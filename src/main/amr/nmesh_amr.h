@@ -48,7 +48,8 @@ typedef struct tDAT {
   struct tINDIC **ic;     /* indicators such as min/max for each var,
                              e.g. ic[vi] has indicators for var vi  */
   struct tCOM *icom;      /* com for indc */
-  int nlim;               /* number of evo substep in which limiting occured */
+  int nlim;               /* number of consectutive evo substeps in which
+                             limiter was active */
 } tDat;
 
 /* surface data needed for node to neighbor node communication */
