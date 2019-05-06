@@ -73,9 +73,9 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
         Xb[dir1] = p1->d[i1];
         Xb[dir2] = p2->d[i2];
         XYZ_of_XbYbZb(node, Xb, X);
-        //fprintf(fp, "%d %d %d: %d %d  %d %d: ", i,j,k, ind1,ind2,dir1,dir2);
+        //fprintf(fp, "%d %d %d: %d %d  %d %d: ", i,j,k, i1,i2,dir1,dir2);
         //fprintf(fp, "%g %g  %g %g: \t\t", Xb[dir1],Xb[dir2], X[dir1],X[dir2]);
-        //fprintf(fp, "%d %d %d: %d %d: %d: ", i,j,k, ind1,ind2, indv);
+        //fprintf(fp, "%d %d %d: %d %d: %d: ", i,j,k, i1,i2, indv);
         fprintf(fp, "%.15g %.15g %.15g\n", X[dir1], X[dir2], pv[indv]);
       }
       if(normal==2) fprintf(fp, "\n");
