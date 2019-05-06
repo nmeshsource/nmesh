@@ -6,8 +6,9 @@
 /* refinement methods: i.e. vals for var ref_method */
 enum
 {
-  PARENT_n,     /* use same n as parent */
-  PARENT_n_O2   /* use parent->n/2 */
+  PARENT_n,       /* use same n as parent */
+  PARENT_nO2,     /* use parent->n/2 */
+  PARENT_nO2_P1   /* use parent->n/2 + 1 */
 };
 
 
@@ -77,7 +78,7 @@ int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
                            int ofaces[6], double oX[3]);
 
 /* refine.c */
-void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
-                             int ref_method);
-void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
-                            int ref_method);
+void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method);
+void remove_nodes_if_rflag(tMesh *mesh, int ref_method);
+void refine_mesh_to_level(tMesh *mesh, int l);
+void refine_pat(tMesh *mesh, int p);

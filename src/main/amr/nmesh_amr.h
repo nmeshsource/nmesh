@@ -104,7 +104,7 @@ typedef struct tNODE {
   int np;                 /* np = n[0] * n[1] * n[2]; */
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
-  int refine;             /* flag for refining node */
+  int rflag;              /* flag for refining node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
   //int lid;                /* local node ID */

@@ -71,10 +71,19 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       /* pick n */
       switch(ref_method)
       {
-      case PARENT_n_O2:
+      case PARENT_nO2:
         for(d=0; d<3; d++)
         {
-          nc[d] = parent->n[d] / 2;
+          nc[d] = parent->n[d]/2;
+          if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
+          n = nc;
+        }
+        break;
+      case PARENT_nO2_P1:
+        for(d=0; d<3; d++)
+        {
+          nc[d] = parent->n[d]/2;
+          if(nc[d]>1) nc[d] += 1; /* add 1, unless it is 1 already */
           if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
           n = nc;
         }
@@ -104,8 +113,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
 }
 
 /* h-refine all nodes on all MPI procs if indicated by func needs_refine. */
-void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
-                             int ref_method)
+void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
@@ -119,19 +127,19 @@ void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
   if(!my_nid || !req || !nn || !ref_nid)
     errorexit("no memory for my_nid, req, nn, ref_nid");
 
-  /* record which nodes we want to refine */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    node->refine = needs_refine(node);
-  }
+  ///* record which nodes we want to refine */
+  //formylnodes(mesh, myid)
+  //{
+  //  tNode *node = MyNode(mesh, myid);
+  //  node->rflag = needs_refine(node);
+  //}
 
   /* save all nids where we need refinement in my_nid */
   nnodes = 0;
   formylnodes_noomp(mesh, myid)
   {
     tNode *node = MyNode(mesh, myid);
-    if(node->refine)
+    if(node->rflag)
       my_nid[nnodes++] = node->nid;
   }
   nn[rank] = nnodes;
@@ -153,7 +161,7 @@ void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
   }
 
   /* refine my_nid */
-  create_children_no_nid_update(mesh, nnodes, my_nid, PARENT_n_O2);
+  create_children_no_nid_update(mesh, nnodes, my_nid, PARENT_nO2);
   nn[rank] = 0;
   done = 1;
 
@@ -165,7 +173,7 @@ void hrefine_nodes_if_needed(tMesh *mesh, int (*needs_refine)(tNode *n),
     if(flag && nn[r]>0)
     {
       /* work on ref_nid[r] */
-      create_children_no_nid_update(mesh, nn[r], ref_nid[r], PARENT_n_O2);
+      create_children_no_nid_update(mesh, nn[r], ref_nid[r], PARENT_nO2);
       nn[r] = 0;
       done++;
     }
@@ -288,8 +296,7 @@ int nid0_compar(const void *x1, const void *x2)
 }
 
 /* Unrefine all nodes on all MPI procs if indicated by func needs_refine. */
-void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
-                            int ref_method)
+void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
@@ -305,12 +312,12 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
   if(!my_unr || !req || !nn || !unref)
     errorexit("no memory for my_unr, req, nn, unref");
 
-  /* record which nodes we want to remove */
-  formylnodes(mesh, myid)
-  {
-    tNode *node = MyNode(mesh, myid);
-    node->refine = unrefine(node);
-  }
+  ///* record which nodes we want to remove */
+  //formylnodes(mesh, myid)
+  //{
+  //  tNode *node = MyNode(mesh, myid);
+  //  node->rflag = unrefine(node);
+  //}
 
   /* save all sibling0 nids where we need refinement in my_unr */
   sib0 = NULL;
@@ -350,7 +357,7 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
     uref = 0;
     for(ijk=0; ijk<8; ijk++)
     {
-      if(sib[ijk]->dat && !(sib[ijk]->refine))
+      if(sib[ijk]->dat && !(sib[ijk]->rflag))
         goto continue_with_next_node;
       uref++;
     }
@@ -446,4 +453,54 @@ void remove_nodes_if_needed(tMesh *mesh, int (*unrefine)(tNode *n),
   free(unref);
   free(nn);
   free(req);
+}
+
+
+
+
+/* refine all nodes up to level l */
+void refine_mesh_to_level__new(tMesh *mesh, int l)
+{
+  int ref;
+
+  do
+  {
+    tNlist *el;
+    ref = 0;
+    fornodelist(mesh->lns, el)
+    {
+      tNode *node = el->node;
+      if(node->l < l)
+      {
+        node->rflag = 1; /* flag node for refinement */
+        ref++;           /* count number of nodes that need refinement */
+      }
+      else
+      {
+        node->rflag = 0;
+      }
+    }
+
+    if(ref)
+    {
+      hrefine_nodes_if_rflag(mesh, PARENT_n);
+      update_mesh_myln_node_nid(mesh);
+    }
+  } while(ref);
+}
+
+/* refine patch number p in mesh */
+void refine_pat__new(tMesh *mesh, int p)
+{
+  tPat *pat = mesh->pat[p];
+  tNlist *el;
+
+  fornodelist(mesh->lns, el)
+  {
+    tNode *node = el->node;
+    if(node->pat == pat) node->rflag = 1;
+    else                 node->rflag = 0;
+  }
+  hrefine_nodes_if_rflag(mesh, PARENT_n);
+  update_mesh_myln_node_nid(mesh);
 }
