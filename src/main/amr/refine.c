@@ -63,7 +63,8 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       int nc[3], *n, d;
 
       /* forward to node with nid[i] */
-      for(; elem->node->nid != nid[i]; elem = elem->next) ;
+      for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
+      //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
 
       /* make children */
       parent = elem->node;
@@ -117,7 +118,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, myid, done, flag;
+  int r, myid, todo, done, flag;
   int nnodes = (mesh->myln->nncats)*(mesh->myln->nm);
   long *my_nid   = calloc(nnodes, sizeof(my_nid[0]));
   nMPI_Req *req  = calloc(size, sizeof(req[0]));
@@ -144,42 +145,121 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
   }
   nn[rank] = nnodes;
 
+  /* number of procs where we have to refine and how many we have done so far */
+  todo = size;
+  done = 0;
+
   /* broadcast number of nodes nn to all MPI jobs */
   for(r=0; r<size; r++)
   {
     nMPI_Bcast(&(nn[r]), 1, nMPI_INT, r);
+
+    if(nn[r]<1) todo--; /* there is nothing to do if nn[r]=0 */
+
     if(r==rank)
       ref_nid[r] = my_nid;
     else
       ref_nid[r] = calloc(nn[r], sizeof(ref_nid[r][0]));
   }
 
+for(r=0; r<size; r++)
+{
+  int i;
+
+  printf("before ref_nid[r] broadcast ref_nid[%d] =", r);
+  for(i=0; i<nn[r]; i++) printf(" %ld", ref_nid[r][i]);
+  printf("\n");
+}
+//exit(4);
+
+
   /* broadcast ref_nid to all MPI jobs */
   for(r=0; r<size; r++)
   {
-    nMPI_Ibcast(&(ref_nid[r]), nn[r], nMPI_LONG, r, &(req[r]));
+    nMPI_Ibcast(&(ref_nid[r][0]), nn[r], nMPI_LONG, r, &(req[r]));
   }
 
-  /* refine my_nid */
-  create_children_no_nid_update(mesh, nnodes, my_nid, PARENT_nO2);
-  nn[rank] = 0;
-  done = 1;
+//Yo(1);
+//printmesh(mesh);
 
+MPI_Waitall(size, req, nMPI_STATUS_IGNORE);
+
+for(r=0; r<size; r++)
+{
+  int i;
+
+  printf("after ref_nid[r] broadcast ref_nid[%d] =", r);
+  for(i=0; i<nn[r]; i++) printf(" %ld", ref_nid[r][i]);
+  printf("\n");
+}
+//exit(4);
+
+
+
+#if 0
+
+  /* refine my_nid */
+//if(0)
+  if(nnodes>0)
+  {
+    create_children_no_nid_update(mesh, nnodes, my_nid, ref_method);
+    nn[rank] = 0;
+    done++;
+  }
+
+MPI_Waitall(size, req, nMPI_STATUS_IGNORE);
+
+Yo(2);
+printmesh(mesh);
+
+//goto endthis;
   /* check for incoming broadcasts and then work on them */
   r = 0;
-  while(done<size)
+  while(done<todo)
   {
     nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
     if(flag && nn[r]>0)
     {
       /* work on ref_nid[r] */
-      create_children_no_nid_update(mesh, nn[r], ref_nid[r], PARENT_nO2);
+      create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
       nn[r] = 0;
       done++;
     }
     r++;
     if(r>=size) r = 0;
   }
+
+  /* make sure all is sent and received */
+  MPI_Waitall(size, req, nMPI_STATUS_IGNORE);
+  exit(77);
+
+
+r = rank^1;
+create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+
+for(r=size-1; r>=0; r--)
+//for(r=0; r<size; r++)
+create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+
+#endif
+
+r = rank;
+//r=1;
+create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+r = rank^1;
+//r=0;
+create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+
+
+
+Yo(3);
+printmesh(mesh);
+
+printf("todo=%d\n", todo);
+//ref_nid[0][-111111111111] = 8;
+
+endthis:
+MPI_Waitall(size, req, nMPI_STATUS_IGNORE);
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
@@ -387,7 +467,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
   /* broadcast unref to all MPI jobs */
   for(r=0; r<size; r++)
   {
-    nMPI_Ibcast(&(unref[r]), 2*nn[r], nMPI_LONG, r, &(req[r]));
+    nMPI_Ibcast(&(unref[r][0]), 2*nn[r], nMPI_LONG, r, &(req[r]));
   }
 
   /* unrefine my own unref[rank] */
@@ -459,11 +539,11 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
 
 /* refine all nodes up to level l */
-void refine_mesh_to_level__new(tMesh *mesh, int l)
+void refine_mesh_to_level(tMesh *mesh, int l)
 {
-  int ref;
+  int i, ref;
 
-  do
+  for(i=0; i<l; i++)
   {
     tNlist *el;
     ref = 0;
@@ -486,7 +566,11 @@ void refine_mesh_to_level__new(tMesh *mesh, int l)
       hrefine_nodes_if_rflag(mesh, PARENT_n);
       update_mesh_myln_node_nid(mesh);
     }
-  } while(ref);
+    else
+    {
+      break;
+    }
+  }
 }
 
 /* refine patch number p in mesh */

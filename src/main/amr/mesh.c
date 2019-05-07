@@ -120,7 +120,7 @@ void remove_all_patches(tMesh *mesh)
 
 
 /* refine all nodes up to level l */
-void refine_mesh_to_level(tMesh *mesh, int l)
+void refine_mesh_to_level__old(tMesh *mesh, int l)
 {
   tNlist *el;
 
@@ -132,6 +132,7 @@ void refine_mesh_to_level(tMesh *mesh, int l)
 }
 
 /* refine patch number p in mesh */
+//void refine_pat__old(tMesh *mesh, int p)
 void refine_pat(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
@@ -171,8 +172,18 @@ int setup_mesh(tMesh *mesh)
   //printmesh(mesh);
 
   /* refine mesh */
-  refine_mesh_to_level(mesh, luni);
-  if(refp >= 0) refine_pat(mesh, refp);
+//  refine_mesh_to_level(mesh, luni);
+//  if(refp >= 0) refine_pat(mesh, refp);
+//Yo(0.1);
+//printmesh(mesh);
+//refine_mesh_to_level__old(mesh, luni);
+refine_mesh_to_level(mesh, luni);
+Yo(1000);
+printmesh(mesh);
+printnodelist(mesh->myln->ln[0][0]);
+//printnodelist(mesh->lns);
+printNlistarray(mesh->myln->ncat[0], mesh->myln->ln[0]);
+//exit(9);
 
   /* load balance full mesh */
   simple_load_balance(mesh);
