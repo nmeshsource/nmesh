@@ -10,6 +10,7 @@
 
 #include <mpi.h>
 #define nMPI_COMM_WORLD MPI_COMM_WORLD
+#define nMPI_COMM_NULL  MPI_COMM_NULL
 #define nMPI_Comm MPI_Comm
 #define nMPI_Req  MPI_Request
 #define nMPI_Stat MPI_Status
@@ -28,6 +29,7 @@
 #else
 
 #define nMPI_COMM_WORLD 0
+#define nMPI_COMM_NULL  0
 #define nMPI_Comm int
 #define nMPI_Req  int
 #define nMPI_Stat int
