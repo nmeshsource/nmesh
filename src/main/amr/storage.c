@@ -1228,12 +1228,17 @@ tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
 {
   tNlist *nlist_beg;
   tMesh *mesh = NULL;
+  int update_lns;
 
   if(elem) mesh = elem->node->pat->mesh;
   else     errorexit("elem is NULL!!!");
 
+  if(elem == mesh->lns) update_lns = 1;
+  else                  update_lns = 0;
+
   nlist_beg = replace1_in_nodelist(elem, nlist, 0);
-  mesh->lns = first_nodelist(nlist_beg);
+  if(update_lns) mesh->lns = nlist_beg;
+
   update_mesh_myln_node_nid(mesh);
   return nlist_beg;
 }
@@ -1264,6 +1269,7 @@ tNlist *remove8siblings_in_mesh_lns(tNlist *sib)
   tNode *parent, *node0;
   tNlist *elem, *elem0;
   tMesh *mesh = NULL;
+  int update_lns;
   int ijk;
 
   if(sib==NULL) errorexit("sib is NULL!!!");
@@ -1287,11 +1293,16 @@ tNlist *remove8siblings_in_mesh_lns(tNlist *sib)
     elem = remove1_in_nodelist(elem, 1);
   }
 
+  /* do we need to update mesh->lns? */
+  if(elem0 == mesh->lns) update_lns = 1;
+  else                   update_lns = 0;
+
   /* replace sibling 0 by parent in list */
   elem0 = replacenode_in_nodelist(elem0, parent);
 
   /* reset mesh lists */
-  mesh->lns = first_nodelist(elem0);
+  if(update_lns) mesh->lns = elem0;
+
   return elem0;
 }
 

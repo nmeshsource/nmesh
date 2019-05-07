@@ -134,8 +134,7 @@ Things that should be done:
 ===========================
 *in main/amr/storage.c we often set mesh->lns = first_nodelist(...
  -BUT in many cases we know that mesh->lns is unchanged, or even know
-  how it chanched!
-  => improve this!!!
+  how it chanched! : DONE in most often used parts.
 
 *node->fnb is an array, a nodelist may have been better
  +Then common_facepoints would not have to be called from both node and its
