@@ -1160,26 +1160,27 @@ long update_mesh_myln_node_nid(tMesh *mesh)
   realloc_myln_nncats(mesh->myln, 0);
 
   /* go over leaves if  mesh->lns is not NULL */
-  if(mesh->lns) fornodelist(mesh->lns, elem)
-  {
-    tNode *node = elem->node;
-    tNode *parent = node->parent;
-
-    if(node->dat)
+  if(mesh->lns)
+    fornodelist(mesh->lns, elem)
     {
-      /* for now we put all leaves in cat. 0 */
-      addto_myln_ln_c(mesh->myln, 0, elem);
-      //PRF;printf(": myln->ncat[0]=%d %p\n", mesh->myln->ncat[0], elem);
+      tNode *node = elem->node;
+      tNode *parent = node->parent;
 
-      /* set lid and invalidate parent's lid */
-      //node->lid = lid++;
-      //if(parent) parent->lid = -lid;
+      if(node->dat)
+      {
+        /* for now we put all leaves in cat. 0 */
+        addto_myln_ln_c(mesh->myln, 0, elem);
+        //PRF;printf(": myln->ncat[0]=%d %p\n", mesh->myln->ncat[0], elem);
+
+        /* set lid and invalidate parent's lid */
+        //node->lid = lid++;
+        //if(parent) parent->lid = -lid;
+      }
+      /* set nid and invalidate parent's nid */
+      node->nid = nid++;
+      if(parent) parent->nid = -nid;
+      //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
     }
-    /* set nid and invalidate parent's nid */
-    node->nid = nid++;
-    if(parent) parent->nid = -nid;
-    //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
-  }
   else /* mesh->lns is NULL, so free myln */
     realloc_myln_nncats(mesh->myln, 0);
 
