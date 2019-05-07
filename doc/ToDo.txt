@@ -90,7 +90,8 @@ Things that need to be done urgently:
 *advect square profile and check for flux integral conservation
 
 *check funs in refine.c
-
+ +MPI part seems to work
+ +switch on threads and test with them
 
 *implement mesh refinement of troubled cells/nodes
  +go from n_old, n_new= 1 + n_old/2, until we reach n_new=1
@@ -165,8 +166,6 @@ Things that should be done:
 
 Cleanup:
 ========
--cleanup make_outside_neighbor_list 
-  don't need:  brct_nodeface(node, face/2, brct); and many debug lines
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
 

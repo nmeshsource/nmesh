@@ -398,15 +398,11 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
   tNlist *nbl, *nblist1, *elem;
   tNode *nb;
   int nc, nb_f;
-  double brct[4]; // bound. rect. of node
 
   /* no outside neighb. if not on patch face */
   if(!node->patface[face]) return NULL;
 
   //PRF;printf(":\n");
-
-  /* set bound. rect. of node */
-  brct_nodeface(node, face/2, brct);
 
   /* loop over all bfaces on face and find nb */
   nblist = NULL;
@@ -438,16 +434,9 @@ tNlist *make_outside_neighbor_list(tNode *node, int face)
 
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
-/*
-if(node->nid==41)
-{
-Yo(1);
-printnd(node);
-printnodelist(nbl);
-}
-*/
-    /* go over nbl and remove all whose face does not intersect
-       with the node bounding rectangle brct */
+
+    /* go over nbl and remove all whose do not have common face points
+       with the node */
     nblist1 = NULL;
     fornodelist(nbl, elem)
     {
@@ -461,32 +450,13 @@ printnodelist(nbl);
         nblist1 = elem; /* save elem that touches our node */
         continue;
       }
-/*
-if(node->nid==41)
-{
-Yo(2.2);
-//printnodelist(nblist1);
-//printnodelist(elem);
-prbbox(brct,2);
-prbbox(nbrct,2);
-prbbox(irct,2);
-printf("\n");
-printf("touch=%d problem=%d\n", touch, problem);
-printf("remove:"); printnd(nb);
-}
-*/
+
       /* remove nb=elem->node from nbl */
       elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
       if(elem) goto nbl_loop_start;
       else     break;
     }
-/*
-if(node->nid==41)
-{
-Yo(2.9);
-printnodelist(nblist1);
-}
-*/
+
     /* add nblist1 to nblist */
     nblist = insertnodelist_into_nodelist_after(nblist, nblist1);
   }
