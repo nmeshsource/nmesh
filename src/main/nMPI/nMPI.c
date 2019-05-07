@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
-#define PR 0
+#define PR 1
 
 /* my rank and size if MPI is not compiled in, look at nMPI_Init for
    debugging help!!! */
@@ -380,7 +380,8 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
 void print_com(tCom *com)
 {
   int n_rq = com->n_rq;
-  printf("com: n_rq=%d send_i=%d recv_i=%d\n", n_rq, com->send_i, com->recv_i);
+  printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
+         com, n_rq, com->send_i, com->recv_i);
 #ifndef USEMPI
   for(int i=0; i<n_rq; i++)
     printf("%d: send_rq=%d recv_rq=%d send_stat=%d recv_stat=%d\n",
@@ -523,11 +524,23 @@ int nMPI_Waitall_com(tCom *com)
 /* wait for send request rq to finish */
 int nMPI_Wait_com_send(tCom *com, int rq)
 {
+  if(PR)
+  {
+    PRFs(": ");
+    print_com(com);
+    printf("    rq=%d\n", rq);
+  }
   return nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
 }
 /* wait for recv request rq to finish */
 int nMPI_Wait_com_recv(tCom *com, int rq)
 {
+  if(PR)
+  {
+    PRFs(": ");
+    print_com(com);
+    printf("    rq=%d\n", rq);
+  }
   return nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
 }
 
@@ -536,6 +549,13 @@ void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag,
                                  nMPI_Comm s_comm, nMPI_Comm r_comm)
 {
+  if(PR)
+  {
+    PRFs(": ");
+    print_com(com);
+    printf("    rq=%d rank_other=%d s_tag=%d r_tag=%d\n",
+           rq, rank_other, s_tag, r_tag);
+  }
   nMPI_Isend_Irecv_double(com->send_buf[rq], com->send_buflen[rq],
                           com->recv_buf[rq], com->recv_buflen[rq],
                           rank_other, s_tag, r_tag, s_comm, r_comm,
