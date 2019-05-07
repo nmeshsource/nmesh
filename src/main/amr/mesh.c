@@ -143,9 +143,9 @@ int setup_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   //printmesh(mesh);
 
-  /* refine mesh */
-  hrefine_mesh_to_level(mesh, luni);
-  if(refp >= 0) hrefine_pat(mesh, refp);
+//  /* refine mesh */
+//  hrefine_mesh_to_level(mesh, luni);
+//  if(refp >= 0) hrefine_pat(mesh, refp);
 /*
 //Yo(0.1);
 //printmesh(mesh);
@@ -158,6 +158,42 @@ printnodelist(mesh->myln->ln[0][0]);
 printNlistarray(mesh->myln->ncat[0], mesh->myln->ln[0]);
 //exit(9);
 */
+
+hrefine_pat(mesh, 1);
+Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+ simple_load_balance(mesh);
+Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+hrefine_pat(mesh, 1);
+Yo(2);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+ simple_load_balance(mesh);
+Yo(2);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+hrefine_pat(mesh, 0);
+Yo(3);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+ simple_load_balance(mesh);
+Yo(3);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+hrefine_mesh_to_level(mesh, 3);
+Yo(4);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+ simple_load_balance(mesh);
+Yo(4);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+hcoarsen_pat(mesh, 0);
+Yo(5);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+ simple_load_balance(mesh);
+Yo(5);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+hcoarsen_mesh_to_level(mesh, 2);
+Yo(6);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+ simple_load_balance(mesh);
+Yo(6);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+hcoarsen_pat(mesh, 0);
+Yo(7);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
+
+
+
   /* load balance full mesh */
   simple_load_balance(mesh);
   printmesh(mesh);

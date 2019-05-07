@@ -239,6 +239,9 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
 
   if(!elem_parent) errorexit("no memory for elem_parent");
 
+  //PRF;printnodelist(mesh->lns);
+  //prlarray("nid0", 2*nnodes, nid0);
+
   /* update mesh->lns by removing all in nid0 and their siblings */
   n_remain = 0;
   for(i=0; i<nnodes; i++)
@@ -261,17 +264,24 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
       continue;
     }
 
-    /* update mesh->lns if needed and remove 8 siblings */
+    /* update mesh->lns if needed */
     if(elem == mesh->lns)
       update_lns = 1;
     else
       update_lns = 0;
 
+    //printf("rm %ld: ",i);
+    ////printnodelistelement_and_neighbors_flag(elem,2);
+    //printnodelist(elem);
+
+    /* remove 8 siblings */
     elem_parent[i] = remove8siblings_in_mesh_lns(elem);
     if(update_lns) mesh->lns = elem_parent[i];
 
     /* set elem to parent */
     elem = elem_parent[i];
+    ////printnodelistelement_and_neighbors_flag(elem,2);
+    //printnodelist(elem);
   }
 
   /* Now mesh->lns is up to date, next destroy the children */
@@ -341,6 +351,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   if(!my_unr || !req || !nn || !unref)
     errorexit("no memory for my_unr, req, nn, unref");
+
+  //PRF;printnodelist(mesh->lns);
 
   ///* record which nodes we want to remove */
   //formylnodes(mesh, myid)
