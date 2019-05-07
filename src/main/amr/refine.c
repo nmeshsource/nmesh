@@ -67,8 +67,9 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       int nc[3], *n, d;
 
       /* forward to node with nid[i] */
-      for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
+      //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
       //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
+      for(; elem->node->nid != nid[i]; elem = elem->next) ;
 
       /* make children */
       parent = elem->node;
@@ -242,10 +243,12 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
   n_remain = 0;
   for(i=0; i<nnodes; i++)
   {
-    tNlist *elem;
+    tNlist *elem = mesh->lns;
     int update_lns;
 
     /* forward to node with nid0[2*i] */
+    //for(; elem && elem->node->nid != nid0[2*i]; elem = elem->next) ;
+    //if(!elem) errorexiti("could not find nid0[2*i]=%d", nid0[2*i]);
     for(; elem->node->nid != nid0[2*i]; elem = elem->next) ;
 
     /* go to next node if not all 8 siblings need unrefinement,
