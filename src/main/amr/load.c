@@ -272,5 +272,4 @@ void move_nodelist_to_rank(tNlist *list, int desrank)
   }
 
   free_com(rcom);
-  update_mesh_myln_node_nid(mesh);
 }

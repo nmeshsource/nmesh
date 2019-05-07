@@ -278,6 +278,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   l2 = addnode_to_nodelist_after(l2, el->next->next->node);
   addnode_to_nodelist_after(l2, el->next->next->next->node);
   move_nodelist_to_rank(l2, (nMPI_size()>1));
+  update_mesh_myln_node_nid(mesh);
   free_nodelist(l2);
   l2 = NULL;
   //printmesh(mesh);
