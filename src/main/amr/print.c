@@ -112,9 +112,10 @@ void printnode(tNode *n)
           n->bbox[0], n->bbox[1], n->bbox[2],
           n->bbox[3], n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
   printf(" l%d leaf=%d: ", n->l, n->leaf);
-  printf(" datrank=%d  dat: %s ", n->datrank, n->dat ? "yes" : "no");
+  printf(" datrank=%d  dat: %s ", n->datrank, n->dat ? "yes" : "no ");
   printf(" patface=");
   for(i=0; i<6; i++) printf("%d", n->patface[i]);
+  printf("  rflag=%d", n->rflag);
   printf("\n");
   printf(" nb =");
   //for(i=0; i<6; i++) printf(" %ld", get_node_nid(n->nb[i]));
