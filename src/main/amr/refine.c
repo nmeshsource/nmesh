@@ -327,7 +327,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, myid, done, flag;
+  int r, myid, todo, done, flag;
   int nnodes;
   int myn = (mesh->myln->nncats)*(mesh->myln->nm);
   long *my_unr  = calloc(2*myn, sizeof(my_unr[0]));
@@ -400,37 +400,58 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
   }
   nn[rank] = nnodes;
 
+  /* number of procs where we have to uref and how many we have done so far */
+  todo = size;
+  done = 0;
+
   /* broadcast number of nodes nn to all MPI jobs */
   for(r=0; r<size; r++)
   {
     nMPI_Bcast(&(nn[r]), 1, nMPI_INT, r);
+
+    if(nn[r]<=0) todo--; /* there is nothing to do if nn[r]=0 */
+
     if(r==rank)
+    {
       unref[r] = my_unr;
+    }
     else
-      unref[r] = calloc(2*nn[r], sizeof(unref[r][0]));
+    {
+      if(nn[r]>0)
+        unref[r] = calloc(2*nn[r], sizeof(unref[r][0]));
+      else
+        unref[r] = NULL;
+    }
   }
   my_unr = NULL; /* we do not need my_unr anymore */
 
   /* broadcast unref to all MPI jobs */
   for(r=0; r<size; r++)
   {
-    nMPI_Ibcast(&(unref[r][0]), 2*nn[r], nMPI_LONG, r, &(req[r]));
+    if(nn[r]>0)
+      nMPI_Ibcast(&(unref[r][0]), 2*nn[r], nMPI_LONG, r, &(req[r]));
   }
 
   /* unrefine my own unref[rank] */
-  nn[rank] = -destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
-  done = 1;
+  if(nn[rank]>0)
+  {
+    nn[rank] = -destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
+    done++;
+  }
 
   /* check for incoming broadcasts and then work on them */
   r = 0;
-  while(done<size)
+  while(done<todo)
   {
-    nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
-    if(flag && nn[r]>0)
+    if(nn[r]>0)
     {
-      /* work on unref[r] */
-      nn[r] = -destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
-      done++;
+      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
+      if(flag)
+      {
+        /* work on unref[r] */
+        nn[r] = -destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
+        done++;
+      }
     }
     r++;
     if(r>=size) r = 0;
@@ -438,7 +459,6 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   /* flip sign on nn[r] since we made it negative above */
   for(r=0; r<size; r++) nn[r] = -nn[r];
-
 
   /* merge the arrays with left over nids into one */
   for(r=0; r<size; r++)
