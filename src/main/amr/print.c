@@ -532,6 +532,15 @@ void pr3v(char *s, double x[3])
   printf("%s=%g %g %g  ", s, x[0],x[1],x[2]);
 }
 
+/* print an array of long ints */
+void prlarray(char *s, long n, long *ar)
+{
+  long i;
+  printf("%s =", s);
+  for(i=0; i<n; i++) printf(" %ld", ar[i]);
+  printf("\n");
+}
+
 void prbbox(double *bb, int dim)
 {
   int d;

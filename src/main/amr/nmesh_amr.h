@@ -381,6 +381,7 @@ void printbfaces_on_f(tPat *pat, int f);
 void printbfaces(tPat *pat);
 void printallbfaces(tMesh *mesh);
 void pr3v(char *s, double x[3]);
+void prlarray(char *s, long n, long *ar);
 void prbbox(double *bb, int dim);
 void printcorners(tPat *pat);
 void printfacecorners(tPat *pat, int  f);
