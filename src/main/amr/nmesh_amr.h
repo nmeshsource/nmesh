@@ -301,7 +301,7 @@ void realloc_patlist_in_mesh(tMesh *mesh, int npats);
 void free_mesh(tMesh *mesh);
 tPat *alloc_patch(tMesh *mesh, int p, int nD);
 void free_patch(tPat *pat);
-tNode *alloc_node(void);
+tNode *alloc_node(int initcomm);
 void free_node(tNode *node);
 tNode *make_root_node(tPat *pat, int n[3], int datrank);
 tNlist *make8_child_nodes(tNode *parent, int n[3]);

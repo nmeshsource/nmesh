@@ -182,14 +182,17 @@ void free_3_arrays(tArray *array[3])
 /**************************************************************************/
 
 /* allocate one node*/
-tNode *alloc_node(void)
+tNode *alloc_node(int initcomm)
 {
   tNode *node = calloc(1, sizeof(*node));
   if(!node) errorexit("out of memory");
 
-  /* make node MPI communicator node->comm, for now we just duplicate
-     main_comm from main.c */
-  nMPI_Comm_dup(main_comm, &(node->comm));
+  if(initcomm)
+  {
+    /* make node MPI communicator node->comm, for now we just duplicate
+       main_comm from main.c */
+    nMPI_Comm_dup(main_comm, &(node->comm));
+  }
 
   return node;
 }
@@ -261,7 +264,7 @@ void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
 /* make root node */
 tNode *make_root_node(tPat *pat, int n[3], int datrank)
 {
-  tNode *node = alloc_node();
+  tNode *node = alloc_node(1);
   int i;
 
   /* fill in info */
@@ -307,7 +310,7 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
 tNode *make_child_node(tNode *parent, int n[3], int ijk)
 {
   tMesh *mesh = parent->pat->mesh;
-  tNode *node = alloc_node();
+  tNode *node = alloc_node(1);
   double mid[3];
   int i,j,k, d, vi,nvdb;
   int ns[] = {2,2,2};
