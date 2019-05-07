@@ -315,15 +315,15 @@ long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
   /* if nid0 is not empty, merge nid0b into nid0 */
   if(n>0)
   {
-    for(i=0; i<nn; i++)
+    for(j=0; j<nb; j++)
     {
-      long nid0_2i = nid0[2*i];
+      long nid0b_2j = nid0b[2*j];
 
-      /* find nid0_2i in nid0b */
-      for(j=0; j<nb; j++)
-        if(nid0b[2*j] == nid0_2i) break;
+      /* find nid0b_2j in nid0 */
+      for(i=0; i<n; i++)
+        if(nid0[2*i] == nid0b_2j) break;
 
-      if(j<nb) /* found nid0_2i in nid0b */
+      if(i<n)  /* found nid0b_2j in nid0 */
         nid0[2*i+1] += nid0b[2*j+1];
       else     /* append nid0b to nid0 */
         { nid0[2*nn] = nid0b[2*j];  nid0[2*nn+1] = nid0b[2*j+1];  nn++; }
@@ -331,7 +331,7 @@ long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
   }
   else /* copy nid0b into nid0 */
   {
-    for(i=0; i<2*nb; i++) nid0[i] = nid0b[i];
+    for(j=0; j<2*nb; j++) nid0[j] = nid0b[j];
     nn = nb;
   }
 
