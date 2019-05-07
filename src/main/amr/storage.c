@@ -1146,6 +1146,15 @@ int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem)
   return myln->ncat[c];
 }
 
+/* total number of nodes in all categories of myln */
+int total_nnodes_in_myln(tMylnodes *myln)
+{
+  int c, sum=0;
+  for(c=0; c < myln->nncats; c++)
+    sum += myln->ncat[c];
+  return sum;
+}
+
 /**********************************************************************/
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
