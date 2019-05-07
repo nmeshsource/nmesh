@@ -221,7 +221,7 @@ int evolve_init_evosys(tMesh *mesh)
     evosys->rhs = alloc_pVLList();
     evosys->u_p = alloc_pVLList();
 
-    printf("Adding variables for RK4 evolution:\n");
+    printf("Adding variables for RK evolution:\n");
     forList(evosys->u, i)
     {
       tVarList *u   = ListEntry(evosys->u, i);

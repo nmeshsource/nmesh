@@ -144,9 +144,9 @@ int setup_mesh(tMesh *mesh)
   //printmesh(mesh);
 
   /* refine mesh */
-//  hrefine_mesh_to_level(mesh, luni);
-//  if(refp >= 0) hrefine_pat(mesh, refp);
-
+  hrefine_mesh_to_level(mesh, luni);
+  if(refp >= 0) hrefine_pat(mesh, refp);
+/*
 hrefine_pat(mesh, 1);
 Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
  simple_load_balance(mesh);
@@ -179,8 +179,7 @@ Yo(6);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
 
 hcoarsen_pat(mesh, 0);
 Yo(7);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-
+*/
 
   /* load balance full mesh */
   simple_load_balance(mesh);
