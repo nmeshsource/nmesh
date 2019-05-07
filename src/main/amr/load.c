@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 1
+#define PR 0
 
 /* functions to move nodes between procs */
 
@@ -34,7 +34,7 @@ void simple_load_balance(tMesh *mesh)
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
 
-  PRF;printf(": nnodes=%ld\n", nnodes);
+  PRF;printf(": nnodes=%ld", nnodes);
 
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
@@ -62,6 +62,7 @@ void simple_load_balance(tMesh *mesh)
 
   free_com(rcom);
   update_mesh_myln_node_nid(mesh);
+  printf(" --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
 }
 
 /* return: number of variables and number of doubles inside dat */
