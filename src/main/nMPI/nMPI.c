@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
-#define PR 1
+#define PR 0
 
 /* my rank and size if MPI is not compiled in, look at nMPI_Init for
    debugging help!!! */

@@ -315,7 +315,7 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
 tNode *make_child_node(tNode *parent, int n[3], int ijk)
 {
   tMesh *mesh = parent->pat->mesh;
-  tNode *node = alloc_node(1);
+  tNode *node = alloc_node(0);
   double mid[3];
   int i,j,k, d, vi,nvdb;
   int ns[] = {2,2,2};
