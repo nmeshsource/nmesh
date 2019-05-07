@@ -364,6 +364,8 @@ void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);
 void printnodelist_and_neighbors(tNlist *nl);
 void printnodelist(tNlist *nl);
+void printnodearray(long nnodes, tNode **na);
+void printNlistarray(long nnodes, tNlist **nl);
 void printvar_innode(tNode *node, int vi);
 void printvar_ajsurfdiff(tNode *node, int vi);
 void printvar_indc(tNode *node, int vi);

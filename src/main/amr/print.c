@@ -174,6 +174,8 @@ void printnodelist_and_neighbors_flag(tNlist *nl, int pr_nb)
 
   fornodelist(first_nodelist(nl), el)
   {
+    if(el==nl) printf(">");
+    else       printf(" ");
     printf("nid%ld %s: ", get_node_nid(el->node), nodename(el->node, s,100));
     if(el->prev)
       printf(" prev=nid%ld %s ",
@@ -199,6 +201,45 @@ void printnodelist_and_neighbors(tNlist *nl)
 {
   printnodelist_and_neighbors_flag(nl, 1);
 }
+
+void printnodearray_and_neighbors_flag(long nnodes, tNode **na, int pr_nb)
+{
+  char s[100];
+  long i;
+
+  for(i=0; i<nnodes; i++)
+  {
+    printf("nid%ld %s\n", get_node_nid(na[i]), nodename(na[i], s,100));
+    if(pr_nb) printnode_and_neighbors(na[i]);
+  }
+  if(!na || nnodes<1) printf("<empty nodearray>\n");
+}
+
+void printnodearray(long nnodes, tNode **na)
+{
+  printnodearray_and_neighbors_flag(nnodes, na, 0);
+}
+
+void printNlistarray_and_neighbors_flag(long nnodes, tNlist **nl, int pr_nb)
+{
+  char s[100];
+  long i;
+
+  for(i=0; i<nnodes; i++)
+  {
+    tNode *node = nl[i]->node;
+    printf("nid%ld %s\n", get_node_nid(node), nodename(node, s,100));
+    if(pr_nb) printnode_and_neighbors(node);
+  }
+  if(!nl || nnodes<1) printf("<empty nodearray>\n");
+}
+
+void printNlistarray(long nnodes, tNlist **nl)
+{
+  printNlistarray_and_neighbors_flag(nnodes, nl, 0);
+}
+
+
 
 /* print a variable in a node */
 void printvar_innode(tNode *node, int vi)
