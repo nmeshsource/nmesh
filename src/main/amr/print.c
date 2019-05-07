@@ -547,7 +547,7 @@ void pr3v(char *s, double x[3])
 void prlarray(char *s, long n, long *ar)
 {
   long i;
-  printf("%s =", s);
+  printf("%s[%ld] =", s, n);
   for(i=0; i<n; i++) printf(" %ld", ar[i]);
   printf("\n");
 }
