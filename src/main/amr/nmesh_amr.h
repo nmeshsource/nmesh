@@ -320,6 +320,7 @@ tNlist *remove1_in_nodelist(tNlist *elem, int return_next);
 tNlist *first_nodelist(tNlist *list);
 tNlist *last_nodelist(tNlist *list);
 void free_nodelist(tNlist *elem);
+int total_nnodes_in_myln(tMylnodes *myln);
 long update_mesh_myln_node_nid(tMesh *mesh);
 long get_node_nid(tNode *node);
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
