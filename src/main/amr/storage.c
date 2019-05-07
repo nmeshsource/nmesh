@@ -1180,6 +1180,10 @@ long update_mesh_myln_node_nid(tMesh *mesh)
       node->nid = nid++;
       if(parent) parent->nid = -nid;
       //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
+
+      /* make node MPI communicator if it is not set yet */
+      if(node->comm == nMPI_COMM_NULL)
+        nMPI_Comm_dup(main_comm, &(node->comm));
     }
   else /* mesh->lns is NULL, so free myln */
     realloc_myln_nncats(mesh->myln, 0);
