@@ -102,7 +102,7 @@ void printnd(tNode *n)
           n->bbox[3], n->bbox[4],n->bbox[5], n->leaf, n->dat ? "yes" : "no");
 }
 
-void printnode(tNode *n) 
+void printnode(tNode *n)
 {
   int i, j;
   char s[100];
