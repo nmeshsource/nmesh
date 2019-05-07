@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "coordinates.h"
 
-#define PR 1
+#define PR 0
 
 
 
@@ -114,7 +114,7 @@ int coordinates_init_node(tNode *node)
   if(dat->coords_set) return 0;
   if(!vars_on) return 0;
 
-  PRF;printf(": nid%ld\n", node->nid);
+  if(PR) { PRF;printf(": nid%ld\n", node->nid); }
 
   /* pointers to 3 metric */
   if(i3metric>=0)
