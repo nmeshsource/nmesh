@@ -46,10 +46,14 @@ void hrefine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
 void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
                                    int ref_method)
 {
-  tNlist **replace  = calloc(nnodes, sizeof(replace[0]));
-  tNlist **children = calloc(nnodes, sizeof(children[0]));
+  tNlist **replace, **children;
   long i;
 
+  if(nnodes<=0) return;
+
+  /* get mem. */
+  replace  = calloc(nnodes, sizeof(replace[0]));
+  children = calloc(nnodes, sizeof(children[0]));
   if(!replace || !children) errorexit("no memory for replace, children");
 
   FORNODES_Pragma(omp parallel)
@@ -157,9 +161,16 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
     if(nn[r]<=0) todo--; /* there is nothing to do if nn[r]=0 */
 
     if(r==rank)
+    {
       ref_nid[r] = my_nid;
+    }
     else
-      ref_nid[r] = calloc(nn[r], sizeof(ref_nid[r][0]));
+    {
+      if(nn[r]>0)
+        ref_nid[r] = calloc(nn[r], sizeof(ref_nid[r][0]));
+      else
+        ref_nid[r] = NULL;
+    }
   }
 
   /* broadcast ref_nid to all MPI jobs */
@@ -176,6 +187,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
     nn[rank] = 0;
     done++;
   }
+  my_nid = NULL; /* we do not need my_nid anymore */
 
   /* check for incoming broadcasts and then work on them */
   r = 0;
@@ -195,23 +207,6 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
     r++;
     if(r>=size) r = 0;
   }
-
-#if 0
-r = rank^1;
-create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
-
-//for(r=size-1; r>=0; r--)
-////for(r=0; r<size; r++)
-//create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
-
-
-r = rank;
-//r=1;
-create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
-r = rank^1;
-//r=0;
-create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
-#endif
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
