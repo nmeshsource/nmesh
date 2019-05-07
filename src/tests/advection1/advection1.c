@@ -340,7 +340,7 @@ int advection1_init(tMesh *mesh)
   get_all_myln_indc_for_vl(mesh, vlu);
   formylnodes(mesh, myid)
   {
-    tNode *node = MyNode(mesh, myid);
+    //tNode *node = MyNode(mesh, myid);
     //limiter_MRS(node, vlu);
   }
 

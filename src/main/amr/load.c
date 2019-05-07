@@ -242,7 +242,7 @@ void move_nodelist_to_rank(tNlist *list, int desrank)
 {
   tNlist *elem, *list0;
   tNode *node = list->node;
-  tMesh *mesh = node->pat->mesh;
+  //tMesh *mesh = node->pat->mesh;
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
 
