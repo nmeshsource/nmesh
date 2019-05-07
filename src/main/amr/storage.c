@@ -193,6 +193,10 @@ tNode *alloc_node(int initcomm)
        main_comm from main.c */
     nMPI_Comm_dup(main_comm, &(node->comm));
   }
+  else
+  {
+    node->comm = nMPI_COMM_NULL;
+  }
 
   return node;
 }
@@ -219,7 +223,8 @@ void free_this_node_only(tNode *node)
   free_dat(node->dat);
 
   /* free node MPI communicator comm */
-  nMPI_Comm_free(&(node->comm));
+  if(node->comm != nMPI_COMM_NULL)
+    nMPI_Comm_free(&(node->comm));
 
   free(node);
 }
