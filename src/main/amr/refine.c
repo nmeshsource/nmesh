@@ -489,9 +489,39 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
 
 
+/* refine all nodes up to level l */
+//void refine_mesh_to_level(tMesh *mesh, int l)
+void refine_mesh_to_level__old(tMesh *mesh, int l)
+{
+  tNlist *el;
+
+  for(el=mesh->lns; el; el = el->next)
+  {
+    while(el->node->l < l)
+      el = make8children_in_mesh_lns_myln(el, el->node->n);
+  }
+}
+
+/* refine patch number p in mesh */
+//void refine_pat(tMesh *mesh, int p)
+void refine_pat__old(tMesh *mesh, int p)
+{
+  tPat *pat = mesh->pat[p];
+  tNlist *el, *en;
+
+  el = mesh->lns;
+  for(en = el->next; el; en = el ? el->next : 0)
+  {
+    if(el->node->pat == pat)
+      make8children_in_mesh_lns_myln(el, el->node->n);
+    el = en;
+  }
+}
+
+
 
 /* refine all nodes up to level l */
-void refine_mesh_to_level__new(tMesh *mesh, int l)
+void refine_mesh_to_level(tMesh *mesh, int l)
 {
   int i, ref;
 
@@ -526,7 +556,7 @@ void refine_mesh_to_level__new(tMesh *mesh, int l)
 }
 
 /* refine patch number p in mesh */
-void refine_pat__new(tMesh *mesh, int p)
+void refine_pat(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
   tNlist *el;
