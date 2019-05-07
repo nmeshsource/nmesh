@@ -80,5 +80,7 @@ int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
 /* refine.c */
 void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method);
 void remove_nodes_if_rflag(tMesh *mesh, int ref_method);
-void refine_mesh_to_level(tMesh *mesh, int l);
-void refine_pat(tMesh *mesh, int p);
+void hrefine_mesh_to_level(tMesh *mesh, int l);
+void hcoarsen_mesh_to_level(tMesh *mesh, int l);
+void hrefine_pat(tMesh *mesh, int p);
+void hcoarsen_pat(tMesh *mesh, int p);

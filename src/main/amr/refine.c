@@ -506,7 +506,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
 /* refine all nodes up to level l */
 //void refine_mesh_to_level(tMesh *mesh, int l)
-void refine_mesh_to_level__old(tMesh *mesh, int l)
+void hrefine_mesh_to_level__old(tMesh *mesh, int l)
 {
   tNlist *el;
 
@@ -519,7 +519,7 @@ void refine_mesh_to_level__old(tMesh *mesh, int l)
 
 /* refine patch number p in mesh */
 //void refine_pat(tMesh *mesh, int p)
-void refine_pat__old(tMesh *mesh, int p)
+void hrefine_pat__old(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
   tNlist *el, *en;
@@ -536,7 +536,7 @@ void refine_pat__old(tMesh *mesh, int p)
 
 
 /* refine all nodes up to level l */
-void refine_mesh_to_level(tMesh *mesh, int l)
+void hrefine_mesh_to_level(tMesh *mesh, int l)
 {
   int i, ref;
 
@@ -570,8 +570,39 @@ void refine_mesh_to_level(tMesh *mesh, int l)
   }
 }
 
+/* refine all nodes up to level l */
+void hcoarsen_mesh_to_level(tMesh *mesh, int l)
+{
+  int ref;
+
+  do
+  {
+    tNlist *el;
+    ref = 0;
+    fornodelist(mesh->lns, el)
+    {
+      tNode *node = el->node;
+      if(node->l > l)
+      {
+        node->rflag = 1; /* flag node for refinement */
+        ref++;           /* count number of nodes that need refinement */
+      }
+      else
+      {
+        node->rflag = 0;
+      }
+    }
+
+    if(ref)
+    {
+      remove_nodes_if_rflag(mesh, PARENT_n);
+      update_mesh_myln_node_nid(mesh);
+    }
+  } while(ref);
+}
+
 /* refine patch number p in mesh */
-void refine_pat(tMesh *mesh, int p)
+void hrefine_pat(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
   tNlist *el;
@@ -585,3 +616,20 @@ void refine_pat(tMesh *mesh, int p)
   hrefine_nodes_if_rflag(mesh, PARENT_n);
   update_mesh_myln_node_nid(mesh);
 }
+
+/* refine patch number p in mesh */
+void hcoarsen_pat(tMesh *mesh, int p)
+{
+  tPat *pat = mesh->pat[p];
+  tNlist *el;
+
+  fornodelist(mesh->lns, el)
+  {
+    tNode *node = el->node;
+    if(node->pat == pat) node->rflag = 1;
+    else                 node->rflag = 0;
+  }
+  remove_nodes_if_rflag(mesh, PARENT_n);
+  update_mesh_myln_node_nid(mesh);
+}
+

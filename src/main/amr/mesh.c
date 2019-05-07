@@ -144,8 +144,8 @@ int setup_mesh(tMesh *mesh)
   //printmesh(mesh);
 
   /* refine mesh */
-  refine_mesh_to_level(mesh, luni);
-  if(refp >= 0) refine_pat(mesh, refp);
+  hrefine_mesh_to_level(mesh, luni);
+  if(refp >= 0) hrefine_pat(mesh, refp);
 /*
 //Yo(0.1);
 //printmesh(mesh);
