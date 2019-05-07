@@ -143,21 +143,9 @@ int setup_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   //printmesh(mesh);
 
-//  /* refine mesh */
+  /* refine mesh */
 //  hrefine_mesh_to_level(mesh, luni);
 //  if(refp >= 0) hrefine_pat(mesh, refp);
-/*
-//Yo(0.1);
-//printmesh(mesh);
-//refine_mesh_to_level__old(mesh, luni);
-refine_mesh_to_level(mesh, luni);
-Yo(1000);
-printmesh(mesh);
-printnodelist(mesh->myln->ln[0][0]);
-//printnodelist(mesh->lns);
-printNlistarray(mesh->myln->ncat[0], mesh->myln->ln[0]);
-//exit(9);
-*/
 
 hrefine_pat(mesh, 1);
 Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);

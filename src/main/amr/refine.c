@@ -270,9 +270,9 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
     else
       update_lns = 0;
 
-    //printf("rm %ld: ",i);
-    ////printnodelistelement_and_neighbors_flag(elem,2);
-    //printnodelist(elem);
+    //printf("B:rm %ld: ", i);
+    //printnodelistelement_and_neighbors_flag(elem,2);
+    ////printnodelist(elem);
 
     /* remove 8 siblings */
     elem_parent[i] = remove8siblings_in_mesh_lns(elem);
@@ -280,8 +280,9 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
 
     /* set elem to parent */
     elem = elem_parent[i];
-    ////printnodelistelement_and_neighbors_flag(elem,2);
-    //printnodelist(elem);
+    //printf("E:rm %ld: ", i);
+    //printnodelistelement_and_neighbors_flag(elem,2);
+    ////printnodelist(elem);
   }
 
   /* Now mesh->lns is up to date, next destroy the children */
@@ -307,19 +308,33 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
 long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
 {
   long i, j, nn=n;
-  for(i=0; i<nn; i++)
+
+  /* do nothing if nid0b is empty */
+  if(nb<1) return n;
+
+  /* if nid0 is not empty, merge nid0b into nid0 */
+  if(n>0)
   {
-    long nid0_2i = nid0[2*i];
+    for(i=0; i<nn; i++)
+    {
+      long nid0_2i = nid0[2*i];
 
-    /* find nid0_2i in nid0b */
-    for(j=0; j<nb; j++)
-      if(nid0b[2*j] == nid0_2i) break;
+      /* find nid0_2i in nid0b */
+      for(j=0; j<nb; j++)
+        if(nid0b[2*j] == nid0_2i) break;
 
-    if(j<nb) /* found nid0_2i in nid0b */
-      nid0[2*i+1] += nid0b[2*j+1];
-    else     /* append nid0b to nid0 */
-      { nid0[2*nn] = nid0b[2*j];  nid0[2*nn+1] = nid0b[2*j+1];  nn++; }
+      if(j<nb) /* found nid0_2i in nid0b */
+        nid0[2*i+1] += nid0b[2*j+1];
+      else     /* append nid0b to nid0 */
+        { nid0[2*nn] = nid0b[2*j];  nid0[2*nn+1] = nid0b[2*j+1];  nn++; }
+    }
   }
+  else /* copy nid0b into nid0 */
+  {
+    for(i=0; i<2*nb; i++) nid0[i] = nid0b[i];
+    nn = nb;
+  }
+
   /* return new length of nid0 */
   return nn;
 }
@@ -353,6 +368,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     errorexit("no memory for my_unr, req, nn, unref");
 
   //PRF;printnodelist(mesh->lns);
+  //PRF;printmesh(mesh);
+  //printNlistarray(mesh->myln->nm, mesh->myln->ln[0]);
 
   ///* record which nodes we want to remove */
   //formylnodes(mesh, myid)
@@ -395,13 +412,18 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     sib[6] = sib[4]->nb[3];
     sib[7] = sib[3]->nb[5];
 
-    /* check if all that we have on this proc needs to unrefined */
+    if(sib0->l==0 && sib0->rflag)
+      errorexit("root node cannot be removed!");
+
+    /* check if all that we have on this proc needs to be unrefined */
     uref = 0;
     for(ijk=0; ijk<8; ijk++)
     {
-      if(sib[ijk]->dat && !(sib[ijk]->rflag))
-        goto continue_with_next_node;
-      uref++;
+      if(sib[ijk]->dat)
+      {
+        if(sib[ijk]->rflag) uref++;
+        else                goto continue_with_next_node;
+      }
     }
 
     /* save nid0 and number of siblings that need a to be unrefined */
@@ -446,6 +468,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     if(nn[r]>0)
       nMPI_Ibcast(&(unref[r][0]), 2*nn[r], nMPI_LONG, r, &(req[r]));
   }
+
+  //PRF;prlarray(" unref[rank]", 2*nn[rank], unref[rank]);
 
   /* unrefine my own unref[rank] */
   if(nn[rank]>0)
