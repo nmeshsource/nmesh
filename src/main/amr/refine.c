@@ -310,7 +310,7 @@ long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
   long i, j, nn=n;
 
   /* do nothing if nid0b is empty */
-  if(nb<1) return n;
+  if(nb<=0) return n;
 
   /* if nid0 is not empty, merge nid0b into nid0 */
   if(n>0)
