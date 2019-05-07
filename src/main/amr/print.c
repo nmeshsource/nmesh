@@ -182,7 +182,8 @@ void printnodelistelement_and_neighbors_flag(tNlist *el, int pr_nb)
     printf("\n");
   //printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
   //printnode(el->node);
-  if(pr_nb) printnode_and_neighbors(el->node);
+  if(pr_nb == 1) printnode_and_neighbors(el->node);
+  if(pr_nb == 2) printnode(el->node);
 }
 
 void printnodelistelement(tNlist *el)
