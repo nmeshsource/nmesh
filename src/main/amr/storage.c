@@ -269,7 +269,7 @@ void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
 /* make root node */
 tNode *make_root_node(tPat *pat, int n[3], int datrank)
 {
-  tNode *node = alloc_node(1);
+  tNode *node = alloc_node(0);
   int i;
 
   /* fill in info */
