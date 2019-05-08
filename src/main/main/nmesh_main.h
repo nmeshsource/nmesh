@@ -223,10 +223,10 @@ void *pmalloc(int n);
 
 
 /* endianIO.c */
-size_t fread_little(double *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp);
-size_t fread_big(double *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp);
 
 /* timer.c */
 int write_all_timers(tMesh *mesh);

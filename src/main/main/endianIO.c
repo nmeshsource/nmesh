@@ -71,7 +71,7 @@ size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp)
 
 
 /* use fread to read from a file in little endian format */
-size_t fread_little(double *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   int little = BYTE_ORDER_LITTLE; /* endianess */
 
@@ -96,7 +96,7 @@ size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp)
 
 
 /* use fread to read from a file in big endian format */
-size_t fread_big(double *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   int little = BYTE_ORDER_LITTLE; /* endianess */
 
