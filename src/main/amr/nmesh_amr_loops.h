@@ -11,32 +11,29 @@
 /****************************************************************************/
 /* loop over my leaf nodes on this proc without OpenMP */
 /* Note: for node in ln[c][i]: myid = myln->nm*c + i */
-#define formylnodes_noomp(mesh, myid) \
+#define formylnodes_noomp(mesh) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  for(myid=mesh->myln->nm*cat_, li_=0; \
-      li_ < mesh->myln->ncat[cat_]; myid++, li_++)
+  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
-/* we could use OpenMP to parallelize the 2nd loop in formylnodes_noomp,
-   but for now formylnodes and formylnodes_noomp do the same: */
-#define formylnodes(mesh, myid) formylnodes_noomp(mesh, myid)
-/* this is what we need in formylnodes:
+/* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
+#define formylnodes(mesh) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  #pragma omp parallel for
-  for(myid=mesh->myln->nm*cat_, li_=0; \
-      li_ < mesh->myln->ncat[cat_]; myid++, li_++) */
+  FORNODES_Pragma(omp parallel for) \
+  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
 /* this one will have no "parallel" on its own */
-#define formylnodes_ompfor(mesh, myid) formylnodes_noomp(mesh, myid)
-/* this is what we need in formylnodes:
+#define formylnodes_ompfor(mesh) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  #pragma omp for
-  for(myid=mesh->myln->nm*cat_, li_=0; \
-      li_ < mesh->myln->ncat[cat_]; myid++, li_++) */
+  FORNODES_Pragma(omp for) \
+  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 /* to start tasks formylnodes_ompfor has to be inside a:
    #pragma omp parallel {  } */
 
-/* get node from myid */
-#define MyNode(mesh, myid) \
+/* get leaf node from mesh, cat_ and li_ */
+#define MyLnode mesh->myln->ln[cat_][li_]->node
+
+///* get node from myid */
+#define Lnode_myid(mesh, myid) \
   mesh->myln->ln[myid / mesh->myln->nm][myid % mesh->myln->nm]->node
 
 /* loop over all points in a node */

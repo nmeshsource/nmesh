@@ -11,11 +11,10 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
                           double power, int mode)
 {
   double sum, VolInt = 0.;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
 
     if(pat && node->pat != pat) continue;
 
@@ -33,11 +32,10 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 double MeshMax(tMesh *mesh, tPat *pat, int vind)
 {
   double Max, max = -1e300;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double nmax;
     int ijk;
 
@@ -57,11 +55,10 @@ double MeshMax(tMesh *mesh, tPat *pat, int vind)
 double MeshMin(tMesh *mesh, tPat *pat, int vind)
 {
   double Min, min = 1e300;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double nmin;
     int ijk;
 

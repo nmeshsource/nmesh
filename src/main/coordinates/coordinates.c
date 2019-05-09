@@ -401,13 +401,11 @@ int coordinates_init_node(tNode *node)
 /* initialize coordinates in each patch */
 int coordinates_init(tMesh *mesh)
 {
-  int myid;
-
   PRF;printf(":\n");
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     coordinates_init_node(node);
   }
 

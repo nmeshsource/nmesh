@@ -112,7 +112,7 @@ void evolve_print_evosys(tMesh *mesh)
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
-  int i, myid;
+  int i;
 
   if(PR) PRFs(":\n");
 
@@ -121,9 +121,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   request_all_myln_surfaces_exchange(mesh);
 
   /* set time on all nodes */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
 
     node->time = mesh->time;
     node->dt   = mesh->dt;
@@ -145,7 +145,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
-  int i, myid;
+  int i;
 
   if(PR) PRFs(":\n");
 
@@ -163,9 +163,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
       init_all_myln_myindc_for_vl(mesh, vl, nvals);
 
       /* set data limiter needs in myindc arrays of each node */
-      formylnodes(mesh, myid)
+      formylnodes(mesh)
       {
-        tNode *node = MyNode(mesh, myid);
+        tNode *node = MyLnode;
         ListEntry(evosys->limdata,i)(node, vl);
       }
 
@@ -177,9 +177,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
       get_all_myln_indc_for_vl(mesh, vl);
 
       /* use limiter on each node */
-      formylnodes(mesh, myid)
+      formylnodes(mesh)
       {
-        tNode *node = MyNode(mesh, myid);
+        tNode *node = MyLnode;
 
         /* apply limiter */
         if(ListEntry(evosys->limiter,i))
@@ -246,7 +246,7 @@ int evolve_myln(tMesh *mesh)
   void (*Evolve_mesh)(tMesh *mesh) = NULL; /* func pointer for evo method */
   int allnodes = 1;
   tVarList *allu = vlalloc(mesh);
-  int i, myid;
+  int i;
 
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
@@ -289,9 +289,9 @@ int evolve_myln(tMesh *mesh)
   else /* evolve each node on its own */
   {
     /* evolve each node */
-    formylnodes(mesh, myid)
+    formylnodes(mesh)
     {
-      tNode *node = MyNode(mesh, myid);
+      tNode *node = MyLnode;
 
       /* FIXME: for now all nodes use the same time step */
       node->dt = mesh->dt;

@@ -1440,7 +1440,6 @@ void realloc_nodevariables(tNode *node, int nvdb_new)
 void realloc_meshvariables(tMesh *mesh, int nvdb_new)
 {
   int nvdb_old = mesh->nvdb;
-  int myid;
 
   if(0) printf("realloc_meshvariables from %d to %d\n",
                mesh->nvdb, nvdb_new);
@@ -1460,9 +1459,9 @@ void realloc_meshvariables(tMesh *mesh, int nvdb_new)
   mesh->nvdb = nvdb_new;
 
   /* now make sure dat in nodes is also reallocated */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     realloc_nodevariables(node, nvdb_new);
   }
 }
@@ -1533,11 +1532,10 @@ void disablevar_innode(tNode *node, int i)
 void enablevarcomp_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     if(node->pat == pat) enablevarcomp_innode(node, i);
   }
 }
@@ -1546,11 +1544,10 @@ void enablevarcomp_inpatch(tPat *pat, int i)
 void disablevarcomp_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     if(node->pat == pat) disablevarcomp_innode(node, i);
   }
 }
@@ -1559,11 +1556,10 @@ void disablevarcomp_inpatch(tPat *pat, int i)
 void enablevar_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     if(node->pat == pat) enablevar_innode(node, i);
   }
 }
@@ -1572,11 +1568,10 @@ void enablevar_inpatch(tPat *pat, int i)
 void disablevar_inpatch(tPat *pat, int i)
 {
   tMesh *mesh = pat->mesh;
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     if(node->pat == pat) disablevar_innode(node, i);
   }
 }
@@ -1584,11 +1579,10 @@ void disablevar_inpatch(tPat *pat, int i)
 /* enable all components of a variable on one mesh */
 void enablevar(tMesh *mesh, int i)
 {
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     enablevar_innode(node, i);
   }
 }
@@ -1596,11 +1590,10 @@ void enablevar(tMesh *mesh, int i)
 /* disable all components of a variable on one mesh */
 void disablevar(tMesh *mesh, int i)
 {
-  int myid;
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     disablevar_innode(node, i);
   }
 }
@@ -1624,12 +1617,11 @@ void disablevarlist_innode(tNode *node, tVarList *vl)
 void enablevarlist(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
-  int myid;
   if(vl && mesh)
   {
-    formylnodes(mesh, myid)
+    formylnodes(mesh)
     {
-      tNode *node = MyNode(mesh, myid);
+      tNode *node = MyLnode;
       enablevarlist_innode(node, vl);
     }
   }
@@ -1639,12 +1631,11 @@ void enablevarlist(tVarList *vl)
 void disablevarlist(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
-  int myid;
   if(vl)
   {
-    formylnodes(mesh, myid)
+    formylnodes(mesh)
     {
-      tNode *node = MyNode(mesh, myid);
+      tNode *node = MyLnode;
       disablevarlist_innode(node, vl);
     }
   }

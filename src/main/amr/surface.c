@@ -72,10 +72,9 @@ void free_all_surfaces(tNode *node)
 /* free all surfaces on all nodes in the mesh */
 void free_all_myln_surfaces(tMesh *mesh)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     free_all_surfaces(node);
   }
 }
@@ -150,10 +149,9 @@ int init_all_surfaces(tNode *node)
 /* init all surfaces on all nodes in the mesh */
 void init_all_myln_surfaces(tMesh *mesh)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     init_all_surfaces(node);
   }
 }
@@ -205,10 +203,9 @@ int set_all_mysurf(tNode *node)
 /* set all surfaces on all nodes in the mesh */
 void set_all_myln_mysurf(tMesh *mesh)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     set_all_mysurf(node);
   }
 }
@@ -393,15 +390,13 @@ void request_all_surfaces_exchange(tNode *node)
    to n1 or receiving from n1 */
 void request_all_myln_surfaces_exchange(tMesh *mesh)
 {
-  int myid;
-
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     request_all_surfaces_exchange(node);
   }
   TIMER_STOP;
@@ -527,23 +522,21 @@ void get_all_surfaces(tNode *node)
 /* get nbsurf for all nodes out of buffers and free the buffers */
 void get_all_myln_surfaces(tMesh *mesh)
 {
-  int myid;
-
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     get_all_surfaces(node);
   }
 
   /* postpone Waitall until we have finished all nodefaces. This could have
      been already called in get_all_surfaces to free mem earlier.*/
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     free_dat_reqs_after_Waitall_com_send(node);
   }
 
@@ -1226,10 +1219,9 @@ void set_all_ajsurf(tNode *node)
 /* get nbsurf for all nodes out of buffers and free the buffers */
 void set_all_myln_ajsurf(tMesh *mesh)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     set_all_ajsurf(node);
   }
 }
@@ -1308,10 +1300,9 @@ void free_all_nbsurf_only(tNode *node)
 /* free nbsurf on all nodes in the mesh */
 void free_all_myln_nbsurf_only(tMesh *mesh)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     free_all_nbsurf_only(node);
   }
 }

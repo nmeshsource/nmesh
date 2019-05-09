@@ -13,15 +13,15 @@ int SurfExchange_test(tMesh *mesh)
 {
   tNode *nd;
   int ui = Ind("SurfExchange_u");
-  int myid, l;
+  int l;
 
   PRF;printf(": Hmmm.\n");
   enablevar(mesh, ui);
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
     int ijk;
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     tArray *ua = VarA(node, ui);
 
     /* set particular pattern in u */
@@ -41,15 +41,15 @@ int SurfExchange_test(tMesh *mesh)
   }
 
   /* print var */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printnode(node);
     printvar_innode(node, ui);
   }
 
   /* print var in one node again */
-  nd = MyNode(mesh, 0); /* my first node */
+  nd = Lnode_myid(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, ui);
 
@@ -66,9 +66,9 @@ int SurfExchange_test(tMesh *mesh)
   /* do exchange 4 times similar to RK4 */
   for(l=0; l<4; l++)
   {
-    formylnodes(mesh, myid)
+    formylnodes(mesh)
     {
-      tNode *node = MyNode(mesh, myid);
+      tNode *node = MyLnode;
 
       set_all_mysurf(node);
       request_all_surfaces_exchange(node);
@@ -77,9 +77,9 @@ int SurfExchange_test(tMesh *mesh)
     /* Here we can do work. MPI is now busy sending buffers */
 
     /* now get the surfaces and wait for buffers if necessary */
-    formylnodes(mesh, myid)
+    formylnodes(mesh)
     {
-      tNode *node = MyNode(mesh, myid);
+      tNode *node = MyLnode;
 
       get_all_surfaces(node);
     }
@@ -88,7 +88,7 @@ int SurfExchange_test(tMesh *mesh)
   /* get_all_myln_surfaces sets ajsurf via interpolation */
 
   /* print var in one node yet again with surfaces */
-  nd = MyNode(mesh, 0); /* my first node */
+  nd = Lnode_myid(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, ui);
 

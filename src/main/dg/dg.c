@@ -58,7 +58,6 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   int isqrtgdiagx     = Ind("sqrtgdiagx");
   int iooJ = Ind("det_dXbdx");
-  int myid;
 
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
@@ -68,9 +67,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   //#pragma omp parallel
   {
     tDGinfo *dgi = alloc_DGinfo(vlu); /* each task needs its own dgi */
-    formylnodes_ompfor(mesh, myid)
+    formylnodes_ompfor(mesh)
     {
-      tNode *node = MyNode(mesh, myid);
+      tNode *node = MyLnode;
       int *n = node->n;
       double *ooJ = Vard(node, iooJ);
       int face;

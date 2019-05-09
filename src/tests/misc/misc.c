@@ -20,7 +20,7 @@ int misc_test(tMesh *mesh)
 {
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid, dir;
+  int dir;
   double *Xb[3];
 
   prdivider(0);
@@ -28,10 +28,10 @@ int misc_test(tMesh *mesh)
   enablevar(mesh, ui);
   enablevar(mesh, vi);
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
     int ijk;
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     tArray *ua = VarA(node, ui);
 
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
@@ -69,7 +69,7 @@ int test_point_interpolation(tMesh *mesh)
   int n2;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid, dir, p, k;
+  int dir, p, k;
   double *Xb[] = { NULL, NULL, NULL };
   double X[3], Cb[2];
   double f, interp;
@@ -77,14 +77,14 @@ int test_point_interpolation(tMesh *mesh)
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
   }
 
   /* print var in one node */
-  nd = MyNode(mesh, 0); /* my first node */
+  nd = Lnode_myid(mesh, 0); /* my first node */
   printarray(nd->Xb[2]);
   printarray(nd->WL[2]);
   n2 = nd->n[2];
@@ -383,7 +383,6 @@ int test_ajsurf(tMesh *mesh)
   int iX = Ind("X");
   int ix = Ind("x");
   //double *Xbd[3];
-  int myid;
   double sum, Sum;
   int test_func_lamAB = Getv(Par("misc_ajsurf_v_init"), "test_func(lam,A,B)");
 
@@ -394,14 +393,14 @@ int test_ajsurf(tMesh *mesh)
   /* above we messed with all kinds of things,
      so make sure all coords are set again */
   coordinates_init(mesh);
-//nd = MyNode(mesh, 1);
+//nd = Lnode_myid(mesh, 1);
 //printvar_innode(nd, ix);
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
     int ijk;
     //int dir;
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     tArray *va = VarA(node, vi);
 
     //for(dir=0; dir<3; dir++) Xbd[dir] = node->Xb[dir]->d;
@@ -439,15 +438,15 @@ int test_ajsurf(tMesh *mesh)
   }
 
   /* print var */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printnode(node);
     printvar_innode(node, vi);
   }
 
   /* print var in one node again */
-  nd = MyNode(mesh, 0); /* my first node */
+  nd = Lnode_myid(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, vi);
 
@@ -467,14 +466,14 @@ int test_ajsurf(tMesh *mesh)
   PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
 
   /* print var in one node yet again with surfaces */
-//  nd = MyNode(mesh, 7);
+//  nd = Lnode_myid(mesh, 7);
 //  printnode(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));
   //printvar_innode(nd, Ind("oC1_1"));
 //  printvar_innode(nd, vi);
 
-//  nd = MyNode(mesh, 78);
+//  nd = Lnode_myid(mesh, 78);
 //  printnode(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));
@@ -484,9 +483,9 @@ int test_ajsurf(tMesh *mesh)
   /* print var in all nodes */
   prdivider(0);
   PRF;printf(": ajsurfdiff on all nodes:\n");
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printnode(node);
     printvar_ajsurfdiff(node, vi);
   }
@@ -497,18 +496,18 @@ int test_ajsurf(tMesh *mesh)
   /* print var in all nodes again */
   prdivider(0);
   PRF;printf(": ajsurfdiff on all nodes after freeing nbsurf:\n");
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printnode(node);
     printvar_ajsurfdiff(node, vi);
   }
 
   PRF;printf(": L2 norm of ajsurfdiff:\n");
   sum = 0.;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     int f;
     double norm_n_f;
     char s[100];
@@ -519,7 +518,7 @@ int test_ajsurf(tMesh *mesh)
       if(!sf) continue;
 
       norm_n_f = Lp_norm_array_reldiff(sf->ajsurf, sf->mysurf, 2);
-      printf("  %d nid%ld %s f%d: %g\n", myid, node->nid,
+      printf("  nid%ld %s f%d: %g\n", node->nid,
              nodename(node,s,99), f, norm_n_f);
       sum += pow(norm_n_f, 2);
     }
@@ -540,7 +539,6 @@ int test_indc(tMesh *mesh)
   tNode *nd;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid;
   tVarList *vl;
 
   /* varlist with ui and vi */
@@ -557,15 +555,15 @@ int test_indc(tMesh *mesh)
   coordinates_init(mesh);
 
   /* print var */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printnode(node);
     printvar_innode(node, vi);
   }
 
   /* print var in one node again */
-  nd = MyNode(mesh, 0); /* my first node */
+  nd = Lnode_myid(mesh, 0); /* my first node */
   printnode(nd);
   printvar_innode(nd, vi);
 
@@ -574,9 +572,9 @@ int test_indc(tMesh *mesh)
   PRF;printf(": request_all_myln_indc_exchange_for_vl\n");
   init_all_myln_myindc_for_vl(mesh, vl, 3);
   /* set indc to something ... */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     node->dat->ic[vi]->myindc->d[0] = node->nid; 
     node->dat->ic[vi]->myindc->d[1] = -node->nid; 
   }
@@ -593,9 +591,9 @@ int test_indc(tMesh *mesh)
   /* print var in all nodes */
   prdivider(0);
   PRF;printf(": print the var indc on all nodes:\n");
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printnode(node);
     printvar_indc(node, vi);
   }
@@ -612,7 +610,6 @@ int test_node_av(tMesh *mesh)
 {
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int myid;
 
   prdivider(0);
   PRF;printf(": node average\n");
@@ -623,9 +620,9 @@ int test_node_av(tMesh *mesh)
   coordinates_init(mesh);
 
   /* print var and its average */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
 
     prdivider(0);
     printnode(node);
@@ -645,7 +642,6 @@ int test_node_av(tMesh *mesh)
 int test_0doutput(tMesh *mesh)
 {
   int ui = Ind("misc_u");
-  int myid;
 
   prdivider(0);
   PRF;printf(":\n");
@@ -656,9 +652,9 @@ int test_0doutput(tMesh *mesh)
   coordinates_init(mesh);
 
   /* print var and its average */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u = Vard(node, ui);
     int ijk;
 

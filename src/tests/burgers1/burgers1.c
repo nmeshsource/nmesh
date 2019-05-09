@@ -61,15 +61,14 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
   int ifzx = ifxx+6;
   char *advdir = Gets(Par("burgers1_direction"));
   double nx,ny,nz;
-  int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
 
   /* compute derivs */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u = Vard(node, iu);
     double *fx = Vard(node, ifx);
     double *fy = Vard(node, ifx+1);
@@ -149,16 +148,15 @@ void burgers1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   //int ix = Ind("x");
   //char *advdir = Gets(Par("burgers1_direction"));
   //double nx,ny,nz, nmag2;
-  int myid;
 
   /* prop. dir.*/
   //sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
   //nmag2 = (nx*nx + ny*ny + nz*nz);
 
   /* compute boundary flux terms */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     tPat *pat = node->pat;
     int *n = node->n;
     double *r = Vard(node, ir);
@@ -195,7 +193,6 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int ifxx = Ind("burgers1_fxx");
-  int myid;
 
   TIMER_START;
 
@@ -203,9 +200,9 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   burgers1_f_df(mesh, vlu);
 
   /* RHS */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *r  = Vard(node, ir);
     double *fxx = Vard(node, ifxx);
     double *fyy = Vard(node, ifxx+4);
@@ -238,7 +235,6 @@ int burgers1_init(tMesh *mesh)
   tVarList *vlu = vlalloc(mesh);
   char *advdir = Gets(Par("burgers1_direction"));
   double nx,ny,nz;
-  int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
@@ -255,9 +251,9 @@ int burgers1_init(tMesh *mesh)
   enablevar(mesh, iue);
 
   /* at t=0: set u=sin(x) */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u = Vard(node, iu);
     double *x = Vard(node, ix);
     double *y = Vard(node, ix+1);
@@ -291,7 +287,6 @@ int burgers1_analyze(tMesh *mesh)
   char *advdir = Gets(Par("burgers1_direction"));
   double nx,ny,nz;
   //double nmag2;
-  int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
@@ -300,9 +295,9 @@ int burgers1_analyze(tMesh *mesh)
   if(PR) PRFs("\n");
 
   /*  compute errors */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u = Vard(node, iu);
     double *ue = Vard(node, iue);
     double *x = Vard(node, ix);

@@ -212,7 +212,6 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
     int vi = vl->index[vli];
     char *vname = VarName(vi);
     int rk;
-    int myid;
 
     /* MPI motivated loop to assign work */
     for(rk=0; rk<nMPI_size(); rk++)
@@ -229,9 +228,9 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
         fpbin = fopen_bin(vname, outdir, suffix[norm]);
 
         /* loop over all leaf nodes */
-        formylnodes_noomp(mesh, myid)
+        formylnodes_noomp(mesh)
         {
-          tNode *node = MyNode(mesh, myid);
+          tNode *node = MyLnode;
 
           /* do something only if this proc has dat */
           if(node->dat)
@@ -316,7 +315,6 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
     int vi = vl->index[vli];
     char *vname = VarName(vi);
     int rk;
-    int myid;
 
     /* MPI motivated loop to assign work */
     for(rk=0; rk<nMPI_size(); rk++)
@@ -333,9 +331,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         fpbin = fopen_bin(vname, outdir, suffix);
 
         /* loop over all leaf nodes */
-        formylnodes_noomp(mesh, myid)
+        formylnodes_noomp(mesh)
         {
-          tNode *node = MyNode(mesh, myid);
+          tNode *node = MyLnode;
 
           /* do something only if this proc has dat */
           if(node->dat)

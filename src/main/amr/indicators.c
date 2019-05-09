@@ -80,10 +80,9 @@ void free_all_indc_for_vl(tNode *node, tVarList  *vl)
 /* free all indc on all nodes in the mesh */
 void free_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     free_all_indc_for_vl(node, vl);
   }
 }
@@ -141,10 +140,9 @@ int init_myindc_for_vl(tNode *node, tVarList  *vl, int nvals)
 /* init all indc on all nodes in the mesh for a varlist */
 void init_all_myln_myindc_for_vl(tMesh *mesh, tVarList  *vl, int nvals)
 {
-  int myid;
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     init_myindc_for_vl(node, vl, nvals);
   }
 }
@@ -266,15 +264,14 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
    to n1 or receiving from n1 */
 void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl)
 {
-  int myid;
 
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     request_indc_exchange_for_vl(node, vl);
   }
   TIMER_STOP;
@@ -351,23 +348,21 @@ void get_all_indc_for_vl(tNode *node, tVarList  *vl)
 /* get nbindc for all nodes out of buffers and free the buffers */
 void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl)
 {
-  int myid;
-
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
      MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     get_all_indc_for_vl(node, vl);
   }
 
   /* postpone Waitall until we have finished all nodefaces. This could have
      been already called in get_all_indc_for_vl to free mem earlier. */
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     free_dat_icom_reqs_after_Waitall_com_send(node);
   }
 

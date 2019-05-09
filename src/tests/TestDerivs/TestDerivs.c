@@ -10,7 +10,6 @@
 /* initialize TestDerivs */
 int TestDerivs_startup(tMesh *mesh)
 {
-  int myid;
   double A         = Getd(Par("TestDerivs_A"));
   double sigmax    = Getd(Par("TestDerivs_sigmax"));
   double sigmay    = Getd(Par("TestDerivs_sigmay"));
@@ -28,9 +27,9 @@ int TestDerivs_startup(tMesh *mesh)
   enablevar(mesh, Ind("TestDerivs_Err_dduxx"));
 
   /* set initial data in nodes */
-  formylnodes(mesh,myid)
+  formylnodes(mesh)
   {  
-    tNode *node = MyNode(mesh,myid);
+    tNode *node = MyLnode;
     int i;
     //double *pX = Vard(node,Ind("X"));
     //double *pY = Vard(node,Ind("Y"));
@@ -60,7 +59,6 @@ int TestDerivs_startup(tMesh *mesh)
 /* compute absolute error in ANALYSIS */
 int TestDerivs_analyze(tMesh *mesh)
 {
-  int myid;
   double A         = Getd(Par("TestDerivs_A"));
   double sigmax    = Getd(Par("TestDerivs_sigmax"));
   double sigmay    = Getd(Par("TestDerivs_sigmay"));
@@ -72,9 +70,9 @@ int TestDerivs_analyze(tMesh *mesh)
   printf("TestDerivs: computing absolute error in derivatives\n");
   
   /* set initial data in nodees */
-  formylnodes(mesh,myid)
+  formylnodes(mesh)
   {  
-    tNode *node = MyNode(mesh,myid);
+    tNode *node = MyLnode;
     int i;
     //double *pX = Vard(node,Ind("X"));
     //double *pY = Vard(node,Ind("Y"));

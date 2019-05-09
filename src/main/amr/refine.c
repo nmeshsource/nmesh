@@ -123,7 +123,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, myid, todo, done, flag;
+  int r, todo, done, flag;
   int nnodes = (mesh->myln->nncats)*(mesh->myln->nm);
   long *my_nid   = calloc(nnodes, sizeof(my_nid[0]));
   nMPI_Req *req  = calloc(size, sizeof(req[0]));
@@ -134,17 +134,17 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
     errorexit("no memory for my_nid, req, nn, ref_nid");
 
   ///* record which nodes we want to refine */
-  //formylnodes(mesh, myid)
+  //formylnodes(mesh)
   //{
-  //  tNode *node = MyNode(mesh, myid);
+  //  tNode *node = MyLnode;
   //  node->rflag = needs_refine(node);
   //}
 
   /* save all nids where we need refinement in my_nid */
   nnodes = 0;
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     if(node->rflag)
       my_nid[nnodes++] = node->nid;
   }
@@ -355,7 +355,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, myid, todo, done, flag;
+  int r, todo, done, flag;
   int nnodes;
   int myn = (mesh->myln->nncats)*(mesh->myln->nm);
   long *my_unr  = calloc(2*myn, sizeof(my_unr[0]));
@@ -372,18 +372,18 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
   //printNlistarray(mesh->myln->nm, mesh->myln->ln[0]);
 
   ///* record which nodes we want to remove */
-  //formylnodes(mesh, myid)
+  //formylnodes(mesh)
   //{
-  //  tNode *node = MyNode(mesh, myid);
+  //  tNode *node = MyLnode;
   //  node->rflag = unrefine(node);
   //}
 
   /* save all sibling0 nids where we need refinement in my_unr */
   sib0 = NULL;
   nnodes = 0;
-  formylnodes_noomp(mesh, myid)
+  formylnodes_noomp(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     tNode *sib[8];
     int ijk = node->ijk;
     int n[] = {2,2,2};

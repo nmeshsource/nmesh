@@ -10,6 +10,7 @@
 #ifdef USEOMP
 
 #include <omp.h>
+#define FORNODES_Pragmas
 #define tMUTEX omp_lock_t
 #define DECL_MESH_MUTEX(node, mutex) \
   tMesh *mesh = (node)->pat->mesh; \
@@ -20,7 +21,7 @@
 #define MUTEX_DESTROY(x) omp_destroy_lock(x)
 #define T_CRITICAL(x )   _Pragma ( MSTR(omp critical x) )
 #define TASK_YIELD       _Pragma ( "omp taskyield" )
-#define FORNODES_Pragmas
+#define MAX_NTHREADS     opm_get_max_threads()
 
 #else
 
@@ -32,6 +33,7 @@
 #define MUTEX_DESTROY(x)
 #define T_CRITICAL(x)
 #define TASK_YIELD
+#define MAX_NTHREADS 1
 
 #endif
 

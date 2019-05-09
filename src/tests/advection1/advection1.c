@@ -58,12 +58,11 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
   int ifxx = Ind("advection1_fxx");
   int ifyx = ifxx+3;
   int ifzx = ifxx+6;
-  int myid;
 
   /* compute derivs */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u = Vard(node, iu);
     double *fx = Vard(node, ifx);
     double *fy = Vard(node, ifx+1);
@@ -144,16 +143,15 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int square_profile = Getv(Par("advection1_profile"),"square");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz, nmag2;
-  int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
   nmag2 = (nx*nx + ny*ny + nz*nz);
 
   /* compute boundary flux terms */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     tPat *pat = node->pat;
     int *n = node->n;
     double *r = Vard(node, ir);
@@ -197,7 +195,6 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int ifxx = Ind("advection1_fxx");
-  int myid;
 
   TIMER_START;
 
@@ -205,9 +202,9 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   advection1_f_df(mesh, vlu);
 
   /* RHS */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *r  = Vard(node, ir);
     double *fxx = Vard(node, ifxx);
     double *fyy = Vard(node, ifxx+4);
@@ -238,7 +235,6 @@ int advection1_set_profile(tMesh *mesh, int iu)
   int square_profile = Getv(Par("advection1_profile"),"square");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz, nmag2;
-  int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
@@ -247,9 +243,9 @@ int advection1_set_profile(tMesh *mesh, int iu)
   //if(PR) PRFs("\n");
 
   /* profile */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u = Vard(node, iu);
     double *x = Vard(node, ix);
     double *y = Vard(node, ix+1);
@@ -290,7 +286,6 @@ int advection1_init(tMesh *mesh)
   int limiter = Par("advection1_limiter");
   char *advdir = Gets(Par("advection1_direction"));
   double nx,ny,nz;
-  int myid;
 
   /* prop. dir.*/
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
@@ -330,38 +325,38 @@ int advection1_init(tMesh *mesh)
 
   /* test */
   init_all_myln_myindc_for_vl(mesh, vlu, 3);
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     limdata_MRS(node, vlu);
   }
   request_all_myln_indc_exchange_for_vl(mesh, vlu);
 
   get_all_myln_indc_for_vl(mesh, vlu);
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    //tNode *node = MyNode(mesh, myid);
+    //tNode *node = MyLnode;
     //limiter_MRS(node, vlu);
   }
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printvar_innode(node, iu);
     printvar_indc(node, iu);
   }
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     limiter_MRS(node, vlu);
   }
 
   free_all_myln_indc_for_vl(mesh, vlu);
 
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     printvar_innode(node, iu);
     printvar_indc(node, iu);
   }
@@ -377,7 +372,6 @@ int advection1_analyze(tMesh *mesh)
 {
   int iu  = Ind("advection1_u");
   int iue = Ind("advection1_u_err");
-  int myid;
 
   if(PR) PRFs("\n");
 
@@ -385,9 +379,9 @@ int advection1_analyze(tMesh *mesh)
   advection1_set_profile(mesh, iue);
 
   /*  compute errors: u_err = u - u_correct */
-  formylnodes(mesh, myid)
+  formylnodes(mesh)
   {
-    tNode *node = MyNode(mesh, myid);
+    tNode *node = MyLnode;
     double *u  = Vard(node, iu);
     double *ue = Vard(node, iue);
     int i;
