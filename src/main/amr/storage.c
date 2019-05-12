@@ -212,6 +212,9 @@ void free_this_node_only(tNode *node)
   /* free surface neigbhor list */
   for(face=0; face<6; face++) free(node->fnb[face]);
 
+  /* remove nfaces */
+  remove_all_nfaces(node);
+
   /* remove parent's pointer to it */
   ijk = node->ijk;
   if(parent) parent->child[ijk] = NULL;
@@ -586,12 +589,13 @@ tNode *destroy_children(tNode *parent)
   /* set neighbor info to NULL, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 0);
 
-  /* orphan child nodes */
+  /* orphan child nodes, and remove all nfaces of narray */
   for(ijk=0; ijk<8; ijk++)
   {
     if(narray[ijk]->child[0])
       errorexit("cannot orphan child that itself has child[0]");
     parent->child[ijk] = NULL;
+    remove_all_nfaces(narray[ijk]);
   }
   /* the narray is disconnected now, but still has lock on face neighbors */
 

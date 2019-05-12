@@ -175,6 +175,7 @@ Things that should be done:
 
 Cleanup:
 ========
+-remove ldescendants_along_face
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
 

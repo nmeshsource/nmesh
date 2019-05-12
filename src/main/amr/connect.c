@@ -348,6 +348,236 @@ tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
   return leafdesc;
 }
 
+/* find nfaces within this patch, this adds these nfaces to the node and
+   its neighbors */
+int add_nfaces_within_patch(tNode *node, int face)
+{
+  tNlist *nblist, *elem;
+  tNode *anc, *nb;
+  int nc, nnb;
+  int nbface;
+
+  /* no neighb. if on patch face */
+  if(node->patface[face]) return 0;
+
+  /* find neighbor at same level or on lower level
+     note: root node has no patch neighbors */
+  for(nb=NULL, anc=node; anc->parent; anc=anc->parent)
+  {
+    nb = anc->nb[face];
+    if(nb) break;
+  }
+  /* if no neighbor at all is found return just 0 */
+  if(!nb) return 0;
+
+  /* face where neighbors are */
+  nbface = face^1;
+
+  /* so now we have a neighbor, but is it childless? */
+  nc = count_children(nb);
+  if(nc==0) /* neighbor has 0 children */
+  {
+    add_nface(node, face, nb, nbface);
+    return 1;  /* there is only one neighbor */
+  }
+  if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
+
+  /* ok so this neighbor has 8 children, who also may have children */
+  nblist = leafdescendants_along_face(nb, nbface, NULL);
+  nblist = first_nodelist(nblist);
+
+  /* add all in nblist as nfaces */
+  nnb = 0;
+  fornodelist(nblist, elem)
+  {
+    nb = elem->node;
+    add_nface(node, face, nb, nbface);
+    nnb++; /* count neighbors */
+  }
+
+  /* free node lists */
+  free_nodelist(nblist);
+
+  return nnb;
+}
+
+/* find nfaces outside this patch (using bfaces), this adds these nfaces to
+   the node and its neighbors */
+int add_nfaces_outside_patch(tNode *node, int face)
+{
+  tPat *pat = node->pat;
+  tBface *bface;
+  tNlist *nbl, *nblist1, *elem;
+  tNode *nb;
+  int nc, nb_f;
+  int nnb = 0;   /* number of nfaces added */
+
+  /* no outside neighb. if not on patch face */
+  if(!node->patface[face]) return 0;
+
+  //PRF;printf(":\n");
+
+  /* loop over all bfaces on face and find nb */
+  forbfacesonface(pat, face, bface)
+  {
+    tBface *obface = bface->obface;
+    int touch;
+
+    /* do nothing if no other patch face */
+    if(!obface) continue;
+
+    /* root node in other patch */
+    nb = obface->pat->rnode;
+    nb_f = obface->f;
+
+    /* so now we have a neighbor, but is it childless? */
+    nc = count_children(nb);
+    if(nc==0) /* neighbor has 0 children */
+    {
+      nblist1 = alloc_nodelist(nb);
+    }
+    else
+    {
+      if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
+
+      /* find nblist1 with all leaves on face nb_f */
+      nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
+    }
+
+    /* beginning of nblist1 */
+    nbl = first_nodelist(nblist1);
+
+    /* go over nbl and remove all who do not have common face points
+       with the node */
+    nblist1 = NULL;
+    fornodelist(nbl, elem)
+    {
+    nbl_loop_start:
+
+      /* get neigh. and check if node and nb have common points */
+      nb = elem->node;
+      touch = common_facepoints(node,face, nb,nb_f);
+      if(touch)
+      {
+        nblist1 = elem; /* save elem that touches our node */
+        continue;
+      }
+
+      /* remove nb=elem->node from nbl */
+      elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
+      if(elem) goto nbl_loop_start;
+      else     break;
+    }
+
+    /* add all in nblist1 as nfaces */
+    fornodelist(nblist1, elem)
+    {
+      nb = elem->node;
+      add_nface(node, face, nb, nb_f);
+      nnb++; /* count neighbors */
+    }
+
+    /* free node lists */
+    free_nodelist(nblist1);
+  }
+
+  return nnb;
+}
+
+/* all all nfaces on one node face */
+int add_nfaces_at_nodeface(tNode *node, int face)
+{
+  int num;
+
+  num  = add_nfaces_within_patch(node, face);
+  num += add_nfaces_outside_patch(node, face);
+  return num;
+}
+
+/* update all nfaces of a node. This also updates the neighbor faces */
+void update_node_nfaces(tNode *node)
+{
+  tNode *parent = node->parent;
+  int face;
+
+  /* remove all nfaces of node and its parent */
+  remove_all_nfaces(node);
+  remove_all_nfaces(parent);
+
+  /* go over all faces and add nefaces */
+  for(face=0; face<6; face++)
+    add_nfaces_at_nodeface(node, face);
+}
+
+
+/* set surface neigbhor list in node on face:
+   save neighbors on all 6 faces in list node->fnb[face] */
+void set_node_fnb_from_nfaces(tNode *node, int face)
+{
+  tNface *nface;
+  int nfnb, ni;
+
+  /* count number of nb */
+  nfnb = 0;
+  for(nface=node->nfaces[face]; nface; nface=nface->next) nfnb++;
+
+  /* first free and then allocate room for neighbors */
+  free(node->fnb[face]);
+  node->fnb[face] = NULL;
+  if(nfnb)
+    node->fnb[face] = calloc(nfnb, sizeof(node->fnb[face][0]));
+
+  /* now set fnb on face */
+  //PRF;printf(" face=%d\n", face);
+  //printnfaces_on_f(node, face);
+  node->nfnb[face] = nfnb;
+  ni = 0;
+  for(nface=node->nfaces[face]; nface; nface=nface->next)
+  {
+    //printnface(nface);
+    node->fnb[face][ni] = nface->onface->node;
+    ni++;
+  }
+}
+
+/* initialize the 6 surface neigbhor lists in node and in the faces of
+   other nodes that touch it */
+void update_node_and_neighbors_fnb__new(tNode *node)
+//void update_node_and_neighbors_fnb(tNode *node)
+{
+  int face;
+
+  /* set nfaces on node and neighbors */
+  update_node_nfaces(node);
+
+  for(face=0; face<6; face++)
+  {
+    tNface *nface;
+
+    /* update fnb on this node */
+    set_node_fnb_from_nfaces(node, face);
+
+    /* now update fnb on all its neighbors */
+    for(nface=node->nfaces[face]; nface; nface=nface->next)
+    {
+      tNface *onface = nface->onface;
+      tNode *nb = onface->node;
+      int nb_f  = onface->f;
+
+      set_node_fnb_from_nfaces(nb, nb_f);
+    }
+  }
+}
+
+
+
+
+
+
+
+
+/* OLD ::: */
+
 
 /* find leaf node neighbors within this patch, this allocates the nodelist
    containing them, which has to be freed by caller */
@@ -559,6 +789,7 @@ printf("remove:"); printnd(nb);
 
 
 /* same as update_node_fnb, but do it for neighbors as well */
+//void update_node_and_neighbors_fnb__old(tNode *node)
 void update_node_and_neighbors_fnb(tNode *node)
 {
   int face;

@@ -94,8 +94,10 @@ typedef struct tNODE {
   struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
   int nfnb[6];            /* number of face neighbor nodes */
-  struct tNODE **fnb[6];  /* list of neighbor nodes on face,
-                             kept up to date by update_node_fnb */
+  struct tNODE **fnb[6];  /* list of neighbor nodes on face, contains info
+                             condensed out of nfaces */
+  struct tNFACE *nfaces[6]; /* 1st nface of this node,
+                               kept up to date by update_node_fnb */
   struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
                                      and its nbs are currently being updated */
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */
@@ -231,6 +233,19 @@ typedef struct tBFACE {
 } tBface;
 /* NOTE: ioC0_0 is set to -1 when a bface is allocated with
    add_empty_bface. So -1 means we do not know it yet. */
+
+
+/***********************************************************************/
+/* Nfaces */
+/***********************************************************************/
+/* Info about touching node faces */
+typedef struct tNFACE {
+  tNode *node;           // node we are on
+  int f;                 // face, runs from 0 to 5
+  struct tNFACE *onface; // pointer to other nface that touches
+  struct tNFACE *next;   // next bface in this patch
+  struct tNFACE *prev;   // previous bface in this patch
+} tNface;
 
 
 /***********************************************************************/
@@ -387,6 +402,9 @@ void prlarray(char *s, long n, long *ar);
 void prbbox(double *bb, int dim);
 void printcorners(tPat *pat);
 void printfacecorners(tPat *pat, int  f);
+void printnface(tNface *nface);
+void printnfaces_on_f(tNode *node, int f);
+void printnfaces(tNode *node);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);

@@ -603,3 +603,62 @@ void printfacecorners(tPat *pat, int  f)
     printf("%g %g %g    %g %g %g\n", x[0],x[1],x[2], X[0],X[1],X[2]);
   }
 }
+
+
+/* print one nface */
+void printthisnface(tNface *nface, char *s)
+{
+  char str[100];
+
+  if(!nface) return;
+  printf(" %s %s f%d\n", s, nodename(nface->node,str,99), nface->f);
+}
+
+/* print one nface and its pair */
+void printnface(tNface *nface)
+{
+  tNface *onface;
+
+  if(!nface) return;
+
+  onface = nface->onface;
+
+  if(!onface)
+  {
+    printthisnface(nface, " ");
+    return;
+  }
+
+  if(onface->onface == nface)
+  {
+    printthisnface(nface, "/");
+    printthisnface(onface, "\\");
+  }
+  else
+  {
+    printf("  WARNING: nfaces are not properly linked!!\n");
+    printf("  nface=%p nface->onface=%p:\n", nface, nface->onface);
+    printthisnface(nface, " ");
+    printf("  onface=%p onface->onface%p:\n", onface, onface->onface);
+    printthisnface(onface, " ");
+  }
+}
+
+/* print bfaces on face f */
+void printnfaces_on_f(tNode *node, int f)
+{
+  tNface *nf;
+  char s[100];
+
+  printf("node %s f=%d:\n", nodename(node,s,99), f);
+  for(nf=node->nfaces[f]; nf; nf=nf->next)
+    printnface(nf);
+}
+
+/* print all node nfaces */
+void printnfaces(tNode *node)
+{
+  int f;
+  for(f=0; f<6; f++)
+    printnfaces_on_f(node, f);
+}
