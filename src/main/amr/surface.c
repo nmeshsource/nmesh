@@ -266,12 +266,12 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   {
     printf("node:\n");
     printnode(node);
-    printnfaces_on_f(node, face);
-    printbfaces_on_f(node->pat, face);
+    printnfaces(node);
+    printbfaces(node->pat);
     printf("neighbor node:\n");
     printnode(nb);
-    printnfaces_on_f(nb, nb_f);
-    printbfaces_on_f(nb->pat, nb_f);
+    printnfaces(nb);
+    printbfaces(nb->pat);
     errorexit("couldn't find nb face!!!");
   }
 
