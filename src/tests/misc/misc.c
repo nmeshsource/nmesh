@@ -20,8 +20,6 @@ int misc_test(tMesh *mesh)
 {
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int dir;
-  double *Xb[3];
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
@@ -33,6 +31,8 @@ int misc_test(tMesh *mesh)
     int ijk;
     tNode *node = MyLnode;
     tArray *ua = VarA(node, ui);
+    int dir;
+    double *Xb[3];
 
     for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
 
@@ -77,11 +77,8 @@ int test_point_interpolation(tMesh *mesh)
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
-  }
+  nd = Lnode_myid(mesh, mesh->myln->nm-1); /* my last node??? */
+  for(dir=0; dir<3; dir++) Xb[dir] = nd->Xb[dir]->d;
 
   /* print var in one node */
   nd = Lnode_myid(mesh, 0); /* my first node */
@@ -509,7 +506,7 @@ int test_ajsurf(tMesh *mesh)
   {
     tNode *node = MyLnode;
     int f;
-    double norm_n_f;
+    double norm_n_f, norm_n_f2;
     char s[100];
 
     for(f=0; f<6; f++)
@@ -520,7 +517,10 @@ int test_ajsurf(tMesh *mesh)
       norm_n_f = Lp_norm_array_reldiff(sf->ajsurf, sf->mysurf, 2);
       printf("  nid%ld %s f%d: %g\n", node->nid,
              nodename(node,s,99), f, norm_n_f);
-      sum += pow(norm_n_f, 2);
+      norm_n_f2 = pow(norm_n_f, 2);
+      //#pragma omp atomic
+      FORNODES_Pragma(omp atomic)
+      sum += norm_n_f2;
     }
   }
   printf("on this proc: total %.15g\n", sqrt(sum));
