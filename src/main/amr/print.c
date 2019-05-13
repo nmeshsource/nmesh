@@ -134,6 +134,7 @@ void printnode(tNode *n)
       printf(" }");
     }
     printf("\n");
+    //printf(" ");printnfaces(n);
   }
   else
   {

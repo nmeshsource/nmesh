@@ -451,6 +451,9 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   free_dat(parent->dat);
   parent->dat = NULL;
 
+  //printf("Created:\n");
+  //printnodes_in_list(nlist);
+
   return nlist;
 }
 

@@ -447,6 +447,12 @@ int add_nfaces_outside_patch(tNode *node, int face)
     /* beginning of nblist1 */
     nbl = first_nodelist(nblist1);
 
+//char s[100];
+//if(strcmp(nodename(node,s,99),"0_1")==0 && face==1)
+//{
+//PRFs(":\n");printnodelist(nbl);
+//}
+
     /* go over nbl and remove all who do not have common face points
        with the node */
     nblist1 = NULL;
@@ -463,11 +469,24 @@ int add_nfaces_outside_patch(tNode *node, int face)
         continue;
       }
 
+//if(strcmp(nodename(node,s,99),"0_1")==0 && face==1)
+//{
+//PRFs(": remove:\n");printnodelist(elem);
+//}
+
       /* remove nb=elem->node from nbl */
       elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
       if(elem) goto nbl_loop_start;
       else     break;
     }
+
+//if(strcmp(nodename(node,s,99),"0_1")==0 && face==1)
+//{
+//PRFs(": final:\n");printnodelist(nblist1);
+//}
+
+    /* rewind nblist1 so that the fornodelist loop blow works */
+    nblist1 = first_nodelist(nblist1);
 
     /* add all in nblist1 as nfaces */
     fornodelist(nblist1, elem)
@@ -542,14 +561,19 @@ void set_node_fnb_from_nfaces(tNode *node, int face)
 
 /* initialize the 6 surface neigbhor lists in node and in the faces of
    other nodes that touch it */
-void update_node_and_neighbors_fnb__new(tNode *node)
-//void update_node_and_neighbors_fnb(tNode *node)
+//void update_node_and_neighbors_fnb__new(tNode *node)
+void update_node_and_neighbors_fnb(tNode *node)
 {
   int face;
 
   /* set nfaces on node and neighbors */
   update_node_nfaces(node);
 
+//char s[100];
+//if(strcmp(nodename(node,s,99),"0_1")==0)
+//{
+//PRF;printnfaces(node);
+//}
   for(face=0; face<6; face++)
   {
     tNface *nface;
@@ -789,8 +813,8 @@ printf("remove:"); printnd(nb);
 
 
 /* same as update_node_fnb, but do it for neighbors as well */
-//void update_node_and_neighbors_fnb__old(tNode *node)
-void update_node_and_neighbors_fnb(tNode *node)
+void update_node_and_neighbors_fnb__old(tNode *node)
+//void update_node_and_neighbors_fnb(tNode *node)
 {
   int face;
 

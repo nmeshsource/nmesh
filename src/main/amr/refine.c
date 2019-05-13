@@ -5,7 +5,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 1
+#define PR 0
 
 
 
