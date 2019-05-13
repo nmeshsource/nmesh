@@ -5,7 +5,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 0
+#define PR 1
 
 
 
@@ -601,6 +601,11 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
     {
       hrefine_nodes_if_rflag(mesh, PARENT_n);
       update_mesh_myln_node_nid(mesh);
+      if(PR)
+      {
+        PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+        printmesh(mesh);
+      }
     }
     else
     {
@@ -636,6 +641,11 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
     {
       remove_nodes_if_rflag(mesh, PARENT_n);
       update_mesh_myln_node_nid(mesh);
+      if(PR)
+      {
+        PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+        printmesh(mesh);
+      }
     }
   } while(ref);
 }
@@ -654,6 +664,11 @@ void hrefine_pat(tMesh *mesh, int p)
   }
   hrefine_nodes_if_rflag(mesh, PARENT_n);
   update_mesh_myln_node_nid(mesh);
+  if(PR)
+  {
+    PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+    printmesh(mesh);
+  }
 }
 
 /* refine patch number p in mesh */
@@ -670,5 +685,9 @@ void hcoarsen_pat(tMesh *mesh, int p)
   }
   remove_nodes_if_rflag(mesh, PARENT_n);
   update_mesh_myln_node_nid(mesh);
+  if(PR)
+  {
+    PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+    printmesh(mesh);
+  }
 }
-
