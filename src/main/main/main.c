@@ -269,10 +269,11 @@ int make_output_directory(tMesh *mesh)
   /* say what we have after redirection: */
   prdivider(1);
   time_str[strlen(time_str)-1] = '\0';
-  printf("The current time is %s\n", time_str);
+  printf("The current time is %s.\n", time_str);
   printf("nmesh (rev " MSTR_OFVAL(MAINREV)
-         ") was compiled on %s at %s\n", __DATE__, __TIME__);
-  printf("  outdir = %s \n", outdir);
+         ") compiled on %s at %s:", __DATE__, __TIME__);
+  printf("  MAX_NTHREADS = %d\n", MAX_NTHREADS);
+  printf("  outdir = %s\n", outdir);
 
   free(outdirp);
   return 0;
