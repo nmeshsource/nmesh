@@ -422,16 +422,30 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 {
   tNlist *nlist = NULL;
   tNlist *elem = NULL;
+  tNode parent_tmp[1];
   tNode *node;
   tNode *narray[8];
   int ijk;
 
+  /* shallow copy of parent */
+  parent_tmp[0] = parent[0];
+
+  /* use parent_tmp to make children */
   for(ijk=0; ijk<8; ijk++)
   {
-    node = make_child_node(parent, n, ijk);
+    node = make_child_node(parent_tmp, n, ijk);
     elem = addnode_to_nodelist_after(elem, node);
     if(ijk==0) nlist = elem; // save list head
     narray[ijk] = node; /* save nodes also in an array */
+  }
+
+  /* now attach children to parent */
+  // parent[0] = parent_tmp[0];
+  for(ijk=0; ijk<8; ijk++)
+  {
+    parent->child[ijk] = parent_tmp->child[ijk];
+    parent->leaf = 0;  // parent is now no longer a leaf node
+    parent->child[ijk]->parent = parent;
   }
 
   /* aquire lock for change of connections */
