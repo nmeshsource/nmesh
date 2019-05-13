@@ -378,6 +378,7 @@ void printCI(tPat *pat);
 void printnd(tNode *n) ;
 void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);
+void printnodes_in_list(tNlist *nl);
 void printnodelistelement_and_neighbors_flag(tNlist *el, int pr_nb);
 void printnodelistelement(tNlist *el);
 void printnodelist_and_neighbors(tNlist *nl);

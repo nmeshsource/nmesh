@@ -171,6 +171,19 @@ void printnode_and_neighbors(tNode *n)
   }
 }
 
+void printnodes_in_list(tNlist *nl)
+{
+  tNlist *el;
+
+  fornodelist(first_nodelist(nl), el)
+  {
+    //if(el==nl) printf(">");
+    //else       printf(" ");
+    printnode(el->node);
+  }
+  if(!nl) printf("<empty nodelist>\n");
+}
+
 void printnodelistelement_and_neighbors_flag(tNlist *el, int pr_nb)
 {
   char s[100];
