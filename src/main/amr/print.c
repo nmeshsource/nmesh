@@ -519,7 +519,7 @@ void printbfaces_on_f(tPat *pat, int f)
 {
   tBface *bf;
 
-  printf("pat->p=%d f=%d\n", pat->p, f);
+  printf("bfaces on f%d of pat->p=%d\n", f, pat->p);
   forbfacesonface(pat, f, bf)
     printbface(bf);
 }
@@ -529,7 +529,7 @@ void printbfaces(tPat *pat)
 {
   tBface *bf;
 
-  printf("pat->p=%d\n", pat->p);
+  printf("bfaces on pat->p=%d\n", pat->p);
   forbfaces(pat, bf)
     printbface(bf);
 }
@@ -644,21 +644,30 @@ void printnface(tNface *nface)
   }
 }
 
-/* print bfaces on face f */
-void printnfaces_on_f(tNode *node, int f)
+/* print bfaces on face f with or without nodename */
+void printnfaces_on_f_prname(tNode *node, int f, int prname)
 {
   tNface *nf;
   char s[100];
 
-  printf("node %s f=%d:\n", nodename(node,s,99), f);
+  if(prname) printf("nfaces[%d] on %s:\n", f, nodename(node,s,99));
   for(nf=node->nfaces[f]; nf; nf=nf->next)
     printnface(nf);
+}
+
+/* print bfaces on face f */
+void printnfaces_on_f(tNode *node, int f)
+{
+  printnfaces_on_f_prname(node, f, 1);
 }
 
 /* print all node nfaces */
 void printnfaces(tNode *node)
 {
   int f;
+  char s[100];
+
+  printf("nfaces on %s:\n", nodename(node,s,99));
   for(f=0; f<6; f++)
-    printnfaces_on_f(node, f);
+    printnfaces_on_f_prname(node, f, 0);
 }
