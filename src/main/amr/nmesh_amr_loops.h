@@ -32,9 +32,9 @@
 /* get leaf node from mesh, cat_ and li_ */
 #define MyLnode mesh->myln->ln[cat_][li_]->node
 
-///* get node from myid */
+/* get node from myid */
 #define Lnode_myid(mesh, myid) \
-  mesh->myln->ln[myid / mesh->myln->nm][myid % mesh->myln->nm]->node
+  mesh->myln->ln[(myid) / mesh->myln->nm][(myid) % mesh->myln->nm]->node
 
 /* loop over all points in a node */
 #define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
