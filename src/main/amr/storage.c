@@ -439,6 +439,9 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
 
+  /* aquire lock for change of connections */
+  node_and_fnbs_lock(parent);
+
   /* now attach children to parent */
   // parent[0] = parent_tmp[0];
   for(ijk=0; ijk<8; ijk++)
@@ -447,9 +450,6 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     parent->leaf = 0;  // parent is now no longer a leaf node
     parent->child[ijk]->parent = parent;
   }
-
-  /* aquire lock for change of connections */
-  node_and_fnbs_lock(parent);
 
   /* fill in neighbor info, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 1);
