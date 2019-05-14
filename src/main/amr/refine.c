@@ -145,7 +145,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
-    if(node->rflag)
+    if(node->rflag > 0)
       my_nid[nnodes++] = node->nid;
   }
   nn[rank] = nnodes;
@@ -421,8 +421,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     {
       if(sib[ijk]->dat)
       {
-        if(sib[ijk]->rflag) uref++;
-        else                goto continue_with_next_node;
+        if(sib[ijk]->rflag < 0) uref++;
+        else                    goto continue_with_next_node;
       }
     }
 
@@ -577,6 +577,7 @@ void hrefine_pat__old(tMesh *mesh, int p)
 /* refine all nodes up to level l */
 void hrefine_mesh_to_level(tMesh *mesh, int l)
 {
+  int rmeth = PARENT_n;
   int i, ref;
 
   for(i=0; i<l; i++)
@@ -588,8 +589,8 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
       tNode *node = el->node;
       if(node->l < l)
       {
-        node->rflag = 1; /* flag node for refinement */
-        ref++;           /* count number of nodes that need refinement */
+        node->rflag = rmeth; /* flag node for refinement */
+        ref++;               /* count number of nodes that need refinement */
       }
       else
       {
@@ -599,7 +600,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
 
     if(ref)
     {
-      hrefine_nodes_if_rflag(mesh, PARENT_n);
+      hrefine_nodes_if_rflag(mesh, rmeth);
       update_mesh_myln_node_nid(mesh);
       if(PR)
       {
@@ -617,6 +618,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
 /* refine all nodes up to level l */
 void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 {
+  int rmeth = PARENT_n;
   int ref;
 
   do
@@ -628,8 +630,8 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
       tNode *node = el->node;
       if(node->l > l)
       {
-        node->rflag = 1; /* flag node for refinement */
-        ref++;           /* count number of nodes that need refinement */
+        node->rflag = -rmeth; /* flag node for unrefinement */
+        ref++;                /* count number of nodes that need refinement */
       }
       else
       {
@@ -639,7 +641,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 
     if(ref)
     {
-      remove_nodes_if_rflag(mesh, PARENT_n);
+      remove_nodes_if_rflag(mesh, rmeth);
       update_mesh_myln_node_nid(mesh);
       if(PR)
       {
@@ -653,16 +655,17 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 /* refine patch number p in mesh */
 void hrefine_pat(tMesh *mesh, int p)
 {
+  int rmeth = PARENT_n;
   tPat *pat = mesh->pat[p];
   tNlist *el;
 
   fornodelist(mesh->lns, el)
   {
     tNode *node = el->node;
-    if(node->pat == pat) node->rflag = 1;
+    if(node->pat == pat) node->rflag = rmeth;
     else                 node->rflag = 0;
   }
-  hrefine_nodes_if_rflag(mesh, PARENT_n);
+  hrefine_nodes_if_rflag(mesh, rmeth);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {
@@ -674,16 +677,17 @@ void hrefine_pat(tMesh *mesh, int p)
 /* refine patch number p in mesh */
 void hcoarsen_pat(tMesh *mesh, int p)
 {
+  int rmeth = PARENT_n;
   tPat *pat = mesh->pat[p];
   tNlist *el;
 
   fornodelist(mesh->lns, el)
   {
     tNode *node = el->node;
-    if(node->pat == pat) node->rflag = 1;
+    if(node->pat == pat) node->rflag = -rmeth;
     else                 node->rflag = 0;
   }
-  remove_nodes_if_rflag(mesh, PARENT_n);
+  remove_nodes_if_rflag(mesh, rmeth);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {
@@ -743,7 +747,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
 
     /* flag h-unrefinement if parent has more points */
     if( (node->dat->nlim==0) && (node->np < p_np) && (p_rflag == ref_method) )
-      node->rflag = ref_method;
+      node->rflag = -ref_method;
     else
       node->rflag = 0;
   }
