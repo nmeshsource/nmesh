@@ -118,7 +118,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
   free(replace);
 }
 
-/* h-refine all nodes on all MPI procs if indicated by func needs_refine. */
+/* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
@@ -350,7 +350,7 @@ int nid0_compar(const void *x1, const void *x2)
   return 0;
 }
 
-/* Unrefine all nodes on all MPI procs if indicated by func needs_refine. */
+/* Unrefine all nodes on all MPI procs if indicated by node->rflag */
 void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
@@ -693,20 +693,63 @@ void hcoarsen_pat(tMesh *mesh, int p)
 }
 
 
-/*  */
+/* refine to better resolve nodes where limiting occured */
 void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
 {
   int ref_method = PARENT_nO2_P1;
 
+  /* look for nodes where limiting occured and refine them */
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    if(node->dat->nlim) node->rflag = ref_method;
-    else                node->rflag = 0;
+    /* flag refinement if we have more than 1 point */
+    if(node->dat->nlim && node->np > 1)
+      node->rflag = ref_method;
+    else
+      node->rflag = 0;
   }
-
   hrefine_nodes_if_rflag(mesh, ref_method);
   update_mesh_myln_node_nid(mesh);
+
+  if(PR)
+  {
+    PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+    printmesh(mesh);
+  }
+}
+
+
+/* remove previously refined nodes if no limiting occured */
+void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
+{
+  int ref_method = PARENT_nO2_P1;
+
+  /* look for nodes where no limiting occured */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tNode *parent = node->parent;
+    int p_np, p_rflag;
+
+    if(parent)
+    {
+      p_np = parent->np;
+      p_rflag = parent->rflag;
+    }
+    else
+    {
+      p_np = p_rflag = 0;
+    }
+
+    /* flag h-unrefinement if parent has more points */
+    if( (node->dat->nlim==0) && (node->np < p_np) && (p_rflag == ref_method) )
+      node->rflag = ref_method;
+    else
+      node->rflag = 0;
+  }
+  remove_nodes_if_rflag(mesh, ref_method);
+  update_mesh_myln_node_nid(mesh);
+
   if(PR)
   {
     PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
