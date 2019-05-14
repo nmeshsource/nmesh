@@ -301,12 +301,12 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   if(nMPI_rank()==datrank)
     node->dat = alloc_dat(node);
 
-  /* lock new node and its face nbs, to do so first initialize fnb */
-  update_node_fnb(node);
+  /* lock new node and its face nbs, to do so first set fnb */
+  update_node_fnb_only(node);
   node_and_fnbs_lock(node);
 
   /* initialize surface neigbhor list in node and it neighbors */
-  update_node_and_neighbors_fnb(node);
+  update_node_and_neighbors_nfaces_fnb(node);
 
   /* unlock new node and its face nbs */
   node_and_fnbs_unlock(node);
@@ -456,7 +456,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
 
   /* update fnb of all in narray and their neighbors */
   for(ijk=0; ijk<8; ijk++)
-    update_node_and_neighbors_fnb(narray[ijk]);
+    update_node_and_neighbors_nfaces_fnb(narray[ijk]);
 
   /* release locks */
   node_and_fnbs_unlock(parent);
@@ -617,7 +617,7 @@ tNode *destroy_children(tNode *parent)
   /* the narray is disconnected now, but still has lock on face neighbors */
 
   /* update fnb on parent and its neighbors */
-  update_node_and_neighbors_fnb(parent);
+  update_node_and_neighbors_nfaces_fnb(parent);
 
   /* parent is now a leaf node */
   parent->leaf = 1;

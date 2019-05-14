@@ -348,6 +348,10 @@ tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
   return leafdesc;
 }
 
+/*************************************************************************/
+/* functions to set nfaces and fnb */
+/*************************************************************************/
+
 /* find nfaces within this patch, this adds these nfaces to the node and
    its neighbors */
 int add_nfaces_within_patch(tNode *node, int face)
@@ -562,7 +566,7 @@ void set_node_fnb_from_nfaces(tNode *node, int face)
 /* initialize the 6 surface neigbhor lists in node and in the faces of
    other nodes that touch it */
 //void update_node_and_neighbors_fnb__new(tNode *node)
-void update_node_and_neighbors_fnb(tNode *node)
+void update_node_and_neighbors_nfaces_fnb(tNode *node)
 {
   int face;
 
@@ -593,15 +597,32 @@ void update_node_and_neighbors_fnb(tNode *node)
   }
 }
 
+// Not sure if this function is useful ...
+/* initialize the 6 surface neigbhor lists in node and in the faces of
+   other nodes that touch it, but set only node's fnb */
+void update_node_nfaces_fnb(tNode *node)
+{
+  int face;
 
+  /* set nfaces on node and neighbors */
+  update_node_nfaces(node);
 
+  /* update fnb on this node */
+  for(face=0; face<6; face++)
+    set_node_fnb_from_nfaces(node, face);
+}
 
+/* init surface neighbor list for all root nodes in the mesh */
+void update_all_rnode_nfaces_fnb(tMesh *mesh)
+{
+  int p;
+  forpatches(mesh, p)
+    update_node_and_neighbors_nfaces_fnb(mesh->pat[p]->rnode);
+}
 
-
-
-
-/* OLD ::: */
-
+/*************************************************************************/
+/* functions to set fnb without nfaces */
+/*************************************************************************/
 
 /* find leaf node neighbors within this patch, this allocates the nodelist
    containing them, which has to be freed by caller */
@@ -742,7 +763,7 @@ tNlist *make_mesh_neighbor_list(tNode *node, int face)
 
 /* initialize surface neigbhor list in node:
    save neighbors on all 6 faces in list node->fnb[face] */
-void update_node_fnb(tNode *node)
+void update_node_fnb_only(tNode *node)
 {
   tNlist *nblist, *elem;
   int face, nfnb, ni;
@@ -773,7 +794,7 @@ void update_node_fnb(tNode *node)
 }
 
 /* remove nb on face f with index ni from node->fnb */
-void remove_node_fnb(tNode *node, int f, int ni)
+void remove_node_fnb_only(tNode *node, int f, int ni)
 {
   int nfnb = node->nfnb[f];
   int i;
@@ -783,7 +804,7 @@ void remove_node_fnb(tNode *node, int f, int ni)
 }
 
 /* remove nb on face f with index ni from node->fnb */
-void remove_unpaired_node_fnbs(tNode *node)
+void remove_unpaired_node_fnbs_only(tNode *node)
 {
   int f, ni;
 
@@ -797,7 +818,7 @@ void remove_unpaired_node_fnbs(tNode *node)
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found)
       {
-        remove_node_fnb(node, f, ni);
+        remove_node_fnb_only(node, f, ni);
         ni--;
 
 if(node->nid==72)
@@ -813,13 +834,13 @@ printf("remove:"); printnd(nb);
 
 
 /* same as update_node_fnb, but do it for neighbors as well */
-void update_node_and_neighbors_fnb__old(tNode *node)
-//void update_node_and_neighbors_fnb(tNode *node)
+//void update_node_and_neighbors_fnb__old(tNode *node)
+void update_node_and_neighbors_fnb_only(tNode *node)
 {
   int face;
 
   /* update this node */
-  update_node_fnb(node);
+  update_node_fnb_only(node);
 
   /* now update all its neighbors */
   for(face=0; face<6; face++)
@@ -828,7 +849,7 @@ void update_node_and_neighbors_fnb__old(tNode *node)
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
       tNode *nb = node->fnb[face][ni];
-      update_node_fnb(nb);
+      update_node_fnb_only(nb);
     }
   }
   // no unpaired nodes should exist!!!
@@ -848,11 +869,11 @@ void update_node_and_neighbors_fnb__old(tNode *node)
 }
 
 /* init surface neighbor list for all root nodes in the mesh */
-void update_all_rnode_fnb(tMesh *mesh)
+void update_all_rnode_fnb_only(tMesh *mesh)
 {
   int p;
   forpatches(mesh, p)
-    update_node_and_neighbors_fnb(mesh->pat[p]->rnode);
+    update_node_and_neighbors_fnb_only(mesh->pat[p]->rnode);
 }
 
 /* find node facenb in the node->fnb lists, returns 1  if it is there

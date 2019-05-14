@@ -232,7 +232,7 @@ int setup_box_mesh(tMesh *mesh)
   printallbfaces(mesh);
 
   /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_fnb(mesh);
+  update_all_rnode_nfaces_fnb(mesh);
   printmesh(mesh);
 
   return 0;
@@ -329,7 +329,7 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
   printallbfaces(mesh);
 
   /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_fnb(mesh);
+  update_all_rnode_nfaces_fnb(mesh);
   printmesh(mesh);
 
   return 0;
@@ -403,7 +403,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   printallbfaces(mesh);
 
   /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_fnb(mesh);
+  update_all_rnode_nfaces_fnb(mesh);
   printmesh(mesh);
 
   /* 8 children in patch0 */
