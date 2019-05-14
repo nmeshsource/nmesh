@@ -342,11 +342,12 @@ long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
 /* compare nid0 numbers for qsort */
 int nid0_compar(const void *x1, const void *x2)
 {
-  long *const *n1 = x1;
-  long *const *n2 = x2;
+  const long *n1, *n2;
+  n1 = x1;
+  n2 = x2;
 
-  if(n1 < n2) return -1;
-  if(n1 > n2) return 1;
+  if(*n1 < *n2) return -1;
+  if(*n1 > *n2) return 1;
   return 0;
 }
 
@@ -403,6 +404,12 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     if(sib[0] == sib0) continue;
     sib0 = sib[0]; /* save sib[0] as last one processed */
 
+    if(sib0->l==0)
+    {
+      if(sib0->rflag < 0) errorexit("root node cannot be removed!");
+      else continue;
+    }
+
     /* other siblings */
     sib[1] = sib[0]->nb[1];
     sib[2] = sib[0]->nb[3];
@@ -412,13 +419,13 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     sib[6] = sib[4]->nb[3];
     sib[7] = sib[3]->nb[5];
 
-    if(sib0->l==0 && sib0->rflag)
-      errorexit("root node cannot be removed!");
-
     /* check if all that we have on this proc needs to be unrefined */
     uref = 0;
     for(ijk=0; ijk<8; ijk++)
     {
+      if(sib[ijk]->child[0]) /* cannot unrefine if there are any children */
+        goto continue_with_next_node;
+
       if(sib[ijk]->dat)
       {
         if(sib[ijk]->rflag < 0) uref++;
@@ -469,7 +476,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
       nMPI_Ibcast(&(unref[r][0]), 2*nn[r], nMPI_LONG, r, &(req[r]));
   }
 
-  //PRF;prlarray(" unref[rank]", 2*nn[rank], unref[rank]);
+  //PRFs(" 1: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* unrefine my own unref[rank] */
   if(nn[rank]>0)
@@ -477,6 +484,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
     nn[rank] = -destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
     done++;
   }
+  //PRFs(" 2: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* check for incoming broadcasts and then work on them */
   r = 0;
@@ -498,6 +506,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   /* flip sign on nn[r] since we made it negative above */
   for(r=0; r<size; r++) nn[r] = -nn[r];
+  //PRFs(" 3: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* merge the arrays with left over nids into one */
   for(r=0; r<size; r++)
@@ -522,10 +531,16 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   /* sort new longer unref[rank] with left over nid0s */
   qsort(unref[rank], nn[rank], 2*sizeof(unref[rank][0]), nid0_compar);
+  //PRFs(" 4: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* finally remove the stuff in unref[rank] */
   nn[rank] = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
-  if(nn[rank]) errorexit("nn[rank] is supposed to be 0 now!");
+  if(nn[rank])
+  {
+    //printmesh(mesh);
+    prlarray("unref[rank]", 2*nn[rank]+4, unref[rank]);
+    errorexiti("nn[rank]=%d is supposed to be 0 now!", nn[rank]);
+  }
 
   /* free unref content */
   for(r=0; r<size; r++)
@@ -711,6 +726,13 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
       node->rflag = ref_method;
     else
       node->rflag = 0;
+
+    //if(node->rflag)
+    //{
+    //  char s[100];
+    //  printf("%s: nlim=%d rflag=%d\n", nodename(node,s,99),
+    //         node->dat->nlim, node->rflag);
+    //}
   }
   hrefine_nodes_if_rflag(mesh, ref_method);
   update_mesh_myln_node_nid(mesh);
@@ -720,6 +742,7 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
     PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
     printmesh(mesh);
   }
+  //exit(9);
 }
 
 
@@ -750,6 +773,13 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
       node->rflag = -ref_method;
     else
       node->rflag = 0;
+
+    //if(node->rflag)
+    //{
+    //  char s[100];
+    //  printf("%s: nlim=%d rflag=%d\n", nodename(node,s,99),
+    //         node->dat->nlim, node->rflag);
+    //}
   }
   remove_nodes_if_rflag(mesh, ref_method);
   update_mesh_myln_node_nid(mesh);
@@ -764,7 +794,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
 /* use limiter data in node->dat->nlim to decide if and where we refine */
 int resolve_shocks_using_nlim(tMesh *mesh)
 {
-  hrefine_pcoarsen_nodes_if_nlim(mesh);
   undo_hrefine_pcoarsen_nodes_if_zero_nlim(mesh);
+  hrefine_pcoarsen_nodes_if_nlim(mesh);
   return 0;
 }
