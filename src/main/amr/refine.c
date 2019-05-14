@@ -760,3 +760,11 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     printmesh(mesh);
   }
 }
+
+/* use limiter data in node->dat->nlim to decide if and where we refine */
+int resolve_shocks_using_nlim(tMesh *mesh)
+{
+  hrefine_pcoarsen_nodes_if_nlim(mesh);
+  undo_hrefine_pcoarsen_nodes_if_zero_nlim(mesh);
+  return 0;
+}

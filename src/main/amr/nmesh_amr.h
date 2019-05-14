@@ -451,3 +451,6 @@ void free_indc(tIndic *ic);
 void free_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl);
 void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
+
+/* refine.c */
+int resolve_shocks_using_nlim(tMesh *mesh);
