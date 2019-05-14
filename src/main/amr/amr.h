@@ -6,6 +6,7 @@
 /* refinement methods: i.e. vals for var ref_method */
 enum
 {
+  NOREFINE,
   PARENT_n,       /* use same n as parent */
   PARENT_nO2,     /* use parent->n/2 */
   PARENT_nO2_P1   /* use parent->n/2 + 1 */

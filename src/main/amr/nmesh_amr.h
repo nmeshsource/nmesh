@@ -4,6 +4,7 @@
 /* declarations from other parts that we need here already */
 #include "thread_defs.h"
 #include "../main/skeleton.h"
+#include "../main/variables.h"
 #include "../nMPI/nMPI_defs.h"
 #include "../evolve/evosys.h"
 #include "../coordinates/CI.h"

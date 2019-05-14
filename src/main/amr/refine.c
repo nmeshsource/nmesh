@@ -691,3 +691,25 @@ void hcoarsen_pat(tMesh *mesh, int p)
     printmesh(mesh);
   }
 }
+
+
+/*  */
+void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
+{
+  int ref_method = PARENT_nO2_P1;
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    if(node->dat->nlim) node->rflag = ref_method;
+    else                node->rflag = 0;
+  }
+
+  hrefine_nodes_if_rflag(mesh, ref_method);
+  update_mesh_myln_node_nid(mesh);
+  if(PR)
+  {
+    PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+    printmesh(mesh);
+  }
+}

@@ -98,7 +98,7 @@ void AddAuxMeshVar(tMesh *mesh, const char *name,
 {
   int nvdb  = mesh->nvdb;
   AddMeshVar(mesh, name, tensorindices, description);
-  MeshVarSetType(mesh, nvdb, 1);
+  MeshVarSetType(mesh, nvdb, AUXVAR);
 }
 
 /* add variable with surfaces */
@@ -130,7 +130,7 @@ void AddAuxMeshVarDim(tMesh *mesh, const char *name,
 {
   int nvdb  = mesh->nvdb;
   AddMeshVar(mesh, name, tensorindices, description);
-  MeshVarSetType(mesh, nvdb, 1);
+  MeshVarSetType(mesh, nvdb, AUXVAR);
   MeshVarSetSpecial(mesh, nvdb, n_special0, n_special1, n_special2);
 }
 

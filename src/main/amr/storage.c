@@ -401,7 +401,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
         enablevarcomp_innode(node, vi);
 
         /* fill node->dat with interpolation data from parent */
-        if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
+        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
         {
           Lagrange_interpolate_topoints(parent, parent->dat->v[vi],
                                         Xp, node->dat->v[vi]);
@@ -547,7 +547,7 @@ tNode *destroy_children(tNode *parent)
     for(vi=0; vi<nvdb; vi++)
     {
       /* fill parent->dat with interpolation data from child */
-      if(MeshVarType(mesh, vi)!=1) /* exclude Aux. vars */
+      if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
       {
         if(child0->dat->v[vi])
         {

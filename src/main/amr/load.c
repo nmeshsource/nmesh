@@ -83,7 +83,7 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
   for(nvars=0, *ndoubles=0, vi=0; vi<dat->nv; vi++)
     if(dat->v[vi])
     {
-      *ndoubles += (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=1);
+      *ndoubles += (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=AUXVAR);
       if(PR) { PRF;printf(": vi=%d ndoubles=%d\n", vi, *ndoubles); }
       nvars++;
     }
@@ -117,7 +117,7 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
     /* add to buffer if eneabled and not auxiliary var */
     if(dat->v[vi])
     {
-      N = (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=1);
+      N = (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=AUXVAR);
       buf[bi++] = vi;
       buf[bi++] = N;
       memcpy(buf+bi, dat->v[vi]->d, N * sizeof(double));
