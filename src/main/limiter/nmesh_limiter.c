@@ -10,8 +10,7 @@ int nmesh_limiter(tMesh *mesh)
   printf("Adding limiter\n");
 
   /* functions */
-  //AddFun(INITIALDATA, limiter_startup);
-  //AddFun(ANALYZE, limiter_analyze);
+  AddFun(POST_PARAMETERS, limiter_init_global_par_indices);
 
   /* variables */
   //AddAuxVar("limiter_u",      "",    "test function");

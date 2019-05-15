@@ -5,6 +5,17 @@
 #include "nmesh.h"
 #include "limiter.h"
 
+/* parameter indices of some frequently used pars */
+int Par_limiter_alpha, Par_limiter_beta;
+
+/* func to init frequently used pars */
+int limiter_init_global_par_indices(tMesh *mesh)
+{
+  Par_limiter_alpha = Par("limiter_alpha");
+  Par_limiter_beta  = Par("limiter_beta");
+  return 0;
+}
+
 
 /* the limiters in here use the struct tINDIC within tDat to exchange data
    between neighbors. The exchange is done in evolve, which calls functions
@@ -65,8 +76,6 @@ double MRS_theta_Mml(double Mi, double wbar, double wMi)
 /* MRS limiter: limit u using data in dat->ic */
 int limiter_MRS(tNode *node, tVarList *vl)
 {
-  static int firstcall = 1;
-  static int limiter_alpha;
   tMesh *mesh = node->pat->mesh;
   double *bb = node->bbox;
   tDat *dat;
@@ -78,14 +87,8 @@ int limiter_MRS(tNode *node, tVarList *vl)
   dat = node->dat;
   if(!dat) return 0;
 
-  if(firstcall)
-  {
-    limiter_alpha = Par("limiter_alpha");
-    firstcall = 0;
-  }
-
   /* set alpha_h from alpha (smaller alpha makes MRS more agressive) */
-  alpha = Getd(limiter_alpha); //0.1; //5.0;
+  alpha = Getd(Par_limiter_alpha); //0.1; //5.0;
   h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   alpha_h = alpha * pow(h, 1.5);
 
@@ -232,8 +235,6 @@ double minmod3B(double a, double b, double c,  double Mt_dx)
 /* minmodB slope limiter as in : limit u using data in dat->ic */
 int limiter_minmodB(tNode *node, tVarList *vl)
 {
-  static int firstcall = 1;
-  static int limiter_alpha, limiter_beta;
   tMesh *mesh = node->pat->mesh;
   int *n = node->n;
   double *bb = node->bbox;
@@ -248,18 +249,11 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   dat = node->dat;
   if(!dat) return 0;
 
-  if(firstcall)
-  {
-    limiter_alpha = Par("limiter_alpha");
-    limiter_beta  = Par("limiter_beta");
-    firstcall = 0;
-  }
-
   /* set pars (smaller alpha makes minmodB more agressive) */
-  alpha = Getd(limiter_alpha);
+  alpha = Getd(Par_limiter_alpha);
   h     = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   Mt_h  = alpha * h;
-  beta = Getd(limiter_beta);
+  beta = Getd(Par_limiter_beta);
   bos3 = beta/sqrt3;
 
   /* locations of coeffs */
