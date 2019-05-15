@@ -12,6 +12,7 @@ int nmesh_advection1(tMesh *mesh)
   printf("Adding advection1\n");
 
   /* functions */
+  AddFun(POST_PARAMETERS, advection1_init_global_pars);
   AddFun(INITIALDATA, advection1_init);
   AddFun(ANALYZE, advection1_analyze);
 //FIXME: test hack:
