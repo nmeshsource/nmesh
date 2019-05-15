@@ -10,21 +10,29 @@
 /* func pointer for numerical flux */
 void (*advection1_numflux)(tDGinfo *d);
 
+/* frequently used pars */
+double advection1_direction[3];
+
+/* func to init frequently used pars */
+int advection1_init_global_pars(tMesh *mesh)
+{
+  char *advdir = Gets(Par("advection1_direction"));
+  sscanf(advdir, "%lg %lg %lg",
+         &(advection1_direction[0]),
+         &(advection1_direction[1]),
+         &(advection1_direction[2]));
+  printf("setting: advection1_direction[0] = %g\n", advection1_direction[0]);
+  printf("setting: advection1_direction[1] = %g\n", advection1_direction[1]);
+  printf("setting: advection1_direction[2] = %g\n", advection1_direction[2]);
+  return 0;
+}
+
 
 /* flux in direction norm */
 void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
                        double *u)
 {
-  static int firstcall = 1;
-  static double nd[3];
-
-  if(firstcall)
-  {
-    char *advdir = Gets(Par("advection1_direction"));
-    /* prop. dir.*/
-    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
-    firstcall = 0;
-  }
+  double *nd = advection1_direction;
 
   /* flux times norm */
   f[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * u[0];
@@ -33,16 +41,7 @@ void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
 /* eigenvalue in direction norm */
 void advection1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
 {
-  static int firstcall = 1;
-  static double nd[3];
-
-  if(firstcall)
-  {
-    char *advdir = Gets(Par("advection1_direction"));
-    /* prop. dir.*/
-    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
-    firstcall = 0;
-  }
+  double *nd = advection1_direction;
 
   /* eigenvalue */
   lam[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]);
@@ -337,6 +336,7 @@ int advection1_init(tMesh *mesh)
   {
     //tNode *node = MyLnode;
     //limiter_MRS(node, vlu);
+    //limiter_minmodB(node, vlu);
   }
 
   formylnodes(mesh)
@@ -360,7 +360,6 @@ int advection1_init(tMesh *mesh)
     printvar_innode(node, iu);
     printvar_indc(node, iu);
   }
-
 
 //  exit(9);
 
