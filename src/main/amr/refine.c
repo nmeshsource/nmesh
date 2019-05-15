@@ -286,7 +286,7 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
   }
 
   /* Now mesh->lns is up to date, next destroy the children */
-  FORNODES_Pragma(omp parallel for)
+  //FORNODES_Pragma(omp parallel for)
   for(i=0; i<nnodes; i++)
   {
     if(elem_parent[i])

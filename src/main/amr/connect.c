@@ -504,6 +504,10 @@ int add_nfaces_outside_patch(tNode *node, int face)
     free_nodelist(nblist1);
   }
 
+//  char s[100];
+//  PRF;printf(": %s f%d\n", nodename(node,s,99), face);
+//  printnodelist(nblist1); fflush(stdout);
+
   return nnb;
 }
 
@@ -935,6 +939,10 @@ void set_nc_lock_on_node_and_fnbs(tNode *node, tNode *locker)
 
   /* mark node as locked by locker */
   node->nc_lock = locker;
+  //char ns[100], ls[100];
+  //PRF;printf(": %s locked by %s\n",
+  //           nodename(node,ns,99), nodename(locker,ls,99));
+  //fflush(stdout);
 
   /* mark neighbors as locked by locker */
   for(face=0; face<6; face++)
@@ -944,6 +952,9 @@ void set_nc_lock_on_node_and_fnbs(tNode *node, tNode *locker)
     {
       tNode *nb = node->fnb[face][ni];
       nb->nc_lock = locker;
+      //PRF;printf(":   %s locked by %s\n",
+      //           nodename(nb,ns,99), nodename(locker,ls,99));
+      //fflush(stdout);
     }
   }
 }

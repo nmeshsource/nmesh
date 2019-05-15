@@ -423,12 +423,17 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   tNlist *nlist = NULL;
   tNlist *elem = NULL;
   tNode parent_tmp[1];
+  char *pt1, *pt2;
   tNode *node;
   tNode *narray[8];
   int ijk;
 
-  /* shallow copy of parent */
-  parent_tmp[0] = parent[0];
+  /* shallow copy of parent,
+     but exclude nb info parts to not throw off data race detectors */
+  //parent_tmp[0] = parent[0];
+  pt1 = (char *) parent;
+  pt2 = (char *) &(parent->nb[0]);
+  memcpy(&(parent_tmp[0]), parent, pt2-pt1);
 
   /* use parent_tmp to make children */
   for(ijk=0; ijk<8; ijk++)
@@ -439,15 +444,17 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
 
+//#pragma omp critical
+{
   /* aquire lock for change of connections */
   node_and_fnbs_lock(parent);
 
   /* now attach children to parent */
   // parent[0] = parent_tmp[0];
+  parent->leaf = 0;  // parent is now no longer a leaf node
   for(ijk=0; ijk<8; ijk++)
   {
     parent->child[ijk] = parent_tmp->child[ijk];
-    parent->leaf = 0;  // parent is now no longer a leaf node
     parent->child[ijk]->parent = parent;
   }
 
@@ -458,8 +465,11 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   for(ijk=0; ijk<8; ijk++)
     update_node_and_neighbors_nfaces_fnb(narray[ijk]);
 
+  //#pragma omp flush
+
   /* release locks */
   node_and_fnbs_unlock(parent);
+}
 
   /* free all data on parent */
   free_dat(parent->dat);
@@ -599,6 +609,8 @@ tNode *destroy_children(tNode *parent)
     coordinates_init_node(parent);
   }
 
+//#pragma omp critical
+{
   /* obtain lock on face neighbors of narray in name of parent */
   parent_and_fnbs_lock(narray, parent);
 
@@ -627,6 +639,7 @@ tNode *destroy_children(tNode *parent)
 
   /* free child nodes */
   for(ijk=0; ijk<8; ijk++) free_node(narray[ijk]);
+}
 
   return parent;
 }
