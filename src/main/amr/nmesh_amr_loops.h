@@ -17,15 +17,21 @@
 
 /* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
 #define formylnodes(mesh) \
+  formylnodes_noomp(mesh)
+/*
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   FORNODES_Pragma(omp parallel for) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
+*/
 
 /* this one will have no "parallel" on its own */
 #define formylnodes_ompfor(mesh) \
+  formylnodes_noomp(mesh)
+/*
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   FORNODES_Pragma(omp for) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
+*/
 /* to start tasks formylnodes_ompfor has to be inside a:
    #pragma omp parallel {  } */
 
