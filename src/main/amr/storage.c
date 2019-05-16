@@ -444,30 +444,31 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
 
-//#pragma omp critical
-{
-  /* aquire lock for change of connections */
-  node_and_fnbs_lock(parent);
-
-  /* now attach children to parent */
-  // parent[0] = parent_tmp[0];
-  parent->leaf = 0;  // parent is now no longer a leaf node
-  for(ijk=0; ijk<8; ijk++)
+  //T_CRITICAL(make_or_destroy_nodes)
+  #pragma omp critical
   {
-    parent->child[ijk] = parent_tmp->child[ijk];
-    parent->child[ijk]->parent = parent;
+    ///* aquire lock for change of connections */
+    //node_and_fnbs_lock(parent);
+
+    /* now attach children to parent */
+    // parent[0] = parent_tmp[0];
+    parent->leaf = 0;  // parent is now no longer a leaf node
+    for(ijk=0; ijk<8; ijk++)
+    {
+      parent->child[ijk] = parent_tmp->child[ijk];
+      parent->child[ijk]->parent = parent;
+    }
+
+    /* fill in neighbor info, as far as these 8 are concerned */
+    connect8_with_neighbors(narray, 1);
+
+    /* update fnb of all in narray and their neighbors */
+    for(ijk=0; ijk<8; ijk++)
+      update_node_and_neighbors_nfaces_fnb(narray[ijk]);
+
+    ///* release locks */
+    //node_and_fnbs_unlock(parent);
   }
-
-  /* fill in neighbor info, as far as these 8 are concerned */
-  connect8_with_neighbors(narray, 1);
-
-  /* update fnb of all in narray and their neighbors */
-  for(ijk=0; ijk<8; ijk++)
-    update_node_and_neighbors_nfaces_fnb(narray[ijk]);
-
-  /* release locks */
-  node_and_fnbs_unlock(parent);
-}
 
   /* free all data on parent */
   free_dat(parent->dat);
@@ -607,40 +608,41 @@ tNode *destroy_children(tNode *parent)
     coordinates_init_node(parent);
   }
 
-//#pragma omp critical
-{
-  /* obtain lock on face neighbors of narray in name of parent */
-  parent_and_fnbs_lock(narray, parent);
-
-  /* update neighbor info */
-  /* set neighbor info to NULL, as far as these 8 are concerned */
-  connect8_with_neighbors(narray, 0);
-
-  /* unlink child nodes, and remove all nfaces of narray */
-  for(ijk=0; ijk<8; ijk++)
+  //T_CRITICAL(make_or_destroy_nodes)
+  #pragma omp critical
   {
-    if(narray[ijk]->child[0])
-      errorexit("cannot orphan child that itself has child[0]");
-    parent->child[ijk] = NULL;
-    remove_all_nfaces(narray[ijk]);
+    ///* obtain lock on face neighbors of narray in name of parent */
+    //parent_and_fnbs_lock(narray, parent);
+
+    /* update neighbor info */
+    /* set neighbor info to NULL, as far as these 8 are concerned */
+    connect8_with_neighbors(narray, 0);
+
+    /* unlink child nodes, and remove all nfaces of narray */
+    for(ijk=0; ijk<8; ijk++)
+    {
+      if(narray[ijk]->child[0])
+        errorexit("cannot orphan child that itself has child[0]");
+      parent->child[ijk] = NULL;
+      remove_all_nfaces(narray[ijk]);
+    }
+    /* the narray is disconnected now, but still has lock on face neighbors */
+
+    /* update fnb on parent and its neighbors */
+    update_node_and_neighbors_nfaces_fnb(parent);
+
+    /* parent is now a leaf node */
+    parent->leaf = 1;
+
+    /////* release lock on face neighbors */
+    ////parent_and_fnbs_unlock(narray, parent);
+
+    /* free child nodes */
+    for(ijk=0; ijk<8; ijk++) free_node(narray[ijk]);
+
+    ///* release lock on parent and its face neighbors */
+    //node_and_fnbs_unlock(parent);
   }
-  /* the narray is disconnected now, but still has lock on face neighbors */
-
-  /* update fnb on parent and its neighbors */
-  update_node_and_neighbors_nfaces_fnb(parent);
-
-  /* parent is now a leaf node */
-  parent->leaf = 1;
-
-  ///* release lock on face neighbors */
-  //parent_and_fnbs_unlock(narray, parent);
-
-  /* free child nodes */
-  for(ijk=0; ijk<8; ijk++) free_node(narray[ijk]);
-
-  /* release lock on parent and its face neighbors */
-  node_and_fnbs_unlock(parent);
-}
 
   return parent;
 }
