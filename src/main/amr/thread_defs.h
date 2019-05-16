@@ -19,7 +19,7 @@
 #define MUTEX_LOCK(x)    omp_set_lock(x)
 #define MUTEX_UNLOCK(x)  omp_unset_lock(x)
 #define MUTEX_DESTROY(x) omp_destroy_lock(x)
-#define T_CRITICAL(x)    _Pragma ( MSTR(omp critical (x)) )
+#define T_CRITICAL       _Pragma ( MSTR_OFVAL(omp critical) )
 #define TASK_YIELD       _Pragma ( "omp taskyield" )
 #define MAX_NTHREADS     omp_get_max_threads()
 

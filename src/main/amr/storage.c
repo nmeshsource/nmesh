@@ -444,8 +444,8 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
 
-  //T_CRITICAL(make_or_destroy_nodes)
-  #pragma omp critical
+  //#pragma omp critical (make_or_destroy_nodes)
+  T_CRITICAL
   {
     ///* aquire lock for change of connections */
     //node_and_fnbs_lock(parent);
@@ -608,8 +608,8 @@ tNode *destroy_children(tNode *parent)
     coordinates_init_node(parent);
   }
 
-  //T_CRITICAL(make_or_destroy_nodes)
-  #pragma omp critical
+  //#pragma omp critical (make_or_destroy_nodes)
+  T_CRITICAL
   {
     ///* obtain lock on face neighbors of narray in name of parent */
     //parent_and_fnbs_lock(narray, parent);
