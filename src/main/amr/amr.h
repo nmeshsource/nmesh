@@ -45,6 +45,7 @@ void node_and_fnbs_lock(tNode *node);
 void node_and_fnbs_unlock(tNode *node);
 void parent_and_fnbs_lock(tNode *narray[8], tNode *locker);
 void parent_and_fnbs_unlock(tNode *narray[8], tNode *locker);
+tNode *get_node_nc_lock(tNode *node);
 
 /* surface.c */
 void free_surface(tSurface *s);

@@ -331,9 +331,10 @@ tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
 {
   tNode *child;
   int i;
+  tNode *locker = get_node_nc_lock(node);
 
-  /* check if node has children */
-  if(node->child[0])
+  /* check if node has children but only if it is finished (unlocked) */
+  if( (locker==NULL) && (node->child[0]) )
   {
     for(i=0; i<8; i++)
     {
@@ -572,6 +573,7 @@ void set_node_fnb_from_nfaces(tNode *node, int face)
 //void update_node_and_neighbors_fnb__new(tNode *node)
 void update_node_and_neighbors_nfaces_fnb(tNode *node)
 {
+  DECL_MESH_MUTEX(node, mutex);
   int face;
 
   /* set nfaces on node and neighbors */
@@ -582,14 +584,17 @@ void update_node_and_neighbors_nfaces_fnb(tNode *node)
 //{
 //PRF;printnfaces(node);
 //}
+
+  /* update fnb on this node */
+  for(face=0; face<6; face++)
+    set_node_fnb_from_nfaces(node, face);
+
+  /* now update fnb on all its neighbors */
+  MUTEX_LOCK(mutex); /* use mutex, as fnb is used in locking nodes */
   for(face=0; face<6; face++)
   {
     tNface *nface;
 
-    /* update fnb on this node */
-    set_node_fnb_from_nfaces(node, face);
-
-    /* now update fnb on all its neighbors */
     for(nface=node->nfaces[face]; nface; nface=nface->next)
     {
       tNface *onface = nface->onface;
@@ -599,6 +604,7 @@ void update_node_and_neighbors_nfaces_fnb(tNode *node)
       set_node_fnb_from_nfaces(nb, nb_f);
     }
   }
+  MUTEX_UNLOCK(mutex);
 }
 
 // Not sure if this function is useful ...
@@ -1143,6 +1149,27 @@ void parent_and_fnbs_unlock(tNode *narray[8], tNode *locker)
   }
   MUTEX_UNLOCK(mutex);
 }
+
+
+/*******************************************************************/
+/* check lock */
+/*******************************************************************/
+
+/* return locker on node, protected by mutex */
+tNode *get_node_nc_lock(tNode *node)
+{
+  tNode *locker;
+  DECL_MESH_MUTEX(node, mutex);
+
+  MUTEX_LOCK(mutex);
+  {
+    locker = node->nc_lock;
+  }
+  MUTEX_UNLOCK(mutex);
+
+  return locker;
+}
+
 
 
 /*******************************************************************/
