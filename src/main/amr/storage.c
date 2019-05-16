@@ -465,8 +465,6 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   for(ijk=0; ijk<8; ijk++)
     update_node_and_neighbors_nfaces_fnb(narray[ijk]);
 
-  //#pragma omp flush
-
   /* release locks */
   node_and_fnbs_unlock(parent);
 }
@@ -618,7 +616,7 @@ tNode *destroy_children(tNode *parent)
   /* set neighbor info to NULL, as far as these 8 are concerned */
   connect8_with_neighbors(narray, 0);
 
-  /* orphan child nodes, and remove all nfaces of narray */
+  /* unlink child nodes, and remove all nfaces of narray */
   for(ijk=0; ijk<8; ijk++)
   {
     if(narray[ijk]->child[0])
@@ -634,11 +632,14 @@ tNode *destroy_children(tNode *parent)
   /* parent is now a leaf node */
   parent->leaf = 1;
 
-  /* release lock on face neighbors */
-  parent_and_fnbs_unlock(narray, parent);
+  ///* release lock on face neighbors */
+  //parent_and_fnbs_unlock(narray, parent);
 
   /* free child nodes */
   for(ijk=0; ijk<8; ijk++) free_node(narray[ijk]);
+
+  /* release lock on parent and its face neighbors */
+  node_and_fnbs_unlock(parent);
 }
 
   return parent;
