@@ -331,10 +331,9 @@ tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
 {
   tNode *child;
   int i;
-  tNode *locker = get_node_nc_lock(node);
 
-  /* check if node has children but only if it is finished (unlocked) */
-  if( (locker==NULL) && (node->child[0]) )
+  /* check if node has children */
+  if(node->child[0])
   {
     for(i=0; i<8; i++)
     {
@@ -348,6 +347,23 @@ tNlist *leafdescendants_along_face(tNode *node, int face, tNlist *leafdesc)
 
   return leafdesc;
 }
+
+/* return all leaf descendants of node along face.
+   the list leafdesc it returns has to be freed by caller */
+tNlist *get_leafdescendants_along_face(tNode *node, int face)
+{
+  tNlist *leafdesc;
+  //DECL_MESH_MUTEX(node, mutex);
+
+  //MUTEX_LOCK(mutex);
+  {
+    leafdesc = leafdescendants_along_face(node, face, NULL);
+  }
+  //MUTEX_UNLOCK(mutex);
+
+  return leafdesc;
+}
+
 
 /*************************************************************************/
 /* functions to set nfaces and fnb */
@@ -573,7 +589,7 @@ void set_node_fnb_from_nfaces(tNode *node, int face)
 //void update_node_and_neighbors_fnb__new(tNode *node)
 void update_node_and_neighbors_nfaces_fnb(tNode *node)
 {
-  DECL_MESH_MUTEX(node, mutex);
+  //DECL_MESH_MUTEX(node, mutex);
   int face;
 
   /* set nfaces on node and neighbors */
@@ -590,7 +606,7 @@ void update_node_and_neighbors_nfaces_fnb(tNode *node)
     set_node_fnb_from_nfaces(node, face);
 
   /* now update fnb on all its neighbors */
-  MUTEX_LOCK(mutex); /* use mutex, as fnb is used in locking nodes */
+  //MUTEX_LOCK(mutex); /* use mutex, as fnb is used in locking nodes */
   for(face=0; face<6; face++)
   {
     tNface *nface;
@@ -604,7 +620,7 @@ void update_node_and_neighbors_nfaces_fnb(tNode *node)
       set_node_fnb_from_nfaces(nb, nb_f);
     }
   }
-  MUTEX_UNLOCK(mutex);
+  //MUTEX_UNLOCK(mutex);
 }
 
 // Not sure if this function is useful ...
@@ -988,6 +1004,9 @@ tNode *parent_and_fnbs_nc_locked(tNode *narray[8])
     int j = jOfInd_n_k(ijk, ns,k);
     int i = iOfInd_n_jk(ijk, ns,j,k);
 
+    /* return locker of 1st locked node in narray */
+    if(node->nc_lock) return node->nc_lock;
+
     /* return locker of 1st nodearray neighbor that is locked */
     /* X-dir: */
     fo = i;   /* face index in direction of other neighbor */
@@ -1037,6 +1056,9 @@ void set_nc_lock_on_parent_and_fnbs_of_nodearray(tNode *narray[8],
     int k = kOfInd_n(ijk, ns);
     int j = jOfInd_n_k(ijk, ns,k);
     int i = iOfInd_n_jk(ijk, ns,j,k);
+
+    /* mark node in narray as locked */
+    node->nc_lock = locker;
 
     /* mark nodearray neighbors as locked by locker */
     /* X-dir: */
