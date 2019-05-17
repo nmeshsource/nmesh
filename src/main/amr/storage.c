@@ -444,6 +444,21 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
     narray[ijk] = node; /* save nodes also in an array */
   }
 
+  /*
+  Below we use critical sections because the locking of nearest neighbors
+  in node_and_fnbs_lock (while probably working) is not enough.
+  update_node_and_neighbors_nfaces_fnb calls add_nfaces_outside_patch, which
+  in turn calls leafdescendants_along_face. Yet leafdescendants_along_face
+  is called with the root node! From there it descends to all nodes along
+  the face of a patch. Many of these nodes may not be locked and are far
+  away from parent. I.e. we access nodes that other threads are working on
+  so that we get a race condition! So for now we let only one thread go
+  here. However, a better solution would be to improve
+  add_nfaces_outside_patch such that it starts from some known neighbors in
+  the other patch and not from the root node. Then there is a chance to keep
+  the descends local. So that locking nearest neighbors would be effective.
+  */
+
   //#pragma omp critical (make_or_destroy_nodes)
   T_CRITICAL
   {
@@ -607,6 +622,13 @@ tNode *destroy_children(tNode *parent)
     /* init coords in parent */
     coordinates_init_node(parent);
   }
+
+  /*
+  The long comment before critical section in make8_child_nodes applies here
+  as well. add_nfaces_outside_patch makes the leafdescendants_along_face
+  start with the root node. Thus we access far away nodes that cannot be
+  locked with parent_and_fnbs_lock.
+  */
 
   //#pragma omp critical (make_or_destroy_nodes)
   T_CRITICAL
