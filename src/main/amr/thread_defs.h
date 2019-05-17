@@ -31,7 +31,7 @@
 #define MUTEX_LOCK(x)
 #define MUTEX_UNLOCK(x)
 #define MUTEX_DESTROY(x)
-#define T_CRITICAL(x)
+#define T_CRITICAL
 #define TASK_YIELD
 #define MAX_NTHREADS 1
 
