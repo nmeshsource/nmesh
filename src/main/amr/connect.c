@@ -506,7 +506,7 @@ int add_nfaces_outside_patch(tNode *node, int face)
 //PRFs(": final:\n");printnodelist(nblist1);
 //}
 
-    /* rewind nblist1 so that the fornodelist loop blow works */
+    /* rewind nblist1 so that the fornodelist loop below works */
     nblist1 = first_nodelist(nblist1);
 
     /* add all in nblist1 as nfaces */
@@ -548,7 +548,7 @@ void update_node_nfaces(tNode *node)
   remove_all_nfaces(node);
   remove_all_nfaces(parent);
 
-  /* go over all faces and add nefaces */
+  /* go over all faces and add nfaces */
   for(face=0; face<6; face++)
     add_nfaces_at_nodeface(node, face);
 }
