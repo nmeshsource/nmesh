@@ -91,7 +91,7 @@ Things that need to be done urgently:
 
 *check funs in refine.c
  +MPI part alone seems to work
- +threads alone seems to work as well
+ +threads alone seem to work if I use critical secs
  -test with MPI + threads, may need to init MPI differently...
 
 *advect square profile and check for flux integral conservation
