@@ -102,7 +102,7 @@ void numflux1d_HLL(tDGinfo *d)
   double ami = 0.;
   int i;
 
-  /* max speeds */
+  /* min & max speeds */
   for(i=0; i<nf; i++)
   {
     apl = max2(apl, max2(d->lama[i], d->lami[i]));
