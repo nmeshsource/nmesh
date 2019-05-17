@@ -882,7 +882,7 @@ void free_mesh(tMesh *mesh)
   /* free skeleton in mesh */
   remove_all_MeshFuns(mesh);
 
-  /* init mesh mutex */
+  /* free mesh mutex */
   MUTEX_DESTROY(mesh->mutex);
 
   free(mesh);
