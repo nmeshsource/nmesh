@@ -288,6 +288,20 @@ typedef struct tVARLIST {
 
 
 /**************************************************************************/
+/* for mesh refinement */
+/**************************************************************************/
+
+/* refinement methods: i.e. vals for var ref_method */
+enum
+{
+  NOREFINE,
+  PARENT_n,       /* use same n as parent */
+  PARENT_nO2,     /* use parent->n/2 */
+  PARENT_nO2_P1   /* use parent->n/2 + 1 */
+};
+
+
+/**************************************************************************/
 /* loops */
 /**************************************************************************/
 #include "nmesh_amr_loops.h"
@@ -455,3 +469,5 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 
 /* refine.c */
 int resolve_shocks_using_nlim(tMesh *mesh);
+void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method);
+void remove_nodes_if_rflag(tMesh *mesh, int ref_method);

@@ -3,16 +3,6 @@
 
 
 
-/* refinement methods: i.e. vals for var ref_method */
-enum
-{
-  NOREFINE,
-  PARENT_n,       /* use same n as parent */
-  PARENT_nO2,     /* use parent->n/2 */
-  PARENT_nO2_P1   /* use parent->n/2 + 1 */
-};
-
-
 /* world comm from main */
 extern nMPI_Comm main_comm;
 
@@ -83,8 +73,6 @@ int remove_nface(tNface *nface);
 void remove_all_nfaces(tNode *node);
 
 /* refine.c */
-void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method);
-void remove_nodes_if_rflag(tMesh *mesh, int ref_method);
 void hrefine_mesh_to_level(tMesh *mesh, int l);
 void hcoarsen_mesh_to_level(tMesh *mesh, int l);
 void hrefine_pat(tMesh *mesh, int p);
