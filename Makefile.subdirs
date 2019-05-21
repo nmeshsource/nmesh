@@ -8,7 +8,7 @@
 # OBJS := bam_$(NAME).o get_coords.o
 # include $(TOP)/Makefile.subdirs
 
-# We work in a eparate directory LIBDIR to not cluuter the source
+# We work in a separate directory LIBDIR to not clutter the source
 # directories with object files and library files.
 
 # Make name of the library that we want to create
