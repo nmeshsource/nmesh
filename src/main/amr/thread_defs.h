@@ -22,7 +22,7 @@
 #define T_CRITICAL       _Pragma ( MSTR_OFVAL(omp critical) )
 #define TASK_YIELD       _Pragma ( "omp taskyield" )
 #define MAX_NTHREADS     omp_get_max_threads()
-
+#define TID              omp_get_thread_num()
 #else
 
 #define tMUTEX int
@@ -34,6 +34,7 @@
 #define T_CRITICAL
 #define TASK_YIELD
 #define MAX_NTHREADS 1
+#define TID 0
 
 #endif
 

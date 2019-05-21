@@ -27,31 +27,46 @@ static int timer_MPI_barrier = 0;
 
 
 
-/* get or make a new timer for the function named "name",
+/* get or make a new timer for the function named "funcname",
    returns pointer to entry for name */
-tTimer *timer_get(const char *name)
+tTimer *timer_get(const char *funcname)
 {
   int i;
+  int tid = TID;
+  int namelen = strlen(funcname) + 64;
+  char *name = malloc(sizeof(name[0])*namelen);
 
-  if(tdb != NULL)
+  /* append thread ID to name, if we do not call from thread0 */
+  if(tid) snprintf(name,namelen, "%s %d", funcname, TID);
+  else    snprintf(name,namelen, "%s", funcname);
+
+  T_CRITICAL
   {
-    /* return timer with correct name */
+    /* look for timer with correct name */
     for(i = 0; i < ntimers; i++)
       if(strcmp(tdb[i]->name, name) == 0)
-        return tdb[i];
-  }
+        break;
 
-  /* make a new timer */
-  i = ntimers;
-  ntimers++;
-  /* realloc timer list */
-  tdb = realloc(tdb, ntimers * sizeof(tdb[0]));
-  /* alloc and set new timer */
-  tdb[i] = calloc(1, sizeof(*tdb[0]));
-  tdb[i]->name  = strdup(name);
-  tdb[i]->start = -1.;
-  tdb[i]->time  = 0.;
-  tdb[i]->n     = 0;
+    /* if we cannot find timer */
+    if(i >= ntimers)
+    {
+      /* make a new timer */
+      i = ntimers;
+      ntimers++;
+      /* realloc timer list */
+      tdb = realloc(tdb, ntimers * sizeof(tdb[0]));
+      /* alloc and set new timer */
+      tdb[i] = calloc(1, sizeof(*tdb[0]));
+      tdb[i]->name  = name;
+      tdb[i]->start = -1.;
+      tdb[i]->time  = 0.;
+      tdb[i]->n     = 0;
+    }
+    else /* timer has index i and now we do not need name anymore */
+    {
+      free(name);
+    }
+  }
 
   return tdb[i];
 }
