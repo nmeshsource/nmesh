@@ -15,8 +15,9 @@ int nmesh_advection1(tMesh *mesh)
   AddFun(POST_PARAMETERS, advection1_init_global_pars);
   AddFun(INITIALDATA, advection1_init);
   AddFun(ANALYZE, advection1_analyze);
-//FIXME: test hack:
-AddFun(POST_EVOLVE, resolve_shocks_using_nlim);
+  //AddFun(PRE_EVOLVE, advection1_refine); // test refinement
+  //FIXME: test hack:
+  //AddFun(POST_EVOLVE, resolve_shocks_using_nlim);
 
   /* variables */
   AddEvoVar("advection1_u", "",     "field we advect");

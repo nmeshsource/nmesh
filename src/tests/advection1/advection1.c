@@ -273,7 +273,7 @@ int advection1_set_profile(tMesh *mesh, int iu)
 }
 
 
-/* initialize test */
+/* initialize advection1 */
 int advection1_init(tMesh *mesh)
 {
   int iu  = Ind("advection1_u");
@@ -323,6 +323,7 @@ int advection1_init(tMesh *mesh)
     advection1_numflux = numflux1d_upwind;
 
   /* test */
+  /*
   init_all_myln_myindc_for_vl(mesh, vlu, 3);
   formylnodes(mesh)
   {
@@ -360,8 +361,8 @@ int advection1_init(tMesh *mesh)
     printvar_innode(node, iu);
     printvar_indc(node, iu);
   }
-
-//  exit(9);
+  */
+  //exit(9);
 
   return 0;
 } 
@@ -388,5 +389,61 @@ int advection1_analyze(tMesh *mesh)
     forpoints(node, i)
       ue[i] = u[i]- ue[i];
   }
+  return 0;
+}
+
+
+/* refine if diff between min and max is above threshold */
+int advection1_refine(tMesh *mesh)
+{
+  int iu  = Ind("advection1_u");
+  int ref_method = PARENT_n;
+  double rft  = 0.5;
+  double urft = 0.1;
+
+  if(PR) PRFs("\n");
+
+  /* set rflag based on refinement criterion */
+  formylnodes(mesh)
+  {
+    tNode *parent;
+    tNode *node = MyLnode;
+    //double *u  = Vard(node, iu);
+    tArray *uA = VarA(node, iu);
+    int imin, imax;
+    double min = min_array(uA, &imin);
+    double max = max_array(uA, &imax);
+
+    /* should we refine, unrefine, or do nothing */
+    if(max-min>rft)       node->rflag = ref_method;
+    else if(max-min<urft) node->rflag = -ref_method;
+    else                  node->rflag = 0;
+
+    /* find parent if unset rflag if it exists */
+    parent = node->parent;
+    if(parent) parent->rflag = 0;
+
+    /* do not allow unrefine if we are already at the root node level */
+    if(node->rflag<0 && !parent) node->rflag = 0;
+
+    if(node->rflag>0 && node->l>=4) node->rflag = 0;
+    //node->rflag = 0;
+
+    if(0 && node->rflag<0)
+    {
+      char s[100];
+      printf("%s min=%g max=%g rflag=%d\n",
+      nodename(node,s,99), min, max, node->rflag);
+    }
+  }
+
+  /* unrefine where needed */
+  remove_nodes_if_rflag(mesh, ref_method);
+  update_mesh_myln_node_nid(mesh);
+
+  /* refine where needed */
+  hrefine_nodes_if_rflag(mesh, ref_method);
+  update_mesh_myln_node_nid(mesh);
+
   return 0;
 }
