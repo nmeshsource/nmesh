@@ -10,16 +10,17 @@
 void output1d_vl(tVarList *vl, int It, double T)
 {
   tMesh *mesh = vl->mesh;
-  int fmt = Par("2dformat");
+/*
+  int fmt = Par("1dformat");
   int gnuplot = Getv(fmt, "gnuplot");
   int xdmf    = Getv(fmt, "xdmf");
-/*
   int vtk     = Getv(fmt, "vtk");
   int text    = Getv(fmt, "text");
   int binary  = Getv(fmt, "binary");
   int flt     = Getv(fmt, "float");
   int dbl     = Getv(fmt, "double");
 */
+  int gnuplot=1, xdmf=0;
 
   TIMER_START;
 

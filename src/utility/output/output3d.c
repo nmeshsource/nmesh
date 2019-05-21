@@ -12,8 +12,8 @@ void output3d_vl(tVarList *vl, int It, double T)
 {
   tMesh *mesh = vl->mesh;
   int fmt = Par("3dformat");
-  int xdmf    = Getv(fmt, "xdmf");
-  int vtk     = Getv(fmt, "vtk");
+  int xdmf = Getv(fmt, "xdmf");
+  int vtk  = Getv(fmt, "vtk");
 /*
   int gnuplot = Getv(fmt, "gnuplot");
   int text    = Getv(fmt, "text");
