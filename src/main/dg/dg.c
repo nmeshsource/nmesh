@@ -59,12 +59,13 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   int isqrtgdiagx     = Ind("sqrtgdiagx");
   int iooJ = Ind("det_dXbdx");
 
+  TIMER_START;
+
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
 
   /* loop over nodes so we can add boundary flux terms */
-  //FIXME: start parallel region here, e.g.:
-  //#pragma omp parallel
+  FORNODES_Pragma(omp parallel)
   {
     tDGinfo *dgi = alloc_DGinfo(vlu); /* each task needs its own dgi */
     formylnodes_ompfor(mesh)
@@ -134,6 +135,8 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
     }
     free_DGinfo(dgi);
   }
+
+  TIMER_STOP;
 
   return 0;
 }
