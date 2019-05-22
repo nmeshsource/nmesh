@@ -200,7 +200,7 @@ int write_all_timers(tMesh *mesh)
   fprintf(fp, "---------------------------------------------------------"
           "---------------------\n");
   fprintf(fp, "iteration %d, time %g\n", mesh->iteration, mesh->time);
-  fprintf(fp, "Function calls                                      %%"
+  fprintf(fp, "Functions with timer                                %%"
           "      time/s       calls\n");
   fprintf(fp, "---------------------------------------------------------"
           "---------------------\n");
