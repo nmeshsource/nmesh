@@ -15,7 +15,6 @@ int nmesh_advection1(tMesh *mesh)
   AddFun(POST_PARAMETERS, advection1_init_global_pars);
   AddFun(INITIALDATA, advection1_init);
   AddFun(ANALYZE, advection1_analyze);
-  //AddFun(PRE_EVOLVE, advection1_refine); // test refinement
   //FIXME: test hack:
   //AddFun(POST_EVOLVE, resolve_shocks_using_nlim);
 
@@ -30,6 +29,12 @@ int nmesh_advection1(tMesh *mesh)
   AddPar("advection1_direction", "1 0 0", "propagation direction n^i");
   AddPar("advection1_numflux", "upwind", "numerical flux [LLF,upwind]");
   AddPar("advection1_limiter", "none", "limiter [none,MRS,minmodB]");
+
+  AddPar("advection1_refine", "no", "use dynamic refinement [no,yes]");
+  if(Getb(Par("advection1_refine")))
+  {
+    AddFun(PRE_EVOLVE, advection1_refine);
+  }
 
   return 0;
 }
