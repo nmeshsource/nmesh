@@ -82,10 +82,10 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
       advection1_flux1d(mesh,1, &(fz[i]),no, &u_i);
     }
 
-   /* flux derivs */
-   cart_partials(node, ifx, ifxx);
-   cart_partials(node, ify, ifyx);
-   cart_partials(node, ifz, ifzx);
+    /* flux derivs */
+    cart_partials(node, ifx, ifxx);
+    cart_partials(node, ify, ifyx);
+    cart_partials(node, ifz, ifzx);
   }
 }
 
