@@ -40,7 +40,7 @@ tTimer *timer_get(const char *funcname)
   if(tid) snprintf(name,namelen, "%s %d", funcname, TID);
   else    snprintf(name,namelen, "%s", funcname);
 
-  T_CRITICAL
+  GEN_Pragma(omp critical (timer_get))
   {
     /* look for timer with correct name */
     for(i = 0; i < ntimers; i++)
