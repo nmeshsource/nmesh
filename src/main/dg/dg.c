@@ -65,7 +65,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   get_all_myln_surfaces(mesh);
 
   /* loop over nodes so we can add boundary flux terms */
-  FORNODES_Pragma(omp parallel)
+  NODELEVEL_Pragma(omp parallel)
   {
     tDGinfo *dgi = alloc_DGinfo(vlu); /* each thread gets its own dgi */
 

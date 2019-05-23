@@ -519,7 +519,7 @@ int test_ajsurf(tMesh *mesh)
              nodename(node,s,99), f, norm_n_f);
       norm_n_f2 = pow(norm_n_f, 2);
       //#pragma omp atomic
-      FORNODES_Pragma(omp atomic)
+      NODELEVEL_Pragma(omp atomic)
       sum += norm_n_f2;
     }
   }

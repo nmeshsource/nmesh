@@ -56,11 +56,11 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
   children = calloc(nnodes, sizeof(children[0]));
   if(!replace || !children) errorexit("no memory for replace, children");
 
-  FORNODES_Pragma(omp parallel)
+  NODELEVEL_Pragma(omp parallel)
   {
     tNlist *elem = mesh->lns;
 
-    FORNODES_Pragma(omp for)
+    NODELEVEL_Pragma(omp for)
     for(i=0; i<nnodes; i++)
     {
       tNode *parent;
@@ -286,7 +286,7 @@ long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
   }
 
   /* Now mesh->lns is up to date, next destroy the children */
-  FORNODES_Pragma(omp parallel for)
+  NODELEVEL_Pragma(omp parallel for)
   for(i=0; i<nnodes; i++)
   {
     if(elem_parent[i])

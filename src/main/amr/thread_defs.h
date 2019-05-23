@@ -10,7 +10,7 @@
 #ifdef USEOMP
 
 #include <omp.h>
-#define FORNODES_Pragmas
+#define NODELEVEL_Pragmas
 #define tMUTEX omp_lock_t
 #define DECL_MESH_MUTEX(node, mutex) \
   tMesh *mesh = (node)->pat->mesh; \
@@ -23,6 +23,8 @@
 #define TASK_YIELD       _Pragma ( "omp taskyield" )
 #define MAX_NTHREADS     omp_get_max_threads()
 #define TID              omp_get_thread_num()
+#define GEN_Pragma(x)    _Pragma ( #x )
+
 #else
 
 #define tMUTEX int
@@ -35,20 +37,21 @@
 #define TASK_YIELD
 #define MAX_NTHREADS 1
 #define TID 0
+#define GEN_Pragma(x)
 
 #endif
 
 /* To parallelize with OpenMP we need _Pragma ( "omp parallel for" ) 
    in many places. But for different applications we want to switch 
    them on or off depending on where they are.
-   FORNODES_Pragma used for omp loops all nodes
+   NODELEVEL_Pragma used for omp loops all nodes
 */
-/* define FORNODES_Pragma macros that allow us to include
-   certain pragmas only if certain things like FORNODES_Pragmas are defined */
-#ifdef FORNODES_Pragmas
-#define FORNODES_Pragma(x)  _Pragma ( #x )
+/* define NODELEVEL_Pragma macros that allow us to include
+   certain pragmas only if certain things like NODELEVEL_Pragmas are defined */
+#ifdef NODELEVEL_Pragmas
+#define NODELEVEL_Pragma(x)  _Pragma ( #x )
 #else
-#define FORNODES_Pragma(x)
+#define NODELEVEL_Pragma(x)
 #endif
 
 #if defined(LEVEL6_Pragmas) || defined(TOPLEVEL_Pragmas)
