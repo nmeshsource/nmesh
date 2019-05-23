@@ -67,7 +67,11 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   /* loop over nodes so we can add boundary flux terms */
   FORNODES_Pragma(omp parallel)
   {
-    tDGinfo *dgi = alloc_DGinfo(vlu); /* each task needs its own dgi */
+    tDGinfo *dgi = alloc_DGinfo(vlu); /* each thread gets its own dgi */
+
+    /* Note the following leaf node loop cannot be a taskloop because we
+       allocated one dgi per thread. But each task needs its own dgi!!!
+       And one thread may do more than one task... */
     formylnodes_ompfor(mesh)
     {
       tNode *node = MyLnode;
@@ -75,7 +79,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
       double *ooJ = Vard(node, iooJ);
       int face;
 
-      /* set DG info */
+      /* set DG node info */
       dgi->node = node;
 
       for(face=0; face<6; face++)
@@ -88,7 +92,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         double *w = Wquad(node, dir);
         int i,j,k;
 
-        /* set DG info */
+        /* set DG face info */
         dgi->face = face;
 
         forplaneN(dir, i,j,k, n, p)
@@ -100,7 +104,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           double gd_ow = sqrtgdiag[ijk] / w[i0];
           int l;
 
-          /* set DG info */
+          /* set DG i,j,k info */
           dgi->i = i;
           dgi->j = j;
           dgi->k = k;
@@ -111,7 +115,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           /* compute numerical flux */
           numflux(dgi);
 
-          /* add boundary flux terms to RHS */
+          /* get F from dgi and add boundary flux terms to RHS */
           forvl(vlr, l)
           {
             int ir = Vind(vlr,l);
