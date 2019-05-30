@@ -1,0 +1,37 @@
+(* TensorEquations3dToC.math *)
+(* Bernd Bruegmann, 2/96, 10/02 & Wolfgang Tichy 2/2005, 5/2019  *)
+
+(* Mathematica script:
+   Given equations in tensor notation, write corresponding C code.
+*)  
+
+
+(*************************)
+(* apply tensor formulas *)
+
+<< tensorrules.math
+
+
+(************************************************)
+(* replace abstract indices by explicit indices *)
+
+<< expandindices.math
+
+
+(*************************)
+(* put variables on grid *)
+
+<< ontogrid.math
+
+(************************************************)
+(* optimize for best floating point performance *)
+
+<< optimize.math
+
+
+(****************)
+(* write C code *)
+
+<< writeC.math
+
+
