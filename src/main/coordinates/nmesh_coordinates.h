@@ -81,6 +81,10 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui[3]);
 void cart_partials_U(tNode *node, int U, int dUi);
+void cart_partials_Ui(tNode *node, int Ux, int dUxx);
+void cart_partials_Sij(tNode *node, int Sxx, int dSxxx);
+void cart_partials2_U(tNode *node, int U, int dUx, int ddUxx);
+void cart_partials2_Sij(tNode *node, int Sxx, int dSxxx, int ddSxxxx);
 
 /* utilities.c */
 double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);
