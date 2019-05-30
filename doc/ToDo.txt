@@ -94,7 +94,13 @@ Things that need to be done urgently:
  +threads alone seem to work if I use critical secs
  -test with MPI + threads, may need to init MPI differently...
 
-*advect square profile and check for flux integral conservation
+*advect square profile and check for flux integral conservation: seems ok
+
+*implement:
+ -ADM
+ -EOS
+ -TOV
+
 
 *implement mesh refinement of troubled cells/nodes
  +go from n_old, n_new= 1 + n_old/2, until we reach n_new=1

@@ -126,6 +126,56 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   return 0;
 }
 
+/*******************************************************************/
+/* more funcs to test if it is time to output */
+/*******************************************************************/
+
+/* is it time to output a variable with index vindex? */
+int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
+{
+  //int Noutput = NextAll + 4; // really just need 4 from 0d-,1d-,2d-,3d-output
+  int Noutput = 4;
+  int di[Noutput];
+  double dt[Noutput];
+  char output[Noutput][128];
+  char *name, s[128];
+  int d, n;
+
+  errorexit("this function is not tested yet!");
+
+  name = VarName(vindex);
+
+  /* read all pars for all dims */
+  for(d = 0; d <= 3; d++)
+  {
+    sprintf(s, "%ddoutiter", d);
+    di[d] = Geti(Par(s));
+    sprintf(s, "%ddouttime", d);
+    dt[d] = Getd(Par(s));
+    sprintf(output[d], "%ddoutput", d);
+  }
+
+  /* check if "name" is contained in any output par */
+  for(n = 0; n < Noutput; n++)
+  {
+    if(Getv(Par(output[n]), name))
+      if(TimeForMeshOutput_di_dt(mesh, di[n], dt[n])) return 1;
+  }
+  return 0;
+}
+
+/* is it time to output any variable in a VarList ? */
+int TimeForMeshOutput_vl(tMesh *mesh, tVarList *vl)
+{
+  int i;
+
+  errorexit("this function is not tested yet!");
+
+  for(i = 0; i < vl->n; i++)
+    if(TimeForMeshOutput_vindex(mesh, vl->index[i])) return 1;
+  return 0;
+}
+
 
 
 /*******************************************************************/
@@ -165,7 +215,7 @@ int TimeForNodeOutput_di_dt(tNode *node, int di, double dt)
 int TimeForNodeOutput_vindex(tNode *node, int vindex)
 {
   tMesh *mesh = node->pat->mesh;
-  //int Noutput = NextAll + 4; // really just need 4 from 0d-,1d-,2d-,3d-output 
+  //int Noutput = NextAll + 4; // really just need 4 from 0d-,1d-,2d-,3d-output
   int Noutput = 4;
   int di[Noutput];
   double dt[Noutput];
@@ -187,10 +237,10 @@ int TimeForNodeOutput_vindex(tNode *node, int vindex)
     sprintf(output[d], "%ddoutput", d);
   }
 
-  /* check if we "name" is contained in any output par */
+  /* check if "name" is contained in any output par */
   for(n = 0; n < Noutput; n++)
   {
-    if(Getv(Par(output[n]), name)) 
+    if(Getv(Par(output[n]), name))
       if(TimeForNodeOutput_di_dt(node, di[n], dt[n])) return 1;
   }
   return 0;
