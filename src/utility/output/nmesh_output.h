@@ -5,6 +5,7 @@
 /* output.c */
 int mesh_output(tMesh *mesh);
 int write_mesh(tMesh *mesh, int Iteration, double Time);
+int TimeForMeshOutput_vl(tMesh *mesh, tVarList *vl);
 
 /* quick_out.c for debugging */
 /*
