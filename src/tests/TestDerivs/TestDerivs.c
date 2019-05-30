@@ -92,10 +92,10 @@ int TestDerivs_analyze(tMesh *mesh)
     double *uzz= Vard(node,Ind("TestDerivs_Err_dduxx")+5);
 
     /* compute the derivs */
-    cart_partials(node, Ind("TestDerivs_u"), Ind("TestDerivs_Err_dux"));
-    cart_partials(node, Ind("TestDerivs_Err_duz"), Ind("TestDerivs_Err_dduyy"));
-    cart_partials(node, Ind("TestDerivs_Err_duy"), Ind("TestDerivs_Err_dduxz"));
-    cart_partials(node, Ind("TestDerivs_Err_dux"), Ind("TestDerivs_Err_dduxx"));
+    cart_partials_U(node, Ind("TestDerivs_u"), Ind("TestDerivs_Err_dux"));
+    cart_partials_U(node, Ind("TestDerivs_Err_duz"), Ind("TestDerivs_Err_dduyy"));
+    cart_partials_U(node, Ind("TestDerivs_Err_duy"), Ind("TestDerivs_Err_dduxz"));
+    cart_partials_U(node, Ind("TestDerivs_Err_dux"), Ind("TestDerivs_Err_dduxx"));
 
     /* subtract true values */
     forpoints(node,i)

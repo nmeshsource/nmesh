@@ -4,7 +4,7 @@
 
 
 /* basis.c */
-int basis_var_derivs(tNode *node, int vi, int dvi);
+int basis_var_derivs(tNode *node, int vi, int dvi[3]);
 int basis_var_analysis3(tNode *node, int ui, int ci);
 tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar);
 double array_GLquadrature3(tNode *node, tArray *var);

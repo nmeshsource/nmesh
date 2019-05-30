@@ -90,9 +90,9 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
     }
 
    /* flux derivs */
-   cart_partials(node, ifx, ifxx);
-   cart_partials(node, ify, ifyx);
-   cart_partials(node, ifz, ifzx);
+   cart_partials_U(node, ifx, ifxx);
+   cart_partials_U(node, ify, ifyx);
+   cart_partials_U(node, ifz, ifzx);
   }
 }
 
