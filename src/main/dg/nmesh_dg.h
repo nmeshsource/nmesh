@@ -16,7 +16,7 @@ typedef struct tDGINFO {
   double *fa;     /* adjacent fluxes */
   double *lami;   /* inside eigenvals */
   double *lama;   /* adjacent eigenvals */
-  double *fnum;   /* numerical flux f^* */
+  double *fnum;   /* numerical fluxes f^* */
 } tDGinfo;
 
 
