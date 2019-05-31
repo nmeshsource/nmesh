@@ -115,7 +115,7 @@ export
 # default target
 nmesh: $(autoinclude) $(autoinitial)
 	@echo
-	@echo ======================= Compiling nmesh =======================
+	@echo ======================= Compiling nmesh ========================
 	@echo CC=$(CC)
 	@echo CXX=$(CXX)
 	@echo CLINKER=$(CLINKER)
@@ -133,7 +133,7 @@ MyConfig:
 
 # automatic configuration files
 $(autoinclude): MyConfig
-	@echo ==================== Auto generating files ====================
+	@echo ==================== Auto generating files =====================
 	@echo $(autotext) > $(autoinclude)
 	for X in $(libincludes); do \
 	  echo \#include \"$(TOP)/$$X\" >> $(autoinclude); \
@@ -167,13 +167,13 @@ cleantilde:
 
 # targets to get git projects
 git_clone:
-	@echo =================== Cloning nmesh projects ===================
+	@echo ==================== Cloning nmesh projects ====================
 	for X in $(projectnames); do git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
 
 git_pull:
-	@echo ===================== main part of nmesh =====================
+	@echo ====================== main part of nmesh ======================
 	git pull
-	@echo ======================= nmesh projects =======================
+	@echo ======================== nmesh projects ========================
 	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then echo $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
 
 
