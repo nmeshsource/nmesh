@@ -6,9 +6,10 @@
 # top level dir
 TOP := $(shell pwd)
 
-# name of program and location where executable goes
+# name of program, location of executable and extra projects
 EXEC = nmesh
 EXECDIR = $(TOP)/exe
+PROJECTDIR = $(TOP)/src/projects
 
 # default for variables used in all cases
 CC = gcc	# gcc or icc
@@ -41,7 +42,15 @@ libpaths += src/main/dg src/main/limiter src/utility/output
 
 # --------------------------------------------------------------------------
 # we can choose more libraries and options in the file MyConfig
+
+projects =#
 include MyConfig
+
+# --------------------------------------------------------------------------
+# add projects to libpaths, and set variable projectnames for git targets
+
+libpaths += $(projects)
+projectnames = $(notdir $(projects))
 
 # --------------------------------------------------------------------------
 # some more required libraries that need to be last
@@ -151,9 +160,22 @@ clean:
 	-rm -f $(autoinclude)
 	-rm -f $(autoinitial)
 
-# remove emacs backup files
+# remove joe/emacs backup files
 cleantilde:
 	find . -name "*~" -exec rm {} \;
+
+
+# targets to get git projects
+git_clone:
+	@echo =================== Cloning nmesh projects ===================
+	for X in $(projectnames); do git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
+
+git_pull:
+	@echo ===================== main part of nmesh =====================
+	git pull
+	@echo ======================= nmesh projects =======================
+	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then echo $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
+
 
 # remove code that is not needed once the corresponding libs have been built
 rm_MemoryMan_code:
