@@ -174,7 +174,7 @@ git_pull:
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
-	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then echo $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
+	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "***\n%s\n" $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
