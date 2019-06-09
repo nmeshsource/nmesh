@@ -339,10 +339,13 @@ int inidata_mesh(tMesh *mesh)
   RunFun(LOADBALANCING);
 
   /* setup coords */
+  RunFun(PRE_COORDINATES);
   RunFun(COORDINATES);
 
   /* compute initial data */
+  RunFun(PRE_INITIALDATA);
   RunFun(INITIALDATA);
+  RunFun(POST_INITIALDATA);
 
   /* initial data is just another new time slice */
   RunFun(POST_EVOLVE);
