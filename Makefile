@@ -171,7 +171,7 @@ cleantilde:
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
-	for X in $(projectnames); do printf "***\n%s\n" $$X; git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
+	-for X in $(projectnames); do printf "***\n%s\n" $$X; git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
 	@$(MAKE) install_git_hooks
 
 git_pull: install_git_hooks
