@@ -113,7 +113,7 @@ export
 # Make Targets
 # --------------------------------------------------------------------------
 # default target
-nmesh: $(autoinclude) $(autoinitial)
+nmesh: $(autoinclude) $(autoinitial) .git/hooks/pre-commit
 	@echo
 	@echo ======================= Compiling nmesh ========================
 	@echo CC=$(CC)
@@ -159,6 +159,7 @@ clean:
 	-rm -rf lib
 	-rm -f $(autoinclude)
 	-rm -f $(autoinitial)
+	-@touch git_hooks/*
 
 # remove joe/emacs backup files
 cleantilde:
@@ -168,13 +169,21 @@ cleantilde:
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
-	for X in $(projectnames); do git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
+	for X in $(projectnames); do printf "***\n%s\n" $$X; git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
+	-@touch git_hooks/*
 
 git_pull:
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
 	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "***\n%s\n" $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
+	-@touch git_hooks/*
+
+# targets for git hooks
+.git/hooks/pre-commit: git_hooks/pre-commit
+	@echo ==================== Installing git hooks ======================
+	cp git_hooks/pre-commit .git/hooks
+	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$X/.git/hooks; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
