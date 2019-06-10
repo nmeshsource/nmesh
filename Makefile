@@ -155,11 +155,13 @@ tar:
 	cd ..; tar czf nmesh.tgz --exclude lib --exclude exe ./nmesh
 
 # take a fresh look at things
-clean:
+cleanonly:
+	@echo ====================== Removing files ==========================
 	-rm -rf lib
 	-rm -f $(autoinclude)
 	-rm -f $(autoinitial)
-	-@touch git_hooks/*
+
+clean: install_git_hooks cleanonly
 
 # remove joe/emacs backup files
 cleantilde:
@@ -170,17 +172,19 @@ cleantilde:
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
 	for X in $(projectnames); do printf "***\n%s\n" $$X; git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
-	-@touch git_hooks/*
+	@$(MAKE) install_git_hooks
 
-git_pull:
+git_pull: install_git_hooks
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
 	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "***\n%s\n" $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
-	-@touch git_hooks/*
 
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
+	@$(MAKE) install_git_hooks
+
+install_git_hooks:
 	@echo ==================== Installing git hooks ======================
 	cp git_hooks/pre-commit .git/hooks
 	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$X/.git/hooks; fi done
