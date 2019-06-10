@@ -152,6 +152,43 @@ void print3Dmat(double M[3][3])
   }
 }
 
+/* det of symm. matrix */
+double det_3Dsymmmat(double M11, double M12, double M13,
+                     double M22, double M23, double M33)
+{
+  double MMinv11, MMinv12, MMinv13;
+
+  MMinv11 = M22*M33 - M23*M23;
+  MMinv12 = M13*M23 - M12*M33;
+  MMinv13 = M12*M23 - M13*M22;
+  return M11*MMinv11 + M12*MMinv12 + M13*MMinv13;
+}
+
+/* inverse of symm. matrix */
+double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
+                               double M22, double M23, double M33,
+                               double *i11, double *i12, double *i13,
+                               double *i22, double *i23, double *i33)
+{
+  double detM, MMinv11, MMinv12, MMinv13, MMinv22, MMinv23, MMinv33;
+
+  MMinv11 = M22*M33 - M23*M23;
+  MMinv12 = M13*M23 - M12*M33;
+  MMinv13 = M12*M23 - M13*M22;
+  MMinv22 = M11*M33 - M13*M13;
+  MMinv23 = M12*M13 - M11*M23;
+  MMinv33 = M11*M22 - M12*M12;
+  detM = M11*MMinv11 + M12*MMinv12 + M13*MMinv13;
+  *i11 = MMinv11/detM;
+  *i12 = MMinv12/detM;
+  *i13 = MMinv13/detM;
+  *i22 = MMinv22/detM;
+  *i23 = MMinv23/detM;
+  *i33 = MMinv33/detM;
+  return detM;
+}
+
+
 /* find pat size L of pat */
 double find_pat_size(tPat *pat)
 {

@@ -97,9 +97,20 @@ Things that need to be done urgently:
 *advect square profile and check for flux integral conservation: seems ok
 
 *implement:
- -ADM
- -EOS
- -TOV
+ +ADM
+ +EOS:
+   make func pointers like:
+     EoS_p_Of_rho0_epsl, EoS_p_Of_rho0_epsl_Y, EoS_rho0_Of_p_epsl_Y, ...
+   set them equal to:
+     EoS_p_Of_rho0_epsl = PWP_p_Of_rho0_epsl
+   make struct for PWP
+   but we also need funcs like this:
+     EoS_p_T_cs2_dpdrho0_dpdepsl_Of_rho0_epsl_Y
+   maybe have:
+     int ret=EoS_Get_From_rho0_epsl_Y(EoS_res, rho0,epsl,Y);
+     p = EoS_res->p; T = EoS_res->T; ...; dpdepsl = EoS_res->dpdepsl;
+   where: tEoSinfo EoS_res[1];
+ +TOV
 
 
 *implement mesh refinement of troubled cells/nodes

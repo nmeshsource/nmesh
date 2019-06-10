@@ -91,6 +91,12 @@ double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);
 double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3]);
 double det_3Dmatrix(double M[3][3]);
 double inv3Dmat_from_3Dmat(double M[3][3], double invM[3][3]);
+double det_3Dsymmmat(double M11, double M12, double M13,
+                     double M22, double M23, double M33);
+double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
+                               double M22, double M23, double M33,
+                               double *i11, double *i12, double *i13,
+                               double *i22, double *i23, double *i33);
 double smallest_pat_size(tMesh *mesh);
 void array_dXdx(tNode *node, int ind, tArray *aJ);
 void array_dxdX(tNode *node, int ind, tArray *aJ);
