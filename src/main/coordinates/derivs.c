@@ -28,7 +28,7 @@ int cart_partials(tNode *node, int ui, int dui[3])
   /* get dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
 
-  /* scale: du/dX = dXb/dX du/dXb = */
+  /* scale: du/dX = dXb/dX du/dXb */
   forpoints(node,ind)
     for(m=0; m<3; m++) du[m][ind] *= dXbdX[m];
 
