@@ -141,7 +141,7 @@ int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
   char *name, s[128];
   int d, n;
 
-  errorexit("this function is not tested yet!");
+  //errorexit("this function is not tested yet!");
 
   name = VarName(vindex);
 
@@ -168,8 +168,6 @@ int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
 int TimeForMeshOutput_vl(tMesh *mesh, tVarList *vl)
 {
   int i;
-
-  errorexit("this function is not tested yet!");
 
   for(i = 0; i < vl->n; i++)
     if(TimeForMeshOutput_vindex(mesh, vl->index[i])) return 1;
