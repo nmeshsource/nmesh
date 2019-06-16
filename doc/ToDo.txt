@@ -102,6 +102,9 @@ Things that need to be done urgently:
  +EOS: works
 
 
+*check if HLL flux is correct (compare with fv_HLL in
+                               bamps' projects/grhdc/grhdc_FV.c)
+
 *implement mesh refinement of troubled cells/nodes
  +go from n_old, n_new= 1 + n_old/2, until we reach n_new=1
   but only if newly created node is still troubled
