@@ -114,6 +114,7 @@ Things that need to be done urgently:
   -refine each troubled node on all ranks, can we use omp tasks for this?
 
 *implement grhd as in BAM
+ -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
  -TOV star in Cowling approx
 
 *Burgers
