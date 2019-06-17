@@ -132,7 +132,7 @@ void advection1_fluxes_pt(tDGinfo *d)
 }
 
 
-/* set a BC on patch boundary */
+/* set a BC on outer boundary of each patch */
 void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
