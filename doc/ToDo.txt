@@ -166,6 +166,8 @@ Things that should be done:
 *investigate: Adams-Bashforth methods. Then we need e.g. 3 timelevels.
               Spectre uses this so local timesteps are easier.
 
+*investigate: Spectre uses Hermite WENO (HWENO)
+
 *update set_all_myln_mysurf and request_all_myln_surfaces_exchange
  so that we also have min/max or averages in extra space of mysurf
  and nbsurf arrays <-- will NOT work!!! Because in a RK substep we need
