@@ -10,13 +10,14 @@ typedef struct tDGINFO {
   int j;
   int k;
   tVarList *vlu;  /* varlist with cons. vars */
-  double *ui;     /* arrays with cons vars inside node at i,j,k */
-  double *ua;     /* arrays with cons vars on adjacent side of i,j,k */
-  double *fi;     /* inside fluxes */
-  double *fa;     /* adjacent fluxes */
-  double *lami;   /* inside eigenvals */
-  double *lama;   /* adjacent eigenvals */
-  double *fnum;   /* numerical fluxes f^* */
+  double *ui;     /* array with cons vars inside node at i,j,k */
+  double *ua;     /* array with cons vars on adjacent side of i,j,k */
+  double *fi;     /* array of inside fluxes */
+  double *fa;     /* array of adjacent fluxes */
+  double *lami;   /* array of inside eigenvals */
+  double *lama;   /* array of adjacent eigenvals */
+  double *fnum;   /* array of numerical fluxes f^* = f^i* n_i */
+  tVarList *vls;  /* varlist with sources needed */
 } tDGinfo;
 
 
@@ -28,5 +29,6 @@ void numflux1d_HLL(tDGinfo *d);
 
 /* dg.c */
 int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+                          tVarList *vls,
                           void (*u_f_lam)(tDGinfo *d),
                           void (*numflux)(tDGinfo *d));

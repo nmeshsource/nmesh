@@ -215,7 +215,7 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   }
 
   /* get flux terms on boundary */
-  dg_add_surface_fluxes(mesh, vlr, vlu,
+  dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
                         advection1_fluxes_pt, advection1_numflux);
 
   /* impose outer BC */

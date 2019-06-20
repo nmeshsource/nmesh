@@ -214,7 +214,8 @@ int burgers1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   }
 
   /* add boundary flux terms */
-  dg_add_surface_fluxes(mesh, vlr, vlu, burgers1_fluxes_pt, burgers1_numflux);
+  dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
+                        burgers1_fluxes_pt, burgers1_numflux);
 
   /* impose outer BC */
   burgers1_u_BC(mesh, vlr, vlu);

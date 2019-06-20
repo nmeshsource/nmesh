@@ -9,13 +9,14 @@
 /* some funcions to add boundary fluxes of discontinous Galerkin (dg) */
 
 /* allocate DGinfo structure */
-tDGinfo *alloc_DGinfo(tVarList *vlu)
+tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls)
 {
   tDGinfo *dgi = calloc(1, sizeof(dgi[0]));
   int nvars = vlu->n;
 
-  /* set varlist */
-  dgi->vlu  = vlu;
+  /* set varlists */
+  dgi->vlu  = vlu; /* varlist with cons vars */
+  dgi->vls  = vls; /* varlist with needed source terms, could be NULL */
 
   /* alloc mem for vars at point i,j,k */
   dgi->ui   = dmalloc(nvars); /* cons. vars inside this node */
@@ -49,6 +50,7 @@ void free_DGinfo(tDGinfo *dgi)
 
 /* add surface flux terms */
 int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+                          tVarList *vls,
                           void (*u_f_lam)(tDGinfo *d),
                           void (*numflux)(tDGinfo *d))
 {
@@ -67,7 +69,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   /* loop over nodes so we can add boundary flux terms */
   NODELEVEL_Pragma(omp parallel)
   {
-    tDGinfo *dgi = alloc_DGinfo(vlu); /* each thread gets its own dgi */
+    tDGinfo *dgi = alloc_DGinfo(vlu, vls); /* each thread gets its own dgi */
 
     /* Note the following leaf node loop cannot be a taskloop because we
        allocated one dgi per thread. But each task needs its own dgi!!!
