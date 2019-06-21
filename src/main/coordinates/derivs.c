@@ -7,8 +7,78 @@
 
 
 
+/* compute Cart. derivs of u in array au, put du/dx^m into arrays dau[0..2] */
+int array_cart_partials(tNode *node, tArray *au, tArray *dau[3])
+{
+  tPat *pat = node->pat;
+  tMesh *mesh = pat->mesh;
+  tDat *dat = node->dat;
+  double *du[] = { Arrd(dau[0]), Arrd(dau[1]), Arrd(dau[2]) };
+  double dXbdX[3];
+  int ind, m,i;
+
+  if(!dat) return 0;
+
+  /* do we need to init. coords? */
+  if(!(dat->coords_set)) coordinates_init_node(node);
+
+  /* take derivs with respect to Xb: du/dXb */
+  basis_array_derivs(node, au, dau);
+
+  /* get dXb/dX */
+  dXbYbZb_dXYZ(node, dXbdX);
+
+  /* scale: du/dX = dXb/dX du/dXb */
+  forpoints(node,ind)
+    for(m=0; m<3; m++) du[m][ind] *= dXbdX[m];
+
+  /* transform to Cartesian coords */
+  if(pat->dXYZ_dxyz)
+  {
+    int idXd = Ind("dXdx");
+    double *dXdx[3][3]
+              = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
+                  {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
+                  {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
+    /* compute Cartesian derivs at all points */
+    forpoints(node,ind)
+    {
+      double dv[3];
+
+      /* Transform derivs to Cartesian coords */
+      for(m=0; m<3; m++)
+      {
+        dv[m] = 0.;
+        for(i=0; i<3; i++) dv[m] += dXdx[i][m][ind] * du[i][ind];
+      }
+      /* copy dv into du */
+      for(m=0; m<3; m++) du[m][ind] = dv[m];
+    }
+  }
+  return 1;
+}
+
+
 /* compute Cart. derivs, put du/dx^m into vars with index dui[0..2] */
 int cart_partials(tNode *node, int ui, int dui[3])
+{
+  tDat *dat = node->dat;
+  tArray *au;
+  tArray *dau[3];
+
+  if(!dat) return 0;
+
+  au     = dat->v[ui];
+  dau[0] = dat->v[dui[0]];
+  dau[1] = dat->v[dui[1]];
+  dau[2] = dat->v[dui[2]];
+
+  return array_cart_partials(node, au, dau);
+}
+
+
+/* compute Cart. derivs, put du/dx^m into vars with index dui[0..2] */
+int cart_partials__old(tNode *node, int ui, int dui[3])
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
