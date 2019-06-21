@@ -17,6 +17,16 @@ void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar)
   tArray *Dt = node->Dt[dir];
   mm_array_indir(Dt, var, dir, dvar);
 }
+
+/* compute 1st derivs of array var in all 3 dirs,
+   result goes into arrays dvar[0], dvar[1], dvar[2] */
+void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3])
+{
+  int dir;
+  for(dir=0; dir<3; dir++)
+    basis_array_deriv1(node, dir, var, dvar[dir]);
+}
+
 /* get deriv in direction dir of var with index vi, result goes to var dvi */
 int basis_var_deriv1(tNode *node, int dir, int vi, int dvi)
 {
