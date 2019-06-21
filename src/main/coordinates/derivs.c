@@ -227,6 +227,8 @@ int cart_1partial(tNode *node, int dir, int ui, int dui)
 
 /* compute Cart. divergence d_i U^i of vector U^i with index Ux,
    put it into var divUi */
+/* NOTE: maybe one could get d_i U^i from [d_A (sqrt(f) U^A)]/sqrt(f)
+   where f is the flat metric in X^A coords. This might need less memory! */
 int cart_div_Ui(tNode *node, int Ux, int divUi)
 {
   tDat *dat = node->dat;
