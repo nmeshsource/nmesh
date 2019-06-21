@@ -21,7 +21,7 @@ int nmesh_advection1(tMesh *mesh)
   /* variables */
   AddEvoVar("advection1_u", "",     "field we advect");
   AddAuxVar("advection1_f", "I",    "f^i = n^i u");
-  AddAuxVar("advection1_f", "Ij",   "d_j f^i");
+  //AddAuxVar("advection1_f", "Ij",   "d_j f^i");
   AddAuxVar("advection1_divf", "",  "d_i f^i");
   AddAuxVar("advection1_u_err", "", "error in u");
 
