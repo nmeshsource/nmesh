@@ -52,11 +52,12 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
 {
   int iu = vlu->index[0];
   int ifx  = Ind("advection1_fx");
-  int ify = ifx+1;
-  int ifz = ifx+2;
-  int ifxx = Ind("advection1_fxx");
-  int ifyx = ifxx+3;
-  int ifzx = ifxx+6;
+  //int ify = ifx+1;
+  //int ifz = ifx+2;
+  int idivf = Ind("advection1_divf");
+  //int ifxx = Ind("advection1_fxx");
+  //int ifyx = ifxx+3;
+  //int ifzx = ifxx+6;
 
   /* compute derivs */
   formylnodes(mesh)
@@ -83,9 +84,10 @@ void advection1_f_df(tMesh *mesh, tVarList *vlu)
     }
 
     /* flux derivs */
-    cart_partials_U(node, ifx, ifxx);
-    cart_partials_U(node, ify, ifyx);
-    cart_partials_U(node, ifz, ifzx);
+    cart_div_Ui(node, ifx, idivf);
+    //cart_partials_U(node, ifx, ifxx);
+    //cart_partials_U(node, ify, ifyx);
+    //cart_partials_U(node, ifz, ifzx);
   }
 }
 
@@ -193,7 +195,7 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
-  int ifxx = Ind("advection1_fxx");
+  //int ifxx = Ind("advection1_fxx");
   int idivf = Ind("advection1_divf");
 
   TIMER_START;
@@ -206,18 +208,16 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   {
     tNode *node = MyLnode;
     double *r  = Vard(node, ir);
-    double *fxx = Vard(node, ifxx);
-    double *fyy = Vard(node, ifxx+4);
-    double *fzz = Vard(node, ifxx+8);
+    //double *fxx = Vard(node, ifxx);
+    //double *fyy = Vard(node, ifxx+4);
+    //double *fzz = Vard(node, ifxx+8);
     double *divf = Vard(node, idivf);
     int i;
-
-    //cart_div_Ui(node, Ind("advection1_fx"), idivf);
 
     /* RHS at each point */
     forpoints(node, i)
     {
-      divf[i] = fxx[i] + fyy[i] + fzz[i];
+      //divf[i] = fxx[i] + fyy[i] + fzz[i];
       r[i] = -divf[i];
     }
   }
