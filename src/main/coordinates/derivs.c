@@ -76,58 +76,6 @@ int cart_partials(tNode *node, int ui, int dui[3])
   return array_cart_partials(node, au, dau);
 }
 
-
-/* compute Cart. derivs, put du/dx^m into vars with index dui[0..2] */
-int cart_partials__old(tNode *node, int ui, int dui[3])
-{
-  tPat *pat = node->pat;
-  tMesh *mesh = pat->mesh;
-  tDat *dat = node->dat;
-  double *du[] = { Vard(node,dui[0]), Vard(node,dui[1]), Vard(node,dui[2]) };
-  double dXbdX[3];
-  int ret, ind, m,i;
-
-  if(!dat) return 0;
-
-  /* do we need to init. coords? */
-  if(!(dat->coords_set)) coordinates_init_node(node);
-
-  /* take derivs with respect to Xb: du/dXb */
-  ret = basis_var_derivs(node, ui, dui);
-
-  /* get dXb/dX */
-  dXbYbZb_dXYZ(node, dXbdX);
-
-  /* scale: du/dX = dXb/dX du/dXb */
-  forpoints(node,ind)
-    for(m=0; m<3; m++) du[m][ind] *= dXbdX[m];
-
-  /* transform to Cartesian coords */
-  if(pat->dXYZ_dxyz)
-  {
-    int idXd = Ind("dXdx");
-    double *dXdx[3][3]
-              = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
-                  {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
-                  {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
-    /* compute Cartesian derivs at all points */
-    forpoints(node,ind)
-    {
-      double dv[3];
-
-      /* Transform derivs to Cartesian coords */
-      for(m=0; m<3; m++)
-      {
-        dv[m] = 0.;
-        for(i=0; i<3; i++) dv[m] += dXdx[i][m][ind] * du[i][ind];
-      }
-      /* copy dv into du */
-      for(m=0; m<3; m++) du[m][ind] = dv[m];
-    }
-  }
-  return ret;
-}
-
 /***********************************************************************/
 /* 2 variants of cart_partials to get the 1st derivs of a scaler */
 /***********************************************************************/
@@ -227,4 +175,98 @@ void cart_partials2_Sij(tNode *node, int Sxx, int dSxxx, int ddSxxxx)
     cart_3partials(node, dSxxx+3*n+1, ddSxxxx+6*n+1, ddSxxxx+6*n+3, ddSxxxx+6*n+4);
     cart_3partials(node, dSxxx+3*n+2, ddSxxxx+6*n+2, ddSxxxx+6*n+4, ddSxxxx+6*n+5);
   }
+}
+
+/***********************************************************************/
+/* compute just one Cart. deriv or the divergence */
+/***********************************************************************/
+
+/* compute Cart. deriv in direction dir, put deriv into var with index dui */
+int array_cart_1partial(tNode *node, int dir, tArray *u, tArray *du)
+{
+  tDat *dat = node->dat;
+  tArray *dau[3];
+  int d, ret;
+
+  if(!dat) return 0;
+
+  /* use du and 2 additional arrays to hold all 3 derivs of u */
+  for(d=0; d<dir; d++)
+  {
+    if(d==dir) dau[d] = du;
+    else       dau[d] = alloc_array(node->n);
+  }
+
+  /* get all 3 derivs of u */
+  ret = array_cart_partials(node, u, dau);
+
+  /* free 2 additional arrays */
+  for(d=0; d<dir; d++)
+  {
+    if(d!=dir) free_array(dau[d]);
+  }
+
+  return ret;
+}
+
+/* compute Cart. deriv in direction dir, put deriv into var with index dui */
+int cart_1partial(tNode *node, int dir, int ui, int dui)
+{
+  tDat *dat = node->dat;
+  tArray *au;
+  tArray *dau;
+
+  if(!dat) return 0;
+
+  /* arrays with u and du */
+  au  = dat->v[ui];
+  dau = dat->v[dui];
+
+  return array_cart_1partial(node, dir, au, dau);
+}
+
+/* compute Cart. divergence of vector with index ui, put it into var divui */
+int cart_div_Ui(tNode *node, int ui, int divui)
+{
+  tDat *dat = node->dat;
+  tArray *au;
+  tArray *divau;
+  tArray *dau[3];
+  tArray *dau0;
+  double *divu = Vard(node, divui);
+  double *du;
+  int i;
+
+  if(!dat) return 0;
+
+  /* 4 arrays: divu, and 3 temp. dau */
+  divau = dat->v[divui];
+  dau0   = alloc_array(node->n);
+  dau[1] = alloc_array(node->n);
+  dau[2] = alloc_array(node->n);
+
+  /* set x-deriv in divau */
+  au = dat->v[ui];
+  dau[0] = divau;
+  array_cart_partials(node, au, dau);
+
+  /* add y-deriv */
+  au     = dat->v[ui+1];
+  dau[0] = dau0;
+  array_cart_partials(node, au, dau);
+  du = Arrd(dau[1]);
+  forpoints(node,i) divu[i] += du[i];
+
+  /* add z-deriv */
+  au     = dat->v[ui+2];
+  //dau[0] = dau0;
+  array_cart_partials(node, au, dau);
+  du = Arrd(dau[2]);
+  forpoints(node,i) divu[i] += du[i];
+
+  free(dau0);
+  free(dau[1]);
+  free(dau[2]);
+
+  return 1;
 }
