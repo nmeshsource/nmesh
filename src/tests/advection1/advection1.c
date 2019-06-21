@@ -194,6 +194,7 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int ifxx = Ind("advection1_fxx");
+  int idivf = Ind("advection1_divf");
 
   TIMER_START;
 
@@ -208,10 +209,17 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     double *fxx = Vard(node, ifxx);
     double *fyy = Vard(node, ifxx+4);
     double *fzz = Vard(node, ifxx+8);
+    double *divf = Vard(node, idivf);
     int i;
 
+    //cart_div_Ui(node, Ind("advection1_fx"), idivf);
+
     /* RHS at each point */
-    forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
+    forpoints(node, i)
+    {
+      divf[i] = fxx[i] + fyy[i] + fzz[i];
+      r[i] = -divf[i];
+    }
   }
 
   /* get flux terms on boundary */
@@ -279,6 +287,7 @@ int advection1_init(tMesh *mesh)
   int iu  = Ind("advection1_u");
   int ifx = Ind("advection1_fx");
   int ifxx = Ind("advection1_fxx");
+  int idivf = Ind("advection1_divf");
   int iue = Ind("advection1_u_err");
   tVarList *vlu = vlalloc(mesh);
   int numflux = Par("advection1_numflux");
@@ -298,6 +307,7 @@ int advection1_init(tMesh *mesh)
   enablevar(mesh, iu);
   enablevar(mesh, ifx);
   enablevar(mesh, ifxx);
+  enablevar(mesh, idivf);
   enablevar(mesh, iue);
 
   /* set initial profile, e.g. at t=0: set u=sin(x) */
