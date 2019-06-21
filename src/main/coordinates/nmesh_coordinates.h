@@ -85,6 +85,7 @@ void cart_partials_Ui(tNode *node, int Ux, int dUxx);
 void cart_partials_Sij(tNode *node, int Sxx, int dSxxx);
 void cart_partials2_U(tNode *node, int U, int dUx, int ddUxx);
 void cart_partials2_Sij(tNode *node, int Sxx, int dSxxx, int ddSxxxx);
+int cart_div_Ui(tNode *node, int Ux, int divUi);
 
 /* utilities.c */
 double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);

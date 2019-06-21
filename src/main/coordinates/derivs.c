@@ -225,48 +225,49 @@ int cart_1partial(tNode *node, int dir, int ui, int dui)
   return array_cart_1partial(node, dir, au, dau);
 }
 
-/* compute Cart. divergence of vector with index ui, put it into var divui */
-int cart_div_Ui(tNode *node, int ui, int divui)
+/* compute Cart. divergence d_i U^i of vector U^i with index Ux,
+   put it into var divUi */
+int cart_div_Ui(tNode *node, int Ux, int divUi)
 {
   tDat *dat = node->dat;
-  tArray *au;
-  tArray *divau;
-  tArray *dau[3];
-  tArray *dau0;
-  double *divu = Vard(node, divui);
-  double *du;
+  tArray *aU;
+  tArray *divaU;
+  tArray *daU[3];
+  tArray *daU0;
+  double *divU = Vard(node, divUi);
+  double *dU;
   int i;
 
   if(!dat) return 0;
 
-  /* 4 arrays: divu, and 3 temp. dau */
-  divau = dat->v[divui];
-  dau0   = alloc_array(node->n);
-  dau[1] = alloc_array(node->n);
-  dau[2] = alloc_array(node->n);
+  /* 4 arrays: divU, and 3 temp. daU */
+  divaU = dat->v[divUi];
+  daU0   = alloc_array(node->n);
+  daU[1] = alloc_array(node->n);
+  daU[2] = alloc_array(node->n);
 
-  /* set x-deriv in divau */
-  au = dat->v[ui];
-  dau[0] = divau;
-  array_cart_partials(node, au, dau);
+  /* set x-deriv in divaU */
+  aU = dat->v[Ux];
+  daU[0] = divaU;
+  array_cart_partials(node, aU, daU);
 
   /* add y-deriv */
-  au     = dat->v[ui+1];
-  dau[0] = dau0;
-  array_cart_partials(node, au, dau);
-  du = Arrd(dau[1]);
-  forpoints(node,i) divu[i] += du[i];
+  aU     = dat->v[Ux+1];
+  daU[0] = daU0;
+  array_cart_partials(node, aU, daU);
+  dU = Arrd(daU[1]);
+  forpoints(node,i) divU[i] += dU[i];
 
   /* add z-deriv */
-  au     = dat->v[ui+2];
-  //dau[0] = dau0;
-  array_cart_partials(node, au, dau);
-  du = Arrd(dau[2]);
-  forpoints(node,i) divu[i] += du[i];
+  aU     = dat->v[Ux+2];
+  //daU[0] = daU0;
+  array_cart_partials(node, aU, daU);
+  dU = Arrd(daU[2]);
+  forpoints(node,i) divU[i] += dU[i];
 
-  free(dau0);
-  free(dau[1]);
-  free(dau[2]);
+  free(daU0);
+  free(daU[1]);
+  free(daU[2]);
 
   return 1;
 }
