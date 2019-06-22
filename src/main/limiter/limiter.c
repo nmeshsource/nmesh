@@ -293,7 +293,7 @@ int limiter_minmodB(tNode *node, tVarList *vl)
       w0[f] = av;
     }
 
-    /* limited weights bos3 = beta/sqrt3 */
+    /* set limited weights, where bos3 = beta/sqrt3 */
     wl100 = minmod3B(w100, bos3*(w0c-w0[0]), bos3*(w0[1]-w0c), Mt_h);
     wl010 = minmod3B(w010, bos3*(w0c-w0[2]), bos3*(w0[3]-w0c), Mt_h);
     wl001 = minmod3B(w001, bos3*(w0c-w0[4]), bos3*(w0[5]-w0c), Mt_h);
