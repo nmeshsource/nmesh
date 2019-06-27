@@ -72,6 +72,7 @@ int newton1d_brak(double *x0,
     /* test if Newton step could be possible */
     if( !isfinite(df) ) bisect = 1;
     else                bisect = (fabs(2.0*f) > fabs(dxold*df));
+    /* note: if df=0 and f!=0 the latter else set bisect=1 */
 
     if(bisect==0) /* try Newton step */
     {

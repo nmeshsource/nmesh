@@ -38,7 +38,8 @@ MPILIBS =	# -lmpi						#for openmpi
 # some nmesh libraries are required
 libpaths = src/main/amr src/main/nMPI
 libpaths += src/main/basis src/main/coordinates src/main/evolve
-libpaths += src/main/dg src/main/limiter src/utility/output
+libpaths += src/main/dg src/main/limiter
+libpaths += src/utility/output src/utility/numerics
 
 # --------------------------------------------------------------------------
 # we can choose more libraries and options in the file MyConfig
