@@ -82,9 +82,13 @@ int newton1d_brak(double *x0,
       dx=f/df;
       tmp=xrt;
       xrt -= dx;
-      if(tmp == xrt) { *x0=xrt; return j; }
-      /* check if Newton step brings us outside interval */
-      if( (xrt-xh)*(xrt-xl) > 0.0 ) { bisect=1; xrt=tmp; dx=dxold; }
+      //if(tmp == xrt) { *x0=xrt; return j; } // if df is large this can fail
+      /* check if Newton step brings us outside interval,
+         or if step was so small that it didn't change xrt */
+      if( ((xrt-xh)*(xrt-xl) > 0.0) || (tmp == xrt) )
+      {
+        bisect=1; xrt=tmp; dx=dxold;
+      }
     }
     if(bisect) /* Bisection step */
     {
