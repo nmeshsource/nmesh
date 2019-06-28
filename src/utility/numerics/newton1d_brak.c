@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#define PR 1
+
 /* Newton-Raphson with bracketing:
 
    similar to sgrid's rtsafe_itsP
@@ -40,7 +42,7 @@ int newton1d_brak(double *x0,
   if(fl >= 0.0 && fh <= 0.0) j=1; /* if fl or fh is NAN j stays 0 */
   if(!j)
   {
-    /* printf("newton1d_brak: Root is not bracketed!\n"); */
+    if(PR) printf("newton1d_brak: Root is not bracketed!\n");
     return -2*maxits-3;
   }
 
@@ -95,7 +97,7 @@ int newton1d_brak(double *x0,
     if(fabs(dx) < xacc) { *x0=xrt; return j; }
   }
 
-  /* printf("newton1d_brak: Maximum number of iterations exceeded!\n"); */
+  if(PR) printf("newton1d_brak: Maximum number of iterations exceeded!\n");
   *x0=xrt;
   return j;
 }
