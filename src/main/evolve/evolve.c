@@ -132,7 +132,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   /* set all sources */
   forList(u, i)
     if(ListEntry(evosys->setsrc,i))
-      ListEntry(evosys->setsrc,i)(mesh, ListEntry(u,i));
+      ListEntry(evosys->setsrc,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 
   /* set all RHSs */
   forList(u, i)
@@ -382,7 +382,7 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
   /* set all sources */
   forList(u, i)
     if(ListEntry(evosys->setsrc,i))
-      ListEntry(evosys->setsrc,i)(node, ListEntry(u,i));
+      ListEntry(evosys->setsrc,i)(node, ListEntry(rhs,i), ListEntry(u,i));
 
   /* set all RHSs */
   forList(u, i)

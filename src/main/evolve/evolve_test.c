@@ -49,7 +49,7 @@ int evolve_test_rhs_v(tMesh *mesh, tVarList *vlr, tVarList *vlv)
 }
 
 /* set source s for v: s = u */
-int evolve_test_src_u(tMesh *mesh, tVarList *vlu)
+int evolve_test_src_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   /* get surfaces so that we can compute fluxes */
   get_all_myln_surfaces(mesh);
