@@ -46,6 +46,6 @@ typedef int (*FuncPointer)();  /* a func. pointer */
 /* compile lists with entries of type (tArray *) */
 /***************************************************************************/
 typedef tArray *pArr;        /* list_templates.h only works with numbers */
-#define TYP pArr             /* the pointer pAr is a number */
+#define TYP pArr             /* the pointer pArr is a number */
 #include "list_templates.c"
 #undef TYP
