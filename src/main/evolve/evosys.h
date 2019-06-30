@@ -19,12 +19,15 @@ typedef struct tEVOSYS {
   pVLL *w;            /* temp work list, needs to be an EvoVar just like u */
   pVLL *u_p;          /* u at previous time */
   pVLL *s[NEVOTEMP];  /* temp. storage for say RK stages */
-  pFL *setsrc;        /* set some source terms, is called first */
-  pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
+  /* func. pointers that are called in this order */
+  pFL *prelim;        /* set vars that are need early, e.g. gmunu */
   pFL *limdata;       /* produce data such as min,max on each node */
                       /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
                                must return number of data vals we need */
   pFL *limiter;       /* apply limiter on node using data from limdata */
+  pFL *presurf;       /* set vars need before surf exchange, e.g. prims */
+  pFL *setsrc;        /* set some source terms, is called before setrhs */
+  pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP
