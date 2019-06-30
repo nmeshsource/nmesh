@@ -20,7 +20,7 @@
    limiters or to set source terms before rhs is called */
 void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
-                FuncPointer presurf, FuncPointer src, FuncPointer rhs)
+                FuncPointer presurf, FuncPointer setsrc, FuncPointer setrhs)
 {
   tEvoSys *evosys = mesh->evosys;
 
@@ -39,8 +39,8 @@ void evolve_register_subsys(tMesh *mesh, tVarList *u,
   push_FuncPointerList(evosys->limdata, limdata);
   push_FuncPointerList(evosys->limiter, limiter);
   push_FuncPointerList(evosys->presurf, presurf);
-  push_FuncPointerList(evosys->setsrc, src);
-  push_FuncPointerList(evosys->setrhs, rhs);
+  push_FuncPointerList(evosys->setsrc, setsrc);
+  push_FuncPointerList(evosys->setrhs, setrhs);
 }
 
 /* register a list of variable lists and its RHS, source functions and
@@ -76,10 +76,12 @@ int evolve_free_evosys(tMesh *mesh)
   /* free Lists */
   printf("Freeing rhs lists for evolution:\n");
   //free_pVLList(evosys->u); /* free list only, not content */
-  free_FuncPointerList(evosys->setrhs);
-  free_FuncPointerList(evosys->setsrc);
+  free_FuncPointerList(evosys->prelim);
   free_FuncPointerList(evosys->limdata);
   free_FuncPointerList(evosys->limiter);
+  free_FuncPointerList(evosys->presurf);
+  free_FuncPointerList(evosys->setsrc);
+  free_FuncPointerList(evosys->setrhs);
 
   /* now set all of evosys to zero */
   //evolve_print_evosys(mesh);
@@ -105,19 +107,23 @@ void evolve_print_evosys(tMesh *mesh)
       prvarlist(ListEntry(evosys->u,i));
     }
   }
-  if(evosys->setrhs)
-  {
-    forList(evosys->setrhs, i)
-      if(ListEntry(evosys->setrhs,i)) printf("%d: setrhs: yes\n", i);
-    forList(evosys->setsrc, i)
-      if(ListEntry(evosys->setsrc,i)) printf("%d: setsrc: yes\n", i);
-  }
   if(evosys->limdata)
   {
-    forList(evosys->limiter, i)
-      if(ListEntry(evosys->limiter,i)) printf("%d: limiter: yes\n", i);
+    forList(evosys->prelim, i)
+      if(ListEntry(evosys->prelim,i))  printf("%d: prelim:  yes\n", i);
     forList(evosys->limdata, i)
       if(ListEntry(evosys->limdata,i)) printf("%d: limdata: yes\n", i);
+    forList(evosys->limiter, i)
+      if(ListEntry(evosys->limiter,i)) printf("%d: limiter: yes\n", i);
+  }
+  if(evosys->setrhs)
+  {
+    forList(evosys->presurf, i)
+      if(ListEntry(evosys->presurf,i)) printf("%d: presurf: yes\n", i);
+    forList(evosys->setsrc, i)
+      if(ListEntry(evosys->setsrc,i))  printf("%d: setsrc:  yes\n", i);
+    forList(evosys->setrhs, i)
+      if(ListEntry(evosys->setrhs,i))  printf("%d: setrhs:  yes\n", i);
   }
 }
 
@@ -131,9 +137,10 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 
   if(PR) PRFs(":\n");
 
-  /* do surface exchange on entire mesh */
-  set_all_myln_mysurf(mesh);
-  request_all_myln_surfaces_exchange(mesh);
+  /* set things before surface exchange */
+  forList(u, i)
+    if(ListEntry(evosys->presurf,i))
+      ListEntry(evosys->presurf,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 
   /* set time on all nodes */
   formylnodes(mesh)
@@ -143,6 +150,10 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     node->time = mesh->time;
     node->dt   = mesh->dt;
   }
+
+  /* do surface exchange on entire mesh */
+  set_all_myln_mysurf(mesh);
+  request_all_myln_surfaces_exchange(mesh);
 
   /* set all sources */
   forList(u, i)
@@ -163,6 +174,22 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
   int i;
 
   if(PR) PRFs(":\n");
+
+  /* loop over list of varlists */
+  forList(u, i)
+  {
+    tVarList *vl = ListEntry(u,i);
+
+    if(ListEntry(evosys->prelim,i))
+    {
+      /* set data limiter needs in myindc arrays of each node */
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        ListEntry(evosys->prelim,i)(node, vl);
+      }
+    }
+  }
 
   /* loop over list of varlists */
   forList(u, i)
