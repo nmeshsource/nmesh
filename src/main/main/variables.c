@@ -531,7 +531,8 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
       continue;
     }
 
-    /* add scalar variable with new name to variable database */
+    /* add scalar variable with new name to variable database,
+       we copy the tensorindices later */
     AddMeshVar(mesh, name, "", var->description);
 
     /* get index of new variable and overwrite index in duplicate */
