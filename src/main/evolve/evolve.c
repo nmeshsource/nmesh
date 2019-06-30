@@ -14,6 +14,35 @@
    metric (another src) that depends on Z4. */
 
 
+/* register a variable list u and its RHS in evosys. The func. pointers will
+   be called in the order they appear here. rhs is the most important one
+   and contains the RHS for the evo eqn of u. The others are there to apply
+   limiters or to set source terms before rhs is called */
+void evolve_register_subsys(tMesh *mesh, tVarList *u,
+                FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
+                FuncPointer presurf, FuncPointer src, FuncPointer rhs)
+{
+  tEvoSys *evosys = mesh->evosys;
+
+  /* allocate lists in evosys */
+  if(!evosys->u)       evosys->u       = alloc_pVLList();
+  if(!evosys->prelim)  evosys->prelim  = alloc_FuncPointerList();
+  if(!evosys->limdata) evosys->limdata = alloc_FuncPointerList();
+  if(!evosys->limiter) evosys->limiter = alloc_FuncPointerList();
+  if(!evosys->presurf) evosys->presurf = alloc_FuncPointerList();
+  if(!evosys->setsrc)  evosys->setsrc  = alloc_FuncPointerList();
+  if(!evosys->setrhs)  evosys->setrhs  = alloc_FuncPointerList();
+
+  /* add u, rhs, src, ... to lists in evosys */
+  push_pVLList(evosys->u, u);
+  push_FuncPointerList(evosys->prelim, prelim);
+  push_FuncPointerList(evosys->limdata, limdata);
+  push_FuncPointerList(evosys->limiter, limiter);
+  push_FuncPointerList(evosys->presurf, presurf);
+  push_FuncPointerList(evosys->setsrc, src);
+  push_FuncPointerList(evosys->setrhs, rhs);
+}
+
 /* register a list of variable lists and its RHS, source functions and
    limiters in evosys */
 void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
@@ -21,6 +50,7 @@ void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
                                           FuncPointer limdata,
                                           FuncPointer limiter)
 {
+//  evolve_register_subsys(mesh, u, NULL,limdata,limiter, NULL,src,rhs);
   tEvoSys *evosys = mesh->evosys;
 
   /* allocate lists in evosys */
