@@ -50,22 +50,7 @@ void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
                                           FuncPointer limdata,
                                           FuncPointer limiter)
 {
-//  evolve_register_subsys(mesh, u, NULL,limdata,limiter, NULL,src,rhs);
-  tEvoSys *evosys = mesh->evosys;
-
-  /* allocate lists in evosys */
-  if(!evosys->u)       evosys->u       = alloc_pVLList();
-  if(!evosys->setrhs)  evosys->setrhs  = alloc_FuncPointerList();
-  if(!evosys->setsrc)  evosys->setsrc  = alloc_FuncPointerList();
-  if(!evosys->limdata) evosys->limdata = alloc_FuncPointerList();
-  if(!evosys->limiter) evosys->limiter = alloc_FuncPointerList();
-
-  /* add u, rhs, src, ... to lists in evosys */
-  push_pVLList(evosys->u, u);
-  push_FuncPointerList(evosys->setrhs, rhs);
-  push_FuncPointerList(evosys->setsrc, src);
-  push_FuncPointerList(evosys->limdata, limdata);
-  push_FuncPointerList(evosys->limiter, limiter);
+  evolve_register_subsys(mesh, u, NULL,limdata,limiter, NULL,src,rhs);
 }
 
 /* free extra VarLists and other Lists */
