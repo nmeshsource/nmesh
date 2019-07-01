@@ -25,7 +25,7 @@ typedef struct tEVOSYS {
                       /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
                                must return number of data vals we need */
   pFL *limiter;       /* apply limiter on node using data from limdata */
-  pFL *presurf;       /* set vars need before surf exchange, e.g. prims */
+  pFL *presurf;       /* set vars needed before surf exchange, e.g. prims */
   pFL *setsrc;        /* set some source terms, is called before setrhs */
   pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
 } tEvoSys;
