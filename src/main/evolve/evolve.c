@@ -137,10 +137,21 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 
   if(PR) PRFs(":\n");
 
-  /* set things before surface exchange */
+  /* set things before surface exchange, e.g. cons2prim */
   forList(u, i)
+  {
+    tVarList *vlr = ListEntry(rhs,i);
+    tVarList *vlu = ListEntry(u,i);
+
     if(ListEntry(evosys->presurf,i))
-      ListEntry(evosys->presurf,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    {
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        ListEntry(evosys->presurf,i)(node, vlr, vlu);
+      }
+    }
+  }
 
   /* set time on all nodes */
   formylnodes(mesh)
