@@ -24,7 +24,7 @@ tParameter *make_empty_pdb(int npdb1max)
 
   /* allocate array for pdb1 */
   pdb1 = (tParameter *) calloc(npdb1max, sizeof(tParameter));
-  if(!pdb1) errorexit("make_empty_pdb: out of memory");
+  if(!pdb1) errorexit("out of memory");
 
   /* set all entries to NULL */
   for(i=0; i<npdb1max; i++)
