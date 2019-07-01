@@ -164,7 +164,7 @@ double det_3Dsymmmat(double M11, double M12, double M13,
   return M11*MMinv11 + M12*MMinv12 + M13*MMinv13;
 }
 
-/* inverse of symm. matrix */
+/* inverse of symm. matrix, returns det */
 double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
                                double M22, double M23, double M33,
                                double *i11, double *i12, double *i13,
@@ -188,6 +188,30 @@ double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
   return detM;
 }
 
+/* compute V_i from V^i using metric g_{ij}, or V^i from V_i using
+   metric g^{ij}, returns V^2 = V_i V^i */
+double symmmat3D_times_vec(double gxx, double gxy, double gxz,
+                           double gyy, double gyz, double gzz,
+                           double Vx, double Vy, double Vz,
+                           double *gVx, double *gVy, double *gVz)
+{
+  *gVx = gxx*Vx + gxy*Vy + gxz*Vz;
+  *gVy = gxy*Vx + gyy*Vy + gyz*Vz;
+  *gVz = gxz*Vx + gyz*Vy + gzz*Vz;
+  return Vx*(*gVx) + Vy*(*gVy) + Vz*(*gVz);
+}
+
+/* compute V^2 = V_i V^i from metric g_{ij} and V^i, or from g^{ij} and V_i */
+double mag2_vector_3Dmetric(double gxx, double gxy, double gxz,
+                            double gyy, double gyz, double gzz,
+                            double Vx, double Vy, double Vz)
+{
+  double gVx, gVy, gVz;
+  gVx = gxx*Vx + gxy*Vy + gxz*Vz;
+  gVy = gxy*Vx + gyy*Vy + gyz*Vz;
+  gVz = gxz*Vx + gyz*Vy + gzz*Vz;
+  return Vx*gVx + Vy*gVy + Vz*gVz;
+}
 
 /* find pat size L of pat */
 double find_pat_size(tPat *pat)

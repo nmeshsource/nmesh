@@ -98,6 +98,13 @@ double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
                                double M22, double M23, double M33,
                                double *i11, double *i12, double *i13,
                                double *i22, double *i23, double *i33);
+double symmmat3D_times_vec(double gxx, double gxy, double gxz,
+                           double gyy, double gyz, double gzz,
+                           double Vx, double Vy, double Vz,
+                           double *gVx, double *gVy, double *gVz);
+double mag2_vector_3Dmetric(double gxx, double gxy, double gxz,
+                            double gyy, double gyz, double gzz,
+                            double Vx, double Vy, double Vz);
 double smallest_pat_size(tMesh *mesh);
 void array_dXdx(tNode *node, int ind, tArray *aJ);
 void array_dxdX(tNode *node, int ind, tArray *aJ);
