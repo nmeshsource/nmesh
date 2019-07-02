@@ -226,7 +226,7 @@ int advection1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   return 0;
 }
 
-/* RHS of: d_t u = - d_i f^i */
+/* surface terms in RHS of: d_t u */
 int advection1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   TIMER_START;
