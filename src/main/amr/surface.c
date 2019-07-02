@@ -226,6 +226,9 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
   int my_dir = my_f/2;
   int nb_dir = nb_f/2;
 
+  /* set *vind to var "X" that has no surfaces */
+  *vind=0;
+
   /* count number of vars that have surfaces to be exchanged and set myN */
   for(*nvars=0, vi=0; vi<dat->nv; vi++)
   {
