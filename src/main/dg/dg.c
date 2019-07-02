@@ -63,8 +63,10 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
 
   TIMER_START;
 
-  /* get surfaces so that we can compute fluxes */
-  get_all_myln_surfaces(mesh);
+  /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
+     so we do not need to do it here */
+  ///* get surfaces so that we can compute fluxes */
+  //get_all_myln_surfaces(mesh);
 
   /* loop over nodes so we can add boundary flux terms */
   NODELEVEL_Pragma(omp parallel)

@@ -48,12 +48,13 @@ void evolve_register_subsys(tMesh *mesh, tVarList *u,
 
 /* register a list of variable lists and its RHS, source functions and
    limiters in evosys */
-void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
-                                          FuncPointer rhs, FuncPointer src,
-                                          FuncPointer limdata,
-                                          FuncPointer limiter)
+void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
+                                      FuncPointer volrhs, FuncPointer surfrhs,
+                                      FuncPointer limdata,
+                                      FuncPointer limiter)
 {
-  evolve_register_subsys(mesh, u, NULL,limdata,limiter, NULL,src,rhs,NULL);
+  evolve_register_subsys(mesh, u, NULL,limdata,limiter,
+                         NULL,NULL,volrhs,surfrhs);
 }
 
 /* free extra VarLists and other Lists */
@@ -182,7 +183,8 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     if(ListEntry(evosys->volrhs,i))
       ListEntry(evosys->volrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 
- // ........
+  /* get surfaces so that we can compute fluxes */
+  get_all_myln_surfaces(mesh);
 
   /* add all surface RHSs */
   forList(u, i)

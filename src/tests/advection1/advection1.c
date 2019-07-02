@@ -191,7 +191,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int advection1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
@@ -222,7 +222,16 @@ int advection1_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     }
   }
 
-  /* get flux terms on boundary */
+  TIMER_STOP;
+  return 0;
+}
+
+/* RHS of: d_t u = - d_i f^i */
+int advection1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+{
+  TIMER_START;
+
+  /* get flux terms on surfaces */
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
                         advection1_fluxes_pt, advection1_numflux);
 
@@ -315,15 +324,16 @@ int advection1_init(tMesh *mesh)
 
   /* register u and its RHS with evolve */
   if(Getv(limiter, "MRS"))
-    evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0,
-                                         limdata_MRS, limiter_MRS);
+    evolve_register_subsys_u_rhs_lim(mesh, vlu, advection1_vol_rhs_u,
+                                     advection1_surf_rhs_u,
+                                     limdata_MRS, limiter_MRS);
   else if(Getv(limiter, "minmodB"))
-    evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0,
-                                         limdata_c000_100_010_001,
-                                         limiter_minmodB);
+    evolve_register_subsys_u_rhs_lim(mesh, vlu, advection1_vol_rhs_u,
+                                   advection1_surf_rhs_u,
+                                   limdata_c000_100_010_001, limiter_minmodB);
   else
-    evolve_register_subsys_u_rhs_src_lim(mesh, vlu, advection1_rhs_u, 0, 0,0);
-
+    evolve_register_subsys_u_rhs_lim(mesh, vlu, advection1_vol_rhs_u,
+                                     advection1_surf_rhs_u, 0,0);
   evolve_print_evosys(mesh);
 
   /* choose numerical flux */

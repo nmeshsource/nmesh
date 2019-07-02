@@ -9,8 +9,8 @@ void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
                 FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,
                 FuncPointer surfrhs);
-void evolve_register_subsys_u_rhs_src_lim(tMesh *mesh, tVarList *u,
-                                          FuncPointer rhs, FuncPointer src,
-                                          FuncPointer limdata,
-                                          FuncPointer limiter);
+void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
+                                      FuncPointer volrhs, FuncPointer surfrhs,
+                                      FuncPointer limdata,
+                                      FuncPointer limiter);
 void evolve_print_evosys(tMesh *mesh);
