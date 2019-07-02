@@ -27,7 +27,7 @@ typedef struct tEVOSYS {
   pFL *limiter;       /* apply limiter on node using data from limdata */
   pFL *presurf;       /* set vars needed before surf exchange, e.g. prims */
   pFL *setsrc;        /* set some source terms, is called before setrhs */
-  pFL *setrhs;        /* set RHS of eve eqns, called after setsrc */
+  pFL *setrhs;        /* set RHS of evo eqns, called after setsrc */
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP
