@@ -309,10 +309,10 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
   n_rq = com->n_rq;
 
   /* free buffer contents */
-  if( (n_rq_new < com->n_rq) && (com->free_buf) )
+  if( (n_rq_new < n_rq) && (com->free_buf) )
   {
     int i;
-    for(i=n_rq_new; i<com->n_rq; i++)
+    for(i=n_rq_new; i<n_rq; i++)
     {
       free(com->send_buf[i]);
       free(com->recv_buf[i]);
