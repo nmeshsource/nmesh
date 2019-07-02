@@ -179,6 +179,12 @@ Cleanup:
 -remove ldescendants_along_face
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
+-fix warning. The line
+  if(fatal) errorexits("Could not find parameter \"%s\"", name);
+ in findparameterindex causes an incorrect warning with -O3:
+ warning: ‘__s’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+ parameters.c: note: ‘__s’ was declared here
+  int iterate_parameters"
 
 -----------------------------------------------------------------
 
