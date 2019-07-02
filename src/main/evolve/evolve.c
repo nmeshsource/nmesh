@@ -222,6 +222,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
   {
     tVarList *vl = ListEntry(u,i);
 
+    /* set limiter data in indicators (indc) */
     if(ListEntry(evosys->limdata,i))
     {
       /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
@@ -243,26 +244,26 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 
       /* now get the indicators and wait for MPI buffers if necessary */
       get_all_myln_indc_for_vl(mesh, vl);
+    }
 
+    /* apply limiter */
+    if(ListEntry(evosys->limiter,i))
+    {
       /* use limiter on each node */
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
+        int ret = ListEntry(evosys->limiter,i)(node, vl);
 
-        /* apply limiter */
-        if(ListEntry(evosys->limiter,i))
-        {
-          int ret = ListEntry(evosys->limiter,i)(node, vl);
-
-          /* increase nlim if limiter was active, otherwise reset nlim */
-          if(ret) node->dat->nlim += 1;
-          else    node->dat->nlim = 0;
-        }
+        /* increase nlim if limiter was active, otherwise reset nlim */
+        if(ret) node->dat->nlim += 1;
+        else    node->dat->nlim = 0;
       }
-
-      /* free indicators again */
-      free_all_myln_indc_for_vl(mesh, vl);
     }
+
+    /* free indicators again */
+    if(ListEntry(evosys->limdata,i))
+      free_all_myln_indc_for_vl(mesh, vl);
 
   } /* end loop over varlists */
 }
