@@ -786,13 +786,16 @@ int ind_on_nodeface(tNode *node, int ind, int *face)
   I[1] = jOfInd_n_k(ind, n, I[2]);
   I[0] = iOfInd_n_jk(ind, n, I[1],I[2]);
 
-  for(nf=0, f=0; f<5; f++)
+  for(nf=0, f=0; f<6; f++)
   {
     int d = f/2;
     int pl = (n[d]-1)*(f%2);
     if(I[d]==pl) { face[f] = 1; nf++; }
     else         { face[f] = 0; }
   }
+  printf("%d: %d %d %d  ", ind, I[0],I[1],I[2]);
+  for(f=0; f<6; f++) printf("%d ", face[f]);
+  printf(" -> nf=%d\n ", nf);
   return nf;
 }
 
@@ -804,7 +807,7 @@ int ind_on_outerbound(tNode *node, int ind)
   if(ind_on_nodeface(node, ind, face))
   {
     int f;
-    for(f=0; f<5; f++)
+    for(f=0; f<6; f++)
       if(face[f])
       {
         tBface *bfaces = node->pat->bfaces[f];
