@@ -52,6 +52,8 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
                            double X[3], const double x[3]);
 long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3]);
 int XYZ_on_face(tPat *pat, int *face, const double X[3]);
+int ijk_on_nodeface(tNode *node, int ijk, int *face);
+int ijk_on_outerbound(tNode *node, int ijk);
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
 int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3]);
 int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
