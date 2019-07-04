@@ -245,8 +245,8 @@ typedef struct tNFACE {
   tNode *node;           // node we are on
   int f;                 // face, runs from 0 to 5
   struct tNFACE *onface; // pointer to other nface that touches
-  struct tNFACE *next;   // next bface in this patch
-  struct tNFACE *prev;   // previous bface in this patch
+  struct tNFACE *next;   // next nface in this patch
+  struct tNFACE *prev;   // previous nface in this patch
 } tNface;
 
 
