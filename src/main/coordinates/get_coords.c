@@ -793,9 +793,12 @@ int ind_on_nodeface(tNode *node, int ind, int *face)
     if(I[d]==pl) { face[f] = 1; nf++; }
     else         { face[f] = 0; }
   }
-  printf("%d: %d %d %d  ", ind, I[0],I[1],I[2]);
-  for(f=0; f<6; f++) printf("%d ", face[f]);
-  printf(" -> nf=%d\n ", nf);
+  if(0)
+  {
+    printf("%d: %d %d %d  ", ind, I[0],I[1],I[2]);
+    for(f=0; f<6; f++) printf("%d ", face[f]);
+    printf(" -> nf=%d\n ", nf);
+  }
   return nf;
 }
 
