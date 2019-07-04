@@ -775,16 +775,16 @@ int XYZ_on_face(tPat *pat, int *face, const double X[3])
 }
 
 
-/* check if ijk is on a node face */
-int ijk_on_nodeface(tNode *node, int ijk, int *face)
+/* check if ind is on a node face */
+int ind_on_nodeface(tNode *node, int ind, int *face)
 {
   int *n = node->n;
   int I[3];
   int f, nf;
 
-  I[2] = kOfInd_n(ijk, n);
-  I[1] = jOfInd_n_k(ijk, n, I[2]);
-  I[0] = iOfInd_n_jk(ijk, n, I[1],I[2]);
+  I[2] = kOfInd_n(ind, n);
+  I[1] = jOfInd_n_k(ind, n, I[2]);
+  I[0] = iOfInd_n_jk(ind, n, I[1],I[2]);
 
   for(nf=0, f=0; f<5; f++)
   {
@@ -796,12 +796,12 @@ int ijk_on_nodeface(tNode *node, int ijk, int *face)
   return nf;
 }
 
-/* check if ijk is on outer boundary */
-int ijk_on_outerbound(tNode *node, int ijk)
+/* check if ind is on outer boundary */
+int ind_on_outerbound(tNode *node, int ind)
 {
   int face[6];
 
-  if(ijk_on_nodeface(node, ijk, face))
+  if(ind_on_nodeface(node, ind, face))
   {
     int f;
     for(f=0; f<5; f++)
