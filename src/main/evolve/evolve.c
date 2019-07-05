@@ -348,7 +348,7 @@ int evolve_myln(tMesh *mesh)
   forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
 
   /* initialize surfaces for exchange */
-  init_all_vl_surfaces(mesh, allu);
+  init_all_myln_surfaces(mesh);
 
   /* how we evolve the mesh */
   if(allnodes)
