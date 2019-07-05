@@ -267,9 +267,9 @@ int cart_div_Ui(tNode *node, int Ux, int divUi)
   dU = Arrd(daU[2]);
   forpoints(node,i) divU[i] += dU[i];
 
-  free(daU0);
-  free(daU[1]);
-  free(daU[2]);
+  free_array(daU0);
+  free_array(daU[1]);
+  free_array(daU[2]);
 
   return 1;
 }
