@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#define PR 1
 
 /* Newton-Raphson with bracketing:
 
@@ -17,7 +16,8 @@
    *x0 is used as starting guess if x1<=x0<=x2 || x2<=x0<=x1 */
 int newton1d_brak(double *x0,
                   void (*fdf)(double x, void *par, double *f, double *df),
-                  double x1, double x2, void *par, int maxits, double xacc)
+                  double x1, double x2, void *par, int maxits, double xacc,
+                  int pr)
 {
   int j, bisect;
   double f,fh,fl, df;
@@ -42,7 +42,7 @@ int newton1d_brak(double *x0,
   if(fl >= 0.0 && fh <= 0.0) j=1; /* if fl or fh is NAN j stays 0 */
   if(!j)
   {
-    if(PR) printf("newton1d_brak: Root is not bracketed!\n");
+    if(pr) printf("newton1d_brak: Root is not bracketed!\n");
     return -2*maxits-3;
   }
 
@@ -101,7 +101,7 @@ int newton1d_brak(double *x0,
     if(fabs(dx) < xacc) { *x0=xrt; return j; }
   }
 
-  if(PR) printf("newton1d_brak: Maximum number of iterations exceeded!\n");
+  if(pr) printf("newton1d_brak: Maximum number of iterations exceeded!\n");
   *x0=xrt;
   return j;
 }
