@@ -72,11 +72,13 @@ void free_all_surfaces(tNode *node)
 /* free all surfaces on all nodes in the mesh */
 void free_all_myln_surfaces(tMesh *mesh)
 {
+  TIMER_START;
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
     free_all_surfaces(node);
   }
+  TIMER_STOP;
 }
 
 
@@ -149,11 +151,13 @@ int init_all_surfaces(tNode *node)
 /* init all surfaces on all nodes in the mesh */
 void init_all_myln_surfaces(tMesh *mesh)
 {
+  TIMER_START;
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
     init_all_surfaces(node);
   }
+  TIMER_STOP;
 }
 
 /**********************************************************************/
