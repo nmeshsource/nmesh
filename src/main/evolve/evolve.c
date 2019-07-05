@@ -314,8 +314,8 @@ int evolve_myln(tMesh *mesh)
   void (*Evolve)(tNode *node) = NULL;      /* func pointer for evo method */
   void (*Evolve_mesh)(tMesh *mesh) = NULL; /* func pointer for evo method */
   int allnodes = 1;
-  tVarList *allu = vlalloc(mesh);
-  int i;
+  //tVarList *allu = vlalloc(mesh);
+  //int i;
 
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
@@ -344,8 +344,8 @@ int evolve_myln(tMesh *mesh)
   else
     errorexits("unknown: evolve_method = ", Gets(evolve_method));
 
-  /* make varlist with all in u */
-  forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
+  ///* make varlist with all in u */
+  //forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
 
   /* initialize surfaces for exchange */
   init_all_myln_surfaces(mesh);
@@ -373,8 +373,8 @@ int evolve_myln(tMesh *mesh)
   /* free all surfaces */
   free_all_myln_surfaces(mesh);
 
-  /* we don't need allu anymore */
-  vlfree(allu);
+  ///* we don't need allu anymore */
+  //vlfree(allu);
 
   return 0;
 }
