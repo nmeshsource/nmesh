@@ -285,6 +285,9 @@ int evolve_init_evosys(tMesh *mesh)
   /* if there are no aux vars add them */
   if(!evosys->rhs)
   {
+    /* free surfaces since we are adding EvoVars with more surfaces */
+    free_all_myln_surfaces(mesh);
+
     /* add lists */
     evosys->w   = alloc_pVLList();
     evosys->rhs = alloc_pVLList();
@@ -303,7 +306,6 @@ int evolve_init_evosys(tMesh *mesh)
     //printf("evosys->w = %p\n", evosys->w);
 
     /* now that we have more vars re-init surfaces */
-    free_all_myln_surfaces(mesh);
     init_all_myln_surfaces(mesh);
   }
   return 0;

@@ -7,6 +7,9 @@
 #define PR 0
 
 
+/* frequently used global vars */
+tcoordinates coordinates[1];
+
 
 /* try to enable all coord vars, return 1 if we have dat */
 int coordinates_coordvars_enabled(tNode *node)
@@ -18,6 +21,7 @@ int coordinates_coordvars_enabled(tNode *node)
   int iX, ix, idXdx, idet_dXbdx;
   int isqrtdet2gamma0, isqrtgdiagx;
   int surface_metric, sqrtdet2gamma, sqrtgdiag;
+  int itmp;
   int f, d;
 
   /* do nothing if this is not my node */
@@ -33,6 +37,7 @@ int coordinates_coordvars_enabled(tNode *node)
   idet_dXbdx = Ind("det_dXbdx");
   isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
   isqrtgdiagx = Ind("sqrtgdiagx");
+  itmp = Ind("coordinates_tmp1");
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
@@ -50,6 +55,9 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, idXdx+3);
   enablevar_innode(node, idXdx+6);
   enablevar_innode(node, idet_dXbdx);
+  enablevar_innode(node, itmp);
+  enablevar_innode(node, itmp+1);
+  enablevar_innode(node, itmp+2);
   if(1 || sqrtdet2gamma) enablevar_innode(node, isqrtdet2gamma0);
   if(1 || sqrtgdiag)     enablevar_innode(node, isqrtgdiagx);
 
@@ -402,6 +410,9 @@ int coordinates_init_node(tNode *node)
 int coordinates_init(tMesh *mesh)
 {
   PRF;printf(":\n");
+
+  /* set some global vars */
+  coordinates->itmp1 = Ind("coordinates_tmp1");
 
   formylnodes(mesh)
   {

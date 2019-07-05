@@ -5,6 +5,12 @@
 #define LDOUBLE double
 
 
+/* structure that holds global coordinates vars and pars */
+typedef struct {
+  int itmp1;        /* Ind("coordinates_tmp1") */
+} tcoordinates;
+
+
 /* coordinates.c */
 
 

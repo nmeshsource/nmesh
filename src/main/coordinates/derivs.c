@@ -5,6 +5,8 @@
 #include "coordinates.h"
 
 
+/* global vars */
+extern tcoordinates coordinates[1];
 
 
 /* compute Cart. derivs of u in array au, put du/dx^m into arrays dau[0..2] */
@@ -244,9 +246,12 @@ int cart_div_Ui(tNode *node, int Ux, int divUi)
 
   /* 4 arrays: divU, and 3 temp. daU */
   divaU = dat->v[divUi];
-  daU0   = alloc_array(node->n);
-  daU[1] = alloc_array(node->n);
-  daU[2] = alloc_array(node->n);
+  //daU0   = alloc_array(node->n);
+  //daU[1] = alloc_array(node->n);
+  //daU[2] = alloc_array(node->n);
+  daU0   = VarA(node, coordinates->itmp1);
+  daU[1] = VarA(node, coordinates->itmp1+1);
+  daU[2] = VarA(node, coordinates->itmp1+2);
 
   /* set x-deriv in divaU */
   aU = dat->v[Ux];
@@ -267,9 +272,9 @@ int cart_div_Ui(tNode *node, int Ux, int divUi)
   dU = Arrd(daU[2]);
   forpoints(node,i) divU[i] += dU[i];
 
-  free_array(daU0);
-  free_array(daU[1]);
-  free_array(daU[2]);
+  //free_array(daU0);
+  //free_array(daU[1]);
+  //free_array(daU[2]);
 
   return 1;
 }
