@@ -301,6 +301,10 @@ int evolve_init_evosys(tMesh *mesh)
       //push_pVLList(evosys->s[0], AddDuplicateEnable(u, "_s0", 1,0));
     }
     //printf("evosys->w = %p\n", evosys->w);
+
+    /* now that we have more vars re-init surfaces */
+    free_all_myln_surfaces(mesh);
+    init_all_myln_surfaces(mesh);
   }
   return 0;
 }
@@ -347,8 +351,8 @@ int evolve_myln(tMesh *mesh)
   ///* make varlist with all in u */
   //forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
 
-  /* initialize surfaces for exchange */
-  init_all_myln_surfaces(mesh);
+  ///* initialize surfaces for exchange */
+  //init_all_myln_surfaces(mesh);
 
   /* how we evolve the mesh */
   if(allnodes)
@@ -370,8 +374,8 @@ int evolve_myln(tMesh *mesh)
     }
   }
 
-  /* free all surfaces */
-  free_all_myln_surfaces(mesh);
+  ///* free all surfaces */
+  //free_all_myln_surfaces(mesh);
 
   ///* we don't need allu anymore */
   //vlfree(allu);

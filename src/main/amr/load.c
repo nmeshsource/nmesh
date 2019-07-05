@@ -36,6 +36,9 @@ void simple_load_balance(tMesh *mesh)
 
   PRF;printf(": nnodes=%ld", nnodes);
 
+  /* free surfaces since they will change now anyway */
+  free_all_myln_surfaces(mesh);
+
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
   {
@@ -61,8 +64,12 @@ void simple_load_balance(tMesh *mesh)
   }
 
   free_com(rcom);
+
   update_mesh_myln_node_nid(mesh);
   printf(" --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
+
+  /* now that nodes are elsewhere re-init surfaces */
+  init_all_myln_surfaces(mesh);
 }
 
 /* return: number of variables and number of doubles inside dat */
