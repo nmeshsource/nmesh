@@ -125,7 +125,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
   int size = nMPI_size();
   int r, todo, done, flag;
   int nnodes = (mesh->myln->nncats)*(mesh->myln->nm);
-  long *my_nid   = calloc(nnodes, sizeof(my_nid[0]));
+  long *my_nid   = calloc(nnodes+1, sizeof(my_nid[0]));
   nMPI_Req *req  = calloc(size, sizeof(req[0]));
   int *nn        = calloc(size, sizeof(nn[0]));
   long **ref_nid = calloc(size, sizeof(ref_nid[0]));
@@ -353,10 +353,10 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, todo, done, flag;
+  int r, todo, done, nn_rank, flag;
   int nnodes;
   int myn = (mesh->myln->nncats)*(mesh->myln->nm);
-  long *my_unr  = calloc(2*myn, sizeof(my_unr[0]));
+  long *my_unr  = calloc(2*myn+2, sizeof(my_unr[0]));
   nMPI_Req *req = calloc(size, sizeof(req[0]));
   int *nn       = calloc(size, sizeof(nn[0]));
   long **unref  = calloc(size, sizeof(unref[0]));
@@ -476,11 +476,9 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
   //PRFs(" 1: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* unrefine my own unref[rank] */
+  nn_rank = nn[rank];
   if(nn[rank]>0)
-  {
-    nn[rank] = -destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
-    done++;
-  }
+    nn_rank = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
   //PRFs(" 2: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* check for incoming broadcasts and then work on them */
@@ -493,7 +491,11 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
       if(flag)
       {
         /* work on unref[r] */
-        nn[r] = -destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
+        if(r != rank) /* r=rank has been done already above */
+          nn[r] = destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
+        else
+          nn[r] = nn_rank;
+        nn[r] = -nn[r]; /* make nn[r] negative */
         done++;
       }
     }
