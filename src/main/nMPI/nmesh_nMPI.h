@@ -46,6 +46,7 @@ int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root);
 int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
                 int root, nMPI_Req *request);
 int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat);
+int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat);
 
 tCom *alloc_com(int entrysize, int free_buf);
 void free_com(tCom *com);

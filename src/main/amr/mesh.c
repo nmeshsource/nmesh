@@ -181,6 +181,8 @@ hcoarsen_pat(mesh, 0);
 Yo(7);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
 */
 
+  //nMPI_barrier();
+
   /* load balance full mesh */
   simple_load_balance(mesh);
   printmesh(mesh);
