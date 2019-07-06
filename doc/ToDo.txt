@@ -89,6 +89,8 @@ Things that need to be done urgently:
 
 *add struct with nfaces: DONE!
 
+*use tags from surface.c also in indicators.c
+
 *check funs in refine.c
  +MPI part alone seems to work
  +threads alone seem to work if I use critical secs
