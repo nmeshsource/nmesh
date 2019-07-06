@@ -183,11 +183,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   /* refine my_nid */
   if(nnodes>0)
-  {
     create_children_no_nid_update(mesh, nnodes, my_nid, ref_method);
-    nn[rank] = 0;
-    done++;
-  }
   my_nid = NULL; /* we do not need my_nid anymore */
 
   /* check for incoming broadcasts and then work on them */
@@ -200,7 +196,8 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
       if(flag)
       {
         /* work on ref_nid[r] */
-        create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+        if(r != rank) /* r=rank has been done already above */
+          create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
         nn[r] = 0;
         done++;
       }
