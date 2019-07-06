@@ -74,6 +74,7 @@ void remove_all_nfaces(tNode *node);
 
 /* refine.c */
 void hrefine_mesh_to_level(tMesh *mesh, int l);
+void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l);
 void hcoarsen_mesh_to_level(tMesh *mesh, int l);
 void hrefine_pat(tMesh *mesh, int p);
 void hcoarsen_pat(tMesh *mesh, int p);

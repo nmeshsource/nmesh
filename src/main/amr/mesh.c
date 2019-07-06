@@ -144,7 +144,7 @@ int setup_mesh(tMesh *mesh)
   //printmesh(mesh);
 
   /* refine mesh */
-  hrefine_mesh_to_level(mesh, luni);
+  hrefine_mesh_to_level_loadbalance(mesh, luni);
   if(refp >= 0) hrefine_pat(mesh, refp);
 /*
 hrefine_pat(mesh, 1);

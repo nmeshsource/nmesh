@@ -629,6 +629,18 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
   }
 }
 
+
+/* like hrefine_mesh_to_level, but load balance after each level is created */
+void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l)
+{
+  int i;
+  for(i=0; i<=l; i++)
+  {
+    hrefine_mesh_to_level(mesh, i);
+    simple_load_balance(mesh);
+  }
+}
+
 /* refine all nodes up to level l */
 void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 {
