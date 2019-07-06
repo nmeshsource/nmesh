@@ -27,6 +27,10 @@ typedef struct tCOM {
 
 /* nMPI.c */
 int nMPI_print_compile_info(tMesh *mesh);
+int nMPIvars_init(tMesh *mesh);
+int nMPIvars_finalize(tMesh *mesh);
+nMPI_Comm nMPIvars_get_comm(int i);
+int nMPIvars_get_ncomms(void);
 int nMPI_Init(int *pargc, char ***pargv);
 int nMPI_Finalize(void);
 int nMPI_Abort(int errorcode);

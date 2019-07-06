@@ -15,5 +15,3 @@ extern nMPI_Comm main_comm;
 
 
 /* nMPI.c */
-int nMPI_init_nMPIvars(tMesh *mesh);
-int nMPI_finalize_nMPIvars(tMesh *mesh);

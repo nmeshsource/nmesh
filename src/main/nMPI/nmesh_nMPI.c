@@ -10,9 +10,9 @@ int nmesh_nMPI(tMesh *mesh)
   printf("Adding nMPI\n");
 
   /* functions */
+  AddFun(FIRST, nMPIvars_init);
   AddFun(POST_PARAMETERS, nMPI_print_compile_info);
-  AddFun(POST_PARAMETERS, nMPI_init_nMPIvars);
-  AddFun(FINALIZEMESH, nMPI_finalize_nMPIvars);
+  AddFun(FINALIZEMESH, nMPIvars_finalize);
 
   /* variables */
   //AddVar("nMPI_temp1", "", "temporary variable");

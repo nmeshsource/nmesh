@@ -15,7 +15,7 @@ tnMPIvars nMPIvars[1];
 
 
 /* init global struct */
-int nMPI_init_nMPIvars(tMesh *mesh)
+int nMPIvars_init(tMesh *mesh)
 {
   int i;
 
@@ -24,12 +24,11 @@ int nMPI_init_nMPIvars(tMesh *mesh)
     nMPIvars->comm[i] = nMPI_COMM_NULL;
     nMPI_Comm_dup(main_comm, &(nMPIvars->comm[i]));
   }
-
   return 0;
 }
 
 /* free global struct */
-int nMPI_finalize_nMPIvars(tMesh *mesh)
+int nMPIvars_finalize(tMesh *mesh)
 {
   int i;
 
@@ -39,6 +38,18 @@ int nMPI_finalize_nMPIvars(tMesh *mesh)
 
   return 0;
 }
+
+/* return nMPIvars->comm[i] */
+nMPI_Comm nMPIvars_get_comm(int i)
+{
+  if(i>=NCOMMS || i<0) return nMPI_COMM_NULL;
+  return nMPIvars->comm[i];
+}
+int nMPIvars_get_ncomms(void)
+{
+  return NCOMMS;
+}
+
 
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
