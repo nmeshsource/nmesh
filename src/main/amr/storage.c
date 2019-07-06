@@ -189,13 +189,13 @@ tNode *alloc_node(int initcomm)
 
   if(initcomm)
   {
-    /* make node MPI communicator node->comm, for now we just duplicate
-       main_comm from main.c */
-    nMPI_Comm_dup(main_comm, &(node->comm));
+    /* set node MPI communicator node->comm */
+    node->comm = nMPIvars_get_comm(initcomm-1);
   }
   else
   {
-    node->comm = nMPI_COMM_NULL;
+    // node->comm = nMPI_COMM_NULL;
+    node->comm = main_comm;
   }
 
   return node;
@@ -224,10 +224,6 @@ void free_this_node_only(tNode *node)
 
   /* free variable data */
   free_dat(node->dat);
-
-  /* free node MPI communicator comm */
-  if(node->comm != nMPI_COMM_NULL)
-    nMPI_Comm_free(&(node->comm));
 
   free(node);
 }
@@ -1233,6 +1229,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
     {
       tNode *node = elem->node;
       tNode *parent = node->parent;
+      int i;
 
       if(node->dat)
       {
@@ -1249,9 +1246,11 @@ long update_mesh_myln_node_nid(tMesh *mesh)
       if(parent) parent->nid = -nid;
       //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
 
-      /* make node MPI communicator if it is not set yet */
-      if(node->comm == nMPI_COMM_NULL)
-        nMPI_Comm_dup(main_comm, &(node->comm));
+      /* set node MPI communicator */
+      i = nMPIvars_get_ncomms();
+      i = node->nid % i;
+      node->comm = nMPIvars_get_comm(i);
+      //PRF;printf(": i=%d node->comm=%d\n", i, node->comm);
     }
   else /* mesh->lns is NULL, so free myln */
     realloc_myln_nncats(mesh->myln, 0);

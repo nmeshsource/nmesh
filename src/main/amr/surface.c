@@ -299,7 +299,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   else
   {
     /* nb is on other process so use MPI to exchange data */
-    int rq, nb_rank, s_tag, r_tag;
+    int rq, nb_rank, s_tag, r_tag, lid, nb_lid;
     nMPI_Comm s_comm, r_comm;
     tCom *com = dat->com[face];
     int nb_n[3], nb_N;
@@ -317,8 +317,16 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     /* use MPI to recv nb->dat->s[nb_f][vi]->mysurf in s->nbsurf[ni],
        and also send s->mysurf to nb->dat->s[nb_f][vi]->nbsurf[nb_ni] */
     nb_rank = nb->datrank;
-    r_tag = (node->nid)*6 + face;
-    s_tag = (nb->nid)*6 + nb_f;
+    //r_tag = (node->nid)*6 + face;
+    //s_tag = (nb->nid)*6 + nb_f;
+    //r_comm = nb->comm;
+    //s_comm = node->comm;
+    lid = calc_node_lid(node);
+    nb_lid = calc_node_lid(nb);
+    s_tag = (nb_lid*64 + nb_ni)*6 + nb_f;
+    r_tag = (lid*64 + ni)*6 + face;
+    if(r_tag<0) r_tag = -r_tag;
+    if(s_tag<0) s_tag = -s_tag;
     r_comm = nb->comm;
     s_comm = node->comm;
 

@@ -354,6 +354,7 @@ void free_nodelist(tNlist *elem);
 int total_nnodes_in_myln(tMylnodes *myln);
 long update_mesh_myln_node_nid(tMesh *mesh);
 long get_node_nid(tNode *node);
+int calc_node_lid(tNode *node);
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
 tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist);
 tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3]);
