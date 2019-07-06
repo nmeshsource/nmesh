@@ -199,13 +199,26 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
         tIndic *ic;
         int nvars = vl->n;
         int si;
+        int found, nb_f, nb_ni, lid, nb_lid;
+
+        /* we get nb_f, nb_ni only so that we can make unique tags */
+        found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
+        if(!found) errorexit("couldn't find nb face!!!");
 
         /* use MPI to recv nb->dat->ic[vi]->myindc in 
            dat->ic[vi]->nbindc[f][ni], and also send dat->ic[vi]->myindc to 
            nb->dat->ic[vi]->nbindc[nb_nbi] */
         nb_rank = nb->datrank;
-        r_tag = (node->nid);
-        s_tag = (nb->nid);
+        //r_tag = (node->nid);
+        //s_tag = (nb->nid);
+        //r_comm = nb->comm;
+        //s_comm = node->comm;
+        lid = calc_node_lid(node);
+        nb_lid = calc_node_lid(nb);
+        s_tag = (nb_lid*64 + nb_ni)*6 + nb_f;
+        r_tag = (lid*64 + ni)*6 + f;
+        if(r_tag<0) r_tag = -r_tag;
+        if(s_tag<0) s_tag = -s_tag;
         r_comm = nb->comm;
         s_comm = node->comm;
 

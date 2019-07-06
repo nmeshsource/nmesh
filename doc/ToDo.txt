@@ -89,7 +89,7 @@ Things that need to be done urgently:
 
 *add struct with nfaces: DONE!
 
-*use tags from surface.c also in indicators.c
+*use tags from surface.c also in indicators.c: DONE!
 
 *check funs in refine.c
  +MPI part alone seems to work
