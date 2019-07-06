@@ -44,6 +44,9 @@ int main(int argc, char **argv)
   initialize_libraries(mesh);
   TIMER_START;
 
+  /* hook for funs to run 1st */
+  RunFun(FIRST);
+
   iterate_parameters(mesh, 0); /* start of new iteration */
   while(iterate_parameters(mesh, 1))
   {
