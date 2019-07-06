@@ -11,6 +11,8 @@ int nmesh_nMPI(tMesh *mesh)
 
   /* functions */
   AddFun(POST_PARAMETERS, nMPI_print_compile_info);
+  AddFun(POST_PARAMETERS, nMPI_init_nMPIvars);
+  AddFun(FINALIZEMESH, nMPI_finalize_nMPIvars);
 
   /* variables */
   //AddVar("nMPI_temp1", "", "temporary variable");

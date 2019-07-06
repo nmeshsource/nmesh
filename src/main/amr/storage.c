@@ -1266,6 +1266,19 @@ long get_node_nid(tNode *node)
   return node ? node->nid : -1;
 }
 
+/* return a local node id */
+int calc_node_lid(tNode *node)
+{
+  tMesh *mesh = node->pat->mesh;
+  long nnodes = mesh->nln;
+  long size = nMPI_size();
+  long npr2 = 2*nnodes/size;
+  long tmp = (node->nid) % npr2;
+  int lid = tmp;
+
+  return lid;
+}
+
 /* append a node list to mesh->lns and also update mesh->myln */
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
 {

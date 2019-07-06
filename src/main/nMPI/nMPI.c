@@ -10,6 +10,35 @@
    debugging help!!! */
 int noMPI_rank=0, noMPI_size=1;
 
+/* global vars of nMPI */
+tnMPIvars nMPIvars[1];
+
+
+/* init global struct */
+int nMPI_init_nMPIvars(tMesh *mesh)
+{
+  int i;
+
+  for(i=0; i<NCOMMS; i++)
+  {
+    nMPIvars->comm[i] = nMPI_COMM_NULL;
+    nMPI_Comm_dup(main_comm, &(nMPIvars->comm[i]));
+  }
+
+  return 0;
+}
+
+/* free global struct */
+int nMPI_finalize_nMPIvars(tMesh *mesh)
+{
+  int i;
+
+  for(i=0; i<NCOMMS; i++)
+    if(nMPIvars->comm[i] != nMPI_COMM_NULL)
+      nMPI_Comm_free(&(nMPIvars->comm[i]));
+
+  return 0;
+}
 
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
