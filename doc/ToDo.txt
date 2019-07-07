@@ -188,6 +188,17 @@ Cleanup:
  parameters.c: note: ‘__s’ was declared here
   int iterate_parameters"
 
+Optimizations:
+==============
+*mm_array2 is 4 times slower than mm_array1 and mm_array1 is 4 times slower
+ than mm_array2
+ -would this help: #define Ind_n0n1(i,j,k,n) ( (i) + (n0)*( (j) + (n1)*(k) ) )
+ -try stack arrays
+ -try changing i,j,k loop orders
+*MeshVarInd is slow
+ -change Mathematica to declare var indices ouside all loops
+*move init_all_myln_myindc_for_vl and its free out of evostep
+
 -----------------------------------------------------------------
 
 Parallelization:
