@@ -3,7 +3,7 @@
 
 (* Mathematica script:
    Given equations in tensor notation, write corresponding C code.
-*)  
+*)
 
 
 (*************************)
@@ -33,5 +33,3 @@
 (* write C code *)
 
 << writeC.math
-
-

@@ -9,7 +9,7 @@
    - write definitions of C variables
    - write equations as C assignments
    - write end of function
-*)  
+*)
 
 
 (***************************************************************************)
@@ -40,40 +40,40 @@ BeginCFunction[];
 (***************************************************************************)
 (* write definition of C variables *)
 
-prdecvar[vars_, index_] := Module[{cvars, s, nf}, 
+prdecvar[vars_, index_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
-    s = StringForm["double *`` = Vard(node, `` + ``);\n", 
+    s = StringForm["double *`` = Vard_(node, `` + ``);\n",
                     cvars[[nf+1]], index, nf];
     pr[s];
   ];
 ]
 
-prdecvarname[vars_, name_] := Module[{cvars, s, nf}, 
+prdecvarname[vars_, name_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   s = StringForm["int index_`` = Ind(\"``\");\n", name, name];
   pr[s];
   For[nf = 0, nf < Length[cvars], nf++,
-      (* box should not be hardwired *)
-      s = StringForm["double *`` = Vard(node, index_`` + ``);\n", 
+      (* should node be hardwired??? *)
+      s = StringForm["double *`` = Vard_(node, index_`` + ``);\n",
                     cvars[[nf+1]], name, nf];
     pr[s];
   ];
 ]
 
-prdecvl[vars_, name_] := Module[{cvars, s, nf}, 
+prdecvl[vars_, name_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
-    s = StringForm["double *`` = Vard(node,  (``)->index[``]);\n", 
+    s = StringForm["double *`` = Vard_(node,  (``)->index[``]);\n",
                     cvars[[nf+1]], name, nf];
     pr[s];
   ];
 ]
 
-prdecvlindices[vars_, name_] := Module[{cvars, s, nf}, 
+prdecvlindices[vars_, name_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
-      s = StringForm["int index_`` = (``)->index[``];\n", 
+      s = StringForm["int index_`` = (``)->index[``];\n",
                      cvars[[nf+1]], name, nf];
     pr[s];
   ];
@@ -96,7 +96,7 @@ variabledeclarations[];
 pr["\n"];
 
 (* insert custom InitializationCommands[] *)
-(* in InitializationCommands[] we can put an OpenMP loop and all 
+(* in InitializationCommands[] we can put an OpenMP loop and all
    auxvars are then thread local. *)
 InitializationCommands[];
 
@@ -138,24 +138,24 @@ writeCassign[e_] := Module[{x, nfields, nf, acc, one},
 
   If[e[[1]] === Cif,
     If[e[[2]] === end,
-      pr["}\n"]; 
+      pr["}\n"];
       pr[StringForm["/* if (``) */\n\n\n", lastif]]
     ];
     If[e[[2]] === else,
-      pr["\n"]; 
+      pr["\n"];
       pr[StringForm["} else { /* if (!``) */\n\n", lastif]]
     ];
     If[e[[2]] =!= end && e[[2]] =!= else,
-      pr["\n\n"]; 
+      pr["\n\n"];
       pr["/* conditional */\n"];
       pr[StringForm["if (``) {\n\n", e[[2]]]];
       lastif = e[[2]]
-    ] 
+    ]
   ];
 
   (* Cinstruction: a piece of C-code *)
   If[e[[1]] === Cinstruction,
-      pr["\n"]; 
+      pr["\n"];
       pr[StringForm["``\n\n", e[[2]]]];
   ];
 
@@ -177,8 +177,8 @@ nmul = Count[char, "*"];
 ndiv = Count[char, "/"];
 nsum = Count[char, "+"] + Count[char, "-"];
 count = StringForm[
-  "/* nvars = ``, n* = ``,  n/ = ``,  n+ = ``, n = ``, O = `` */\n", 
-  Length[vars], nmul, ndiv, nsum, nmul+ndiv+nsum, 
+  "/* nvars = ``, n* = ``,  n/ = ``,  n+ = ``, n = ``, O = `` */\n",
+  Length[vars], nmul, ndiv, nsum, nmul+ndiv+nsum,
   If [optimizeflag, 1, 0, 0]
 ];
 Print[""];
@@ -191,4 +191,3 @@ Close[filepointer];
 
 timer["after writeC.math"]
 prtimer[]
-
