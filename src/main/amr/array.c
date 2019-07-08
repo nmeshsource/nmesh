@@ -7,6 +7,12 @@
 
 #define PR 0
 
+/* Temporary arrays in mm_array1/2.
+   We can use arrays on the heap (1) or stack (0). */
+//#define MM_TEMP_HEAP_ARRAYS 1
+#define MM_TEMP_HEAP_ARRAYS 1
+
+
 /* NOTE about nmesh variables and arrays:
    var arrays a[ind] = v_{ijk} are indexed like this:
    ind = i + n[0]*(j + n[1]*k)
@@ -124,8 +130,13 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   int nC[] = { nt0, nt1, n2 };
   int nat1 = Ata->n[1];
   int nAC[] = { nat1, nt1, n2 };
+#if MM_TEMP_HEAP_ARRAYS == 1
   tArray *Ca = alloc_array(nC);
   tArray *ACa = alloc_array(nAC);
+#else
+  DECL_STACK_ARRAY(Ca, nC);
+  DECL_STACK_ARRAY(ACa, nAC);
+#endif
   int nB[] = { n0,n1,n2 };
   int nAB[] = { nt1, nat1, n2 };
   double *B = Ba->d;
@@ -156,8 +167,10 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
       for(j=0; j<nAC[1]; j++)
         AB[Ind_n(j,i,k, nAB)] = AC[Ind_n(i,j,k, nAC)];
 
+#if MM_TEMP_HEAP_ARRAYS == 1
   free_array(ACa);
   free_array(Ca);
+#endif
 }
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
@@ -176,8 +189,13 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   int nC[] = { nt0, nt1, n0 };
   int nat1 = Ata->n[1];
   int nAC[] = { nat1, nt1, n0 };
+#if MM_TEMP_HEAP_ARRAYS == 1
   tArray *Ca = alloc_array(nC);
   tArray *ACa = alloc_array(nAC);
+#else
+  DECL_STACK_ARRAY(Ca, nC);
+  DECL_STACK_ARRAY(ACa, nAC);
+#endif
   int nB[] = { n0,n1,n2 };
   int nAB[] = { n0, nt1, nat1 };
   double *B = Ba->d;
@@ -208,8 +226,10 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
       for(k=0; k<nAC[2]; k++)
         AB[Ind_n(k,j,i, nAB)] = AC[Ind_n(i,j,k, nAC)];
 
+#if MM_TEMP_HEAP_ARRAYS == 1
   free_array(ACa);
   free_array(Ca);
+#endif
 }
 
 /* set entire array to value c */

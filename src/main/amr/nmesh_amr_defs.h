@@ -25,4 +25,4 @@
    we can use:
     DECL_STACK_ARRAY(array, n);
  */
-#define DECL_STACK_ARRAY(array, n_) STACK_ARRAY_with_segs(array, n_, 0, 1)
+#define DECL_STACK_ARRAY(array, n_) DECL_STACK_ARRAY_with_segs(array, n_,0,1)
