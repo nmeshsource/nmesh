@@ -286,7 +286,7 @@ int evolve_init_evosys(tMesh *mesh)
   if(!evosys->rhs)
   {
     /* free surfaces since we are adding EvoVars with more surfaces */
-    free_all_myln_surfaces(mesh);
+    evolve_free_communication_structs(mesh);
 
     /* add lists */
     evosys->w   = alloc_pVLList();
@@ -306,8 +306,25 @@ int evolve_init_evosys(tMesh *mesh)
     //printf("evosys->w = %p\n", evosys->w);
 
     /* now that we have more vars re-init surfaces */
-    init_all_myln_surfaces(mesh);
+    evolve_init_communication_structs(mesh);
   }
+  return 0;
+}
+
+
+/* init structs that are used for node to neighbor node communication */
+int evolve_init_communication_structs(tMesh *mesh)
+{
+  /* init node to nb surface exchanges */
+  init_all_myln_surfaces(mesh);
+  return 0;
+}
+
+/* free structs that are used for node to neighbor node communication */
+int evolve_free_communication_structs(tMesh *mesh)
+{
+  /* free surfaces */
+  free_all_myln_surfaces(mesh);
   return 0;
 }
 

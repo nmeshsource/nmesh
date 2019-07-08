@@ -14,3 +14,5 @@ void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
                                       FuncPointer limdata,
                                       FuncPointer limiter);
 void evolve_print_evosys(tMesh *mesh);
+int evolve_init_communication_structs(tMesh *mesh);
+int evolve_free_communication_structs(tMesh *mesh);
