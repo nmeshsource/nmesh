@@ -35,8 +35,8 @@ void simple_load_balance(tMesh *mesh)
 
   PRF;printf(": nnodes=%ld\n", nnodes);
 
-  /* free surfaces since they will change now anyway */
-  free_all_myln_surfaces(mesh);
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
 
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
@@ -67,8 +67,8 @@ void simple_load_balance(tMesh *mesh)
   update_mesh_myln_node_nid(mesh);
   PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
 
-  /* now that nodes are elsewhere re-init surfaces */
-  init_all_myln_surfaces(mesh);
+  /* now that nodes are elsewhere re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
 }
 
 /* return: number of variables and number of doubles inside dat */
@@ -279,15 +279,3 @@ void move_nodelist_to_rank(tNlist *list, int desrank)
 
   free_com(rcom);
 }
-
-
-/**********************************************************************/
-/* functions for things we need to do before or after moving nodes
-   between MPI procs */
-/**********************************************************************/
-
-/**/
-//pre_loadbalance
-//{
-//  free_all_myln_surfaces(mesh);
-//}
