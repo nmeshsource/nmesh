@@ -6,10 +6,9 @@
 
 #define PR 0
 
-/* functions to move nodes between procs */
 
 /**********************************************************************/
-/*  */
+/* functions to move nodes between procs */
 /**********************************************************************/
 
 /* compute desired rank */
@@ -280,3 +279,15 @@ void move_nodelist_to_rank(tNlist *list, int desrank)
 
   free_com(rcom);
 }
+
+
+/**********************************************************************/
+/* functions for things we need to do before or after moving nodes
+   between MPI procs */
+/**********************************************************************/
+
+/**/
+//pre_loadbalance
+//{
+//  free_all_myln_surfaces(mesh);
+//}
