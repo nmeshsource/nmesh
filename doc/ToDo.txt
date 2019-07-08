@@ -196,7 +196,8 @@ Optimizations:
  -try stack arrays
  -try changing i,j,k loop orders
 *MeshVarInd is slow
- -change Mathematica to declare var indices ouside all loops
+ -change Mathematica to declare var indices ouside all loops: DONE!
+ -use klib's khash
 *move init_all_myln_myindc_for_vl and its free out of evostep
 
 -----------------------------------------------------------------
