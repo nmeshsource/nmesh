@@ -265,7 +265,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
     if(ListEntry(evosys->limdata,i))
       free_all_myln_indc_for_vl(mesh, vl);
 
-  } /* end loop over varlists */
+  } /* end loop over list of varlists */
 }
 
 
