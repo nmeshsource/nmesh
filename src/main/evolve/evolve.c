@@ -328,6 +328,76 @@ int evolve_free_communication_structs(tMesh *mesh)
   return 0;
 }
 
+/* init all indc on all nodes in the mesh for all varlists in evosys */
+void init_all_myln_myindc_in_evosys(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int i;
+
+  PRFs(":\n");
+
+  /* check if evo vars in u need myindc */
+  if(evosys->u)
+  {
+    forList(evosys->u, i)
+    {
+      tVarList *vl = ListEntry(evosys->u,i);
+
+      if(ListEntry(evosys->limdata,i))
+      {
+        int nvals = ListEntry(evosys->limdata,i)(NULL, vl);
+        if(nvals>0)
+          init_all_myln_myindc_for_vl(mesh, vl, nvals);
+      }
+    } /* end forList */
+  }
+
+  /* check if evo vars in w need myindc */
+  if(evosys->w)
+  {
+    forList(evosys->w, i)
+    {
+      tVarList *vl = ListEntry(evosys->w,i);
+
+      if(ListEntry(evosys->limdata,i))
+      {
+        int nvals = ListEntry(evosys->limdata,i)(NULL, vl);
+        if(nvals>0)
+          init_all_myln_myindc_for_vl(mesh, vl, nvals);
+      }
+    } /* end forList */
+  }
+}
+
+/* free all indc on all nodes in the mesh for varlists in evosys */
+void free_all_myln_myindc_in_evosys(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int i;
+
+  PRFs(":\n");
+
+  /* check if evo vars in u need myindc */
+  if(evosys->u)
+  {
+    forList(evosys->u, i)
+    {
+      tVarList *vl = ListEntry(evosys->u,i);
+      free_all_myln_indc_for_vl(mesh, vl);
+    } /* end forList */
+  }
+
+  /* check if evo vars in w need myindc */
+  if(evosys->w)
+  {
+    forList(evosys->w, i)
+    {
+      tVarList *vl = ListEntry(evosys->w,i);
+      free_all_myln_indc_for_vl(mesh, vl);
+    } /* end forList */
+  }
+}
+
 
 /* evolve the entire leaf node mesh one time step forward */
 int evolve_myln(tMesh *mesh)
