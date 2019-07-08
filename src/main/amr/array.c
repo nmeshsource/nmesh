@@ -122,9 +122,9 @@ void mm_array1(tArray *Ata, tArray *Ba, tArray *ABa)
   int nt0 = n1;
   int nt1 = n0;
   int nC[] = { nt0, nt1, n2 };
-  tArray *Ca = alloc_array(nC);
   int nat1 = Ata->n[1];
   int nAC[] = { nat1, nt1, n2 };
+  tArray *Ca = alloc_array(nC);
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { nt1, nat1, n2 };
@@ -174,9 +174,9 @@ void mm_array2(tArray *Ata, tArray *Ba, tArray *ABa)
   int nt0 = n2;
   int nt1 = n1;
   int nC[] = { nt0, nt1, n0 };
-  tArray *Ca = alloc_array(nC);
   int nat1 = Ata->n[1];
   int nAC[] = { nat1, nt1, n0 };
+  tArray *Ca = alloc_array(nC);
   tArray *ACa = alloc_array(nAC);
   int nB[] = { n0,n1,n2 };
   int nAB[] = { n0, nt1, nat1 };
