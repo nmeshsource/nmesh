@@ -145,6 +145,30 @@ Things that need to be done urgently:
  in omp_set_lock region???
 
 
+Questions about bamps:
+======================
+*MPI
+  -what is better MPI send/rcev or one-sided comm.?
+*OpenMP:
+  --how to improve scaling? how to reduce thread creation overhead?
+*How to benchmark MPI or OpenMP?
+*GRHD:
+  -What limiters do you use?
+  -How do you do C2P?
+  -Do you use art. atmosphere?
+  -What outer BCs?
+  -What internode BCs? Is LLF good enough?
+*GR
+  -What systems are working?
+  -Is filtering needed?
+*AMR:
+  -What refinement criterions do you use?
+  -What load balancing scheme?
+  -How to do non-uniform time steps?
+*IO
+  -binary XMF seems slow
+  -VisIt has problems showing mesh when refinement/derefinement happens
+
 Things that should be done:
 ===========================
 *in main/amr/storage.c we often set mesh->lns = first_nodelist(...
@@ -192,13 +216,13 @@ Optimizations:
 ==============
 *mm_array2 is 4 times slower than mm_array1 and mm_array1 is 4 times slower
  than mm_array2
- -would this help: #define Ind_n0n1(i,j,k,n) ( (i) + (n0)*( (j) + (n1)*(k) ) )
- -try stack arrays
- -try changing i,j,k loop orders
+ -would this help?: #define Ind_n0n1(i,j,k,n) ( (i) + (n0)*( (j) + (n1)*(k) ) )
+ -try stack arrays: 10% speed gain on tyrfing
+ -try changing i,j,k loop orders: no peed gain on tyrfing
 *MeshVarInd is slow
  -change Mathematica to declare var indices ouside all loops: DONE!
  -use klib's khash
-*move init_all_myln_myindc_for_vl and its free out of evostep
+*move init_all_myln_myindc_for_vl and its free out of evostep: DONE!
 
 -----------------------------------------------------------------
 
