@@ -89,7 +89,7 @@ Things that need to be done urgently:
 
 *add struct with nfaces: DONE!
 
-*use tags from surface.c also in indicators.c: DONE!
+*use MPI tags from surface.c also in indicators.c: DONE!
 
 *check funs in refine.c
  +MPI part alone seems to work
@@ -103,6 +103,14 @@ Things that need to be done urgently:
  +ADM: works for one TOV star
  +EOS: works
 
+*implement GRHD:
+ -c2p: works in some way
+ -positivity limiters
+ -general limiter
+
+*check GRHD:
+ -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
+ -TOV star in Cowling approx
 
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
@@ -114,10 +122,6 @@ Things that need to be done urgently:
   -can use indc & limiters to find troubled inside each MPI proc
   -then use nMPI_Ibcast to get troubled nodes to all ranks
   -refine each troubled node on all ranks, can we use omp tasks for this?
-
-*implement grhd as in BAM
- -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
- -TOV star in Cowling approx
 
 *Burgers
 
