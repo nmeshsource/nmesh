@@ -169,6 +169,7 @@ Questions about bamps:
   -binary XMF seems slow
   -VisIt has problems showing mesh when refinement/derefinement happens
 
+
 Things that should be done:
 ===========================
 *in main/amr/storage.c we often set mesh->lns = first_nodelist(...
@@ -198,6 +199,10 @@ Things that should be done:
  so that we also have min/max or averages in extra space of mysurf
  and nbsurf arrays <-- will NOT work!!! Because in a RK substep we need
  to limit w = u_p + r dt and not r or u_p.
+
+*add to tNode:  int nchildren; // number of children this node has, usually 8
+  -update of storage.c should be east
+  -update of connect.c will be harder because it assumes nb in all 3 direc.
 
 
 Cleanup:
