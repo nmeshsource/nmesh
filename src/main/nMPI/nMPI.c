@@ -295,6 +295,8 @@ int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
   int status = 0;
 #ifdef USEMPI
   MPI_Test(request, flag, stat);
+#else
+  *flag = 1;
 #endif
   return status;
 }
