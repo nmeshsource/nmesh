@@ -150,7 +150,7 @@ Questions about bamps:
 *MPI
   -what is better MPI send/rcev or one-sided comm.?
 *OpenMP:
-  --how to improve scaling? how to reduce thread creation overhead?
+  -how to improve scaling? how to reduce thread creation overhead?
 *How to benchmark MPI or OpenMP?
 *GRHD:
   -What limiters do you use?
