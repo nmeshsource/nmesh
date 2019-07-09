@@ -10,7 +10,7 @@
 /* Temporary arrays in mm_array1/2.
    We can use arrays on the heap (1) or stack (0). */
 //#define MM_TEMP_HEAP_ARRAYS 1
-#define MM_TEMP_HEAP_ARRAYS 1
+#define MM_TEMP_HEAP_ARRAYS 0
 
 
 /* NOTE about nmesh variables and arrays:
