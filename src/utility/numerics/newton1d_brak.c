@@ -25,8 +25,12 @@ int newton1d_brak(double *x0,
   double tmp;
 
   /* check bracket */
-  if(!isfinite(x1))  return -2*maxits-1; /* bracket must be finite */
-  if(!isfinite(x2))  return -2*maxits-2;
+  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  {
+    if(pr) printf("newton1d_brak: Bracket is not finite!  "
+                  "x1=%g x2=%g\n", x1,x2);
+    return -2*maxits-2;
+  }
 
   /* check if *x0 is within x1,x2 */
   if( (x1<=*x0 && *x0<=x2) || (x2<=*x0 && *x0<=x1) )  xrt=*x0;
@@ -42,7 +46,8 @@ int newton1d_brak(double *x0,
   if(fl >= 0.0 && fh <= 0.0) j=1; /* if fl or fh is NAN j stays 0 */
   if(!j)
   {
-    if(pr) printf("newton1d_brak: Root is not bracketed!\n");
+    if(pr) printf("newton1d_brak: Root is not bracketed!  "
+                  "fl=%g fh=%g\n", fl,fh);
     return -2*maxits-3;
   }
 
@@ -101,7 +106,8 @@ int newton1d_brak(double *x0,
     if(fabs(dx) < xacc) { *x0=xrt; return j; }
   }
 
-  if(pr) printf("newton1d_brak: Maximum number of iterations exceeded!\n");
+  if(pr) printf("newton1d_brak: Maximum number of iterations exceeded!  "
+                "j=%d > maxits=%d\n", j, maxits);
   *x0=xrt;
   return j;
 }
