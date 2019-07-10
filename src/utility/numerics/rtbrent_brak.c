@@ -22,8 +22,8 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
   double fb = (*func)(b,par);
   double c = b;
   double fc = fb;
-  double d,e, p,q,r,s, tol, xm;
-  int iter;
+  double d,e, p,q,r,s, tol, xm, b_new;
+  int iter, bisect;
 
  /* check bracket for NANs */
   if( (!isfinite(x1)) || (!isfinite(x2)) )
@@ -34,7 +34,7 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
   }
 
   /* check if *x0 is within [x1,x2] */
-  if((fa < 0.0 && fb < 0.0) || (fa > 0.0 && fb > 0.0))
+  if((fa < 0. && fb < 0.) || (fa > 0. && fb > 0.))
   {
     if(pr) printf("rtbrent_brak: Root is not bracketed!\n");
     return -2*maxits-3;
@@ -43,7 +43,7 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
   /* iterate */
   for(iter=1; iter<=maxits; iter++)
   {
-    if((fb < 0.0 && fc < 0.0) || (fb > 0.0 && fc > 0.0))
+    if((fb < 0. && fc < 0.) || (fb > 0. && fc > 0.))
     {
       c  = a;
       fc = fa;
@@ -62,21 +62,22 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
     /* check if c-b is very small, i.e. for convergence */
     tol = 2.*DBL_EPSILON*fabs(b) + 0.5*xacc;
     xm = 0.5*(c - b);
-    if(fabs(xm) <= tol || fb == 0.0)
+    if(fabs(xm) <= tol || fb == 0.)
     {
       *x0 = b;
       return iter;
     }
 
     /* decide if we use interpolation or bisection */
-    if(fabs(e) >= tol && fabs(fa) > fabs(fb))
+    bisect = (fabs(e) < tol) || (fabs(fa) <= fabs(fb));
+    if(bisect==0)
     {
       /* use inverse cubic interpolation */
       s = fb/fa;
       if(a == c)
       {
-        p = 2.0*xm*s;
-        q = 1.0-s;
+        p = 2.*xm*s;
+        q = 1. - s;
       }
       else
       {
@@ -85,24 +86,44 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
         p = s * (2.*xm*q*(q-r) - (b-a)*(r-1.));
         q = (q-1.) * (r-1.) * (s-1.);
       }
-      if(p > 0.0) q = -q;
+      if(p > 0.) q = -q;
       p = fabs(p);
 
-      /* as in GSL's roots/brent.c, check if interpolation works */
-      if( 2.0*p < fmin(3.0*xm*q - fabs(tol*q), fabs(e*q)) )
+      /* check if interpolation works */
+      if( 2.*p < fmin(3.*xm*q - fabs(tol*q), fabs(e*q)) )
       {
-        e = d;       /* interpolation is ok */
+        /* interpolation is ok */
+        e = d;
         d = p/q;
+
+        /* try to update b */
+        if(fabs(d) > tol)
+          b_new = b + d;
+        else
+          b_new = b + (xm >= 0. ? +tol : -tol);
+
+        /* check if b_new is outside [x1,x2] */
+        if((b_new - x2)*(b_new - x1) > 0.)
+        {
+          /* use bisection after all */
+          bisect = 1;
+        }
       }
       else
       {
-        e = d = xm;  /* interpolation failed, fall back to bisection */
+        bisect = 1;  /* interpolation failed, fall back to bisection */
       }
     }
-    else
+    if(bisect)
     {
       /* use bisection */
       e = d = xm;
+
+      /* try to update b */
+      if(fabs(d) > tol)
+        b_new = b + d;
+      else
+        b_new = b + (xm >= 0. ? +tol : -tol);
     }
 
     /* copy b into a */
@@ -110,10 +131,7 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
     fa = fb;
 
     /* update b */
-    if(fabs(d) > tol)
-      b += d;
-    else
-      b += (xm >= 0 ? +tol : -tol);
+    b = b_new;
     fb = (*func)(b,par);
   }
 
