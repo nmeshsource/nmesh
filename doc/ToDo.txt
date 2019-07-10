@@ -106,6 +106,9 @@ Things that need to be done urgently:
 *implement GRHD:
  -c2p: works in some way
  -positivity limiters
+   find root for larger P
+   make root finder with upper or lower limit
+   make root finder with with fd deriv
  -general limiter
 
 *check GRHD:
