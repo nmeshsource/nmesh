@@ -4,10 +4,10 @@
 #include <math.h>
 
 
-/* Newton-Raphson with bracketing:
+/* Newton-Raphson with bracketing in [x1,x2]:
 
-   similar to sgrid's rtsafe_itsP
-   allows for par and maxits args and returns error code.
+   It is similar to sgrid's rtsafe_itsP
+   It allows for par and maxits args and returns error code.
    fdf has same signature as fdf in GSL
    The actual root is returned in x0.
    returns j>=0   if ok,        j = number of iterations done
