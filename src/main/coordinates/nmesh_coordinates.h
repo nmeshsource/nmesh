@@ -140,6 +140,7 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1);
 int sphere_around_empty_box_at_x0(tMesh *mesh, double dc[3], double r0);
+int sphere_around_full_box_at_x0(tMesh *mesh, double dc[3], double r0);
 int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
                                  double r0, double r1);
 int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
