@@ -59,7 +59,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
   /* check bracket */
   if( (!isfinite(x1)) || (!isfinite(x2)) )
   {
-    if(pr) printf("newton1d_fd: Region is not finite!  "
+    if(pr) printf("newton1d_fd_region: Region is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);
     return -2*maxits-2;
   }
@@ -71,7 +71,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
   }
   else /* we also get this if *x0 is NAN */
   {
-    if(pr) printf("newton1d_fd: x0 is not inside region  "
+    if(pr) printf("newton1d_fd_region: x0 is not inside region  "
                   "x1=%g x2=%g x0=%g\n", x1, x2, *x0);
     return -2*maxits-3;
   }
@@ -125,7 +125,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
     if(fabs(dx) < xacc) { return j; }
   }
 
-  if(pr) printf("newton1d_fd: Maximum number of iterations exceeded!  "
+  if(pr) printf("newton1d_fd_region: Maximum number of iterations exceeded!  "
                 "j=%d > maxits=%d\n", j, maxits);
   return j;
 }
@@ -151,7 +151,7 @@ int find_2roots_region(double x0[2],
   /* check bracket */
   if( (!isfinite(x1)) || (!isfinite(x2)) )
   {
-    if(pr) printf("newton1d_fd: Region is not finite!  "
+    if(pr) printf("find_2roots_region: Region is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);
     return -2*maxits-2;
   }
@@ -163,7 +163,7 @@ int find_2roots_region(double x0[2],
   }
   else /* we also get this if x0[0] is NAN */
   {
-    if(pr) printf("newton1d_fd: x0 is not inside region  "
+    if(pr) printf("find_2roots_region: x0 is not inside region  "
                   "x1=%g x2=%g x0=%g\n", x1, x2, x0[0]);
     return -2*maxits-3;
   }
@@ -219,13 +219,18 @@ int find_2roots_region(double x0[2],
     df = fd_deriv(x0[0], f, func, par);
 
     /* 3 times Newton step should overshoot and change sign */
-    dx  = 3.*f/df;
+    dx  = 3.*(f + fl*EPS)/df;
     xmid = x0[0] - dx;
   }
 
+  if(0) printf("find_2roots_region: xmid=%.16g\n", xmid);
+  if(0) printf("find_2roots_region: x1=%.16g x2=%.16g\n", x1,x2);
+
   /* brackets are [x1,xmid] and [xmid,x2] */
-  if(x0[0] < xmid) { xl=xmid; xh=x2; }
-  else             { xl=x1; xl=xmid; }
+  if(x0[0] <= xmid) { xl=xmid; xh=x2; }
+  else              { xl=x1;   xh=xmid; }
+
+  if(0) printf("find_2roots_region: xl=%.16g xh=%.16g\n", xl,xh);
 
   /* use root finder with bracket */
   ret = rtbrent_brak(&(x0[1]), func, xl,xh, par, maxits, xacc, pr);
