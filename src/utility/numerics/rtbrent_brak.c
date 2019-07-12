@@ -40,6 +40,9 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
     return -2*maxits-3;
   }
 
+  /* init e or compiler will complain */
+  e  = d = b - a;
+
   /* iterate */
   for(iter=1; iter<=maxits; iter++)
   {
