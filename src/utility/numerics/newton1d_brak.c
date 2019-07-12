@@ -111,3 +111,84 @@ int newton1d_brak(double *x0,
   *x0=xrt;
   return j;
 }
+
+
+/* Bisection method with bracket [x1,x2]:
+
+   The actual root is returned in x0.
+   returns j>=0   if ok,        j = number of iterations done
+   returns <0     if error!!!
+   returns root in *x0
+   *x0 is used as starting guess if x1<=x0<=x2 || x2<=x0<=x1 */
+int rtbisect(double *x0, double (*func)(double,void *par),
+             double x1, double x2, void *par, int maxits, double xacc, int pr)
+{
+  int j;
+  double f,fh,fl, xh,xl, xrt, dx,dxold;
+
+  /* check bracket */
+  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  {
+    if(pr) printf("rtbisect: Bracket is not finite!  "
+                  "x1=%g x2=%g\n", x1,x2);
+    return -2*maxits-2;
+  }
+
+  /* check if *x0 is within x1,x2 */
+  if( (x1<=*x0 && *x0<=x2) || (x2<=*x0 && *x0<=x1) )  xrt=*x0;
+  else  xrt=0.5*(x1+x2); /* we also get this if *x0 is NAN */
+
+  /* get func values */
+  fl = (*func)(x1, par);
+  fh = (*func)(x2, par);
+
+  /* check if root is bracketed and if func values are not NAN */
+  j=0;
+  if(fl <= 0.0 && fh >= 0.0) j=1; /* if fl or fh is NAN j stays 0 */
+  if(fl >= 0.0 && fh <= 0.0) j=1; /* if fl or fh is NAN j stays 0 */
+  if(!j)
+  {
+    if(pr) printf("rtbisect: Root is not bracketed!  "
+                  "fl=%g fh=%g\n", fl,fh);
+    return -2*maxits-3;
+  }
+
+  /* early returns */
+  if(fl == 0.0) { *x0=x1; return 0; }
+  if(fh == 0.0) { *x0=x2; return 0; }
+
+  /* set xl and xh */
+  if(fl < 0.0) { xl=x1; xh=x2; }
+  else         { xh=x1; xl=x2; }
+
+  /* set dx ... */
+  dxold=fabs(x2-x1);
+  dx=dxold;
+
+  /* iterate */
+  for(j=1; j<=maxits; j++)
+  {
+    /* eval func at new x=xrt */
+    f= (*func)(xrt, par);
+
+    /* catch special cases */
+    if(!isfinite(f)) { return -j; }
+    if(f == 0.0) { *x0=xrt; return j; }
+
+    if(f < 0.0) xl=xrt;
+    else        xh=xrt;
+
+    /* Bisection step */
+    dxold = dx;
+    dx = 0.5*(xh - xl);
+    xrt = xl + dx;
+    if(xl == xrt) { *x0=xrt; return j; }
+    /* check accuracy goal */
+    if(fabs(dx) < xacc) { *x0=xrt; return j; }
+  }
+
+  if(pr) printf("rtbisect: Maximum number of iterations exceeded!  "
+                "j=%d > maxits=%d\n", j, maxits);
+  *x0=xrt;
+  return j;
+}
