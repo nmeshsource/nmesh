@@ -64,7 +64,7 @@ double getTimeIn_s(void)
   double t_in_s;
 
   clock_gettime(CLOCK_REALTIME, tp);
-  t_in_s = tp->tv_sec + 1e-9 * tp->tv_nsec - time_in_s_at_nmesh_start;
+  t_in_s = (tp->tv_sec - time_in_s_at_nmesh_start) + 1e-9 * tp->tv_nsec;
 
   return t_in_s;
 }

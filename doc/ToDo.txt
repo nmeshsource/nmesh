@@ -154,20 +154,38 @@ Things that need to be done urgently:
 
 Questions about bamps:
 ======================
+*Wave Eqn:
+  -boundary
+  -can it work with LLF flux
 *MPI
   -what is better MPI send/rcev or one-sided comm.?
+    Bernd: there are papers that criticize one-sided comm.
+           on many platforms MPI implementations for one-sided do the same
+           as two-sided comm. behind the scenes
 *OpenMP:
   -how to improve scaling? how to reduce thread creation overhead?
 *How to benchmark MPI or OpenMP?
 *GRHD:
+  +Vivek can do single TOV star: DG only (no fin.vol.) one box, 8 or more
+   DG elements, 4 or 5 points per element
   -What limiters do you use?
+    Entropy based limiter (needs extra EoM).
+    This is a flux limiter: use LLF if entropy is high, otherwise HLL
+    *can you use LLF everywhere?
   -How do you do C2P?
+    standard C2P
   -Do you use art. atmosphere?
+    Yes, similar as BAM, but T_{\mu\nu}=0 in cons. eqns sources terms when
+    rho is at atm level, cons vars are computed from prims at atm level
   -What outer BCs?
   -What internode BCs? Is LLF good enough?
+    not clear
 *GR
   -What systems are working?
   -Is filtering needed?
+    Bernd: yes even for wave eqn if several boxes
+           there is a standard exponential filter that pretty much only
+           filters the highest coeff
 *AMR:
   -What refinement criterions do you use?
   -What load balancing scheme?
@@ -175,6 +193,7 @@ Questions about bamps:
 *IO
   -binary XMF seems slow
   -VisIt has problems showing mesh when refinement/derefinement happens
+    they use paraview
 
 
 Things that should be done:
