@@ -136,7 +136,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
    It allows for par and maxits args and returns error code.
    The actual roots are returned in x0[0] and x0[1].
    returns 2 if 2 roots are found
-   returns 1 if [x1,x2] a bracket, then x0[0]=x0[1] are this root
+   returns 1 if [x1,x2] is a valid bracket, then x0[0]=x0[1] are this root
    returns <0     if error!!!
    x0[0] is used as starting guess */
 int find_2roots_region(double x0[2],
