@@ -112,16 +112,17 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
       {
         badstep = 1;
         xrt = tmp;
-        dx = dxold;
       }
     }
 
     /* update x0 */
     *x0 = xrt;
-    if(badstep) { return -j; }
 
     /* check accuracy goal */
     if(fabs(dx) < xacc) { return j; }
+
+    /* fail if step above went outside */
+    if(badstep) { return -j; }
   }
 
   if(pr) printf("newton1d_fd_region: Maximum number of iterations exceeded!  "
@@ -235,6 +236,9 @@ int find_2roots_region(double x0[2],
   else              { xl=x1;   xh=xmid; }
 
   if(0) printf("find_2roots_region: xl=%.16g xh=%.16g\n", xl,xh);
+
+  /* if xmid is outside [x1,x2] we fail */
+  if(xmid<x1 || xmid>x2) return -maxits; /* no root found */
 
   /* use root finder with bracket */
   ret = rtbrent_brak(&(x0[1]), func, xl,xh, par, maxits, xacc, pr);
