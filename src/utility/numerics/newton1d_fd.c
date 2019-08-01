@@ -205,7 +205,12 @@ int find_2roots_region(double x0[2],
   }
 
   /* fail if there is not at least one root */
-  if(ret<0) return -maxits; /* no root found */
+  if(ret<0)
+  {
+    if(pr) printf("find_2roots_region: newton1d_fd_region failed ret=%d: "
+                  "x1=%g x2=%g xrt=%g\n", ret, x1, x2, xrt);
+    return -maxits; /* no root found */
+  }
 
   /* we found one root x0[0], now make bracket to find the other */
   f = (*func)(x0[0], par);
