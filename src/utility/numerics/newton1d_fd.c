@@ -107,9 +107,8 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
       dx  = f/df;
       tmp = xrt;
       xrt -= dx;
-      /* check if Newton step brings us outside interval,
-         or if step was so small that it didn't change xrt */
-      if( ((xrt-x2)*(xrt-x1) > 0.0) || (tmp == xrt) )
+      /* check if Newton step brings us outside interval */
+      if( ((xrt-x2)*(xrt-x1) > 0.0) )
       {
         badstep = 1;
         xrt = tmp;
