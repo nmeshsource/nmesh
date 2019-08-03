@@ -144,9 +144,10 @@ int find_2roots_region(double x0[2],
                        double x1, double x2, void *par,
                        int maxits, double xacc, int pr)
 {
-  int j, ret;
   double f, fh,fl, df;
   double xh,xl, xrt, dx, xmid;
+  int j;
+  int ret=-1;
 
   /* check bracket */
   if( (!isfinite(x1)) || (!isfinite(x2)) )
