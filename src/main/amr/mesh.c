@@ -290,13 +290,11 @@ int setup_CubedSphere_mesh(tMesh *mesh)
         two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
       break;
     case 6:
-      rc[1] = rc[2] = dc*0.5;
-      rc[0] = dc;
+      rc[0] = rc[1] = rc[2] = dc;
       sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
       break;
     case 7:
-      rc[1] = rc[2] = dc*0.5;
-      rc[0] = dc;
+      rc[0] = rc[1] = rc[2] = dc;
       sphere_around_full_box_at_x0(mesh, rc, ssfac*dc);
       break;
     case 12:
