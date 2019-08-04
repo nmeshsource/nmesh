@@ -188,7 +188,7 @@ git_pull: install_git_hooks
 install_git_hooks:
 	@echo ==================== Installing git hooks ======================
 	cp git_hooks/pre-commit .git/hooks
-	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$X/.git/hooks; fi done
+	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X/.git/hooks" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$X/.git/hooks; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
