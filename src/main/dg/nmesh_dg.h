@@ -17,6 +17,7 @@ typedef struct tDGINFO {
   double *lami;   /* array of inside eigenvals */
   double *lama;   /* array of adjacent eigenvals */
   double *fnum;   /* array of numerical fluxes f^* = f^i* n_i */
+  double Ffac;    /* factor (usually 1) by which we multiply surface terms */
   tVarList *vls;  /* varlist with sources needed */
 } tDGinfo;
 
