@@ -17,6 +17,9 @@ int nmesh_dg(tMesh *mesh)
   //AddAuxVar("dg_u",      "",    "test function");
    
   /* parameters */
+  AddPar("dg_outerBC_flux_fac", "1 1 1", "factors in all 3 directions that "
+         "can be used to switch off all surface flux terms (e.g. use "
+         "'dg_outerBC_flux_fac = 1 0 0' for 1d meshes)");
   AddPar("dg_numerical_flux", "LLF", "numerical flux [LLF]");
 
   return 0;

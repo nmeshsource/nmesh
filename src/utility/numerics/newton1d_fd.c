@@ -107,22 +107,22 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
       dx  = f/df;
       tmp = xrt;
       xrt -= dx;
-      /* check if Newton step brings us outside interval,
-         or if step was so small that it didn't change xrt */
-      if( ((xrt-x2)*(xrt-x1) > 0.0) || (tmp == xrt) )
+      /* check if Newton step brings us outside interval */
+      if( ((xrt-x2)*(xrt-x1) > 0.0) )
       {
         badstep = 1;
         xrt = tmp;
-        dx = dxold;
       }
     }
 
     /* update x0 */
     *x0 = xrt;
-    if(badstep) { return -j; }
 
     /* check accuracy goal */
     if(fabs(dx) < xacc) { return j; }
+
+    /* fail if step above went outside */
+    if(badstep) { return -j; }
   }
 
   if(pr) printf("newton1d_fd_region: Maximum number of iterations exceeded!  "
@@ -136,7 +136,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
    It allows for par and maxits args and returns error code.
    The actual roots are returned in x0[0] and x0[1].
    returns 2 if 2 roots are found
-   returns 1 if [x1,x2] a bracket, then x0[0]=x0[1] are this root
+   returns 1 if [x1,x2] is a valid bracket, then x0[0]=x0[1] are this root
    returns <0     if error!!!
    x0[0] is used as starting guess */
 int find_2roots_region(double x0[2],
@@ -144,9 +144,10 @@ int find_2roots_region(double x0[2],
                        double x1, double x2, void *par,
                        int maxits, double xacc, int pr)
 {
-  int j, ret;
   double f, fh,fl, df;
   double xh,xl, xrt, dx, xmid;
+  int j;
+  int ret=-1;
 
   /* check bracket */
   if( (!isfinite(x1)) || (!isfinite(x2)) )
@@ -205,7 +206,12 @@ int find_2roots_region(double x0[2],
   }
 
   /* fail if there is not at least one root */
-  if(ret<0) return -maxits; /* no root found */
+  if(ret<0)
+  {
+    if(pr) printf("find_2roots_region: newton1d_fd_region failed ret=%d: "
+                  "x1=%g x2=%g xrt=%g\n", ret, x1, x2, xrt);
+    return -maxits; /* no root found */
+  }
 
   /* we found one root x0[0], now make bracket to find the other */
   f = (*func)(x0[0], par);
@@ -231,6 +237,9 @@ int find_2roots_region(double x0[2],
   else              { xl=x1;   xh=xmid; }
 
   if(0) printf("find_2roots_region: xl=%.16g xh=%.16g\n", xl,xh);
+
+  /* if xmid is outside [x1,x2] we fail */
+  if(xmid<x1 || xmid>x2) return -maxits; /* no root found */
 
   /* use root finder with bracket */
   ret = rtbrent_brak(&(x0[1]), func, xl,xh, par, maxits, xacc, pr);

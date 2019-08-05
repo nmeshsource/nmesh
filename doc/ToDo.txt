@@ -189,9 +189,14 @@ Questions about bamps:
 *AMR:
   -What refinement criterions do you use?
   -What load balancing scheme?
+    each node gets a weight (depending on e.g. how many grid point it has)
+    then all nodes are distributed such that all proc have same
+    load (calculated using the weights)
   -How to do non-uniform time steps?
 *IO
   -binary XMF seems slow
+    they have option to have binary data in one file, or one file/node
+    Sara said we need the right order of spatial and temporal in xmf file
   -VisIt has problems showing mesh when refinement/derefinement happens
     they use paraview
 
