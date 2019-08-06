@@ -120,13 +120,23 @@ int has_expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
         f0 = exp( -alp0 * pow(i/N0, s0) );
         ijk = Ind_n(i,j,k, n);
         absc = fabs(c[ijk]);
+        //printf("%d %d %d: absc=%g\n", i,j,k, absc);
 
         /* if absc is too big we do not have proper exp. falloff */
         if( (absc > norm * f0) || (absc > norm * f1) || (absc > norm * f2) )
+        {
+          if(PR)
+          {
+            printf("%d %d %d: ", i,j,k);
+            printf("absc=%g norm=%g f0=%g f1=%g f2=%g\n", absc,norm, f0,f1,f2);
+          }
+          //abort();
           return 0;
-      }
+        }
+      } /* end for i */
     }
   }
+  //if(absc!=0.) abort();
   return 1;
 }
 
