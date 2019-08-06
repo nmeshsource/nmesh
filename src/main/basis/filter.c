@@ -81,8 +81,8 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
 /* functions to check coeff falloff */
 /***********************************************************************/
 
-/* is ca falling off */
-int expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
+/* is array ca falling off? */
+int has_expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
 {
   int *n = ca->n;
   double N0 = n[0] - 1;
@@ -131,22 +131,22 @@ int expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
 }
 
 /* get coeffs ca of array ua, and check for falloff */
-int expfalloff_array(tNode *node, tArray *ua, double alp[3], double s[3])
+int has_expfalloff_array(tNode *node, tArray *ua, double alp[3], double s[3])
 {
   DECL_STACK_ARRAY(ca, ua->n);
   basis_array_analysis3(node, ua, ca);
-  return expfalloff_coeff_array(ca, alp, s);
+  return has_expfalloff_coeff_array(ca, alp, s);
 }
 
 /* check var for exp falloff */
-int expfalloff_var(tNode *node, int ui, double alp[3], double s[3])
+int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3])
 {
   tArray *ua;
   tDat *dat = node->dat;
   if(dat)
   {
     ua = dat->v[ui];
-    return expfalloff_array(node, ua, alp, s);
+    return has_expfalloff_array(node, ua, alp, s);
   }
   return 1; /* return 1 if we do not have var ui on this proc */
 }
