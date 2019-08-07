@@ -68,8 +68,10 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
   tDat *dat = node->dat;
   if(dat)
   {
+    var_to_var_times_JtoPower(node, ui, 1);
     ua = dat->v[ui];
     expfilter_array(node, ua, alp, s);
+    var_to_var_times_JtoPower(node, ui, -1);
     return 1;
   }
   else

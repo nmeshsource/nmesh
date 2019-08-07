@@ -114,6 +114,7 @@ void array_2dxdX(tNode *node, int ind, int norm, tArray *aJ);
 void array_2dxdXb(tNode *node, int ind, int norm, tArray *aJ);
 void array_3Dmat(double M[3][3], tArray *aM);
 double det_2_2_array(tArray *aM);
+void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower);
 
 /* ComplexFunctions.c */
 double BaseAngle(double p, double peri, double p0);
