@@ -251,6 +251,13 @@ double array_GLquadrature3(tNode *node, tArray *var)
   return I;
 }
 
+/* compute average of array var */
+double array_nodeaverage(tNode *node, tArray *var)
+{
+  /* in Xb coords node volume is 2*2*2=8, so divide by 8 */
+  return array_GLquadrature3(node, var) * 0.125;
+}
+
 /* compute 3d integral (\int d^3X var) of array var */
 double array_GLquadratureXYZ3(tNode *node, tArray *var)
 {
