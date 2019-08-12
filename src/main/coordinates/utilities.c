@@ -5,6 +5,9 @@
 #include "coordinates.h"
 
 
+/* global vars */
+extern tcoordinates coordinates[1];
+
 
 /* find normal vector (n[0],n[1],n[2]) of patch face f at X,Y,Z */
 double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
@@ -388,4 +391,33 @@ double det_2_2_array(tArray *aM)
 {
   double *d = Arrd_(aM);
   return d[0]*d[3] - d[1]*d[2];
+}
+
+/* divide or multiply var u by Jacobian J,
+   if Jpow=1: u -> J * u,
+   if Jpow=-1: u -> J^{-1} * u
+   if Jpow=0: do nothing */
+void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower)
+{
+  int iooJ;
+  double *ooJ, *u;
+  int i;
+
+  if(Jpower==0) return;
+
+  iooJ = coordinates->idet_dXbdx;
+  ooJ = Vard_(node, iooJ); /* contains 1/J */
+  u   = Vard_(node, ui);
+
+  switch(Jpower)
+  {
+  case 1:
+    forvari(node, ui, i) u[i] = u[i] / ooJ[i];
+    break;
+  case -1:
+    forvari(node, ui, i) u[i] = u[i] * ooJ[i];
+    break;
+  default:
+    errorexit("Jpower must be 1, -1 or 0");
+  }
 }

@@ -27,6 +27,7 @@ tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls)
   dgi->lama = dmalloc(nvars);
 
   dgi->fnum = dmalloc(nvars);
+  dgi->Ffac = 1.;
 
   return dgi;
 }
@@ -106,6 +107,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           int i0 = i0_norm(i,j,k, dir);
           double sdg_oJ_ow = sqrtdet2gam[JK] * fabs(ooJ[ijk]) / w[i0];
           double gd_ow = sqrtgdiag[ijk] / w[i0];
+          double Ffac;
           int l;
 
           /* set DG i,j,k info */
@@ -118,6 +120,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
 
           /* compute numerical flux */
           numflux(dgi);
+
+          /* get Ffac, this can be set in u_f_lam or numflux */
+          Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off suface fluxes */
 
           /* get F from dgi and add boundary flux terms to RHS */
           forvl(vlr, l)
@@ -135,7 +140,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
             //  else                  dgi->fnum[l] = dgi->fi[l];
             //}
 
-            F = dgi->fnum[l] - dgi->fi[l];
+            F = (dgi->fnum[l] - dgi->fi[l]) * Ffac;
             r[ijk] -= F * (det2gam * sdg_oJ_ow + gdiag * gd_ow);
           }
         }

@@ -413,6 +413,7 @@ int coordinates_init(tMesh *mesh)
 
   /* set some global vars */
   coordinates->itmp1 = Ind("coordinates_tmp1");
+  coordinates->idet_dXbdx = Ind("det_dXbdx");
 
   formylnodes(mesh)
   {

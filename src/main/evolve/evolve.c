@@ -155,14 +155,14 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 
   if(PR) PRFs(":\n");
 
-  /* loop over list of varlists */
+  /* loop over list of varlists and call funcs that we need before limiters */
   forList(u, i)
   {
     tVarList *vl = ListEntry(u,i);
 
     if(ListEntry(evosys->prelim,i))
     {
-      /* set data limiter needs in myindc arrays of each node */
+      /* call prelim functions */
       formylnodes(mesh)
       {
         tNode *node = MyLnode;

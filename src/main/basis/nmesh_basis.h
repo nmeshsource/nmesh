@@ -9,6 +9,7 @@ int basis_var_derivs(tNode *node, int vi, int dvi[3]);
 int basis_var_analysis3(tNode *node, int ui, int ci);
 tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar);
 double array_GLquadrature3(tNode *node, tArray *var);
+double array_nodeaverage(tNode *node, tArray *var);
 double var_GLquadrature3(tNode *node, int ui);
 double array_GLquadratureXYZ3(tNode *node, tArray *var);
 double var_nodeaverage(tNode *node, int ui);
@@ -54,3 +55,7 @@ void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax);
 
 /* get_coords.c */
 void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);
+
+/* filter.c */
+int expfilter_var(tNode *node, int ui, double alp[3], double s[3]);
+int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3]);

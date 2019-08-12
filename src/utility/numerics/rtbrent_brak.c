@@ -36,7 +36,8 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
   /* check if *x0 is within [x1,x2] */
   if((fa < 0. && fb < 0.) || (fa > 0. && fb > 0.))
   {
-    if(pr) printf("rtbrent_brak: Root is not bracketed!\n");
+    if(pr) printf("rtbrent_brak: Root is not bracketed!  "
+                  "fa=%g fb=%g\n", fa,fb);
     return -2*maxits-3;
   }
 

@@ -10,7 +10,7 @@
  */
 #define DECL_STACK_ARRAY_with_segs(array, n_, Ne_, ns_) \
   tArray array[1]; \
-  array->N = n_[0] * n_[1] * n_[2]; \
+  array->N = (n_[0]) * (n_[1]) * (n_[2]); \
   for(int i=0; i<3; i++)  array->n[i] = n_[i]; \
   array->Ne = (Ne_); \
   array->ns = (ns_); \

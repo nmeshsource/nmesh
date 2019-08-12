@@ -54,11 +54,7 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
 {
   int iu = vlu->index[0];
   int ifx = Ind("burgers1_fx");
-  int ify = ifx+1;
-  int ifz = ifx+2;
-  int ifxx = Ind("burgers1_fxx");
-  int ifyx = ifxx+3;
-  int ifzx = ifxx+6;
+  int idivf = Ind("burgers1_divf");
   char *advdir = Gets(Par("burgers1_direction"));
   double nx,ny,nz;
 
@@ -89,10 +85,8 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
       burgers1_flux1d(mesh,1, &(fz[i]),no, &u_i);
     }
 
-   /* flux derivs */
-   cart_partials_U(node, ifx, ifxx);
-   cart_partials_U(node, ify, ifyx);
-   cart_partials_U(node, ifz, ifzx);
+   /* flux divergence */
+   cart_div_Ui(node, ifx, idivf);
   }
 }
 
@@ -192,7 +186,7 @@ int burgers1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
-  int ifxx = Ind("burgers1_fxx");
+  int idivf = Ind("burgers1_divf");
 
   TIMER_START;
 
@@ -204,13 +198,11 @@ int burgers1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   {
     tNode *node = MyLnode;
     double *r  = Vard(node, ir);
-    double *fxx = Vard(node, ifxx);
-    double *fyy = Vard(node, ifxx+4);
-    double *fzz = Vard(node, ifxx+8);
+    double *divf = Vard(node, idivf);
     int i;
 
     /* RHS at each point */
-    forpoints(node, i) r[i] = -(fxx[i] + fyy[i] + fzz[i]);
+    forpoints(node, i) r[i] = -divf[i];
   }
 
   TIMER_STOP;
@@ -239,7 +231,7 @@ int burgers1_init(tMesh *mesh)
 {
   int iu  = Ind("burgers1_u");
   int ifx = Ind("burgers1_fx");
-  int ifxx = Ind("burgers1_fxx");
+  int idivf = Ind("burgers1_divf");
   int ix =  Ind("x");
   int iue = Ind("burgers1_u_err");
   tVarList *vlu = vlalloc(mesh);
@@ -257,7 +249,7 @@ int burgers1_init(tMesh *mesh)
   /* enable all needed vars */
   enablevar(mesh, iu);
   enablevar(mesh, ifx);
-  enablevar(mesh, ifxx);
+  enablevar(mesh, idivf);
   enablevar(mesh, iue);
 
   /* at t=0: set u=sin(x) */

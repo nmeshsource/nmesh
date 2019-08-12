@@ -104,16 +104,23 @@ Things that need to be done urgently:
  +EOS: works
 
 *implement GRHD:
- -c2p: works in some way
+ -c2p: does something
  -positivity limiters
    find root for larger P
    make root finder with upper or lower limit
    make root finder with with fd deriv
  -general limiter
+ -check c2p with root finder for Wv as in arXiv:1306.4953
 
 *check GRHD:
  -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
  -TOV star in Cowling approx
+
+*we need checkpointing:
+ -save pars and lnode-list of each MPI proc
+ -save vars of each MPI proc
+ -as in BAM make sure that each _init is called, i.e. call all time bins up
+  to at least PRE_INITIALDATA, or maybe do one full evo step...
 
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)

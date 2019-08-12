@@ -8,6 +8,7 @@
 /* structure that holds global coordinates vars and pars */
 typedef struct {
   int itmp1;        /* Ind("coordinates_tmp1") */
+  int idet_dXbdx;   /* Ind("det_dXbdx") */
 } tcoordinates;
 
 

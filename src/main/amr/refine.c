@@ -700,7 +700,7 @@ void hrefine_pat(tMesh *mesh, int p)
   }
 }
 
-/* refine patch number p in mesh */
+/* unrefine patch number p in mesh */
 void hcoarsen_pat(tMesh *mesh, int p)
 {
   int rmeth = PARENT_n;
