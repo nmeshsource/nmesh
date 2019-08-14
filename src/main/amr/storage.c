@@ -1056,6 +1056,31 @@ tNlist *remove1_in_nodelist(tNlist *elem, int return_next)
   else		  return left;
 }
 
+/* make a new list with all nodes that are children of the nodes in nlist */
+tNlist *childnodelist_of_nodelist(tNlist *nlist)
+{
+  tNlist *elem, *cnlist, *clast;
+
+  cnlist = NULL; /* child node list is NULL at first */
+  fornodelist(nlist, elem)
+  {
+    tNode *node = elem->node;
+    tNode *child0 = node->child[0];
+    int ijk;
+
+    if(child0)
+    {
+      /* add all 8 children if child0 exists */
+      for(ijk=0; ijk<8; ijk++)
+      {
+        clast = addnode_to_nodelist_after(cnlist, node->child[ijk]);
+        if(!cnlist) cnlist = clast; /* save first entry of childlist */
+      }
+    }
+  }
+  return cnlist;
+}
+
 /* return 1st element in a nodelist */
 tNlist *first_nodelist(tNlist *list)
 {
