@@ -556,6 +556,6 @@ NORET void errorexiti(const char *file, int line, const char *func,
 }
 /************************************************************************/
 /* NOTE: DO NOT WRITE ANYTHING BELOW THIS LINE!!!
-   Reason: The method of using macros and undef/define for the
-   errorexit functions means that they have to be at the end. */
+   Reason: The method of using macros and undef/define for the errorexit
+   functions works only if they are at the end. */
 /************************************************************************/
