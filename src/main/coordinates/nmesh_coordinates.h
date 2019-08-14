@@ -152,6 +152,7 @@ int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
 int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
                           int stretch, int SigFunc, double *xc,
                           double Din, double Dout, double ABrct[4]);
+int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc);
 
 /* coordtrans_CubedSphere.c */
 int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,

@@ -378,131 +378,29 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double *xc, double *Din, double *Dout)
 {
-  int amr_n0 = Geti(Par("amr_n0"));
-  int amr_n1 = Geti(Par("amr_n1"));
-  int amr_n2 = Geti(Par("amr_n2"));
-  int n[] = { amr_n0, amr_n1, amr_n2 };
-  int n1max = Geti(Par("amr_nmax"));
-  double bbox[6];
-  tPat *pat;
-  int isigma0    = Ind("CubedSphere_sigma0");
-  int isigma0_dA = Ind("CubedSphere_dsigma0_dA");
-  int isigma0_dB = Ind("CubedSphere_dsigma0_dB");
-  int isigma1    = Ind("CubedSphere_sigma1");
-  int isigma1_dA = Ind("CubedSphere_dsigma1_dA");
-  int isigma1_dB = Ind("CubedSphere_dsigma1_dB");
-  //int isigdef   = Ind("CubedSphere_sigma01_def");
-  int i;
+  int i, ret;
 
-  if(N<1 || N>6) { errorexit("N must be 1,2,3,4,5,6"); return 0; }
+  if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
 
-  /* set pat CI struct */
+  /* make the N domains */
   for(i=0; i<N; i++)
   {
-    int d;
     double Amin,Amax, Bmin,Bmax;
+    double ABrct[4];
 
-    /* set min/max in each direction */
+    /* set min/max in A-, B-directions */
     set_AB_min_max_from_Din(i, Din, &Amin,&Amax, &Bmin,&Bmax);
-    bbox[0] = 0.;
-    bbox[1] = 1.;
-    bbox[2] = Amin;
-    bbox[3] = Amax;
-    bbox[4] = Bmin;
-    bbox[5] = Bmax;
+    ABrct[0] = Amin;
+    ABrct[1] = Amax;
+    ABrct[2] = Bmin;
+    ABrct[3] = Bmax;
 
-    /* make new patch */
-    pat = add_patch(mesh, bbox, n, n1max);
-
-    /* set coords trafos */
-    if(stretch==0)
-    {
-      pat->xyz_of_XYZ = xyz_of_lamAB_CubSph;
-      pat->XYZ_of_xyz = lamAB_of_xyz_CubSph;
-      pat->dXYZ_dxyz  = dlamAB_dxyz_CubSph;
-    }
-    else
-    {
-      pat->xyz_of_XYZ = xyz_of_rhoAB_CubSph;
-      pat->XYZ_of_xyz = rhoAB_of_xyz_CubSph;
-      pat->dXYZ_dxyz  = drhoAB_dxyz_CubSph;
-    }
-
-    /* set center */
-    for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];
-
-    /* set inner and outer distance from center */
-    pat->CI->s[0] = Din[i];
-    pat->CI->s[1] = Dout[i];
-
-    /* set domain index and type */
-    pat->CI->dom = i;
-    pat->CI->type= type;
-
-    /* set sigma vars and iSurf, idSurfdX for them */
-    if( (stretch==0) && (SigFunc) )
-    {
-      switch(type)
-      {
-      case innerCubedSphere:
-        /* now set coord. info structure */
-        //pat->CI->iFS[0] = isigdef;
-        pat->CI->iSurf[0] = isigma0;
-        pat->CI->idSurfdX[0][1] = isigma0_dA;
-        pat->CI->idSurfdX[0][2] = isigma0_dB;
-        /* default surface functions */
-        pat->CI->FSurf[0] = FSurf_is_CI_s;
-        pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-        break;
-
-      case outerCubedSphere:
-        /* now set coord. info structure */
-        //pat->CI->iFS[1] = isigdef;
-        pat->CI->iSurf[1] = isigma1;
-        pat->CI->idSurfdX[1][1] = isigma1_dA;
-        pat->CI->idSurfdX[1][2] = isigma1_dB;
-        /* default surface functions */
-        pat->CI->FSurf[1] = FSurf_is_CI_s;
-        pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-        break;
-
-      case CubedShell:
-        /* now set coord. info structure */
-        //pat->CI->iFS[0] = isigdef;
-        pat->CI->iSurf[0] = isigma0;
-        pat->CI->idSurfdX[0][1] = isigma0_dA;
-        pat->CI->idSurfdX[0][2] = isigma0_dB;
-        //pat->CI->iFS[1] = isigdef;
-        pat->CI->iSurf[1] = isigma1;
-        pat->CI->idSurfdX[1][1] = isigma1_dA;
-        pat->CI->idSurfdX[1][2] = isigma1_dB;
-        /* default surface functions */
-        pat->CI->FSurf[0] = FSurf_is_CI_s;
-        pat->CI->FSurf[1] = FSurf_is_CI_s;
-        pat->CI->dFSurfdC[0] = dFSurfdC_is_zero;
-        pat->CI->dFSurfdC[1] = dFSurfdC_is_zero;
-        break;
-
-      default:
-        errorexit("not sure what to do...");
-      }
-      /* compute sigma derivs */
-//      if(pat->v[isigdef]!=NULL)
-//      {
-//        // /* deform sigma for testing */
-//        // if(1) deform_CubedSphere_sigma01(pat, isigdef, 0.2, -0.1);
-//        /* enable isigma and its derivs, and set them  */
-//        enablevar_inpatch(pat, isigma);
-//        enablevar_inpatch(pat, isigma_dA);
-//        enablevar_inpatch(pat, isigma_dB);
-//          /* wait until dom=5 and then set all 6 pats from dom0 to dom5 */
-//        if(pat->CI->dom==5)
-//          init_6CubedSphereBoxes_from_CI_iFS(mesh, p0);
-//      }
-    }
+    /* add 1 Cubed Sphere */
+    ret = add_1_CubedSphere_pat(mesh, i,type, stretch,SigFunc,
+                                xc,Din[i],Dout[i], ABrct);
   }
 
-  return pat->p; /* return pat index of last added pat */
+  return ret; /* return pat index of last added pat */
 }
 
 
@@ -572,12 +470,6 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
   int n1max = Geti(Par("amr_nmax"));
   double bbox[6];
   tPat *pat;
-  int isigma0    = Ind("CubedSphere_sigma0");
-  int isigma0_dA = Ind("CubedSphere_dsigma0_dA");
-  int isigma0_dB = Ind("CubedSphere_dsigma0_dB");
-  int isigma1    = Ind("CubedSphere_sigma1");
-  int isigma1_dA = Ind("CubedSphere_dsigma1_dA");
-  int isigma1_dB = Ind("CubedSphere_dsigma1_dB");
   int d;
 
   /* set min/max in each direction */
@@ -591,8 +483,36 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
   /* make new patch */
   pat = add_patch(mesh, bbox, n, n1max);
 
-  /* set pat CI struct */
-  /* set coords trafos */
+  /* set center */
+  for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];
+
+  /* set inner and outer distance from center */
+  pat->CI->s[0] = Din;
+  pat->CI->s[1] = Dout;
+
+  /* set domain index and type */
+  pat->CI->dom = dom;
+  pat->CI->type= type;
+
+  /* use info in pat and stretch, SigFunc to set rest of CI */
+  set_1_CubedSphere_pat(pat, stretch, SigFunc);
+
+  return pat->p; /* return pat index of last added pat */
+}
+
+
+/* set 1 cubed sphere pat from patch info, as well as stretch, SigFunc */
+int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
+{
+  tMesh *mesh = pat->mesh;
+  int isigma0    = Ind("CubedSphere_sigma0");
+  int isigma0_dA = Ind("CubedSphere_dsigma0_dA");
+  int isigma0_dB = Ind("CubedSphere_dsigma0_dB");
+  int isigma1    = Ind("CubedSphere_sigma1");
+  int isigma1_dA = Ind("CubedSphere_dsigma1_dA");
+  int isigma1_dB = Ind("CubedSphere_dsigma1_dB");
+
+  /* set coord trafos */
   if(stretch==0)
   {
     pat->xyz_of_XYZ = xyz_of_lamAB_CubSph;
@@ -606,21 +526,11 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
     pat->dXYZ_dxyz  = drhoAB_dxyz_CubSph;
   }
 
-  /* set center */
-  for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];
-
-  /* set inner and outer distance from center */
-  pat->CI->s[0] = Din;
-  pat->CI->s[1] = Dout;
-
-  /* set domain index and type */
-  pat->CI->dom = dom;
-  pat->CI->type= type;
-
+  /* set pat remaining parts of CI struct: */
   /* set sigma vars and iSurf, idSurfdX for them */
   if( (stretch==0) && (SigFunc) )
   {
-    switch(type)
+    switch(pat->CI->type)
     {
     case innerCubedSphere:
       /* now set coord. info structure */
@@ -663,7 +573,21 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
 
     default:
       errorexit("not sure what to do...");
+
+    /* compute sigma derivs */
+//    if(pat->v[isigdef]!=NULL)
+//    {
+//      // /* deform sigma for testing */
+//      // if(1) deform_CubedSphere_sigma01(pat, isigdef, 0.2, -0.1);
+//      /* enable isigma and its derivs, and set them  */
+//      enablevar_inpatch(pat, isigma);
+//      enablevar_inpatch(pat, isigma_dA);
+//      enablevar_inpatch(pat, isigma_dB);
+//        /* wait until dom=5 and then set all 6 pats from dom0 to dom5 */
+//      if(pat->CI->dom==5)
+//        init_6CubedSphereBoxes_from_CI_iFS(mesh, p0);
+//    }
     }
   }
-  return pat->p; /* return pat index of last added pat */
+  return pat->p; /* return index of this patch */
 }
