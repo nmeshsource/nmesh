@@ -96,8 +96,6 @@ Things that need to be done urgently:
  +threads alone seem to work if I use critical secs
  -test with MPI + threads, may need to init MPI differently...
 
-*convert int voffset, int xyzoffset to long in utility/output/XDMF_out.c
-
 *advect square profile and check for flux integral conservation: seems ok
 
 *implement:
