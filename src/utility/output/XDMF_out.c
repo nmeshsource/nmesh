@@ -50,13 +50,13 @@ char *B_E_grid =
   "        <Grid Name=\"%s\">\n"
   "          <Time Value=\"%.9f\"/>\n"
   "          <Geometry Type=\"XYZ\">\n"
-  "            <DataItem DataType=\"Float\" Dimensions=\"%d %d\" Format=\"%s\" Seek=\"%d\" Precision=\"4\">\n"
+  "            <DataItem DataType=\"Float\" Dimensions=\"%d %d\" Format=\"%s\" Seek=\"%ld\" Precision=\"4\">\n"
   "              %s\n"
   "            </DataItem>\n"
   "          </Geometry>\n"
   "          <Topology Dimensions=\"%d %d %d\" Type=\"3DSMesh\"/>\n"
   "          <Attribute Center=\"Node\" Name=\"%s\" Type=\"Scalar\">\n"
-  "            <DataItem DataType=\"Float\" Dimensions=\"%d %d %d\" Format=\"%s\" Seek=\"%d\" Precision=\"4\">\n"
+  "            <DataItem DataType=\"Float\" Dimensions=\"%d %d %d\" Format=\"%s\" Seek=\"%ld\" Precision=\"4\">\n"
   "              %s\n"
   "            </DataItem>\n"
   "          </Attribute>\n"
@@ -148,7 +148,7 @@ FILE *fopen_bin(char *varname, char *outdir, char *suffix)
 
 
 /* write XML grid description into .xmf file with file pointer fp */
-void write_xdmf_xmf(FILE *fp, int voffset, int xyzoffset,
+void write_xdmf_xmf(FILE *fp, long voffset, long xyzoffset,
                     char *vname, char *suffix,
 		    char *nodename, double time,
 		    int n[3], int bin, int dbl)
@@ -197,7 +197,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
   tMesh *mesh = vl->mesh;
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
-  int voffset, xyzoffset;
+  long voffset, xyzoffset;
   FILE *fpxmf, *fpbin;
   char ndname[100];
   char *suffix[] = { "yz", "xz", "xy" };
@@ -303,7 +303,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   char *outdir = Gets(outd);
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
-  int voffset, xyzoffset;
+  long voffset, xyzoffset;
   FILE *fpxmf, *fpbin;
   char ndname[100];
   char *suffix = "xyz";
