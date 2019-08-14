@@ -96,6 +96,8 @@ Things that need to be done urgently:
  +threads alone seem to work if I use critical secs
  -test with MPI + threads, may need to init MPI differently...
 
+*convert int voffset, int xyzoffset to long in utility/output/XDMF_out.c
+
 *advect square profile and check for flux integral conservation: seems ok
 
 *implement:
@@ -117,10 +119,27 @@ Things that need to be done urgently:
  -TOV star in Cowling approx
 
 *we need checkpointing:
- -save pars and lnode-list of each MPI proc
- -save vars of each MPI proc
- -as in BAM make sure that each _init is called, i.e. call all time bins up
-  to at least PRE_INITIALDATA, or maybe do one full evo step...
+ -save entire mesh
+  +save all patch info, so that we can call funcs to create them, with their
+   bfaces and all
+  +save all nodes on each level (can later go through them and create all
+   nodes)
+  +for leaf nodes save all enabled EvoVars
+  +disable all extra RK stage vars before saving
+ -schedule checkpoint_load after POST_PARAMETERS, e.g. make CHCKPNT_LOAD
+ -move ams's setup_mesh into INITMESH
+ -make par checkpoint_save_pars. All pars in this list will be saved, all
+  others come from parfile or earlier call to initialize_libraries
+ -schedule checkpoint_save in ANALYZE or POST_EVOLVE or ???
+ -save checkpoint in a way that is independent from num. of MPI procs
+ -unlike in BAM we do not need to make sure that each _init is called, e.g.
+  calling all time bins up to at least PRE_INITIALDATA, or maybe doing one
+  full evo step...
+ -put checkpoint into dir checkpoint_new, then mv to checkpoint
+ -save these files in checkpoint dir:
+  patches.txt, nodes.txt,
+  lnodes.txt (should contain ftell val. for data in variables.bin),
+  variables.bin, save_pars.txt
 
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
