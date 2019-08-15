@@ -16,22 +16,30 @@
 /* save patch info */
 int checkpoint_save_patches(tMesh *mesh, char *fname)
 {
+  FILE *fp;
   int p;
 
   /* open destination file */
-  out = fopen(fname, "wb");
-  if(!out) errorexits("failed opening %s", fname);
+  fp = fopen(fname, "wb");
+  if(!fp) errorexits("failed opening %s", fname);
+
+  /* header with some mesh info */
+  fprintf(fp, "mesh->\n");
+  fprintf(fp, " time = %.19g\n", mesh->time);
+  fprintf(fp, " iteration = %d\n", mesh->iteration);
+  fprintf(fp, " dt = %.19g\n", mesh->dt);
+  fprintf(fp, "\n");
 
   /* write data of each patch */
   forpatches(mesh, p)
   {
     tPat *pat = mesh->pat[p];
 
-    checkpoint_write_pat(out, pat)
+    checkpoint_write_pat(fp, pat)
     fprintf(fp, "\n");
   }
 
-  fclose(out);
+  fclose(fp);
   return 0;
 }
 
@@ -45,11 +53,13 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   for(f=0; f<6; f++)
     fprintf(fp, " bbox[%d] = %.19g\n", f, pat->bbox[f]);
 
-  fprintf(fp,   " bbdiag = %.19g\n", pat->bbdiag);
   fprintf(fp,   " nmax = %d\n", pat->nmax);
 
   for(d=0; d<3; d++)
     fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
+
+  for(d=0; d<3; d++)
+    fprintf(fp, " rnode->n[%d] = %d\n", d, rnode->n[d]);
 
   checkpoint_write_CI(fp, pat->CI);
 }
@@ -86,27 +96,56 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 /* save node info */
 int checkpoint_save_nodes(tMesh *mesh, char *fname)
 {
+  FILE *fp;
+  tNlist *rnlist, *el;
   int p;
 
-  /* open destination file */
-  out = fopen(fname, "wb");
-  if(!out) errorexits("failed opening %s", fname);
-
-  /* write data of each patch */
+  /* make list of all root nodes, and save first elem. in rnlist */
   forpatches(mesh, p)
   {
     tPat *pat = mesh->pat[p];
+    tNode *rnode = pat->rnode;
 
-    checkpoint_write_nodetree(out, pat->rnode)
-    fprintf(fp, "\n");
+    if(p==0) rnlist = el = alloc_nodelist(rnode);
+    else     el = addnode_to_nodelist_after(el, rnode);
   }
 
-  fclose(out);
+  /* open destination file */
+  fp = fopen(fname, "wb");
+  if(!fp) errorexits("failed opening %s", fname);
+
+  /* write all nodes */
+  checkpoint_write_nodetrees(fp, rnlist);
+  fprintf(fp, "\n");
+
+  fclose(fp);
+  free_nodelist(rnlist);
   return 0;
 }
 
+/* write nodelist and all their children */
+void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
+{
+  tNlist *nlist  = rnlist;
+  tNlist *cnlist = NULL;
+  int d;
+
+  fprintf(fp, "nodetrees in mesh:\n");
+
+  /* write all nodes in rnlist anf their children */
+  while(nlist)
+  {
+    checkpoint_write_nodes_with_child0(fp, nlist);
+
+    /* make list of all children of nlist, and then update nlist */
+    free_nodelist(cnlist);
+    cnlist = childnodelist_of_nodelist(nlist);
+    nlist = cnlist;
+  }
+}
+
 /* write non-pointer part of tPat */
-void checkpoint_write_nodetree(FILE *fp, tNode *rnode)
+void checkpoint_write_1_nodetree(FILE *fp, tNode *rnode)
 {
   tNlist *nlist, *cnlist;
   int d;
@@ -120,7 +159,7 @@ void checkpoint_write_nodetree(FILE *fp, tNode *rnode)
   /* write all nodes in nlist */
   while(nlist)
   {
-    checkpoint_write_nodelist(fp, nlist);
+    checkpoint_write_nodes_with_child0(fp, nlist);
 
     /* make list of all children of nlist, and then update nlist */
     cnlist = childnodelist_of_nodelist(nlist);
@@ -130,31 +169,37 @@ void checkpoint_write_nodetree(FILE *fp, tNode *rnode)
 }
 
 /* write info about all nodes in a list */
-void checkpoint_write_nodelist(FILE *fp, tNlist *nlist)
+void checkpoint_write_nodes_with_child0(FILE *fp, tNlist *nlist)
 {
   tNlist *elem;
 
   fornodelist(nlist, elem)
   {
-    checkpoint_write_node(fp, elem->node);
-    fprintf(fp, "\n");
+    tNode *node = elem->node;
+    tNode *child0 = node->child[0];
+
+    if(child0)
+    {
+      checkpoint_write_node(fp, node);
+      fprintf(fp, "\n");
+    }
   }
 }
 
 /* write info about one node */
 void checkpoint_write_node(FILE *fp, tNode *node)
 {
-  char loc[100];
-  char ploc[100];
+  tNode *child0 = node->child[0];
+  char name[256];
   int d;
 
-  node_location_str(node, loc,99);
-  node_location_str(node->parent, ploc,99);
+  nodename(node, name,255);
 
   /* info in node struct */
-  fprintf(fp, "node_location_str = %s\n", loc);
-  fprintf(fp, "parent_location_str = %s\n", ploc);
+  fprintf(fp, "nodename = %s\n", name);
 
+  // Not needed:
+  /*
   fprintf(fp,   " dt = %.19g\n", node->dt);
   fprintf(fp,   " time = %.19g\n", node->time);
 
@@ -164,9 +209,12 @@ void checkpoint_write_node(FILE *fp, tNode *node)
   fprintf(fp,   " ijk = %d\n", node->ijk);
   fprintf(fp,   " l = %d\n", node->l);
   fprintf(fp,   " leaf = %d\n", node->leaf);
+  */
 
-  /* add info about child0, so that we can easily create children */
-  if(node->child[0])
+  if(child0)
+  {
+    /* add info about child0, so that we can easily re-create children */
     for(d=0; d<3; d++)
-      fprintf(fp, " child[0]->n[%d] = %d\n", d, node->child[0]->n[d]);
+      fprintf(fp, " child[0]->n[%d] = %d\n", d, child0->n[d]);
+  }
 }
