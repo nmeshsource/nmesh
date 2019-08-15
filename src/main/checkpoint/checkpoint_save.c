@@ -263,9 +263,11 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
   tVarList *vl = vlalloc(mesh);
   FILE *fp;
 
-  /* loop over all vars and put anything that not AUXVAR into vl */
+  /* loop over all vars and put all impportant EvoVars into vl */
   for(vi=0; vi<nvdb; vi++)
-    if(MeshVarType(mesh, vi) != AUXVAR) vlpushone(vl, vi)
+    if(MeshVarType(mesh, vi) != AUXVAR)
+      if(!var_added_by_evolve_init_evosys(mesh, vi))
+        vlpushone(vl, vi)
 
   /* open destination file */
   fp = fopen(fname, "wb");
