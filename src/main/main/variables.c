@@ -461,6 +461,15 @@ tVarList *vlduplicate(tVarList *v)
   return u;
 }
 
+/* return index of first element vi in list v, returns -1 if not in list */
+int vlindex(tVarList *v, int vi)
+{
+  int i;
+  int in=-1; /* is not in list */
+  for(i=0; i<v->n; i++) if(v->index[i]==vi) { in=i; break; }
+  return in;
+}
+
 /* enable all variables in a variable list */
 void vlenable(tVarList *v)
 {

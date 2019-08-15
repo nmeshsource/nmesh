@@ -167,6 +167,7 @@ tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
 void vlpush(tVarList *v, int vi);
 void vlpushvl(tVarList *v, tVarList *u);
+int vlindex(tVarList *v, int vi);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
                              int type, int surfacezones);
