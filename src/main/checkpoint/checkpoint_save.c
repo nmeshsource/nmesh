@@ -13,7 +13,7 @@ int checkpoint_save(tMesh *mesh)
 {
   char *outdir = Gets(Par("outdir"));
 
-  int cl = strlen(outdir) + 80;
+  int cl = strlen(outdir) + 20;
   char *cdir = cmalloc(cl);
 
   int pl = cl + 40;
