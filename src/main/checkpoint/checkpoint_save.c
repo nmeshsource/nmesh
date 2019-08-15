@@ -218,3 +218,83 @@ void checkpoint_write_node(FILE *fp, tNode *node)
       fprintf(fp, " child[0]->n[%d] = %d\n", d, child0->n[d]);
   }
 }
+
+
+/******************************************************************/
+/* functions to save variables */
+/******************************************************************/
+
+/* save all EvoVars */
+int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
+{
+
+}
+
+
+/* output varlist on each node */
+void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
+{
+  tMesh *mesh = vl->mesh;
+  char name[256];
+  int vli, rk;
+
+  /* write all var names */*/
+  if(Rank0)
+  {
+    fprintf(fp, "variable list in this file:\n");
+    fprintf(fp, "vl->n = %d\n", vl->n);
+    forvl(vl, vli)
+    {
+      int vi = Vind(vl, vli);
+      fprintf(fp, "%s\n", VarName(vi));
+    }
+    fprintf(fp, "node data:\n");
+  }
+
+  /* loop over varlist and write data */
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      /* loop over all leaf nodes */
+      formylnodes_noomp(mesh)
+      {
+        tNode *node = MyLnode;
+
+        /* node name and number of points np on this node */
+        nodename(node, name,255);
+        fprintf(fp, "node\n");
+        fprintf(fp, "%s\n", name);
+        fprintf(fp, "%d\n", node->np);
+
+        /* write data for all in vl on this node */
+        forvl(vl, vli)
+        {
+          /* do something only if this proc has dat */
+          if(node->dat)
+          {
+            int vi = Vind(vl, vli);
+            tArray *va = node->dat->v[vi]
+            if(va)
+            {
+              /* print only index in varlist */
+              fprintf(fp, "%d\n", vli);
+
+              /* write var array in raw binary */
+              if(write_big)
+                fwrite_big(Arrd_(va), sizeof(double), node->np, fp);
+              else
+                fwrite_little(Arrd_(va), sizeof(double), node->np, fp);
+              fprintf(fp, "\n");
+            }
+          }
+        }
+        fprintf(fp, "\n");
+      } /* end node-loop */
+    }
+    /* wait until everyone is here */
+    nMPI_barrier();
+  } /* end rk-loop */
+}
