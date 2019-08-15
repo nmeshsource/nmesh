@@ -177,6 +177,38 @@ int evolve_init_evosys(tMesh *mesh)
   return 0;
 }
 
+/* check if var vi is in list w */
+int var_in_pVLList(pVLList *w, int vi)
+{
+  if(w)
+  {
+    int i;
+    forList(w, i)
+    {
+      tVarList *vl = ListEntry(w, i);
+      if(vlindex(vl, vi) >= 0) return 1;
+    }
+  }
+  return 0;
+}
+
+/* return 1 if var vi is one of the vars that evolve_init_evosys has added */
+int var_added_by_evolve_init_evosys(tMesh *mesh, int vi)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int i;
+
+  if(var_in_pVLList(evosys->w, vi)) return 1;
+
+  if(var_in_pVLList(evosys->rhs, vi)) return 1;
+
+  if(var_in_pVLList(evosys->u_p, vi)) return 1;
+
+  for(i=0; i<NEVOTEMP; i++)
+    if(var_in_pVLList(evosys->s[i], vi)) return 1;
+
+  return 0;
+}
 
 /* init structs that are used for node to neighbor node communication */
 int evolve_init_communication_structs(tMesh *mesh)
