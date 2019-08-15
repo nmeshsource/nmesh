@@ -227,9 +227,24 @@ void checkpoint_write_node(FILE *fp, tNode *node)
 /* save all EvoVars */
 int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
 {
+  tVarList *vl = vlalloc(mesh);
+  FILE *fp;
 
+  /* loop over all vars and put anything that not AUXVAR into vl */
+  for(vi=0; vi<nvdb; vi++)
+    if(MeshVarType(mesh, vi) != AUXVAR) vlpushone(vl, vi)
+
+  /* open destination file */
+  fp = fopen(fname, "wb");
+  if(!fp) errorexits("failed opening %s", fname);
+
+  /* write var list vl in little endian format */
+  checkpoint_write_vl(fp, vl, 0);
+
+  fclose(fp);
+  vlfree(vl);
+  return 0;
 }
-
 
 /* output varlist on each node */
 void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
@@ -238,7 +253,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
   char name[256];
   int vli, rk;
 
-  /* write all var names */*/
+  /* write all var names */
   if(Rank0)
   {
     fprintf(fp, "variable list in this file:\n");
@@ -248,10 +263,10 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
       int vi = Vind(vl, vli);
       fprintf(fp, "%s\n", VarName(vi));
     }
+    fprintf(fp, "\n");
     fprintf(fp, "node data:\n");
   }
 
-  /* loop over varlist and write data */
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
   {
