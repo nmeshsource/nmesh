@@ -9,40 +9,6 @@
 /* some functions to save nmesh data for checkpoints  */
 /******************************************************************/
 
-int checkpoint_save(tMesh *mesh)
-{
-  char *outdir = Gets(Par("outdir"));
-
-  int cl = strlen(outdir) + 20;
-  char *cdir = cmalloc(cl);
-
-  int pl = cl + 40;
-  char *pars  = cmalloc(pl);
-  char *pats  = cmalloc(pl);
-  char *nodes = cmalloc(pl);
-  char *vars  = cmalloc(pl);
-
-  /* output filenames */
-  snprintf(cdir,cl, "%s/%s", outdir, "checkpoint");
-  snprintf(pars,pl,  "%s/%s", cdir, "save_pars.txt");
-  snprintf(pats,pl,  "%s/%s", cdir, "patches.txt");
-  snprintf(nodes,pl, "%s/%s", cdir, "nodes.txt");
-  snprintf(vars,pl,  "%s/%s", cdir, "variables.bin");
-
-  /* save checkpoint in various files */
-  checkpoint_save_patches(mesh, pats);
-  checkpoint_save_nodes(mesh, nodes);
-  checkpoint_save_EvoVars(mesh, vars);
-
-  /* free strings */
-  free(vars);
-  free(nodes);
-  free(pats);
-  free(pars);
-  free(cdir);
-}
-
-
 /******************************************************************/
 /* functions to save patches */
 /******************************************************************/
@@ -68,7 +34,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
   {
     tPat *pat = mesh->pat[p];
 
-    checkpoint_write_pat(fp, pat)
+    checkpoint_write_pat(fp, pat);
     fprintf(fp, "\n");
   }
 
@@ -92,7 +58,7 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
     fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
 
   for(d=0; d<3; d++)
-    fprintf(fp, " rnode->n[%d] = %d\n", d, rnode->n[d]);
+    fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
 
   checkpoint_write_CI(fp, pat->CI);
 }
@@ -130,7 +96,8 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 int checkpoint_save_nodes(tMesh *mesh, char *fname)
 {
   FILE *fp;
-  tNlist *rnlist, *el;
+  tNlist *rnlist = NULL;
+  tNlist *el;
   int p;
 
   /* make list of all root nodes, and save first elem. in rnlist */
@@ -161,7 +128,6 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
 {
   tNlist *nlist  = rnlist;
   tNlist *cnlist = NULL;
-  int d;
 
   fprintf(fp, "nodetrees in mesh:\n");
 
@@ -181,10 +147,9 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
 void checkpoint_write_1_nodetree(FILE *fp, tNode *rnode)
 {
   tNlist *nlist, *cnlist;
-  int d;
 
-  fprintf(fp,   "nodetree in patch%d: rnode->\n");
-  fprintf(fp,   " pat->p = %.19g\n", rnode->pat->p);
+  fprintf(fp,   "nodetree in patch%d: rnode->\n", rnode->pat->p);
+  fprintf(fp,   " pat->p = %d\n", rnode->pat->p);
 
   /* put root node into a nodelist */
   nlist = alloc_nodelist(rnode);
@@ -262,12 +227,13 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
 {
   tVarList *vl = vlalloc(mesh);
   FILE *fp;
+  int vi;
 
   /* loop over all vars and put all impportant EvoVars into vl */
-  for(vi=0; vi<nvdb; vi++)
+  for(vi=0; vi<mesh->nvdb; vi++)
     if(MeshVarType(mesh, vi) != AUXVAR)
       if(!var_added_by_evolve_init_evosys(mesh, vi))
-        vlpushone(vl, vi)
+        vlpushone(vl, vi);
 
   /* open destination file */
   fp = fopen(fname, "wb");
@@ -326,7 +292,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
           if(node->dat)
           {
             int vi = Vind(vl, vli);
-            tArray *va = node->dat->v[vi]
+            tArray *va = node->dat->v[vi];
             if(va)
             {
               /* print only index in varlist */

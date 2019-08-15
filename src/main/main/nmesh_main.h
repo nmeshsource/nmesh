@@ -165,6 +165,7 @@ int MeshVar_Nextra(tMesh *mesh, int i);
 void prvarlist(tVarList *v);
 tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
+void vlpushone(tVarList *v, int vi);
 void vlpush(tVarList *v, int vi);
 void vlpushvl(tVarList *v, tVarList *u);
 int vlindex(tVarList *v, int vi);
