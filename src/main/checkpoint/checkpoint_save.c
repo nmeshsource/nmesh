@@ -9,6 +9,39 @@
 /* some functions to save nmesh data for checkpoints  */
 /******************************************************************/
 
+int checkpoint_save(tMesh *mesh)
+{
+  char *outdir = Gets(Par("outdir"));
+
+  int cl = strlen(outdir) + 80;
+  char *cdir = cmalloc(cl);
+
+  int pl = cl + 40;
+  char *pars  = cmalloc(pl);
+  char *pats  = cmalloc(pl);
+  char *nodes = cmalloc(pl);
+  char *vars  = cmalloc(pl);
+
+  /* output filenames */
+  snprintf(cdir,cl, "%s/%s", outdir, "checkpoint");
+  snprintf(pars,pl,  "%s/%s", cdir, "save_pars.txt");
+  snprintf(pats,pl,  "%s/%s", cdir, "patches.txt");
+  snprintf(nodes,pl, "%s/%s", cdir, "nodes.txt");
+  snprintf(vars,pl,  "%s/%s", cdir, "variables.bin");
+
+  /* save checkpoint in various files */
+  checkpoint_save_patches(mesh, pats);
+  checkpoint_save_nodes(mesh, nodes);
+  checkpoint_save_EvoVars(mesh, vars);
+
+  /* free strings */
+  free(vars);
+  free(nodes);
+  free(pats);
+  free(pars);
+  free(cdir);
+}
+
 
 /******************************************************************/
 /* functions to save patches */
