@@ -175,8 +175,6 @@ int make_output_directory(tMesh *mesh)
 {
   char *outdir  = Gets(Par("outdir"));
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
-  char f[100];
-  char so[1000];
   time_t mytime = time(NULL);       // get time
   char *time_str = ctime(&mytime);
 
@@ -233,41 +231,8 @@ int make_output_directory(tMesh *mesh)
   /* all wait here until mkdir is done. */
   nMPI_barrier();
 
-  /* redirect stdout and stderr for rank0 */
-  if(Rank0 && !Getv(Par("logfile_creation"),"no"))
-  {
-    char *opt;
-    snprintf(so,999, "%s.log", outdir);
-    prdivider(3);
-    printf("*** NOTE ***  Output from proc0 redirected to:\n %s\n", so);
-    prdivider(3);
-    if(Getv(Par("logfile_creation"),"append"))
-      opt = "a";
-    else
-      opt = "w";
-    freopen(so, opt, stdout);
-    freopen(so, opt, stderr);
-  }
-
-  /* rank0 announces that others will be redirected as well */
-  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
-  if(Rank0 && nMPI_size()>1)
-  {
-    snprintf(so,999, f, outdir, 1);
-    prdivider(3);
-    printf("*** NOTE ***  Output from other procs redirected to e.g.:\n %s\n",
-           so);
-    prdivider(3);
-  }
-
-  /* redirect stdout and stderr. Do it for all MPI ranks>0
-     all output is collected in e.g. outdir/stdout.001 ... */
-  if(nMPI_rank()>0)
-  {
-    snprintf(so,999, f, outdir, nMPI_rank());
-    freopen(so, "w", stdout);
-    freopen(so, "w", stderr);
-  }
+  /* redirect stdout */
+  redirect_stdout_and_stderr(mesh);
 
   /* say what we have after redirection: */
   prdivider(1);
@@ -324,11 +289,57 @@ int parse_command_line_options(tMesh *mesh)
   return 0;
 } 
 
+/* redirect stdout */
+int redirect_stdout_and_stderr(tMesh *mesh)
+{
+  char *outdir  = Gets(Par("outdir"));
+  char f[100];
+  char so[1000];
+
+  /* redirect stdout and stderr for rank0 */
+  if(Rank0 && !Getv(Par("logfile_creation"),"no"))
+  {
+    char *opt;
+    snprintf(so,999, "%s.log", outdir);
+    prdivider(3);
+    printf("*** NOTE ***  Output from proc0 redirected to:\n %s\n", so);
+    prdivider(3);
+    if(Getv(Par("logfile_creation"),"append"))
+      opt = "a";
+    else
+      opt = "w";
+    freopen(so, opt, stdout);
+    freopen(so, opt, stderr);
+  }
+
+  /* rank0 announces that others will be redirected as well */
+  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
+  if(Rank0 && nMPI_size()>1)
+  {
+    snprintf(so,999, f, outdir, 1);
+    prdivider(3);
+    printf("*** NOTE ***  Output from other procs redirected to e.g.:\n %s\n",
+           so);
+    prdivider(3);
+  }
+
+  /* redirect stdout and stderr. Do it for all MPI ranks>0
+     all output is collected in e.g. outdir/stdout.001 ... */
+  if(nMPI_rank()>0)
+  {
+    snprintf(so,999, f, outdir, nMPI_rank());
+    freopen(so, "w", stdout);
+    freopen(so, "w", stderr);
+  }
+
+  return 0;
+}
+
 
 /* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
 {
-  int chkpt_loaded;
+  int chkpt;
 
   prdivider(0);
   printf("Initializing mesh\n");
@@ -338,10 +349,17 @@ int inidata_mesh(tMesh *mesh)
   RunFun(POST_PARAMETERS);
 
   /* load checkpoint if it exists */
-  chkpt_loaded = checkpoint_load(mesh, "");
-chkpt_loaded = 0;
-
-  if(!chkpt_loaded)
+  chkpt = checkpoint_exists(mesh, "_previous", "");
+chkpt = 0;
+  if(chkpt)
+  {
+    if(Rank0)
+    {
+      /* */
+    }
+    checkpoint_load(mesh, "");
+  }
+  else /* intialize if there is no checkpoint */
   {
     /* here we schedule funcs to programatically set up the mesh */
     RunFun(INITMESH);
