@@ -335,6 +335,40 @@ int redirect_stdout_and_stderr(tMesh *mesh)
   return 0;
 }
 
+/* delete current output and move _previous back */
+int move_previous_output_to_outdir(tMesh *mesh)
+{
+  if(Rank0)
+  {
+    char *outdir  = Gets(Par("outdir"));
+    char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
+    char *outdird = (char *) calloc(strlen(outdir)+40, sizeof(char));
+
+    /* set outdirp to outdir_previous */
+    strcpy(outdirp, outdir);
+    strcat(outdirp, "_previous");
+    strcat(outdird, "_deleted");
+
+    /* move previous back */
+    system3("mv", outdir, outdird);
+    system3("mv", outdirp, outdir);
+
+    /* redirect output again */
+    redirect_stdout_and_stderr(mesh);
+
+    /* delete outdird */
+    system2("rm -rf", outdird);
+
+    free(outdird);
+    free(outdirp);
+  }
+
+  /* all wait here until move is done. */
+  nMPI_barrier();
+
+  return 0;
+}
+
 
 /* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
@@ -353,10 +387,8 @@ int inidata_mesh(tMesh *mesh)
 chkpt = 0;
   if(chkpt)
   {
-    if(Rank0)
-    {
-      /* */
-    }
+    /* delete current output and move _previous back */
+    move_previous_output_to_outdir(mesh);
     checkpoint_load(mesh, "");
   }
   else /* intialize if there is no checkpoint */
