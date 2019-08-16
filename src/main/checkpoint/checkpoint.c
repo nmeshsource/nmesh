@@ -130,6 +130,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
       //nMPI_Comm_free(&(main_comm));
       nMPI_Finalize();
     }
+    return 1; /* signal that checkpoint was saved */
   }
 
   return 0;
