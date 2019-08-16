@@ -328,6 +328,8 @@ int parse_command_line_options(tMesh *mesh)
 /* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
 {
+  int chkpt_loaded;
+
   prdivider(0);
   printf("Initializing mesh\n");
   prTimeIn_s("WallTime at beginning of inidata_mesh: ");
@@ -335,34 +337,41 @@ int inidata_mesh(tMesh *mesh)
   /* hook for funs right after iterate_parameters */
   RunFun(POST_PARAMETERS);
 
-  /* here we schedule funcs to programatically set up the mesh */
-  RunFun(INITMESH);
+  /* load checkpoint if it exists */
+  chkpt_loaded = checkpoint_load(mesh);
+chkpt_loaded = 0;
 
-  /* move nodes to differnt procs */
-  RunFun(LOADBALANCING);
+  if(!chkpt_loaded)
+  {
+    /* here we schedule funcs to programatically set up the mesh */
+    RunFun(INITMESH);
 
-  /* setup coords */
-  RunFun(PRE_COORDINATES);
-  RunFun(COORDINATES);
+    /* move nodes to differnt procs */
+    RunFun(LOADBALANCING);
 
-  /* compute initial data */
-  RunFun(PRE_INITIALDATA);
-  RunFun(INITIALDATA);
-  RunFun(POST_INITIALDATA);
+    /* setup coords */
+    RunFun(PRE_COORDINATES);
+    RunFun(COORDINATES);
 
-  /* initial data is just another new time slice */
-  RunFun(POST_EVOLVE);
+    /* compute initial data */
+    RunFun(PRE_INITIALDATA);
+    RunFun(INITIALDATA);
+    RunFun(POST_INITIALDATA);
 
-  /* initial data complete */
-  prdivider(0);
-  printf("Done with initialization\n");
-  printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
+    /* initial data is just another new time slice */
+    RunFun(POST_EVOLVE);
 
-  /* analyze initial data */
-  RunFun(ANALYZE);
+    /* initial data complete */
+    prdivider(0);
+    printf("Done with initialization\n");
+    printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
-  /* save checkpoint */
-  checkpoint_save_if_needed(mesh, 1);
+    /* analyze initial data */
+    RunFun(ANALYZE);
+
+    /* save checkpoint */
+    checkpoint_save_if_needed(mesh, 1);
+  }
 
   /* output for permanent variables */
   RunFun(OUTPUT);
