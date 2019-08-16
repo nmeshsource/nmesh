@@ -423,3 +423,44 @@ int coordinates_init(tMesh *mesh)
 
   return 0;
 }
+
+
+/********************************************************************/
+/* some functions to convert between pat->xyz_of_XYZ and labels */
+/********************************************************************/
+
+/* helper typedef for coord trafo function */
+typedef int (*x_of_X)(tPat *pat, tNode *node, int ind,
+                      const double X[3], double x[3]);
+
+/* return label of pat->xyz_of_XYZ */
+int coordinates_get_label(tPat *pat)
+{
+  x_of_X xyz_of_XYZ = pat->xyz_of_XYZ;
+
+  /* return label */
+  if(xyz_of_XYZ == NULL)
+    return Cartesian;
+  else if(xyz_of_XYZ == xyz_of_lamAB_CubSph)
+    return CubedSphere;
+  else if(xyz_of_XYZ == xyz_of_rhoAB_CubSph)
+    return stretchedCubedSphere;
+  else
+    errorexit("implement label for this pat->xyz_of_XYZ");
+}
+
+/* return func. pointer xyz_of_XYZ depending on label */
+x_of_X coordinates_get_xyz_of_XYZ(int label)
+{
+  switch(label)
+  {
+  case Cartesian:
+    return NULL;
+  case CubedSphere:
+    return xyz_of_lamAB_CubSph;
+  case stretchedCubedSphere:
+    return xyz_of_rhoAB_CubSph;
+  default:
+    errorexiti("unknown or unimplemented label %i", label);
+  }
+}
