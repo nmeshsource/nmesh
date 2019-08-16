@@ -412,6 +412,9 @@ int evolve_mesh(tMesh *mesh)
     /* call analyze functions */
     RunFun(ANALYZE);
 
+    /* save checkpoint */
+    checkpoint_save_if_needed(mesh);
+
     /* call output functions, say for variable output */
     RunFun(OUTPUT);
 

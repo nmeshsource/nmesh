@@ -23,33 +23,53 @@ int checkpoint_save(tMesh *mesh)
 {
   char *outdir = Gets(Par("outdir"));
 
-  int cl = strlen(outdir) + 20;
-  char *cdir = cmalloc(cl);
+  int nl = strlen(outdir) + 40;
+  char *dir = cmalloc(nl);
+  char *dirn = cmalloc(nl);
+  char *dirp = cmalloc(nl);
 
-  int pl = cl + 40;
+  int pl = nl + 40;
   char *pars  = cmalloc(pl);
   char *pats  = cmalloc(pl);
   char *nodes = cmalloc(pl);
   char *vars  = cmalloc(pl);
 
   /* output filenames */
-  snprintf(cdir,cl, "%s/%s", outdir, chckpt_dir);
-  snprintf(pars,pl,  "%s/%s", cdir, save_pars_file);
-  snprintf(pats,pl,  "%s/%s", cdir, patches_file);
-  snprintf(nodes,pl, "%s/%s", cdir, nodes_file);
-  snprintf(vars,pl,  "%s/%s", cdir, variables_file);
+  snprintf(dir,nl, "%s/%s", outdir, chckpt_dir);
+  snprintf(dirp,nl, "%s_previous", dir);
+  snprintf(dirn,nl, "%s_new", dir);
+  snprintf(pars,pl,  "%s/%s", dirn, save_pars_file);
+  snprintf(pats,pl,  "%s/%s", dirn, patches_file);
+  snprintf(nodes,pl, "%s/%s", dirn, nodes_file);
+  snprintf(vars,pl,  "%s/%s", dirn, variables_file);
+
+  /* make new dir */
+  if(Rank0) system2("mkdir", dirn);
 
   /* save checkpoint in various files */
   if(Rank0) checkpoint_save_patches(mesh, pats);
   if(Rank0) checkpoint_save_nodes(mesh, nodes);
   checkpoint_save_EvoVars(mesh, vars);
 
+  /* wait until all get here */
+  nMPI_barrier();
+
+  /* rename checkpoint and remove old one */
+  if(Rank0)
+  {
+    system3("mv", dir, dirp);
+    system3("mv", dirn, dir);
+    system2("rm -rf", dirp);
+  }
+
   /* free strings */
   free(vars);
   free(nodes);
   free(pats);
   free(pars);
-  free(cdir);
+  free(dirp);
+  free(dirn);
+  free(dir);
   return 0;
 }
 

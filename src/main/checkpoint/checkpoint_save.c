@@ -54,8 +54,8 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
 
   fprintf(fp,   " nmax = %d\n", pat->nmax);
 
-  for(d=0; d<3; d++)
-    fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
+  //for(d=0; d<3; d++)
+  //  fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
 
   for(d=0; d<3; d++)
     fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
@@ -70,14 +70,14 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
   int d, f;
 
   fprintf(fp, " CI->\n");
-
+  /*
   for(f=0; f<6; f++)
     fprintf(fp,   "  iSurf[%d] = %d\n", f, CI->iSurf[f]);
 
   for(f=0; f<6; f++)
     for(d=0; d<3; d++)
       fprintf(fp, "  idSurfdX[%d][%d] = %d\n", f,d, CI->idSurfdX[f][d]);
-
+  */
   for(f=0; f<6; f++)
     fprintf(fp,   "  s[%d] = %.19g\n", f, CI->s[f]);
 
@@ -116,7 +116,6 @@ int checkpoint_save_nodes(tMesh *mesh, char *fname)
 
   /* write all nodes */
   checkpoint_write_nodetrees(fp, rnlist);
-  fprintf(fp, "\n");
 
   fclose(fp);
   free_nodelist(rnlist);
@@ -129,7 +128,7 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
   tNlist *nlist  = rnlist;
   tNlist *cnlist = NULL;
 
-  fprintf(fp, "nodetrees in mesh:\n");
+  fprintf(fp, "parent nodes and their child0->n:\n\n");
 
   /* write all nodes in rnlist anf their children */
   while(nlist)
@@ -137,8 +136,8 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
     checkpoint_write_nodes_with_child0(fp, nlist);
 
     /* make list of all children of nlist, and then update nlist */
-    free_nodelist(cnlist);
     cnlist = childnodelist_of_nodelist(nlist);
+    if(nlist!=rnlist) free_nodelist(nlist);
     nlist = cnlist;
   }
 }
@@ -194,10 +193,11 @@ void checkpoint_write_node(FILE *fp, tNode *node)
   nodename(node, name,255);
 
   /* info in node struct */
-  fprintf(fp, "nodename = %s\n", name);
+  fprintf(fp, "%s\n", name);
 
   // Not needed:
   /*
+  fprintf(fp, "nodename = %s\n", name);
   fprintf(fp,   " dt = %.19g\n", node->dt);
   fprintf(fp,   " time = %.19g\n", node->time);
 
@@ -213,7 +213,11 @@ void checkpoint_write_node(FILE *fp, tNode *node)
   {
     /* add info about child0, so that we can easily re-create children */
     for(d=0; d<3; d++)
+      fprintf(fp, "%d\n", child0->n[d]);
+    /*
+    for(d=0; d<3; d++)
       fprintf(fp, " child[0]->n[%d] = %d\n", d, child0->n[d]);
+    */
   }
 }
 
@@ -257,15 +261,15 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
   /* write all var names */
   if(Rank0)
   {
-    fprintf(fp, "variable list in this file:\n");
-    fprintf(fp, "vl->n = %d\n", vl->n);
+    fprintf(fp, "number of variables and variable list in this file:\n");
+    fprintf(fp, "%d\n", vl->n);
     forvl(vl, vli)
     {
       int vi = Vind(vl, vli);
       fprintf(fp, "%s\n", VarName(vi));
     }
-    fprintf(fp, "\n");
-    fprintf(fp, "node data:\n");
+    fprintf(fp, "\n\n");
+    fprintf(fp, "variable-list-data:\n\n");
   }
 
   /* MPI motivated loop to assign work */
