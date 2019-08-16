@@ -58,14 +58,32 @@ int checkpoint_load(tMesh *mesh)
   char *pats;
   char *nodes;
   char *vars;
+  int ret=0;
 
   checkpoint_create_pathnames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
 
-  /* load checkpoint from the various files */
-  checkpoint_load_pars(mesh, pars);
-  //checkpoint_load_patches(mesh, pats);
-  //checkpoint_load_nodes(mesh, nodes);
-  //checkpoint_load_EvoVars(mesh, vars);
+  /* check if files exist */
+  if(Rank0)
+  {
+    FILE *fp = fopen(pats, "r");
+    if(fp)
+    {
+      ret = 1;
+      fclose(fp);
+    }
+  }
+  /* broadcast ret from rank0 to all others */
+  nMPI_Bcast(&ret, 1, nMPI_INT, 0);
+
+  /* read checkpoint if it exists */
+  if(ret)
+  {
+    /* load checkpoint from the various files */
+    checkpoint_load_pars(mesh, pars);
+    //checkpoint_load_patches(mesh, pats);
+    //checkpoint_load_nodes(mesh, nodes);
+    //checkpoint_load_EvoVars(mesh, vars);
+  }
 
   /* free strings */
   free(vars);
@@ -73,7 +91,7 @@ int checkpoint_load(tMesh *mesh)
   free(pats);
   free(pars);
   free(dir);
-  return 0;
+  return ret;
 }
 
 /******************************************************************/
