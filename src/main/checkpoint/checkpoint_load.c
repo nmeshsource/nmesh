@@ -109,6 +109,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
     /* all node names contain an '_' */
     if(strstr(buf, "_"))
     {
+      tNlist *elem;
+
       /* strip trailing '\n' from buf */
       buf[strlen(buf)] = 0;
 
@@ -121,7 +123,14 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
       fscanf(fp, "%d", &(n[2]));
 
       /* make 8 child nodes */
-      //...
+
+      /* find element in nodelist with parent */
+      for(elem = mesh->lns; elem->node != parent; elem = elem->next)
+        if(!(elem->next)) break;
+
+      make8children_in_mesh_lns_myln(elem, n);
+
+
     }
   }
 
