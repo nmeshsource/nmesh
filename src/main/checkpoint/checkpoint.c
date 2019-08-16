@@ -13,6 +13,71 @@ char patches_file[]   = "patches.txt";
 char nodes_file[]     = "nodes.txt";
 char variables_file[] = "variables.bin";
 
+/* make and allocate complete checkpoint pathnames, return allocated chars */
+int checkpoint_create_filenames(tMesh *mesh, char **Dir, const char *suffix,
+                                char **Pars, char **Pats,
+                                char **Nodes, char **Vars)
+{
+  char *outdir = Gets(Par("outdir"));
+
+  int nl = strlen(outdir) + 40;
+  char *dir = cmalloc(nl);
+
+  int pl = nl + 40;
+  char *pars  = cmalloc(pl);
+  char *pats  = cmalloc(pl);
+  char *nodes = cmalloc(pl);
+  char *vars  = cmalloc(pl);
+
+  /* filenames */
+  snprintf(dir,nl, "%s/%s%s", outdir, chckpt_dir, suffix);
+  snprintf(pars,pl,  "%s/%s", dir, save_pars_file);
+  snprintf(pats,pl,  "%s/%s", dir, patches_file);
+  snprintf(nodes,pl, "%s/%s", dir, nodes_file);
+  snprintf(vars,pl,  "%s/%s", dir, variables_file);
+
+  /* save filenames */
+  *Dir   = dir;
+  *Pars  = pars;
+  *Pats  = pats;
+  *Nodes = nodes;
+  *Vars  = vars;
+  return pl;
+}
+
+
+/******************************************************************/
+/* some functions to load nmesh data from checkpoints  */
+/******************************************************************/
+
+/* read a checkpoint */
+int checkpoint_load(tMesh *mesh)
+{
+  char *dir;
+  char *pars;
+  char *pats;
+  char *nodes;
+  char *vars;
+
+  checkpoint_create_filenames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
+
+  /* load checkpoint from the various files */
+  //if(Rank0) checkpoint_save_pars(mesh, pars);
+  //if(Rank0) checkpoint_save_patches(mesh, pats);
+  //if(Rank0) checkpoint_save_nodes(mesh, nodes);
+  //checkpoint_save_EvoVars(mesh, vars);
+
+  /* wait until all get here */
+  nMPI_barrier();
+
+  /* free strings */
+  free(vars);
+  free(nodes);
+  free(pats);
+  free(pars);
+  free(dir);
+  return 0;
+}
 
 /******************************************************************/
 /* some functions to save nmesh data for checkpoints  */
@@ -22,26 +87,19 @@ char variables_file[] = "variables.bin";
 int checkpoint_save(tMesh *mesh)
 {
   char *outdir = Gets(Par("outdir"));
-
-  int nl = strlen(outdir) + 40;
-  char *dir = cmalloc(nl);
-  char *dirn = cmalloc(nl);
-  char *dirp = cmalloc(nl);
-
-  int pl = nl + 40;
-  char *pars  = cmalloc(pl);
-  char *pats  = cmalloc(pl);
-  char *nodes = cmalloc(pl);
-  char *vars  = cmalloc(pl);
+  char *dirn;
+  char *pars;
+  char *pats;
+  char *nodes;
+  char *vars;
+  int pl = checkpoint_create_filenames(mesh, &dirn,"_new",
+                                       &pars, &pats, &nodes, &vars);
+  char *dir = cmalloc(pl);
+  char *dirp = cmalloc(pl);
 
   /* output filenames */
-  snprintf(dir,nl, "%s/%s", outdir, chckpt_dir);
-  snprintf(dirp,nl, "%s_previous", dir);
-  snprintf(dirn,nl, "%s_new", dir);
-  snprintf(pars,pl,  "%s/%s", dirn, save_pars_file);
-  snprintf(pats,pl,  "%s/%s", dirn, patches_file);
-  snprintf(nodes,pl, "%s/%s", dirn, nodes_file);
-  snprintf(vars,pl,  "%s/%s", dirn, variables_file);
+  snprintf(dir,pl, "%s/%s", outdir, chckpt_dir);
+  snprintf(dirp,pl, "%s_previous", dir);
 
   /* make new dir */
   if(Rank0) system2("mkdir", dirn);
@@ -64,13 +122,13 @@ int checkpoint_save(tMesh *mesh)
   }
 
   /* free strings */
+  free(dirp);
+  free(dir);
   free(vars);
   free(nodes);
   free(pats);
   free(pars);
-  free(dirp);
   free(dirn);
-  free(dir);
   return 0;
 }
 
