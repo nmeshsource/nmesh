@@ -10,6 +10,39 @@
 /******************************************************************/
 
 /******************************************************************/
+/* functions to save pars */
+/******************************************************************/
+/* save pars */
+int checkpoint_save_pars(tMesh *mesh, char *fname)
+{
+  FILE *fp;
+  char *list, *saveptr, *name;
+
+  /* open destination file */
+  fp = fopen(fname, "wb");
+  if(!fp) errorexits("failed opening %s", fname);
+
+  fprintf(fp, "# parameters listed in checkpoint_save_pars\n");
+
+  /* put vasl of checkpoint_save_pars in list,
+     duplicate Gets(Par("checkpoint_save_pars")) because strtok_r
+     will modify list */
+  list = strdup( Gets(Par("checkpoint_save_pars")) );
+
+  /* loop over contents of list, and print pars */
+  for(name=strtok_r(list, " ", &saveptr); name!=NULL;
+      name=strtok_r(NULL, " ", &saveptr))
+  {
+    fprintf(fp, "%s = %s\n", name, Gets(Par(name)));
+  }
+
+  free(list);
+  fclose(fp);
+  return 0;
+}
+
+
+/******************************************************************/
 /* functions to save patches */
 /******************************************************************/
 /* save patch info */
@@ -47,8 +80,9 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
 {
   int d, f;
 
-  fprintf(fp, "pat->\n");
+  fprintf(fp, "patch:\n");
   fprintf(fp, "coordinates_get_label(pat) = %d\n", coordinates_get_label(pat));
+  fprintf(fp, "pat->\n");
 
   for(f=0; f<6; f++)
     fprintf(fp, " bbox[%d] = %.19g\n", f, pat->bbox[f]);
