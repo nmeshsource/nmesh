@@ -100,9 +100,9 @@ int checkpoint_load(tMesh *mesh, const char *outdir_suffix)
 
   /* load checkpoint from the various files */
   checkpoint_load_pars(mesh, pars);
-  //checkpoint_load_patches(mesh, pats);
-  //checkpoint_load_nodes(mesh, nodes);
-  //checkpoint_load_EvoVars(mesh, vars);
+  checkpoint_load_patches(mesh, pats);
+  checkpoint_load_nodes(mesh, nodes);
+  checkpoint_load_Vars(mesh, vars);
 
   /* free strings */
   free(vars);

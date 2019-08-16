@@ -347,6 +347,7 @@ int move_previous_output_to_outdir(tMesh *mesh)
     /* set outdirp to outdir_previous */
     strcpy(outdirp, outdir);
     strcat(outdirp, "_previous");
+    strcpy(outdird, outdir);
     strcat(outdird, "_deleted");
 
     /* move previous back */
