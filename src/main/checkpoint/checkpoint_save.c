@@ -80,8 +80,7 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
 {
   int d, f;
 
-  fprintf(fp, "patch:\n");
-  fprintf(fp, "coordinates_get_label(pat) = %d\n", coordinates_get_label(pat));
+  fprintf(fp, "patch%d:\n", pat->p);
   fprintf(fp, "pat->\n");
 
   for(f=0; f<6; f++)
@@ -95,14 +94,17 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   for(d=0; d<3; d++)
     fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
 
+  //printCI(pat);
   checkpoint_write_CI(fp, pat->CI);
+  fprintf(fp, "coordinates_get_label(pat) = %d\n", coordinates_get_label(pat));
+  //fprintf(fp, "end-of-patch.\n");
 }
 
 
 /* write non-pointer part of tCoordInfo */
 void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 {
-  int d, f;
+  int d, f, useF=0;
 
   fprintf(fp, " CI->\n");
   /*
@@ -121,6 +123,9 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 
   fprintf(fp,     "  dom = %d\n", CI->dom);
   fprintf(fp,     "  type = %d\n", CI->type);
+
+  for(f=0; f<6; f++) if(CI->FSurf[f]) { useF = 1; break; }
+  fprintf(fp,     "  use_FSurf = %d\n", useF);
 }
 
 

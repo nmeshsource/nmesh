@@ -67,9 +67,6 @@ int checkpoint_load(tMesh *mesh)
   //checkpoint_load_nodes(mesh, nodes);
   //checkpoint_load_EvoVars(mesh, vars);
 
-  /* wait until all get here */
-  nMPI_barrier();
-
   /* free strings */
   free(vars);
   free(nodes);

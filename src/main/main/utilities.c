@@ -5,6 +5,7 @@
 #include "main.h"
 
 #include <time.h>
+#include <ctype.h>       /* for isspace */
 
 /* for POSIX.1-2001 mkdir, opendir, fork, wait functions */
 #include <unistd.h>      /* for fork */
@@ -239,6 +240,61 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
   if(*ai==1) { fmax = max2_in_1d_array(f0,n0, f2,n2, ai, imax); *ai = (*ai)*2; }
   else       { fmax = max2_in_1d_array(f0,n0, f1,n1, ai, imax); }
   return fmax;
+}
+
+
+/* remove all trailing and leading whitespaces */
+void trim_whitespace(char *str)
+{
+  int len, f,i;
+
+  if(!str) return;
+
+  len = strlen(str);
+
+  /* remove all trailing spaces */
+  for(f=len-1; f>=0; f--) if(!isspace(str[f])) break;
+  str[f+1] = 0;
+  len = f;
+
+  /* find first no-space char */
+  for(f=0; f<len; f++) if(!isspace(str[f])) break;
+
+  /* shift all chars left by f */
+  if(f) for(i=0; i<=len-f; i++) str[i] = str[i+f];
+}
+
+/* parse a string to find a parname and its value,
+   returns 1 if str contains '=' otherwise 0.  */
+int get_par_from_str(char *str, char **name, char **value, int n)
+{
+  char *str2, *saveptr, *nam, *val;
+  int ret;
+
+  /* duplicate, because strtok_r writes into str2 */
+  str2 = strdup(str);
+
+  /* find parname and its value */
+  nam = strtok_r(str2, "=", &saveptr);
+  val = strtok_r(NULL, "=", &saveptr);
+
+  if(!(*nam))
+  {
+    ret = 0;
+  }
+  else
+  {
+    /* trim spaces */
+    trim_whitespace(nam);
+    trim_whitespace(val);
+
+    strncpy(*name,  nam, n);
+    if(val) strncpy(*value, val, n);
+    ret = 1;
+  }
+
+  free(str2);
+  return ret;
 }
 
 
