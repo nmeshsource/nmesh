@@ -14,7 +14,8 @@ char nodes_file[]     = "nodes.txt";
 char variables_file[] = "variables.bin";
 
 /* make and allocate complete checkpoint pathnames, return allocated chars */
-int checkpoint_create_pathnames(tMesh *mesh, char **Dir, const char *suffix,
+int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
+                                char **Dir, const char *Dir_suffix,
                                 char **Pars, char **Pats,
                                 char **Nodes, char **Vars)
 {
@@ -30,7 +31,7 @@ int checkpoint_create_pathnames(tMesh *mesh, char **Dir, const char *suffix,
   char *vars  = cmalloc(pl);
 
   /* filenames */
-  snprintf(dir,nl, "%s/%s%s", outdir, chckpt_dir, suffix);
+  snprintf(dir,nl, "%s%s/%s%s", outdir,outdir_suffix, chckpt_dir,Dir_suffix);
   snprintf(pars,pl,  "%s/%s", dir, save_pars_file);
   snprintf(pats,pl,  "%s/%s", dir, patches_file);
   snprintf(nodes,pl, "%s/%s", dir, nodes_file);
@@ -60,7 +61,7 @@ int checkpoint_load(tMesh *mesh)
   char *vars;
   int ret=0;
 
-  checkpoint_create_pathnames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
+  checkpoint_create_pathnames(mesh, "", &dir,"", &pars, &pats, &nodes, &vars);
 
   /* check if files exist */
   if(Rank0)
@@ -107,7 +108,7 @@ int checkpoint_save(tMesh *mesh)
   char *pats;
   char *nodes;
   char *vars;
-  int pl = checkpoint_create_pathnames(mesh, &dirn,"_new",
+  int pl = checkpoint_create_pathnames(mesh, "", &dirn,"_new",
                                        &pars, &pats, &nodes, &vars);
   char *dir = cmalloc(pl);
   char *dirp = cmalloc(pl);
