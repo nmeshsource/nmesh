@@ -123,6 +123,9 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   /* load balance root nodes */
   simple_load_balance(mesh);
 
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+
   return 0;
 }
 
