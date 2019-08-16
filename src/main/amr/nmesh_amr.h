@@ -317,6 +317,7 @@ enum
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
 tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
+int amr_setup_mesh(tMesh *mesh);
 
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);

@@ -11,7 +11,7 @@ int nmesh_amr(tMesh *mesh)
   printf("Adding amr\n");
 
   /* functions */
-  AddFun(POST_PARAMETERS, setup_mesh);
+  //AddFun(POST_PARAMETERS, setup_mesh);
 
   /* variables */
   //AddAuxVar("Xb", "", "coord0 inside each node"); // we may not need these???

@@ -121,7 +121,7 @@ void remove_all_patches(tMesh *mesh)
 
 
 /* select mesh */
-int setup_mesh(tMesh *mesh)
+int amr_setup_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int luni = Geti(Par("amr_luni"));

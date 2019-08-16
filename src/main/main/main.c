@@ -394,6 +394,9 @@ chkpt = 0;
   }
   else /* intialize if there is no checkpoint */
   {
+    /* create a mesh */
+    amr_setup_mesh(mesh);
+
     /* here we schedule funcs to programatically set up the mesh */
     RunFun(INITMESH);
 
