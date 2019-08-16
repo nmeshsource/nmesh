@@ -4,12 +4,20 @@
 
 
 
-/* For coordtrans_CubedSphere.c :
-   Type of cubed sphere or rather sphered cube coord transform */
+/* labels for the different coord trafos that can be in pat->xyz_of_XYZ */
 enum
 {
-  Cartesian,        /* box->CI->type=0 means Cartesian */
-  PyramidFrustum,   /* both inner & outer surfaces are flat */  
+  Cartesian=0,          /* Cartesian coords */
+  CubedSphere,          /* cubed sphere coords xyz_of_lamAB_CubSph */
+  stretchedCubedSphere  /* stretched cubed sphere coords xyz_of_rhoAB_CubSph */
+};
+
+/* Extras for coordtrans_CubedSphere.c : Type of cubed sphere.
+   NOTE: Cartesian means box->CI->type=0, so we start with PyramidFrustum=1 */
+enum
+{
+  /* Cartesian=0, */
+  PyramidFrustum=1, /* both inner & outer surfaces are flat */
   innerCubedSphere, /* inner surface is curved, but outer surface is flat */
   outerCubedSphere, /* outer surface is curved, but inner surface is flat */
   CubedShell        /* both inner & outer surfaces are curved */
