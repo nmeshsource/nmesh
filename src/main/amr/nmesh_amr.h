@@ -318,6 +318,7 @@ enum
 tMesh *make_empty_mesh(int pr);
 tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
 int amr_setup_mesh(tMesh *mesh);
+int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr);
 
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);
@@ -456,6 +457,7 @@ long node_location(tNode *node);
 tNode *node_from_nodename(tMesh *mesh,  char *name);
 
 /* load.c */
+void simple_load_balance(tMesh *mesh);
 void move_nodelist_to_rank(tNlist *list, int desrank);
 
 /* amr.c */
