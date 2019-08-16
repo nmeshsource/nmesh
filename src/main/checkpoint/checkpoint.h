@@ -15,5 +15,9 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname);
 void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big);
 
 /* checkpoint_load.c */
+int checkpoint_load_pars(tMesh *mesh, char *fname);
+int checkpoint_load_patches(tMesh *mesh, char *fname);
+int checkpoint_load_nodes(tMesh *mesh, char *fname);
+int checkpoint_load_Vars(tMesh *mesh, char *fname);
 tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh);
 void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big);

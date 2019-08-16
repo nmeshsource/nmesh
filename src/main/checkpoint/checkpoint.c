@@ -62,7 +62,7 @@ int checkpoint_load(tMesh *mesh)
   checkpoint_create_pathnames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
 
   /* load checkpoint from the various files */
-  parse_parameter_file(mesh, pars);
+  checkpoint_load_pars(mesh, pars);
   //checkpoint_load_patches(mesh, pats);
   //checkpoint_load_nodes(mesh, nodes);
   //checkpoint_load_EvoVars(mesh, vars);
