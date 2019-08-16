@@ -47,7 +47,8 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
 {
   int d, f;
 
-  fprintf(fp, "patch%d: pat->\n", pat->p);
+  fprintf(fp, "pat->\n");
+  fprintf(fp, "coordinates_get_label(pat) = %d\n", coordinates_get_label(pat));
 
   for(f=0; f<6; f++)
     fprintf(fp, " bbox[%d] = %.19g\n", f, pat->bbox[f]);

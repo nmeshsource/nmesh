@@ -27,6 +27,7 @@ enum
 /* coordinates.c */
 int coordinates_init(tMesh *mesh);
 int coordinates_init_node(tNode *node);
+int coordinates_get_label(tPat *pat);
 
 /* get_coords.c */
 void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3]);
