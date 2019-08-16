@@ -52,7 +52,7 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
 /******************************************************************/
 
 /* read a checkpoint */
-int checkpoint_load(tMesh *mesh)
+int checkpoint_load(tMesh *mesh, const char *outdir_suffix)
 {
   char *dir;
   char *pars;
@@ -61,7 +61,8 @@ int checkpoint_load(tMesh *mesh)
   char *vars;
   int ret=0;
 
-  checkpoint_create_pathnames(mesh, "", &dir,"", &pars, &pats, &nodes, &vars);
+  checkpoint_create_pathnames(mesh, outdir_suffix, &dir,"",
+                              &pars, &pats, &nodes, &vars);
 
   /* check if files exist */
   if(Rank0)

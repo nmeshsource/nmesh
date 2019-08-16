@@ -3,5 +3,5 @@
 
 
 /* checkpoint.c */
-int checkpoint_load(tMesh *mesh);
+int checkpoint_load(tMesh *mesh, const char *outdir_suffix);
 int checkpoint_save_if_needed(tMesh *mesh, int always);

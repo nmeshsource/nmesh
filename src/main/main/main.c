@@ -338,7 +338,7 @@ int inidata_mesh(tMesh *mesh)
   RunFun(POST_PARAMETERS);
 
   /* load checkpoint if it exists */
-  chkpt_loaded = checkpoint_load(mesh);
+  chkpt_loaded = checkpoint_load(mesh, "");
 chkpt_loaded = 0;
 
   if(!chkpt_loaded)
