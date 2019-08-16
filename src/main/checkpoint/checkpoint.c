@@ -102,9 +102,9 @@ int checkpoint_save(tMesh *mesh)
   if(Rank0) system2("mkdir", dirn);
 
   /* save checkpoint in various files */
-  if(Rank0) checkpoint_save_pars(mesh, pars);
-  if(Rank0) checkpoint_save_patches(mesh, pats);
-  if(Rank0) checkpoint_save_nodes(mesh, nodes);
+  checkpoint_save_pars(mesh, pars);
+  checkpoint_save_patches(mesh, pats);
+  checkpoint_save_nodes(mesh, nodes);
   checkpoint_save_EvoVars(mesh, vars);
 
   /* wait until all get here */
