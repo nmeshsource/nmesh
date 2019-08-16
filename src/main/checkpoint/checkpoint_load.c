@@ -30,7 +30,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   /* read file line by line */
   while(fgets(buf,999, fp))
   {
-    /* CI-> signifies that we know all to create a new patch */
+    /* CI-> signifies that we know all we need to create a new patch */
     if(strcmp(buf, " CI->\n")==0)
     {
       pat = add_patch(mesh, bbox, n, nmax);
@@ -122,15 +122,13 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
       fscanf(fp, "%d", &(n[1]));
       fscanf(fp, "%d", &(n[2]));
 
-      /* make 8 child nodes */
-
       /* find element in nodelist with parent */
-      for(elem = mesh->lns; elem->node != parent; elem = elem->next)
-        if(!(elem->next)) break;
+      for(elem = mesh->lns; (elem) && (elem->node != parent);
+          elem = elem->next) ;
+      if(!elem) errorexit("cannot find parent in mesh->lns");
 
+      /* make 8 child nodes */
       make8children_in_mesh_lns_myln(elem, n);
-
-
     }
   }
 
