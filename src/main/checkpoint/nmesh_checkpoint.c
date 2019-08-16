@@ -14,8 +14,8 @@ int nmesh_checkpoint(tMesh *mesh)
   /* variables */
 
   /* parameters */
-  AddPar("checkpoint_hours", "0", "hours after which we checkpoint");
-  AddPar("checkpoint_hours_quit", "0", "when to quit after checkpoint");
+  AddPar("checkpoint_hours", "-1", "hours after which we checkpoint");
+  AddPar("checkpoint_hours_quit", "-1", "when to quit after checkpoint");
   AddPar("checkpoint_save_pars", "", "pars in this list will be saved, all "
          "others come from parfile or earlier call to initialize_libraries "
          "when we restart");

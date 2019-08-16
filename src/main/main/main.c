@@ -361,11 +361,14 @@ int inidata_mesh(tMesh *mesh)
   /* analyze initial data */
   RunFun(ANALYZE);
 
+  /* save checkpoint */
+  checkpoint_save_if_needed(mesh, 1);
+
   /* output for permanent variables */
   RunFun(OUTPUT);
 
-  /* checkpoint, in case we init from checkpoint files */
-  //checkpoint(mesh);
+  /* post output */
+  RunFun(POST_OUTPUT);
 
   return 0;
 }
@@ -413,7 +416,7 @@ int evolve_mesh(tMesh *mesh)
     RunFun(ANALYZE);
 
     /* save checkpoint */
-    checkpoint_save_if_needed(mesh);
+    checkpoint_save_if_needed(mesh, 0);
 
     /* call output functions, say for variable output */
     RunFun(OUTPUT);

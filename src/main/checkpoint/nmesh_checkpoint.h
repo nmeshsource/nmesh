@@ -3,4 +3,4 @@
 
 
 /* checkpoint.c */
-int checkpoint_save_if_needed(tMesh *mesh);
+int checkpoint_save_if_needed(tMesh *mesh, int always);

@@ -74,7 +74,7 @@ int checkpoint_save(tMesh *mesh)
 }
 
 /* save a checkpoint if the time is right for it */
-int checkpoint_save_if_needed(tMesh *mesh)
+int checkpoint_save_if_needed(tMesh *mesh, int always)
 {
   static double last_checkpoint_time = 0.;
   double hours      = Getd(Par("checkpoint_hours"));
@@ -88,8 +88,9 @@ int checkpoint_save_if_needed(tMesh *mesh)
   if(Rank0)
   {
     /* test based on walltime */
-    if((hours      > 0. && hours      <= time_since_checkpoint) ||
-       (hours_quit > 0. && hours_quit <= time))
+    if((hours      >= 0. && hours      <= time_since_checkpoint) ||
+       (hours_quit >= 0. && hours_quit <= time) ||
+       (hours      >= 0. && always))
     {
       do_checkpoint = 1; /* yes, we want to save a checkpoint */
       last_checkpoint_time = time;
