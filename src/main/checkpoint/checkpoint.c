@@ -14,7 +14,7 @@ char nodes_file[]     = "nodes.txt";
 char variables_file[] = "variables.bin";
 
 /* make and allocate complete checkpoint pathnames, return allocated chars */
-int checkpoint_create_filenames(tMesh *mesh, char **Dir, const char *suffix,
+int checkpoint_create_pathnames(tMesh *mesh, char **Dir, const char *suffix,
                                 char **Pars, char **Pats,
                                 char **Nodes, char **Vars)
 {
@@ -59,7 +59,7 @@ int checkpoint_load(tMesh *mesh)
   char *nodes;
   char *vars;
 
-  checkpoint_create_filenames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
+  checkpoint_create_pathnames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
 
   /* load checkpoint from the various files */
   //if(Rank0) checkpoint_save_pars(mesh, pars);
@@ -92,7 +92,7 @@ int checkpoint_save(tMesh *mesh)
   char *pats;
   char *nodes;
   char *vars;
-  int pl = checkpoint_create_filenames(mesh, &dirn,"_new",
+  int pl = checkpoint_create_pathnames(mesh, &dirn,"_new",
                                        &pars, &pats, &nodes, &vars);
   char *dir = cmalloc(pl);
   char *dirp = cmalloc(pl);
