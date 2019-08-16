@@ -120,6 +120,9 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
     nMPI_barrier();
   } /* end rk-loop */
 
+  /* load balance root nodes */
+  simple_load_balance(mesh);
+
   return 0;
 }
 

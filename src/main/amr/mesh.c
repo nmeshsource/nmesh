@@ -195,6 +195,21 @@ hcoarsen_pat(mesh, 0);
   return ret;
 }
 
+
+/* init neighbor info of root nodes */
+int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr)
+{
+  /* setup all bfaces */
+  amr_set_all_bfaces(mesh);
+  if(pr) printallbfaces(mesh);
+
+  /* now setup root node connections, i.e. setup neighbors of root nodes */
+  update_all_rnode_nfaces_fnb(mesh);
+  if(pr) printmesh(mesh);
+  return 0;
+}
+
+
 /* setup mesh made out of boxes */
 int setup_box_mesh(tMesh *mesh)
 {
@@ -234,13 +249,8 @@ int setup_box_mesh(tMesh *mesh)
     arrange_box_pats_inBox(mesh, xc, dout, N);
   }
 
-  /* setup all bfaces */
-  amr_set_all_bfaces(mesh);
-  printallbfaces(mesh);
-
-  /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_nfaces_fnb(mesh);
-  printmesh(mesh);
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
   return 0;
 }
@@ -334,13 +344,9 @@ outputPatchPlanes_meshvar(mesh, "x", 0,0);
 outputPatchPlanes_meshvar(mesh, "y", 0,0);
 outputPatchPlanes_meshvar(mesh, "z", 0,0);
 //exit(9);
-  /* setup all bfaces */
-  amr_set_all_bfaces(mesh);
-  printallbfaces(mesh);
 
-  /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_nfaces_fnb(mesh);
-  printmesh(mesh);
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
   return 0;
 }
@@ -408,13 +414,8 @@ int setup_3patchl2_mesh(tMesh *mesh)
   add_patch(mesh, bbox1, n, n1max);
   add_patch(mesh, bbox2, n, n1max);
 
-  /* setup all bfaces */
-  amr_set_all_bfaces(mesh);
-  printallbfaces(mesh);
-
-  /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_nfaces_fnb(mesh);
-  printmesh(mesh);
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
   /* 8 children in patch0 */
   make8children_in_mesh_lns_myln(mesh->lns, n);
