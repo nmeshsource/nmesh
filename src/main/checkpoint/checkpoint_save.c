@@ -18,6 +18,9 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
   FILE *fp;
   char *list, *saveptr, *name;
 
+  /* only Rank0 writes the file */
+  if(!Rank0) return 0;
+
   /* open destination file */
   fp = fopen(fname, "wb");
   if(!fp) errorexits("failed opening %s", fname);
@@ -50,6 +53,9 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
 {
   FILE *fp;
   int p;
+
+  /* only Rank0 writes the file */
+  if(!Rank0) return 0;
 
   /* open destination file */
   fp = fopen(fname, "wb");
@@ -139,6 +145,9 @@ int checkpoint_save_nodes(tMesh *mesh, char *fname)
   tNlist *rnlist = NULL;
   tNlist *el;
   int p;
+
+  /* only Rank0 writes the file */
+  if(!Rank0) return 0;
 
   /* make list of all root nodes, and save first elem. in rnlist */
   forpatches(mesh, p)
@@ -271,7 +280,7 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
 {
   tVarList *vl = vlalloc(mesh);
   FILE *fp;
-  int vi;
+  int vi, rk;
 
   /* loop over all vars and put all impportant EvoVars into vl */
   for(vi=0; vi<mesh->nvdb; vi++)
@@ -279,14 +288,26 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
       if(!var_added_by_evolve_init_evosys(mesh, vi))
         vlpushone(vl, vi);
 
-  /* open destination file */
-  fp = fopen(fname, "wb");
-  if(!fp) errorexits("failed opening %s", fname);
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      /* open destination file */
+      if(Rank0) fp = fopen(fname, "wb");
+      else      fp = fopen(fname, "ab");
+      if(!fp) errorexits("failed opening %s", fname);
 
-  /* write var list vl in little endian format */
-  checkpoint_write_vl(fp, vl, 0);
+      /* write var list vl in little endian format */
+      checkpoint_write_vl(fp, vl, 0);
 
-  fclose(fp);
+      fclose(fp);
+    }
+    /* wait until everyone is here */
+    nMPI_barrier();
+  } /* end rk-loop */
+
   vlfree(vl);
   return 0;
 }
@@ -296,7 +317,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
 {
   tMesh *mesh = vl->mesh;
   char name[256];
-  int vli, rk;
+  int vli;
 
   /* write all var names */
   if(Rank0)
@@ -312,49 +333,39 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
     fprintf(fp, "variable-list-data:\n\n");
   }
 
-  /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
+  /* loop over all leaf nodes */
+  formylnodes_noomp(mesh)
   {
-    /* do work when it is my turn */
-    if(rk == nMPI_rank())
+    tNode *node = MyLnode;
+
+    /* node name and number of points np on this node */
+    nodename(node, name,255);
+    fprintf(fp, "node\n");
+    fprintf(fp, "%s\n", name);
+    fprintf(fp, "%d\n", node->np);
+
+    /* write data for all in vl on this node */
+    forvl(vl, vli)
     {
-      /* loop over all leaf nodes */
-      formylnodes_noomp(mesh)
+      /* do something only if this proc has dat */
+      if(node->dat)
       {
-        tNode *node = MyLnode;
-
-        /* node name and number of points np on this node */
-        nodename(node, name,255);
-        fprintf(fp, "node\n");
-        fprintf(fp, "%s\n", name);
-        fprintf(fp, "%d\n", node->np);
-
-        /* write data for all in vl on this node */
-        forvl(vl, vli)
+        int vi = Vind(vl, vli);
+        tArray *va = node->dat->v[vi];
+        if(va)
         {
-          /* do something only if this proc has dat */
-          if(node->dat)
-          {
-            int vi = Vind(vl, vli);
-            tArray *va = node->dat->v[vi];
-            if(va)
-            {
-              /* print only index in varlist */
-              fprintf(fp, "%d\n", vli);
+          /* print only index in varlist */
+          fprintf(fp, "%d\n", vli);
 
-              /* write var array in raw binary */
-              if(write_big)
-                fwrite_big(Arrd_(va), sizeof(double), node->np, fp);
-              else
-                fwrite_little(Arrd_(va), sizeof(double), node->np, fp);
-              fprintf(fp, "\n");
-            }
-          }
+          /* write var array in raw binary */
+          if(write_big)
+            fwrite_big(Arrd_(va), sizeof(double), node->np, fp);
+          else
+            fwrite_little(Arrd_(va), sizeof(double), node->np, fp);
+          fprintf(fp, "\n");
         }
-        fprintf(fp, "\n");
-      } /* end node-loop */
+      }
     }
-    /* wait until everyone is here */
-    nMPI_barrier();
-  } /* end rk-loop */
+    fprintf(fp, "\n");
+  } /* end node-loop */
 }
