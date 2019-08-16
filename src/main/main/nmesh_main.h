@@ -50,6 +50,7 @@ typedef struct tPAR {
   double numericalvalue; /* some pars are pure numbers, we cache them here */
   int booleanvalue; /* some pars are true/false, we cache them here as 1/0 */
 } tPar;
+void parse_parameter_file(tMesh *mesh, char *parfile);
 void AddMeshPar(tMesh *mesh, const char *name, const char *value,
                 const char *description);
 void AddOrModifyMeshPar(tMesh *mesh, const char *name, const char *value,

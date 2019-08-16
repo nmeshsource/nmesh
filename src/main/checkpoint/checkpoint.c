@@ -62,10 +62,10 @@ int checkpoint_load(tMesh *mesh)
   checkpoint_create_pathnames(mesh, &dir,"", &pars, &pats, &nodes, &vars);
 
   /* load checkpoint from the various files */
-  //if(Rank0) checkpoint_save_pars(mesh, pars);
-  //if(Rank0) checkpoint_save_patches(mesh, pats);
-  //if(Rank0) checkpoint_save_nodes(mesh, nodes);
-  //checkpoint_save_EvoVars(mesh, vars);
+  parse_parameter_file(mesh, pars);
+  //checkpoint_load_patches(mesh, pats);
+  //checkpoint_load_nodes(mesh, nodes);
+  //checkpoint_load_EvoVars(mesh, vars);
 
   /* wait until all get here */
   nMPI_barrier();
