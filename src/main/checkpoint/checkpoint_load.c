@@ -187,6 +187,9 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
     nMPI_barrier();
   } /* end rk-loop */
 
+  /* load balance all leaf nodes */
+  simple_load_balance(mesh);
+
   return 0;
 }
 
