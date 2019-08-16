@@ -1061,19 +1061,18 @@ tNlist *childnodelist_of_nodelist(tNlist *nlist)
 {
   tNlist *elem, *cnlist, *clast;
 
-  cnlist = NULL; /* child node list is NULL at first */
+  cnlist = clast = NULL; /* child node list is NULL at first */
   fornodelist(nlist, elem)
   {
     tNode *node = elem->node;
     tNode *child0 = node->child[0];
-    int ijk;
-
     if(child0)
     {
+      int ijk;
       /* add all 8 children if child0 exists */
       for(ijk=0; ijk<8; ijk++)
       {
-        clast = addnode_to_nodelist_after(cnlist, node->child[ijk]);
+        clast = addnode_to_nodelist_after(clast, node->child[ijk]);
         if(!cnlist) cnlist = clast; /* save first entry of childlist */
       }
     }
