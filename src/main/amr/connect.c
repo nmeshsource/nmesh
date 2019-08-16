@@ -247,6 +247,44 @@ char *nodename(tNode *node, char *s, int slen)
   return s;
 }
 
+/* get node in a patch from string produced by node_location_str */
+tNode *node_from_location_str(tPat *pat, char *loc)
+{
+  tNode *node = pat->rnode;
+  int i, ijk;
+  int len = strlen(loc);
+
+  for(i=0; i<len; i++)
+  {
+    ijk = loc[i] - '0';
+    node = node->child[ijk];
+  }
+  return node;
+}
+
+/* get node in the mesh from its full nodename */
+tNode *node_from_nodename(tMesh *mesh,  char *name)
+{
+  tPat *pat;
+  int i;
+  char *loc;
+  int max = 99;
+
+  /* find pos i of '_' */
+  for(i=0; i<max; i++) if(name[i]=='_') break;
+
+  /* get patch */
+  name[i] = 0;
+  pat = mesh->pat[atoi(name)];
+  name[i] = '_';
+
+  /* get location str. */
+  loc = name + i+1;
+
+  return node_from_location_str(pat, loc);
+}
+
+
 /* is node on a face? */
 int node_is_at_face(tNode *node, int face)
 {

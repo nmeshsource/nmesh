@@ -96,7 +96,6 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 {
   FILE *fp;
   char buf[1000];
-  tPat *pat;
   tNode *parent;
   int n[3];
 
@@ -110,8 +109,11 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
     /* all node names contain an '_' */
     if(strstr(buf, "_"))
     {
-      //pat = ...;
-      //parent = ...;
+      /* strip trailing '\n' from buf */
+      buf[strlen(buf)] = 0;
+
+      /* find parent node from its name in buf */
+      parent = node_from_nodename(mesh, buf);
 
       /* read n for child0 */
       fscanf(fp, "%d", &(n[0]));
@@ -179,7 +181,7 @@ tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh)
 /* output varlist on each node */
 void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
 {
-  //tMesh *mesh = vl->mesh;
+  tMesh *mesh = vl->mesh;
   char buf[1000];
   int rk;
 
@@ -206,7 +208,7 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
           vi = Vind(vl, vli);
 
           /* find node from its name */
-          //...
+          node = node_from_nodename(mesh, name);
 
           /* check if this var needs to be read on this node */
           if(node->dat)

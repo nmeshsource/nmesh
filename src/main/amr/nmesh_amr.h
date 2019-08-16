@@ -452,6 +452,7 @@ void free_all_vl_surfaces(tNode *node, tVarList *vl);
 char *node_location_str(tNode *node, char *s, int slen);
 char *nodename(tNode *node, char *s, int slen);
 long node_location(tNode *node);
+tNode *node_from_nodename(tMesh *mesh,  char *name);
 
 /* load.c */
 void move_nodelist_to_rank(tNlist *list, int desrank);
