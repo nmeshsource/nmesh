@@ -13,3 +13,7 @@ void checkpoint_write_nodes_with_child0(FILE *fp, tNlist *nlist);
 void checkpoint_write_node(FILE *fp, tNode *node);
 int checkpoint_save_EvoVars(tMesh *mesh, char *fname);
 void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big);
+
+/* checkpoint_load.c */
+tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh);
+void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big);

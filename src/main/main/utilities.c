@@ -266,7 +266,7 @@ void trim_whitespace(char *str)
 
 /* parse a string to find a parname and its value,
    returns 1 if str contains '=' otherwise 0.  */
-int get_par_from_str(char *str, char **name, char **value, int n)
+int get_par_from_str(char *str, char *name, char *value, int n)
 {
   char *str2, *saveptr, *nam, *val;
   int ret;
@@ -288,8 +288,8 @@ int get_par_from_str(char *str, char **name, char **value, int n)
     trim_whitespace(nam);
     trim_whitespace(val);
 
-    strncpy(*name,  nam, n);
-    if(val) strncpy(*value, val, n);
+    strncpy(name,  nam, n);
+    if(val) strncpy(value, val, n);
     ret = 1;
   }
 
