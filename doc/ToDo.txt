@@ -124,20 +124,18 @@ Things that need to be done urgently:
    nodes)
   +for leaf nodes save all enabled EvoVars
   +disable all extra RK stage vars before saving
- -schedule checkpoint_load after POST_PARAMETERS, e.g. make CHCKPNT_LOAD
- -move ams's setup_mesh into INITMESH
+ -call checkpoint_load after POST_PARAMETERS
+ -call amr's setup_mesh diectly if we do not load checkpoint
  -make par checkpoint_save_pars. All pars in this list will be saved, all
   others come from parfile or earlier call to initialize_libraries
- -schedule checkpoint_save in ANALYZE or POST_EVOLVE or ???
+ -call checkpoint_save after ANALYZE
  -save checkpoint in a way that is independent from num. of MPI procs
  -unlike in BAM we do not need to make sure that each _init is called, e.g.
   calling all time bins up to at least PRE_INITIALDATA, or maybe doing one
   full evo step...
  -put checkpoint into dir checkpoint_new, then mv to checkpoint
  -save these files in checkpoint dir:
-  patches.txt, nodes.txt,
-  lnodes.txt (should contain ftell val. for data in variables.bin),
-  variables.bin, save_pars.txt
+  patches.txt, nodes.txt, variables.bin, save_pars.txt
 
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
