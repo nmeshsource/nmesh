@@ -237,7 +237,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
       }
       */
 
-      printf("Now kill nmesh before the queuing system does!\n");
+      printf("Now exit nmesh before the queuing system kills it!\n");
       fflush(stdout);
       finalize_all_and_exit(mesh, 0);
     }
