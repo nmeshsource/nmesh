@@ -232,7 +232,7 @@ int make_output_directory(tMesh *mesh)
   nMPI_barrier();
 
   /* redirect stdout */
-  redirect_stdout_and_stderr(mesh);
+  redirect_stdout_and_stderr(mesh, "w");
 
   /* say what we have after redirection: */
   prdivider(1);
@@ -290,7 +290,7 @@ int parse_command_line_options(tMesh *mesh)
 } 
 
 /* redirect stdout */
-int redirect_stdout_and_stderr(tMesh *mesh)
+int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
 {
   char *outdir  = Gets(Par("outdir"));
   char f[100];
@@ -355,7 +355,7 @@ int move_previous_output_to_outdir(tMesh *mesh)
     system3("mv", outdirp, outdir);
 
     /* redirect output again */
-    redirect_stdout_and_stderr(mesh);
+    redirect_stdout_and_stderr(mesh, "a");
 
     /* delete outdird */
     system2("rm -rf", outdird);
@@ -383,48 +383,61 @@ int inidata_mesh(tMesh *mesh)
   /* hook for funs right after iterate_parameters */
   RunFun(POST_PARAMETERS);
 
-  /* load checkpoint if it exists */
+  /* check if there is a saved checkpoint */
   chkpt = checkpoint_exists(mesh, "_previous", "");
 chkpt = 0;
+  /* load stage 0 of checkpoint if it exists */
   if(chkpt)
   {
+    prdivider(1);
+    printf("Restarting from checkpoint:\n");
+
     /* delete current output and move _previous back */
     move_previous_output_to_outdir(mesh);
     checkpoint_load_stage(mesh, "", 0);
-    checkpoint_load_stage(mesh, "", 1);
   }
-  else /* intialize if there is no checkpoint */
+  else /* intialize mesh if there is no checkpoint */
   {
     /* create a mesh */
     amr_setup_mesh(mesh);
+  }
 
-    /* here we schedule funcs to programatically set up the mesh */
-    RunFun(INITMESH);
+  /* no matter if there is a saved checkpoint or not, we initialize
+     everything now (we may even recompute initial data) */
 
-    /* move nodes to differnt procs */
-    RunFun(LOADBALANCING);
+  /* here we schedule funcs to programatically set up the mesh */
+  RunFun(INITMESH);
 
-    /* setup coords */
-    RunFun(PRE_COORDINATES);
-    RunFun(COORDINATES);
+  /* move nodes to differnt procs */
+  RunFun(LOADBALANCING);
 
-    /* compute initial data */
-    RunFun(PRE_INITIALDATA);
-    RunFun(INITIALDATA);
-    RunFun(POST_INITIALDATA);
+  /* setup coords */
+  RunFun(PRE_COORDINATES);
+  RunFun(COORDINATES);
 
-    /* initial data is just another new time slice */
-    RunFun(POST_EVOLVE);
+  /* compute initial data */
+  RunFun(PRE_INITIALDATA);
+  RunFun(INITIALDATA);
+  RunFun(POST_INITIALDATA);
 
-    /* initial data complete */
-    prdivider(0);
-    printf("Done with initialization\n");
-    printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
+  /* initial data is just another new time slice */
+  RunFun(POST_EVOLVE);
 
-    /* analyze initial data */
-    RunFun(ANALYZE);
+  /* initial data complete */
+  prdivider(0);
+  printf("Done with initialization\n");
+  printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
-    /* save checkpoint */
+  /* analyze initial data */
+  RunFun(ANALYZE);
+
+  /* load next stage of checkpoint, or save checkpoint*/
+  if(chkpt)
+  {
+    checkpoint_load_stage(mesh, "", 1);
+  }
+  else
+  {
     checkpoint_save_if_needed(mesh, 1);
   }
 
@@ -487,9 +500,6 @@ int evolve_mesh(tMesh *mesh)
 
     /* post output */
     RunFun(POST_OUTPUT);
-
-    /* checkpoint */
-    //checkpoint(mesh);
 
     /* AMR and load balancing */
     RunFun(AMR);

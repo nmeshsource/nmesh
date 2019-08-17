@@ -255,6 +255,3 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
                           double power, int mode);
 double MeshMax(tMesh *mesh, tPat *pat, int vind);
 double MeshMin(tMesh *mesh, tPat *pat, int vind);
-
-/* main.c */
-int redirect_stdout_and_stderr(tMesh *mesh);
