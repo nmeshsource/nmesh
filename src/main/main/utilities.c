@@ -294,6 +294,7 @@ int get_par_from_str(char *str, char *name, char *value, int n)
 
     strncpy(name,  nam, n);
     if(val) strncpy(value, val, n);
+    else    value[0] = 0;
     ret = 1;
   }
 
