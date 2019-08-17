@@ -418,9 +418,6 @@ int inidata_mesh(tMesh *mesh)
   printf("Done with initialization\n");
   printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
-  /* analyze initial data */
-  RunFun(ANALYZE);
-
   /* load next stage of checkpoint, or save checkpoint*/
   if(chkpt)
   {
@@ -432,6 +429,9 @@ int inidata_mesh(tMesh *mesh)
   {
     checkpoint_save_if_needed(mesh, 1);
   }
+
+  /* analyze initial data or checkpoint */
+  RunFun(ANALYZE);
 
   /* output for permanent variables */
   RunFun(OUTPUT);
