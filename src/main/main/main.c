@@ -194,26 +194,13 @@ int make_output_directory(tMesh *mesh)
   /* check if we remove outdir_previous */
   if(!GetvLax(ParLax("nmesh_options"), "--keep_previous"))
   {
-    /*
-    char *prev = checkpoint_filename("_previous", "");
-    char *curr = checkpoint_filename("", "");
-    FILE *fpprev = fopen(prev, "r");
-    FILE *fpcurr = fopen(curr, "r");
-
-    //printf("prev: %s, curr: %s\n", prev, curr);
-    if(0) printf("Safety first: checking data before overwriting "
-                 "previous directory.\n");
-    if(fpprev && !fpcurr)
+    /* check if we have a checkpoint in outdir+"_previous" */
+    if(checkpoint_exists(mesh, "_previous", ""))
     {
-        printf("Warning: %s exists, while %s does not.\n", prev, curr);
-        printf("Warning: This could result in the loss of the checkpoint!\n");
-        errorexit("There may be important data in the previous directory!");
+      printf("*** Refusing to delete %s ***\n", outdirp);
+      errorexits("There is a checkpoint in %s_previous", outdir);
     }
-    if(fpprev) fclose(fpprev);
-    if(fpcurr) fclose(fpcurr);
-    free(prev);
-    free(curr);
-    */
+
     /* remove outdir_previous and move outdir to outdir_previous */
     if(Rank0)
     {
