@@ -282,21 +282,32 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
   /* find string node */
   while(fgets(buf,999, fp))
   {
-    if(strcmp(buf, "node\n")==0)
-    {
-      tNode *node;
-      char name[256];
-      int np, vli, vi;
+    tNode *node;
+    char name[256];
+    int np, vli, vi, found_node;
 
-      /* read var info */
+    if(strcmp(buf, "{\n")==0)
+    {
+      /* read node info */
       fscanf(fp, "%s", name);
       fscanf(fp, "%d", &np);
-      fscanf(fp, "%d", &vli);
-      fgets(buf,999, fp); /* use fgets to also read the '\n' after vli */
-      vi = Vind(vl, vli);
+      fgets(buf,999, fp); /* use fgets to also read the '\n' after np */
 
       /* find node from its name */
       node = node_from_nodename(mesh, name);
+      found_node = 1;
+    }
+    else
+    {
+      found_node = 0;
+    }
+    while(found_node)
+    {
+      /* check for end / read var info */
+      fgets(buf,999, fp); /* use fgets to read '}' or vli plus '\n' */
+      if(strcmp(buf, "}\n")==0) break;
+      vli = atoi(buf);
+      vi  = Vind(vl, vli);
       //printf("name=%s np=%d vli=%d\n", name, np, vli);
       //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), node->nid, vi);
 
@@ -319,6 +330,7 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
         long offset = sizeof(double) * np;
         fseek(fp, offset, SEEK_CUR);
       }
-    } /* end if(strcmp(buf, "node\n")) */
+      fgets(buf,999, fp); /* use fgets to also read the '\n' after var. */
+    } /* end while(found_node) */
   }
 }

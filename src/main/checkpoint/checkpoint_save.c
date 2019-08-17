@@ -340,7 +340,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
 
     /* node name and number of points np on this node */
     nodename(node, name,255);
-    fprintf(fp, "node\n");
+    fprintf(fp, "{\n");
     fprintf(fp, "%s\n", name);
     fprintf(fp, "%d\n", node->np);
 
@@ -367,6 +367,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
         }
       }
     }
+    fprintf(fp, "}\n");
     fprintf(fp, "\n");
   } /* end node-loop */
 }
