@@ -304,7 +304,7 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
     prdivider(3);
     printf("*** NOTE ***  Output from proc0 redirected to:\n %s\n", so);
     prdivider(3);
-    if(Getv(Par("logfile_creation"),"append"))
+    if( Getv(Par("logfile_creation"),"append") || strstr(mode,"a") )
       opt = "a";
     else
       opt = "w";
@@ -328,8 +328,8 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
   if(nMPI_rank()>0)
   {
     snprintf(so,999, f, outdir, nMPI_rank());
-    freopen(so, "w", stdout);
-    freopen(so, "w", stderr);
+    freopen(so, mode, stdout);
+    freopen(so, mode, stderr);
   }
 
   return 0;
