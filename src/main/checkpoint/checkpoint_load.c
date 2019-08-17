@@ -134,7 +134,8 @@ exit(8);
   simple_load_balance(mesh);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 0);
+  printallbfaces(mesh);
 
   return 0;
 }
@@ -202,7 +203,10 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
   /* load balance all leaf nodes */
   simple_load_balance(mesh);
+  printmesh(mesh);
 
+  PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
+             mesh->iteration, mesh->time);
   return 0;
 }
 
@@ -233,6 +237,8 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
 
       /* now read data for vars */
       checkpoint_read_vl(fp, vl, 0);
+      PRF;printf(": finished reading varlist.\n");
+      prvarlist(vl);
 
       vlfree(vl);
       fclose(fp);
