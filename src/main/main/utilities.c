@@ -251,17 +251,21 @@ void trim_whitespace(char *str)
   if(!str) return;
 
   len = strlen(str);
+  //printf("str=|%s| len=%d\n", str, len);
 
   /* remove all trailing spaces */
   for(f=len-1; f>=0; f--) if(!isspace(str[f])) break;
-  str[f+1] = 0;
-  len = f;
+  len = f+1;
+  str[len] = 0;
+  //printf("str=|%s| len=%d\n", str, len);
 
   /* find first no-space char */
   for(f=0; f<len; f++) if(!isspace(str[f])) break;
+  len = len-f;
 
   /* shift all chars left by f */
-  if(f) for(i=0; i<=len-f; i++) str[i] = str[i+f];
+  if(f) for(i=0; i<=len; i++) str[i] = str[i+f];
+  //printf("str=|%s| len=%d\n", str, len);
 }
 
 /* parse a string to find a parname and its value,
