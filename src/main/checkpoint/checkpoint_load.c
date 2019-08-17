@@ -289,15 +289,16 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
       int np, vli, vi;
 
       /* read var info */
-      //fgets(name,255, fp);
       fscanf(fp, "%s", name);
       fscanf(fp, "%d", &np);
       fscanf(fp, "%d", &vli);
-      //printf("%s %d %d\n", name, np, vli);
+      fgets(buf,999, fp); /* use fgets to also read the '\n' after vli */
       vi = Vind(vl, vli);
 
       /* find node from its name */
       node = node_from_nodename(mesh, name);
+      //printf("name=%s np=%d vli=%d\n", name, np, vli);
+      //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), node->nid, vi);
 
       /* check if this var needs to be read on this node */
       if(node->dat)
@@ -311,6 +312,7 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
         /* read var as raw binary */
         if(read_big) fread_big(v, sizeof(double), np, fp);
         else         fread_little(v, sizeof(double), np, fp);
+        //if(node->nid==28) printf("v[]=%g\n", v[0]);
       }
       else /* just over-read data */
       {

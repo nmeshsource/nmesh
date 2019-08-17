@@ -354,15 +354,16 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
         tArray *va = node->dat->v[vi];
         if(va)
         {
+          double *v = Arrd_(va);
+
           /* print only index in varlist */
           fprintf(fp, "%d\n", vli);
 
           /* write var array in raw binary */
-          if(write_big)
-            fwrite_big(Arrd_(va), sizeof(double), node->np, fp);
-          else
-            fwrite_little(Arrd_(va), sizeof(double), node->np, fp);
+          if(write_big) fwrite_big(v, sizeof(double), node->np, fp);
+          else          fwrite_little(v, sizeof(double), node->np, fp);
           fprintf(fp, "\n");
+          //if(node->nid==28) printf("v[]=%g\n", v[0]);
         }
       }
     }
