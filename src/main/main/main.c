@@ -325,34 +325,37 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
 /* delete current output and move _previous back */
 int move_previous_output_to_outdir(tMesh *mesh)
 {
+  char *outdir  = Gets(Par("outdir"));
+  char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
+  char *outdird = (char *) calloc(strlen(outdir)+80, sizeof(char));
+
+  /* set outdirp to outdir_previous */
+  strcpy(outdirp, outdir);
+  strcat(outdirp, "_previous");
+  strcpy(outdird, outdir);
+  strcat(outdird, "___trash_to_be_deleted_soon___");
+
   if(Rank0)
   {
-    char *outdir  = Gets(Par("outdir"));
-    char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
-    char *outdird = (char *) calloc(strlen(outdir)+40, sizeof(char));
-
-    /* set outdirp to outdir_previous */
-    strcpy(outdirp, outdir);
-    strcat(outdirp, "_previous");
-    strcpy(outdird, outdir);
-    strcat(outdird, "_deleted");
-
     /* move previous back */
     system3("mv", outdir, outdird);
     system3("mv", outdirp, outdir);
-
-    /* redirect output again */
-    redirect_stdout_and_stderr(mesh, "a");
-
-    /* delete outdird */
-    system2("rm -rf", outdird);
-
-    free(outdird);
-    free(outdirp);
   }
 
   /* all wait here until move is done. */
   nMPI_barrier();
+
+  /* redirect output again */
+  redirect_stdout_and_stderr(mesh, "a");
+
+  if(Rank0)
+  {
+    /* delete outdird */
+    system2("rm -rf", outdird);
+  }
+
+  free(outdird);
+  free(outdirp);
 
   return 0;
 }
