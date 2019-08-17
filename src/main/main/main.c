@@ -375,7 +375,7 @@ int inidata_mesh(tMesh *mesh)
 
   /* check if there is a saved checkpoint, and if we want checkpointing */
   chkpt = Getb(Par("checkpoint")) && checkpoint_exists(mesh, "_previous", "");
-//chkpt = 0;
+
   /* load stage 0 of checkpoint if it exists */
   if(chkpt)
   {
@@ -456,7 +456,7 @@ int evolve_mesh(tMesh *mesh)
     iterationmax = timemax/mesh->dt + 0.5;
 
   if(iterationmax > 0) 
-    printf("Evolving mesh for %d iterations to time %g\n", 
+    printf("Evolving mesh until iteration %d at time %g\n",
 	   iterationmax, iterationmax * mesh->dt);
 
   if(iterationmax <= 0) return 0;
