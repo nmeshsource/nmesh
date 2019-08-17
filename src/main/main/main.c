@@ -390,7 +390,8 @@ chkpt = 0;
   {
     /* delete current output and move _previous back */
     move_previous_output_to_outdir(mesh);
-    checkpoint_load(mesh, "");
+    checkpoint_load_stage(mesh, "", 0);
+    checkpoint_load_stage(mesh, "", 1);
   }
   else /* intialize if there is no checkpoint */
   {

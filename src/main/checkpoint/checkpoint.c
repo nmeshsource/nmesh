@@ -85,8 +85,9 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
 /* some functions to load nmesh data from checkpoints  */
 /******************************************************************/
 
-/* read a checkpoint */
-int checkpoint_load(tMesh *mesh, const char *outdir_suffix)
+/* read a checkpoint
+   stage=0 loads only the mesh, stage>0 loads only the vars */
+int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
 {
   char *dir;
   char *pars;
@@ -99,10 +100,16 @@ int checkpoint_load(tMesh *mesh, const char *outdir_suffix)
                               &pars, &pats, &nodes, &vars);
 
   /* load checkpoint from the various files */
-  checkpoint_load_pars(mesh, pars);
-  checkpoint_load_patches(mesh, pats);
-  checkpoint_load_nodes(mesh, nodes);
-  checkpoint_load_Vars(mesh, vars);
+  if(stage==0)
+  {
+    checkpoint_load_pars(mesh, pars);
+    checkpoint_load_patches(mesh, pats);
+    checkpoint_load_nodes(mesh, nodes);
+  }
+  else
+  {
+    checkpoint_load_Vars(mesh, vars);
+  }
 
   /* free strings */
   free(vars);
