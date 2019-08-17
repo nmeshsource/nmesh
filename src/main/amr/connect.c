@@ -266,7 +266,7 @@ tNode *node_from_location_str(tPat *pat, char *loc)
 tNode *node_from_nodename(tMesh *mesh,  char *name)
 {
   tPat *pat;
-  int i;
+  int i, p;
   char *loc;
   int max = 99;
 
@@ -275,8 +275,10 @@ tNode *node_from_nodename(tMesh *mesh,  char *name)
 
   /* get patch */
   name[i] = 0;
-  pat = mesh->pat[atoi(name)];
+  p = atoi(name);
+  pat = mesh->pat[p];
   name[i] = '_';
+  //printf("name=%s => p=%d\n", name, p);
 
   /* get location str. */
   loc = name + i+1;
