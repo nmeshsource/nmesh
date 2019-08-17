@@ -64,13 +64,23 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
         /* CI-> signifies that we know all we need to create a new patch */
         if(strcmp(buf, " CI->\n")==0)
         {
+          //prbbox(bbox, 3);
+          //printf("n = %d %d %d\n", n[0],n[1],n[2]);
           pat = add_patch(mesh, bbox, n, nmax);
           useF = 0;
         }
-
+/*
+char ttt[] = "  domu=read 99 \n";
+printf("ttt = |%s|\n", ttt);
+get_par_from_str(ttt, par,val,999);
+printf("|%s| = |%s|\n", par,val);
+exit(8);
+*/
         /* read various info pieces */
-        if(get_par_from_str(buf, par, val, 999))
+        get_par_from_str(buf, par, val, 999);
+        if(val[0])
         {
+          //printf("%s = %s\n", par, val);
           if(strcmp(par, "time")==0)      mesh->time = atof(val);
           if(strcmp(par, "iteration")==0) mesh->iteration = atoi(val);
           if(strcmp(par, "dt")==0)        mesh->dt = atof(val);
@@ -162,15 +172,18 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           tNlist *elem;
 
           /* strip trailing '\n' from buf */
-          buf[strlen(buf)] = 0;
+          buf[strlen(buf)-1] = 0;
 
           /* find parent node from its name in buf */
           parent = node_from_nodename(mesh, buf);
+          //printf("buf=%s\n", buf);
+          //printnode(parent);
 
           /* read n for child0 */
           fscanf(fp, "%d", &(n[0]));
           fscanf(fp, "%d", &(n[1]));
           fscanf(fp, "%d", &(n[2]));
+          //printf("n = %d %d %d\n", n[0],n[1],n[2]);
 
           /* find element in nodelist with parent */
           for(elem = mesh->lns; (elem) && (elem->node != parent);
@@ -263,7 +276,7 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
   /* find string node */
   while(fgets(buf,999, fp))
   {
-    if(strcmp(buf, "node\n"))
+    if(strcmp(buf, "node\n")==0)
     {
       tNode *node;
       char name[256];
@@ -274,6 +287,7 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
       fscanf(fp, "%s", name);
       fscanf(fp, "%d", &np);
       fscanf(fp, "%d", &vli);
+      //printf("%s %d %d\n", name, np, vli);
       vi = Vind(vl, vli);
 
       /* find node from its name */
