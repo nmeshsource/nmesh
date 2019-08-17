@@ -96,6 +96,9 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
   char *vars;
   int ret=0;
 
+  /* is checkpointing on? */
+  if(!Getb(Par("checkpoint"))) return 0;
+
   checkpoint_create_pathnames(mesh, outdir_suffix, &dir,"",
                               &pars, &pats, &nodes, &vars);
   prdivider(1);
@@ -187,6 +190,9 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
   double time_since_checkpoint;
   int do_checkpoint = 0;
 
+  /* is checkpointing on? */
+  if(!Getb(Par("checkpoint"))) return 0;
+
   /* test if it is time */
   time_since_checkpoint = time - last_checkpoint_time;
   if(Rank0)
@@ -211,7 +217,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
 
     nMPI_Bcast(&ntime, 1, nMPI_INT, 0);
     prdivider(1);
-    printf("checkpoint_save by walltime, after %g hours\n",
+    printf("checkpoint_save after %g hours\n",
            time_since_checkpoint);
 
     checkpoint_save(mesh);
@@ -232,9 +238,8 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
       */
 
       printf("Now kill nmesh before the queuing system does!\n");
-      //finalize_mesh(mesh);
-      //nMPI_Comm_free(&(main_comm));
-      nMPI_Finalize();
+      fflush(stdout);
+      finalize_all_and_exit(mesh, 0);
     }
     return 1; /* signal that checkpoint was saved */
   }

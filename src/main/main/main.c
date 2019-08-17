@@ -383,9 +383,9 @@ int inidata_mesh(tMesh *mesh)
   /* hook for funs right after iterate_parameters */
   RunFun(POST_PARAMETERS);
 
-  /* check if there is a saved checkpoint */
-  chkpt = checkpoint_exists(mesh, "_previous", "");
-chkpt = 0;
+  /* check if there is a saved checkpoint, and if we want checkpointing */
+  chkpt = Getb(Par("checkpoint")) && checkpoint_exists(mesh, "_previous", "");
+//chkpt = 0;
   /* load stage 0 of checkpoint if it exists */
   if(chkpt)
   {
@@ -435,6 +435,8 @@ chkpt = 0;
   if(chkpt)
   {
     checkpoint_load_stage(mesh, "", 1);
+    //write_mesh(mesh, -1, -2);
+    //exit(9);
   }
   else
   {
@@ -512,6 +514,8 @@ int evolve_mesh(tMesh *mesh)
       = (timemax > 0) ? timemax/mesh->dt + 0.5 : Geti(Par("iterations"));
   }
 
+  /* write checkpoint at the end */
+  checkpoint_save_if_needed(mesh, 1);
   prTimeIn_s("WallTime at end of evolve_mesh: ");
 
   return 0;
@@ -526,4 +530,15 @@ int finalize_mesh(tMesh *mesh)
   free_mesh(mesh);
   prTimeIn_s("WallTime at end of finalize_mesh: ");
   return 0;
+}
+
+
+/* finalize all and the exit with code ec */
+void finalize_all_and_exit(tMesh *mesh, int ec)
+{
+  finalize_mesh(mesh);
+  nMPI_Comm_free(&(main_comm));
+  nMPI_Finalize();
+  fflush(stdout);
+  exit(ec);
 }
