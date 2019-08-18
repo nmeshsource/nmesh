@@ -158,7 +158,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
       FILE *fp;
       char buf[1000];
       tNode *parent;
-      int n[3], i;
+      int n[3];
       tNlist *elem = mesh->lns; /* first element in leaf node list */
 
       /* open source file */
@@ -205,23 +205,6 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
           /* set elem to last child we added */
           elem = lastchild;
-
-          if(0)
-          {
-          /* update entry point in leaf node list */
-          if(!elem->next) elem = mesh->lns;
-
-          /* find element in nodelist with parent */
-          /* we could start loop at elem=mesh->lns, but this will be slow */
-          for( ; (elem) && (elem->node != parent); elem = elem->next) ;
-          if(!elem) errorexit("cannot find parent in mesh->lns");
-
-          /* make 8 child nodes, and replace elem with pos at child0 */
-          elem = make8children_in_mesh_lns_myln(elem, n);
-
-          /* advance elem by 7 to child7 */
-          for(i=1; i<8; i++) elem = elem->next;
-          }
         }
       }
       fclose(fp);
