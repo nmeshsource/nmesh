@@ -171,6 +171,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
         /* all node names contain an '_' */
         if(strstr(buf, "_"))
         {
+          tNlist *children, *lastchild;
+
           /* strip trailing '\n' from buf */
           buf[strlen(buf)-1] = 0;
 
@@ -186,6 +188,26 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
           //fflush(stdout);
 
+          /* find element in nodelist with parent: */
+          /* update entry point in leaf node list */
+          if(!elem->next) elem = mesh->lns;
+          /* we could start search loop at elem=mesh->lns,
+             but this would be slower */
+          for( ; (elem) && (elem->node != parent); elem = elem->next) ;
+          if(!elem) errorexit("cannot find parent in mesh->lns");
+
+          /* make 8 child nodes */
+          children = make8_child_nodes(parent, n);
+
+          /* update mesh->lns if needed and add children to leaf node list */
+          if(elem == mesh->lns) mesh->lns = first_nodelist(children);
+          lastchild = replace1_in_nodelist(elem, children, 1);
+
+          /* set elem to last child we added */
+          elem = lastchild;
+
+          if(0)
+          {
           /* update entry point in leaf node list */
           if(!elem->next) elem = mesh->lns;
 
@@ -199,22 +221,28 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
           /* advance elem by 7 to child7 */
           for(i=1; i<8; i++) elem = elem->next;
+          }
         }
       }
       fclose(fp);
     }
 
     PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
-             mesh->iteration, mesh->time);
+               mesh->iteration, mesh->time);
     fflush(stdout);
 
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
 
+  /* make sure all nodes have new current nids */
+  update_mesh_myln_node_nid(mesh);
+
   /* load balance all leaf nodes */
   simple_load_balance(mesh);
-  printmesh(mesh);
+  //printmesh(mesh);
+  PRF;printf(": total number of leaf nodes mesh->nln=%ld\n", mesh->nln);
+  fflush(stdout);
 
   return 0;
 }
