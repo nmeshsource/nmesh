@@ -335,6 +335,11 @@ int move_previous_output_to_outdir(tMesh *mesh)
   strcpy(outdird, outdir);
   strcat(outdird, "___trash_to_be_deleted_soon___");
 
+  /* all wait here, until all has been written before moving dirs */
+  fflush(stdout);
+  fflush(stderr);
+  nMPI_barrier();
+
   if(Rank0)
   {
     /* move previous back */
