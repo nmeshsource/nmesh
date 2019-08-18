@@ -208,12 +208,10 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
         }
       }
       fclose(fp);
+      PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
+                 mesh->iteration, mesh->time);
+      fflush(stdout);
     }
-
-    PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
-               mesh->iteration, mesh->time);
-    fflush(stdout);
-
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
