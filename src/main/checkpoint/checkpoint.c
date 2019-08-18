@@ -109,12 +109,20 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
   if(stage==0)
   {
     checkpoint_load_pars(mesh, pars);
+    PRF;printf(": finished loading pars.\n");
+    fflush(stdout);
     checkpoint_load_patches(mesh, pats);
+    PRF;printf(": finished loading patches.\n");
+    fflush(stdout);
     checkpoint_load_nodes(mesh, nodes);
+    PRF;printf(": finished loading nodes.\n");
+    fflush(stdout);
   }
   else
   {
     checkpoint_load_Vars(mesh, vars);
+    PRF;printf(": finished loading variables.\n");
+    fflush(stdout);
   }
   PRF;printf(": finished stage%d\n", stage);
   prdivider(1);

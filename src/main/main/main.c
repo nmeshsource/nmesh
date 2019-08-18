@@ -342,7 +342,10 @@ int move_previous_output_to_outdir(tMesh *mesh)
 
   if(Rank0)
   {
-    /* move previous back */
+    /* delete outdird */
+    system2("rm -rf", outdird);
+
+    /* move previous back to current */
     system3("mv", outdir, outdird);
     system3("mv", outdirp, outdir);
   }
