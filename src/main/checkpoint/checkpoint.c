@@ -95,9 +95,12 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
   char *nodes;
   char *vars;
   int ret=0;
+  double time, ntime;
 
   /* is checkpointing on? */
   if(!Getb(Par("checkpoint"))) return 0;
+
+  time = getTimeIn_s()/60.;
 
   checkpoint_create_pathnames(mesh, outdir_suffix, &dir,"",
                               &pars, &pats, &nodes, &vars);
@@ -124,7 +127,8 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
     PRF;printf(": finished loading variables.\n");
     fflush(stdout);
   }
-  PRF;printf(": finished stage%d\n", stage);
+  ntime = getTimeIn_s()/60.;
+  PRF;printf(": finished stage%d in %g minutes.\n", stage, ntime-time);
   prdivider(1);
   fflush(stdout);
 
