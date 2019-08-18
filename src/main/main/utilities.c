@@ -572,6 +572,8 @@ void *pmalloc(int n)
 NORET void finalexit(int ec)
 {
   tMesh *mesh = main_mesh;
+  fflush(stderr);
+  fflush(stdout);
   nMPI_Abort(ec);
   if(GetvLax(Par("errorexit"), "abort"))  abort();
   else                                    exit(ec);
@@ -590,7 +592,6 @@ NORET void errorexit(const char *file, int line, const char *func,
 {
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: %s\n", s);
-  fflush(stdout);
   finalexit(1);
 }
 
@@ -601,7 +602,6 @@ NORET void errorexits(const char *file, int line, const char *func,
   fprintf(stdout, "Error: ");
   fprintf(stdout, s, t);
   fprintf(stdout, "\n");
-  fflush(stdout);
   finalexit(1);
 }
 
@@ -612,7 +612,6 @@ NORET void errorexiti(const char *file, int line, const char *func,
   fprintf(stdout, "Error: ");
   fprintf(stdout, s, i);
   fprintf(stdout, "\n");
-  fflush(stdout);
   finalexit(1);
 }
 /************************************************************************/
