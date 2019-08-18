@@ -207,6 +207,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
   PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
              mesh->iteration, mesh->time);
+  fflush(stdout);
   return 0;
 }
 
@@ -239,6 +240,7 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
       checkpoint_read_vl(fp, vl, 0);
       PRF;printf(": finished reading varlist.\n");
       prvarlist(vl);
+      fflush(stdout);
 
       vlfree(vl);
       fclose(fp);
