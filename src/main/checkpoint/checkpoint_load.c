@@ -184,6 +184,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           fscanf(fp, "%d", &(n[1]));
           fscanf(fp, "%d", &(n[2]));
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
+          //fflush(stdout);
 
           /* update entry point in leaf node list */
           if(!elem->next) elem = mesh->lns;
