@@ -103,6 +103,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
                               &pars, &pats, &nodes, &vars);
   prdivider(1);
   PRF;printf(": loading stage%d\n", stage);
+  fflush(stdout);
 
   /* load checkpoint from the various files */
   if(stage==0)
@@ -117,6 +118,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
   }
   PRF;printf(": finished stage%d\n", stage);
   prdivider(1);
+  fflush(stdout);
 
   /* free strings */
   free(vars);
@@ -217,14 +219,15 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
 
     nMPI_Bcast(&ntime, 1, nMPI_INT, 0);
     prdivider(1);
-    printf("checkpoint_save after %g hours\n",
-           time_since_checkpoint);
+    printf("checkpoint_save after %g hours\n", time_since_checkpoint);
+    fflush(stdout);
 
     checkpoint_save(mesh);
 
     printf("It took %g minutes to checkpoint %g hours into the run.\n",
            60.*(ntime - time), time);
     prdivider(1);
+    fflush(stdout);
 
     /* check if we want to kill nmesh */
     if(0. < hours_quit && hours_quit <= ntime)
