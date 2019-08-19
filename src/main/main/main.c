@@ -329,13 +329,10 @@ int move_previous_output_to_outdir(tMesh *mesh)
 {
   char *outdir  = Gets(Par("outdir"));
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
-  char *outdird = (char *) calloc(strlen(outdir)+80, sizeof(char));
 
   /* set outdirp to outdir_previous */
   strcpy(outdirp, outdir);
   strcat(outdirp, "_previous");
-  strcpy(outdird, outdir);
-  strcat(outdird, "___trash_to_be_deleted_soon___");
 
   /* all wait here, until all has been written before moving dirs */
   fflush(stdout);
@@ -344,12 +341,8 @@ int move_previous_output_to_outdir(tMesh *mesh)
 
   if(Rank0)
   {
-    /* delete outdird */
-    system2("rm -rf", outdird);
-
-    /* move previous back to current */
-    system3("mv", outdir, outdird);
-    system2("rm -rf", outdird);
+    /* delete outdir and move previous back to outdir */
+    system2("rm -rf", outdir);
     system3("mv", outdirp, outdir);
   }
 
@@ -362,9 +355,7 @@ int move_previous_output_to_outdir(tMesh *mesh)
   /* redirect output again */
   redirect_stdout_and_stderr(mesh, "a");
 
-  free(outdird);
   free(outdirp);
-
   return 0;
 }
 
