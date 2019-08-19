@@ -349,20 +349,18 @@ int move_previous_output_to_outdir(tMesh *mesh)
 
     /* move previous back to current */
     system3("mv", outdir, outdird);
+    system2("rm -rf", outdird);
     system3("mv", outdirp, outdir);
   }
 
   /* all wait here until move is done. */
   nMPI_barrier();
+  /* NOTE: this may not work!!!
+     on koko system3("mv", outdirp, outdir) was finished on node0, but node1
+     still saw the old outdir! So redirection below went to the wrong dir! */
 
   /* redirect output again */
   redirect_stdout_and_stderr(mesh, "a");
-
-  if(Rank0)
-  {
-    /* delete outdird */
-    system2("rm -rf", outdird);
-  }
 
   free(outdird);
   free(outdirp);
