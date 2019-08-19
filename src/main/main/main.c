@@ -102,7 +102,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   if(Rank0) printf("Making first parameters\n");
   makeparameter(mesh, "errorexit", "exit", "how we exit");
   /* this is about how we output */
-  makeparameter(mesh, "logfile_creation", "append", "how we create logfile");
+  makeparameter(mesh, "logfile_creation", "yes", "whether we create logfile");
 
   /* got two or more arguments? */
   if (argc >= 2)
@@ -177,10 +177,9 @@ int make_output_directory(tMesh *mesh)
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
   time_t mytime = time(NULL);       // get time
   char *time_str = ctime(&mytime);
-
-  /* set outdirp to outdir_previous */
-  strcpy(outdirp, outdir);
-  strcat(outdirp, "_previous");
+  int keep_previous = GetvLax(ParLax("nmesh_options"), "--keep_previous");
+  int chkpt = checkpoint_exists(mesh, "", "");
+  int move_old;
 
   /* check if a shell is available to execute commands later */
   /* NOTE: system2 and system3 are smart enough to do "mkdir", "rm -rf"
@@ -191,8 +190,13 @@ int make_output_directory(tMesh *mesh)
     printf("         Consider using system_emu.\n");
   }
 
-  /* check if we remove outdir_previous */
-  if(!GetvLax(ParLax("nmesh_options"), "--keep_previous"))
+  /* set outdirp to outdir_previous */
+  strcpy(outdirp, outdir);
+  strcat(outdirp, "_previous");
+
+  /* check if we remove outdir_previous and then mv outdir to outdir_previous */
+  move_old = (!keep_previous) && (!chkpt);
+  if(move_old)
   {
     /* check if we have a checkpoint in outdir+"_previous" */
     if(checkpoint_exists(mesh, "_previous", ""))
@@ -215,11 +219,11 @@ int make_output_directory(tMesh *mesh)
     system2("mkdir", outdir);
     copy_file_into_dir(Gets(Par("parameterfile")), outdir);
   }
-  /* all wait here until mkdir is done. */
+  /* all wait here until mkdir and copy are done. */
   nMPI_barrier();
 
   /* redirect stdout */
-  redirect_stdout_and_stderr(mesh, "w");
+  redirect_stdout_and_stderr(mesh, "a");
 
   /* say what we have after redirection: */
   prdivider(1);
@@ -283,24 +287,22 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
   char f[100];
   char so[1000];
 
+  /* filename format for stdout files */
+  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
+
   /* redirect stdout and stderr for rank0 */
   if(Rank0 && !Getv(Par("logfile_creation"),"no"))
   {
-    char *opt;
-    snprintf(so,999, "%s.log", outdir);
+    //snprintf(so,999, "%s.log", outdir);
+    snprintf(so,999, f, outdir, 0);
     prdivider(3);
     printf("*** NOTE ***  Output from proc0 redirected to:\n %s\n", so);
     prdivider(3);
-    if( Getv(Par("logfile_creation"),"append") || strstr(mode,"a") )
-      opt = "a";
-    else
-      opt = "w";
-    freopen(so, opt, stdout);
-    freopen(so, opt, stderr);
+    freopen(so, mode, stdout);
+    freopen(so, mode, stderr);
   }
 
   /* rank0 announces that others will be redirected as well */
-  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
   if(Rank0 && nMPI_size()>1)
   {
     snprintf(so,999, f, outdir, 1);
@@ -382,16 +384,13 @@ int inidata_mesh(tMesh *mesh)
   RunFun(POST_PARAMETERS);
 
   /* check if there is a saved checkpoint, and if we want checkpointing */
-  chkpt = Getb(Par("checkpoint")) && checkpoint_exists(mesh, "_previous", "");
+  chkpt = Getb(Par("checkpoint")) && checkpoint_exists(mesh, "", "");
 
   /* load stage 0 of checkpoint if it exists */
   if(chkpt)
   {
     prdivider(1);
     printf("Restarting from checkpoint:\n");
-
-    /* delete current output and move _previous back */
-    move_previous_output_to_outdir(mesh);
     checkpoint_load_stage(mesh, "", 0);
   }
   else /* intialize mesh if there is no checkpoint */
@@ -438,7 +437,7 @@ int inidata_mesh(tMesh *mesh)
     checkpoint_save_if_needed(mesh, 1);
   }
 
-  /* analyze initial data or checkpoint */
+  /* analyze initial data or data from checkpoint */
   RunFun(ANALYZE);
 
   /* output for permanent variables */
