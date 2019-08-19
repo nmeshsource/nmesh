@@ -159,6 +159,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
       char buf[1000];
       tNode *parent;
       int n[3];
+      int p = -1; /* patch number read from file */
+      int p_prev; /* previous patch number read from file */
       tNlist *elem = mesh->lns; /* first element in leaf node list */
 
       /* open source file */
@@ -178,6 +180,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
           /* find parent node from its name in buf */
           parent = node_from_nodename(mesh, buf);
+          p_prev = p;
+          p = parent->pat->p;
           //printf("buf=%s\n", buf);
           //printnode(parent);
 
@@ -190,7 +194,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
           /* find element in nodelist with parent: */
           /* update entry point in leaf node list */
-          if(!elem->next) elem = mesh->lns;
+          if(p<p_prev || !elem->next) elem = mesh->lns;
           /* we could start search loop at elem=mesh->lns,
              but this would be slower */
           for( ; (elem) && (elem->node != parent); elem = elem->next) ;
