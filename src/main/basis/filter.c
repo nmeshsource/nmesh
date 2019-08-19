@@ -79,6 +79,41 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
     return 0;
 }
 
+/* filter varlist on entire mesh */
+void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3])
+{
+  tMesh *mesh = vl->mesh;
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int vli;
+
+    forvl(vl, vli)
+    {
+      expfilter_var(node, vli, alp, s);
+    }
+  }
+}
+
+/* filter varlist on entire mesh */
+void expfilter_vl(tVarList *vl, double af, double sf)
+{
+  tMesh *mesh = vl->mesh;
+  double alp[] = { af, af, af };
+  double s[]   = { sf, sf, sf };
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int vli;
+
+    forvl(vl, vli)
+    {
+      expfilter_var(node, vli, alp, s);
+    }
+  }
+}
 
 /***********************************************************************/
 /* functions to check coeff falloff */
