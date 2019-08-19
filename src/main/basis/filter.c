@@ -12,7 +12,8 @@
 /* functions to filter */
 /***********************************************************************/
 
-/* apply exponential filter as in https://arxiv.org/abs/1804.02003 */
+/* Apply exponential filter as in https://arxiv.org/abs/1804.02003
+   In 1D: c_i -> c_i * e^{-alp (i/(n0-1))^s} */
 void expfilter_coeff_array(tArray *ca, double alp[3], double s[3])
 {
   int *n = ca->n;
