@@ -96,23 +96,12 @@ void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3])
   }
 }
 
-/* filter varlist on entire mesh */
+/* filter varlist on entire mesh with same filter pars in all 3 directions */
 void expfilter_vl(tVarList *vl, double af, double sf)
 {
-  tMesh *mesh = vl->mesh;
-  double alp[] = { af, af, af };
+  double alp[] = { af, af, af }; /* use same filter pars in all 3 directions */
   double s[]   = { sf, sf, sf };
-
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int vli;
-
-    forvl(vl, vli)
-    {
-      expfilter_var(node, vli, alp, s);
-    }
-  }
+  expfilter_mesh_vl(vl, alp, s);
 }
 
 /***********************************************************************/
