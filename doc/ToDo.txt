@@ -225,6 +225,14 @@ Questions about bamps:
 
 Things that should be done:
 ===========================
+*investigate: MPI_Test and MPI_Iprobe as alt. for MPI_Wait (as in Athena++)
+
+*I think get_all_surfaces takes very long on koko with 8^6 node GRHD:
+  -maybe use MPI_Test and MPI_Iprobe to avoid MPI_Wait (as in Athena++)
+  -we could work on set_ajsurf_forall_vars for which ever requests are
+   done instead of waiting for all of them in order...
+ +do same for corresponding indc exchanges...
+
 *in main/amr/storage.c we often set mesh->lns = first_nodelist(...
  -BUT in many cases we know that mesh->lns is unchanged, or even know
   how it chanched! : DONE in most often used parts.
@@ -233,12 +241,10 @@ Things that should be done:
  -should we get rid of node->fnb???
 
 *we have timer.c to see what needs to be optimized
- -make timer_get s.t. "name" gets appended by threadID
-  -use gettid? or some openMP call with #ifdef around it???
+ -make timer_get s.t. "name" gets appended by threadID: DONE in some way.
+  -but should we use gettid? or some openMP call with #ifdef around it???
 
 *compare with: http://www.cfca.nao.ac.jp/files/um2014_tomida.pdf
-
-*investigate: MPI_Test and MPI_Iprobe as alt. for MPI_Wait (as in Athena++)
 
 *investigate: tasks within each node using OpenMP:
               https://openmp.org/wp-content/uploads/sc13.tasking.ruud.pdf
@@ -254,7 +260,7 @@ Things that should be done:
  to limit w = u_p + r dt and not r or u_p.
 
 *add to tNode:  int nchildren; // number of children this node has, usually 8
-  -update of storage.c should be east
+  -update of storage.c should be easy
   -update of connect.c will be harder because it assumes nb in all 3 direc.
 
 
