@@ -586,6 +586,29 @@ int nMPI_Wait_com_recv(tCom *com, int rq)
   return nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
 }
 
+/* test if send request rq has finished */
+int nMPI_Test_com_send(tCom *com, int rq, int *flag)
+{
+  if(PR)
+  {
+    PRFs(": ");
+    print_com(com);
+    printf("    rq=%d\n", rq);
+  }
+  return nMPI_Test(&(com->send_rq[rq]), flag, &(com->send_stat[rq]));
+}
+/* test if recv request rq has finished */
+int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
+{
+  if(PR)
+  {
+    PRFs(": ");
+    print_com(com);
+    printf("    rq=%d\n", rq);
+  }
+  return nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
+}
+
 /* do send and recv request rq of com */
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag,
