@@ -289,6 +289,27 @@ int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
 }
 
 
+/* Tests for the completion of all previously initiated requests */
+int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
+{
+  int status = 0;
+  if(!nreq) return 0;
+  if(PR)
+  {
+    PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
+    fflush(stdout);
+  }
+#ifdef USEMPI
+  status = MPI_Testall(nreq, req, flag, stat);
+
+  if(status == MPI_ERR_IN_STATUS)
+    errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
+#else
+  *flag = 1;
+#endif
+  return status;
+}
+
 /* Test for the completion of a specific send or receive. */
 int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
 {
@@ -607,6 +628,31 @@ int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
     printf("    rq=%d\n", rq);
   }
   return nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
+}
+
+/* wait for all send requests in com */
+int nMPI_Testall_com_send(tCom *com, int *flag)
+{
+  return nMPI_Testall(com->n_rq, com->send_rq, flag, com->send_stat);
+}
+/* wait for all recv requests in com */
+int nMPI_Testall_com_recv(tCom *com, int *flag)
+{
+  return nMPI_Testall(com->n_rq, com->recv_rq, flag, com->recv_stat);
+}
+/* wait for all requests in com */
+int nMPI_Testall_com(tCom *com, int *flag)
+{
+  int rflag, sflag;
+  int status=0;
+  if(PR)
+  {
+    PRF;printf("\n");
+  }
+  status  = nMPI_Testall_com_send(com, &sflag);
+  status += nMPI_Testall_com_recv(com, &rflag);
+  *flag = rflag && sflag;
+  return status;
 }
 
 /* do send and recv request rq of com */
