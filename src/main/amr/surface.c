@@ -563,6 +563,55 @@ void get_all_myln_surfaces(tMesh *mesh)
 }
 
 
+/* Issue MPI_Testall calls to test node->dat->com for completion.
+   We do this only to cause MPI progression!
+   sendrecv=0 tests only sends
+   sendrecv=1 tests only recvs
+   sendrecv=2 tests both sends and recvs */
+int causeMPIprogress_all_myln_surfaces(tMesh *mesh, int sendrecv)
+{
+  int flag = 1;
+
+  TIMER_START;
+
+  /* If we want threads in this loop, we need MPI_Init_thread with
+     MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
+  formylnodes_noomp(mesh)
+  {
+    tNode *node = MyLnode;
+    tDat *dat = node->dat;
+    int face;
+
+    if(dat)
+      for(face=0; face<6; face++)
+      {
+        tCom *com = node->dat->com[face];
+        int fl;
+
+        if(com)
+        {
+          switch(sendrecv)
+          {
+          case 0:
+            nMPI_Testall_com_send(com, &fl);
+            break;
+          case 1:
+            nMPI_Testall_com_recv(com, &fl);
+            break;
+          default:
+            nMPI_Testall_com(com, &fl);
+          }
+          flag = flag && fl;
+        }
+      }
+  }
+
+  TIMER_STOP;
+
+  return flag;
+}
+
+
 /**********************************************************************/
 /* set adjacent surface in ajsurf using data in nbsurf */
 /**********************************************************************/
