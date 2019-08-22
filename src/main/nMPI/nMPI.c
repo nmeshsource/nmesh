@@ -579,8 +579,8 @@ int nMPI_Waitall_com(tCom *com)
   {
     PRF;printf("\n");
   }
-  status  = nMPI_Waitall_com_recv(com);
-  status += nMPI_Waitall_com_send(com);
+  status  = nMPI_Waitall_com_send(com);
+  status += nMPI_Waitall_com_recv(com);
   return status;
 }
 
