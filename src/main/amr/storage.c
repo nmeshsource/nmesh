@@ -4,6 +4,8 @@
 #include "nmesh.h"
 #include "amr.h"
 
+#define PR 0
+
 
 /* world comm from main */
 extern nMPI_Comm main_comm;
@@ -1588,6 +1590,10 @@ void enablevarcomp_innode(tNode *node, int i)
     }
     dat->v[i] = alloc_array_extra(n, Ne);
     dat->nvenabled++;
+    if(PR)
+    {
+      PRF;printf(": var_%d: %s\n", i, MeshVarName(node->pat->mesh, i));
+    }
   }
 }
 
@@ -1604,6 +1610,10 @@ void disablevarcomp_innode(tNode *node, int i)
   {
     free_array(dat->v[i]);
     dat->nvenabled--;
+    if(PR)
+    {
+      PRF;printf(": var_%d: %s\n", i, MeshVarName(node->pat->mesh, i));
+    }
   }
 }
 
