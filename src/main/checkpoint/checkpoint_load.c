@@ -192,9 +192,12 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
           //fflush(stdout);
 
+          /* update starting point in leaf node list of the 'for'-loop below */
+          if(p<p_prev || !elem->next)
+          {
+            elem = mesh->lns;
+          }
           /* find element in nodelist with parent: */
-          /* update entry point in leaf node list */
-          if(p<p_prev || !elem->next) elem = mesh->lns;
           /* we could start search loop at elem=mesh->lns,
              but this would be slower */
           for( ; (elem) && (elem->node != parent); elem = elem->next) ;
