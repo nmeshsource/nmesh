@@ -112,7 +112,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   /* load checkpoint from the various files */
   if(stage==0)
   {
-    checkpoint_load_pars(mesh, pars);
+    nmesh_load_parameters(mesh, pars, 1, 1);
     PRF;printf(": finished loading pars.\n");
     fflush(stdout);
     checkpoint_load_patches(mesh, pats);

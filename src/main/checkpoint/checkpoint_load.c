@@ -10,29 +10,6 @@
 /******************************************************************/
 
 /******************************************************************/
-/* functions to load pars */
-/******************************************************************/
-/* save pars */
-int checkpoint_load_pars(tMesh *mesh, char *fname)
-{
-  int rk;
-
-  /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
-  {
-    /* do work when it is my turn */
-    if(rk == nMPI_rank())
-    {
-      parse_parameter_file(mesh, fname);
-    }
-    /* wait until everyone is here */
-    nMPI_barrier();
-  } /* end rk-loop */
-
-  return 0;
-}
-
-/******************************************************************/
 /* functions to load patches */
 /******************************************************************/
 /* load patch info */

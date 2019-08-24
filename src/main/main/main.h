@@ -11,5 +11,6 @@ int evolve_mesh(tMesh *mesh);
 int finalize_mesh(tMesh *mesh);
 
 /* parameters.c */
+void parse_parameter_file(tMesh *mesh, char *parfile);
 int iterate_parameters(tMesh *mesh, int next);
 int nmesh_update_parameters(tMesh *mesh);

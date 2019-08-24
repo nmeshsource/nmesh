@@ -46,8 +46,9 @@ int set_booleanvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
 
 
 
-/* parse given parameter file */
-void parse_parameter_file(tMesh *mesh, char *parfile)
+/* open and parse a given parameter file */
+int open_and_parse_parameter_file(tMesh *mesh, char *parfile,
+                                  int fatal, int pr)
 {
   FILE *fp;
   int c, i, j;
@@ -56,12 +57,17 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   char *par, *val;
   int lpar, lval;
 
-  if(Rank0) printf("Reading parameter file \"%s\"\n", parfile);
+  if(pr) printf("Reading parameter file \"%s\"\n", parfile);
 
   /* read file into memory, and also add one space at end and beginning */
   fp = fopen(parfile, "r");
   if(!fp)
-    errorexits("Could not open parameter file \"%s\"\n", parfile);
+  {
+    if(fatal)
+      errorexits("Could not open parameter file \"%s\"\n", parfile);
+    else
+      return 0;
+  }
 
   buffer = 0;
   for(i = nbuffer = 0;; i++)
@@ -161,6 +167,34 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
     printparameters(mesh);
   }
   free(buffer);
+  return 1;
+}
+
+/* use open_and_parse_parameter_file to get pars on one proc after
+   the other */
+int nmesh_load_parameters(tMesh *mesh, char *fname, int fatal, int pr)
+{
+  int rk;
+
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      open_and_parse_parameter_file(mesh, fname, fatal, pr);
+    }
+    /* wait until everyone is here */
+    nMPI_barrier();
+  } /* end rk-loop */
+
+  return 0;
+}
+
+/* parse a parameter file */
+void parse_parameter_file(tMesh *mesh, char *parfile)
+{
+  nmesh_load_parameters(mesh, parfile, 1, Rank0);
 }
 
 /* update parameters from file outdir/nmesh_update_parameters.par */
@@ -171,7 +205,7 @@ int nmesh_update_parameters(tMesh *mesh)
   char *pars  = cmalloc(pl);
 
   snprintf(pars,pl, "%s/%s", outdir, "nmesh_update_parameters.par");
-  checkpoint_load_pars(mesh, pars);
+  nmesh_load_parameters(mesh, pars, 0, 0);
 
   free(pars);
   return 0;
