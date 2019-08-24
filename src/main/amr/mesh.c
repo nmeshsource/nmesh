@@ -105,7 +105,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
   }
 
   /* setup root node */
-  pat->rnode = make_root_node(pat, nroot, 0);
+  pat->rnode = make_root_node(pat, nroot, datrank);
   /* add root node to global mesh->lns list */
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
