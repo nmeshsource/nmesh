@@ -63,6 +63,7 @@ int open_and_parse_parameter_file(tMesh *mesh, char *parfile,
   fp = fopen(parfile, "r");
   if(!fp)
   {
+    if(pr) printf("  parameter file \"%s\" does not exist!\n", parfile);
     if(fatal)
       errorexits("Could not open parameter file \"%s\"\n", parfile);
     else
