@@ -481,7 +481,7 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
   bbox[5] = ABrct[3];
 
   /* make new patch */
-  pat = add_patch(mesh, bbox, n, n1max);
+  pat = add_patch(mesh, bbox, n, n1max, 0);
 
   /* set center */
   for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];

@@ -316,7 +316,8 @@ enum
 
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
-tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax);
+tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
+                int datrank);
 int amr_setup_mesh(tMesh *mesh);
 int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr);
 

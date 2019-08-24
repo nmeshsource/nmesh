@@ -66,7 +66,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
         {
           //prbbox(bbox, 3);
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
-          pat = add_patch(mesh, bbox, n, nmax);
+          pat = add_patch(mesh, bbox, n, nmax, 0);
           useF = 0;
         }
 /*

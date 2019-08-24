@@ -27,7 +27,7 @@ int add_1box_pat(tMesh *mesh, double xc[3], double dout[3])
   }
 
   /* make new patch */
-  pat = add_patch(mesh, bbox, n, n1max);
+  pat = add_patch(mesh, bbox, n, n1max, 0);
 
   return pat->p; /* return pat index */
 }

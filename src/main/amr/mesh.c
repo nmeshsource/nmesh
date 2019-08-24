@@ -28,7 +28,8 @@ tMesh *make_empty_mesh(int pr)
 }
 
 /* add a patch to the mesh */
-tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax)
+tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
+                int datrank)
 {
   tNlist *nlist;
   tPat *pat;
@@ -370,7 +371,7 @@ int setup_l2_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   remove_all_patches(mesh);
-  add_patch(mesh, bbox, n, n1max);
+  add_patch(mesh, bbox, n, n1max, 0);
 
   make8children_in_mesh_lns_myln(mesh->lns, n);
 
@@ -410,9 +411,9 @@ int setup_3patchl2_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   remove_all_patches(mesh);
-  add_patch(mesh, bbox0, n, n1max);
-  add_patch(mesh, bbox1, n, n1max);
-  add_patch(mesh, bbox2, n, n1max);
+  add_patch(mesh, bbox0, n, n1max, 0);
+  add_patch(mesh, bbox1, n, n1max, 0);
+  add_patch(mesh, bbox2, n, n1max, 0);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
@@ -557,7 +558,7 @@ int setup_test_mesh(tMesh *mesh)
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
-  add_patch(mesh, bbox, n, n1max);
+  add_patch(mesh, bbox, n, n1max, 0);
 
   enablevar(mesh, Ind("SurfExchange_u"));
   enablevar(mesh, Ind("SurfExchange_v"));
