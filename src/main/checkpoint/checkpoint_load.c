@@ -66,7 +66,9 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
         {
           //prbbox(bbox, 3);
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
-          pat = add_patch(mesh, bbox, n, nmax, -1); //rnode dat is nowhere!
+          /* We set datrank=-1 to save memory. No dat is allocated
+             anywhere! */
+          pat = add_patch(mesh, bbox, n, nmax, -1);
           useF = 0;
         }
 /*
@@ -130,8 +132,8 @@ exit(8);
     nMPI_barrier();
   } /* end rk-loop */
 
-  ///* load balance root nodes */
-  //simple_load_balance(mesh);
+  /* do not load balance root nodes here! datrank=-1 saves memory only
+     until simple_load_balance(mesh) is called for the 1st time! */
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 0);
@@ -196,9 +198,9 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           if(p<p_prev || !elem->next)
           {
             elem = mesh->lns;
-            // we can balance here
-            // BUT ONLY if all MPI-proc. go through file in parallel!
-            //simple_load_balance(mesh);
+            /* We could load balance here, BUT ONLY if all MPI-proc. go
+               through the file in parallel! In any case, it's better to
+               do load balance only once after all nodes are read. */
           }
           /* find element in nodelist with parent: */
           /* we could start search loop at elem=mesh->lns,
