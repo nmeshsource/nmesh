@@ -141,6 +141,8 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
   tNode *node = dat->node;
   int i, vi, nvars, bi, N;
 
+  if(!buf) return 0;
+
   /* write buffer into vars */
   nvars = buf[0];
   for(bi=1, i=0; i<nvars; i++)
