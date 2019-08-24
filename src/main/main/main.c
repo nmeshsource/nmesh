@@ -52,6 +52,7 @@ int main(int argc, char **argv)
   {
     inidata_mesh(mesh);
     evolve_mesh(mesh);
+    free_mesh_patches_and_nodes(mesh);
 
     /* set a par so we can find output from previous par iteration */
     makeparameter(mesh, "outdir_previous_iteration", "",

@@ -336,6 +336,7 @@ tArray *redim_array(tArray *array, int n0, int n1, int n2);
 void free_array(tArray *array);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
+void free_mesh_patches_and_nodes(tMesh *mesh);
 void free_mesh_contents(tMesh *mesh);
 void free_mesh(tMesh *mesh);
 tPat *alloc_patch(tMesh *mesh, int p, int nD);

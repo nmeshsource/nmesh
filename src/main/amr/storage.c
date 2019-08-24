@@ -876,7 +876,7 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
   mesh->pat = NULL;
   mesh->lns = NULL;
   mesh->nln = 0;
-  memset(mesh->myln, 0, sizeof(mesh->myln[0]));
+  memset(&(mesh->myln[0]), 0, sizeof(mesh->myln[0]));
 }
 
 /* free mesh contents */
