@@ -194,7 +194,12 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 
           /* update starting point in leaf node list of the 'for'-loop below */
           if(p<p_prev || !elem->next)
+          {
             elem = mesh->lns;
+            // we can balance here
+            // BUT ONLY if all MPI-proc. go through file in parallel!
+            //simple_load_balance(mesh);
+          }
           /* find element in nodelist with parent: */
           /* we could start search loop at elem=mesh->lns,
              but this would be slower */

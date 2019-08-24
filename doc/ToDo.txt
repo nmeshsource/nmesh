@@ -225,6 +225,13 @@ Questions about bamps:
 
 Things that should be done:
 ===========================
+*checkpoint_load_nodes creates all nodes in 1 (or few) MPI processes and only
+ later does load balance. This is not good! Not all may fit in 1 proc. And
+ even if it fits, gaps will appear in mem, when dat is freed on on this proc.
+ after load balance. Then proc0 occupies way more mem than all others.
+ -soln: load in parallel and load bal. after each level is read by all proc.
+ -how many proc can open one file at once for reading on ceph or lustre???
+
 *investigate: MPI_Test and MPI_Iprobe as alt. for MPI_Wait (as in Athena++)
 
 *I think get_all_surfaces takes very long on koko with 8^6 node GRHD:
