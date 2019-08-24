@@ -565,7 +565,7 @@ int iterate_parameters(tMesh* mesh, int next)
   tPar *p;
   char *list, *name, *newvalue=NULL, *value, *saveptr;
   char iterpar[100] = "iterate_parameter1";
-  char newoutdir[10000], *outdirp;
+  char newoutdir[10000];
   int i, j, l;
 
   /* reset iter to zero if next=0 */
