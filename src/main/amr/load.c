@@ -198,15 +198,19 @@ void move_node_to_rank(tNode *node, int desrank,
     {
       tMesh *mesh = node->pat->mesh;
 
-      /* alloc buffer */
-      rlen = 1 + (mesh->nvdb) * (2 + node->np); /* size to hold all vars */
-      rbuf = calloc(rlen, sizeof(double));
       other = node->datrank;
-      /* put buffers in com */
-      rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
-      //print_com(rcom);
-      /* receive */
-      nMPI_Irecv_double_com(rcom, rq, other, node->nid, WORLD);
+      /* receive only if datrank is in valid range */
+      if(other >= 0)
+      {
+        /* alloc buffer */
+        rlen = 1 + (mesh->nvdb) * (2 + node->np); /* size to hold all vars */
+        rbuf = calloc(rlen, sizeof(double));
+        /* put buffers in com */
+        rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
+        //print_com(rcom);
+        /* receive */
+        nMPI_Irecv_double_com(rcom, rq, other, node->nid, WORLD);
+      }
 
       /* allocate space already and init some stuff */
       if(node->dat) errorexit("destination node should not have dat yet");
