@@ -66,7 +66,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
         {
           //prbbox(bbox, 3);
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
-          pat = add_patch(mesh, bbox, n, nmax, 0);
+          pat = add_patch(mesh, bbox, n, nmax, -1); //rnode dat is nowhere!
           useF = 0;
         }
 /*
@@ -130,8 +130,8 @@ exit(8);
     nMPI_barrier();
   } /* end rk-loop */
 
-  /* load balance root nodes */
-  simple_load_balance(mesh);
+  ///* load balance root nodes */
+  //simple_load_balance(mesh);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 0);
