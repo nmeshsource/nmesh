@@ -163,7 +163,19 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
   free(buffer);
 }
 
+/* update parameters from file outdir/nmesh_update_parameters.par */
+int nmesh_update_parameters(tMesh *mesh)
+{
+  char *outdir = Gets(Par("outdir"));
+  int pl = strlen(outdir) + 80;
+  char *pars  = cmalloc(pl);
 
+  snprintf(pars,pl, "%s/%s", outdir, "nmesh_update_parameters.par");
+  checkpoint_load_pars(mesh, pars);
+
+  free(pars);
+  return 0;
+}
 
 
 
