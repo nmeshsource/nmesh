@@ -851,7 +851,7 @@ void realloc_patlist_in_mesh(tMesh *mesh, int npats)
 }
 
 /* free mesh contents */
-void free_mesh_contents(tMesh *mesh)
+void free_mesh_patches_and_nodes(tMesh *mesh)
 {
   int i;
 
@@ -870,6 +870,24 @@ void free_mesh_contents(tMesh *mesh)
   free_nodelist(mesh->lns);
   mesh->lns = NULL;
   realloc_myln_nncats(mesh->myln, 0);
+
+  /* set patch and node stuff to 0 */
+  mesh->npats = 0;
+  mesh->pat = NULL;
+  mesh->lns = NULL;
+  mesh->nln = 0;
+  memset(mesh->myln, 0, sizeof(mesh->myln[0]));
+}
+
+/* free mesh contents */
+void free_mesh_contents(tMesh *mesh)
+{
+  if(!mesh) return;
+
+  PRFs(":\n");
+
+  /* free patches and nodes */
+  free_mesh_patches_and_nodes(mesh);
 
   /* free vdb and pdb in mesh */
   free_mesh_vdb_contents(mesh);
