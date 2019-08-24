@@ -61,6 +61,7 @@ int main(int argc, char **argv)
 
   TIMER_STOP;
   finalize_mesh(mesh);
+  free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
   return 0;
@@ -513,7 +514,7 @@ int evolve_mesh(tMesh *mesh)
 int finalize_mesh(tMesh *mesh)
 {
   RunFun(FINALIZEMESH);
-  free_mesh(mesh);
+  free_mesh_contents(mesh);
   prTimeIn_s("WallTime at end of finalize_mesh: ");
   return 0;
 }
@@ -523,6 +524,7 @@ int finalize_mesh(tMesh *mesh)
 void finalize_all_and_exit(tMesh *mesh, int ec)
 {
   finalize_mesh(mesh);
+  free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
   fflush(stderr);

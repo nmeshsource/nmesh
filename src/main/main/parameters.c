@@ -43,6 +43,7 @@ void printparameters(tMesh *mesh);
 void translatevalue(char **value);
 int set_numericalvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
 int set_booleanvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
+int make_output_directory(tMesh *mesh);
 
 
 
@@ -641,13 +642,7 @@ int iterate_parameters(tMesh* mesh, int next)
   {
     printf("Starting parameter iteration %d:\n", iter);
     if(1) printf("outdir = %s\n", Gets(Par("outdir")));
-    outdirp = (char *) calloc(strlen(newoutdir)+40, sizeof(char));
-    strcpy(outdirp, newoutdir);
-    strcat(outdirp, "_previous");
-    system2("rm -rf", outdirp);
-    system3("mv", newoutdir, outdirp);
-    system2("mkdir", newoutdir);
-    free(outdirp);
+    make_output_directory(mesh);
     iter++;
     return 1;
   }

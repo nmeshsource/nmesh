@@ -850,8 +850,8 @@ void realloc_patlist_in_mesh(tMesh *mesh, int npats)
   mesh->npats = npats;
 }
 
-/* free mesh */
-void free_mesh(tMesh *mesh)
+/* free mesh contents */
+void free_mesh_contents(tMesh *mesh)
 {
   int i;
 
@@ -863,7 +863,7 @@ void free_mesh(tMesh *mesh)
   for(i = 0; i < mesh->npats; i++)
     free_patch(mesh->pat[i]);
 
-  /* now patch list array */
+  /* now free patch list array */
   free(mesh->pat);
 
   /* node list in mesh */
@@ -883,6 +883,14 @@ void free_mesh(tMesh *mesh)
   /* free mesh mutex */
   MUTEX_DESTROY(mesh->mutex);
 
+  /* now set all in mesh back to 0 */
+  memset(mesh, 0, sizeof(mesh[0]));
+}
+
+/* free mesh */
+void free_mesh(tMesh *mesh)
+{
+  free_mesh_contents(mesh);
   free(mesh);
 }
 
