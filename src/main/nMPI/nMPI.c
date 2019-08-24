@@ -504,14 +504,22 @@ void set_com_counters(tCom *com, int si, int ri)
   com->send_i = si;
   com->recv_i = ri;
 }
-/* increase the counters */
+/* increase the counters, or wrap back to 0 */
 void inc_com_send_i(tCom *com)
 {
-  com->send_i += 1;
+  int i = com->send_i + 1;
+  if(i < com->n_rq)
+    com->send_i = i;
+  else
+    com->send_i = 0;
 }
 void inc_com_recv_i(tCom *com)
 {
-  com->recv_i += 1;
+  int i = com->recv_i + 1;
+  if(i < com->n_rq)
+    com->recv_i = i;
+  else
+    com->recv_i = 0;
 }
 
 /* get com buffer pointers one after the other, i.e. increase i */
