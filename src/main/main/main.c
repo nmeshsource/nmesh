@@ -414,7 +414,7 @@ int inidata_mesh(tMesh *mesh)
   printf("Done with initialization\n");
   printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
-  /* load next stage of checkpoint, or save checkpoint*/
+  /* load next stage of checkpoint, or save checkpoint */
   if(chkpt)
   {
     checkpoint_load_stage(mesh, "", 1);

@@ -87,7 +87,8 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
 
 /* read a checkpoint
    stage=0 loads only the mesh, stage>0 loads only the vars */
-int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix, int stage)
+int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
+                          int stage)
 {
   char *dir;
   char *pars;
