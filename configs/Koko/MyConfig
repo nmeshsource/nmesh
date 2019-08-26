@@ -1,0 +1,47 @@
+# MyConfig
+#
+# The file MyConfig is included verbatim in the Makefile to determine which
+# libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# projects we add:
+#libpaths += src/tests/SurfExchange
+#libpaths += src/tests/misc
+libpaths += src/tests/advection1
+projects += src/projects/GRHD
+projects += src/projects/ADM
+projects += src/projects/TOVstar
+projects += src/projects/EoS
+projects += src/projects/Ein
+projects += src/projects/SRHDtestID
+projects += src/projects/ScalarWave
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = nmesh
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler
+CC = mpiicc # gcc # icc
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -std=c99 -O3 # -fopenmp # -g # -Wall -Werror
+
+# use OpenMP pragmas, this also needs something -fopenmp in OFLAGS
+#DFLAGS += -DUSEOMP
+
+# use MPI, no paths should be needed with mpicc
+DFLAGS += -DUSEMPI
+## This works on Debian 9 with openmpi:
+#MPIDIR = /usr/lib/x86_64-linux-gnu/openmpi
+#MPIDIRL = -L$(MPIDIR)/lib
+#MPIDIRI = -I$(MPIDIR)/include
+#MPILIBS = -lmpi
+
+# other libraries needed, in some cases we need even -lrt for clock_gettime
+SPECIALLIBS += -lgsl -lgslcblas
+#SPECIALLIBS += -lefence

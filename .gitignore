@@ -1,3 +1,4 @@
-lib
-MyConfig
+/lib
+/MyConfig
+tags
 *~
