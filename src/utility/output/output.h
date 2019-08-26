@@ -8,7 +8,6 @@ typedef struct tOUTPARS {
   int p;
   char *nodeloc;
   int text;
-  int binary;
   int arrange_as_1d;
   int flt;
   int dbl;

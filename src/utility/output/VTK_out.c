@@ -119,7 +119,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
     fprintf(fp, "variable %s, patch %d, node %s, time %.15g, "
             "Note: uniform grid spacings below are fake\n",
             par->name, par->p, par->nodeloc, Time);
-    fprintf(fp, par->binary ? "BINARY" : "ASCII\n");
+    fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
     fprintf(fp, "DATASET STRUCTURED_POINTS\n");
     fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
@@ -141,7 +141,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
     fprintf(fp, "# vtk DataFile Version 2.0\n");
     fprintf(fp, "variable %s, patch %d, node %s, time %.15g\n",
             par->name, par->p, par->nodeloc, Time);
-    fprintf(fp, par->binary ? "BINARY" : "ASCII\n");
+    fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
     fprintf(fp, "DATASET RECTILINEAR_GRID\n");
     fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
@@ -179,7 +179,6 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   /* pars we may need for vtk or others */
   par->name          = name;
   par->text          = Getv(Par("3dformat"), "text");
-  par->binary        = Getv(Par("3dformat"), "binary");
   par->arrange_as_1d = Getv(Par("3dformat"), "arrange_as_1d");
   par->flt           = Getv(Par("3dformat"), "float");
   par->dbl           = Getv(Par("3dformat"), "double");
@@ -284,7 +283,7 @@ void write_plane_vtk(tNode *node, FILE *fp, int normal, int plane[],
   fprintf(fp, "# vtk DataFile Version 2.0\n");
   fprintf(fp, "variable %s, patch %d, node %s, time %.15g\n",
           par->name, par->p, par->nodeloc, Time);
-  fprintf(fp, par->binary ? "BINARY" : "ASCII\n");
+  fprintf(fp, par->text ? "ASCII\n" : "BINARY");
   fprintf(fp, "\n");
   fprintf(fp, "DATASET RECTILINEAR_GRID\n");
   fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
@@ -322,7 +321,6 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   /* pars we may need for vtk or others */
   par->name          = name;
   par->text          = Getv(Par("2dformat"), "text");
-  par->binary        = Getv(Par("2dformat"), "binary");
   par->arrange_as_1d = 0; // Getv(Par("2dformat"), "arrange_as_1d");
   par->flt           = Getv(Par("2dformat"), "float");
   par->dbl           = Getv(Par("2dformat"), "double");
