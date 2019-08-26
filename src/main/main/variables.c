@@ -59,7 +59,7 @@ void AddMeshVar(tMesh *mesh, const char *name,
     newv->sym[2]        = sym[3*j+2];
 
     /* if this var lives only on one face, it needs special dimensions */
-    if(tensorindices[0]=='f')
+    if(tensorindices[0]=='@')
     {
       int face = ilist[j][0] - '0';
       int dir = face/2;

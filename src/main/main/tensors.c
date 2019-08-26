@@ -368,8 +368,8 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  /* faces f plus 3d indices i,j,... */
-  if(strcmp(tensorindices, "f") == 0) {
+  /* node surfaces (denoted by @) plus 3d indices i,j,... */
+  if(strcmp(tensorindices, "@") == 0) {
     for(f=0; f<6; f++)
     {
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
@@ -377,7 +377,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "fi") == 0) {
+  if(strcmp(tensorindices, "@i") == 0) {
     for(f=0; f<6; f++)
     for(i = 0; i < 3; i++) {
       sym[3*n+i] *= -1;
@@ -386,7 +386,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "fij") == 0) {
+  if(strcmp(tensorindices, "@ij") == 0) {
     for(f=0; f<6; f++)
     for(i = 0; i < 3; i++)
     for(j = 0; j < 3; j++) {
@@ -397,8 +397,8 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "fij+fji") == 0 ||
-     strcmp(tensorindices, "f(ij)" ) == 0) {
+  if(strcmp(tensorindices, "@ij+@ji") == 0 ||
+     strcmp(tensorindices, "@(ij)" ) == 0) {
     for(f=0; f<6; f++)
     for(i = 0; i < 3; i++)
     for(j = i; j < 3; j++) {
@@ -409,8 +409,8 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "fij-fji") == 0 ||
-     strcmp(tensorindices, "f[ij]") == 0) {
+  if(strcmp(tensorindices, "@ij-@ji") == 0 ||
+     strcmp(tensorindices, "@[ij]") == 0) {
     for(f=0; f<6; f++)
     for(i = 0; i < 3; i++)
     for(j = i+1; j < 3; j++) {
@@ -433,7 +433,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     printf("q, qr, qr+rq, qrs+rqs, qrst+qrts+rqst+rqts\n");
     printf("q, qr, (qr), (qr)s, (qr)(st)\n");
     printf("iq, iqr, i(qr)\n");
-    printf("fi, fij, f(ij), f[ij]\n");
+    printf("@i, @ij, @(ij), @[ij]\n");
     printf("Other combinations can be added to main/tensors.c .\n");
     errorexits("Error in tensor index string %s", tensorindices);
   }
