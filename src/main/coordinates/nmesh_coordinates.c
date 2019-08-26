@@ -23,15 +23,15 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("dYd", "i", "coord derivative dY/dx^i"); // thing in between
   AddAuxVar("dZd", "i", "coord derivative dZ/dx^i"); // these 3 lines
   AddAuxVar("det_dXbdx", "", "determinant of dXb/dx");
-  AddAuxVar("sqrtdet2gamma","f", "sqrt(det(2gamma)), here 2gamma is 2-metric "
+  AddAuxVar("sqrtdet2gamma","@", "sqrt(det(2gamma)), here 2gamma is 2-metric "
             "induced on surface_f of node in Xb-coords");
   AddAuxVar("sqrtgdiag", "I", "sqrt of diagonal components of upper index "
             "3-metric in Xb-coords");
   AddAuxVar("coordinates_tmp1", "", "temp. space"); // don't put any-
   AddAuxVar("coordinates_tmp2", "", "temp. space"); // thing in between
   AddAuxVar("coordinates_tmp3", "", "temp. space"); // the tmp var lines
-  //AddAuxVar("oC0_", "f", "coord0 on faces"); // don't put anything
-  //AddAuxVar("oC1_", "f", "coord1 on faces"); // between these 2 lines
+  //AddAuxVar("oC0_", "@", "coord0 on faces"); // don't put anything
+  //AddAuxVar("oC1_", "@", "coord1 on faces"); // between these 2 lines
 
   /* create vars that contain cub. sph. sigma_{0/1} and their derivs */
   AddAuxVarDim("CubedSphere_sigma0",     "", "sigma_{0}", 1,-1,-1);
