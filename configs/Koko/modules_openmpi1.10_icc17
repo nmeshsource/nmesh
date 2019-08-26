@@ -1,0 +1,12 @@
+module load anaconda/anaconda3/5.0.1
+module load openmpi/gcc/64/1.10.1 fftw3/openmpi/gcc/64/3.3.4
+module load slurm
+module rm   gcc
+module load intel/compiler/2017u1
+module rm   blas/gcc/64/1
+module load blas/intel/64/3.6.0
+module load lapack/intel/64/3.6.0
+##module load suitesparse/4.5.6
+#module load suite-sparse-5.2.0-gcc-7.3.0-ofyrn6x
+# Rhian's tip to get libstdc++
+module load gsl-2.4-gcc-7.3.0-tvtublc
