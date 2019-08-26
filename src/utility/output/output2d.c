@@ -13,8 +13,8 @@ void output2d_vl(tVarList *vl, int It, double T)
   int fmt = Par("2dformat");
   int gnuplot = Getv(fmt, "gnuplot");
   int xdmf    = Getv(fmt, "xdmf");
-/*
   int vtk     = Getv(fmt, "vtk");
+/*
   int text    = Getv(fmt, "text");
   int binary  = Getv(fmt, "binary");
   int flt     = Getv(fmt, "float");
@@ -23,14 +23,15 @@ void output2d_vl(tVarList *vl, int It, double T)
 
   TIMER_START;
 
-  if(gnuplot)
+  if(gnuplot || vtk)
   {
     int vli;
     for(vli=0; vli<vl->n; vli++)
     {
       int vi = vl->index[vli];
       char *vname = VarName(vi);
-      gnuplot_output2d_meshvar(mesh, vname, It, T);
+      if(gnuplot) gnuplot_output2d_meshvar(mesh, vname, It, T);
+      if(vtk)     vtk_output2d_meshvar(mesh, vname, It, T);
     }
   }
   if(xdmf)

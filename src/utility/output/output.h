@@ -41,6 +41,7 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
                  int series, tOutpars *par);
 void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T);
+void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* XDMF_out.c */
 void output2d_xdmf(tVarList *vl, int It, double T);
