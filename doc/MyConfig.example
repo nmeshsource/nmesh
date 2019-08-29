@@ -1,0 +1,38 @@
+# MyConfig
+#
+# The file MyConfig is included verbatim in the Makefile to determine which
+# libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# projects we add:
+libpaths += src/tests/advection1
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = nmesh
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler
+CC = gcc
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
+
+# use OpenMP pragmas, this also needs something like -fopenmp in OFLAGS
+#DFLAGS += -DUSEOMP
+
+# use MPI, no paths should be needed with mpicc
+#DFLAGS += -DUSEMPI
+## This works on Debian 9 with openmpi, but no paths are needed with mpicc:
+#MPIDIR = /usr/lib/x86_64-linux-gnu/openmpi
+#MPIDIRL = -L$(MPIDIR)/lib
+#MPIDIRI = -I$(MPIDIR)/include
+#MPILIBS = -lmpi
+
+# other libraries needed, in some cases we need even -lrt for clock_gettime
+#SPECIALLIBS += -lgsl -lgslcblas
+#SPECIALLIBS += -lrt
