@@ -29,7 +29,7 @@ int nmesh_advection1(tMesh *mesh)
   AddPar("advection1_direction", "1 0 0", "propagation direction n^i");
   AddPar("advection1_numflux", "upwind", "numerical flux [LLF,upwind]");
   AddPar("advection1_limiter", "none", "limiter [none,MRS,minmodB]");
-  AddPar("advection1_outerBC_influxes", "no", " [no,yes]");
+  AddPar("advection1_outerBC_influxes", "yes", " [no,yes]");
 
   AddPar("advection1_refine", "no", "use dynamic refinement [no,yes]");
   if(Getb(Par("advection1_refine")))
