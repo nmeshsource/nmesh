@@ -5,10 +5,17 @@ How to compile nmesh:
 cd nmesh
 make
 
-2. first edit MyConfig:
------------------------
+2. or first edit MyConfig:
+--------------------------
 There is a file MyConfig that the main Makefile includes. In it we set
-the compiler flags and libraries we wish to use when compiling.
+the compiler flags and libraries we wish to use when compiling. If it is
+not present, an example is copied from doc/MyConfig.example .
+
+3. more make targets:
+---------------------
+make clean
+make git_pull
+make git_clone
 
 
 How to run nmesh:
@@ -73,3 +80,31 @@ tgraph.py -c 3:6:9 { Adv/x.1XY2 Adv/y.1XY2 Adv/advection1_u.1XY2 }
 
 3D output can also be in VTK legacy format or XDMF format. It can be
 visualized with programs like paraview or visit.
+
+
+Getting more nmesh-projects:
+============================
+# Most physics projects reside in their own git repos. E.g. there are:
+Ein
+ADM
+EoS
+TOVstar
+GRHD
+SRHDtestID
+ScalarWave
+
+# To get and compile all these you need to add the lines
+projects += src/projects/Ein
+projects += src/projects/ADM
+projects += src/projects/EoS
+projects += src/projects/TOVstar
+projects += src/projects/GRHD
+projects += src/projects/SRHDtestID
+projects += src/projects/ScalarWave
+# in the "# projects we add:" section of nmesh/MyConfig and then type:
+make git_clone
+# To later update them, type:
+make git_pull
+# To compile them use:
+make clean
+make
