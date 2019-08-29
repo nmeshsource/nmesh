@@ -1,0 +1,42 @@
+###################################################################
+# modules we use
+
+physics = advection1
+
+###################################################################
+# evolution
+
+dt = 0.01
+finaltime = 0.2 # 3
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 7 CubedSpheres
+
+amr_luni = 1
+
+amr_n0 = 11
+amr_n1 = 10
+amr_n2 = 9
+
+###################################################################
+# parameters for advection1
+
+advection1_direction = 0.7 -0.6 0.4
+
+###################################################################
+# output
+
+logfile_creation = no
+
+1douttime = 0.1
+1doutput = advection1_u advection1_u_err x y z
+
+2dformat = xdmf  gnuplot
+2douttime = 0.1
+2doutput = advection1_u advection1_u_err x y z
+
+3dformat = xdmf # gnuplot
+3douttime = 0.1
+3doutput = advection1_u
