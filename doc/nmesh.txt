@@ -1,0 +1,75 @@
+How to compile nmesh:
+=====================
+1. simplest case:
+-----------------
+cd nmesh
+make
+
+2. first edit MyConfig:
+-----------------------
+There is a file MyConfig that the main Makefile includes. In it we set
+the compiler flags and libraries we wish to use when compiling.
+
+
+How to run nmesh:
+=================
+cd nmesh/exe
+./nmesh parfile.par
+
+An example parfile is in src/tests/advection1/parfiles/Adv.par . It can
+be copied to e.g. nmesh/exe and then used:
+./nmesh Adv.par
+
+
+How to update nmesh:
+====================
+cd nmesh
+make git_pull
+
+
+How it works:
+=============
+Nmesh is modular. Modules are in:
+src/tests
+src/projects
+
+Each module has its own Makefile and requires at least 5 files. E.g. for
+the advection1 module we have:
+Makefile            <-- Makefile to build module
+nmesh_advection1.c  <-- file that describes funcs, vars, and parameters
+advection1.c        <-- main C code of module
+advection1.h        <-- header file visible to this module only
+nmesh_advection1.h  <-- globally visible header file
+
+In nmesh_advection1.c is stuff like:
+  AddFun(INITIALDATA, advection1_init);
+  // ^- schedules funcadvection1_init in time bin INITIALDATA
+
+  AddEvoVar("advection1_u", "",     "field we advect");
+  // ^- adds a scalar var "advection1_u"
+
+  AddPar("advection1_profile", "sin", "initial profile [sin,square]");
+  // ^- adds a parameter "advection1_profile" with default value "sin"
+
+When nmesh starts in main of src/main/main/main.c it goes through the time
+bins and calls the funcs in them. The time bins are defined in
+main/main/skeleton.h .
+
+
+Looking at the output:
+======================
+By default nmesh creates an output dir named after the parfile used. E.g.
+./nmesh Adv.par
+results in a new dir "Adv" that contains the data from the run. ASCII output
+or 2D VTK output can be displayed with tgraph
+from https://github.com/wofti/tgraph .
+
+This can be as simple as:
+tgraph.py -c 1:2 Adv/advection1_u.0X2
+tgraph.py -c 1:2:3 Adv/advection1_u.0XY2
+
+Or if Cartesian coords are desired on the axes something like:
+tgraph.py -c 3:6:9 { Adv/x.1XY2 Adv/y.1XY2 Adv/advection1_u.1XY2 }
+
+3D output can also be in VTK legacy format or XDMF format. It can be
+visualized with programs like paraview or visit.
