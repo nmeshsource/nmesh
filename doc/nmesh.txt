@@ -53,7 +53,7 @@ In nmesh_advection1.c is stuff like:
 
 When nmesh starts in main of src/main/main/main.c it goes through the time
 bins and calls the funcs in them. The time bins are defined in
-main/main/skeleton.h .
+src/main/main/skeleton.h .
 
 
 Looking at the output:
