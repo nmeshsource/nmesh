@@ -43,7 +43,7 @@ nmesh_advection1.h  <-- globally visible header file
 
 In nmesh_advection1.c is stuff like:
   AddFun(INITIALDATA, advection1_init);
-  // ^- schedules funcadvection1_init in time bin INITIALDATA
+  // ^- schedules func advection1_init in time bin INITIALDATA
 
   AddEvoVar("advection1_u", "",     "field we advect");
   // ^- adds a scalar var "advection1_u"
