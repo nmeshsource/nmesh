@@ -216,6 +216,63 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   } endforlnodes;
 }
 
+/* quick array output in vtk format */
+void write_array(tNode *node, tArray *va, char *name, int as_1d,
+                 int fake_it, double fake_t)
+{
+  tMesh *mesh = node->pat->mesh;
+  FILE *fp;
+  int nseries;
+  char *outdir = Gets(Par("outdir"));
+  tOutpars par[1];
+  int p = node->pat->p;
+  char ns[100];
+
+  /* find string that identifies node */
+  node_location_str(node, ns,100);
+
+  /* pars we may need for vtk or others */
+  par->name          = name;
+  par->text          = 1;
+  par->arrange_as_1d = as_1d;
+  par->flt           = 0;
+  par->dbl           = 1;
+  par->nodeloc       = ns;
+  par->p             = p;
+
+  /* a number that counts the output */
+  nseries = TimeForMeshOutput_di_dt(mesh, 1, -1.);
+
+  /* write files */
+  fp = fopen_vtk(name, outdir, "XYZ", p, ns, nseries-1);
+  write3d_vtk(node, fp, va, fake_it,fake_t, nseries-1, par);
+  fclose(fp);
+}
+
+/* quick var output in vtk format */
+void write_var(tNode *node, char *name, int as_1d,
+               int fake_it, double fake_t)
+{
+  tMesh *mesh = node->pat->mesh;
+  tArray *va = VarA(node, Ind(name));
+
+  if(va) write_array(node, va, name, as_1d, fake_it,fake_t);
+}
+
+/* quick varlist output in vtk format */
+void write_vl(tNode *node, tVarList *vl, int as_1d,
+              int fake_it, double fake_t)
+{
+  tMesh *mesh = node->pat->mesh;
+  int vli;
+
+  for(vli=0; vli<vl->n; vli++)
+  {
+    int vi = vl->index[vli];
+    char *vname = VarName(vi);
+    write_var(node, vname, as_1d, fake_it, fake_t);
+  }
+}
 
 
 /* 2d output of one array */
