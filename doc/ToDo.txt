@@ -91,6 +91,26 @@ Things that need to be done urgently:
 
 *use MPI tags from surface.c also in indicators.c: DONE!
 
+*checkpointing: DONE!
+ -save entire mesh
+  +save all patch info, so that we can call funcs to create them, with their
+   bfaces and all
+  +save all nodes on each level (can later go through them and create all
+   nodes)
+  +for leaf nodes save all enabled EvoVars, but not RK stage vars
+ -call checkpoint_load after POST_PARAMETERS
+ -call amr's setup_mesh diectly if we do not load checkpoint
+ -make par checkpoint_save_pars. All pars in this list will be saved, all
+  others come from parfile or earlier call to initialize_libraries
+ -call checkpoint_save after ANALYZE
+ -save checkpoint in a way that is independent from num. of MPI procs
+ -unlike in BAM we do not need to make sure that each _init is called, e.g.
+  calling all time bins up to at least PRE_INITIALDATA, or maybe doing one
+  full evo step...
+ -put checkpoint into dir checkpoint_new, then mv to checkpoint
+ -save these files in checkpoint dir:
+  patches.txt, nodes.txt, variables.bin, save_pars.txt
+
 *check funs in refine.c
  +MPI part alone seems to work
  +threads alone seem to work if I use critical secs
@@ -115,27 +135,6 @@ Things that need to be done urgently:
 *check GRHD:
  -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
  -TOV star in Cowling approx
-
-*we need checkpointing:
- -save entire mesh
-  +save all patch info, so that we can call funcs to create them, with their
-   bfaces and all
-  +save all nodes on each level (can later go through them and create all
-   nodes)
-  +for leaf nodes save all enabled EvoVars
-  +disable all extra RK stage vars before saving
- -call checkpoint_load after POST_PARAMETERS
- -call amr's setup_mesh diectly if we do not load checkpoint
- -make par checkpoint_save_pars. All pars in this list will be saved, all
-  others come from parfile or earlier call to initialize_libraries
- -call checkpoint_save after ANALYZE
- -save checkpoint in a way that is independent from num. of MPI procs
- -unlike in BAM we do not need to make sure that each _init is called, e.g.
-  calling all time bins up to at least PRE_INITIALDATA, or maybe doing one
-  full evo step...
- -put checkpoint into dir checkpoint_new, then mv to checkpoint
- -save these files in checkpoint dir:
-  patches.txt, nodes.txt, variables.bin, save_pars.txt
 
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
