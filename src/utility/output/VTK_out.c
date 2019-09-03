@@ -116,8 +116,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
 
     /* write header */
     fprintf(fp, "# vtk DataFile Version 2.0\n");
-    fprintf(fp, "variable %s, patch %d, node %s, time %.15g, "
-            "Note: uniform grid spacings below are fake\n",
+    fprintf(fp, "variable %s, patch %d, node %s, time %.15g\n",
             par->name, par->p, par->nodeloc, Time);
     fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
