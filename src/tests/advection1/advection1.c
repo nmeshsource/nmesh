@@ -470,7 +470,7 @@ int advection1_refine(tMesh *mesh)
     else if(max-min<urft) node->rflag = -ref_method;
     else                  node->rflag = 0;
 
-    /* find parent if unset rflag if it exists */
+    /* find parent and unset rflag if it exists */
     parent = node->parent;
     if(parent) parent->rflag = 0;
 
