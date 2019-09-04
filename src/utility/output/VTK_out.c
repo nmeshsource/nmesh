@@ -240,7 +240,7 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   par->p             = p;
 
   /* a number that counts the output */
-  nseries = TimeForMeshOutput_di_dt(mesh, 1, -1.);
+  nseries = fake_it + 1;
 
   /* write files */
   fp = fopen_vtk(name, outdir, "XYZ", p, ns, nseries-1);
