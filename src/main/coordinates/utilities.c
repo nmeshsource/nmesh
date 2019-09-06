@@ -191,6 +191,84 @@ double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
   return detM;
 }
 
+/* inverse of symm. matrix, returns det */
+double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
+                               double s22, double s23, double s24,
+                               double s33, double s34, double s44,
+                               double *i11,double *i12,double *i13,double *i14,
+                               double *i22, double *i23, double *i24,
+                               double *i33, double *i34, double *i44)
+{
+/*
+var('s11 s12 s13 s14 s22 s23 s24 s33 s34 s44')
+Smat = matrix([[s11,s12,s13,s14],[s12,s22,s23,s24],[s13,s23,s33,s34],
+[s14,s24,s34,s44]])
+Sinvdet = Smat.I * Smat.det()
+# idet11 = Sinvdet[0,0].simplify_full()
+# ...
+invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
+[i14,i24,i34,i44]])
+*/
+  double detS, idet11,idet12,idet13,idet14;
+  double       idet22,idet23,idet24, idet33,idet34, idet44;
+
+  idet11 = -s24*s24*s33 + 2*s23*s24*s34 - s22*s34*s34 - (s23*s23 - s22*s33)*s44;
+  idet12 = s14*s24*s33 + s12*s34*s34 - (s14*s23 + s13*s24)*s34 + (s13*s23 - s12*s33)*s44;
+  idet13 = -s14*s23*s24 + s13*s24*s24 + (s14*s22 - s12*s24)*s34 - (s13*s22 - s12*s23)*s44;
+  idet14 = s14*s23*s23 - s13*s23*s24 - (s14*s22 - s12*s24)*s33 + (s13*s22 - s12*s23)*s34;
+  idet22 = -s14*s14*s33 + 2*s13*s14*s34 - s11*s34*s34 - (s13*s13 - s11*s33)*s44;
+  idet23 = s14*s14*s23 - s13*s14*s24 - (s12*s14 - s11*s24)*s34 + (s12*s13 - s11*s23)*s44;
+  idet24 = -s13*s14*s23 + s13*s13*s24 + (s12*s14 - s11*s24)*s33 - (s12*s13 - s11*s23)*s34;
+  idet33 = -s14*s14*s22 + 2*s12*s14*s24 - s11*s24*s24 - (s12*s12 - s11*s22)*s44;
+  idet34 = s13*s14*s22 - s12*s14*s23 - (s12*s13 - s11*s23)*s24 + (s12*s12 - s11*s22)*s34;
+  idet44 = -s13*s13*s22 + 2*s12*s13*s23 - s11*s23*s23 - (s12*s12 - s11*s22)*s33;
+
+  detS = s11*idet11 + s12*idet12 + s13*idet13 + s14*idet14;
+
+  *i11 = idet11/detS;
+  *i12 = idet12/detS;
+  *i13 = idet13/detS;
+  *i14 = idet14/detS;
+  *i22 = idet22/detS;
+  *i23 = idet23/detS;
+  *i24 = idet24/detS;
+  *i33 = idet33/detS;
+  *i34 = idet34/detS;
+  *i44 = idet44/detS;
+
+  return detS;
+}
+
+/* invert a 4*4*1 symmetric array in place and return det */
+double invert4x4x1symm_array(tArray *a)
+{
+  double i11,i12,i13,i14, i22,i23,i24, i33,i34, i44;
+  double *d = Arrd_(a);
+  double det = inv4Dmat_from_4Dsymmmat(d[0],d[1],d[2],d[3],
+                                      d[5],d[6],d[7], d[10],d[11], d[15],
+                                      &i11,&i12,&i13,&i14,
+                                      &i22, &i23, &i24, &i33, &i34, &i44);
+  d[0]  = i11;
+  d[1]  = i12;
+  d[2]  = i13;
+  d[3]  = i14;
+  d[5]  = i22;
+  d[6]  = i23;
+  d[7]  = i24;
+  d[10] = i33;
+  d[11] = i34;
+  d[15] = i44;
+
+  d[4]  = i12;
+  d[8]  = i13;
+  d[9]  = i23;
+  d[12] = i14;
+  d[13] = i24;
+  d[14] = i34;
+
+  return det;
+}
+
 /* compute V_i from V^i using metric g_{ij}, or V^i from V_i using
    metric g^{ij}, returns V^2 = V_i V^i */
 double symmmat3D_times_vec(double gxx, double gxy, double gxz,

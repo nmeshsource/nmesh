@@ -109,6 +109,13 @@ double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
                                double M22, double M23, double M33,
                                double *i11, double *i12, double *i13,
                                double *i22, double *i23, double *i33);
+double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
+                               double s22, double s23, double s24,
+                               double s33, double s34, double s44,
+                               double *i11,double *i12,double *i13,double *i14,
+                               double *i22, double *i23, double *i24,
+                               double *i33, double *i34, double *i44);
+double invert4x4x1symm_array(tArray *a);
 double symmmat3D_times_vec(double gxx, double gxy, double gxz,
                            double gyy, double gyz, double gzz,
                            double Vx, double Vy, double Vz,
