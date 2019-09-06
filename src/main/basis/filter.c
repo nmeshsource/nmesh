@@ -288,7 +288,7 @@ void linear_fit_array(tArray *c, double beta[4])
   mm_array0(X, c, XTc);
 
   /* b = (X^T X)^{-1} XTc = ((X^T X)^T)^{-1} XTc = ((X^T X)^{-1})^T XTc */
-  point_array_a_to_data(b, beta, 1);
+  point_array_d_to_data(b, beta, 1);
   mm_array0(XTX, XTc, b);
 
   /* restore dims of c */

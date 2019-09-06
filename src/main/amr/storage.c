@@ -113,7 +113,7 @@ tArray *get_array_seg(tArray *array, int si)
 }
 
 /* replace pointer to data with something else */
-void point_array_a_to_data(tArray *array, void *data, int nofree)
+void point_array_d_to_data(tArray *array, void *data, int nofree)
 {
   if( (array->si == 0) && (array->d_nofree == 0) )
     free(array->d); /* free data only if this segm. 0 and it should be freed */

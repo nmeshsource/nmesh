@@ -229,7 +229,7 @@ int coordinates_init_node(tNode *node)
           /* Put transpose of 3-metric into a3gamT.
              Trick here is that C-arrays are row major. So when we put this
              into the col. major a3gamT, we get the transpose automatically! */
-          point_array_a_to_data(a3gamT, M, 1);
+          point_array_d_to_data(a3gamT, M, 1);
           mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
           mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
         }
@@ -266,10 +266,10 @@ int coordinates_init_node(tNode *node)
     /* Put coord. transf. into adXdx.
        Trick here is that C-arrays are row major. So when we put dXdx
        into the col. major adXdxT, we automatically take the transpose! */
-    point_array_a_to_data(adXdxT, dXdx, 1);
+    point_array_d_to_data(adXdxT, dXdx, 1);
 
     /* Put inv. of 3-metric into ainvM. */
-    point_array_a_to_data(ainvM, invM, 1);
+    point_array_d_to_data(ainvM, invM, 1);
 
     forpoints(node, ijk)
     {

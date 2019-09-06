@@ -436,11 +436,11 @@ print3Dmat(M);
 //printvar_innode(node, Ind("y"));
 //printvar_innode(node, Ind("z"));
 tArray *A = alloc_array2d(3,3);
-point_array_a_to_data(A, M, 1);
+point_array_d_to_data(A, M, 1);
 printarray(A);
 
 print3Dmat(invM);
-point_array_a_to_data(A, invM, 1);
+point_array_d_to_data(A, invM, 1);
 printarray(A);
 for(i=0; i<3; i++) printf("invM[i][1]=%g\n" , invM[i][1]);
 for(i=0; i<3; i++) printf("invM[i][2]=%g\n" , invM[i][2]);
