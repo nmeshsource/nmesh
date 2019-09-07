@@ -375,67 +375,63 @@ void fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
   free_array(cu);
 }
 
-/**/
-int cmp_top_unflitered_coeffs_to_fit(tArray *ca, int n_unfilt[3],
-                                     double beta[4], double fac)
+/* check if top unflitered coeffs are greater than fitted result */
+int top_unflitered_coeffs_agree_with_fit(tArray *ca, int n_unfilt[3],
+                                         double beta[4], double fac)
 {
-  int i, j, k;
+  int d, i, j, k, p;
   double logcf, cf;
-  int largec[] = { 0,0,0 };
+  int agree[] = { 1,1,1 };
 
-  /* check along max. i */
-  i = n_unfilt[0] - 1;
-  for(k=0; k<n_unfilt[2]; k++)
+  /* check along max. i, j and k */
+  for(d=0; d<3; d++)
   {
-    for(j=0; j<n_unfilt[1]; j++)
+    p = n_unfilt[d] - 1;
+    forplaneN(d, i,j,k, n_unfilt, p)
     {
       int ia = Ind_n(i,j,k, ca->n);
+
       logcf = linear_fit_result(beta, i,j,k);
       cf = exp(logcf);
       if(fabs(ca->d[ia]) > cf * fac)
       {
-        largec[0] = 1;
-        break;
+        agree[d] = 0;
+        goto next_d;
       }
     }
-    if(largec[0]) break;
+  next_d: ;
   }
+  return agree[0] && agree[1] && agree[2];
+}
 
-  /* check along max. j */
-  j = n_unfilt[1] - 1;
-  for(k=0; k<n_unfilt[2]; k++)
+/* check if top unfiltered_coeffs obey exp. falloff */
+int topcoeff_has_expfalloff_array(tNode *node, tArray *ua,
+                                  double alp[3], double s[3],
+                                  double f_unfilt, double fac)
+{
+  int n_unfilt[3], ret;
+  double beta[4];
+  DECL_STACK_ARRAY(ca, ua->n);
+
+  basis_array_analysis3(node, ua, ca);
+  fit_unfiltered_coefflogs(ca, alp,s, f_unfilt, n_unfilt, beta);
+  ret = top_unflitered_coeffs_agree_with_fit(ca, n_unfilt, beta, fac);
+  return ret;
+}
+
+/* check if top unfiltered_coeffs obey exp. falloff in var */
+int topcoeff_has_expfalloff_var(tNode *node, int ui,
+                                double alp[3], double s[3],
+                                double f_unfilt, double fac)
+{
+  tDat *dat = node->dat;
+
+  if(dat)
   {
-    for(i=0; i<n_unfilt[0]; i++)
-    {
-      int ia = Ind_n(i,j,k, ca->n);
-      logcf = linear_fit_result(beta, i,j,k);
-      cf = exp(logcf);
-      if(fabs(ca->d[ia]) > cf * fac)
-      {
-        largec[1] = 1;
-        break;
-      }
-    }
-    if(largec[1]) break;
+    tArray *ua = dat->v[ui];
+    if(!ua) return 1;
+    return topcoeff_has_expfalloff_array(node, ua, alp,s, f_unfilt, fac);
   }
-
-  /* check along max. k */
-  k = n_unfilt[0] - 1;
-  for(j=0; j<n_unfilt[1]; j++)
-  {
-    for(i=0; i<n_unfilt[0]; i++)
-    {
-      int ia = Ind_n(i,j,k, ca->n);
-      logcf = linear_fit_result(beta, i,j,k);
-      cf = exp(logcf);
-      if(fabs(ca->d[ia]) > cf * fac)
-      {
-        largec[2] = 1;
-        break;
-      }
-    }
-    if(largec[2]) break;
-  }
-
-
+  else
+    return -1;
 }
