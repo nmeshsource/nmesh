@@ -189,13 +189,13 @@ int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3])
 }
 
 
-
 /***********************************************************************/
 /* functions for linear fit */
 /***********************************************************************/
 
 /*
 1D least squares fit
+====================
 
 data: (x_i, y_i),  i=1, ... , n
 x_i is indep. and y_i dependent variable
@@ -227,10 +227,10 @@ here X is the n*m matrix:
      ( X_{11} X_{12} ... )
  X = ( X_{21} X_{22} ... )
      ( ...               )
-*/
 
-/*
+
 3D least squares fit
+====================
 
 data: (x_i, y_i, z_i, v_i),  i=1, ... , n
 \vec{x}_i = (x_i, y_i, z_i) are indep. and v_i dependent variables
@@ -262,21 +262,28 @@ X^T \vec{v} - X^T X \vec{\beta} = 0
 
 */
 
-/* 3d linear fit to array c_ijk: */
-void linear_fit_array(tArray *c, double beta[4])
+/* 3d linear fit to array c_{ijk}:
+   we fit with: c_fit = beta0*i + beta1*j + beta2*k + beta3,
+   i.e. linear in i,j,k
+   the fit pars are returned in beta[4] */
+void linear_fit_to_array(tArray *c, double beta[4])
 {
+  int i,j,k;
   tArray *X   = alloc_array2d(c->N, 4);
   tArray *XTX = alloc_array2d(4, 4);
   tArray *XTc = alloc_array2d(4, 1);
   tArray *b = alloc_empty_array2d(4, 1);
   int n[3] = { c->n[0], c->n[1], c->n[2] }; /* save c->n */
 
-
-  /* make c into 1d array, i.e. a column vector */
-  redim_array(c, c->N,1,1);
-
   /* set N*4 matrix X */
-  //... FIXME!!!
+  forijk(i,j,k, n)
+  {
+    int ind = Ind_n(i,j,k, n);
+    X->d[ind]            = i;
+    X->d[ind + c->N]     = j;
+    X->d[ind + c->N * 2] = k;
+    X->d[ind + c->N * 3] = 1.;
+  }
 
   /* set 4*4 matrix XTX = X^T X */
   mm_array0_norestrict(X, X, XTX);
@@ -284,18 +291,151 @@ void linear_fit_array(tArray *c, double beta[4])
   /* get inverse of XTX */
   invert4x4x1symm_array(XTX); /* XTX now contains inverse of X^T X */
 
+  /* make c into 1d array, i.e. a column vector */
+  redim_array(c, c->N,1,1);
+
   /* get X^T \vec{c} */
   mm_array0(X, c, XTc);
-
-  /* b = (X^T X)^{-1} XTc = ((X^T X)^T)^{-1} XTc = ((X^T X)^{-1})^T XTc */
-  point_array_d_to_data(b, beta, 1);
-  mm_array0(XTX, XTc, b);
 
   /* restore dims of c */
   redim_array(c, n[0],n[1],n[2]);
 
+  /* b = (X^T X)^{-1} XTc = ((X^T X)^T)^{-1} XTc = ((X^T X)^{-1})^T XTc */
+  point_array_d_to_data(b, beta, 1);
+  mm_array0(XTX, XTc, b); /* data pointer of b points to beta */
+
   /* free all arrays */
   free_array(b);
+  free_array(XTc);
   free_array(XTX);
   free_array(X);
+}
+
+/* return fitted results for fit to coeff array */
+double linear_fit_result(double beta[4], int i, int j, int k)
+{
+  return beta[0]*i + beta[1]*j + beta[2]*k + beta[3];
+}
+
+/***********************************************************************/
+/* functions to determine if coeffs fall off exponentially */
+/***********************************************************************/
+
+/* find num of unfiltered coeffs for exp. filter */
+void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
+                                   double f_unfilt, int n_unfilt[3])
+{
+  double N[] = { n[0]-1, n[1]-1, n[2]-1 };
+  int d, m;
+
+  /* make sure we don't divide by zero */
+  if(N[0]==0.) N[0] = 1.;
+  if(N[1]==0.) N[1] = 1.;
+  if(N[2]==0.) N[2] = 1.;
+
+  for(d=0; d<3; d++)
+  {
+    /* check if coeffs are strongly filtered */
+    for(m=n[d]-1; m>=0; m--)
+    {
+      double f = exp( -alp[d] * pow(m/N[d], s[d]) );
+      if(f>=f_unfilt) break;
+    }
+    if(m<0) m = 0;
+    n_unfilt[d] = m;
+  }
+}
+
+#define LOGFLOOR 1e-50
+
+/* linear fit to unfiltered coeffs, returns n_unfilt and beta */
+void fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
+                              double f_unfilt, int n_unfilt[3],
+                              double beta[4])
+{
+  int *n = ca->n;
+  int i, j, k;
+  tArray *cu;
+
+  /* find n of unfilt. coeffs */
+  unfiltered_range_of_expfilter(ca->n, alp,s, f_unfilt, n_unfilt);
+  cu = alloc_array(n_unfilt);
+
+  /* write log of unfilt. coeffs ca into cu */
+  forijk(i,j,k, n_unfilt)
+  {
+    int ia = Ind_n(i,j,k, n);
+    int iu = Ind_n(i,j,k, n_unfilt);
+    cu->d[iu] = log(fabs(ca->d[ia]) + LOGFLOOR);
+  }
+
+  /* find fit pars beta */
+  linear_fit_to_array(cu, beta);
+
+  free_array(cu);
+}
+
+/**/
+int cmp_top_unflitered_coeffs_to_fit(tArray *ca, int n_unfilt[3],
+                                     double beta[4], double fac)
+{
+  int i, j, k;
+  double logcf, cf;
+  int largec[] = { 0,0,0 };
+
+  /* check along max. i */
+  i = n_unfilt[0] - 1;
+  for(k=0; k<n_unfilt[2]; k++)
+  {
+    for(j=0; j<n_unfilt[1]; j++)
+    {
+      int ia = Ind_n(i,j,k, ca->n);
+      logcf = linear_fit_result(beta, i,j,k);
+      cf = exp(logcf);
+      if(fabs(ca->d[ia]) > cf * fac)
+      {
+        largec[0] = 1;
+        break;
+      }
+    }
+    if(largec[0]) break;
+  }
+
+  /* check along max. j */
+  j = n_unfilt[1] - 1;
+  for(k=0; k<n_unfilt[2]; k++)
+  {
+    for(i=0; i<n_unfilt[0]; i++)
+    {
+      int ia = Ind_n(i,j,k, ca->n);
+      logcf = linear_fit_result(beta, i,j,k);
+      cf = exp(logcf);
+      if(fabs(ca->d[ia]) > cf * fac)
+      {
+        largec[1] = 1;
+        break;
+      }
+    }
+    if(largec[1]) break;
+  }
+
+  /* check along max. k */
+  k = n_unfilt[0] - 1;
+  for(j=0; j<n_unfilt[1]; j++)
+  {
+    for(i=0; i<n_unfilt[0]; i++)
+    {
+      int ia = Ind_n(i,j,k, ca->n);
+      logcf = linear_fit_result(beta, i,j,k);
+      cf = exp(logcf);
+      if(fabs(ca->d[ia]) > cf * fac)
+      {
+        largec[2] = 1;
+        break;
+      }
+    }
+    if(largec[2]) break;
+  }
+
+
 }

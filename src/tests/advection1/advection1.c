@@ -353,6 +353,9 @@ int advection1_init(tMesh *mesh)
   /* set initial profile, e.g. at t=0: set u=sin(x) */
   advection1_set_profile(mesh, iu);
 
+//write_vl(mesh->lns->node, vlu, 1,11,12);
+//exit(88);
+
   /* register u and its RHS with evolve */
   if(Getv(limiter, "MRS"))
     evolve_register_subsys_u_rhs_lim(mesh, vlu, advection1_vol_rhs_u,
