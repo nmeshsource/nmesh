@@ -81,11 +81,11 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n,
 
 
 /* 3d output of one array */
-void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
-                 int series, tOutpars *par)
+void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
+                 double Time, int series, tOutpars *par)
 {
   tArray *X[3];
-  tArray *Xb[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
+  tArray *Xb[3];
   double *pX, *pY, *pZ;
   double *pV = va->d;
   int *n = va->n;
@@ -94,13 +94,34 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
   /* return if var has no memory */
   if(pV==NULL) return;
 
-  /* make room for X,Y,Z */
-  X[0] = alloc_array(Xb[0]->n);
-  X[1] = alloc_array(Xb[1]->n);
-  X[2] = alloc_array(Xb[2]->n);
+  if(node)
+  {
+    Xb[0] = node->Xb[0];
+    Xb[1] = node->Xb[1];
+    Xb[2] = node->Xb[2];
 
-  /* get arrays with X,Y,Z */
-  array_XYZ_of_XbYbZb(node, Xb, X);
+    /* make room for X,Y,Z */
+    X[0] = alloc_array(Xb[0]->n);
+    X[1] = alloc_array(Xb[1]->n);
+    X[2] = alloc_array(Xb[2]->n);
+
+    /* get arrays with X,Y,Z */
+    array_XYZ_of_XbYbZb(node, Xb, X);
+  }
+  else
+  {
+    int d, m;
+    int N[] = { 1,1,1 };
+    /* put index ranges in X */
+    for(d=0; d<3; d++)
+    {
+      N[0] = n[d];
+      X[d] = alloc_array(N);
+      for(m=0; m<n[d]; m++) X[d]->d[m] = m;
+    }
+  }
+
+  /* pointers to X data */
   pX = X[0]->d;
   pY = X[1]->d;
   pZ = X[2]->d;
