@@ -286,8 +286,13 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
 void write_var(tNode *node, char *name, int as_1d,
                int fake_it, double fake_t)
 {
-  tMesh *mesh = node->pat->mesh;
-  tArray *va = VarA(node, Ind(name));
+  tMesh *mesh;
+  tArray *va;
+
+  if(!node) return;
+
+  mesh = node->pat->mesh;
+  va = VarA(node, Ind(name));
 
   if(va) write_array(node, va, name, as_1d, fake_it,fake_t);
 }
