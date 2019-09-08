@@ -245,9 +245,9 @@ double invert4x4x1symm_array(tArray *a)
   double i11,i12,i13,i14, i22,i23,i24, i33,i34, i44;
   double *d = Arrd_(a);
   double det = inv4Dmat_from_4Dsymmmat(d[0],d[1],d[2],d[3],
-                                      d[5],d[6],d[7], d[10],d[11], d[15],
-                                      &i11,&i12,&i13,&i14,
-                                      &i22, &i23, &i24, &i33, &i34, &i44);
+                                       d[5],d[6],d[7], d[10],d[11], d[15],
+                                       &i11,&i12,&i13,&i14,
+                                       &i22, &i23, &i24, &i33, &i34, &i44);
   d[0]  = i11;
   d[1]  = i12;
   d[2]  = i13;
@@ -266,6 +266,7 @@ double invert4x4x1symm_array(tArray *a)
   d[13] = i24;
   d[14] = i34;
 
+  //PRF;printf(": det=%g\n", det);
   return det;
 }
 

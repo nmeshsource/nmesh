@@ -61,6 +61,14 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3]);
 int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3]);
 void expfilter_vl(tVarList *vl, double af, double sf);
 double linear_fit_result(double beta[4], int i, int j, int k);
+void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
+                                   double f_unfilt, int n_unfilt[3]);
 double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
                                 double f_unfilt, int n_unfilt[3],
                                 double beta[4]);
+int topcoeff_has_expfalloff_array(tNode *node, tArray *ua,
+                                  double alp[3], double s[3],
+                                  double f_unfilt, double fac);
+int topcoeff_has_expfalloff_var(tNode *node, int ui,
+                                double alp[3], double s[3],
+                                double f_unfilt, double fac);

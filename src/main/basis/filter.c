@@ -391,7 +391,7 @@ int top_unflitered_coeffs_agree_with_fit(tArray *ca, int n_unfilt[3],
                                          double beta[4], double fac)
 {
   int d, i, j, k, p;
-  double logcf, cf;
+  double logcfit, cfit, cmag;
   int agree[] = { 1,1,1 };
 
   /* check along max. i, j and k */
@@ -402,9 +402,12 @@ int top_unflitered_coeffs_agree_with_fit(tArray *ca, int n_unfilt[3],
     {
       int ia = Ind_n(i,j,k, ca->n);
 
-      logcf = linear_fit_result(beta, i,j,k);
-      cf = exp(logcf);
-      if(fabs(ca->d[ia]) > cf * fac)
+      logcfit = linear_fit_result(beta, i,j,k);
+      cfit = exp(logcfit);
+      cmag = fabs(ca->d[ia]);
+      //PRF;
+      printf(": i=%d j=%d k=%d: cmag=%g cfit=%g\n", i,j,k, cmag, cfit);
+      if(cmag > cfit * fac)
       {
         agree[d] = 0;
         goto next_d;
