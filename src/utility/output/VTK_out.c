@@ -12,14 +12,14 @@
 
 /* open file for vtk writing */
 FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
-                int p, char *nstr, int series)
+                char *nstr, int series)
 {
   char filename[1000];
   FILE *fp;
 
   /* make subdirectory if it does not exist */
-  snprintf(filename,999, "%s/%s.%02d%s%s_vtk", outdir,
-           varname, p, suffix, nstr);
+  snprintf(filename,999, "%s/%s.%s%s_vtk", outdir,
+           varname, suffix, nstr);
   fp = fopen(filename, "r");
   if(!fp)
     mkdir(filename, 0777);
@@ -27,9 +27,9 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
     fclose(fp);
 
   /* open file */
-  snprintf(filename,999, "%s/%s.%02d%s%s_vtk/%s.%02d%s%s_%08d.vtk",
-	   outdir, varname, p, suffix, nstr,
-	   varname, p, suffix, nstr, series);
+  snprintf(filename,999, "%s/%s.%s%s_vtk/%s.%s%s_%08d.vtk",
+	   outdir, varname, suffix, nstr,
+	   varname, suffix, nstr, series);
   fp = fopen(filename, "wb");
   if(!fp)
     errorexits("failed opening %s", filename);
@@ -137,8 +137,8 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
 
     /* write header */
     fprintf(fp, "# vtk DataFile Version 2.0\n");
-    fprintf(fp, "variable %s, patch %d, node %s, time %.15g\n",
-            par->name, par->p, par->nodeloc, Time);
+    fprintf(fp, "variable %s, node %s, time %.15g\n",
+            par->name, par->nodename, Time);
     fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
     fprintf(fp, "DATASET STRUCTURED_POINTS\n");
@@ -159,8 +159,8 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
 
     /* write header */
     fprintf(fp, "# vtk DataFile Version 2.0\n");
-    fprintf(fp, "variable %s, patch %d, node %s, time %.15g\n",
-            par->name, par->p, par->nodeloc, Time);
+    fprintf(fp, "variable %s, node %s, time %.15g\n",
+            par->name, par->nodename, Time);
     fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
     fprintf(fp, "DATASET RECTILINEAR_GRID\n");
@@ -212,21 +212,19 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
     if(node->dat)
     if(node->dat->v[vi])
     {
-      int p = node->pat->p;
       char ns[100];
 
       /* find string that identifies node */
-      node_location_str(node, ns,100);
+      nodename(node, ns,100);
 
       /* set some more pars */
-      par->nodeloc = ns;
-      par->p       = p;
+      par->nodename = ns;
 
       /* write files */
       if(vtk || 1) /* can do only VTK right now */
       {
         /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XYZ", p, ns, nseries-1);
+        fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1);
         write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
         fclose(fp);
       }
@@ -245,22 +243,19 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   int nseries;
   char *outdir;
   tOutpars par[1];
-  int p;
   char ns[100];
 
   if(node)
   {
     mesh = node->pat->mesh;
     outdir = Gets(Par("outdir"));
-    p = node->pat->p;
 
     /* find string that identifies node */
-    node_location_str(node, ns,100);
+    nodename(node, ns,100);
   }
   else
   {
     outdir = ".";
-    p = -1;
     ns[0] = 0;
   }
 
@@ -270,14 +265,13 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   par->arrange_as_1d = as_1d;
   par->flt           = 0;
   par->dbl           = 1;
-  par->nodeloc       = ns;
-  par->p             = p;
+  par->nodename      = ns;
 
   /* a number that counts the output */
   nseries = fake_it + 1;
 
   /* write files */
-  fp = fopen_vtk(name, outdir, "XYZ", p, ns, nseries-1);
+  fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1);
   write3d_vtk(node, fp, va, fake_it,fake_t, nseries-1, par);
   fclose(fp);
 }
@@ -376,8 +370,8 @@ void write_plane_vtk(tNode *node, FILE *fp, int normal, int plane[],
 
   /* write header and data */
   fprintf(fp, "# vtk DataFile Version 2.0\n");
-  fprintf(fp, "variable %s, patch %d, node %s, time %.15g\n",
-          par->name, par->p, par->nodeloc, Time);
+  fprintf(fp, "variable %s, node %s, time %.15g\n",
+          par->name, par->nodename, Time);
   fprintf(fp, par->text ? "ASCII\n" : "BINARY");
   fprintf(fp, "\n");
   fprintf(fp, "DATASET RECTILINEAR_GRID\n");
@@ -429,7 +423,6 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
     if(node->dat)
     if(node->dat->v[vi])
     {
-      int p = node->pat->p;
       char ns[100];
       int ijk[3];
 
@@ -446,18 +439,17 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
         nearest_ijk_of_XYZ(node, ijk, X0);
 
       /* find string that idetifies node */
-      node_location_str(node, ns,100);
+      nodename(node, ns,100);
 
       /* set some more pars */
-      par->nodeloc = ns;
-      par->p       = p;
+      par->nodename = ns;
 
       /* write files */
       /* XY-plane:  Z = Z0 */
       if(ijk[2]>=0)
       {
         /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XY", p, ns, nseries-1);
+        fp = fopen_vtk(name, outdir, "XY", ns, nseries-1);
         write_plane_vtk(node, fp, 2,ijk, VarA(node, vi), It,T, nseries-1, par);
         fclose(fp);
       }
@@ -465,7 +457,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       if(ijk[1]>=0)
       {
         /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XZ", p, ns, nseries-1);
+        fp = fopen_vtk(name, outdir, "XZ", ns, nseries-1);
         write_plane_vtk(node, fp, 1,ijk, VarA(node, vi), It,T, nseries-1, par);
         fclose(fp);
       }
@@ -473,7 +465,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       if(ijk[0]>=0)
       {
         /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "YZ", p, ns, nseries-1);
+        fp = fopen_vtk(name, outdir, "YZ", ns, nseries-1);
         write_plane_vtk(node, fp, 0,ijk, VarA(node, vi), It,T, nseries-1, par);
         fclose(fp);
       }
