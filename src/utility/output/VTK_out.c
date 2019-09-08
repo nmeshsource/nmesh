@@ -219,16 +219,29 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
 void write_array(tNode *node, tArray *va, char *name, int as_1d,
                  int fake_it, double fake_t)
 {
-  tMesh *mesh = node->pat->mesh;
+  tMesh *mesh;
   FILE *fp;
   int nseries;
-  char *outdir = Gets(Par("outdir"));
+  char *outdir;
   tOutpars par[1];
-  int p = node->pat->p;
+  int p;
   char ns[100];
 
-  /* find string that identifies node */
-  node_location_str(node, ns,100);
+  if(node)
+  {
+    mesh = node->pat->mesh;
+    outdir = Gets(Par("outdir"));
+    p = node->pat->p;
+
+    /* find string that identifies node */
+    node_location_str(node, ns,100);
+  }
+  else
+  {
+    outdir = ".";
+    p = -1;
+    ns[0] = 0;
+  }
 
   /* pars we may need for vtk or others */
   par->name          = name;
