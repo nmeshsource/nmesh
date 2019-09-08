@@ -296,7 +296,7 @@ void write_var(tNode *node, char *name, int as_1d,
 void write_vl(tNode *node, tVarList *vl, int as_1d,
               int fake_it, double fake_t)
 {
-  tMesh *mesh = node->pat->mesh;
+  tMesh *mesh = vl->mesh;
   int vli;
 
   for(vli=0; vli<vl->n; vli++)
