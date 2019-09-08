@@ -266,13 +266,14 @@ X^T \vec{v} - X^T X \vec{\beta} = 0
    we fit with: c_fit = beta0*i + beta1*j + beta2*k + beta3,
    i.e. linear in i,j,k
    the fit pars are returned in beta[4] */
-void linear_fit_to_array(tArray *c, double beta[4])
+double linear_fit_to_array(tArray *c, double beta[4])
 {
   int i,j,k;
   tArray *X   = alloc_array2d(c->N, 4);
   tArray *XTX = alloc_array2d(4, 4);
   tArray *XTc = alloc_array2d(4, 1);
   tArray *b = alloc_empty_array2d(4, 1);
+  double detXTX;
   int n[3] = { c->n[0], c->n[1], c->n[2] }; /* save c->n */
 
   /* set N*4 matrix X */
@@ -289,7 +290,12 @@ void linear_fit_to_array(tArray *c, double beta[4])
   mm_array0_norestrict(X, X, XTX);
 
   /* get inverse of XTX */
-  invert4x4x1symm_array(XTX); /* XTX now contains inverse of X^T X */
+  detXTX = invert4x4x1symm_array(XTX); // XTX now contains (X^T X)^{-1}
+  //PRF;printf(": detXTX=%g\n", detXTX);
+  if(detXTX==0.)
+  {
+    PRF;printf(": det(X^T X)=0, cannot find inverse!\n");
+  }
 
   /* make c into 1d array, i.e. a column vector */
   redim_array(c, c->N,1,1);
@@ -309,6 +315,7 @@ void linear_fit_to_array(tArray *c, double beta[4])
   free_array(XTc);
   free_array(XTX);
   free_array(X);
+  return detXTX;
 }
 
 /* return fitted results for fit to coeff array */
@@ -350,10 +357,11 @@ void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
 #define LOGFLOOR 1e-50
 
 /* linear fit to unfiltered coeffs, returns n_unfilt and beta */
-void fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
-                              double f_unfilt, int n_unfilt[3],
-                              double beta[4])
+double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
+                                double f_unfilt, int n_unfilt[3],
+                                double beta[4])
 {
+  double detXTX;
   int *n = ca->n;
   int i, j, k;
   tArray *cu;
@@ -369,11 +377,14 @@ void fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
     int iu = Ind_n(i,j,k, n_unfilt);
     cu->d[iu] = log(fabs(ca->d[ia]) + LOGFLOOR);
   }
+write_array(0, cu, "cu", 0,2,3);
 
   /* find fit pars beta */
-  linear_fit_to_array(cu, beta);
+  detXTX = linear_fit_to_array(cu, beta);
+  if(detXTX==0.) errorexit("linear_fit_to_array failed!");
 
   free_array(cu);
+  return detXTX;
 }
 
 /* check if top unflitered coeffs are greater than fitted result */
