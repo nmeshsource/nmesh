@@ -377,7 +377,6 @@ double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
     int iu = Ind_n(i,j,k, n_unfilt);
     cu->d[iu] = log(fabs(ca->d[ia]) + LOGFLOOR);
   }
-write_array(0, cu, "cu", 0,2,3);
 
   /* find fit pars beta */
   detXTX = linear_fit_to_array(cu, beta);
