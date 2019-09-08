@@ -339,9 +339,10 @@ void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
     for(m=n[d]-1; m>=0; m--)
     {
       double f = exp( -alp[d] * pow(m/N[d], s[d]) );
+      //PRF;printf(": m=%d  %g %g\n", m, f, f_unfilt);
       if(f>=f_unfilt) break;
     }
-    if(m<0) m = 0;
+    m++; /* number is last m+1 */
     n_unfilt[d] = m;
   }
 }
