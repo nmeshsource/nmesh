@@ -268,29 +268,32 @@ X^T \vec{v} - X^T X \vec{\beta} = 0
    the fit pars are returned in beta[4] */
 double linear_fit_to_array(tArray *c, double beta[4])
 {
-  int i,j,k;
-  tArray *X   = alloc_array2d(c->N, 4);
-  tArray *XTX = alloc_array2d(4, 4);
-  tArray *XTc = alloc_array2d(4, 1);
-  tArray *b = alloc_empty_array2d(4, 1);
-  double detXTX;
   int n[3] = { c->n[0], c->n[1], c->n[2] }; /* save c->n */
+  int i,j,k;
+  int Xcols = (n[0]>1) + (n[1]>1) + (n[2]>1) + 1; // normally Xcols = 4
+  tArray *X   = alloc_array2d(c->N, Xcols);
+  tArray *XTX = alloc_array2d(Xcols, Xcols);
+  tArray *XTc = alloc_array2d(Xcols, 1);
+  tArray *b = alloc_empty_array2d(Xcols, 1);
+  double detXTX;
 
-  /* set N*4 matrix X */
+  /* set N*Xcols matrix X */
   forijk(i,j,k, n)
   {
     int ind = Ind_n(i,j,k, n);
-    X->d[ind]            = i;
-    X->d[ind + c->N]     = j;
-    X->d[ind + c->N * 2] = k;
-    X->d[ind + c->N * 3] = 1.;
+    int off = 0;
+
+    if(n[0]>1) { X->d[ind]       = i;  off += c->N; }
+    if(n[1]>1) { X->d[ind + off] = j;  off += c->N; }
+    if(n[2]>1) { X->d[ind + off] = k;  off += c->N; }
+    X->d[ind + off] = 1.;
   }
 
-  /* set 4*4 matrix XTX = X^T X */
+  /* set Xcols*Xcols matrix XTX = X^T X */
   mm_array0_norestrict(X, X, XTX);
 
   /* get inverse of XTX */
-  detXTX = invert4x4x1symm_array(XTX); // XTX now contains (X^T X)^{-1}
+  detXTX = invertNxNx1symm_array(XTX); // XTX now contains (X^T X)^{-1}
   //PRF;printf(": detXTX=%g\n", detXTX);
   if(detXTX==0.)
   {
@@ -309,6 +312,26 @@ double linear_fit_to_array(tArray *c, double beta[4])
   /* b = (X^T X)^{-1} XTc = ((X^T X)^T)^{-1} XTc = ((X^T X)^{-1})^T XTc */
   point_array_d_to_data(b, beta, 1);
   mm_array0(XTX, XTc, b); /* data pointer of b points to beta */
+
+  /* shift beta, in case Xcols<4 */
+  if(n[0]<=1)
+  {
+    beta[3] = beta[2];
+    beta[2] = beta[1];
+    beta[1] = beta[0];
+    beta[0] = 0.;
+  }
+  if(n[1]<=1)
+  {
+    beta[3] = beta[2];
+    beta[2] = beta[1];
+    beta[1] = 0.;
+  }
+  if(n[2]<=1)
+  {
+    beta[3] = beta[2];
+    beta[2] = 0.;
+  }
 
   /* free all arrays */
   free_array(b);

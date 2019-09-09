@@ -168,6 +168,33 @@ double det_3Dsymmmat(double M11, double M12, double M13,
 }
 
 /* inverse of symm. matrix, returns det */
+double inv2Dmat_from_2Dsymmmat(double  s11, double  s12, double  s22,
+                               double *i11, double *i12, double *i22)
+{
+/*
+var('s11 s12 s22')
+Smat = matrix([[s11,s12],[s12,s22]])
+Sinvdet = Smat.I * Smat.det()
+# idet11 = Sinvdet[0,0].simplify_full()
+# ...
+invS = matrix([[i11,i12],[i12,i22]])
+*/
+  double detS, idet11,idet12,idet22;
+
+  idet11 = s22;
+  idet12 = -s12;
+  idet22 = s11;
+
+  detS = s11*idet11 + s12*idet12;
+
+  *i11 = idet11/detS;
+  *i12 = idet12/detS;
+  *i22 = idet22/detS;
+
+  return detS;
+}
+
+/* inverse of symm. matrix, returns det */
 double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
                                double M22, double M23, double M33,
                                double *i11, double *i12, double *i13,
@@ -239,6 +266,47 @@ invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
   return detS;
 }
 
+
+/* invert a 2*2*1 symmetric array in place and return det */
+double invert2x2x1symm_array(tArray *a)
+{
+  double i11,i12,i22;
+  double *d = Arrd_(a);
+  double det = inv2Dmat_from_2Dsymmmat(d[0],d[1],d[3], &i11,&i12,&i22);
+
+  d[0] = i11;
+  d[1] = i12;
+
+  d[2] = i12;
+  d[3] = i22;
+
+  //PRF;printf(": det=%g\n", det);
+  return det;
+}
+
+/* invert a 3*3*1 symmetric array in place and return det */
+double invert3x3x1symm_array(tArray *a)
+{
+  double i11,i12,i13, i22,i23, i33;
+  double *d = Arrd_(a);
+  double det = inv3Dmat_from_3Dsymmmat(d[0],d[1],d[2], d[4],d[5], d[8],
+                                       &i11,&i12,&i13, &i22,&i23, &i33);
+  d[0] = i11;
+  d[1] = i12;
+  d[2] = i13;
+
+  d[3] = i12;
+  d[4] = i22;
+  d[5] = i23;
+
+  d[6] = i13;
+  d[7] = i23;
+  d[8] = i33;
+
+  //PRF;printf(": det=%g\n", det);
+  return det;
+}
+
 /* invert a 4*4*1 symmetric array in place and return det */
 double invert4x4x1symm_array(tArray *a)
 {
@@ -268,6 +336,29 @@ double invert4x4x1symm_array(tArray *a)
 
   //PRF;printf(": det=%g\n", det);
   return det;
+}
+
+/* invert a N*N*1 symmetric array in place and return det */
+double invertNxNx1symm_array(tArray *a)
+{
+  double det;
+
+  /* note we expect that: a->N = N*N */
+  switch(a->N)
+  {
+  case 1:
+    det = a->d[0];
+    a->d[0] = 1./det;
+    return det;
+  case 4:
+    return invert2x2x1symm_array(a);
+  case 9:
+    return invert3x3x1symm_array(a);
+  case 16:
+    return invert4x4x1symm_array(a);
+  default:
+    errorexit("implement N>4 cases");
+  }
 }
 
 /* compute V_i from V^i using metric g_{ij}, or V^i from V_i using
