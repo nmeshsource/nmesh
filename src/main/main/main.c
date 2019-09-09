@@ -401,6 +401,7 @@ int inidata_mesh(tMesh *mesh)
   /* setup coords */
   RunFun(PRE_COORDINATES);
   RunFun(COORDINATES);
+  RunFun(POST_COORDINATES);
 
   /* compute initial data */
   RunFun(PRE_INITIALDATA);
