@@ -111,17 +111,15 @@ Things that need to be done urgently:
  -save these files in checkpoint dir:
   patches.txt, nodes.txt, variables.bin, save_pars.txt
 
-*check funs in refine.c
- +MPI part alone seems to work
- +threads alone seem to work if I use critical secs
- -test with MPI + threads, may need to init MPI differently...
-
-*advect square profile and check for flux integral conservation: seems ok
-
 *implement:
  +TOV: DONE!
  +ADM: works for one TOV star
  +EOS: works
+
+*TOVstar with refinement near surface:
+ +invent criterion that detects interfaces between vacuum and matter regions
+ +1st print ref-criterion in different places to see if it can find the
+  star surface
 
 *implement GRHD:
  -c2p: does something
@@ -131,6 +129,13 @@ Things that need to be done urgently:
    make root finder with with fd deriv
  -general limiter
  -check c2p with root finder for Wv as in arXiv:1306.4953
+
+*check funs in refine.c
+ +MPI part alone seems to work
+ +threads alone seem to work if I use critical secs
+ -test with MPI + threads, may need to init MPI differently...
+
+*advect square profile and check for flux integral conservation: seems ok
 
 *check GRHD:
  -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
