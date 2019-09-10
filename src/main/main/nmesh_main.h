@@ -36,6 +36,7 @@
 void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), const char *name);
 void remove_all_MeshFuns(tMesh *mesh);
 void RunMeshFun(tMesh *mesh, int step);
+void PrintMeshFuncs(tMesh *mesh);
 /* conveniece macros for functions */
 #define AddFun(step, f)  AddMeshFun(mesh, step, f, MSTR(f))
 #define RunFun(step)     RunMeshFun(mesh, step)

@@ -44,6 +44,9 @@ int main(int argc, char **argv)
   initialize_libraries(mesh);
   TIMER_START;
 
+  /* print skeleton of function bins */
+  PrintMeshFuncs(mesh);
+
   /* hook for funs to run 1st */
   RunFun(FIRST);
 
