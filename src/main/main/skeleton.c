@@ -8,7 +8,7 @@
 /* global var that tells us how often we have restarted nmesh */
 extern int nmesh_restarts;
 
-
+/* add a function to a time bin */
 void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), const char *name)
 {
   tTodo *t;
@@ -24,6 +24,7 @@ void AddMeshFun(tMesh *mesh, int step, int (*f)(tMesh *), const char *name)
   t->name = strdup(name);
 }
 
+/* remove all functions from time bins */
 void remove_all_MeshFuns(tMesh *mesh)
 {
   tTodo **skel = mesh->skel;
