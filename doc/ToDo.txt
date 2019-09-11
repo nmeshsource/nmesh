@@ -229,6 +229,9 @@ Questions about bamps:
 
 Things that should be done:
 ===========================
+*does hrefine_mesh_to_level need a fornodelist(mesh->lns, el) loop or can we
+ use formylnodes(mesh)
+
 *consider moving some stuff from tNode into tDat, e.g.:
  int rflag; nMPI_Comm comm;
 
