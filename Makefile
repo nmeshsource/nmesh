@@ -103,6 +103,12 @@ autoinclude = src/main/main/nmesh_automatic_include.h
 autoinitial = src/main/main/nmesh_automatic_initialize.c
 autotext    = \/\* automatically generated from Makefile and MyConfig \*\/
 
+# important header files (when they change we want a recompile)
+mainheaders = src/main/amr/nmesh_amr.h src/main/amr/thread_defs.h
+mainheaders += src/main/main/skeleton.h src/main/main/variables.h
+mainheaders += src/main/nMPI/nMPI_defs.h src/main/evolve/evosys.h
+mainheaders += src/main/coordinates/CI.h
+mainheaders += src/main/amr/nmesh_amr_defs.h src/main/amr/nmesh_amr_loops.h
 
 # --------------------------------------------------------------------------
 # some of the above variables are meant to be global, so we pass them on
@@ -133,7 +139,7 @@ MyConfig:
 
 
 # automatic configuration files
-$(autoinclude): MyConfig
+$(autoinclude): MyConfig $(mainheaders)
 	@echo ==================== Auto generating files =====================
 	@echo $(autotext) > $(autoinclude)
 	for X in $(libincludes); do \
@@ -143,7 +149,7 @@ $(autoinclude): MyConfig
 	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinclude); \
 	done
 
-$(autoinitial): MyConfig
+$(autoinitial): MyConfig $(mainheaders)
 	@echo $(autotext) > $(autoinitial)
 	@echo "/* call nmesh initialization functions: */" >> $(autoinitial);
 	for X in $(libnames); do \
