@@ -48,12 +48,12 @@ double LegendreP(int l, double x)
 double basis_normLegendreP(int i, double x, int np)
 {
   int N = np-1;
-  double ci, sci;
+  double ooci, oosci;
 
-  ci = 2.0/(2*i+1);
-  if( (i==N) && (N!=0) ) ci = 2.0/i;
-  sci = sqrt(ci);
-  return basis_LegendreP(i, x, 0)/sci;
+  ooci = 0.5*(2*i+1);                   /* ci = 2.0/(2*i+1); */
+  if( (i==N) && (N!=0) ) ooci = 0.5*i;  /* ci = 2.0/i; */
+  oosci = sqrt(ooci);                   /* sci = sqrt(ci); */
+  return basis_LegendreP(i, x, 0)*oosci;
 }
 
 /* compute the values of the Legendre polynomial P=P_l(x), dP=dP_l(x)/dx,
@@ -244,14 +244,14 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
   int normalized = 1;
   int N = n-1;
   int i, j;
-  double ci, sci;
+  double ooci, oosci;
 
   /* row-loop */
   for(i = 0; i < n; i++)
   {
-    ci = 2.0/(2*i+1);
-    if( (i==N) && (N!=0) ) ci = 2.0/i;
-    sci = sqrt(ci);
+    ooci = 0.5*(2*i+1);                   /* ci = 2.0/(2*i+1); */
+    if( (i==N) && (N!=0) ) ooci = 0.5*i;  /* ci = 2.0/i; */
+    oosci = sqrt(ooci);                   /* sci = sqrt(ci); */
 
     /* col-loop */
     for(j = 0; j < n; j++)
@@ -260,14 +260,14 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
       {
 	/* transpose of synthesis matrix Sij */
 	/* set transposed elements first because we need them below */
-	ST[i + j*n] = LegendreP(i, x[j]) / sci;
+	ST[i + j*n] = LegendreP(i, x[j]) * oosci;
 	/* transpose of analysis matrix Aij */
 	AT[j + i*n] = w[j] * ST[i + j*n];
       }
       else
       {
 	ST[i + j*n] = LegendreP(i, x[j]);
-	AT[j + i*n] = w[j] * ST[i + j*n] / ci;
+	AT[j + i*n] = w[j] * ST[i + j*n] * ooci;
       }
     }
   }
@@ -277,4 +277,4 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
 /* some functions for Discontinous Galerkin (DG) method              */
 /* ***************************************************************** */
 
-/* NOTE: there is more in Legendre.c of titan:Archives/DG_test*/
+/* NOTE: there is more in Legendre.c of titan:Archives/DG_test */
