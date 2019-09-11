@@ -14,6 +14,9 @@
 #define PIh 1.57079632679489661923132169163975
 #define PIq 0.785398163397448309615660845819876
 
+/* min x we pass into log(x) */
+#define LOGARGFLOOR 1e-50
+
 /* _Noreturn */
 #define NORET _Noreturn
 

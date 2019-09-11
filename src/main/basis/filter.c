@@ -377,7 +377,7 @@ void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
   }
 }
 
-#define LOGFLOOR 1e-50
+#define LOGFLOOR 0.9*LOGARGFLOOR
 
 /* linear fit to unfiltered coeffs, returns n_unfilt and beta */
 double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
