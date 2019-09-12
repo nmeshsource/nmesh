@@ -107,15 +107,15 @@ void printnode(tNode *n)
   int i, j;
   char s[100];
 
-  printf("nid%ld: %s ijk%d [%g,%g]x[%g,%g]x[%g,%g] np=%dx%dx%d=%d\n",
-          n->nid, nodename(n, s,100), n->ijk,
+  printf("nid%ld:  %s  l%d  leaf=%d  rflag=%d  datrank=%d  dat: %s\n",
+          n->nid, nodename(n, s,99), n->l, n->leaf, n->rflag,
+          n->datrank, n->dat ? "yes" : "no");
+  printf(" ijk%d  [%g,%g]x[%g,%g]x[%g,%g]  np=%dx%dx%d=%d ",
+          n->ijk,
           n->bbox[0], n->bbox[1], n->bbox[2],
           n->bbox[3], n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
-  printf(" l%d leaf=%d: ", n->l, n->leaf);
-  printf(" datrank=%d  dat: %s ", n->datrank, n->dat ? "yes" : "no ");
   printf(" patface=");
   for(i=0; i<6; i++) printf("%d", n->patface[i]);
-  printf("  rflag=%d", n->rflag);
   printf("\n");
   printf(" nb =");
   //for(i=0; i<6; i++) printf(" %ld", get_node_nid(n->nb[i]));
