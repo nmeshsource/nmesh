@@ -183,7 +183,12 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           /* we could start search loop at elem=mesh->lns,
              but this would be slower */
           for( ; (elem) && (elem->node != parent); elem = elem->next) ;
-          if(!elem) errorexit("cannot find parent in mesh->lns");
+          if(!elem)
+          {
+            char ns[100];
+            nodename(parent, ns,99);
+            errorexits("cannot find parent %s in mesh->lns", ns);
+          }
 
           /* make 8 child nodes */
           children = make8_child_nodes(parent, n);
