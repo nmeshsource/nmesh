@@ -140,6 +140,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
       int n[3];
       int p = -1; /* patch number read from file */
       int p_prev; /* previous patch number read from file */
+      int lp = -1; /* ref. level of parent */
+      int lp_prev; /* ref. level of previous parent */
       tNlist *elem = mesh->lns; /* first element in leaf node list */
 
       /* open source file */
@@ -161,6 +163,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           parent = node_from_nodename(mesh, buf);
           p_prev = p;
           p = parent->pat->p;
+          lp_prev = lp;
+          lp = parent->l;
           //printf("buf=%s\n", buf);
           //printnode(parent);
 
@@ -172,7 +176,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           //fflush(stdout);
 
           /* update starting point in leaf node list of the 'for'-loop below */
-          if(p<p_prev || !elem->next)
+          if(p<p_prev || !elem->next || lp>lp_prev)
           {
             elem = mesh->lns;
             /* We could load balance here, BUT ONLY if all MPI-proc. go
