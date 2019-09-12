@@ -183,6 +183,11 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           /* we could start search loop at elem=mesh->lns,
              but this would be slower */
           for( ; (elem) && (elem->node != parent); elem = elem->next) ;
+          if(0 && !elem) /* try again from beginning if parent is not found */
+          {
+            for(elem = mesh->lns; (elem) && (elem->node != parent);
+                elem = elem->next) ;
+          }
           if(!elem)
           {
             char ns[100];
