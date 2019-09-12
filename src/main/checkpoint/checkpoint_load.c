@@ -176,7 +176,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           //fflush(stdout);
 
           /* update starting point in leaf node list of the 'for'-loop below */
-          if(p<p_prev || !elem->next || lp>lp_prev)
+          if(p<p_prev || !elem->next || lp!=lp_prev)
           {
             elem = mesh->lns;
             /* We could load balance here, BUT ONLY if all MPI-proc. go
