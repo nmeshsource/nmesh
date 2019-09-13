@@ -148,8 +148,9 @@ $(autoinclude): MyConfig $(mainheaders)
 	@for X in $(libnames); do \
 	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinclude); \
 	done
+	touch $(TOP)/src/main/main/nmesh.h
 
-$(autoinitial): MyConfig $(mainheaders)
+$(autoinitial): MyConfig
 	@echo $(autotext) > $(autoinitial)
 	@echo "/* call nmesh initialization functions: */" >> $(autoinitial);
 	for X in $(libnames); do \

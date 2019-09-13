@@ -32,6 +32,4 @@ $(OBJDIR)/%.o: %.c nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
 
 # dependencies on auto-generated files
 nmesh.h: nmesh_automatic_include.h
-	touch nmesh.h
-
 main.o: nmesh_automatic_initialize.c

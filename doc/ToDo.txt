@@ -120,10 +120,6 @@ Things that need to be done urgently:
  +ADM: works for one TOV star
  +EOS: works
 
-*if I edit one nmesh_*.h, $(autoinclude) get rebuilt, and then
- src/main/main/Makefile touches nmesh.h, so that next time all get rebuilt
- needlessly!
-
 *TOVstar with refinement near surface:
  +invent criterion that detects interfaces between vacuum and matter regions
  +1st print ref-criterion in different places to see if it can find the
