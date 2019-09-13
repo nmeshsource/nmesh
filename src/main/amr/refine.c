@@ -163,7 +163,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, todo, done, flag;
+  int r, todo;
   int nnodes = (mesh->myln->nncats)*(mesh->myln->nm);
   long *my_nid   = calloc(nnodes+1, sizeof(my_nid[0]));
   nMPI_Req *req  = calloc(size, sizeof(req[0]));
@@ -192,7 +192,6 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   /* number of procs where we have to refine and how many we have done so far */
   todo = size;
-  done = 0;
 
   /* broadcast number of nodes nn to all MPI jobs */
   for(r=0; r<size; r++)
@@ -221,30 +220,8 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
       nMPI_Ibcast(&(ref_nid[r][0]), nn[r], nMPI_LONG, r, &(req[r]));
   }
 
-  /* refine my_nid */
-  if(nnodes>0)
-    create_children_no_nid_update(mesh, nnodes, my_nid, ref_method);
-  my_nid = NULL; /* we do not need my_nid anymore */
-
   /* check for incoming broadcasts and then work on them */
-  r = 0;
-  while(done<todo)
-  {
-    if(nn[r]>0)
-    {
-      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
-      if(flag)
-      {
-        /* work on ref_nid[r] */
-        if(r != rank) /* r=rank has been done already above */
-          create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
-        nn[r] = 0;
-        done++;
-      }
-    }
-    r++;
-    if(r>=size) r = 0;
-  }
+  hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref_method);
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
