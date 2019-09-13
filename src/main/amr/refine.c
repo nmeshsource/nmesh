@@ -118,6 +118,46 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
   free(replace);
 }
 
+/* hrefine nids in the order in which we recv the MPI messages.
+   NOTE: The order in which we recv is not certain => we do not have the same
+   order for all MPI procs. => order of node->nfaces and thus node->fnb
+   differs between different MPI procs!!! => nb index ni differs between
+   MPI procs => request_surfaces_exchange_for_all_vars deadlocks because
+   tags in there need a unique ni!!! */
+void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
+                                int *nn, long **ref_nid,
+                                int todo, int ref_method)
+{
+  int rank = nMPI_rank(); /* my own rank */
+  int size = nMPI_size();
+  int r, done, flag;
+
+  /* refine my own ref_nid[rank] */
+  if(nn[rank]>0)
+    create_children_no_nid_update(mesh, nn[rank], ref_nid[rank], ref_method);
+
+  /* check for incoming broadcasts and then work on them */
+  r = 0;
+  done = 0;
+  while(done<todo)
+  {
+    if(nn[r]>0)
+    {
+      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
+      if(flag)
+      {
+        /* work on ref_nid[r] */
+        if(r != rank) /* r=rank has been done already above */
+          create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+        nn[r] = 0;
+        done++;
+      }
+    }
+    r++;
+    if(r>=size) r = 0;
+  }
+}
+
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
@@ -346,6 +386,54 @@ int nid0_compar(const void *x1, const void *x2)
   if(*n1 < *n2) return -1;
   if(*n1 > *n2) return 1;
   return 0;
+}
+
+/* destroy nids in the order in which we recv the MPI messages.
+   NOTE: The order in which we recv is not certain => we do not have the same
+   order for all MPI procs. => order of node->nfaces and thus node->fnb
+   differs between different MPI procs!!! => nb index ni differs between
+   MPI procs => request_surfaces_exchange_for_all_vars deadlocks because
+   tags in there need a unique ni!!! */
+void destroy_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
+                                int *nn, long **unref,
+                                int todo, int ref_method)
+{
+  int rank = nMPI_rank(); /* my own rank */
+  int size = nMPI_size();
+  int r, done, flag, nn_rank;
+
+  /* unrefine my own unref[rank] */
+  nn_rank = nn[rank];
+  if(nn[rank]>0)
+    nn_rank = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
+  //PRFs(" 2: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
+
+  /* check for incoming broadcasts and then work on them */
+  r = 0;
+  done = 0;
+  while(done<todo)
+  {
+    if(nn[r]>0)
+    {
+      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
+      if(flag)
+      {
+        /* work on unref[r] */
+        if(r != rank) /* r=rank has been done already above */
+          nn[r] = destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
+        else
+          nn[r] = nn_rank;
+        nn[r] = -nn[r]; /* make nn[r] negative */
+        done++;
+      }
+    }
+    r++;
+    if(r>=size) r = 0;
+  }
+
+  /* flip sign on nn[r] since we made it negative above */
+  for(r=0; r<size; r++) nn[r] = -nn[r];
+  //PRFs(" 3: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 }
 
 /* Unrefine all nodes on all MPI procs if indicated by node->rflag */
