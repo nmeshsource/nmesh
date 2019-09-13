@@ -91,6 +91,10 @@ Things that need to be done urgently:
 
 *use MPI tags from surface.c also in indicators.c: DONE!
 
+*hrefine_nodes_if_rflag needs to call create_children_no_nid_update in an
+ order that is the SAME on all procs, otherwise the nfaces and fnb have
+ differnt ordering and the nb index ni cannot be used as a MPI tag: DONE!
+
 *checkpointing: DONE!
  -save entire mesh
   +save all patch info, so that we can call funcs to create them, with their
@@ -115,11 +119,6 @@ Things that need to be done urgently:
  +TOV: DONE!
  +ADM: works for one TOV star
  +EOS: works
-
-*hrefine_nodes_if_rflag needs to call create_children_no_nid_update in an
- order that is the SAME on all procs, otherwise the nfaces and fnb
- have differnt ordering and the nb index ni cannot be used as a MPI tag!!!
-
 
 *TOVstar with refinement near surface:
  +invent criterion that detects interfaces between vacuum and matter regions
