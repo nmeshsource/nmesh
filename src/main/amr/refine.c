@@ -180,7 +180,6 @@ void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
   }
 }
 
-
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
@@ -244,6 +243,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
   }
 
   /* check for incoming broadcasts and then work on them */
+  //hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref_method);
   hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref_method);
 
   /* free ref_nid content */
@@ -436,6 +436,27 @@ void destroy_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
   //PRFs(" 3: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 }
 
+/* destroy nids in the order of the MPI ranks. */
+void destroy_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
+                                int *nn, long **unref,
+                                int todo, int ref_method)
+{
+  int size = nMPI_size();
+  int r;
+
+  /* check for incoming broadcasts and then work on them */
+  for(r=0; r<size; r++)
+  {
+    if(nn[r]>0)
+    {
+      nMPI_Wait(&(req[r]), nMPI_STATUS_IGNORE);
+
+      /* work on unref[r] */
+      nn[r] = destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
+    }
+  }
+}
+
 /* Unrefine all nodes on all MPI procs if indicated by node->rflag */
 void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
@@ -563,7 +584,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
   //PRFs(" 1: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* check for incoming broadcasts and then work on them */
-  destroy_nids_in_recv_order(mesh, req, nn, unref, todo, ref_method);
+  //destroy_nids_in_recv_order(mesh, req, nn, unref, todo, ref_method);
+  destroy_nids_in_rank_order(mesh, req, nn, unref, todo, ref_method);
 
   /* merge the arrays with left over nids into one */
   for(r=0; r<size; r++)
