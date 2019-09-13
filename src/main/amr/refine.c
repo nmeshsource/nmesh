@@ -637,6 +637,28 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
 
 
+/* refine all nodes that have finer neighbors */
+void hrefine_nodes_if_nb_finer(tMesh *mesh, int ref_method)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int f, ni;
+
+    /* mark nodes as to be refined if nb is more refined */
+    for(f=0; f<6; f++)
+      for(ni=0; ni<node->nfnb[f]; ni++)
+      {
+        tNode *nb = node->fnb[f][ni];
+        if(nb->l > node->l) node->rflag = ref_method;
+      }
+  }
+  hrefine_nodes_if_rflag(mesh, ref_method);
+}
+
+
+
 /* refine all nodes up to level l */
 //void refine_mesh_to_level(tMesh *mesh, int l)
 void hrefine_mesh_to_level__old(tMesh *mesh, int l)
@@ -709,7 +731,6 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
   }
 }
 
-
 /* like hrefine_mesh_to_level, but load balance after each level is created */
 void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l)
 {
@@ -721,7 +742,7 @@ void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l)
   }
 }
 
-/* refine all nodes up to level l */
+/* coarsen all nodes up to level l */
 void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 {
   int rmeth = PARENT_n;
