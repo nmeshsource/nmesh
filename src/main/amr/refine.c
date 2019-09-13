@@ -418,7 +418,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
-  int r, todo, done, nn_rank, flag;
+  int r, todo;
   int nnodes;
   int myn = (mesh->myln->nncats)*(mesh->myln->nm);
   long *my_unr  = calloc(2*myn+2, sizeof(my_unr[0]));
@@ -508,7 +508,6 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   /* number of procs where we have to uref and how many we have done so far */
   todo = size;
-  done = 0;
 
   /* broadcast number of nodes nn to all MPI jobs */
   for(r=0; r<size; r++)
@@ -540,37 +539,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
   //PRFs(" 1: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
-  /* unrefine my own unref[rank] */
-  nn_rank = nn[rank];
-  if(nn[rank]>0)
-    nn_rank = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
-  //PRFs(" 2: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
-
   /* check for incoming broadcasts and then work on them */
-  r = 0;
-  while(done<todo)
-  {
-    if(nn[r]>0)
-    {
-      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
-      if(flag)
-      {
-        /* work on unref[r] */
-        if(r != rank) /* r=rank has been done already above */
-          nn[r] = destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
-        else
-          nn[r] = nn_rank;
-        nn[r] = -nn[r]; /* make nn[r] negative */
-        done++;
-      }
-    }
-    r++;
-    if(r>=size) r = 0;
-  }
-
-  /* flip sign on nn[r] since we made it negative above */
-  for(r=0; r<size; r++) nn[r] = -nn[r];
-  //PRFs(" 3: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
+  destroy_nids_in_recv_order(mesh, req, nn, unref, todo, ref_method);
 
   /* merge the arrays with left over nids into one */
   for(r=0; r<size; r++)

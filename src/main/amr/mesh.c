@@ -182,12 +182,12 @@ hcoarsen_pat(mesh, 0);
 Yo(7);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
 */
 
-/* // test:
+ // test:
 simple_load_balance(mesh);
 hcoarsen_mesh_to_level(mesh, 2);
 simple_load_balance(mesh);
 hcoarsen_pat(mesh, 0);
-*/
+
 
   /* load balance full mesh */
   simple_load_balance(mesh);
