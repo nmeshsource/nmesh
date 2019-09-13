@@ -158,6 +158,29 @@ void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
   }
 }
 
+/* hrefine nids in the order of the MPI ranks. */
+void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
+                                int *nn, long **ref_nid,
+                                int todo, int ref_method)
+{
+  int size = nMPI_size();
+  int r;
+
+  /* wait for incoming broadcasts and then work on them */
+  for(r=0; r<size; r++)
+  {
+    if(nn[r]>0)
+    {
+      nMPI_Wait(&(req[r]), nMPI_STATUS_IGNORE);
+
+      /* work on ref_nid[r] */
+      create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+      nn[r] = 0;
+    }
+  }
+}
+
+
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
 {
@@ -221,7 +244,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
   }
 
   /* check for incoming broadcasts and then work on them */
-  hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref_method);
+  hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref_method);
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
