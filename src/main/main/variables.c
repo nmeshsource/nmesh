@@ -215,8 +215,10 @@ int MeshVarNComponents(tMesh *mesh, int i)
     errorexit("index out of range");
   if(vdb[i].component != 0)
   {
-    errorexit("you have to use index of zeroth component");
-    /* i = MeshVarIndComponent0(mesh, i); */
+    errorexit("use index of zeroth component here, and in "
+              "enablevar/disablevar funcs");
+    /* we don't use:  i = MeshVarIndComponent0(mesh, i);
+       so that enablevar_innode works only with comp0 */
   }
   return vdb[i].ncomponents;
 }
