@@ -200,7 +200,7 @@ char *MeshVarName(tMesh *mesh, int i)
 {
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
-  if (i < 0 || i >= nvdb)
+  if(i < 0 || i >= nvdb)
     errorexit("index out of range");
 
   return vdb[i].name;
@@ -211,9 +211,9 @@ int MeshVarNComponents(tMesh *mesh, int i)
 {
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
-  if (i < 0 || i >= nvdb)
+  if(i < 0 || i >= nvdb)
     errorexit("index out of range");
-  if (vdb[i].component != 0)
+  if(vdb[i].component != 0)
   {
     /* errorexit("you have to use index of zeroth component"); */
     i = MeshVarIndComponent0(mesh, i);
@@ -534,7 +534,7 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
 
     /* if variable already exists, don't add it again */
     /* note that we nevertheless return a corresponding variable list */
-    if ((j = MeshVarIndLax(mesh, name)) >= 0)
+    if((j = MeshVarIndLax(mesh, name)) >= 0)
     {
       newvl->index[i] = j;
       continue;
@@ -646,7 +646,7 @@ void vlcopy(tVarList *v, tVarList *u)
 
 void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u)
 {
-  if (!mesh || !v || !u) return;
+  if(!mesh || !v || !u) return;
   v->mesh = u->mesh = mesh;
   vlcopy(v, u);
 }
@@ -817,10 +817,10 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
     vladd_node(node, r, ca,a, cb,b);
   }
   /* add times as well */
-  if (ca == 0 && cb == 0) r->time = 0.0;
-  else if (ca == 0)	  r->time = cb * b->time;
-  else if (cb == 0)	  r->time = ca * a->time;
-  else			  r->time = ca * a->time + cb * b->time;
+  if(ca == 0 && cb == 0) r->time = 0.0;
+  else if(ca == 0)       r->time = cb * b->time;
+  else if(cb == 0)       r->time = ca * a->time;
+  else                   r->time = ca * a->time + cb * b->time;
 }
 
 
@@ -845,7 +845,7 @@ void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a)
 {
   int i, n;
 
-  if (ca == 0) return;
+  if(ca == 0) return;
 
   /* loop over vars in varlists */
   for(n=0; n<r->n; n++)
@@ -855,7 +855,7 @@ void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a)
     double *pr = Vard(node, ri);
     double *pa = Vard(node, ai);
 
-    if (ca == 1)
+    if(ca == 1)
     {
       forvari(node, ri, i) pr[i] += pa[i];
     }
@@ -876,7 +876,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
 {
   tMesh *mesh = r->mesh;
 
-  if (ca == 0) return;
+  if(ca == 0) return;
 
   formylnodes(mesh)
   {
