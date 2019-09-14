@@ -1648,8 +1648,6 @@ void enablevar_innode(tNode *node, int i)
 {
   tMesh *mesh = node->pat->mesh;
   int j, n = MeshVarNComponents(mesh, i);
-
-  i = MeshVarIndComponent0(mesh, i);
   for(j=0; j<n; j++) enablevarcomp_innode(node, i+j);
 }
 
@@ -1658,8 +1656,6 @@ void disablevar_innode(tNode *node, int i)
 {
   tMesh *mesh = node->pat->mesh;
   int j, n = MeshVarNComponents(mesh, i);
-
-  i = MeshVarIndComponent0(mesh, i);
   for(j=0; j<n; j++) disablevarcomp_innode(node, i+j);
 }
 

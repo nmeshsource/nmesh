@@ -215,8 +215,8 @@ int MeshVarNComponents(tMesh *mesh, int i)
     errorexit("index out of range");
   if(vdb[i].component != 0)
   {
-    /* errorexit("you have to use index of zeroth component"); */
-    i = MeshVarIndComponent0(mesh, i);
+    errorexit("you have to use index of zeroth component");
+    /* i = MeshVarIndComponent0(mesh, i); */
   }
   return vdb[i].ncomponents;
 }
