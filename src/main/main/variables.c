@@ -189,7 +189,7 @@ int VarIndFromPtr(tNode *node, double *p)
 int Set_vdb_iStart_AtVar(tMesh *mesh, const char *name)
 {
   int i = MeshVarIndLax(mesh, name);
-  if(i<0) errorexits("Ind: variable \"%s\" does not exist\n", name);
+  if(i<0) errorexits("variable \"%s\" does not exist\n", name);
   mesh->vdb_iStart = i;
   return i;
 }
@@ -201,7 +201,7 @@ char *MeshVarName(tMesh *mesh, int i)
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
   if (i < 0 || i >= nvdb)
-    errorexit("VarName: index out of range");
+    errorexit("index out of range");
 
   return vdb[i].name;
 }
@@ -212,10 +212,10 @@ int MeshVarNComponents(tMesh *mesh, int i)
   tVar *vdb = mesh->vdb;
   int nvdb  = mesh->nvdb;
   if (i < 0 || i >= nvdb)
-    errorexit("VarNComponents: index out of range");
+    errorexit("index out of range");
   if (vdb[i].component != 0)
   {
-    /* errorexit("VarNComponents: you have to use index of zeroth component"); */
+    /* errorexit("you have to use index of zeroth component"); */
     i = MeshVarIndComponent0(mesh, i);
   }
   return vdb[i].ncomponents;
