@@ -216,12 +216,15 @@ int setup_box_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  double c = Getd(Par("amr_BoxMesh_xc"));
+  char *BoxMesh_xc = Gets(Par("amr_BoxMesh_xc"));
   double d = Getd(Par("amr_BoxMesh_dout"));
-  double xc[]   = { c, 0., 0. };
+  double xc[]   = { 0., 0., 0. };
   double dout[] = { d, d, d };
 
   PRFs(":\n");
+
+  sscanf(BoxMesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
+  //pr3v("xc", xc);printf("\n");
 
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
