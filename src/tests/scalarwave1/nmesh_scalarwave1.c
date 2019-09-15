@@ -30,7 +30,7 @@ int nmesh_scalarwave1(tMesh *mesh)
 
   /* parameters */
   AddPar("scalarwave1_profile", "sin", "initial profile [sin,square]");
-  AddPar("scalarwave1_k", "1 0 0", "wave vector k^i");
+  AddPar("scalarwave1_k", "0.8 -0.5 0.33166247903554", "wave vector k^i");
   AddPar("scalarwave1_numflux", "upwind", "numerical flux [upwind,LLF]");
   AddPar("scalarwave1_limiter", "none", "limiter [none,MRS,minmodB]");
 
