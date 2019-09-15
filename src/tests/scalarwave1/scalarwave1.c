@@ -450,8 +450,8 @@ void scalarwave1_set_profile_pt(double xyz[3], double t, int nv, double *u)
     u[4] = s;
     u[0] = -om*c;
     u[1] = kx*c;
-    u[2] = kx*c;
-    u[3] = kx*c;
+    u[2] = ky*c;
+    u[3] = kz*c;
   }
   if(scalarwave1->square_profile)
   {
