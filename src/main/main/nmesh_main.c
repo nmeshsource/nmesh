@@ -13,7 +13,7 @@ int nmesh_main(tMesh *mesh)
   /* functions */
   AddFun(OUTPUT, write_all_timers);
   AddFun(FINALIZEMESH, free_all_timers);
-  AddFun(INITMESH, nmesh_update_parameters);
+  AddFun(PRE_COORDINATES, nmesh_update_parameters);
   AddFun(PRE_EVOLVE, nmesh_update_parameters);
 
   /* variables */
