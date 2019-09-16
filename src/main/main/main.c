@@ -390,13 +390,13 @@ int inidata_mesh(tMesh *mesh)
   {
     /* create a mesh */
     amr_setup_mesh(mesh);
+
+    /* here we schedule funcs to programatically set up the mesh */
+    RunFun(INITMESH);
   }
 
   /* no matter if there is a saved checkpoint or not, we initialize
      everything now (we may even recompute initial data) */
-
-  /* here we schedule funcs to programatically set up the mesh */
-  RunFun(INITMESH);
 
   /* move nodes to differnt procs */
   RunFun(LOADBALANCING);
