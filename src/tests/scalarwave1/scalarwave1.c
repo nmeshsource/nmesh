@@ -39,7 +39,6 @@ void scalarwave1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
   f[2] = -u[0]*norm[1];
   f[3] = -u[0]*norm[2];
   f[4] = 0.;
-
 }
 
 /* eigenvalues in direction norm */
