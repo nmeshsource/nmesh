@@ -130,7 +130,7 @@ Things that need to be done urgently:
  -positivity limiters
    find root for larger P
    make root finder with upper or lower limit
-   make root finder with with fd deriv
+   make root finder with fd deriv
  -general limiter
  -check c2p with root finder for Wv as in arXiv:1306.4953
 
