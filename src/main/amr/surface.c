@@ -749,6 +749,15 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         int on1 = nb_n[od1];
         int on2 = nb_n[od2];
 
+        /* Find distance to closest nb point for 3 node points.
+           [Note: if n[]={1,1,1}:
+             -all 3 points are the same
+             -all 3 lie in the node center, not at the surface!!!
+             -distance to nb points cannot be zero!!!
+              ==> interpolation will be used, even though we could copy
+             +However, this is likely a rare case. With refinement most nodes
+              will not be at patch boundaries. So don't worry for now.]
+        */
         /* 3 points: */
         /* point 1 */
         ijk_inplaneN(dir, i,j,k, 0,0,pl);
