@@ -139,6 +139,10 @@ Things that need to be done urgently:
  +threads alone seem to work if I use critical secs
  -test with MPI + threads, may need to init MPI differently...
 
+*can we make a limiter by filtering?
+ E.g. keep only 1, x,y,z, x^2,y^2,z^2,xy,xz,yz, x^3,y^3,z^3,x^2y,xy^2,xyz,...
+ I.e. drop all that is higher than cubic
+
 *advect square profile and check for flux integral conservation: seems ok
 
 *check GRHD:
