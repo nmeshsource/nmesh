@@ -256,7 +256,7 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
       /* get varlist from file */
       vl = checkpoint_make_vl(fp, mesh);
 
-      /* now read data for vars */
+      /* now read data for vars in little endian format */
       checkpoint_read_vl(fp, vl, 0);
       PRF;printf(": finished reading varlist.\n");
       prvarlist(vl);
