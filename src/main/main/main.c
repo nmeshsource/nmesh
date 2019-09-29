@@ -65,6 +65,7 @@ int main(int argc, char **argv)
 
   TIMER_STOP;
   finalize_mesh(mesh);
+  prTimeIn_s("WallTime after main's call to finalize_mesh: ");
   free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
@@ -519,7 +520,7 @@ int finalize_mesh(tMesh *mesh)
 {
   RunFun(FINALIZEMESH);
   free_mesh_contents(mesh);
-  prTimeIn_s("WallTime at end of finalize_mesh: ");
+  if(0) prTimeIn_s("WallTime at end of finalize_mesh: ");
   return 0;
 }
 

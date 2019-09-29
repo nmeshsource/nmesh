@@ -857,7 +857,7 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
 
   if(!mesh) return;
 
-  PRFs(":\n");
+  if(PR) PRFs(":\n");
 
   /* free patches */
   for(i = 0; i < mesh->npats; i++)
@@ -884,7 +884,7 @@ void free_mesh_contents(tMesh *mesh)
 {
   if(!mesh) return;
 
-  PRFs(":\n");
+  if(PR) PRFs(":\n");
 
   /* free patches and nodes */
   free_mesh_patches_and_nodes(mesh);
