@@ -688,17 +688,26 @@ double distance_to_closest_point(tNode *node, int i, int j, int k,
   Xb0[2] = XbA[2]->d[k];
   XYZ_of_XbYbZb(node, Xb0, X0);
 
-  for(kk=-1; kk<=1; kk+=2)
-    for(jj=-1; jj<=1; jj+=2)
-      for(ii=-1; ii<=1; ii+=2)
+  for(kk=-1; kk<=1; kk++)
+  {
+    int kn = k+kk;
+    if(kn<0 || kn>=n[2]) continue;
+
+    for(jj=-1; jj<=1; jj++)
+    {
+      int jn = j+jj;
+      if(jn<0 || jn>=n[1]) continue;
+
+      for(ii=-1; ii<=1; ii++)
       {
         int in = i+ii;
-        int jn = j+jj;
-        int kn = k+kk;
-
         if(in<0 || in>=n[0]) continue;
-        if(jn<0 || jn>=n[1]) continue;
-        if(kn<0 || kn>=n[2]) continue;
+
+        if(in==i && jn==j && kn==k) continue;
+
+        if(in!=i && jn!=j) continue;
+        if(in!=i && kn!=k) continue;
+        if(jn!=j && kn!=k) continue;
 
         Xb1[0] = XbA[0]->d[in];
         Xb1[1] = XbA[1]->d[jn];
@@ -707,7 +716,11 @@ double distance_to_closest_point(tNode *node, int i, int j, int k,
 
         dist = Cart_distance_X0_X1(node, X0,X1);
         if(dist<hmin) hmin = dist;
+
+        //pr3v("X0", X0); pr3v("X1", X1); printf(" -> dist=%g\n", dist);
       }
+    }
+  }
   return hmin;
 }
 
