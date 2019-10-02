@@ -153,6 +153,12 @@ Things that need to be done urgently:
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
 
+*replace interpolation in surface communication by something like mortar meth
+ -Bernd told me that I can read Kopriva's book or papers about mortar meth
+ -Insert a surface between adjacent leaf nodes with enough points so that
+  transfer in at leat one direc. can be done without errors
+ -there are also works by Dumbser and Canuto about this
+
 *check funs in refine.c
  +MPI part alone seems to work
  +threads alone seem to work if I use critical secs
