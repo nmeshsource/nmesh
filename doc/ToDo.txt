@@ -134,10 +134,11 @@ Things that need to be done urgently:
  -general limiter
  -check c2p with root finder for Wv as in arXiv:1306.4953
 
-*check funs in refine.c
- +MPI part alone seems to work
- +threads alone seem to work if I use critical secs
- -test with MPI + threads, may need to init MPI differently...
+*implement dt calculation
+
+*implement/test limiters in 1 dir as in Hebert
+
+*what is WENO3 in bamps?
 
 *can we make a limiter by filtering?
  E.g. keep only 1, x,y,z, x^2,y^2,z^2,xy,xz,yz, x^3,y^3,z^3,x^2y,xy^2,xyz,...
@@ -151,6 +152,11 @@ Things that need to be done urgently:
 
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
+
+*check funs in refine.c
+ +MPI part alone seems to work
+ +threads alone seem to work if I use critical secs
+ -test with MPI + threads, may need to init MPI differently...
 
 *implement mesh refinement of troubled cells/nodes
  +go from n_old, n_new= 1 + n_old/2, until we reach n_new=1
