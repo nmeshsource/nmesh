@@ -593,7 +593,7 @@ void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower)
 }
 
 
-/* find nb. point in dir, pm = +/- 1 */
+/* find nb. point index in dir, pm = +/- 1 */
 int nb_point_in_dir(int ijk, int *n, int pm, int dir)
 {
   if(n[dir]>1)
@@ -615,15 +615,17 @@ int nb_point_in_dir(int ijk, int *n, int pm, int dir)
 }
 
 /* find new hmin given point ccc and nb point nbr */
-double hmin_new(tNode *node, int ccc, int nbr, double hmin_old)
+double hmin_new_ccc_nbr(tNode *node, int ccc, int nbr, double hmin_old)
 {
+  errorexit("works only if node has dat and var x is enabled");
   if(nbr!=ccc)
   {
-    tMesh *mesh = node->pat->mesh;
-    int ix = Ind("x");
-    double *x = Vard_(node, ix);
-    double *y = Vard_(node, ix+1);
-    double *z = Vard_(node, ix+2);
+    tPat *pat = node->pat;
+    tMesh *mesh = pat->mesh;
+    int ix = pat->xyz_of_XYZ ? Ind("x") : Ind("X");
+    double *x = Vard(node, ix);
+    double *y = Vard(node, ix+1);
+    double *z = Vard(node, ix+2);
     double r, dx,dy,dz;
 
     dx = x[nbr] - x[ccc];
@@ -636,19 +638,14 @@ double hmin_new(tNode *node, int ccc, int nbr, double hmin_old)
 }
 
 
-/* find smallest Cartesian grid spacing in all 8 nnode corners */
-double find_hmin(tNode *node)
+/* find Cartesian distance between two points in X-coords */
+double Cart_distance_X0_X1(tNode *node, double X0[3], double X1[3])
 {
   tPat *pat = node->pat;
-  int *n = node->n;
-  int ccc; /* ijk of corner */
-  int nbr; /* ijk of nb point next to corner */
   int d;
-  double X0[] = { node->bbox[0], node->bbox[2], node->bbox[4] };
-  double X1[] = { node->bbox[1], node->bbox[3], node->bbox[5] };
   double c0[3], c1[3], dx[3];
   double *x0, *x1;
-  double diag2, hmin;
+  double dist2;
 
   /* set x0, x1 from X0, X1 */
   if(pat->xyz_of_XYZ)
@@ -664,87 +661,92 @@ double find_hmin(tNode *node)
     x1 = &(X1[0]);
   }
 
-  /* set hmin from node diagonal */
-  diag2 = 0.;
+  /* get distance from distance^2 */
+  dist2 = 0.;
   for(d=0; d<3; d++)
   {
     dx[d] = x1[d] - x0[d];
-    diag2 += dx[d]*dx[d];
+    dist2 += dx[d]*dx[d];
   }
-  hmin = sqrt(diag2/3.0);
+  return sqrt(dist2);
+}
 
-  /* corner 0 */
-  ccc = 0;
-  nbr = nb_point_in_dir(ccc,n, +1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+/* find distance to closest point, but return hmin_old if no other point is
+   found */
+double distance_to_closest_point(tNode *node, int i, int j, int k,
+                                 double hmin_old)
+{
+  int *n = node->n;
+  tArray *XbA[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
+  double Xb0[3], Xb1[3], X0[3], X1[3];
+  int ii, jj, kk; /* increments to i,j,k to get to nb. points */
+  double dist;
+  double hmin = hmin_old;
 
-  /* next corner */
-  ccc = n[0]-1;
-  nbr = nb_point_in_dir(ccc,n, -1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+  Xb0[0] = XbA[0]->d[i];
+  Xb0[1] = XbA[1]->d[j];
+  Xb0[2] = XbA[2]->d[k];
+  XYZ_of_XbYbZb(node, Xb0, X0);
 
-  /* next corner */
-  ccc = Ind_n(0, n[1]-1, 0, n);
-  nbr = nb_point_in_dir(ccc,n, +1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+  for(kk=-1; kk<=1; kk+=2)
+    for(jj=-1; jj<=1; jj+=2)
+      for(ii=-1; ii<=1; ii+=2)
+      {
+        int in = i+ii;
+        int jn = j+jj;
+        int kn = k+kk;
 
-  /* next corner */
-  ccc = Ind_n(n[0]-1, n[1]-1, 0, n);
-  nbr = nb_point_in_dir(ccc,n, -1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+        if(in<0 || in>=n[0]) continue;
+        if(jn<0 || jn>=n[1]) continue;
+        if(kn<0 || kn>=n[2]) continue;
+
+        Xb1[0] = XbA[0]->d[in];
+        Xb1[1] = XbA[1]->d[jn];
+        Xb1[2] = XbA[2]->d[kn];
+        XYZ_of_XbYbZb(node, Xb1, X1);
+
+        dist = Cart_distance_X0_X1(node, X0,X1);
+        if(dist<hmin) hmin = dist;
+      }
+  return hmin;
+}
 
 
-  /* next corner */
-  ccc = Ind_n(0, 0, n[2]-1, n);
-  nbr = nb_point_in_dir(ccc,n, +1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+/* find smallest Cartesian grid spacing in all 8 nnode corners */
+double find_hmin(tNode *node)
+{
+  int *n = node->n;
+  double X0[] = { node->bbox[0], node->bbox[2], node->bbox[4] };
+  double X1[] = { node->bbox[1], node->bbox[3], node->bbox[5] };
+  double hmin;
 
-  /* next corner */
-  ccc = Ind_n(n[0]-1, 0, n[2]-1, n);
-  nbr = nb_point_in_dir(ccc,n, -1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, +1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
 
-  /* next corner */
-  ccc = Ind_n(0, n[1]-1, n[2]-1, n);
-  nbr = nb_point_in_dir(ccc,n, +1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+  /* set hmin from node diagonal */
+  hmin = Cart_distance_X0_X1(node, X0,X1)/sqrt(3.);
+
+  /* first corner */
+  hmin = distance_to_closest_point(node, 0,0,0, hmin);
 
   /* next corner */
-  ccc = Ind_n(n[0]-1, n[1]-1, n[2]-1, n);
-  nbr = nb_point_in_dir(ccc,n, -1,0);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,1);
-  hmin = hmin_new(node, ccc,nbr, hmin);
-  nbr = nb_point_in_dir(ccc,n, -1,2);
-  hmin = hmin_new(node, ccc,nbr, hmin);
+  hmin = distance_to_closest_point(node, n[0]-1,0,0, hmin);
+
+  /* next corner */
+  hmin = distance_to_closest_point(node, 0,n[1]-1,0, hmin);
+
+  /* next corner */
+  hmin = distance_to_closest_point(node, n[0]-1,n[1]-1,0, hmin);
+
+  /* next corner */
+  hmin = distance_to_closest_point(node, 0,0,n[2]-1, hmin);
+
+  /* next corner */
+  hmin = distance_to_closest_point(node, n[0]-1,0,n[2]-1, hmin);
+
+  /* next corner */
+  hmin = distance_to_closest_point(node, 0,n[1]-1,n[2]-1, hmin);
+
+  /* last corner */
+  hmin = distance_to_closest_point(node, n[0]-1,n[1]-1,n[2]-1, hmin);
 
   return hmin;
 }
