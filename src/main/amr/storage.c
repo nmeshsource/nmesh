@@ -1268,6 +1268,8 @@ int total_nnodes_in_myln(tMylnodes *myln)
 /* update array of leaf nodes on this proc, set nid */
 long update_mesh_myln_node_nid(tMesh *mesh)
 {
+  int auto_dt  = Getv(Par("dt"), "auto");
+  double dtfac = Getd(Par("dtfac"));
   tNlist *elem;
   long nid = 0;
   //int lid = 0;
@@ -1282,6 +1284,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
       tNode *node = elem->node;
       tNode *parent = node->parent;
       int i;
+      double dt;
 
       if(node->dat)
       {
@@ -1303,6 +1306,19 @@ long update_mesh_myln_node_nid(tMesh *mesh)
       i = node->nid % i;
       node->comm = nMPIvars_get_comm(i);
       //PRF;printf(": i=%d node->comm=%d\n", i, node->comm);
+
+      /* check if we need to change node->dt and mesh->dt */
+      if(auto_dt)
+      {
+        if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
+        dt = dtfac * find_hmin(node);
+        if(dt < node->dt || node->dt <= 0.)
+        {
+          node->dt = dt*0.999999;
+          mesh->dt = node->dt;
+          PRF;printf(": setting mesh->dt = %g\n", mesh->dt);
+        }
+      }
     }
   else /* mesh->lns is NULL, so free myln */
     realloc_myln_nncats(mesh->myln, 0);
@@ -1847,7 +1863,7 @@ void disablevarlist(tVarList *vl)
 //   bface->mesh = mesh;
 //   /* remove pointer to bface0->fpts */
 //   bface->fpts = NULL;
-// 
+//
 //   return bface;
 // }
 //

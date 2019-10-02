@@ -20,8 +20,9 @@ int nmesh_main(tMesh *mesh)
 
   /* parameters */
   AddPar("physics", "", "what problem to solve");
-  AddPar("dt"  , "0.125", "time step dt");
-  
+  AddPar("dt", "auto", "time step dt [#,auto], for auto: dt = dtfac * hmin");
+  AddPar("dtfac", "0.25", "Courant factor in: dt = dtfac * hmin");
+
   AddPar("iterations", "0", "number of mesh iterations");
   AddPar("finaltime", "0", "iterate until mesh reaches this time");
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
