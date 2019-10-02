@@ -591,3 +591,160 @@ void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower)
     errorexit("Jpower must be 1, -1 or 0");
   }
 }
+
+
+/* find nb. point in dir, pm = +/- 1 */
+int nb_point_in_dir(int ijk, int *n, int pm, int dir)
+{
+  if(n[dir]>1)
+  {
+    switch(dir)
+    {
+    case 0:
+      return ijk + pm;
+    case 1:
+      return ijk + pm*n[0];
+    case 2:
+      return ijk + pm*n[0]*n[1];
+    default:
+      errorexit("dir must be 0,1,2");
+    }
+  }
+  else
+    return ijk; /* we return ijk if there is no nb. */
+}
+
+/* find new hmin given point ccc and nb point nbr */
+double hmin_new(tNode *node, int ccc, int nbr, double hmin_old)
+{
+  if(nbr!=ccc)
+  {
+    tMesh *mesh = node->pat->mesh;
+    int ix = Ind("x");
+    double *x = Vard_(node, ix);
+    double *y = Vard_(node, ix+1);
+    double *z = Vard_(node, ix+2);
+    double r, dx,dy,dz;
+
+    dx = x[nbr] - x[ccc];
+    dy = y[nbr] - y[ccc];
+    dz = z[nbr] - z[ccc];
+    r = sqrt(dx*dx + dy*dy + dz*dz);
+    if(r < hmin_old) return r;
+  }
+  return hmin_old;
+}
+
+
+/* find smallest Cartesian grid spacing in all 8 nnode corners */
+double find_hmin(tNode *node)
+{
+  tPat *pat = node->pat;
+  int *n = node->n;
+  int ccc; /* ijk of corner */
+  int nbr; /* ijk of nb point next to corner */
+  int d;
+  double X0[] = { node->bbox[0], node->bbox[2], node->bbox[4] };
+  double X1[] = { node->bbox[1], node->bbox[3], node->bbox[5] };
+  double c0[3], c1[3], dx[3];
+  double *x0, *x1;
+  double diag2, hmin;
+
+  /* set x0, x1 from X0, X1 */
+  if(pat->xyz_of_XYZ)
+  {
+    x0 = &(c0[0]);
+    x1 = &(c1[0]);
+    pat->xyz_of_XYZ(pat,node,-1, X0, x0);
+    pat->xyz_of_XYZ(pat,node,-1, X1, x1);
+  }
+  else /* assume Cartesian */
+  {
+    x0 = &(X0[0]);
+    x1 = &(X1[0]);
+  }
+
+  /* set hmin from node diagonal */
+  diag2 = 0.;
+  for(d=0; d<3; d++)
+  {
+    dx[d] = x1[d] - x0[d];
+    diag2 += dx[d]*dx[d];
+  }
+  hmin = sqrt(diag2/3.0);
+
+  /* corner 0 */
+  ccc = 0;
+  nbr = nb_point_in_dir(ccc,n, +1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  /* next corner */
+  ccc = n[0]-1;
+  nbr = nb_point_in_dir(ccc,n, -1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  /* next corner */
+  ccc = Ind_n(0, n[1]-1, 0, n);
+  nbr = nb_point_in_dir(ccc,n, +1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  /* next corner */
+  ccc = Ind_n(n[0]-1, n[1]-1, 0, n);
+  nbr = nb_point_in_dir(ccc,n, -1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+
+  /* next corner */
+  ccc = Ind_n(0, 0, n[2]-1, n);
+  nbr = nb_point_in_dir(ccc,n, +1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  /* next corner */
+  ccc = Ind_n(n[0]-1, 0, n[2]-1, n);
+  nbr = nb_point_in_dir(ccc,n, -1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, +1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  /* next corner */
+  ccc = Ind_n(0, n[1]-1, n[2]-1, n);
+  nbr = nb_point_in_dir(ccc,n, +1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  /* next corner */
+  ccc = Ind_n(n[0]-1, n[1]-1, n[2]-1, n);
+  nbr = nb_point_in_dir(ccc,n, -1,0);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,1);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+  nbr = nb_point_in_dir(ccc,n, -1,2);
+  hmin = hmin_new(node, ccc,nbr, hmin);
+
+  return hmin;
+}
