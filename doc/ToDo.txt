@@ -154,10 +154,12 @@ Things that need to be done urgently:
                                bamps' projects/grhdc/grhdc_FV.c)
 
 *replace interpolation in surface communication by something like mortar meth
- -Bernd told me that I can read Kopriva's book or papers about mortar meth
+ -Bernd told me that I can read Kopriva's book or
+  papers~\cite{Kopriva1996a,Kopriva2002a} about the mortar method
  -Insert a surface between adjacent leaf nodes with enough points so that
   transfer in at leat one direc. can be done without errors
- -there are 2 properties that one would like to have, what were they?
+ -there are 2 properties that one would like to have:
+  global conservation & outflow condition
  -there are also works by Dumbser and Canuto about this
 
 *check funs in refine.c
