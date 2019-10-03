@@ -647,6 +647,9 @@ double Cart_distance_X0_X1(tNode *node, double X0[3], double X1[3])
   double *x0, *x1;
   double dist2;
 
+  /* Note: calling xyz_of_XYZ may be slow. We could just also pass in
+     the point indices and then use the vars x,y,z. */
+
   /* set x0, x1 from X0, X1 */
   if(pat->xyz_of_XYZ)
   {
@@ -732,7 +735,6 @@ double find_hmin(tNode *node)
   double X0[] = { node->bbox[0], node->bbox[2], node->bbox[4] };
   double X1[] = { node->bbox[1], node->bbox[3], node->bbox[5] };
   double hmin;
-
 
   /* set hmin from node diagonal */
   hmin = Cart_distance_X0_X1(node, X0,X1)/sqrt(3.);
