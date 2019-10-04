@@ -91,6 +91,8 @@ Things that need to be done urgently:
 
 *use MPI tags from surface.c also in indicators.c: DONE!
 
+*implement dt calculation: DONE!
+
 *hrefine_nodes_if_rflag needs to call create_children_no_nid_update in an
  order that is the SAME on all procs, otherwise the nfaces and fnb have
  differnt ordering and the nb index ni cannot be used as a MPI tag: DONE!
@@ -133,8 +135,6 @@ Things that need to be done urgently:
    make root finder with fd deriv
  -general limiter
  -check c2p with root finder for Wv as in arXiv:1306.4953
-
-*implement dt calculation
 
 *implement/test limiters in 1 dir as in Hebert
 
