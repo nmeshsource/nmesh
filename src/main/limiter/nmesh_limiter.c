@@ -20,6 +20,7 @@ int nmesh_limiter(tMesh *mesh)
   AddPar("limiter_alpha", "5", "for MRS and also minmodB: [0,inf], "
          "0 is most aggressive");
   AddPar("limiter_beta", "0.5", "for minmod: [0.5,1], 0.5 is TVD");
+  AddPar("limiter_scaleBound", "no", "for minmodB: [no,yes]");
 	     	   	   	 
   return 0;
 }

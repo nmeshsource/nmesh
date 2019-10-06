@@ -6,13 +6,14 @@
 #include "limiter.h"
 
 /* parameter indices of some frequently used pars */
-int Par_limiter_alpha, Par_limiter_beta;
+int Par_limiter_alpha, Par_limiter_beta, Par_limiter_scaleBound;
 
 /* func to init frequently used pars */
 int limiter_init_global_par_indices(tMesh *mesh)
 {
   Par_limiter_alpha = Par("limiter_alpha");
   Par_limiter_beta  = Par("limiter_beta");
+  Par_limiter_scaleBound  = Par("limiter_scaleBound");
   return 0;
 }
 
@@ -226,10 +227,10 @@ double minmod3(double a, double b, double c)
 }
 
 /* bounded minmod */
-double minmod3B(double a, double b, double c,  double Mt_dx)
+double minmod3B(double a, double b, double c,  double aBound)
 {
-  if(fabs(a) <= Mt_dx) return a;
-  else                 return minmod3(a,b,c);
+  if(fabs(a) <= aBound) return a;
+  else                  return minmod3(a,b,c);
 }
 
 /* minmodB slope limiter as in : limit u using data in dat->ic */
@@ -240,7 +241,8 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   double *bb = node->bbox;
   tDat *dat;
   int vli, f, ni;
-  double alpha, beta, bos3, h, Mt_h;
+  int scaleBound = Getb(Par_limiter_scaleBound);
+  double alpha, beta, bos3, h, Mt_h, bound;
   const double sqrt3 = sqrt(3.);
   int i100, i010, i001;
   int ret;
@@ -271,7 +273,7 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   forvl(vl, vli)
   {
     int iq = Vind(vl, vli);
-    double w0[6];
+    double w0[6], w0L1;
     double w0c, w100, w010, w001;
     double wl100, wl010, wl001;
 
@@ -282,6 +284,7 @@ int limiter_minmodB(tNode *node, tVarList *vl)
     w001 = dat->ic[iq]->myindc->d[3];
 
     /* get coeffs with av info of neighbors */
+    w0L1 = 0.;
     for(f=0; f<6; f++)
     {
       int nnb = node->nfnb[f];
@@ -291,12 +294,17 @@ int limiter_minmodB(tNode *node, tVarList *vl)
       for(ni=0; ni<nnb; ni++) av += dat->ic[iq]->nbindc[f][ni]->d[0];
       if(nnb>0) av = av/nnb;
       w0[f] = av;
+      w0L1 += fabs(av) * 0.166666666666667;
     }
 
+    /* set bound in bounded minmodB */
+    if(scaleBound) bound = Mt_h * w0L1;
+    else           bound = Mt_h;
+
     /* set limited weights, where bos3 = beta/sqrt3 */
-    wl100 = minmod3B(w100, bos3*(w0c-w0[0]), bos3*(w0[1]-w0c), Mt_h);
-    wl010 = minmod3B(w010, bos3*(w0c-w0[2]), bos3*(w0[3]-w0c), Mt_h);
-    wl001 = minmod3B(w001, bos3*(w0c-w0[4]), bos3*(w0[5]-w0c), Mt_h);
+    wl100 = minmod3B(w100, bos3*(w0c-w0[0]), bos3*(w0[1]-w0c), bound);
+    wl010 = minmod3B(w010, bos3*(w0c-w0[2]), bos3*(w0[3]-w0c), bound);
+    wl001 = minmod3B(w001, bos3*(w0c-w0[4]), bos3*(w0[5]-w0c), bound);
 
     /* limit q */
     if( !dequal(wl100,w100) || !dequal(wl010,w010) || !dequal(wl001,w001) )
