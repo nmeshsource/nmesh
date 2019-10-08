@@ -5,6 +5,9 @@
 #include "nMPI.h"
 
 #define PR 0
+#define PR0 if(PR){PRF;printf(": calling MPI function...\n");fflush(stdout);}
+#define PR1 if(PR){PRF;printf(": done.\n");fflush(stdout);}
+
 
 /* my rank and size if MPI is not compiled in, look at nMPI_Init for
    debugging help!!! */
@@ -67,7 +70,9 @@ int nMPI_print_compile_info(tMesh *mesh)
 int nMPI_Init(int *pargc, char ***pargv)
 {
 #ifdef USEMPI
+  PR0;
   return MPI_Init(pargc, pargv);
+  PR1;
 #else
   /* for debugging we can start nmesh as:
      nmesh nam.par 2 5
@@ -87,7 +92,9 @@ int nMPI_Finalize(void)
   fclose(stderr);
   fclose(stdout);
 #ifdef USEMPI
+  PR0;
   return MPI_Finalize();
+  PR1;
 #endif
   return 0;
 }
@@ -98,7 +105,9 @@ int nMPI_Abort(int errorcode)
   fclose(stderr);
   fclose(stdout);
 #ifdef USEMPI
+  PR0;
   return MPI_Abort(WORLD, errorcode);
+  PR1;
 #endif
   return errorcode;
 }
@@ -108,7 +117,9 @@ int nMPI_rank(void)
 {
   int rank = noMPI_rank;
 #ifdef USEMPI
+  PR0;
   MPI_Comm_rank(WORLD, &rank);
+  PR1;
 #endif
   return rank;
 }
@@ -118,7 +129,9 @@ int nMPI_size(void)
 {
   int size = noMPI_size;
 #ifdef USEMPI
+  PR0;
   MPI_Comm_size(WORLD, &size);
+  PR1;
 #endif
   return size;
 }
@@ -128,7 +141,9 @@ int nMPI_barrier(void)
 {
   int ret=0;
 #ifdef USEMPI
+  PR0;
   ret = MPI_Barrier(WORLD);
+  PR1;
 #endif
   return ret;
 }
@@ -138,7 +153,9 @@ int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm)
 {
   int ret=0;
 #ifdef USEMPI
+  PR0;
   ret = MPI_Comm_dup(comm, newcomm);
+  PR1;
 #endif
   return ret;
 }
@@ -148,7 +165,9 @@ int nMPI_Comm_free(nMPI_Comm *comm)
 {
   int ret=0;
 #ifdef USEMPI
+  PR0;
   MPI_Comm_free(comm);
+  PR1;
 #endif
   return ret;
 }
@@ -162,7 +181,9 @@ void nMPI_Isend_double(double *buf, int blen, int dest, int tag,
     PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
   }
 #ifdef USEMPI
+  PR0;
   MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
+  PR1;
 #endif
 }
 
@@ -175,7 +196,9 @@ void nMPI_Irecv_double(double *buf, int blen, int src, int tag,
     PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
   }
 #ifdef USEMPI
+  PR0;
   MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
+  PR1;
 #endif
 }
 
@@ -198,7 +221,9 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
   //printf("\n");
   //fflush(stdout);
 #ifdef USEMPI
+  PR0;
   errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag, s_comm, s_req);
+  PR1;
   if(errS != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
   
   errR = MPI_Irecv(rbuf, nr, MPI_DOUBLE, rank_other, r_tag, r_comm, r_req);
@@ -220,7 +245,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   status = MPI_Waitall(nreq, req, stat);
   if(PR)
   {
-    PRF;printf(": finished waiting, status=%d\n", status);
+    PRF;printf(": done waiting, status=%d\n", status);
     fflush(stdout);
   }
   if(status == MPI_ERR_IN_STATUS)
@@ -242,7 +267,7 @@ int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
   status = MPI_Wait(req, stat);
   if(PR)
   {
-    PRF;printf(": finished waiting, status=%d\n", status);
+    PRF;printf(": done waiting, status=%d\n", status);
     fflush(stdout);
   }
   if(status == MPI_ERR_IN_STATUS)
@@ -257,7 +282,9 @@ int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
 {
   int status = 0;
 #ifdef USEMPI
+  PR0;
   status = MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, WORLD);
+  PR1;
 #endif
   return status;
 }
@@ -268,8 +295,10 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 {
   int status = 0;
 #ifdef USEMPI
+  PR0;
   status = MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, WORLD,
                           request);
+  PR1;
 #endif
   return status;
 }
@@ -280,7 +309,9 @@ int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root)
 {
   int status = 0;
 #ifdef USEMPI
+  PR0;
   MPI_Bcast(buffer, count, datatype, root, WORLD);
+  PR1;
 #endif
   return status;
 }
@@ -291,7 +322,9 @@ int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
 {
   int status = 0;
 #ifdef USEMPI
+  PR0;
   MPI_Ibcast(buffer, count, datatype, root, WORLD, request);
+  PR1;
 #endif
   return status;
 }
@@ -304,12 +337,13 @@ int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
   if(!nreq) return 0;
   if(PR)
   {
-    PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
+    PRF;printf(": %d testing for %d requests to finish\n", nMPI_rank(), nreq);
     fflush(stdout);
   }
 #ifdef USEMPI
+  PR0;
   status = MPI_Testall(nreq, req, flag, stat);
-
+  PR1;
   if(status == MPI_ERR_IN_STATUS)
     errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
 #else
@@ -323,7 +357,9 @@ int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
 {
   int status = 0;
 #ifdef USEMPI
+  PR0;
   MPI_Test(request, flag, stat);
+  PR1;
 #else
   *flag = 1;
 #endif
