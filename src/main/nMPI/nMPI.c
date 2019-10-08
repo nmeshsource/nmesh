@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
-#define PR 0
+#define PR 1
 #define PR0 if(PR){PRF;printf(": calling MPI function...\n");fflush(stdout);}
 #define PR1 if(PR){PRF;printf(": done.\n");fflush(stdout);}
 
@@ -238,7 +238,8 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   if(!nreq) return 0;
   if(PR)
   {
-    PRF;printf(": %d waiting for %d requests to finish\n", nMPI_rank(), nreq);
+    int rank = nMPI_rank();
+    PRF;printf(": %d waiting for %d requests to finish\n", rank, nreq);
     fflush(stdout);
   }
 #ifdef USEMPI
@@ -249,7 +250,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
     fflush(stdout);
   }
   if(status == MPI_ERR_IN_STATUS)
-    errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
+    errorexiti("MPI_Waitall error after waiting for %d requests", nreq);
 #endif
   return status;
 }
@@ -260,7 +261,8 @@ int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
   int status = 0;
   if(PR)
   {
-    PRF;printf(": %d waiting for request to finish\n", nMPI_rank());
+    int rank = nMPI_rank();
+    PRF;printf(": %d waiting for request to finish\n", rank);
     fflush(stdout);
   }
 #ifdef USEMPI
