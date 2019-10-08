@@ -218,7 +218,11 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   }
 #ifdef USEMPI
   status = MPI_Waitall(nreq, req, stat);
-
+  if(PR)
+  {
+    PRF;printf(": finished waiting, status=%d\n", status);
+    fflush(stdout);
+  }
   if(status == MPI_ERR_IN_STATUS)
     errorexiti("MPI_Waitall error after waiting for %d requests",nreq);
 #endif
@@ -236,7 +240,11 @@ int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat)
   }
 #ifdef USEMPI
   status = MPI_Wait(req, stat);
-
+  if(PR)
+  {
+    PRF;printf(": finished waiting, status=%d\n", status);
+    fflush(stdout);
+  }
   if(status == MPI_ERR_IN_STATUS)
     errorexit("MPI_Wait error after waiting for request");
 #endif
