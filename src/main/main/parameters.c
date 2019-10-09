@@ -206,6 +206,9 @@ int nmesh_update_parameters(tMesh *mesh)
   int pl = strlen(outdir) + 80;
   char *pars  = cmalloc(pl);
 
+  /* FIXME: add an elapsed time check (as in checkpoint_save_if_needed) to avoid
+     opening files in each evo step */
+
   snprintf(pars,pl, "%s/%s", outdir, "nmesh_update_parameters.par");
   nmesh_load_parameters(mesh, pars, 0, 0);
 

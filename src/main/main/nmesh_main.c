@@ -13,8 +13,9 @@ int nmesh_main(tMesh *mesh)
   /* functions */
   AddFun(OUTPUT, write_all_timers);
   AddFun(FINALIZEMESH, free_all_timers);
-  AddFun(PRE_COORDINATES, nmesh_update_parameters);
-  AddFun(PRE_EVOLVE, nmesh_update_parameters);
+  //FIXME: disable nmesh_update_parameters, as it currently does not scale at all:
+  //AddFun(PRE_COORDINATES, nmesh_update_parameters);
+  //AddFun(PRE_EVOLVE, nmesh_update_parameters);
 
   /* variables */
 
