@@ -27,7 +27,7 @@ int nmesh_output(tMesh *mesh)
   AddPar("2douttime", "-1", "when to output based on time");
   AddPar("3douttime", "-1", "when to output based on time");
 
-  AddPar("0doutput_normtype", "integral", 
+  AddPar("0doutput_normtype", "integral",
 	 "how we compute norms such as rms [integral,L2norm]");
 
   AddPar("0doutput", "", "variables to output norms for");
@@ -36,9 +36,9 @@ int nmesh_output(tMesh *mesh)
   AddPar("3doutput", "", "variables to output in 3d");
 
   AddPar("2dformat", "gnuplot",
-	 "format for 2d output [gnuplot,vtk,text,binary,float,double]"); 
+	 "format for 2d output [gnuplot,vtk,text,binary,float,double]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "
-	 "[vtk,text,binary,float,double]"); 
+	 "[xdmf,vtk,text,binary,float,double]");
 
   AddPar("outputX0", "0", "origin for output in X");
   AddPar("outputY0", "0", "origin for output in Y");

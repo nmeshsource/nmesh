@@ -69,7 +69,6 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   int di[4];
   double dt[4];
   char *ou[4];
-  char s[32];
   char str[1000];
   int start;
   int d, vi, vi0;
@@ -81,12 +80,12 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   /* par values in strings */
   for(d = 0; d <= 3; d++)
   {
-    snprintf(s,999, "%ddoutiter", d);
-    di[d] = Geti(Par(s));
-    snprintf(s,999, "%ddouttime", d);
-    dt[d] = Getd(Par(s));
-    snprintf(s,999, "%ddoutput", d);
-    ou[d] = Gets(Par(s));
+    snprintf(str,999, "%ddoutiter", d);
+    di[d] = Geti(Par(str));
+    snprintf(str,999, "%ddouttime", d);
+    dt[d] = Getd(Par(str));
+    snprintf(str,999, "%ddoutput", d);
+    ou[d] = Gets(Par(str));
   }
 
   /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
