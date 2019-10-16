@@ -31,7 +31,7 @@ CC = mpiicc # gcc # icc
 # optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
 OFLAGS = -std=c99 -O3 # -fopenmp # -g # -Wall -Werror
 
-# use OpenMP pragmas, this also needs something -fopenmp in OFLAGS
+# use OpenMP pragmas, this also needs something like -fopenmp in OFLAGS
 #DFLAGS += -DUSEOMP
 
 # use MPI, no paths should be needed with mpicc
