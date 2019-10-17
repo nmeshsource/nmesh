@@ -173,7 +173,7 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
 }
 
 /************************************************************************/
-/* make patches the surround a central box */
+/* make patches that surround a central box */
 /************************************************************************/
 
 /* surround a box with cubed spheres that have
@@ -279,6 +279,41 @@ int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
   }
   xc[0] = xc[1] = xc[2] = 0.0;
   pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
+  return pl;
+}
+
+/************************************************************************/
+/* make patches that surround an inner sphere */
+/************************************************************************/
+
+/* surround an inner excised sphere with cubed spheres that have
+   A,B that are in an extended range
+         _______
+      __/       \__
+     /      3      \
+    /____       ____\
+   /     \_---_/     \     e.g. dom0/1 have A = [-0.8, 0.8]
+  |   0  /     \   1  |         dom2/3 have A = [-1.25,1.25]
+  |      \_   _/      |
+   \ ____/ --- \____ /      r0 is radius of outer sphere
+    \               /       dc[i] is radius of inner sphere in dir i
+     \__    2    __/
+        \_______/
+*/
+int sphere_around_empty_sphere_at_x0(tMesh *mesh, double dc[3], double r0)
+{
+  int pl;
+  double xc[3], Din[6], Dout[6];
+  int f;
+
+  /* set distances to make 6 cubed spheres around the empty inner sphere */
+  for(f=0; f<6; f++)
+  {
+    Din[f]  = dc[f/2];
+    Dout[f] = r0;
+  }
+  xc[0] = xc[1] = xc[2] = 0.0;
+  pl = add_6CubedSphere_pats(mesh, CubedShell,0,0, xc, Din,Dout);
   return pl;
 }
 
