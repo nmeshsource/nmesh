@@ -305,7 +305,10 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       break;
     case 6:
       rc[0] = rc[1] = rc[2] = dc;
-      sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
+      if(Getv(mesh_type, "Shell"))
+        sphere_around_empty_sphere_at_x0(mesh, rc, ssfac*dc);
+      else
+        sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
       break;
     case 7:
       rc[0] = rc[1] = rc[2] = dc;
