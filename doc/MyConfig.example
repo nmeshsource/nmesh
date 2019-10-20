@@ -36,3 +36,6 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 # other libraries needed, in some cases we need even -lrt for clock_gettime
 #SPECIALLIBS += -lgsl -lgslcblas
 #SPECIALLIBS += -lrt
+
+# for little-endian systems without <endian.h>, uncomment the line below
+#DFLAGS += -DBYTE_ORDER_LITTLE=1
