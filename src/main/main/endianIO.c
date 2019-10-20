@@ -14,14 +14,21 @@
 #include "nmesh.h"
 
 /* About binary formats:
-   There is /usr/include/endian.h . Is this standard?
-   also see /usr/include/byteswap.h, and
+   There is <endian.h> or "/usr/include/endian.h" on Linux. This is not
+   standard yet. On BSD this can be in <sys/endian.h>, or on crazy systems
+   like macos in <machine/endian.h>.
+   On Linux see also "/usr/include/byteswap.h", and
    include/bits/byteswap.h for gcc/x86 optimized code */
+
+/* check if BYTE_ORDER_LITTLE was set in MyConfig.
+   If not, use info from <endian.h> to set it: */
+#ifndef BYTE_ORDER_LITTLE
 #include <endian.h>
-#if  __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER == __LITTLE_ENDIAN
 #define BYTE_ORDER_LITTLE 1
 #else
 #define BYTE_ORDER_LITTLE 0
+#endif
 #endif
 
 
@@ -105,4 +112,18 @@ size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp)
     return fread(ptr, size, nmemb, fp);
   else
     return fread_swapbytes(ptr, size, nmemb, fp);
+}
+
+
+/* return value of BYTE_ORDER_LITTLE */
+int return_BYTE_ORDER_LITTLE(void)
+{
+  return BYTE_ORDER_LITTLE; /* endianess */
+}
+
+/* print what byte order we have */
+int print_endian_info(tMesh *mesh)
+{
+  printf("BYTE_ORDER_LITTLE = %d\n", return_BYTE_ORDER_LITTLE());
+  return 0;
 }

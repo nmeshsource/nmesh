@@ -11,6 +11,7 @@ int nmesh_main(tMesh *mesh)
   printf("Adding main\n");
 
   /* functions */
+  AddFun(FIRST, print_endian_info);
   AddFun(OUTPUT, write_all_timers);
   AddFun(FINALIZEMESH, free_all_timers);
   //FIXME: disable nmesh_update_parameters, as it currently does not scale at all:

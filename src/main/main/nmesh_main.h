@@ -241,6 +241,8 @@ size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp);
 size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp);
+int return_BYTE_ORDER_LITTLE(void);
+int print_endian_info(tMesh *mesh);
 
 /* timer.c */
 int write_all_timers(tMesh *mesh);
