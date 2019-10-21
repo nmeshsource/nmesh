@@ -10,6 +10,9 @@ make
 There is a file MyConfig that the main Makefile includes. In it we set
 the compiler flags and libraries we wish to use when compiling. If it is
 not present, an example is copied from doc/MyConfig.example .
+On very old or strange systems we may need the following in MyConfig:
+OFLAGS = -std=gnu99
+DFLAGS += -DBYTE_ORDER_LITTLE=1 -DNOC11
 
 3. more make targets:
 ---------------------

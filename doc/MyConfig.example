@@ -27,7 +27,7 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 
 # use MPI, no paths should be needed with mpicc
 #DFLAGS += -DUSEMPI
-## This works on Debian 9 with openmpi, but no paths are needed with mpicc:
+## This works on Debian 10 with openmpi, but no paths are needed with mpicc:
 #MPIDIR = /usr/lib/x86_64-linux-gnu/openmpi
 #MPIDIRL = -L$(MPIDIR)/lib
 #MPIDIRI = -I$(MPIDIR)/include
@@ -39,3 +39,6 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 
 # for little-endian systems without <endian.h>, uncomment the line below
 #DFLAGS += -DBYTE_ORDER_LITTLE=1
+
+# on old compilers without _Noreturn, uncomment the line below
+#DFLAGS += -DNOC11
