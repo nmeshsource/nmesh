@@ -17,8 +17,12 @@
 /* min x we pass into log(x) */
 #define LOGARGFLOOR 1e-50
 
-/* _Noreturn */
+/* define NORET as _Noreturn, unless we use -DNOC11 */
+#ifdef NOC11
+#define NORET
+#else
 #define NORET _Noreturn
+#endif
 
 /* snap effect for mesh coordinates */
 #define dequaleps 1e-10
