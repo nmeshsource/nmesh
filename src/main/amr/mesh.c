@@ -133,6 +133,8 @@ int amr_setup_mesh(tMesh *mesh)
     ret = setup_box_mesh(mesh);
   else if(Getv(mesh_type, "CubedSpheres"))
     ret = setup_CubedSphere_mesh(mesh);
+  else if(Getv(mesh_type, "Shell"))
+    ret = setup_Shell_mesh(mesh);
   else if(Getv(mesh_type, "l2_mesh"))
     ret = setup_l2_mesh(mesh);
   else if(Getv(mesh_type, "3patchl2_mesh"))
@@ -306,7 +308,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
     case 6:
       rc[0] = rc[1] = rc[2] = dc;
       if(Getv(mesh_type, "Shell"))
-        sphere_around_empty_sphere_at_x0(mesh, rc, ssfac*dc);
+        CubedSphere_shell_at_x0(mesh, dc, ssfac*dc);
       else
         sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
       break;
@@ -351,6 +353,30 @@ outputPatchPlanes_meshvar(mesh, "x", 0,0);
 outputPatchPlanes_meshvar(mesh, "y", 0,0);
 outputPatchPlanes_meshvar(mesh, "z", 0,0);
 //exit(9);
+
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+
+  return 0;
+}
+
+/* a shell made out of a number of cubed spheres */
+int setup_Shell_mesh(tMesh *mesh)
+{
+  double rin  = Getd(Par("amr_Shell_rin"));
+  double rout = Getd(Par("amr_Shell_rout"));
+
+  PRFs(":\n");
+
+  mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  /* remove all patches to mesh, so we can just ad new pristine ones */
+  remove_all_patches(mesh);
+
+  /* setup cubed spheres in form of a shell */
+  CubedSphere_shell_at_x0(mesh, rin, rout);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);

@@ -20,7 +20,7 @@ int nmesh_amr(tMesh *mesh)
 
   /* parameters */
   AddPar("amr_mesh_type", "test_mesh",
-	 "mesh we start with [test_mesh,l2_mesh]");
+	 "initial mesh [BoxMesh,CubedSpheres,Shell,test_mesh,l2_mesh]");
   AddPar("amr_n0", "5", "number of points in dir. 0 in one node");
   AddPar("amr_n1", "5", "number of points in dir. 1 in one node");
   AddPar("amr_n2", "5", "number of points in dir. 2 in one node");
@@ -29,6 +29,8 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_refine_p", "-1", "patch that we refine one level further");
   AddPar("amr_BoxMesh_xc", "0 0 0", "center for boxes");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
+  AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
+  AddPar("amr_Shell_rout", "1", "outer radius of shell");
 
   AddPar("bface_options", "face2_order3", "how we set some bface flags "
          "[none,face2_order0,face2_order1,face2_order2,face2_order3]");
