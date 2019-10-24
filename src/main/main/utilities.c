@@ -357,7 +357,7 @@ int remove_dir(char *dirname)
 {
   DIR *d;
   struct dirent *dir;
-  char file[1000];
+  char file[8192];
 
   /* open the dir dirname */
   d = opendir(dirname);
@@ -371,7 +371,7 @@ int remove_dir(char *dirname)
       if( strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0 )
         continue;
 
-      snprintf(file, 999, "./%s/%s", dirname, dir->d_name);
+      snprintf(file, 8192, "./%s/%s", dirname, dir->d_name);
 
       sd = opendir(file);
       if(sd!=NULL)
