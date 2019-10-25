@@ -474,7 +474,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     printf("i, ij, (ij), [ij], ijk, i(jk), (ij)k [ij]k ijkl (ij)(kl)\n");
     printf("ij+ji, ij-ji, ijk+ikj, ijk+jik\n");
     printf("a, ab, ab+ba, abc+acb\n");
-    printf("(ab), a(bc), (ab)c, (ab)i, (ab)(ij)\n");
+    printf("(ab), a(bc), (ab)c, (ab)i, (ab)(ij), i(ab), (ij)(ab), ij(ab)\n");
     printf("q, qr, qr+rq, qrs+rqs, qrst+qrts+rqst+rqts\n");
     printf("q, qr, (qr), (qr)s, (qr)(st)\n");
     printf("iq, iqr, i(qr)\n");
