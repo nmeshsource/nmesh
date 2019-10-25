@@ -149,7 +149,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "ijkl+ijlk+jikl+jilk)") == 0 ||
+  if(strcmp(tensorindices, "ijkl+ijlk+jikl+jilk") == 0 ||
      strcmp(tensorindices, "(ij)(kl)") == 0) {
     for(i = 0; i < 3; i++)
     for(j = i; j < 3; j++)
@@ -257,19 +257,48 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "abij+abji+baij+baji)") == 0 ||
+  if(strcmp(tensorindices, "iab+iba")   == 0 ||
+     strcmp(tensorindices, "i(ab)")   == 0) {
+    for(i = 0; i <  3; i++)
+    for(j = 0; j <= 3; j++)
+    for(k = j; k <= 3; k++) {
+      sym[3*n+i] *= -1;
+      if(j > 0) sym[3*n+j-1] *= -1;
+      if(k > 0) sym[3*n+k-1] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s%s", coord[i], coord4[j], coord4[k]);
+    }
+  }
+
+  if(strcmp(tensorindices, "abij+abji+baij+baji") == 0 ||
      strcmp(tensorindices, "(ab)(ij)") == 0) {
     for(i = 0; i <= 3; i++)
     for(j = i; j <= 3; j++)
     for(k = 0; k < 3; k++)
     for(l = k; l < 3; l++)
     {
-      if(i > 0) sym[3*n+i] *= -1;
-      if(j > 0) sym[3*n+j] *= -1;
+      if(i > 0) sym[3*n+i-1] *= -1;
+      if(j > 0) sym[3*n+j-1] *= -1;
       sym[3*n+k] *= -1;
       sym[3*n+l] *= -1;
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
       sprintf(ilist[n++], "%s%s%s%s", coord4[i], coord4[j], coord[k], coord[l]);
+    }
+  }
+
+  if(strcmp(tensorindices, "ijab+ijba+jiab+jiba") == 0 ||
+     strcmp(tensorindices, "(ij)(ab)") == 0) {
+    for(i = 0; i < 3; i++)
+    for(j = i; j < 3; j++)
+    for(k = 0; k <= 3; k++)
+    for(l = k; l <= 3; l++)
+    {
+      sym[3*n+i] *= -1;
+      sym[3*n+j] *= -1;
+      if(k > 0) sym[3*n+k-1] *= -1;
+      if(l > 0) sym[3*n+l-1] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s%s%s", coord[i], coord[j], coord4[k], coord4[l]);
     }
   }
 
@@ -316,7 +345,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if(strcmp(tensorindices, "qrst+qrts+rqst+rqts)") == 0 ||
+  if(strcmp(tensorindices, "qrst+qrts+rqst+rqts") == 0 ||
      strcmp(tensorindices, "(qr)(st)") == 0) {
     for(i = 0; i < 2; i++)
     for(j = i; j < 2; j++)
