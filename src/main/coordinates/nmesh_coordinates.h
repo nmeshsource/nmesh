@@ -98,6 +98,11 @@ void cart_partials_dUij_dk(tNode *node, int Uxx, int dUxxx);
 void cart_partials_dUa_di(tNode *node, int Ut, int dUtx);
 void cart_partials_dSab_di(tNode *node, int Stt, int dSttx);
 void cart_partials_dUab_di(tNode *node, int Utt, int dUttx);
+#define cart_partials_diU(node, U, dU) cart_partials_dU_di((node), (U), (dU))
+void cart_partials_diUa(tNode *node, int Ut, int dUxt);
+void cart_partials_diSab(tNode *node, int Stt, int dSxtt);
+void cart_partials_diUab(tNode *node, int Utt, int dUxtt);
+void cart_partials_diTjab(tNode *node, int Txtt, int dTxxtt);
 void cart_partials_dU_di_dU_dij(tNode *node, int U, int dUx, int ddUxx);
 void cart_partials_dUi_dj_dUi_djk(tNode *node, int Ux, int dUxx, int ddUxxx);
 void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,

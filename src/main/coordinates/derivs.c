@@ -163,6 +163,46 @@ void cart_partials_dUab_di(tNode *node, int Utt, int dUttx)
     cart_partials_dU_di(node, Utt + n, dUttx + 3*n);
 }
 
+/* compute first derivs d_i U_{a} of a vector U_{a} in a node */
+void cart_partials_diUa(tNode *node, int Ut, int dUxt)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<4; n++)
+    cart_3partials(node, Ut+n, dUxt+n, dUxt+4+n, dUxt+8+n);
+}
+
+/* compute first derivs d_i S_{ab} of a symmetric tensor S_{ab} in a node */
+void cart_partials_diSab(tNode *node, int Stt, int dSxtt)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<10; n++)
+    cart_3partials(node, Stt+n, dSxtt+n, dSxtt+10+n, dSxtt+20+n);
+}
+
+/* compute first derivs d_i U_{ab} of a general tensor U_{ab} in a node */
+void cart_partials_diUab(tNode *node, int Utt, int dUxtt)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<16; n++)
+    cart_3partials(node, Utt+n, dUxtt+n, dUxtt+16+n, dUxtt+32+n);
+}
+
+/* compute first derivs d_i T_{jab} of a tensor T_{iab} = T_{iba} */
+void cart_partials_diTjab(tNode *node, int Txtt, int dTxxtt)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<30; n++)
+    cart_3partials(node, Txtt+n, dTxxtt+n, dTxxtt+30+n, dTxxtt+60+n);
+}
+
 /***********************************************************************/
 /* 2nd derivs of vectors and tensors */
 /***********************************************************************/
