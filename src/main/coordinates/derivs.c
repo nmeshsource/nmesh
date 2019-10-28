@@ -130,6 +130,40 @@ void cart_partials_Uij(tNode *node, int Uxx, int dUxxx)
 }
 
 /***********************************************************************/
+/* 1st derivs of 4-vectors and 4-tensors */
+/***********************************************************************/
+
+/* compute first derivs U_{a,i} of a vector U_{a} in a node */
+void cart_partials_Ua(tNode *node, int Ut, int dUtx)
+{
+  /* compute partial derivs of all components in node */
+  cart_partials_U(node, Ut,   dUtx);
+  cart_partials_U(node, Ut+1, dUtx+3);
+  cart_partials_U(node, Ut+2, dUtx+6);
+  cart_partials_U(node, Ut+3, dUtx+9);
+}
+
+/* compute first derivs S_{ab,k} of a symmetric tensor S_{ab} in a node */
+void cart_partials_Sab(tNode *node, int Stt, int dSttx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<10; n++)
+    cart_partials_U(node, Stt + n, dSttx + 3*n);
+}
+
+/* compute first derivs U_{ab,k} of a general tensor U_{ab} in a node */
+void cart_partials_Uab(tNode *node, int Utt, int dUttx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<16; n++)
+    cart_partials_U(node, Utt + n, dUttx + 3*n);
+}
+
+/***********************************************************************/
 /* 2nd derivs of vectors and tensors */
 /***********************************************************************/
 

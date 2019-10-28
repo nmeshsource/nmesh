@@ -96,6 +96,9 @@ void cart_partials_Ui(tNode *node, int Ux, int dUxx);
 void cart_partials_Sij(tNode *node, int Sxx, int dSxxx);
 void cart_partials2_U(tNode *node, int U, int dUx, int ddUxx);
 void cart_partials2_Sij(tNode *node, int Sxx, int dSxxx, int ddSxxxx);
+void cart_partials_Ua(tNode *node, int Ut, int dUtx);
+void cart_partials_Sab(tNode *node, int Stt, int dSttx);
+void cart_partials_Uab(tNode *node, int Utt, int dUttx);
 int cart_div_Ui(tNode *node, int Ux, int divUi);
 
 /* utilities.c */
