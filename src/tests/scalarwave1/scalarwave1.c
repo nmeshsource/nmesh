@@ -426,6 +426,9 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
     for(l=0; l<nf; l++)
       d->fnum[l] = fnumi[l] + fnuma[l];
   }
+
+  /* flux for scalar field itself is zero */
+  d->fnum[4] = 0.;
 }
 
 
