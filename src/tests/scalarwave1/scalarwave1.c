@@ -122,10 +122,10 @@ void scalarwave1_f_divf(tMesh *mesh, tVarList *vlu)
     }
 
     /* flux derivs */
-    cart_div_Ui(node, if_pix, idivf_pi);
-    cart_div_Ui(node, if_cxx, idivf_cx);
-    cart_div_Ui(node, if_cyx, idivf_cx+1);
-    cart_div_Ui(node, if_czx, idivf_cx+2);
+    cart_di_Ui(node, if_pix, idivf_pi);
+    cart_di_Ui(node, if_cxx, idivf_cx);
+    cart_di_Ui(node, if_cyx, idivf_cx+1);
+    cart_di_Ui(node, if_czx, idivf_cx+2);
   }
 }
 

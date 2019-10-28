@@ -86,7 +86,7 @@ void burgers1_f_df(tMesh *mesh, tVarList *vlu)
     }
 
    /* flux divergence */
-   cart_div_Ui(node, ifx, idivf);
+   cart_di_Ui(node, ifx, idivf);
   }
 }
 

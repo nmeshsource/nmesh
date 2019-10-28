@@ -90,7 +90,7 @@ void cart_3partials(tNode *node, int U, int dUx, int dUy, int dUz)
 }
 
 /* compute first derivs U_{,i} of a scalar U in a node */
-void cart_partials_U(tNode *node, int U, int dUx)
+void cart_partials_dU_di(tNode *node, int U, int dUx)
 {
   int dU[] = { dUx, dUx+1, dUx+2 };
   cart_partials(node, U, dU);
@@ -101,32 +101,32 @@ void cart_partials_U(tNode *node, int U, int dUx)
 /***********************************************************************/
 
 /* compute first derivs U_{i,j} of a vector U_{i} in a node */
-void cart_partials_Ui(tNode *node, int Ux, int dUxx)
+void cart_partials_dUi_dj(tNode *node, int Ux, int dUxx)
 {
   /* compute partial derivs of all components in node */
-  cart_partials_U(node, Ux,   dUxx);
-  cart_partials_U(node, Ux+1, dUxx+3);
-  cart_partials_U(node, Ux+2, dUxx+6);
+  cart_partials_dU_di(node, Ux,   dUxx);
+  cart_partials_dU_di(node, Ux+1, dUxx+3);
+  cart_partials_dU_di(node, Ux+2, dUxx+6);
 }
 
 /* compute first derivs S_{ij,k} of a symmetric tensor S_{ij} in a node */
-void cart_partials_Sij(tNode *node, int Sxx, int dSxxx)
+void cart_partials_dSij_dk(tNode *node, int Sxx, int dSxxx)
 {
   int n;
 
   /* compute partial derivs of all components in node */
   for(n=0; n<6; n++)
-    cart_partials_U(node, Sxx + n, dSxxx + 3*n);
+    cart_partials_dU_di(node, Sxx + n, dSxxx + 3*n);
 }
 
 /* compute first derivs U_{ij,k} of a general tensor U_{ij} in a node */
-void cart_partials_Uij(tNode *node, int Uxx, int dUxxx)
+void cart_partials_dUij_dk(tNode *node, int Uxx, int dUxxx)
 {
   int n;
 
   /* compute partial derivs of all components in node */
   for(n=0; n<9; n++)
-    cart_partials_U(node, Uxx + n, dUxxx + 3*n);
+    cart_partials_dU_di(node, Uxx + n, dUxxx + 3*n);
 }
 
 /***********************************************************************/
@@ -134,33 +134,33 @@ void cart_partials_Uij(tNode *node, int Uxx, int dUxxx)
 /***********************************************************************/
 
 /* compute first derivs U_{a,i} of a vector U_{a} in a node */
-void cart_partials_Ua(tNode *node, int Ut, int dUtx)
+void cart_partials_dUa_di(tNode *node, int Ut, int dUtx)
 {
   /* compute partial derivs of all components in node */
-  cart_partials_U(node, Ut,   dUtx);
-  cart_partials_U(node, Ut+1, dUtx+3);
-  cart_partials_U(node, Ut+2, dUtx+6);
-  cart_partials_U(node, Ut+3, dUtx+9);
+  cart_partials_dU_di(node, Ut,   dUtx);
+  cart_partials_dU_di(node, Ut+1, dUtx+3);
+  cart_partials_dU_di(node, Ut+2, dUtx+6);
+  cart_partials_dU_di(node, Ut+3, dUtx+9);
 }
 
 /* compute first derivs S_{ab,k} of a symmetric tensor S_{ab} in a node */
-void cart_partials_Sab(tNode *node, int Stt, int dSttx)
+void cart_partials_dSab_di(tNode *node, int Stt, int dSttx)
 {
   int n;
 
   /* compute partial derivs of all components in node */
   for(n=0; n<10; n++)
-    cart_partials_U(node, Stt + n, dSttx + 3*n);
+    cart_partials_dU_di(node, Stt + n, dSttx + 3*n);
 }
 
 /* compute first derivs U_{ab,k} of a general tensor U_{ab} in a node */
-void cart_partials_Uab(tNode *node, int Utt, int dUttx)
+void cart_partials_dUab_di(tNode *node, int Utt, int dUttx)
 {
   int n;
 
   /* compute partial derivs of all components in node */
   for(n=0; n<16; n++)
-    cart_partials_U(node, Utt + n, dUttx + 3*n);
+    cart_partials_dU_di(node, Utt + n, dUttx + 3*n);
 }
 
 /***********************************************************************/
@@ -168,10 +168,10 @@ void cart_partials_Uab(tNode *node, int Utt, int dUttx)
 /***********************************************************************/
 
 /* compute 1st and 2nd order Cart. derivs of scalar U */
-void cart_partials2_U(tNode *node, int U, int dUx, int ddUxx)
+void cart_partials_dU_di_dU_dij(tNode *node, int U, int dUx, int ddUxx)
 {
   /* 1st derivs */
-  cart_partials_U(node, U, dUx);
+  cart_partials_dU_di(node, U, dUx);
 
   /* 2nd derivs */
   cart_3partials(node, dUx,   ddUxx,  ddUxx+1,ddUxx+2);
@@ -180,12 +180,12 @@ void cart_partials2_U(tNode *node, int U, int dUx, int ddUxx)
 }
 
 /* compute 1st and 2nd derivs U_{i,jk} of a vector U_{i} in a node */
-void cart_partials2_Ui(tNode *node, int Ux, int dUxx, int ddUxxx)
+void cart_partials_dUi_dj_dUi_djk(tNode *node, int Ux, int dUxx, int ddUxxx)
 {
   int n;
 
   /* 1st derivs */
-  cart_partials_Ui(node, Ux, dUxx);
+  cart_partials_dUi_dj(node, Ux, dUxx);
 
   /* 2nd derivs */
   for(n=0; n<3; n++) /* n=0: dUxj, n=1: dUyj, n=2: dUzj */
@@ -197,12 +197,13 @@ void cart_partials2_Ui(tNode *node, int Ux, int dUxx, int ddUxxx)
 }
 
 /* compute 1st and 2nd derivs S_{ij,kl} of a symmetric tensor S_{ij} */
-void cart_partials2_Sij(tNode *node, int Sxx, int dSxxx, int ddSxxxx)
+void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
+                                    int dSxxx, int ddSxxxx)
 {
   int n;
 
   /* 1st derivs */
-  cart_partials_Sij(node, Sxx, dSxxx);
+  cart_partials_dSij_dk(node, Sxx, dSxxx);
 
   /* 2nd derivs */
   for(n=0; n<6; n++) /* n=0: dSxxj, n=2: dSxzj, n=3: dSxyj */
@@ -265,7 +266,7 @@ int cart_1partial(tNode *node, int dir, int ui, int dui)
    put it into var divUi */
 /* NOTE: maybe one could get d_i U^i from [d_A (sqrt(f) U^A)]/sqrt(f)
    where f is the flat metric in X^A coords. This might need less memory! */
-int cart_div_Ui(tNode *node, int Ux, int divUi)
+int cart_di_Ui(tNode *node, int Ux, int divUi)
 {
   tDat *dat = node->dat;
   tArray *aU;

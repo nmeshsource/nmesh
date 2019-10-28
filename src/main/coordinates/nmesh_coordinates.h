@@ -91,15 +91,18 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui[3]);
-void cart_partials_U(tNode *node, int U, int dUi);
-void cart_partials_Ui(tNode *node, int Ux, int dUxx);
-void cart_partials_Sij(tNode *node, int Sxx, int dSxxx);
-void cart_partials2_U(tNode *node, int U, int dUx, int ddUxx);
-void cart_partials2_Sij(tNode *node, int Sxx, int dSxxx, int ddSxxxx);
-void cart_partials_Ua(tNode *node, int Ut, int dUtx);
-void cart_partials_Sab(tNode *node, int Stt, int dSttx);
-void cart_partials_Uab(tNode *node, int Utt, int dUttx);
-int cart_div_Ui(tNode *node, int Ux, int divUi);
+void cart_partials_dU_di(tNode *node, int U, int dUx);
+void cart_partials_dUi_dj(tNode *node, int Ux, int dUxx);
+void cart_partials_dSij_dk(tNode *node, int Sxx, int dSxxx);
+void cart_partials_dUij_dk(tNode *node, int Uxx, int dUxxx);
+void cart_partials_dUa_di(tNode *node, int Ut, int dUtx);
+void cart_partials_dSab_di(tNode *node, int Stt, int dSttx);
+void cart_partials_dUab_di(tNode *node, int Utt, int dUttx);
+void cart_partials_dU_di_dU_dij(tNode *node, int U, int dUx, int ddUxx);
+void cart_partials_dUi_dj_dUi_djk(tNode *node, int Ux, int dUxx, int ddUxxx);
+void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
+                                    int dSxxx, int ddSxxxx);
+int cart_di_Ui(tNode *node, int Ux, int divUi);
 
 /* utilities.c */
 double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);
