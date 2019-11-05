@@ -195,8 +195,8 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
   }
 
   if(strcmp(tensorindices, "ia") == 0) {
-    for(i = 0; i < 3; i++)
-    for(j = 0; j <=  3; j++) {
+    for(i = 0; i <  3; i++)
+    for(j = 0; j <= 3; j++) {
       sym[3*n+i] *= -1;
       if(j > 0) sym[3*n+j-1] *= -1;
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
