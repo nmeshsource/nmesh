@@ -96,7 +96,9 @@ int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal);
 #define Setd(ip, x)   MeshParSetd(mesh, (ip), (x))
 #define Sets(ip, s)   MeshParSets(mesh, (ip), (s))
 #define Appends(ip, s)  MeshParAppends(mesh, (ip), (s))
-
+/* NOTE: If a parvalue contains several words (e.g. 3), we can do this:
+num = sscanf(Gets(Par("parname")), "%s %s %s", str1, str2, str3);
+*/
 
 /* tensors.c */
 #define NINDEXLIST 100
