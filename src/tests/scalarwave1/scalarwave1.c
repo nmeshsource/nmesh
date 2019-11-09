@@ -180,7 +180,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
     tBface *bfaces = pat->bfaces[f];
 
     /* compute boundary flux terms, if on outer bound */
-    if(node->patface[f] && bfaces && bfaces->outerbound)
+    if(node->patface[f] && bfaces && bfaces->boundary)
     {
       double xyz[] = { x[ijk],y[ijk],z[ijk] };
       double u5[5];

@@ -168,7 +168,7 @@ void burgers1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       dir = face/2;
       p = (face%2)*(n[dir] - 1);
 
-      if(node->patface[face] && bfaces && bfaces->outerbound)
+      if(node->patface[face] && bfaces && bfaces->boundary)
         forplaneN(dir, i,j,k, n, p)
         {
           ijk = Ind_n(i,j,k, n);

@@ -146,7 +146,7 @@ void advection1_fluxes_pt(tDGinfo *d)
         tBface *bfaces = pat->bfaces[f];
 
         /* compute boundary flux terms */
-        if(node->patface[f] && bfaces && bfaces->outerbound)
+        if(node->patface[f] && bfaces && bfaces->boundary)
         {
           /* if stuff is coming in */
           if(d->lami[l] < 0.)
@@ -213,7 +213,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
       dir = face/2;
       p = (face%2)*(n[dir] - 1);
 
-      if(node->patface[face] && bfaces && bfaces->outerbound)
+      if(node->patface[face] && bfaces && bfaces->boundary)
         forplaneN(dir, i,j,k, n, p)
         {
           ijk = Ind_n(i,j,k, n);

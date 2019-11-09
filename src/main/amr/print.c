@@ -493,9 +493,9 @@ void printthisbface(tBface *bface, char *s)
            bface->brct[0], bface->brct[1], bface->brct[2], bface->brct[3]);
   else
     printf(" [ , ]x[ , ]");
-  printf(" ioC0_0=%d bits=%1d%1d%1d\n",
+  printf(" ioC0_0=%d flags=%1d%1d\n",
          bface->ioC0_0,
-         bface->face2, bface->innerbound,  bface->outerbound);
+         bface->face2, bface->boundary);
 }
 
 /* print one bface and its pair */

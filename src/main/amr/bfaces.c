@@ -410,7 +410,7 @@ int amr_set_all_bfaces(tMesh *mesh)
 
   /* if there is no other patch on the other side of a bface, mark it as
      outer boundary */
-  mark_all_bfaces_without_op_as_outerbound(mesh);
+  mark_all_bfaces_without_op_as_OUTERBOUND(mesh);
 
 //  /* set ofi and bit fields for all bfaces */
 //  if(pr)
@@ -885,7 +885,7 @@ void expand_bfaces_to_patch_edges(tMesh *mesh)
 }
 
 /* mark all bfaces that have no other patch as outer boundary */
-void mark_all_bfaces_without_op_as_outerbound(tMesh *mesh)
+void mark_all_bfaces_without_op_as_OUTERBOUND(tMesh *mesh)
 {
   int p;
 
@@ -898,7 +898,7 @@ void mark_all_bfaces_without_op_as_outerbound(tMesh *mesh)
     {
       /* if op=-1 there is no other box, mark as outer boundary */
       if(bface->op == -1)
-        bface->outerbound = 1;
+        bface->boundary = OUTERBOUND;
     }
   }
 }

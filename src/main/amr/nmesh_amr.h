@@ -228,13 +228,20 @@ typedef struct tBFACE {
   struct tBFACE *obface; // pointer to other bface that touches
   int ioC0_0;     // ind of vars in this node that contain coords in other pat
   int face2;      // 1 if we set normal derivs of field and not field itself
-  int innerbound; // 1 if bface is inner boundary (e.g. horizon)
-  int outerbound; // 1 if bface is outer mesh boundary (e.g. infinity)
+  int boundary;   // type of boundary: NOTBOUND=0, OUTERBOUND, INNERBOUND
   struct tBFACE *next; // next bface in this patch
   struct tBFACE *prev; // previous bface in this patch
 } tBface;
 /* NOTE: ioC0_0 is set to -1 when a bface is allocated with
    add_empty_bface. So -1 means we do not know it yet. */
+
+/* possible values of bface->boundary */
+enum
+{
+  NOTBOUND=0,
+  OUTERBOUND=1, // bface is outer mesh boundary (e.g. infinity)
+  INNERBOUND    // bface is inner boundary (e.g. horizon)
+};
 
 
 /***********************************************************************/
