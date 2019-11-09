@@ -7,6 +7,7 @@
 
 #define PR 0
 
+extern tbasis basis[1];
 
 /***********************************************************************/
 /* functions to filter */
@@ -69,10 +70,14 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
   tDat *dat = node->dat;
   if(dat)
   {
-    var_to_var_times_JtoPower(node, ui, 1);
+    tMesh *mesh = node->pat->mesh;
+    int Jpow = Geti(basis->expfilter_JacobianPower);
+
+    //PRF;printf(": Jpow=%d\n", Jpow);
+    var_to_var_times_JtoPower(node, ui, Jpow);
     ua = dat->v[ui];
     expfilter_array(node, ua, alp, s);
-    var_to_var_times_JtoPower(node, ui, -1);
+    var_to_var_times_JtoPower(node, ui, -Jpow);
     return 1;
   }
   else

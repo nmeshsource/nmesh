@@ -7,6 +7,20 @@
 
 #define PR 0
 
+/* frequently used global vars */
+tbasis basis[1];
+
+/* initialize coordinates in each patch */
+int basis_init_globals(tMesh *mesh)
+{
+  PRF;printf(":\n");
+
+  /* set some global vars */
+  basis->expfilter_JacobianPower = Par("basis_expfilter_JacobianPower");
+
+  return 0;
+}
+
 /***********************************************************************/
 /* get derivatives of a variable */
 /***********************************************************************/

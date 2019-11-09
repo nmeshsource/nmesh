@@ -10,13 +10,15 @@ int nmesh_basis(tMesh *mesh)
   printf("Adding basis\n");
 
   /* functions */
-  //AddFun(POST_PARAMETERS, basis_print_info);
+  AddFun(POST_PARAMETERS, basis_init_globals);
 
   /* variables */
   //AddVar("basis_temp1", "", "temporary variable");
 
   /* parameters */
   //AddPar("basis0", "Legendre", "basis functions we use");
+  AddPar("basis_expfilter_JacobianPower", "1",
+         "multiply var with Jacobian to this power before filtering it");
 
   return 0;
 }
