@@ -73,7 +73,8 @@ int misc_test(tMesh *mesh)
   test_ajsurf(mesh);
   test_0doutput(mesh);
   test_Jacobian(mesh);
-  test_filter(mesh);
+  test_filter(mesh, 1);
+  test_filter(mesh, 0);
 
   return 0;
 }
@@ -742,7 +743,7 @@ int test_Jacobian(tMesh *mesh)
 }
 
 /* filter */
-int test_filter(tMesh *mesh)
+int test_filter(tMesh *mesh, int Jpow)
 {
   //tNode *nd;
   int ui = Ind("misc_u");
@@ -796,7 +797,7 @@ int test_filter(tMesh *mesh)
       //ud[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
     }
   }
-  PRF;printf(": before filter\n");
+  PRF;printf(": coeffs before filter\n");
 
   /* print coeffs of ui in vi */
   formylnodes(mesh)
@@ -808,8 +809,7 @@ int test_filter(tMesh *mesh)
   }
 
   /* filter var ui */
-  Seti(Par("basis_expfilter_JacobianPower"), 0);
-  //Seti(Par("basis_expfilter_JacobianPower"), 1);
+  Seti(Par("basis_expfilter_JacobianPower"), Jpow);
   for(dir=0; dir<3; dir++)
   {
     alp[dir] = 36.;
@@ -821,7 +821,7 @@ int test_filter(tMesh *mesh)
     expfilter_var(node, ui, alp, s);
   }
 
-  PRF;printf(": after expfilter_var\n");
+  PRF;printf(": coeffs after expfilter_var with Jpow=%d\n", Jpow);
 
   /* print coeffs of ui in vi again */
   formylnodes(mesh)

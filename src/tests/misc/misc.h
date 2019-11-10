@@ -14,4 +14,4 @@ int test_indc(tMesh *mesh);
 int test_node_av(tMesh *mesh);
 int test_0doutput(tMesh *mesh);
 int test_Jacobian(tMesh *mesh);
-int test_filter(tMesh *mesh);
+int test_filter(tMesh *mesh, int Jpow);
