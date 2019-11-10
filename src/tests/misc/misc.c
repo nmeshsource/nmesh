@@ -15,6 +15,22 @@ double test_func(double x, double y, double z)
 }
 
 
+double test_func2(double x[3], int lmax[3], int n[3])
+{
+  int d, l;
+  double sum[] = { 0.,0.,0. };
+
+  for(d=0; d<3; d++)
+    for(l=0; l<=lmax[d]; l++)
+    {
+      sum[d] += (d+1. + 0.001*(d+1)*l)*basis_normLegendreP(l, x[d], n[d]);
+    }
+
+  return sum[0] * sum[1] * sum[2];
+  return sum[0] + sum[1] + sum[2];
+}
+
+
 /* try some things */
 int misc_test(tMesh *mesh)
 {
@@ -57,6 +73,7 @@ int misc_test(tMesh *mesh)
   test_node_av(mesh);
   test_ajsurf(mesh);
   test_0doutput(mesh);
+  test_filter(mesh);
 
   return 0;
 }
@@ -659,6 +676,99 @@ int test_0doutput(tMesh *mesh)
     int ijk;
 
     forpoints(node, ijk) u[ijk] = 1.0; //node_location(node);
+  }
+
+  return 0;
+}
+
+/* filter */
+int test_filter(tMesh *mesh)
+{
+  //tNode *nd;
+  int ui = Ind("misc_u");
+  int vi = Ind("misc_v");
+  int iX = Ind("X");
+  int ix = Ind("x");
+  double alp[3], s[3];
+  int dir;
+
+  prdivider(0);
+  PRF;printf(": ...\n");
+  enablevar(mesh, ui);
+  enablevar(mesh, vi);
+
+  /* above we messed with all kinds of things,
+     so make sure all coords are set again */
+  coordinates_init(mesh);
+
+  formylnodes(mesh)
+  {
+    int ijk;
+    //int dir;
+    tNode *node = MyLnode;
+    double *ud = Vard(node, ui);
+
+    /* set v to func test_func at grid points */
+    forpoints(node, ijk)
+    {
+      int lmax[] = { 7,7,7 };// { 3,3,3 };
+      //double Xb[] = { Xbd[0][i], Xbd[1][j], Xbd[2][k] };
+      double X[] = { Vard(node, iX)[ijk],
+                     Vard(node, iX+1)[ijk], Vard(node, iX+2)[ijk] };
+      double x[] = { Vard(node, ix)[ijk],
+                     Vard(node, ix+1)[ijk], Vard(node, ix+2)[ijk] };
+      //tPat *pat = node->pat;
+      //int p = pat->p;
+      //double dlam = (p != 0);
+      //double dlam = (p > 5);
+      //double lam = X[0] + dlam;
+      //double A = dom!=3 ? X[1] : 2.*(1.-X[1]) + 1.;
+      //double A = dom/2 ? X[1] : -X[1];
+      //double A = X[1];
+      //double B = X[2];
+      //int dom = pat->CI->dom;
+      //double B = dom/2 ? X[2] : -X[2];
+
+      //XYZ_of_XbYbZb(node, Xb, X);
+      ud[ijk] = test_func2(x, lmax, node->n) + 0.000 * node->nid * node->nid;
+      ud[ijk] = test_func2(X, lmax, node->n);
+      //ud[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
+    }
+  }
+
+  PRF;printf(": before filter\n");
+
+  /* print coeffs of ui in vi */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    printnode(node);
+    basis_var_analysis3(node, ui, vi);
+    printvar_innode(node, vi);
+  }
+
+  /* filter var ui */
+  //Setd(Par("basis_expfilter_JacobianPower"), 0.);
+  for(dir=0; dir<3; dir++)
+  {
+    alp[dir] = 36.;
+    s[dir] = 32.;
+  }
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    expfilter_var(node, ui, alp, s);
+  }
+
+  PRF;printf(": after expfilter_var\n");
+
+  /* print coeffs of ui in vi again */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    printnode(node);
+    basis_var_analysis3(node, ui, vi);
+    printvar_innode(node, vi);
   }
 
   return 0;
