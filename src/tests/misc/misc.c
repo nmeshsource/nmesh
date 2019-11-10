@@ -689,7 +689,12 @@ int test_Jacobian(tMesh *mesh)
   int idXdx = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx"); //coordinates->idet_dXbdx; //Ind("det_dXbdx");
 
+  prdivider(0);
   PRF;printf(": 1/J\n");
+
+  /* above we messed with all kinds of things,
+     so make sure all coords are set again */
+  coordinates_init(mesh);
 
   /* print 1/J */
   formylnodes(mesh)
@@ -755,7 +760,7 @@ int test_filter(tMesh *mesh, int Jpow)
   int dir;
 
   prdivider(0);
-  PRF;printf(": ...\n");
+  PRF;printf(": Jpow=%d\n", Jpow);
   enablevar(mesh, ui);
   enablevar(mesh, vi);
 
