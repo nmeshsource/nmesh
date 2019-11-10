@@ -8,7 +8,6 @@
 
 
 
-
 double test_func(double x, double y, double z)
 {
   return pow(x-0.1, 4) + pow(y+0.2, 3) + pow(z-0.3, 2);
@@ -23,7 +22,7 @@ double test_func2(double x[3], int lmax[3], int n[3])
   for(d=0; d<3; d++)
     for(l=0; l<=lmax[d]; l++)
     {
-      sum[d] += (d+1. + 0.001*(d+1)*l)*basis_normLegendreP(l, x[d], n[d]);
+      sum[d] += (d+1. + 0.001*(d+1)*l)*exp(-l)*basis_normLegendreP(l, x[d], n[d]);
     }
 
   return sum[0] * sum[1] * sum[2];
@@ -73,6 +72,7 @@ int misc_test(tMesh *mesh)
   test_node_av(mesh);
   test_ajsurf(mesh);
   test_0doutput(mesh);
+  test_Jacobian(mesh);
   test_filter(mesh);
 
   return 0;
@@ -681,6 +681,53 @@ int test_0doutput(tMesh *mesh)
   return 0;
 }
 
+/* Jacobian */
+int test_Jacobian(tMesh *mesh)
+{
+  int ui = Ind("misc_u");
+  int idXdx = Ind("dXdx");
+  int idet_dXbdx = Ind("det_dXbdx"); //coordinates->idet_dXbdx; //Ind("det_dXbdx");
+
+  formylnodes(mesh)
+  {
+    int ijk;
+    //int dir;
+    tNode *node = MyLnode;
+    double *ud = Vard(node, ui);
+    double *det_dXbdx = Vard(node, idet_dXbdx);
+    double fac = 8./( (node->bbox[1]-node->bbox[0])*(node->bbox[3]-node->bbox[2])*
+                      (node->bbox[5]-node->bbox[4]) );
+
+    /* set v to func test_func at grid points */
+    forpoints(node, ijk)
+    {
+      double dXdx[3][3] =
+        {{ Vard(node,idXdx+0)[ijk], Vard(node,idXdx+1)[ijk], Vard(node,idXdx+2)[ijk]},
+         { Vard(node,idXdx+3)[ijk], Vard(node,idXdx+4)[ijk], Vard(node,idXdx+5)[ijk]},
+         { Vard(node,idXdx+6)[ijk], Vard(node,idXdx+7)[ijk], Vard(node,idXdx+8)[ijk]}};
+      ud[ijk] =  dXdx[0][0]*dXdx[1][1]*dXdx[2][2] +
+                 dXdx[0][1]*dXdx[1][2]*dXdx[2][0] +
+                 dXdx[0][2]*dXdx[1][0]*dXdx[2][1] +
+                -dXdx[0][2]*dXdx[1][1]*dXdx[2][0] +
+                -dXdx[0][1]*dXdx[1][0]*dXdx[2][2] +
+                -dXdx[0][0]*dXdx[1][2]*dXdx[2][0];
+      ud[ijk] = fac*ud[ijk] - det_dXbdx[ijk];
+    }
+  }
+
+  PRF;printf(": error in 1/J\n");
+
+  /* print var ui */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    printnode(node);
+    printvar_innode(node, ui);
+  }
+
+  return 0;
+}
+
 /* filter */
 int test_filter(tMesh *mesh)
 {
@@ -689,6 +736,7 @@ int test_filter(tMesh *mesh)
   int vi = Ind("misc_v");
   int iX = Ind("X");
   int ix = Ind("x");
+  int iooJ = Ind("det_dXbdx");
   double alp[3], s[3];
   int dir;
 
@@ -708,7 +756,7 @@ int test_filter(tMesh *mesh)
     tNode *node = MyLnode;
     double *ud = Vard(node, ui);
 
-    /* set v to func test_func at grid points */
+    /* set u to func test_func2 at grid points */
     forpoints(node, ijk)
     {
       int lmax[] = { 7,7,7 };// { 3,3,3 };
@@ -734,6 +782,18 @@ int test_filter(tMesh *mesh)
       ud[ijk] = test_func2(X, lmax, node->n);
       //ud[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
     }
+  }
+
+  PRF;printf(": 1/J\n");
+
+  /* print coeffs of ui in vi */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    //double ooJ = Vard_(node, iooJ); /* contains 1/J */
+
+    printnode(node);
+    printvar_innode(node, iooJ);
   }
 
   PRF;printf(": before filter\n");

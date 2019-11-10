@@ -414,6 +414,7 @@ int coordinates_init(tMesh *mesh)
   /* set some global vars */
   coordinates->itmp1 = Ind("coordinates_tmp1");
   coordinates->idet_dXbdx = Ind("det_dXbdx");
+  //PRF;printf(":  coordinates->idet_dXbdx=%d\n",  coordinates->idet_dXbdx);
 
   formylnodes(mesh)
   {
