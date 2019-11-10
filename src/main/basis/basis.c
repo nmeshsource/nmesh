@@ -158,6 +158,22 @@ int basis_var_analysis3(tNode *node, int ui, int ci)
     return 0;
 }
 
+/* get var ui from coeffs in var ci */
+int basis_var_synthesis3(tNode *node, int ui, int ci)
+{
+  tArray *u, *c;
+  tDat *dat = node->dat;
+  if(dat)
+  {
+    u = dat->v[ui];
+    c = dat->v[ci];
+    basis_array_synthesis3(node, u, c);
+    return 1;
+  }
+  else
+    return 0;
+}
+
 /***********************************************************************/
 /* interpolate */
 /***********************************************************************/
