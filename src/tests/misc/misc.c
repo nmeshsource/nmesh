@@ -688,6 +688,19 @@ int test_Jacobian(tMesh *mesh)
   int idXdx = Ind("dXdx");
   int idet_dXbdx = Ind("det_dXbdx"); //coordinates->idet_dXbdx; //Ind("det_dXbdx");
 
+  PRF;printf(": 1/J\n");
+
+  /* print 1/J */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    //double ooJ = Vard_(node, idet_dXbdx); /* contains 1/J */
+
+    printnode(node);
+    printvar_innode(node, idet_dXbdx);
+  }
+
+  /* compute error in 1/J */
   formylnodes(mesh)
   {
     int ijk;
@@ -736,7 +749,7 @@ int test_filter(tMesh *mesh)
   int vi = Ind("misc_v");
   int iX = Ind("X");
   int ix = Ind("x");
-  int iooJ = Ind("det_dXbdx");
+  //int iooJ = Ind("det_dXbdx");
   double alp[3], s[3];
   int dir;
 
@@ -783,19 +796,6 @@ int test_filter(tMesh *mesh)
       //ud[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
     }
   }
-
-  PRF;printf(": 1/J\n");
-
-  /* print coeffs of ui in vi */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    //double ooJ = Vard_(node, iooJ); /* contains 1/J */
-
-    printnode(node);
-    printvar_innode(node, iooJ);
-  }
-
   PRF;printf(": before filter\n");
 
   /* print coeffs of ui in vi */
@@ -808,7 +808,8 @@ int test_filter(tMesh *mesh)
   }
 
   /* filter var ui */
-  //Setd(Par("basis_expfilter_JacobianPower"), 0.);
+  Seti(Par("basis_expfilter_JacobianPower"), 0);
+  //Seti(Par("basis_expfilter_JacobianPower"), 1);
   for(dir=0; dir<3; dir++)
   {
     alp[dir] = 36.;
