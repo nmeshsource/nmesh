@@ -172,16 +172,25 @@ void set_mysurf(tSurface *s)
   tNode *node = dat->node;
   int f = s->face;
   int dir = f/2;
-  int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
   int vi = s->vi;
 
   /* do nothing if this surface is NULL */
   if(!s) return;
 
   if(s->allocd_mysurf)
-    copy_array_plane(dat->v[vi], dir, p, s->mysurf, 0);
+  {
+    int p;
+    int zones = MeshVarSurfacezones(node->pat->mesh, vi);
+
+    if(zones<1) zones = 1;
+    p = (node->n[dir] - zones) * (f%2); /* starting plane of surface */
+
+    copy_array_planes(zones, dat->v[vi], dir, p, s->mysurf, 0);
+  }
   else
+  {
     s->mysurf = dat->v[vi]; //FIXME: this should be set only in init_surface
+  }
 }
 
 /* set all mysurf of a node */
