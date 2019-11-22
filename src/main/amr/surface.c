@@ -1207,7 +1207,8 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
     tSurface *s = dat->s[f][vi];
     if(s)
     {
-      int *n, *nn;
+      int nzones = MeshVarSurfacezones(node->pat->mesh, vi);
+      int zone, *n, *nn;
 
       /* unless it has mem already, get mem for ajsurf */
       if(s->allocd_ajsurf==0 || s->ajsurf==NULL)
@@ -1221,69 +1222,72 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
       nn = s->nbsurf[0]->n;
 
       /* now copy s->nbsurf[0] into s->ajsurf */
-      forplaneN(dir, i,j,k, n, 0)
+      for(zone=0; zone<nzones; zone++)
       {
-        int ind1 = Ind_n(i,j,k, s->ajsurf->n);
-        int I1 = i1_norm(i,j,k, dir);
-        int I2 = i2_norm(i,j,k, dir);
-        int i2,j2,k2, ind2;
-
-        switch(odir)
+        forplaneN(dir, i,j,k, n, zone)
         {
-        case 0:  oi = 0;   oj = I1;  ok = I2;  break;
-        case 1:  oi = I1;  oj = 0;   ok = I2;  break;
-        case 2:  oi = I1;  oj = I2;  ok = 0;   break;
-        default: errorexit("odir must be 0,1,2");
-        }
+          int ind1 = Ind_n(i,j,k, s->ajsurf->n);
+          int I1 = i1_norm(i,j,k, dir);
+          int I2 = i2_norm(i,j,k, dir);
+          int i2,j2,k2, ind2;
 
-        i2 = oi;  j2 = oj;  k2 = ok;
+          switch(odir)
+          {
+          case 0:  oi = zone;  oj = I1;    ok = I2;    break;
+          case 1:  oi = I1;    oj = zone;  ok = I2;    break;
+          case 2:  oi = I1;    oj = I2;    ok = zone;  break;
+          default: errorexit("odir must be 0,1,2");
+          }
 
-        switch(odir)
-        {
-        case 0:
-          if(!intrch)
+          i2 = oi;  j2 = oj;  k2 = ok;
+
+          switch(odir)
           {
-            if(rev1) { j2 = nn[1]-1 - oj; }
-            if(rev2) { k2 = nn[2]-1 - ok; }
+          case 0:
+            if(!intrch)
+            {
+              if(rev1) { j2 = nn[1]-1 - oj; }
+              if(rev2) { k2 = nn[2]-1 - ok; }
+            }
+            else
+            {
+              j2 = ok;  k2 = oj;
+              if(rev1) { j2 = nn[1]-1 - ok; }
+              if(rev2) { k2 = nn[2]-1 - oj; }
+            }
+            break;
+          case 1:
+            if(!intrch)
+            {
+              if(rev1) { i2 = nn[0]-1 - oi; }
+              if(rev2) { k2 = nn[2]-1 - ok; }
+            }
+            else
+            {
+              i2 = ok;  k2 = oi;
+              if(rev1) { i2 = nn[0]-1 - ok; }
+              if(rev2) { k2 = nn[2]-1 - oi; }
+            }
+            break;
+          case 2:
+            if(!intrch)
+            {
+              if(rev1) { i2 = nn[0]-1 - oi; }
+              if(rev2) { j2 = nn[1]-1 - oj; }
+            }
+            else
+            {
+              i2 = oj;  j2 = oi;
+              if(rev1) { i2 = nn[0]-1 - oj; }
+              if(rev2) { j2 = nn[1]-1 - oi; }
+            }
+            break;
           }
-          else
-          {
-            j2 = ok;  k2 = oj;
-            if(rev1) { j2 = nn[1]-1 - ok; }
-            if(rev2) { k2 = nn[2]-1 - oj; }
-          }
-          break;
-        case 1:
-          if(!intrch)
-          {
-            if(rev1) { i2 = nn[0]-1 - oi; }
-            if(rev2) { k2 = nn[2]-1 - ok; }
-          }
-          else
-          {
-            i2 = ok;  k2 = oi;
-            if(rev1) { i2 = nn[0]-1 - ok; }
-            if(rev2) { k2 = nn[2]-1 - oi; }
-          }
-          break;
-        case 2:
-          if(!intrch)
-          {
-            if(rev1) { i2 = nn[0]-1 - oi; }
-            if(rev2) { j2 = nn[1]-1 - oj; }
-          }
-          else
-          {
-            i2 = oj;  j2 = oi;
-            if(rev1) { i2 = nn[0]-1 - oj; }
-            if(rev2) { j2 = nn[1]-1 - oi; }
-          }
-          break;
+          //printf("   ajsurf: %d %d %d  nbsurf: %d %d %d\n", i,j,k, i2,j2,k2);
+          ind2 = Ind_n(i2,j2,k2, nn);
+          s->ajsurf->d[ind1] = s->nbsurf[0]->d[ind2];
         }
-        //printf("   ajsurf: %d %d %d  nbsurf: %d %d %d\n", i,j,k, i2,j2,k2);
-        ind2 = Ind_n(i2,j2,k2, nn);
-        s->ajsurf->d[ind1] = s->nbsurf[0]->d[ind2];
-      }
+      } /* end zone loop */
     }
   }
   return;
