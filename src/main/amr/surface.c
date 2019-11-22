@@ -1224,7 +1224,7 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
         case 0:  oi = 0;   oj = I1;  ok = I2;  break;
         case 1:  oi = I1;  oj = 0;   ok = I2;  break;
         case 2:  oi = I1;  oj = I2;  ok = 0;   break;
-        default: errorexit("dir must be 0,1,2");
+        default: errorexit("odir must be 0,1,2");
         }
 
         i2 = oi;  j2 = oj;  k2 = ok;
