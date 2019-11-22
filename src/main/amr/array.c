@@ -262,6 +262,13 @@ void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP)
   }
 }
 
+/* copy np planes starting at pA from A into P starting at plane pP */
+void copy_array_planes(int np, tArray *A, int dir, int pA,
+                       tArray *P, int pP)
+{
+  int p;
+  for(p=0; p<np; p++)  copy_array_plane(A, dir, pA+p, P, pP+p);
+}
 
 /* sum of array */
 double sum_array(tArray *A, double p)
