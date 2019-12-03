@@ -5,7 +5,7 @@
 #include "amr.h"
 
 #define EPS1 1e-5
-#define EPS2 1e-5
+#define EPS2 1e-11
 #define NPOINTS 16
 
 
