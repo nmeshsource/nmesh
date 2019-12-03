@@ -4,7 +4,8 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define EPS 1e-5
+#define EPS1 1e-5
+#define EPS2 1e-5
 #define NPOINTS 16
 
 
@@ -519,7 +520,7 @@ void find_external_faces_of_pat(tPat *pat, double L,
         d0 = sqrt(d0);
         for(dd=0; dd<3; dd++)
         {
-          dx[dd] = Ndir[dd]*(L+d0)*EPS;
+          dx[dd] = Ndir[dd]*(L*EPS1 + d0*EPS2);
           ox[dd] = x[dd] + dx[dd];
         }
 
@@ -659,7 +660,7 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
     d0 = sqrt(d0);
     for(dd=0; dd<3; dd++)
     {
-      dx[dd] = N[dd]*(L+d0)*EPS;
+      dx[dd] = N[dd]*(L*EPS1 + d0*EPS2);
       ox[dd] = x[dd] + dx[dd];
     }
 
