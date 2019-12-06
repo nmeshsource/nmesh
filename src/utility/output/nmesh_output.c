@@ -45,5 +45,7 @@ int nmesh_output(tMesh *mesh)
   AddPar("outputZ0", "0", "origin for output in Z");
   AddPar("outputX0Y0Z0coord", "X", "meaning of X in outputX0 [X,Xb]");
 
+  AddPar("output_xcoord", "x", "var used as Cartesian x-coordinate");
+
   return 0;
 }
