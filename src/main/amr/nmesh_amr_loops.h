@@ -223,3 +223,85 @@
 #define forplane2_nojump(i,j,k, n, p) \
   for(k=(p), j = 0; j < (n[1]); j++) \
     for(i =((n[0])-1)*(j%2); i < (n[0]) && i >= 0; i=i+1-2*(j%2))
+
+
+/****************************************************************************/
+/* defines useful for finite differences on Cartesian grids */
+/****************************************************************************/
+typedef struct tIDX {
+  int i;  /* index of point */
+  int f ; /* index of face where neighbor is (0-5), -1 means in my node */
+} tIdx;
+
+/* declaration of neighbor indices:
+     ccc is the index of the center point 'i,j,k'
+     mcc is the index of the i-1,j,k point
+     pcc is the index of the i+1,j,k point
+     Mcc is the index of the i-2,j,k point
+     Pcc is the index of the i+2,j,k point
+     m3cc is the index of the i-3,j,k point
+     p3cc is the index of the i+3,j,k point */
+#define tIdx_ptinds_faces   tIdx mcc[1], pcc[1], cmc[1], cpc[1], ccm[1], ccp[1]
+#define tIdx_ptinds_faces2  tIdx Mcc[1], Pcc[1], cMc[1], cPc[1], ccM[1], ccP[1]
+#define tIdx_ptinds_faces3 \
+  tIdx m3cc[1], p3cc[1], cm3c[1], cp3c[1], ccm3[1], ccp3[1]
+#define tIdx_ptinds_corners \
+  tIdx mmm[1], mmp[1], mpm[1], mpp[1], pmm[1], pmp[1], ppm[1], ppp[1]
+#define tIdx_ptinds_edges \
+  tIdx mmc[1], mcm[1], cmm[1], ppc[1], pcp[1], cpp[1], \
+       mpc[1], mcp[1], cmp[1], pmc[1], pcm[1], cpm
+
+#define tIdx_ptinds_7   tIdx ccc[1];      tIdx_ptinds_faces
+#define tIdx_ptinds2_13 tIdx_ptinds_7;    tIdx_ptinds_faces2
+#define tIdx_ptinds3_19 tIdx_ptinds2_13;  tIdx_ptinds_faces3
+#define tIdx_ptinds_19  tIdx_ptinds_7;    tIdx_ptinds_edges
+#define tIdx_ptinds2_25 tIdx_ptinds_19;   tIdx_ptinds_faces2
+#define tIdx_ptinds_27  tIdx_ptinds_19;   tIdx_ptinds_corners
+
+/* 7 point stencil where some points are in the neighbors,
+   here na[4] contains adjacent n from neighbor 4 */
+#define set_ptinds_check_7(i,j,k, n, na)				\
+  ccc->f = -1;								\
+  ccc->i = Ind_n(i,j,k, n);						\
+  if(i>0) { mcc->f =-1;  mcc->i = ccc->i-1; }				\
+  else    { mcc->f = 0;  mcc->i = Ind_n(na[0][0]-1,j,k, na[0]); }	\
+  if(j>0) { cmc->f =-1;  cmc->i = ccc->i-n[0]; }			\
+  else    { cmc->f = 2;  cmc->i = Ind_n(i,na[2][1]-1,k, na[2]); }	\
+  if(k>0) { ccm->f =-1;  ccm->i = ccc->i-n[0]*n[1]; }			\
+  else    { ccm->f = 4;  ccm->i = Ind_n(i,j,na[4][2]-1, na[4]); }	\
+  if(i+1<n[0]) { pcc->f =-1;  pcc->i = ccc->i+1; }			\
+  else         { pcc->f = 1;  pcc->i = Ind_n(0,j,k, na[1]); }		\
+  if(j+1<n[1]) { cpc->f =-1;  cpc->i = ccc->i+n[0]; }			\
+  else         { cpc->f = 3;  cpc->i = Ind_n(i,0,k, na[3]); }		\
+  if(k+1<n[2]) { ccp->f =-1;  ccp->i = ccc->i+n[0]*n[1]; }		\
+  else         { ccp->f = 5;  ccp->i = Ind_n(i,j,0, na[5]); }
+
+/* 7+6 point stencil where some points are in the neighbors */
+#define set_ptinds2_check_6(i,j,k, n, na)				\
+  if(i>1) { Mcc->f =-1;  Mcc->i = mcc->i-1; }				\
+  else    { Mcc->f = 0;  Mcc->i = Ind_n(na[0][0]-2,j,k, na[0]); }	\
+  if(j>1) { cMc->f =-1;  cMc->i = cmc->i-n[0]; }			\
+  else    { cMc->f = 2;  cMc->i = Ind_n(i,na[2][1]-2,k, na[2]); }	\
+  if(k>1) { ccM->f =-1;  ccM->i = ccm->i-n[0]*n[1]; }			\
+  else    { ccM->f = 4;  ccM->i = Ind_n(i,j,na[4][2]-2, na[4]); }	\
+  if(i+2<n[0]) { Pcc->f =-1;  Pcc->i = pcc->i+1; }			\
+  else         { Pcc->f = 1;  Pcc->i = Ind_n(1,j,k, na[1]); }		\
+  if(j+2<n[1]) { cPc->f =-1;  cPc->i = cpc->i+n[0]; }			\
+  else         { cPc->f = 3;  cPc->i = Ind_n(i,1,k, na[3]); }		\
+  if(k+2<n[2]) { ccP->f =-1;  ccP->i = ccp->i+n[0]*n[1]; }		\
+  else         { ccP->f = 5;  ccP->i = Ind_n(i,j,1, na[5]); }
+
+/* 7+6+6 point stencil where some points are in the neighbors */
+#define set_ptinds3_check_6(i,j,k, n, na)				\
+  if(i>2) { m3cc->f =-1;  m3cc->i = Mcc->i-1; }				\
+  else    { m3cc->f = 0;  m3cc->i = Ind_n(na[0][0]-3,j,k, na[0]); }	\
+  if(j>2) { cm3c->f =-1;  cm3c->i = cMc->i-n[0]; }			\
+  else    { cm3c->f = 2;  cm3c->i = Ind_n(i,na[2][1]-3,k, na[2]); }	\
+  if(k>2) { ccm3->f =-1;  ccm3->i = ccM->i-n[0]*n[1]; }			\
+  else    { ccm3->f = 4;  ccm3->i = Ind_n(i,j,na[4][2]-3, na[4]); }	\
+  if(i+3<n[0]) { p3cc->f =-1;  p3cc->i = Pcc->i+1; }			\
+  else         { p3cc->f = 1;  p3cc->i = Ind_n(2,j,k, na[1]); }		\
+  if(j+3<n[1]) { cp3c->f =-1;  cp3c->i = cPc->i+n[0]; }			\
+  else         { cp3c->f = 3;  cp3c->i = Ind_n(i,2,k, na[3]); }		\
+  if(k+3<n[2]) { ccp3->f =-1;  ccp3->i = ccP->i+n[0]*n[1]; }		\
+  else         { ccp3->f = 5;  ccp3->i = Ind_n(i,j,2, na[5]); }
