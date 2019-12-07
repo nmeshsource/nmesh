@@ -200,6 +200,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
   long voffset, xyzoffset;
   FILE *fpxmf, *fpbin;
   char ndname[100];
+  int ix = Ind( Gets(Par("output_xcoord")) );
   char *suffix[] = { "yz", "xz", "xy" };
   double X0[] = { Getd(Par("outputX0")),
                   Getd(Par("outputY0")),
@@ -263,7 +264,6 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
               /* write point's x,y,z coordinates */
               if(vli==0) /* write xyz only for first var in list */
               {
-                int ix = Ind("x");
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
@@ -306,6 +306,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   long voffset, xyzoffset;
   FILE *fpxmf, *fpbin;
   char ndname[100];
+  int ix = Ind( Gets(Par("output_xcoord")) );
   char *suffix = "xyz";
   int vli;
 
@@ -353,7 +354,6 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
               /* write point's x,y,z coordinates */
               if(vli==0) /* write xyz only for first var in list */
               {
-                int ix = Ind("x");
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
