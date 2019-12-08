@@ -1,0 +1,54 @@
+###################################################################
+# modules we use
+
+physics = advectionFDy
+
+###################################################################
+# evolution
+
+dt = auto # 0.01
+finaltime = 3
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 1 BoxMesh
+
+amr_luni = 1
+
+amr_n0 = 8
+amr_n1 = 8
+amr_n2 = 8
+
+iterate_parameters = yes
+iterate_parameter1 = amr_n0 4 8 16
+iterate_parameter2 = amr_n1 4 8 16
+iterate_parameter3 = amr_n2 4 8 16
+
+###################################################################
+# parameters for advectionFDy
+
+advectionFDy_profile = sin # square
+
+###################################################################
+# output
+
+logfile_creation = no
+
+0douttime = 0.1
+0doutput = advectionFDy_u_err
+
+1douttime = 0.1
+1doutput = advectionFDy_u advectionFDy_u_err
+           advectionFDy_x advectionFDy_y advectionFDy_z
+
+output_xcoord = advectionFDy_x
+
+2dformat = xdmf
+2douttime = 0.1
+2doutput = advectionFDy_u advectionFDy_u_err
+           advectionFDy_x advectionFDy_y advectionFDy_z
+
+3dformat = xdmf # gnuplot
+3douttime = 0.1
+3doutput = advectionFDy_u
