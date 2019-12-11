@@ -11,7 +11,7 @@
 /* Note:
   Currently the exchange happens only between nearest neighbors.
   I.e. in e.g. the xy-plane data can be exchanged only between C
-  and the neibors 0,1,..., BUT not between C and NE
+  and the neighbors 0,1,..., BUT not between C and NE
         ---------
         | . . . |            C is current node
   NW    | .3. . |  NE        0,1,2,3,4,5 are 5 nearest neighbors
