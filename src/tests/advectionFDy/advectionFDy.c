@@ -247,6 +247,7 @@ int advectionFDy_init(tMesh *mesh)
   tVarList *vlu = vlalloc(mesh);
 
   PRF;printf(": dt = %g\n", mesh->dt);
+  //printmesh(mesh);
 
   /* set surface to thickness 2 */
   MeshVarSetSurfInfo(mesh, iu, 2);
