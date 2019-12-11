@@ -8,6 +8,25 @@
 
 /* functions to exchange surface data */
 
+/* Note:
+  Currently the exchange happens only between nearest neighbors.
+  I.e. in e.g. the xy-plane data can be exchanged only between C
+  and the neibors 0,1,..., BUT not between C and NE
+        ---------
+        | . . . |            C is current node
+  NW    | .3. . |  NE        0,1,2,3,4,5 are 5 nearest neighbors
+        | . . . |            NW, NE, ... are next-to-nearest neighbors
+-------------------------    the ". . ." indicate grid points inside
+| . . . | . . . | . . . |
+| .0. . | .C. . | .1. . |    C can exchange data with 0,1,2,3,4,5
+| . . . | . . . | . . . |    C CANNOT exchange data with e.g. NW or NE, ...
+-------------------------
+        | . . . |
+  SW    | .2. . | SE
+        | . . . |
+        ---------
+*/
+
 /**********************************************************************/
 /* allocate and fill surfaces for vars that need it */
 /**********************************************************************/
