@@ -96,7 +96,8 @@ void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3])
 
     forvl(vl, vli)
     {
-      expfilter_var(node, vli, alp, s);
+      //PRF;printf("vli=%d\n", Vind(vl,vli));
+      expfilter_var(node, Vind(vl,vli), alp, s);
     }
   }
 }
