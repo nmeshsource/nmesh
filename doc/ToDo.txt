@@ -204,6 +204,20 @@ Things that need to be done urgently:
  in omp_set_lock region???
 
 
+*IDEA about ghost zones for finite differences
+ -make main/amr/ghostupdate.c analog to main/amr/surface.c
+ -in main/amr/ghostupdate.c we make analogs to:
+    set_all_myln_mysurf(mesh);
+    request_all_myln_surfaces_exchange(mesh);
+    get_all_myln_surfaces(mesh);
+ -in evolve and amr/load we then call funtions that either call
+  set_all_myln_mysurf,request_all_myln_surfaces_exchange,get_all_myln_surfaces
+  from main/amr/surface.c or their analogs from main/amr/ghostupdate.c
+ -main/amr/ghostupdate.c should first exchange data in the X-dir, then the
+  Y-dir, and finally in the Z-dir. In this way we can communicate data from
+  next-next nearest neighbors via the arrays in tSurface.
+
+
 Questions about bamps:
 ======================
 *Wave Eqn:
