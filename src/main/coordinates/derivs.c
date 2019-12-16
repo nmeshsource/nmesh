@@ -129,6 +129,36 @@ void cart_partials_dUij_dk(tNode *node, int Uxx, int dUxxx)
     cart_partials_dU_di(node, Uxx + n, dUxxx + 3*n);
 }
 
+/* compute first derivs d_i U_{j} of a vector U_{j} in a node */
+void cart_partials_diUj(tNode *node, int Ux, int dUxx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<3; n++)
+    cart_3partials(node, Ux+n, dUxx+n, dUxx+3+n, dUxx+6+n);
+}
+
+/* compute first derivs d_i S_{jk} of a symmetric tensor S_{jk} in a node */
+void cart_partials_diSjk(tNode *node, int Sxx, int dSxxx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<6; n++)
+    cart_3partials(node, Sxx+n, dSxxx+n, dSxxx+6+n, dSxxx+12+n);
+}
+
+/* compute first derivs d_i U_{jk} of a general tensor U_{jk} in a node */
+void cart_partials_diUjk(tNode *node, int Uxx, int dUxxx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<9; n++)
+    cart_3partials(node, Uxx+n, dUxxx+n, dUxxx+9+n, dUxxx+18+n);
+}
+
 /***********************************************************************/
 /* 1st derivs of 4-vectors and 4-tensors */
 /***********************************************************************/
