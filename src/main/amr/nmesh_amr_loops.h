@@ -101,6 +101,9 @@
 /* get double pointer to data in a variable without checking if node has dat */
 #define Vard_(node, varindex) node->dat->v[(varindex)]->d
 
+/* get array pointer without check */
+#define VarA_(node, varindex) node->dat->v[(varindex)]
+
 /* access Array, without check */
 #define Arrd_(Arr) (Arr->d)
 
