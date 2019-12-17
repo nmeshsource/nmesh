@@ -7,6 +7,10 @@
 #define PR 0
 
 
+/* get global pars for amr */
+extern tAMR amr[1];
+
+
 /* functions to exchange ghost zone data on a uniform mesh */
 
 
@@ -301,7 +305,8 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
 /* setup ghost exchange */
 void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
 {
-  int nghosts = 2;
+  tMesh *mesh = node->pat->mesh;
+  int nghosts;
   tNode *nb26[26];
   tDat *dat = node->dat;
   int *rqs;
@@ -310,6 +315,8 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
 
   /* do nothing if this node is on other proc */
   if(!dat) return;
+
+  nghosts = Geti(amr->nghosts);
 
   /* alloc memory to store request numbers for all 26 nbs */
   if(VarA_(node, vi0)->par) free(VarA_(node, vi0)->par);
@@ -466,7 +473,8 @@ void request_all_myln_ghostdata(tMesh *mesh)
 /* get all ghost data from neighbors */
 void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
 {
-  int nghosts = 2;
+  tMesh *mesh = node->pat->mesh;
+  int nghosts;
   tNode *nb26[26];
   tDat *dat = node->dat;
   tCom *com = dat->gcom;
@@ -479,6 +487,8 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
 
   /* do nothing if com is empty */
   if(com->n_rq == 0) return;
+
+  nghosts = Geti(amr->nghosts);
 
   /* get MPI rq numbers */
   rqs = (int *) VarA_(node, vi0)->par;
