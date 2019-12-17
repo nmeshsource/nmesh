@@ -56,7 +56,7 @@ int evolve_myln(tMesh *mesh)
   //forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
 
   ///* initialize surfaces for exchange */
-  //init_all_myln_surfaces(mesh);
+  //MPIexchange_init_all_myln(mesh);
 
   /* how we evolve the mesh */
   if(allnodes)
@@ -79,7 +79,7 @@ int evolve_myln(tMesh *mesh)
   }
 
   ///* free all surfaces */
-  //free_all_myln_surfaces(mesh);
+  //MPIexchange_free_all_myln(mesh);
 
   ///* we don't need allu anymore */
   //vlfree(allu);
@@ -124,8 +124,8 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   }
 
   /* do surface exchange on entire mesh */
-  set_all_myln_mysurf(mesh);
-  request_all_myln_surfaces_exchange(mesh);
+  MPIexchange_set_all_myln_localdata(mesh);
+  MPIexchange_request_all_myln_data(mesh);
 
   /* set all sources */
   forList(u, i)
@@ -138,7 +138,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
       ListEntry(evosys->volrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 
   /* get surfaces so that we can compute fluxes */
-  get_all_myln_surfaces(mesh);
+  MPIexchange_get_all_myln_data(mesh);
 
   /* add all surface RHSs */
   forList(u, i)

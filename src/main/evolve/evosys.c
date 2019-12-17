@@ -214,7 +214,7 @@ int var_added_by_evolve_init_evosys(tMesh *mesh, int vi)
 int evolve_init_communication_structs(tMesh *mesh)
 {
   /* init node to nb surface exchanges */
-  init_all_myln_surfaces(mesh);
+  MPIexchange_init_all_myln(mesh);
 
   /* int node to nb indc exchanges */
   init_all_myln_myindc_in_evosys(mesh);
@@ -228,7 +228,7 @@ int evolve_free_communication_structs(tMesh *mesh)
   free_all_myln_myindc_in_evosys(mesh);
 
   /* free surfaces */
-  free_all_myln_surfaces(mesh);
+  MPIexchange_free_all_myln(mesh);
   return 0;
 }
 
