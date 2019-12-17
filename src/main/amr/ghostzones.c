@@ -445,6 +445,19 @@ void request_all_myln_ghostdata_for_vl(tMesh *mesh, tVarList  *vl)
   TIMER_STOP;
 }
 
+/* call request_all_myln_ghostdata_for_vl for all EvoVars */
+void request_all_myln_ghostdata(tMesh *mesh)
+{
+  int vi;
+  tVarList *vl = vlalloc(mesh);
+
+  /* make varlist with all non-Aux. Vars */
+  for(vi=0; vi<mesh->nvdb; vi++)
+    if(MeshVarType(mesh, vi) != AUXVAR) vlpushone(vl, vi);
+
+  request_all_myln_ghostdata_for_vl(mesh, vl);
+  vlfree(vl);
+}
 
 /**********************************************************************/
 /* get the ghost data out of the MPI buffers */
@@ -574,4 +587,18 @@ void get_all_myln_ghostdata_for_vl(tMesh *mesh, tVarList  *vl)
   }
 
   TIMER_STOP;
+}
+
+/* call get_all_myln_ghostdata_for_vl for all EvoVars */
+void get_all_myln_ghostdata(tMesh *mesh)
+{
+  int vi;
+  tVarList *vl = vlalloc(mesh);
+
+  /* make varlist with all non-Aux. Vars */
+  for(vi=0; vi<mesh->nvdb; vi++)
+    if(MeshVarType(mesh, vi) != AUXVAR) vlpushone(vl, vi);
+
+  get_all_myln_ghostdata_for_vl(mesh, vl);
+  vlfree(vl);
 }

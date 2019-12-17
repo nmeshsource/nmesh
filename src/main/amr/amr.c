@@ -89,6 +89,7 @@ void MPIexchange_request_all_myln_data(tMesh *mesh)
     request_all_myln_surfaces_exchange(mesh);
     break;
   case 2:
+    request_all_myln_ghostdata(mesh);
     break;
   default:
     errorexit("unknown value in amr_MPIexchange");
@@ -104,6 +105,7 @@ void MPIexchange_get_all_myln_data(tMesh *mesh)
     get_all_myln_surfaces(mesh);
     break;
   case 2:
+    get_all_myln_ghostdata(mesh);
     break;
   default:
     errorexit("unknown value in amr_MPIexchange");
