@@ -218,6 +218,33 @@ double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
   return detM;
 }
 
+/* det of symm. matrix */
+double det_4Dsymmmat(double s11,double s12,double s13,double s14,
+                     double s22, double s23, double s24,
+                     double s33, double s34, double s44)
+{
+/*
+var('s11 s12 s13 s14 s22 s23 s24 s33 s34 s44')
+Smat = matrix([[s11,s12,s13,s14],[s12,s22,s23,s24],[s13,s23,s33,s34],
+[s14,s24,s34,s44]])
+Sinvdet = Smat.I * Smat.det()
+# idet11 = Sinvdet[0,0].simplify_full()
+# ...
+invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
+[i14,i24,i34,i44]])
+*/
+  double detS, idet11,idet12,idet13,idet14;
+
+  idet11 = -s24*s24*s33 + 2*s23*s24*s34 - s22*s34*s34 - (s23*s23 - s22*s33)*s44;
+  idet12 = s14*s24*s33 + s12*s34*s34 - (s14*s23 + s13*s24)*s34 + (s13*s23 - s12*s33)*s44;
+  idet13 = -s14*s23*s24 + s13*s24*s24 + (s14*s22 - s12*s24)*s34 - (s13*s22 - s12*s23)*s44;
+  idet14 = s14*s23*s23 - s13*s23*s24 - (s14*s22 - s12*s24)*s33 + (s13*s22 - s12*s23)*s34;
+
+  detS = s11*idet11 + s12*idet12 + s13*idet13 + s14*idet14;
+
+  return detS;
+}
+
 /* inverse of symm. matrix, returns det */
 double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
                                double s22, double s23, double s24,
@@ -265,7 +292,6 @@ invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
 
   return detS;
 }
-
 
 /* invert a 2*2*1 symmetric array in place and return det */
 double invert2x2x1symm_array(tArray *a)
