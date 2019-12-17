@@ -475,6 +475,12 @@ void simple_load_balance(tMesh *mesh);
 void move_nodelist_to_rank(tNlist *list, int desrank);
 
 /* amr.c */
+int amr_init_global_pars(tMesh *mesh);
+void MPIexchange_init_all_myln(tMesh *mesh);
+void MPIexchange_set_all_myln_localdata(tMesh *mesh);
+void MPIexchange_request_all_myln_data(tMesh *mesh);
+void MPIexchange_get_all_myln_data(tMesh *mesh);
+void MPIexchange_free_all_myln(tMesh *mesh);
 int Ind_n_norm(int i, int j, int k, int n[3], int norm);
 
 /* bfaces.c */
