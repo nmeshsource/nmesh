@@ -12,7 +12,6 @@ int nmesh_advectionFDy(tMesh *mesh)
   printf("Adding advectionFDy\n");
 
   /* functions */
-  AddFun(POST_PARAMETERS, advectionFDy_init_global_pars);
   AddFun(INITIALDATA, advectionFDy_init);
   AddFun(ANALYZE, advectionFDy_analyze);
 

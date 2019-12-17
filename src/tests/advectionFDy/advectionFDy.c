@@ -249,6 +249,9 @@ int advectionFDy_init(tMesh *mesh)
   PRF;printf(": dt = %g\n", mesh->dt);
   //printmesh(mesh);
 
+  /* set global pars */
+  advectionFDy_init_global_pars(mesh);
+
   /* set surface to thickness 2 */
   MeshVarSetSurfInfo(mesh, iu, 2);
 
