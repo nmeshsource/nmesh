@@ -275,7 +275,7 @@ typedef struct tARRAY {
   int ns;       /* number of segments */
   int si;       /* segment index */
   int info;     /* space to save extra info, e.g. MPI req. numbers or tags */
-//  void *par;    /* pointer to some extra pars */
+  void *par;    /* pointer to some extra pars */
 } tArray;
 /* NOTE: the anon. union is used to be able to store either double or int in
    tArray */
