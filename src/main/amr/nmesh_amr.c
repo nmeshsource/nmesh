@@ -11,7 +11,7 @@ int nmesh_amr(tMesh *mesh)
   printf("Adding amr\n");
 
   /* functions */
-  //AddFun(POST_PARAMETERS, setup_mesh);
+  AddFun(POST_PARAMETERS, amr_init_global_pars);
 
   /* variables */
   //AddAuxVar("Xb", "", "coord0 inside each node"); // we may not need these???
@@ -32,6 +32,16 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
 
+  AddPar("amr_MPIexchange", "1", "type of MPI exchange we use: "
+         "1: surfaces, 2: ghosts");
+  /* ghost related pars */
+  AddPar("amr_nghosts", "1", "number of ghost zones");
+  AddPar("amr_N0", "-1", "total number of inner points in dir. 0 "
+         "[any positive #, -1 means don't use it]");
+  AddPar("amr_N1", "-1", "total number of inner points in dir. 1");
+  AddPar("amr_N2", "-1", "total number of inner points in dir. 2");
+
+  /* bface pars */
   AddPar("bface_options", "face2_order3", "how we set some bface flags "
          "[none,face2_order0,face2_order1,face2_order2,face2_order3]");
 
