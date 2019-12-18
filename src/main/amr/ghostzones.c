@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 1
+#define PR 0
 
 
 /* get global pars for amr */
@@ -47,6 +47,7 @@ enum
   mcp, pcp, cmp, cpp,             // next-nearest nbs on face 5
   mmm, pmm, mpm, ppm,             // next to next-nearest nbs on face 4
   mmp, pmp, mpp, ppp              // next to next-nearest nbs on face 5 */
+
 
 /***************************************************************************/
 /* find neighbors */
@@ -359,8 +360,7 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
     else
     {
       /* nb is on other process so use MPI to exchange data */
-      int nvars = vl->n;
-      int buflen = nvars * nc[0]*nc[1]*nc[2];
+      int buflen = (vl->n) * nc[0]*nc[1]*nc[2];
       int rq, nb_rank, s_tag, r_tag;
       nMPI_Comm s_comm, r_comm;
       tCom *com = dat->gcom;
@@ -453,6 +453,27 @@ void request_all_myln_ghostdata(tMesh *mesh)
   vlfree(vl);
 }
 
+
+/**********************************************************************/
+/* funcs to free stuff like MPI com */
+/**********************************************************************/
+
+/* free req and send arrays after all has been sent */
+void free_dat_gcom_reqs_after_Waitall_com_send(tNode *node)
+{
+  tDat *dat = node->dat;
+
+  if(!dat) return;
+
+  /* to be sure, wait again for all recvs */
+  nMPI_Waitall_com_recv(dat->gcom);
+
+  /* wait until all has been sent, then free all buffers for this face */
+  nMPI_Waitall_com_send(dat->gcom);
+  realloc_com_reqs(dat->gcom, 0); /* free req and send arrays */
+}
+
+
 /**********************************************************************/
 /* get the ghost data out of the MPI buffers */
 /**********************************************************************/
@@ -472,74 +493,73 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
   /* do nothing if this node is on other proc */
   if(!dat) return;
 
-  /* do nothing if com is empty */
-  if(com->n_rq == 0) return;
-
-  nghosts = Geti(amr->nghosts);
+  /* number of vars that exchanged ghost */
+  nvars = vl->n;
 
   /* get MPI rq numbers */
   rqs = (int *) VarA_(node, vi0)->par;
 
-  /* find 27 neighbors */
-  find_nb27(node, nb27);
-
-  /* loop over 26 neighbors */
-  for(ni=0; ni<27; ni++)
+  /* do something only if we have requests and vars */
+  if(com->n_rq != 0 && nvars != 0)
   {
-    tNode *nb = nb27[ni];
-    int *n = node->n;
-    double *rbuf; /* buffer for recv */
-    int si, vli;
-    int gsta[3], sta[3], nc[3];
+    nghosts = Geti(amr->nghosts);
 
-    /* do nothing for self */
-    if(ni==ccc) continue;
+    /* find 27 neighbors */
+    find_nb27(node, nb27);
 
-    /* goto next neighbor if nb is NULL */
-    if(!nb) continue;
-
-    /* if nb is local we have already exchanged info  */
-    if(nb->dat) continue;
-
-    /* nb is on other process, we have used MPI to exchange data */
-
-    /* number of vars that exchanged ghost */
-    nvars = vl->n;
-
-    /* do nothing if there are no vars that exchanged ghost */
-    if(!nvars) return;
-
-    /* select start value and thickness of layer to copy */
-    set_ghoststart_start_nc(ni, n, nghosts, gsta, sta, nc);
-
-    /* get MPI request number, and buffer */
-    rq = rqs[ni];
-    rbuf = get_com_recv_buf(com, rq);
-
-    /* wait for MPI buffer */
-    nMPI_Wait_com_recv(com, rq);
-
-    /* copy data from recv buffer into ghost zones */
-    for(si=0, vli=0; vli<vl->n; vli++)
+    /* loop over 26 neighbors */
+    for(ni=0; ni<27; ni++)
     {
-      int vi = Vind(vl, vli);
-      double *v = Vard_(node, vi);
-      int i0,j0,k0;
+      tNode *nb = nb27[ni];
+      int *n = node->n;
+      double *rbuf; /* buffer for recv */
+      int si, vli;
+      int gsta[3], sta[3], nc[3];
 
-      /* copy from rbuf into var */
-      for(k0=0; k0<nc[2]; k0++)
-      for(j0=0; j0<nc[1]; j0++)
-      for(i0=0; i0<nc[0]; i0++)
+      /* do nothing for self */
+      if(ni==ccc) continue;
+
+      /* goto next neighbor if nb is NULL */
+      if(!nb) continue;
+
+      /* if nb is local we have already exchanged info  */
+      if(nb->dat) continue;
+
+      /* nb is on other process, we have used MPI to exchange data */
+
+
+      /* select start value and thickness of layer to copy */
+      set_ghoststart_start_nc(ni, n, nghosts, gsta, sta, nc);
+
+      /* get MPI request number, and buffer */
+      rq = rqs[ni];
+      rbuf = get_com_recv_buf(com, rq);
+
+      /* wait for MPI buffer */
+      nMPI_Wait_com_recv(com, rq);
+
+      /* copy data from recv buffer into ghost zones */
+      for(si=0, vli=0; vli<vl->n; vli++)
       {
-        int k = k0 + gsta[2];
-        int j = j0 + gsta[1];
-        int i = i0 + gsta[0];
-        int ijk = Ind_n(i,j,k, n);
+        int vi = Vind(vl, vli);
+        double *v = Vard_(node, vi);
+        int i0,j0,k0;
 
-        v[ijk] = rbuf[si++];
+        /* copy from rbuf into var */
+        for(k0=0; k0<nc[2]; k0++)
+        for(j0=0; j0<nc[1]; j0++)
+        for(i0=0; i0<nc[0]; i0++)
+        {
+          int k = k0 + gsta[2];
+          int j = j0 + gsta[1];
+          int i = i0 + gsta[0];
+          int ijk = Ind_n(i,j,k, n);
+
+          v[ijk] = rbuf[si++];
+        }
       }
-    }
-  } /* end loop over neighbors */
+    } /* end loop over neighbors */
+  }
 
   /* free rqs in par of 1st var */
   if(rqs)
@@ -547,22 +567,6 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
     free(rqs);
     VarA_(node, vi0)->par = NULL;
   }
-}
-
-
-/* free req and send arrays after all has been sent */
-void free_dat_gcom_reqs_after_Waitall_com_send(tNode *node)
-{
-  tDat *dat = node->dat;
-
-  if(!dat) return;
-
-  /* to be sure, wait again for all recvs */
-  nMPI_Waitall_com_recv(dat->gcom);
-
-  /* wait until all has been sent, then free all buffers for this face */
-  nMPI_Waitall_com_send(dat->gcom);
-  realloc_com_reqs(dat->gcom, 0); /* free req and send arrays */
 }
 
 /* get ghostdata for all nodes out of buffers and free the buffers */
