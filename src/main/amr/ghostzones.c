@@ -37,18 +37,18 @@ enum
 void find_nb26(tNode *node, tNode *nb26[26])
 {
   /* nearest neighbors */
-  nb26[mcc] = node->fnb[mcc][0];
-  nb26[pcc] = node->fnb[pcc][0];
-  nb26[cmc] = node->fnb[cmc][0];
-  nb26[cpc] = node->fnb[cpc][0];
-  nb26[ccm] = node->fnb[ccm][0];
-  nb26[ccp] = node->fnb[ccp][0];
+  nb26[mcc] = node->fnb[mcc] ? node->fnb[mcc][0] : NULL;
+  nb26[pcc] = node->fnb[pcc] ? node->fnb[pcc][0] : NULL;
+  nb26[cmc] = node->fnb[cmc] ? node->fnb[cmc][0] : NULL;
+  nb26[cpc] = node->fnb[cpc] ? node->fnb[cpc][0] : NULL;
+  nb26[ccm] = node->fnb[ccm] ? node->fnb[ccm][0] : NULL;
+  nb26[ccp] = node->fnb[ccp] ? node->fnb[ccp][0] : NULL;
 
   /* next-nearest nbs on face 0,1 */
   if(nb26[mcc])
   {
-    nb26[mmc] = nb26[mcc]->fnb[cmc][0];
-    nb26[mpc] = nb26[mcc]->fnb[cpc][0];
+    nb26[mmc] = nb26[mcc]->fnb[cmc] ? nb26[mcc]->fnb[cmc][0] : NULL;
+    nb26[mpc] = nb26[mcc]->fnb[cpc] ? nb26[mcc]->fnb[cpc][0] : NULL;
   }
   else
   {
@@ -56,8 +56,8 @@ void find_nb26(tNode *node, tNode *nb26[26])
   }
   if(nb26[pcc])
   {
-    nb26[pmc] = nb26[pcc]->fnb[cmc][0];
-    nb26[ppc] = nb26[pcc]->fnb[cpc][0];
+    nb26[pmc] = nb26[pcc]->fnb[cmc] ? nb26[pcc]->fnb[cmc][0] : NULL;
+    nb26[ppc] = nb26[pcc]->fnb[cpc] ? nb26[pcc]->fnb[cpc][0] : NULL;
   }
   else
   {
@@ -67,10 +67,10 @@ void find_nb26(tNode *node, tNode *nb26[26])
   /* next-nearest nbs on face 4 */
   if(nb26[ccm])
   {
-    nb26[mcm] = nb26[ccm]->fnb[mcc][0];
-    nb26[pcm] = nb26[ccm]->fnb[pcc][0];
-    nb26[cmm] = nb26[ccm]->fnb[cmc][0];
-    nb26[cpm] = nb26[ccm]->fnb[cpc][0];
+    nb26[mcm] = nb26[ccm]->fnb[mcc] ? nb26[ccm]->fnb[mcc][0] : NULL;
+    nb26[pcm] = nb26[ccm]->fnb[pcc] ? nb26[ccm]->fnb[pcc][0] : NULL;
+    nb26[cmm] = nb26[ccm]->fnb[cmc] ? nb26[ccm]->fnb[cmc][0] : NULL;
+    nb26[cpm] = nb26[ccm]->fnb[cpc] ? nb26[ccm]->fnb[cpc][0] : NULL;
   }
   else
   {
@@ -80,10 +80,10 @@ void find_nb26(tNode *node, tNode *nb26[26])
   /* next-nearest nbs on face 5 */
   if(nb26[ccp])
   {
-    nb26[mcp] = nb26[ccp]->fnb[mcc][0];
-    nb26[pcp] = nb26[ccp]->fnb[pcc][0];
-    nb26[cmp] = nb26[ccp]->fnb[cmc][0];
-    nb26[cpp] = nb26[ccp]->fnb[cpc][0];
+    nb26[mcp] = nb26[ccp]->fnb[mcc] ? nb26[ccp]->fnb[mcc][0] : NULL;
+    nb26[pcp] = nb26[ccp]->fnb[pcc] ? nb26[ccp]->fnb[pcc][0] : NULL;
+    nb26[cmp] = nb26[ccp]->fnb[cmc] ? nb26[ccp]->fnb[cmc][0] : NULL;
+    nb26[cpp] = nb26[ccp]->fnb[cpc] ? nb26[ccp]->fnb[cpc][0] : NULL;
   }
   else
   {
@@ -93,8 +93,8 @@ void find_nb26(tNode *node, tNode *nb26[26])
   /* next to next-nearest nbs on face 4 */
   if(nb26[cmm])
   {
-    nb26[mmm] = nb26[cmm]->fnb[mcc][0];
-    nb26[pmm] = nb26[cmm]->fnb[pcc][0];
+    nb26[mmm] = nb26[cmm]->fnb[mcc] ? nb26[cmm]->fnb[mcc][0] : NULL;
+    nb26[pmm] = nb26[cmm]->fnb[pcc] ? nb26[cmm]->fnb[pcc][0] : NULL;
   }
   else
   {
@@ -102,8 +102,8 @@ void find_nb26(tNode *node, tNode *nb26[26])
   }
   if(nb26[cpm])
   {
-    nb26[mpm] = nb26[cpm]->fnb[mcc][0];
-    nb26[ppm] = nb26[cpm]->fnb[pcc][0];
+    nb26[mpm] = nb26[cpm]->fnb[mcc] ? nb26[cpm]->fnb[mcc][0] : NULL;
+    nb26[ppm] = nb26[cpm]->fnb[pcc] ? nb26[cpm]->fnb[pcc][0] : NULL;
   }
   else
   {
@@ -113,8 +113,8 @@ void find_nb26(tNode *node, tNode *nb26[26])
   /* next to next-nearest nbs on face 5 */
   if(nb26[cmp])
   {
-    nb26[mmp] = nb26[cmp]->fnb[mcc][0];
-    nb26[pmp] = nb26[cmp]->fnb[pcc][0];
+    nb26[mmp] = nb26[cmp]->fnb[mcc] ? nb26[cmp]->fnb[mcc][0] : NULL;
+    nb26[pmp] = nb26[cmp]->fnb[pcc] ? nb26[cmp]->fnb[pcc][0] : NULL;
   }
   else
   {
@@ -122,8 +122,8 @@ void find_nb26(tNode *node, tNode *nb26[26])
   }
   if(nb26[cpp])
   {
-    nb26[mpp] = nb26[cpp]->fnb[mcc][0];
-    nb26[ppp] = nb26[cpp]->fnb[pcc][0];
+    nb26[mpp] = nb26[cpp]->fnb[mcc] ? nb26[cpp]->fnb[mcc][0] : NULL;
+    nb26[ppp] = nb26[cpp]->fnb[pcc] ? nb26[cpp]->fnb[pcc][0] : NULL;
   }
   else
   {
