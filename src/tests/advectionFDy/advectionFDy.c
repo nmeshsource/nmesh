@@ -9,15 +9,14 @@
 
 
 /* frequently used pars */
-int profile_sin;
-int profile_square;
+tadvectionFDy advectionFDy[1];
 
 
 /* func to init frequently used pars */
 int advectionFDy_init_global_pars(tMesh *mesh)
 {
-  profile_sin    = Getv(Par("advectionFDy_profile"),"sin");
-  profile_square = Getv(Par("advectionFDy_profile"),"square");
+  advectionFDy->sin_profile    = Getv(Par("advectionFDy_profile"),"sin");
+  advectionFDy->square_profile = Getv(Par("advectionFDy_profile"),"square");
 
   return 0;
 }
@@ -194,11 +193,11 @@ void advectionFDy_set_profile_pt(double xyz[3], double t, int nv, double *u)
   double nmag2 = (nx*nx + ny*ny + nz*nz);
 
   /* profile */
-  if(profile_sin)
+  if(advectionFDy->sin_profile)
   {
     u[0] = sin(nx*xyz[0] + ny*xyz[1] + nz*xyz[2] - nmag2*t);
   }
-  if(profile_square)
+  if(advectionFDy->square_profile)
   {
     double inx, iny;
     if(xyz[0]>=(-0.7 + nx*t) && xyz[0]<=(-0.3 + nx*t)) inx = 1.;

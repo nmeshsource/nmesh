@@ -3,6 +3,12 @@
 /* header file for advectionFDy local functions */
 
 
+/* structure that holds global vars and pars */
+typedef struct {
+  int sin_profile;
+  int square_profile;
+} tadvectionFDy;
+
 
 /* advectionFDy.c */
 int advectionFDy_init_global_pars(tMesh *mesh);
