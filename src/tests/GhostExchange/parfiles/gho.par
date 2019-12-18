@@ -1,0 +1,59 @@
+###################################################################
+# modules we use
+
+physics = GhostExchange
+
+###################################################################
+# checkpointing
+
+checkpoint = no # yes
+checkpoint_hours = 1
+checkpoint_hours_quit = 1.94
+
+###################################################################
+# evolution
+
+evolve_method = sspRK3 # RK4 # Euler
+dt = 0.025
+finaltime = 0
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 1 BoxMesh
+amr_BoxMesh_xc = 0
+amr_BoxMesh_dout = 16
+amr_luni = 1
+
+amr_MPIexchange = 2
+amr_nghosts = 1
+
+amr_n0 = 4
+amr_n1 = 4
+amr_n2 = 4
+
+###################################################################
+# initial data
+
+#scalarwave1_k = 0.8  -0.5  0.33166247903554
+
+###################################################################
+# output
+
+timer_on = no # yes
+
+logfile_creation = no
+
+0douttime = 1
+0doutput = GhostExchange_v
+
+1douttime = 1
+1doutput = GhostExchange_v
+
+2douttime = 1
+2doutput = GhostExchange_v
+2dformat = xdmf
+
+3douttime = 1
+3doutput = GhostExchange_v
+3dformat = xdmf
