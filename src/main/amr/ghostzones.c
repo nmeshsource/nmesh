@@ -169,7 +169,7 @@ int get_nb_ni(int ni)
 /* select start value sta, start value of ghosts gsta and thickness nc
   of layer to copy, and also start value nb_sta on nb */
 void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
-                             int sta[3], int nc[3], int nb_sta[3])
+                             int sta[3], int nc[3])
 {
   int n2gho = nghosts*2;
 
@@ -180,9 +180,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
   sta[0] = nghosts;
   sta[1] = nghosts;
   sta[2] = nghosts;
-  nb_sta[0] = n[0] - n2gho;
-  nb_sta[1] = n[1] - n2gho;
-  nb_sta[2] = n[2] - n2gho;
   switch(ni)
   {
   case pcc:
@@ -191,7 +188,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
   case pmm:
     gsta[0] = n[0] - nghosts;
     sta[0] = n[0] - n2gho;
-    nb_sta[0] = nghosts;
     break;
 
   case cpc:
@@ -200,7 +196,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
   case mpm:
     gsta[0] = n[0] - nghosts;
     sta[1] = n[1] - n2gho;
-    nb_sta[1] = nghosts;
     break;
 
   case ccp:
@@ -209,7 +204,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
   case mmp:
     gsta[0] = n[0] - nghosts;
     sta[2] = n[2] - n2gho;
-    nb_sta[2] = nghosts;
     break;
 
   case ppc:
@@ -218,7 +212,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
     gsta[1] = n[1] - nghosts;
     sta[0] = n[0] - n2gho;
     sta[1] = n[1] - n2gho;
-    nb_sta[0] = nb_sta[1] = nghosts;
     break;
 
   case pcp:
@@ -227,7 +220,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
     gsta[2] = n[2] - nghosts;
     sta[0] = n[0] - n2gho;
     sta[2] = n[2] - n2gho;
-    nb_sta[0] = nb_sta[2] = nghosts;
     break;
 
   case cpp:
@@ -236,7 +228,6 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
     gsta[2] = n[2] - nghosts;
     sta[1] = n[1] - n2gho;
     sta[2] = n[2] - n2gho;
-    nb_sta[1] = nb_sta[2] = nghosts;
     break;
 
   case ppp:
@@ -246,14 +237,13 @@ void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
     sta[0] = n[0] - n2gho;
     sta[1] = n[1] - n2gho;
     sta[2] = n[2] - n2gho;
-    nb_sta[0] = nb_sta[1] = nb_sta[2] = nghosts;
     break;
   }
 
   /* select thinkness of layer to copy */
-  nc[0] = n[0];
-  nc[1] = n[1];
-  nc[2] = n[2];
+  nc[0] = n[0] - n2gho;
+  nc[1] = n[1] - n2gho;
+  nc[2] = n[2] - n2gho;
   switch(ni)
   {
   case mcc:
@@ -332,19 +322,21 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
     tNode *nb = nb26[ni];
     int *n = node->n;
     int *nb_n = nb->n;
-    int vli;
-    int gsta[3], sta[3], nc[3], nb_sta[3];
+    int nb_ni, vli;
+    int gsta[3], sta[3], nc[3], nb_gsta[3], nb_sta[3],  nb_nc[3];
 
     /* goto next neighbor if nb is NULL */
     if(!nb) continue;
 
     /* select start value and thickness of layer to copy */
-    set_ghoststart_start_nc(ni, n, nghosts, gsta, sta, nc, nb_sta);
+    set_ghoststart_start_nc(ni, n, nghosts, gsta, sta, nc);
 
     /* is nb local? */
     if(nb->dat)
     {
       /* nb is local so just copy */
+      nb_ni = get_nb_ni(ni);
+      set_ghoststart_start_nc(nb_ni, nb_n, nghosts, nb_gsta, nb_sta, nb_nc);
       for(vli=0; vli<vl->n; vli++)
       {
         int vi = Vind(vl, vli);
@@ -378,7 +370,7 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
       nMPI_Comm s_comm, r_comm;
       tCom *com = dat->gcom;
       double *sbuf, *rbuf; /* buffers for MPI */
-      int si, nb_ni, lid, nb_lid;
+      int si, lid, nb_lid;
 
       /* find my index in nb */
       nb_ni = get_nb_ni(ni);
@@ -503,7 +495,7 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
     int *n = node->n;
     double *rbuf; /* buffer for recv */
     int si, vli;
-    int gsta[3], sta[3], nc[3], nb_sta[3];
+    int gsta[3], sta[3], nc[3];
 
     /* goto next neighbor if nb is NULL */
     if(!nb) continue;
@@ -520,7 +512,7 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
     if(!nvars) return;
 
     /* select start value and thickness of layer to copy */
-    set_ghoststart_start_nc(ni, n, nghosts, gsta, sta, nc, nb_sta);
+    set_ghoststart_start_nc(ni, n, nghosts, gsta, sta, nc);
 
     /* get MPI request number, and buffer */
     rq = rqs[ni];
