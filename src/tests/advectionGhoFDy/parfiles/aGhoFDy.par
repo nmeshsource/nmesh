@@ -1,0 +1,57 @@
+###################################################################
+# modules we use
+
+physics = advectionGhoFDy
+
+###################################################################
+# evolution
+
+dt = auto # 0.01
+finaltime = 3
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 1 BoxMesh
+
+amr_luni = 1
+
+amr_n0 = 12
+amr_n1 = 12
+amr_n2 = 12
+
+amr_MPIexchange = 2
+amr_nghosts = 2
+
+iterate_parameters = no # yes
+iterate_parameter1 = amr_n0 8 12 20
+iterate_parameter2 = amr_n1 8 12 20
+iterate_parameter3 = amr_n2 8 12 20
+
+###################################################################
+# parameters for advectionGhoFDy
+
+advectionGhoFDy_profile = sin # square
+
+###################################################################
+# output
+
+logfile_creation = no
+
+0douttime = 0.1
+0doutput = advectionGhoFDy_u_err
+
+1douttime = 0.1
+1doutput = advectionGhoFDy_u advectionGhoFDy_u_err
+           advectionGhoFDy_x advectionGhoFDy_y advectionGhoFDy_z
+
+output_xcoord = advectionGhoFDy_x
+
+2dformat = xdmf
+2douttime = 0.1
+2doutput = advectionGhoFDy_u advectionGhoFDy_u_err
+           advectionGhoFDy_x advectionGhoFDy_y advectionGhoFDy_z
+
+3dformat = xdmf # gnuplot
+3douttime = 0.1
+3doutput = advectionGhoFDy_u
