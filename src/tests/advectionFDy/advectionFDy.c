@@ -90,7 +90,7 @@ int advectionFDy_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
                         VarAaj(node, iu, 2), VarAaj(node, iu, 3),
                         VarAaj(node, iu, 4), VarAaj(node, iu, 5) };
 
-    /* RHS at each point in interior */
+    /* RHS at each point at y-surface */
     for(k = 0; k < n[2]; k++)
     for(j = 0; j < 2;    j++)
     for(i = 0; i < n[0]; i++)
