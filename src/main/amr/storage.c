@@ -1498,6 +1498,7 @@ tDat *alloc_dat(tNode *node)
   if(!dat->ic) errorexit("out of memory for dat->ic");
 
   dat->icom = alloc_com(sizeof(double), 1);
+  dat->gcom = alloc_com(sizeof(double), 1);
 
   return dat;
 }
@@ -1525,6 +1526,7 @@ void free_dat(tDat *dat)
   }
 
   free_com(dat->icom);
+  free_com(dat->gcom);
 
   free(dat);
 }
