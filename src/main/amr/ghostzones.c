@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 0
+#define PR 1
 
 
 /* get global pars for amr */
@@ -18,116 +18,157 @@ extern tAMR amr[1];
 /* neighbor indices */
 /***************************************************************************/
 
-/* indices of neighbors, next-nearest and next to next-nearest neighbors */
+/* indices of nearest neighbors on faces 0-5 */
 enum
 {
-  mcc=0, pcc, cmc, cpc, ccm, ccp, // nearest neighbors on faces 0-6
+  f_mcc=0, f_pcc, f_cmc, f_cpc, f_ccm, f_ccp // nearest neighbors on faces 0-5
+};
+
+/* indices of node (ccc), nearest neighbors, next-nearest and
+   next to next-nearest neighbors */
+enum
+{
+  mmm, cmm, pmm,
+  mcm, ccm, pcm,
+  mpm, cpm, ppm,
+
+  mmc, cmc, pmc,
+  mcc, ccc, pcc,
+  mpc, cpc, ppc,
+
+  mmp, cmp, pmp,
+  mcp, ccp, pcp,
+  mpp, cpp, ppp
+};
+/* Here we have:
+  mcc, pcc, cmc, cpc, ccm, ccp,   // nearest neighbors on faces 0-5
   mmc, mpc, pmc, ppc,             // next-nearest nbs on face 0,1 in Y-dir
   mcm, pcm, cmm, cpm,             // next-nearest nbs on face 4
   mcp, pcp, cmp, cpp,             // next-nearest nbs on face 5
   mmm, pmm, mpm, ppm,             // next to next-nearest nbs on face 4
-  mmp, pmp, mpp, ppp              // next to next-nearest nbs on face 5
-};
+  mmp, pmp, mpp, ppp              // next to next-nearest nbs on face 5 */
 
 /***************************************************************************/
 /* find neighbors */
 /***************************************************************************/
 
 /* find nearest + next-nearest + next-next-nearest neighbors */
-void find_nb26(tNode *node, tNode *nb26[26])
+void find_nb27(tNode *node, tNode *nb27[27])
 {
+  /* self */
+  nb27[ccc] = node;
+
   /* nearest neighbors */
-  nb26[mcc] = node->fnb[mcc] ? node->fnb[mcc][0] : NULL;
-  nb26[pcc] = node->fnb[pcc] ? node->fnb[pcc][0] : NULL;
-  nb26[cmc] = node->fnb[cmc] ? node->fnb[cmc][0] : NULL;
-  nb26[cpc] = node->fnb[cpc] ? node->fnb[cpc][0] : NULL;
-  nb26[ccm] = node->fnb[ccm] ? node->fnb[ccm][0] : NULL;
-  nb26[ccp] = node->fnb[ccp] ? node->fnb[ccp][0] : NULL;
+  nb27[mcc] = node->fnb[f_mcc] ? node->fnb[f_mcc][0] : NULL;
+  nb27[pcc] = node->fnb[f_pcc] ? node->fnb[f_pcc][0] : NULL;
+  nb27[cmc] = node->fnb[f_cmc] ? node->fnb[f_cmc][0] : NULL;
+  nb27[cpc] = node->fnb[f_cpc] ? node->fnb[f_cpc][0] : NULL;
+  nb27[ccm] = node->fnb[f_ccm] ? node->fnb[f_ccm][0] : NULL;
+  nb27[ccp] = node->fnb[f_ccp] ? node->fnb[f_ccp][0] : NULL;
 
   /* next-nearest nbs on face 0,1 */
-  if(nb26[mcc])
+  if(nb27[mcc])
   {
-    nb26[mmc] = nb26[mcc]->fnb[cmc] ? nb26[mcc]->fnb[cmc][0] : NULL;
-    nb26[mpc] = nb26[mcc]->fnb[cpc] ? nb26[mcc]->fnb[cpc][0] : NULL;
+    nb27[mmc] = nb27[mcc]->fnb[f_cmc] ? nb27[mcc]->fnb[f_cmc][0] : NULL;
+    nb27[mpc] = nb27[mcc]->fnb[f_cpc] ? nb27[mcc]->fnb[f_cpc][0] : NULL;
   }
   else
   {
-    nb26[mmc] = nb26[mpc] = NULL;
+    nb27[mmc] = nb27[mpc] = NULL;
   }
-  if(nb26[pcc])
+  if(nb27[pcc])
   {
-    nb26[pmc] = nb26[pcc]->fnb[cmc] ? nb26[pcc]->fnb[cmc][0] : NULL;
-    nb26[ppc] = nb26[pcc]->fnb[cpc] ? nb26[pcc]->fnb[cpc][0] : NULL;
+    nb27[pmc] = nb27[pcc]->fnb[f_cmc] ? nb27[pcc]->fnb[f_cmc][0] : NULL;
+    nb27[ppc] = nb27[pcc]->fnb[f_cpc] ? nb27[pcc]->fnb[f_cpc][0] : NULL;
   }
   else
   {
-    nb26[pmc] = nb26[ppc] = NULL;
+    nb27[pmc] = nb27[ppc] = NULL;
   }
 
   /* next-nearest nbs on face 4 */
-  if(nb26[ccm])
+  if(nb27[ccm])
   {
-    nb26[mcm] = nb26[ccm]->fnb[mcc] ? nb26[ccm]->fnb[mcc][0] : NULL;
-    nb26[pcm] = nb26[ccm]->fnb[pcc] ? nb26[ccm]->fnb[pcc][0] : NULL;
-    nb26[cmm] = nb26[ccm]->fnb[cmc] ? nb26[ccm]->fnb[cmc][0] : NULL;
-    nb26[cpm] = nb26[ccm]->fnb[cpc] ? nb26[ccm]->fnb[cpc][0] : NULL;
+    nb27[mcm] = nb27[ccm]->fnb[f_mcc] ? nb27[ccm]->fnb[f_mcc][0] : NULL;
+    nb27[pcm] = nb27[ccm]->fnb[f_pcc] ? nb27[ccm]->fnb[f_pcc][0] : NULL;
+    nb27[cmm] = nb27[ccm]->fnb[f_cmc] ? nb27[ccm]->fnb[f_cmc][0] : NULL;
+    nb27[cpm] = nb27[ccm]->fnb[f_cpc] ? nb27[ccm]->fnb[f_cpc][0] : NULL;
   }
   else
   {
-    nb26[mcm] = nb26[pcm] = nb26[cmm] = nb26[cpm] = NULL;
+    nb27[mcm] = nb27[pcm] = nb27[cmm] = nb27[cpm] = NULL;
   }
 
   /* next-nearest nbs on face 5 */
-  if(nb26[ccp])
+  if(nb27[ccp])
   {
-    nb26[mcp] = nb26[ccp]->fnb[mcc] ? nb26[ccp]->fnb[mcc][0] : NULL;
-    nb26[pcp] = nb26[ccp]->fnb[pcc] ? nb26[ccp]->fnb[pcc][0] : NULL;
-    nb26[cmp] = nb26[ccp]->fnb[cmc] ? nb26[ccp]->fnb[cmc][0] : NULL;
-    nb26[cpp] = nb26[ccp]->fnb[cpc] ? nb26[ccp]->fnb[cpc][0] : NULL;
+    nb27[mcp] = nb27[ccp]->fnb[f_mcc] ? nb27[ccp]->fnb[f_mcc][0] : NULL;
+    nb27[pcp] = nb27[ccp]->fnb[f_pcc] ? nb27[ccp]->fnb[f_pcc][0] : NULL;
+    nb27[cmp] = nb27[ccp]->fnb[f_cmc] ? nb27[ccp]->fnb[f_cmc][0] : NULL;
+    nb27[cpp] = nb27[ccp]->fnb[f_cpc] ? nb27[ccp]->fnb[f_cpc][0] : NULL;
   }
   else
   {
-   nb26[mcp] = nb26[pcp] = nb26[cmp] = nb26[cpp] = NULL;
+   nb27[mcp] = nb27[pcp] = nb27[cmp] = nb27[cpp] = NULL;
   }
 
   /* next to next-nearest nbs on face 4 */
-  if(nb26[cmm])
+  if(nb27[cmm])
   {
-    nb26[mmm] = nb26[cmm]->fnb[mcc] ? nb26[cmm]->fnb[mcc][0] : NULL;
-    nb26[pmm] = nb26[cmm]->fnb[pcc] ? nb26[cmm]->fnb[pcc][0] : NULL;
+    nb27[mmm] = nb27[cmm]->fnb[f_mcc] ? nb27[cmm]->fnb[f_mcc][0] : NULL;
+    nb27[pmm] = nb27[cmm]->fnb[f_pcc] ? nb27[cmm]->fnb[f_pcc][0] : NULL;
   }
   else
   {
-    nb26[mmm] = nb26[pmm] = NULL;
+    nb27[mmm] = nb27[pmm] = NULL;
   }
-  if(nb26[cpm])
+  if(nb27[cpm])
   {
-    nb26[mpm] = nb26[cpm]->fnb[mcc] ? nb26[cpm]->fnb[mcc][0] : NULL;
-    nb26[ppm] = nb26[cpm]->fnb[pcc] ? nb26[cpm]->fnb[pcc][0] : NULL;
+    nb27[mpm] = nb27[cpm]->fnb[f_mcc] ? nb27[cpm]->fnb[f_mcc][0] : NULL;
+    nb27[ppm] = nb27[cpm]->fnb[f_pcc] ? nb27[cpm]->fnb[f_pcc][0] : NULL;
   }
   else
   {
-    nb26[mpm] = nb26[ppm] = NULL;
+    nb27[mpm] = nb27[ppm] = NULL;
   }
 
   /* next to next-nearest nbs on face 5 */
-  if(nb26[cmp])
+  if(nb27[cmp])
   {
-    nb26[mmp] = nb26[cmp]->fnb[mcc] ? nb26[cmp]->fnb[mcc][0] : NULL;
-    nb26[pmp] = nb26[cmp]->fnb[pcc] ? nb26[cmp]->fnb[pcc][0] : NULL;
+    nb27[mmp] = nb27[cmp]->fnb[f_mcc] ? nb27[cmp]->fnb[f_mcc][0] : NULL;
+    nb27[pmp] = nb27[cmp]->fnb[f_pcc] ? nb27[cmp]->fnb[f_pcc][0] : NULL;
   }
   else
   {
-    nb26[mmp] = nb26[pmp] = NULL;
+    nb27[mmp] = nb27[pmp] = NULL;
   }
-  if(nb26[cpp])
+  if(nb27[cpp])
   {
-    nb26[mpp] = nb26[cpp]->fnb[mcc] ? nb26[cpp]->fnb[mcc][0] : NULL;
-    nb26[ppp] = nb26[cpp]->fnb[pcc] ? nb26[cpp]->fnb[pcc][0] : NULL;
+    nb27[mpp] = nb27[cpp]->fnb[f_mcc] ? nb27[cpp]->fnb[f_mcc][0] : NULL;
+    nb27[ppp] = nb27[cpp]->fnb[f_pcc] ? nb27[cpp]->fnb[f_pcc][0] : NULL;
   }
   else
   {
-    nb26[mpp] = nb26[ppp] = NULL;
+    nb27[mpp] = nb27[ppp] = NULL;
+  }
+
+  if(PR)
+  {
+    int ni;
+    char s[100];
+    int nn[] = { 3,3,3 }; /* pcc - mcc = 3 */
+    int i,j,k;
+
+
+    PRF;printf(": %s\n", nodename(node, s,99));
+    for(ni=0; ni<27; ni++)
+    {
+      k = kOfInd_n(ni, nn);
+      j = jOfInd_n_k(ni, nn,k);
+      i = iOfInd_n_jk(ni, nn,j,k);
+      printf("ni=%d:=%+d%+d%+d: %s\n", ni, i-1,j-1,k-1,
+             nodename(nb27[ni], s,99));
+    }
   }
 }
 
@@ -171,119 +212,70 @@ int get_nb_ni(int ni)
 void set_ghoststart_start_nc(int ni, int n[3], int nghosts, int gsta[3],
                              int sta[3], int nc[3])
 {
+  int nn[] = { 3,3,3 }; /* pcc - mcc = 3 */
   int n2gho = nghosts*2;
+  int i,j,k;
 
   /* select start values for copy */
-  gsta[0] = 0;
-  gsta[1] = 0;
-  gsta[2] = 0;
+  k = kOfInd_n(ni, nn);
+  j = jOfInd_n_k(ni, nn,k);
+  i = iOfInd_n_jk(ni, nn,j,k);
+
+  gsta[0] = nghosts;
+  gsta[1] = nghosts;
+  gsta[2] = nghosts;
   sta[0] = nghosts;
   sta[1] = nghosts;
   sta[2] = nghosts;
-  switch(ni)
+
+  /* cases m??, ?m?, ??,m */
+  if(i==0)
   {
-  case pcc:
-  case pmc:
-  case pcm:
-  case pmm:
+    gsta[0] = 0;
+    sta[0] = nghosts;
+  }
+  if(j==0)
+  {
+    gsta[1] = 0;
+    sta[1] = nghosts;
+  }
+  if(k==0)
+  {
+    gsta[2] = 0;
+    sta[2] = nghosts;
+  }
+
+  /* cases p??, ?p?, ??,p */
+  if(i==2)
+  {
     gsta[0] = n[0] - nghosts;
     sta[0] = n[0] - n2gho;
-    break;
-
-  case cpc:
-  case mpc:
-  case cpm:
-  case mpm:
-    gsta[0] = n[0] - nghosts;
-    sta[1] = n[1] - n2gho;
-    break;
-
-  case ccp:
-  case mcp:
-  case cmp:
-  case mmp:
-    gsta[0] = n[0] - nghosts;
-    sta[2] = n[2] - n2gho;
-    break;
-
-  case ppc:
-  case ppm:
-    gsta[0] = n[0] - nghosts;
+  }
+  if(j==2)
+  {
     gsta[1] = n[1] - nghosts;
-    sta[0] = n[0] - n2gho;
     sta[1] = n[1] - n2gho;
-    break;
-
-  case pcp:
-  case pmp:
-    gsta[0] = n[0] - nghosts;
+  }
+  if(k==2)
+  {
     gsta[2] = n[2] - nghosts;
-    sta[0] = n[0] - n2gho;
     sta[2] = n[2] - n2gho;
-    break;
-
-  case cpp:
-  case mpp:
-    gsta[1] = n[1] - nghosts;
-    gsta[2] = n[2] - nghosts;
-    sta[1] = n[1] - n2gho;
-    sta[2] = n[2] - n2gho;
-    break;
-
-  case ppp:
-    gsta[0] = n[0] - nghosts;
-    gsta[1] = n[1] - nghosts;
-    gsta[2] = n[2] - nghosts;
-    sta[0] = n[0] - n2gho;
-    sta[1] = n[1] - n2gho;
-    sta[2] = n[2] - n2gho;
-    break;
   }
 
   /* select thinkness of layer to copy */
   nc[0] = n[0] - n2gho;
   nc[1] = n[1] - n2gho;
   nc[2] = n[2] - n2gho;
-  switch(ni)
+
+  if(i!=1) nc[0] = nghosts;
+  if(j!=1) nc[1] = nghosts;
+  if(k!=1) nc[2] = nghosts;
+
+  if(PR)
   {
-  case mcc:
-  case pcc:
-    nc[0] = nghosts;
-    break;
-
-  case cmc:
-  case cpc:
-    nc[1] = nghosts;
-    break;
-
-  case ccm:
-  case ccp:
-    nc[2] = nghosts;
-    break;
-
-  case mmc:
-  case mpc:
-  case pmc:
-  case ppc:
-    nc[0] = nc[1] = nghosts;
-    break;
-
-  case mcm:
-  case mcp:
-  case pcm:
-  case pcp:
-    nc[0] = nc[2] = nghosts;
-    break;
-
-  case cmm:
-  case cmp:
-  case cpm:
-  case cpp:
-    nc[1] = nc[2] = nghosts;
-    break;
-
-  default:
-    nc[0] = nc[1] = nc[2] = nghosts;
+    PRF;printf(": ni=%d=%+d%+d%+d: %d %d %d, %d %d %d, %d %d %d\n",
+               ni,i-1,j-1,k-1,
+               gsta[0],gsta[1],gsta[2], sta[0],sta[1],sta[2], nc[0],nc[1],nc[2]);
   }
 }
 
@@ -297,7 +289,7 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
 {
   tMesh *mesh = node->pat->mesh;
   int nghosts;
-  tNode *nb26[26];
+  tNode *nb27[27];
   tDat *dat = node->dat;
   int *rqs;
   int vi0 = Vind(vl,0); /* 1st var */
@@ -308,22 +300,25 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
 
   nghosts = Geti(amr->nghosts);
 
-  /* alloc memory to store request numbers for all 26 nbs */
+  /* alloc memory to store request numbers for all 27 nbs */
   if(VarA_(node, vi0)->par) free(VarA_(node, vi0)->par);
-  rqs = imalloc(26);
+  rqs = imalloc(27);
   VarA_(node, vi0)->par = (void *) rqs;
 
-  /* find 26 neighbors */
-  find_nb26(node, nb26);
+  /* find 27 neighbors */
+  find_nb27(node, nb27);
 
   /* loop over 26 neighbors */
-  for(ni=0; ni<26; ni++)
+  for(ni=0; ni<27; ni++)
   {
-    tNode *nb = nb26[ni];
+    tNode *nb = nb27[ni];
     int *n = node->n;
     int *nb_n = nb->n;
     int nb_ni, vli;
     int gsta[3], sta[3], nc[3], nb_gsta[3], nb_sta[3],  nb_nc[3];
+
+    /* do nothing for self */
+    if(ni==ccc) continue;
 
     /* goto next neighbor if nb is NULL */
     if(!nb) continue;
@@ -379,8 +374,8 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
       nb_rank = nb->datrank;
       lid = calc_node_lid(node);
       nb_lid = calc_node_lid(nb);
-      s_tag = nb_lid*26 + nb_ni;
-      r_tag = lid*26 + ni;
+      s_tag = nb_lid*27 + nb_ni;
+      r_tag = lid*27 + ni;
       if(r_tag<0) r_tag = -r_tag;
       if(s_tag<0) s_tag = -s_tag;
       r_comm = nb->comm;
@@ -467,7 +462,7 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
 {
   tMesh *mesh = node->pat->mesh;
   int nghosts;
-  tNode *nb26[26];
+  tNode *nb27[27];
   tDat *dat = node->dat;
   tCom *com = dat->gcom;
   int ni, nvars, rq;
@@ -485,17 +480,20 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
   /* get MPI rq numbers */
   rqs = (int *) VarA_(node, vi0)->par;
 
-  /* find 26 neighbors */
-  find_nb26(node, nb26);
+  /* find 27 neighbors */
+  find_nb27(node, nb27);
 
   /* loop over 26 neighbors */
-  for(ni=0; ni<26; ni++)
+  for(ni=0; ni<27; ni++)
   {
-    tNode *nb = nb26[ni];
+    tNode *nb = nb27[ni];
     int *n = node->n;
     double *rbuf; /* buffer for recv */
     int si, vli;
     int gsta[3], sta[3], nc[3];
+
+    /* do nothing for self */
+    if(ni==ccc) continue;
 
     /* goto next neighbor if nb is NULL */
     if(!nb) continue;
