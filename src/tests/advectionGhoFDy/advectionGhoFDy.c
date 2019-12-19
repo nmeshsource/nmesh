@@ -75,68 +75,97 @@ int advectionGhoFDy_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   {
     tNode *node = MyLnode;
     tPat *pat = node->pat;
-    int f = 2; /* face at lowest y */
-    tBface *bfaces = pat->bfaces[f];
+    int f;
 
-    /* compute boundary terms, if on outer bound */
-    if(node->patface[f] && bfaces && bfaces->boundary)
+    /* loop over faces */
+    for(f=0; f<6; f++)
     {
-      double *u = Vard(node, iu);
-      double *r = Vard(node, ir);
-      double *x = Vard(node, ix);
-      double *y = Vard(node, ix+1);
-      double *z = Vard(node, ix+2);
-      int *n = node->n;
-      int dj = n[0];
-      int i,j,k;
-      //int in0 = n[0] - n2gho;
-      int in1 = n[1] - n2gho;
-      //int in2 = n[2] - n2gho;
-      //double hx = (node->bbox[1] - node->bbox[0])/in0;
-      double hy = (node->bbox[3] - node->bbox[2])/in1;
-      //double hz = (node->bbox[5] - node->bbox[4])/in2;
-      //double oohx2 = 1./(2.*hx);
-      double oohy2 = 1./(2.*hy);
-      //double oohz2 = 1./(2.*hz);
+      tBface *bfaces = pat->bfaces[f];
+      if(f==3) continue; /* do nothing on face 3 */
 
-      /* RHS at each ghost point at outer boundary */
-      for(k = 0; k < n[2]; k++)
-      for(j = 0; j < 2;    j++)
-      for(i = 0; i < n[0]; i++)
+      /* compute boundary terms, if on outer bound */
+      if(node->patface[f] && bfaces && bfaces->boundary)
       {
-        int ccc = Ind_n(i,j,k, n);
-        int cmc = ccc - dj;
-        double u_ccc = u[ccc];
-        double u_cmc, u_cMc, uy;
-        double t = mesh->time;
-        double u1[1];
-        double xyz[] = { x[ccc],y[ccc],z[ccc] };
+        double *u = Vard(node, iu);
+        double *r = Vard(node, ir);
+        double *x = Vard(node, ix);
+        double *y = Vard(node, ix+1);
+        double *z = Vard(node, ix+2);
+        int *n = node->n;
+        int dj = n[0];
+        int i0,j0,k0;
+        //int in0 = n[0] - n2gho;
+        int in1 = n[1] - n2gho;
+        //int in2 = n[2] - n2gho;
+        //double hx = (node->bbox[1] - node->bbox[0])/in0;
+        double hy = (node->bbox[3] - node->bbox[2])/in1;
+        //double hz = (node->bbox[5] - node->bbox[4])/in2;
+        //double oohx2 = 1./(2.*hx);
+        double oohy2 = 1./(2.*hy);
+        //double oohz2 = 1./(2.*hz);
+        int ist=0;
+        int kst=0;
+        int n0=n[0];
+        int n2=n[2];
 
-        /* no neighbor ==> impose outer BC */
-        /* set boundary values for u_cmc, u_cMc */
-        if(j==0)
+        switch(f)
         {
-          xyz[1] -= hy;
-          advectionGhoFDy_set_profile_pt(xyz,t, 1, u1);
-          u_cmc = u1[0];
-          xyz[1] -= hy;
-          advectionGhoFDy_set_profile_pt(xyz,t, 1, u1);
-          u_cMc = u1[0];
+        case 1:
+          ist = n[0]-2;
+        case 0:
+          n0 = 2;
+          break;
+
+        case 5:
+          kst = n[2]-2;
+        case 4:
+          n2 = 2;
+          break;
         }
-        else
+        //printf("nid%ld: f=%d  ist=%d n0=%d  kst=%d n2=%d\n", node->nid, f, ist,n0, kst,n2);
+
+        /* RHS at each ghost point at outer boundary */
+        for(k0 = 0; k0 < n2; k0++)
+        for(j0 = 0; j0 < 2;  j0++)
+        for(i0 = 0; i0 < n0; i0++)
         {
-          xyz[1] -= 2.*hy;
-          advectionGhoFDy_set_profile_pt(xyz,t, 1, u1);
-          u_cmc = u[cmc];
-          u_cMc = u1[0];
+          int k = k0 + kst;
+          int j = j0;
+          int i = i0 + ist;
+          int ccc = Ind_n(i,j,k, n);
+          int cmc = ccc - dj;
+          double u_ccc = u[ccc];
+          double u_cmc, u_cMc, uy;
+          double t = mesh->time;
+          double u1[1];
+          double xyz[] = { x[ccc],y[ccc],z[ccc] };
+
+          /* no neighbor ==> impose outer BC */
+          /* set boundary values for u_cmc, u_cMc */
+          if(j==0)
+          {
+            xyz[1] -= hy;
+            advectionGhoFDy_set_profile_pt(xyz,t, 1, u1);
+            u_cmc = u1[0];
+            xyz[1] -= hy;
+            advectionGhoFDy_set_profile_pt(xyz,t, 1, u1);
+            u_cMc = u1[0];
+          }
+          else
+          {
+            xyz[1] -= 2.*hy;
+            advectionGhoFDy_set_profile_pt(xyz,t, 1, u1);
+            u_cmc = u[cmc];
+            u_cMc = u1[0];
+          }
+
+          /* FD deriv */
+          uy = (3.*u_ccc - 4.*u_cmc + u_cMc)*oohy2;
+
+          r[ccc] = -uy;
         }
-
-        /* FD deriv */
-        uy = (3.*u_ccc - 4.*u_cmc + u_cMc)*oohy2;
-
-        r[ccc] = -uy;
       }
-    }
+    } /* end loop over faces f */
   }
 
   return 0;
