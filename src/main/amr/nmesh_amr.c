@@ -28,6 +28,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
   AddPar("amr_refine_p", "-1", "patch that we refine one level further");
   AddPar("amr_BoxMesh_xc", "0 0 0", "center for boxes");
+  AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
