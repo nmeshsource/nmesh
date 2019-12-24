@@ -251,19 +251,26 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
 
       /* open file */
       fp = fopen(fname, "rb");
-      if(!fp) errorexits("failed opening %s", fname);
+      if(fp)
+      {
+        /* get varlist from file */
+        vl = checkpoint_make_vl(fp, mesh);
 
-      /* get varlist from file */
-      vl = checkpoint_make_vl(fp, mesh);
+        /* now read data for vars in little endian format */
+        checkpoint_read_vl(fp, vl, 0);
+        PRF;printf(": finished reading varlist.\n");
+        prvarlist(vl);
+        fflush(stdout);
 
-      /* now read data for vars in little endian format */
-      checkpoint_read_vl(fp, vl, 0);
-      PRF;printf(": finished reading varlist.\n");
-      prvarlist(vl);
-      fflush(stdout);
-
-      vlfree(vl);
-      fclose(fp);
+        vlfree(vl);
+        fclose(fp);
+      }
+      else
+      {
+        errorexits("failed opening %s", fname);
+        //PRF;printf(": failed opening %s\n", fname);
+        fflush(stdout);
+      }
     }
     /* wait until everyone is here */
     nMPI_barrier();
