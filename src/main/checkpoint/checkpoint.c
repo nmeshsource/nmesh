@@ -90,6 +90,8 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
 int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
                           int stage)
 {
+  int checkpoint = Par("checkpoint");
+  int chkpt_on;
   char *dir;
   char *pars;
   char *pats;
@@ -99,7 +101,8 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   double time, ntime;
 
   /* is checkpointing on? */
-  if(!Getb(Par("checkpoint"))) return 0;
+  chkpt_on = (Getb(checkpoint) || Getv(checkpoint, "load_mesh"));
+  if(!chkpt_on) return 0;
 
   time = getTimeIn_s()/60.;
 

@@ -368,7 +368,8 @@ int move_previous_output_to_outdir(tMesh *mesh)
 /* get initial data for mesh */
 int inidata_mesh(tMesh *mesh)
 {
-  int chkpt;
+  int checkpoint = Par("checkpoint");
+  int chkpt_exists, chkpt0, chkpt1;
 
   prdivider(0);
   printf("Initializing mesh\n");
@@ -378,10 +379,12 @@ int inidata_mesh(tMesh *mesh)
   RunFun(POST_PARAMETERS);
 
   /* check if there is a saved checkpoint, and if we want checkpointing */
-  chkpt = Getb(Par("checkpoint")) && checkpoint_exists(mesh, "", "");
+  chkpt_exists = checkpoint_exists(mesh, "", "");
+  chkpt0 = (Getb(checkpoint) || Getv(checkpoint, "load_mesh")) && chkpt_exists;
+  chkpt1 = Getb(checkpoint) && chkpt_exists;
 
   /* load stage 0 of checkpoint if it exists */
-  if(chkpt)
+  if(chkpt0)
   {
     prdivider(1);
     printf("Restarting from checkpoint:\n");
@@ -421,7 +424,7 @@ int inidata_mesh(tMesh *mesh)
   printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
 
   /* load next stage of checkpoint, or save checkpoint */
-  if(chkpt)
+  if(chkpt1)
   {
     checkpoint_load_stage(mesh, "", 1);
     //write_mesh(mesh, -1, -2);
