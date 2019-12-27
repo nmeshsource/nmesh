@@ -7,14 +7,9 @@
 #define PR 1
 
 
-/* func pointer for numerical flux */
-void (*advection1_numflux)(tDGinfo *d);
 
 /* frequently used pars */
-double advection1_direction[3];
-int outerBC_influxes;
-int sin_profile;
-int square_profile;
+tadvection1 advection1[1];
 
 
 /* func to init frequently used pars */
@@ -22,16 +17,16 @@ int advection1_init_global_pars(tMesh *mesh)
 {
   char *advdir = Gets(Par("advection1_direction"));
   sscanf(advdir, "%lg %lg %lg",
-         &(advection1_direction[0]),
-         &(advection1_direction[1]),
-         &(advection1_direction[2]));
-  printf("setting: advection1_direction[0] = %g\n", advection1_direction[0]);
-  printf("setting: advection1_direction[1] = %g\n", advection1_direction[1]);
-  printf("setting: advection1_direction[2] = %g\n", advection1_direction[2]);
+         &(advection1->direction[0]),
+         &(advection1->direction[1]),
+         &(advection1->direction[2]));
+  printf("setting: advection1->direction[0] = %g\n", advection1->direction[0]);
+  printf("setting: advection1->direction[1] = %g\n", advection1->direction[1]);
+  printf("setting: advection1->direction[2] = %g\n", advection1->direction[2]);
 
-  outerBC_influxes = Getb(Par("advection1_outerBC_influxes"));
-  sin_profile      = Getv(Par("advection1_profile"),"sin");
-  square_profile   = Getv(Par("advection1_profile"),"square");
+  advection1->outerBC_influxes = Getb(Par("advection1_outerBC_influxes"));
+  advection1->sin_profile      = Getv(Par("advection1_profile"),"sin");
+  advection1->square_profile   = Getv(Par("advection1_profile"),"square");
 
   return 0;
 }
@@ -41,7 +36,7 @@ int advection1_init_global_pars(tMesh *mesh)
 void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
                        double *u)
 {
-  double *nd = advection1_direction;
+  double *nd = advection1->direction;
 
   /* flux times norm */
   f[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * u[0];
@@ -50,7 +45,7 @@ void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
 /* eigenvalue in direction norm */
 void advection1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
 {
-  double *nd = advection1_direction;
+  double *nd = advection1->direction;
 
   /* eigenvalue */
   lam[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]);
@@ -130,9 +125,9 @@ void advection1_fluxes_pt(tDGinfo *d)
     }
     else /* no adjacent u, i.e. we are on outer boundary */
     {
-      if(outerBC_influxes) /* set outer BCs now */
+      if(advection1->outerBC_influxes) /* set outer BCs now */
       {
-        double *nd = advection1_direction;
+        double *nd = advection1->direction;
         double nx = nd[0];
         double ny = nd[1];
         double nz = nd[2];
@@ -151,9 +146,9 @@ void advection1_fluxes_pt(tDGinfo *d)
           /* if stuff is coming in */
           if(d->lami[l] < 0.)
           {
-            if(sin_profile)
+            if(advection1->sin_profile)
               d->ua[l] = sin(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
-            if(square_profile)
+            if(advection1->square_profile)
             {
               double inx, iny;
               if(x[ijk]>=(-0.7 + nx*t) && x[ijk]<=(-0.3 + nx*t)) inx = 1.;
@@ -185,7 +180,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int ir = vlr->index[0];
   int iu = vlu->index[0];
   int ix = Ind("x");
-  double *nd = advection1_direction;
+  double *nd = advection1->direction;
   double nx = nd[0];
   double ny = nd[1];
   double nz = nd[2];
@@ -222,9 +217,9 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           /* if stuff is coming in */
           if(norm[0]*nx + norm[1]*ny + norm[2]*nz < 0.)
           {
-            if(sin_profile)
+            if(advection1->sin_profile)
               r[ijk] = -nmag2*cos(nx*x[ijk] + ny*y[ijk] + nz*z[ijk] - nmag2*t);
-            if(square_profile)
+            if(advection1->square_profile)
               r[ijk] = -u[ijk];
           }
         }
@@ -269,10 +264,10 @@ int advection1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
   /* get flux terms on surfaces */
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
-                        advection1_fluxes_pt, advection1_numflux);
+                        advection1_fluxes_pt, advection1->numflux);
 
   /* impose outer BC, if it wasn't done above by advection1_fluxes_pt */
-  if(!outerBC_influxes) advection1_u_BC(mesh, vlr, vlu);
+  if(!advection1->outerBC_influxes) advection1_u_BC(mesh, vlr, vlu);
 
   TIMER_STOP;
   return 0;
@@ -283,7 +278,7 @@ int advection1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 int advection1_set_profile(tMesh *mesh, int iu)
 {
   int ix =  Ind("x");
-  double *nd = advection1_direction;
+  double *nd = advection1->direction;
   double nx = nd[0];
   double ny = nd[1];
   double nz = nd[2];
@@ -303,12 +298,12 @@ int advection1_set_profile(tMesh *mesh, int iu)
     int i;
 
     /* profile */
-    if(sin_profile)
+    if(advection1->sin_profile)
       forpoints(node, i)
       {
         u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
       }
-    if(square_profile)
+    if(advection1->square_profile)
       forpoints(node, i)
       {
         double inx, iny;
@@ -333,7 +328,7 @@ int advection1_init(tMesh *mesh)
   tVarList *vlu = vlalloc(mesh);
   int numflux = Par("advection1_numflux");
   int limiter = Par("advection1_limiter");
-  //double *nd = advection1_direction;
+  //double *nd = advection1->direction;
   //double nx = nd[0];
   //double ny = nd[1];
   //double nz = nd[2];
@@ -372,9 +367,9 @@ int advection1_init(tMesh *mesh)
 
   /* choose numerical flux */
   if(Getv(numflux, "LLF"))
-    advection1_numflux = numflux1d_LLF;
+    advection1->numflux = numflux1d_LLF;
   else
-    advection1_numflux = numflux1d_upwind;
+    advection1->numflux = numflux1d_upwind;
 
   /* test */
   /*
