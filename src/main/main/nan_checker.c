@@ -173,11 +173,11 @@ int var_finite(tNode *node, int vi)
 int vl_finite(tNode *node, tVarList *vl)
 {
   int ind = -1;
-  int vi;
+  int vli;
 
-  forvl(vl, vi)
+  forvl(vl, vli)
   {
-    int idx = var_finite(node, vi);
+    int idx = var_finite(node, Vind(vl, vli));
     if(idx>=0) ind = idx;
   }
   return ind;
