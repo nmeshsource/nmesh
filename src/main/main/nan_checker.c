@@ -204,16 +204,17 @@ int vl_finite_mesh(tVarList *vl)
 /* check for NAN in all vars/tensors listed in par nan_check */
 int nan_checker(tMesh *mesh)
 {
-  char *vars = strdup(Gets(Par("nan_check")));
-  char *name, *saveptr;
+  char *nan_check_vars = Gets(Par("nan_check"));
+  char *vars, *name, *saveptr;
   tVarList *vl;
   int ind;
 
   /* do nothing if par is empty */
-  if(vars[0]==0) return 0;
+  if(nan_check_vars[0]==0) return -1;
 
   /* make var list and check it */
   vl = vlalloc(mesh);
+  vars = strdup(nan_check_vars);
   for(name=strtok_r(vars, " ", &saveptr); name!=NULL;
       name=strtok_r(NULL, " ", &saveptr))
   {
@@ -221,7 +222,7 @@ int nan_checker(tMesh *mesh)
   }
   ind = vl_finite_mesh(vl);
 
-  vlfree(vl);
   free(vars);
+  vlfree(vl);
   return ind;
 }

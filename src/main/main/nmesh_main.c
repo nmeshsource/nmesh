@@ -13,6 +13,7 @@ int nmesh_main(tMesh *mesh)
   /* functions */
   AddFun(FIRST, print_endian_info);
   AddFun(OUTPUT, write_all_timers);
+  AddFun(POST_OUTPUT, nan_checker);
   AddFun(FINALIZEMESH, free_all_timers);
   //FIXME: disable nmesh_update_parameters, as it currently does not scale at all:
   //AddFun(PRE_COORDINATES, nmesh_update_parameters);
@@ -24,7 +25,6 @@ int nmesh_main(tMesh *mesh)
   AddPar("physics", "", "what problem to solve");
   AddPar("dt", "auto", "time step dt [#,auto], for auto: dt = dtfac * hmin");
   AddPar("dtfac", "0.25", "Courant factor in: dt = dtfac * hmin");
-
   AddPar("iterations", "0", "number of mesh iterations");
   AddPar("finaltime", "0", "iterate until mesh reaches this time");
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
@@ -34,6 +34,8 @@ int nmesh_main(tMesh *mesh)
 
   AddPar("timer_on", "no", "whether we use timers [yes,no]");
   AddPar("timer_MPI_barrier", "no", "barrier in timer [yes,no]");
+
+  AddPar("nan_check", "", "variables we check for NANs [varnames]");
 
   return 0;
 }
