@@ -5,7 +5,8 @@
 #include "nmesh.h"
 
 
-/* check if an array is finite */
+/* check if an array is finite
+   return values: -1 if finite, array index if not finite */
 int array_finite(tArray *a, char *name, int ijk[3])
 {
   int ind;
@@ -39,7 +40,8 @@ int array_finite(tArray *a, char *name, int ijk[3])
   return -1;
 }
 
-/* check if a var is finite */
+/* check if a var is finite
+   return values: -1 if finite, array index if not finite */
 int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
 {
   int ind;
@@ -90,7 +92,8 @@ int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
 }
 
 
-/* check if a var is finite */
+/* check if a var is finite
+   return values: -1 if finite, array index if not finite */
 int var_finite(tNode *node, int vi)
 {
   tMesh *mesh = node->pat->mesh;
@@ -161,5 +164,64 @@ int var_finite(tNode *node, int vi)
     }
   }
 
+  return ind;
+}
+
+
+/* check if a varlist is finite
+   return values: -1 if finite, array index if not finite */
+int vl_finite(tNode *node, tVarList *vl)
+{
+  int ind = -1;
+  int vi;
+
+  forvl(vl, vi)
+  {
+    int idx = var_finite(node, vi);
+    if(idx>=0) ind = idx;
+  }
+  return ind;
+}
+
+
+/* check if a varlist is finite
+   return values: -1 if finite, array index if not finite */
+int vl_finite_mesh(tVarList *vl)
+{
+  tMesh *mesh = vl->mesh;
+  int ind = -1;
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int idx = vl_finite(node, vl);
+    if(idx>=0) ind = idx;
+  }
+  return ind;
+}
+
+
+/* check for NAN in all vars/tensors listed in par nan_check */
+int nan_checker(tMesh *mesh)
+{
+  char *vars = strdup(Gets(Par("nan_check")));
+  char *name, *saveptr;
+  tVarList *vl;
+  int ind;
+
+  /* do nothing if par is empty */
+  if(vars[0]==0) return 0;
+
+  /* make var list and check it */
+  vl = vlalloc(mesh);
+  for(name=strtok_r(vars, " ", &saveptr); name!=NULL;
+      name=strtok_r(NULL, " ", &saveptr))
+  {
+    vlpush(vl, Ind(name));
+  }
+  ind = vl_finite_mesh(vl);
+
+  vlfree(vl);
+  free(vars);
   return ind;
 }
