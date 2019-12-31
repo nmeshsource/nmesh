@@ -46,7 +46,10 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
   return pl;
 }
 
-/* return 1 if a checkpoint exists, otherwise 0 */
+/* return 0 if there is no checkpoint,
+   return ret otherwise:
+   ret has bit1=2^1 set if checkpoint has patches_file
+   ret has bit3=2^3 set if checkpoint has variables_file */
 int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
                       const char *Dir_suffix)
 {
@@ -62,10 +65,19 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
   /* check if files exist */
   if(Rank0)
   {
-    FILE *fp = fopen(pats, "r");
+    FILE *fp;
+
+    fp = fopen(pats, "r");
     if(fp)
     {
-      ret = 1;
+      ret |= 2;
+      fclose(fp);
+    }
+
+    fp = fopen(vars, "r");
+    if(fp)
+    {
+      ret |= 8;
       fclose(fp);
     }
   }

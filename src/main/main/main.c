@@ -381,7 +381,7 @@ int inidata_mesh(tMesh *mesh)
   /* check if there is a saved checkpoint, and if we want checkpointing */
   chkpt_exists = checkpoint_exists(mesh, "", "");
   chkpt0 = (Getb(checkpoint) || Getv(checkpoint, "load_mesh")) && chkpt_exists;
-  chkpt1 = Getb(checkpoint) && chkpt_exists;
+  chkpt1 = Getb(checkpoint) && (chkpt_exists & 8);
 
   /* load stage 0 of checkpoint if it exists */
   if(chkpt0)
