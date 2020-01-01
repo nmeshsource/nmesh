@@ -94,6 +94,9 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
           n = nc;
         }
         break;
+      case GIVEN_n:
+        n = ref->n;
+        break;
       case PARENT_n:
       default:
         n = parent->n;
