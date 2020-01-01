@@ -299,14 +299,21 @@ typedef struct tVARLIST {
 /* for mesh refinement */
 /**************************************************************************/
 
-/* refinement methods: i.e. vals for var ref_method */
+/* refinement methods: i.e. vals for var method in tRef */
 enum
 {
   NOREFINE,
   PARENT_n,       /* use same n as parent */
   PARENT_nO2,     /* use parent->n/2 */
-  PARENT_nO2_P1   /* use parent->n/2 + 1 */
+  PARENT_nO2_P1,  /* use parent->n/2 + 1 */
+  GIVEN_n         /* use a n given by the user */
 };
+
+/* struct that holds refinement method */
+typedef struct tREF {
+  int method;     /* NOREFINE, PARENT_n, ... */
+  int n[3];       /* n to use if method=GIVEN_n */
+} tRef;
 
 /**************************************************************************/
 /* useful defines */
@@ -500,6 +507,6 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 
 /* refine.c */
 int resolve_shocks_using_nlim(tMesh *mesh);
-void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method);
-void hrefine_nodes_if_nb_finer(tMesh *mesh, int ref_method);
-void remove_nodes_if_rflag(tMesh *mesh, int ref_method);
+void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
+void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref);
+void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);

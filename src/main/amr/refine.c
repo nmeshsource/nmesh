@@ -44,7 +44,7 @@ void hrefine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
 /* h-refine nodes with nids in array, we assume nid[] is sorted in ascending
    order. We do not update nids in here */
 void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
-                                   int ref_method)
+                                   tRef *ref)
 {
   tNlist **replace, **children;
   long i;
@@ -75,7 +75,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       parent = elem->node;
 
       /* pick n */
-      switch(ref_method)
+      switch(ref->method)
       {
       case PARENT_nO2:
         for(d=0; d<3; d++)
@@ -126,7 +126,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
    tags in there need a unique ni!!! */
 void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
                                 int *nn, long **ref_nid,
-                                int todo, int ref_method)
+                                int todo, tRef *ref)
 {
   int rank = nMPI_rank(); /* my own rank */
   int size = nMPI_size();
@@ -134,7 +134,7 @@ void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
 
   /* refine my own ref_nid[rank] */
   if(nn[rank]>0)
-    create_children_no_nid_update(mesh, nn[rank], ref_nid[rank], ref_method);
+    create_children_no_nid_update(mesh, nn[rank], ref_nid[rank], ref);
 
   /* check for incoming broadcasts and then work on them */
   r = 0;
@@ -148,7 +148,7 @@ void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
       {
         /* work on ref_nid[r] */
         if(r != rank) /* r=rank has been done already above */
-          create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+          create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
         nn[r] = 0;
         done++;
       }
@@ -161,7 +161,7 @@ void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
 /* hrefine nids in the order of the MPI ranks. */
 void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
                                 int *nn, long **ref_nid,
-                                int todo, int ref_method)
+                                int todo, tRef *ref)
 {
   int size = nMPI_size();
   int r;
@@ -174,14 +174,14 @@ void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
       nMPI_Wait(&(req[r]), nMPI_STATUS_IGNORE);
 
       /* work on ref_nid[r] */
-      create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref_method);
+      create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
       nn[r] = 0;
     }
   }
 }
 
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
-void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
+void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
@@ -243,8 +243,8 @@ void hrefine_nodes_if_rflag(tMesh *mesh, int ref_method)
   }
 
   /* check for incoming broadcasts and then work on them */
-  //hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref_method);
-  hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref_method);
+  //hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
+  hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
@@ -396,7 +396,7 @@ int nid0_compar(const void *x1, const void *x2)
    tags in there need a unique ni!!! */
 void destroy_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
                                 int *nn, long **unref,
-                                int todo, int ref_method)
+                                int todo, tRef *ref)
 {
   int rank = nMPI_rank(); /* my own rank */
   int size = nMPI_size();
@@ -439,7 +439,7 @@ void destroy_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
 /* destroy nids in the order of the MPI ranks. */
 void destroy_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
                                 int *nn, long **unref,
-                                int todo, int ref_method)
+                                int todo, tRef *ref)
 {
   int size = nMPI_size();
   int r;
@@ -458,7 +458,7 @@ void destroy_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
 }
 
 /* Unrefine all nodes on all MPI procs if indicated by node->rflag */
-void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
+void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
@@ -584,8 +584,8 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
   //PRFs(" 1: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
 
   /* check for incoming broadcasts and then work on them */
-  //destroy_nids_in_recv_order(mesh, req, nn, unref, todo, ref_method);
-  destroy_nids_in_rank_order(mesh, req, nn, unref, todo, ref_method);
+  //destroy_nids_in_recv_order(mesh, req, nn, unref, todo, ref);
+  destroy_nids_in_rank_order(mesh, req, nn, unref, todo, ref);
 
   /* merge the arrays with left over nids into one */
   for(r=0; r<size; r++)
@@ -638,7 +638,7 @@ void remove_nodes_if_rflag(tMesh *mesh, int ref_method)
 
 
 /* refine all nodes that have finer neighbors */
-void hrefine_nodes_if_nb_finer(tMesh *mesh, int ref_method)
+void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
 {
   /* go over mesh */
   formylnodes(mesh)
@@ -651,10 +651,10 @@ void hrefine_nodes_if_nb_finer(tMesh *mesh, int ref_method)
       for(ni=0; ni<node->nfnb[f]; ni++)
       {
         tNode *nb = node->fnb[f][ni];
-        if(nb->l > node->l) node->rflag = ref_method;
+        if(nb->l > node->l) node->rflag = ref->method;
       }
   }
-  hrefine_nodes_if_rflag(mesh, ref_method);
+  hrefine_nodes_if_rflag(mesh, ref);
 }
 
 
@@ -693,8 +693,9 @@ void hrefine_pat__old(tMesh *mesh, int p)
 /* refine all nodes up to level l */
 void hrefine_mesh_to_level(tMesh *mesh, int l)
 {
-  int rmeth = PARENT_n;
   int i, ref;
+  tRef rf[1];
+  rf->method = PARENT_n;
 
   for(i=0; i<l; i++)
   {
@@ -705,8 +706,8 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
       tNode *node = el->node;
       if(node->l < l)
       {
-        node->rflag = rmeth; /* flag node for refinement */
-        ref++;               /* count number of nodes that need refinement */
+        node->rflag = rf->method; /* flag node for refinement */
+        ref++;                    /* count number of nodes that need refinement */
       }
       else
       {
@@ -716,7 +717,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
 
     if(ref)
     {
-      hrefine_nodes_if_rflag(mesh, rmeth);
+      hrefine_nodes_if_rflag(mesh, rf);
       update_mesh_myln_node_nid(mesh);
       if(PR)
       {
@@ -745,8 +746,9 @@ void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l)
 /* coarsen all nodes up to level l */
 void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 {
-  int rmeth = PARENT_n;
   int ref;
+  tRef rf[1];
+  rf->method = PARENT_n;
 
   do
   {
@@ -757,8 +759,8 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
       tNode *node = el->node;
       if(node->l > l)
       {
-        node->rflag = -rmeth; /* flag node for unrefinement */
-        ref++;                /* count number of nodes that need refinement */
+        node->rflag = -rf->method; /* flag node for unrefinement */
+        ref++;                     /* count number of nodes that need refinement */
       }
       else
       {
@@ -768,7 +770,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 
     if(ref)
     {
-      remove_nodes_if_rflag(mesh, rmeth);
+      remove_nodes_if_rflag(mesh, rf);
       update_mesh_myln_node_nid(mesh);
       if(PR)
       {
@@ -782,17 +784,18 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 /* refine patch number p in mesh */
 void hrefine_pat(tMesh *mesh, int p)
 {
-  int rmeth = PARENT_n;
   tPat *pat = mesh->pat[p];
   tNlist *el;
+  tRef rf[1];
+  rf->method = PARENT_n;
 
   fornodelist(mesh->lns, el)
   {
     tNode *node = el->node;
-    if(node->pat == pat) node->rflag = rmeth;
+    if(node->pat == pat) node->rflag = rf->method;
     else                 node->rflag = 0;
   }
-  hrefine_nodes_if_rflag(mesh, rmeth);
+  hrefine_nodes_if_rflag(mesh, rf);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {
@@ -804,17 +807,18 @@ void hrefine_pat(tMesh *mesh, int p)
 /* unrefine patch number p in mesh */
 void hcoarsen_pat(tMesh *mesh, int p)
 {
-  int rmeth = PARENT_n;
   tPat *pat = mesh->pat[p];
   tNlist *el;
+  tRef rf[1];
+  rf->method = PARENT_n;
 
   fornodelist(mesh->lns, el)
   {
     tNode *node = el->node;
-    if(node->pat == pat) node->rflag = -rmeth;
+    if(node->pat == pat) node->rflag = -rf->method;
     else                 node->rflag = 0;
   }
-  remove_nodes_if_rflag(mesh, rmeth);
+  remove_nodes_if_rflag(mesh, rf);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {
@@ -827,7 +831,8 @@ void hcoarsen_pat(tMesh *mesh, int p)
 /* refine to better resolve nodes where limiting occured */
 void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
 {
-  int ref_method = PARENT_nO2_P1;
+  tRef ref[1];
+  ref->method = PARENT_nO2_P1;
 
   /* look for nodes where limiting occured and refine them */
   formylnodes(mesh)
@@ -835,7 +840,7 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
     tNode *node = MyLnode;
     /* flag refinement if we have more than 1 point */
     if(node->dat->nlim && node->np > 1)
-      node->rflag = ref_method;
+      node->rflag = ref->method;
     else
       node->rflag = 0;
 
@@ -846,7 +851,7 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
     //         node->dat->nlim, node->rflag);
     //}
   }
-  hrefine_nodes_if_rflag(mesh, ref_method);
+  hrefine_nodes_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   if(PR)
@@ -861,7 +866,8 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
 /* remove previously refined nodes if no limiting occured */
 void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
 {
-  int ref_method = PARENT_nO2_P1;
+  tRef ref[1];
+  ref->method = PARENT_nO2_P1;
 
   /* look for nodes where no limiting occured */
   formylnodes(mesh)
@@ -881,8 +887,8 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     }
 
     /* flag h-unrefinement if parent has more points */
-    if( (node->dat->nlim==0) && (node->np < p_np) && (p_rflag == ref_method) )
-      node->rflag = -ref_method;
+    if( (node->dat->nlim==0) && (node->np < p_np) && (p_rflag == ref->method) )
+      node->rflag = -ref->method;
     else
       node->rflag = 0;
 
@@ -893,7 +899,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     //         node->dat->nlim, node->rflag);
     //}
   }
-  remove_nodes_if_rflag(mesh, ref_method);
+  remove_nodes_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   if(PR)

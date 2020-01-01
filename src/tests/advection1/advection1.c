@@ -446,9 +446,10 @@ int advection1_analyze(tMesh *mesh)
 int advection1_refine(tMesh *mesh)
 {
   int iu  = Ind("advection1_u");
-  int ref_method = PARENT_n;
   double rft  = 0.5;
   double urft = 0.1;
+  tRef ref[1];
+  ref->method = PARENT_n;
 
   if(PR) PRFs("\n");
 
@@ -464,8 +465,8 @@ int advection1_refine(tMesh *mesh)
     double max = max_array(uA, &imax);
 
     /* should we refine, unrefine, or do nothing */
-    if(max-min>rft)       node->rflag = ref_method;
-    else if(max-min<urft) node->rflag = -ref_method;
+    if(max-min>rft)       node->rflag = ref->method;
+    else if(max-min<urft) node->rflag = -ref->method;
     else                  node->rflag = 0;
 
     /* find parent and unset rflag if it exists */
@@ -487,11 +488,11 @@ int advection1_refine(tMesh *mesh)
   }
 
   /* unrefine where needed */
-  remove_nodes_if_rflag(mesh, ref_method);
+  remove_nodes_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   /* refine where needed */
-  hrefine_nodes_if_rflag(mesh, ref_method);
+  hrefine_nodes_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   return 0;
