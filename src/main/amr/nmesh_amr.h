@@ -353,6 +353,7 @@ tNode *alloc_node(int initcomm);
 void free_node(tNode *node);
 tNode *make_root_node(tPat *pat, int n[3], int datrank);
 tNlist *make8_child_nodes(tNode *parent, int n[3]);
+void update8_node_n(tNode *node, int n[3]);
 tDat *alloc_dat(tNode *node);
 void free_dat(tDat *dat);
 tNlist *alloc_nodelist(tNode *node);

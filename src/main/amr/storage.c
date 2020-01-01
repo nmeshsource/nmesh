@@ -493,6 +493,83 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   return nlist;
 }
 
+/* update node->n on one node, should be called for all 8 siblings */
+void update_node_n(tNode *node, int n[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int nvdb = mesh->nvdb;
+  tNode node_old[1];
+  int d, vi;
+
+  /* backup old node info */
+  memcpy(node_old, node, sizeof(node_old[0]));
+
+  /* update node info */
+  for(d=0; d<3; d++) node->n[d] = n[d];
+  node->np = n[0] * n[1] * n[2];
+
+  /* get node->Dt ... from patch */
+  point_nodearrays_to_patarrays(node->pat, node);
+
+  /* if node has dat, we need to interpolate vars */
+  if(node_old->dat)
+  {
+    tArray *Xp[3];
+
+    /* alloc new dat for node */
+    node->dat = alloc_dat(node);
+
+    /* array memory to store points of node */
+    Xp[0] = alloc_array(n);
+    Xp[1] = alloc_array(n);
+    Xp[2] = alloc_array(n);
+    fill_3arrays_with_nodepoints(node, Xp);
+
+    /* use interpolation to get vars from old dat to new node->dat */
+    for(vi=0; vi<nvdb; vi++)
+      if(node_old->dat->v[vi])
+      {
+        /* enable same vars in new dat as in dat_old */
+        enablevarcomp_innode(node, vi);
+
+        /* fill node->dat with interpolation data from old dat */
+        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        {
+          Lagrange_interpolate_topoints(node_old, node_old->dat->v[vi],
+                                        Xp, node->dat->v[vi]);
+        }
+      } /* end: if parent has dat->v[vi] */
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
+    free_dat(node_old->dat);
+
+    /* init coords in this new node */
+    coordinates_init_node(node);
+  }
+}
+
+/* update node->n on all 8 siblings, must be called by all MPI procs */
+void update8_node_n(tNode *node, int n[3])
+{
+  tNode *parent = node->parent;
+
+  /* update all 8 siblings, unless this is root node */
+  if(parent)
+  {
+    int ijk;
+    for(ijk=0; ijk<8; ijk++)
+    {
+      tNode *sib = parent->child[ijk];
+      update_node_n(sib, n);
+    }
+  }
+  else
+  {
+    update_node_n(node, n);
+  }
+}
+
 /* remove children */
 tNode *destroy_children(tNode *parent)
 {
