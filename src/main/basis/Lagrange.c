@@ -55,7 +55,7 @@ void Lagrange_DT(int n, const double *x, const double *w_interp, double *DT)
 }
 
 /* get Lagrange basis function l_k(x),
-   her x_p are the grid points, w_interp the interp. weights */
+   here x_p are the grid points, w_interp the interp. weights */
 double Lagrange_of_x(int k, double x, int np,
                      const double *x_p, const double *w_interp)
 {
