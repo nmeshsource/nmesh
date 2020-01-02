@@ -274,10 +274,8 @@ tNode *node_from_nodename(tMesh *mesh,  char *name)
   for(i=0; i<max; i++) if(name[i]=='_') break;
 
   /* get patch */
-  name[i] = 0;
-  p = atoi(name);
+  p = atoi(name); /* atoi ignores '_' and all after it */
   pat = mesh->pat[p];
-  name[i] = '_';
   //printf("name=%s => p=%d\n", name, p);
 
   /* get location str. */
