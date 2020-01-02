@@ -50,7 +50,7 @@ int evolve_myln(tMesh *mesh)
     Evolve_mesh = evolve_sspRK3_mesh;
   }
   else
-    errorexits("unknown: evolve_method = ", Gets(evolve_method));
+    errorexits("unknown value:   evolve_method = %s", Gets(evolve_method));
 
   ///* make varlist with all in u */
   //forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
