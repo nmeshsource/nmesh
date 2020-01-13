@@ -181,6 +181,22 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
+  if(strcmp(tensorindices, "ijkl+jikl") == 0 ||
+     strcmp(tensorindices, "(ij)kl") == 0) {
+    for(i = 0; i < 3; i++)
+    for(j = i; j < 3; j++)
+    for(k = 0; k < 3; k++)
+    for(l = 0; l < 3; l++)
+    {
+      sym[3*n+i] *= -1;
+      sym[3*n+j] *= -1;
+      sym[3*n+k] *= -1;
+      sym[3*n+l] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s%s%s", coord[i], coord[j], coord[k], coord[l]);
+    }
+  }
+
   /* 4d indices, a,b,c,... */
   if(strcmp(tensorindices, "a") == 0) {
     for(i = 0; i <= 3; i++) {
@@ -498,7 +514,7 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     printf("Unknown tensor index string %s.\n", tensorindices);
     printf("Implemented (besides the empty string) are:\n");
     printf("i, ij, (ij), [ij], ijk, i(jk), (ij)k, [ij]k, "
-           "ijkl, (ij)(kl), ij(kl)\n");
+           "ijkl, (ij)(kl), ij(kl), (ij)kl\n");
     printf("ij+ji, ij-ji, ijk+ikj, ijk+jik\n");
     printf("a, ab, ab+ba, abc+acb\n");
     printf("(ab), a(bc), (ab)c, (ab)i, (ab)(ij), i(ab), (ij)(ab), ij(ab)\n");
