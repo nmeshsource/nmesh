@@ -281,7 +281,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  /* remove all patches to mesh, so we can just ad new pristine ones */
+  /* remove all patches from mesh, so we can just add new pristine ones */
   remove_all_patches(mesh);
 
   /* setup cubed spheres */
