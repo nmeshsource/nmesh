@@ -122,7 +122,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           numflux(dgi);
 
           /* get Ffac, this can be set in u_f_lam or numflux */
-          Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off suface fluxes */
+          Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
 
           /* get F from dgi and add boundary flux terms to RHS */
           forvl(vlr, l)
