@@ -11,6 +11,7 @@ int nmesh_evolve(tMesh *mesh)
 
   /* functions */
   AddFun(EVOLVE, evolve_myln);
+  AddFun(EVOLVE, evolve_filter_evosys_mesh);
   AddFun(FINALIZEMESH, evolve_free_evosys);
   AddFun(POST_PARAMETERS, evolve_free_evosys);
 
@@ -18,6 +19,9 @@ int nmesh_evolve(tMesh *mesh)
 
   /* parameters */
   AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
+  AddPar("evolve_filter", "no", "whether we filter evo. vars [no,yes]");
+  AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1))^s}");
+  AddPar("evolve_filter_s",   "32",   "s in e^{-alp (i/(n0-1))^s}");
 
   /* just a test, not needed for anything else */
   if(Getv(Par("physics"), "evolve_test"))

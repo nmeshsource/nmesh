@@ -212,6 +212,32 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 }
 
 
+/* apply filters to all evo subsystems */
+int evolve_filter_evosys_mesh(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *u = evosys->u;
+  int i;
+  int filter_on = Getb(Par("evolve_filter"));
+
+  if(filter_on)
+  {
+    double af = Getd(Par("evolve_filter_alp"));
+    double sf = Getd(Par("evolve_filter_s"));
+
+    if(PR) PRFs(":\n");
+
+    /* loop over list of varlists and filter each varlist */
+    forList(u, i)
+    {
+      tVarList *vl = ListEntry(u,i);
+      expfilter_vl(vl, af, sf);
+    }
+  }
+
+  return 0;
+}
+
 
 /*************************************************************************/
 /* NOTE: functions below do not work yet !!! */

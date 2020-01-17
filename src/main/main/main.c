@@ -473,7 +473,10 @@ int evolve_mesh(tMesh *mesh)
     RunFun(PRE_EVOLVE); 
 
     /* make one evolution step */
-    RunFun(EVOLVE); 
+    RunFun(EVOLVE);
+
+    /* apply filters after the full evolution step */
+    RunFun(FILTER);
 
     /* post evolve */
     RunFun(POST_EVOLVE); 
