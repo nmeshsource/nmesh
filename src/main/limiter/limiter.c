@@ -147,8 +147,9 @@ int limiter_MRS(tNode *node, tVarList *vl)
 if(!isfinite(qbar) || !isfinite(theta_i))
 {
 printf("qbar=%g theta_i=%g\n", qbar, theta_i);
-abort();
-exit(8);
+errorexit("qbar or theta_i is not finite!");
+//abort();
+//exit(8);
 }
     /* now limit q */
     forpoints(node, ijk)
