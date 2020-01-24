@@ -22,8 +22,9 @@ int evolve_myln(tMesh *mesh)
   void (*Evolve)(tNode *node) = NULL;      /* func pointer for evo method */
   void (*Evolve_mesh)(tMesh *mesh) = NULL; /* func pointer for evo method */
   int allnodes = 1;
-  //tVarList *allu = vlalloc(mesh);
-  //int i;
+  tVarList *allu = NULL;
+  tVarList *u_ch = NULL;
+  int i;
 
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
@@ -52,11 +53,16 @@ int evolve_myln(tMesh *mesh)
   else
     errorexits("unknown value:   evolve_method = %s", Gets(evolve_method));
 
-  ///* make varlist with all in u */
-  //forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
+  /* make varlist allu with all in evosys->u */
+  allu = vlalloc(mesh);
+  forList(evosys->u, i) vlpushvl(allu, ListEntry(evosys->u,i));
 
-  ///* initialize surfaces for exchange */
-  //MPIexchange_init_all_myln(mesh);
+  /* set u_ch = allu */
+  if(Getb(Par("evolve_compute_change")))
+  {
+    u_ch = AddDuplicateEnable(allu, "_change", AUXVAR, 0);
+    vlcopy(u_ch, allu); /* u_ch = allu */
+  }
 
   /* how we evolve the mesh */
   if(allnodes)
@@ -78,11 +84,13 @@ int evolve_myln(tMesh *mesh)
     }
   }
 
-  ///* free all surfaces */
-  //MPIexchange_free_all_myln(mesh);
+  /* set u_ch = allu - u_ch after evo step */
+  if(Getb(Par("evolve_compute_change")))
+    vladd(u_ch, 1.,allu, -1.,u_ch); /* u_ch = allu - u_ch */
 
-  ///* we don't need allu anymore */
-  //vlfree(allu);
+  /* we don't need allu, u_ch anymore */
+  vlfree(u_ch);
+  vlfree(allu);
 
   return 0;
 }
