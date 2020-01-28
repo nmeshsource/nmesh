@@ -132,6 +132,7 @@ double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
                                double *i11,double *i12,double *i13,double *i14,
                                double *i22, double *i23, double *i24,
                                double *i33, double *i34, double *i44);
+int index_symmmat(double n, int a, int b);
 double matel_symmmat(double n, double *M, int a, int b);
 double invertNxNx1symm_array(tArray *a);
 double symmmat3D_times_vec(double gxx, double gxy, double gxz,
