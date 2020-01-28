@@ -293,6 +293,26 @@ invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
   return detS;
 }
 
+/* return element M_{ab} of a symm. n*n matrix that is stored as a 1d
+   C-array, e.g. Mab could be stored as [Mxx,Mxy,Mxz,Myy,Myz,Mzz]
+   or [Mtt,Mtx,Mty,Mtz,Mxx,Mxy,Mxz,Myy,Myz,Mzz]. Here a,b \in [0,n-1]. */
+double matel_symmmat(double n, double *M, int a, int b)
+{
+  int c,d, oc;
+
+  /* swap indices a,b s.t. new indices c,d have c<=d */
+  if(a>b) { c=b; d=a; }
+  else    { c=a; d=b; }
+
+  /* return M_{cd}:  */
+  /* nc = n-c;
+     oc = ((n+1)*n)/2 - ((nc+1)*nc)/2   // Note: \sum_{k=1}^N k = ((N+1)*N)/2
+        = ( (n+1)*n - (nc+1)*nc )/2 = ( n*n + n - nc*nc - nc )/2
+        = ( 2*n*c - c*c + c )/2 = ( c*(2*n - c + 1) )/2 */
+  oc = ( c*(2*n - c + 1) )/2;
+  return M[oc + d]; /* M_{ab} = M_{cd} */
+}
+
 /* invert a 2*2*1 symmetric array in place and return det */
 double invert2x2x1symm_array(tArray *a)
 {
