@@ -321,6 +321,71 @@ double matel_symmmat(double n, double *M, int a, int b)
   return M[index_symmmat(n, a,b)];
 }
 
+/* compute Mv_a = M_{ab} v^b for for a symm. n*n matrix that is stored as a
+   1d C-array, e.g. M_{ab} could be stored as [Mxx,Mxy,Mxz,Myy,Myz,Mzz]
+   or [Mtt,Mtx,Mty,Mtz,Mxx,Mxy,Mxz,Myy,Myz,Mzz]. Here a,b \in [0,n-1]. */
+void symmmat_times_vec(double n, double *M, double *v, double *Mv)
+{
+  int a,b;
+  for(a=0; a<n; a++)
+  {
+    double sum=0.;
+    for(b=0; b<n; b++) sum += M[index_symmmat(n, a,b)] * v[b];
+    Mv[a] = sum;
+  }
+}
+
+/* compute BMB_{ab} = B_a^c B_b^d M_{cd} */
+void BMB_symmmat(double n, double *B, double *M, double *BMB)
+{
+  int a,b, c,d;
+
+  for(a=0; a<n; a++)
+  for(b=a; b<n; b++)
+  {
+    double sum=0.;
+    for(c=0; c<n; c++)
+    for(d=0; d<n; d++)
+      sum += B[index_symmmat(n, a,c)]*B[index_symmmat(n, b,d)]*
+             M[index_symmmat(n, c,d)];
+    BMB[index_symmmat(n, a,b)] = sum;
+  }
+}
+
+/* compute BBBM_{abc} = B_a^d B_b^e B_c^f M_{def} for one fixed a,
+   where M_{def} = M_{dfe}  ==>  BBBM_{abc} = BBBM_{acb} */
+void BBBMa_symm_bc(double n, double *B, double *M, double *BBBMa, int a)
+{
+  int b,c, d,e,f;
+  int ns = ( (n+1)*n )/2; /* number of elems in symm matrix */
+
+  for(b=0; b<n; b++)
+  for(c=b; c<n; c++)
+  {
+    double sum=0.;
+    for(d=0; d<n; d++)
+    for(e=0; e<n; e++)
+    for(f=0; f<n; f++)
+      sum += B[index_symmmat(n, a,d)]*B[index_symmmat(n, b,e)]*
+             B[index_symmmat(n, c,f)]*M[ns*d + index_symmmat(n, e,f)];
+    BBBMa[index_symmmat(n, b,c)] = sum;
+  }
+}
+/* compute BBBM_{abc} = B_a^d B_b^e B_c^f M_{def},
+   where M_{def} = M_{dfe}  ==>  BBBM_{abc} = BBBM_{acb} */
+void BBBM_symm_bc(double n, double *B, double *M, double *BBBM)
+{
+  int a;
+  int ns = ( (n+1)*n )/2; /* number of elems in symm matrix */
+
+  for(a=0; a<n; a++)
+  {
+    BBBMa_symm_bc(n, B, M, BBBM + ns*a, a);
+  }
+}
+
+
+
 /* invert a 2*2*1 symmetric array in place and return det */
 double invert2x2x1symm_array(tArray *a)
 {

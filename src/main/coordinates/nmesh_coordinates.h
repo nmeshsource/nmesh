@@ -134,6 +134,9 @@ double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
                                double *i33, double *i34, double *i44);
 int index_symmmat(double n, int a, int b);
 double matel_symmmat(double n, double *M, int a, int b);
+void symmmat_times_vec(double n, double *M, double *v, double *Mv);
+void BMB_symmmat(double n, double *B, double *M, double *BMB);
+void BBBMa_symm_bc(double n, double *B, double *M, double *BBBMa, int a);
 double invertNxNx1symm_array(tArray *a);
 double symmmat3D_times_vec(double gxx, double gxy, double gxz,
                            double gyy, double gyz, double gzz,
