@@ -329,10 +329,11 @@ int index_symmmat(int n, int a, int b)
 
   /* return memory index of M_{cd}:  */
   /* nc = n-c;
-     oc = ((n+1)*n)/2 - ((nc+1)*nc)/2   // Note: \sum_{k=1}^N k = ((N+1)*N)/2
-        = ( (n+1)*n - (nc+1)*nc )/2 = ( n*n + n - nc*nc - nc )/2
-        = ( 2*n*c - c*c + c )/2 = ( c*(2*n - c + 1) )/2 */
-  oc = ( c*(2*n - c + 1) )/2;
+     oc = ((n+1)*n)/2 - ((nc+1)*nc)/2 - c // Note: \sum_{k=1}^N k = ((N+1)*N)/2
+        = ( (n+1)*n - (nc+1)*nc )/2 - c = ( n*n + n - nc*nc - nc - 2*c )/2
+        = ( 2*n*c - c*c + c - 2*c)/2 = ( c*(2*n - c - 1) )/2 */
+  oc = ( c*(2*n - c - 1) )/2;
+  //PRF;printf(": n=%d %d%d -> %d%d: oc+d=%d\n", n,a,b,c,d, oc + d);
   return oc + d; /* M_{ab} = M_{cd} */
 }
 
