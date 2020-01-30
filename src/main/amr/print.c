@@ -557,13 +557,13 @@ void printallbfaces(tMesh *mesh)
 }
 
 /* print 3-vec */
-void pr3v(char *s, double x[3])
+void pr3v(char *s, const double x[3])
 {
   printf("%s=%g %g %g  ", s, x[0],x[1],x[2]);
 }
 
 /* print an array of long ints */
-void prlarray(char *s, long n, long *ar)
+void prlarray(char *s, long n, const long *ar)
 {
   long i;
   printf("%s[%ld] =", s, n);
