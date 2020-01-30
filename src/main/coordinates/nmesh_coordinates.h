@@ -132,15 +132,16 @@ double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
                                double *i11,double *i12,double *i13,double *i14,
                                double *i22, double *i23, double *i24,
                                double *i33, double *i34, double *i44);
-double invmat_from_symmmat(int n, double *S, double *I);
+double invmat_from_symmmat(int n, const double *S, double *I);
 int index_symmmat(int n, int a, int b);
-double matel_symmmat(int n, double *M, int a, int b);
-void symmmat_times_vec(int n, double *M, double *v, double *Mv);
-double vec_times_vec(int n, double *u, double *v);
-double mag2_vector_metric(int n, double *g, double *v);
-double BM_symmmat(int n, double *B, double *M);
-void BMB_symmmat(int n, double *B, double *M, double *BMB);
-void BBBMa_symm_bc(int n, double *B, double *M, double *BBBMa, int a);
+double matel_symmmat(int n, const double *M, int a, int b);
+void symmmat_times_vec(int n, const double *M, const double *v, double *Mv);
+double vec_times_vec(int n, const double *u, const double *v);
+double mag2_vector_metric(int n, const double *g, const double *v);
+double BM_symmmat(int n, const double *B, const double *M);
+void BMB_symmmat(int n, const double *B, const double *M, double *BMB);
+void BBBMa_symm_bc(int n, const double *B, const double *M, double *BBBMa,
+                   int a);
 double invertNxNx1symm_array(tArray *a);
 double symmmat3D_times_vec(double gxx, double gxy, double gxz,
                            double gyy, double gyz, double gzz,
