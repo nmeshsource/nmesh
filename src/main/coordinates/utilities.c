@@ -296,7 +296,7 @@ invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
 /* return memory index(a,b) for a symm. n*n matrix that is stored as a 1d
    C-array, e.g. M_{ab} could be stored as [Mxx,Mxy,Mxz,Myy,Myz,Mzz]
    or [Mtt,Mtx,Mty,Mtz,Mxx,Mxy,Mxz,Myy,Myz,Mzz]. Here a,b \in [0,n-1]. */
-int index_symmmat(double n, int a, int b)
+int index_symmmat(int n, int a, int b)
 {
   int c,d, oc;
 
@@ -316,7 +316,7 @@ int index_symmmat(double n, int a, int b)
 /* return element M_{ab} of a symm. n*n matrix that is stored as a 1d
    C-array, e.g. Mab could be stored as [Mxx,Mxy,Mxz,Myy,Myz,Mzz]
    or [Mtt,Mtx,Mty,Mtz,Mxx,Mxy,Mxz,Myy,Myz,Mzz]. Here a,b \in [0,n-1]. */
-double matel_symmmat(double n, double *M, int a, int b)
+double matel_symmmat(int n, double *M, int a, int b)
 {
   return M[index_symmmat(n, a,b)];
 }
@@ -324,7 +324,7 @@ double matel_symmmat(double n, double *M, int a, int b)
 /* compute Mv_a = M_{ab} v^b for for a symm. n*n matrix that is stored as a
    1d C-array, e.g. M_{ab} could be stored as [Mxx,Mxy,Mxz,Myy,Myz,Mzz]
    or [Mtt,Mtx,Mty,Mtz,Mxx,Mxy,Mxz,Myy,Myz,Mzz]. Here a,b \in [0,n-1]. */
-void symmmat_times_vec(double n, double *M, double *v, double *Mv)
+void symmmat_times_vec(int n, double *M, double *v, double *Mv)
 {
   int a,b;
   for(a=0; a<n; a++)
@@ -335,8 +335,40 @@ void symmmat_times_vec(double n, double *M, double *v, double *Mv)
   }
 }
 
+/* compute u^a v_a */
+double vec_times_vec(int n, double *u, double *v)
+{
+  int a;
+  double sum=0.;
+  for(a=0; a<n; a++) sum += u[a] * v[a];
+  return sum;
+}
+
+/* compute g_{ab} v^a v^b */
+double mag2_vector_metric(int n, double *g, double *v)
+{
+  double gv[n], prod;
+  symmmat_times_vec(n, g, v, gv);
+  prod = vec_times_vec(n, v, gv);
+  return prod;
+}
+
+/* compute BM = B_{ab} M^{ab} */
+double BM_symmmat(int n, double *B, double *M)
+{
+  int a,b;
+  double sum=0.;
+
+  for(a=0; a<n; a++)
+  for(b=0; b<n; b++)
+  {
+    sum += B[index_symmmat(n, a,b)] * M[index_symmmat(n, a,b)];
+  }
+  return sum;
+}
+
 /* compute BMB_{ab} = B_a^c B_b^d M_{cd} */
-void BMB_symmmat(double n, double *B, double *M, double *BMB)
+void BMB_symmmat(int n, double *B, double *M, double *BMB)
 {
   int a,b, c,d;
 
@@ -354,7 +386,7 @@ void BMB_symmmat(double n, double *B, double *M, double *BMB)
 
 /* compute BBBM_{abc} = B_a^d B_b^e B_c^f M_{def} for one fixed a,
    where M_{def} = M_{dfe}  ==>  BBBM_{abc} = BBBM_{acb} */
-void BBBMa_symm_bc(double n, double *B, double *M, double *BBBMa, int a)
+void BBBMa_symm_bc(int n, double *B, double *M, double *BBBMa, int a)
 {
   int b,c, d,e,f;
   int ns = ( (n+1)*n )/2; /* number of elems in symm matrix */
@@ -373,7 +405,7 @@ void BBBMa_symm_bc(double n, double *B, double *M, double *BBBMa, int a)
 }
 /* compute BBBM_{abc} = B_a^d B_b^e B_c^f M_{def},
    where M_{def} = M_{dfe}  ==>  BBBM_{abc} = BBBM_{acb} */
-void BBBM_symm_bc(double n, double *B, double *M, double *BBBM)
+void BBBM_symm_bc(int n, double *B, double *M, double *BBBM)
 {
   int a;
   int ns = ( (n+1)*n )/2; /* number of elems in symm matrix */
