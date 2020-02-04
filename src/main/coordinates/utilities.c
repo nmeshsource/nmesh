@@ -441,6 +441,43 @@ void BBBM_symm_bc(int n, const double *B, const double *M, double *BBBM)
   }
 }
 
+/* compute BBBBM_{abcd} = B_a^e B_b^f B_c^g B_d^h M_{efgh} for fixed a,b
+   where M_{efgh} = M_{efhg} and M_{efgh} = M_{fegh}
+   ==>  BBBBM_{abcd} = BBBM_{abdc} and BBBBM_{abcd} = BBBBM_{bacd} */
+void BBBBMab_symm_ab_cd(int n, const double *B, const double *M,
+                        double *BBBBMab, int a, int b)
+{
+  int c,d, e,f,g,h;
+  int ns = ( (n+1)*n )/2; /* number of elems in symm matrix */
+
+  for(c=0; c<n; c++)
+  for(d=c; d<n; d++)
+  {
+    double sum=0.;
+    for(e=0; e<n; e++)
+    for(f=0; f<n; f++)
+    for(g=0; g<n; g++)
+    for(h=0; h<n; h++)
+      sum += B[index_symmmat(n, a,e)]*B[index_symmmat(n, b,f)]*
+             B[index_symmmat(n, c,g)]*B[index_symmmat(n, d,h)]*
+             M[ns*index_symmmat(n, e,f) + index_symmmat(n, g,h)];
+    BBBBMab[index_symmmat(n, c,d)] = sum;
+  }
+}
+/* compute BBBBM_{abcd} = B_a^e B_b^f B_c^g B_d^h M_{efgh} where
+   M_{efgh} = M_{efhg} and M_{efgh} = M_{fegh}
+   ==>  BBBBM_{abcd} = BBBM_{abdc} and BBBBM_{abcd} = BBBBM_{bacd} */
+void BBBBM_symm_ab_cd(int n, const double *B, const double *M, double *BBBBM)
+{
+  int a,b;
+  int ns = ( (n+1)*n )/2; /* number of elems in symm matrix */
+
+  for(a=0; a<n; a++)
+  for(b=a; b<n; b++)
+  {
+    BBBBMab_symm_ab_cd(n, B, M, BBBBM + ns*index_symmmat(n, a,b), a,b);
+  }
+}
 
 
 /* invert a 2*2*1 symmetric array in place and return det */

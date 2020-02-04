@@ -142,6 +142,8 @@ double BM_symmmat(int n, const double *B, const double *M);
 void BMB_symmmat(int n, const double *B, const double *M, double *BMB);
 void BBBMa_symm_bc(int n, const double *B, const double *M, double *BBBMa,
                    int a);
+void BBBBMab_symm_ab_cd(int n, const double *B, const double *M,
+                        double *BBBBMab, int a, int b);
 double invertNxNx1symm_array(tArray *a);
 double symmmat3D_times_vec(double gxx, double gxy, double gxz,
                            double gyy, double gyz, double gzz,
