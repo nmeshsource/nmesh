@@ -66,7 +66,18 @@ void evolve_Euler_mesh(tMesh *mesh)
 }
 
 /* third order strong stability preserving Runge-Kutta scheme from
-   arXiv:1804.02003v2 */
+   arXiv:1804.02003v2 .
+   Since arXiv:1804.02003v2 does not mention it, mesh->time = t + c_i*dt
+   is set using the 1st column of the Butcher tableau for SSPRK3
+             c_i   a_{ij}
+              /       \
+             0   | 0     0     0
+             1   | 1     0     0
+             1/2 | 1/4   1/4   0
+             ----------------------
+     b_i ->      | 1/6   1/6   2/3
+   in https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+*/
 void evolve_sspRK3_mesh(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
