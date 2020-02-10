@@ -44,6 +44,9 @@
 /* get leaf node from mesh, cat_ and li_ */
 #define MyLnode mesh->myln->ln[cat_][li_]->node
 
+/* get 1st leaf node on this proc from mesh, using cat_=0 and li_=0 */
+#define MyLnode0 mesh->myln->ln[0][0]->node
+
 /* get node from myid */
 #define Lnode_myid(mesh, myid) \
   mesh->myln->ln[(myid) / mesh->myln->nm][(myid) % mesh->myln->nm]->node
