@@ -29,23 +29,24 @@ void evolve_RK4_mesh(tMesh *mesh)
   addto_pVLList(u, dt/6.0, r, vladdto,0);     // u += r dt/6
 
   add_pVLList(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
-  evolve_limiter_mesh(mesh, w);
   mesh->time = t+0.5*dt;
+  evolve_limiter_mesh(mesh, w);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt/3., r, vladdto,0);      // u += r dt/3
 
   add_pVLList(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
-  evolve_limiter_mesh(mesh, w);
   mesh->time = t+0.5*dt;
+  evolve_limiter_mesh(mesh, w);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt/3., r, vladdto,0);      // u += r dt/3
 
   add_pVLList(w, 1., u_p, dt, r, vladd,0);    // w  = u_p + r dt
-  evolve_limiter_mesh(mesh, w);
   mesh->time = t+dt;
+  evolve_limiter_mesh(mesh, w);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);      // u += r dt/6
-  evolve_limiter_mesh(mesh, u);
+  mesh->time = t+dt;                          // we are now at t+dt
+  evolve_limiter_mesh(mesh, u);               // limit final u(t+dt)
 }
 
 /* Euler step */
@@ -62,7 +63,8 @@ void evolve_Euler_mesh(tMesh *mesh)
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   addto_pVLList(u, dt, r, vladdto,0);     // u += r dt
-  evolve_limiter_mesh(mesh, u);
+  mesh->time = t+dt;                      // we are now at t+dt
+  evolve_limiter_mesh(mesh, u);           // limit final u(t+dt)
 }
 
 /* third order strong stability preserving Runge-Kutta scheme from
@@ -94,18 +96,19 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   addto_pVLList(u, dt/6., r, vladdto,0);       // u += r dt/6
 
   add_pVLList(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
-  evolve_limiter_mesh(mesh, w);
   mesh->time = t+dt;                           // c_1=1 from Butcher tab.
+  evolve_limiter_mesh(mesh, w);
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);       // u += r dt/6
 
   addto_pVLList(w, dt, r, vladdto,0);          // w += w + r dt
   add_pVLList(w, 0.75, u_p, 0.25, w, vladd,0); // w = 0.75*u_p + 0.25*w
-  evolve_limiter_mesh(mesh, w);
   mesh->time = t+0.5*dt;                       // c_1=1/2 from Butcher tab.
+  evolve_limiter_mesh(mesh, w);
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
-  evolve_limiter_mesh(mesh, u);
+  mesh->time = t+dt;                           // we are now at t+dt
+  evolve_limiter_mesh(mesh, u);                // limit final u(t+dt)
 }
 
 
