@@ -136,6 +136,11 @@ Things that need to be done urgently:
  -general limiter
  -check c2p with root finder for Wv as in arXiv:1306.4953
 
+*add evolve_compute_change
+ +set u_change = u before evo step: DONE!
+ +set u_change = u - u_change after evo step: DONE!
+ -should we divide u_change by dt??? ???
+
 *check out:
  Anninos' work, e.g. COSMOSDG: https://iopscience.iop.org/article/10.3847/1538-4365/aa7ff5/pdf
  Dumbser
