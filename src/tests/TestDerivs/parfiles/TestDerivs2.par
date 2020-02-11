@@ -1,0 +1,35 @@
+physics = TestDerivs
+
+TestDerivs_sigmax = 10
+TestDerivs_sigmay = 13
+TestDerivs_sigmaz = 7
+
+TestDerivs_x0 = 4
+TestDerivs_y0 = 2
+TestDerivs_z0 = 1
+
+errorexit = abort
+logfile_creation = no
+
+amr_mesh_type = 1 BoxMesh
+amr_BoxMesh_dout = 8 # 0.1
+
+amr_luni = 2
+#amr_refine_p = 0
+iterate_parameters = yes
+iterate_parameter1 = amr_luni  2 3 4
+
+amr_n0 = 5
+amr_n1 = 5
+amr_n2 = 5
+
+#outputX0Y0Z0coord = Xb
+
+0doutiter = 1
+0doutput = TestDerivs_Err_dux TestDerivs_Err_dduxx
+
+#1doutiter = 1
+#1doutput = X TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+
+#2doutiter = 1
+#2doutput = X TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
