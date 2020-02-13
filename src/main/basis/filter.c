@@ -87,8 +87,11 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
 /* filter varlist on entire mesh */
 void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3])
 {
-  tMesh *mesh = vl->mesh;
+  tMesh *mesh;
 
+  if(!vl) return;
+
+  mesh = vl->mesh;
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
