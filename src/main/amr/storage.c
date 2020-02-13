@@ -1842,13 +1842,16 @@ void disablevarlist_innode(tNode *node, tVarList *vl)
 /* enable variable list */
 void enablevarlist(tVarList *vl)
 {
-  tMesh *mesh = vl->mesh;
-  if(vl && mesh)
+  if(vl)
   {
-    formylnodes(mesh)
+    tMesh *mesh = vl->mesh;
+    if(mesh)
     {
-      tNode *node = MyLnode;
-      enablevarlist_innode(node, vl);
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        enablevarlist_innode(node, vl);
+      }
     }
   }
 }
@@ -1856,13 +1859,16 @@ void enablevarlist(tVarList *vl)
 /* disable variable list */
 void disablevarlist(tVarList *vl)
 {
-  tMesh *mesh = vl->mesh;
   if(vl)
   {
-    formylnodes(mesh)
+    tMesh *mesh = vl->mesh;
+    if(mesh)
     {
-      tNode *node = MyLnode;
-      disablevarlist_innode(node, vl);
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        disablevarlist_innode(node, vl);
+      }
     }
   }
 }
