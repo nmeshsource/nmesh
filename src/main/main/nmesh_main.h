@@ -57,6 +57,7 @@ typedef struct tPAR {
   char *description;
   double numericalvalue; /* some pars are pure numbers, we cache them here */
   int booleanvalue; /* some pars are true/false, we cache them here as 1/0 */
+  int valuelen; /* cache strlen(value) */
 } tPar;
 int nmesh_load_parameters(tMesh *mesh, char *fname, int fatal, int pr);
 void AddMeshPar(tMesh *mesh, const char *name, const char *value,
@@ -76,6 +77,7 @@ char *MeshParGetsLax(tMesh *mesh, int i);
 int MeshParGeti(tMesh *mesh, int i);
 double MeshParGetd(tMesh *mesh, int i);
 int MeshParGetb(tMesh *mesh, int i);
+int MeshParGetLen(tMesh *mesh, int i);
 int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal);
 /* conveniece macros to query and set  pars */
 #define AddPar(name, val, desc) AddMeshPar(mesh, (name), (val), (desc))
@@ -88,6 +90,7 @@ int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal);
 #define Getd(ip)      MeshParGetd(mesh, (ip))
 #define Getb(ip)      MeshParGetb(mesh, (ip))
 #define Gets(ip)      MeshParGets(mesh, (ip))
+#define GetLen(ip)    MeshParGetLen(mesh, (ip))
 #define GetsLax(ip)   MeshParGetsLax(mesh, (ip))
 #define Getv(ip, val) MeshParGetv_fatal(mesh, (ip), (val), 1)
 #define GetvLax(ip, val) MeshParGetv_fatal(mesh, (ip), (val), 0)

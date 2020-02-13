@@ -43,6 +43,7 @@ void printparameters(tMesh *mesh);
 void translatevalue(char **value);
 int set_numericalvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
 int set_booleanvalue_byIndex(tPar *pdb1, int ind, int npdb1max);
+int set_valuelen_byIndex(tPar *pdb1, int ind, int npdb1max);
 int make_output_directory(tMesh *mesh);
 
 
@@ -289,6 +290,7 @@ void setparameter(tMesh *mesh, int i, const char *value)
   translatevalue(&p->value);
   set_numericalvalue_byIndex(p, 0, 1);
   set_booleanvalue_byIndex(p, 0, 1);
+  set_valuelen_byIndex(p, 0, 1);
 }
 
 
@@ -401,6 +403,18 @@ int set_booleanvalue_byIndex(tPar *pdb1, int ind, int npdb1max)
 
     pdb1[ind].booleanvalue = boolval;
   }
+  else
+    errorexit("parameter index out of range");
+
+  return 1;
+}
+
+/* Write the length of value of the par with index ind into the
+   par cache. */
+int set_valuelen_byIndex(tPar *pdb1, int ind, int npdb1max)
+{
+  if(pdb1!=NULL && ind>=0 && ind<npdb1max)
+    pdb1[ind].valuelen = strlen(pdb1[ind].value);
   else
     errorexit("parameter index out of range");
 
@@ -521,6 +535,14 @@ int MeshParGetb(tMesh *mesh, int i)
   if(i<0 || i>=mesh->npdb)
     errorexit("parameter with this index does not exist");
   return mesh->pdb[i].booleanvalue;
+}
+
+/* return length of par value string */
+int MeshParGetLen(tMesh *mesh, int i)
+{
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+  return mesh->pdb[i].valuelen;
 }
 
 /* "get value?" returns 1 if value is in the list of values and 0 else
