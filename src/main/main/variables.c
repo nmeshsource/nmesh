@@ -513,14 +513,17 @@ void VLDisableFree(tVarList *vl)
    note that we add each component as a scalar first but then fix it because
    we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ...
    We copy all properties if type<0, surfacezones<0, but if one is
-   non-negative we set it this this value. */
+   non-negative we set it to this value. */
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
 {
-  tMesh *mesh = vl->mesh;
   char name[1000];
   int i, j;
   tVarList *newvl;
   tVar *var, *newvar;
+  tMesh *mesh;
+
+  if(vl==NULL) return NULL;
+  mesh = vl->mesh;
 
   if(mesh==NULL) errorexit("vl->mesh is NULL");
 
