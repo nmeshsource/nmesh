@@ -110,27 +110,35 @@ void evolve_print_evosys(tMesh *mesh)
     {
       printf("%d: ", i);
       prvarlist(ListEntry(evosys->u,i));
+      if(ListEntry(evosys->prelim,i))  printf("%d: prelim:  yes\n", i);
+      if(ListEntry(evosys->limdata,i)) printf("%d: limdata: yes\n", i);
+      if(ListEntry(evosys->limiter,i)) printf("%d: limiter: yes\n", i);
+      if(ListEntry(evosys->presurf,i)) printf("%d: presurf: yes\n", i);
+      if(ListEntry(evosys->setsrc,i))  printf("%d: setsrc:  yes\n", i);
+      if(ListEntry(evosys->volrhs,i))  printf("%d: volrhs:  yes\n", i);
+      if(ListEntry(evosys->surfrhs,i)) printf("%d: surfrhs: yes\n", i);
     }
   }
+  printf("evolve function pointers are called in this order:\n");
   if(evosys->limdata)
   {
     forList(evosys->prelim, i)
-      if(ListEntry(evosys->prelim,i))  printf("%d: prelim:  yes\n", i);
+      if(ListEntry(evosys->prelim,i))  printf("%d: prelim\n", i);
     forList(evosys->limdata, i)
-      if(ListEntry(evosys->limdata,i)) printf("%d: limdata: yes\n", i);
+      if(ListEntry(evosys->limdata,i)) printf("%d: limdata\n", i);
     forList(evosys->limiter, i)
-      if(ListEntry(evosys->limiter,i)) printf("%d: limiter: yes\n", i);
+      if(ListEntry(evosys->limiter,i)) printf("%d: limiter\n", i);
   }
   if(evosys->volrhs)
   {
     forList(evosys->presurf, i)
-      if(ListEntry(evosys->presurf,i)) printf("%d: presurf: yes\n", i);
+      if(ListEntry(evosys->presurf,i)) printf("%d: presurf\n", i);
     forList(evosys->setsrc, i)
-      if(ListEntry(evosys->setsrc,i))  printf("%d: setsrc:  yes\n", i);
+      if(ListEntry(evosys->setsrc,i))  printf("%d: setsrc\n", i);
     forList(evosys->volrhs, i)
-      if(ListEntry(evosys->volrhs,i))  printf("%d: volrhs:  yes\n", i);
+      if(ListEntry(evosys->volrhs,i))  printf("%d: volrhs\n", i);
     forList(evosys->surfrhs, i)
-      if(ListEntry(evosys->surfrhs,i)) printf("%d: surfrhs: yes\n", i);
+      if(ListEntry(evosys->surfrhs,i)) printf("%d: surfrhs\n", i);
   }
 }
 
