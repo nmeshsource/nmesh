@@ -350,15 +350,24 @@ int MeshVar_Nextra(tMesh *mesh, int i)
 /* print variable list */
 void prvarlist(tVarList *v)
 {
-  tMesh *mesh = v->mesh;
+  tMesh *mesh;
   int i, j;
 
-  //printf("VarList=%p  time=%g  n=%d\n", v, v->time, v->n);
-  PRF;printf(": time=%g n=%d\n", v->time, v->n);
-  for(i=0; i<v->n; i++)
+  if(v)
   {
-    j = v->index[i];
-    printf("   %d  VarIndex=%d  %s\n", i, j, VarName(j));
+    mesh = v->mesh;
+
+    //printf("VarList=%p  time=%g  n=%d\n", v, v->time, v->n);
+    PRF;printf(": time=%g n=%d\n", v->time, v->n);
+    for(i=0; i<v->n; i++)
+    {
+      j = v->index[i];
+      printf("   %d  VarIndex=%d  %s\n", i, j, VarName(j));
+    }
+  }
+  else
+  {
+    PRF;printf(": NULL\n");
   }
 }
 
