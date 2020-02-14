@@ -283,10 +283,10 @@ typedef struct tARRAY {
 
 /* variable lists */
 typedef struct tVARLIST {
-  double time;
   int n;
   int *index;
   tMesh *mesh;  /* pointer to mesh to which vars belong */
+  double time;
   void *vlPars; /* A pointer that is usually NULL, but can point to some
                    object that contains special extra pars or info. This
                    pointer is not touched by the funcs in variables.c (such
