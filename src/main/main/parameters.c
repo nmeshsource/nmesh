@@ -237,15 +237,12 @@ void makeparameter(tMesh *mesh, const char *name, const char *value,
   p = findparameter(mesh, name, 0);
   if(!p)
   {
-    p = &(mesh->pdb[mesh->npdb]);
+    int i = mesh->npdb;
+    p = &(mesh->pdb[i]);
     mesh->npdb++;
-    p->name  = (char *) calloc(strlen(name)+1, sizeof(char));
-    p->value = (char *) calloc(strlen(value)+1, sizeof(char));
-    strcpy(p->name,  name);
-    strcpy(p->value, value);
-    translatevalue(&p->value);
-    set_numericalvalue_byIndex(mesh->pdb, mesh->npdb-1, mesh->npdb);
-    set_booleanvalue_byIndex(mesh->pdb, mesh->npdb-1, mesh->npdb);
+    p->name  = strdup(name);
+    p->value = NULL;
+    setparameter(mesh, i, value);
   }
   else
   {
