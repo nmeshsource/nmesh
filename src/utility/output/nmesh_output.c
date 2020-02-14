@@ -35,6 +35,11 @@ int nmesh_output(tMesh *mesh)
   AddPar("2doutput", "", "variables to output on coordinate planes");
   AddPar("3doutput", "", "variables to output in 3d");
 
+  AddPar("0doutputall", "yes", "whether to output all components");
+  AddPar("1doutputall", "yes", "whether to output all components");
+  AddPar("2doutputall", "yes", "whether to output all components");
+  AddPar("3doutputall", "yes", "whether to output all components");
+
   AddPar("2dformat", "gnuplot",
 	 "format for 2d output [gnuplot,vtk,text,binary,float,double]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "

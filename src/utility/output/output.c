@@ -69,6 +69,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   int di[4];
   double dt[4];
   char *ou[4];
+  int all[4];
   char str[1000];
   int start;
   int d, vi, vi0;
@@ -86,6 +87,8 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
     dt[d] = Getd(Par(str));
     snprintf(str,999, "%ddoutput", d);
     ou[d] = Gets(Par(str));
+    snprintf(str,999, "%ddoutputall", d);
+    all[d] = Getb(Par(str));
   }
 
   /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
@@ -105,10 +108,18 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
         vi = MeshVarIndLax(mesh, str);
         if(vi<0) continue;
 
-        /* we do ?doutputall */
-        vi0 = MeshVarIndComponent0(mesh, vi);
-        vlpush(vl[d], vi0);
-
+        /* ?doutputall */
+        if(all[d])
+        {
+          vi0 = MeshVarIndComponent0(mesh, vi);
+          if(vi0!=vi)
+            errorexiti("%ddoutput: list only first component of each var", d);
+          vlpush(vl[d], vi0);
+        }
+        else
+        {
+          vlpushone(vl[d], vi);
+        }
       } //end: while loop
     }
   } // end: for d loop
