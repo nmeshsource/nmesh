@@ -111,14 +111,21 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
         /* ?doutputall */
         if(all[d])
         {
+          tVarList *vltmp = vlalloc(mesh);
+          intList *iltmp  = vl2intList(vltmp);
+          intList *il     = vl2intList(vl[d]);
+
           vi0 = MeshVarIndComponent0(mesh, vi);
-          if(vi0!=vi)
-            errorexiti("%ddoutput: list only first component of each var", d);
-          vlpush(vl[d], vi0);
+          vlpush(vltmp, vi0);
+          /* use unionpushlist_intList to add all in vltmp only once */
+          unionpushlist_intList(il, iltmp);
+          vlfree(vltmp);
         }
         else
         {
-          vlpushone(vl[d], vi);
+          /* use unionpush_intList to add var-comp only once */
+          intList *il = vl2intList(vl[d]);
+          unionpush_intList(il, vi);
         }
       } //end: while loop
     }
