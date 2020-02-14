@@ -934,3 +934,14 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
   /* add times as well */
   r->time += ca * a->time;
 }
+
+/* convert tVarList into intList: this works only if the initial
+   members of tVarList and intList are the same!!! */
+intList *vl2intList(tVarList *v)
+{
+  /* with aliasing rules we would just do:  return (intList *) v; */
+  union TMP { tVarList *vl;  intList  *il; } tmp;
+
+  tmp.vl = v;
+  return tmp.il;
+}

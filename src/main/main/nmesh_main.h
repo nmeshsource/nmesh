@@ -193,6 +193,7 @@ void vladd_node(tNode *node,
 void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
 void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a);
 void vladdto(tVarList *r, const double ca, tVarList *a);
+intList *vl2intList(tVarList *v);
 
 /* utilities.c */
 NORET void  errorexit(const char *file, int line, const char *func,
