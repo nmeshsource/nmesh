@@ -243,7 +243,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
   /* now do it if needed */
   if(do_checkpoint)
   {
-    double ntime = getTimeIn_s()/3600.;
+    double ntime;
 
     nMPI_Bcast(&ntime, 1, nMPI_INT, 0);
     prdivider(1);
@@ -251,6 +251,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
     fflush(stdout);
 
     checkpoint_save(mesh);
+    ntime = getTimeIn_s()/3600.;
 
     printf("It took %g minutes to checkpoint %g hours into the run.\n",
            60.*(ntime - time), time);
