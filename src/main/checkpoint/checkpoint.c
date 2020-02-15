@@ -245,7 +245,6 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
   {
     double ntime;
 
-    nMPI_Bcast(&ntime, 1, nMPI_INT, 0);
     prdivider(1);
     printf("checkpoint_save after %g hours\n", time_since_checkpoint);
     fflush(stdout);
