@@ -14,3 +14,6 @@ int finalize_mesh(tMesh *mesh);
 void parse_parameter_file(tMesh *mesh, char *parfile);
 int iterate_parameters(tMesh *mesh, int next);
 int nmesh_update_parameters(tMesh *mesh);
+
+/* sysmon.c */
+int sysmon(tMesh *mesh);

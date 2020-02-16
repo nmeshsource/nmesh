@@ -14,6 +14,7 @@ int nmesh_main(tMesh *mesh)
   AddFun(FIRST, print_endian_info);
   AddFun(OUTPUT, write_all_timers);
   AddFun(POST_OUTPUT, nan_checker);
+  AddFun(POST_OUTPUT, sysmon);
   AddFun(FINALIZEMESH, free_all_timers);
   //FIXME: disable nmesh_update_parameters, as it currently does not scale at all:
   //AddFun(PRE_COORDINATES, nmesh_update_parameters);
@@ -36,6 +37,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("timer_MPI_barrier", "no", "barrier in timer [yes,no]");
 
   AddPar("nan_check", "", "variables we check for NANs [varnames]");
+  AddPar("sysmon_hours", "0.5", "hours after which we write sysmon.log");
 
   return 0;
 }
