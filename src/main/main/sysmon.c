@@ -73,7 +73,7 @@ int sysmon(tMesh *mesh)
           fprintf(fp, "# PhysTime     WallTime  dtPhys/dtWall    max(RSS)\n");
 
         fprintf(fp, "%10.3g  %10.3gh  %11.3g/h  %8.3gGB\n",
-                mesh->time, time, dpt/dt, datall[0]/1e6);
+                mesh->time, time, dpt/dt, datall[0]*1024/1e9);
         fclose(fp);
       }
     }
