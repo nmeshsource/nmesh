@@ -22,6 +22,13 @@ int sysmon(tMesh *mesh)
   ///* is sysmon on? */
   //if(!Getb(Par("sysmon"))) return 0;
 
+  /* reset firstcall & last_mesh_time if we are again at interation 0 */
+  if(mesh->iteration==0 && firstcall==0)
+  {
+    firstcall = 1;
+    last_mesh_time = mesh->time;
+  }
+
   /* test if it is time */
   time_since_sysmon = time - last_sysmon_time;
   if(Rank0)
