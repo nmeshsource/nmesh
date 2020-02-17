@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   /* print skeleton of function bins */
   PrintMeshFuncs(mesh);
 
-  /* hook for funs to run 1st */
+  /* hook for funcs to run 1st */
   RunFun(FIRST);
 
   iterate_parameters(mesh, 0); /* start of new iteration */
@@ -55,6 +55,7 @@ int main(int argc, char **argv)
   {
     inidata_mesh(mesh);
     evolve_mesh(mesh);
+    RunFun(FINALIZE); /* hook for funcs to run after each par iteration */
     free_mesh_patches_and_nodes(mesh);
 
     /* set a par so we can find output from previous par iteration */
