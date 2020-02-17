@@ -70,9 +70,10 @@ int sysmon(tMesh *mesh)
         double dt  = time       - last_sysmon_time;
 
         if(firstcall)
-          fprintf(fp, "# PhysTime     WallTime  dtPhys/dtWall    max(RSS)\n");
+          fprintf(fp, "#   PhysTime       WallTime"
+                      "   dtPhys/dtWall        max(RSS)\n");
 
-        fprintf(fp, "%10.3g  %10.3gh  %11.3g/h  %8.3gGi\n",
+        fprintf(fp, "%12.4f  %12.4fh  %12.4f/h  %12.4fGi\n",
                 mesh->time, time, dpt/dt, datall[0]/1048576);
         fclose(fp);
       }
