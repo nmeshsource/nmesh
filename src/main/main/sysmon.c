@@ -44,7 +44,7 @@ int sysmon(tMesh *mesh)
   /* now do it if needed */
   if(do_sysmon)
   {
-    int n;
+    int i, n;
     int count = 1;
     double dat[count];
     double datall[count];
@@ -54,6 +54,7 @@ int sysmon(tMesh *mesh)
     getrusage(RUSAGE_SELF, usage);
     n = 0;
     dat[n++] = usage->ru_maxrss;  /* maximum resident set size */
+    for(i=0; i<n; i++) datall[i] = dat[i]; /* in case MPI is not there */
     nMPI_Allreduce(dat, datall, n, nMPI_DOUBLE, nMPI_SUM);
 
     if(Rank0)
