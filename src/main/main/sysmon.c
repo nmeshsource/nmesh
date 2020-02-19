@@ -49,11 +49,15 @@ int sysmon(tMesh *mesh)
     double dat[count];
     double datall[count];
     struct rusage usage[1];
+    long ru_maxrss = 0;
 
     /* get info */
     getrusage(RUSAGE_SELF, usage);
+#ifndef NO_RU_MAXRSS
+    ru_maxrss = usage->ru_maxrss;  /* struct rusage has ru_maxrss */
+#endif
     n = 0;
-    dat[n++] = usage->ru_maxrss;  /* maximum resident set size */
+    dat[n++] = ru_maxrss;  /* maximum resident set size */
     for(i=0; i<n; i++) datall[i] = dat[i]; /* in case MPI is not there */
     nMPI_Allreduce(dat, datall, n, nMPI_DOUBLE, nMPI_SUM);
 
