@@ -41,4 +41,4 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 #DFLAGS += -DBYTE_ORDER_LITTLE=1
 
 # on old compilers without _Noreturn, uncomment the line below
-#DFLAGS += -DNOC11
+#DFLAGS += -DNO_C11
