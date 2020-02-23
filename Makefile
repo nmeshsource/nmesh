@@ -188,6 +188,12 @@ git_pull: install_git_hooks
 	@echo ======================== nmesh projects ========================
 	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "***\n%s\n" $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
 
+git_status:
+	@echo ====================== main part of nmesh ======================
+	git status -uno
+	@echo ======================== nmesh projects ========================
+	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "***\n%s\n" $$X; cd $(PROJECTDIR)/$$X; git status -uno; fi done
+
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
 	@$(MAKE) install_git_hooks
