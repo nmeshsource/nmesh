@@ -258,10 +258,10 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
     {
       if(normalized)
       {
-	/* transpose of synthesis matrix Sij */
-	/* set transposed elements first because we need them below */
+	/* transpose of synthesis matrix Shat_{ij} */
+	/* ST is used in AT below */
 	ST[i + j*n] = LegendreP(i, x[j]) * oosci;
-	/* transpose of analysis matrix Aij */
+	/* transpose of analysis matrix Ahat_{ij} */
 	AT[j + i*n] = w[j] * ST[i + j*n];
       }
       else
