@@ -221,7 +221,7 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
 {
   tArray *Wq = node->Wq[dir];
-  tArray *Ivar_new;
+  int Ivar_realloc;
 
   if(PR)
   {
@@ -230,15 +230,15 @@ tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
     printf("var");printarray(var);
   }
 
-  Ivar_new = redimension_array(Ivar, Arrn(var));
-  if(Ivar_new != Ivar) errorexit("Ivar was too small");
+  Ivar_realloc = redimension_array(Ivar, Arrn(var));
+  if(Ivar_realloc) errorexit("Ivar was too small");
 
   /* multiply weights Wq and var */
   mm_array_indir(Wq, var, dir, Ivar);
 
   /* re-dim Ivar array to 1 in the direction we just integrated */
-  Ivar_new = redim_array(Ivar, dir==0, dir==1, dir==2);
-  if(Ivar_new != Ivar) errorexit("Ivar was too small");
+  Ivar_realloc = redim_array(Ivar, dir==0, dir==1, dir==2);
+  if(Ivar_realloc) errorexit("Ivar was too small");
 
   return Ivar;
 }

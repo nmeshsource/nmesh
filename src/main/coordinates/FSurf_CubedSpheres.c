@@ -288,7 +288,7 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 
     /* alloc memory for coeffs in one of the six patches */
     if(pat->CI->Fcoef[si])
-      pat->CI->Fcoef[si] = redimension_array(pat->CI->Fcoef[si], nc);
+      redimension_array(pat->CI->Fcoef[si], nc);
     else
       pat->CI->Fcoef[si] = alloc_array(nc);
 

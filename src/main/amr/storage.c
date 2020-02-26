@@ -128,12 +128,13 @@ void point_array_d_to_data(tArray *array, void *data, int nofree)
 }
 
 /* re-dimension array */
-tArray *redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
+int redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
 {
   int size1 = max3(sizeof(array->d[0]), sizeof(array->i[0]),
                    sizeof(array->l[0]));
   int Nt;
   size_t size_new;
+  int reallocd_d = 0;
   int i;
 
   for(i=0; i<3; i++) if(n[i]>0) array->n[i] = n[i];
@@ -145,16 +146,17 @@ tArray *redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
   size_new = Nt * ns * size1;
   if(size_new > array->size)
   {
-    array = realloc(array, size_new);
+    array->d = realloc(array->d, size_new);
     array->size = size_new;
+    reallocd_d = 1;
   }
-  return array;
+  return reallocd_d;
 }
-tArray *redimension_array(tArray *array, int n[3])
+int redimension_array(tArray *array, int n[3])
 {
   return redimension_array_with_segs(array, n, array->Ne, array->ns);
 }
-tArray *redim_array(tArray *array, int n0, int n1, int n2)
+int redim_array(tArray *array, int n0, int n1, int n2)
 {
   int n[] = { n0,n1,n2 };
   return redimension_array(array, n);
