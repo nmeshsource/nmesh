@@ -43,7 +43,7 @@ tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns)
 tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
 {
   tArray *array;
-  int Nt;
+  int Nt, nmemb;
   int size1 = max3(sizeof(array->d[0]), sizeof(array->i[0]),
                    sizeof(array->l[0]));
   if(!n) return NULL;
@@ -52,9 +52,14 @@ tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
 
   /* memory for data */
   Nt = array->N + array->Ne;
-  array->d = calloc(Nt * ns, size1);
-  if(!array->d) errorexit("out of memory for array->d");
-  array->size = Nt * ns * size1;
+  nmemb = Nt * ns;
+  if(nmemb>0)
+  {
+    array->d = calloc(nmemb, size1);
+    if(!array->d) errorexit("out of memory for array->d");
+  }
+  /* else array->d = NULL; //because array was alloced with calloc */
+  array->size = nmemb * size1;
 
   return array;
 }
