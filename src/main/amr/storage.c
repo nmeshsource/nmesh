@@ -127,7 +127,10 @@ void point_array_d_to_data(tArray *array, void *data, int nofree)
   array->d_nofree = nofree;
 }
 
-/* re-dimension array */
+/* re-dimension array, return values:
+   0 if no new memory was allocated,
+   1 if new memory was allocated, but array->d pointer is unchanged
+   2 if new memory was allocated and array->d pointer has changed */
 int redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
 {
   int size1 = max3(sizeof(array->d[0]), sizeof(array->i[0]),
@@ -146,9 +149,12 @@ int redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
   size_new = Nt * ns * size1;
   if(size_new > array->size)
   {
-    array->d = realloc(array->d, size_new);
+    double *d = realloc(array->d, size_new);
+    if(!d) errorexit("out of memory for array->d");
+    if(d != array->d) reallocd_d = 2;
+    else              reallocd_d = 1;
+    array->d = d;
     array->size = size_new;
-    reallocd_d = 1;
   }
   return reallocd_d;
 }
