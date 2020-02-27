@@ -283,7 +283,7 @@ int get_par_from_str(const char *str, char *name, const char *delim,
   nam = strtok_r(str2, delim, &saveptr);
   val = strtok_r(NULL, delim, &saveptr);
 
-  if(!(*nam))
+  if(!nam)
   {
     ret = 0;
   }
