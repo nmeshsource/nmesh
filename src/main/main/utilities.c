@@ -269,8 +269,9 @@ void trim_whitespace(char *str)
 }
 
 /* parse a string to find a parname and its value,
-   returns 1 if str contains '=' otherwise 0.  */
-int get_par_from_str(char *str, char *name, char *value, int n)
+   returns 1 if str contains the delimiter delim (e.g. "=") otherwise 0. */
+int get_par_from_str(const char *str, char *name, const char *delim,
+                     char *value, int n)
 {
   char *str2, *saveptr, *nam, *val;
   int ret;
@@ -279,8 +280,8 @@ int get_par_from_str(char *str, char *name, char *value, int n)
   str2 = strdup(str);
 
   /* find parname and its value */
-  nam = strtok_r(str2, "=", &saveptr);
-  val = strtok_r(NULL, "=", &saveptr);
+  nam = strtok_r(str2, delim, &saveptr);
+  val = strtok_r(NULL, delim, &saveptr);
 
   if(!(*nam))
   {

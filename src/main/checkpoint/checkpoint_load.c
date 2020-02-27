@@ -51,12 +51,12 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
 /*
 char ttt[] = "  domu=read 99 \n";
 printf("ttt = |%s|\n", ttt);
-get_par_from_str(ttt, par,val,999);
+get_par_from_str(ttt, par,"=",val,999);
 printf("|%s| = |%s|\n", par,val);
 exit(8);
 */
         /* read various info pieces */
-        get_par_from_str(buf, par, val, 999);
+        get_par_from_str(buf, par, "=", val, 999);
         if(val[0])
         {
           //printf("%s = %s\n", par, val);
