@@ -939,7 +939,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
    members of tVarList and intList are the same!!! */
 intList *vl2intList(tVarList *v)
 {
-  /* with aliasing rules we would just do:  return (intList *) v; */
+  /* without aliasing rules we would just do:  return (intList *) v; */
   union TMP { tVarList *vl;  intList  *il; } tmp;
 
   tmp.vl = v;
