@@ -10,7 +10,7 @@ int nmesh_coordinates(tMesh *mesh)
   printf("Adding coordinates\n");
 
   /* functions */
-  AddFun(COORDINATES, coordinates_init);
+  AddFun(COORDINATES, coordinates_init); //is also called in make_child_node!
 
   /* variables */
   AddAuxVar("X", "",    "coord0 in each patch e.g. lam"); // don't put any-
