@@ -322,11 +322,17 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       two_spheres_around_empty_box_at_x0(mesh, rc, ssfac*dc, ssfac*obfac*dc);
       break;
     case 13:
+      rc[1] = rc[2] = dc; //dc*0.5;
+      rc[0] = dc;
+      two_spheres_around_box_at_x0(mesh, rc, ssfac*dc, ssfac*obfac*dc);
+      break;
+    /* 13 patches but with 2 centers as in sgrid:
+    case 13:
       xc[1] = xc[2] = 0.0;
       xc[0] = dc;
       arrange_1pat12CubSph_into_full_cube(mesh, xc,
                                           csize*rf_surf1, rf_surf1, dc);
-      break;
+      break; */
     case 26:
       two_full_cubes_touching_at_x0(mesh, dc,
                                     csize*rf_surf1, rf_surf1,
