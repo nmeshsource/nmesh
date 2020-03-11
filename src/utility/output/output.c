@@ -5,23 +5,30 @@
 #include "output.h"
 
 
+/* output par prefixes */
+char *outpre[] = {"0d", "1d", "2d", "3d", "co"};
+int Nout = sizeof(outpre)/sizeof(outpre[0]); /* Nout=5 */
+
 /* various types of output */
 char *out0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
 char *out1d[] = {"X", "Y", "Z"};
 char *out2d[] = {"XY", "XZ", "YZ"};
 char *out3d[] = {"XYZ"};
+char *outco[] = {"co"};
 
 #define LEN0d sizeof(out0d)/sizeof(out0d[0])
 #define LEN1d sizeof(out1d)/sizeof(out1d[0])
 #define LEN2d sizeof(out2d)/sizeof(out2d[0])
-#define LEN3d sizeof(out1d)/sizeof(out1d[0])
+#define LEN3d sizeof(out3d)/sizeof(out3d[0])
+#define LENco sizeof(outco)/sizeof(outco[0])
 
-/* number of output types */
+/* number of all output types */
 int Nout0d = LEN0d;
 int Nout1d = LEN1d;
 int Nout2d = LEN2d;
 int Nout3d = LEN3d;
-int NoutAll = LEN0d + LEN1d + LEN2d + LEN3d;
+int Noutco = LENco;
+int NoutAll = LEN0d + LEN1d + LEN2d + LEN3d + LENco;
 
 
 
@@ -66,33 +73,33 @@ int mesh_output(tMesh *mesh)
    what iteration & time the mesh has */
 int write_mesh(tMesh *mesh, int Iter, double Time)
 {
-  int di[4];
-  double dt[4];
-  char *ou[4];
-  int all[4];
+  int di[Nout];
+  double dt[Nout];
+  char *ou[Nout];
+  int all[Nout];
   char str[1000];
   int start;
   int d, vi, vi0;
-  tVarList *vl[4];    /* varlists for 0d,1d,2d,3d */
+  tVarList *vl[Nout];    /* varlists for 0d,1d,2d,3d,... */
 
   /* varlists of 0d,1d,2d,3d output */  
-  for(d = 0; d <= 3; d++) vl[d] = vlalloc(mesh);
+  for(d = 0; d < Nout; d++) vl[d] = vlalloc(mesh);
 
   /* par values in strings */
-  for(d = 0; d <= 3; d++)
+  for(d = 0; d < Nout; d++)
   {
-    snprintf(str,999, "%ddoutiter", d);
+    snprintf(str,999, "%soutiter", outpre[d]);
     di[d] = Geti(Par(str));
-    snprintf(str,999, "%ddouttime", d);
+    snprintf(str,999, "%souttime", outpre[d]);
     dt[d] = Getd(Par(str));
-    snprintf(str,999, "%ddoutput", d);
+    snprintf(str,999, "%soutput", outpre[d]);
     ou[d] = Gets(Par(str));
-    snprintf(str,999, "%ddoutputall", d);
+    snprintf(str,999, "%soutputall", outpre[d]);
     all[d] = Getb(Par(str));
   }
 
   /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
-  for(d=0; d<=3; d++)
+  for(d=0; d<Nout; d++)
   {
     if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
     {
@@ -138,7 +145,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   output3d_vl(vl[3], Iter, Time);
 
   /* free varlists */
-  for(d = 0; d <= 3; d++) vlfree(vl[d]);
+  for(d = 0; d < Nout; d++) vlfree(vl[d]);
 
   return 0;
 }
@@ -150,8 +157,8 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
 /* is it time to output a variable with index vindex? */
 int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
 {
-  //int Noutput = NextAll + 4; // really just need 4 from 0d-,1d-,2d-,3d-output
-  int Noutput = 4;
+  //int Noutput = NextAll + Nout; // really just need 5 from 0d-,1d-,2d-,... output
+  int Noutput = Nout;
   int di[Noutput];
   double dt[Noutput];
   char output[Noutput][128];
@@ -163,13 +170,13 @@ int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
   name = VarName(vindex);
 
   /* read all pars for all dims */
-  for(d = 0; d <= 3; d++)
+  for(d = 0; d < Nout; d++)
   {
-    sprintf(s, "%ddoutiter", d);
+    sprintf(s, "%soutiter", outpre[d]);
     di[d] = Geti(Par(s));
-    sprintf(s, "%ddouttime", d);
+    sprintf(s, "%souttime", outpre[d]);
     dt[d] = Getd(Par(s));
-    sprintf(output[d], "%ddoutput", d);
+    sprintf(output[d], "%soutput", outpre[d]);
   }
 
   /* check if "name" is contained in any output par */
@@ -230,8 +237,8 @@ int TimeForNodeOutput_di_dt(tNode *node, int di, double dt)
 int TimeForNodeOutput_vindex(tNode *node, int vindex)
 {
   tMesh *mesh = node->pat->mesh;
-  //int Noutput = NextAll + 4; // really just need 4 from 0d-,1d-,2d-,3d-output
-  int Noutput = 4;
+  //int Noutput = NextAll + Nout; // really just need Nout from 0d-,1d-,2d-,... output
+  int Noutput = Nout;
   int di[Noutput];
   double dt[Noutput];
   char output[Noutput][64];
@@ -243,13 +250,13 @@ int TimeForNodeOutput_vindex(tNode *node, int vindex)
   name = VarName(vindex);
 
   /* read all pars for all dims */
-  for(d = 0; d <= 3; d++)
+  for(d = 0; d < Nout; d++)
   {
-    sprintf(s, "%ddoutiter", d);
+    sprintf(s, "%soutiter", outpre[d]);
     di[d] = Geti(Par(s));
-    sprintf(s, "%ddouttime", d);
+    sprintf(s, "%souttime", outpre[d]);
     dt[d] = Getd(Par(s));
-    sprintf(output[d], "%ddoutput", d);
+    sprintf(output[d], "%soutput", outpre[d]);
   }
 
   /* check if "name" is contained in any output par */
@@ -277,12 +284,21 @@ int TimeForNodeOutput_vl(tNode *node, tVarList *vl)
 int TimeForNodeOutput_any(tNode *node)
 {
   tMesh *mesh = node->pat->mesh;
+  int di;
+  double dt;
+  char str[1000];
+  int d, ret;
 
   errorexit("this function is not tested yet!");
 
-  return 
-  TimeForNodeOutput_di_dt(node,Geti(Par("0doutiter")),Getd(Par("0douttime"))) ||
-  TimeForNodeOutput_di_dt(node,Geti(Par("1doutiter")),Getd(Par("1douttime"))) ||
-  TimeForNodeOutput_di_dt(node,Geti(Par("2doutiter")),Getd(Par("2douttime"))) ||
-  TimeForNodeOutput_di_dt(node,Geti(Par("3doutiter")),Getd(Par("3douttime")));
+  ret = 0;
+  for(d = 0; d < Nout; d++)
+  {
+    snprintf(str,999, "%soutiter", outpre[d]);
+    di = Geti(Par(str));
+    snprintf(str,999, "%souttime", outpre[d]);
+    dt = Getd(Par(str));
+    ret = ret | TimeForNodeOutput_di_dt(node, di, dt);
+  }
+  return ret;
 }

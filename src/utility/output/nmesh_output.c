@@ -21,11 +21,13 @@ int nmesh_output(tMesh *mesh)
   AddPar("1doutiter", "-1", "when to output based on iterations");
   AddPar("2doutiter", "-1", "when to output based on iterations");
   AddPar("3doutiter", "-1", "when to output based on iterations");
+  AddPar("cooutiter", "-1", "when to output based on iterations");
 
   AddPar("0douttime", "-1", "when to output based on time");
   AddPar("1douttime", "-1", "when to output based on time");
   AddPar("2douttime", "-1", "when to output based on time");
   AddPar("3douttime", "-1", "when to output based on time");
+  AddPar("coouttime", "-1", "when to output based on time");
 
   AddPar("0doutput_normtype", "integral",
 	 "how we compute norms such as rms [integral,L2norm]");
@@ -34,16 +36,20 @@ int nmesh_output(tMesh *mesh)
   AddPar("1doutput", "", "variables to output along axes");
   AddPar("2doutput", "", "variables to output on coordinate planes");
   AddPar("3doutput", "", "variables to output in 3d");
+  AddPar("cooutput", "", "variables coefss to output");
 
   AddPar("0doutputall", "yes", "whether to output all components");
   AddPar("1doutputall", "yes", "whether to output all components");
   AddPar("2doutputall", "yes", "whether to output all components");
   AddPar("3doutputall", "yes", "whether to output all components");
+  AddPar("cooutputall", "yes", "whether to output all components");
 
   AddPar("2dformat", "gnuplot",
 	 "format for 2d output [gnuplot,vtk,text,binary,float,double]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "
 	 "[xdmf,vtk,text,binary,float,double]");
+  AddPar("coformat", "vtk text arrange_as_1d", "format for coef output "
+	 "[vtk,text,binary,float,double]");
 
   AddPar("outputX0", "0", "origin for output in X");
   AddPar("outputY0", "0", "origin for output in Y");

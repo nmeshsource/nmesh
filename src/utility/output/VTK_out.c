@@ -234,6 +234,59 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   } endforlnodes;
 }
 
+/* 3d vtk output of coeffs */
+void vtk_outputcoef_meshvar(tMesh *mesh, char *name, int It, double T)
+{
+  tNode *node;
+  int vi = Ind(name);
+  int nseries;
+  int vtk      = Getv(Par("coformat"), "vtk");
+  char *outdir = Gets(Par("outdir"));
+  tOutpars par[1];
+
+  /* pars we may need for vtk or others */
+  par->name          = name;
+  par->text          = Getv(Par("coformat"), "text");
+  par->arrange_as_1d = Getv(Par("coformat"), "arrange_as_1d");
+  par->flt           = Getv(Par("coformat"), "float");
+  par->dbl           = Getv(Par("coformat"), "double");
+
+  /* a number that counts the output */
+  nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("cooutiter")),
+                                    Getd(Par("coouttime")));
+  /* loop over all nodes */
+  forlnodes(mesh, node)
+  {
+    if(node->dat)
+    if(node->dat->v[vi])
+    {
+      char ns[100];
+
+      /* find string that identifies node */
+      nodename(node, ns,100);
+
+      /* set some more pars */
+      par->nodename = ns;
+
+      /* write files */
+      if(vtk || 1) /* can do only VTK right now */
+      {
+        /* VTK output: one file per time step in separate subdirectories */
+        FILE *fp = fopen_vtk(name, outdir, "co", ns, nseries-1);
+        tArray *co = alloc_array(node->n);
+
+        basis_array_analysis3(node, VarA(node, vi), co);
+        write3d_vtk(node, fp, co, It,T, nseries-1, par);
+
+        free_array(co);
+        fclose(fp);
+      }
+    }
+    /* sysnchronize, so that we write only one node at a time */
+    nMPI_barrier();
+  } endforlnodes;
+}
+
 /* quick array output in vtk format */
 void write_array(tNode *node, tArray *va, char *name, int as_1d,
                  int fake_it, double fake_t)
