@@ -143,6 +143,7 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   output1d_vl(vl[1], Iter, Time);
   output2d_vl(vl[2], Iter, Time);
   output3d_vl(vl[3], Iter, Time);
+  outputco_vl(vl[4], Iter, Time);
 
   /* free varlists */
   for(d = 0; d < Nout; d++) vlfree(vl[d]);

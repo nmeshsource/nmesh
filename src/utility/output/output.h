@@ -24,6 +24,7 @@ void output1d_vl(tVarList *vl, int It, double T);
 
 /* output3d.c */
 void output3d_vl(tVarList *vl, int It, double T);
+void outputco_vl(tVarList *vl, int It, double T);
 
 /* gnuplot2d.c */
 void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
@@ -39,6 +40,7 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
                  int series, tOutpars *par);
 void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T);
+void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T);
 void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* XDMF_out.c */

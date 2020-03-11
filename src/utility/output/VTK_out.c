@@ -235,7 +235,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
 }
 
 /* 3d vtk output of coeffs */
-void vtk_outputcoef_meshvar(tMesh *mesh, char *name, int It, double T)
+void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
 {
   tNode *node;
   int vi = Ind(name);

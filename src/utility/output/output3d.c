@@ -41,3 +41,26 @@ void output3d_vl(tVarList *vl, int It, double T)
 
   TIMER_STOP;
 }
+
+/* 3d output of coeffs */
+void outputco_vl(tVarList *vl, int It, double T)
+{
+  tMesh *mesh = vl->mesh;
+  int fmt = Par("coformat");
+  int vtk  = Getv(fmt, "vtk");
+
+  TIMER_START;
+
+  if(vtk)
+  {
+    int vli;
+    for(vli=0; vli<vl->n; vli++)
+    {
+      int vi = vl->index[vli];
+      char *vname = VarName(vi);
+      vtk_output3dcoef_meshvar(mesh, vname, It, T);
+    }
+  }
+
+  TIMER_STOP;
+}
