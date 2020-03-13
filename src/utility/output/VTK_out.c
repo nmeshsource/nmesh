@@ -22,7 +22,7 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
            varname, suffix, nstr);
   fp = fopen(filename, "r");
   if(!fp)
-    mkdir(filename, 0777);
+    mkdir(filename, S_IRWXU | S_IRWXG | S_IRWXO);
   else
     fclose(fp);
 
