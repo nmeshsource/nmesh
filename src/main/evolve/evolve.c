@@ -226,14 +226,17 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
   tEvoSys *evosys = mesh->evosys;
   pVLList *u = evosys->u;
   int i;
-  int filter_on = Getb(Par("evolve_filter"));
+  int evolve_filter         = Par("evolve_filter");
+  int evolve_filter_varlist = Par("evolve_filter_varlist");
+  int filter_all_evovars = Getb(evolve_filter);
+  int filter_varlist     = GetLen(evolve_filter_varlist);
 
-  if(filter_on)
+  if(filter_all_evovars)
   {
     double af = Getd(Par("evolve_filter_alp"));
     double sf = Getd(Par("evolve_filter_s"));
 
-    if(PR) PRFs(":\n");
+    if(PR) { PRF;printf(": filtering all evolution vars in evosys->u\n"); }
 
     /* loop over list of varlists and filter each varlist */
     forList(u, i)
@@ -241,6 +244,26 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
       tVarList *vl = ListEntry(u,i);
       expfilter_vl(vl, af, sf);
     }
+  }
+
+  if(filter_varlist)
+  {
+    double af = Getd(Par("evolve_filter_alp"));
+    double sf = Getd(Par("evolve_filter_s"));
+    char *list = strdup(Gets(evolve_filter_varlist));
+    char *name, *saveptr;
+    tVarList *vl = vlalloc(mesh);
+
+    if(PR) { PRF;printf(": filtering varlist\n%s\n", list); }
+
+    /* loop over list and make a varlist from it */
+    for(name=strtok_r(list, " ", &saveptr); name;
+        name=strtok_r(0,    " ", &saveptr))
+      vlpush(vl, Ind(name));
+
+    expfilter_vl(vl, af, sf);
+    free(vl);
+    free(list);
   }
 
   return 0;
