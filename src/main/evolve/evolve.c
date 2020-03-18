@@ -259,9 +259,13 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
     /* loop over list and make a varlist from it */
     for(name=strtok_r(list, " ", &saveptr); name;
         name=strtok_r(0,    " ", &saveptr))
-      vlpush(vl, Ind(name));
+    {
+      int vi = MeshVarIndLax(mesh, name);
+      if(vi>=0) vlpush(vl, vi);
+    }
 
-    expfilter_vl(vl, af, sf);
+    if(vl->n) expfilter_vl(vl, af, sf);
+
     free(vl);
     free(list);
   }
