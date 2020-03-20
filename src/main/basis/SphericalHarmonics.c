@@ -194,6 +194,21 @@ double Im_Ylm_slowly(int l, int m, double theta, double phi)
   return I;
 }
 
+/* get ReYlm, ImYlm for given theta,phi and one l,m
+   NOTE: don't use this if we need Ylm for many l,m at one theta,phi */
+void Re_Im_Ylm(int l, int m, double theta, double phi,
+               double *ReYlm, double *ImYlm)
+{
+  double *ReYtab = alloc_Plm_Tab(l);
+  double *ImYtab = alloc_Plm_Tab(l);
+
+  set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
+  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, ReYlm, ImYlm);
+
+  free(ImYtab);
+  free(ReYtab);
+}
+
 
 /* from physics/ModeComputer/SpinWeightedSphericalHarmonics.c */
 double Re_sYlm(int l, int m, int s, double theta, double phi);
