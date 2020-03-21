@@ -27,37 +27,6 @@ double fact(double n)
   }
 }
 
-/* Wigner d function, coded by Pablo Galaviz */
-double Wigner_d_function_PG(int l, int m, int s, double theta)
-{
-    double dWig = 0;
-    int C1 = s > m  ? 0 : m-s;
-    int C2 = m < -s ? l+m : l-s;
-    double costheta = cos(theta);
-    double coshtheta = sqrt(0.5*(1.0 + costheta));
-    double sinhtheta = sqrt(0.5*(1.0 - costheta));
-    int c1 = C1 < C2 ? C1 : C2;
-    int c2 = C1 < C2 ? C2 : C1;
-    int t;
-
-    if(c1%2==0)
-    {
-      for( t = c1; t <= c2; t+=2)
-        dWig += pow(coshtheta,2*l+m-s-2*t)*pow(sinhtheta,2*t+s-m)/( fact(l+m-t) * fact(l-s-t) * fact(t) * fact(t+s-m) );
-      for( t = c1+1; t <= c2; t+=2)
-        dWig -= pow(coshtheta,2*l+m-s-2*t)*pow(sinhtheta,2*t+s-m)/( fact(l+m-t) * fact(l-s-t) * fact(t) * fact(t+s-m) );
-    }
-    else
-    {
-      for( t = c1; t <= c2; t+=2)
-        dWig -= pow(coshtheta,2*l+m-s-2*t)*pow(sinhtheta,2*t+s-m)/( fact(l+m-t) * fact(l-s-t) * fact(t) * fact(t+s-m) );
-      for( t = c1+1; t <= c2; t+=2)
-        dWig += pow(coshtheta,2*l+m-s-2*t)*pow(sinhtheta,2*t+s-m)/( fact(l+m-t) * fact(l-s-t) * fact(t) * fact(t+s-m) );
-    }
-
-    return (sqrt(fact(l+m) * fact(l-m) * fact(l+s) * fact(l-s)) * dWig);
-}
-
 /* Wigner d function, coded by WT */
 double Wigner_d_function_WT(int l, int m, int s, double theta)
 {
