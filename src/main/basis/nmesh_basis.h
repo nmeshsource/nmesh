@@ -75,3 +75,7 @@ int topcoeff_has_expfalloff_array(tNode *node, tArray *ua,
 int topcoeff_has_expfalloff_var(tNode *node, int ui,
                                 double alp[3], double s[3],
                                 double f_unfilt, double fac);
+
+/* SpinWeightedSphericalHarmonics.c */
+double Re_sYlm(int l, int m, int s, double theta, double phi);
+double Im_sYlm(int l, int m, int s, double theta, double phi);
