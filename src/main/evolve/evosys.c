@@ -194,6 +194,7 @@ int var_in_pVLList(pVLList *w, int vi)
     forList(w, i)
     {
       tVarList *vl = ListEntry(w, i);
+      if(!vl) continue;
       if(vlindex(vl, vi) >= 0) return 1;
     }
   }
