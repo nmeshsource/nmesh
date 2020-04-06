@@ -184,6 +184,10 @@ Things that need to be done urgently:
   -then use nMPI_Ibcast to get troubled nodes to all ranks
   -refine each troubled node on all ranks, can we use omp tasks for this?
 
+*read 1908.00655
+ -info about gamma pars of GHG
+ -add similar neutrino treatment to nmesh
+
 *Burgers
 
 *DG with 2nd oder wave eqn
