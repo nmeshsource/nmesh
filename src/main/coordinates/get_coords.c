@@ -119,7 +119,7 @@ double nearest_ijk_of_xyz(tNode *node, int ijk[3], const double x0[3])
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
   int *n = node->n;
   int i,j,k, dir, ind;
-  double d1, d2, dist2 = 1e300;
+  double d1, d2, dist2 = DBL_MAX;
 
   /* if this node has no dat we need to compute x for each point from Xb */
   if(!px[0]) errorexit("we need x,y,z in this node");
@@ -157,7 +157,7 @@ double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
   int dir2 = Dir2_norm(N);
   double Xpl=0, X[3], x[3];
   int dir, i,j,k, ind;
-  double d1, d2, dist2 = 1e300;
+  double d1, d2, dist2 = DBL_MAX;
 
   /* if this node has no dat we need to compute x for each point from Xb */
   if(!px[0])
@@ -235,7 +235,7 @@ double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
   int dir2 = Dir2_norm(N);
   double Xpl=0, X[3], x[3];
   int dir, i,j,k, ind;
-  double d1, d2, dist2 = 1e300;
+  double d1, d2, dist2 = DBL_MAX;
 
   /* if this node has no dat we need to compute x from Xb for each point */
   if(!px[0])

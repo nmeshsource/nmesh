@@ -31,7 +31,7 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 /* compute max of var with index vind over a patch or mesh */
 double MeshMax(tMesh *mesh, tPat *pat, int vind)
 {
-  double Max, max = -1e300;
+  double Max, max = -DBL_MAX;
 
   formylnodes_noomp(mesh)
   {
@@ -54,7 +54,7 @@ double MeshMax(tMesh *mesh, tPat *pat, int vind)
 /* compute min of var with index vind over a patch or mesh */
 double MeshMin(tMesh *mesh, tPat *pat, int vind)
 {
-  double Min, min = 1e300;
+  double Min, min = DBL_MAX;
 
   formylnodes_noomp(mesh)
   {

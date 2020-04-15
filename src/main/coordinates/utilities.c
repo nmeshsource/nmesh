@@ -643,7 +643,7 @@ double find_pat_size(tPat *pat)
 double smallest_pat_size(tMesh *mesh)
 {
   int i;
-  double L=1e300;
+  double L=DBL_MAX;
   forpatches(mesh, i)
   {
     tPat *pat = mesh->pat[i];

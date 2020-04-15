@@ -94,7 +94,7 @@ int limiter_MRS(tNode *node, tVarList *vl)
   alpha_h = alpha * pow(h, 1.5);
 
   /* set thetas */
-  theta_Mi = theta_mi = 1e300;
+  theta_Mi = theta_mi = DBL_MAX;
   forvl(vl, vli)
   {
     int iq = Vind(vl, vli);
@@ -106,8 +106,8 @@ int limiter_MRS(tNode *node, tVarList *vl)
     wbar = dat->ic[iq]->myindc->d[0];
 
     /* find min and max of q in neighbors */
-    Mi = -1e300;
-    mi = 1e300;
+    Mi = -DBL_MAX;
+    mi = DBL_MAX;
     for(f=0; f<6; f++)
       for(ni=0; ni<node->nfnb[f]; ni++)
       {
