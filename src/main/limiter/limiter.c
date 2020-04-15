@@ -252,7 +252,12 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   dat = node->dat;
   if(!dat) return 0;
 
-  /* set pars (smaller alpha makes minmodB more agressive) */
+  /* set pars (smaller alpha makes minmodB more agressive):
+     alpha corresponds to \tilde{M} of 1506.06140v2, up to a possible
+     factor of sqrt(2) because the Legendre poly \bar{P} in 1506.06140v2
+     is nornmalized to sqrt(2), while nmesh's basis_normLegendreP is
+     normalized to 1. \tilde{M} := M * h, where h is the size of a node,
+     and h=\Delta x^K in 1506.06140v2 */
   alpha = Getd(Par_limiter_alpha);
   h     = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   Mt_h  = alpha * h;
