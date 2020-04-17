@@ -5,6 +5,9 @@
 #include "nmesh.h"
 #include "checkpoint.h"
 
+#include <unistd.h>   /* for sync */
+
+
 /******************************************************************/
 /* some functions to save nmesh data for checkpoints  */
 /******************************************************************/
@@ -303,6 +306,7 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
       checkpoint_write_vl(fp, vl, 0);
 
       fclose(fp);
+      sync();
     }
     /* wait until everyone is here */
     nMPI_barrier();
