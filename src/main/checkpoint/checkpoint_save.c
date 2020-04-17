@@ -306,7 +306,7 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
       checkpoint_write_vl(fp, vl, 0);
 
       fclose(fp);
-      sync();
+      sync(); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();
