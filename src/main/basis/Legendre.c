@@ -148,6 +148,7 @@ void LGL_x_wquad(int npoints, double *x, double *w)
   int Newton_itmax = 100;
   double Newton_rel_dytol = 1e-15;
 
+  /* special case for just 1 point */
   if(N == 0)
   {
     x[N] = 0.;
@@ -155,6 +156,7 @@ void LGL_x_wquad(int npoints, double *x, double *w)
     return;
   }
 
+  /* end points are local extrema in [-1,1] */
   x[0] = -1.;
   x[N] =  1.;
   if(w)
@@ -163,8 +165,8 @@ void LGL_x_wquad(int npoints, double *x, double *w)
     w[N] = w[0];
   }
 
+  /* if we have only 2 points we are done */
   if(N == 1) return;
-
 
   /* get nodes in (-1,0] */
   for(j = 1; j <= N/2; j++)
@@ -178,7 +180,7 @@ void LGL_x_wquad(int npoints, double *x, double *w)
       /* guess for node */
       y = - cos(PI*(j+0.25)/N - 3/(8*N*PI*(j+0.25)));
 
-      /* find y such that Q(y) = 0,
+      /* find y such that Q(y) = 0, (recall Q=0 <==> dP/dx=0),
          use Newton method to refine guess from line above */
       for(i = 0; i < Newton_itmax; i++)
       {
