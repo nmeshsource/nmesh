@@ -316,6 +316,7 @@ int approxXYZnormal_of_xyznormal(tNode *node, int cartN)
       if(CI->dom>=2) return 1;
       else           return -1;
     }
+    return -1;
   default:
     return cartN; /* assume Cartesian coords */
   }
