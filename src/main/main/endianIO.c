@@ -38,7 +38,7 @@ size_t fwrite_swapbytes(const void *ptr, size_t size, size_t nmemb, FILE *fp)
   const char *buf = ptr;
   size_t i, count;
   char c[size];
-  int b;
+  unsigned int b;
 
   for(count=0, i=0; i<nmemb; i++)
   {
@@ -54,7 +54,7 @@ size_t fread_swapbytes(void *ptr, size_t size, size_t nmemb, FILE *fp)
   char *buf = ptr;
   size_t i, count;
   char c[size];
-  int b;
+  unsigned int b;
 
   for(count=0, i=0; i<nmemb; i++)
   {
