@@ -16,7 +16,7 @@ void printmesh(tMesh *m)
   tNode *node;
 
   if(m==main_mesh) printf("mesh=main_mesh: ");
-  else             printf("mesh=%p: ", m);
+  else             printf("mesh=%p: ", (void *) m);
   printf("npats=%d npdb=%d nvdb=%d nln=%ld myln->nm=%d dt=%g\n",
 	 m->npats, m->npdb, m->nvdb, m->nln, m->myln->nm, m->dt);
   forpatches(m, p)
@@ -39,7 +39,8 @@ void printpatch(tPat *pat)
   printf("leaf nodes again:\n");
   fornodelist(pat->lns, el)
   {
-    printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
+    printf("%p: prev=%p next=%p\n",
+           (void *) el, (void *) el->prev, (void *) el->next);
     printnode(el->node);
   }
 */
@@ -82,13 +83,13 @@ void printCI(tPat *pat)
 
   /* FSurf */
   printf("CI->FSurf[] = [ ");
-  for(i=0;i<6;i++) printf("%p ", CI->FSurf[i]);
+  for(i=0;i<6;i++) printf("%p ", (void *) (size_t) CI->FSurf[i]);
   printf("]\n");
   for(i=p=0; i<6; i++) if(CI->dFSurfdC[i]) p++;
   if(p)
   {
     printf("dFSurfdC[] = [");
-    for(i=0;i<6;i++) printf(" %p", CI->dFSurfdC[i]);
+    for(i=0;i<6;i++) printf(" %p", (void *) (size_t) CI->dFSurfdC[i]);
     printf("]\n");
   }
 }
@@ -145,7 +146,7 @@ void printnode(tNode *n)
   }
   //printf("\n");
   //printf(" Dt =");
-  //for(i=0; i<3; i++) printf(" %p", n->Dt[i]);
+  //for(i=0; i<3; i++) printf(" %p", (void *) n->Dt[i]);
   //printf("\n");
 }
 
@@ -198,7 +199,8 @@ void printnodelistelement_and_neighbors_flag(tNlist *el, int pr_nb)
            get_node_nid(el->next->node), nodename(el->next->node, s,100));
   else
     printf("\n");
-  //printf("%p: prev=%p next=%p\n", el, el->prev, el->next);
+  //printf("%p: prev=%p next=%p\n",
+  //       (void *) el, (void *) el->prev, (void *) el->next);
   //printnode(el->node);
   if(pr_nb == 1) printnode_and_neighbors(el->node);
   if(pr_nb == 2) printnode(el->node);
@@ -521,9 +523,11 @@ void printbface(tBface *bface)
   else
   {
     printf("  WARNING: bfaces are not properly linked!!\n");
-    printf("  bface=%p bface->obface=%p:\n", bface, bface->obface);
+    printf("  bface=%p bface->obface=%p:\n",
+            (void *) bface, (void *) bface->obface);
     printthisbface(bface, " ");
-    printf("  obface=%p obface->obface%p:\n", obface, obface->obface);
+    printf("  obface=%p obface->obface%p:\n",
+           (void *) obface, (void *) obface->obface);
     printthisbface(obface, " ");
   }
 }
@@ -651,9 +655,11 @@ void printnface(tNface *nface)
   else
   {
     printf("  WARNING: nfaces are not properly linked!!\n");
-    printf("  nface=%p nface->onface=%p:\n", nface, nface->onface);
+    printf("  nface=%p nface->onface=%p:\n",
+           (void *) nface, (void *) nface->onface);
     printthisnface(nface, " ");
-    printf("  onface=%p onface->onface%p:\n", onface, onface->onface);
+    printf("  onface=%p onface->onface%p:\n",
+           (void *) onface, (void *) onface->onface);
     printthisnface(onface, " ");
   }
 }

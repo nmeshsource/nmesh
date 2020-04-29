@@ -219,7 +219,7 @@ void move_node_to_rank(tNode *node, int desrank,
       if(0)
       {
         PRF;printf(": nid%ld rank%d node->dat=%p\n",
-                   node->nid, rank, node->dat);
+                   node->nid, rank, (void *) node->dat);
       }
       if(PR) { PRF;printf(": calling coordinates_init_node\n"); }
       coordinates_init_node(node);

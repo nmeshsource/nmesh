@@ -728,9 +728,11 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
           bface->obface = obface;
         if(bface->obface != obface)
         {
-          printf("bface=%p  bface->obface=%p\n", bface, bface->obface);
+          printf("bface=%p  bface->obface=%p\n",
+                 (void *) bface, (void *) bface->obface);
           printbface(bface);
-          printf("obface=%p  obface->obface=%p\n", obface, obface->obface);
+          printf("obface=%p  obface->obface=%p\n",
+                 (void *) obface, (void *) obface->obface);
           printbface(obface);
           errorexit("what happened???");
         }
@@ -738,9 +740,11 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
           obface->obface = bface;
         if(obface->obface != bface)
         {
-          printf("bface=%p  bface->obface=%p\n", bface, bface->obface);
+          printf("bface=%p  bface->obface=%p\n",
+                 (void *) bface, (void *) bface->obface);
           printbface(bface);
-          printf("obface=%p  obface->obface=%p\n", obface, obface->obface);
+          printf("obface=%p  obface->obface=%p\n",
+                 (void *) obface, (void *) obface->obface);
           printbface(obface);
           errorexit("what happened???");
         }

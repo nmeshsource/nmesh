@@ -228,7 +228,7 @@ void makeparameter(tMesh *mesh, const char *name, const char *value,
 {
   tPar *p;
 
-  if(0) {PRF;printf(" mesh=%p\n", mesh);}
+  if(0) {PRF;printf(" mesh=%p\n", (void *) mesh);}
   if(0) {PRF;printf(" %s = %s,  %s\n", name, value, description);}
 
   mesh->pdb = realloc(mesh->pdb, npdbmax*sizeof(tPar));
@@ -678,7 +678,7 @@ void print_pdb_i1_i2(tPar *pdb, int i1, int i2, int pr_ind, int pr_cache)
 {
   int i;
 
-  printf("print_pdb_i1_i2: pdb=%p i1=%d i2=%d\n", pdb, i1,i2);
+  printf("print_pdb_i1_i2: pdb=%p i1=%d i2=%d\n", (void *) pdb, i1,i2);
   for(i=i1; i<=i2; i++)
   {
     if(pr_ind) printf("#%d# ", i);

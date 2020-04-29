@@ -490,7 +490,7 @@ void print_com(tCom *com)
 {
   int n_rq = com->n_rq;
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
-         com, n_rq, com->send_i, com->recv_i);
+         (void *) com, n_rq, com->send_i, com->recv_i);
 #ifndef USEMPI
   for(int i=0; i<n_rq; i++)
     printf("%d: send_rq=%d recv_rq=%d send_stat=%d recv_stat=%d\n",
@@ -612,7 +612,7 @@ void free_com_recv_i_buf(tCom *com)
 {
   int i = com->recv_i;
   //PRF;printf(": i=%d -> recv_i=%d com->recv_buf[i]=%p\n",
-  //           i, com->recv_i, com->recv_buf[i]); fflush(stdout);
+  //           i, com->recv_i, (void *) com->recv_buf[i]); fflush(stdout);
   if(com->recv_buf)
   {
     free(com->recv_buf[i]);
