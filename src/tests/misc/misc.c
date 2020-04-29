@@ -284,7 +284,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   d0 = nd->dat;
   printnode(el->node);
   printvar_innode(nd, ui);
-  if(d0) printf("1 nd %p %p %d\n", nd, d0, d0->nv);
+  if(d0) printf("1 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
 
   make8children_in_mesh_lns_myln(el, nn);
   //printmesh(mesh);
@@ -298,8 +298,8 @@ int test_parent_child_interpolation(tMesh *mesh)
   l2 = NULL;
   //printmesh(mesh);
 
-  printf("2 nd %p %p\n", nd, nd->dat);
-  //if(d0) printf("2b nd %p %p %d\n", nd, d0, d0->nv);
+  printf("2 nd %p %p\n", (void *) nd, (void *) nd->dat);
+  //if(d0) printf("2b nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
   printf("2c: test_func=%g\n", test_func(-4,-2,-1));
   printf("2c: test_func=%g\n", test_func(-1,-1,-1));
   el = mesh->lns;
@@ -307,8 +307,8 @@ int test_parent_child_interpolation(tMesh *mesh)
   printvar_innode(nd->child[0], ui);
 
   destroy8siblings_in_mesh_lns_myln(el);
-  printf("3 nd %p %p\n", nd, nd->dat);
-  //if(d0) printf("4 nd %p %p %d\n", nd, d0, d0->nv);
+  printf("3 nd %p %p\n", (void *) nd, (void *) nd->dat);
+  //if(d0) printf("4 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
   el = mesh->lns;
   printnode(el->node);
   printvar_innode(nd, ui);
