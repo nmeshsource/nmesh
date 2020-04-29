@@ -43,13 +43,12 @@ libpaths += src/utility/output src/utility/numerics
 
 # --------------------------------------------------------------------------
 # we can choose more libraries and options in the file MyConfig
-
+projectsrepoprefix = giter@mars.physics.fau.edu:nmesh-projects/
 projects =#
 include MyConfig
 
 # --------------------------------------------------------------------------
 # add projects to libpaths, and set variable projectnames for git targets
-
 libpaths += $(projects)
 projectnames = $(notdir $(projects))
 
@@ -179,7 +178,7 @@ cleantilde:
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
-	-for X in $(projectnames); do printf "==== %s ====\n" $$X; git clone giter@mars.physics.fau.edu:nmesh-projects/$$X $(PROJECTDIR)/$$X; done
+	-for X in $(projectnames); do printf "==== %s ====\n" $$X; git clone $(projectsrepoprefix)$$X $(PROJECTDIR)/$$X; done
 	@$(MAKE) install_git_hooks
 
 git_pull: install_git_hooks
