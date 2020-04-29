@@ -211,7 +211,8 @@ NORET void errorexiti(const char *file, int line, const char *func,
 #define VarMem(mesh, cat,li, vi) Vard_((mesh)->myln->ln[cat][li]->node, vi)
 #define prVarMem(mesh, cat,li, vi,ijk) \
   printf("cat%d node%d var%d at %p+%d = %g\n", cat,(int) (li), vi, \
-         VarMem(mesh, cat,li, vi), ijk, VarMem(mesh, cat,li, vi)[ijk])
+         (void *) VarMem(mesh, cat,li, vi), ijk, \
+         VarMem(mesh, cat,li, vi)[ijk])
 
 void Yo(double x);
 void prdivider(int n);
