@@ -100,6 +100,7 @@ SRHDtestID
 ScalarWave
 
 # To get and compile all these you need to add the lines
+projectsrepoprefix = giter@mars.physics.fau.edu:nmesh-projects/
 projects += src/projects/Ein
 projects += src/projects/ADM
 projects += src/projects/EoS
