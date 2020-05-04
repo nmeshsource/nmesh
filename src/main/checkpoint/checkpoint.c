@@ -238,8 +238,9 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
     }
   }
 
-  /* broadcast do_checkpoint from rank0 to all others */
+  /* broadcast do_checkpoint, last_checkpoint_time from rank0 to all others */
   nMPI_Bcast(&do_checkpoint, 1, nMPI_INT, 0);
+  nMPI_Bcast(&last_checkpoint_time, 1, nMPI_DOUBLE, 0);
 
   /* now do it if needed */
   if(do_checkpoint)
