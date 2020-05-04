@@ -194,6 +194,7 @@ int checkpoint_save(tMesh *mesh)
   /* rename checkpoint and remove old one */
   if(Rank0)
   {
+    system2("rm -rf", dirp);
     system3("mv", dir, dirp);
     system3("mv", dirn, dir);
     system2("rm -rf", dirp);
