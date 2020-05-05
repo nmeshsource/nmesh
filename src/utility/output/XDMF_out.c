@@ -4,8 +4,10 @@
 #include "nmesh.h"
 #include "output.h"
 
+#include <unistd.h>   /* for sync */
 
-/* VisIt and others (maybe paraview) can read XDMF format.
+
+/* VisIt and ParaView can read XDMF format.
    Our output in XDMF format consists of a .xml file and a .bin file. The
    actual data is in the .bin file, while the .xml file only contains a
    description of the data in XML format.
@@ -287,6 +289,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
         /* close files on this proc now */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf);
+        sync(); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
       nMPI_barrier();
@@ -375,6 +378,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         /* close files on this proc now */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf);
+        sync(); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
       nMPI_barrier();
