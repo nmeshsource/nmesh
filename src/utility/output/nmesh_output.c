@@ -36,7 +36,7 @@ int nmesh_output(tMesh *mesh)
   AddPar("1doutput", "", "variables to output along axes");
   AddPar("2doutput", "", "variables to output on coordinate planes");
   AddPar("3doutput", "", "variables to output in 3d");
-  AddPar("cooutput", "", "variables coefss to output");
+  AddPar("cooutput", "", "variables coeffs to output");
 
   AddPar("0doutputall", "yes", "whether to output all components");
   AddPar("1doutputall", "yes", "whether to output all components");
@@ -45,7 +45,7 @@ int nmesh_output(tMesh *mesh)
   AddPar("cooutputall", "yes", "whether to output all components");
 
   AddPar("2dformat", "gnuplot",
-	 "format for 2d output [gnuplot,vtk,text,binary,float,double]");
+	 "format for 2d output [xdmf,gnuplot,vtk,text,binary,float,double]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "
 	 "[xdmf,vtk,text,binary,float,double]");
   AddPar("coformat", "vtk text arrange_as_1d", "format for coef output "
