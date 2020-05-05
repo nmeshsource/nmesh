@@ -188,13 +188,13 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
 /* 3d vtk output */
 void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
 {
-  tNode *node;
   int vi = Ind(name);
   FILE *fp;
   int nseries;
   int vtk      = Getv(Par("3dformat"), "vtk");
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
+  int rk;
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -206,43 +206,53 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   /* a number that counts the output */
   nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("3doutiter")),
                                     Getd(Par("3douttime")));
-  /* loop over all nodes */
-  forlnodes(mesh, node)
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
   {
-    if(node->dat)
-    if(node->dat->v[vi])
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
     {
-      char ns[100];
-
-      /* find string that identifies node */
-      nodename(node, ns,100);
-
-      /* set some more pars */
-      par->nodename = ns;
-
-      /* write files */
-      if(vtk || 1) /* can do only VTK right now */
+      /* loop over all leaf nodes */
+      formylnodes_noomp(mesh)
       {
-        /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1);
-        write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
-        fclose(fp);
-      }
+        tNode *node = MyLnode;
+
+        if(node->dat)
+        if(node->dat->v[vi])
+        {
+          char ns[100];
+
+          /* find string that identifies node */
+          nodename(node, ns,100);
+
+          /* set some more pars */
+          par->nodename = ns;
+
+          /* write files */
+          if(vtk || 1) /* can do only VTK right now */
+          {
+            /* VTK output: one file per time step in separate subdirectories */
+            fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1);
+            write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
+            fclose(fp);
+          }
+        }
+      } /* end formylnodes_noomp */
     }
-    /* sysnchronize, so that we write only one node at a time */
+    /* wait until everyone is here */
     nMPI_barrier();
-  } endforlnodes;
+  } /* end rk-loop */
 }
 
 /* 3d vtk output of coeffs */
 void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
 {
-  tNode *node;
   int vi = Ind(name);
   int nseries;
   int vtk      = Getv(Par("coformat"), "vtk");
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
+  int rk;
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -254,37 +264,47 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
   /* a number that counts the output */
   nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("cooutiter")),
                                     Getd(Par("coouttime")));
-  /* loop over all nodes */
-  forlnodes(mesh, node)
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
   {
-    if(node->dat)
-    if(node->dat->v[vi])
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
     {
-      char ns[100];
-
-      /* find string that identifies node */
-      nodename(node, ns,100);
-
-      /* set some more pars */
-      par->nodename = ns;
-
-      /* write files */
-      if(vtk || 1) /* can do only VTK right now */
+      /* loop over all leaf nodes */
+      formylnodes_noomp(mesh)
       {
-        /* VTK output: one file per time step in separate subdirectories */
-        FILE *fp = fopen_vtk(name, outdir, "co", ns, nseries-1);
-        tArray *co = alloc_array(node->n);
+        tNode *node = MyLnode;
 
-        basis_array_analysis3(node, VarA(node, vi), co);
-        write3d_vtk(node, fp, co, It,T, nseries-1, par);
+        if(node->dat)
+        if(node->dat->v[vi])
+        {
+          char ns[100];
 
-        free_array(co);
-        fclose(fp);
-      }
+          /* find string that identifies node */
+          nodename(node, ns,100);
+
+          /* set some more pars */
+          par->nodename = ns;
+
+          /* write files */
+          if(vtk || 1) /* can do only VTK right now */
+          {
+            /* VTK output: one file per time step in separate subdirectories */
+            FILE *fp = fopen_vtk(name, outdir, "co", ns, nseries-1);
+            tArray *co = alloc_array(node->n);
+
+            basis_array_analysis3(node, VarA(node, vi), co);
+            write3d_vtk(node, fp, co, It,T, nseries-1, par);
+
+            free_array(co);
+            fclose(fp);
+          }
+        }
+      } /* end formylnodes_noomp */
     }
-    /* sysnchronize, so that we write only one node at a time */
+    /* wait until everyone is here */
     nMPI_barrier();
-  } endforlnodes;
+  } /* end rk-loop */
 }
 
 /* quick array output in vtk format */
@@ -452,13 +472,13 @@ void write_plane_vtk(tNode *node, FILE *fp, int normal, int plane[],
 /* 2d vtk output */
 void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
 {
-  tNode *node;
   int vi = Ind(name);
   FILE *fp;
   int nseries;
   //int vtk      = Getv(Par("2dformat"), "vtk");
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
+  int rk;
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -470,60 +490,70 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   /* a number that counts the output */
   nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("2doutiter")),
                                     Getd(Par("2douttime")));
-  /* loop over all nodes */
-  forlnodes(mesh, node)
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
   {
-    if(node->dat)
-    if(node->dat->v[vi])
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
     {
-      char ns[100];
-      int ijk[3];
-
-      //TODO: use different Xb0 for diff patches
-      double X0[] = { Getd(Par("outputX0")),
-                      Getd(Par("outputY0")),
-                      Getd(Par("outputZ0")) };
-
-      /* find indices of nearest, if all are negative, node does not have
-         outputX0, outputY0, outputZ0 */
-      if(Getv(Par("outputX0Y0Z0coord"), "Xb"))
-        nearest_ijk_of_XbYbZb(node, ijk, X0);
-      else
-        nearest_ijk_of_XYZ(node, ijk, X0);
-
-      /* find string that idetifies node */
-      nodename(node, ns,100);
-
-      /* set some more pars */
-      par->nodename = ns;
-
-      /* write files */
-      /* XY-plane:  Z = Z0 */
-      if(ijk[2]>=0)
+      /* loop over all leaf nodes */
+      formylnodes_noomp(mesh)
       {
-        /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XY", ns, nseries-1);
-        write_plane_vtk(node, fp, 2,ijk, VarA(node, vi), It,T, nseries-1, par);
-        fclose(fp);
-      }
-      /* XZ-plane:  Y = Y0 */
-      if(ijk[1]>=0)
-      {
-        /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "XZ", ns, nseries-1);
-        write_plane_vtk(node, fp, 1,ijk, VarA(node, vi), It,T, nseries-1, par);
-        fclose(fp);
-      }
-      /* YZ-plane:  X = X0 */
-      if(ijk[0]>=0)
-      {
-        /* VTK output: one file per time step in separate subdirectories */
-        fp = fopen_vtk(name, outdir, "YZ", ns, nseries-1);
-        write_plane_vtk(node, fp, 0,ijk, VarA(node, vi), It,T, nseries-1, par);
-        fclose(fp);
-      }
+        tNode *node = MyLnode;
+
+        if(node->dat)
+        if(node->dat->v[vi])
+        {
+          char ns[100];
+          int ijk[3];
+
+          //TODO: use different Xb0 for diff patches
+          double X0[] = { Getd(Par("outputX0")),
+                          Getd(Par("outputY0")),
+                          Getd(Par("outputZ0")) };
+
+          /* find indices of nearest, if all are negative, node does not have
+             outputX0, outputY0, outputZ0 */
+          if(Getv(Par("outputX0Y0Z0coord"), "Xb"))
+            nearest_ijk_of_XbYbZb(node, ijk, X0);
+          else
+            nearest_ijk_of_XYZ(node, ijk, X0);
+
+          /* find string that idetifies node */
+          nodename(node, ns,100);
+
+          /* set some more pars */
+          par->nodename = ns;
+
+          /* write files */
+          /* XY-plane:  Z = Z0 */
+          if(ijk[2]>=0)
+          {
+            /* VTK output: one file per time step in separate subdirectories */
+            fp = fopen_vtk(name, outdir, "XY", ns, nseries-1);
+            write_plane_vtk(node, fp, 2,ijk, VarA(node, vi), It,T, nseries-1, par);
+            fclose(fp);
+          }
+          /* XZ-plane:  Y = Y0 */
+          if(ijk[1]>=0)
+          {
+            /* VTK output: one file per time step in separate subdirectories */
+            fp = fopen_vtk(name, outdir, "XZ", ns, nseries-1);
+            write_plane_vtk(node, fp, 1,ijk, VarA(node, vi), It,T, nseries-1, par);
+            fclose(fp);
+          }
+          /* YZ-plane:  X = X0 */
+          if(ijk[0]>=0)
+          {
+            /* VTK output: one file per time step in separate subdirectories */
+            fp = fopen_vtk(name, outdir, "YZ", ns, nseries-1);
+            write_plane_vtk(node, fp, 0,ijk, VarA(node, vi), It,T, nseries-1, par);
+            fclose(fp);
+          }
+        }
+      } /* end formylnodes_noomp */
     }
-    /* sysnchronize, so that we write only one node at a time */
+    /* wait until everyone is here */
     nMPI_barrier();
-  } endforlnodes;
+  } /* end rk-loop */
 }
