@@ -42,6 +42,8 @@ int nMPI_Comm_free(nMPI_Comm *comm);
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
 int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
                    nMPI_Datatype datatype, nMPI_Op op);
+int nMPI_Reduce(const void *sendbuf, void *recvbuf, int count,
+                nMPI_Datatype datatype, nMPI_Op op, int root);
 int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root);
 int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
                 int root, nMPI_Req *request);

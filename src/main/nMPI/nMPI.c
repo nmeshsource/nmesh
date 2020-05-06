@@ -290,6 +290,17 @@ int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
 #endif
   return status;
 }
+int nMPI_Reduce(const void *sendbuf, void *recvbuf, int count,
+                nMPI_Datatype datatype, nMPI_Op op, int root)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, WORLD);
+  PR1;
+#endif
+  return status;
+}
 
 /* non-blocking reduction */
 int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
