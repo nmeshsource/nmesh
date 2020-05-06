@@ -276,6 +276,8 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
                           double power, int mode);
 double MeshMax(tMesh *mesh, tPat *pat, int vind);
 double MeshMin(tMesh *mesh, tPat *pat, int vind);
+double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
+                       int *Mp, int *Mnid, int *Mijk, double *MX);
 
 /* main.c */
 void finalize_all_and_exit(tMesh *mesh, int ec);
