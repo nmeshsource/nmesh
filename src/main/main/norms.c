@@ -134,7 +134,6 @@ double MeshMaxLoc(tMesh *mesh, tPat *pat, int vind, tNode *Mnode, int *Mijk)
   } uloc[1];
 
   /* get local max and rank into mr and Mr */
-  Mnode = NULL;
   mr->max  = MeshMaxLoc_local(mesh, pat, vind, Mnode, Mijk);
   mr->rank = nMPI_rank();
   Mr->max  = mr->max;
@@ -174,7 +173,6 @@ double MeshMinLoc(tMesh *mesh, tPat *pat, int vind, tNode *Mnode, int *Mijk)
   } uloc[1];
 
   /* get local min and rank into mr and Mr */
-  Mnode = NULL;
   mr->min  = MeshMinLoc_local(mesh, pat, vind, Mnode, Mijk);
   mr->rank = nMPI_rank();
   Mr->min  = mr->min;
