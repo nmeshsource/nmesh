@@ -143,7 +143,9 @@ double MeshMaxLoc(tMesh *mesh, tPat *pat, int vind, tNode *Mnode, int *Mijk)
   nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
 
   /* now we know rank and value, so broadcast node and point index to all */
-  nMPI_Bcast(&(uloc->bytes), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
+  uloc->loc->node = Mnode;
+  uloc->loc->ijk  = *Mijk;
+  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
 
   /* set location */
   Mnode = uloc->loc->node;
@@ -182,7 +184,9 @@ double MeshMinLoc(tMesh *mesh, tPat *pat, int vind, tNode *Mnode, int *Mijk)
   nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
 
   /* now we know rank and value, so broadcast node and point index to all */
-  nMPI_Bcast(&(uloc->bytes), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
+  uloc->loc->node = Mnode;
+  uloc->loc->ijk  = *Mijk;
+  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
 
   /* set location */
   Mnode = uloc->loc->node;
