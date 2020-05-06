@@ -118,7 +118,7 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
    input: mesh, pat, vind, findMax
    output: Mp, Mnid, Mijk, MX[3]
            output has max/min location, we can get x[3] by calling
-           set_xyz(mesh->pat[Mp],0, Mijk, X, x);   */
+           set_xyz(mesh->pat[Mp],0, Mijk, MX, x);   */
 double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
                        int *Mp, int *Mnid, int *Mijk, double *MX)
 {
