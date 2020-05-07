@@ -39,5 +39,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("nan_check", "", "variables we check for NANs [varnames]");
   AddPar("sysmon_hours", "0.5", "hours after which we write sysmon.log");
 
+  AddPar("fs_sync", "no", "whether fs_sync is active [yes,no]");
+
   return 0;
 }

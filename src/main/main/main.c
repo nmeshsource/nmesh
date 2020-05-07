@@ -3,7 +3,8 @@
 
 #include "nmesh.h"
 #include "main.h"
-#include <time.h> // for time and ctime functions
+#include <time.h>    /* for time and ctime functions */
+#include <unistd.h>  /* for sync */
 
 /* global vars */
 nMPI_Comm main_comm;  /* MPI communicator made at start of main */
@@ -362,6 +363,16 @@ int move_previous_output_to_outdir(tMesh *mesh)
   redirect_stdout_and_stderr(mesh, "a");
 
   free(outdirp);
+  return 0;
+}
+
+/* commit filesystem caches to disk if desired */
+int fs_sync(tMesh *mesh)
+{
+  int fs_sync = Par("fs_sync");
+
+  if(Getb(fs_sync)) sync();
+
   return 0;
 }
 

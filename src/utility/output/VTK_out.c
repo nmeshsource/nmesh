@@ -8,8 +8,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <unistd.h>   /* for sync */
-
 
 /* open file for vtk writing */
 FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
@@ -239,7 +237,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
           }
         }
       } /* end formylnodes_noomp */
-      sync(); /* make sure every MPI proc flushes buffers to disk */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();
@@ -303,7 +301,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
           }
         }
       } /* end formylnodes_noomp */
-      sync(); /* make sure every MPI proc flushes buffers to disk */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();
@@ -555,7 +553,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
           }
         }
       } /* end formylnodes_noomp */
-      sync(); /* make sure every MPI proc flushes buffers to disk */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();

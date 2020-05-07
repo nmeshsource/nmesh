@@ -4,7 +4,6 @@
 #include "nmesh.h"
 #include "output.h"
 
-#include <unistd.h>   /* for sync */
 
 /* the functions in this file write data in a text format that is understood
    by gnuplot and tgraph */
@@ -245,7 +244,7 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
           }
         }
       } /* end formylnodes_noomp */
-      sync(); /* make sure every MPI proc flushes buffers to disk */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();
@@ -332,7 +331,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
           }
         }
       } /* end formylnodes_noomp */
-      sync(); /* make sure every MPI proc flushes buffers to disk */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();
@@ -396,7 +395,7 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
           }
         }
       } /* end formylnodes_noomp */
-      sync(); /* make sure every MPI proc flushes buffers to disk */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();

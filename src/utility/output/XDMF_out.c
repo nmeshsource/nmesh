@@ -4,8 +4,6 @@
 #include "nmesh.h"
 #include "output.h"
 
-#include <unistd.h>   /* for sync */
-
 
 /* VisIt and ParaView can read XDMF format.
    Our output in XDMF format consists of a .xml file and a .bin file. The
@@ -289,7 +287,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
         /* close files on this proc now */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf);
-        sync(); /* make sure every MPI proc flushes buffers to disk */
+        fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
       nMPI_barrier();
@@ -378,7 +376,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         /* close files on this proc now */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf);
-        sync(); /* make sure every MPI proc flushes buffers to disk */
+        fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
       nMPI_barrier();
