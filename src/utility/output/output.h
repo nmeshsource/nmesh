@@ -63,4 +63,5 @@ void output0d_vl(tVarList *vl, int It, double T);
 void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T);
 void output0d_filename(tMesh *mesh, char *filename, int len,
                        char *name, char *type, tPat *pat);
-void output0d_value(char *filename, double time, double val);
+void output0d_value(char *filename, double time, double val,
+                    int coords, double x[3]);

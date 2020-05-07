@@ -31,6 +31,9 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   tMesh *mesh = vl->mesh;
   char filename[1000];
   double max, min, maxAbs, rms, mean, VolInt;
+  int p, ijk;
+  long nid;
+  double X[3], xmin[3], xmax[3], *xmaxAbs;
   double Vol;
   int vli;
 
@@ -46,30 +49,44 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     mean   = VolInt/Vol;
     rms    = sqrt(MeshVolumeIntegral(mesh,pat, vi, 2.,0) / Vol);
 
-    min    = MeshMin(mesh,pat, vi);
-    max    = MeshMax(mesh,pat, vi);
-    maxAbs = max2(fabs(min), fabs(max));
+    /* min, max and their positions xmin, xmax */
+    min = MeshExtremumLoc(mesh,pat, vi, 0, &p, &nid, &ijk, X);
+    set_xyz(mesh->pat[p],0, ijk, X, xmin);
+    max = MeshExtremumLoc(mesh,pat, vi, 1, &p, &nid, &ijk, X);
+    set_xyz(mesh->pat[p],0, ijk, X, xmax);
+
+    /* maxAbs and its pos. */
+    if(fabs(max)>fabs(min))
+    {
+      maxAbs  = fabs(max);
+      xmaxAbs = &(xmax[0]);
+    }
+    else
+    {
+      maxAbs  = fabs(min);
+      xmaxAbs = &(xmin[0]);
+    }
 
     if(Rank0)
     {
       /* output max, min, maxAbs, rms, mean, VolInt */
       output0d_filename(mesh, filename,999, name, "VolInt", pat);
-      output0d_value(filename, T, VolInt);
+      output0d_value(filename, T, VolInt, 0, NULL);
 
       output0d_filename(mesh, filename,999, name, "mean", pat);
-      output0d_value(filename, T, mean);
+      output0d_value(filename, T, mean, 0, NULL);
 
       output0d_filename(mesh, filename,999, name, "rms", pat);
-      output0d_value(filename, T, rms);
+      output0d_value(filename, T, rms, 0, NULL);
 
       output0d_filename(mesh, filename,999, name, "min", pat);
-      output0d_value(filename, T, min);
+      output0d_value(filename, T, min, 1, xmin);
 
       output0d_filename(mesh, filename,999, name, "max", pat);
-      output0d_value(filename, T, max);
+      output0d_value(filename, T, max, 1, xmax);
 
       output0d_filename(mesh, filename,999, name, "maxAbs", pat);
-      output0d_value(filename, T, maxAbs);
+      output0d_value(filename, T, maxAbs, 1, xmaxAbs);
     }
   }
 }
@@ -93,7 +110,8 @@ void output0d_filename(tMesh *mesh, char *filename, int len,
 }
 
 /* output one value */
-void output0d_value(char *filename, double time, double val)
+void output0d_value(char *filename, double time, double val,
+                    int coords, double x[3])
 {
   FILE *fp;
   
@@ -102,7 +120,9 @@ void output0d_value(char *filename, double time, double val)
   if(!fp) errorexits("failed opening %s", filename);
 
   /* write value */
-  fprintf(fp, "%.15g %.15g\n", time, val);
+  fprintf(fp, "%.15g %.15g", time, val);
+  if(coords) fprintf(fp, " %.15g %.15g %.15g", x[0],x[1],x[2]);
+  fprintf(fp, "\n");
 
   /* close file */
   fclose(fp);
