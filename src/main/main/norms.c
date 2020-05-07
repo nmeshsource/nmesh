@@ -31,11 +31,11 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 /* compute MPI-proc local max of var with index vind over a patch or mesh,
    set Mnode, Mijk to the node and point-index with the Max */
 double MeshMaxLoc_local(tMesh *mesh, tPat *pat, int vind,
-                        tNode *Mnode, int *Mijk)
+                        tNode **Mnode, int *Mijk)
 {
   double max = -DBL_MAX;
 
-  Mnode = NULL;
+  *Mnode = NULL;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -48,7 +48,7 @@ double MeshMaxLoc_local(tMesh *mesh, tPat *pat, int vind,
     if(nmax > max)
     {
       max = nmax;
-      Mnode = node;
+      *Mnode = node;
       *Mijk = ijk;
     }
   }
@@ -59,11 +59,11 @@ double MeshMaxLoc_local(tMesh *mesh, tPat *pat, int vind,
 /* compute MPI-proc local min of var with index vind over a patch or mesh,
    set Mnode, Mijk to the node and point-index with the Min */
 double MeshMinLoc_local(tMesh *mesh, tPat *pat, int vind,
-                        tNode *Mnode, int *Mijk)
+                        tNode **Mnode, int *Mijk)
 {
   double min = DBL_MAX;
 
-  Mnode = NULL;
+  *Mnode = NULL;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -76,8 +76,9 @@ double MeshMinLoc_local(tMesh *mesh, tPat *pat, int vind,
     if(nmin < min)
     {
       min = nmin;
-      Mnode = node;
+      *Mnode = node;
       *Mijk = ijk;
+      //printf("*Mnode=%p *Mijk=%d\n", *Mnode, *Mijk);
     }
   }
   return min;
@@ -88,10 +89,10 @@ double MeshMinLoc_local(tMesh *mesh, tPat *pat, int vind,
 double MeshMax(tMesh *mesh, tPat *pat, int vind)
 {
   double Max, max;
-  tNode *Mnode=NULL;
+  tNode *Mnode;
   int Mijk;
 
-  max = MeshMaxLoc_local(mesh, pat, vind, Mnode, &Mijk);
+  max = MeshMaxLoc_local(mesh, pat, vind, &Mnode, &Mijk);
   Max = max;
   nMPI_Allreduce(&max, &Max, 1, nMPI_DOUBLE, nMPI_MAX);
 
@@ -103,10 +104,10 @@ double MeshMax(tMesh *mesh, tPat *pat, int vind)
 double MeshMin(tMesh *mesh, tPat *pat, int vind)
 {
   double Min, min;
-  tNode *Mnode=NULL;
+  tNode *Mnode;
   int Mijk;
 
-  min = MeshMinLoc_local(mesh, pat, vind, Mnode, &Mijk);
+  min = MeshMinLoc_local(mesh, pat, vind, &Mnode, &Mijk);
   Min = min;
   nMPI_Allreduce(&min, &Min, 1, nMPI_DOUBLE, nMPI_MIN);
 
@@ -120,7 +121,7 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
            output has max/min location, we can get x[3] by calling
            set_xyz(mesh->pat[Mp],0, Mijk, MX, x);   */
 double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
-                       int *Mp, int *Mnid, int *Mijk, double *MX)
+                       int *Mp, long *Mnid, int *Mijk, double *MX)
 {
   tNode *Mnode=NULL;
   double Xb[3];
@@ -143,28 +144,35 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   } uloc[1];
 
   /* write local extr and rank into mr and Mr */
-  if(findMax) mr->extr  = MeshMaxLoc_local(mesh, pat, vind, Mnode, Mijk);
-  else        mr->extr  = MeshMinLoc_local(mesh, pat, vind, Mnode, Mijk);
+  if(findMax) mr->extr  = MeshMaxLoc_local(mesh, pat, vind, &Mnode, Mijk);
+  else        mr->extr  = MeshMinLoc_local(mesh, pat, vind, &Mnode, Mijk);
   mr->rank = nMPI_rank();
   Mr->extr = mr->extr;
   Mr->rank = mr->rank;
+  //printf("mr->extr=%g\n", mr->extr);
+  //printf("Mnode=%p *Mijk=%d\n", Mnode, *Mijk);
 
-  /* write local patch coords into MX */
-  XbYbZb_of_ind(Mnode, *Mijk, Xb);
-  XYZ_of_XbYbZb(Mnode, Xb, MX);
+  /* write local patch coords into MX and uloc, if we found a node */
+  if(Mnode)
+  {
+    XbYbZb_of_ind(Mnode, *Mijk, Xb);
+    XYZ_of_XbYbZb(Mnode, Xb, MX);
+    uloc->loc->p    = Mnode->pat->p;
+    uloc->loc->nid  = Mnode->nid;
+  }
+
+  /* write local results into uloc */
+  uloc->loc->ijk  = *Mijk;
+  uloc->loc->X[0] = MX[0];
+  uloc->loc->X[1] = MX[1];
+  uloc->loc->X[2] = MX[2];
 
   /* get global extr and rank into Mr */
   if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
   else        nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
 
-  /* now we have rank and value (in Mr),
-     so write local results into uloc and broadcast from Mr->rank to all */
-  uloc->loc->p    = Mnode->pat->p;
-  uloc->loc->nid  = Mnode->nid;
-  uloc->loc->ijk  = *Mijk;
-  uloc->loc->X[0] = MX[0];
-  uloc->loc->X[1] = MX[1];
-  uloc->loc->X[2] = MX[2];
+  /* now we have rank and value in Mr,
+     so broadcast local results from Mr->rank to all */
   nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
 
   /* set location */
