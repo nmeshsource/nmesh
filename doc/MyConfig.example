@@ -37,9 +37,6 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 #SPECIALLIBS += -lgsl -lgslcblas
 #SPECIALLIBS += -lrt
 
-# for little-endian systems without <endian.h>, uncomment the line below
-#DFLAGS += -DBYTE_ORDER_LITTLE=1
-
 # on UNIX without ru_maxrss in struct rusage (in getrusage), uncomment
 #DFLAGS += -DNO_RU_MAXRSS
 
