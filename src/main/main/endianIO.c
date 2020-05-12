@@ -13,6 +13,20 @@
 
 #include "nmesh.h"
 
+
+/* We can check the byte order with this function.
+   Without inline and already with -O1 this will be turned into:
+        mov    $0x1,%eax
+        retq
+   But it will also be inlined, and thus will cause no overhead at all! */
+static inline unsigned int byte_order_is_little()
+{
+  unsigned int ui = 1;
+  unsigned char *s = (unsigned char *) &ui;
+  return s[0]; /* returns first byte in ui, which is 1 for little-endian */
+}
+
+
 /* About binary formats:
    There is <endian.h> or "/usr/include/endian.h" on Linux. This is not
    standard yet. On BSD this can be in <sys/endian.h>, or on crazy systems
@@ -20,8 +34,9 @@
    On Linux see also "/usr/include/byteswap.h", and
    include/bits/byteswap.h for gcc/x86 optimized code */
 
-/* check if BYTE_ORDER_LITTLE was set in MyConfig.
+/* Directives to check check if BYTE_ORDER_LITTLE was set in MyConfig.
    If not, use info from <endian.h> to set it: */
+/*
 #ifndef BYTE_ORDER_LITTLE
 #include <endian.h>
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -30,6 +45,14 @@
 #define BYTE_ORDER_LITTLE 0
 #endif
 #endif
+*/
+
+/* instead of the "defines" above for BYTE_ORDER_LITTLE we simply
+   use the inline-function byte_order_is_little to just test endianness */
+#define BYTE_ORDER_LITTLE byte_order_is_little()
+/* this should cause no overhead! */
+
+
 
 
 /* use fwrite to write an array, but swap byte order */
