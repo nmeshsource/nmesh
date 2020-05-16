@@ -266,7 +266,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
 
     if(vl->n) expfilter_vl(vl, af, sf);
 
-    free(vl);
+    vlfree(vl);
     free(list);
   }
 
