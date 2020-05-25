@@ -58,7 +58,7 @@ int nMPIvars_get_ncomms(void)
 int nMPI_print_compile_info(tMesh *mesh)
 {
 #ifdef USEMPI
-  printf("MPI is compiled in.\n");
+  printf("MPI is compiled in. MPI_VERSION=%d\n", MPI_VERSION);
 #else
   printf("MPI is not compiled in. Posing as rank=%d and size=%d.\n",
          noMPI_rank, noMPI_size);
@@ -166,7 +166,7 @@ int nMPI_Comm_free(nMPI_Comm *comm)
   int ret=0;
 #ifdef USEMPI
   PR0;
-  MPI_Comm_free(comm);
+  ret = MPI_Comm_free(comm);
   PR1;
 #endif
   return ret;
@@ -309,8 +309,13 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
   int status = 0;
 #ifdef USEMPI
   PR0;
+//#if MPI_VERSION >= 3
   status = MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, WORLD,
                           request);
+//#else
+//  status = MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, WORLD);
+//  *request = MPI_REQUEST_NULL;
+//#endif
   PR1;
 #endif
   return status;
@@ -323,7 +328,7 @@ int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root)
   int status = 0;
 #ifdef USEMPI
   PR0;
-  MPI_Bcast(buffer, count, datatype, root, WORLD);
+  status = MPI_Bcast(buffer, count, datatype, root, WORLD);
   PR1;
 #endif
   return status;
@@ -336,7 +341,12 @@ int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
   int status = 0;
 #ifdef USEMPI
   PR0;
-  MPI_Ibcast(buffer, count, datatype, root, WORLD, request);
+//#if MPI_VERSION >= 3
+  status = MPI_Ibcast(buffer, count, datatype, root, WORLD, request);
+//#else
+//  status = MPI_Bcast(buffer, count, datatype, root, WORLD);
+//  *request = MPI_REQUEST_NULL;
+//#endif
   PR1;
 #endif
   return status;
@@ -371,7 +381,7 @@ int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
   int status = 0;
 #ifdef USEMPI
   PR0;
-  MPI_Test(request, flag, stat);
+  status = MPI_Test(request, flag, stat);
   PR1;
 #else
   *flag = 1;
