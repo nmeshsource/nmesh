@@ -58,7 +58,7 @@ int nMPIvars_get_ncomms(void)
 int nMPI_print_compile_info(tMesh *mesh)
 {
 #ifdef USEMPI
-  printf("MPI is compiled in. MPI_VERSION=%d\n", MPI_VERSION);
+  printf("MPI is compiled in. MPI_VERSION = %d\n", MPI_VERSION);
 #else
   printf("MPI is not compiled in. Posing as rank=%d and size=%d.\n",
          noMPI_rank, noMPI_size);
