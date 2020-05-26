@@ -309,13 +309,13 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
   int status = 0;
 #ifdef USEMPI
   PR0;
-//#if MPI_VERSION >= 3
+#if MPI_VERSION >= 3
   status = MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, WORLD,
                           request);
-//#else
-//  status = MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, WORLD);
-//  *request = MPI_REQUEST_NULL;
-//#endif
+#else
+  status = MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, WORLD);
+  *request = MPI_REQUEST_NULL;
+#endif
   PR1;
 #endif
   return status;
@@ -341,12 +341,12 @@ int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
   int status = 0;
 #ifdef USEMPI
   PR0;
-//#if MPI_VERSION >= 3
+#if MPI_VERSION >= 3
   status = MPI_Ibcast(buffer, count, datatype, root, WORLD, request);
-//#else
-//  status = MPI_Bcast(buffer, count, datatype, root, WORLD);
-//  *request = MPI_REQUEST_NULL;
-//#endif
+#else
+  status = MPI_Bcast(buffer, count, datatype, root, WORLD);
+  *request = MPI_REQUEST_NULL;
+#endif
   PR1;
 #endif
   return status;
