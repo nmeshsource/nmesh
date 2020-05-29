@@ -272,8 +272,11 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double csize = 0.375;
   double ssfac = 4.;
   double obfac = 6.; // 10000 in DNSdata
-  double xc[3], rc[3];
+  double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
+  double xc[] = { 0., 0., 0. };
+  char *BoxMesh_xc = Gets(Par("amr_BoxMesh_xc"));
+  sscanf(BoxMesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
 
   PRFs(":\n");
 
@@ -308,23 +311,24 @@ int setup_CubedSphere_mesh(tMesh *mesh)
     case 6:
       rc[0] = rc[1] = rc[2] = dc;
       if(Getv(mesh_type, "Shell"))
-        CubedSphere_shell_at_x0(mesh, dc, ssfac*dc);
+        CubedSphere_shell_at_xc(mesh, xc, dc, ssfac*dc);
       else
-        sphere_around_empty_box_at_x0(mesh, rc, ssfac*dc);
+        sphere_around_empty_box_at_xc(mesh, xc, rc, ssfac*dc);
       break;
     case 7:
       rc[0] = rc[1] = rc[2] = dc;
-      sphere_around_full_box_at_x0(mesh, rc, ssfac*dc);
+      sphere_around_full_box_at_xc(mesh, xc, rc, ssfac*dc);
       break;
     case 12:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      two_spheres_around_empty_box_at_x0(mesh, rc, ssfac*dc, ssfac*obfac*dc);
+      two_spheres_around_empty_box_at_xc(mesh, xc,
+                                         rc, ssfac*dc, ssfac*obfac*dc);
       break;
     case 13:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      two_spheres_around_box_at_x0(mesh, rc, ssfac*dc, ssfac*obfac*dc);
+      two_spheres_around_box_at_xc(mesh, xc, rc, ssfac*dc, ssfac*obfac*dc);
       break;
     /* 13 patches but with 2 centers as in sgrid:
     case 13:
@@ -371,6 +375,9 @@ int setup_Shell_mesh(tMesh *mesh)
 {
   double rin  = Getd(Par("amr_Shell_rin"));
   double rout = Getd(Par("amr_Shell_rout"));
+  double xc[] = { 0., 0., 0. };
+  char *BoxMesh_xc = Gets(Par("amr_BoxMesh_xc"));
+  sscanf(BoxMesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
 
   PRFs(":\n");
 
@@ -382,7 +389,7 @@ int setup_Shell_mesh(tMesh *mesh)
   remove_all_patches(mesh);
 
   /* setup cubed spheres in form of a shell */
-  CubedSphere_shell_at_x0(mesh, rin, rout);
+  CubedSphere_shell_at_xc(mesh, xc, rin, rout);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);

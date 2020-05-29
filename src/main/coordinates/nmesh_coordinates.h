@@ -186,13 +186,16 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
 int two_spheres_around_two_full_cubes(tMesh *mesh,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1);
-int sphere_around_empty_box_at_x0(tMesh *mesh, double dc[3], double r0);
-int sphere_around_full_box_at_x0(tMesh *mesh, double dc[3], double r0);
-int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
+int sphere_around_empty_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+                                  double r0);
+int sphere_around_full_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+                                 double r0);
+int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
                                  double r0, double r1);
-int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
-                                       double r0, double r1);
-int CubedSphere_shell_at_x0(tMesh *mesh, double rin, double rout);
+int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
+                                       double dc[3], double r0, double r1);
+int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
+                            double rin, double rout);
 int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1);
 int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
                                      double r0, double r1);

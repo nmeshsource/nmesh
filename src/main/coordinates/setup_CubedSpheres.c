@@ -190,10 +190,11 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
      \__         __/
         \_______/
 */
-int sphere_around_empty_box_at_x0(tMesh *mesh, double dc[3], double r0)
+int sphere_around_empty_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+                                  double r0)
 {
   int pl;
-  double xc[3], Din[6], Dout[6];
+  double Din[6], Dout[6];
   int f;
 
   /* set distances to make 6 cubed spheres around the box */
@@ -202,23 +203,22 @@ int sphere_around_empty_box_at_x0(tMesh *mesh, double dc[3], double r0)
     Din[f]  = dc[f/2];
     Dout[f] = r0;
   }
-  xc[0] = xc[1] = xc[2] = 0.0;
   pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0,0, xc, Din,Dout);
   return pl;
 }
 
-/* same as sphere_around_empty_box_at_x0, but add one box at the center */
-int sphere_around_full_box_at_x0(tMesh *mesh, double dc[3], double r0)
+/* same as sphere_around_empty_box_at_xc, but add one box at the center */
+int sphere_around_full_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+                                 double r0)
 {
   int pl;
-  double xc[] = { 0., 0., 0.};
   pl = add_1box_pat(mesh, xc, dc);
-  pl = sphere_around_empty_box_at_x0(mesh, dc, r0);
+  pl = sphere_around_empty_box_at_xc(mesh, xc, dc, r0);
   return pl;
 }
 
 /* put 6 stretchedCubedShell's around the sphere from
-   sphere_around_full_box_at_x0
+   sphere_around_full_box_at_xc
                    ___________
              _____/           \______
           __/                        \_
@@ -239,15 +239,15 @@ int sphere_around_full_box_at_x0(tMesh *mesh, double dc[3], double r0)
        -_ /
          \      ...
 */
-int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
+int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
                                  double r0, double r1)
 {
   int pl;
-  double xc[3], Din[6], Dout[6];
+  double Din[6], Dout[6];
   int i;
 
   /* make the full box and sphere0 around them */
-  pl = sphere_around_full_box_at_x0(mesh, dc, r0);
+  pl = sphere_around_full_box_at_xc(mesh, xc, dc, r0);
 
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
@@ -255,21 +255,20 @@ int two_spheres_around_box_at_x0(tMesh *mesh, double dc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  xc[0] = xc[1] = xc[2] = 0.0;
   pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
   return pl;
 }
 
-/* same as two_spheres_around_box_at_x0, but put no box at center */
-int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
-                                       double r0, double r1)
+/* same as two_spheres_around_box_at_xc, but put no box at center */
+int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
+                                       double dc[3], double r0, double r1)
 {
   int pl;
-  double xc[3], Din[6], Dout[6];
+  double Din[6], Dout[6];
   int i;
 
   /* make sphere0 around empty box */
-  pl = sphere_around_empty_box_at_x0(mesh, dc, r0);
+  pl = sphere_around_empty_box_at_xc(mesh, xc, dc, r0);
 
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
@@ -277,7 +276,6 @@ int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  xc[0] = xc[1] = xc[2] = 0.0;
   pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
   return pl;
 }
@@ -299,10 +297,11 @@ int two_spheres_around_empty_box_at_x0(tMesh *mesh, double dc[3],
      \__    2    __/
         \_______/
 */
-int CubedSphere_shell_at_x0(tMesh *mesh, double rin, double rout)
+int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
+                            double rin, double rout)
 {
   int pl;
-  double xc[3], Din[6], Dout[6];
+  double Din[6], Dout[6];
   int f;
 
   /* set distances to make 6 cubed spheres around the empty inner sphere */
@@ -311,7 +310,6 @@ int CubedSphere_shell_at_x0(tMesh *mesh, double rin, double rout)
     Din[f]  = rin;
     Dout[f] = rout;
   }
-  xc[0] = xc[1] = xc[2] = 0.0;
   pl = add_6CubedSphere_pats(mesh, CubedShell,0,0, xc, Din,Dout);
   return pl;
 }
