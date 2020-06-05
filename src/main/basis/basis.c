@@ -219,6 +219,8 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
   tArray *v, *c;
   double val;
 
+errorexit("need MPI to get val from node with dat to all others");
+
   /* set coeffs of var vi in c */
   v = VarA(node, vi);
   c = alloc_array(node->n);
