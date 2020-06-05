@@ -10,6 +10,7 @@ char *outpre[] = {"0d", "1d", "2d", "3d", "co"};
 int Nout = sizeof(outpre)/sizeof(outpre[0]); /* Nout=5 */
 
 /* various types of output */
+char *outpt[] = {"pt"}; /* prefix of the Noutpt special 0doutput points */
 char *out0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
 char *out1d[] = {"X", "Y", "Z"};
 char *out2d[] = {"XY", "XZ", "YZ"};
@@ -22,13 +23,13 @@ char *outco[] = {"co"};
 #define LEN3d sizeof(out3d)/sizeof(out3d[0])
 #define LENco sizeof(outco)/sizeof(outco[0])
 
-/* number of all output types */
+/* number of output types (Noutpt is in output->Noutpt) */
 int Nout0d = LEN0d;
 int Nout1d = LEN1d;
 int Nout2d = LEN2d;
 int Nout3d = LEN3d;
 int Noutco = LENco;
-int NoutAll = LEN0d + LEN1d + LEN2d + LEN3d + LENco;
+//int NoutAll = LEN0d_x + LEN0d + LEN1d + LEN2d + LEN3d + LENco;
 
 
 
