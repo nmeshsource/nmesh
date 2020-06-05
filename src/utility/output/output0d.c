@@ -53,7 +53,7 @@ Npt = 0;
   for(ipt=0; ipt<Npt; ipt++)
   {
     int d;
-    for(d=0; d<3; d++) x_pt[ipt][d] = output->x[ipt][d];
+    for(d=0; d<3; d++) x_pt[ipt][d] = output->xpt[ipt][d];
     node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
     XbYbZb_of_XYZ(node_pt[ipt], Xb_pt[ipt], X);  /* set Xb in node */
   }
