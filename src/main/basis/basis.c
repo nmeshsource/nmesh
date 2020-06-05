@@ -213,7 +213,7 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 }
 
 /* 3d interpolation:
-   interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) */
+   interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) locally */
 double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
 {
   tArray *v, *c;
@@ -231,16 +231,28 @@ double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
 }
 
 /* 3d interpolation:
-   interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) */
+   call basis_var_interpolate_local and then send interp. val around */
 double basis_var_interpolate(tNode *node, int vi, double Xb[3])
 {
-  double val=0.;
+  double Val, val=0.;
+  int Haveval, haveval=0;
 
 errorexit("need MPI to get val from node with dat to all others");
 
-  if(node->dat) val = basis_var_interpolate_local(node, vi, Xb);
+  if(node->dat)
+  {
+    val = basis_var_interpolate_local(node, vi, Xb);
+    haveval = 1;
+  }
+  Val = val;
+  Haveval = haveval;
 
-  return val;
+  /* find out how many have a value, and add all of them */
+  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
+  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  Val = Val/Haveval;
+
+  return Val;
 }
 
 /* 3d interpolation:
