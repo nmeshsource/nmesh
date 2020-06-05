@@ -10,7 +10,7 @@ char *outpre[] = {"0d", "1d", "2d", "3d", "co"};
 int Nout = sizeof(outpre)/sizeof(outpre[0]); /* Nout=5 */
 
 /* various types of output */
-char *outpt[] = {"pt"}; /* prefix of the Noutpt special 0doutput points */
+char outpt[] = "pt"; /* prefix of the Noutpt special 0doutput points */
 char *out0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
 char *out1d[] = {"X", "Y", "Z"};
 char *out2d[] = {"XY", "XZ", "YZ"};
@@ -32,6 +32,8 @@ int Noutco = LENco;
 //int NoutAll = LEN0d_x + LEN0d + LEN1d + LEN2d + LEN3d + LENco;
 
 
+/* output contains some global pars */
+tOutput output[1];
 
 
 /* is it time to output all nodes? */
@@ -163,7 +165,7 @@ int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
   int Noutput = Nout;
   int di[Noutput];
   double dt[Noutput];
-  char output[Noutput][128];
+  char Output[Noutput][128];
   char *name, s[128];
   int d, n;
 
@@ -178,13 +180,13 @@ int TimeForMeshOutput_vindex(tMesh *mesh, int vindex)
     di[d] = Geti(Par(s));
     sprintf(s, "%souttime", outpre[d]);
     dt[d] = Getd(Par(s));
-    sprintf(output[d], "%soutput", outpre[d]);
+    sprintf(Output[d], "%soutput", outpre[d]);
   }
 
   /* check if "name" is contained in any output par */
   for(n = 0; n < Noutput; n++)
   {
-    if(Getv(Par(output[n]), name))
+    if(Getv(Par(Output[n]), name))
       if(TimeForMeshOutput_di_dt(mesh, di[n], dt[n])) return 1;
   }
   return 0;
@@ -243,7 +245,7 @@ int TimeForNodeOutput_vindex(tNode *node, int vindex)
   int Noutput = Nout;
   int di[Noutput];
   double dt[Noutput];
-  char output[Noutput][64];
+  char Output[Noutput][64];
   char *name, s[64];
   int d, n;
 
@@ -258,13 +260,13 @@ int TimeForNodeOutput_vindex(tNode *node, int vindex)
     di[d] = Geti(Par(s));
     sprintf(s, "%souttime", outpre[d]);
     dt[d] = Getd(Par(s));
-    sprintf(output[d], "%soutput", outpre[d]);
+    sprintf(Output[d], "%soutput", outpre[d]);
   }
 
   /* check if "name" is contained in any output par */
   for(n = 0; n < Noutput; n++)
   {
-    if(Getv(Par(output[n]), name))
+    if(Getv(Par(Output[n]), name))
       if(TimeForNodeOutput_di_dt(node, di[n], dt[n])) return 1;
   }
   return 0;

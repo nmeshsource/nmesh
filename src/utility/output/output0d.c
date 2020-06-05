@@ -4,6 +4,10 @@
 #include "nmesh.h"
 #include "output.h"
 
+extern char outpt[];
+
+/* make output visible */
+extern tOutput output[1];
 
 
 /* 0d output */
@@ -31,12 +35,30 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   tMesh *mesh = vl->mesh;
   char filename[1000];
   double max, min, maxAbs, rms, mean, VolInt;
-  int p, ijk;
+  int p, ijk, ipt;
   long nid;
   double X[3], xmin[3], xmax[3], *xmaxAbs;
   double Vol;
+  int Npt; /* number of points at which we output */
+  double val_pt[Noutptmax];
+  double x_pt[Noutptmax][3], Xb_pt[Noutptmax][3];
+  tNode *node_pt[Noutptmax];
   int vli;
 
+  /* set special points x_pt[], ... at which we output */
+  if(pat) Npt = 0;
+  else    Npt = output->Noutpt;
+//FIXME: remove next line
+Npt = 0;
+  for(ipt=0; ipt<Npt; ipt++)
+  {
+    int d;
+    for(d=0; d<3; d++) x_pt[ipt][d] = output->x[ipt][d];
+    node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
+    XbYbZb_of_XYZ(node_pt[ipt], Xb_pt[ipt], X);  /* set Xb in node */
+  }
+
+  /* loop over varlist vl */
   for(vli=0; vli<vl->n; vli++)
   {
     int vi = vl->index[vli];
@@ -67,6 +89,14 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
       xmaxAbs = &(xmin[0]);
     }
 
+    /* get value of var at some points */
+    for(ipt=0; ipt<Npt; ipt++)
+    {
+      val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
+    }
+
+
+    /* output is done by rank0 */
     if(Rank0)
     {
       /* output max, min, maxAbs, rms, mean, VolInt */
@@ -87,8 +117,17 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
 
       output0d_filename(mesh, filename,999, name, "maxAbs", pat);
       output0d_value(filename, T, maxAbs, 1, xmaxAbs);
+
+      /* output value of var at some points */
+      for(ipt=0; ipt<Npt; ipt++)
+      {
+        char typestr[99];
+        snprintf(typestr,99, "%s%d", outpt, ipt);
+        output0d_filename(mesh, filename,999, name, typestr, pat);
+        output0d_value(filename, T, val_pt[ipt], 1, x_pt[ipt]);
+      }
     }
-  }
+  } /* end loop over vli */
 }
 
 /* filename for 0d output */
