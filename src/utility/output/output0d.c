@@ -55,7 +55,8 @@ Npt = 0;
     int d;
     for(d=0; d<3; d++) x_pt[ipt][d] = output->xpt[ipt][d];
     node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
-    XbYbZb_of_XYZ(node_pt[ipt], Xb_pt[ipt], X);  /* set Xb in node */
+    if(node_pt[ipt])
+      XbYbZb_of_XYZ(node_pt[ipt], Xb_pt[ipt], X);  /* set Xb in node */
   }
 
   /* loop over varlist vl */
@@ -92,7 +93,8 @@ Npt = 0;
     /* get value of var at some points */
     for(ipt=0; ipt<Npt; ipt++)
     {
-      val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
+      if(node_pt[ipt])
+        val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
     }
 
 
@@ -121,10 +123,13 @@ Npt = 0;
       /* output value of var at some points */
       for(ipt=0; ipt<Npt; ipt++)
       {
-        char typestr[99];
-        snprintf(typestr,99, "%s%d", outpt, ipt);
-        output0d_filename(mesh, filename,999, name, typestr, pat);
-        output0d_value(filename, T, val_pt[ipt], 1, x_pt[ipt]);
+        if(node_pt[ipt])
+        {
+          char typestr[99];
+          snprintf(typestr,99, "%s%d", outpt, ipt);
+          output0d_filename(mesh, filename,999, name, typestr, pat);
+          output0d_value(filename, T, val_pt[ipt], 1, x_pt[ipt]);
+        }
       }
     }
   } /* end loop over vli */
