@@ -8,6 +8,11 @@ void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3]);
 int basis_var_derivs(tNode *node, int vi, int dvi[3]);
 int basis_var_analysis3(tNode *node, int ui, int ci);
 int basis_var_synthesis3(tNode *node, int ui, int ci);
+void basis_array_analysis3(tNode *node, tArray *u, tArray *c);
+void basis_array_synthesis3(tNode *node, tArray *u, tArray *c);
+double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3]);
+tNode *basis_var_interpolate_mesh(tMesh *mesh, int ui, const double x[3],
+                                  double *val);
 tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar);
 double array_GLquadrature3(tNode *node, tArray *var);
 double array_nodeaverage(tNode *node, tArray *var);
@@ -21,9 +26,6 @@ double basis_LegendreP(int l, double x, int np);
 double basis_normLegendreP(int i, double x, int np);
 void LGL_x_wquad(int npoints, double *x, double *w);
 void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);
-void basis_array_analysis3(tNode *node, tArray *u, tArray *c);
-void basis_array_synthesis3(tNode *node, tArray *u, tArray *c);
-double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3]);
 
 /* Lagrange.c */
 void Lagrange_winterp(int n, const double *x, double *w_interp);

@@ -212,6 +212,35 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
   return sum;
 }
 
+/* 3d interpolation:
+   interpolate var ui to the point (x[0],x[1],x[2]).
+   out: val
+   returns: node if success, or NULL if failure to find x */
+tNode *basis_var_interpolate_mesh(tMesh *mesh, int ui, const double x[3],
+                                  double *val)
+{
+  tArray *u, *c;
+  double X[3], Xb[3];
+  tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
+
+  /* return NULL if node and X are not found */
+  if(!node) return NULL;
+
+  /* set Xb in node */
+  XbYbZb_of_XYZ(node, Xb, X);
+
+  /* set coeffs of var ui in c */
+  u = VarA(node, ui);
+  c = alloc_array(node->n);
+  basis_array_analysis3(node, u, c);
+
+  /* interp var ui to Xb in node */
+  *val = basis_array_interpolate(node, c, Xb);
+
+  free_array(c);
+  return node;
+}
+
 
 /***********************************************************************/
 /* integrate using Gauss-Lobatto points */
