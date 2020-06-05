@@ -214,12 +214,10 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 
 /* 3d interpolation:
    interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) */
-double basis_var_interpolate(tNode *node, int vi, double Xb[3])
+double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
 {
   tArray *v, *c;
   double val;
-
-errorexit("need MPI to get val from node with dat to all others");
 
   /* set coeffs of var vi in c */
   v = VarA(node, vi);
@@ -229,6 +227,19 @@ errorexit("need MPI to get val from node with dat to all others");
   /* interp var vi to Xb in node */
   val = basis_array_interpolate(node, c, Xb);
   free_array(c);
+  return val;
+}
+
+/* 3d interpolation:
+   interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) */
+double basis_var_interpolate(tNode *node, int vi, double Xb[3])
+{
+  double val=0.;
+
+errorexit("need MPI to get val from node with dat to all others");
+
+  if(node->dat) val = basis_var_interpolate_local(node, vi, Xb);
+
   return val;
 }
 
