@@ -213,13 +213,30 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 }
 
 /* 3d interpolation:
-   interpolate var ui to the point (x[0],x[1],x[2]).
+   interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) */
+double basis_var_interpolate(tNode *node, int vi, double Xb[3])
+{
+  tArray *v, *c;
+  double val;
+
+  /* set coeffs of var vi in c */
+  v = VarA(node, vi);
+  c = alloc_array(node->n);
+  basis_array_analysis3(node, v, c);
+
+  /* interp var vi to Xb in node */
+  val = basis_array_interpolate(node, c, Xb);
+  free_array(c);
+  return val;
+}
+
+/* 3d interpolation:
+   interpolate var vi to the point (x[0],x[1],x[2]).
    out: val
    returns: node if success, or NULL if failure to find x */
-tNode *basis_var_interpolate_mesh(tMesh *mesh, int ui, const double x[3],
+tNode *basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
                                   double *val)
 {
-  tArray *u, *c;
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
 
@@ -229,15 +246,9 @@ tNode *basis_var_interpolate_mesh(tMesh *mesh, int ui, const double x[3],
   /* set Xb in node */
   XbYbZb_of_XYZ(node, Xb, X);
 
-  /* set coeffs of var ui in c */
-  u = VarA(node, ui);
-  c = alloc_array(node->n);
-  basis_array_analysis3(node, u, c);
+  /* interp var vi to Xb in node */
+  *val = basis_var_interpolate(node, vi, Xb);
 
-  /* interp var ui to Xb in node */
-  *val = basis_array_interpolate(node, c, Xb);
-
-  free_array(c);
   return node;
 }
 
