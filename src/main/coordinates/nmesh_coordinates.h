@@ -59,6 +59,7 @@ void array_find_Xplane_in_node(tNode *node,int dir, tArray *aCP[2], tArray *aI);
 int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3]);
 int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
                            double X[3], const double x[3]);
+int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3]);
 long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3]);
 int XYZ_on_face(tPat *pat, int *face, const double X[3]);
 int ind_on_nodeface(tNode *node, int ind, int *face);

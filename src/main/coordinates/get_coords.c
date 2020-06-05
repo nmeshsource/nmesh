@@ -721,6 +721,20 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
   return p;
 }
 
+/* go over all patches and find the one that contains x */
+int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
+{
+  int pi, p=-1;
+
+  forpatches(mesh, pi)
+  {
+    tPat *pat = mesh->pat[pi];
+    p = p_XYZ_of_xyz(pat, X, x);
+    if(p>0) break;
+  }
+  return p;
+}
+
 /* return node location if x is inside this patch, if not return -1 */
 long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3])
 {
