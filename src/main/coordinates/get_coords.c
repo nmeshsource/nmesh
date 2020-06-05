@@ -772,7 +772,7 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
   /* mark found_local[rank] if we found X in one of my leaf nodes */
   found_local = calloc(size, sizeof(found_local[0]));
   found       = calloc(size, sizeof(found[0]));
-  found_local[rank] = name[0];
+  found_local[rank] = found[rank] = name[0];
 
   /* get global found */
   nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR);
@@ -790,6 +790,17 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
   free(found);
   free(found_local);
   return p;
+}
+
+/* return node and set X to where x is located */
+tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
+{
+  char name[99];
+
+  if(p_nodename_XYZ_of_xyz_mesh(mesh, name,99, X, x) < 0)
+    return NULL;
+
+  return node_from_nodename(mesh, name);
 }
 
 /* return node location if x is inside this patch, if not return -1 */
