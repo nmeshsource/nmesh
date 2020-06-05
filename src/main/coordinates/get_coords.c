@@ -735,6 +735,63 @@ int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
   return p;
 }
 
+/* go over all patches and nodes and find the node name that contains x
+   in:  mesh, namsiz, x
+   out: name, X
+   returns:  p */
+int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
+                               double X[3], const double x[3])
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int r, p;
+  char *found; /* array with ranks that have x */
+  char *found_local;
+
+  /* set name="" as default */
+  name[0] = 0;
+
+  /* find patch p and set X */
+  p = p_XYZ_of_xyz_mesh(mesh, X, x);
+
+  /* if x is not on mesh return -1 and leave name="" */
+  if(p<0) return p;
+
+  /* search among my leaf nodes (in patch p) for X */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    if(node->pat->p == p)
+      if(XYZ_is_in_node(node, X))
+      {
+        nodename(node, name, namsiz);
+        break;
+      }
+  }
+
+  /* mark found_local[rank] if we found X in one of my leaf nodes */
+  found_local = calloc(size, sizeof(found_local[0]));
+  found       = calloc(size, sizeof(found[0]));
+  found_local[rank] = name[0];
+
+  /* get global found */
+  nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR);
+
+  /* find lowest rank r that has node with X */
+  for(r=0; r<size; r++)
+  {
+    if(found[r]) break;
+  }
+  if(r>=size) errorexit("one rank must have this node");
+
+  /* broadcast node name from rank r to all MPI jobs */
+  nMPI_Bcast(name, strlen(name)+1, nMPI_CHAR, r);
+
+  free(found);
+  free(found_local);
+  return p;
+}
+
 /* return node location if x is inside this patch, if not return -1 */
 long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3])
 {
