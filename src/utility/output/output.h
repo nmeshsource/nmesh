@@ -2,13 +2,6 @@
 /* Wolfgang Tichy 4/2019 */
 
 
-/* global output pars */
-typedef struct tOUTPUT {
-  int Noutpt;               /* 0doutput at this number of specific points */
-#define Noutptmax 2         /* max Noutpt */
-  double xpt[Noutptmax][3]; /* x,y,z coords of specific 0doutput points */
-} tOutput;
-
 
 /* object to hold pars we need to pass around */
 typedef struct tOUTPARS {
