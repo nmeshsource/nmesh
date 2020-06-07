@@ -716,7 +716,7 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
     p = pl->e[i];
     pat = mesh->pat[p];
     p = p_XYZ_of_xyz(pat, X, x);
-    if(p>0) break;
+    if(p>=0) break;
   }
   return p;
 }
@@ -730,7 +730,7 @@ int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
   {
     tPat *pat = mesh->pat[pi];
     p = p_XYZ_of_xyz(pat, X, x);
-    if(p>0) break;
+    if(p>=0) break;
   }
   return p;
 }
@@ -753,6 +753,7 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
 
   /* find patch p and set X */
   p = p_XYZ_of_xyz_mesh(mesh, X, x);
+  PRF;printf(": p=%d\n", p);
 
   /* if x is not on mesh return -1 and leave name="" */
   if(p<0) return p;
