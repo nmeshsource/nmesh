@@ -251,6 +251,7 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
   if(!Haveval) errorexit("one MPI proc should have this node");
   Val = Val/Haveval;
 
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
   return Val;
 }
 
