@@ -237,8 +237,6 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
   double Val, val=0.;
   int Haveval, haveval=0;
 
-errorexit("need MPI to get val from node with dat to all others");
-
   if(node->dat)
   {
     val = basis_var_interpolate_local(node, vi, Xb);
@@ -250,6 +248,7 @@ errorexit("need MPI to get val from node with dat to all others");
   /* find out how many have a value, and add all of them */
   nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
   nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  if(!Haveval) errorexit("one MPI proc should have this node");
   Val = Val/Haveval;
 
   return Val;
