@@ -48,15 +48,13 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   /* set special points x_pt[], ... at which we output */
   if(pat) Npt = 0;
   else    Npt = output->Noutpt;
-//FIXME: remove next line
-Npt = 0;
   for(ipt=0; ipt<Npt; ipt++)
   {
     int d;
     for(d=0; d<3; d++) x_pt[ipt][d] = output->xpt[ipt][d];
     node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
-    PRF;printf(": x_pt[ipt][0]=%g node_pt[ipt]=%p\n",
-               x_pt[ipt][0], node_pt[ipt]);
+    //PRF;printf(": x_pt[ipt][0]=%g node_pt[ipt]=%p\n",
+    //           x_pt[ipt][0], node_pt[ipt]);
     if(node_pt[ipt])
       XbYbZb_of_XYZ(node_pt[ipt], Xb_pt[ipt], X);  /* set Xb in node */
   }
@@ -128,7 +126,7 @@ Npt = 0;
         if(node_pt[ipt])
         {
           char typestr[99];
-          PRF;printf(": val_pt[ipt]=%g\n", val_pt[ipt]);
+          //PRF;printf(": val_pt[ipt]=%g\n", val_pt[ipt]);
           snprintf(typestr,99, "%s%d", outpt, ipt);
           output0d_filename(mesh, filename,999, name, typestr, pat);
           output0d_value(filename, T, val_pt[ipt], 1, x_pt[ipt]);
