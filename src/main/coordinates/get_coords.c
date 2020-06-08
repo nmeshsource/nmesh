@@ -783,7 +783,11 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
   {
     if(found[r]) break;
   }
-  if(r>=size) errorexit("one rank must have this node");
+  if(r>=size)
+  {
+    PRF;printf(": error: one rank must have the node with this x!\n");
+    r = 0; /* to avoid failure in nMPI_Bcast */
+  }
 
   /* broadcast node name from rank r to all MPI jobs */
   nMPI_Bcast(name, strlen(name)+1, nMPI_CHAR, r);
@@ -799,6 +803,9 @@ tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
   char name[99];
 
   if(p_nodename_XYZ_of_xyz_mesh(mesh, name,99, X, x) < 0)
+    return NULL;
+
+  if(name[0]==0)
     return NULL;
 
   return node_from_nodename(mesh, name);
