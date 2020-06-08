@@ -753,7 +753,7 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
 
   /* find patch p and set X */
   p = p_XYZ_of_xyz_mesh(mesh, X, x);
-  //PRF;printf(": p=%d\n", p);
+  //PRFs(": ");pr3v("X", X);printf(": p=%d\n", p);
 
   /* if x is not on mesh return -1 and leave name="" */
   if(p<0) return p;
