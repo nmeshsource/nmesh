@@ -790,7 +790,8 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
   }
 
   /* broadcast node name from rank r to all MPI jobs */
-  nMPI_Bcast(name, strlen(name)+1, nMPI_CHAR, r);
+  //PRF;printf(":|%s|r=%d\n", name, r);fflush(stdout);
+  nMPI_Bcast(name, namsiz, nMPI_CHAR, r);
 
   free(found);
   free(found_local);
