@@ -36,6 +36,7 @@ double MeshMaxLoc_local(tMesh *mesh, tPat *pat, int vind,
   double max = -DBL_MAX;
 
   *Mnode = NULL;
+  *Mijk  = 0;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -64,6 +65,7 @@ double MeshMinLoc_local(tMesh *mesh, tPat *pat, int vind,
   double min = DBL_MAX;
 
   *Mnode = NULL;
+  *Mijk  = 0;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -152,14 +154,15 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   //printf("mr->extr=%g\n", mr->extr);
   //printf("Mnode=%p *Mijk=%d\n", Mnode, *Mijk);
 
+  /* If we can't find a node just set Mnode to first node on this MPI proc,
+     since in that case another MPI proc must have found something... */
+  if(!Mnode) Mnode = MyLnode0;
+
   /* write local patch coords into MX and uloc, if we found a node */
-  if(Mnode)
-  {
-    XbYbZb_of_ind(Mnode, *Mijk, Xb);
-    XYZ_of_XbYbZb(Mnode, Xb, MX);
-    uloc->loc->p    = Mnode->pat->p;
-    uloc->loc->nid  = Mnode->nid;
-  }
+  XbYbZb_of_ind(Mnode, *Mijk, Xb);
+  XYZ_of_XbYbZb(Mnode, Xb, MX);
+  uloc->loc->p    = Mnode->pat->p;
+  uloc->loc->nid  = Mnode->nid;
 
   /* write local results into uloc */
   uloc->loc->ijk  = *Mijk;
