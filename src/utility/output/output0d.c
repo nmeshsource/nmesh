@@ -53,8 +53,8 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     int d;
     for(d=0; d<3; d++) x_pt[ipt][d] = output->xpt[ipt][d];
     node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
-    //PRF;printf(": x_pt[ipt][0]=%g node_pt[ipt]=%p\n",
-    //           x_pt[ipt][0], node_pt[ipt]);
+    //PRF;pr3v(": x_pt[ipt]", x_pt[ipt]);pr3v("X", X);
+    //printf("node_pt[%d]=%p\n", ipt, node_pt[ipt]);
     if(node_pt[ipt])
       XbYbZb_of_XYZ(node_pt[ipt], Xb_pt[ipt], X);  /* set Xb in node */
   }
