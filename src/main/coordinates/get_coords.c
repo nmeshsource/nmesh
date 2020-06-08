@@ -759,7 +759,7 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
   if(p<0) return p;
 
   /* search among my leaf nodes (in patch p) for X */
-  formylnodes(mesh)
+  formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
     if(node->pat->p == p)
