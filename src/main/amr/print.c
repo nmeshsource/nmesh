@@ -271,6 +271,12 @@ void printNlistarray(long nnodes, tNlist **nl)
   printNlistarray_and_neighbors_flag(nnodes, nl, 0);
 }
 
+/* print nodename */
+void pr_nodename(tNode *node)
+{
+  char str[100];
+  printf("%s", nodename(node, str,99));
+}
 
 
 /* print a variable in a node */
