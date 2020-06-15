@@ -1356,11 +1356,10 @@ int total_nnodes_in_myln(tMylnodes *myln)
 /**********************************************************************/
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
-/* update array of leaf nodes on this proc, set nid */
-long update_mesh_myln_node_nid(tMesh *mesh)
+/* Update array of leaf nodes on this proc, set nid.
+   Also update node->dt anf mesh->dt if auto_dt=1 */
+long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac)
 {
-  int auto_dt  = Getv(Par("dt"), "auto");
-  double dtfac = Getd(Par("dtfac"));
   tNlist *elem;
   long nid = 0;
   //int lid = 0;
@@ -1407,6 +1406,14 @@ long update_mesh_myln_node_nid(tMesh *mesh)
 
   mesh->nln = nid;
   return nid;
+}
+
+/* update array of leaf nodes on this proc, set nid */
+long update_mesh_myln_node_nid(tMesh *mesh)
+{
+  int auto_dt  = Getv(Par("dt"), "auto");
+  double dtfac = Getd(Par("dtfac"));
+  return update_mesh_myln_node_nid_dt(mesh, auto_dt, dtfac);
 }
 
 /* return nid or -1 */
