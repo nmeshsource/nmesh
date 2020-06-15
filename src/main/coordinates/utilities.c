@@ -884,6 +884,12 @@ double Cart_distance_X0_X1(tNode *node, double X0[3], double X1[3])
     dx[d] = x1[d] - x0[d];
     dist2 += dx[d]*dx[d];
   }
+
+  PRFs(": ");pr_nodename(node);
+  printf(" pat->xyz_of_XYZ=%p ", pat->xyz_of_XYZ);
+  pr3v("x0", x0); pr3v("x1", x1);
+  printf("-> dist=%g\n", sqrt(dist2));
+
   return sqrt(dist2);
 }
 
@@ -938,9 +944,10 @@ double distance_to_closest_point(tNode *node, int i, int j, int k,
           hmin = dist;
           *ijk0 = Ind_n(i,j,k, n);
           *ijk1 = Ind_n(in,jn,kn, n);
+          PRFs(": ");pr_nodename(node);
+          pr3v(" X0", X0); pr3v("X1", X1);
+          printf("pts=%d,%d -> dist=%g\n", *ijk0,*ijk1, dist);
         }
-
-        //pr3v("X0", X0); pr3v("X1", X1); printf(" -> dist=%g\n", dist);
       }
     }
   }
@@ -983,5 +990,32 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
   /* last corner */
   hmin = distance_to_closest_point(node, n[0]-1,n[1]-1,n[2]-1, hmin,
                                    ijk0, ijk1);
+
+  //PRF;printf(": pts=%d,%d -> hmin=%g\n", *ijk0,*ijk1, hmin);
   return hmin;
+}
+
+
+/* change node->dt and mesh->dt based on the smallest grid spacing hmin,
+   return this dt  */
+double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac)
+{
+  tMesh *mesh = node->pat->mesh;
+  double dtm, hmin;
+  int ijk0[] = {-1}, ijk1[] = {-1};
+
+  if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
+  hmin = find_hmin(node, ijk0,ijk1);
+  dtm = dtfac * hmin;
+  dtm = dtm*0.999999;
+
+  if(dtm < node->dt || node->dt <= 0.)
+  {
+    node->dt = dtm;
+    mesh->dt = dtm;
+    PRFs(": ");pr_nodename(node);
+    printf(" pts = %d,%d: hmin = %g\n", ijk0[0],ijk1[0], hmin);
+    PRF;printf(": setting mesh->dt = %g\n", mesh->dt);
+  }
+  return dtm;
 }

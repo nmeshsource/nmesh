@@ -621,5 +621,8 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
 //    }
     }
   }
+
+  PRF;printf(" pat->p=%d xyz_of_XYZ=%p\n", pat->p, pat->xyz_of_XYZ);
+
   return pat->p; /* return index of this patch */
 }
