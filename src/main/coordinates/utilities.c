@@ -884,11 +884,10 @@ double Cart_distance_X0_X1(tNode *node, double X0[3], double X1[3])
     dx[d] = x1[d] - x0[d];
     dist2 += dx[d]*dx[d];
   }
-
-  PRFs(": ");pr_nodename(node);
-  printf(" pat->xyz_of_XYZ=%p ", pat->xyz_of_XYZ);
-  pr3v("x0", x0); pr3v("x1", x1);
-  printf("-> dist=%g\n", sqrt(dist2));
+  //PRFs(": ");pr_nodename(node);
+  //printf(" pat->xyz_of_XYZ=%p ", pat->xyz_of_XYZ);
+  //pr3v("x0", x0); pr3v("x1", x1);
+  //printf("-> dist=%g\n", sqrt(dist2));
 
   return sqrt(dist2);
 }
@@ -944,9 +943,9 @@ double distance_to_closest_point(tNode *node, int i, int j, int k,
           hmin = dist;
           *ijk0 = Ind_n(i,j,k, n);
           *ijk1 = Ind_n(in,jn,kn, n);
-          PRFs(": ");pr_nodename(node);
-          pr3v(" X0", X0); pr3v("X1", X1);
-          printf("pts=%d,%d -> dist=%g\n", *ijk0,*ijk1, dist);
+          //PRFs(": ");pr_nodename(node);
+          //pr3v(" X0", X0); pr3v("X1", X1);
+          //printf("pts=%d,%d -> dist=%g\n", *ijk0,*ijk1, dist);
         }
       }
     }
