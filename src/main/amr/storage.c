@@ -1374,7 +1374,6 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac)
       tNode *node = elem->node;
       tNode *parent = node->parent;
       int i;
-      double dt;
 
       if(node->dat)
       {
