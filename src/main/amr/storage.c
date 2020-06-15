@@ -1412,8 +1412,8 @@ long update_mesh_myln_node_nid(tMesh *mesh)
           node->dt = dt*0.999999;
           mesh->dt = node->dt;
           PRFs(": ");pr_nodename(node);
-          printf(" pts=%d,%d: hmin=%g", ijk1[1],ijk2[1], hmin);
-          printf(": setting mesh->dt = %g\n", mesh->dt);
+          printf(" pts = %d,%d: hmin = %g\n", ijk1[1],ijk2[1], hmin);
+          PRF;printf(": setting mesh->dt = %g\n", mesh->dt);
         }
       }
     }
