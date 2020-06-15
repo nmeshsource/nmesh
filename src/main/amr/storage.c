@@ -1400,22 +1400,7 @@ long update_mesh_myln_node_nid(tMesh *mesh)
 
       /* check if we need to change node->dt and mesh->dt */
       if(auto_dt)
-      {
-        double hmin;
-        int ijk0[] = {-1}, ijk1[] = {-1};
-
-        if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
-        hmin = find_hmin(node, ijk0,ijk1);
-        dt = dtfac * hmin;
-        if(dt < node->dt || node->dt <= 0.)
-        {
-          node->dt = dt*0.999999;
-          mesh->dt = node->dt;
-          PRFs(": ");pr_nodename(node);
-          printf(" pts = %d,%d: hmin = %g\n", ijk0[0],ijk1[0], hmin);
-          PRF;printf(": setting mesh->dt = %g\n", mesh->dt);
-        }
-      }
+        adapt_node_dt_and_mesh_dt(node, dtfac);
     }
   else /* mesh->lns is NULL, so free myln */
     realloc_myln_nncats(mesh->myln, 0);
