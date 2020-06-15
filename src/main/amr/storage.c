@@ -1447,7 +1447,9 @@ tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
   else
     mesh->lns = first_nodelist(list);
 
-  update_mesh_myln_node_nid(mesh);
+  /* update nids but leave node->dt alone */
+  update_mesh_myln_node_nid_dt(mesh, 0, 0.25);
+
   return lnl;
 }
 
