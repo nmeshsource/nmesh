@@ -1401,13 +1401,19 @@ long update_mesh_myln_node_nid(tMesh *mesh)
       /* check if we need to change node->dt and mesh->dt */
       if(auto_dt)
       {
+        double hmin;
+        int ijk1[1], ijk2[1];
+
         if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
-        dt = dtfac * find_hmin(node);
+        hmin = find_hmin(node, ijk1,ijk2);
+        dt = dtfac * hmin;
         if(dt < node->dt || node->dt <= 0.)
         {
           node->dt = dt*0.999999;
           mesh->dt = node->dt;
-          PRF;printf(": setting mesh->dt = %g\n", mesh->dt);
+          PRFs(": ");pr_nodename(node);
+          printf(" pts=%d,%d: hmin=%g", ijk1[1],ijk2[1], hmin);
+          printf(": setting mesh->dt = %g\n", mesh->dt);
         }
       }
     }
