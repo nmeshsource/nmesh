@@ -135,6 +135,10 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   MPIexchange_set_all_myln_localdata(mesh);
   MPIexchange_request_all_myln_data(mesh);
 
+  /* Now work on things that do not depend on surface data:
+     I.e. we overlap the communication started by
+     MPIexchange_request_all_myln_data with other calculations. */
+
   /* set all sources */
   forList(u, i)
     if(ListEntry(evosys->setsrc,i))
@@ -144,6 +148,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   forList(u, i)
     if(ListEntry(evosys->volrhs,i))
       ListEntry(evosys->volrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+
+  /* After we have done all we can without the surface data, we now wait
+     until we get all the surface data: */
 
   /* get surfaces so that we can compute fluxes */
   MPIexchange_get_all_myln_data(mesh);
