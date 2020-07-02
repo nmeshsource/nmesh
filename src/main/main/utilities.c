@@ -461,12 +461,17 @@ int system3(char *s1, char *s2, char *s3)
 /* print some system info */
 void print_system_info(void)
 {
+  char str[1024];
+  long pid = getpid();
+
   prdivider(0);
   printf("print_system_info: calling some shell commands\n");
   system1("hostname");
   system1("uname -a");
   system1("uptime");
   system1("lscpu");
+  snprintf(str,1023, "cat /proc/%ld/status", pid);
+  system1(str);
   system1("free -h");
 }
 
