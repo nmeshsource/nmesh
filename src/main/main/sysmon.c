@@ -7,6 +7,12 @@
 #include <sys/resource.h>  /* for getrusage */
 
 
+/* functions needed */
+void write_sysmon(tMesh *mesh, double last_mesh_time, char *name,
+                  double time, double last_sysmon_time, double *data,
+                  int addheader);
+
+
 
 /* write into sysmon.log if the time is right for it */
 int sysmon(tMesh *mesh)
@@ -63,25 +69,8 @@ int sysmon(tMesh *mesh)
 
     if(Rank0)
     {
-      char fname[8192];
-      FILE *fp;
-
-      /* open destination file */
-      snprintf(fname,8192, "%s/%s", Gets(Par("outdir")), "sysmon.log");
-      fp = fopen(fname, "a");
-      if(fp)
-      {
-        double dpt = mesh->time - last_mesh_time;
-        double dt  = time       - last_sysmon_time;
-
-        if(firstcall)
-          fprintf(fp, "#    PhysTime        WallTime"
-                      "    dtPhys/dtWall         max(RSS)\n");
-
-        fprintf(fp, "%13g  %13gh  %13g/h  %13gGi\n",
-                mesh->time, time, dpt/dt, datall[0]/1048576);
-        fclose(fp);
-      }
+      write_sysmon(mesh, last_mesh_time, "sysmon.log",
+                   time, last_sysmon_time, datall, firstcall);
     }
 
     /* update times */
@@ -90,4 +79,30 @@ int sysmon(tMesh *mesh)
     firstcall = 0;
   }
   return 0;
+}
+
+/* write sysmon results (in data) into file outdir/name */
+void write_sysmon(tMesh *mesh, double last_mesh_time, char *name,
+                  double time, double last_sysmon_time, double *data,
+                  int addheader)
+{
+  char fname[8192];
+  FILE *fp;
+
+  /* open destination file */
+  snprintf(fname,8192, "%s/%s", Gets(Par("outdir")), name);
+  fp = fopen(fname, "a");
+  if(fp)
+  {
+    double dpt = mesh->time - last_mesh_time;
+    double dt  = time       - last_sysmon_time;
+
+    if(addheader)
+      fprintf(fp, "#    PhysTime        WallTime"
+                  "    dtPhys/dtWall         max(RSS)\n");
+
+    fprintf(fp, "%13g  %13gh  %13g/h  %13gGi\n",
+            mesh->time, time, dpt/dt, data[0]/1048576);
+    fclose(fp);
+  }
 }
