@@ -404,8 +404,12 @@ int remove_dir(char *dirname)
   return 0;
 }
 
-/* call system with 2 or 3 arguments, also call c-functions directly 
+/* call system with 1, 2 or 3 arguments, also call c-functions directly
    in some special case to avoid some unix shell commands */
+int system1(char *s1)
+{
+  return system2(s1, "");
+}
 int system2(char *s1, char *s2) 
 {
   return system3(s1, s2, "");
@@ -450,6 +454,18 @@ int system3(char *s1, char *s2, char *s3)
   
   if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
   return status;
+}
+
+/* print some system info */
+void print_system_info(void)
+{
+  prdivider(0);
+  printf("print_system_info: calling some shell commands\n");
+  system1("hostname");
+  system1("uname -a");
+  system1("uptime");
+  system1("lscpu");
+  system1("free -h");
 }
 
 /* construct an argv array from a string and return number of args */

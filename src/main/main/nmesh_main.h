@@ -238,8 +238,10 @@ void trim_whitespace(char *str);
 int get_par_from_str(const char *str, char *name, const char *delim,
                      char *value, int n);
 int copy_file_into_dir(char *fname, char *dir);
+int system1(char *s1);
 int system2(char *s1, char *s2);
 int system3(char *s1, char *s2, char *s3);
+void print_system_info(void);
 int system_emu(const char *command);
 int construct_argv(char *str, char ***argv);
 double *dmalloc(int n);
