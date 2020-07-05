@@ -1,0 +1,56 @@
+# MyConfig
+#
+# The file MyConfig is included verbatim in the Makefile to determine which
+# libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# projects we add:
+#libpaths += src/tests/advection1
+projects += src/projects/Ein
+projects += src/projects/ADM
+projects += src/projects/EoS
+projects += src/projects/TOVstar
+projects += src/projects/GRHD
+projects += src/projects/ScalarWave
+projects += src/projects/TestID
+projects += src/projects/SRHDtestID
+projects += src/projects/SingleBH
+projects += src/projects/GHG
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = nmesh
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler
+CC = mpiicc # gcc
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -std=c99 -O3 # -g # -O3 # -fopenmp # -g # -Wall -Werror
+
+# use OpenMP pragmas, this also needs something like -fopenmp in OFLAGS
+#DFLAGS += -DUSEOMP
+
+# use MPI, no paths should be needed with mpicc
+DFLAGS += -DUSEMPI
+## This works on Debian 10 with openmpi, but no paths are needed with mpicc:
+#MPIDIR = /usr/lib/x86_64-linux-gnu/openmpi
+#MPIDIRL = -L$(MPIDIR)/lib
+#MPIDIRI = -I$(MPIDIR)/include
+#MPILIBS = -lmpi
+
+# other libraries needed, in some cases we need even -lrt for clock_gettime
+#SPECIALLIBS += -lgsl -lgslcblas
+SPECIALINCS += $(GSL_INC)
+SPECIALLIBS += $(GSL_LIB) # $(GSL_BLAS_SHLIB) # $(GSL_BLAS_LIB)
+#SPECIALLIBS += -lrt
+
+# on UNIX without ru_maxrss in struct rusage (in getrusage), uncomment
+#DFLAGS += -DNO_RU_MAXRSS
+
+# on old compilers without _Noreturn, uncomment the line below
+#DFLAGS += -DNO_C11

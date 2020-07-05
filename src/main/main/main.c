@@ -42,6 +42,7 @@ int main(int argc, char **argv)
   parse_parameter_file(mesh, Gets(Par("parameterfile")));
   parse_command_line_options(mesh);
   make_output_directory(mesh);
+  print_system_info();
   initialize_libraries(mesh);
   TIMER_START;
 

@@ -7,6 +7,12 @@
 #include <sys/resource.h>  /* for getrusage */
 
 
+/* functions needed */
+void write_sysmon(tMesh *mesh, double last_mesh_time, char *name,
+                  double time, double last_sysmon_time, double *data,
+                  int addheader);
+
+
 
 /* write into sysmon.log if the time is right for it */
 int sysmon(tMesh *mesh)
@@ -18,6 +24,7 @@ int sysmon(tMesh *mesh)
   double time  = getTimeIn_s()/3600.;
   double time_since_sysmon;
   int do_sysmon = 0;
+  int output_per_rank = Getb(Par("sysmon_output_per_rank"));
 
   ///* is sysmon on? */
   //if(!Getb(Par("sysmon"))) return 0;
@@ -61,27 +68,23 @@ int sysmon(tMesh *mesh)
     for(i=0; i<n; i++) datall[i] = dat[i]; /* in case MPI is not there */
     nMPI_Allreduce(dat, datall, n, nMPI_DOUBLE, nMPI_SUM);
 
+    /* output datall on rank 0 */
     if(Rank0)
     {
-      char fname[8192];
-      FILE *fp;
+      write_sysmon(mesh, last_mesh_time, "sysmon.log",
+                   time, last_sysmon_time, datall, firstcall);
+    }
 
-      /* open destination file */
-      snprintf(fname,8192, "%s/%s", Gets(Par("outdir")), "sysmon.log");
-      fp = fopen(fname, "a");
-      if(fp)
-      {
-        double dpt = mesh->time - last_mesh_time;
-        double dt  = time       - last_sysmon_time;
-
-        if(firstcall)
-          fprintf(fp, "#    PhysTime        WallTime"
-                      "    dtPhys/dtWall         max(RSS)\n");
-
-        fprintf(fp, "%13g  %13gh  %13g/h  %13gGi\n",
-                mesh->time, time, dpt/dt, datall[0]/1048576);
-        fclose(fp);
-      }
+    /* output dat if needed */
+    if(output_per_rank)
+    {
+      char form[100];
+      char name[100];
+      /* filename format and file name for files */
+      snprintf(form,99, "sysmon.%%0%dd", (int) log10(nMPI_size())+1);
+      snprintf(name,99, form, nMPI_rank());
+      write_sysmon(mesh, last_mesh_time, name,
+                   time, last_sysmon_time, dat, firstcall);
     }
 
     /* update times */
@@ -90,4 +93,30 @@ int sysmon(tMesh *mesh)
     firstcall = 0;
   }
   return 0;
+}
+
+/* write sysmon results (in data) into file outdir/name */
+void write_sysmon(tMesh *mesh, double last_mesh_time, char *name,
+                  double time, double last_sysmon_time, double *data,
+                  int addheader)
+{
+  char fname[8192];
+  FILE *fp;
+
+  /* open destination file */
+  snprintf(fname,8192, "%s/%s", Gets(Par("outdir")), name);
+  fp = fopen(fname, "a");
+  if(fp)
+  {
+    double dpt = mesh->time - last_mesh_time;
+    double dt  = time       - last_sysmon_time;
+
+    if(addheader)
+      fprintf(fp, "#    PhysTime        WallTime"
+                  "    dtPhys/dtWall         max(RSS)\n");
+
+    fprintf(fp, "%13g  %13gh  %13g/h  %13gGi\n",
+            mesh->time, time, dpt/dt, data[0]/1048576);
+    fclose(fp);
+  }
 }

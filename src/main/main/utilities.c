@@ -404,8 +404,12 @@ int remove_dir(char *dirname)
   return 0;
 }
 
-/* call system with 2 or 3 arguments, also call c-functions directly 
+/* call system with 1, 2 or 3 arguments, also call c-functions directly
    in some special case to avoid some unix shell commands */
+int system1(char *s1)
+{
+  return system2(s1, "");
+}
 int system2(char *s1, char *s2) 
 {
   return system3(s1, s2, "");
@@ -419,37 +423,56 @@ int system3(char *s1, char *s2, char *s3)
   if( strcmp(s1,"mv")==0 || strcmp(s1,"mv -f")==0 ) /* use rename */
   {
     sprintf(command, "rename(\"%s\", \"%s\");", s2, s3);
-    status = rename(s2, s3);
     printf("ANSI C call: %s\n", command);
+    status = rename(s2, s3);
   }
   else if( strcmp(s1,"rm -rf")==0 ) /* use remove */
   {
     if(strlen(s2)>0)
     {
-      status = remove_dir(s2);
       printf("remove_dir(\"%s\");\n", s2);
+      status = remove_dir(s2);
     }
     if(strlen(s3)>0)
     {
-      status = remove_dir(s3);
       printf("remove_dir(\"%s\");\n", s3);
+      status = remove_dir(s3);
     }
   }
   else if( strcmp(s1,"mkdir")== 0 ) /* use POSIX.1-2001 mkdir function */
   {
     sprintf(command, "mkdir(\"%s\", S_IRWXU | S_IRWXG);", s2);
-    status = mkdir(s2, S_IRWXU | S_IRWXG);
     printf("POSIX.1-2001 call: %s\n", command);
+    status = mkdir(s2, S_IRWXU | S_IRWXG);
   }
   else /* use system */
   { 
     sprintf(command, "%s %s %s", s1, s2, s3);
-    status = system(command);
     printf("System call: %s\n", command);
+    fflush(stdout);
+    status = system(command);
+    fflush(stdout);
   }
   
   if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
   return status;
+}
+
+/* print some system info */
+void print_system_info(void)
+{
+  char str[1024];
+  long pid = getpid();
+
+  prdivider(0);
+  printf("print_system_info: calling some shell commands\n");
+  system1("hostname");
+  system1("uname -a");
+  system1("uptime");
+  system1("lscpu");
+  snprintf(str,1023, "cat /proc/%ld/status", pid);
+  system1(str);
+  system1("free -h");
 }
 
 /* construct an argv array from a string and return number of args */
