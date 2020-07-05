@@ -291,6 +291,15 @@ Things that should be done:
 
 *consider removing entries from tNode, e.g.: leaf, np ???
 
+*consider adding a "deflated" flag to tNode. If yes set then all node data
+ needs to be gotten from MPI proc with datrank. A deflated node would not
+ have any node info set, and need less memory.
+ BUT for this to work we probably need to replace things like
+  struct tNODE *parent;
+ in tNode by
+  char *parentname;
+ I.e. use full names instead of pointers. Is this worth it???
+
 *fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
  -seems to interpolate only if the 2 nodes are in diff. patches
   which is rare, and thus we maybe should not worry about this...
