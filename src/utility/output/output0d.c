@@ -45,9 +45,19 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   tNode *node_pt[Noutptmax];
   int vli;
 
-  /* set special points x_pt[], ... at which we output */
-  if(pat) Npt = 0;
-  else    Npt = output->Noutpt;
+  /* set special points x_pt[], ... at which we output: */
+  if(pat) /* we output only in one patch */
+  {
+    /* turn point output off, as a point is not in every patch */
+    Npt = 0;
+  }
+  else /* we output on the entire mesh */
+  {
+    /* set number of points x_pt[] on which we output */
+    Npt = output->Noutpt;
+    if(Npt>Noutptmax) errorexit("output->Noutpt > (Noutptmax in tOutput)");
+  }
+  /* loop over special points */
   for(ipt=0; ipt<Npt; ipt++)
   {
     int d;
@@ -142,13 +152,13 @@ void output0d_filename(tMesh *mesh, char *filename, int len,
 {
   char *outdir = Gets(Par("outdir"));
 
-  if(pat)
+  if(pat) /* we output only in one patch */
   {
     char fmt[100];
     snprintf(fmt,99, "%%s/%%s_%%s.%%0%ddt", (int) log10(mesh->npats)+1);
     snprintf(filename,len, fmt, outdir, name, type, pat->p);
   }
-  else
+  else /* we output on the entire mesh */
   {
     snprintf(filename,len, "%s/%s_%s.t", outdir, name, type);
   }
