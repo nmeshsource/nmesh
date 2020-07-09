@@ -9,7 +9,8 @@ TOP := $(shell pwd)
 # name of program, location of executable and extra projects
 EXEC = nmesh
 EXECDIR = $(TOP)/exe
-#PROJECTDIR = $(TOP)/src/projects
+RELAPROJECTDIR = src/projects
+PROJECTDIR = $(TOP)/$(RELAPROJECTDIR)
 
 # default for variables used in all cases
 CC = gcc	# gcc or icc
@@ -43,14 +44,15 @@ libpaths += src/utility/output src/utility/numerics
 
 # --------------------------------------------------------------------------
 # we can choose more libraries and options in the file MyConfig
-projectsrepoprefix = giter@mars.physics.fau.edu:nmesh-projects/
+### ??? projectsrepoprefix = giter@mars.physics.fau.edu:nmesh-projects/
 projects =#
 include MyConfig
 
 # --------------------------------------------------------------------------
 # add projects to libpaths, and set variable projectnames for git targets
-libpaths += $(projects)
-#projectnames = $(notdir $(projects))
+projectnames = $(notdir $(projects))
+projectpaths = $(addprefix $(RELAPROJECTDIR)/,$(projectnames))
+libpaths += $(projectpaths)
 
 # --------------------------------------------------------------------------
 # some more required libraries that need to be last
@@ -174,24 +176,32 @@ clean: install_git_hooks cleanonly
 cleantilde:
 	find . -name "*~" -exec rm {} \;
 
+# print some vars
+printvars:
+	@echo projects=$(projects)
+	@echo PROJECTDIR=$(PROJECTDIR)
+	@echo projectpaths=$(projectpaths)
+	@echo projectnames=$(projectnames)
+	@echo libpaths=$(libpaths)
+
 
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
-	-for X in $(projects); do N=$$(basename $$X); printf "==== %s ====\n" $$N; git clone $(projectsrepoprefix)$$N $(TOP)/$$X; done
+	-for X in $(projects); do N=$$(basename $$X); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
 	@$(MAKE) install_git_hooks
 
 git_pull: install_git_hooks
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
-	@for X in $(projects); do if [ -d "$(TOP)/$$X" ]; then N=$$(basename $$X); printf "==== %s ====\n" $$N; cd $(TOP)/$$X; git pull; fi done
+	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
 
 git_status:
 	@echo ====================== main part of nmesh ======================
 	git status -uno
 	@echo ======================== nmesh projects ========================
-	@for X in $(projects); do if [ -d "$(TOP)/$$X" ]; then N=$$(basename $$X); printf "==== %s ====\n" $$N; cd $(TOP)/$$X; git status -uno; fi done
+	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
 
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
@@ -200,7 +210,7 @@ git_status:
 install_git_hooks:
 	@echo ==================== Installing git hooks ======================
 	cp git_hooks/pre-commit .git/hooks
-	for X in $(projects); do if [ -d "$(TOP)/$$X/.git/hooks" ]; then cp git_hooks/pre-commit $(TOP)/$$X/.git/hooks; fi done
+	for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N/.git/hooks" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$N/.git/hooks; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
