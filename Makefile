@@ -9,7 +9,7 @@ TOP := $(shell pwd)
 # name of program, location of executable and extra projects
 EXEC = nmesh
 EXECDIR = $(TOP)/exe
-PROJECTDIR = $(TOP)/src/projects
+#PROJECTDIR = $(TOP)/src/projects
 
 # default for variables used in all cases
 CC = gcc	# gcc or icc
@@ -178,20 +178,20 @@ cleantilde:
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
-	-for X in $(projectnames); do printf "==== %s ====\n" $$X; git clone $(projectsrepoprefix)$$X $(PROJECTDIR)/$$X; done
+	-for X in $(projects); do N=$$(basename $$X); printf "==== %s ====\n" $$N; git clone $(projectsrepoprefix)$$N $(TOP)/$$X; done
 	@$(MAKE) install_git_hooks
 
 git_pull: install_git_hooks
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
-	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "==== %s ====\n" $$X; cd $(PROJECTDIR)/$$X; git pull; fi done
+	@for X in $(projects); do if [ -d "$(TOP)/$$X" ]; then N=$$(basename $$X); printf "==== %s ====\n" $$N; cd $(TOP)/$$X; git pull; fi done
 
 git_status:
 	@echo ====================== main part of nmesh ======================
 	git status -uno
 	@echo ======================== nmesh projects ========================
-	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X" ]; then printf "==== %s ====\n" $$X; cd $(PROJECTDIR)/$$X; git status -uno; fi done
+	@for X in $(projects); do if [ -d "$(TOP)/$$X" ]; then N=$$(basename $$X); printf "==== %s ====\n" $$N; cd $(TOP)/$$X; git status -uno; fi done
 
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
@@ -200,7 +200,7 @@ git_status:
 install_git_hooks:
 	@echo ==================== Installing git hooks ======================
 	cp git_hooks/pre-commit .git/hooks
-	for X in $(projectnames); do if [ -d "$(PROJECTDIR)/$$X/.git/hooks" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$X/.git/hooks; fi done
+	for X in $(projects); do if [ -d "$(TOP)/$$X/.git/hooks" ]; then cp git_hooks/pre-commit $(TOP)/$$X/.git/hooks; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
