@@ -50,7 +50,7 @@ include MyConfig
 # --------------------------------------------------------------------------
 # add projects to libpaths, and set variable projectnames for git targets
 libpaths += $(projects)
-projectnames = $(notdir $(projects))
+#projectnames = $(notdir $(projects))
 
 # --------------------------------------------------------------------------
 # some more required libraries that need to be last
