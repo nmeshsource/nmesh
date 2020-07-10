@@ -49,8 +49,11 @@ projects =#
 include MyConfig
 
 # --------------------------------------------------------------------------
-# add projects to libpaths, and set variable projectnames for git targets
+# set variable projectnames from git targets in projects. NOTE: there must
+# be a / just before the actual projectname (e.g. mars.fau.edu:/DNSdata)
 projectnames = $(notdir $(projects))
+
+# set projectpaths and add them to libpaths
 projectpaths = $(addprefix $(RELAPROJECTDIR)/,$(projectnames))
 libpaths += $(projectpaths)
 
