@@ -44,7 +44,6 @@ libpaths += src/utility/output src/utility/numerics
 
 # --------------------------------------------------------------------------
 # we can choose more libraries and options in the file MyConfig
-### ??? projectsrepoprefix = giter@mars.physics.fau.edu:nmesh-projects/
 projects =#
 include MyConfig
 
