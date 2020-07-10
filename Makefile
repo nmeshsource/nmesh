@@ -50,7 +50,8 @@ include MyConfig
 # --------------------------------------------------------------------------
 # set variable projectnames from git targets in projects. NOTE: there must
 # be a / just before the actual projectname (e.g. mars.fau.edu:/DNSdata)
-projectnames = $(notdir $(projects))
+projectbasenames = $(basename $(projects))
+projectnames = $(notdir $(projectbasenames))
 
 # set projectpaths and add them to libpaths
 projectpaths = $(addprefix $(RELAPROJECTDIR)/,$(projectnames))
@@ -190,20 +191,20 @@ printvars:
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning nmesh projects ====================
-	-for X in $(projects); do N=$$(basename $$X); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
+	-for X in $(projects); do N=$$(basename $$X .git); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
 	@$(MAKE) install_git_hooks
 
 git_pull: install_git_hooks
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
-	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
 
 git_status:
 	@echo ====================== main part of nmesh ======================
 	git status -uno
 	@echo ======================== nmesh projects ========================
-	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
 
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
@@ -212,7 +213,7 @@ git_status:
 install_git_hooks:
 	@echo ==================== Installing git hooks ======================
 	cp git_hooks/pre-commit .git/hooks
-	for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N/.git/hooks" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$N/.git/hooks; fi done
+	for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/.git/hooks" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$N/.git/hooks; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
