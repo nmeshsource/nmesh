@@ -8,16 +8,16 @@
 
 # projects we add:
 #libpaths += src/tests/advection1
-projects += src/projects/Ein
-projects += src/projects/ADM
-projects += src/projects/EoS
-projects += src/projects/TOVstar
-projects += src/projects/GRHD
-projects += src/projects/ScalarWave
-projects += src/projects/TestID
-projects += src/projects/SRHDtestID
-projects += src/projects/SingleBH
-projects += src/projects/GHG
+projects += giter@mars.physics.fau.edu:nmesh-projects/Ein
+projects += giter@mars.physics.fau.edu:nmesh-projects/ADM
+projects += giter@mars.physics.fau.edu:nmesh-projects/EoS
+projects += giter@mars.physics.fau.edu:nmesh-projects/TOVstar
+projects += giter@mars.physics.fau.edu:nmesh-projects/GRHD
+projects += giter@mars.physics.fau.edu:nmesh-projects/ScalarWave
+projects += giter@mars.physics.fau.edu:nmesh-projects/TestID
+projects += giter@mars.physics.fau.edu:nmesh-projects/SRHDtestID
+projects += giter@mars.physics.fau.edu:nmesh-projects/SingleBH
+projects += giter@mars.physics.fau.edu:nmesh-projects/GHG
 
 # ------------------------------------------------------------------------
 # override various options in the Makefile
