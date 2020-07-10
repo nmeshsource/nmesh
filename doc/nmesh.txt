@@ -99,13 +99,14 @@ SRHDtestID
 ScalarWave
 
 # To get and compile all these you need to add the lines
-projects += giter@mars.physics.fau.edu:nmesh-projects/Ein
-projects += giter@mars.physics.fau.edu:nmesh-projects/ADM
-projects += giter@mars.physics.fau.edu:nmesh-projects/EoS
-projects += giter@mars.physics.fau.edu:nmesh-projects/TOVstar
-projects += giter@mars.physics.fau.edu:nmesh-projects/GRHD
-projects += giter@mars.physics.fau.edu:nmesh-projects/SRHDtestID
-projects += giter@mars.physics.fau.edu:nmesh-projects/ScalarWave
+repo = giter@mars.physics.fau.edu:nmesh-projects
+projects += $(repo)/Ein
+projects += $(repo)/ADM
+projects += $(repo)/EoS
+projects += $(repo)/TOVstar
+projects += $(repo)/GRHD
+projects += $(repo)/SRHDtestID
+projects += $(repo)/ScalarWave
 # in the "# projects we add:" section of nmesh/MyConfig and then type:
 make git_clone
 # To later update them, type:

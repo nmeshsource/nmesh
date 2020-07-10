@@ -10,13 +10,14 @@
 #libpaths += src/tests/SurfExchange
 #libpaths += src/tests/misc
 libpaths += src/tests/advection1
-projects += giter@mars.physics.fau.edu:nmesh-projects/GRHD
-projects += giter@mars.physics.fau.edu:nmesh-projects/ADM
-projects += giter@mars.physics.fau.edu:nmesh-projects/TOVstar
-projects += giter@mars.physics.fau.edu:nmesh-projects/EoS
-projects += giter@mars.physics.fau.edu:nmesh-projects/Ein
-projects += giter@mars.physics.fau.edu:nmesh-projects/SRHDtestID
-projects += giter@mars.physics.fau.edu:nmesh-projects/ScalarWave
+repo = giter@mars.physics.fau.edu:nmesh-projects
+projects += $(repo)/GRHD
+projects += $(repo)/ADM
+projects += $(repo)/TOVstar
+projects += $(repo)/EoS
+projects += $(repo)/Ein
+projects += $(repo)/SRHDtestID
+projects += $(repo)/ScalarWave
 
 # ------------------------------------------------------------------------
 # override various options in the Makefile
