@@ -69,9 +69,10 @@ int nMPI_print_compile_info(tMesh *mesh)
 /* Wrappers for MPI_Init and MPI_Finalize */
 int nMPI_Init(int *pargc, char ***pargv)
 {
+  int ret=0;
 #ifdef USEMPI
   PR0;
-  return MPI_Init(pargc, pargv);
+  ret = MPI_Init(pargc, pargv);
   PR1;
 #else
   /* for debugging we can start nmesh as:
@@ -84,19 +85,20 @@ int nMPI_Init(int *pargc, char ***pargv)
     if(noMPI_rank<0) noMPI_rank=0;
     if(noMPI_size<1) noMPI_size=1;
   }
-  return 0;
 #endif
+  return ret;
 }
 int nMPI_Finalize(void)
 {
+  int ret=0;
   fclose(stderr);
   fclose(stdout);
 #ifdef USEMPI
   PR0;
-  return MPI_Finalize();
+  ret = MPI_Finalize();
   PR1;
 #endif
-  return 0;
+  return ret;
 }
 
 /* abort MPI in case of errorexit */
