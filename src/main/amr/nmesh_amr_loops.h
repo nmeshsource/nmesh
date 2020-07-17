@@ -36,11 +36,13 @@
 
 /* this one will have no "parallel" on its own */
 // THIS DIDN'T WORK!!!:
-//#define formylnodes_ompfor(mesh) \
-//  NODELEVEL_Pragma(omp single) \
-//  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-//  NODELEVEL_Pragma(omp taskloop) \
-//  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
+/*
+#define formylnodes_ompfor(mesh) \
+  NODELEVEL_Pragma(omp single) \
+  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
+  NODELEVEL_Pragma(omp taskloop) \
+  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
+*/
 /* to start tasks formylnodes_ompfor has to be inside a:
    #pragma omp parallel {  } */
 
