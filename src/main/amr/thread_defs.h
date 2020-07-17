@@ -10,6 +10,7 @@
 #ifdef USEOMP
 
 #include <omp.h>
+#define OMP_VERSION _OPENMP
 #define NODELEVEL_Pragmas
 #define tMUTEX omp_lock_t
 #define DECL_MESH_MUTEX(node, mutex) \
@@ -27,6 +28,7 @@
 
 #else
 
+#define OMP_VERSION 0
 #define tMUTEX int
 #define DECL_MESH_MUTEX(node, mutex)
 #define MUTEX_INIT(x)
