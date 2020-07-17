@@ -1,6 +1,14 @@
 /* nmesh_amr_loops.h */
 /* Wolfgang Tichy, 1/2019 */
 
+
+/* decide if we use "omp taskloop" of OpenMP 4.5 from Nov. 2015 */
+#if OMP_VERSION >= 201511
+#define USE_OMP_TASKLOOP
+#endif
+// for now we do not use "omp taskloop" because it messes up ham & mom
+#undef USE_OMP_TASKLOOP
+
 /****************************************************************************/
 /* Loops are performed by macros so that the user has to know very little
    about the implementation details. */
@@ -15,23 +23,37 @@
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
+/* do we use omp taskloop? */
+#ifdef USE_OMP_TASKLOOP
+
 /* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
 #define formylnodes(mesh) \
-  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  NODELEVEL_Pragma(omp parallel for) \
-  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
-/*
   NODELEVEL_Pragma(omp parallel) \
   NODELEVEL_Pragma(omp single) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   NODELEVEL_Pragma(omp taskloop) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
-*/
-/*
+
+/* this one will have no "parallel" on its own */
+// THIS DIDN'T WORK!!!:
+//#define formylnodes_ompfor(mesh) \
+//  NODELEVEL_Pragma(omp single) \
+//  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
+//  NODELEVEL_Pragma(omp taskloop) \
+//  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
+/* to start tasks formylnodes_ompfor has to be inside a:
+   #pragma omp parallel {  } */
+
+#else
+
+/* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
+#define formylnodes(mesh) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   NODELEVEL_Pragma(omp parallel for) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
-*/
+
+#endif
+
 
 /* this one will have no "parallel" on its own */
 #define formylnodes_ompfor(mesh) \
@@ -40,6 +62,7 @@
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 /* to start tasks formylnodes_ompfor has to be inside a:
    #pragma omp parallel {  } */
+
 
 /* get leaf node from mesh, cat_ and li_ */
 #define MyLnode mesh->myln->ln[cat_][li_]->node
