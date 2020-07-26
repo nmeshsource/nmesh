@@ -451,3 +451,26 @@ How does EinsteinToolkit do its great AMR?
  -give many nodes to each MPI proc, use OpenMP loops over these loops
   on each proc
  -use OpenMP in formylnodes
+
+
+About OpenMP Parallelization:
+=============================
+*currently we use NODELEVEL_Pragma(omp parallel for) in formylnodes by
+default
+
+*on supermuc with icc and -O3 NODELEVEL_Pragma(omp parallel for) seems to
+ work well. Intel Inspector reports no problems.
+
+*I have tried to replace this with NODELEVEL_Pragma(omp taskloop), but this
+never worked properly:
+-on supermuc with icc and -O3 Intel Inspector reports data races
+-on supermuc with icc and just -g Intel Inspector reports only the warning
+ "one or more threads in the app. accessed the stack of another thread",
+ otherwise it says "No Problems Detected".
+-on Koko with icc and -O3 NODELEVEL_Pragma(omp parallel for) and
+ NODELEVEL_Pragma(omp taskloop) give different answers for ham and mom. when
+ I evolve a single TOV star for a few time steps with GRHD and GHG. For some
+ reason the evolved quantities and AMD vars are very close and only ham and
+ mom differe a lot.
++on the other hand on tyrfing with gcc and -g -fsanitize=thread no problems
+ are reported. Why???
