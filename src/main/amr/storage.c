@@ -472,11 +472,12 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   */
 
   /* #pragma omp critical (make_or_destroy_nodes) */
-  /* NOTE: For some reason gcc's -fsanitize=thread throws a false positive
-           if I use a named critical section.
+  /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
+           if I use a named critical section!
            So replace "GEN_Pragma(omp critical (make_or_destroy_nodes))"
            by "GEN_Pragma(omp critical)" when debugging races!!! */
-  GEN_Pragma(omp critical (make_or_destroy_nodes))
+  //GEN_Pragma(omp critical (make_or_destroy_nodes))
+  GEN_Pragma(omp critical)
   {
     ///* aquire lock for change of connections */
     //node_and_fnbs_lock(parent);
@@ -724,11 +725,12 @@ tNode *destroy_children(tNode *parent)
   */
 
   /* #pragma omp critical (make_or_destroy_nodes) */
-  /* NOTE: For some reason gcc's -fsanitize=thread throws a false positive
-           if I use a named critical section.
+  /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
+           if I use a named critical section!
            So replace "GEN_Pragma(omp critical (make_or_destroy_nodes))"
            by "GEN_Pragma(omp critical)" when debugging races!!! */
-  GEN_Pragma(omp critical (make_or_destroy_nodes))
+  //GEN_Pragma(omp critical (make_or_destroy_nodes))
+  GEN_Pragma(omp critical)
   {
     ///* obtain lock on face neighbors of narray in name of parent */
     //parent_and_fnbs_lock(narray, parent);
