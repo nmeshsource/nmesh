@@ -472,5 +472,5 @@ never worked properly:
  I evolve a single TOV star for a few time steps with GRHD and GHG. For some
  reason the evolved quantities and AMD vars are very close and only ham and
  mom differe a lot.
-+on the other hand on tyrfing with gcc and -g -fsanitize=thread no problems
- are reported. Why???
++on the other hand on tyrfing with gcc and -O3 -g -fsanitize=thread no
+ problems are reported. Why???
