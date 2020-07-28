@@ -44,9 +44,7 @@
 */
 /* THIS DIDN'T WORK in dg_add_surface_fluxes!!! It caused a race for e.g.
    dgi->node = node; ... It seems tasks get processed by arbitrary threads so
-   that allocating dgi on a per thread basis is not good enough...
-   BUT try it again now that "omp master","omp taskloop" are inside the
-   cat_-loop!!! */
+   that allocating dgi on a per thread basis is not good enough... */
 /* to start tasks formylnodes_ompfor has to be inside a:
    #pragma omp parallel {  } */
 
