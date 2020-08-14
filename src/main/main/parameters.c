@@ -49,12 +49,11 @@ int make_output_directory(tMesh *mesh);
 
 
 /* open and parse a given parameter file */
-int open_and_parse_parameter_file(tMesh *mesh, char *parfile,
-                                  int fatal, int pr)
+int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
 {
   FILE *fp;
   int c, i, j;
-  int nbuffer;
+  int nbuffer, file_exists;
   char *buffer;
   char *par, *val;
   int lpar, lval;
@@ -62,36 +61,55 @@ int open_and_parse_parameter_file(tMesh *mesh, char *parfile,
   if(pr) printf("Reading parameter file \"%s\"\n", parfile);
 
   /* read file into memory, and also add one space at end and beginning */
-  fp = fopen(parfile, "r");
-  if(!fp)
+  file_exists = 1;
+  buffer = NULL;
+  if(Rank0)
   {
-    if(pr) printf("  parameter file \"%s\" does not exist!\n", parfile);
-    if(fatal)
-      errorexits("Could not open parameter file \"%s\"\n", parfile);
-    else
-      return 0;
-  }
-
-  buffer = 0;
-  for(i = nbuffer = 0;; i++)
-  {
-    if(i >= nbuffer-2)
+    fp = fopen(parfile, "r");
+    if(!fp)
     {
-      if(nbuffer > 1000000)
-        errorexit("Parameter files bigger than 1MB are not allowed!");
-      buffer = (char *) realloc(buffer, sizeof(char)*(nbuffer += 1000));
-      if(!buffer)
-        errorexit("Out of memory for buffer while reading parameter file!");
+      if(pr) printf("  parameter file \"%s\" does not exist!\n", parfile);
+      if(fatal)
+        errorexits("Could not open parameter file \"%s\"\n", parfile);
+      else
+        file_exists = 0; /* signals error reading file */
     }
-    if(i == 0) buffer[i++] = ' ';
-    if((c = fgetc(fp)) == EOF) break;
-    buffer[i] = c;
-  }
-  fclose(fp);
-  buffer[i++] = ' ';
-  buffer[i] = '\0';
-  nbuffer = strlen(buffer);
 
+    if(file_exists)
+    {
+      for(i = nbuffer = 0;; i++)
+      {
+        if(i >= nbuffer-2)
+        {
+          if(nbuffer > 1000000)
+            errorexit("Parameter files bigger than 1MB are not allowed!");
+          buffer = (char *) realloc(buffer, sizeof(char)*(nbuffer += 1000));
+          if(!buffer)
+            errorexit("Out of memory for buffer while reading parameter file!");
+        }
+        if(i == 0) buffer[i++] = ' ';
+        if((c = fgetc(fp)) == EOF) break;
+        buffer[i] = c;
+      }
+      fclose(fp);
+      buffer[i++] = ' ';
+      buffer[i] = '\0';
+      nbuffer = strlen(buffer);
+    }
+    else
+    {
+      nbuffer = 0;
+    }
+  }
+
+  /* broadcast whether parfile exists */
+  nMPI_Bcast(&file_exists,1, nMPI_INT, 0);
+  if(!file_exists) return 0;
+
+  /* broadcast buffer to all MPI ranks */
+  nMPI_Bcast(&nbuffer,1, nMPI_INT, 0);
+  if(!Rank0) buffer = malloc(sizeof(char) * (nbuffer+1));
+  nMPI_Bcast(buffer,nbuffer+1, nMPI_CHAR, 0);
   if(0) { printf("%s", buffer); Yo(1); }
 
   /* replace comments by spaces */
@@ -171,27 +189,6 @@ int open_and_parse_parameter_file(tMesh *mesh, char *parfile,
   }
   free(buffer);
   return 1;
-}
-
-/* use open_and_parse_parameter_file to get pars on one proc after
-   the other */
-int nmesh_load_parameters(tMesh *mesh, char *fname, int fatal, int pr)
-{
-  int rk;
-
-  /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
-  {
-    /* do work when it is my turn */
-    if(rk == nMPI_rank())
-    {
-      open_and_parse_parameter_file(mesh, fname, fatal, pr);
-    }
-    /* wait until everyone is here */
-    nMPI_barrier();
-  } /* end rk-loop */
-
-  return 0;
 }
 
 /* parse a parameter file */
