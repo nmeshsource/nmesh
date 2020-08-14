@@ -303,6 +303,58 @@ int get_par_from_str(const char *str, char *name, const char *delim,
   return ret;
 }
 
+/* start at buffer + offset and read into array mem until first delim,
+   return offset to mem after last read, write length of mem read in len */
+long mem_from_buf(const char *buffer, long nbuffer, long offset,
+                  char delim, char *mem, long memsize, long *len)
+{
+  const char *buf;
+  long nbuf, i, im, newoffset;
+
+  if(offset>=nbuffer) return -1; /* signal end of buffer */
+  if(offset<0)        return -1;
+
+  buf = buffer + offset;
+  nbuf = nbuffer - offset;
+
+  if(nbuf < memsize) im = nbuf;
+  else               im = memsize;
+
+  for(i=0; i<im; i++)
+  {
+    mem[i] = buf[i];
+    if(buf[i] == delim) { i++;  break; }
+  }
+  newoffset = offset + i;
+  *len = i;
+
+  return newoffset;
+}
+
+/* start at buffer + offset and read into string str until first delim,
+   return offset to mem after last read, write length of mem read in len */
+long str_from_buf(const char *buffer, long nbuffer, long offset,
+                  char delim, char *str, long nstr, long *strlen)
+{
+  long newoffset;
+  newoffset = mem_from_buf(buffer,nbuffer,offset, delim, str, nstr-1, strlen);
+  str[*strlen] = 0; /* add string terminator */
+  return newoffset;
+}
+
+
+/* return the number of bytes in a file */
+long nbytes_infile(FILE *fp)
+{
+  long nbytes;
+
+  /* find number of bytes in file */
+  fseek(fp, 0L, SEEK_END);
+  nbytes = ftell(fp);
+  fseek(fp, 0L, SEEK_SET);
+  return nbytes;
+}
+
 
 /* make copy of a file: cp fname newname */
 int copy_file(char *fname, char *newname)

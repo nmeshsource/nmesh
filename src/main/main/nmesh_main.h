@@ -237,6 +237,9 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 void trim_whitespace(char *str);
 int get_par_from_str(const char *str, char *name, const char *delim,
                      char *value, int n);
+long str_from_buf(const char *buffer, long nbuffer, long offset,
+                  char delim, char *str, long nstr, long *strlen);
+long nbytes_infile(FILE *fp);
 int copy_file_into_dir(char *fname, char *dir);
 int system1(char *s1);
 int system2(char *s1, char *s2);
