@@ -142,34 +142,82 @@ exit(8);
 /* load node info */
 int checkpoint_load_nodes(tMesh *mesh, char *fname)
 {
-  int rk;
+  FILE *fp=NULL;
+  char *buffer=NULL;
+  long nbuffer;
+  long first = 524288;
+  long extra = 1024;
+  long nbuffer_allocd = first + extra;
+  int file_end;
 
-  /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
+  /* alloc buffer */
+  buffer = cmalloc(nbuffer_allocd);
+
+  /* open file on rank0 */
+  if(Rank0)
   {
-    /* do work when it is my turn */
-    if(rk == nMPI_rank())
+    fp = fopen(fname, "rb");
+    if(!fp) errorexits("failed opening %s", fname);
+  }
+
+  /* get part of file into mem buffer on proc0 */
+  file_end = 0;
+  do
+  {
+    char buf[1000];
+    char str[1000];
+    tNode *parent;
+    int n[3];
+    int p = -1; /* patch number read from file */
+    int p_prev; /* previous patch number read from file */
+    int lp = -1; /* ref. level of parent */
+    int lp_prev; /* ref. level of previous parent */
+    tNlist *elem = mesh->lns; /* first element in leaf node list */
+
+    /* read a chunk from file into buffer */
+    if(Rank0)
     {
-      FILE *fp;
-      char buf[1000];
-      tNode *parent;
-      int n[3];
-      int p = -1; /* patch number read from file */
-      int p_prev; /* previous patch number read from file */
-      int lp = -1; /* ref. level of parent */
-      int lp_prev; /* ref. level of previous parent */
-      tNlist *elem = mesh->lns; /* first element in leaf node list */
+      char *tailbuf;
+      long pos;
+      int lastone, newl, c;
 
-      /* open source file */
-      fp = fopen(fname, "rb");
-      if(!fp) errorexits("failed opening %s", fname);
+      /* read a certain number of parent nodes and their child0->n */
+      nbuffer = fread(buffer, sizeof(char), first, fp);
+      if(nbuffer<first) file_end = 1;
 
-      /* read file line by line */
-      while(fgets(buf,999, fp))
+      tailbuf = buffer + nbuffer;
+      pos = 0;
+      lastone = newl = 0;
+      while((c=fgetc(fp)) != EOF)
+      {
+        tailbuf[pos++] = c;
+        if(c=='_') lastone = 1; /* from now on we read 4 more \n */
+        if(lastone && c=='\n') newl++;
+        if(newl>=4) break;
+      }
+      nbuffer += pos;
+      if(c == EOF) file_end = 1;
+    }
+
+    /* broadcast buffer to all MPI ranks */
+    nMPI_Bcast(&file_end,1, nMPI_INT, 0);
+    nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
+    if(!Rank0) buffer = cmalloc(nbuffer);
+    nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
+
+//PRF;printf(": nbuffer=%ld\n", nbuffer);
+
+    {
+      long off, len;
+
+      /* read buffer line by line */
+      off = 0;
+      while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
       {
         /* all node names contain an '_' */
         if(strstr(buf, "_"))
         {
+          int d;
           tNlist *children, *lastchild;
 
           /* strip trailing '\n' from buf */
@@ -185,9 +233,11 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           //printnode(parent);
 
           /* read n for child0 */
-          fscanf(fp, "%d", &(n[0]));
-          fscanf(fp, "%d", &(n[1]));
-          fscanf(fp, "%d", &(n[2]));
+          for(d=0; d<3; d++)
+          {
+            off = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
+            n[d] = atoi(str);
+          }
           //printf("n = %d %d %d\n", n[0],n[1],n[2]);
           //fflush(stdout);
 
@@ -226,14 +276,16 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           elem = lastchild;
         }
       }
-      fclose(fp);
-      PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
-                 mesh->iteration, mesh->time);
-      fflush(stdout);
     }
-    /* wait until everyone is here */
-    nMPI_barrier();
-  } /* end rk-loop */
+
+  } while(!file_end);
+
+  /* close file */
+  if(Rank0) fclose(fp);
+
+  PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
+             mesh->iteration, mesh->time);
+  fflush(stdout);
 
   /* make sure all nodes have new current nids */
   update_mesh_myln_node_nid(mesh);
@@ -244,6 +296,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
   PRF;printf(": total number of leaf nodes mesh->nln=%ld\n", mesh->nln);
   fflush(stdout);
 
+  free(buffer);
   return 0;
 }
 
