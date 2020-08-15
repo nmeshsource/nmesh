@@ -15,101 +15,118 @@
 /* load patch info */
 int checkpoint_load_patches(tMesh *mesh, char *fname)
 {
-  int rk;
+  char *buffer=NULL;
+  long nbuffer;
+  char buf[1000];
+  long off, len;
+  tPat *pat = NULL;
+  char par[1000], val[1000];
+  int clabel=0, nmax=0, useF=0;
+  int n[] = { 0,0,0 };
+  double bbox[] = { 0.,0.,0.,0.,0.,0. };
 
-  /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
-  {
-    /* do work when it is my turn */
-    if(rk == nMPI_rank())
-    {
-      FILE *fp;
-      char buf[1000];
-      tPat *pat = NULL;
-      char par[1000], val[1000];
-      int clabel=0, nmax=0, useF=0;
-      int n[] = { 0,0,0 };
-      double bbox[] = { 0.,0.,0.,0.,0.,0. };
-
-      /* open source file */
-      fp = fopen(fname, "rb");
-      if(!fp) errorexits("failed opening %s", fname);
-
-      /* read file line by line */
-      while(fgets(buf,999, fp))
-      {
-        /* CI-> signifies that we know all we need to create a new patch */
-        if(strcmp(buf, " CI->\n")==0)
-        {
-          //prbbox(bbox, 3);
-          //printf("n = %d %d %d\n", n[0],n[1],n[2]);
-          /* We set datrank=-1 to save memory. No dat is allocated
-             anywhere! */
-          pat = add_patch(mesh, bbox, n, nmax, -1);
-          useF = 0;
-        }
 /*
-char ttt[] = "  domu=read 99 \n";
-printf("ttt = |%s|\n", ttt);
-get_par_from_str(ttt, par,"=",val,999);
-printf("|%s| = |%s|\n", par,val);
+long len, off=0;
+char ttt[] = "  domu=read 99 newl=wwww 6    6  = qqqq3=";
+char *str=cmalloc(999);
+printf("ttt = |%s|:%d\n", ttt, sizeof(ttt)-1);
+off=0;
+while((off = str_from_buf(ttt, sizeof(ttt)-1, off, '=', str, 999, &len))>=0L)
+{
+printf("|%s|: %ld\n", str, off);
+}
+printf("off=%ld: %d\n", off, ttt[off-1]);
 exit(8);
 */
-        /* read various info pieces */
-        if(get_par_from_str(buf, par, "=", val, 999) && val[0])
-        {
-          //printf("%s = %s\n", par, val);
-          if(strcmp(par, "time")==0)      mesh->time = atof(val);
-          if(strcmp(par, "iteration")==0) mesh->iteration = atoi(val);
-          if(strcmp(par, "dt")==0)        mesh->dt = atof(val);
 
-          if(strcmp(par, "bbox[0]")==0) bbox[0] = atof(val);
-          if(strcmp(par, "bbox[1]")==0) bbox[1] = atof(val);
-          if(strcmp(par, "bbox[2]")==0) bbox[2] = atof(val);
-          if(strcmp(par, "bbox[3]")==0) bbox[3] = atof(val);
-          if(strcmp(par, "bbox[4]")==0) bbox[4] = atof(val);
-          if(strcmp(par, "bbox[5]")==0) bbox[5] = atof(val);
-          if(strcmp(par, "nmax")==0) nmax = atoi(val);
-          if(strcmp(par, "rnode->n[0]")==0) n[0] = atoi(val);
-          if(strcmp(par, "rnode->n[1]")==0) n[1] = atoi(val);
-          if(strcmp(par, "rnode->n[2]")==0) n[2] = atoi(val);
-          if(strcmp(par, "s[0]")==0)  pat->CI->s[0] = atof(val);
-          if(strcmp(par, "s[1]")==0)  pat->CI->s[1] = atof(val);
-          if(strcmp(par, "s[2]")==0)  pat->CI->s[2] = atof(val);
-          if(strcmp(par, "s[3]")==0)  pat->CI->s[3] = atof(val);
-          if(strcmp(par, "s[4]")==0)  pat->CI->s[4] = atof(val);
-          if(strcmp(par, "s[5]")==0)  pat->CI->s[5] = atof(val);
-          if(strcmp(par, "xc[0]")==0) pat->CI->xc[0] = atof(val);
-          if(strcmp(par, "xc[1]")==0) pat->CI->xc[1] = atof(val);
-          if(strcmp(par, "xc[2]")==0) pat->CI->xc[2] = atof(val);
-          if(strcmp(par, "dom")==0)   pat->CI->dom = atoi(val);
-          if(strcmp(par, "type")==0)  pat->CI->type = atoi(val);
-          if(strcmp(par, "use_FSurf")==0)  useF = atoi(val);
-          if(strcmp(par, "coordinates_get_label(pat)")==0)
-          {
-            /* this signifies end of patch info, so now set final pat info */
-            clabel = atoi(val);
-            switch(clabel)
-            {
-            case CubedSphere:
-              set_1_CubedSphere_pat(pat, 0, useF);
-              break;
-            case stretchedCubedSphere:
-              set_1_CubedSphere_pat(pat, 1, useF);
-              break;
-            }
-          }
-        } /* end of if get_par_from_str */
-      }
+  /* get file into mem buffer on proc0 */
+  if(Rank0)
+  {
+    FILE *fp;
 
-      fclose(fp);
+    /* open file */
+    fp = fopen(fname, "rb");
+    if(!fp) errorexits("failed opening %s", fname);
+
+    /* find number of bytes in file and write them into buffer */
+    nbuffer = nbytes_infile(fp);
+    buffer = cmalloc(nbuffer);
+    fread(buffer, sizeof(char), nbuffer, fp);
+
+    fclose(fp);
+  }
+
+  /* broadcast buffer to all MPI ranks */
+  nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
+  if(!Rank0) buffer = cmalloc(nbuffer);
+  nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
+
+  /* read buffer line by line */
+  off = 0;
+  while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
+  {
+    /* CI-> signifies that we know all we need to create a new patch */
+    if(strcmp(buf, " CI->\n")==0)
+    {
+      //prbbox(bbox, 3);
+      //printf("n = %d %d %d\n", n[0],n[1],n[2]);
+      /* We set datrank=-1 to save memory. No dat is allocated
+         anywhere! */
+      pat = add_patch(mesh, bbox, n, nmax, -1);
+      useF = 0;
     }
-    /* wait until everyone is here */
-    nMPI_barrier();
-  } /* end rk-loop */
+
+    /* read various info pieces */
+    if(get_par_from_str(buf, par, "=", val, 999) && val[0])
+    {
+      //printf("%s = %s\n", par, val);
+      if(strcmp(par, "time")==0)      mesh->time = atof(val);
+      if(strcmp(par, "iteration")==0) mesh->iteration = atoi(val);
+      if(strcmp(par, "dt")==0)        mesh->dt = atof(val);
+
+      if(strcmp(par, "bbox[0]")==0) bbox[0] = atof(val);
+      if(strcmp(par, "bbox[1]")==0) bbox[1] = atof(val);
+      if(strcmp(par, "bbox[2]")==0) bbox[2] = atof(val);
+      if(strcmp(par, "bbox[3]")==0) bbox[3] = atof(val);
+      if(strcmp(par, "bbox[4]")==0) bbox[4] = atof(val);
+      if(strcmp(par, "bbox[5]")==0) bbox[5] = atof(val);
+      if(strcmp(par, "nmax")==0) nmax = atoi(val);
+      if(strcmp(par, "rnode->n[0]")==0) n[0] = atoi(val);
+      if(strcmp(par, "rnode->n[1]")==0) n[1] = atoi(val);
+      if(strcmp(par, "rnode->n[2]")==0) n[2] = atoi(val);
+      if(strcmp(par, "s[0]")==0)  pat->CI->s[0] = atof(val);
+      if(strcmp(par, "s[1]")==0)  pat->CI->s[1] = atof(val);
+      if(strcmp(par, "s[2]")==0)  pat->CI->s[2] = atof(val);
+      if(strcmp(par, "s[3]")==0)  pat->CI->s[3] = atof(val);
+      if(strcmp(par, "s[4]")==0)  pat->CI->s[4] = atof(val);
+      if(strcmp(par, "s[5]")==0)  pat->CI->s[5] = atof(val);
+      if(strcmp(par, "xc[0]")==0) pat->CI->xc[0] = atof(val);
+      if(strcmp(par, "xc[1]")==0) pat->CI->xc[1] = atof(val);
+      if(strcmp(par, "xc[2]")==0) pat->CI->xc[2] = atof(val);
+      if(strcmp(par, "dom")==0)   pat->CI->dom = atoi(val);
+      if(strcmp(par, "type")==0)  pat->CI->type = atoi(val);
+      if(strcmp(par, "use_FSurf")==0)  useF = atoi(val);
+      if(strcmp(par, "coordinates_get_label(pat)")==0)
+      {
+        /* this signifies end of patch info, so now set final pat info */
+        clabel = atoi(val);
+        switch(clabel)
+        {
+        case CubedSphere:
+          set_1_CubedSphere_pat(pat, 0, useF);
+          break;
+        case stretchedCubedSphere:
+          set_1_CubedSphere_pat(pat, 1, useF);
+          break;
+        }
+      }
+    } /* end of if get_par_from_str */
+  }
 
   /* do not load balance root nodes here! datrank=-1 saves memory only
      until simple_load_balance(mesh) is called for the 1st time! */
+
+  free(buffer);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 0);
