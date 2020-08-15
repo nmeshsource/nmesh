@@ -39,6 +39,10 @@ int nMPI_size(void);
 int nMPI_barrier(void);
 int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm);
 int nMPI_Comm_free(nMPI_Comm *comm);
+int nMPI_Send(const void *buf, int count, nMPI_Datatype datatype,
+              int dest, int tag);
+int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,
+              int source, int tag);
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
 int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
                    nMPI_Datatype datatype, nMPI_Op op);

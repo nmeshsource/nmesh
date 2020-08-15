@@ -174,7 +174,33 @@ int nMPI_Comm_free(nMPI_Comm *comm)
   return ret;
 }
 
-/* non-blocking send */
+/* general blocking send */
+int nMPI_Send(const void *buf, int count, nMPI_Datatype datatype,
+              int dest, int tag)
+{
+  int stat = 0;
+#ifdef USEMPI
+  PR0;
+  stat = MPI_Send(buf,count, datatype, dest, tag, WORLD);
+  PR1;
+#endif
+  return stat;
+}
+
+/* general blocking recv */
+int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,
+              int source, int tag)
+{
+  int stat = 0;
+#ifdef USEMPI
+  PR0;
+  stat = MPI_Recv(buf,count, datatype, source, tag, WORLD, MPI_STATUS_IGNORE);
+  PR1;
+#endif
+  return stat;
+}
+
+/* non-blocking send for double */
 void nMPI_Isend_double(double *buf, int blen, int dest, int tag,
                        nMPI_Comm comm, nMPI_Req *req)
 {
@@ -189,7 +215,7 @@ void nMPI_Isend_double(double *buf, int blen, int dest, int tag,
 #endif
 }
 
-/* non-blocking recv */
+/* non-blocking recv for double */
 void nMPI_Irecv_double(double *buf, int blen, int src, int tag,
                        nMPI_Comm comm, nMPI_Req *req)
 {
