@@ -312,7 +312,7 @@ long mem_from_buf(const char *buffer, long nbuffer, long offset,
   long nbuf, i, im, newoffset;
 
   if(offset>=nbuffer) return -1; /* signal end of buffer */
-  if(offset<0)        return -1;
+  if(offset<0)        return -1; /* if offset<0 stay at end of buffer */
 
   buf = buffer + offset;
   nbuf = nbuffer - offset;
