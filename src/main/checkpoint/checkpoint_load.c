@@ -555,7 +555,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       /* use fgets to also read the '\n' after var. */
       s = fgets(buf,999, fp); /* s=NULL at EOF */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
-    } /* end while(found_node) */
+    } /* end while(found_node && s) */
     free(v);
     v = NULL;
     if(found_node) break; /* stop after we found a node */
