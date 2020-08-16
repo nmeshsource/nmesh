@@ -396,6 +396,7 @@ exit(9);
   fflush(stdout);
 
   vlfree(vl);
+  if(Rank0) fclose(fp);
   return 0;
 }
 
