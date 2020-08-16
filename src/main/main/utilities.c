@@ -332,7 +332,11 @@ long mem_from_buf(const char *buffer, long nbuffer, long offset,
 }
 
 /* start at buffer + offset and read into string str until first delim,
-   return offset to mem after last read, write length of mem read in len */
+   return offset to mem after last read, write length of mem read in len:
+   To be used like e.g. this:
+     while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
+   or:
+     off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);  */
 long str_from_buf(const char *buffer, long nbuffer, long offset,
                   char delim, char *str, long nstr, long *strlen)
 {
