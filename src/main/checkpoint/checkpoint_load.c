@@ -26,16 +26,16 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   double bbox[] = { 0.,0.,0.,0.,0.,0. };
 
 /*
-long len, off=0;
-char ttt[] = "  domu=read 99 newl=wwww 6    6  = qqqq3=";
-char *str=cmalloc(999);
-printf("ttt = |%s|:%d\n", ttt, sizeof(ttt)-1);
+char ttt[] = "  domu=read 99 newl=wwww 6    6  = qqqq3=xyz";
+int sl = 20;
+char *str=cmalloc(sl);
+printf("ttt = |%s|:%ld\n", ttt, sizeof(ttt)-1);
 off=0;
-while((off = str_from_buf(ttt, sizeof(ttt)-1, off, '=', str, 999, &len))>=0L)
+while((off = str_from_buf(ttt,sizeof(ttt)-1, off, '=', str,sl, &len))>=0L)
 {
-printf("|%s|: %ld\n", str, off);
+printf("|%s|: %ld %ld\n", str, off,len);
 }
-printf("off=%ld: %d\n", off, ttt[off-1]);
+printf("off=%ld\n", off);
 exit(8);
 */
 
