@@ -454,7 +454,7 @@ void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
     {
       found_node = 0;
     }
-    while(found_node)
+    while(found_node && (off>=0))
     {
       /* check for end ("}\n") or read var info */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
@@ -483,7 +483,7 @@ void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
 
       /* also read the '\n' after var. data */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
-    } /* end while(found_node) */
+    } /* end while(found_node && (off>=0)) */
   }
 }
 
