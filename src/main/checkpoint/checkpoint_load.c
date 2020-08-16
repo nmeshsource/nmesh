@@ -394,6 +394,7 @@ exit(9);
   prvarlist(vl);
   fflush(stdout);
 
+  vlfree(vl);
   return 0;
 }
 
