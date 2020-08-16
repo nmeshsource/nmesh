@@ -19,4 +19,6 @@ int checkpoint_load_patches(tMesh *mesh, char *fname);
 int checkpoint_load_nodes(tMesh *mesh, char *fname);
 int checkpoint_load_Vars(tMesh *mesh, char *fname);
 tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh);
-void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big);
+void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl);
+char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
+                                 long *nbuffer, int *datrank);

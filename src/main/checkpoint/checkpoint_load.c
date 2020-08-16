@@ -307,43 +307,92 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
 /* load all EvoVars */
 int checkpoint_load_Vars(tMesh *mesh, char *fname)
 {
-  int rk;
+  tVarList *vl;
+  int nvars=0;
+  int *ibuffer;
+  FILE *fp=NULL;
+  char *buffer;
+  long nbuffer;
+  int i;
 
-  /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
+  /* open file on rank0 */
+  if(Rank0)
   {
-    /* do work when it is my turn */
-    if(rk == nMPI_rank())
+    fp = fopen(fname, "rb");
+    if(!fp) errorexits("failed opening %s", fname);
+
+    /* get varlist from file */
+    vl = checkpoint_make_vl(fp, mesh);
+    nvars = vl->n;
+  }
+  else
+  {
+    vl = vlalloc(mesh);
+  }
+
+  /* broadcast vl to all MPI ranks */
+  nMPI_Bcast(&nvars,1, nMPI_INT, 0);
+  ibuffer = imalloc(nvars);
+  if(Rank0)
+    for(i=0; i<nvars; i++) ibuffer[i] = vl->index[i];
+  nMPI_Bcast(ibuffer,nvars, nMPI_INT, 0);
+  if(!Rank0)
+    for(i=0; i<nvars; i++) vlpushone(vl, ibuffer[i]);
+
+  /* loop over all nodes */
+  buffer = NULL;
+  do
+  {
+    int datrank;
+
+    /* make sure to free everything in buffer */
+    free(buffer);
+    buffer = NULL;
+
+    /* get data (in little endian format) for 1 node into buffer on rank0 */
+    if(Rank0)
+      buffer = checkpoint_make_nodebuffer(fp, vl, 0, &nbuffer, &datrank);
+/*
+if(Rank0)
+{
+FILE *out=fopen("out", "w");
+fwrite(buffer,1,nbuffer, out);
+fclose(out);
+}
+nMPI_barrier();
+exit(9);
+*/
+    /* broadcast nbuffer and stop if it's empty */
+    nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
+    nMPI_Bcast(&datrank,1, nMPI_INT, 0);
+    //PRF;printf(": nbuffer=%ld datrank=%d\n", nbuffer, datrank);
+    if(!nbuffer) break; /* break do-loop if no more node-data */
+
+    /* if the buffer needs to go to another rank, send it there */
+    if(datrank != 0)
     {
-      tVarList *vl;
-      FILE *fp;
+      /* send buffer from 0 to rank with dat */
+      if(Rank0)
+        nMPI_Send(buffer, nbuffer, nMPI_CHAR, datrank, 11);
 
-      /* open file */
-      fp = fopen(fname, "rb");
-      if(fp)
+      if(nMPI_rank()==datrank)
       {
-        /* get varlist from file */
-        vl = checkpoint_make_vl(fp, mesh);
-
-        /* now read data for vars in little endian format */
-        checkpoint_read_vl(fp, vl, 0);
-        PRF;printf(": finished reading varlist.\n");
-        prvarlist(vl);
-        fflush(stdout);
-
-        vlfree(vl);
-        fclose(fp);
-      }
-      else
-      {
-        errorexits("failed opening %s", fname);
-        //PRF;printf(": failed opening %s\n", fname);
-        fflush(stdout);
+        buffer = cmalloc(nbuffer);
+        nMPI_Recv(buffer, nbuffer, nMPI_CHAR, 0, 11);
       }
     }
-    /* wait until everyone is here */
+
+    /* read var data from buffer for this one node */
+    if(nMPI_rank()==datrank) checkpoint_read_vl(buffer, nbuffer, vl);
+
+    /* wait for all to get here */
     nMPI_barrier();
-  } /* end rk-loop */
+  } while(nbuffer);
+  free(buffer);
+
+  PRF;printf(": finished reading varlist.\n");
+  prvarlist(vl);
+  fflush(stdout);
 
   return 0;
 }
@@ -371,14 +420,16 @@ tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh)
   return vl;
 }
 
-/* output varlist on each node */
-void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
+/* read varlist on each node */
+void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
   char buf[1000];
+  long off, len;
 
   /* find string node */
-  while(fgets(buf,999, fp))
+  off = 0;
+  while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
   {
     tNode *node;
     char name[256];
@@ -387,9 +438,10 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
     if(strcmp(buf, "{\n")==0)
     {
       /* read node info */
-      fscanf(fp, "%s", name);
-      fscanf(fp, "%d", &np);
-      fgets(buf,999, fp); /* use fgets to also read the '\n' after np */
+      off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
+      sscanf(buf, "%s", name);
+      off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
+      sscanf(buf, "%d", &np);
 
       /* find node from its name */
       node = node_from_nodename(mesh, name);
@@ -401,12 +453,14 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
     }
     while(found_node)
     {
-      /* check for end / read var info */
-      fgets(buf,999, fp); /* use fgets to read '}' or vli plus '\n' */
+      /* check for end ("}\n") or read var info */
+      off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       if(strcmp(buf, "}\n")==0) break;
       vli = atoi(buf);
       vi  = Vind(vl, vli);
-      //printf("name=%s np=%d vli=%d\n", name, np, vli);
+      len = sizeof(double) * np;
+      //PRF;printf(": name=%s np=%d vli=%d node->datrank=%d\n",
+      //           name, np, vli, node->datrank);
       //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), node->nid, vi);
 
       /* check if this var needs to be read on this node */
@@ -419,16 +473,85 @@ void checkpoint_read_vl(FILE *fp, tVarList *vl, int read_big)
         v = Vard(node, vi);
 
         /* read var as raw binary */
-        if(read_big) fread_big(v, sizeof(double), np, fp);
-        else         fread_little(v, sizeof(double), np, fp);
+        memcpy(v, buffer+off, len);
         //if(node->nid==28) printf("v[]=%g\n", v[0]);
       }
-      else /* just over-read data */
-      {
-        long offset = sizeof(double) * np;
-        fseek(fp, offset, SEEK_CUR);
-      }
-      fgets(buf,999, fp); /* use fgets to also read the '\n' after var. */
+      off += len; /* go len bytes further in buffer */
+
+      /* also read the '\n' after var. data */
+      off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
     } /* end while(found_node) */
   }
+}
+
+/* add buf to buffer */
+char *append_buf(char *buffer, long *nbuffer, const char *buf, long nbuf)
+{
+  long len = *nbuffer + nbuf;
+  buffer = realloc(buffer, len * sizeof(char));
+  memcpy(buffer + *nbuffer, buf, nbuf);
+  *nbuffer = len;
+  return buffer;
+}
+
+/* read var info for one node into buffer */
+char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
+                                 long *nbuffer, int *datrank)
+{
+  tMesh *mesh = vl->mesh;
+  char *buffer;
+  char buf[1000];
+  double *v = NULL;
+
+  /* read line by line into the buffer */
+  buffer = NULL;
+  *nbuffer = 0;
+  while(fgets(buf,999, fp))
+  {
+    char name[256];
+    int np, found_node;
+    tNode *node;
+
+    if(strcmp(buf, "{\n")==0)
+    {
+      buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app "{\n" */
+
+      fgets(buf,999, fp);
+      buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app "nodename\n" */
+      sscanf(buf, "%s", name);   /* find node name */
+      node = node_from_nodename(mesh, name);
+      *datrank = node->datrank;
+
+      fgets(buf,999, fp);
+      buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app "np\n" */
+      np = atoi(buf);
+
+      found_node = 1;
+      free(v);
+      v = dmalloc(np);
+    }
+    else
+    {
+      found_node = 0;
+    }
+    while(found_node)
+    {
+      //PRF;printf(": %s %d found_node=%d\n", name, np, found_node);
+      /* check for end / read var info */
+      fgets(buf,999, fp); /* use fgets to read "}\n" or vli plus '\n' */
+      buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
+      if(strcmp(buf, "}\n")==0) break;
+
+      /* read var as raw binary */
+      if(read_big) fread_big(v, sizeof(double), np, fp);
+      else         fread_little(v, sizeof(double), np, fp);
+      buffer = append_buf(buffer,nbuffer, (char *) v,np*sizeof(*v)); /* app v */
+
+      fgets(buf,999, fp); /* use fgets to also read the '\n' after var. */
+      buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
+    } /* end while(found_node) */
+    free(v);
+    if(found_node) break; /* stop after we found a node */
+  }
+  return buffer;
 }
