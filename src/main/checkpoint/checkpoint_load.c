@@ -181,10 +181,12 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
       long pos;
       int lastone, newl, c;
 
-      /* read a certain number of parent nodes and their child0->n */
+      /* read a certain number of parent nodes and their child0->n: */
+      /* start with reading a certain number of bytes */
       nbuffer = fread(buffer, sizeof(char), first, fp);
       if(nbuffer<first) file_end = 1;
 
+      /* read more bytes until info for last parent in buffer is complete */
       tailbuf = buffer + nbuffer;
       pos = 0;
       lastone = newl = 0;
@@ -204,9 +206,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
     nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
     if(!Rank0) buffer = cmalloc(nbuffer);
     nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
-
-//PRF;printf(": nbuffer=%ld\n", nbuffer);
-
+    //PRF;printf(": nbuffer=%ld\n", nbuffer);
+    /* now use the info in buffer to create nodes */
     {
       long off, len;
 
