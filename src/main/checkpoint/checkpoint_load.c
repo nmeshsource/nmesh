@@ -338,6 +338,7 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
   nMPI_Bcast(ibuffer,nvars, nMPI_INT, 0);
   if(!Rank0)
     for(i=0; i<nvars; i++) vlpushone(vl, ibuffer[i]);
+  free(ibuffer);
 
   /* loop over all nodes */
   buffer = NULL;
