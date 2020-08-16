@@ -505,12 +505,13 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
   tMesh *mesh = vl->mesh;
   char *buffer;
   char buf[1000];
+  char *s;
   double *v = NULL;
 
   /* read line by line into the buffer */
   buffer = NULL;
   *nbuffer = 0;
-  while(fgets(buf,999, fp))
+  while((s = fgets(buf,999, fp)))
   {
     char name[256];
     int np, found_node;
@@ -526,7 +527,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       node = node_from_nodename(mesh, name);
       *datrank = node->datrank;
 
-      fgets(buf,999, fp);
+      s = fgets(buf,999, fp); /* s=NULL at EOF */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app "np\n" */
       np = atoi(buf);
 
@@ -538,7 +539,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
     {
       found_node = 0;
     }
-    while(found_node)
+    while(found_node && s)
     {
       //PRF;printf(": %s %d found_node=%d\n", name, np, found_node);
       /* check for end / read var info */
@@ -551,7 +552,8 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       else         fread_little(v, sizeof(double), np, fp);
       buffer = append_buf(buffer,nbuffer, (char *) v,np*sizeof(*v)); /* app v */
 
-      fgets(buf,999, fp); /* use fgets to also read the '\n' after var. */
+      /* use fgets to also read the '\n' after var. */
+      s = fgets(buf,999, fp); /* s=NULL at EOF */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
     } /* end while(found_node) */
     free(v);
