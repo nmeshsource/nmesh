@@ -432,9 +432,10 @@ void request_all_surfaces_exchange(tNode *node)
 }
 
 /* request surface exchanges on all my nodes in the mesh
-   Note: We need to call this! If we call request_all_surfaces_exchange(n1)
-   for only node n1, MPI deadlocks because the other nodes are not sending
-   to n1 or receiving from n1 */
+   Note: The user has to call request_all_myln_surfaces_exchange! It calls
+   request_all_surfaces_exchange on all nodes. If we call
+   request_all_surfaces_exchange(n1) for only node n1, MPI deadlocks because
+   the other nodes are not sending to n1 or receiving from n1 */
 void request_all_myln_surfaces_exchange(tMesh *mesh)
 {
   TIMER_START;
