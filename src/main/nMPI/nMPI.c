@@ -82,7 +82,7 @@ int nMPI_Init(int *pargc, char ***pargv)
               "required < provided");
 #else
   PR0;
-  ret = MPI_Init(pargc, pargv);
+  ret = MPI_Init(pargc, pargv); /* no OpenMP, no threads */
   PR1;
 #endif
 #else
