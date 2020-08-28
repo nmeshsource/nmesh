@@ -441,7 +441,7 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
-     MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
+     MPI_THREAD_MULTIPLE, instead of MPI_THREAD_FUNNELED. */
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -573,7 +573,7 @@ void get_all_myln_surfaces(tMesh *mesh)
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
-     MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
+     MPI_THREAD_MULTIPLE, instead of MPI_THREAD_FUNNELED. */
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -604,7 +604,7 @@ int causeMPIprogress_all_myln_surfaces(tMesh *mesh, int sendrecv)
   TIMER_START;
 
   /* If we want threads in this loop, we need MPI_Init_thread with
-     MPI_THREAD_MULTIPLE, instead of just MPI_Init in main. */
+     MPI_THREAD_MULTIPLE, instead of MPI_THREAD_FUNNELED. */
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
