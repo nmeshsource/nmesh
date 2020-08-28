@@ -71,9 +71,20 @@ int nMPI_Init(int *pargc, char ***pargv)
 {
   int ret=0;
 #ifdef USEMPI
+#ifdef USEOMP
+  int required = MPI_THREAD_FUNNELED; /* only masterthread makes MPI calls */
+  int provided;
+  PR0;
+  ret = MPI_Init_thread(pargc, pargv, required, &provided);
+  PR1;
+  if(provided < required) /* exit if MPI cannot do threads */
+    errorexit("MPI_Init_thread(pargc, pargv, required, &provided): "
+              "required < provided");
+#else
   PR0;
   ret = MPI_Init(pargc, pargv);
   PR1;
+#endif
 #else
   /* for debugging we can start nmesh as:
      nmesh nam.par 2 5
