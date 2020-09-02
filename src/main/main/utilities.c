@@ -656,8 +656,8 @@ NORET void finalexit(int ec)
   fflush(stdout);
   sync();
   nMPI_Abort(ec);
-  if(GetvLax(Par("errorexit"), "abort"))  abort();
-  else                                    exit(ec);
+  if(mesh && GetvLax(Par("errorexit"), "abort"))  abort();
+  else                                            exit(ec);
 }
 
 /* errorexit functions */
