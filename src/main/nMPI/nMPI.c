@@ -74,14 +74,12 @@ int nMPI_Init(int *pargc, char ***pargv)
 #ifdef USEOMP
   int required = MPI_THREAD_FUNNELED; /* only masterthread makes MPI calls */
   int provided;
-  PR0;
   ret = MPI_Init_thread(pargc, pargv, required, &provided);
   PR1;
   if(provided < required) /* exit if MPI cannot do threads */
     errorexit("MPI_Init_thread: provided < required. "
               "MPI library doesn't support USEOMP.");
 #else
-  PR0;
   ret = MPI_Init(pargc, pargv); /* no OpenMP, no threads */
   PR1;
 #endif
