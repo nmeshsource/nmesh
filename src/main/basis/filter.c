@@ -360,7 +360,7 @@ double linear_fit_result(double beta[4], int i, int j, int k)
 /* functions to determine if coeffs fall off exponentially */
 /***********************************************************************/
 
-/* find num of unfiltered coeffs for exp. filter */
+/* find num of unfiltered coeffs for exp. filter, return in n_unfilt[3] */
 void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
                                    double f_unfilt, int n_unfilt[3])
 {
@@ -388,7 +388,10 @@ void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
 
 #define LOGFLOOR 0.9*LOGARGFLOOR
 
-/* linear fit to unfiltered coeffs, returns n_unfilt and beta */
+/* linear fit to log of unfiltered part of coeffs in ca,
+   returns: num of unfiltered coeffs n_unfilt and beta s.t.:
+   log(c_unfilt) ~ beta0*i + beta1*j + beta2*k + beta3 .
+   Note: when c_unfilt falls off exponentially we expect beta[0-2]<0 */
 double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
                                 double f_unfilt, int n_unfilt[3],
                                 double beta[4])
@@ -410,7 +413,8 @@ double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
     cu->d[iu] = log(fabs(ca->d[ia]) + LOGFLOOR);
   }
 
-  /* find fit pars beta */
+  /* find fit pars beta s.t.
+     cu ~ c_fit = beta0*i + beta1*j + beta2*k + beta3 */
   detXTX = linear_fit_to_array(cu, beta);
   if(detXTX==0.) errorexit("linear_fit_to_array failed!");
 
