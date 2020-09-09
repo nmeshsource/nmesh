@@ -640,8 +640,9 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 
 
 
-/* refine all nodes that have finer neighbors */
-void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
+/* Refine all nodes that have neighbors whose level is greater by an
+   amount dl than that of each node. This makes only sense if dl>=1 */
+void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
 {
   /* go over mesh */
   formylnodes(mesh)
@@ -654,12 +655,17 @@ void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
       for(ni=0; ni<node->nfnb[f]; ni++)
       {
         tNode *nb = node->fnb[f][ni];
-        if(nb->l > node->l) node->rflag = ref->method;
+        if(nb->l - node->l >= dl) node->rflag = ref->method;
       }
   }
   hrefine_nodes_if_rflag(mesh, ref);
 }
 
+/* refine all nodes that have finer neighbors */
+void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
+{
+  hrefine_nodes_if_nb_finer_by_dl(mesh, 1, ref);
+}
 
 
 /* refine all nodes up to level l */
