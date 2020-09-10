@@ -987,7 +987,7 @@ void hrefine_sphere(tMesh *mesh, double radius, double xc[3], int levels)
   int i;
   double r;
 
-  r = radius * (1<<(levels-1));
+  r = radius * pow(2., levels-1);
   for(i=0; i<levels; i++)
   {
     int cnt = hrefine_once_within_sphere(mesh, r, xc, ref);
@@ -1003,7 +1003,7 @@ void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
   int i;
   double r;
 
-  r = radius * (1<<(levels-1));
+  r = radius * pow(2., levels-1);
   for(i=0; i<levels; i++)
   {
     hrefine_sphere(mesh, r, xc, 1);
