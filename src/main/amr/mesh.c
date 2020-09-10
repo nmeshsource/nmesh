@@ -127,6 +127,9 @@ int amr_setup_mesh(tMesh *mesh)
   int mesh_type = Par("amr_mesh_type");
   int luni = Geti(Par("amr_luni"));
   int refp = Geti(Par("amr_refine_p"));
+  int sph_l = Geti(Par("amr_refine_sphere_levels"));
+  double sph_r = Geti(Par("amr_refine_sphere_radius"));
+  double x0[3] = {0.};
   int ret;
 
   if(Getv(mesh_type, "BoxMesh"))
@@ -149,6 +152,10 @@ int amr_setup_mesh(tMesh *mesh)
   /* refine mesh */
   hrefine_mesh_to_level_loadbalance(mesh, luni);
   if(refp >= 0) hrefine_pat(mesh, refp);
+
+  /* refine further in nested sphere regions */
+  hrefine_sphere_loadbalance(mesh, sph_r, x0, sph_l);
+
 /*
 hrefine_pat(mesh, 1);
 Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);

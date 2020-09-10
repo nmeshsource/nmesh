@@ -84,6 +84,8 @@ void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l);
 void hcoarsen_mesh_to_level(tMesh *mesh, int l);
 void hrefine_pat(tMesh *mesh, int p);
 void hcoarsen_pat(tMesh *mesh, int p);
+void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
+                                int levels);
 
 /* ghostzones.c */
 void request_all_myln_ghostdata(tMesh *mesh);

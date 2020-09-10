@@ -26,14 +26,21 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_n1", "5", "number of points in dir. 1 in one node");
   AddPar("amr_n2", "5", "number of points in dir. 2 in one node");
   AddPar("amr_nmax", "55", "max number of points in all 3 dir. in one node");
-  AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
-  AddPar("amr_refine_p", "-1", "patch that we refine one level further");
   AddPar("amr_BoxMesh_xc", "0 0 0", "center for boxes");
   AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
 
+  /* refinement related pars for initial mesh creation */
+  AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
+  AddPar("amr_refine_p", "-1", "patch that we refine one level further");
+  AddPar("amr_refine_sphere_levels", "0",
+         "number of nested sphere refinement levels");
+  AddPar("amr_refine_sphere_radius", "10",
+         "radius of innermost sphere in nested sphere refinement");
+
+  /* MPI related pars */
   AddPar("amr_MPIexchange", "1", "type of MPI exchange we use: "
          "1: surfaces, 2: ghosts");
   /* ghost related pars */
