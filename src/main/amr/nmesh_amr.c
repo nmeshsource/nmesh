@@ -34,7 +34,7 @@ int nmesh_amr(tMesh *mesh)
 
   /* refinement related pars for initial mesh creation */
   AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
-  AddPar("amr_refine_p", "-1", "patch that we refine one level further");
+  AddPar("amr_refine_p", "", "patch list that we refine one level further");
   AddPar("amr_refine_sphere_levels", "0",
          "number of nested sphere refinement levels");
   AddPar("amr_refine_sphere_radius", "10",
