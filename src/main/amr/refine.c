@@ -639,6 +639,9 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 }
 
 
+/***************************************************************************/
+/* functions we can call to refine in some particular way */
+/***************************************************************************/
 
 /* Refine all nodes that have neighbors whose level is greater by an
    amount dl than that of each node. This makes only sense if dl>=1 */
@@ -924,4 +927,74 @@ int resolve_shocks_using_nlim(tMesh *mesh)
   undo_hrefine_pcoarsen_nodes_if_zero_nlim(mesh);
   hrefine_pcoarsen_nodes_if_nlim(mesh);
   return 0;
+}
+
+
+/************************************************************************/
+/* h-refine in nested spherical regions */
+/************************************************************************/
+
+/* refine within a sphere centered on (xc[0],xc[1],xc[2]) */
+void hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
+                                tRef *ref)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    double nc[3], r;
+
+    /* find position of node center nc */
+    set_nodecenter_xyz(node, nc);
+
+    /* distance from xc to nc */
+    r = Cart_distance_x0_x1(node, nc, xc);
+
+    if(r<=radius) node->rflag = ref->method;
+  }
+  hrefine_nodes_if_rflag(mesh, ref);
+}
+
+/************************************************************************/
+/* h-refine concentric nested spherical regions
+         _______
+      __/       \__
+     /    _____    \     radius : radius of innermost sphere
+    /    /     \    \    xc     : center of spheres
+   /    /   _   \    \   levels : number of refinement levels we add
+  |    |   |_|   |    |
+   \    \       /    /   this should be controled by pars like:
+    \    \_____/    /    amr_refine_sphere_radius : radius of innermost sphere
+     \__         __/     amr_refine_sphere_levels : how many spheres we add
+        \_______/
+ */
+void hrefine_sphere(tMesh *mesh, double radius, double xc[3], int levels)
+{
+  tRef ref[1];
+  ref->method = PARENT_n;
+  int i;
+  double r;
+
+  r = radius * (2<<(levels-1));
+  for(i=0; i<levels; i++)
+  {
+    hrefine_once_within_sphere(mesh, r, xc, ref);
+    r = r*0.5;
+  }
+}
+
+/* use hrefine_sphere together with simple_load_balance */
+void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
+                                int levels)
+{
+  int i;
+  double r;
+
+  r = radius * (2<<(levels-1));
+  for(i=0; i<levels; i++)
+  {
+    hrefine_sphere(mesh, r, xc, 1);
+    simple_load_balance(mesh);
+    r = r*0.5;
+  }
 }
