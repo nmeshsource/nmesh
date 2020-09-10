@@ -126,7 +126,7 @@ int amr_setup_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int luni = Geti(Par("amr_luni"));
-  int refp = Geti(Par("amr_refine_p"));
+  int refp = Par("amr_refine_p");
   int sph_l = Geti(Par("amr_refine_sphere_levels"));
   double sph_r = Geti(Par("amr_refine_sphere_radius"));
   double x0[3] = {0.};
@@ -149,9 +149,23 @@ int amr_setup_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   //printmesh(mesh);
 
-  /* refine mesh */
+  /* refine mesh uniformly */
   hrefine_mesh_to_level_loadbalance(mesh, luni);
-  if(refp >= 0) hrefine_pat(mesh, refp);
+
+  /* now refine the patches listed in amr_refine_p */
+  if(GetLen(refp) > 0)
+  {
+    char *plist = Gets(refp);
+    char *pl, *str, *sav;
+
+    pl = strdup(plist);
+    for(str=strtok_r(pl, " ", &sav); str!=NULL;
+        str=strtok_r(NULL, " ", &sav))
+    {
+      int p = atoi(str);
+      if(p>=0) hrefine_pat(mesh, p);
+    }
+  }
 
   /* refine further in nested sphere regions */
   hrefine_sphere_loadbalance(mesh, sph_r, x0, sph_l);
