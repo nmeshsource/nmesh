@@ -398,6 +398,12 @@ int setup_Shell_mesh(tMesh *mesh)
 }
 
 
+
+/***************************************************************************/
+/* all the functions below were just for early testing and could possibly
+   removed now */
+/***************************************************************************/
+
 /* set up a mesh with 2 levels  */
 int setup_l2_mesh(tMesh *mesh)
 {
