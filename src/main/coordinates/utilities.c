@@ -850,6 +850,20 @@ double hmin_new_ccc_nbr(tNode *node, int ccc, int nbr, double hmin_old)
   return hmin_old;
 }
 
+/* trivial Cartesian distance between two points in x-coords */
+double Cart_distance_x0_x1(tNode *node, double x0[3], double x1[3])
+{
+  int d;
+  double dist2;
+
+  dist2 = 0.;
+  for(d=0; d<3; d++)
+  {
+    double temp = x1[d] - x0[d];
+    dist2 += temp*temp;
+  }
+  return sqrt(dist2);
+}
 
 /* find Cartesian distance between two points in X-coords */
 double Cart_distance_X0_X1(tNode *node, double X0[3], double X1[3])
