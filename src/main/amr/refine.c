@@ -935,9 +935,11 @@ int resolve_shocks_using_nlim(tMesh *mesh)
 /************************************************************************/
 
 /* refine within a sphere centered on (xc[0],xc[1],xc[2]) */
-void hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
-                                tRef *ref)
+int hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
+                               tRef *ref)
 {
+  int cnt = 0;
+
   /* go over mesh */
   formylnodes(mesh)
   {
@@ -950,9 +952,19 @@ void hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
     /* distance from xc to nc */
     r = Cart_distance_x0_x1(node, nc, xc);
 
-    if(r<=radius) node->rflag = ref->method;
+    //pr3v("xc",xc);
+    //pr3v("nc",nc);
+    //printf(" radius=%g r=%g\n", radius, r);
+
+    if(r<=radius)
+    {
+      node->rflag = ref->method;
+      cnt++;
+    }
   }
   hrefine_nodes_if_rflag(mesh, ref);
+  update_mesh_myln_node_nid(mesh);
+  return cnt;
 }
 
 /************************************************************************/
@@ -975,10 +987,11 @@ void hrefine_sphere(tMesh *mesh, double radius, double xc[3], int levels)
   int i;
   double r;
 
-  r = radius * (2<<(levels-1));
+  r = radius * (1<<(levels-1));
   for(i=0; i<levels; i++)
   {
-    hrefine_once_within_sphere(mesh, r, xc, ref);
+    int cnt = hrefine_once_within_sphere(mesh, r, xc, ref);
+    PRF;printf(": refined %d nodes within r=%g\n", cnt, r);
     r = r*0.5;
   }
 }
@@ -990,7 +1003,7 @@ void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
   int i;
   double r;
 
-  r = radius * (2<<(levels-1));
+  r = radius * (1<<(levels-1));
   for(i=0; i<levels; i++)
   {
     hrefine_sphere(mesh, r, xc, 1);
