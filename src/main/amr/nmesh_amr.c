@@ -11,6 +11,7 @@ int nmesh_amr(tMesh *mesh)
   printf("Adding amr\n");
 
   /* functions */
+  /* NOTE: amr_setup_mesh(mesh) is called directly from main */
   AddFun(POST_PARAMETERS, amr_init_global_pars);
 
   /* variables */
