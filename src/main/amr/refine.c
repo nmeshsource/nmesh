@@ -952,9 +952,9 @@ int hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
     /* distance from xc to nc */
     r = Cart_distance_x0_x1(node, nc, xc);
 
-    //pr3v("xc",xc);
-    //pr3v("nc",nc);
-    //printf(" radius=%g r=%g\n", radius, r);
+    pr3v("xc",xc);
+    pr3v("nc",nc);
+    printf(" radius=%g r=%g\n", radius, r);
 
     if(r<=radius)
     {

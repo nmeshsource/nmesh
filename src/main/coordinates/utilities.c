@@ -1037,26 +1037,11 @@ double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac)
 /* put approx. node center in X-coords into X */
 void set_nodecenter_XYZ(tNode *node, double X[3])
 {
-  int *n = node->n;
-  tArray *XbA[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
-  int m[3];
-  double Xb[3];
+  double *bb = node->bbox;
   int d;
 
-  /* find middle of node first in Xb and then in X */
   for(d=0; d<3; d++)
-  {
-    m[d] = n[d]/2;
-    if(n[d]%2) /* if n[d] is odd use middle point */
-    {
-      Xb[d] = Arrd(XbA[0])[m[d]];
-    }
-    else /* if n[d] is even take average of two middle points */
-    {
-      Xb[d] = 0.5*( Arrd(XbA[0])[m[d]] + Arrd(XbA[0])[m[d]-1] );
-    }
-  }
-  XYZ_of_XbYbZb(node, Xb, X);
+    X[d] = 0.5*(bb[2*d + 1] + bb[2*d]);
 }
 
 /* put approx. node center in Cart. coords into x */
