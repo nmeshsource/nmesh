@@ -200,17 +200,44 @@ void parse_parameter_file(tMesh *mesh, char *parfile)
 /* update parameters from file outdir/nmesh_update_parameters.par */
 int nmesh_update_parameters(tMesh *mesh)
 {
-  char *outdir = Gets(Par("outdir"));
-  int pl = strlen(outdir) + 80;
-  char *pars  = cmalloc(pl);
+  static double last_update_time = 0.;
+  double hours = Getd(Par("update_parameters_hours"));
+  double time  = getTimeIn_s()/3600.;
+  double time_since_update;
+  int do_update = 0;
 
-  /* FIXME: add an elapsed time check (as in checkpoint_save_if_needed) to avoid
-     opening files in each evo step */
+  /* test if it is time */
+  time_since_update = time - last_update_time;
+  if(Rank0)
+  {
+    /* test based on walltime */
+    if(hours >= 0. && hours <= time_since_update)
+      do_update = 1; /* yes, we want to update pars */
+  }
 
-  snprintf(pars,pl, "%s/%s", outdir, "nmesh_update_parameters.par");
-  nmesh_load_parameters(mesh, pars, 0, 0);
+  /* broadcast do_update from rank0 to all others */
+  nMPI_Bcast(&do_update, 1, nMPI_INT, 0);
 
-  free(pars);
+  /* now do it if needed */
+  if(do_update)
+  {
+    char *outdir = Gets(Par("outdir"));
+    int pl = strlen(outdir) + 80;
+    char *pars = cmalloc(pl);
+    char *pars2 = cmalloc(pl);
+
+    /* read pars in file nmesh_update_parameters.par */
+    snprintf(pars,pl, "%s/%s", outdir, "nmesh_update_parameters.par");
+    nmesh_load_parameters(mesh, pars, 0, 0);
+
+    /* rename file, so that we do not update over and over again */
+    snprintf(pars2,pl, "%s/%s", outdir, "nmesh_update_parameters.par_done");
+    rename(pars, pars2);
+
+    /* update times */
+    last_update_time = time;
+    free(pars);
+  }
   return 0;
 }
 
