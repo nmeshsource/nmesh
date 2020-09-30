@@ -31,7 +31,8 @@
 
 /* define the CONST we use for read-only multidimensional arrays */
 #define CONST
-/* with gcc we can use:
+/* with gcc we can use the much better:
 #define CONST const
    Because gcc has the proposed extenstion N 1923 mentioned in
-   http://www.open-std.org/jtc1/sc22/wg14/www/docs/sd3.htm */
+   http://www.open-std.org/jtc1/sc22/wg14/www/docs/sd3.htm
+   But with the 2019 icc "#define CONST const" results in warnings! */
