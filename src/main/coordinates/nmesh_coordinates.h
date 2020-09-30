@@ -117,8 +117,8 @@ int cart_di_Ui(tNode *node, int Ux, int divUi);
 /* utilities.c */
 double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);
 double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3]);
-double det_3Dmatrix(double M[3][3]);
-double inv3Dmat_from_3Dmat(double M[3][3], double invM[3][3]);
+double det_3Dmatrix(const double M[3][3]);
+double inv3Dmat_from_3Dmat(const double M[3][3], double invM[3][3]);
 double det_3Dsymmmat(double M11, double M12, double M13,
                      double M22, double M23, double M33);
 double inv3Dmat_from_3Dsymmmat(double M11, double M12, double M13,
@@ -159,7 +159,7 @@ void array_dXdx(tNode *node, int ind, tArray *aJ);
 void array_dxdX(tNode *node, int ind, tArray *aJ);
 void array_2dxdX(tNode *node, int ind, int norm, tArray *aJ);
 void array_2dxdXb(tNode *node, int ind, int norm, tArray *aJ);
-void array_3Dmat(double M[3][3], tArray *aM);
+void array_3Dmat(const double M[3][3], tArray *aM);
 double det_2_2_array(tArray *aM);
 void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower);
 double Cart_distance_x0_x1(tNode *node, double x0[3], double x1[3]);
