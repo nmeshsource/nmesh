@@ -81,7 +81,7 @@ double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
 }
 
 /* get transpose of a 3x3 matrix. */
-void transp3Dmat_from_3Dmat(const double M[3][3], double transpM[3][3])
+void transp3Dmat_from_3Dmat(CONST double M[3][3], double transpM[3][3])
 {
   transpM[0][0] = M[0][0];
   transpM[0][1] = M[1][0];
@@ -95,7 +95,7 @@ void transp3Dmat_from_3Dmat(const double M[3][3], double transpM[3][3])
 }
 
 /* determinant of 3x3 matrix */
-double det_3Dmatrix(const double M[3][3])
+double det_3Dmatrix(CONST double M[3][3])
 {
   /* M = {{m11,m12,m13},{m21,m22,m23},{m31,m32,m33}}
      Det[M] = m11*m22*m33 - m13*m22*m31 + m12*m23*m31 +
@@ -110,7 +110,7 @@ double det_3Dmatrix(const double M[3][3])
 }
 
 /* 3d matrix inverse and return det. */
-double inv3Dmat_from_3Dmat(const double M[3][3], double invM[3][3])
+double inv3Dmat_from_3Dmat(CONST double M[3][3], double invM[3][3])
 {
   /* M = {{m11,m12,m13},{m21,m22,m23},{m31,m32,m33}}
      Det[M] = m11*m22*m33 - m13*m22*m31 + m12*m23*m31 +
@@ -145,7 +145,7 @@ double inv3Dmat_from_3Dmat(const double M[3][3], double invM[3][3])
 }
 
 /* print 3x3 matrix */
-void print3Dmat(const double M[3][3])
+void print3Dmat(CONST double M[3][3])
 {
   int i,j;
   for(i=0; i<3; i++)
@@ -760,7 +760,7 @@ for(i=0; i<3; i++) printf("invM[i][2]=%g\n" , invM[i][2]);
 }
 
 /* put 3x3 matrix M in array aM */
-void array_3Dmat(const double M[3][3], tArray *aM)
+void array_3Dmat(CONST double M[3][3], tArray *aM)
 {
   int i,j;
 

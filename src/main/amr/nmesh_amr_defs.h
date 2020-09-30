@@ -27,3 +27,11 @@
     DECL_STACK_ARRAY(array, n);
  */
 #define DECL_STACK_ARRAY(array, n_) DECL_STACK_ARRAY_with_segs(array, n_,0,1)
+
+
+/* define the CONST we use for read-only multidimensional arrays */
+#define CONST
+/* with gcc we can use:
+#define CONST const
+   Because gcc has the proposed extenstion N 1923 mentioned in
+   http://www.open-std.org/jtc1/sc22/wg14/www/docs/sd3.htm */
