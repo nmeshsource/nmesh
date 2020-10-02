@@ -307,6 +307,7 @@ enum
   PARENT_nO2,          /* use parent->n/2 */
   PARENT_nO2_P1,       /* use parent->n/2 + 1 */
   PARENT_nO2_P1IFnG3,  /* use parent->n/2 + 1*if(parent->n>3) */
+  PARENT_nO2_P1MOD,    /* use parent->n/2 + 1 or parent->n - 1 if n<=3 */
   GIVEN_n              /* use a n given by the user */
 };
 
