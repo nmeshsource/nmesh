@@ -321,11 +321,11 @@ void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
   free(xg);
 }
 
-/* Legendre nodes x_i and integration weights w_i for equally spaced
-   or uniform points.
+/* Nodes x_i and integration weights w_i for equally spaced i.e. uniform
+   points.
    N = degree, so there are N+1 points
    This is using Gaussian quad to get the weights. */
-void Luni_x_wquad(int npoints, double *x, double *w)
+void uniform_x_wquad(int npoints, double *x, double *w)
 {
   int N = npoints-1;
   int j;
