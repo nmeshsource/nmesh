@@ -210,7 +210,7 @@ void LGL_x_wquad(int npoints, double *x, double *w)
    compute I = \int_{-1}^1 dx f(x) where f(x) is known at the nodes.
    For LGL nodes, the w[i] are the integration weights from LGL_x_wquad
    This is accurate for polynomials up to degree 2n-3 for LGL. */
-double Gauss_integral(int n, const double *x, const double *w, const double *f)
+double Gauss_integral(int n, const double *w, const double *f)
 {
   int i;
   double I = 0.;
@@ -274,6 +274,110 @@ void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
     }
   }
 }
+
+
+/* ************************************************************************ */
+/* various functions needed for equally spaced points or nodes              */
+/* ************************************************************************ */
+
+/* compute the Gaussian quadrature weights using Gaussian integration itself:
+   w_j = \int_{-1}^{1} dx l_j(x) = \sum_i wg_i l_j(xg_i)
+   where l_j(x) is the interpolating polynomial made from the
+   grid points x_i: l_j(x) = Lagrange_of_x(j,x,...).
+   We assume that the x_i are symmetric about x=0. */
+void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
+{
+  int N = npoints-1;
+  /* Here wg_i and xg_i are LGL weights and points that we pick such that
+     the numerical integral is exact. */
+  int ng = 1 + (npoints+4)/2;
+  double *xg = malloc(ng*sizeof(double));
+  double *wg = malloc(ng*sizeof(double));
+  double *fg = malloc(ng*sizeof(double));
+  double *wI = malloc(npoints*sizeof(double));
+  int i, j;
+
+  /* get points and weights for ng points */
+  LGL_x_wquad(ng, xg, wg);
+
+  /* get interpolation weights wI for l_j(x) for npoints */
+  Lagrange_winterp(npoints, x, wI);
+
+  /* now get w_j by integration */
+  for(j = 0; j <= N/2; j++)
+  {
+    /* set fg_i = l_j(xg_i) */
+    for(i=0; i<ng; i++)
+      fg[i] = Lagrange_of_x(j, xg[i], npoints, x, wI);
+
+    /* w_j = \int_{-1}^{1} dx l_j(x) */
+    w[j] = Gauss_integral(ng, wg, fg);
+    w[N-j] = w[j];
+  }
+
+  free(wI);
+  free(fg);
+  free(wg);
+  free(xg);
+}
+
+/* Legendre nodes x_i and integration weights w_i for equally spaced
+   or uniform points.
+   N = degree, so there are N+1 points
+   This is using Gaussian quad to get the weights. */
+void Luni_x_wquad(int npoints, double *x, double *w)
+{
+  int N = npoints-1;
+  int j;
+  double y, h;
+
+  /* special case for just 1 point */
+  if(N == 0)
+  {
+    x[N] = 0.;
+    if(w) w[N] = 2.;
+    return;
+  }
+
+  /* end points */
+  x[0] = -1.;
+  x[N] =  1.;
+
+  /* if we have only 2 points we are done */
+  if(N == 1)
+  {
+    if(w)
+    {
+      w[N] = w[0] = 2.0/(N*(N+1.0));
+    }
+    return;
+  }
+
+  /* grid spacing */
+  h = 2./N;
+
+  /* get nodes in (-1,0] */
+  for(j = 1; j <= N/2; j++)
+  {
+    if(j == N/2.0)  /* same as: if( (N%2==0 && j==N/2) ) */
+      y = 0.;
+    else
+      y = -1. + j*h;
+
+    /* set x array for [-1,0] and [0,1] */
+    x[j]   = +y;
+    x[N-j] = -y;
+  }
+
+  /* now compute the weights using Gaussian integration
+     w_j = \int_{-1}^{1} dx l_j(x) = \sum_i wg_i l_j(xg_i)
+     where l_j(x) is the interpolating polynomial made from the
+     grid points x_i: l_j(x) = Lagrange_of_x(j,x,...). */
+  if(w)
+    Gauss_wquad_from_symm_x(npoints, x, w);
+}
+
+
 
 /* ***************************************************************** */
 /* some functions for Discontinous Galerkin (DG) method              */
