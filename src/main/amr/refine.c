@@ -95,9 +95,9 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       case PARENT_nO2_P1IFnG3:
         for(d=0; d<3; d++)
         {
-          //int pn = parent->n[d];
-          nc[d] = parent->n[d]/2;
-          if(nc[d]>1) nc[d] += 1; /* add 1, unless it is 1 already */
+          int pn = parent->n[d];
+          if(pn>3) nc[d] = pn/2 + 1; /* add 1, unless parent->n <= 3 */
+          else     nc[d] = pn/2;
           if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
         }
         n = nc;
