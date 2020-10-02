@@ -82,17 +82,24 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
         {
           nc[d] = parent->n[d]/2;
           if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
-          n = nc;
         }
+        n = nc;
         break;
       case PARENT_nO2_P1:
+        for(d=0; d<3; d++)
+        {
+          nc[d] = parent->n[d]/2 + 1;
+        }
+        n = nc;
+        break;
+      case PARENT_nO2_P1IFnG3:
         for(d=0; d<3; d++)
         {
           nc[d] = parent->n[d]/2;
           if(nc[d]>1) nc[d] += 1; /* add 1, unless it is 1 already */
           if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
-          n = nc;
         }
+        n = nc;
         break;
       case GIVEN_n:
         n = ref->n;

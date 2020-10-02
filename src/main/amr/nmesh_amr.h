@@ -303,10 +303,11 @@ typedef struct tVARLIST {
 enum
 {
   NOREFINE,
-  PARENT_n,       /* use same n as parent */
-  PARENT_nO2,     /* use parent->n/2 */
-  PARENT_nO2_P1,  /* use parent->n/2 + 1 */
-  GIVEN_n         /* use a n given by the user */
+  PARENT_n,            /* use same n as parent */
+  PARENT_nO2,          /* use parent->n/2 */
+  PARENT_nO2_P1,       /* use parent->n/2 + 1 */
+  PARENT_nO2_P1IFnG3,  /* use parent->n/2 + 1*if(parent->n>3) */
+  GIVEN_n              /* use a n given by the user */
 };
 
 /* struct that holds refinement method */
