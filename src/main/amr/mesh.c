@@ -27,6 +27,38 @@ tMesh *make_empty_mesh(int pr)
   return mesh;
 }
 
+
+/* choose grid points for patch p */
+void choose_patch_points(tMesh *mesh, int p, int npoints, double *x, double *w)
+{
+  int uniform_p = Par("amr_uniform_p");
+  int uniform = 0;
+
+  /* now check if patch p is mentioned in amr_uniform_p */
+  if(GetLen(uniform_p) > 0)
+  {
+    char *plist = Gets(uniform_p);
+    char *pl, *str, *sav;
+
+    pl = strdup(plist);
+    for(str=strtok_r(pl, " ", &sav); str!=NULL;
+        str=strtok_r(NULL, " ", &sav))
+    {
+      int pp = atoi(str);
+      if(pp==p) { uniform = 1; break; }
+    }
+  }
+
+  /* set up desired points */
+  if(uniform)
+    /* set equally spaced points and their weights */
+    uniform_x_wquad(npoints, x, w);
+  else
+    /* set Legendre Gauss-Lobatto points and integration weights */
+    LGL_x_wquad(npoints, x, w);
+}
+
+
 /* add a patch to the mesh */
 tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
                 int datrank)

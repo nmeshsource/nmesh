@@ -31,6 +31,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
+  AddPar("amr_uniform_p", "", "patch list where we use uniform grid spacing");
 
   /* refinement related pars for initial mesh creation */
   AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
