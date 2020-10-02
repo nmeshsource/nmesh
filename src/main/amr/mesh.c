@@ -28,7 +28,7 @@ tMesh *make_empty_mesh(int pr)
 }
 
 
-/* choose grid points for patch p */
+/* choose grid points x_i and weights w_i for patch p */
 void choose_patch_points(tMesh *mesh, int p, int npoints, double *x, double *w)
 {
   int uniform_p = Par("amr_uniform_p");
@@ -105,8 +105,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
          we do not need e.g. pat->Xb[ni] 3 times */
       if(dir==0) /* set them only for dir0 */
       {
-        /* get Legendre Gauss-Lobatto points and integration weights */
-        LGL_x_wquad(ni, Xb, Wq);
+        /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
+        choose_patch_points(mesh, p, ni, Xb, Wq);
 
         /* diff matrix DT for Lagrange interp. poly basis */
         Lagrange_winterp(ni, Xb, WL);
