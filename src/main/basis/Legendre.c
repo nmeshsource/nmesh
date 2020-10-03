@@ -290,7 +290,7 @@ void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
   int N = npoints-1;
   /* Here wg_i and xg_i are LGL weights and points that we pick such that
      the numerical integral is exact. */
-  int ng = 1 + (npoints+4)/2;
+  int ng = 1 + (npoints+3)/2; // ng = (npoints+3)/2; is probably enough
   double *xg = malloc(ng*sizeof(double));
   double *wg = malloc(ng*sizeof(double));
   double *fg = malloc(ng*sizeof(double));
