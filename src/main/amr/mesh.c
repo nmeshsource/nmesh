@@ -109,9 +109,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
         case UNIFORM: /* set equally spaced points and their weights */
           uniform_x_wquad(ni, Xb, Wq);
 
-          /* get analysis & synthesis matrix for Legendre basis,
-             could be useful for filtering, but not needed for interpolation */
-          LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+          /* get analysis & synthesis matrix for Legendre basis */
+          Legendre_AT_ST_matrices(ni, Xb, Wq, AT, ST);
           break;
 
         default: /* set Legendre Gauss-Lobatto points, weights, ... */

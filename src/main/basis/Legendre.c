@@ -241,7 +241,8 @@ double Gauss_integral(int n, const double *w, const double *f)
 
    In the function below store the transposes A^T and S^T of A and S
    if AT and ST are interpreted as stored in column-major form */
-void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST)
+void LGL_AT_ST_matrices(int n, const double *x, const double *w,
+                        double *AT, double *ST)
 {
   int normalized = 1;
   int N = n-1;
@@ -377,6 +378,14 @@ void uniform_x_wquad(int npoints, double *x, double *w)
     Gauss_wquad_from_symm_x(npoints, x, w);
 }
 
+/* first set ST using LGL_AT_ST_matrices, which gets the correct ST for
+   for any grid point, then set AT simply as the inverse of ST */
+void Legendre_AT_ST_matrices(int n, const double *x, const double *w,
+                             double *AT, double *ST)
+{
+  LGL_AT_ST_matrices(n, x, w, AT, ST);
+  M_to_Minv_gaussjordan(n, ST, AT);
+}
 
 
 /* ***************************************************************** */

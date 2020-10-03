@@ -445,6 +445,7 @@ void print_matrices_innode(tNode *n)
     printarray(n->St[d]);
     //printf("\n");
   }
+  /*
   DECL_STACK_ARRAY(fa, n->Xb[0]->n);
   DECL_STACK_ARRAY(ca, n->Xb[0]->n);
   DECL_STACK_ARRAY(ga, n->Xb[0]->n);
@@ -459,6 +460,7 @@ void print_matrices_innode(tNode *n)
   printf("ca");printarray(ca);
   mm_array0(n->St[0], ca, ga);
   printf("ga");printarray(ga);
+  */
 }
 
 

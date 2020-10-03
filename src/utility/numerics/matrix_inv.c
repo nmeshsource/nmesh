@@ -70,7 +70,7 @@ int gaussjordan_inv(int n, double a[])
 }
 
 /* write inverse of n*n matrix M into Minv */
-int Minv_from_M_gaussjordan(int n, const double M[], double Minv[])
+int M_to_Minv_gaussjordan(int n, const double M[], double Minv[])
 {
   int i;
   for(i=0; i<n*n; i++) Minv[i] = M[i];

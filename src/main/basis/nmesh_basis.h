@@ -26,9 +26,12 @@ double var_GLquadratureXYZ3(tNode *node, int ui);
 double basis_LegendreP(int l, double x, int np);
 double basis_normLegendreP(int i, double x, int np);
 void LGL_x_wquad(int npoints, double *x, double *w);
-void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);
+void LGL_AT_ST_matrices(int n, const double *x, const double *w,
+                        double *AT, double *ST);
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w);
 void uniform_x_wquad(int npoints, double *x, double *w);
+void Legendre_AT_ST_matrices(int n, const double *x, const double *w,
+                             double *AT, double *ST);
 
 /* Lagrange.c */
 void Lagrange_winterp(int n, const double *x, double *w_interp);
