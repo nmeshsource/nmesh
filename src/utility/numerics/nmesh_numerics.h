@@ -23,3 +23,6 @@ int find_2roots_region(double x0[2],
                        double (*func)(double x, void *par),
                        double x1, double x2, void *par,
                        int maxits, double xacc, int pr);
+
+/* matrix_inv.c */
+void gaussjordan_inv(double *a, int n);
