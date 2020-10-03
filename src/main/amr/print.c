@@ -411,6 +411,43 @@ void printvar_indc(tNode *node, int vi)
   }
 }
 
+/* print important arrays in a node */
+void print_matrices_innode(tNode *n)
+{
+  int d;
+  char s[100];
+
+  printf("nid%ld:  %s  l%d  leaf=%d  rflag=%d  datrank=%d  dat: %s\n",
+          n->nid, nodename(n, s,99), n->l, n->leaf, n->rflag,
+          n->datrank, n->dat ? "yes" : "no");
+  printf(" ijk%d  [%g,%g]x[%g,%g]x[%g,%g]  np=%dx%dx%d=%d ",
+          n->ijk,
+          n->bbox[0], n->bbox[1], n->bbox[2],
+          n->bbox[3], n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
+
+  printf(" arrays:\n");
+  for(d=0; d<3; d++)
+  {
+    printf("Xb[%d]", d);
+    printarray(n->Xb[d]);
+    printf("Wq[%d]", d);
+    printarray(n->Wq[d]);
+    printf("WL[%d]", d);
+    printarray(n->WL[d]);
+    printf("Dt[%d]", d);
+    printarray_matrix0(n->Dt[d]);
+    printf("\n");
+    printf("At[%d]", d);
+    printarray_matrix0(n->At[d]);
+    printf("\n");
+    printf("St[%d]", d);
+    printarray_matrix0(n->St[d]);
+    printf("\n");
+  }
+  exit(88);
+}
+
+
 /* print an array */
 void printarray_sel(tArray *A, int dbl)
 {
@@ -490,6 +527,7 @@ void printarray_matrix2(tArray *A)
     printf("\n");
   }
 }
+
 
 /* print one bface */
 void printthisbface(tBface *bface, char *s)

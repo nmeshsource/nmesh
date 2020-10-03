@@ -436,6 +436,7 @@ void pr_nodename(tNode *node);
 void printvar_innode(tNode *node, int vi);
 void printvar_ajsurfdiff(tNode *node, int vi);
 void printvar_indc(tNode *node, int vi);
+void print_matrices_innode(tNode *n);
 void printarray(tArray *A);
 void printarray_int(tArray *A);
 void printarray_matrix0(tArray *A);
