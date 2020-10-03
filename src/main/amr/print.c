@@ -435,13 +435,13 @@ void print_matrices_innode(tNode *n)
     printf("WL[%d]", d);
     printarray(n->WL[d]);
 
-    printf("D: Dt[%d]", d);
+    printf("D=(Dt)^t: Dt[%d]", d);
     printarray(n->Dt[d]);
     //printf("\n");
-    printf("A: At[%d]", d);
+    printf("A=(At)^t: At[%d]", d);
     printarray(n->At[d]);
     //printf("\n");
-    printf("S: St[%d]", d);
+    printf("S=(St)^t: St[%d]", d);
     printarray(n->St[d]);
     //printf("\n");
   }

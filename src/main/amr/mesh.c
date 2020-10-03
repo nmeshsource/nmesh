@@ -144,8 +144,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
-  if(1) print_matrices_innode(pat->rnode);
-  exit(88);
+//  if(1) print_matrices_innode(pat->rnode);
+//  exit(88);
 
   return pat;
 }
