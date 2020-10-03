@@ -56,9 +56,8 @@ void choose_patch_points(tMesh *mesh, int p, int npoints, double *x, double *w)
   else
     /* set Legendre Gauss-Lobatto points and integration weights */
     LGL_x_wquad(npoints, x, w);
-//void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
-//Gauss_wquad_from_symm_x(npoints, x, w);
 
+//Gauss_wquad_from_symm_x(npoints, x, w); // test Gauss_wquad_from_symm_x
 }
 
 
