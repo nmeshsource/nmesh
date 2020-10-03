@@ -11,7 +11,7 @@
    similar to gaussj from numrec but with the RHS b removed, all numrec
    allocs are replaced, and array indices shifted by -1.
    numrec's a[j'][k'] = a[j + k*n] , where j'=j+1, k'=k+1 */
-void gaussjordan_inv(double *a, int n)
+int gaussjordan_inv(int n, double a[])
 {
   int *indxc = imalloc(n);
   int *indxr = imalloc(n);
@@ -66,4 +66,13 @@ void gaussjordan_inv(double *a, int n)
   free(ipiv);
   free(indxr);
   free(indxc);
+  return 0;
+}
+
+/* write inverse of n*n matrix M into Minv */
+int Minv_from_M_gaussjordan(int n, const double M[], double Minv[])
+{
+  int i;
+  for(i=0; i<n*n; i++) Minv[i] = M[i];
+  return gaussjordan_inv(n, Minv);
 }

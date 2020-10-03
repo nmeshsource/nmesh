@@ -25,4 +25,5 @@ int find_2roots_region(double x0[2],
                        int maxits, double xacc, int pr);
 
 /* matrix_inv.c */
-void gaussjordan_inv(double *a, int n);
+int gaussjordan_inv(int n, double a[]);
+int Minv_from_M_gaussjordan(int n, const double M[], double Minv[]);
