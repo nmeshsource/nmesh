@@ -434,17 +434,17 @@ void print_matrices_innode(tNode *n)
     printarray(n->Wq[d]);
     printf("WL[%d]", d);
     printarray(n->WL[d]);
-    printf("Dt[%d]", d);
-    printarray_matrix0(n->Dt[d]);
-    printf("\n");
-    printf("At[%d]", d);
-    printarray_matrix0(n->At[d]);
-    printf("\n");
-    printf("St[%d]", d);
-    printarray_matrix0(n->St[d]);
-    printf("\n");
+
+    printf("D: Dt[%d]", d);
+    printarray(n->Dt[d]);
+    //printf("\n");
+    printf("A: At[%d]", d);
+    printarray(n->At[d]);
+    //printf("\n");
+    printf("S: St[%d]", d);
+    printarray(n->St[d]);
+    //printf("\n");
   }
-  exit(88);
 }
 
 
