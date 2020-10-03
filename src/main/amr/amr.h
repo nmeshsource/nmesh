@@ -13,6 +13,14 @@ typedef struct {
 } tAMR;
 
 
+/* grid point options */
+enum
+{
+  LGL,      /* Legendre Gauss-Lobatto grid points */
+  UNIFORM   /* uniform grid points */
+};
+
+
 /* storage.c */
 tNode *destroy_children(tNode *parent);
 tNlist *remove8siblings_in_mesh_lns(tNlist *sib);

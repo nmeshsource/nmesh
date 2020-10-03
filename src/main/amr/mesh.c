@@ -29,10 +29,10 @@ tMesh *make_empty_mesh(int pr)
 
 
 /* choose grid points x_i and weights w_i for patch p */
-void choose_patch_points(tMesh *mesh, int p, int npoints, double *x, double *w)
+int choose_patch_points(tMesh *mesh, int p)
 {
   int uniform_p = Par("amr_uniform_p");
-  int uniform = 0;
+  int ret = LGL; /* default is Legendre Gauss-Lobatto */
 
   /* now check if patch p is mentioned in amr_uniform_p */
   if(GetLen(uniform_p) > 0)
@@ -45,19 +45,10 @@ void choose_patch_points(tMesh *mesh, int p, int npoints, double *x, double *w)
         str=strtok_r(NULL, " ", &sav))
     {
       int pp = atoi(str);
-      if(pp==p) { uniform = 1; break; }
+      if(pp==p) { ret = UNIFORM; break; }
     }
   }
-
-  /* set up desired points */
-  if(uniform)
-    /* set equally spaced points and their weights */
-    uniform_x_wquad(npoints, x, w);
-  else
-    /* set Legendre Gauss-Lobatto points and integration weights */
-    LGL_x_wquad(npoints, x, w);
-
-//Gauss_wquad_from_symm_x(npoints, x, w); // test Gauss_wquad_from_symm_x
+  return ret;
 }
 
 
@@ -107,16 +98,34 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
          we do not need e.g. pat->Xb[ni] 3 times */
       if(dir==0) /* set them only for dir0 */
       {
+        int pts;
+
         /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
-        choose_patch_points(mesh, p, ni, Xb, Wq);
+        pts = choose_patch_points(mesh, p);
+
+        /* set up desired points */
+        switch(pts)
+        {
+        case UNIFORM: /* set equally spaced points and their weights */
+          uniform_x_wquad(ni, Xb, Wq);
+
+          /* get analysis & synthesis matrix for Legendre basis,
+             could be useful for filtering, but not needed for interpolation */
+          LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+          break;
+
+        default: /* set Legendre Gauss-Lobatto points, weights, ... */
+          LGL_x_wquad(ni, Xb, Wq);
+          //Gauss_wquad_from_symm_x(npoints, x, w); // test Gauss_wquad_from_symm_x
+
+          /* get analysis & synthesis matrix for Legendre basis,
+             could be useful for filtering, but not needed for interpolation */
+          LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+        }
 
         /* diff matrix DT for Lagrange interp. poly basis */
         Lagrange_winterp(ni, Xb, WL);
         Lagrange_DT(ni, Xb, WL, DT);
-
-        /* get analysis & synthesis matrix for Legendre basis,
-           could be useful for filtering, but not needed for interpolation */
-        LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
       }
       else /* point dir1 & 2 arrays to the same mem as dir1 arrays */
       {
@@ -144,8 +153,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
-//  if(1) print_matrices_innode(pat->rnode);
-//  exit(88);
+  //if(1) print_matrices_innode(pat->rnode);
+  //exit(88);
 
   return pat;
 }
