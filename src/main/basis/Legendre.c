@@ -192,8 +192,8 @@ void LGL_x_wquad(int npoints, double *x, double *w)
     }
 
     /* set x array for [-1,0] and [0,1] */
-    x[j]   =  y;
     x[N-j] = -y;
+    x[j]   =  y;
 
     /* really just set P as in: P =  LegendreP(N, y); */
     Legendre_P_dP_Q_dQ(N, y, &P, &dP, &Q, &dQ);
@@ -365,8 +365,8 @@ void uniform_x_wquad(int npoints, double *x, double *w)
       y = -1. + j*h;
 
     /* set x array for [-1,0] and [0,1] */
-    x[j]   = +y;
     x[N-j] = -y;
+    x[j]   = +y;
   }
 
   /* now compute the weights using Gaussian integration
