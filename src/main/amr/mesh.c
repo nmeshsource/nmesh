@@ -56,6 +56,9 @@ void choose_patch_points(tMesh *mesh, int p, int npoints, double *x, double *w)
   else
     /* set Legendre Gauss-Lobatto points and integration weights */
     LGL_x_wquad(npoints, x, w);
+//void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
+//Gauss_wquad_from_symm_x(npoints, x, w);
+
 }
 
 
@@ -141,6 +144,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
   /* add root node to global mesh->lns list */
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
+
+  if(1) print_matrices_innode(pat->rnode);
 
   return pat;
 }

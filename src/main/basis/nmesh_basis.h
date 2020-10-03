@@ -27,6 +27,7 @@ double basis_LegendreP(int l, double x, int np);
 double basis_normLegendreP(int i, double x, int np);
 void LGL_x_wquad(int npoints, double *x, double *w);
 void LGL_AT_ST_matrices(int n, double *x, double *w, double *AT, double *ST);
+void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w);
 void uniform_x_wquad(int npoints, double *x, double *w);
 
 /* Lagrange.c */
