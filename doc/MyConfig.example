@@ -40,5 +40,5 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 # on UNIX without ru_maxrss in struct rusage (in getrusage), uncomment
 #DFLAGS += -DNO_RU_MAXRSS
 
-# on old compilers without _Noreturn, uncomment the line below
+# on old compilers without NORET=_Noreturn, uncomment the line below
 #DFLAGS += -DNO_C11
