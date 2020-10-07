@@ -49,5 +49,39 @@ int nmesh_coordinates(tMesh *mesh)
   AddPar("CubedSphere_sigma01_lmax", "8", "lmax for Ylm's "
          "used in FSurf_CubSph_sigma01_func");
 
+  /* Variables to store some things in the middle between two regular grid
+     points of a node */
+  AddPar("coordinates_midpoint_data", "no", "[no,yes]");
+  if(Getb(Par("coordinates_midpoint_data")))
+  {
+    AddAuxVarDim("Xm_dXd", "i", "dX/dx^i on X mid points",
+                 NODE_nM1, NODE_n, NODE_n);                // don't put any-
+    AddAuxVarDim("Xm_dYd", "i", "dY/dx^i on X mid points",
+                 NODE_nM1, NODE_n, NODE_n);                // thing in between
+    AddAuxVarDim("Xm_dZd", "i", "dZ/dx^i on X mid points",
+                 NODE_nM1, NODE_n, NODE_n);                // these 3 lines
+    AddAuxVarDim("Ym_dXd", "i", "dX/dx^i on Y mid points",
+                 NODE_n, NODE_nM1, NODE_n);                // don't put any-
+    AddAuxVarDim("Ym_dYd", "i", "dY/dx^i on Y mid points",
+                 NODE_n, NODE_nM1, NODE_n);                // thing in between
+    AddAuxVarDim("Ym_dZd", "i", "dZ/dx^i on Y mid points",
+                 NODE_n, NODE_nM1, NODE_n);                // these 3 lines
+    AddAuxVarDim("Zm_dXd", "i", "dX/dx^i on Z mid points",
+                 NODE_n, NODE_n, NODE_nM1);                // don't put any-
+    AddAuxVarDim("Zm_dYd", "i", "dY/dx^i on Z mid points",
+                 NODE_n, NODE_n, NODE_nM1);                // thing in between
+    AddAuxVarDim("Zm_dZd", "i", "dZ/dx^i on Z mid points",
+                 NODE_n, NODE_n, NODE_nM1);                // these 3 lines
+    AddAuxVarDim("Xm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
+                 "metric in Xb-coords on mid points in X-dir",
+                 NODE_nM1, NODE_n, NODE_n);
+    AddAuxVarDim("Ym_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
+                 "metric in Xb-coords on mid points in X-dir",
+                 NODE_n, NODE_nM1, NODE_n);
+    AddAuxVarDim("Zm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
+                 "metric in Xb-coords on mid points in X-dir",
+                 NODE_n, NODE_n, NODE_nM1);
+  }
+
   return 0;
 }
