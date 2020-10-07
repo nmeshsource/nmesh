@@ -88,6 +88,31 @@ int coordinates_coordvars_enabled(tNode *node)
           enablevar_innode(node, CI->idSurfdX[f][d]);
     }
 
+  /* enable extra vars to store stuff in the middle between grid points */
+  if(Getb(Par("coordinates_midpoint_data")))
+  {
+    int iXm_dXdx = Ind("Xm_dXdx");
+    int iYm_dXdx = Ind("Ym_dXdx");
+    int iZm_dXdx = Ind("Zm_dXdx");
+    int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
+    int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
+    int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
+
+    enablevar_innode(node, iXm_dXdx);
+    enablevar_innode(node, iXm_dXdx+3);
+    enablevar_innode(node, iXm_dXdx+6);
+    enablevar_innode(node, iYm_dXdx);
+    enablevar_innode(node, iYm_dXdx+3);
+    enablevar_innode(node, iYm_dXdx+6);
+    enablevar_innode(node, iZm_dXdx);
+    enablevar_innode(node, iZm_dXdx+3);
+    enablevar_innode(node, iZm_dXdx+6);
+
+    enablevar_innode(node, iXm_sqrtgdiagx);
+    enablevar_innode(node, iYm_sqrtgdiagx);
+    enablevar_innode(node, iZm_sqrtgdiagx);
+  }
+
   return 1;
 }
 
