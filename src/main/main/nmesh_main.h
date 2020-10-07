@@ -125,6 +125,16 @@ typedef struct tVAR {
   int Nextra;       /* extra space allocated in var array */
 } tVar;
 
+/* Extra possibilities for n_special[i] in tVar, besides any positive number.
+   These are checked in enablevarcomp_innode */
+enum
+{
+  NOT_USED=0,   /* everything else in here needs to be negative! */
+  NODE_n=-1,    /* use node->n[d] in dir d */
+  NODE_nM1=-2,  /* use node->n[d]-1 in dir d */
+  NODE_nP1=-3   /* use node->n[d]+1 in dir d */
+};
+
 /* functions to create and access variables */
 void AddMeshVar(tMesh *mesh, const char *name, const char *tensorindices,
                 const char *description);
