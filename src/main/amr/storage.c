@@ -1729,8 +1729,25 @@ void enablevarcomp_innode(tNode *node, int i)
 
     for(dir=0; dir<3; dir++)
     {
-      n[dir] = node->n[dir];
-      if(ns[dir]>0) n[dir] = ns[dir];
+      int node_n = node->n[dir];
+
+      /* use n_special of this var comp */
+      switch(ns[dir])
+      {
+      case NOT_USED:
+      case NODE_n:
+        n[dir] = node_n;
+        break;
+      case NODE_nM1:
+        n[dir] = node_n - 1;
+        break;
+      case NODE_nP1:
+        n[dir] = node_n + 1;
+        break;
+      default:
+        n[dir] = ns[dir];
+      }
+      if(n[dir]<=0) errorexiti("forbidden n_special in var comp %i", i);
     }
     dat->v[i] = alloc_array_extra(n, Ne);
     dat->nvenabled++;
