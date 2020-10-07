@@ -76,10 +76,10 @@ int nmesh_coordinates(tMesh *mesh)
                  "metric in Xb-coords on mid points in X-dir",
                  NODE_nM1, NODE_n, NODE_n);
     AddAuxVarDim("Ym_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
-                 "metric in Xb-coords on mid points in X-dir",
+                 "metric in Xb-coords on mid points in Y-dir",
                  NODE_n, NODE_nM1, NODE_n);
     AddAuxVarDim("Zm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
-                 "metric in Xb-coords on mid points in X-dir",
+                 "metric in Xb-coords on mid points in Z-dir",
                  NODE_n, NODE_n, NODE_nM1);
   }
 
