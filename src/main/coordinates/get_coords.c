@@ -964,7 +964,7 @@ int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
   {
     return pat->dXYZ_dxyz(pat, node, ind, X, x, dXYZdxyz);
   }
-  else /* assume X,Y,Z are Cartesian*/
+  else /* assume X,Y,Z are Cartesian */
   {
     int d, e;
 
@@ -1457,5 +1457,46 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
     }
     else /* point is not inside opat */
       oI[ind] = -1;
+  }
+}
+
+
+/* write node mid point at i,j,k in dir into Xbm in Xb-coords,
+   return value is 1 if mid point is found */
+int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
+                            double Xbm[3])
+{
+  int *n = node->n;
+  switch(dir)
+  {
+  case 0:
+    if(i<n[dir]-1)
+    {
+      Xbm[dir] = 0.5*(node->Xb[dir]->d[i] + node->Xb[dir]->d[i+1]);
+      Xbm[1] = node->Xb[1]->d[j];
+      Xbm[2] = node->Xb[2]->d[k];
+      return 1;
+    }
+    return 0;
+  case 1:
+    if(j<n[dir]-1)
+    {
+      Xbm[0] = node->Xb[0]->d[i];
+      Xbm[dir] = 0.5*(node->Xb[dir]->d[j] + node->Xb[dir]->d[j+1]);
+      Xbm[2] = node->Xb[2]->d[k];
+      return 1;
+    }
+    return 0;
+  case 2:
+    if(i<n[dir]-1)
+    {
+      Xbm[0] = node->Xb[0]->d[i];
+      Xbm[1] = node->Xb[1]->d[j];
+      Xbm[dir] = 0.5*(node->Xb[dir]->d[k] + node->Xb[dir]->d[k+1]);
+      return 1;
+    }
+    return 0;
+  default:
+    errorexit("dir must be 0,1,2");
   }
 }
