@@ -482,7 +482,6 @@ int scalarwave1_set_profile(tVarList *vlu)
   int ipi  = Vind(vlu, 0);
   int icx  = Vind(vlu, 1);
   double t = mesh->time;
-  double u5[5] = {0.};
 
   /* profile */
   formylnodes(mesh)
@@ -496,6 +495,7 @@ int scalarwave1_set_profile(tVarList *vlu)
     double *cx = Vard(node, icx);
     double *cy = Vard(node, icx+1);
     double *cz = Vard(node, icx+2);
+    double u5[5] = {0.};
     int i;
 
     forpoints(node, i)
