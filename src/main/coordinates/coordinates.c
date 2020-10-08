@@ -487,7 +487,7 @@ int coordinates_init_node(tNode *node)
       tArray *Am_g[6];
 
       /* NOTE: for now we only use a flat metric in DG */
-      for(d=0; d<3; d++) Am_g[d] = NULL;
+      for(d=0; d<6; d++) Am_g[d] = NULL;
       if(i3metric>=0)
         errorexit("implement case where we use non-flat metric in DG");
 
