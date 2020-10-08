@@ -140,6 +140,7 @@ int coordinates_init_node(tNode *node)
   double *det_dXbdx = Vard(node, Ind("det_dXbdx"));
   double dXbdX[3];
   double det_dXbYbZb_dXYZ;
+  tArray *Ag[6]; /* arrays for 3-metric */
   double *gxx, *gxy, *gxz, *gyy, *gyz, *gzz;
 
   /* do nothing if coords are set already or if vars are off */
@@ -149,18 +150,23 @@ int coordinates_init_node(tNode *node)
 
   if(PR) { PRF;printf(": nid%ld\n", node->nid); }
 
-  /* pointers to 3 metric */
+  /* arrays for 3 metric */
   if(i3metric>=0)
   {
-    gxx = Vard(node, i3metric);
-    gxy = Vard(node, i3metric+1);
-    gxz = Vard(node, i3metric+2);
-    gyy = Vard(node, i3metric+3);
-    gyz = Vard(node, i3metric+4);
-    gzz = Vard(node, i3metric+5);
+    for(d=0; d<6; d++) Ag[d] = VarA(node, i3metric + d);
+    if(Ag[0]==NULL) errorexit("array for gxx is NULL!");
   }
   else
-  { gxx = gxy = gxz = gyy = gyz = gzz = NULL; }
+  {
+    for(d=0; d<6; d++) Ag[d] = NULL;
+  }
+  /* pointers to 3 metric */
+  gxx = Arrd(Ag[0]);
+  gxy = Arrd(Ag[1]);
+  gxz = Arrd(Ag[2]);
+  gyy = Arrd(Ag[3]);
+  gyz = Arrd(Ag[4]);
+  gzz = Arrd(Ag[5]);
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
@@ -274,63 +280,19 @@ int coordinates_init_node(tNode *node)
   /* set sqrtgdiag */
   if(sqrtgdiag)
   {
-    /* arrays to compute sqrtgdiag */
-    tArray *adXdxT = alloc_empty_array2d(3,3); /* 3x3 for coord. transf. */
-    tArray *ainvM  = alloc_empty_array2d(3,3); /* 3x3 for inv. metric */
-    tArray *agam = alloc_array2d(3,3); /* 3x3 for transf. inv. metric */
-    tArray *tmp  = alloc_array2d(3,3);
-    double dXdx[3][3]; /* coord. transf. */
-    double invM[3][3]; /* inverse metric in x-coords  */
-    double *gam = Arrd(agam);
     int isqrtgdiagx = Ind("sqrtgdiagx");
-    double *sqrtgdiagx = Vard(node, isqrtgdiagx);
-    double *sqrtgdiagy = Vard(node, isqrtgdiagx+1);
-    double *sqrtgdiagz = Vard(node, isqrtgdiagx+2);
-    int ijk;
+    /* 3 arrays for dXdx on midpoints */
+    tArray *AdXdx[3][3] =
+      { { VarA(node,idXdx),   VarA(node,idXdx+1), VarA(node,idXdx+2) },
+        { VarA(node,idXdx+3), VarA(node,idXdx+4), VarA(node,idXdx+5) },
+        { VarA(node,idXdx+6), VarA(node,idXdx+7), VarA(node,idXdx+8) } };
+    /* 3 arrays for sqrtgdiag on midpoints */
+    tArray *Asqrtgdiag[3] = { VarA(node, isqrtgdiagx),
+                              VarA(node, isqrtgdiagx+1),
+                              VarA(node, isqrtgdiagx+2) };
 
-    /* Put coord. transf. into adXdx.
-       Trick here is that C-arrays are row major. So when we put dXdx
-       into the col. major adXdxT, we automatically take the transpose! */
-    point_array_d_to_data(adXdxT, dXdx, 1);
-
-    /* Put inv. of 3-metric into ainvM. */
-    point_array_d_to_data(ainvM, invM, 1);
-
-    forpoints(node, ijk)
-    {
-      /* set transpose of coord. transf. */
-      for(d=0; d<3; d++)
-        for(e=0; e<3; e++)
-          dXdx[d][e] = pdXdx[d][e][ijk];
-
-      /* if no 3-metric is specified, we assume it is flat */
-      if(i3metric<0)
-      {
-        /* transform flat metric to X coords */
-        mm_array0_norestrict(adXdxT,adXdxT, agam);
-      }
-      else
-      {
-        double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
-                           { gxy[ijk], gyy[ijk], gyz[ijk] },
-                           { gxz[ijk], gyz[ijk], gzz[ijk] } };
-
-        /* get inverse metric and multiply with dX/dx */
-        inv3Dmat_from_3Dmat(M, invM); /* ainvM points to invM */
-        /* gam = dX/dx invM (dX/dx)^T */
-        mm_array0(ainvM,adXdxT, tmp); /* ainvM adXdxT -> tmp */
-        mm_array0(adXdxT,tmp, agam);  /* adXdx tmp    -> agam */
-      }
-
-      /* go from X to Xb coords */
-      sqrtgdiagx[ijk] = dXbdX[0] * sqrt(gam[0]);
-      sqrtgdiagy[ijk] = dXbdX[1] * sqrt(gam[4]);
-      sqrtgdiagz[ijk] = dXbdX[2] * sqrt(gam[8]);
-    }
-    free_array(tmp);
-    free_array(agam);
-    free_array(ainvM);
-    free_array(adXdxT);
+    /* now set sqrtgdiag */
+    set_sqrtgdiag_array(node, AdXdx, Ag, Asqrtgdiag);
   }
 
   /* set oC surface coords, for now this is off */
@@ -522,17 +484,17 @@ int coordinates_init_node(tNode *node)
       tArray *AZm_sqrtgdiag[3] = { VarA(node, iZm_sqrtgdiagx),
                                    VarA(node, iZm_sqrtgdiagx+1),
                                    VarA(node, iZm_sqrtgdiagx+2) };
-      tArray *Ag[6];
+      tArray *Am_g[6];
 
       /* NOTE: for now we only use a flat metric in DG */
-      for(d=0; d<3; d++) Ag[d] = NULL;
+      for(d=0; d<3; d++) Am_g[d] = NULL;
       if(i3metric>=0)
         errorexit("implement case where we use non-flat metric in DG");
 
       /* now set sqrtgdiag */
-      set_sqrtgdiag_array(node, AXm_dXdx, Ag, AXm_sqrtgdiag);
-      set_sqrtgdiag_array(node, AYm_dXdx, Ag, AYm_sqrtgdiag);
-      set_sqrtgdiag_array(node, AZm_dXdx, Ag, AZm_sqrtgdiag);
+      set_sqrtgdiag_array(node, AXm_dXdx, Am_g, AXm_sqrtgdiag);
+      set_sqrtgdiag_array(node, AYm_dXdx, Am_g, AYm_sqrtgdiag);
+      set_sqrtgdiag_array(node, AZm_dXdx, Am_g, AZm_sqrtgdiag);
     }
   }
 
