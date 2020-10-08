@@ -1488,7 +1488,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
     }
     return 0;
   case 2:
-    if(i<n[dir]-1)
+    if(k<n[dir]-1)
     {
       Xbm[0] = node->Xb[0]->d[i];
       Xbm[1] = node->Xb[1]->d[j];
