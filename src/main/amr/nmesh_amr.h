@@ -40,6 +40,8 @@ typedef struct tDAT {
   int nv;                 /* number of vars */
   int nvenabled;          /* number of enabled vars */
   int coords_set;         /* whether coord vars are enabled and set */
+  int troubled;           /* whether node is troubled (e.g. by shocks) */
+  int use_fv;             /* whether we currently use fin. vol. in node */
   struct tARRAY **v;      /* list of data pointers to vars, if v[vi]=NULL,
                              the var vi and its surfaces are not enabled */
   struct tSURFACE **s[6]; /* list of surfaces needed for data exchange,
