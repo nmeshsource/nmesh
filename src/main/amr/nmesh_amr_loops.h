@@ -125,6 +125,9 @@
 /* get integration weights for direc. dir on node */
 #define Wquad(node, dir) node->Wq[dir]->d
 
+/* grid points in Xb-coords in direc. dir on node */
+#define Xbpts(node, dir) node->Xb[dir]->d
+
 /***************************************************************************/
 /* macros that should be used only in very particular advanced cases       */
 /***************************************************************************/

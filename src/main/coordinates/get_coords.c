@@ -1506,30 +1506,47 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
   }
 }
 
-/* write node mid point at id in dir into Xbmd in Xb-coords */
-int set_nodemidpoint_Xb_dir(tNode *node, int id, int dir,
-                            double *Xbmd)
+/* write nm node midpoints (starting at id) in dir into Xbmd in Xb-coords */
+int set_nm_nodemidpoints_Xb_dir(tNode *node, int nm, int id, int dir,
+                                double *Xbmd)
 {
   double ret;
   double Xbm[3];
+  int i;
 
   switch(dir)
   {
   case 0:
-    ret = set_nodemidpoint_XbYbZb(node, id,0,0, dir, Xbm);
-    *Xbmd = Xbm[dir];
+    for(i=0; i<nm; i++)
+    {
+      ret = set_nodemidpoint_XbYbZb(node, id+i,0,0, dir, Xbm);
+      Xbmd[i] = Xbm[dir];
+    }
     return ret;
   case 1:
-    ret = set_nodemidpoint_XbYbZb(node, 0,id,0, dir, Xbm);
-    *Xbmd = Xbm[dir];
+    for(i=0; i<nm; i++)
+    {
+      ret = set_nodemidpoint_XbYbZb(node, 0,id+i,0, dir, Xbm);
+      Xbmd[i] = Xbm[dir];
+    }
     return ret;
   case 2:
-    ret = set_nodemidpoint_XbYbZb(node, 0,0,id, dir, Xbm);
-    *Xbmd = Xbm[dir];
+    for(i=0; i<nm; i++)
+    {
+      ret = set_nodemidpoint_XbYbZb(node, 0,0,id+i, dir, Xbm);
+      Xbmd[i] = Xbm[dir];
+    }
     return ret;
   default:
     errorexit("dir must be 0,1,2");
   }
+}
+
+/* write node mid point at id in dir into Xbmd in Xb-coords */
+int set_nodemidpoint_Xb_dir(tNode *node, int id, int dir,
+                            double *Xbmd)
+{
+  return set_nm_nodemidpoints_Xb_dir(node,1, id, dir, Xbmd);
 }
 
 /* write min distance in Xb-coords of nodemidpoints into Xbdist,
