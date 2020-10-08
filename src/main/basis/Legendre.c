@@ -128,6 +128,12 @@ double int_LegendreP_a_b(int k, double a, double b)
 /* various functions needed for Legendre Gauss-Lobatto points or nodes      */
 /* ************************************************************************ */
 
+/* Note: All points and weights in this file are computed for the standard
+   interval [-1,1]. If we have an interval [a,b] instead, we have to scale
+   the standard points and weights like this:
+     x^[a,b] = m*x^[-1,1] + (a+b)/2,    where m:=(b-a)/2
+     w^[a,b]_k = m w^[-1,1]_k                              */
+
 /* Legendre Gauss-Lobatto nodes x_i and integration weights w_i
    N = degree, so there are N+1 points
    This is based on
