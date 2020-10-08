@@ -425,11 +425,207 @@ int coordinates_init_node(tNode *node)
       }
     }
 
+  /* set extra vars to store stuff in the middle between grid points */
+  if(Getb(Par("coordinates_midpoint_data")))
+  {
+    int iXm_dXdx = Ind("Xm_dXdx");
+    int iYm_dXdx = Ind("Ym_dXdx");
+    int iZm_dXdx = Ind("Zm_dXdx");
+    int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
+    int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
+    int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
+    double *pXm_dXdx[3][3] =
+     {{Vard(node,iXm_dXdx),   Vard(node,iXm_dXdx+1), Vard(node,iXm_dXdx+2)},
+      {Vard(node,iXm_dXdx+3), Vard(node,iXm_dXdx+4), Vard(node,iXm_dXdx+5)},
+      {Vard(node,iXm_dXdx+6), Vard(node,iXm_dXdx+7), Vard(node,iXm_dXdx+8)} };
+    double *pYm_dXdx[3][3] =
+     {{Vard(node,iYm_dXdx),   Vard(node,iYm_dXdx+1), Vard(node,iYm_dXdx+2)},
+      {Vard(node,iYm_dXdx+3), Vard(node,iYm_dXdx+4), Vard(node,iYm_dXdx+5)},
+      {Vard(node,iYm_dXdx+6), Vard(node,iYm_dXdx+7), Vard(node,iYm_dXdx+8)} };
+    double *pZm_dXdx[3][3] =
+     {{Vard(node,iZm_dXdx),   Vard(node,iZm_dXdx+1), Vard(node,iZm_dXdx+2)},
+      {Vard(node,iZm_dXdx+3), Vard(node,iZm_dXdx+4), Vard(node,iZm_dXdx+5)},
+      {Vard(node,iZm_dXdx+6), Vard(node,iZm_dXdx+7), Vard(node,iZm_dXdx+8)} };
+
+    /* set Xm_dXdx, Ym_dXdx, Zm_dXdx */
+    {
+      forijk(i,j,k, n)
+      {
+        double Xmid[3];
+        double Ymid[3];
+        double Zmid[3];
+        double X[3], x[3], dXdx[3][3];
+        int Xm_n[] = { n[0]-1, n[1],   n[2] };
+        int Ym_n[] = { n[0],   n[1]-1, n[2] };
+        int Zm_n[] = { n[0],   n[1],   n[2]-1 };
+        int gotXmid, gotYmid, gotZmid;
+        int ijk;
+
+        /* find mid points in X-dir */
+        gotXmid = set_nodemidpoint_XbYbZb(node, i,j,k, 0, Xmid);
+        gotYmid = set_nodemidpoint_XbYbZb(node, i,j,k, 1, Ymid);
+        gotZmid = set_nodemidpoint_XbYbZb(node, i,j,k, 2, Zmid);
+
+        /* now set x, dXdx */
+        if(gotXmid)
+        {
+          XYZ_of_XbYbZb(node, Xmid, X);
+          set_xyz_dXYZdxyz(pat, node, -1, X, x, dXdx);
+          ijk = Ind_n(i,j,k, Xm_n);
+
+          for(d=0; d<3; d++)
+            for(e=0; e<3; e++) pXm_dXdx[d][e][ijk] = dXdx[d][e];
+        }
+        if(gotYmid)
+        {
+          XYZ_of_XbYbZb(node, Ymid, X);
+          set_xyz_dXYZdxyz(pat, node, -1, X, x, dXdx);
+          ijk = Ind_n(i,j,k, Ym_n);
+
+          for(d=0; d<3; d++)
+            for(e=0; e<3; e++) pYm_dXdx[d][e][ijk] = dXdx[d][e];
+        }
+        if(gotZmid)
+        {
+          XYZ_of_XbYbZb(node, Zmid, X);
+          set_xyz_dXYZdxyz(pat, node, -1, X, x, dXdx);
+          ijk = Ind_n(i,j,k, Zm_n);
+
+          for(d=0; d<3; d++)
+            for(e=0; e<3; e++) pZm_dXdx[d][e][ijk] = dXdx[d][e];
+        }
+      } /* end forijk */
+    }
+
+    /* set Xm_sqrtgdiag, Ym_sqrtgdiag, Zm_sqrtgdiag */
+    {
+      /* 3 arrays for dXdx on midpoints */
+      tArray *AXm_dXdx[3][3] =
+      {{VarA(node,iXm_dXdx),   VarA(node,iXm_dXdx+1), VarA(node,iXm_dXdx+2)},
+       {VarA(node,iXm_dXdx+3), VarA(node,iXm_dXdx+4), VarA(node,iXm_dXdx+5)},
+       {VarA(node,iXm_dXdx+6), VarA(node,iXm_dXdx+7), VarA(node,iXm_dXdx+8)}};
+      tArray *AYm_dXdx[3][3] =
+      {{VarA(node,iYm_dXdx),   VarA(node,iYm_dXdx+1), VarA(node,iYm_dXdx+2)},
+       {VarA(node,iYm_dXdx+3), VarA(node,iYm_dXdx+4), VarA(node,iYm_dXdx+5)},
+       {VarA(node,iYm_dXdx+6), VarA(node,iYm_dXdx+7), VarA(node,iYm_dXdx+8)}};
+      tArray *AZm_dXdx[3][3] =
+      {{VarA(node,iZm_dXdx),   VarA(node,iZm_dXdx+1), VarA(node,iZm_dXdx+2)},
+       {VarA(node,iZm_dXdx+3), VarA(node,iZm_dXdx+4), VarA(node,iZm_dXdx+5)},
+       {VarA(node,iZm_dXdx+6), VarA(node,iZm_dXdx+7), VarA(node,iZm_dXdx+8)}};
+      /* 3 arrays for sqrtgdiag on midpoints */
+      tArray *AXm_sqrtgdiag[3] = { VarA(node, iXm_sqrtgdiagx),
+                                   VarA(node, iXm_sqrtgdiagx+1),
+                                   VarA(node, iXm_sqrtgdiagx+2) };
+      tArray *AYm_sqrtgdiag[3] = { VarA(node, iYm_sqrtgdiagx),
+                                   VarA(node, iYm_sqrtgdiagx+1),
+                                   VarA(node, iYm_sqrtgdiagx+2) };
+      tArray *AZm_sqrtgdiag[3] = { VarA(node, iZm_sqrtgdiagx),
+                                   VarA(node, iZm_sqrtgdiagx+1),
+                                   VarA(node, iZm_sqrtgdiagx+2) };
+      tArray *Ag[6];
+
+      /* NOTE: for now we only use a flat metric in DG */
+      for(d=0; d<3; d++) Ag[d] = NULL;
+      if(i3metric>=0)
+        errorexit("implement case where we use non-flat metric in DG");
+
+      /* now set sqrtgdiag */
+      set_sqrtgdiag_array(node, AXm_dXdx, Ag, AXm_sqrtgdiag);
+      set_sqrtgdiag_array(node, AYm_dXdx, Ag, AYm_sqrtgdiag);
+      set_sqrtgdiag_array(node, AZm_dXdx, Ag, AZm_sqrtgdiag);
+    }
+  }
+
   /* mark coords as set */
   dat->coords_set = 1;
 
   return 0;
 }
+
+
+/* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 arrays Asqrtgdiag[i].
+   We calculate Asqrtgdiag from dXdx[3][3] and the symm. 3-metric in Ag[6]
+   in x-coords. */
+void set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3], tArray *Ag[6],
+                         tArray *Asqrtgdiag[3])
+{
+  /* arrays to compute sqrtgdiag */
+  tArray *adXdxT = alloc_empty_array2d(3,3); /* 3x3 for coord. transf. */
+  tArray *ainvM  = alloc_empty_array2d(3,3); /* 3x3 for inv. metric */
+  tArray *agam = alloc_array2d(3,3); /* 3x3 for transf. inv. metric */
+  tArray *tmp  = alloc_array2d(3,3);
+  double dXdx[3][3]; /* coord. transf. */
+  double invM[3][3]; /* inverse metric in x-coords  */
+  double *gam = Arrd(agam);
+  double *sqrtgdiagx = Arrd(Asqrtgdiag[0]);
+  double *sqrtgdiagy = Arrd(Asqrtgdiag[1]);
+  double *sqrtgdiagz = Arrd(Asqrtgdiag[2]);
+  double *pdXdx[3][3];
+  double *gxx = Arrd(Ag[0]);
+  double *gxy = Arrd(Ag[1]);
+  double *gxz = Arrd(Ag[2]);
+  double *gyy = Arrd(Ag[3]);
+  double *gyz = Arrd(Ag[4]);
+  double *gzz = Arrd(Ag[5]);
+  double dXbdX[3];
+  int ijk, d,e;
+
+  /* init pdXdx: point pdXdx to AdXdx data */
+  for(d=0; d<3; d++)
+    for(e=0; e<3; e++)
+      pdXdx[d][e] = Arrd(AdXdx[d][e]);
+
+  /* set dXbdX from node dimensions */
+  dXbYbZb_dXYZ(node, dXbdX);
+
+  /* Put coord. transf. into adXdx.
+     Trick here is that C-arrays are row major. So when we put dXdx
+     into the col. major adXdxT, we automatically take the transpose! */
+  point_array_d_to_data(adXdxT, dXdx, 1);
+
+  /* Put inv. of 3-metric into ainvM. */
+  point_array_d_to_data(ainvM, invM, 1);
+
+  /* loop over target arrays,
+     we assume all arrays passed in have same dims */
+  forarray(Asqrtgdiag[0], ijk)
+  {
+    /* set transpose of coord. transf. */
+    for(d=0; d<3; d++)
+      for(e=0; e<3; e++)
+        dXdx[d][e] = pdXdx[d][e][ijk];
+
+    /* if no 3-metric is specified, we assume it is flat */
+    if(!gxx)
+    {
+      /* transform flat metric to X coords */
+      mm_array0_norestrict(adXdxT,adXdxT, agam);
+    }
+    else
+    {
+      double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
+                         { gxy[ijk], gyy[ijk], gyz[ijk] },
+                         { gxz[ijk], gyz[ijk], gzz[ijk] } };
+
+      /* get inverse metric and multiply with dX/dx */
+      inv3Dmat_from_3Dmat(M, invM); /* ainvM points to invM */
+      /* gam = dX/dx invM (dX/dx)^T */
+      mm_array0(ainvM,adXdxT, tmp); /* ainvM adXdxT -> tmp */
+      mm_array0(adXdxT,tmp, agam);  /* adXdx tmp    -> agam */
+    }
+
+    /* go from X to Xb coords */
+    sqrtgdiagx[ijk] = dXbdX[0] * sqrt(gam[0]);
+    sqrtgdiagy[ijk] = dXbdX[1] * sqrt(gam[4]);
+    sqrtgdiagz[ijk] = dXbdX[2] * sqrt(gam[8]);
+  }
+  free_array(tmp);
+  free_array(agam);
+  free_array(ainvM);
+  free_array(adXdxT);
+}
+
+
 
 /* initialize coordinates in each patch */
 int coordinates_init(tMesh *mesh)

@@ -90,6 +90,8 @@ void mark_points_in_nb_f(tNode *node, int f, tArray *aC[2],
                          tNode *nb, int nb_f, tArray *aoC[2], tArray *aI);
 void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
                                  tArray *nbC[2], tArray *nbI);
+int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
+                            double Xbm[3]);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui[3]);
