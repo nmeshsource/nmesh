@@ -260,9 +260,10 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 void scalarwave1_numflux1d_upwind(tDGinfo *d)
 {
   int nf = 4; /* only 4 modes besides phi */
-  int *n = d->node->n;
+  tNode *node = d->node;
   int f = d->face;
-  int ijk = Ind_n(d->i,d->j,d->k, n);
+  int dir = f/2;
+  int ijk;
   int l,m,s;
   double lam_p[4][4];// = {{0.}};  //positive eigenvalue diagonal matrix
   double lam_n[4][4];// = {{0.}};  //negative eigenvalue diagonal matrix
@@ -274,6 +275,30 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
   double fnuma[4];// = {0.}; //numflux contribution from adjacent u
   double norm[3];
   double nx, ny, nz;
+
+  /* standard DG point */
+  if(d->info == 0)
+  {
+    int *n = node->n;
+    ijk = Ind_n(d->i,d->j,d->k, n);
+    //JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
+    /* get face normal norm at point ijk */
+    node_normal_at_ijk(node, f, ijk, norm);
+  }
+  else /* interpret i,j,k as midpoint indices */
+  {
+    int *n = node->n;
+    int nm[3] = { n[0]-(dir==0), n[1]-(dir==1), n[2]-(dir==2) };
+    ijk = Ind_n(d->i,d->j,d->k, nm);
+    //JK = Ind_n_norm(d->i,d->j,d->k, nm, dir);
+    /* get normal norm at midpoint ijk */
+    node_normal_at_midpt_ijk(node, f, ijk, norm);
+  }
+
+  /* set face normal */
+  nx = norm[0];
+  ny = norm[1];
+  nz = norm[2];
 
   for(l=0; l<nf; l++)
   {
@@ -296,12 +321,6 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
     else                 lam_n[l][l] = d->lami[l];
   }
 
-  /* get face normal norm at point ijk */
-  node_normal_at_ijk(d->node, f, ijk, norm);
-
-  nx = norm[0];
-  ny = norm[1];
-  nz = norm[2];
 
   /* For plane parallel to XY plane */
   if(nz!=0)
