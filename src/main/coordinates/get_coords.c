@@ -1467,10 +1467,15 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
                             double Xbm[3])
 {
   int *n = node->n;
+  int nm1 = n[dir]-1;
+
+  /* return zero if there is only 1 regular grid point in dir */
+  if(nm1<=0) return 0;
+
   switch(dir)
   {
   case 0:
-    if(i<n[dir]-1)
+    if(i<nm1)
     {
       Xbm[dir] = 0.5*(node->Xb[dir]->d[i] + node->Xb[dir]->d[i+1]);
       Xbm[1] = node->Xb[1]->d[j];
@@ -1479,7 +1484,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
     }
     return 0;
   case 1:
-    if(j<n[dir]-1)
+    if(j<nm1)
     {
       Xbm[0] = node->Xb[0]->d[i];
       Xbm[dir] = 0.5*(node->Xb[dir]->d[j] + node->Xb[dir]->d[j+1]);
@@ -1488,7 +1493,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
     }
     return 0;
   case 2:
-    if(k<n[dir]-1)
+    if(k<nm1)
     {
       Xbm[0] = node->Xb[0]->d[i];
       Xbm[1] = node->Xb[1]->d[j];
@@ -1498,5 +1503,61 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
     return 0;
   default:
     errorexit("dir must be 0,1,2");
+  }
+}
+
+/* write node mid point at id in dir into Xbmd in Xb-coords */
+int set_nodemidpoint_Xb_dir(tNode *node, int id, int dir,
+                            double *Xbmd)
+{
+  double ret;
+  double Xbm[3];
+
+  switch(dir)
+  {
+  case 0:
+    ret = set_nodemidpoint_XbYbZb(node, id,0,0, dir, Xbm);
+    *Xbmd = Xbm[dir];
+    return ret;
+  case 1:
+    ret = set_nodemidpoint_XbYbZb(node, 0,id,0, dir, Xbm);
+    *Xbmd = Xbm[dir];
+    return ret;
+  case 2:
+    ret = set_nodemidpoint_XbYbZb(node, 0,0,id, dir, Xbm);
+    *Xbmd = Xbm[dir];
+    return ret;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+}
+
+/* write min distance in Xb-coords of nodemidpoints into Xbdist,
+   if there is no midpoint write -2 in distXb for this face */
+void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
+{
+  int *n = node->n;
+  double *bb = node->bbox;
+  int f;
+
+  for(f=0; f<6; f++)
+  {
+    double Xbm, Xb[3], X[3];
+    int dir = f/2;
+    int right = f%2;
+    int nm1 = n[dir]-1;
+    int id = (nm1-1)*(right);
+
+    if(nm1>0)
+    {
+      set_nodemidpoint_Xb_dir(node, id, dir, &Xbm);
+      X[dir] = bb[f];
+      XbYbZb_of_XYZ(node, Xb, X);
+      distXb[f] = Xbm - Xb[dir];
+    }
+    else /* if we have only 1 regular grid point return -(node width) */
+    {
+      distXb[f] = -2.;
+    }
   }
 }
