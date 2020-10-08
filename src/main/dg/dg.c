@@ -83,6 +83,13 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
       int *n = node->n;
       double *ooJ = Vard(node, iooJ);
       int face;
+      int use_fv = node->dat->use_fv;
+      double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
+      double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
+      double distXb[6];
+
+      /* find distance from faces to nearest midpoint */
+      set_nodemidpoints_to_face_distXb(node, distXb);
 
       /* set DG node info */
       dgi->node = node;
@@ -95,6 +102,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
         double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
         double *Wq = Wquad(node, dir);
+        double Wqmod = fabs(distXb[face]);
         int i,j,k;
 
         /* set DG face info */
@@ -105,7 +113,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           int ijk = Ind_n(i,j,k, n);
           int JK = Ind_n_norm(i,j,k, n, dir);
           int i0 = i0_norm(i,j,k, dir);
-          double oow = 1./Wq[i0];
+          double oow = 1./(Wq[i0]*mod0 + Wqmod*mod1);
           double sdg_oJ_ow = sqrtdet2gam[JK] * fabs(ooJ[ijk]) * oow;
           double gd_ow = sqrtgdiag[ijk] * oow;
           double Ffac;

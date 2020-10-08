@@ -92,6 +92,7 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
                                  tArray *nbC[2], tArray *nbI);
 int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
                             double Xbm[3]);
+void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6]);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui[3]);
