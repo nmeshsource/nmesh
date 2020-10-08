@@ -105,9 +105,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           int ijk = Ind_n(i,j,k, n);
           int JK = Ind_n_norm(i,j,k, n, dir);
           int i0 = i0_norm(i,j,k, dir);
-          double w = Wq[i0];
-          double sdg_oJ_ow = sqrtdet2gam[JK] * fabs(ooJ[ijk]) / w;
-          double gd_ow = sqrtgdiag[ijk] / w;
+          double oow = 1./Wq[i0];
+          double sdg_oJ_ow = sqrtdet2gam[JK] * fabs(ooJ[ijk]) * oow;
+          double gd_ow = sqrtgdiag[ijk] * oow;
           double Ffac;
           int l;
 
