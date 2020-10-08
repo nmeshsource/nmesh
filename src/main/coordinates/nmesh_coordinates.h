@@ -95,6 +95,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
 int set_nm_nodemidpoints_Xb_dir(tNode *node, int nm, int id, int dir,
                                 double *Xbmd);
 void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6]);
+void shift_Xb0_XbN_toward_Xbm0_XbmN(const double *Xbm, int n, double *Xb);
 
 /* derivs.c */
 int cart_partials(tNode *node, int ui, int dui[3]);

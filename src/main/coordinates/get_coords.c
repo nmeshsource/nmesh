@@ -1578,3 +1578,14 @@ void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
     }
   }
 }
+
+/* with fin. vol. we sometimes want to interpret the standard grid points
+   that are on the faces as grid points at the cell center between the face
+   and the nearest midpoint.
+   This func shifts them in this way. */
+void shift_Xb0_XbN_toward_Xbm0_XbmN(const double *Xbm, int n, double *Xb)
+{
+  int nm = n-1;
+  Xb[0]  = 0.5*(Xb[0]   + Xbm[0]);
+  Xb[nm] = 0.5*(Xb[nm] + Xbm[nm-1]);
+}
