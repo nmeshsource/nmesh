@@ -643,6 +643,19 @@ void *pmalloc(int n)
   return p;
 }
 
+/* malloc memory (and check out of memory) for VLA matrix or tensor.
+   use it like this:
+   double (*M)[ny] = dtensor(nx*ny);        // gives M[nx][ny]
+   double (*T)[ny][nz] = dtensor(nx*ny*nz); // gives T[nx][ny][nz]
+   //...
+   free(T); free(M); */
+void *dtensor(size_t size)
+{
+  void *p = malloc(sizeof(double) * size);
+
+  if(!p) errorexiti("out of memory (%d double)", size);
+  return p;
+}
 
 /********************************************/
 /* Functions that have to do with errorexit */

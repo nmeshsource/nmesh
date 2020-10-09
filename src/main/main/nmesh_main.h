@@ -261,6 +261,7 @@ double *dmalloc(int n);
 int *imalloc(int n);
 char *cmalloc(int n);
 void *pmalloc(int n);
+void *dtensor(size_t size);
 
 
 /* endianIO.c */
