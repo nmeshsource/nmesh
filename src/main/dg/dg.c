@@ -149,7 +149,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
             //  else                  dgi->fnum[l] = dgi->fi[l];
             //}
 
-            F = (dgi->fnum[l] - dgi->fi[l]) * Ffac;
+            F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
             r[ijk] -= F * (det2gam * sdg_oJ_ow + gdiag * gd_ow);
           }
         }
