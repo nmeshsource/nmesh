@@ -716,12 +716,15 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     for(dir=0; dir<3; dir++)
     {
       double *msqrtgdiag = (double *) &(m_sqrtgdiag[dir][0]);
+      double *Xb;
       int i,j,k;
+
       /* find points */
-      double *Xb = Xbpts(node, dir);
+      Xb = Xbpts(node, dir);
       set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
-      shift_Xb0_XbN_toward_Xbm0_XbmN(Xbm, n[dir], Xb);
       set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
+      /* do we want this???: */
+      shift_Xb0_XbN_toward_Xbm0_XbmN(Xbm, n[dir], Xb);
 
       /* loop over plane */
       forplaneN(dir, i,j,k, n, 0)
@@ -813,8 +816,8 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           /* factors in flux terms on RHS at right and left midpoint */
           wm  = dXb[im0];
           wm1 = dXb[im0m1];
-          gd_ow_m  = msqrtgdiag[ccc]/wm;
-          gd_ow_m1 = msqrtgdiag[cccm1]/wm1;
+          gd_ow_m  = i0lN * msqrtgdiag[ccc]/wm;
+          gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm1;
 
           /* get F from d and add boundary flux terms to RHS */
           for(l=0; l<nvars; l++)
@@ -824,12 +827,11 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
             double *fnum = fnumR[l];
             double F;
 
-            F = fnum[im0]*gd_ow_m*i0lN - fnum[im0m1]*gd_ow_m1*i0g0;
+            F = fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1;
             r[ccc] -= F;
           }
         }
       } /* end plane loop */
-
     } /* end dir-loop*/
 
     /* release mem */
