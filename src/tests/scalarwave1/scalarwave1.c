@@ -210,8 +210,10 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* compute flux */
-  scalarwave1_f_divf(mesh, vlu);
-//scalarwave1_divf_FV(mesh, vlu);
+  if(Getv(Par("scalarwave1_nummethod"), "dg"))
+    scalarwave1_f_divf(mesh, vlu);
+  else
+    scalarwave1_divf_FV(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh)
@@ -698,6 +700,10 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 
     /* write node into d because numflux needs this */
     d->node = node;
+    d->info = 1; // anything other than 0 triggers normals on midpoints
+
+    /* force node into FV mode */
+    node->dat->use_fv = 1;
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
