@@ -680,11 +680,6 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int nvars = vlr->n - 1; /* only 4 since phi never contributes to any flux */
   int ipi = Vind(vlu, 0);
   int icx = Vind(vlu, 1);
-  int irpi = Vind(vlr, 0);
-  int ircx = Vind(vlr, 1);
-  int irphi = Vind(vlr, 4);
-  int idivf_pi = Ind("scalarwave1_divf_pi");
-  int idivf_cx = Ind("scalarwave1_divf_cx");
   int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
   int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
   int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
@@ -700,17 +695,6 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     double *cx = Vard(node, icx);
     double *cy = Vard(node, icx+1);
     double *cz = Vard(node, icx+2);
-    double *rpi = Vard(node, irpi);
-    double *rcx = Vard(node, ircx);
-    double *rcy = Vard(node, ircx+1);
-    double *rcz = Vard(node, ircx+2);
-    double *rphi = Vard(node, irphi);
-    double *divf_pi = Vard(node, idivf_pi);
-    double *divf_cx = Vard(node, idivf_cx);
-    double *divf_cy = Vard(node, idivf_cx+1);
-    double *divf_cz = Vard(node, idivf_cx+2);
-
-
     double *m_sqrtgdiag[3][3] =
       { { Vard(node, iXm_sqrtgdiagx), Vard(node, iXm_sqrtgdiagx+1),
                                            Vard(node, iXm_sqrtgdiagx+2) },
@@ -718,36 +702,26 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
                                            Vard(node, iYm_sqrtgdiagx+2) },
         { Vard(node, iZm_sqrtgdiagx), Vard(node, iZm_sqrtgdiagx+1),
                                            Vard(node, iZm_sqrtgdiagx+2) } };
-
-
     int *n = node->n;
     int maxn = max3(n[0],n[1],n[2]);
     double *Xbm = dmalloc(maxn);
-    tArray *uc = alloc_array2d(maxn, nvars);   //array for the 4 pi,cx,cy,cz
+    double *dXb = dmalloc(maxn);
+    double (*uc)[maxn] = dtensor(nvars*maxn);    //array for the 4 pi,cx,cy,cz
+    double (*fnumR)[maxn] = dtensor(nvars*maxn); //array for the 4 fluxes
     double um_p[5]; /* array for the 5 pi,cx,cy,cz, phi */
     double um_m[5]; /* array for the 5 pi,cx,cy,cz, phi */
-    tArray *fnumR = alloc_array2d(maxn, nvars); //array for the 4 pi,cx,cy,cz
     int dir;
 
-    /* fluxes in each direction */
+    /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
     {
-      double *msqrtgdiag = &(m_sqrtgdiag[dir][0]);
+      double *msqrtgdiag = (double *) &(m_sqrtgdiag[dir][0]);
       int i,j,k;
-      int nm[3] = { n[0]-(dir==0), n[1]-(dir==1), n[2]-(dir==2) };
       /* find points */
       double *Xb = Xbpts(node, dir);
       set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
       shift_Xb0_XbN_toward_Xbm0_XbmN(Xbm, n[dir], Xb);
-
-/*
-
-The index buisiness in here looks really messy, maybe make arrays for
-Xm_dXdx and such be of the same dim and normal vars. This takes a bit more
-mem. but will be easier to deal with!
-
-*/
-
+      set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
 
       /* loop over plane */
       forplaneN(dir, i,j,k, n, 0)
@@ -758,49 +732,55 @@ mem. but will be easier to deal with!
         int i0;                       /* index orthogonal to plane */
         int ic,jc,kc, ccc;
 
-        /* fill field arrays uc */
+        /* fill field arrays uc, i0 runs orth. to plane */
         for(i0=0; i0<n[dir]; i0++)
         {
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
-          Arrd(uc)[       + i0] = pi[ccc];
-          Arrd(uc)[maxn   + i0] = cx[ccc];
-          Arrd(uc)[maxn*2 + i0] = cy[ccc];
-          Arrd(uc)[maxn*3 + i0] = cz[ccc];
+          uc[0][i0] = pi[ccc];
+          uc[1][i0] = cx[ccc];
+          uc[2][i0] = cy[ccc];
+          uc[3][i0] = cz[ccc];
         }
-
 
         /* loop over points in dir */
         for(i0=0; i0<n[dir]; i0++)
         {
           double normR[3];
-          int im0, im0m1, im,jm,km, ijk_m, ijk_m1;
+          int im0, im0m1, im,jm,km, cccm1;
           double i0g0, i0lN, gd_ow_m, gd_ow_m1, wm, wm1;
 
-          if(i0>0) { i0g0=1; im0m1=i0-1; }
-          else     { i0g0=0; im0m1=i0; }
-          if(i0<n[dir]-1) { i0lN=1; im0=i0; }
-          else            { i0lN=0; im0=i0-1; }
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
 
-          /* if im0 if within range */
+          /* index of right and left midpoint */
+          im0   = i0;
+          im0m1 = i0-1;
+
+          /* flags if we are at endpoints */
+          if(i0>0) i0g0=1;
+          else     i0g0=0;
+          if(i0<n[dir]-1) i0lN=1;
+          else            i0lN=0;
+
+          /* if im0 is within range */
           if(i0lN)
           {
             /* interpolate fields 0-3 towards the midpoints */
             for(l=0; l<nvars; l++)
             {
               /* reconstruct from both sides of midpoint at i0m */
-              rec1d_p_0(n[dir], &(Arrd(uc)[maxn*l]), im0, &(um_p[l]));
-              rec1d_m_0(n[dir], &(Arrd(uc)[maxn*l]), im0, &(um_m[l]));
+              rec1d_p_0(n[dir], uc[l], im0, &(um_p[l]));
+              rec1d_m_0(n[dir], uc[l], im0, &(um_m[l]));
             }
 
-            /* set midpoints and their index */
-            ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
-            ijk_m = Ind_n(im,jm,km, nm);
+            /* set midpoints to left and their index */
             ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
-            ijk_m1 = Ind_n(im,jm,km, nm);
+            cccm1 = Ind_n(im,jm,km, n);
 
-            /* get right pointing normal at midpoint ijk_m */
-            node_normal_at_midpt_ijk(node, dir*2+1, ijk_m, normR);
+            /* get right pointing normal at midpoint ccc */
+            node_normal_at_midpt_ijk(node, dir*2+1, ccc, normR);
 
             /* set fields */
             for(l=0; l<nvars; l++)
@@ -820,21 +800,28 @@ mem. but will be easier to deal with!
             /* compute numerical flux */
             scalarwave1->numflux(d);
             for(l=0; l<nvars; l++)
-              Arrd(fnumR)[maxn*l + im0] = d->fnum[l];
+              fnumR[l][im0] = d->fnum[l];
             /* we could now also compute fnumL with normL=-normR, but I think
                this results in fnumL = -fnumR */
           }
+          else
+          {
+            cccm1 = ccc; /* set dummy cccm1 */
+            im0m1 = i0;  /* set dummy im0m1 */
+          }
 
-          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
-          ccc = Ind_n(ic,jc,kc, n);
-          gd_ow_m = msqrtgdiag[ijk_m]/wm;
-          gd_ow_m1 = msqrtgdiag[ijk_m1]/wm1;
+          /* factors in flux terms on RHS at right and left midpoint */
+          wm  = dXb[im0];
+          wm1 = dXb[im0m1];
+          gd_ow_m  = msqrtgdiag[ccc]/wm;
+          gd_ow_m1 = msqrtgdiag[cccm1]/wm1;
+
           /* get F from d and add boundary flux terms to RHS */
           for(l=0; l<nvars; l++)
           {
             int ir = Vind(vlr,l);
             double *r = Vard_(node, ir);
-            double *fnum = Arrd(fnumR) + maxn*l;
+            double *fnum = fnumR[l];
             double F;
 
             F = fnum[im0]*gd_ow_m*i0lN - fnum[im0m1]*gd_ow_m1*i0g0;
@@ -846,11 +833,11 @@ mem. but will be easier to deal with!
     } /* end dir-loop*/
 
     /* release mem */
-    free_array(fnumR);
-    free_array(uc);
+    free(fnumR);
+    free(uc);
+    free(dXb);
     free(Xbm);
     free_DGinfo(d);
-
   }
 
   TIMER_STOP;
