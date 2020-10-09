@@ -210,8 +210,8 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* compute flux */
-  scalarwave1_f_divf(mesh, vlu);
-//scalarwave1_divf_FV(mesh, vlu);
+//  scalarwave1_f_divf(mesh, vlu);
+scalarwave1_divf_FV(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh)
@@ -703,15 +703,18 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     for(dir=0; dir<3; dir++)
     {
       double *msqrtgdiag = (double *) &(m_sqrtgdiag[dir][0]);
-      double *Xb;
+      //double *Xb;
       int i,j,k;
 
-      /* find points */
-      Xb = Xbpts(node, dir);
+      /* get grid points */
+      // Xb = Xbpts(node, dir);
+      /* we can shift grid points of the nodefaces with this:
+           shift_Xb0_XbN_toward_Xbm0_XbmN(Xbm, n[dir], Xb);
+         but then really changes the points in the node!
+         BETTER make Xb a copy of Xbpts(node, dir). */
+      /* get midpoints */
       set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
       set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
-      /* do we want this???: */
-      shift_Xb0_XbN_toward_Xbm0_XbmN(Xbm, n[dir], Xb);
 
       /* loop over plane */
       forplaneN(dir, i,j,k, n, 0)
@@ -744,18 +747,19 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
 
-          /* index of right and left midpoint */
-          im0   = i0;
-          im0m1 = i0-1;
+          /* set index of right and left midpoint and some flags if we
+             are at endpoints */
+          if(i0>0) { i0g0=1; im0m1 = i0-1; }
+          else     { i0g0=0; im0m1 = i0; /* save value */ }
+          if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
+          else            { i0lN=0; im0 = i0-1; /* save value */ }
 
-          /* flags if we are at endpoints */
-          if(i0>0) i0g0=1;
-          else     i0g0=0;
-          if(i0<n[dir]-1) i0lN=1;
-          else            i0lN=0;
+          /* set midpoint to left and its index */
+          ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+          cccm1 = Ind_n(im,jm,km, n);
 
           /* if im0 is within range */
-          if(i0lN)
+          if(im0<n[dir]-1)
           {
             /* interpolate fields 0-3 towards the midpoints */
             for(l=0; l<nvars; l++)
@@ -764,10 +768,6 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
               um_p[l] = rec1d_p_0(n[dir], uc[l], im0);
               um_m[l] = rec1d_m_0(n[dir], uc[l], im0);
             }
-
-            /* set midpoints to left and their index */
-            ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
-            cccm1 = Ind_n(im,jm,km, n);
 
             /* get right pointing normal at midpoint ccc */
             node_normal_at_midpt_ijk(node, dir*2+1, ccc, normR);
@@ -793,11 +793,6 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
               fnumR[l][im0] = d->fnum[l];
             /* we could now also compute fnumL with normL=-normR, but I think
                this results in fnumL = -fnumR */
-          }
-          else
-          {
-            cccm1 = ccc; /* set dummy cccm1 */
-            im0m1 = i0;  /* set dummy im0m1 */
           }
 
           /* factors in flux terms on RHS at right and left midpoint */
