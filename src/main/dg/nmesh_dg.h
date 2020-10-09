@@ -36,3 +36,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                           tVarList *vls,
                           void (*u_f_lam)(tDGinfo *d),
                           void (*numflux)(tDGinfo *d));
+
+/* rec1d.c */
+double rec1d_p_0(int n, const double *u, int im);
+double rec1d_m_0(int n, const double *u, int im);

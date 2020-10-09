@@ -647,32 +647,9 @@ int scalarwave1_analyze(tMesh *mesh)
 }
 
 
-
-
-
-
-/* Interpolate a field u to midpoint with index im.
-   Here we interpolate in the positive direction (p) from the left of the
-   midpoint to the midpoint to obtain um_p. */
-void rec1d_p_0(int n, const double *u, int im, double *um_p)
-{
-  *um_p = u[im]; // one sided 0-th order interpolation
-}
-
-/* Interpolate a field u to midpoint with index im.
-   Here we interpolate in the negative direction (m) from the right of the
-   midpoint to the midpoint to obtain um_m. */
-void rec1d_m_0(int n, const double *u, int im, double *um_m)
-{
-  *um_m = u[im+1]; // one sided 0-th order interpolation
-}
-
-
-
-
-
-
-
+/***********************************************************************/
+/* funcs needed for finite volume method in nmesh */
+/***********************************************************************/
 
 /* RHS of: d_t u = - d_i f^i when computed with finite vol. methods */
 int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
@@ -774,8 +751,8 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
             for(l=0; l<nvars; l++)
             {
               /* reconstruct from both sides of midpoint at i0m */
-              rec1d_p_0(n[dir], uc[l], im0, &(um_p[l]));
-              rec1d_m_0(n[dir], uc[l], im0, &(um_m[l]));
+              um_p[l] = rec1d_p_0(n[dir], uc[l], im0);
+              um_m[l] = rec1d_m_0(n[dir], uc[l], im0);
             }
 
             /* set midpoints to left and their index */
