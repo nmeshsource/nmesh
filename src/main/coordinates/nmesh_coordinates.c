@@ -54,33 +54,21 @@ int nmesh_coordinates(tMesh *mesh)
   AddPar("coordinates_midpoint_data", "no", "[no,yes]");
   if(Getb(Par("coordinates_midpoint_data")))
   {
-    AddAuxVarDim("Xm_dXd", "i", "dX/dx^i on X mid points",
-                 NODE_nM1, NODE_n, NODE_n);                // don't put any-
-    AddAuxVarDim("Xm_dYd", "i", "dY/dx^i on X mid points",
-                 NODE_nM1, NODE_n, NODE_n);                // thing in between
-    AddAuxVarDim("Xm_dZd", "i", "dZ/dx^i on X mid points",
-                 NODE_nM1, NODE_n, NODE_n);                // these 3 lines
-    AddAuxVarDim("Ym_dXd", "i", "dX/dx^i on Y mid points",
-                 NODE_n, NODE_nM1, NODE_n);                // don't put any-
-    AddAuxVarDim("Ym_dYd", "i", "dY/dx^i on Y mid points",
-                 NODE_n, NODE_nM1, NODE_n);                // thing in between
-    AddAuxVarDim("Ym_dZd", "i", "dZ/dx^i on Y mid points",
-                 NODE_n, NODE_nM1, NODE_n);                // these 3 lines
-    AddAuxVarDim("Zm_dXd", "i", "dX/dx^i on Z mid points",
-                 NODE_n, NODE_n, NODE_nM1);                // don't put any-
-    AddAuxVarDim("Zm_dYd", "i", "dY/dx^i on Z mid points",
-                 NODE_n, NODE_n, NODE_nM1);                // thing in between
-    AddAuxVarDim("Zm_dZd", "i", "dZ/dx^i on Z mid points",
-                 NODE_n, NODE_n, NODE_nM1);                // these 3 lines
-    AddAuxVarDim("Xm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
-                 "metric in Xb-coords on mid points in X-dir",
-                 NODE_nM1, NODE_n, NODE_n);
-    AddAuxVarDim("Ym_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
-                 "metric in Xb-coords on mid points in Y-dir",
-                 NODE_n, NODE_nM1, NODE_n);
-    AddAuxVarDim("Zm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
-                 "metric in Xb-coords on mid points in Z-dir",
-                 NODE_n, NODE_n, NODE_nM1);
+    AddAuxVar("Xm_dXd", "i", "dX/dx^i on X mid points"); // don't put any-
+    AddAuxVar("Xm_dYd", "i", "dY/dx^i on X mid points"); // thing in between
+    AddAuxVar("Xm_dZd", "i", "dZ/dx^i on X mid points"); // these 3 lines
+    AddAuxVar("Ym_dXd", "i", "dX/dx^i on Y mid points"); // don't put any-
+    AddAuxVar("Ym_dYd", "i", "dY/dx^i on Y mid points"); // thing in between
+    AddAuxVar("Ym_dZd", "i", "dZ/dx^i on Y mid points"); // these 3 lines
+    AddAuxVar("Zm_dXd", "i", "dX/dx^i on Z mid points"); // don't put any-
+    AddAuxVar("Zm_dYd", "i", "dY/dx^i on Z mid points"); // thing in between
+    AddAuxVar("Zm_dZd", "i", "dZ/dx^i on Z mid points"); // these 3 lines
+    AddAuxVar("Xm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
+              "metric in Xb-coords on mid points in X-dir");
+    AddAuxVar("Ym_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
+              "metric in Xb-coords on mid points in Y-dir");
+    AddAuxVar("Zm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
+              "metric in Xb-coords on mid points in Z-dir");
   }
 
   return 0;
