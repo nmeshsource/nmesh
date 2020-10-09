@@ -1543,8 +1543,7 @@ int set_nm_nodemidpoints_Xb_dir(tNode *node, int nm, int id, int dir,
 }
 
 /* write node mid point at id in dir into Xbmd in Xb-coords */
-int set_nodemidpoint_Xb_dir(tNode *node, int id, int dir,
-                            double *Xbmd)
+int set_nodemidpoint_Xb_dir(tNode *node, int id, int dir, double *Xbmd)
 {
   return set_nm_nodemidpoints_Xb_dir(node,1, id, dir, Xbmd);
 }
