@@ -211,6 +211,7 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
   /* compute flux */
   scalarwave1_f_divf(mesh, vlu);
+//scalarwave1_divf_FV(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh)
@@ -262,7 +263,7 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
   int nf = 4; /* only 4 modes besides phi */
   tNode *node = d->node;
   int f = d->face;
-  int dir = f/2;
+  //int dir = f/2;
   int ijk;
   int l,m,s;
   double lam_p[4][4];// = {{0.}};  //positive eigenvalue diagonal matrix
@@ -288,9 +289,8 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
   else /* interpret i,j,k as midpoint indices */
   {
     int *n = node->n;
-    int nm[3] = { n[0]-(dir==0), n[1]-(dir==1), n[2]-(dir==2) };
-    ijk = Ind_n(d->i,d->j,d->k, nm);
-    //JK = Ind_n_norm(d->i,d->j,d->k, nm, dir);
+    ijk = Ind_n(d->i,d->j,d->k, n);
+    //JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
     /* get normal norm at midpoint ijk */
     node_normal_at_midpt_ijk(node, f, ijk, norm);
   }
@@ -651,17 +651,24 @@ int scalarwave1_analyze(tMesh *mesh)
 /* funcs needed for finite volume method in nmesh */
 /***********************************************************************/
 
-/* RHS of: d_t u = - d_i f^i when computed with finite vol. methods */
-int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+/* compute d_i f^i with finite vol. methods */
+void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 {
-  int nvars = vlr->n - 1; /* only 4 since phi never contributes to any flux */
+  int nvars = vlu->n - 1; /* only 4 since phi never contributes to any flux */
   int ipi = Vind(vlu, 0);
   int icx = Vind(vlu, 1);
+  int idivf_pi = Ind("scalarwave1_divf_pi");
+  int idivf_cx = Ind("scalarwave1_divf_cx");
   int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
   int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
   int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
+  tVarList *vldivf = vlalloc(mesh);
 
   TIMER_START;
+
+  /* make var list for div of fluxes */
+  vlpush(vldivf, idivf_pi);
+  vlpush(vldivf, idivf_cx);
 
   /* RHS */
   formylnodes(mesh)
@@ -688,6 +695,9 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     double um_p[5]; /* array for the 5 pi,cx,cy,cz, phi */
     double um_m[5]; /* array for the 5 pi,cx,cy,cz, phi */
     int dir;
+
+    /* write node into d because numflux needs this */
+    d->node = node;
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
@@ -796,16 +806,14 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
           gd_ow_m  = i0lN * msqrtgdiag[ccc]/wm;
           gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm1;
 
-          /* get F from d and add boundary flux terms to RHS */
+          /* get divf with FV method */
           for(l=0; l<nvars; l++)
           {
-            int ir = Vind(vlr,l);
-            double *r = Vard_(node, ir);
+            int idivf = Vind(vldivf,l);
+            double *divf = Vard_(node, idivf);
             double *fnum = fnumR[l];
-            double F;
 
-            F = fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1;
-            r[ccc] -= F;
+            divf[ccc] = fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1;
           }
         }
       } /* end plane loop */
@@ -819,6 +827,7 @@ int scalarwave1_vol_rhsFV_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     free_DGinfo(d);
   }
 
+  vlfree(vldivf);
+
   TIMER_STOP;
-  return 0;
 }

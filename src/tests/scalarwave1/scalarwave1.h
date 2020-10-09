@@ -19,3 +19,4 @@ void scalarwave1_fluxes_pt(tDGinfo *d);
 void scalarwave1_set_profile_pt(double xyz[3], double t, int nv, double *u);
 int scalarwave1_init(tMesh *mesh);
 int scalarwave1_analyze(tMesh *mesh);
+void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu);
