@@ -210,8 +210,8 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* compute flux */
-//  scalarwave1_f_divf(mesh, vlu);
-scalarwave1_divf_FV(mesh, vlu);
+  scalarwave1_f_divf(mesh, vlu);
+//scalarwave1_divf_FV(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh)
@@ -702,7 +702,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
     {
-      double *msqrtgdiag = (double *) &(m_sqrtgdiag[dir][0]);
+      double *msqrtgdiag = (double *) (m_sqrtgdiag[dir][0]);
       //double *Xb;
       int i,j,k;
 
