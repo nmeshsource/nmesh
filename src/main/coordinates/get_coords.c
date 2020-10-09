@@ -1578,6 +1578,34 @@ void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
   }
 }
 
+/* this computes all distances between the n-1 midpoints Xbmd in direc. dir
+   and the distances to the nodeface on both ends and puts them into
+   dXb, this results in n different distances */
+int set_nm_nodemidpoints_distXb_dir(tNode *node, int n, int id, int dir,
+                                    const double *Xbmid, double *dXb)
+{
+  double distXb[6];
+  int i;
+
+  if(n<=1)
+  {
+    dXb[0] = 2.;
+    return 0;
+  }
+
+  /* dist of first and last midpoint to nodeface */
+  set_nodemidpoints_to_face_distXb(node, distXb);
+  dXb[0]   = distXb[dir*2];
+  dXb[n-1] = distXb[dir*2+1];
+
+  /* distances between two midpoints */
+  for(i=1; i<n-1; i++)
+  {
+    dXb[i] = Xbmid[i] - Xbmid[i-1];
+  }
+  return 1;
+}
+
 /* with fin. vol. we sometimes want to interpret the standard grid points
    that are on the faces as grid points at the cell center between the face
    and the nearest midpoint.
