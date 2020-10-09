@@ -1510,7 +1510,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
 int set_nm_nodemidpoints_Xb_dir(tNode *node, int nm, int id, int dir,
                                 double *Xbmd)
 {
-  double ret;
+  double ret = 0;
   double Xbm[3];
   int i;
 
