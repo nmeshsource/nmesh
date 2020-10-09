@@ -47,6 +47,7 @@ int choose_patch_points(tMesh *mesh, int p)
       int pp = atoi(str);
       if(pp==p) { ret = UNIFORM; break; }
     }
+    free(pl);
   }
   return ret;
 }
