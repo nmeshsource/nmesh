@@ -408,6 +408,9 @@ int coordinates_init_node(tNode *node)
      {{Vard(node,iZm_dXdx),   Vard(node,iZm_dXdx+1), Vard(node,iZm_dXdx+2)},
       {Vard(node,iZm_dXdx+3), Vard(node,iZm_dXdx+4), Vard(node,iZm_dXdx+5)},
       {Vard(node,iZm_dXdx+6), Vard(node,iZm_dXdx+7), Vard(node,iZm_dXdx+8)} };
+    int *Xm_n = Arrn(VarA(node, iXm_dXdx));
+    int *Ym_n = Arrn(VarA(node, iYm_dXdx));
+    int *Zm_n = Arrn(VarA(node, iZm_dXdx));
 
     /* set Xm_dXdx, Ym_dXdx, Zm_dXdx */
     {
@@ -417,11 +420,13 @@ int coordinates_init_node(tNode *node)
         double Ymid[3];
         double Zmid[3];
         double X[3], x[3], dXdx[3][3];
-        int Xm_n[] = { n[0]-1, n[1],   n[2] };
-        int Ym_n[] = { n[0],   n[1]-1, n[2] };
-        int Zm_n[] = { n[0],   n[1],   n[2]-1 };
         int gotXmid, gotYmid, gotZmid;
         int ijk;
+
+        //printf("Xm_n[]=%d %d %d\n", Xm_n[0],Xm_n[1],Xm_n[2]);
+        //printf("Ym_n[]=%d %d %d\n", Ym_n[0],Ym_n[1],Ym_n[2]);
+        //printf("Zm_n[]=%d %d %d\n", Zm_n[0],Zm_n[1],Zm_n[2]);
+        //exit(88);
 
         /* find mid points in X-dir */
         gotXmid = set_nodemidpoint_XbYbZb(node, i,j,k, 0, Xmid);
