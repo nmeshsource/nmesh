@@ -749,6 +749,9 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
           int im0, im0m1, im,jm,km, cccm1;
           double i0g0, i0lN, gd_ow_m, gd_ow_m1, wm, wm1;
 
+          /* if we have only 1 point do nothing, as there are no midpoints */
+          if(n[dir]<=1) break;
+
           /* set points and their index */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
@@ -756,9 +759,9 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
           /* set index of right and left midpoint and some flags if we
              are at endpoints */
           if(i0>0) { i0g0=1; im0m1 = i0-1; }
-          else     { i0g0=0; im0m1 = i0; /* save value */ }
+          else     { i0g0=0; im0m1 = i0; /* safe value */ }
           if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
-          else            { i0lN=0; im0 = i0-1; /* save value */ }
+          else            { i0lN=0; im0 = i0-1; /* safe value */ }
 
           /* set midpoint to left and its index */
           ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
