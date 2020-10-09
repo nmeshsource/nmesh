@@ -1581,10 +1581,11 @@ void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
 /* this computes all distances between the n-1 midpoints Xbmd in direc. dir
    and the distances to the nodeface on both ends and puts them into
    dXb, this results in n different distances */
-int set_nm_nodemidpoint_distsXb_dir(tNode *node, int n, int id, int dir,
+int set_nm_nodemidpoint_distsXb_dir(tNode *node, int dir,
                                     const double *Xbmid, double *dXb)
 {
   double distXb[6];
+  int n = node->n[dir];
   int i;
 
   if(n<=1)

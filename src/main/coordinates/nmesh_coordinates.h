@@ -95,7 +95,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
 int set_nm_nodemidpoints_Xb_dir(tNode *node, int nm, int id, int dir,
                                 double *Xbmd);
 void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6]);
-int set_nm_nodemidpoint_distsXb_dir(tNode *node, int n, int id, int dir,
+int set_nm_nodemidpoint_distsXb_dir(tNode *node, int dir,
                                     const double *Xbmid, double *dXb);
 void shift_Xb0_XbN_toward_Xbm0_XbmN(const double *Xbm, int n, double *Xb);
 
