@@ -1569,7 +1569,7 @@ void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
       set_nodemidpoint_Xb_dir(node, id, dir, &Xbm);
       X[dir] = bb[f];
       XbYbZb_of_XYZ(node, Xb, X);
-      distXb[f] = Xbm - Xb[dir];
+      distXb[f] = fabs(Xbm - Xb[dir]);
     }
     else /* if we have only 1 regular grid point return -(node width) */
     {
@@ -1604,6 +1604,8 @@ int set_nm_nodemidpoint_distsXb_dir(tNode *node, int dir,
   {
     dXb[i] = Xbmid[i] - Xbmid[i-1];
   }
+printf("dXb[0]=%g dXb[2]=%g dXb[n-1]=%g\n", dXb[0], dXb[2], dXb[n-1]);
+
   return 1;
 }
 
