@@ -1604,7 +1604,7 @@ int set_nm_nodemidpoint_distsXb_dir(tNode *node, int dir,
   {
     dXb[i] = Xbmid[i] - Xbmid[i-1];
   }
-printf("dXb[0]=%g dXb[2]=%g dXb[n-1]=%g\n", dXb[0], dXb[2], dXb[n-1]);
+  //printf("dXb[0]=%g dXb[2]=%g dXb[n-1]=%g\n", dXb[0], dXb[2], dXb[n-1]);
 
   return 1;
 }
