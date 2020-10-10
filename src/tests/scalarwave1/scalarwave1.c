@@ -747,7 +747,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
         {
           double normR[3];
           int im0, im0m1, im,jm,km, cccm1;
-          double i0g0, i0lN, gd_ow_m, gd_ow_m1, wm, wm1;
+          double i0g0, i0lN, gd_ow_m, gd_ow_m1, wm;
 
           /* if we have only 1 point do nothing, as there are no midpoints */
           if(n[dir]<=1) break;
@@ -805,10 +805,12 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
           }
 
           /* factors in flux terms on RHS at right and left midpoint */
-          wm  = dXb[im0];
-          wm1 = dXb[im0m1];
+          wm  = dXb[i0];
           gd_ow_m  = i0lN * msqrtgdiag[ccc]/wm;
-          gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm1;
+          gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm;
+
+          //printf("i0=%d im0=%d im0m1=%d: wm=%g gd_ow_m=%g gd_ow_m1=%g\n",
+          //i0, im0, im0m1, wm, gd_ow_m, gd_ow_m1);
 
           /* get divf with FV method */
           for(l=0; l<nvars; l++)
