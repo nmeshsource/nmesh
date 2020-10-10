@@ -817,7 +817,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
             double *divf = Vard_(node, idivf);
             double *fnum = fnumR[l];
 
-            divf[ccc] = fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1;
+            divf[ccc] = -(fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1);
           }
         }
       } /* end plane loop */
