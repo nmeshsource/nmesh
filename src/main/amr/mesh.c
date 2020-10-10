@@ -304,8 +304,31 @@ int setup_box_mesh(tMesh *mesh)
 
   if(Getv(mesh_type, "Line"))
   {
-    /* put npats boxes in x-dir */
-    add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
+    /* some rare case */
+    if(Getv(mesh_type, "HalfEndPatches"))
+    {
+      /* end patches have only half the thickness */
+      double douto2[] = { 0.5*d, d, d };
+      double x[]   = { 0., 0., 0. };
+      double c = 0.5 * (!(npats%2));
+      int s = npats/2;
+
+      /* left end patch */
+      x[0] = xc[0] + 2.*d*(0 - s + c) + 0.5*d;
+      add_1box_pat(mesh, x, douto2);
+
+      /* middle patches */
+      add_Nbox_pats_indir(mesh, xc, dout, npats-2, 0);
+
+      /* right end patch */
+      x[0] = xc[0] + 2.*d*(npats-1 - s + c) - 0.5*d;
+      add_1box_pat(mesh, x, douto2);
+    }
+    else /* all npats patches are the same */
+    {
+      /* put npats boxes in x-dir */
+      add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
+    }
   }
   else if(Getv(mesh_type, "Plane"))
   {

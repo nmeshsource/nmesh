@@ -35,6 +35,9 @@ int setup_l2_mesh(tMesh *mesh);
 int setup_3patchl2_mesh(tMesh *mesh);
 int setup_test_mesh(tMesh *mesh);
 
+/* setup_Boxes.c */
+int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
+
 /* connect.c */
 void connect8_with_neighbors(tNode *narray[8], int connect);
 void connect8_siblings(tNode *narray[8]);
