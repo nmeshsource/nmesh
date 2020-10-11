@@ -304,30 +304,39 @@ int setup_box_mesh(tMesh *mesh)
 
   if(Getv(mesh_type, "Line"))
   {
+    int dir;
+
+    /* set direction of line */
+    if(Getv(mesh_type, "Dir2"))      dir = 2;
+    else if(Getv(mesh_type, "Dir1")) dir = 1;
+    else                             dir = 0;
+
     /* some rare case */
     if(Getv(mesh_type, "HalfEndPatches"))
     {
-      /* end patches have only half the thickness */
-      double douto2[] = { 0.5*d, d, d };
+      double douto2[] = { d, d, d };
       double x[]   = { 0., 0., 0. };
       double c = 0.5 * (!(npats%2));
       int s = npats/2;
 
+      /* end patches have only half the thickness */
+      douto2[dir] = 0.5*d;
+
       /* left end patch */
-      x[0] = xc[0] + 2.*d*(0 - s + c) + 0.5*d;
+      x[dir] = xc[dir] + 2.*d*(0 - s + c) + 0.5*d;
       add_1box_pat(mesh, x, douto2);
 
       /* middle patches */
-      add_Nbox_pats_indir(mesh, xc, dout, npats-2, 0);
+      add_Nbox_pats_indir(mesh, xc, dout, npats-2, dir);
 
       /* right end patch */
-      x[0] = xc[0] + 2.*d*(npats-1 - s + c) - 0.5*d;
+      x[dir] = xc[dir] + 2.*d*(npats-1 - s + c) - 0.5*d;
       add_1box_pat(mesh, x, douto2);
     }
     else /* all npats patches are the same */
     {
       /* put npats boxes in x-dir */
-      add_Nbox_pats_indir(mesh, xc, dout, npats, 0);
+      add_Nbox_pats_indir(mesh, xc, dout, npats, dir);
     }
   }
   else if(Getv(mesh_type, "Plane"))
