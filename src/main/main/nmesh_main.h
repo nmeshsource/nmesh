@@ -196,6 +196,7 @@ int vlindex(tVarList *v, int vi);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
                              int type, int surfacezones);
+void vlsetconstant(tVarList *u, const double c);
 void vlcopy_node(tNode *node, tVarList *v, tVarList *u);
 void vlcopy(tVarList *v, tVarList *u);
 void vladd_node(tNode *node,

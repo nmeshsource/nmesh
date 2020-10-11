@@ -210,10 +210,10 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* compute flux */
-  if(Getv(Par("scalarwave1_nummethod"), "dg"))
-    scalarwave1_f_divf(mesh, vlu);
-  else
+  if(Getv(Par("scalarwave1_nummethod"), "fv"))
     scalarwave1_divf_FV(mesh, vlu);
+  else
+    scalarwave1_f_divf(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh)
@@ -572,6 +572,25 @@ int scalarwave1_init(tMesh *mesh)
   enablevar(mesh, ipie);
   enablevar(mesh, icxe);
 
+  /* move endpoints if fin. vol. */
+  if(0 && Getv(Par("scalarwave1_nummethod"), "fv"))
+  {
+    int ix = Ind("x");
+
+    formylnodes(mesh)
+    {
+      tNode *node = MyLnode;
+      int *n = node->n;
+      double *x = Vard(node, ix);
+      double distXb[6];
+
+      /* find distance from faces to nearest midpoint */
+      set_nodemidpoints_to_face_distXb(node, distXb);
+      x[0]      += 0.5*distXb[0];
+      x[n[0]-1] -= 0.5*distXb[1];
+    }
+  }
+
   /* set initial profile, e.g. at t=0: set u=sin(x) */
   scalarwave1_set_profile(vlu);
 
@@ -668,9 +687,10 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 
   TIMER_START;
 
-  /* make var list for div of fluxes */
+  /* make var list for div of fluxes and set it zero */
   vlpush(vldivf, idivf_pi);
   vlpush(vldivf, idivf_cx);
+  vlsetconstant(vldivf, 0.);
 
   /* RHS */
   formylnodes(mesh)
@@ -827,7 +847,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
             double *divf = Vard_(node, idivf);
             double *fnum = fnumR[l];
 
-            divf[ccc] = (fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1);
+            divf[ccc] += (fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1);
 //if(l==0)
 //printf("fnum[im0m1]=%g gd_ow_m1=%g fnum[im0m1]*gd_ow_m1=%g\n",
 //fnum[im0m1], gd_ow_m1, fnum[im0m1]*gd_ow_m1);
