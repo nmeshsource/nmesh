@@ -756,21 +756,21 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
 
-          /* set index of right and left midpoint and some flags if we
+          /* set 1d index of right and left midpoint and some flags if we
              are at endpoints */
           if(i0>0) { i0g0=1; im0m1 = i0-1; }
           else     { i0g0=0; im0m1 = i0; /* safe value */ }
           if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
           else            { i0lN=0; im0 = i0-1; /* safe value */ }
 
-          /* set midpoint to left and its index */
+          /* set left midpoint index */
           ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
           cccm1 = Ind_n(im,jm,km, n);
 
-          /* if im0 is within range */
-          if(im0<n[dir]-1)
+          /* if i0 has a midpoint to its right */
+          if(i0<n[dir]-1)
           {
-            /* interpolate fields 0-3 towards the midpoints */
+            /* interpolate fields 0-3 towards the midpoint at im0 */
             for(l=0; l<nvars; l++)
             {
               /* reconstruct from both sides of midpoint at i0m */
@@ -778,8 +778,15 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
               um_m[l] = rec1d_m_0(n[dir], uc[l], im0);
             }
 
+            /* set index and face of this midpoint */
+            d->i = ic;
+            d->j = jc;
+            d->k = kc;
+            d->face = dir*2 + 1;
+
             /* get right pointing normal at midpoint ccc */
-            node_normal_at_midpt_ijk(node, dir*2+1, ccc, normR);
+            node_normal_at_midpt_ijk(node, d->face, ccc, normR);
+            //pr3v("normR", normR);printf("ccc=%d ",ccc);
 
             /* set fields */
             for(l=0; l<nvars; l++)
@@ -802,6 +809,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
               fnumR[l][im0] = d->fnum[l];
             /* we could now also compute fnumL with normL=-normR, but I think
                this results in fnumL = -fnumR */
+            //printDGinfo(d);
           }
 
           /* factors in flux terms on RHS at right and left midpoint */
@@ -819,7 +827,10 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
             double *divf = Vard_(node, idivf);
             double *fnum = fnumR[l];
 
-            divf[ccc] = -(fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1);
+            divf[ccc] = (fnum[im0]*gd_ow_m - fnum[im0m1]*gd_ow_m1);
+//if(l==0)
+//printf("fnum[im0m1]=%g gd_ow_m1=%g fnum[im0m1]*gd_ow_m1=%g\n",
+//fnum[im0m1], gd_ow_m1, fnum[im0m1]*gd_ow_m1);
           }
         }
       } /* end plane loop */
