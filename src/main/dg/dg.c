@@ -151,6 +151,12 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
 
             F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
             r[ijk] -= F * (det2gam * sdg_oJ_ow + gdiag * gd_ow);
+//if(l==0 && face==1)
+//{
+//printDGinfo(dgi);
+//printf("nid%ld dgi->fnum[l]=%g gd_ow=%g dgi->fnum[l]*gd_ow=%g\n",
+//node->nid, dgi->fnum[l], gd_ow, dgi->fnum[l]*gd_ow);
+//}
           }
         }
       } /* end loop over faces */
@@ -161,4 +167,22 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   TIMER_STOP;
 
   return 0;
+}
+
+/* print */
+void printDGinfo(tDGinfo *d)
+{
+  int k;
+
+  PRFs(": ");pr_nodename(d->node);
+  printf(": face=%d i,j,k=%d,%d,%d Ffac=%g info=%d\n",
+         d->face, d->i,d->j,d->k, d->Ffac, d->info);
+  if(d->vlu) prvarlist(d->vlu);
+  if(d->vls) prvarlist(d->vls);
+  forvl(d->vlu, k)
+  {
+    printf(" %3d: ui=%g fi=%g lami=%g\n", k, d->ui[k], d->fi[k], d->lami[k]);
+    printf("      ua=%g fa=%g lama=%g", d->ua[k], d->fa[k], d->lama[k]);
+    printf(" => fnum=%g\n", d->fnum[k]);
+  }
 }
