@@ -53,8 +53,9 @@ void scalarwave1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
 }
 
 /* flux and its derivs for adv. eqn: f^i = n^i u */
-void scalarwave1_f_divf(tMesh *mesh, tVarList *vlu)
+void scalarwave1_f_divf(tNode *node, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int iphi = Vind(vlu, 4);
   int ipi  = Vind(vlu, 0);
   int icx  = Vind(vlu, 1);
@@ -66,9 +67,7 @@ void scalarwave1_f_divf(tMesh *mesh, tVarList *vlu)
   int idivf_cx = Ind("scalarwave1_divf_cx");
 
   /* compute derivs */
-  formylnodes(mesh)
   {
-    tNode *node = MyLnode;
     double *phi = Vard(node, iphi);
     double *pi = Vard(node, ipi);
     double *cx = Vard(node, icx);
@@ -128,6 +127,19 @@ void scalarwave1_f_divf(tMesh *mesh, tVarList *vlu)
     cart_di_Ui(node, if_czx, idivf_cx+2);
   }
 }
+
+/* flux and its derivs for adv. eqn: f^i = n^i u on mesh */
+void scalarwave1_f_divf_mesh(tMesh *mesh, tVarList *vlu)
+{
+  /* compute derivs on all nodes */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    scalarwave1_f_divf(node, vlu);
+  }
+}
+
+
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
    In: vlu. Out: ui,ua, fi,fa, lami,lama */
@@ -217,7 +229,7 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   }
   else
   {
-    scalarwave1_f_divf(mesh, vlu);
+    scalarwave1_f_divf_mesh(mesh, vlu);
   }
 
   /* RHS */
