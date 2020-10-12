@@ -303,6 +303,25 @@ int get_par_from_str(const char *str, char *name, const char *delim,
   return ret;
 }
 
+/* convert a string to an intList */
+int str_to_intList(const char *str, const char *delim, intList *il)
+{
+  char *str2, *sav, *val;
+  int ret = 0;
+
+  /* duplicate, because strtok_r writes into str2 */
+  str2 = strdup(str);
+  for(val=strtok_r(str2, delim, &sav); val!=NULL;
+      val=strtok_r(NULL, delim, &sav))
+  {
+    int i = atoi(val);
+    push_intList(il, i);
+    ret++;
+  }
+  free(str2);
+  return ret;
+}
+
 /* start at buffer + offset and read into array mem until first delim,
    return offset to mem after last read, write length of mem read in len */
 long mem_from_buf(const char *buffer, long nbuffer, long offset,
