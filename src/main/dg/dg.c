@@ -123,6 +123,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           dgi->i = i;
           dgi->j = j;
           dgi->k = k;
+          /* we do not use:  dgi->info = use_fv;
+             because our regular grid points on the faces already are
+             considered midpoints in fin. vol. approach */
 
           /* set vars, fluxes and eigenvals on both sides */
           u_f_lam(dgi);
