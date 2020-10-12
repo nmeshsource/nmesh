@@ -691,12 +691,21 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
   int idivf_pi = Ind("scalarwave1_divf_pi");
   int idivf_cx = Ind("scalarwave1_divf_cx");
   int sqrtgdiagx = Ind("sqrtgdiagx");
-  int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
-  int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
-  int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
+  int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
   tVarList *vldivf = vlalloc(mesh);
 
   TIMER_START;
+
+  if(norms_and_sqrtgdiag_on_midpoints)
+  {
+    iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
+    iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
+    iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
+  }
+  else
+  {
+    iXm_sqrtgdiagx = iYm_sqrtgdiagx = iZm_sqrtgdiagx = sqrtgdiagx;
+  }
 
   /* make var list for div of fluxes and set it zero */
   vlpush(vldivf, idivf_pi);
@@ -712,8 +721,6 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     double *cx = Vard(node, icx);
     double *cy = Vard(node, icx+1);
     double *cz = Vard(node, icx+2);
-    double *c_sqrtgdiag[3]={Vard(node,sqrtgdiagx), Vard(node,sqrtgdiagx+1),
-                                                   Vard(node,sqrtgdiagx+2)};
     double *m_sqrtgdiag[3][3] =
       { { Vard(node, iXm_sqrtgdiagx), Vard(node, iXm_sqrtgdiagx+1),
                                            Vard(node, iXm_sqrtgdiagx+2) },
@@ -744,8 +751,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
     {
-      double *csqrtgdiag = c_sqrtgdiag[dir];
-      double *msqrtgdiag = m_sqrtgdiag[dir][dir];
+      double *sqrtgdiag = m_sqrtgdiag[dir][dir];
       //double *Xb;
       int i,j,k;
 
@@ -856,13 +862,13 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
           wm  = dXb[i0];
           if(norms_and_sqrtgdiag_on_midpoints)
           {
-            gd_ow_m  = i0lN * msqrtgdiag[ccc]/wm;
-            gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm;
+            gd_ow_m  = i0lN * sqrtgdiag[ccc]/wm;
+            gd_ow_m1 = i0g0 * sqrtgdiag[cccm1]/wm;
           }
           else /* get sqrtgdiag on grid points */
           {
-            gd_ow_m  = i0lN * csqrtgdiag[ccc]/wm;
-            gd_ow_m1 = i0g0 * csqrtgdiag[ccc]/wm;
+            gd_ow_m  = i0lN * sqrtgdiag[ccc]/wm;
+            gd_ow_m1 = i0g0 * sqrtgdiag[ccc]/wm;
           }
 
           //printf("i0=%d im0=%d im0m1=%d: wm=%g gd_ow_m=%g gd_ow_m1=%g\n",
