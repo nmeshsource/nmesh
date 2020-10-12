@@ -212,11 +212,17 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
 /* compute div of flux */
 void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
 {
-  int use_fv = Getv(Par("scalarwave1_nummethod"), "fv");
+  intList *pl = alloc_intList();
+
+  /* push all ints from scalarwave1_fv_p into pl */
+  str_to_intList(Gets(Par("scalarwave1_fv_p")), " ", pl);
 
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
+    int p = node->pat->p;
+    int use_fv = in_intList(pl, p);
+
     if(use_fv)
     {
       //scalarwave1_uface_to_uin(node, vlu, 1);
@@ -227,6 +233,7 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
       scalarwave1_f_divf(node, vlu);
     }
   }
+  free_intList(pl);
 }
 
 /* RHS of: d_t u = - d_i f^i */
