@@ -737,7 +737,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
     {
-      double *msqrtgdiag = (double *) (m_sqrtgdiag[dir][0]);
+      double *msqrtgdiag = m_sqrtgdiag[dir][dir];
       //double *Xb;
       int i,j,k;
 
