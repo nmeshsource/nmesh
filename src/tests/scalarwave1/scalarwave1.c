@@ -684,7 +684,7 @@ int scalarwave1_analyze(tMesh *mesh)
 /* compute d_i f^i with finite vol. methods */
 void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 {
-  int norms_and_sqrtgdiag_on_midpoints = 1;
+  int norms_and_sqrtgdiag_on_midpoints = 0;
   int nvars = vlu->n - 1; /* only 4 since phi never contributes to any flux */
   int ipi = Vind(vlu, 0);
   int icx = Vind(vlu, 1);
