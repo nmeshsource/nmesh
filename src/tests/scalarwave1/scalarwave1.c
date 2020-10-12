@@ -684,11 +684,13 @@ int scalarwave1_analyze(tMesh *mesh)
 /* compute d_i f^i with finite vol. methods */
 void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 {
+  int norms_and_sqrtgdiag_on_midpoints = 1;
   int nvars = vlu->n - 1; /* only 4 since phi never contributes to any flux */
   int ipi = Vind(vlu, 0);
   int icx = Vind(vlu, 1);
   int idivf_pi = Ind("scalarwave1_divf_pi");
   int idivf_cx = Ind("scalarwave1_divf_cx");
+  int sqrtgdiagx = Ind("sqrtgdiagx");
   int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
   int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
   int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
@@ -710,6 +712,8 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     double *cx = Vard(node, icx);
     double *cy = Vard(node, icx+1);
     double *cz = Vard(node, icx+2);
+    double *c_sqrtgdiag[3]={Vard(node,sqrtgdiagx), Vard(node,sqrtgdiagx+1),
+                                                   Vard(node,sqrtgdiagx+2)};
     double *m_sqrtgdiag[3][3] =
       { { Vard(node, iXm_sqrtgdiagx), Vard(node, iXm_sqrtgdiagx+1),
                                            Vard(node, iXm_sqrtgdiagx+2) },
@@ -729,7 +733,10 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 
     /* write node into d because numflux needs this */
     d->node = node;
-    d->info = 1; // anything other than 0 triggers normals on midpoints
+    if(norms_and_sqrtgdiag_on_midpoints)
+      d->info = 1; // anything other than 0 triggers normals on midpoints
+    else
+      d->info = 0;
 
     /* force node into FV mode */
     node->dat->use_fv = 1;
@@ -737,6 +744,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
     {
+      double *csqrtgdiag = c_sqrtgdiag[dir];
       double *msqrtgdiag = m_sqrtgdiag[dir][dir];
       //double *Xb;
       int i,j,k;
@@ -745,7 +753,7 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
       // Xb = Xbpts(node, dir);
       /* we can shift grid points of the nodefaces with this:
            shift_Xb0_XbN_toward_Xbm0_XbmN(Xbm, n[dir], Xb);
-         but then really changes the points in the node!
+         but that really changes the points in the node!
          BETTER make Xb a copy of Xbpts(node, dir). */
       /* get midpoints */
       set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
@@ -814,7 +822,10 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
             d->face = dir*2 + 1;
 
             /* get right pointing normal at midpoint ccc */
-            node_normal_at_midpt_ijk(node, d->face, ccc, normR);
+            if(norms_and_sqrtgdiag_on_midpoints)
+              node_normal_at_midpt_ijk(node, d->face, ccc, normR);
+            else /* or rather on grid point ccc */
+              node_normal_at_ijk(node, d->face, ccc, normR);
             //pr3v("normR", normR);printf("ccc=%d ",ccc);
 
             /* set fields */
@@ -843,8 +854,16 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
 
           /* factors in flux terms on RHS at right and left midpoint */
           wm  = dXb[i0];
-          gd_ow_m  = i0lN * msqrtgdiag[ccc]/wm;
-          gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm;
+          if(norms_and_sqrtgdiag_on_midpoints)
+          {
+            gd_ow_m  = i0lN * msqrtgdiag[ccc]/wm;
+            gd_ow_m1 = i0g0 * msqrtgdiag[cccm1]/wm;
+          }
+          else /* get sqrtgdiag on grid points */
+          {
+            gd_ow_m  = i0lN * csqrtgdiag[ccc]/wm;
+            gd_ow_m1 = i0g0 * csqrtgdiag[ccc]/wm;
+          }
 
           //printf("i0=%d im0=%d im0m1=%d: wm=%g gd_ow_m=%g gd_ow_m1=%g\n",
           //i0, im0, im0m1, wm, gd_ow_m, gd_ow_m1);
