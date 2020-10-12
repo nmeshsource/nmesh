@@ -69,6 +69,9 @@ int nmesh_coordinates(tMesh *mesh)
               "metric in Xb-coords on mid points in Y-dir");
     AddAuxVar("Zm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
               "metric in Xb-coords on mid points in Z-dir");
+    /* Maybe we only need Xm_dXdx^i, Ym_dYdx^i, Zm_dZd^i and
+       Xm_sqrtgdiagx, Ym_sqrtgdiagy, Zm_sqrtgdiagz ??? Then we could
+       drastically reduce the number of variables! */
   }
 
   return 0;
