@@ -213,7 +213,7 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   if(Getv(Par("scalarwave1_nummethod"), "fv"))
   {
     //scalarwave1_uface_to_uin_mesh(mesh, vlu, 1);
-    scalarwave1_divf_FV(mesh, vlu);
+    scalarwave1_divf_FV_mesh(mesh, vlu);
   }
   else
   {
@@ -681,9 +681,10 @@ int scalarwave1_analyze(tMesh *mesh)
 /* funcs needed for finite volume method in nmesh */
 /***********************************************************************/
 
-/* compute d_i f^i with finite vol. methods */
-void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
+/* compute d_i f^i with finite vol. methods on one node */
+void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int norms_and_sqrtgdiag_on_midpoints = 0;
   int nvars = vlu->n - 1; /* only 4 since phi never contributes to any flux */
   int ipi = Vind(vlu, 0);
@@ -693,8 +694,6 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
   int sqrtgdiagx = Ind("sqrtgdiagx");
   int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
   tVarList *vldivf = vlalloc(mesh);
-
-  TIMER_START;
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -710,13 +709,11 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
   /* make var list for div of fluxes and set it zero */
   vlpush(vldivf, idivf_pi);
   vlpush(vldivf, idivf_cx);
-  vlsetconstant(vldivf, 0.);
+  vlsetconstant_node(node, vldivf, 0.);
 
   /* RHS */
-  formylnodes(mesh)
   {
     tDGinfo *d = alloc_DGinfo(vlu, NULL); /* each thread gets its own d */
-    tNode *node = MyLnode;
     double *pi = Vard(node, ipi);
     double *cx = Vard(node, icx);
     double *cy = Vard(node, icx+1);
@@ -899,9 +896,20 @@ void scalarwave1_divf_FV(tMesh *mesh, tVarList *vlu)
   }
 
   vlfree(vldivf);
-
-  TIMER_STOP;
 }
+
+/* compute d_i f^i with finite vol. methods on mesh */
+void scalarwave1_divf_FV_mesh(tMesh *mesh, tVarList *vlu)
+{
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    scalarwave1_divf_FV(node, vlu);
+  }
+}
+
+
+
 
 /* WARNING: The interploation does not help for 2 FV neighbors!!!
             BUT maybe it would help if going from FV to DG???  */
