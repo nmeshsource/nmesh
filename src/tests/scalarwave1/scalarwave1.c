@@ -209,6 +209,20 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
 }
 
 
+/* compute div of flux */
+void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
+{
+  if(Getv(Par("scalarwave1_nummethod"), "fv"))
+  {
+    //scalarwave1_uface_to_uin_mesh(mesh, vlu, 1);
+    scalarwave1_divf_FV_mesh(mesh, vlu);
+  }
+  else
+  {
+    scalarwave1_f_divf_mesh(mesh, vlu);
+  }
+}
+
 /* RHS of: d_t u = - d_i f^i */
 int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
@@ -221,16 +235,8 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
   TIMER_START;
 
-  /* compute flux */
-  if(Getv(Par("scalarwave1_nummethod"), "fv"))
-  {
-    //scalarwave1_uface_to_uin_mesh(mesh, vlu, 1);
-    scalarwave1_divf_FV_mesh(mesh, vlu);
-  }
-  else
-  {
-    scalarwave1_f_divf_mesh(mesh, vlu);
-  }
+  /* set div of flux */
+  scalarwave1_set_divf(mesh, vlu);
 
   /* RHS */
   formylnodes(mesh)
