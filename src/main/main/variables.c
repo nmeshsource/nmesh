@@ -605,28 +605,35 @@ tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
    some are node based, some work on the entire mesh */
 /********************************************************************/
 
+/* set: u = c on one node */
+void vlsetconstant_node(tNode *node, tVarList *u, const double c)
+{
+  int n;
+
+  if(!u) return;
+
+  for(n=0; n<u->n; n++)
+  {
+    int ui = u->index[n];
+    double *pu = Vard(node, ui);
+    int i;
+
+    forvari(node, ui, i)
+      pu[i] = c;
+  }
+}
+
 /* set: u = c */
 void vlsetconstant(tVarList *u, const double c)
 {
   tMesh *mesh;
-
   if(!u) return;
 
   mesh = u->mesh;
-
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    double *pu;
-    int i, n, ui;
-
-    for(n=0; n<u->n; n++)
-    {
-      ui = u->index[n];
-      pu = Vard(node, ui);
-      forvari(node, ui, i)
-        pu[i] = c;
-    }
+    vlsetconstant_node(node, u, c);
   }
 }
 
