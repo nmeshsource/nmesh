@@ -20,4 +20,5 @@ void scalarwave1_set_profile_pt(double xyz[3], double t, int nv, double *u);
 int scalarwave1_init(tMesh *mesh);
 int scalarwave1_analyze(tMesh *mesh);
 void scalarwave1_divf_FV(tNode *node, tVarList *vlu);
+void scalarwave1_uface_to_uin(tNode *node, tVarList *vlu, int forward);
 void scalarwave1_uface_to_uin_mesh(tMesh *mesh, tVarList *vlu, int forward);

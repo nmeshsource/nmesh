@@ -291,9 +291,8 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
                         scalarwave1_fluxes_pt, scalarwave1->numflux);
 
-  /* extraplote u back to face */
-  //if(Getv(Par("scalarwave1_nummethod"), "fv"))
-  //  scalarwave1_uface_to_uin_mesh(mesh, vlu, 0);
+  /* extraplote u back to face on fv nodes */
+  //scalarwave1_uface_to_uin_mesh(mesh, vlu, 0);
 
   TIMER_STOP;
   return 0;
@@ -1008,9 +1007,19 @@ void scalarwave1_uface_to_uin(tNode *node, tVarList *vlu, int forward)
    forward=0: convert from u at 0.25h in to u at face */
 void scalarwave1_uface_to_uin_mesh(tMesh *mesh, tVarList *vlu, int forward)
 {
+  intList *pl = alloc_intList();
+
+  /* push all ints from scalarwave1_fv_p into pl */
+  str_to_intList(Gets(Par("scalarwave1_fv_p")), " ", pl);
+
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    scalarwave1_uface_to_uin(node, vlu, forward);
+    int p = node->pat->p;
+    int use_fv = in_intList(pl, p);
+
+    if(use_fv)
+      scalarwave1_uface_to_uin(node, vlu, forward);
   }
+  free_intList(pl);
 }
