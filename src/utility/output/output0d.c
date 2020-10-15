@@ -80,7 +80,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
 
     VolInt = MeshVolumeIntegral(mesh,pat, vi, 1.,0);
     mean   = VolInt/Vol;
-    rms    = sqrt(MeshVolumeIntegral(mesh,pat, vi, 2.,0) / Vol);
+    rms    = sqrt( fabs(MeshVolumeIntegral(mesh,pat, vi, 2.,0) / Vol) );
 
     /* min, max and their positions xmin, xmax */
     min = MeshExtremumLoc(mesh,pat, vi, 0, &p, &nid, &ijk, X);
