@@ -724,6 +724,10 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   int sqrtgdiagx = Ind("sqrtgdiagx");
   int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
   tVarList *vldivf = vlalloc(mesh);
+  int scalarwave1_rec = Par("scalarwave1_rec");
+  int rec_WENO3_1 = Getv(scalarwave1_rec, "WENO3_1");
+  double (*rec1d_p)(int n, const double *u, int im); // func ptr for rec.
+  double (*rec1d_m)(int n, const double *u, int im); // func ptr for rec.
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -735,6 +739,21 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   {
     iXm_sqrtgdiagx = iYm_sqrtgdiagx = iZm_sqrtgdiagx = sqrtgdiagx;
   }
+
+  /* set func ptrs for rec. */
+  if(rec_WENO3_1)
+  {
+    /* use WENO3_1 from both sides of midpoint at i0m */
+    rec1d_p = rec1d_p_WENO3_1;
+    rec1d_m = rec1d_m_WENO3_1;
+  }
+  else
+  {
+    /* reconstruct from both sides of midpoint at i0m */
+    rec1d_p = rec1d_p_0;
+    rec1d_m = rec1d_m_0;
+  }
+
 
   /* make var list for div of fluxes and set it zero */
   vlpush(vldivf, idivf_pi);
@@ -844,8 +863,8 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
             for(l=0; l<nvars; l++)
             {
               /* reconstruct from both sides of midpoint at i0m */
-              um_p[l] = rec1d_p_0(n[dir], uc[l], im0);
-              um_m[l] = rec1d_m_0(n[dir], uc[l], im0);
+              um_p[l] = rec1d_p(n[dir], uc[l], im0);
+              um_m[l] = rec1d_m(n[dir], uc[l], im0);
             }
 
             /* set index and face of this midpoint */
