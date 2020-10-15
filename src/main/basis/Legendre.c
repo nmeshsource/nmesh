@@ -291,7 +291,8 @@ void LGL_AT_ST_matrices(int n, const double *x, const double *w,
    w_j = \int_{-1}^{1} dx l_j(x) = \sum_i wg_i l_j(xg_i)
    where l_j(x) is the interpolating polynomial made from the
    grid points x_i: l_j(x) = Lagrange_of_x(j,x,...).
-   We assume that the x_i are symmetric about x=0. */
+   We assume that the x_i are symmetric about x=0.
+   NOTE: w_j = \int_{-1}^{1} dx l_j(x) may not be positive!!! */
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
 {
   int N = npoints-1;
