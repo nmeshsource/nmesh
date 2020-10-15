@@ -27,7 +27,8 @@ double rec1d_m_0(int n, const double *u, int im)
 
 
 
-/* ideal weights and epsilon for WENO3 */
+/* ideal weights and epsilon for WENO3,
+   taken from https://math.la.asu.edu/~gardner/weno.pdf */
 #define WENO3_id_gamma1 0.333333333333333333333333333
 #define WENO3_id_gamma2 0.666666666666666666666666667
 #define WENO3_epsilon 1e-6
@@ -106,4 +107,20 @@ double rec1d_m_WENO3(int n, const double *u, int im)
 
   /* final reconstruction */
   return omega1*u1 + omega2*u2;
+}
+
+
+/* Use WENO3 inside and WENO1 (i.e. just copying) near the boundary.
+   Even if the stencil would fit we stay one more away from the boundary
+   because the grid points at i=0 and i=n-1 are considerd to be moved in
+   by h/4. */
+double rec1d_p_WENO3_1(int n, const double *u, int im)
+{
+  if(im>1 && im<n-1) return rec1d_p_WENO3(n, u, im);
+  else               return rec1d_p_0(n, u, im);
+}
+double rec1d_m_WENO3_1(int n, const double *u, int im)
+{
+  if(im>0 && im<n-2) return rec1d_m_WENO3(n, u, im);
+  else               return rec1d_m_0(n, u, im);
 }
