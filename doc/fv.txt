@@ -1,0 +1,82 @@
+How we can use finite volume (fv) in nmesh?
+===========================================
+
+Grid setup
+==========
+
+With standard dg we have non-uniform grid points in a node, e.g. like this:
+o  o      o             o             o      o  o
+
+For fv we 1st change the node grid points to e.g:
+o       o       o       o       o       o       o
+
+We then define midpoints (i.e. in the middle between grid points)
+at which we need to need to reconstruct the fields so that we can get the
+fluxes there. This would give:
+o   |   o   |   o   |   o   |   o   |   o   |   o
+                    <-- h -->
+If d_t u = RHS = -d_x f
+Then u at an interior point i, has a RHS of the following form:
+RHS_i = -(f*_{i+1/2} - f*_{i-1/2})/h
+here h is the distance between the 2 midpoints around point i.
+                i
+o   |   o   |   o   |   o   |   o   |   o   |   o
+           /   u_i   \
+          /           \
+      f*_{i-1/2}       f*_{i+1/2}
+Note, RHS_i is the quantity that would be the divergence of the flux in the
+dg method.
+RHS_i = -(f*_{i-1/2} - f*_{i+1/2})/h works for all interior points.
+
+The points at the ends of the node are dealt with differently!
+First we interpret the final points to be moved in by h/4, so that we get e.g.:
+| x |   o   |   o   |   o   |   o   |   o   | x |
+I.e. we now have another fv-element at the ends of the node.
+
+So to update e.g. u_0, we now need the fluxes at f*_{1/2} and f*_{-1/2}:
+d_t u_0 = RHS_0 = -(f*_{1/2} - f*_{-1/2})/(h/2)
+| x |   o   |   o   |   o   |   o   |   o   | x |
+|    \
+|     f*_{1/2}
+f*_{-1/2}
+f*_{-1/2} can be constructed with the help from info from the node to the
+left. f*_{1/2} can be constructed with information from within the node.
+
+
+Flux reconstrution in the interior at e.g. at i+1/2
+===================================================
+
+*At 1st order (i.e. with error of O(h)):
+Def:   up_{i+1/2} := u_{i}               um_{i+1/2} := u_{i+1}
+       The function that gets up_{i+1/2} is rec1d_p_0.
+Then:  fp_{i+1/2} = f(up_{i+1/2})        fm_{i+1/2} = f(um_{i+1/2})
+
+fp_{i+1/2} and fm_{i+1/2} are two ways to reconstruct the flux at i+1/2.
+In order to get the numerical flux f*_{i+1/2} we then use e.g. the LLF flux,
+to calculate f*_{i+1/2} from
+[inside: (up_{i+1/2}, fp_{i+1/2}), adjacent: (um_{i+1/2}, fm_{i+1/2})]
+
+*At 3rd order (i.e. with error of O(h^3)):
+Get fp_{i+1/2} and fm_{i+1/2} from e.g. rec1d_p_WENO3 and rec1d_m_WENO3.
+Note: rec1d_p_WENO3 and rec1d_m_WENO3 only work if i>1 and i>0.
+Again we can use e.g. LLF to get f*_{i+1/2}.
+
+Flux reconstrution in the interior close to surface at e.g. at 1/2
+==================================================================
+
+*At 1st order (i.e. with error of O(h)):
+Def:   up_{1/2} := u_{0}               um_{1/2} := u_{1}
+       The function that gets up_{1/2} is rec1d_p_0.
+Then:  fp_{1/2} = f(up_{1/2})        fm_{1/2} = f(um_{1/2})
+Again we can use e.g. LLF to get f*_{i+1/2}.
+
+Flux reconstrution at the node surface e.g. at -1/2
+===================================================
+
+*At 1st order (i.e. with error of O(h)):
+Def:   up_{-1/2} := u_adj <- val from node to left
+Def:   um_{-1/2} := u_{0}
+       The function that gets um_{-1/2} is rec1d_p_0, u_adj it sent via MPI.
+Then:  fp_{-1/2} = f(up_{-1/2})        fm_{-1/2} = f(um_{-1/2})
+Again we can use e.g. LLF to get f*_{-1/2}.
+[inside: (um_{-1/2}, fm_{-1/2}), adjacent: (up_{-1/2}, fp_{-1/2})]
