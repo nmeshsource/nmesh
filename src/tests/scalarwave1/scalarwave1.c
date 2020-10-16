@@ -752,8 +752,8 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   else
   {
     /* reconstruct from both sides of midpoint at i0m */
-    rec1d_p = rec1d_p_0;
-    rec1d_m = rec1d_m_0;
+    rec1d_p = rec1d_p_1;
+    rec1d_m = rec1d_m_1;
   }
 
 

@@ -12,7 +12,7 @@
 /* Interpolate a field u to midpoint with index im.
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain umid_p. */
-double rec1d_p_0(int n, const double *u, int im, double u_scale)
+double rec1d_p_1(int n, const double *u, int im, double u_scale)
 {
   return u[im]; // one sided 0-th order interpolation
 }
@@ -20,7 +20,7 @@ double rec1d_p_0(int n, const double *u, int im, double u_scale)
 /* Interpolate a field u to midpoint with index im.
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m. */
-double rec1d_m_0(int n, const double *u, int im, double u_scale)
+double rec1d_m_1(int n, const double *u, int im, double u_scale)
 {
   return u[im+1]; // one sided 0-th order interpolation
 }
@@ -119,10 +119,10 @@ double rec1d_m_WENO3(int n, const double *u, int im, double u_scale)
 double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale)
 {
   if(im>1 && im<n-1) return rec1d_p_WENO3(n, u, im, u_scale);
-  else               return rec1d_p_0(n, u, im, u_scale);
+  else               return rec1d_p_1(n, u, im, u_scale);
 }
 double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale)
 {
   if(im>0 && im<n-2) return rec1d_m_WENO3(n, u, im, u_scale);
-  else               return rec1d_m_0(n, u, im, u_scale);
+  else               return rec1d_m_1(n, u, im, u_scale);
 }
