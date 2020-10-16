@@ -329,11 +329,8 @@ void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
   free(xg);
 }
 
-/* Nodes x_i and integration weights w_i for equally spaced i.e. uniform
-   points.
-   N = degree, so there are N+1 points
-   This is using Gaussian quad to get the weights. */
-void uniform_x_wquad(int npoints, double *x, double *w)
+/* grid points for equally spaced i.e. uniform points from -1 to +1. */
+void uniform_x(int npoints, double *x)
 {
   int N = npoints-1;
   int j;
@@ -343,7 +340,6 @@ void uniform_x_wquad(int npoints, double *x, double *w)
   if(N == 0)
   {
     x[N] = 0.;
-    if(w) w[N] = 2.;
     return;
   }
 
@@ -353,13 +349,7 @@ void uniform_x_wquad(int npoints, double *x, double *w)
 
   /* if we have only 2 points we are done */
   if(N == 1)
-  {
-    if(w)
-    {
-      w[N] = w[0] = 2.0/(N*(N+1.0));
-    }
     return;
-  }
 
   /* grid spacing */
   h = 2./N;
@@ -376,6 +366,35 @@ void uniform_x_wquad(int npoints, double *x, double *w)
     x[N-j] = -y;
     x[j]   = +y;
   }
+}
+
+/* Nodes x_i and Gauss quadrature weights w_i for equally spaced i.e.
+   uniform points.
+   N = degree, so there are N+1 points
+   This is using Gaussian quad to get the weights. */
+void uniform_x_wGaussquad(int npoints, double *x, double *w)
+{
+  int N = npoints-1;
+
+  /* set uniform points */
+  uniform_x(npoints, x);
+
+  /* special case for just 1 point */
+  if(N == 0)
+  {
+    if(w) w[N] = 2.;
+    return;
+  }
+
+  /* if we have only 2 points we are done */
+  if(N == 1)
+  {
+    if(w)
+    {
+      w[N] = w[0] = 2.0/(N*(N+1.0));
+    }
+    return;
+  }
 
   /* now compute the weights using Gaussian integration
      w_j = \int_{-1}^{1} dx l_j(x) = \sum_i wg_i l_j(xg_i)
@@ -384,6 +403,7 @@ void uniform_x_wquad(int npoints, double *x, double *w)
   if(w)
     Gauss_wquad_from_symm_x(npoints, x, w);
 }
+
 
 /* first set ST using LGL_AT_ST_matrices, which gets the correct ST for
    for any grid point, then set AT simply as the inverse of ST */

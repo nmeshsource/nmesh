@@ -29,7 +29,7 @@ void LGL_x_wquad(int npoints, double *x, double *w);
 void LGL_AT_ST_matrices(int n, const double *x, const double *w,
                         double *AT, double *ST);
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w);
-void uniform_x_wquad(int npoints, double *x, double *w);
+void uniform_x_wGaussquad(int npoints, double *x, double *w);
 void Legendre_AT_ST_matrices(int n, const double *x, const double *w,
                              double *AT, double *ST);
 
