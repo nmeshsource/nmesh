@@ -101,3 +101,6 @@ void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
 /* ghostzones.c */
 void request_all_myln_ghostdata(tMesh *mesh);
 void get_all_myln_ghostdata(tMesh *mesh);
+
+/* amr.c */
+int amr_print_thread_info(tMesh *mesh);

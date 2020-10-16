@@ -19,9 +19,17 @@ int amr_init_global_pars(tMesh *mesh)
   int amr_N1 = Par("amr_N1");
   int amr_N2 = Par("amr_N2");
 
+  PRFs(":\n");
+
   /* set amr globals */
   amr->MPIexchange = Par("amr_MPIexchange");
   amr->nghosts     = Par("amr_nghosts");
+
+  /* print global pars */
+  printf("amr->MPIexchange = par_%04d : Geti(amr->MPIexchange) = %d\n",
+         amr->MPIexchange, Geti(amr->MPIexchange));
+  printf("amr->nghosts = par_%04d :     Geti(amr->nghosts) = %d\n",
+         amr->nghosts, Geti(amr->nghosts));
 
   /* set amr_n0,... from amr_N0, ... */
   if(Geti(amr_N0)>0)
@@ -43,6 +51,21 @@ int amr_init_global_pars(tMesh *mesh)
     printf("  amr_n1 = %d\n", Geti(Par("amr_n1")));
     printf("  amr_n2 = %d\n", Geti(Par("amr_n2")));
   }
+  return 0;
+}
+
+/* print some info about things in amr */
+int amr_print_thread_info(tMesh *mesh)
+{
+  PRFs(":\n");
+  system2("echo", "$OMP_NUM_THREADS");
+  printf("MAX_NTHREADS = %d\n", MAX_NTHREADS);
+#ifdef USEOMP
+  printf("OpenMP pragmas are active. OMP_VERSION = _OPENMP = %d\n",
+         OMP_VERSION);
+#else
+  printf("OpenMP pragmas are off.\n");
+#endif
   return 0;
 }
 

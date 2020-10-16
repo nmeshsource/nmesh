@@ -12,6 +12,7 @@ int nmesh_amr(tMesh *mesh)
 
   /* functions */
   /* NOTE: amr_setup_mesh(mesh) is called directly from main */
+  AddFun(FIRST, amr_print_thread_info);
   AddFun(POST_PARAMETERS, amr_init_global_pars);
 
   /* variables */
