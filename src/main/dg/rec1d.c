@@ -12,7 +12,7 @@
 /* Interpolate a field u to midpoint with index im.
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain umid_p. */
-double rec1d_p_0(int n, const double *u, int im)
+double rec1d_p_0(int n, const double *u, int im, double u_scale)
 {
   return u[im]; // one sided 0-th order interpolation
 }
@@ -20,7 +20,7 @@ double rec1d_p_0(int n, const double *u, int im)
 /* Interpolate a field u to midpoint with index im.
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m. */
-double rec1d_m_0(int n, const double *u, int im)
+double rec1d_m_0(int n, const double *u, int im, double u_scale)
 {
   return u[im+1]; // one sided 0-th order interpolation
 }
@@ -37,7 +37,7 @@ double rec1d_m_0(int n, const double *u, int im)
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain umid_p.
    We use u at the points i-1, i, i+1 */
-double rec1d_p_WENO3(int n, const double *u, int im)
+double rec1d_p_WENO3(int n, const double *u, int im, double u_scale)
 {
   /* u at 3 grid points around point i=im */
   double u_im1 = u[im-1];
@@ -51,8 +51,9 @@ double rec1d_p_WENO3(int n, const double *u, int im)
   /* smoothness indicators */
   double beta1 = d1*d1;
   double beta2 = d2*d2;
-  double beta1_p_eps = beta1 + WENO3_epsilon;
-  double beta2_p_eps = beta2 + WENO3_epsilon;
+  double us2 = u_scale*u_scale;
+  double beta1_p_eps = beta1 + WENO3_epsilon*us2;
+  double beta2_p_eps = beta2 + WENO3_epsilon*us2;
 
   /* non-normalized weights */
   double omegab1 = WENO3_id_gamma1/(beta1_p_eps*beta1_p_eps);
@@ -75,7 +76,7 @@ double rec1d_p_WENO3(int n, const double *u, int im)
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m.
    We use u at the points i, i+1, i+2 */
-double rec1d_m_WENO3(int n, const double *u, int im)
+double rec1d_m_WENO3(int n, const double *u, int im, double u_scale)
 {
   /* u at 3 grid points around point i=im */
   double u_i   = u[im];
@@ -89,8 +90,9 @@ double rec1d_m_WENO3(int n, const double *u, int im)
   /* smoothness indicators */
   double beta1 = d1*d1;
   double beta2 = d2*d2;
-  double beta1_p_eps = beta1 + WENO3_epsilon;
-  double beta2_p_eps = beta2 + WENO3_epsilon;
+  double us2 = u_scale*u_scale;
+  double beta1_p_eps = beta1 + WENO3_epsilon*us2;
+  double beta2_p_eps = beta2 + WENO3_epsilon*us2;
 
   /* non-normalized weights */
   double omegab1 = WENO3_id_gamma2/(beta1_p_eps*beta1_p_eps);
@@ -114,13 +116,13 @@ double rec1d_m_WENO3(int n, const double *u, int im)
    Even if the stencil would fit we stay one more away from the boundary
    because the grid points at i=0 and i=n-1 are considerd to be moved in
    by h/4. */
-double rec1d_p_WENO3_1(int n, const double *u, int im)
+double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>1 && im<n-1) return rec1d_p_WENO3(n, u, im);
-  else               return rec1d_p_0(n, u, im);
+  if(im>1 && im<n-1) return rec1d_p_WENO3(n, u, im, u_scale);
+  else               return rec1d_p_0(n, u, im, u_scale);
 }
-double rec1d_m_WENO3_1(int n, const double *u, int im)
+double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>0 && im<n-2) return rec1d_m_WENO3(n, u, im);
-  else               return rec1d_m_0(n, u, im);
+  if(im>0 && im<n-2) return rec1d_m_WENO3(n, u, im, u_scale);
+  else               return rec1d_m_0(n, u, im, u_scale);
 }

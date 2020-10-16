@@ -726,8 +726,10 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   tVarList *vldivf = vlalloc(mesh);
   int scalarwave1_rec = Par("scalarwave1_rec");
   int rec_WENO3_1 = Getv(scalarwave1_rec, "WENO3_1");
-  double (*rec1d_p)(int n, const double *u, int im); // func ptr for rec.
-  double (*rec1d_m)(int n, const double *u, int im); // func ptr for rec.
+  /* func ptrs for reconstruction */
+  double (*rec1d_p)(int n, const double *u, int im, double u_scale);
+  double (*rec1d_m)(int n, const double *u, int im, double u_scale);
+  double u_scale = 1.; /* typical order of magnitude of fields */
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -863,8 +865,8 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
             for(l=0; l<nvars; l++)
             {
               /* reconstruct from both sides of midpoint at i0m */
-              um_p[l] = rec1d_p(n[dir], uc[l], im0);
-              um_m[l] = rec1d_m(n[dir], uc[l], im0);
+              um_p[l] = rec1d_p(n[dir], uc[l], im0, u_scale);
+              um_m[l] = rec1d_m(n[dir], uc[l], im0, u_scale);
             }
 
             /* set index and face of this midpoint */

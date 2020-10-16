@@ -39,7 +39,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
 void printDGinfo(tDGinfo *d);
 
 /* rec1d.c */
-double rec1d_p_0(int n, const double *u, int im);
-double rec1d_m_0(int n, const double *u, int im);
-double rec1d_p_WENO3_1(int n, const double *u, int im);
-double rec1d_m_WENO3_1(int n, const double *u, int im);
+double rec1d_p_0(int n, const double *u, int im, double u_scale);
+double rec1d_m_0(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale);
