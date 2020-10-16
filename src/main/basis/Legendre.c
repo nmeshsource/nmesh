@@ -404,6 +404,25 @@ void uniform_x_wGaussquad(int npoints, double *x, double *w)
     Gauss_wquad_from_symm_x(npoints, x, w);
 }
 
+/* uniform points and weights for trapezoidal integration rule */
+void uniform_x_wTrapez(int npoints, double *x, double *w)
+{
+  int N = npoints-1;
+  int j;
+
+  /* set uniform points */
+  uniform_x(npoints, x);
+
+  /* special case for just 1 point */
+  if(npoints == 1)
+  {
+    if(w) w[N] = 2.;
+    return;
+  }
+
+  w[N] = w[0] = 1./N;
+  for(j=1; j<N; j++) w[j] = 2./N;
+}
 
 /* first set ST using LGL_AT_ST_matrices, which gets the correct ST for
    for any grid point, then set AT simply as the inverse of ST */
