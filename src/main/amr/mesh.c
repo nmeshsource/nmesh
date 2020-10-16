@@ -108,7 +108,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
         switch(pts)
         {
         case UNIFORM: /* set equally spaced points and their weights */
-          uniform_x_wGaussquad(ni, Xb, Wq);
+          //uniform_x_wGaussquad(ni, Xb, Wq);
+          uniform_x_wTrapez(ni, Xb, Wq);
 
           /* get analysis & synthesis matrix for Legendre basis */
           Legendre_AT_ST_matrices(ni, Xb, Wq, AT, ST);

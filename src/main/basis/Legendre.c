@@ -420,8 +420,11 @@ void uniform_x_wTrapez(int npoints, double *x, double *w)
     return;
   }
 
-  w[N] = w[0] = 1./N;
-  for(j=1; j<N; j++) w[j] = 2./N;
+  if(w)
+  {
+    w[N] = w[0] = 1./N;
+    for(j=1; j<N; j++) w[j] = 2./N;
+  }
 }
 
 /* first set ST using LGL_AT_ST_matrices, which gets the correct ST for
