@@ -48,7 +48,7 @@ Flux reconstrution in the interior at e.g. at i+1/2
 
 *At 1st order (i.e. with error of O(h)):
 Def:   up_{i+1/2} := u_{i}               um_{i+1/2} := u_{i+1}
-       The function that gets up_{i+1/2} is rec1d_p_0.
+       The function that gets up_{i+1/2} is rec1d_p_1.
 Then:  fp_{i+1/2} = f(up_{i+1/2})        fm_{i+1/2} = f(um_{i+1/2})
 
 fp_{i+1/2} and fm_{i+1/2} are two ways to reconstruct the flux at i+1/2.
@@ -66,7 +66,7 @@ Flux reconstrution in the interior close to surface at e.g. at 1/2
 
 *At 1st order (i.e. with error of O(h)):
 Def:   up_{1/2} := u_{0}               um_{1/2} := u_{1}
-       The function that gets up_{1/2} is rec1d_p_0.
+       The function that gets up_{1/2} is rec1d_p_1.
 Then:  fp_{1/2} = f(up_{1/2})        fm_{1/2} = f(um_{1/2})
 Again we can use e.g. LLF to get f*_{i+1/2}.
 
@@ -76,7 +76,7 @@ Flux reconstrution at the node surface e.g. at -1/2
 *At 1st order (i.e. with error of O(h)):
 Def:   up_{-1/2} := u_adj <- val from node to left
 Def:   um_{-1/2} := u_{0}
-       The function that gets um_{-1/2} is rec1d_p_0, u_adj it sent via MPI.
+       The function that gets um_{-1/2} is rec1d_p_1, u_adj it sent via MPI.
 Then:  fp_{-1/2} = f(up_{-1/2})        fm_{-1/2} = f(um_{-1/2})
 Again we can use e.g. LLF to get f*_{-1/2}.
 [inside: (um_{-1/2}, fm_{-1/2}), adjacent: (up_{-1/2}, fp_{-1/2})]
