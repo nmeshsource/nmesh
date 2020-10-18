@@ -76,7 +76,7 @@ void simple_load_balance(tMesh *mesh)
 int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
 {
   tMesh *mesh;
-  int nvars, vi;
+  int nvars, vi, sizeofinfo;
 
   if(!dat)
   {
@@ -85,7 +85,7 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
   }
   mesh = dat->node->pat->mesh;
 
-  /* find amount of data */
+  /* find amount of data in vars */
   for(nvars=0, *ndoubles=0, vi=0; vi<dat->nv; vi++)
     if(dat->v[vi])
     {
@@ -93,30 +93,40 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
       if(PR) { PRF;printf(": vi=%d ndoubles=%d\n", vi, *ndoubles); }
       nvars++;
     }
+
+  /* add amount in dat->info */
+  sizeofinfo = sizeof(dat->info);
+  *ndoubles += (sizeofinfo / sizeof(double)) + (sizeofinfo % sizeof(double));
+
   return nvars;
 }
 
 /* pack all (non-aux) vars of dat into a buffer which contains:
   |nvars||varind1|npoints1|<--data1-->||varind2|npoints2|<--data2-->||...
-  here nvars is the number of variables that we send,
-  the buffer has to be freed by caller later */
-/* NOTE: this does not take the extra space in some vars into account */
+  here nvars is the number of variables that we send.
+  NOTE: this does not take the extra space in some vars into account.
+  We also append dat->info to the end of this buffer:
+  |sizeofinfo||info|
+  The buffer has to be freed by caller later */
 double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
 {
   tMesh *mesh = dat->node->pat->mesh;
   int len;
   double *buf;
   int vi, datlen, nvars, bi, N;
+  int sizeofinfo;
 
   /* find amount of data */
   nvars = nvars_ndoubles_in_dat(dat, &datlen);
   if(PR) { PRF;printf(": nvars=%d datlen=%d\n", nvars, datlen); }
 
   /* alloc buffer */
-  len = 1 + nvars*2 + datlen;
+  len = 1 + nvars*2; /* for nvars, varinds, npoints */
+  len += datlen;     /* for double data */
+  len += 1;          /* for sizeofinfo */
   buf = calloc(len, sizeof(double));
 
-  /* fill buffer */
+  /* fill buffer with data in variables */
   buf[0] = nvars;
   for(bi=1, vi=0; vi<dat->nv; vi++)
   {
@@ -131,6 +141,13 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
       if(PR) { PRF;printf(": vi=%d bi=%d\n", vi, bi); }
     }
   }
+
+  /* now append the stuff in dat->info */
+  sizeofinfo = sizeof(dat->info);
+  buf[bi++] = sizeofinfo;
+  memcpy(buf+bi, dat->info, sizeofinfo);
+  bi += (sizeofinfo / sizeof(double)) + (sizeofinfo % sizeof(double));
+
   /* return pointer to this buffer, and its length */
   *buflen = bi;
   return buf;
@@ -140,6 +157,7 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
 {
   tNode *node = dat->node;
   int i, vi, nvars, bi, N;
+  int sizeofinfo;
 
   if(!buf) return 0;
 
@@ -154,6 +172,11 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
     bi += N;
     if(PR) { PRF;printf(": vi=%d bi=%d\n", vi, bi); }
   }
+
+  /* now put the end of the buffer in dat->info */
+  sizeofinfo = buf[bi++];
+  memcpy(dat->info, buf+bi, sizeofinfo);
+
   return bi;
 }
 
@@ -204,6 +227,7 @@ void move_node_to_rank(tNode *node, int desrank,
       {
         /* alloc buffer */
         rlen = 1 + (mesh->nvdb) * (2 + node->np); /* size to hold all vars */
+        rlen += 1 + sizeof(node->dat->info); // size to hold info and its len
         rbuf = calloc(rlen, sizeof(double));
         /* put buffers in com */
         rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
