@@ -869,7 +869,7 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
   {
     tNode *node = MyLnode;
     /* flag refinement if we have more than 1 point */
-    if(node->dat->nlim && node->np > 1)
+    if(node->dat->info->nlim && node->np > 1)
       node->rflag = ref->method;
     else
       node->rflag = 0;
@@ -878,7 +878,7 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
     //{
     //  char s[100];
     //  printf("%s: nlim=%d rflag=%d\n", nodename(node,s,99),
-    //         node->dat->nlim, node->rflag);
+    //         node->dat->info->nlim, node->rflag);
     //}
   }
   hrefine_nodes_if_rflag(mesh, ref);
@@ -917,7 +917,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     }
 
     /* flag h-unrefinement if parent has more points */
-    if( (node->dat->nlim==0) && (node->np < p_np) && (p_rflag == ref->method) )
+    if( (node->dat->info->nlim==0) && (node->np < p_np) && (p_rflag == ref->method) )
       node->rflag = -ref->method;
     else
       node->rflag = 0;
@@ -926,7 +926,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     //{
     //  char s[100];
     //  printf("%s: nlim=%d rflag=%d\n", nodename(node,s,99),
-    //         node->dat->nlim, node->rflag);
+    //         node->dat->info->nlim, node->rflag);
     //}
   }
   remove_nodes_if_rflag(mesh, ref);
@@ -939,7 +939,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
   }
 }
 
-/* use limiter data in node->dat->nlim to decide if and where we refine */
+/* use limiter data in node->dat->info->nlim to decide if and where we refine */
 int resolve_shocks_using_nlim(tMesh *mesh)
 {
   undo_hrefine_pcoarsen_nodes_if_zero_nlim(mesh);

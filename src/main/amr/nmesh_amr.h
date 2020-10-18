@@ -61,8 +61,6 @@ typedef struct tDAT {
                              e.g. ic[vi] has indicators for var vi  */
   struct tCOM *icom;      /* com for indc */
   struct tCOM *gcom;      /* com for ghosts */
-  int nlim;               /* number of consectutive evo substeps in which
-                             limiter was active */
   tNodeInfo info[1];      /* extra info about node */
 } tDat;
 

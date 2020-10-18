@@ -219,8 +219,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
         int ret = ListEntry(evosys->limiter,i)(node, vl);
 
         /* increase nlim if limiter was active, otherwise reset nlim */
-        if(ret) node->dat->nlim += 1;
-        else    node->dat->nlim = 0;
+        if(ret) node->dat->info->nlim += 1;
+        else    node->dat->info->nlim = 0;
       }
     }
   } /* end loop over list of varlists */
