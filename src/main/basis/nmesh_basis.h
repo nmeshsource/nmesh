@@ -1,7 +1,34 @@
 /* nmesh_basis.h */
 /* (c) Wolfgang Tichy 1/2019 */
-/* header file for global functions */
+/* global header file */
 
+
+
+/* types of grid points we can have in 1d */
+enum
+{
+  P_LGL,     /* Legendre Gauss-Lobatto points */
+  P_UNIFORM, /* uniform grid spacing */
+  P_NTYPES   /* number of point types */
+};
+
+
+/* structure to hold points, weights and matrices for each point type */
+typedef struct tGRIDPOINTS {
+
+  int nmax;                     /* max n we can have */
+  struct tARRAY *(*Xb)[P_NTYPES]; /* list of points (often LGL in [-1,1]) */
+  struct tARRAY *(*Wq)[P_NTYPES]; /* list of quadrature weights for Xb */
+  struct tARRAY *(*WL)[P_NTYPES]; /* list of Lagrange interp. weights */
+  struct tARRAY *(*Dt)[P_NTYPES]; /* list of transp. differentiation matrices
+                                 we store Dt[1...nmax][typ], typ=P_LGL,... */
+  struct tARRAY *(*At)[P_NTYPES]; /* list of transposed analysis matrices */
+  struct tARRAY *(*St)[P_NTYPES]; /* list of transposed synthesis matrices */
+  double (*basis[P_NTYPES])(int l, double Xb, int np);//basis related to At,St
+} tGridPoints;
+
+
+/* global functions */
 
 /* basis.c */
 void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3]);

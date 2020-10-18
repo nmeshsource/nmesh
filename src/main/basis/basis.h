@@ -10,3 +10,7 @@ typedef struct {
 
 /* basis.c */
 int basis_init_globals(tMesh *mesh);
+
+/* gridpoints.c */
+int init_gridpoints(tMesh *mesh);
+int free_gridpoints(tMesh *mesh);
