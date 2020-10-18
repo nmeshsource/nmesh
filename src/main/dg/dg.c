@@ -83,7 +83,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
       int *n = node->n;
       double *ooJ = Vard(node, iooJ);
       int face;
-      int use_fv = node->dat->use_fv;
+      int use_fv = node->dat->info->use_fv;
       double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
       double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
       double distXb[6];

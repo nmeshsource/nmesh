@@ -794,7 +794,7 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
       d->info = 0;
 
     /* force node into FV mode */
-    node->dat->use_fv = 1;
+    node->dat->info->use_fv = 1;
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
