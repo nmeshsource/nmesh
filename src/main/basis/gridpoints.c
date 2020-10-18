@@ -57,7 +57,7 @@ int init_gridpoints(tMesh *mesh)
     }
     n[0] = ni;
     n[1] = n[2] = 1;
-    for(typ=0; typ<3; typ++)
+    for(typ=0; typ<P_NTYPES; typ++)
     {
       gridpoints->Xb[ni][typ] = alloc_array(n);
       gridpoints->Wq[ni][typ] = alloc_array(n);
