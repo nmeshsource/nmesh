@@ -20,27 +20,31 @@ int init_gridpoints(tMesh *mesh)
   gridpoints->nmax = nmax;
 
   /* get mem. for grid points, diff. matrices, ... */
-  gridpoints->Xb = calloc(nmax+1, sizeof(gridpoints->Xb[0]));
-  if(!(gridpoints->Xb) )
-    errorexit("out of memory for points");
-  gridpoints->Wq = calloc(nmax+1, sizeof(gridpoints->Wq[0]));
-  if(!(gridpoints->Wq) )
-    errorexit("out of memory for integr. weights");
 
-  gridpoints->WL = calloc(nmax+1, sizeof(gridpoints->WL[0]));
-  if(!(gridpoints->WL) )
-    errorexit("out of memory for Lagrange interp. weights");
+  for(typ=0; typ<P_NTYPES; typ++)
+  {
+    gridpoints->Xb[typ] = calloc(nmax+1, sizeof(gridpoints->Xb[typ][0]));
+    if(!(gridpoints->Xb[typ]))
+      errorexit("out of memory for points");
+    gridpoints->Wq[typ] = calloc(nmax+1, sizeof(gridpoints->Wq[typ][0]));
+    if(!(gridpoints->Wq[typ]))
+      errorexit("out of memory for integr. weights");
 
-  gridpoints->Dt = calloc(nmax+1, sizeof(gridpoints->Dt[0]));
-  if(!(gridpoints->Dt) )
-    errorexit("out of memory for diff. matrices");
+    gridpoints->WL[typ] = calloc(nmax+1, sizeof(gridpoints->WL[typ][0]));
+    if(!(gridpoints->WL[typ]))
+      errorexit("out of memory for Lagrange interp. weights");
 
-  gridpoints->At = calloc(nmax+1, sizeof(gridpoints->At[0]));
-  if(!(gridpoints->At) )
-    errorexit("out of memory for ana. matrices");
-  gridpoints->St = calloc(nmax+1, sizeof(gridpoints->St[0]));
-  if(!(gridpoints->St) )
-    errorexit("out of memory for syn. matrices");
+    gridpoints->Dt[typ] = calloc(nmax+1, sizeof(gridpoints->Dt[typ][0]));
+    if(!(gridpoints->Dt[typ]))
+      errorexit("out of memory for diff. matrices");
+
+    gridpoints->At[typ] = calloc(nmax+1, sizeof(gridpoints->At[typ][0]));
+    if(!(gridpoints->At[typ]))
+      errorexit("out of memory for ana. matrices");
+    gridpoints->St[typ] = calloc(nmax+1, sizeof(gridpoints->St[typ][0]));
+    if(!(gridpoints->St[typ]))
+      errorexit("out of memory for syn. matrices");
+  }
 
   /* allocate arrays */
   for(ni=1; ni<=nmax; ni++)
@@ -51,17 +55,17 @@ int init_gridpoints(tMesh *mesh)
     n[2] = 1;
     for(typ=0; typ<P_NTYPES; typ++)
     {
-      gridpoints->Dt[ni][typ] = alloc_array(n);
-      gridpoints->At[ni][typ] = alloc_array(n);
-      gridpoints->St[ni][typ] = alloc_array(n);
+      gridpoints->Dt[typ][ni] = alloc_array(n);
+      gridpoints->At[typ][ni] = alloc_array(n);
+      gridpoints->St[typ][ni] = alloc_array(n);
     }
     n[0] = ni;
     n[1] = n[2] = 1;
     for(typ=0; typ<P_NTYPES; typ++)
     {
-      gridpoints->Xb[ni][typ] = alloc_array(n);
-      gridpoints->Wq[ni][typ] = alloc_array(n);
-      gridpoints->WL[ni][typ] = alloc_array(n);
+      gridpoints->Xb[typ][ni] = alloc_array(n);
+      gridpoints->Wq[typ][ni] = alloc_array(n);
+      gridpoints->WL[typ][ni] = alloc_array(n);
     }
   }
 
@@ -70,12 +74,12 @@ int init_gridpoints(tMesh *mesh)
   {
     for(ni=1; ni<=nmax; ni++)
     {
-      double *Xb = gridpoints->Xb[ni][typ]->d;
-      double *Wq = gridpoints->Wq[ni][typ]->d;
-      double *WL = gridpoints->WL[ni][typ]->d;
-      double *DT = gridpoints->Dt[ni][typ]->d;
-      double *AT = gridpoints->At[ni][typ]->d;
-      double *ST = gridpoints->St[ni][typ]->d;
+      double *Xb = gridpoints->Xb[typ][ni]->d;
+      double *Wq = gridpoints->Wq[typ][ni]->d;
+      double *WL = gridpoints->WL[typ][ni]->d;
+      double *DT = gridpoints->Dt[typ][ni]->d;
+      double *AT = gridpoints->At[typ][ni]->d;
+      double *ST = gridpoints->St[typ][ni]->d;
 
       /* set up desired points */
       switch(typ)
@@ -113,51 +117,51 @@ int free_gridpoints(tMesh *mesh)
   int ni, typ;
 
   /* free points, diff matrices, and such */
-  for(ni=1; ni<=gridpoints->nmax; ni++)
+  for(typ=0; typ<P_NTYPES; typ++)
   {
-    for(typ=0; typ<P_NTYPES; typ++)
+    for(ni=1; ni<=gridpoints->nmax; ni++)
     {
-      free_array(gridpoints->Dt[ni][typ]);
-      free_array(gridpoints->At[ni][typ]);
-      free_array(gridpoints->St[ni][typ]);
-      free_array(gridpoints->Xb[ni][typ]);
-      free_array(gridpoints->Wq[ni][typ]);
-      free_array(gridpoints->WL[ni][typ]);
+      free_array(gridpoints->Dt[typ][ni]);
+      free_array(gridpoints->At[typ][ni]);
+      free_array(gridpoints->St[typ][ni]);
+      free_array(gridpoints->Xb[typ][ni]);
+      free_array(gridpoints->Wq[typ][ni]);
+      free_array(gridpoints->WL[typ][ni]);
     }
+    free(gridpoints->Dt[typ]);
+    free(gridpoints->At[typ]);
+    free(gridpoints->St[typ]);
+    free(gridpoints->Xb[typ]);
+    free(gridpoints->Wq[typ]);
+    free(gridpoints->WL[typ]);
   }
-  free(gridpoints->Dt);
-  free(gridpoints->At);
-  free(gridpoints->St);
-  free(gridpoints->Xb);
-  free(gridpoints->Wq);
-  free(gridpoints->WL);
 
   return 0;
 }
 
 /*
-tArray *get_gridpoints_Dt(int ni, int typ)
+tArray *get_gridpoints_Dt(int typ, int ni)
 {
-  return gridpoints->Dt[ni][typ];
+  return gridpoints->Dt[typ][ni];
 }
-tArray *get_gridpoints_At(int ni, int typ)
+tArray *get_gridpoints_At(int typ, int ni)
 {
-  return gridpoints->At[ni][typ];
+  return gridpoints->At[typ][ni];
 }
-tArray *get_gridpoints_St(int ni, int typ)
+tArray *get_gridpoints_St(int typ, int ni)
 {
-  return gridpoints->St[ni][typ];
+  return gridpoints->St[typ][ni];
 }
-tArray *get_gridpoints_Xb(int ni, int typ)
+tArray *get_gridpoints_Xb(int typ, int ni)
 {
-  return gridpoints->Xb[ni][typ];
+  return gridpoints->Xb[typ][ni];
 }
-tArray *get_gridpoints_Wq(int ni, int typ)
+tArray *get_gridpoints_Wq(int typ, int ni)
 {
-  return gridpoints->Wq[ni][typ];
+  return gridpoints->Wq[typ][ni];
 }
-tArray *get_gridpoints_WL(int ni, int typ)
+tArray *get_gridpoints_WL(int typ, int ni)
 {
-  return gridpoints->WL[ni][typ];
+  return gridpoints->WL[typ][ni];
 }
 */

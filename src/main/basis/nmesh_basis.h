@@ -17,13 +17,13 @@ enum
 typedef struct tGRIDPOINTS {
 
   int nmax;                     /* max n we can have */
-  struct tARRAY *(*Xb)[P_NTYPES]; /* list of points (often LGL in [-1,1]) */
-  struct tARRAY *(*Wq)[P_NTYPES]; /* list of quadrature weights for Xb */
-  struct tARRAY *(*WL)[P_NTYPES]; /* list of Lagrange interp. weights */
-  struct tARRAY *(*Dt)[P_NTYPES]; /* list of transp. differentiation matrices
+  struct tARRAY **Xb[P_NTYPES]; /* list of points (often LGL in [-1,1]) */
+  struct tARRAY **Wq[P_NTYPES]; /* list of quadrature weights for Xb */
+  struct tARRAY **WL[P_NTYPES]; /* list of Lagrange interp. weights */
+  struct tARRAY **Dt[P_NTYPES]; /* list of transp. differentiation matrices
                                  we store Dt[1...nmax][typ], typ=P_LGL,... */
-  struct tARRAY *(*At)[P_NTYPES]; /* list of transposed analysis matrices */
-  struct tARRAY *(*St)[P_NTYPES]; /* list of transposed synthesis matrices */
+  struct tARRAY **At[P_NTYPES]; /* list of transposed analysis matrices */
+  struct tARRAY **St[P_NTYPES]; /* list of transposed synthesis matrices */
   double (*basis[P_NTYPES])(int l, double Xb, int np);//basis related to At,St
 } tGridPoints;
 

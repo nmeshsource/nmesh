@@ -184,3 +184,11 @@ int Ind_n_norm(int i, int j, int k, int n[3], int norm)
   }
   return I + N0*(J + N1*K);
 }
+
+/* get Xb for a node out of gridpoints */
+/*
+tArray *node_Xb(tNode *node, int dir)
+{
+  return grid..points->Xb[node->pt_typ[dir]][node->n[dir]];
+}
+*/

@@ -97,12 +97,12 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank)
     {
       /* as long as we only use Legendre Gauss-Lobatto in all 3 dirs
          we do not really need e.g. pat->Xb[ni] 3 times */
-      pat->Xb[ni][dir] = gridpoints->Xb[ni][typ];
-      pat->Wq[ni][dir] = gridpoints->Wq[ni][typ];
-      pat->WL[ni][dir] = gridpoints->WL[ni][typ];
-      pat->Dt[ni][dir] = gridpoints->Dt[ni][typ];
-      pat->At[ni][dir] = gridpoints->At[ni][typ];
-      pat->St[ni][dir] = gridpoints->St[ni][typ];
+      pat->Xb[ni][dir] = gridpoints->Xb[typ][ni];
+      pat->Wq[ni][dir] = gridpoints->Wq[typ][ni];
+      pat->WL[ni][dir] = gridpoints->WL[typ][ni];
+      pat->Dt[ni][dir] = gridpoints->Dt[typ][ni];
+      pat->At[ni][dir] = gridpoints->At[typ][ni];
+      pat->St[ni][dir] = gridpoints->St[typ][ni];
     }
     /* set basis */
     pat->basis[dir] = gridpoints->basis[typ];
