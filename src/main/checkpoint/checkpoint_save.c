@@ -264,13 +264,19 @@ void checkpoint_write_node(FILE *fp, tNode *node)
 
   if(child0)
   {
+    tNode *parent = child0->parent;
+
     /* add info about child0, so that we can easily re-create children */
     for(d=0; d<3; d++)
       fprintf(fp, "%d\n", child0->n[d]);
-    /*
-    for(d=0; d<3; d++)
-      fprintf(fp, " child[0]->n[%d] = %d\n", d, child0->n[d]);
-    */
+/*
+    if(parent)
+      for(d=0; d<3; d++)
+      {
+        if(parent->pt_typ[d] != child0->pt_typ[d])
+          fprintf(fp, "P%d\n", child0->pt_typ[d]);
+      }
+*/
   }
 }
 

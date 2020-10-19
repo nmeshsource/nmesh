@@ -471,6 +471,7 @@ int setup_l2_mesh(tMesh *mesh)
   int amr_n1 = Geti(Par("amr_n1"));
   int amr_n2 = Geti(Par("amr_n2"));
   int n[] = { amr_n0, amr_n1, amr_n2 };
+  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
   double bbox[6] = { -4,4, -2,2, -1,1 };
   tNlist *el, *en;
 
@@ -483,14 +484,14 @@ int setup_l2_mesh(tMesh *mesh)
   remove_all_patches(mesh);
   add_patch(mesh, bbox, n, 0);
 
-  make8children_in_mesh_lns_myln(mesh->lns, n);
+  make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
 
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
     if(el->node->l < 2)
     {
-      make8children_in_mesh_lns_myln(el, n);
+      make8children_in_mesh_lns_myln(el, pt_typ, n);
       el = en;
     }
   }
@@ -508,6 +509,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   int amr_n1 = Geti(Par("amr_n1"));
   int amr_n2 = Geti(Par("amr_n2"));
   int n[] = { amr_n0, amr_n1, amr_n2 };
+  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
@@ -528,7 +530,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
   /* 8 children in patch0 */
-  make8children_in_mesh_lns_myln(mesh->lns, n);
+  make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
   printmesh(mesh);
 
   /* 8 more in each patch */
@@ -537,7 +539,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   {
     if(el->node->l < 2)
     {
-      make8children_in_mesh_lns_myln(el, n);
+      make8children_in_mesh_lns_myln(el, pt_typ, n);
       el = en;
     }
   }
@@ -652,6 +654,7 @@ int setup_test_mesh(tMesh *mesh)
 {
   double bbox[6] = { -4,4, -2,2, -1,1 };
   int n[3] = { 5,4,3 };
+  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
   tNlist *el, *el2;
   int i;
 
@@ -676,7 +679,7 @@ int setup_test_mesh(tMesh *mesh)
 //  nd = mesh->pat[0]->rnode;
 //  nlist = make8_child_nodes(nd, n);
 //  replace1_in_mesh_lns_myln(mesh->lns, nlist);
-  make8children_in_mesh_lns_myln(mesh->lns, n);
+  make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
 
   //printnodelist(nlist);
   printmesh(mesh);
@@ -686,14 +689,14 @@ int setup_test_mesh(tMesh *mesh)
 //  nd = el->node;
 //  nlist = make8_child_nodes(nd, n);
 //  replace1_in_mesh_lns_myln(el, nlist);
-  make8children_in_mesh_lns_myln(el, n);
+  make8children_in_mesh_lns_myln(el, pt_typ, n);
 
   el = mesh->lns;
   for(i=1; i<=8+2; i++) el = el->next;
 //  nd = el->node;
 //  nlist = make8_child_nodes(nd, n);
 //  replace1_in_mesh_lns_myln(el, nlist);
-  el = make8children_in_mesh_lns_myln(el, n);
+  el = make8children_in_mesh_lns_myln(el, pt_typ, n);
 
   //printnodelist(nlist);
   printmesh(mesh);

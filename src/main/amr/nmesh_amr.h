@@ -111,7 +111,7 @@ typedef struct tNODE {
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
   //int lid;                /* local node ID */
-  int pt_typ[3];        /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
+  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
   // get rid of the 6*3 arrays below
   struct tARRAY *Xb[3];   /* points we use e.g. Gauss-Lobatto: Xb\in[-1,1].
                              X=0.5*((a+b)+(b-a)*Xb), a=bbox[0], b=bbox[1] */
@@ -320,7 +320,9 @@ enum
   PARENT_nO2_P1,       /* use parent->n/2 + 1 */
   PARENT_nO2_P1IFnG3,  /* use parent->n/2 + 1*if(parent->n>3) */
   PARENT_nO2_P1MOD,    /* use parent->n/2 + 1 or parent->n - 1 if n<=3 */
-  GIVEN_n              /* use a n given by the user */
+  GIVEN_n,             /* use a n given by the user */
+  PARENT_n_P_LGL,      /* use same n as parent, and LGL gridpoints */
+  PARENT_n_P_UNIFORM   /* use same n as parent, and UNIFORM gridpoints */
 };
 
 /* struct that holds refinement method */
@@ -372,7 +374,7 @@ void free_patch(tPat *pat);
 tNode *alloc_node(int initcomm);
 void free_node(tNode *node);
 tNode *make_root_node(tPat *pat, int n[3], int datrank);
-tNlist *make8_child_nodes(tNode *parent, int n[3]);
+tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3]);
 void update8_node_n(tNode *node, int n[3]);
 tDat *alloc_dat(tNode *node);
 void free_dat(tDat *dat);
@@ -396,7 +398,7 @@ long get_node_nid(tNode *node);
 int calc_node_lid(tNode *node);
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
 tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist);
-tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3]);
+tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int pt_typ[3], int n[3]);
 void destroy8siblings_in_mesh_lns_myln(tNlist *sib);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);

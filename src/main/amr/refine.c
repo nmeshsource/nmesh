@@ -21,15 +21,16 @@ void hrefine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
     tNode *parent;
     tNlist *children;
     tNlist *lastchild;
-    int *n;
+    int *n, *pt_typ;
 
     /* forward to node with nid[i] */
     for(; elem->node->nid != nid[i]; elem = elem->next) ;
 
     /* make children */
     parent = elem->node;
+    pt_typ = elem->node->pt_typ; /* pick pt_typ */
     n = elem->node->n; /* pick n */
-    children = make8_child_nodes(parent, n);
+    children = make8_child_nodes(parent, pt_typ, n);
 
     /* update mesh->lns if needed and add children to list */
     if(elem == mesh->lns) mesh->lns = first_nodelist(children);
@@ -64,15 +65,18 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
     for(i=0; i<nnodes; i++)
     {
       tNode *parent;
-      int nc[3], *n, d;
+      int pt_typ[3], nc[3], *n, d;
 
       /* forward to node with nid[i] */
       //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
       //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
       for(; elem->node->nid != nid[i]; elem = elem->next) ;
 
-      /* make children */
+      /* find parent */
       parent = elem->node;
+
+      /* default point type for children is taken from parent */
+      for(d=0; d<3; d++) pt_typ[d] = parent->pt_typ[d];
 
       /* pick n */
       switch(ref->method)
@@ -115,11 +119,14 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       case GIVEN_n:
         n = ref->n;
         break;
+      case PARENT_n_P_UNIFORM:
+        for(d=0; d<3; d++) pt_typ[d] = P_UNIFORM;
       case PARENT_n:
       default:
         n = parent->n;
       }
-      children[i] = make8_child_nodes(parent, n);
+      /* make children */
+      children[i] = make8_child_nodes(parent, pt_typ, n);
 
       /* save elem that has to be replaced by children[i] later */
       replace[i] = elem;
@@ -698,7 +705,7 @@ void hrefine_mesh_to_level__old(tMesh *mesh, int l)
   for(el=mesh->lns; el; el = el->next)
   {
     while(el->node->l < l)
-      el = make8children_in_mesh_lns_myln(el, el->node->n);
+      el = make8children_in_mesh_lns_myln(el, el->node->pt_typ, el->node->n);
   }
 }
 
@@ -713,7 +720,7 @@ void hrefine_pat__old(tMesh *mesh, int p)
   for(en = el->next; el; en = el ? el->next : 0)
   {
     if(el->node->pat == pat)
-      make8children_in_mesh_lns_myln(el, el->node->n);
+      make8children_in_mesh_lns_myln(el, el->node->pt_typ, el->node->n);
     el = en;
   }
 }

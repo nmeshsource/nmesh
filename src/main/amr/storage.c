@@ -305,7 +305,7 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   for(i=0; i<3; i++)
   {
     node->n[i] = n[i];
-    node->pt_typ[i] = pat->pt_typ[i]; /* copy pt_type from patch */
+    node->pt_typ[i] = pat->pt_typ[i]; /* copy pt_typ from patch */
   }
   node->np = n[0] * n[1] * n[2];
   node->l = 0;
@@ -334,7 +334,7 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
 }
 
 /* make a child node */
-tNode *make_child_node(tNode *parent, int n[3], int ijk)
+tNode *make_child_node(tNode *parent, int pt_typ[3], int n[3], int ijk)
 {
   tMesh *mesh = parent->pat->mesh;
   tNode *node = alloc_node(0);
@@ -381,7 +381,11 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
   node->parent = parent;
   /* node->nb is left uninitialized here !!! */
 
-  for(d=0; d<3; d++) node->n[d] = n[d];
+  for(d=0; d<3; d++)
+  {
+    node->n[d] = n[d];
+    node->pt_typ[d] = pt_typ[d]; /* save point type */
+  }
   node->np = n[0] * n[1] * n[2];
 
   node->l = parent->l + 1;
@@ -437,7 +441,7 @@ tNode *make_child_node(tNode *parent, int n[3], int ijk)
 }
 
 /* make 8 childern and return them in a short list */
-tNlist *make8_child_nodes(tNode *parent, int n[3])
+tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3])
 {
   tNlist *nlist = NULL;
   tNlist *elem = NULL;
@@ -457,7 +461,7 @@ tNlist *make8_child_nodes(tNode *parent, int n[3])
   /* use parent_tmp to make children */
   for(ijk=0; ijk<8; ijk++)
   {
-    node = make_child_node(parent_tmp, n, ijk);
+    node = make_child_node(parent_tmp, pt_typ, n, ijk);
     elem = addnode_to_nodelist_after(elem, node);
     if(ijk==0) nlist = elem; // save list head
     narray[ijk] = node; /* save nodes also in an array */
@@ -1460,7 +1464,7 @@ tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
 
 /* replace current entry in leaf node list with its 8 new childern,
    return element with 0th child */
-tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
+tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int pt_typ[3], int n[3])
 {
   tNode *parent;
   tNlist *children;
@@ -1469,7 +1473,7 @@ tNlist *make8children_in_mesh_lns_myln(tNlist *elem, int n[3])
   TIMER_START;
 
   parent = elem->node;
-  children = make8_child_nodes(parent, n);
+  children = make8_child_nodes(parent, pt_typ, n);
   children0 = replace1_in_mesh_lns_myln(elem, children);
 
   TIMER_STOP;
