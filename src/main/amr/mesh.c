@@ -32,7 +32,7 @@ tMesh *make_empty_mesh(int pr)
 int choose_patch_points(tMesh *mesh, int p)
 {
   int uniform_p = Par("amr_uniform_p");
-  int ret = LGL; /* default is Legendre Gauss-Lobatto */
+  int ret = P_LGL; /* default is Legendre Gauss-Lobatto */
 
   /* now check if patch p is mentioned in amr_uniform_p */
   if(GetLen(uniform_p) > 0)
@@ -45,7 +45,7 @@ int choose_patch_points(tMesh *mesh, int p)
         str=strtok_r(NULL, " ", &sav))
     {
       int pp = atoi(str);
-      if(pp==p) { ret = UNIFORM; break; }
+      if(pp==p) { ret = P_UNIFORM; break; }
     }
     free(pl);
   }
@@ -107,7 +107,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
         /* set up desired points */
         switch(pts)
         {
-        case UNIFORM: /* set equally spaced points and their weights */
+        case P_UNIFORM: /* set equally spaced points and their weights */
           //uniform_x_wGaussquad(ni, Xb, Wq);
           uniform_x_wTrapez(ni, Xb, Wq);
 
