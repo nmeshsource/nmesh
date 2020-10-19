@@ -56,9 +56,9 @@ int choose_patch_points(tMesh *mesh, int p)
 
 
 /* add a patch to the mesh */
-tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
-                int datrank)
+tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank)
 {
+  int nmax = gridpoints->nmax;
   tNlist *nlist;
   tPat *pat;
   int p = mesh->npats;
@@ -472,7 +472,6 @@ int setup_l2_mesh(tMesh *mesh)
   int amr_n2 = Geti(Par("amr_n2"));
   int n[] = { amr_n0, amr_n1, amr_n2 };
   double bbox[6] = { -4,4, -2,2, -1,1 };
-  int n1max = Geti(Par("amr_nmax"));
   tNlist *el, *en;
 
   PRFs(":\n");
@@ -482,7 +481,7 @@ int setup_l2_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   remove_all_patches(mesh);
-  add_patch(mesh, bbox, n, n1max, 0);
+  add_patch(mesh, bbox, n, 0);
 
   make8children_in_mesh_lns_myln(mesh->lns, n);
 
@@ -512,7 +511,6 @@ int setup_3patchl2_mesh(tMesh *mesh)
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
-  int n1max = Geti(Par("amr_nmax"));
   tNlist *el, *en;
 
   PRFs(":\n");
@@ -522,9 +520,9 @@ int setup_3patchl2_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   remove_all_patches(mesh);
-  add_patch(mesh, bbox0, n, n1max, 0);
-  add_patch(mesh, bbox1, n, n1max, 0);
-  add_patch(mesh, bbox2, n, n1max, 0);
+  add_patch(mesh, bbox0, n, 0);
+  add_patch(mesh, bbox1, n, 0);
+  add_patch(mesh, bbox2, n, 0);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
@@ -653,7 +651,6 @@ void test_array_thingies(tMesh *mesh)
 int setup_test_mesh(tMesh *mesh)
 {
   double bbox[6] = { -4,4, -2,2, -1,1 };
-  int n1max = Geti(Par("amr_nmax"));
   int n[3] = { 5,4,3 };
   tNlist *el, *el2;
   int i;
@@ -669,7 +666,7 @@ int setup_test_mesh(tMesh *mesh)
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
-  add_patch(mesh, bbox, n, n1max, 0);
+  add_patch(mesh, bbox, n, 0);
 
   enablevar(mesh, Ind("SurfExchange_u"));
   enablevar(mesh, Ind("SurfExchange_v"));

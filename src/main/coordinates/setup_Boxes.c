@@ -14,7 +14,6 @@ int add_1box_pat(tMesh *mesh, double xc[3], double dout[3])
   int amr_n1 = Geti(Par("amr_n1"));
   int amr_n2 = Geti(Par("amr_n2"));
   int n[] = { amr_n0, amr_n1, amr_n2 };
-  int n1max = Geti(Par("amr_nmax"));
   double bbox[6];
   tPat *pat;
   int d;
@@ -27,7 +26,7 @@ int add_1box_pat(tMesh *mesh, double xc[3], double dout[3])
   }
 
   /* make new patch */
-  pat = add_patch(mesh, bbox, n, n1max, 0);
+  pat = add_patch(mesh, bbox, n, 0);
 
   return pat->p; /* return pat index */
 }

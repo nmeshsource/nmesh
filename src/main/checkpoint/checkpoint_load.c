@@ -21,7 +21,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   long off, len;
   tPat *pat = NULL;
   char par[1000], val[1000];
-  int clabel=0, nmax=0, useF=0;
+  int clabel=0, useF=0;
   int n[] = { 0,0,0 };
   double bbox[] = { 0.,0.,0.,0.,0.,0. };
 
@@ -72,7 +72,7 @@ exit(8);
       //printf("n = %d %d %d\n", n[0],n[1],n[2]);
       /* We set datrank=-1 to save memory. No dat is allocated
          anywhere! */
-      pat = add_patch(mesh, bbox, n, nmax, -1);
+      pat = add_patch(mesh, bbox, n, -1);
       useF = 0;
     }
 
@@ -90,7 +90,7 @@ exit(8);
       if(strcmp(par, "bbox[3]")==0) bbox[3] = atof(val);
       if(strcmp(par, "bbox[4]")==0) bbox[4] = atof(val);
       if(strcmp(par, "bbox[5]")==0) bbox[5] = atof(val);
-      if(strcmp(par, "nmax")==0) nmax = atoi(val);
+      //if(strcmp(par, "nmax")==0) nmax = atoi(val);
       if(strcmp(par, "rnode->n[0]")==0) n[0] = atoi(val);
       if(strcmp(par, "rnode->n[1]")==0) n[1] = atoi(val);
       if(strcmp(par, "rnode->n[2]")==0) n[2] = atoi(val);

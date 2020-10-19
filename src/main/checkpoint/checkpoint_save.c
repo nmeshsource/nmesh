@@ -93,7 +93,7 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   for(f=0; f<6; f++)
     fprintf(fp, " bbox[%d] = %.19g\n", f, pat->bbox[f]);
 
-  fprintf(fp,   " nmax = %d\n", pat->nmax);
+  //fprintf(fp,   " nmax = %d\n", pat->nmax);
 
   //for(d=0; d<3; d++)
   //  fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
