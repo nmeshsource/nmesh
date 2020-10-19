@@ -8,6 +8,8 @@
 #define PR 0
 
 
+/* use gridpoints from basis/gridpoints.c */
+extern tGridPoints gridpoints[1];
 
 
 /* make an empty mesh, into which we an then initialize or into which
@@ -86,66 +88,24 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int nmax,
   /* set diff, and other matrices */
   for(dir=0; dir<3; dir++)
   {
+    int typ;
+
+    /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
+    typ = choose_patch_points(mesh, p);
+
     for(ni=1; ni<=nmax; ni++)
     {
-      double *Xb = pat->Xb[ni][dir]->d;
-      double *Wq = pat->Wq[ni][dir]->d;
-      double *WL = pat->WL[ni][dir]->d;
-      double *DT = pat->Dt[ni][dir]->d;
-      double *AT = pat->At[ni][dir]->d;
-      double *ST = pat->St[ni][dir]->d;
-
-      /* since we currently use Legendre Gauss-Lobatto in all 3 dirs
-         we do not need e.g. pat->Xb[ni] 3 times */
-      if(dir==0) /* set them only for dir0 */
-      {
-        int pts;
-
-        /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
-        pts = choose_patch_points(mesh, p);
-
-        /* set up desired points */
-        switch(pts)
-        {
-        case P_UNIFORM: /* set equally spaced points and their weights */
-          //uniform_x_wGaussquad(ni, Xb, Wq);
-          uniform_x_wTrapez(ni, Xb, Wq);
-
-          /* get analysis & synthesis matrix for Legendre basis */
-          Legendre_AT_ST_matrices(ni, Xb, Wq, AT, ST);
-          break;
-
-        default: /* set Legendre Gauss-Lobatto points, weights, ... */
-          LGL_x_wquad(ni, Xb, Wq);
-          //Gauss_wquad_from_symm_x(npoints, x, w); // test Gauss_wquad_from_symm_x
-
-          /* get analysis & synthesis matrix for Legendre basis,
-             could be useful for filtering, but not needed for interpolation */
-          LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
-        }
-
-        /* diff matrix DT for Lagrange interp. poly basis */
-        Lagrange_winterp(ni, Xb, WL);
-        Lagrange_DT(ni, Xb, WL, DT);
-      }
-      else /* point dir1 & 2 arrays to the same mem as dir1 arrays */
-      {
-        free_array(pat->Xb[ni][dir]);
-        free_array(pat->Wq[ni][dir]);
-        free_array(pat->WL[ni][dir]);
-        free_array(pat->Dt[ni][dir]);
-        free_array(pat->At[ni][dir]);
-        free_array(pat->St[ni][dir]);
-        pat->Xb[ni][dir] = pat->Xb[ni][0];
-        pat->Wq[ni][dir] = pat->Wq[ni][0];
-        pat->WL[ni][dir] = pat->WL[ni][0];
-        pat->Dt[ni][dir] = pat->Dt[ni][0];
-        pat->At[ni][dir] = pat->At[ni][0];
-        pat->St[ni][dir] = pat->St[ni][0];
-      }
+      /* as long as we only use Legendre Gauss-Lobatto in all 3 dirs
+         we do not really need e.g. pat->Xb[ni] 3 times */
+      pat->Xb[ni][dir] = gridpoints->Xb[ni][typ];
+      pat->Wq[ni][dir] = gridpoints->Wq[ni][typ];
+      pat->WL[ni][dir] = gridpoints->WL[ni][typ];
+      pat->Dt[ni][dir] = gridpoints->Dt[ni][typ];
+      pat->At[ni][dir] = gridpoints->At[ni][typ];
+      pat->St[ni][dir] = gridpoints->St[ni][typ];
     }
-    /* set Legendre polys as basis since AT and ST are for Legendre basis */
-    pat->basis[dir] = basis_normLegendreP;
+    /* set basis */
+    pat->basis[dir] = gridpoints->basis[typ];
   }
 
   /* setup root node */

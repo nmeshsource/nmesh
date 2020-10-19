@@ -775,8 +775,6 @@ tNode *destroy_children(tNode *parent)
 /* allocate patch */
 tPat *alloc_patch(tMesh *mesh, int p, int nmax)
 {
-  int n[3];
-  int d, dir;
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));
@@ -810,26 +808,6 @@ tPat *alloc_patch(tMesh *mesh, int p, int nmax)
     errorexit("out of memory for syn. matrices");
 
 
-  for(d=1; d<=nmax; d++)
-  {
-    n[0] = n[1] = d;
-    n[2] = 1;
-    for(dir=0; dir<3; dir++)
-    {
-      pat->Dt[d][dir] = alloc_array(n);
-      pat->At[d][dir] = alloc_array(n);
-      pat->St[d][dir] = alloc_array(n);
-    }
-    n[0] = d;
-    n[1] = n[2] = 1;
-    for(dir=0; dir<3; dir++)
-    {
-      pat->Xb[d][dir] = alloc_array(n);
-      pat->Wq[d][dir] = alloc_array(n);
-      pat->WL[d][dir] = alloc_array(n);
-    }
-  }
-
   /* Bfaces */
 
   return pat;
@@ -848,22 +826,12 @@ void free_patch(tPat *pat)
 {
   tMesh *mesh = pat->mesh;
   tNlist *elem;
-  int ni;
 
   if(!pat) return;
 
   //PRFs(":\n");
 
   /* free diff matrices and such */
-  for(ni=1; ni<=pat->nmax; ni++)
-  {
-    free_3_arrays(pat->Dt[ni]);
-    free_3_arrays(pat->At[ni]);
-    free_3_arrays(pat->St[ni]);
-    free_3_arrays(pat->Xb[ni]);
-    free_3_arrays(pat->Wq[ni]);
-    free_3_arrays(pat->WL[ni]);
-  }
   free(pat->Dt);
   free(pat->At);
   free(pat->St);
