@@ -170,6 +170,8 @@ typedef struct tPAT {
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bfaces[6]; /* 1st bface of this patch on each face */
   tNode *rnode;         /* root node in this patch */
+  int pt_typ[3];        /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
+  // everything below I should remove and replace by func calls, dito in tNode
   int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
   struct tARRAY *(*Xb)[3]; /* list of points (often Gauss-Lobatto in [-1,1]) */
   struct tARRAY *(*Wq)[3]; /* list of quadrature weights for Xb */
