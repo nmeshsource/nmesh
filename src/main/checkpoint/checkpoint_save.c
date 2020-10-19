@@ -182,7 +182,7 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
   tNlist *cnlist = NULL;
 
   fprintf(fp, "parent nodes, their child0->n, and optionally their "
-          "child0->pt_type:\n\n");
+          "child0's point type:\n\n");
 
   /* write all nodes in rnlist anf their children */
   while(nlist)
