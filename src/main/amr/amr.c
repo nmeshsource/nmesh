@@ -5,6 +5,9 @@
 #include "amr.h"
 
 
+/* use gridpoints from basis/gridpoints.c */
+extern tGridPoints gridpoints[1];
+
 /*************************************************************************/
 /* global pars */
 /*************************************************************************/
@@ -185,10 +188,105 @@ int Ind_n_norm(int i, int j, int k, int n[3], int norm)
   return I + N0*(J + N1*K);
 }
 
-/* get Xb for a node out of gridpoints */
-/*
+
+/* get Xb in dir for a node out of gridpoints */
 tArray *node_Xb(tNode *node, int dir)
 {
-  return grid..points->Xb[node->pt_typ[dir]][node->n[dir]];
+  return gridpoints->Xb[node->pt_typ[dir]][node->n[dir]];
 }
-*/
+/* get Xb[3] for a node out of gridpoints */
+void Xb3_n(tNode *node, int n[3], tArray *Xb[3])
+{
+  int d;
+  for(d=0; d<3; d++) Xb[d] = gridpoints->Xb[node->pt_typ[d]][n[d]];
+}
+/* get Xb[3] for a node out of gridpoints */
+void node_Xb3(tNode *node, tArray *Xb[3])
+{
+  Xb3_n(node, node->n, Xb);
+}
+
+/* get Wq in dir for a node out of gridpoints */
+tArray *node_Wq(tNode *node, int dir)
+{
+  return gridpoints->Wq[node->pt_typ[dir]][node->n[dir]];
+}
+/* get Wq[3] for a node out of gridpoints */
+void Wq3_n(tNode *node, int n[3], tArray *Wq[3])
+{
+  int d;
+  for(d=0; d<3; d++) Wq[d] = gridpoints->Wq[node->pt_typ[d]][n[d]];
+}
+/* get Wq[3] for a node out of gridpoints */
+void node_Wq3(tNode *node, tArray *Wq[3])
+{
+  Wq3_n(node, node->n, Wq);
+}
+
+/* get WL in dir for a node out of gridpoints */
+tArray *node_WL(tNode *node, int dir)
+{
+  return gridpoints->WL[node->pt_typ[dir]][node->n[dir]];
+}
+/* get WL[3] for a node out of gridpoints */
+void WL3_n(tNode *node, int n[3], tArray *WL[3])
+{
+  int d;
+  for(d=0; d<3; d++) WL[d] = gridpoints->WL[node->pt_typ[d]][n[d]];
+}
+/* get WL[3] for a node out of gridpoints */
+void node_WL3(tNode *node, tArray *WL[3])
+{
+  WL3_n(node, node->n, WL);
+}
+
+/* get Dt in dir for a node out of gridpoints */
+tArray *node_Dt(tNode *node, int dir)
+{
+  return gridpoints->Dt[node->pt_typ[dir]][node->n[dir]];
+}
+/* get Dt[3] for a node out of gridpoints */
+void Dt3_n(tNode *node, int n[3], tArray *Dt[3])
+{
+  int d;
+  for(d=0; d<3; d++) Dt[d] = gridpoints->Dt[node->pt_typ[d]][n[d]];
+}
+/* get Dt[3] for a node out of gridpoints */
+void node_Dt3(tNode *node, tArray *Dt[3])
+{
+  Dt3_n(node, node->n, Dt);
+}
+
+/* get At in dir for a node out of gridpoints */
+tArray *node_At(tNode *node, int dir)
+{
+  return gridpoints->At[node->pt_typ[dir]][node->n[dir]];
+}
+/* get At[3] for a node out of gridpoints */
+void At3_n(tNode *node, int n[3], tArray *At[3])
+{
+  int d;
+  for(d=0; d<3; d++) At[d] = gridpoints->At[node->pt_typ[d]][n[d]];
+}
+/* get At[3] for a node out of gridpoints */
+void node_At3(tNode *node, tArray *At[3])
+{
+  At3_n(node, node->n, At);
+}
+
+/* get St in dir for a node out of gridpoints */
+tArray *node_St(tNode *node, int dir)
+{
+  return gridpoints->St[node->pt_typ[dir]][node->n[dir]];
+}
+/* get St[3] for a node out of gridpoints */
+void St3_n(tNode *node, int n[3], tArray *St[3])
+{
+  int d;
+  for(d=0; d<3; d++) St[d] = gridpoints->St[node->pt_typ[d]][n[d]];
+}
+/* get St[3] for a node out of gridpoints */
+void node_St3(tNode *node, tArray *St[3])
+{
+  St3_n(node, node->n, St);
+}
