@@ -69,7 +69,9 @@ int init_gridpoints(tMesh *mesh)
     }
   }
 
-  /* set points, weights, diff, and other matrices */
+  /* Set points, weights, diff, and other matrices.
+     Points in patch coords are then
+     X=0.5*((a+b)+(b-a)*Xb),   where a=bbox[0], b=bbox[1] */
   for(typ=0; typ<P_NTYPES; typ++)
   {
     for(ni=1; ni<=nmax; ni++)
