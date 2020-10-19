@@ -112,15 +112,6 @@ typedef struct tNODE {
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
   //int lid;                /* local node ID */
   int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
-  // get rid of the 6*3 arrays below
-//  struct tARRAY *Xb[3];   /* points we use e.g. Gauss-Lobatto: Xb\in[-1,1].
-//                             X=0.5*((a+b)+(b-a)*Xb), a=bbox[0], b=bbox[1] */
-//  struct tARRAY *Wq[3];   /* integr. (or quadrature) weights in 3 dirs */
-//  struct tARRAY *WL[3];   /* Lagrange interp. weights in 3 dirs */
-//  struct tARRAY *Dt[3];   /* transp. differentiation matrix in 3 dirs for [-1,1]
-//                             domain. This just points to an array in patch. */
-//  struct tARRAY *At[3];   /* transp. analysis matrix in 3 dirs */
-//  struct tARRAY *St[3];   /* transp. synthesis matrix in 3 dirs */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
   nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
