@@ -363,7 +363,7 @@ void realloc_patlist_in_mesh(tMesh *mesh, int npats);
 void free_mesh_patches_and_nodes(tMesh *mesh);
 void free_mesh_contents(tMesh *mesh);
 void free_mesh(tMesh *mesh);
-tPat *alloc_patch(tMesh *mesh, int p, int nD);
+tPat *alloc_patch(tMesh *mesh, int p);
 void free_patch(tPat *pat);
 tNode *alloc_node(int initcomm);
 void free_node(tNode *node);

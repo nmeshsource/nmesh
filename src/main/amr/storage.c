@@ -10,6 +10,9 @@
 /* world comm from main */
 extern nMPI_Comm main_comm;
 
+/* use gridpoints from basis/gridpoints.c */
+extern tGridPoints gridpoints[1];
+
 
 /**************************************************************************/
 /* basic memory management */
@@ -773,8 +776,9 @@ tNode *destroy_children(tNode *parent)
 /**************************************************************************/
 
 /* allocate patch */
-tPat *alloc_patch(tMesh *mesh, int p, int nmax)
+tPat *alloc_patch(tMesh *mesh, int p)
 {
+  int nmax = gridpoints->nmax;
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));

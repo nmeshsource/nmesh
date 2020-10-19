@@ -72,7 +72,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank)
 
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
-  pat = alloc_patch(mesh, p, nmax);
+  pat = alloc_patch(mesh, p);
   mesh->pat[p] = pat;
 
   /* set bbox and bbdiag */
