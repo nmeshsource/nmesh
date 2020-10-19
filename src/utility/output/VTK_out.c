@@ -95,9 +95,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
 
   if(node)
   {
-    Xb[0] = node->Xb[0];
-    Xb[1] = node->Xb[1];
-    Xb[2] = node->Xb[2];
+    node_Xb3(node, Xb);
 
     /* make room for X,Y,Z */
     X[0] = alloc_array(Xb[0]->n);
@@ -387,10 +385,12 @@ void write_plane_vtk(tNode *node, FILE *fp, int normal, int plane[],
                      int series, tOutpars *par)
 {
   tArray *X[3];
-  tArray *Xb[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
+  tArray *Xb[3];
   double *pX, *pY, *pZ, *buf;
   int *n = va->n;
   int n0, n1, n2, off0, off1, off2, i,j,k, cnt;
+
+  node_Xb3(node, Xb);
 
   /* return if var has no memory */
   if(!va || va->d==NULL) return;

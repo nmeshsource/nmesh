@@ -28,7 +28,7 @@ int basis_init_globals(tMesh *mesh)
 /* get deriv in direction dir of array var, result goes into dvar */
 void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar)
 {
-  tArray *Dt = node->Dt[dir];
+  tArray *Dt = node_Dt(node,dir);
   mm_array_indir(Dt, var, dir, dvar);
 }
 
@@ -85,7 +85,7 @@ int basis_var_derivs(tNode *node, int vi, int dvi[3])
 /* get coeffs in direction dir of array var, coeffs goes into c */
 void basis_array_analysis1(tNode *node, int dir, tArray *var, tArray *c)
 {
-  tArray *At = node->At[dir];
+  tArray *At = node_At(node,dir);
   mm_array_indir(At, var, dir, c);
 }
 /* get coeffs in direction dir of variable vi, coeffs goes into ci */
@@ -107,7 +107,7 @@ int basis_var_analysis1(tNode *node, int dir, int vi, int ci)
 /* get array from coeffs c in direction dir, array goes into var */
 void basis_array_synthesis1(tNode *node, int dir, tArray *var, tArray *c)
 {
-  tArray *St = node->St[dir];
+  tArray *St = node_St(node,dir);
   mm_array_indir(St, c, dir, var);
 }
 /* get var vi from coeffs in var ci in direction dir */
@@ -285,7 +285,7 @@ tNode *basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
 /* get integral in direction dir of array var, result goes into Ivar */
 tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
 {
-  tArray *Wq = node->Wq[dir];
+  tArray *Wq = node_Wq(node,dir);
   int Ivar_realloc;
 
   if(PR)

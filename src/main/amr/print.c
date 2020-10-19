@@ -429,26 +429,26 @@ void print_matrices_innode(tNode *n)
   for(d=0; d<3; d++)
   {
     printf("Xb[%d]", d);
-    printarray(n->Xb[d]);
+    printarray(node_Xb(n,d));
     printf("Wq[%d]", d);
-    printarray(n->Wq[d]);
+    printarray(node_Wq(n,d));
     printf("WL[%d]", d);
-    printarray(n->WL[d]);
+    printarray(node_WL(n,d));
 
     printf("D=(Dt)^t: Dt[%d]", d);
-    printarray(n->Dt[d]);
+    printarray(node_Dt(n,d));
     //printf("\n");
     printf("A=(At)^t: At[%d]", d);
-    printarray(n->At[d]);
+    printarray(node_At(n,d));
     //printf("\n");
     printf("S=(St)^t: St[%d]", d);
-    printarray(n->St[d]);
+    printarray(node_St(n,d));
     //printf("\n");
   }
   /*
-  DECL_STACK_ARRAY(fa, n->Xb[0]->n);
-  DECL_STACK_ARRAY(ca, n->Xb[0]->n);
-  DECL_STACK_ARRAY(ga, n->Xb[0]->n);
+  DECL_STACK_ARRAY(fa, node_Xb(n,0)->n);
+  DECL_STACK_ARRAY(ca, node_Xb(n,0)->n);
+  DECL_STACK_ARRAY(ga, node_Xb(n,0)->n);
   fa->d[0] = 1.;
   fa->d[1] = 0.25;
   fa->d[2] = 0.;
@@ -456,9 +456,9 @@ void print_matrices_innode(tNode *n)
   fa->d[4] = 1.;
 
   printf("fa");printarray(fa);
-  mm_array0(n->At[0], fa, ca);
+  mm_array0(node_At(n,0), fa, ca);
   printf("ca");printarray(ca);
-  mm_array0(n->St[0], ca, ga);
+  mm_array0(node_St(n,0), ca, ga);
   printf("ga");printarray(ga);
   */
 }

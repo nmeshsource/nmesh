@@ -266,23 +266,6 @@ void free_node(tNode *node)
   free_this_node_only(node);
 }
 
-/* set node pointers for node->Dt ... . Point them to arrays from patch */
-void point_nodearrays_to_patarrays(tPat *pat, tNode *node)
-{
-  int *n = node->n;
-  int dir;
-  /* get node->Dt ... from patch */
-  for(dir=0; dir<3; dir++)
-  {
-    node->Xb[dir] = node->pat->Xb[n[dir]][dir];
-    node->Wq[dir] = node->pat->Wq[n[dir]][dir];
-    node->WL[dir] = node->pat->WL[n[dir]][dir];
-    node->Dt[dir] = node->pat->Dt[n[dir]][dir];
-    node->At[dir] = node->pat->At[n[dir]][dir];
-    node->St[dir] = node->pat->St[n[dir]][dir];
-  }
-}
-
 
 /* make root node */
 tNode *make_root_node(tPat *pat, int n[3], int datrank)
@@ -311,9 +294,6 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
   node->l = 0;
   node->leaf = 1;    /* make this a leaf node */
   node->nid = -1;    /* mark nid as not set */
-
-  /* get node->Dt ... from patch */
-  point_nodearrays_to_patarrays(pat, node);
 
   /* see where dat needs to be allocated */
   node->datrank = datrank;
@@ -392,9 +372,6 @@ tNode *make_child_node(tNode *parent, int pt_typ[3], int n[3], int ijk)
   node->leaf = 1;    /* make this a leaf node */
   node->ijk = ijk;
   nvdb = node->pat->mesh->nvdb;
-
-  /* get node->Dt ... from patch */
-  point_nodearrays_to_patarrays(node->pat, node);
 
   /* default is same proc as parent */
   node->datrank = parent->datrank;
@@ -538,9 +515,6 @@ void update_node_n(tNode *node, int n[3])
   for(d=0; d<3; d++) node->n[d] = n[d];
   node->np = n[0] * n[1] * n[2];
 
-  /* get node->Dt ... from patch */
-  point_nodearrays_to_patarrays(node->pat, node);
-
   /* if node has dat, we need to interpolate vars */
   if(node_old->dat)
   {
@@ -554,6 +528,8 @@ void update_node_n(tNode *node, int n[3])
     Xp[1] = alloc_array(n);
     Xp[2] = alloc_array(n);
     fill_3arrays_with_nodepoints(node, Xp);
+    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
+      could use: node_Xb3(node, Xp); to get new node points into Xp */
 
     /* use interpolation to get vars from old dat to new node->dat */
     for(vi=0; vi<nvdb; vi++)

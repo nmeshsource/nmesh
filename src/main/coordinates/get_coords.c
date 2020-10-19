@@ -9,10 +9,11 @@
 /* get Xb from i,j,k */
 void XbYbZb_of_ijk(tNode *node, int i, int j, int k, double Xb[3])
 {
-  tArray *A[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
+  tArray *A[3];
   int m[] = { i,j,k };
   int dir;
 
+  node_Xb3(node, A);
   for(dir=0; dir<3; dir++) Xb[dir] = A[dir]->d[m[dir]];
 }
 /* get Xb from index ind */
@@ -30,7 +31,7 @@ void XbYbZb_of_ind(tNode *node, int ind, double Xb[3])
 void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3])
 {
   int *n = node->n;
-  double *Xb[] = { node->Xb[0]->d, node->Xb[1]->d, node->Xb[2]->d };
+  double *Xb[]={ node_Xb(node,0)->d, node_Xb(node,1)->d, node_Xb(node,2)->d };
   int dir, i,j,k;
   double a,b;
 
@@ -162,7 +163,7 @@ double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,
   /* if this node has no dat we need to compute x for each point from Xb */
   if(!px[0])
   {
-    double Xb = node->Xb[N]->d[pl]; /* Xb coord in plane pl */
+    double Xb = node_Xb(node,N)->d[pl]; /* Xb coord in plane pl */
 
     /* convert Xb to X coords */
     X_of_Xb_indir(node, N, Xb, &Xpl);
@@ -240,7 +241,7 @@ double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
   /* if this node has no dat we need to compute x from Xb for each point */
   if(!px[0])
   {
-    double Xb = node->Xb[N]->d[pl]; /* Xb coord in plane pl */
+    double Xb = node_Xb(node,N)->d[pl]; /* Xb coord in plane pl */
 
     /* convert Xb to X coords */
     X_of_Xb_indir(node, N, Xb, &Xpl);
@@ -257,9 +258,9 @@ double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
       double Xb;
 
       /* set X */
-      Xb = node->Xb[dir1]->d[i1];
+      Xb = node_Xb(node,dir1)->d[i1];
       X_of_Xb_indir(node, dir1, Xb, &(X[dir1]));
-      Xb = node->Xb[dir2]->d[i2];
+      Xb = node_Xb(node,dir2)->d[i2];
       X_of_Xb_indir(node, dir2, Xb, &(X[dir2]));
       /* get x from X */
       set_xyz(0, node,-1, X, x);
@@ -1477,27 +1478,27 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
   case 0:
     if(i<nm1)
     {
-      Xbm[dir] = 0.5*(node->Xb[dir]->d[i] + node->Xb[dir]->d[i+1]);
-      Xbm[1] = node->Xb[1]->d[j];
-      Xbm[2] = node->Xb[2]->d[k];
+      Xbm[dir] = 0.5*(node_Xb(node,dir)->d[i] + node_Xb(node,dir)->d[i+1]);
+      Xbm[1] = node_Xb(node,1)->d[j];
+      Xbm[2] = node_Xb(node,2)->d[k];
       return 1;
     }
     return 0;
   case 1:
     if(j<nm1)
     {
-      Xbm[0] = node->Xb[0]->d[i];
-      Xbm[dir] = 0.5*(node->Xb[dir]->d[j] + node->Xb[dir]->d[j+1]);
-      Xbm[2] = node->Xb[2]->d[k];
+      Xbm[0] = node_Xb(node,0)->d[i];
+      Xbm[dir] = 0.5*(node_Xb(node,dir)->d[j] + node_Xb(node,dir)->d[j+1]);
+      Xbm[2] = node_Xb(node,2)->d[k];
       return 1;
     }
     return 0;
   case 2:
     if(k<nm1)
     {
-      Xbm[0] = node->Xb[0]->d[i];
-      Xbm[1] = node->Xb[1]->d[j];
-      Xbm[dir] = 0.5*(node->Xb[dir]->d[k] + node->Xb[dir]->d[k+1]);
+      Xbm[0] = node_Xb(node,0)->d[i];
+      Xbm[1] = node_Xb(node,1)->d[j];
+      Xbm[dir] = 0.5*(node_Xb(node,dir)->d[k] + node_Xb(node,dir)->d[k+1]);
       return 1;
     }
     return 0;

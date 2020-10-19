@@ -180,7 +180,8 @@ int coordinates_init_node(tNode *node)
   /* set coords */
   forijk(i,j,k, n)
   {
-    double Xb[] = { node->Xb[0]->d[i], node->Xb[1]->d[j], node->Xb[2]->d[k] };
+    double Xb[] = { node_Xb(node,0)->d[i], node_Xb(node,1)->d[j],
+                    node_Xb(node,2)->d[k] };
     double X[3], x[3], dXdx[3][3];
     int ijk = Ind_n(i,j,k, n);
 

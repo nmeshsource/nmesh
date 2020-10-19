@@ -77,12 +77,12 @@ double Lagrange_of_x(int k, double x, int np,
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
 {
   int *n = var->n;
-  double *xp0 = node->Xb[0]->d; /* points */
-  double *xp1 = node->Xb[1]->d;
-  double *xp2 = node->Xb[2]->d;
-  double *w0 = node->WL[0]->d;  /* weights */
-  double *w1 = node->WL[1]->d;
-  double *w2 = node->WL[2]->d;
+  double *xp0 = node_Xb(node,0)->d; /* points */
+  double *xp1 = node_Xb(node,1)->d;
+  double *xp2 = node_Xb(node,2)->d;
+  double *w0 = node_WL(node,0)->d;  /* weights */
+  double *w1 = node_WL(node,1)->d;
+  double *w2 = node_WL(node,2)->d;
   double *restrict B0 = dmalloc(n[0]);   /* basis */
   double *restrict B1 = dmalloc(n[1]);
   double *restrict B2 = dmalloc(n[2]);
@@ -121,12 +121,12 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
                                     double Cb[2])
 {
   int *n = var->n;
-  double *xp0 = node->Xb[0]->d; /* points */
-  double *xp1 = node->Xb[1]->d;
-  double *xp2 = node->Xb[2]->d;
-  double *w0 = node->WL[0]->d;  /* weights */
-  double *w1 = node->WL[1]->d;
-  double *w2 = node->WL[2]->d;
+  double *xp0 = node_Xb(node,0)->d; /* points */
+  double *xp1 = node_Xb(node,1)->d;
+  double *xp2 = node_Xb(node,2)->d;
+  double *w0 = node_WL(node,0)->d;  /* weights */
+  double *w1 = node_WL(node,1)->d;
+  double *w2 = node_WL(node,2)->d;
   double *restrict B1 = dmalloc(max3(n[0],n[1],n[2]));
   double *restrict B2 = dmalloc(max3(n[0],n[1],n[2]));
   int i,j,k;
@@ -183,7 +183,8 @@ void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3])
   int i,j,k, dir, *n = node->n;
   forijk(i,j,k, n)
   {
-    double Xb[] = { node->Xb[0]->d[i], node->Xb[1]->d[j], node->Xb[2]->d[k] };
+    double Xb[] = { node_Xb(node,0)->d[i], node_Xb(node,1)->d[j],
+                    node_Xb(node,2)->d[k] };
     for(dir=0; dir<3; dir++)
       Xp[dir]->d[Ind_n(i,j,k, n)] = Xb[dir];
   }
@@ -223,7 +224,7 @@ void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2])
   ai = 0;
   forplaneN(dir, i,j,k, node->n, 0)
   {
-    double Cb[2] = { node->Xb[d0]->d[*m0], node->Xb[d1]->d[*m1] };
+    double Cb[2] = { node_Xb(node,d0)->d[*m0], node_Xb(node,d1)->d[*m1] };
     for(c=0; c<2; c++) Cp[c]->d[ai] = Cb[c];
     ai++;
   }

@@ -123,10 +123,10 @@
 #define Vind(vl, vli) vl->index[vli]
 
 /* get integration weights for direc. dir on node */
-#define Wquad(node, dir) node->Wq[dir]->d
+#define Wquad(node, dir) node_Wq(node,dir)->d
 
 /* grid points in Xb-coords in direc. dir on node */
-#define Xbpts(node, dir) node->Xb[dir]->d
+#define Xbpts(node, dir) node_Xb(node,dir)->d
 
 /***************************************************************************/
 /* macros that should be used only in very particular advanced cases       */

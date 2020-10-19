@@ -958,11 +958,13 @@ double distance_to_closest_point(tNode *node, int i, int j, int k,
                                  double hmin_old, int *ijk0, int *ijk1)
 {
   int *n = node->n;
-  tArray *XbA[] = { node->Xb[0], node->Xb[1], node->Xb[2] };
+  tArray *XbA[3];
   double Xb0[3], Xb1[3], X0[3], X1[3];
   int ii, jj, kk; /* increments to i,j,k to get to nb. points */
   double dist;
   double hmin = hmin_old;
+
+  node_Xb3(node, XbA); /* set node point arrays */
 
   Xb0[0] = XbA[0]->d[i];
   Xb0[1] = XbA[1]->d[j];

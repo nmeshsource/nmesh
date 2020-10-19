@@ -51,39 +51,43 @@ int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
   if(ind>=0)
   {
     double Xb[3];
+    tArray *nodeXb[3];
+
+    /* get node points into nodeXb */
+    node_Xb3(node, nodeXb);
     
     if(node->np == a->N)
     {
       int ai = ijk[0];
       int aj = ijk[1];
       int ak = ijk[2];
-      Xb[0] = node->Xb[0]->d[ai];
-      Xb[1] = node->Xb[1]->d[aj];
-      Xb[2] = node->Xb[2]->d[ak];
+      Xb[0] = nodeXb[0]->d[ai];
+      Xb[1] = nodeXb[1]->d[aj];
+      Xb[2] = nodeXb[2]->d[ak];
       printf("problem at Xb = %g %g %g\n", Xb[0], Xb[1], Xb[2]);
     }
     if(a->n[0] == 1)
     {
       int aj = ijk[1];
       int ak = ijk[2];
-      Xb[1] = node->Xb[1]->d[aj];
-      Xb[2] = node->Xb[2]->d[ak];
+      Xb[1] = nodeXb[1]->d[aj];
+      Xb[2] = nodeXb[2]->d[ak];
       printf("problem in plane0 at Xb = # %g %g\n", Xb[1], Xb[2]);
     }
     if(a->n[1] == 1)
     {
       int ai = ijk[0];
       int ak = ijk[2];
-      Xb[0] = node->Xb[0]->d[ai];
-      Xb[2] = node->Xb[2]->d[ak];
+      Xb[0] = nodeXb[0]->d[ai];
+      Xb[2] = nodeXb[2]->d[ak];
       printf("problem in plane1 at Xb = %g # %g\n", Xb[0], Xb[2]);
     }
     if(a->n[2] == 1)
     {
       int ai = ijk[0];
       int aj = ijk[1];
-      Xb[0] = node->Xb[0]->d[ai];
-      Xb[1] = node->Xb[1]->d[aj];
+      Xb[0] = nodeXb[0]->d[ai];
+      Xb[1] = nodeXb[1]->d[aj];
       printf("problem in plane2 at Xb = %g %g #\n", Xb[0], Xb[1]);
     }
   }

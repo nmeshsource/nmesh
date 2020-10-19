@@ -32,8 +32,8 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
 
   if(normal==0)
   {
-    p1 = node->Xb[1];
-    p2 = node->Xb[2];
+    p1 = node_Xb(node, 1);
+    p2 = node_Xb(node, 2);
     if(plane[0]>imax) imin = imax;
     else              imin = imax = plane[0];
     XYZ_of_ijk(node, plane[0],0,0, X);
@@ -41,8 +41,8 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
   }
   else if(normal==1)
   {
-    p1 = node->Xb[0];
-    p2 = node->Xb[2];
+    p1 = node_Xb(node, 0);
+    p2 = node_Xb(node, 2);
     if(plane[1]>jmax) jmin = jmax;
     else              jmin = jmax = plane[1];
     XYZ_of_ijk(node, 0,plane[1],0, X);
@@ -50,8 +50,8 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
   }
   else
   {
-    p1 = node->Xb[0];
-    p2 = node->Xb[1];
+    p1 = node_Xb(node, 0);
+    p2 = node_Xb(node, 1);
     if(plane[2]>kmax) kmin = kmax;
     else              kmin = kmax = plane[2];
     XYZ_of_ijk(node, 0,0,plane[2], X);
@@ -110,7 +110,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
   switch(dir)
   {
   case 0:
-    p1 = node->Xb[0];
+    p1 = node_Xb(node, 0);
     if(axis[1]>jmax) jmin = jmax;
     else             jmin = jmax = axis[1];
     if(axis[2]>kmax) kmin = kmax;
@@ -119,7 +119,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     fprintf(fp, ", j=%d, k=%d, Y=%.15g, Z=%.15g\n", jmin, kmin, X[1], X[2]);
     break;
   case 1:
-    p1 = node->Xb[1];
+    p1 = node_Xb(node, 1);
     if(axis[0]>imax) imin = imax;
     else             imin = imax = axis[0];
     if(axis[2]>kmax) kmin = kmax;
@@ -128,7 +128,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     fprintf(fp, ", i=%d, k=%d, X=%.15g, Z=%.15g\n", imin, kmin, X[0], X[2]);
     break;
   case 2:
-    p1 = node->Xb[2];
+    p1 = node_Xb(node, 2);
     if(axis[0]>imax) imin = imax;
     else             imin = imax = axis[0];
     if(axis[1]>jmax) jmin = jmax;

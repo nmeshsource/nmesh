@@ -709,12 +709,12 @@ int setup_test_mesh(tMesh *mesh)
   //test_array_thingies(mesh);
   //abort();
 
-  //printarray(mesh->lns->next->node->St[1]);
-  printarray_matrix0(mesh->lns->next->node->St[1]);
-  printarray_matrix0(mesh->lns->next->node->Dt[1]);
+  //printarray(node_St(mesh->lns->next->node,1));
+  printarray_matrix0(node_St(mesh->lns->next->node,1));
+  printarray_matrix0(node_Dt(mesh->lns->next->node,1));
 
-  printarray(mesh->lns->next->node->Xb[1]);
-  printarray(mesh->lns->next->node->Wq[1]);
+  printarray(node_Xb(mesh->lns->next->node,1));
+  printarray(node_Wq(mesh->lns->next->node,1));
 
 //  el = mesh->lns;
 //  printnodelist(el);
