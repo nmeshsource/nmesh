@@ -302,7 +302,11 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
     node->patface[i] = 1;
   }
 
-  for(i=0; i<3; i++) node->n[i] = n[i];
+  for(i=0; i<3; i++)
+  {
+    node->n[i] = n[i];
+    node->pt_typ[i] = pat->pt_typ[i]; /* copy pt_type from patch */
+  }
   node->np = n[0] * n[1] * n[2];
   node->l = 0;
   node->leaf = 1;    /* make this a leaf node */
