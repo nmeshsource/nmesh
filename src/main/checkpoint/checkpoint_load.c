@@ -257,7 +257,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
             else
             {
               int dl;
-              for(dl=d; dl<3; dl++) pt_typ[d] = parent->pt_typ[d];
+              for(dl=d; dl<3; dl++) pt_typ[dl] = parent->pt_typ[dl];
               break;
             }
           }

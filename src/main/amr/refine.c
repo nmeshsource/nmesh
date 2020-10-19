@@ -119,8 +119,16 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       case GIVEN_n:
         n = ref->n;
         break;
+
+      case PARENT_n_P_LGL:
+        n = parent->n;
+        for(d=0; d<3; d++) pt_typ[d] = P_LGL;
+        break;
       case PARENT_n_P_UNIFORM:
+        n = parent->n;
         for(d=0; d<3; d++) pt_typ[d] = P_UNIFORM;
+        break;
+
       case PARENT_n:
       default:
         n = parent->n;

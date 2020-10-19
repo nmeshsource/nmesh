@@ -181,7 +181,8 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
   tNlist *nlist  = rnlist;
   tNlist *cnlist = NULL;
 
-  fprintf(fp, "parent nodes and their child0->n:\n\n");
+  fprintf(fp, "parent nodes, their child0->n, and optionally their "
+          "child0->pt_type:\n\n");
 
   /* write all nodes in rnlist anf their children */
   while(nlist)
@@ -242,6 +243,7 @@ void checkpoint_write_node(FILE *fp, tNode *node)
   tNode *child0 = node->child[0];
   char name[256];
   int d;
+  int write_pt_typ = 0;
 
   nodename(node, name,255);
 
@@ -264,20 +266,18 @@ void checkpoint_write_node(FILE *fp, tNode *node)
 
   if(child0)
   {
-    tNode *parent = child0->parent;
-
     /* add info about child0, so that we can easily re-create children */
     for(d=0; d<3; d++)
       fprintf(fp, "%d\n", child0->n[d]);
-/*
-    if(parent)
+
+    /* check if parent node and child differ in pt_typ */
+    for(d=0; d<3; d++)
+      if(node->pt_typ[d] != child0->pt_typ[d]) {write_pt_typ = 1; break;}
+
+    if(write_pt_typ)
       for(d=0; d<3; d++)
-      {
-        if(parent->pt_typ[d] != child0->pt_typ[d])
-          fprintf(fp, "P%d\n", child0->pt_typ[d]);
-      }
-*/
-  }
+        fprintf(fp, "P%d\n", child0->pt_typ[d]);
+  } /* end if(child0) */
 }
 
 
