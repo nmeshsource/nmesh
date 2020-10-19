@@ -165,15 +165,15 @@ typedef struct tPAT {
   tNode *rnode;         /* root node in this patch */
   int pt_typ[3];        /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
   // everything below I should remove and replace by func calls, dito in tNode
-  int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
-  struct tARRAY *(*Xb)[3]; /* list of points (often Gauss-Lobatto in [-1,1]) */
-  struct tARRAY *(*Wq)[3]; /* list of quadrature weights for Xb */
-  struct tARRAY *(*WL)[3]; /* list of Lagrange interp. weights */
-  struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
-                              we store Dt[1...nmax][dir], where dir=0,1,2 */
-  struct tARRAY *(*At)[3]; /* list of transposed analysis matrices */
-  struct tARRAY *(*St)[3]; /* list of transposed synthesis matrices */
-  double (*basis[3])(int l, double Xb, int np); /* basis related to At,St */
+//  int nmax;             /* max n[0],n[1],n[2] a node in this patch can have */
+//  struct tARRAY *(*Xb)[3]; /* list of points (often Gauss-Lobatto in [-1,1]) */
+//  struct tARRAY *(*Wq)[3]; /* list of quadrature weights for Xb */
+//  struct tARRAY *(*WL)[3]; /* list of Lagrange interp. weights */
+//  struct tARRAY *(*Dt)[3]; /* list of transposed differentiation matrices
+//                              we store Dt[1...nmax][dir], where dir=0,1,2 */
+//  struct tARRAY *(*At)[3]; /* list of transposed analysis matrices */
+//  struct tARRAY *(*St)[3]; /* list of transposed synthesis matrices */
+double (*basis[3])(int l, double Xb, int np); /* basis related to At,St */
   //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch has Bfaces as in sgrid. But instead of pointlists we use
@@ -516,6 +516,7 @@ void node_At3(tNode *node, tArray *At[3]);
 tArray *node_St(tNode *node, int dir);
 void St3_n(tNode *node, int n[3], tArray *St[3]);
 void node_St3(tNode *node, tArray *St[3]);
+double node_basis(tNode *node, int dir, int i, double x, int np);
 
 /* bfaces.c */
 tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);

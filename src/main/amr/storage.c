@@ -762,7 +762,6 @@ tNode *destroy_children(tNode *parent)
 /* allocate patch */
 tPat *alloc_patch(tMesh *mesh, int p)
 {
-  int nmax = gridpoints->nmax;
   tPat *pat;
 
   pat = calloc(1, sizeof(*pat));
@@ -770,9 +769,12 @@ tPat *alloc_patch(tMesh *mesh, int p)
 
   pat->mesh = mesh;
   pat->p = p;
-  pat->nmax = nmax;
 
   /* get mem. for diff. matrices */
+  /*
+  int nmax = gridpoints->nmax;
+  pat->nmax = nmax;
+
   pat->Xb = calloc(nmax+1, sizeof(pat->Xb[0]));
   if(!(pat->Xb) )
     errorexit("out of memory for points");
@@ -794,7 +796,7 @@ tPat *alloc_patch(tMesh *mesh, int p)
   pat->St = calloc(nmax+1, sizeof(pat->St[0]));
   if(!(pat->St) )
     errorexit("out of memory for syn. matrices");
-
+  */
 
   /* Bfaces */
 
@@ -820,12 +822,14 @@ void free_patch(tPat *pat)
   //PRFs(":\n");
 
   /* free diff matrices and such */
+  /*
   free(pat->Dt);
   free(pat->At);
   free(pat->St);
   free(pat->Xb);
   free(pat->Wq);
   free(pat->WL);
+  */
 
   /* free all in CI coordinfo, and also all bfaces  */
   free_pat_CI(pat);

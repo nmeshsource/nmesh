@@ -30,9 +30,10 @@ void printmesh(tMesh *m)
 
 void printpatch(tPat *pat)
 {
-  printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] nmax=%d\n",
+  printf("p%d: [%g,%g]x[%g,%g]x[%g,%g] pt_typ = %d %d %d\n",
          pat->p, pat->bbox[0], pat->bbox[1], pat->bbox[2], pat->bbox[3],
-         pat->bbox[4],pat->bbox[5], pat->nmax);
+         pat->bbox[4],pat->bbox[5],
+         pat->pt_typ[0],pat->pt_typ[0],pat->pt_typ[0]);
   printf("root node:\n");
   printnode(pat->rnode);
 /*

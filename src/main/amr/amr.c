@@ -290,3 +290,11 @@ void node_St3(tNode *node, tArray *St[3])
 {
   St3_n(node, node->n, St);
 }
+
+/* basis in of node in dir */
+double node_basis(tNode *node, int dir,
+                  int i, double x, int np)
+{
+  int typ = node->pt_typ[dir];
+  return gridpoints->basis[typ](i, x, np);
+}
