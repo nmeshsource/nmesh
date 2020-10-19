@@ -165,7 +165,7 @@ typedef struct tPAT {
   tNode *rnode;         /* root node in this patch */
   int pt_typ[3];        /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
   // everything below I should remove and replace by func calls, dito in tNode
-double (*basis[3])(int l, double Xb, int np); /* basis related to At,St */
+//double (*basis[3])(int l, double Xb, int np); /* basis related to At,St */
   //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch has Bfaces as in sgrid. But instead of pointlists we use

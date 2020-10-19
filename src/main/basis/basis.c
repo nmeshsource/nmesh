@@ -182,7 +182,6 @@ int basis_var_synthesis3(tNode *node, int ui, int ci)
    interpolate to the point (Xb[0],Xb[1],Xb[2]) using coeffs in array coef */
 double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
 {
-  tPat *pat = node->pat;
   int *n = coef->n;
   double *B0 = dmalloc(n[0]);
   double *B1 = dmalloc(n[1]);
@@ -191,9 +190,9 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
   double sum;
 
   /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B0,... */
-  for(k=0; k<n[0]; k++) B0[k] = pat->basis[0](k, Xb[0], n[0]);
-  for(k=0; k<n[1]; k++) B1[k] = pat->basis[1](k, Xb[1], n[1]);
-  for(k=0; k<n[2]; k++) B2[k] = pat->basis[2](k, Xb[2], n[2]);
+  for(k=0; k<n[0]; k++) B0[k] = node_basis(node,0, k, Xb[0], n[0]);
+  for(k=0; k<n[1]; k++) B1[k] = node_basis(node,1, k, Xb[1], n[1]);
+  for(k=0; k<n[2]; k++) B2[k] = node_basis(node,2, k, Xb[2], n[2]);
 
   /* interpolate to (Xb[0],Xb[1],Xb[2]) */
   sum = 0.;
