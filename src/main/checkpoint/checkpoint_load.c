@@ -23,6 +23,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   char par[1000], val[1000];
   int clabel=0, useF=0;
   int n[] = { 0,0,0 };
+  int pt_typ[] = { 0,0,0 };
   double bbox[] = { 0.,0.,0.,0.,0.,0. };
 
 /*
@@ -68,11 +69,13 @@ exit(8);
     /* CI-> signifies that we know all we need to create a new patch */
     if(strcmp(buf, " CI->\n")==0)
     {
+      int dir;
       //prbbox(bbox, 3);
       //printf("n = %d %d %d\n", n[0],n[1],n[2]);
       /* We set datrank=-1 to save memory. No dat is allocated
          anywhere! */
       pat = add_patch(mesh, bbox, n, -1);
+      for(dir=0; dir<3; dir++) pat->pt_typ[dir] = pt_typ[dir];
       useF = 0;
     }
 
@@ -94,6 +97,9 @@ exit(8);
       if(strcmp(par, "rnode->n[0]")==0) n[0] = atoi(val);
       if(strcmp(par, "rnode->n[1]")==0) n[1] = atoi(val);
       if(strcmp(par, "rnode->n[2]")==0) n[2] = atoi(val);
+      if(strcmp(par, "pt_typ[0]")==0) pt_typ[0] = atoi(val);
+      if(strcmp(par, "pt_typ[1]")==0) pt_typ[1] = atoi(val);
+      if(strcmp(par, "pt_typ[2]")==0) pt_typ[2] = atoi(val);
       if(strcmp(par, "s[0]")==0)  pat->CI->s[0] = atof(val);
       if(strcmp(par, "s[1]")==0)  pat->CI->s[1] = atof(val);
       if(strcmp(par, "s[2]")==0)  pat->CI->s[2] = atof(val);

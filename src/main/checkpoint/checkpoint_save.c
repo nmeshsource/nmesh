@@ -101,6 +101,9 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   for(d=0; d<3; d++)
     fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
 
+  for(d=0; d<3; d++)
+    fprintf(fp, " pt_typ[%d] = %d\n", d, pat->pt_typ[d]);
+
   //printCI(pat);
   checkpoint_write_CI(fp, pat->CI);
   fprintf(fp, "coordinates_get_label(pat) = %d\n", coordinates_get_label(pat));
