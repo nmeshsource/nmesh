@@ -507,6 +507,24 @@ void MPIexchange_request_all_myln_data(tMesh *mesh);
 void MPIexchange_get_all_myln_data(tMesh *mesh);
 void MPIexchange_free_all_myln(tMesh *mesh);
 int Ind_n_norm(int i, int j, int k, int n[3], int norm);
+tArray *node_Xb(tNode *node, int dir);
+void Xb3_n(tNode *node, int n[3], tArray *Xb[3]);
+void node_Xb3(tNode *node, tArray *Xb[3]);
+tArray *node_Wq(tNode *node, int dir);
+void Wq3_n(tNode *node, int n[3], tArray *Wq[3]);
+void node_Wq3(tNode *node, tArray *Wq[3]);
+tArray *node_WL(tNode *node, int dir);
+void WL3_n(tNode *node, int n[3], tArray *WL[3]);
+void node_WL3(tNode *node, tArray *WL[3]);
+tArray *node_Dt(tNode *node, int dir);
+void Dt3_n(tNode *node, int n[3], tArray *Dt[3]);
+void node_Dt3(tNode *node, tArray *Dt[3]);
+tArray *node_At(tNode *node, int dir);
+void At3_n(tNode *node, int n[3], tArray *At[3]);
+void node_At3(tNode *node, tArray *At[3]);
+tArray *node_St(tNode *node, int dir);
+void St3_n(tNode *node, int n[3], tArray *St[3]);
+void node_St3(tNode *node, tArray *St[3]);
 
 /* bfaces.c */
 tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);
