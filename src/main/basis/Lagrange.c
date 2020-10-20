@@ -73,26 +73,36 @@ double Lagrange_of_x(int k, double x, int np,
 /* 3d interpolation:
    interpolate to the point (Xb[0],Xb[1],Xb[2]) for variable in array var
    Note: for Lagrange interpolation the coeffs are simply the function
-         values at grid points */
+         values at grid points
+   Note2: the only info we really retrieve from the node (in Xb3_n and WL3_n)
+          is node->pt_typ, but not node->n */
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
 {
   int *n = var->n;
-  double *xp0 = node_Xb(node,0)->d; /* points */
-  double *xp1 = node_Xb(node,1)->d;
-  double *xp2 = node_Xb(node,2)->d;
-  double *w0 = node_WL(node,0)->d;  /* weights */
-  double *w1 = node_WL(node,1)->d;
-  double *w2 = node_WL(node,2)->d;
+  tArray *Xb_n[3];
+  tArray *WL_n[3];
+  double *xp[3]; /* points */
+  double *w[3];  /* weights */
   double *restrict B0 = dmalloc(n[0]);   /* basis */
   double *restrict B1 = dmalloc(n[1]);
   double *restrict B2 = dmalloc(n[2]);
   int k;
   double sum;
 
+  /* get arrays with points and weights for n = var->n */
+  Xb3_n(node, n, Xb_n);
+  WL3_n(node, n, WL_n);
+  /* now set data pointers to points and weights */
+  for(k=0; k<3; k++)
+  {
+    xp[k] = Xb_n[k]->d;
+    w[k]  = WL_n[k]->d;
+  }
+
   /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B0,... */
-  for(k=0; k<n[0]; k++) B0[k] = Lagrange_of_x(k, Xb[0], n[0], xp0, w0);
-  for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Xb[1], n[1], xp1, w1);
-  for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Xb[2], n[2], xp2, w2);
+  for(k=0; k<n[0]; k++) B0[k] = Lagrange_of_x(k, Xb[0], n[0], xp[0], w[0]);
+  for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Xb[1], n[1], xp[1], w[1]);
+  for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Xb[2], n[2], xp[2], w[2]);
 
   /* interpolate to (Xb[0],Xb[1],Xb[2]) */
   sum = 0.;
@@ -116,28 +126,38 @@ double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3])
    in plane p orthogonal to direction dir
    NOTE: We can set node=neighbor when we call this, even if the var is not
          on neighbor. We can use this to interpolate on a surface that was
-         copied from a neighbor node! */
+         copied from a neighbor node!
+   Note2: the only info we really retrieve from the node (in Xb3_n and WL3_n)
+          is node->pt_typ, but not node->n */
 double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
                                     double Cb[2])
 {
   int *n = var->n;
-  double *xp0 = node_Xb(node,0)->d; /* points */
-  double *xp1 = node_Xb(node,1)->d;
-  double *xp2 = node_Xb(node,2)->d;
-  double *w0 = node_WL(node,0)->d;  /* weights */
-  double *w1 = node_WL(node,1)->d;
-  double *w2 = node_WL(node,2)->d;
+  tArray *Xb_n[3];
+  tArray *WL_n[3];
+  double *xp[3]; /* points */
+  double *w[3];  /* weights */
   double *restrict B1 = dmalloc(max3(n[0],n[1],n[2]));
   double *restrict B2 = dmalloc(max3(n[0],n[1],n[2]));
   int i,j,k;
   double sum;
 
+  /* get arrays with points and weights for n = var->n */
+  Xb3_n(node, n, Xb_n);
+  WL3_n(node, n, WL_n);
+  /* now set data pointers to points and weights */
+  for(k=0; k<3; k++)
+  {
+    xp[k] = Xb_n[k]->d;
+    w[k]  = WL_n[k]->d;
+  }
+
   switch(dir)
   {
   case 0:
     /* save basis func values */
-    for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[1], xp1, w1);
-    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[2], xp2, w2);
+    for(k=0; k<n[1]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[1], xp[1], w[1]);
+    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[2], xp[2], w[2]);
 
     /* interpolate */
     sum = 0.;
@@ -147,8 +167,8 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
     break;
   case 1:
     /* save basis func values */
-    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[0], xp0, w0);
-    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[2], xp2, w2);
+    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[0], xp[0], w[0]);
+    for(k=0; k<n[2]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[2], xp[2], w[2]);
 
     /* interpolate */
     sum = 0.;
@@ -158,8 +178,8 @@ double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
     break;
   case 2:
     /* save basis func values */
-    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[0], xp0, w0);
-    for(k=0; k<n[1]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[1], xp1, w1);
+    for(k=0; k<n[0]; k++) B1[k] = Lagrange_of_x(k, Cb[0], n[0], xp[0], w[0]);
+    for(k=0; k<n[1]; k++) B2[k] = Lagrange_of_x(k, Cb[1], n[1], xp[1], w[1]);
 
     /* interpolate */
     sum = 0.;
