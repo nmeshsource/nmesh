@@ -49,7 +49,7 @@ int misc_test(tMesh *mesh)
     int dir;
     double *Xb[3];
 
-    for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
+    for(dir=0; dir<3; dir++) Xb[dir] = node_Xb(node,dir)->d;
 
     /* set u to func test_func at grid points */
     forarray(ua, ijk)
@@ -96,14 +96,14 @@ int test_point_interpolation(tMesh *mesh)
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
   nd = Lnode_myid(mesh, mesh->myln->nm-1); /* my last node??? */
-  for(dir=0; dir<3; dir++) Xb[dir] = nd->Xb[dir]->d;
+  for(dir=0; dir<3; dir++) Xb[dir] = node_Xb(nd,dir)->d;
 
   /* print var in one node */
   nd = Lnode_myid(mesh, 0); /* my first node */
-  printarray(nd->Xb[2]);
-  printarray(nd->WL[2]);
+  printarray(node_Xb(nd,2));
+  printarray(node_WL(nd,2));
   n2 = nd->n[2];
-  f = Lagrange_of_x(n2/2, 0., n2, nd->Xb[2]->d, nd->WL[2]->d);
+  f = Lagrange_of_x(n2/2, 0., n2, node_Xb(nd,2)->d, node_WL(nd,2)->d);
   printf("Lagrange_of_x at Zb=0: f=%g\n", f);
   printnode(nd);
   printvar_innode(nd, ui);
@@ -238,7 +238,7 @@ int print_u_minus_f(tNode *node)
   {
     int ijk;
 
-    for(dir=0; dir<3; dir++) Xb[dir] = node->Xb[dir]->d;
+    for(dir=0; dir<3; dir++) Xb[dir] = node_Xb(node,dir)->d;
 
     /* set u to func test_func at grid points */
     forarray(ua, ijk)
@@ -267,6 +267,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int nn[] = { 3,5,5 };
+  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
   tNlist *el = mesh->lns;
   tNlist *l2 = NULL;
   tDat *d0;
@@ -286,7 +287,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   printvar_innode(nd, ui);
   if(d0) printf("1 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
 
-  make8children_in_mesh_lns_myln(el, nn);
+  make8children_in_mesh_lns_myln(el, pt_typ, nn);
   //printmesh(mesh);
   el = mesh->lns;
   l2 = NULL;
@@ -418,7 +419,7 @@ int test_ajsurf(tMesh *mesh)
     tNode *node = MyLnode;
     tArray *va = VarA(node, vi);
 
-    //for(dir=0; dir<3; dir++) Xbd[dir] = node->Xb[dir]->d;
+    //for(dir=0; dir<3; dir++) Xbd[dir] = node_Xb(node,dir)->d;
 
     /* set v to func test_func at grid points */
     forarray(va, ijk)
