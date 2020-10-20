@@ -63,6 +63,7 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
   /* read file into memory, and also add one space at end and beginning */
   file_exists = 1;
   buffer = NULL;
+  nbuffer = 0;
   if(Rank0)
   {
     fp = fopen(parfile, "r");
@@ -108,7 +109,7 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
 
   /* broadcast buffer to all MPI ranks */
   nMPI_Bcast(&nbuffer,1, nMPI_INT, 0);
-  if(!Rank0) buffer = malloc(sizeof(char) * (nbuffer+1));
+  if(!Rank0) buffer = calloc(nbuffer+2, sizeof(char));
   nMPI_Bcast(buffer,nbuffer+1, nMPI_CHAR, 0);
   if(0) { printf("%s", buffer); Yo(1); }
 
