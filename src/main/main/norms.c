@@ -119,11 +119,12 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
 
 /* compute max/min of var with index vind over a patch or mesh
    input: mesh, pat, vind, findMax
-   output: Mp, Mnid, Mijk, MX[3]
-           output has max/min location, we can get x[3] by calling
-           set_xyz(mesh->pat[Mp],0, Mijk, MX, x);   */
+   output: Mp, Mnodeloc, Mijk, MX[3]
+           output has max/min location, we can get x[3] by calling:
+           node = node_from_location_str(mesh->pat[Mp], Mnodeloc);
+           set_xyz(NULL, node, Mijk, MX, x); */
 double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
-                       int *Mp, long *Mnid, int *Mijk, double *MX)
+                       int *Mp, char Mnodeloc[104], int *Mijk, double *MX)
 {
   tNode *Mnode=NULL;
   double Xb[3];
@@ -135,7 +136,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
 
   struct Loc { /* location info */
     int p;
-    long nid;
+    char nodeloc[104]; /* node location string */
     int ijk;
     double X[3];
   };
@@ -161,8 +162,8 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   /* write local patch coords into MX and uloc, if we found a node */
   XbYbZb_of_ind(Mnode, *Mijk, Xb);
   XYZ_of_XbYbZb(Mnode, Xb, MX);
-  uloc->loc->p    = Mnode->pat->p;
-  uloc->loc->nid  = Mnode->nid;
+  uloc->loc->p = Mnode->pat->p;
+  node_location_str(Mnode, uloc->loc->nodeloc, 103);
 
   /* write local results into uloc */
   uloc->loc->ijk  = *Mijk;
@@ -180,7 +181,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
 
   /* set location */
   *Mp = uloc->loc->p;
-  *Mnid = uloc->loc->nid;
+  strncpy(Mnodeloc, uloc->loc->nodeloc, 104);
   *Mijk = uloc->loc->ijk;
   MX[0] = uloc->loc->X[0];
   MX[1] = uloc->loc->X[1];

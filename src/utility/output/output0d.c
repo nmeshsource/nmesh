@@ -36,7 +36,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   char filename[1000];
   double max, min, maxAbs, rms, mean, VolInt;
   int p, ijk, ipt;
-  long nid;
+  char nodeloc[105]; /* node location string inside patch */
   double X[3], xmin[3], xmax[3], *xmaxAbs;
   double Vol;
   int Npt; /* number of points at which we output */
@@ -74,6 +74,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   {
     int vi = vl->index[vli];
     char *name = VarName(vi);
+    tNode *node;
 
     /* get volume only once */
     if(vli==0) Vol = MeshVolumeIntegral(mesh,pat, vi, 0.,0);
@@ -83,10 +84,12 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     rms    = sqrt( fabs(MeshVolumeIntegral(mesh,pat, vi, 2.,0) / Vol) );
 
     /* min, max and their positions xmin, xmax */
-    min = MeshExtremumLoc(mesh,pat, vi, 0, &p, &nid, &ijk, X);
-    set_xyz(mesh->pat[p],0, ijk, X, xmin);
-    max = MeshExtremumLoc(mesh,pat, vi, 1, &p, &nid, &ijk, X);
-    set_xyz(mesh->pat[p],0, ijk, X, xmax);
+    min = MeshExtremumLoc(mesh,pat, vi, 0, &p, nodeloc, &ijk, X);
+    node = node_from_location_str(mesh->pat[p], nodeloc);
+    set_xyz(NULL, node, ijk, X, xmin);
+    max = MeshExtremumLoc(mesh,pat, vi, 1, &p, nodeloc, &ijk, X);
+    node = node_from_location_str(mesh->pat[p], nodeloc);
+    set_xyz(NULL, node, ijk, X, xmax);
 
     /* maxAbs and its pos. */
     if(fabs(max)>fabs(min))
