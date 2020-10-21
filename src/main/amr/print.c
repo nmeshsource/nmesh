@@ -147,7 +147,7 @@ void printnode(tNode *n)
   }
   //printf("\n");
   //printf(" Dt =");
-  //for(i=0; i<3; i++) printf(" %p", (void *) n->Dt[i]);
+  //for(i=0; i<3; i++) printf(" %p", (void *) node_Dt(n,i));
   //printf("\n");
 }
 
