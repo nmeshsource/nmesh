@@ -268,7 +268,7 @@ void free_node(tNode *node)
 
 
 /* make root node */
-tNode *make_root_node(tPat *pat, int n[3], int datrank)
+tNode *make_root_node(tPat *pat, int pt_typ[3], int n[3], int datrank)
 {
   tNode *node = alloc_node(0);
   int i;
@@ -285,10 +285,11 @@ tNode *make_root_node(tPat *pat, int n[3], int datrank)
     node->patface[i] = 1;
   }
 
+  /* save n and pt_typ for root node */
   for(i=0; i<3; i++)
   {
     node->n[i] = n[i];
-    node->pt_typ[i] = pat->pt_typ[i]; /* copy pt_typ from patch */
+    node->pt_typ[i] = pt_typ[i];
   }
   node->np = n[0] * n[1] * n[2];
   node->l = 0;

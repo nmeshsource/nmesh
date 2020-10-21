@@ -111,7 +111,7 @@ typedef struct tNODE {
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
   //int lid;                /* local node ID */
-  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
+  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
   nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
@@ -163,7 +163,6 @@ typedef struct tPAT {
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bfaces[6]; /* 1st bface of this patch on each face */
   tNode *rnode;         /* root node in this patch */
-  int pt_typ[3];        /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of rnode */
   //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch has Bfaces as in sgrid. But instead of pointlists we use
@@ -328,7 +327,8 @@ typedef struct tREF {
 
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
-tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank);
+tPat *add_patch(tMesh *mesh, double bbox[6],
+                int *pt_typ_root, int nroot[3], int datrank);
 int amr_setup_mesh(tMesh *mesh);
 int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr);
 
@@ -354,7 +354,7 @@ tPat *alloc_patch(tMesh *mesh, int p);
 void free_patch(tPat *pat);
 tNode *alloc_node(int initcomm);
 void free_node(tNode *node);
-tNode *make_root_node(tPat *pat, int n[3], int datrank);
+tNode *make_root_node(tPat *pat, int pt_typ[3], int n[3], int datrank);
 tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3]);
 void update8_node_n(tNode *node, int n[3]);
 tDat *alloc_dat(tNode *node);

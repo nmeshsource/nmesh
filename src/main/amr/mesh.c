@@ -56,7 +56,8 @@ int choose_patch_points(tMesh *mesh, int p)
 
 
 /* add a patch to the mesh */
-tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank)
+tPat *add_patch(tMesh *mesh, double bbox[6],
+                int *pt_typ_root, int nroot[3], int datrank)
 {
   int nmax = gridpoints->nmax;
   tNlist *nlist;
@@ -64,6 +65,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank)
   int p = mesh->npats;
   double dg;
   int i, dir;
+  int pt_typ[3];
 
   /* check if we have enough space for diff. and other matrices */
   for(dir=0; dir<3; dir++)
@@ -85,18 +87,19 @@ tPat *add_patch(tMesh *mesh, double bbox[6], int nroot[3], int datrank)
   }
   pat->bbdiag = sqrt(pat->bbdiag);
 
-  /* set diff, and other matrices */
-  for(dir=0; dir<3; dir++)
+  /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
+  if(pt_typ_root)
   {
-    int typ;
-
-    /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
-    typ = choose_patch_points(mesh, p);
-    pat->pt_typ[dir] = typ;
+    for(dir=0; dir<3; dir++) pt_typ[dir] = pt_typ_root[dir];
+  }
+  else
+  {
+    int typ = choose_patch_points(mesh, p);
+    for(dir=0; dir<3; dir++) pt_typ[dir] = typ;
   }
 
   /* setup root node */
-  pat->rnode = make_root_node(pat, nroot, datrank);
+  pat->rnode = make_root_node(pat, pt_typ, nroot, datrank);
   /* add root node to global mesh->lns list */
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
@@ -469,7 +472,7 @@ int setup_l2_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   remove_all_patches(mesh);
-  add_patch(mesh, bbox, n, 0);
+  add_patch(mesh, bbox, pt_typ, n, 0);
 
   make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
 
@@ -509,9 +512,9 @@ int setup_3patchl2_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   remove_all_patches(mesh);
-  add_patch(mesh, bbox0, n, 0);
-  add_patch(mesh, bbox1, n, 0);
-  add_patch(mesh, bbox2, n, 0);
+  add_patch(mesh, bbox0, pt_typ, n, 0);
+  add_patch(mesh, bbox1, pt_typ, n, 0);
+  add_patch(mesh, bbox2, pt_typ, n, 0);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
@@ -656,7 +659,7 @@ int setup_test_mesh(tMesh *mesh)
 //tNode *tnode = alloc_node();
 //mesh->pat[0]->rnode = 0;
   //realloc_patlist_in_mesh(mesh, 1);
-  add_patch(mesh, bbox, n, 0);
+  add_patch(mesh, bbox, pt_typ, n, 0);
 
   enablevar(mesh, Ind("SurfExchange_u"));
   enablevar(mesh, Ind("SurfExchange_v"));
