@@ -502,8 +502,9 @@ tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3])
 }
 
 /* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
    should be called for all 8 siblings */
-void update_node_n_pt_typ(tNode *node, int n[3], int *pt_typ)
+void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
 {
   tMesh *mesh = node->pat->mesh;
   int nvdb = mesh->nvdb;
@@ -514,8 +515,11 @@ void update_node_n_pt_typ(tNode *node, int n[3], int *pt_typ)
   memcpy(node_old, node, sizeof(node_old[0]));
 
   /* update node info */
-  for(d=0; d<3; d++) node->n[d] = n[d];
-  node->np = n[0] * n[1] * n[2];
+  if(n)
+  {
+    for(d=0; d<3; d++) node->n[d] = n[d];
+    node->np = n[0] * n[1] * n[2];
+  }
   if(pt_typ)
     for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
 
@@ -566,8 +570,9 @@ void update_node_n(tNode *node, int n[3])
 }
 
 /* update node->n (and possibly node->pt_typ) on all 8 siblings,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
    must be called by all MPI procs */
-void update8_node_n_pt_typ(tNode *node, int n[3], int *pt_typ)
+void update8_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
 {
   tNode *parent = node->parent;
 
