@@ -319,8 +319,8 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double rf_surf1 = 0.25;
   double rf_surf2 = 0.25;
   double dc = Getd(Par("amr_CubedSphere_dc"));
-  double csize = 0.375;
-  double ssfac = 4.;
+  double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
+  double ssfac = Getd(Par("amr_CubedSphere_r0fac")); //DNSdata_OuterShellStart
   double obfac = 6.; // 10000 in DNSdata
   double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };

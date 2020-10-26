@@ -29,6 +29,8 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_nmax", "55", "max number of points in all 3 dir. in one node");
   AddPar("amr_BoxMesh_xc", "0 0 0", "center for boxes");
   AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
+  AddPar("amr_CubedSphere_r0fac", "4", "size factor for outer radius r0 of "
+         "cubed sphere patches: r0 = radiusfac*dc");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
