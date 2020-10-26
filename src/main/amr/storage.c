@@ -501,8 +501,9 @@ tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3])
   return nlist;
 }
 
-/* update node->n on one node, should be called for all 8 siblings */
-void update_node_n(tNode *node, int n[3])
+/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   should be called for all 8 siblings */
+void update_node_n_pt_typ(tNode *node, int n[3], int *pt_typ)
 {
   tMesh *mesh = node->pat->mesh;
   int nvdb = mesh->nvdb;
@@ -515,6 +516,8 @@ void update_node_n(tNode *node, int n[3])
   /* update node info */
   for(d=0; d<3; d++) node->n[d] = n[d];
   node->np = n[0] * n[1] * n[2];
+  if(pt_typ)
+    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
 
   /* if node has dat, we need to interpolate vars */
   if(node_old->dat)
@@ -556,8 +559,15 @@ void update_node_n(tNode *node, int n[3])
   }
 }
 
-/* update node->n on all 8 siblings, must be called by all MPI procs */
-void update8_node_n(tNode *node, int n[3])
+/* update node->n on one node, should be called for all 8 siblings */
+void update_node_n(tNode *node, int n[3])
+{
+  update_node_n_pt_typ(node, n, NULL);
+}
+
+/* update node->n (and possibly node->pt_typ) on all 8 siblings,
+   must be called by all MPI procs */
+void update8_node_n_pt_typ(tNode *node, int n[3], int *pt_typ)
 {
   tNode *parent = node->parent;
 
@@ -568,13 +578,19 @@ void update8_node_n(tNode *node, int n[3])
     for(ijk=0; ijk<8; ijk++)
     {
       tNode *sib = parent->child[ijk];
-      update_node_n(sib, n);
+      update_node_n_pt_typ(sib, n, pt_typ);
     }
   }
   else
   {
-    update_node_n(node, n);
+    update_node_n_pt_typ(node, n, pt_typ);
   }
+}
+
+/* update node->n on all 8 siblings, must be called by all MPI procs */
+void update8_node_n(tNode *node, int n[3])
+{
+  update8_node_n_pt_typ(node, n, NULL);
 }
 
 /* remove children */
