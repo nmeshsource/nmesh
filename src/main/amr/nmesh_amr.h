@@ -302,7 +302,9 @@ enum
   PARENT_nO2_P1MOD,    /* use parent->n/2 + 1 or parent->n - 1 if n<=3 */
   GIVEN_n,             /* use a n given by the user */
   PARENT_n_P_LGL,      /* use same n as parent, and LGL gridpoints */
-  PARENT_n_P_UNIFORM   /* use same n as parent, and UNIFORM gridpoints */
+  PARENT_n_P_UNIFORM,  /* use same n as parent, and UNIFORM gridpoints */
+  GIVEN_n_P_LGL,       /* use given n, and LGL gridpoints */
+  GIVEN_n_P_UNIFORM    /* use given n, and UNIFORM gridpoints */
 };
 
 /* struct that holds refinement method */
