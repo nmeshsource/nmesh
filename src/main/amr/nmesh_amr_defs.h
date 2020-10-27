@@ -33,6 +33,6 @@
 #define CONST
 /* with gcc we can use the much better:
 #define CONST const
-   Because gcc has the proposed extenstion N 1923 mentioned in
-   http://www.open-std.org/jtc1/sc22/wg14/www/docs/sd3.htm
+   Because gcc has the proposed extensions N1923 and N2497 see e.g.:
+   http://www.open-std.org/JTC1/SC22/wg14/www/wg14_document_log.htm
    But with the 2019 icc "#define CONST const" results in warnings! */
