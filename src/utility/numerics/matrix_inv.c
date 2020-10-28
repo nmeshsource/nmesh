@@ -16,8 +16,9 @@ int gaussjordan_inv(int n, double a[])
   int *indxc = imalloc(n);
   int *indxr = imalloc(n);
   int *ipiv  = imalloc(n);
-  int i,icol,irow,j,k,l,ll;
-  double big,dum,pivinv,temp;
+  double big, dum, pivinv, temp;
+  int i,j,k,l,ll;
+  int icol=0, irow=0; /* useless init so gcc-8.3.0 doesn't warn with -O3 */
 
   for(j=0;j<n;j++) ipiv[j]=0;
   for(i=0;i<n;i++)
@@ -56,7 +57,8 @@ int gaussjordan_inv(int n, double a[])
       a[ll+icol*n]=0.0;
       for(l=0;l<n;l++) a[ll+l*n] -= a[icol+l*n]*dum;
     }
-  }
+  } /* end for i loop */
+
   for(l=n-1;l>=0;l--)
   {
     if(indxr[l] != indxc[l])
