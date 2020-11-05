@@ -537,9 +537,17 @@ int evolve_mesh(tMesh *mesh)
 /* finalize mesh */
 int finalize_mesh(tMesh *mesh)
 {
+  /* run funcs in last func bin (they may still need the mesh) */
   RunFun(FINALIZEMESH);
-  free_mesh_contents(mesh);
+
+  /* get rid of most things except for func skelton an then run last bin */
+  free_mesh_contents_exceptMeshFuns(mesh);
   RunFun(POST_FINALIZEMESH);
+
+  /* now remove func skeleton, and erase mesh contents */
+  remove_all_MeshFuns(mesh);
+  memset(mesh, 0, sizeof(mesh[0]));
+
   if(0) prTimeIn_s("WallTime at end of finalize_mesh: ");
   return 0;
 }

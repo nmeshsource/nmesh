@@ -138,6 +138,9 @@ int free_gridpoints(tMesh *mesh)
     free(gridpoints->WL[typ]);
   }
 
+  /* now set all in gridpoints back to 0 */
+  memset(gridpoints, 0, sizeof(gridpoints[0]));
+
   return 0;
 }
 

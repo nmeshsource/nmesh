@@ -924,8 +924,8 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
   memset(&(mesh->myln[0]), 0, sizeof(mesh->myln[0]));
 }
 
-/* free mesh contents */
-void free_mesh_contents(tMesh *mesh)
+/* free mesh contents, except for MeshFuns that make up func skeleton */
+void free_mesh_contents_exceptMeshFuns(tMesh *mesh)
 {
   if(!mesh) return;
 
@@ -940,22 +940,34 @@ void free_mesh_contents(tMesh *mesh)
   free_mesh_pdb_contents(mesh);
   free(mesh->pdb);
 
-  /* free skeleton in mesh */
-  remove_all_MeshFuns(mesh);
-
   /* free mesh mutex */
   MUTEX_DESTROY(mesh->mutex);
+}
+
+/* free all mesh contents */
+void free_all_mesh_contents(tMesh *mesh)
+{
+  if(!mesh) return;
+
+  if(PR) PRFs(":\n");
+
+  free_mesh_contents_exceptMeshFuns(mesh);
+
+  /* free skeleton in mesh */
+  remove_all_MeshFuns(mesh);
 
   /* now set all in mesh back to 0 */
   memset(mesh, 0, sizeof(mesh[0]));
 }
 
 /* free mesh */
+/*
 void free_mesh(tMesh *mesh)
 {
   free_mesh_contents(mesh);
   free(mesh);
 }
+*/
 
 /**********************************************************************/
 /* storage for lists of nodes */
