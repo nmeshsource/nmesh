@@ -11,7 +11,7 @@ int nmesh_basis(tMesh *mesh)
 
   /* functions */
   AddFun(FIRST, init_gridpoints);
-  AddFun(FINALIZEMESH, free_gridpoints);
+  AddFun(POST_FINALIZEMESH, free_gridpoints);
   AddFun(POST_PARAMETERS, basis_init_globals);
 
   /* variables */

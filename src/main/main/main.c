@@ -539,12 +539,13 @@ int finalize_mesh(tMesh *mesh)
 {
   RunFun(FINALIZEMESH);
   free_mesh_contents(mesh);
+  RunFun(POST_FINALIZEMESH);
   if(0) prTimeIn_s("WallTime at end of finalize_mesh: ");
   return 0;
 }
 
 
-/* finalize all and the exit with code ec */
+/* finalize all and then exit with code ec */
 void finalize_all_and_exit(tMesh *mesh, int ec)
 {
   finalize_mesh(mesh);
