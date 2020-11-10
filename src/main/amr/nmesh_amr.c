@@ -28,14 +28,12 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_n2", "5", "number of points in dir. 2 in one node");
   AddPar("amr_nmax", "55", "max number of points in all 3 dir. in one node");
   AddPar("amr_BoxMesh_xc", "0 0 0", "center for boxes");
+  AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
   AddPar("amr_CubedSphere_r0fac", "4", "size factor for outer radius r0 of "
          "cubed sphere patches: r0 = r0fac*dc");
   AddPar("amr_CubedSphere_r1fac", "6", "size factor for outer radius r1 of "
          "cubed sphere patches: r1 = r1fac*dc");
-  AddPar("amr_OuterShell_stretch", "yes", "whether we use stretched "
-         "cubed spheres for outermost shell [yes,no]");
-  AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
   AddPar("amr_uniform_p", "", "patch list where we use uniform grid spacing");
