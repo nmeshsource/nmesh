@@ -322,7 +322,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
   double ssfac = Getd(Par("amr_CubedSphere_r0fac")); //DNSdata_OuterShellStart
   double obfac = Getd(Par("amr_CubedSphere_r1fac")); //DNSdata_OuterBoundary
-  int stretch  = Getd(Par("amr_OuterShell_stretch"));
+  int stretch  = Getb(Par("amr_OuterShell_stretch"));
   double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
   double xc[] = { 0., 0., 0. };
