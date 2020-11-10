@@ -255,7 +255,7 @@ int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,1, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
   return pl;
 }
 
@@ -277,7 +277,7 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,1, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
   return pl;
 }
 
