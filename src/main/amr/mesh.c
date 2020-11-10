@@ -322,6 +322,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
   double ssfac = Getd(Par("amr_CubedSphere_r0fac")); //DNSdata_OuterShellStart
   double obfac = Getd(Par("amr_CubedSphere_r1fac")); //DNSdata_OuterBoundary
+  int stretch  = Getd(Par("amr_OuterShell_stretch"));
   double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
   double xc[] = { 0., 0., 0. };
@@ -373,12 +374,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
       two_spheres_around_empty_box_at_xc(mesh, xc,
-                                         rc, ssfac*dc, obfac*dc);
+                                         rc, ssfac*dc, obfac*dc, stretch);
       break;
     case 13:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      two_spheres_around_box_at_xc(mesh, xc, rc, ssfac*dc, obfac*dc);
+      two_spheres_around_box_at_xc(mesh, xc, rc, ssfac*dc, obfac*dc, stretch);
       break;
     /* 13 patches but with 2 centers as in sgrid:
     case 13:

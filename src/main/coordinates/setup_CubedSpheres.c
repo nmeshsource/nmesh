@@ -231,16 +231,16 @@ int sphere_around_full_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
   |            /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
   |           |      |     |      |   r1 is radius of outer sphere (sphere1)
   |           |      |_____|      |
-  |            \ __--       --__ /
-   \            \               /
-    |          _/\__         __/
+  |            \ __--       --__ /    if stretch=1 use xyz_of_rhoAB_CubSph
+   \            \               /     else         use lamAB_of_xyz_CubSph
+    |          _/\__         __/      in outermost CubedShell
      |       _/     \_______/
       \    _/
        -_ /
          \      ...
 */
 int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
-                                 double r0, double r1)
+                                 double r0, double r1, int stretch)
 {
   int pl;
   double Din[6], Dout[6];
@@ -255,13 +255,14 @@ int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,1, xc, Din,Dout);
   return pl;
 }
 
 /* same as two_spheres_around_box_at_xc, but put no box at center */
 int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
-                                       double dc[3], double r0, double r1)
+                                       double dc[3], double r0, double r1,
+                                       int stretch)
 {
   int pl;
   double Din[6], Dout[6];
@@ -276,7 +277,7 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
+  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,1, xc, Din,Dout);
   return pl;
 }
 

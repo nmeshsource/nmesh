@@ -33,6 +33,8 @@ int nmesh_amr(tMesh *mesh)
          "cubed sphere patches: r0 = r0fac*dc");
   AddPar("amr_CubedSphere_r1fac", "6", "size factor for outer radius r1 of "
          "cubed sphere patches: r1 = r1fac*dc");
+  AddPar("amr_OuterShell_stretch", "yes", "whether we use stretched "
+         "cubed spheres for outermost shell [yes,no]");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
