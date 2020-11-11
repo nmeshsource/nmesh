@@ -84,10 +84,10 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     rms    = sqrt( fabs(MeshVolumeIntegral(mesh,pat, vi, 2.,0) / Vol) );
 
     /* min, max and their positions xmin, xmax */
-    min = MeshExtremumLoc(mesh,pat, vi, 0, &p, nodeloc, &ijk, X);
+    min = MeshExtremumLoc(mesh,pat, vi, 0, &p, nodeloc, &ijk, X, xmin);
     node = node_from_location_str(mesh->pat[p], nodeloc);
     set_xyz(NULL, node, ijk, X, xmin);
-    max = MeshExtremumLoc(mesh,pat, vi, 1, &p, nodeloc, &ijk, X);
+    max = MeshExtremumLoc(mesh,pat, vi, 1, &p, nodeloc, &ijk, X, xmax);
     node = node_from_location_str(mesh->pat[p], nodeloc);
     set_xyz(NULL, node, ijk, X, xmax);
 

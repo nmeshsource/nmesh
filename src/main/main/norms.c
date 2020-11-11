@@ -119,12 +119,11 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
 
 /* compute max/min of var with index vind over a patch or mesh
    input: mesh, pat, vind, findMax
-   output: Mp, Mnodeloc, Mijk, MX[3]
-           output has max/min location, we can get x[3] by calling:
-           node = node_from_location_str(mesh->pat[Mp], Mnodeloc);
-           set_xyz(NULL, node, Mijk, MX, x); */
+   output: Mp, Mnodeloc, Mijk, MX[3], Mx[3]
+           output has max/min location */
 double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
-                       int *Mp, char Mnodeloc[104], int *Mijk, double *MX)
+                       int *Mp, char Mnodeloc[104], int *Mijk,
+                       double *MX, double *Mx)
 {
   tNode *Mnode=NULL;
   double Xb[3];
@@ -139,6 +138,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
     char nodeloc[104]; /* node location string */
     int ijk;
     double X[3];
+    double x[3];
   };
 
   union { /* union to convert Loc to char array */
@@ -162,6 +162,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   /* write local patch coords into MX and uloc, if we found a node */
   XbYbZb_of_ind(Mnode, *Mijk, Xb);
   XYZ_of_XbYbZb(Mnode, Xb, MX);
+  set_xyz(NULL, Mnode, *Mijk, MX, Mx);
   uloc->loc->p = Mnode->pat->p;
   node_location_str(Mnode, uloc->loc->nodeloc, 103);
 
@@ -170,6 +171,9 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   uloc->loc->X[0] = MX[0];
   uloc->loc->X[1] = MX[1];
   uloc->loc->X[2] = MX[2];
+  uloc->loc->x[0] = Mx[0];
+  uloc->loc->x[1] = Mx[1];
+  uloc->loc->x[2] = Mx[2];
 
   /* get global extr and rank into Mr */
   if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
@@ -186,6 +190,9 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   MX[0] = uloc->loc->X[0];
   MX[1] = uloc->loc->X[1];
   MX[2] = uloc->loc->X[2];
+  Mx[0] = uloc->loc->x[0];
+  Mx[1] = uloc->loc->x[1];
+  Mx[2] = uloc->loc->x[2];
 
   return Mr->extr;
 }

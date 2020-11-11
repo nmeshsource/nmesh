@@ -296,7 +296,8 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 double MeshMax(tMesh *mesh, tPat *pat, int vind);
 double MeshMin(tMesh *mesh, tPat *pat, int vind);
 double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
-                       int *Mp, char Mnodeloc[104], int *Mijk, double *MX);
+                       int *Mp, char Mnodeloc[104], int *Mijk,
+                       double *MX, double *Mx);
 
 /* main.c */
 int fs_sync(tMesh *mesh);
