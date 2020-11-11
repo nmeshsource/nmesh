@@ -547,7 +547,7 @@ double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
   if(isig<=0) return pat->CI->s[si];
 
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
-  if(ind>=0)
+  if(ind>=0 && node->dat)
   {
     int *n = node->n;    
     int k = kOfInd_n(ind,n);
@@ -575,7 +575,7 @@ void CubedSphere_dsigma_dAB(tPat *pat, tNode *node, int si, int ind,
   }
 
   /* if we are on a grid point (ind>=0), use value at this j,k, but i=p */
-  if(ind>=0)
+  if(ind>=0 && node->dat)
   {
     int *n = node->n;    
     int k = kOfInd_n(ind,n);
