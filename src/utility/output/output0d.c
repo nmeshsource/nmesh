@@ -74,7 +74,6 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   {
     int vi = vl->index[vli];
     char *name = VarName(vi);
-    tNode *node;
 
     /* get volume only once */
     if(vli==0) Vol = MeshVolumeIntegral(mesh,pat, vi, 0.,0);
@@ -85,11 +84,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
 
     /* min, max and their positions xmin, xmax */
     min = MeshExtremumLoc(mesh,pat, vi, 0, &p, nodeloc, &ijk, X, xmin);
-    node = node_from_location_str(mesh->pat[p], nodeloc);
-    set_xyz(NULL, node, ijk, X, xmin);
     max = MeshExtremumLoc(mesh,pat, vi, 1, &p, nodeloc, &ijk, X, xmax);
-    node = node_from_location_str(mesh->pat[p], nodeloc);
-    set_xyz(NULL, node, ijk, X, xmax);
 
     /* maxAbs and its pos. */
     if(fabs(max)>fabs(min))
