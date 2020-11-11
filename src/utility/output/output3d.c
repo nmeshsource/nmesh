@@ -10,57 +10,63 @@
 /* 3d output */
 void output3d_vl(tVarList *vl, int It, double T)
 {
-  tMesh *mesh = vl->mesh;
-  int fmt = Par("3dformat");
-  int xdmf = Getv(fmt, "xdmf");
-  int vtk  = Getv(fmt, "vtk");
-/*
-  int gnuplot = Getv(fmt, "gnuplot");
-  int text    = Getv(fmt, "text");
-  int binary  = Getv(fmt, "binary");
-  int flt     = Getv(fmt, "float");
-  int dbl     = Getv(fmt, "double");
-*/
-
-  TIMER_START;
-
-  if(vtk)
+  if(vl)
   {
-    int vli;
-    for(vli=0; vli<vl->n; vli++)
+    tMesh *mesh = vl->mesh;
+    int fmt = Par("3dformat");
+    int xdmf = Getv(fmt, "xdmf");
+    int vtk  = Getv(fmt, "vtk");
+    /*
+    int gnuplot = Getv(fmt, "gnuplot");
+    int text    = Getv(fmt, "text");
+    int binary  = Getv(fmt, "binary");
+    int flt     = Getv(fmt, "float");
+    int dbl     = Getv(fmt, "double");
+    */
+
+    TIMER_START;
+
+    if(vtk)
     {
-      int vi = vl->index[vli];
-      char *vname = VarName(vi);
-      vtk_output3d_meshvar(mesh, vname, It, T);
+      int vli;
+      for(vli=0; vli<vl->n; vli++)
+      {
+        int vi = vl->index[vli];
+        char *vname = VarName(vi);
+        vtk_output3d_meshvar(mesh, vname, It, T);
+      }
     }
-  }
-  if(xdmf)
-  {
-    output3d_xdmf(vl, It, T);
-  }
+    if(xdmf)
+    {
+      output3d_xdmf(vl, It, T);
+    }
 
-  TIMER_STOP;
+    TIMER_STOP;
+  }
 }
 
 /* 3d output of coeffs */
 void outputco_vl(tVarList *vl, int It, double T)
 {
-  tMesh *mesh = vl->mesh;
-  int fmt = Par("coformat");
-  int vtk  = Getv(fmt, "vtk");
-
-  TIMER_START;
-
-  if(vtk)
+  if(vl)
   {
-    int vli;
-    for(vli=0; vli<vl->n; vli++)
-    {
-      int vi = vl->index[vli];
-      char *vname = VarName(vi);
-      vtk_output3dcoef_meshvar(mesh, vname, It, T);
-    }
-  }
+    tMesh *mesh = vl->mesh;
+    int fmt = Par("coformat");
+    int vtk  = Getv(fmt, "vtk");
 
-  TIMER_STOP;
+    TIMER_START;
+
+    if(vtk)
+    {
+      int vli;
+      for(vli=0; vli<vl->n; vli++)
+      {
+        int vi = vl->index[vli];
+        char *vname = VarName(vi);
+        vtk_output3dcoef_meshvar(mesh, vname, It, T);
+      }
+    }
+
+    TIMER_STOP;
+  }
 }

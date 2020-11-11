@@ -13,19 +13,22 @@ extern tOutput output[1];
 /* 0d output */
 void output0d_vl(tVarList *vl, int It, double T)
 {
-  tMesh *mesh = vl->mesh;
-  int pi;
+  if(vl)
+  {
+    tMesh *mesh = vl->mesh;
+    int pi;
 
-  TIMER_START;
+    TIMER_START;
 
-  /* 0d output for mesh */
-  output0d_mesh_vl(vl,NULL, It, T);
+    /* 0d output for mesh */
+    output0d_mesh_vl(vl,NULL, It, T);
 
-  /* 0d output for each patch separately */
-  forpatches(mesh, pi)
-    output0d_mesh_vl(vl, mesh->pat[pi], It, T);
+    /* 0d output for each patch separately */
+    forpatches(mesh, pi)
+      output0d_mesh_vl(vl, mesh->pat[pi], It, T);
 
-  TIMER_STOP;
+    TIMER_STOP;
+  }
 }
 
 

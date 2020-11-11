@@ -85,9 +85,6 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   int d, vi, vi0;
   tVarList *vl[Nout];    /* varlists for 0d,1d,2d,3d,... */
 
-  /* varlists of 0d,1d,2d,3d output */  
-  for(d = 0; d < Nout; d++) vl[d] = vlalloc(mesh);
-
   /* par values in strings */
   for(d = 0; d < Nout; d++)
   {
@@ -104,9 +101,12 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
   /* d=0: 0d output, d=1: 1d output, d=2: 2d output, ... */
   for(d=0; d<Nout; d++)
   {
+    vl[d] = NULL; /* set output varlist to NULL */
+
     if(TimeForMeshOutput_di_dt(mesh, di[d], dt[d]))
     {
-      //printf("2dout ... |%s|\n", ou[d]);
+      vl[d] = vlalloc(mesh); /* time for output -> alloc output varlist */
+
       start=0;
       while(sscanf(ou[d]+start, "%s", str)==1)
       {
