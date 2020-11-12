@@ -255,7 +255,7 @@ int finit(double x)
   //printf(" %lx ", ud.bits);
 
   /* According to IEEE 754:
-     NaN starts with 7FF0, 7FF8, 7FFF. -NaN starts with FFF0, FFF8, FFFF.
+     NaN starts with 7FF0, 7FF8 or 7FFF. -NaN starts with FFF0, FFF8 or FFFF.
      Inf starts with 7FF0. -Inf starts with FFF0. */
   if((ud.bits | 0x800FFFFFFFFFFFFF) == 0xFFFFFFFFFFFFFFFF)
     return 0;
