@@ -193,7 +193,7 @@ int coordinates_init_node(tNode *node)
     if(pat->dXYZ_dxyz)
     {
       pat->dXYZ_dxyz(pat, node, -1, X, x, dXdx);
-      if(0) if( !isfinite(x[0]) || !isfinite(x[1]) || !isfinite(x[2]) )
+      if(0) if( !finit(x[0]) || !finit(x[1]) || !finit(x[2]) )
       {
         printpatch(pat);
         printCI(pat);

@@ -135,7 +135,7 @@ int FSurf_CubSph_sigma01_derivs(tPat *pat, int si, double AB[2],
       Icsdth = csdth[ijk];
       Icdphi = cdphi[ijk++];
 /*
-if(!isfinite(Rcsdth+Rcdphi+Icsdth+Icdphi))
+if(!finit(Rcsdth+Rcdphi+Icsdth+Icdphi))
 {
 printf("l=%d m=%d ijk=%d Rcsdth=%g Rcdphi=%g Icsdth=%g Icdphi=%g\n",
 l,m,ijk, Rcsdth,Rcdphi,Icsdth,Icdphi);
@@ -184,7 +184,7 @@ errorexit("NAN!");
   free(ImYtab);
   free(ReYtab);
 /*
-if(!isfinite(dsig[0]) || !isfinite(dsig[1]))
+if(!finit(dsig[0]) || !finit(dsig[1]))
 {
 printf("fth=%g fp=%g dThetadA=%g dThetadB=%g dPhidA=%g dPhidB=%g\n",
 fth,fp, dThetadA,dThetadB, dPhidA,dPhidB);

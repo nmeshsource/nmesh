@@ -144,7 +144,7 @@ int limiter_MRS(tNode *node, tVarList *vl)
     qbar = var_nodeaverage(node, iq);
 //printf("qbar=%g theta_i=%g\n", qbar, theta_i);
 //exit(88);
-if(!isfinite(qbar) || !isfinite(theta_i))
+if(!finit(qbar) || !finit(theta_i))
 {
 printf("qbar=%g theta_i=%g\n", qbar, theta_i);
 errorexit("qbar or theta_i is not finite!");

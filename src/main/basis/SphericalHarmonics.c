@@ -338,7 +338,7 @@ void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
       csdth[i]   = Rcld;
       csdth[i+1] = Icld;
 /*
-if(!isfinite(Rcld+Icld))
+if(!finit(Rcld+Icld))
 {
 printf("Rcld=%g Icld=%g\n",
 Rcld,Icld);

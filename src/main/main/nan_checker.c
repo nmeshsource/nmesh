@@ -21,7 +21,7 @@ int array_finite(tArray *a, char *name, int ijk[3])
 
   forarray(a, ind)
   {
-    if(!isfinite(d[ind]))
+    if(!finit(d[ind]))
     {
       int k = kOfInd_n(ind,n);
       int j = jOfInd_n_k(ind,n,k);
