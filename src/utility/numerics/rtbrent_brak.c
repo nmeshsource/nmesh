@@ -1,8 +1,8 @@
 /* rtbrent_brak.c,  Wolfgang Tichy 6/2019 */
 
-#include <stdio.h>
-#include <math.h>
-#define DBL_EPSILON 1e-14 /* machine double floating point precision */
+#include "nmesh.h"
+#include "numerics.h"
+#define DOUBLE_EPS 1e-14 /* machine double floating point precision */
 
 /* find root using Brent's method with bracketing in [x1,x2]:
 
@@ -26,7 +26,7 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
   int iter, bisect;
 
  /* check bracket for NANs */
-  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  if( (!finit(x1)) || (!finit(x2)) )
   {
     if(pr) printf("rtbrent_brak: Bracket is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);
@@ -64,7 +64,7 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
     }
 
     /* check if c-b is very small, i.e. for convergence */
-    tol = 2.*DBL_EPSILON*fabs(b) + 0.5*xacc;
+    tol = 2.*DOUBLE_EPS*fabs(b) + 0.5*xacc;
     xm = 0.5*(c - b);
     if(fabs(xm) <= tol || fb == 0.)
     {

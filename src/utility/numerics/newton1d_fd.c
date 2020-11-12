@@ -1,7 +1,7 @@
 /* newton1d_fd.c,  Wolfgang Tichy 6/2019 */
 
-#include <stdio.h>
-#include <math.h>
+#include "nmesh.h"
+#include "numerics.h"
 
 
 /* funcs needed */
@@ -57,7 +57,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
   double tmp;
 
   /* check bracket */
-  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  if( (!finit(x1)) || (!finit(x2)) )
   {
     if(pr) printf("newton1d_fd_region: Region is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);
@@ -94,11 +94,11 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
     df = fd_deriv(xrt, f, func, par);
 
     /* catch special cases */
-    if(!isfinite(f)) { return -j; }
+    if(!finit(f)) { return -j; }
     if(f == 0.0) { *x0=xrt; return j; }
 
     /* test if Newton step could be possible */
-    if( !isfinite(df) ) badstep = 1;
+    if( !finit(df) ) badstep = 1;
     else                badstep = 0;
 
     if(badstep==0) /* try Newton step */
@@ -150,7 +150,7 @@ int find_2roots_region(double x0[2],
   int ret=-1;
 
   /* check bracket */
-  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  if( (!finit(x1)) || (!finit(x2)) )
   {
     if(pr) printf("find_2roots_region: Region is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);

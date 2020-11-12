@@ -1,7 +1,7 @@
 /* newton1d_brak.c,  Wolfgang Tichy 6/2019 */
 
-#include <stdio.h>
-#include <math.h>
+#include "nmesh.h"
+#include "numerics.h"
 
 
 /* Newton-Raphson with bracketing in [x1,x2]:
@@ -25,7 +25,7 @@ int newton1d_brak(double *x0,
   double tmp;
 
   /* check bracket */
-  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  if( (!finit(x1)) || (!finit(x2)) )
   {
     if(pr) printf("newton1d_brak: Bracket is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);
@@ -70,14 +70,14 @@ int newton1d_brak(double *x0,
     (*fdf)(xrt, par, &f, &df);
 
     /* catch special cases */
-    if(!isfinite(f)) { return -j; }
+    if(!finit(f)) { return -j; }
     if(f == 0.0) { *x0=xrt; return j; }
 
     if(f < 0.0) xl=xrt;
     else        xh=xrt;
 
     /* test if Newton step could be possible */
-    if( !isfinite(df) ) bisect = 1;
+    if( !finit(df) ) bisect = 1;
     else                bisect = (fabs(2.0*f) > fabs(dxold*df));
     /* note: if df=0 and f!=0 the "else" case sets bisect=1 */
 
@@ -127,7 +127,7 @@ int rtbisect(double *x0, double (*func)(double,void *par),
   double f,fh,fl, xh,xl, xrt, dx,dxold;
 
   /* check bracket */
-  if( (!isfinite(x1)) || (!isfinite(x2)) )
+  if( (!finit(x1)) || (!finit(x2)) )
   {
     if(pr) printf("rtbisect: Bracket is not finite!  "
                   "x1=%g x2=%g\n", x1,x2);
@@ -172,7 +172,7 @@ int rtbisect(double *x0, double (*func)(double,void *par),
     f= (*func)(xrt, par);
 
     /* catch special cases */
-    if(!isfinite(f)) { return -j; }
+    if(!finit(f)) { return -j; }
     if(f == 0.0) { *x0=xrt; return j; }
 
     if(f < 0.0) xl=xrt;
