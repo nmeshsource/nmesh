@@ -155,25 +155,30 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   //printf("mr->extr=%g\n", mr->extr);
   //printf("Mnode=%p *Mijk=%d\n", Mnode, *Mijk);
 
-  /* If we can't find a node just set Mnode to first node on this MPI proc,
-     since in that case another MPI proc must have found something... */
-  if(!Mnode) Mnode = MyLnode0;
+  if(Mnode)
+  {
+    /* write local patch coords into MX and uloc, if we found a node */
+    XbYbZb_of_ind(Mnode, *Mijk, Xb);
+    XYZ_of_XbYbZb(Mnode, Xb, MX);
+    set_xyz(NULL, Mnode, *Mijk, MX, Mx);
+    uloc->loc->p = Mnode->pat->p;
+    node_location_str(Mnode, uloc->loc->nodeloc, 103);
 
-  /* write local patch coords into MX and uloc, if we found a node */
-  XbYbZb_of_ind(Mnode, *Mijk, Xb);
-  XYZ_of_XbYbZb(Mnode, Xb, MX);
-  set_xyz(NULL, Mnode, *Mijk, MX, Mx);
-  uloc->loc->p = Mnode->pat->p;
-  node_location_str(Mnode, uloc->loc->nodeloc, 103);
-
-  /* write local results into uloc */
-  uloc->loc->ijk  = *Mijk;
-  uloc->loc->X[0] = MX[0];
-  uloc->loc->X[1] = MX[1];
-  uloc->loc->X[2] = MX[2];
-  uloc->loc->x[0] = Mx[0];
-  uloc->loc->x[1] = Mx[1];
-  uloc->loc->x[2] = Mx[2];
+    /* write local results into uloc */
+    uloc->loc->ijk  = *Mijk;
+    uloc->loc->X[0] = MX[0];
+    uloc->loc->X[1] = MX[1];
+    uloc->loc->X[2] = MX[2];
+    uloc->loc->x[0] = Mx[0];
+    uloc->loc->x[1] = Mx[1];
+    uloc->loc->x[2] = Mx[2];
+  }
+  else
+  {
+    /* If we can't find a node just set uloc to zero, since in that case
+       another MPI proc must have found something... */
+    memset(&(uloc[0]), 0, sizeof(uloc[0]));
+  }
 
   /* get global extr and rank into Mr */
   if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
