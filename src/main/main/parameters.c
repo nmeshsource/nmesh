@@ -64,7 +64,7 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
   file_exists = 1;
   buffer = NULL;
   nbuffer = 0;
-  if(Rank0)
+  if(Rank0_or_NoMPI)
   {
     fp = fopen(parfile, "r");
     if(!fp)
@@ -109,7 +109,7 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
 
   /* broadcast buffer to all MPI ranks */
   nMPI_Bcast(&nbuffer,1, nMPI_INT, 0);
-  if(!Rank0) buffer = calloc(nbuffer+2, sizeof(char));
+  if(!Rank0_or_NoMPI) buffer = calloc(nbuffer+2, sizeof(char));
   nMPI_Bcast(buffer,nbuffer+1, nMPI_CHAR, 0);
   if(0) { printf("%s", buffer); Yo(1); }
 

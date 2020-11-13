@@ -8,6 +8,7 @@
 /* redefine some things */
 #ifdef USEMPI
 
+#define Rank0_or_NoMPI Rank0
 #include <mpi.h>
 #define nMPI_COMM_WORLD MPI_COMM_WORLD
 #define nMPI_COMM_NULL  MPI_COMM_NULL
@@ -32,6 +33,7 @@
 
 #else
 
+#define Rank0_or_NoMPI 1
 #define nMPI_COMM_WORLD 0
 #define nMPI_COMM_NULL  0
 #define nMPI_Comm int
