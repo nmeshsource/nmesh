@@ -50,7 +50,7 @@ int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
   ind = array_finite(a, name, ijk);
   if(ind>=0)
   {
-    double Xb[3];
+    double Xb[3], X[3], x[3];
     tArray *nodeXb[3];
 
     /* get node points into nodeXb */
@@ -65,6 +65,10 @@ int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
       Xb[1] = nodeXb[1]->d[aj];
       Xb[2] = nodeXb[2]->d[ak];
       printf("problem at Xb = %g %g %g\n", Xb[0], Xb[1], Xb[2]);
+      XYZ_of_XbYbZb(node, Xb, X);
+      set_xyz(NULL, node, ind, X, x);
+      printf("  => X = %g %g %g,  x = %g %g %g\n",
+             X[0], X[1], X[2],  x[0], x[1], x[2]);
     }
     if(a->n[0] == 1)
     {
