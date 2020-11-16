@@ -96,7 +96,7 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
 
   /* add amount in dat->info */
   sizeofinfo = sizeof(dat->info);
-  *ndoubles += (sizeofinfo / sizeof(double)) + (sizeofinfo % sizeof(double));
+  *ndoubles += (sizeofinfo + sizeof(double)-1)/sizeof(double);
 
   return nvars;
 }
@@ -146,7 +146,7 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
   sizeofinfo = sizeof(dat->info);
   buf[bi++] = sizeofinfo;
   memcpy(buf+bi, dat->info, sizeofinfo);
-  bi += (sizeofinfo / sizeof(double)) + (sizeofinfo % sizeof(double));
+  bi += (sizeofinfo + sizeof(double)-1)/sizeof(double);
 
   /* return pointer to this buffer, and its length */
   *buflen = bi;
