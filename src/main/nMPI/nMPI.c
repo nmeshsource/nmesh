@@ -434,6 +434,8 @@ tCom *alloc_com(int entrysize, int free_buf)
 {
   tCom *com;
 
+  if(PR) PRFs(":\n");
+
   com = calloc(1, sizeof(tCom));
   if(!com) errorexit("out of memory for com");
   com->entrysize = entrysize;
@@ -446,6 +448,8 @@ tCom *alloc_com(int entrysize, int free_buf)
 void free_com(tCom *com)
 {
   int i;
+
+  if(PR) PRFs(":\n");
 
   if(!com) return;
 
@@ -471,6 +475,8 @@ void free_com(tCom *com)
 void realloc_com_reqs(tCom *com, int n_rq_new)
 {
   int n_rq;
+
+  if(PR) { PRF;printf(": n_rq_new=%d\n", n_rq_new); }
 
   if(!com) return;
   n_rq = com->n_rq;
@@ -547,6 +553,9 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
 void print_com(tCom *com)
 {
   int n_rq = com->n_rq;
+
+  if(PR) PRFs(":\n");
+
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
          (void *) com, n_rq, com->send_i, com->recv_i);
 #ifndef USEMPI
@@ -560,6 +569,8 @@ void print_com(tCom *com)
 /* set free_buf flag in com */
 void set_free_buf_in_com(tCom *com, int free_buf)
 {
+  if(PR) { PRF;printf(": free_buf=%d\n", free_buf); }
+
   com->free_buf  = free_buf;
 }
 
@@ -567,6 +578,8 @@ void set_free_buf_in_com(tCom *com, int free_buf)
 void put_buffers_in_com(tCom *com, int rq,
                         void *sbuf, int slen, void *rbuf, int rlen)
 {
+  if(PR) PRFs(":\n");
+
   com->send_buf[rq] = sbuf;
   com->send_buflen[rq] = slen;
   com->recv_buf[rq] = rbuf;
@@ -577,6 +590,9 @@ void put_buffers_in_com(tCom *com, int rq,
 int append_buffers_to_com(tCom *com, void *sbuf,int slen, void *rbuf,int rlen)
 {
   int rq = com->n_rq;
+
+  if(PR) PRFs(":\n");
+
   realloc_com_reqs(com, rq + 1);
   put_buffers_in_com(com, rq, sbuf,slen, rbuf,rlen);
   return rq;
