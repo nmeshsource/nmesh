@@ -4,6 +4,8 @@
 #include "nmesh.h"
 #include "amr.h"
 
+#define PR 0
+
 
 /* use gridpoints from basis/gridpoints.c */
 extern tGridPoints gridpoints[1];
@@ -79,6 +81,8 @@ int amr_print_thread_info(tMesh *mesh)
 /* init exchange */
 void MPIexchange_init_all_myln(tMesh *mesh)
 {
+  if(PR) PRFs(":\n");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
@@ -94,6 +98,8 @@ void MPIexchange_init_all_myln(tMesh *mesh)
 /* set some local data */
 void MPIexchange_set_all_myln_localdata(tMesh *mesh)
 {
+  if(PR) PRFs(":\n");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
@@ -109,6 +115,8 @@ void MPIexchange_set_all_myln_localdata(tMesh *mesh)
 /* request exchange */
 void MPIexchange_request_all_myln_data(tMesh *mesh)
 {
+  if(PR) PRFs(":\n");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
@@ -125,6 +133,8 @@ void MPIexchange_request_all_myln_data(tMesh *mesh)
 /* get buffers */
 void MPIexchange_get_all_myln_data(tMesh *mesh)
 {
+  if(PR) PRFs(":\n");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
@@ -141,6 +151,8 @@ void MPIexchange_get_all_myln_data(tMesh *mesh)
 /* clean up after MPIexchange */
 void MPIexchange_free_all_myln(tMesh *mesh)
 {
+  if(PR) PRFs(":\n");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
