@@ -1393,7 +1393,7 @@ int calc_node_lid(tNode *node)
   tMesh *mesh = node->pat->mesh;
   long nnodes = mesh->nln;
   long size = nMPI_size();
-  long npr2 = 2*nnodes/size;
+  long npr2 = 2*nnodes/size + 1;
   long tmp = (node->nid) % npr2;
   int lid = tmp;
 
