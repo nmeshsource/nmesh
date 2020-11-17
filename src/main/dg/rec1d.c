@@ -27,10 +27,10 @@ double rec1d_m_1(int n, const double *u, int im, double u_scale)
 
 
 
-/* ideal weights and epsilon for WENO3,
+/* ideal weights*3 and epsilon for WENO3,
    taken from https://math.la.asu.edu/~gardner/weno.pdf */
-#define WENO3_id_gamma1 0.333333333333333333333333333
-#define WENO3_id_gamma2 0.666666666666666666666666667
+#define WENO3_3id_gamma1 1.
+#define WENO3_3id_gamma2 2.
 #define WENO3_epsilon 1e-6
 
 /* Interpolate a field u to midpoint at i+1/2 with index im.
@@ -56,8 +56,8 @@ double rec1d_p_WENO3(int n, const double *u, int im, double u_scale)
   double beta2_p_eps = beta2 + WENO3_epsilon*us2;
 
   /* non-normalized weights */
-  double omegab1 = WENO3_id_gamma1/(beta1_p_eps*beta1_p_eps);
-  double omegab2 = WENO3_id_gamma2/(beta2_p_eps*beta2_p_eps);
+  double omegab1 = WENO3_3id_gamma1/(beta1_p_eps*beta1_p_eps);
+  double omegab2 = WENO3_3id_gamma2/(beta2_p_eps*beta2_p_eps);
   double omegab_sum = omegab1 + omegab2;
 
   /* normalized weights */
@@ -95,8 +95,8 @@ double rec1d_m_WENO3(int n, const double *u, int im, double u_scale)
   double beta2_p_eps = beta2 + WENO3_epsilon*us2;
 
   /* non-normalized weights */
-  double omegab1 = WENO3_id_gamma2/(beta1_p_eps*beta1_p_eps);
-  double omegab2 = WENO3_id_gamma1/(beta2_p_eps*beta2_p_eps);
+  double omegab1 = WENO3_3id_gamma2/(beta1_p_eps*beta1_p_eps);
+  double omegab2 = WENO3_3id_gamma1/(beta2_p_eps*beta2_p_eps);
   double omegab_sum = omegab1 + omegab2;
 
   /* normalized weights */
