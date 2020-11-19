@@ -66,6 +66,28 @@ double Lagrange_of_x(int k, double x, int np,
   return prod * w_interp[k];
 }
 
+/* helpers: */
+/* product where we omit (x - x_p[l]), i.e. product in in Lagrange_of_x */
+double Lagrange_prod1(int l, double x, int np, const double *x_p)
+{
+  int q;
+  double prod = 1.;
+
+  for(q=0; q<np; q++) if(q!=l) prod *= (x - x_p[q]);
+  return prod;
+}
+
+/* product where we omit (x - x_p[l]) and (x - x_p[m])*/
+double Lagrange_prod2(int l, int m, double x, int np, const double *x_p)
+{
+  int q;
+  double prod = 1.;
+
+  for(q=0; q<np; q++) if(q!=l && q!=m) prod *= (x - x_p[q]);
+  return prod;
+}
+
+
 /***********************************************************************/
 /* interpolate */
 /***********************************************************************/

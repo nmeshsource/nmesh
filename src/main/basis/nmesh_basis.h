@@ -66,6 +66,8 @@ void Lagrange_winterp(int n, const double *x, double *w_interp);
 void Lagrange_DT(int n, const double *x, const double *w_interp, double *DT);
 double Lagrange_of_x(int k, double x, int np,
                      const double *x_p, const double *w_interp);
+double Lagrange_prod1(int l, double x, int np, const double *x_p);
+double Lagrange_prod2(int l, int m, double x, int np, const double *x_p);
 double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3]);
 double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
                                     double Cb[2]);
