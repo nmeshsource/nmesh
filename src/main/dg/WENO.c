@@ -176,6 +176,12 @@ void Shu_m_WENO3_weights(int np, const double *pt, int i, double d[2])
   d[1] = c3_02/c2_m11;
 }
 
+
+
+
+
+
+/* print the c_k_rj and the resulting WENO3 weights */
 int pr_c_k_rj(tMesh *mesh)
 {
   double pt[] = {0., 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8 };
@@ -185,7 +191,7 @@ int pr_c_k_rj(tMesh *mesh)
 
   PRF;printf(": np=%d cell boundary points\n", np);
 
-  i=2;
+  i=4;
   printf("i=%d:\n", i);
 
   k=2;
@@ -194,7 +200,7 @@ int pr_c_k_rj(tMesh *mesh)
     for(j=0; j<k; j++)
     {
       c = Shu_WENO_c_k_rj(np,pt, i, k, r, j);
-      printf("  k=%d: c_%d%d = %g\n", k, r,j, c);
+      printf("  c%d_%d%d = %g\n", k, r,j, c);
     }
 
   printf("i=%d:\n", i);
@@ -205,7 +211,7 @@ int pr_c_k_rj(tMesh *mesh)
     for(j=0; j<k; j++)
     {
       c = Shu_WENO_c_k_rj(np,pt, i, k, r, j);
-      printf("  k=%d: 6*c_%d%d = %g\n", k, r,j, 6.*c);
+      printf("  6*c%d_%d%d = %g\n", k, r,j, 6.*c);
     }
 
 
@@ -215,6 +221,13 @@ int pr_c_k_rj(tMesh *mesh)
   printf("m: d0=%g d1=%g   d0/d1=%g\n", d[0], d[1], d[0]/d[1]);
 
   i=1;
+  printf("i=%d:\n", i);
+  Shu_m_WENO3_weights(np,pt, i, d);
+  printf("m: d0=%g d1=%g   d0/d1=%g\n", d[0], d[1], d[0]/d[1]);
+  Shu_p_WENO3_weights(np,pt, i, d);
+  printf("p: d0=%g d1=%g   d0/d1=%g\n", d[0], d[1], d[0]/d[1]);
+
+  i=2;
   printf("i=%d:\n", i);
   Shu_m_WENO3_weights(np,pt, i, d);
   printf("m: d0=%g d1=%g   d0/d1=%g\n", d[0], d[1], d[0]/d[1]);
@@ -232,7 +245,6 @@ int pr_c_k_rj(tMesh *mesh)
   printf("i=%d:\n", i);
   Shu_p_WENO3_weights(np,pt, i, d);
   printf("p: d0=%g d1=%g   d0/d1=%g\n", d[0], d[1], d[0]/d[1]);
-
 
 exit(99);
   return 0;
