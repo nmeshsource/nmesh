@@ -255,20 +255,46 @@ double rec1d_m_WENO3_uniform(int n, const double *u, int im, double u_scale)
 
 
 
-
-
-
 /* Use WENO3 inside and WENO1 (i.e. just copying) near the boundary.
    Even if the stencil would fit we stay one more away from the boundary
    because the grid points at i=0 and i=n-1 are considerd to be moved in
    by h/4. */
-double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale)
+double rec1d_p_WENO3_if2away(int n, const double *u, int im, double u_scale)
 {
   if(im>1 && im<n-2) return rec1d_p_WENO3_uniform(n, u, im, u_scale);
   else               return rec1d_p_1(n, u, im, u_scale);
 }
-double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale)
+double rec1d_m_WENO3_if2away(int n, const double *u, int im, double u_scale)
 {
   if(im>0 && im<n-3) return rec1d_m_WENO3_uniform(n, u, im, u_scale);
   else               return rec1d_m_1(n, u, im, u_scale);
+}
+
+/* Use WENO3 inside and WENO1 (i.e. just copying) at the boundary.
+   The grid points at i=0 and i=n-1 are considerd to be moved in by h/4. */
+double rec1d_p_WENO3_if1away(int n, const double *u, int im, double u_scale)
+{
+  if(im>1 && im<n-2)
+  {
+    return rec1d_p_WENO3_uniform(n, u, im, u_scale);
+  }
+  else
+  {
+    if(im==1)         return rec1d_p_WENO3_at_im(n, u, im, u_scale);
+    else if(im==n-2)  return rec1d_p_WENO3_at_last_minus_l(n, u, 0, u_scale);
+    else              return rec1d_p_1(n, u, im, u_scale);
+  }
+}
+double rec1d_m_WENO3_if1away(int n, const double *u, int im, double u_scale)
+{
+  if(im>0 && im<n-3)
+  {
+    return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+  }
+  else
+  {
+    if(im==0)        return rec1d_m_WENO3_at_im(n, u, im, u_scale);
+    else if(im==n-3) return rec1d_m_WENO3_at_last_minus_l(n, u, 1, u_scale);
+    else             return rec1d_m_1(n, u, im, u_scale);
+  }
 }
