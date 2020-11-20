@@ -356,6 +356,215 @@ double LiuOsherChan_m_WENO3_weight_ratio(int np, const double *pt, int i)
   return numer/denom; /* C^j_0 /  C^j_1 */
 }
 
+
+
+/* Set WENO3 weights for interpolation from left to right (p).
+   We pass in the np face- and mid-points.
+   E.g.:
+       | x |   o   |   o   |   o   |   o   |   o   | x |
+   pt[0]  pt[1]   pt[2]   ...                          pt[np-1]
+
+   This func computes the np-2 sets of weights at the np-2 mid-points
+   i=0      i=1      ... i=(np-2)-1
+   pt[1]    pt[2]    ... pt[np-2]    */
+void set_mid_p_WENO3weights(int np, const double *pt, tWENO3weights **W3)
+{
+  int pr=0;
+  int i;
+
+  if(pr)
+  {
+    printf("\n");
+    PRFs(":\n");
+    printf("midpoints (including face points):\n");
+    for(i=-1; i<(np)-1; i++) printf("pt[%d]=%g  ", i, pt[i+1]);
+    printf("\n");
+  }
+
+  for(i=1; i<(np-2); i++)
+  {
+    int k, r, j;
+    double ratio;
+
+    k=2;
+    //printf("At midpoint with index i=%d:\n", i);
+    for(r=1; r>=0; r--)
+    {
+      for(j=0; j<k; j++)
+      {
+        double c = Shu_WENO_c_k_rj(np,pt, i, k, r, j);
+        W3[i]->lw[1-r][j] = c;
+      }
+    }
+    ratio = LiuOsherChan_p_WENO3_weight_ratio(np,pt, i);
+    W3[i]->optw[0] = 1.;
+    W3[i]->optw[1] = ratio;
+  }
+}
+/* Set WENO3 weights for interpolation from right to left (m). */
+void set_mid_m_WENO3weights(int np, const double *pt, tWENO3weights **W3)
+{
+  int pr=0;
+  int i;
+
+  if(pr)
+  {
+    printf("\n");
+    PRFs(":\n");
+    printf("midpoints (including face points):\n");
+    for(i=-1; i<(np)-1; i++) printf("pt[%d]=%g  ", i, pt[i+1]);
+    printf("\n");
+  }
+
+  for(i=0; i<(np-2)-1; i++)
+  {
+    int k, r, j;
+    double ratio;
+
+    k=2;
+    //printf("At midpoint with index i=%d:\n", i);
+    for(r=0; r>=-1; r--)
+    {
+      for(j=0; j<k; j++)
+      {
+        double c = Shu_WENO_c_k_rj(np,pt, i, k, r, j);
+        W3[i]->lw[-r][j] = c;
+      }
+    }
+    ratio = LiuOsherChan_m_WENO3_weight_ratio(np,pt, i);
+    W3[i]->optw[1] = 1.;
+    W3[i]->optw[0] = ratio;
+  }
+}
+/* print WENO3 weights in W3 */
+void pr_WENO3weights(int nm, tWENO3weights **W3)
+{
+  int i, l;
+  for(i=0; i<nm; i++)
+  {
+    printf("%d: ", i);
+    for(l=0; l<2; l++)
+      printf("lw[%d][]=%g %g  ",
+             l, W3[i]->lw[l][0], W3[i]->lw[l][1]);
+    printf(":  optw[]=%g %g\n",
+           W3[i]->optw[0], W3[i]->optw[1]);
+  }
+}
+
+/* allocate the WENO3 weights */
+tWENO3weights **alloc_WENO3weights(int nm)
+{
+  int i;
+  tWENO3weights **W3 = calloc(nm, sizeof(W3[0]));
+  for(i=0; i<nm; i++)
+    W3[i] = calloc(1, sizeof(W3[0][0]));
+  return W3;
+}
+/* free WENO3 weights */
+void free_WENO3weights(int nm, tWENO3weights **W3)
+{
+  int i;
+  for(i=0; i<nm; i++) free(W3[i]);
+  free(W3);
+}
+
+
+/* consider this grid:
+    | x |   o   |   o   |   o   |   o   |   o   | x |
+i:      0       1       2       3       4       5       <-- np-2 diff. i's
+   the bars are the cell boundaries and their coords are put into the
+   pt array below */
+void print_p_WENO3_weights(void)
+{
+  double pt[] = { 0., 0.5, 1.5, 2.5, 3.5, 4.5, 5. }; // grid example
+  int np = sizeof(pt)/sizeof(double);
+  int i;
+
+  printf("\n");
+  PRFs(":\n");
+  printf("midpoints (including face points):\n");
+  for(i=-1; i<(np)-1; i++) printf("pt[%d]=%g  ", i, pt[i+1]);
+  printf("\n");
+
+  for(i=1; i<(np-2); i++)
+  {
+    int k, r, j;
+    double d[2];
+
+    k=2;
+
+    printf("At midpoint with index i=%d:\n", i);
+    /* Shu_WENO_c_k_rj(int np, const double *pt, int i, int k, int r, int j) */
+    printf("  weights for 2 linear reconstructions:\n");
+    for(r=1; r>=0; r--)
+    {
+      printf("    reconstruction%d: ", 2-r);
+      for(j=0; j<k; j++)
+      {
+        double c = Shu_WENO_c_k_rj(np,pt, i, k, r, j);
+        printf("c%d_%d%d=%g ", k, r,j, c);
+      }
+      printf("\n");
+    }
+
+    Shu_p_WENO3_weights(np,pt, i, d);
+    printf("  p_WENO3: ideal WENO3 weights: d[0]=%g d[1]=%g\n", d[0], d[1]);
+    printf("  p_WENO3: ideal WENO3 weight ratio=%g\n",
+           LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
+  }
+
+  tWENO3weights **W3 = alloc_WENO3weights(np-2);
+  set_mid_p_WENO3weights(np,pt, W3);
+  pr_WENO3weights(np-2, W3);
+  free_WENO3weights(np-2, W3);
+}
+void print_m_WENO3_weights(void)
+{
+  double pt[] = { 0., 0.5, 1.5, 2.5, 3.5, 4.5, 5. };
+  int np = sizeof(pt)/sizeof(double);
+  int i;
+
+  printf("\n");
+  PRFs(":\n");
+  printf("midpoints (including face points):\n");
+  for(i=-1; i<(np)-1; i++) printf("pt[%d]=%g  ", i, pt[i+1]);
+  printf("\n");
+
+  for(i=0; i<(np-2)-1; i++)
+  {
+    int k, r, j;
+    double d[2];
+
+    k=2;
+
+    printf("At midpoint with index i=%d:\n", i);
+    /* Shu_WENO_c_k_rj(int np, const double *pt, int i, int k, int r, int j) */
+    printf("  weights for 2 linear reconstructions:\n");
+    for(r=0; r>=-1; r--)
+    {
+      printf("    reconstruction%d: ", 1-r);
+      for(j=0; j<k; j++)
+      {
+        double c = Shu_WENO_c_k_rj(np,pt, i, k, r, j);
+        printf("c%d_%d%d=%g ", k, r,j, c);
+      }
+      printf("\n");
+    }
+
+    Shu_m_WENO3_weights(np,pt, i, d);
+    printf("  m_WENO3: ideal WENO3 weights: d[0]=%g d[1]=%g\n", d[0], d[1]);
+    printf("  m_WENO3: ideal WENO3 weight ratio=%g\n",
+           LiuOsherChan_m_WENO3_weight_ratio(np,pt, i));
+  }
+
+  tWENO3weights **W3 = alloc_WENO3weights(np-2);
+  set_mid_m_WENO3weights(np,pt, W3);
+  pr_WENO3weights(np-2, W3);
+  free_WENO3weights(np-2, W3);
+}
+
+
+
 /* print the resulting WENO3 weights */
 int pr_weight_ratios(tMesh *mesh)
 {
@@ -391,6 +600,9 @@ int pr_weight_ratios(tMesh *mesh)
   i=np-3;
   printf("i=%d:\n", i);
   printf("p: ratio=%g\n", LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
+
+  print_p_WENO3_weights();
+  print_m_WENO3_weights();
 
   exit(99);
   return 0;
