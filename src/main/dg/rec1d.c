@@ -37,7 +37,7 @@ double rec1d_m_1(int n, const double *u, int im, double u_scale)
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain umid_p.
    We use u at the points i-1, i, i+1 */
-double rec1d_p_WENO3_uniform(int n, const double *u, int im, double u_scale)
+double rec1d_p_WENO3_uniform__old(int n, const double *u, int im, double u_scale)
 {
   /* u at 3 grid points around point i=im */
   double u_im1 = u[im-1];
@@ -76,7 +76,7 @@ double rec1d_p_WENO3_uniform(int n, const double *u, int im, double u_scale)
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m.
    We use u at the points i, i+1, i+2 */
-double rec1d_m_WENO3_uniform(int n, const double *u, int im, double u_scale)
+double rec1d_m_WENO3_uniform__old(int n, const double *u, int im, double u_scale)
 {
   /* u at 3 grid points around point i=im */
   double u_i   = u[im];
@@ -169,6 +169,20 @@ double rec1d_p_WENO3_at_last_minus_l(int n, const double *u, int l,
   return rec1d_p_WENO3(n,u, im, u_scale, W3);
 }
 
+/* use rec1d_p_WENO3 and set weights uniform grid */
+double rec1d_p_WENO3_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO3weight W3[1];
+  W3->lw[0][0] = -0.5;
+  W3->lw[0][1] = 1.5;
+  W3->lw[1][0] = 0.5;
+  W3->lw[1][1] = 0.5;
+  W3->optw[0] = WENO3_3id_gamma1;
+  W3->optw[1] = WENO3_3id_gamma2;
+  return rec1d_p_WENO3(n,u, im, u_scale, W3);
+}
+
+
 /* Interpolate a field u to midpoint i+1/2 with index im.
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m.
@@ -226,6 +240,18 @@ double rec1d_m_WENO3_at_last_minus_l(int n, const double *u, int l,
   return rec1d_m_WENO3(n,u, im, u_scale, W3);
 }
 
+/* use rec1d_m_WENO3 and set weights uniform grid */
+double rec1d_m_WENO3_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO3weight W3[1];
+  W3->lw[0][0] = 0.5;
+  W3->lw[0][1] = 0.5;
+  W3->lw[1][0] = 1.5;
+  W3->lw[1][1] = -0.5;
+  W3->optw[0] = WENO3_3id_gamma2;
+  W3->optw[1] = WENO3_3id_gamma1;
+  return rec1d_m_WENO3(n,u, im, u_scale, W3);
+}
 
 
 
@@ -238,11 +264,11 @@ double rec1d_m_WENO3_at_last_minus_l(int n, const double *u, int l,
    by h/4. */
 double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>1 && im<n-2) return rec1d_p_WENO3_uniform(n, u, im, u_scale);
+  if(im>1 && im<n-2) return rec1d_p_WENO3_uniform__old(n, u, im, u_scale);
   else               return rec1d_p_1(n, u, im, u_scale);
 }
 double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>0 && im<n-3) return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+  if(im>0 && im<n-3) return rec1d_m_WENO3_uniform__old(n, u, im, u_scale);
   else               return rec1d_m_1(n, u, im, u_scale);
 }

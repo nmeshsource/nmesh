@@ -24,8 +24,6 @@ typedef struct WENOweights {
 } tWENOweights;
 
 /* funcs in WENO.c */
-//void WENOweights_global_init(void);
-//void WENOweights_global_free(void);
 int WENOweights_init_globals(tMesh *mesh);
 int WENOweights_free_globals(tMesh *mesh);
 tWENO3weight *WENOweights_global_p_WENO3_at_(int i);
