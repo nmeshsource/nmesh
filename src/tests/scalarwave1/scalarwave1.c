@@ -746,8 +746,16 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   if(rec_WENO3_1)
   {
     /* use WENO3_1 from both sides of midpoint at i0m */
-    rec1d_p = rec1d_p_WENO3_if2away;
-    rec1d_m = rec1d_m_WENO3_if2away;
+    if(Getv(scalarwave1_rec, "if1away"))
+    {
+      rec1d_p = rec1d_p_WENO3_if1away;
+      rec1d_m = rec1d_m_WENO3_if1away;
+    }
+    else
+    {
+      rec1d_p = rec1d_p_WENO3_if2away;
+      rec1d_m = rec1d_m_WENO3_if2away;
+    }
   }
   else
   {
