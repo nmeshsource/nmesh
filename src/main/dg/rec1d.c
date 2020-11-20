@@ -37,7 +37,7 @@ double rec1d_m_1(int n, const double *u, int im, double u_scale)
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain umid_p.
    We use u at the points i-1, i, i+1 */
-double rec1d_p_WENO3(int n, const double *u, int im, double u_scale)
+double rec1d_p_WENO3_uniform(int n, const double *u, int im, double u_scale)
 {
   /* u at 3 grid points around point i=im */
   double u_im1 = u[im-1];
@@ -76,7 +76,7 @@ double rec1d_p_WENO3(int n, const double *u, int im, double u_scale)
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m.
    We use u at the points i, i+1, i+2 */
-double rec1d_m_WENO3(int n, const double *u, int im, double u_scale)
+double rec1d_m_WENO3_uniform(int n, const double *u, int im, double u_scale)
 {
   /* u at 3 grid points around point i=im */
   double u_i   = u[im];
@@ -118,11 +118,11 @@ double rec1d_m_WENO3(int n, const double *u, int im, double u_scale)
    by h/4. */
 double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>1 && im<n-2) return rec1d_p_WENO3(n, u, im, u_scale);
+  if(im>1 && im<n-2) return rec1d_p_WENO3_uniform(n, u, im, u_scale);
   else               return rec1d_p_1(n, u, im, u_scale);
 }
 double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>0 && im<n-3) return rec1d_m_WENO3(n, u, im, u_scale);
+  if(im>0 && im<n-3) return rec1d_m_WENO3_uniform(n, u, im, u_scale);
   else               return rec1d_m_1(n, u, im, u_scale);
 }
