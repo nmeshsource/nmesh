@@ -1549,6 +1549,21 @@ int set_nodemidpoint_Xb_dir(tNode *node, int id, int dir, double *Xbmd)
   return set_nm_nodemidpoints_Xb_dir(node,1, id, dir, Xbmd);
 }
 
+/* write all node midpoints plus the points on the 2 faces in dir into
+   Xbmdf in Xb-coords. These are n+1 values if the node has n gridpoints! */
+int set_nodemidpoints_2facepoints_Xb_dir(tNode *node, int dir, double *Xbmdf)
+{
+  int n = node->n[dir];
+
+  /* first set all n-1 interior midpoints */
+  set_nm_nodemidpoints_Xb_dir(node, n-1,0, dir, Xbmdf+1);
+
+  /* add face points as first and last */
+  Xbmdf[0] = -1.;
+  Xbmdf[n] = +1.;
+  return n+1;
+}
+
 /* write min distance in Xb-coords of nodemidpoints into Xbdist,
    if there is no midpoint write -2 in distXb for this face */
 void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
