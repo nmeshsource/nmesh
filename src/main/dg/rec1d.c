@@ -264,11 +264,11 @@ double rec1d_m_WENO3_uniform(int n, const double *u, int im, double u_scale)
    by h/4. */
 double rec1d_p_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>1 && im<n-2) return rec1d_p_WENO3_uniform__old(n, u, im, u_scale);
+  if(im>1 && im<n-2) return rec1d_p_WENO3_uniform(n, u, im, u_scale);
   else               return rec1d_p_1(n, u, im, u_scale);
 }
 double rec1d_m_WENO3_1(int n, const double *u, int im, double u_scale)
 {
-  if(im>0 && im<n-3) return rec1d_m_WENO3_uniform__old(n, u, im, u_scale);
+  if(im>0 && im<n-3) return rec1d_m_WENO3_uniform(n, u, im, u_scale);
   else               return rec1d_m_1(n, u, im, u_scale);
 }
