@@ -532,6 +532,18 @@ void WENOweights_global_free(void)
 {
   WENOweights_free(WENOweights);
 }
+/* same but with nmesh interface */
+int WENOweights_init_globals(tMesh *mesh)
+{
+  WENOweights_global_init();
+  return 0;
+}
+int WENOweights_free_globals(tMesh *mesh)
+{
+  WENOweights_global_free();
+  return 0;
+}
+
 
 /* get access to weights at some points */
 tWENO3weight *WENOweights_global_p_WENO3_at_(int i)

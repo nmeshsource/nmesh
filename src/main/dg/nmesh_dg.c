@@ -10,7 +10,9 @@ int nmesh_dg(tMesh *mesh)
   printf("Adding dg\n");
 
   /* functions */
-//AddFun(FIRST, pr_weight_ratios);
+  //AddFun(FIRST, pr_weight_ratios);
+  AddFun(POST_PARAMETERS, WENOweights_init_globals);
+  AddFun(FINALIZE,        WENOweights_free_globals);
   //AddFun(INITIALDATA, dg_startup);
   //AddFun(ANALYZE, dg_analyze);
 
