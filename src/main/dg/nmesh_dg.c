@@ -10,6 +10,7 @@ int nmesh_dg(tMesh *mesh)
   printf("Adding dg\n");
 
   /* functions */
+//AddFun(FIRST, pr_weight_ratios);
   //AddFun(INITIALDATA, dg_startup);
   //AddFun(ANALYZE, dg_analyze);
 

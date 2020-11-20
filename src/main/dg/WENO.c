@@ -7,6 +7,10 @@
 #include "dg.h"
 
 
+/* global vars to keep some weights */
+tWENOweights *WENOweights;
+
+
 
 /* Here we use Shu-WENO-notes.pdf Eq. 2.20:
 
@@ -367,7 +371,7 @@ double LiuOsherChan_m_WENO3_weight_ratio(int np, const double *pt, int i)
    This func computes the np-2 sets of weights at the np-2 mid-points
    i=0      i=1      ... i=(np-2)-1
    pt[1]    pt[2]    ... pt[np-2]    */
-void set_mid_p_WENO3weights(int np, const double *pt, tWENO3weights **W3)
+void set_mid_p_WENO3weights(int np, const double *pt, tWENO3weight **W3)
 {
   int pr=0;
   int i;
@@ -402,7 +406,7 @@ void set_mid_p_WENO3weights(int np, const double *pt, tWENO3weights **W3)
   }
 }
 /* Set WENO3 weights for interpolation from right to left (m). */
-void set_mid_m_WENO3weights(int np, const double *pt, tWENO3weights **W3)
+void set_mid_m_WENO3weights(int np, const double *pt, tWENO3weight **W3)
 {
   int pr=0;
   int i;
@@ -437,37 +441,126 @@ void set_mid_m_WENO3weights(int np, const double *pt, tWENO3weights **W3)
   }
 }
 /* print WENO3 weights in W3 */
-void pr_WENO3weights(int nm, tWENO3weights **W3)
+void pr_WENO3weight(tWENO3weight *W3)
 {
-  int i, l;
+  int l;
+  for(l=0; l<2; l++)
+    printf("lw[%d][]=%g %g  ", l, W3->lw[l][0], W3->lw[l][1]);
+  printf(":  optw[]=%g %g\n", W3->optw[0], W3->optw[1]);
+}
+
+/* print WENO3 weights in W3 */
+void pr_WENO3weights(int nm, tWENO3weight **W3)
+{
+  int i;
   for(i=0; i<nm; i++)
   {
     printf("%d: ", i);
-    for(l=0; l<2; l++)
-      printf("lw[%d][]=%g %g  ",
-             l, W3[i]->lw[l][0], W3[i]->lw[l][1]);
-    printf(":  optw[]=%g %g\n",
-           W3[i]->optw[0], W3[i]->optw[1]);
+    pr_WENO3weight(W3[i]);
   }
 }
 
-/* allocate the WENO3 weights */
-tWENO3weights **alloc_WENO3weights(int nm)
+
+/********************************************************************/
+/* funcs to generate tWENOweights object */
+/********************************************************************/
+
+/* allocate array with WENO3 weights */
+tWENO3weight **WENO3weights_alloc(int nm)
 {
   int i;
-  tWENO3weights **W3 = calloc(nm, sizeof(W3[0]));
+  tWENO3weight **W3 = calloc(nm, sizeof(W3[0]));
   for(i=0; i<nm; i++)
     W3[i] = calloc(1, sizeof(W3[0][0]));
   return W3;
 }
 /* free WENO3 weights */
-void free_WENO3weights(int nm, tWENO3weights **W3)
+void WENO3weights_free(int nm, tWENO3weight **W3)
 {
   int i;
   for(i=0; i<nm; i++) free(W3[i]);
   free(W3);
 }
 
+/* allocate the WENO weight object */
+tWENOweights *WENOweights_alloc(int n)
+{
+  tWENOweights *w = calloc(1, sizeof(w[0]));
+  w->n = n;
+  w->p_WENO3 = WENO3weights_alloc(n);
+  w->m_WENO3 = WENO3weights_alloc(n);
+  return w;
+}
+/* free WENO weight object */
+void WENOweights_free(tWENOweights *w)
+{
+  WENO3weights_free(w->n, w->p_WENO3);
+  WENO3weights_free(w->n, w->m_WENO3);
+  free(w);
+}
+
+/* set tWENOweights object */
+void WENOweights_set(tWENOweights *w, int np, const double pt[])
+{
+  set_mid_p_WENO3weights(np,pt, w->p_WENO3);
+  set_mid_m_WENO3weights(np,pt, w->m_WENO3);
+}
+
+void WENOweights_print(tWENOweights *w)
+{
+  int n = w->n;
+  PRFs(":\n");
+  printf(" ->n = %d:\n", n);
+  printf("p_WENO3:\n");
+  pr_WENO3weights(n, w->p_WENO3);
+  printf("m_WENO3:\n");
+  pr_WENO3weights(n, w->m_WENO3);
+}
+
+/* set global WENOweights var */
+void WENOweights_global_init(void)
+{
+  /*    | x |   o   |   o   |   o   |   o   | x |
+    i:      0       1       2       3       4        <-- np-2 diff. i's */
+  double pt[] = { 0., 0.5, 1.5, 2.5, 3.5, 4.5, 5. }; // grid we use for FV
+  int np = sizeof(pt)/sizeof(double);
+
+  WENOweights = WENOweights_alloc(np-2);
+  WENOweights_set(WENOweights, np,pt);
+}
+void WENOweights_global_free(void)
+{
+  WENOweights_free(WENOweights);
+}
+
+/* get access to weights at some points */
+tWENO3weight *WENOweights_global_p_WENO3_at_(int i)
+{
+  tWENO3weight *W3 = WENOweights->p_WENO3[i];
+  return W3;
+}
+tWENO3weight *WENOweights_global_m_WENO3_at_(int i)
+{
+  tWENO3weight *W3 = WENOweights->m_WENO3[i];
+  return W3;
+}
+tWENO3weight *WENOweights_global_p_WENO3_at_last_minus_(int l)
+{
+  int n = WENOweights->n;
+  tWENO3weight *W3 = WENOweights->p_WENO3[n-1-l];
+  return W3;
+}
+tWENO3weight *WENOweights_global_m_WENO3_at_last_minus_(int l)
+{
+  int n = WENOweights->n;
+  tWENO3weight *W3 = WENOweights->m_WENO3[n-1-l];
+  return W3;
+}
+
+
+/*********************************************************/
+/* print stuff */
+/*********************************************************/
 
 /* consider this grid:
     | x |   o   |   o   |   o   |   o   |   o   | x |
@@ -513,10 +606,10 @@ void print_p_WENO3_weights(void)
            LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
   }
 
-  tWENO3weights **W3 = alloc_WENO3weights(np-2);
+  tWENO3weight **W3 = WENO3weights_alloc(np-2);
   set_mid_p_WENO3weights(np,pt, W3);
   pr_WENO3weights(np-2, W3);
-  free_WENO3weights(np-2, W3);
+  WENO3weights_free(np-2, W3);
 }
 void print_m_WENO3_weights(void)
 {
@@ -557,10 +650,10 @@ void print_m_WENO3_weights(void)
            LiuOsherChan_m_WENO3_weight_ratio(np,pt, i));
   }
 
-  tWENO3weights **W3 = alloc_WENO3weights(np-2);
+  tWENO3weight **W3 = WENO3weights_alloc(np-2);
   set_mid_m_WENO3weights(np,pt, W3);
   pr_WENO3weights(np-2, W3);
-  free_WENO3weights(np-2, W3);
+  WENO3weights_free(np-2, W3);
 }
 
 
@@ -572,6 +665,7 @@ int pr_weight_ratios(tMesh *mesh)
                   0.55, 0.65, 0.75, 0.8 };
   int np = sizeof(pt)/sizeof(double);
   int i;
+  tWENO3weight *W3;
 
   /* first Shu things */
   pr_Shu_c_k_rj_AND_d(np, pt);
@@ -604,6 +698,40 @@ int pr_weight_ratios(tMesh *mesh)
   print_p_WENO3_weights();
   print_m_WENO3_weights();
 
+  WENOweights_global_init();
+  WENOweights_print(WENOweights);
+
+  printf("some weights:\n");
+
+  printf("m: 0: ");
+  W3 = WENOweights_global_m_WENO3_at_(0);
+  pr_WENO3weight(W3);
+  printf("m: 1: ");
+  W3 = WENOweights_global_m_WENO3_at_(1);
+  pr_WENO3weight(W3);
+
+  printf("p: 1: ");
+  W3 = WENOweights_global_p_WENO3_at_(1);
+  pr_WENO3weight(W3);
+  printf("p: 2: ");
+  W3 = WENOweights_global_p_WENO3_at_(2);
+  pr_WENO3weight(W3);
+
+  printf("p: -1: ");
+  W3 = WENOweights_global_p_WENO3_at_last_minus_(1);
+  pr_WENO3weight(W3);
+  printf("p: -0: ");
+  W3 = WENOweights_global_p_WENO3_at_last_minus_(0);
+  pr_WENO3weight(W3);
+
+  printf("m: -2: ");
+  W3 = WENOweights_global_m_WENO3_at_last_minus_(2);
+  pr_WENO3weight(W3);
+  printf("m: -1: ");
+  W3 = WENOweights_global_m_WENO3_at_last_minus_(1);
+  pr_WENO3weight(W3);
+
+  WENOweights_global_free();
   exit(99);
   return 0;
 }

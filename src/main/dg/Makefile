@@ -1,7 +1,7 @@
 # dg/Makefile
 
 NAME := dg
-OBJS := nmesh_$(NAME).o dg.o numflux1d.o rec1d.o
+OBJS := nmesh_$(NAME).o dg.o numflux1d.o rec1d.o WENO.o
 
 
 include $(TOP)/Makefile.subdirs
