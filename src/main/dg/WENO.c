@@ -137,7 +137,8 @@ double Shu_WENO_c_k_rj(int np, const double *pt, int i, int k, int r, int j)
 /* weights to interpolate to midpoint at i+1/2 with index i
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain v_{i+1/2}.
-   We use v at the points i-1, i, i+1 */
+   We use v at the points i-1, i, i+1
+   Note: the 1st point pt[0] is a face point and thus at i=-1 */
 void Shu_p_WENO3_weights(int np, const double *pt, int i, double d[2])
 {
   /* we use:
@@ -158,7 +159,8 @@ void Shu_p_WENO3_weights(int np, const double *pt, int i, double d[2])
 /* weights to interpolate to midpoint at i+1/2 with index i
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain v_{i+1/2}.
-   We use v at the points i, i+1, i+2 */
+   We use v at the points i, i+1, i+2
+   Note: the last point pt[np-1] is a face point and thus at i=np-2 */
 void Shu_m_WENO3_weights(int np, const double *pt, int i, double d[2])
 {
   /* we use:
@@ -177,15 +179,9 @@ void Shu_m_WENO3_weights(int np, const double *pt, int i, double d[2])
 }
 
 
-
-
-
-
 /* print the c_k_rj and the resulting WENO3 weights */
-int pr_c_k_rj(tMesh *mesh)
+void pr_Shu_c_k_rj_AND_d(int np, double pt[])
 {
-  double pt[] = {0., 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8 };
-  int np = sizeof(pt)/sizeof(double);
   double c, d[2];
   int i, k, r,j;
 
@@ -245,7 +241,157 @@ int pr_c_k_rj(tMesh *mesh)
   printf("i=%d:\n", i);
   Shu_p_WENO3_weights(np,pt, i, d);
   printf("p: d0=%g d1=%g   d0/d1=%g\n", d[0], d[1], d[0]/d[1]);
+}
 
-exit(99);
+
+/* WENO comes form:
+   XD. Liu, S. Osher, T. Chan
+   "Weighted Essentially Non-Oscillatory Schemes",
+   J. of Comput. Physics 115, p. 200 (1994)
+   [ LiuOsherChan_WENO_JComputPhys115p200_1994.pdf ]
+
+  In Sec. 3.3 they introduce stencils S_{j+k} around point x_{j+1/2}
+  e.g. for r=2: k=0,1 (since k=0, ..., r-1) we get:
+    S_{j}   = (x_{j-3/2}, x_{j-1/2}, x_{j+1/2})       <-- k=0
+    S_{j+1} = (x_{j-1/2}, x_{j+1/2}, x_{j+3/2})       <-- k=1
+
+  In Eq. 3.6 the interpolation polynomial is
+  R_j(x) = \sum_{k=0}^{r-1} \alpha^j_k p'_{j+k}(x) / (\sum_l \alpha^j_l)
+
+  in Eq. 3.9 they set
+  \alpha^j_k = C^j_k / (\epsilon + IS_{j+k})^r
+
+  Their WENO idea is to choose the C^j_k such that the accuracy of
+  R_j(x) is improved in smoothe regions.
+
+  After Eq. 3.11a they introduce
+  a^j_k(x) = \sum_{s=0}^r \prod_{l=0, l\neq s}^r (x - x_{j + k - l + 1/2})
+
+  The truncation error of R_j(x) is given on Eq. 3.11c. It is samller if
+  \sum_{k=0}^{r-1} C^j_k a^j_k = 0
+  THIS is the main idea choose C^j_k such that this is zero!
+
+  If r=2
+  a^j_k(x) = (x - x_{j+k-1/2})(x - x_{j+k-3/2}) +
+             (x - x_{j+k+1/2})(x - x_{j+k-3/2}) +
+             (x - x_{j+k+1/2})(x - x_{j+k-1/2})
+
+  a^j_0(x) = (x - x_{j-1/2})(x - x_{j-3/2}) +
+             (x - x_{j+1/2})(x - x_{j-3/2}) +
+             (x - x_{j+1/2})(x - x_{j-1/2})
+
+  a^j_1(x) = (x - x_{j+1/2})(x - x_{j-1/2}) +
+             (x - x_{j+3/2})(x - x_{j-1/2}) +
+             (x - x_{j+3/2})(x - x_{j+1/2})
+
+  So at x = x_{j+1/2}
+  a^j_0(x_{j+1/2}) = (x_{j+1/2} - x_{j-1/2})(x_{j+1/2} - x_{j-3/2}) +
+                     (x_{j+1/2} - x_{j+1/2})(x_{j+1/2} - x_{j-3/2}) +
+                     (x_{j+1/2} - x_{j+1/2})(x_{j+1/2} - x_{j-1/2})
+                   = (x_{j+1/2} - x_{j-1/2})(x_{j+1/2} - x_{j-3/2})
+
+  a^j_1(x_{j+1/2}) = (x_{j+1/2} - x_{j+1/2})(x_{j+1/2} - x_{j-1/2}) +
+                     (x_{j+1/2} - x_{j+3/2})(x_{j+1/2} - x_{j-1/2}) +
+                     (x_{j+1/2} - x_{j+3/2})(x_{j+1/2} - x_{j+1/2})
+                   = (x_{j+1/2} - x_{j+3/2})(x_{j+1/2} - x_{j-1/2})
+
+  So C^j_0 a^j_0(x_{j+1/2}) + C^j_1 a^j_1(x_{j+1/2}) = 0 gives
+  C^j_1 = -[a^j_0(x_{j+1/2}) / a^j_1(x_{j+1/2})] C^j_0
+        = -[ (x_{j+1/2} - x_{j-3/2}) / (x_{j+1/2} - x_{j+3/2}) ] C^j_0
+        = +[ (x_{j+1/2} - x_{j-3/2}) / (x_{j+3/2} - x_{j+1/2}) ] C^j_0
+
+  These C^j_1 , C^j_0 are the ideal weights [ C^j_0 + C^j_1 = 1 ]
+  for interpolation from the left of x_{j+1/2} towards it (p).
+
+
+  Do the same at x = x_{j-1/2}
+  a^j_0(x_{j+1/2}) = (x_{j-1/2} - x_{j-1/2})(x_{j-1/2} - x_{j-3/2}) +
+                     (x_{j-1/2} - x_{j+1/2})(x_{j-1/2} - x_{j-3/2}) +
+                     (x_{j-1/2} - x_{j+1/2})(x_{j-1/2} - x_{j-1/2})
+                   = (x_{j-1/2} - x_{j+1/2})(x_{j-1/2} - x_{j-3/2})
+
+  a^j_1(x_{j+1/2}) = (x_{j-1/2} - x_{j+1/2})(x_{j-1/2} - x_{j-1/2}) +
+                     (x_{j-1/2} - x_{j+3/2})(x_{j-1/2} - x_{j-1/2}) +
+                     (x_{j-1/2} - x_{j+3/2})(x_{j-1/2} - x_{j+1/2})
+                   = (x_{j-1/2} - x_{j+3/2})(x_{j-1/2} - x_{j+1/2})
+
+  So C^j_0 a^j_0(x_{j-1/2}) + C^j_1 a^j_1(x_{j-1/2}) = 0 gives
+  C^j_1 = -[a^j_0(x_{j-1/2}) / a^j_1(x_{j-1/2})] C^j_0
+        = -[ (x_{j-1/2} - x_{j-3/2}) / (x_{j-1/2} - x_{j+3/2}) ] C^j_0
+        = +[ (x_{j-1/2} - x_{j-3/2}) / (x_{j+3/2} - x_{j-1/2}) ] C^j_0
+
+  These C^j_1 , C^j_0 are the ideal weights [ C^j_0 + C^j_1 = 1 ]
+  for interpolation from the right of x_{j-1/2} towards it (m).   */
+
+
+/* weights to interpolate to midpoint at i+1/2 with index i
+   Here we interpolate in the positive direction (p) from the left of the
+   midpoint to the midpoint to obtain v_{i+1/2}.
+   We use v at the points i-1, i, i+1 */
+double LiuOsherChan_p_WENO3_weight_ratio(int np, const double *pt, int i)
+{
+  /* we use:
+     C^j_1 = +[ (x_{j+1/2} - x_{j-3/2}) / (x_{j+3/2} - x_{j+1/2}) ] C^j_0 */
+  int j = i;
+  double numer = pt[j+1] - pt[j-1];
+  double denom = pt[j+2] - pt[j+1];
+
+  return numer/denom; /* C^j_1 /  C^j_0 */
+}
+
+/* weights to interpolate to midpoint at i+1/2 with index i
+   Here we interpolate in the negative direction (m) from the right of the
+   midpoint to the midpoint to obtain v_{i+1/2}.
+   We use v at the points i, i+1, i+2 */
+double LiuOsherChan_m_WENO3_weight_ratio(int np, const double *pt, int i)
+{
+  /* this:
+     C^j_1 = +[ (x_{j-1/2} - x_{j-3/2}) / (x_{j+3/2} - x_{j-1/2}) ] C^j_0
+     interpolates to x_{j-1/2}. We need to shift this over by 1 to the right
+     to get the result at x_{j+1/2} */
+  int j = i+1;
+  double denom = pt[j]   - pt[j-1];
+  double numer = pt[j+2] - pt[j];
+
+  return numer/denom; /* C^j_0 /  C^j_1 */
+}
+
+/* print the resulting WENO3 weights */
+int pr_weight_ratios(tMesh *mesh)
+{
+  double pt[] = { -0.05, 0., 0.05, 0.15, 0.25, 0.35, 0.45,
+                  0.55, 0.65, 0.75, 0.8 };
+  int np = sizeof(pt)/sizeof(double);
+  int i;
+
+  /* first Shu things */
+  pr_Shu_c_k_rj_AND_d(np, pt);
+
+  PRF;printf(": np=%d cell boundary points\n", np);
+
+  i=0;
+  printf("i=%d:\n", i);
+  printf("m: ratio=%g\n", LiuOsherChan_m_WENO3_weight_ratio(np,pt, i));
+
+  i=1;
+  printf("i=%d:\n", i);
+  printf("m: ratio=%g\n", LiuOsherChan_m_WENO3_weight_ratio(np,pt, i));
+  printf("p: ratio=%g\n", LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
+
+  i=2;
+  printf("i=%d:\n", i);
+  printf("m: ratio=%g\n", LiuOsherChan_m_WENO3_weight_ratio(np,pt, i));
+  printf("p: ratio=%g\n", LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
+
+  i=np-4;
+  printf("i=%d:\n", i);
+  printf("p: ratio=%g\n", LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
+  printf("m: ratio=%g\n", LiuOsherChan_m_WENO3_weight_ratio(np,pt, i));
+
+  i=np-3;
+  printf("i=%d:\n", i);
+  printf("p: ratio=%g\n", LiuOsherChan_p_WENO3_weight_ratio(np,pt, i));
+
+  exit(99);
   return 0;
 }
