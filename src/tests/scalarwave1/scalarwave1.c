@@ -7,7 +7,11 @@
 #define PR 1
 
 
-/* global vars/pars */
+/* use DGglobals */
+extern tDGglobals DGglobals[1];
+
+
+/* global vars/pars for scalarwave1.c */
 tscalarwave1 scalarwave1[1];
 
 /* func to init global vars/pars */
@@ -724,8 +728,6 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   int sqrtgdiagx = Ind("sqrtgdiagx");
   int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
   tVarList *vldivf = vlalloc(mesh);
-  int scalarwave1_rec = Par("scalarwave1_rec");
-  int rec_WENO3_1 = Getv(scalarwave1_rec, "WENO3_1");
   /* func ptrs for reconstruction */
   double (*rec1d_p)(int n, const double *u, int im, double u_scale);
   double (*rec1d_m)(int n, const double *u, int im, double u_scale);
@@ -743,27 +745,28 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   }
 
   /* set func ptrs for rec. */
-  if(rec_WENO3_1)
+  switch(DGglobals->fv_rec_mode)
   {
-    /* use WENO3_1 from both sides of midpoint at i0m */
-    if(Getv(scalarwave1_rec, "if1away"))
-    {
-      rec1d_p = rec1d_p_WENO3_if1away;
-      rec1d_m = rec1d_m_WENO3_if1away;
-    }
-    else
-    {
-      rec1d_p = rec1d_p_WENO3_if2away;
-      rec1d_m = rec1d_m_WENO3_if2away;
-    }
-  }
-  else
-  {
+  case FV_REC_1:
     /* reconstruct from both sides of midpoint at i0m */
     rec1d_p = rec1d_p_1;
     rec1d_m = rec1d_m_1;
+    break;
+  /* use WENO3_1 from both sides of midpoint at i0m */
+  case FV_REC_WENO3if2away_1:
+    rec1d_p = rec1d_p_WENO3_if2away;
+    rec1d_m = rec1d_m_WENO3_if2away;
+    break;
+  case FV_REC_WENO3if1away_1:
+    rec1d_p = rec1d_p_WENO3_if1away;
+    rec1d_m = rec1d_m_WENO3_if1away;
+    break;
+  case FV_REC_WENO3_2:
+    errorexit("not implemented!!!");
+    break;
+  default:
+    errorexit("unknown DGglobals->fv_rec_mode");
   }
-
 
   /* make var list for div of fluxes and set it zero */
   vlpush(vldivf, idivf_pi);

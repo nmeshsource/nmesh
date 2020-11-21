@@ -34,7 +34,6 @@ int nmesh_scalarwave1(tMesh *mesh)
   AddPar("scalarwave1_numflux", "upwind", "numerical flux [upwind,LLF]");
   AddPar("scalarwave1_limiter", "none", "limiter [none,MRS,minmodB]");
   AddPar("scalarwave1_fv_p", "", "patch list where we use fin. vol.(fv)");
-  AddPar("scalarwave1_rec", "1", "how we reconstruct with fv [1,WENO3_1]");
 
   return 0;
 }
