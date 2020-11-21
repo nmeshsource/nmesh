@@ -2,6 +2,19 @@
 /* Wolfgang Tichy, April 2019 */
 
 
+
+/* reconstruction modes that we can have in DGglobals->fv_rec_mode */
+enum
+{
+  FV_REC_0=0,              /* reconstruction mode not set */
+  FV_REC_1,                /* 1st order accurate reconstruction */
+  FV_REC_WENO3if2away_1,   /* WENO3 if 2 away from face, else 1st order */
+  FV_REC_WENO3if1away_1,   /* WENO3 if 1 away from face, else 1st order */
+  FV_REC_WENO3_2           /* WENO3 if 1 away from face, else 2nd? order*/
+};
+
+
+
 /* structure that contains info needed for DG flux */
 typedef struct tDGINFO {
   tNode *node;

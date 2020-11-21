@@ -6,6 +6,10 @@
 #include "dg.h"
 
 
+/* global vars for dg */
+tDGglobals DGglobals[1];
+
+
 /* some funcions to add boundary fluxes of discontinous Galerkin (dg) */
 
 /* allocate DGinfo structure */
@@ -188,4 +192,24 @@ void printDGinfo(tDGinfo *d)
     printf("      ua=%g fa=%g lama=%g", d->ua[k], d->fa[k], d->lama[k]);
     printf(" => fnum=%g\n", d->fnum[k]);
   }
+}
+
+
+/* init DGglobals struct */
+int dg_set_DGglobals(tMesh *mesh)
+{
+  int fv_rec = Par("fv_rec");
+
+  if(Getv(fv_rec, "1"))
+    DGglobals->fv_rec_mode = FV_REC_1;
+  else if(Getv(fv_rec, "WENO3if1away_1"))
+    DGglobals->fv_rec_mode = FV_REC_WENO3if1away_1;
+  else if(Getv(fv_rec, "WENO3if2away_1"))
+    DGglobals->fv_rec_mode = FV_REC_WENO3if2away_1;
+  else if(Getv(fv_rec, "WENO3_2"))
+    DGglobals->fv_rec_mode = FV_REC_WENO3_2;
+  else
+    errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
+
+  return 0;
 }
