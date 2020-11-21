@@ -2,15 +2,6 @@
 /* Wolfgang Tichy, April 2019 */
 
 
-/* structure that holds global dg pars */
-typedef struct {
-  /* frequently used pars */
-  int fv_rec_mode;  /* reconstruction mode based on par fv_rec */
-} tDGglobals;
-
-/* funcs in dg.c */
-int dg_set_DGglobals(tMesh *mesh);
-
 
 /* for WENO.c: */
 /* Structure for weights needed for WENO3 at one midpoint.
@@ -39,3 +30,7 @@ tWENO3weight *WENOweights_global_m_WENO3_at_(int i);
 tWENO3weight *WENOweights_global_p_WENO3_at_last_minus_(int l);
 tWENO3weight *WENOweights_global_m_WENO3_at_last_minus_(int l);
 int pr_weight_ratios(tMesh *mesh);
+
+
+/* funcs in dg.c */
+int dg_set_DGglobals(tMesh *mesh);

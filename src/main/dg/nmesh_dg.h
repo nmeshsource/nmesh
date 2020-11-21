@@ -13,6 +13,12 @@ enum
   FV_REC_WENO3_2           /* WENO3 if 1 away from face, else 2nd? order*/
 };
 
+/* structure that holds global dg pars */
+typedef struct {
+  /* frequently used pars */
+  int fv_rec_mode;  /* reconstruction mode based on par fv_rec */
+} tDGglobals;
+
 
 
 /* structure that contains info needed for DG flux */
