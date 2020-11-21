@@ -527,6 +527,35 @@ void WENOweights_global_init(void)
 
   WENOweights = WENOweights_alloc(np-2);
   WENOweights_set(WENOweights, np,pt);
+
+  /*
+  //test: uniform WENO3 weights seem to work quite well!!!
+  WENOweights->p_WENO3[1]->lw[0][0] = -0.5;
+  WENOweights->p_WENO3[1]->lw[0][1] = 1.5;
+  WENOweights->p_WENO3[1]->lw[1][0] = 0.5;
+  WENOweights->p_WENO3[1]->lw[1][1] = 0.5;
+  WENOweights->p_WENO3[1]->optw[1] = 2.;
+
+  WENOweights->p_WENO3[4]->lw[0][0] = -0.5;
+  WENOweights->p_WENO3[4]->lw[0][1] = 1.5;
+  WENOweights->p_WENO3[4]->lw[1][0] = 0.5;
+  WENOweights->p_WENO3[4]->lw[1][1] = 0.5;
+  WENOweights->p_WENO3[4]->optw[1] = 2.;
+
+  WENOweights->m_WENO3[0]->lw[0][0] = 0.5;
+  WENOweights->m_WENO3[0]->lw[0][1] = 0.5;
+  WENOweights->m_WENO3[0]->lw[1][0] = 1.5;
+  WENOweights->m_WENO3[0]->lw[1][1] = -0.5;
+  WENOweights->m_WENO3[0]->optw[0] = 2.;
+
+  WENOweights->m_WENO3[3]->lw[0][0] = 0.5;
+  WENOweights->m_WENO3[3]->lw[0][1] = 0.5;
+  WENOweights->m_WENO3[3]->lw[1][0] = 1.5;
+  WENOweights->m_WENO3[3]->lw[1][1] = -0.5;
+  WENOweights->m_WENO3[3]->optw[0] = 2.;
+  */
+  //WENOweights_print(WENOweights);
+//exit(9);
 }
 void WENOweights_global_free(void)
 {
