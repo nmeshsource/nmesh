@@ -3,7 +3,7 @@
 /* header file for scalarwave1 local functions */
 
 
-/* structure that holds global GRHD vars and pars */
+/* structure that holds global scalarwave1 vars and pars */
 typedef struct {
   void (*numflux)(tDGinfo *d); // func pointer for numerical flux
   /* frequently used pars */
