@@ -1049,19 +1049,19 @@ void scalarwave1_uface_to_uin(tNode *node, tVarList *vlu, int forward)
   {
     int *n = node->n;
     int f;
-    double c1 = 0.75;
-    double c2 = 1. - c1;
-    double w1,w2;
+    double c0 = 0.75;
+    double c1 = 1. - c0;
+    double w0,w1;
 
     if(forward) /* weights for linear interpolation*/
     {
+      w0 = c0;
       w1 = c1;
-      w2 = c2;
     }
     else /* weights for linear extrapolation*/
     {
-      w1 = 1./c1;
-      w2 = -c2*w1;
+      w0 = 1./c0;
+      w1 = -c1*w0;
     }
 
     /* loop over 6 faces */
@@ -1097,7 +1097,7 @@ void scalarwave1_uface_to_uin(tNode *node, tVarList *vlu, int forward)
           int iu = Vind(vlu, vi);
           double *u = Vard_(node, iu);
 
-          u[ccc] = w1*u[ccc] + w2*u[cccin];
+          u[ccc] = w0*u[ccc] + w1*u[cccin];
         }
       } /* end plane loop */
     } /* end face-loop*/
