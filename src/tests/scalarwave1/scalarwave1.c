@@ -293,8 +293,7 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
       node->dat->info->use_fv = 1;
 
       /* linear interpolation to moved in point */
-      if(DGglobals->fv_rec_mode == FV_REC_WENO3_2)
-        scalarwave1_uface_to_uin(node, vlu, 1);
+      scalarwave1_uface_to_uin(node, vlu, 1);
 
       scalarwave1_divf_FV(node, vlu);
     }
@@ -358,16 +357,14 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* extraplote u back to face on fv nodes */
-  if(DGglobals->fv_rec_mode == FV_REC_WENO3_2)
-    scalarwave1_uface_to_uin_mesh(mesh, vlu, 0);
+  scalarwave1_uface_to_uin_mesh(mesh, vlu, 0);
 
   /* get flux terms on surfaces */
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
                         scalarwave1_fluxes_pt, scalarwave1->numflux);
 
   /* extraplote RHS to face */
-  if(DGglobals->fv_rec_mode == FV_REC_WENO3_2)
-    scalarwave1_uface_to_uin_mesh(mesh, vlr, 0);
+  scalarwave1_uface_to_uin_mesh(mesh, vlr, 0);
 
   TIMER_STOP;
   return 0;
