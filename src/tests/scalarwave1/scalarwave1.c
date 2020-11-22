@@ -1040,79 +1040,72 @@ void scalarwave1_divf_FV_mesh(tMesh *mesh, tVarList *vlu)
    forward=0: convert from u at 0.25h in to u at face */
 void scalarwave1_uface_to_uin(tNode *node, tVarList *vlu, int forward)
 {
-  int *n = node->n;
-  int f;
-  double c1 = 0.75;
-  double c2 = 1. - c1;
-  double w1,w2;
-
-  if(forward) /* weights for linear interpolation*/
+  if(node->dat->info->use_fv)
   {
-    w1 = c1;
-    w2 = c2;
-  }
-  else /* weights for linear extrapolation*/
-  {
-    w1 = 1./c1;
-    w2 = -c2*w1;
-  }
+    int *n = node->n;
+    int f;
+    double c1 = 0.75;
+    double c2 = 1. - c1;
+    double w1,w2;
 
-  /* loop over 6 faces */
-  for(f=0; f<6; f++)
-  {
-    int dir = f/2;
-    int top = (f%2);
-    int sign = 2*top - 1;
-    int pl = top*(n[dir] - 1);
-    int i,j,k;
-
-    /* no interpolation if only 1 point */
-    if(n[dir]<=1) continue;
-
-    /* loop over plane p */
-    forplaneN(dir, i,j,k, n, pl)
+    if(forward) /* weights for linear interpolation*/
     {
-      int vi; /* field index */
-      int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
-      int i2 = i2_norm(i,j,k, dir);
-      int i0 = i0_norm(i,j,k, dir); /* index orthogonal to plane */
-      int i0in = i0 - sign;         /* one away from from face */
-      int ic,jc,kc, ccc, cccin;
+      w1 = c1;
+      w2 = c2;
+    }
+    else /* weights for linear extrapolation*/
+    {
+      w1 = 1./c1;
+      w2 = -c2*w1;
+    }
 
-      /* get index for i0 and i0in */
-      ccc = Ind_n(i,j,k, n);
-      ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0in);
-      cccin = Ind_n(ic,jc,kc, n);
+    /* loop over 6 faces */
+    for(f=0; f<6; f++)
+    {
+      int dir = f/2;
+      int top = (f%2);
+      int sign = 2*top - 1;
+      int pl = top*(n[dir] - 1);
+      int i,j,k;
 
-      /* interpolate inward or extrapolate outward */
-      forvl(vlu, vi)
+      /* no interpolation if only 1 point */
+      if(n[dir]<=1) continue;
+
+      /* loop over plane p */
+      forplaneN(dir, i,j,k, n, pl)
       {
-        int iu = Vind(vlu, vi);
-        double *u = Vard_(node, iu);
+        int vi; /* field index */
+        int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+        int i2 = i2_norm(i,j,k, dir);
+        int i0 = i0_norm(i,j,k, dir); /* index orthogonal to plane */
+        int i0in = i0 - sign;         /* one away from from face */
+        int ic,jc,kc, ccc, cccin;
 
-        u[ccc] = w1*u[ccc] + w2*u[cccin];
-      }
-    } /* end plane loop */
-  } /* end face-loop*/
+        /* get index for i0 and i0in */
+        ccc = Ind_n(i,j,k, n);
+        ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0in);
+        cccin = Ind_n(ic,jc,kc, n);
+
+        /* interpolate inward or extrapolate outward */
+        forvl(vlu, vi)
+        {
+          int iu = Vind(vlu, vi);
+          double *u = Vard_(node, iu);
+
+          u[ccc] = w1*u[ccc] + w2*u[cccin];
+        }
+      } /* end plane loop */
+    } /* end face-loop*/
+  }
 }
 
 /* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */
 void scalarwave1_uface_to_uin_mesh(tMesh *mesh, tVarList *vlu, int forward)
 {
-  intList *pl = alloc_intList();
-
-  /* push all ints from scalarwave1_fv_p into pl */
-  str_to_intList(Gets(Par("scalarwave1_fv_p")), " ", pl);
-
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int p = node->pat->p;
-    int use_fv = in_intList(pl, p);
-
-    if(use_fv)
-      scalarwave1_uface_to_uin(node, vlu, forward);
+    scalarwave1_uface_to_uin(node, vlu, forward);
   }
-  free_intList(pl);
 }
