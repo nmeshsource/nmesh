@@ -400,3 +400,78 @@ double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
   /* should never get here: */
   errorexiti("im=%d out of range", im);
 }
+
+
+/* forward=1: convert from u at face to u at 0.25h in
+   forward=0: convert from u at 0.25h in to u at face */
+void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward)
+{
+  if(node->dat->info->use_fv)
+  {
+    int *n = node->n;
+    int f;
+    double c0 = 0.75;
+    double c1 = 1. - c0;
+    double w0,w1;
+
+    if(forward) /* weights for linear interpolation*/
+    {
+      w0 = c0;
+      w1 = c1;
+    }
+    else /* weights for linear extrapolation*/
+    {
+      w0 = 1./c0;
+      w1 = -c1*w0;
+    }
+
+    /* loop over 6 faces */
+    for(f=0; f<6; f++)
+    {
+      int dir = f/2;
+      int top = (f%2);
+      int sign = 2*top - 1;
+      int pl = top*(n[dir] - 1);
+      int i,j,k;
+
+      /* no interpolation if only 1 point */
+      if(n[dir]<=1) continue;
+
+      /* loop over plane p */
+      forplaneN(dir, i,j,k, n, pl)
+      {
+        int vi; /* field index */
+        int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+        int i2 = i2_norm(i,j,k, dir);
+        int i0 = i0_norm(i,j,k, dir); /* index orthogonal to plane */
+        int i0in = i0 - sign;         /* one away from from face */
+        int ic,jc,kc, ccc, cccin;
+
+        /* get index for i0 and i0in */
+        ccc = Ind_n(i,j,k, n);
+        ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0in);
+        cccin = Ind_n(ic,jc,kc, n);
+
+        /* interpolate inward or extrapolate outward */
+        forvl(vlu, vi)
+        {
+          int iu = Vind(vlu, vi);
+          double *u = Vard_(node, iu);
+
+          u[ccc] = w0*u[ccc] + w1*u[cccin];
+        }
+      } /* end plane loop */
+    } /* end face-loop*/
+  }
+}
+
+/* forward=1: convert from u at face to u at 0.25h in
+   forward=0: convert from u at 0.25h in to u at face */
+void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
+{
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    rec1d_uface_to_uin_1(node, vlu, forward);
+  }
+}

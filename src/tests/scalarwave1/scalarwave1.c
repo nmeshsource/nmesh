@@ -293,7 +293,9 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
       node->dat->info->use_fv = 1;
 
       /* linear interpolation to moved in point */
-      scalarwave1_uface_to_uin(node, vlu, 1);
+      rec1d_uface_to_uin_1(node, vlu, 1);
+      /* WARNING: The interploation does not help for 2 FV neighbors!!!
+                  BUT maybe it would help if going from FV to DG???  */
 
       scalarwave1_divf_FV(node, vlu);
     }
@@ -357,14 +359,14 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* extraplote u back to face on fv nodes */
-  scalarwave1_uface_to_uin_mesh(mesh, vlu, 0);
+  rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
 
   /* get flux terms on surfaces */
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
                         scalarwave1_fluxes_pt, scalarwave1->numflux);
 
   /* extraplote RHS to face */
-  scalarwave1_uface_to_uin_mesh(mesh, vlr, 0);
+  rec1d_uface_to_uin_1_mesh(mesh, vlr, 0);
 
   TIMER_STOP;
   return 0;
@@ -1033,84 +1035,5 @@ void scalarwave1_divf_FV_mesh(tMesh *mesh, tVarList *vlu)
   {
     tNode *node = MyLnode;
     scalarwave1_divf_FV(node, vlu);
-  }
-}
-
-
-
-
-/* WARNING: The interploation does not help for 2 FV neighbors!!!
-            BUT maybe it would help if going from FV to DG???  */
-/* forward=1: convert from u at face to u at 0.25h in
-   forward=0: convert from u at 0.25h in to u at face */
-void scalarwave1_uface_to_uin(tNode *node, tVarList *vlu, int forward)
-{
-  if(node->dat->info->use_fv)
-  {
-    int *n = node->n;
-    int f;
-    double c0 = 0.75;
-    double c1 = 1. - c0;
-    double w0,w1;
-
-    if(forward) /* weights for linear interpolation*/
-    {
-      w0 = c0;
-      w1 = c1;
-    }
-    else /* weights for linear extrapolation*/
-    {
-      w0 = 1./c0;
-      w1 = -c1*w0;
-    }
-
-    /* loop over 6 faces */
-    for(f=0; f<6; f++)
-    {
-      int dir = f/2;
-      int top = (f%2);
-      int sign = 2*top - 1;
-      int pl = top*(n[dir] - 1);
-      int i,j,k;
-
-      /* no interpolation if only 1 point */
-      if(n[dir]<=1) continue;
-
-      /* loop over plane p */
-      forplaneN(dir, i,j,k, n, pl)
-      {
-        int vi; /* field index */
-        int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
-        int i2 = i2_norm(i,j,k, dir);
-        int i0 = i0_norm(i,j,k, dir); /* index orthogonal to plane */
-        int i0in = i0 - sign;         /* one away from from face */
-        int ic,jc,kc, ccc, cccin;
-
-        /* get index for i0 and i0in */
-        ccc = Ind_n(i,j,k, n);
-        ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0in);
-        cccin = Ind_n(ic,jc,kc, n);
-
-        /* interpolate inward or extrapolate outward */
-        forvl(vlu, vi)
-        {
-          int iu = Vind(vlu, vi);
-          double *u = Vard_(node, iu);
-
-          u[ccc] = w0*u[ccc] + w1*u[cccin];
-        }
-      } /* end plane loop */
-    } /* end face-loop*/
-  }
-}
-
-/* forward=1: convert from u at face to u at 0.25h in
-   forward=0: convert from u at 0.25h in to u at face */
-void scalarwave1_uface_to_uin_mesh(tMesh *mesh, tVarList *vlu, int forward)
-{
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    scalarwave1_uface_to_uin(node, vlu, forward);
   }
 }
