@@ -289,6 +289,9 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
 
     if(use_fv)
     {
+      /* force node into FV mode */
+      node->dat->info->use_fv = 1;
+
       //scalarwave1_uface_to_uin(node, vlu, 1);
       scalarwave1_divf_FV(node, vlu);
     }
@@ -864,9 +867,6 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
       d->info = 1; // anything other than 0 triggers normals on midpoints
     else
       d->info = 0;
-
-    /* force node into FV mode */
-    node->dat->info->use_fv = 1;
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
