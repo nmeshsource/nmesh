@@ -64,3 +64,5 @@ double rec1d_p_WENO3_if2away(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENO3_if2away(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENO3_if1away(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENO3_if1away(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale);

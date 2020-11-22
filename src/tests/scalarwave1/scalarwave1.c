@@ -762,7 +762,8 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
     rec1d_m = rec1d_m_WENO3_if1away;
     break;
   case FV_REC_WENO3_2:
-    errorexit("not implemented!!!");
+    rec1d_p = rec1d_p_WENO3_2;
+    rec1d_m = rec1d_m_WENO3_2;
     break;
   default:
     errorexit("unknown DGglobals->fv_rec_mode");

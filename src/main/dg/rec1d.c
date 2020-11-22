@@ -298,3 +298,105 @@ double rec1d_m_WENO3_if1away(int n, const double *u, int im, double u_scale)
     else             return rec1d_m_1(n, u, im, u_scale);
   }
 }
+
+
+/* Use WENO3 inside and some 2nd order thing at the boundary.
+   The grid points at i=0 and i=n-1 are considerd to be moved in by h/4.
+   The n-2 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
+{
+  int lm;
+
+  /* inside */
+  if(im>1 && im<n-2)
+    return rec1d_p_WENO3_uniform(n, u, im, u_scale);
+
+  /* on left end */
+  switch(im)
+  {
+  case 1:
+    return rec1d_p_WENO3_at_im(n, u, im, u_scale);
+  case 0:
+    {
+      //return rec1d_p_1(n, u, im, u_scale);; // <--old
+
+      double lw1 = 0.33333333333333333333333333333;
+      double lw0 = 1. - lw1;
+      return lw0*u[0] + lw1*u[1];
+    }
+  case -1:
+    {
+      errorexit("p_WENO3_2 not implemented at left face");
+      double lw1 = -0.33333333333333333333333333333;
+      double lw0 = 1. - lw1;
+      return lw0*u[0] + lw1*u[1];
+    }
+  }
+
+  /* on right end: lm=0 is last midpoint lm=-1 is facepoint */
+  lm = (n-2) - im;
+  switch(lm)
+  {
+  case 0:
+    return rec1d_p_WENO3_at_last_minus_l(n, u, 0, u_scale);
+  case -1:
+    {
+      errorexit("rt???");
+
+      double lw0 = -0.33333333333333333333333333333;
+      double lw1 = 1. - lw0;
+      return lw0*u[n-2] + lw1*u[n-1];
+    }
+  }
+  /* should never get here: */
+  errorexiti("im=%d out of range", im);
+}
+double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
+{
+  int lm;
+
+  /* inside */
+  if(im>0 && im<n-3)
+    return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+
+  /* on left end */
+  switch(im)
+  {
+  case 0:
+    return rec1d_m_WENO3_at_im(n, u, im, u_scale);
+  case -1:
+    {
+      errorexit("lft???");
+
+      double lw1 = -0.33333333333333333333333333333;
+      double lw0 = 1. - lw1;
+      return lw0*u[0] + lw1*u[1];
+    }
+  }
+
+  /* on right end: lm=0 is last midpoint lm=-1 is facepoint */
+  lm = (n-2) - im;
+  switch(lm)
+  {
+  case 1:
+    return rec1d_m_WENO3_at_last_minus_l(n, u, 1, u_scale);
+  case 0:
+    {
+      //return rec1d_m_1(n, u, im, u_scale);; // <--old
+
+      double lw0 = 0.33333333333333333333333333333;
+      double lw1 = 1. - lw0;
+      return lw0*u[n-2] + lw1*u[n-1];
+    }
+  case -1:
+    {
+      errorexit("m_WENO3_2 not implemented at right face");
+      double lw0 = -0.33333333333333333333333333333;
+      double lw1 = 1. - lw0;
+      return lw0*u[n-2] + lw1*u[n-1];
+    }
+  }
+  /* should never get here: */
+  errorexiti("im=%d out of range", im);
+}
