@@ -358,14 +358,14 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
   TIMER_START;
 
-  /* extraplote u back to face on fv nodes */
+  /* extrapolate u back to face on fv nodes */
   rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
 
   /* get flux terms on surfaces */
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
                         scalarwave1_fluxes_pt, scalarwave1->numflux);
 
-  /* extraplote RHS to face */
+  /* extrapolate RHS to face */
   rec1d_uface_to_uin_1_mesh(mesh, vlr, 0);
 
   TIMER_STOP;
