@@ -181,7 +181,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
     uaj = Varaj(node, vi, f);
 
     /* cons var inside node */
-    if(1 && use_1st_order)
+    if(1 || use_1st_order)
     {
       d->ui[l] = u[ijk];
     }
