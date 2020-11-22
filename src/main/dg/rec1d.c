@@ -434,8 +434,8 @@ void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward)
       int pl = top*(n[dir] - 1);
       int i,j,k;
 
-      /* no interpolation if only 1 point */
-      if(n[dir]<=1) continue;
+      /* no interpolation if only 1 or 2 points */
+      if(n[dir]<=2) continue;
 
       /* loop over plane p */
       forplaneN(dir, i,j,k, n, pl)
