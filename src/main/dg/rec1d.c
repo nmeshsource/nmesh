@@ -317,7 +317,8 @@ double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
   switch(lm)
   {
   case 0:
-    return rec1d_p_WENO3_at_last_minus_l(n, u, 0, u_scale);
+    if(n>2) return rec1d_p_WENO3_at_last_minus_l(n, u, 0, u_scale);
+    else    return rec1d_p_1(n, u, im, u_scale);
   case -1:
     {
       //errorexit("rt???");
@@ -364,7 +365,8 @@ double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
   switch(im)
   {
   case 0:
-    return rec1d_m_WENO3_at_im(n, u, im, u_scale);
+    if(n>2) return rec1d_m_WENO3_at_im(n, u, im, u_scale);
+    else    return rec1d_m_1(n, u, im, u_scale);
   case -1:
     {
       //errorexit("lft???");
