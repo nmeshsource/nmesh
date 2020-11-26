@@ -659,17 +659,22 @@ int same_bbox_normal_to_dir(tNode *node1, tNode *node2, int dir)
   return samebb;
 }
 
-/* do two nodes have same point number n, orthogonal to dir? */
-int same_n_normal_to_dir(tNode *node1, tNode *node2, int dir)
+/* do two nodes have same point number n and pt_typ, orthogonal to dir? */
+int same_n_and_pt_typ_normal_to_dir(tNode *node1, tNode *node2, int dir)
 {
-  int d, samen = 1;
+  int d, same_n_typ = 1;
 
   for(d=0; d<3; d++)
     if(d!=dir)
     {
-      if(node1->n[d] != node2->n[d]) { samen=0; break; }
+      if( (node1->n[d] != node2->n[d]) ||
+          (node1->pt_typ[d] != node2->pt_typ[d]) )
+      {
+        same_n_typ = 0;
+        break;
+      }
     }
-  return samen;
+  return same_n_typ;
 }
 
 /* do two nodes have same point number n, orthogonal to norm1 and norm2? */
@@ -733,10 +738,10 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     {
       if(nb->l == node->l)
       {
-        int same_n = same_n_normal_to_dir(nb, node, dir);
+        int same_n_t = same_n_and_pt_typ_normal_to_dir(nb, node, dir);
         /* if number of points is the same we can copy or just point
            ajsurf to nbsurf[0] */
-        if(same_n)
+        if(same_n_t)
         {
           for(vi=0; vi<dat->nv; vi++)
           {
