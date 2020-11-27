@@ -17,6 +17,7 @@ int basis_init_globals(tMesh *mesh)
 
   /* set some global vars */
   basis->expfilter_JacobianPower = Par("basis_expfilter_JacobianPower");
+  basis->filter_fv = Par("basis_filter_fv");
 
   return 0;
 }

@@ -71,7 +71,11 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
   if(dat)
   {
     tMesh *mesh = node->pat->mesh;
+    int filter_fv = Getb(basis->filter_fv);
     int Jpow = Geti(basis->expfilter_JacobianPower);
+
+    if(node->dat->info->use_fv && !filter_fv)
+      return 1; /* do nothing if basis_filter_fv = no */
 
     //PRF;printf(": Jpow=%d\n", Jpow);
     var_to_var_times_JtoPower(node, ui, Jpow);

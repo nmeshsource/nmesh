@@ -21,6 +21,7 @@ int nmesh_basis(tMesh *mesh)
   //AddPar("basis0", "Legendre", "basis functions we use");
   AddPar("basis_expfilter_JacobianPower", "1",
          "multiply var with Jacobian to this power before filtering it");
+  AddPar("basis_filter_fv", "yes", "filter in fv nodes [yes,no]");
 
   return 0;
 }

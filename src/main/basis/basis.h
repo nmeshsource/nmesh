@@ -6,6 +6,7 @@
 /* structure that holds global coordinates vars and pars */
 typedef struct {
   int expfilter_JacobianPower; /* Par("basis_expfilter_JacobianPower") */
+  int filter_fv;               /* Par("basis_filter_fv") */
 } tbasis;
 
 /* basis.c */
