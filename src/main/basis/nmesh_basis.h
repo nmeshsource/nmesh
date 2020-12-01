@@ -70,6 +70,10 @@ double Lagrange_prod1(int l, double x, int np, const double *x_p);
 double Lagrange_prod2(int l, int m, double x, int np, const double *x_p);
 
 /* interpolate.c */
+double basis_pw_const(int k, double x, int np,
+                      const double *x_p, const double *w_interp);
+double basis_pw_linear(int k, double x, int np,
+                       const double *x_p, const double *w_interp);
 double basis_array_interp(tNode *node, tArray *var, double Xb[3],
                           double basis(int k, double x, int np,
                                        const double *x_p,

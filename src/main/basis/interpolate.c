@@ -12,8 +12,8 @@
 /* ************************************************************************ */
 
 /* piecewise const basis functions */
-double basis_piecewise_const(int k, double x, int np,
-                             const double *x_p, const double *w_interp)
+double basis_pw_const(int k, double x, int np,
+                      const double *x_p, const double *w_interp)
 {
   int n;
   double xml, xmr;
@@ -44,8 +44,8 @@ double basis_piecewise_const(int k, double x, int np,
 }
 
 /* piecewise linear basis functions */
-double basis_piecewise_linear(int k, double x, int np,
-                              const double *x_p, const double *w_interp)
+double basis_pw_linear(int k, double x, int np,
+                       const double *x_p, const double *w_interp)
 {
   double l_k, l_km1;
 
