@@ -404,8 +404,8 @@ tNode *make_child_node(tNode *parent, int pt_typ[3], int n[3], int ijk)
         /* fill node->dat with interpolation data from parent */
         if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
         {
-          Lagrange_interpolate_topoints(parent, parent->dat->v[vi],
-                                        Xp, node->dat->v[vi]);
+          basis_interp_topoints(parent, parent->dat->v[vi],
+                                Xp, node->dat->v[vi], Lagrange_of_x);
         }
       } /* end: if parent has dat->v[vi] */
     free_array(Xp[2]);
@@ -549,8 +549,8 @@ void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
         /* fill node->dat with interpolation data from old dat */
         if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
         {
-          Lagrange_interpolate_topoints(node_old, node_old->dat->v[vi],
-                                        Xp, node->dat->v[vi]);
+          basis_interp_topoints(node_old, node_old->dat->v[vi],
+                                Xp, node->dat->v[vi], Lagrange_of_x);
         }
       } /* end: if parent has dat->v[vi] */
     free_array(Xp[2]);
@@ -686,8 +686,8 @@ tNode *destroy_children(tNode *parent)
             tNode *child = narray[ijk];
             tArray *var = child->dat->v[vi];
             if(var)
-              Lagrange_interpolate_toIpoints(child, var,
-                                             Xc[ijk],Ip[ijk], Res[ijk]);
+              basis_interp_toIpoints(child, var, Xc[ijk],Ip[ijk], Res[ijk],
+                                     Lagrange_of_x);
           }
 
           /* take average of results from different child nodes */

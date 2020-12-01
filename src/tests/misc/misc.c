@@ -121,7 +121,7 @@ int test_point_interpolation(tMesh *mesh)
   X[1]=0.8;
   X[2]=0.7;
   f = test_func(X[0],X[1],X[2]);
-  interp = Lagrange_array_interpolate(nd, VarA(nd, ui), X);
+  interp = basis_array_interp(nd, VarA(nd, ui), X, Lagrange_of_x);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
@@ -130,7 +130,7 @@ int test_point_interpolation(tMesh *mesh)
   X[1]=-0.457;
   X[2]=+0.666;
   f = test_func(X[0],X[1],X[2]);
-  interp = Lagrange_array_interpolate(nd, VarA(nd, ui), X);
+  interp = basis_array_interp(nd, VarA(nd, ui), X, Lagrange_of_x);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
@@ -141,7 +141,7 @@ int test_point_interpolation(tMesh *mesh)
   Cb[0] = X[1];
   Cb[1] = X[2];
   f = test_func(Xb[0][p],X[1],X[2]);
-  interp = Lagrange_array_interpolate2d(nd, VarA(nd, ui), dir,p, Cb);
+  interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, Lagrange_of_x);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[1],X[2], f, interp-f);
 
   dir = 1;
@@ -149,7 +149,7 @@ int test_point_interpolation(tMesh *mesh)
   Cb[0] = X[0];
   Cb[1] = X[2];
   f = test_func(X[0],Xb[1][p],X[2]);
-  interp = Lagrange_array_interpolate2d(nd, VarA(nd, ui), dir,p, Cb);
+  interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, Lagrange_of_x);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[2], f, interp-f);
 
   dir = 2;
@@ -157,7 +157,7 @@ int test_point_interpolation(tMesh *mesh)
   Cb[0] = X[0];
   Cb[1] = X[1];
   f = test_func(X[0],X[1],Xb[2][p]);
-  interp = Lagrange_array_interpolate2d(nd, VarA(nd, ui), dir,p, Cb);
+  interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, Lagrange_of_x);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[1], f, interp-f);
 
   prdivider(0);
@@ -168,8 +168,8 @@ int test_point_interpolation(tMesh *mesh)
   forvari(nd,vi, k) Vard(nd,vi)[k] = 666;
   printvar_innode(nd, vi);
   fill_3arrays_with_nodepoints(nd, Xp);
-  Lagrange_interpolate_topoints(nd, VarA(nd, ui), Xp,
-                                VarA(nd, vi));
+  basis_interp_topoints(nd, VarA(nd, ui), Xp,
+                        VarA(nd, vi), Lagrange_of_x);
   printf("u and v should now be the same:\n");
   printvar_innode(nd, vi);
   printvar_innode(nd, ui);
@@ -184,8 +184,8 @@ int test_point_interpolation(tMesh *mesh)
   p = (n2>1);
   redim_array(Cp[0], 11*p+1,0,0);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
-  Lagrange_interpolate2d_topoints(nd, VarA(nd, ui), dir,p,
-                                  Cp, Xp[0]);
+  basis_interp2d_topoints(nd, VarA(nd, ui), dir,p,
+                          Cp, Xp[0], Lagrange_of_x);
   insert_array_inplane(VarA(nd, vi), dir,p, Xp[0]);
   //printvar_innode(nd, vi);
 
@@ -193,8 +193,8 @@ int test_point_interpolation(tMesh *mesh)
   p = (n2>1);
   redim_array(Cp[0], 14*p+1,0,0);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
-  Lagrange_interpolate2d_topoints(nd, VarA(nd, ui), dir,p,
-                                  Cp, Xp[0]);
+  basis_interp2d_topoints(nd, VarA(nd, ui), dir,p,
+                          Cp, Xp[0], Lagrange_of_x);
   insert_array_inplane(VarA(nd, vi), dir,p, Xp[0]);
   //printvar_innode(nd, vi);
 
@@ -202,8 +202,8 @@ int test_point_interpolation(tMesh *mesh)
   p = (n2>1);
   redim_array(Cp[0], 19*p+1,0,0);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
-  Lagrange_interpolate2d_topoints(nd, VarA(nd, ui), dir,p,
-                                  Cp, Xp[0]);
+  basis_interp2d_topoints(nd, VarA(nd, ui), dir,p,
+                          Cp, Xp[0], Lagrange_of_x);
   insert_array_inplane(VarA(nd, vi), dir,p, Xp[0]);
   printf("u and v should now be the same in plane 1 of all 3 dirs:\n");
   printvar_innode(nd, vi);

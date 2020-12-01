@@ -68,20 +68,40 @@ double Lagrange_of_x(int k, double x, int np,
                      const double *x_p, const double *w_interp);
 double Lagrange_prod1(int l, double x, int np, const double *x_p);
 double Lagrange_prod2(int l, int m, double x, int np, const double *x_p);
-double Lagrange_array_interpolate(tNode *node, tArray *var, double Xb[3]);
-double Lagrange_array_interpolate2d(tNode *node, tArray *var, int dir, int p,
-                                    double Cb[2]);
+
+/* interpolate.c */
+double basis_array_interp(tNode *node, tArray *var, double Xb[3],
+                          double basis(int k, double x, int np,
+                                       const double *x_p,
+                                       const double *w_interp));
+double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
+                            double Cb[2],
+                            double basis(int k, double x, int np,
+                                         const double *x_p,
+                                         const double *w_interp));
 void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3]);
 void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2]);
-void Lagrange_interpolate_topoints(tNode *node, tArray *var,
-                                   tArray *Xp[3], tArray *interp);
-void Lagrange_interpolate_toIpoints(tNode *node, tArray *var,
-                                    tArray *Xp[3], tArray *Ip, tArray *interp);
-void Lagrange_interpolate2d_topoints(tNode *node, tArray *var, int dir, int p,
-                                     tArray *Cp[2], tArray *interp);
-void Lagrange_interpolate2d_toIpoints(tNode *node, tArray *var, int dir,int p,
-                                      tArray *Cp[2], tArray *Ip,
-                                      tArray *interp);
+void basis_interp_topoints(tNode *node, tArray *var,
+                           tArray *Xp[3], tArray *interp,
+                           double basis(int k, double x, int np,
+                                        const double *x_p,
+                                        const double *w_interp));
+void basis_interp_toIpoints(tNode *node, tArray *var,
+                            tArray *Xp[3], tArray *Ip, tArray *interp,
+                            double basis(int k, double x, int np,
+                                         const double *x_p,
+                                         const double *w_interp));
+void basis_interp2d_topoints(tNode *node, tArray *var, int dir, int p,
+                             tArray *Cp[2], tArray *interp,
+                             double basis(int k, double x, int np,
+                                          const double *x_p,
+                                          const double *w_interp));
+void basis_interp2d_toIpoints(tNode *node, tArray *var, int dir,int p,
+                              tArray *Cp[2], tArray *Ip,
+                              tArray *interp,
+                              double basis(int k, double x, int np,
+                                           const double *x_p,
+                                           const double *w_interp));
 void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d);
 
 /* SphericalHarmonics.c */
