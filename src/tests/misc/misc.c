@@ -87,11 +87,13 @@ int test_point_interpolation(tMesh *mesh)
   int n2;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
-  int dir, p, k;
+  int dir, p, i,j,k;
   double *Xb[] = { NULL, NULL, NULL };
   double X[3], Cb[2];
   double f, interp;
   tArray *coef, *Xp[3], *Cp[2];
+  int p_ori[3];
+  int p_uni[] = {P_UNIFORM,P_UNIFORM,P_UNIFORM};
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
@@ -107,6 +109,62 @@ int test_point_interpolation(tMesh *mesh)
   printf("Lagrange_of_x at Zb=0: f=%g\n", f);
   printnode(nd);
   printvar_innode(nd, ui);
+
+  /* print basis funcs */
+  printf("basis_pw_const:\n");
+  for(i=0; i<5; i++)
+  {
+    double xp[] = { -1., -0.5, 0., 0.5, 1. };
+    double x;
+
+    printf("%d:", i);
+    for(x=-1.; x<=1.; x+=0.25)
+    {
+      f = basis_pw_const(i, x, 5, xp, NULL);
+      printf("  %g: %g", x, f);
+    }
+    printf("\n");
+  }
+  printf("basis_pw_linear:\n");
+  for(i=0; i<5; i++)
+  {
+    double xp[] = { -1., -0.5, 0., 0.5, 1. };
+    double x;
+
+    printf("%d:", i);
+    for(x=-1.; x<=1.; x+=0.25)
+    {
+      f = basis_pw_linear(i, x, 5, xp, NULL);
+      printf("  %g: %g", x, f);
+    }
+    printf("\n");
+  }
+
+  /* save n pt_typ of node nd, and then switch to P_UNIFORM */
+  for(dir=0; dir<3; dir++) p_ori[dir] = nd->pt_typ[dir];
+  printf("set pt_typ to P_UNIFORM\n");
+  update_node_n_pt_typ(nd, nd->n, p_uni);
+
+  /* set and then interp var vi in X[0] */
+  forijk(i,j,k, nd->n) Vard(nd, vi)[Ind_n(i,j,k, nd->n)] = i*i;
+  X[1]=0.8;
+  X[2]=0.7;
+  printf("3d interp. in X[0] with Lagrange_of_x, basis_pw_linear, "
+         "basis_pw_const:\n");
+  for(X[0]=-1.; X[0]<=1.; X[0]+=0.125)
+  {
+    printf("X[0]=%+.3f ", X[0]);
+    interp = basis_array_interp(nd, VarA(nd, vi), X, Lagrange_of_x);
+    printf(" Lag=%+.3f ", interp);
+    interp = basis_array_interp(nd, VarA(nd, vi), X, basis_pw_linear);
+    printf(" lin=%+.3f ", interp);
+    interp = basis_array_interp(nd, VarA(nd, vi), X, basis_pw_const);
+    printf(" con=%+.3f\n", interp);
+  }
+  /* reset nd->pt_typ */
+  printf("reset pt_typ\n");
+  update_node_n_pt_typ(nd, nd->n, p_ori);
+  printf("\n");
 
   /* interpolate in 2 ways */
   /* get coeffs for interp. using basis, i.e. Legendre poly */
@@ -133,6 +191,12 @@ int test_point_interpolation(tMesh *mesh)
   interp = basis_array_interp(nd, VarA(nd, ui), X, Lagrange_of_x);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+
+  printf("3d interp. at last point with basis_pw_linear and basis_pw_const:\n");
+  interp = basis_array_interp(nd, VarA(nd, ui), X, basis_pw_linear);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  interp = basis_array_interp(nd, VarA(nd, ui), X, basis_pw_const);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
 
   PRF;printf(": 2d interp. in 3 dir. with Lagrange:\n");

@@ -358,6 +358,7 @@ tNode *alloc_node(int initcomm);
 void free_node(tNode *node);
 tNode *make_root_node(tPat *pat, int pt_typ[3], int n[3], int datrank);
 tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3]);
+void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ);
 void update8_node_n_pt_typ(tNode *node, int *n, int *pt_typ);
 void update8_node_n(tNode *node, int n[3]);
 tDat *alloc_dat(tNode *node);
