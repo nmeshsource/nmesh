@@ -1102,20 +1102,25 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       /* interpolation within each nb, save results in Res */
       for(ni=0; ni<nnb; ni++)
       {
+        int od1, od2;
+
         nb = node->fnb[f][ni];
         found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
         if(!found) errorexit("couldn't find nb face!!!");
         nb_dir = nb_f/2;
-        switch(nb->pt_typ[dir])
-        {
-        case P_UNIFORM:
+        /* For now we assume that pt_typ=P_UNIFORM means fin.vol., and that
+           we thus use linear instead of Lagrange interpolation!
+           Later we may want to check nb->dat->info->use_fv, but this needs
+           to be send via MPI... */
+        od1 = Dir1_norm(nb_dir);
+        od2 = Dir2_norm(nb_dir);
+        if(nb->pt_typ[od1]==P_UNIFORM && nb->pt_typ[od2]==P_UNIFORM)
+          basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
+                                   Cb[ni],Ip[ni], Res[ni], basis_pw_linear);
+        else /* Lagrange interpolation is the default */
           basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                    Cb[ni],Ip[ni], Res[ni], Lagrange_of_x);
-          break;
-        default:
-          basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
-                                   Cb[ni],Ip[ni], Res[ni], Lagrange_of_x);
-        }
+
 if(0 && node->nid==17 && nb->nid==64 && vi==35)
 {
 tMesh *mesh = node->pat->mesh;
