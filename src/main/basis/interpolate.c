@@ -18,19 +18,22 @@ double basis_pw_const(int k, double x, int np,
   int n;
   double xml, xmr;
 
-  if(k<=0)
+  /* special case for just 1 point */
+  if(np<=1) return 1.;
+
+  if(k<=0) /* lowest k */
   {
     n = 0;
     xmr = 0.5*(x_p[n] + x_p[n+1]);
     xml = x_p[n] - (xmr - x_p[n]);
   }
-  else if(k<np-1)
+  else if(k<np-1) /* k in the middle */
   {
     n = k;
     xml = 0.5*(x_p[k] + x_p[k-1]);
     xmr = 0.5*(x_p[k] + x_p[k+1]);
   }
-  else
+  else /* highest k */
   {
     n = np-1;
     xml = 0.5*(x_p[n] + x_p[n-1]);
@@ -49,11 +52,16 @@ double basis_pw_linear(int k, double x, int np,
 {
   double l_k, l_km1;
 
+  /* special case for just 1 point: do same as in basis_pw_const */
+  if(np<=1) return 1.;
+
   /* set l_{k} */
   if(k < np-1)
   {
-    if(x >= x_p[k] && x<x_p[k+1]) l_k = (x - x_p[k+1]) / (x_p[k] - x_p[k+1]);
-    else                          l_k = 0.;
+    if(x >= x_p[k] && x < x_p[k+1])
+      l_k = (x - x_p[k+1])/(x_p[k] - x_p[k+1]);
+    else
+      l_k = 0.;
   }
   else
   {
@@ -63,8 +71,12 @@ double basis_pw_linear(int k, double x, int np,
   /* set l_{k-1} */
   if(k>0)
   {
-    if(x >= x_p[k-1] && x<x_p[k]) l_km1 = (x - x_p[k-1]) / (x_p[k] - x_p[k-1]);
-    else                          l_km1 = 0.;
+    if(x >= x_p[k-1] && x < x_p[k])
+      l_km1 = (x - x_p[k-1]) / (x_p[k] - x_p[k-1]);
+    else if(k == np-1 && x == x_p[k]) /* include x=x_p[k] if last k */
+      l_km1 = 1.;
+    else
+      l_km1 = 0.;
   }
   else
   {
