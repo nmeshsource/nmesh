@@ -10,6 +10,7 @@
 
 double test_func(double x, double y, double z)
 {
+  //return (x+0.1)*(y-0.2)*(z+0.3) + (x-0.1) + (y+0.2) + (z-0.3); // linear
   return pow(x-0.1, 4) + pow(y+0.2, 3) + pow(z-0.3, 2);
 }
 
@@ -222,6 +223,31 @@ int test_point_interpolation(tMesh *mesh)
   Cb[1] = X[1];
   f = test_func(X[0],X[1],Xb[2][p]);
   interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, Lagrange_of_x);
+  printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[1], f, interp-f);
+
+  PRF;printf(": 2d interp. in 3 dir. with basis_pw_linear:\n");
+  dir = 0;
+  p = (n2>1);
+  Cb[0] = X[1];
+  Cb[1] = X[2];
+  f = test_func(Xb[0][p],X[1],X[2]);
+  interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, basis_pw_linear);
+  printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[1],X[2], f, interp-f);
+
+  dir = 1;
+  p = (n2>1);
+  Cb[0] = X[0];
+  Cb[1] = X[2];
+  f = test_func(X[0],Xb[1][p],X[2]);
+  interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, basis_pw_linear);
+  printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[2], f, interp-f);
+
+  dir = 2;
+  p = (n2>1);
+  Cb[0] = X[0];
+  Cb[1] = X[1];
+  f = test_func(X[0],X[1],Xb[2][p]);
+  interp = basis_array_interp2d(nd, VarA(nd, ui), dir,p, Cb, basis_pw_linear);
   printf("%d %d: (%g,%g) -> f=%g interp-f=%g\n", dir,p, X[0],X[1], f, interp-f);
 
   prdivider(0);
