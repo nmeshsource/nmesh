@@ -1050,6 +1050,29 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
   hmin = distance_to_closest_point(node, n[0]-1,n[1]-1,n[2]-1, hmin,
                                    ijk0, ijk1);
 
+  /* reduce hmin by half if we use fin.vol. (FV) */
+  if(ijk0>=0 && ijk1>=0)
+  {
+    int i0,j0,k0, i1,j1,k1, di,dj,dk;
+    int dir = -1;
+    /* get i,j,k vals of both points */
+    k0 = kOfInd_n(*ijk0, n);
+    j0 = jOfInd_n_k(*ijk0, n, k0);
+    i0 = iOfInd_n_jk(*ijk0, n, j0,k0);
+    k1 = kOfInd_n(*ijk1, n);
+    j1 = jOfInd_n_k(*ijk1, n, k1);
+    i1 = iOfInd_n_jk(*ijk1, n, j1,k1);
+    di = abs(i1 - i0);
+    dj = abs(j1 - j0);
+    dk = abs(k1 - k0);
+    if(di==1 && dj==0 && dk==0) dir = 0;
+    if(di==0 && dj==1 && dk==0) dir = 1;
+    if(di==0 && dj==0 && dk==1) dir = 2;
+    if(dir>=0)
+      if(node->pt_typ[dir] == P_UNIFORM)
+        hmin *= 0.5; /* FV cell near face has only half the usual length */
+  }
+
   //PRF;printf(": pts=%d,%d -> hmin=%g\n", *ijk0,*ijk1, hmin);
   return hmin;
 }
