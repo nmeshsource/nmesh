@@ -90,30 +90,86 @@ double basis_pw_linear(int k, double x, int np,
 double basis_pw_parab(int k, double x, int np,
                       const double *x_p, const double *w_interp)
 {
-  int m, n1, n2;
+  int m, m1, m2;
   double xml, xmr, xmll, xmrr;
 
   /* special case for less than 3 points */
   if(np<3) return basis_pw_linear(k, x, np, x_p, w_interp);
 
+  /* special case for only 3 points*/
+  if(np==3)
+  {
+    switch(k)
+    {
+    case 0:
+      return  (     x - x_p[1])*(     x - x_p[2]) /
+             ((x_p[0] - x_p[1])*(x_p[0] - x_p[2]));
+    case 1:
+      return  (     x - x_p[0])*(     x - x_p[2]) /
+             ((x_p[1] - x_p[0])*(x_p[1] - x_p[2]));
+    case 2:
+      return  (     x - x_p[0])*(     x - x_p[1]) /
+             ((x_p[2] - x_p[0])*(x_p[2] - x_p[1]));
+    default:
+      return 0.;
+    }
+  }
+
+  /* x is left */
+  xmr = 0.5*(x_p[0] + x_p[1]);
+  if(x < xmr)
+  {
+    switch(k)
+    {
+    case 0:
+      return  (     x - x_p[1])*(     x - x_p[2]) /
+             ((x_p[0] - x_p[1])*(x_p[0] - x_p[2]));
+    case 1:
+      return  (     x - x_p[0])*(     x - x_p[2]) /
+             ((x_p[1] - x_p[0])*(x_p[1] - x_p[2]));
+    case 2:
+      return  (     x - x_p[0])*(     x - x_p[1]) /
+             ((x_p[2] - x_p[0])*(x_p[2] - x_p[1]));
+    default:
+      return 0.;
+    }
+  }
+
+  /* x is right */
+  xml = 0.5*(x_p[np-2] + x_p[np-1]);
+  if(x >= xml)
+  {
+    int n0 = np-3;
+    int n1 = np-2;
+    int n2 = np-1;
+    int l = k - n0;
+
+    switch(l)
+    {
+    case 0:
+      return  (      x - x_p[n1])*(      x - x_p[n2]) /
+             ((x_p[n0] - x_p[n1])*(x_p[n0] - x_p[n2]));
+    case 1:
+      return  (      x - x_p[n0])*(      x - x_p[n2]) /
+             ((x_p[n1] - x_p[n0])*(x_p[n1] - x_p[n2]));
+    case 2:
+      return  (      x - x_p[n0])*(      x - x_p[n1]) /
+             ((x_p[n2] - x_p[n0])*(x_p[n2] - x_p[n1]));
+    default:
+      return 0.;
+    }
+  }
+
+  /* x is in middle: */
   if(k<=0) /* lowest k */
   {
     m = 0;
     xmr = 0.5*(x_p[m] + x_p[m+1]);
     xml = x_p[m] - (xmr - x_p[m]);
+    xmll = xml - (xmr - xml);
     xmrr = 0.5*(x_p[m+1] + x_p[m+2]);
-    xmll = xml - (xmr - xml);
-    n1 = 1;
-    n2 = 2;
-
-    m = 0;
-    xmr = 0.5*(x_p[m+1] + x_p[m+2]);
-    xml = 0.5*(x_p[m] + x_p[m+1]);
-    if(np>3) xmrr = 0.5*(x_p[m+2] + x_p[m+3]);
-    else     xmrr = xmr + (xmr - xml);
-    xmll = xml - (xmr - xml);
-    n1 = 1;
-    n2 = 2;
+    m1 = 1;
+    m2 = 2;
   }
   else if(k<np-1) /* k in the middle */
   {
@@ -124,34 +180,23 @@ double basis_pw_parab(int k, double x, int np,
     else       xmrr = xmr + (xmr - xml);
     if(k>=2) xmll = 0.5*(x_p[m-1] + x_p[m-2]);
     else     xmll = xml - (xmr - xml);
-    n1 = k-1;
-    n2 = k+1;
+    m1 = k-1;
+    m2 = k+1;
   }
   else /* highest k */
   {
     m = np-1;
-    xml = 0.5*(x_p[m] + x_p[m-1]);
+    xml = 0.5*(x_p[m-1] + x_p[m]);
     xmr = x_p[m] + (x_p[m] - xml);
-    xmll = 0.5*(x_p[m-1] + x_p[m-2]);
+    xmll = 0.5*(x_p[m-2] + x_p[m-1]);
     xmrr = xmr + (xmr - xml);
-    n1 = m-2;
-    n2 = m-1;
-
-    m = np-1;
-    xml = 0.5*(x_p[m-2] + x_p[m-1]);
-    xmr = 0.5*(x_p[m-1] + x_p[m]);
-    if(np>3) xmll = 0.5*(x_p[m-2] + x_p[m-3]);
-    else     xmll = xml - (xmr - xml);
-    xmrr = xmr + (xmr - xml);
-    n1 = m-2;
-    n2 = m-1;
+    m1 = m-2;
+    m2 = m-1;
   }
 
-//printf();
-
   if(x >= xml && x < xmr)
-    return  (     x - x_p[n1])*(     x - x_p[n2]) /
-           ((x_p[m] - x_p[n1])*(x_p[m] - x_p[n2]));
+    return  (     x - x_p[m1])*(     x - x_p[m2]) /
+           ((x_p[m] - x_p[m1])*(x_p[m] - x_p[m2]));
 
   if(x >= xmll && x < xml)
     return  (     x - x_p[m-2])*(     x - x_p[m-1]) /
