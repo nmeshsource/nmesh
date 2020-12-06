@@ -25,7 +25,7 @@ double basis_pw_const(int k, double x, int np,
   {
     n = 0;
     xmr = 0.5*(x_p[n] + x_p[n+1]);
-    xml = x_p[n] - (xmr - x_p[n]);
+    xml = -DBL_MAX;
   }
   else if(k<np-1) /* k in the middle */
   {
@@ -37,7 +37,7 @@ double basis_pw_const(int k, double x, int np,
   {
     n = np-1;
     xml = 0.5*(x_p[n] + x_p[n-1]);
-    xmr = x_p[n] + (x_p[n] - xml);
+    xmr = DBL_MAX;
   }
 
   if(x >= xml && x < xmr)
@@ -50,40 +50,53 @@ double basis_pw_const(int k, double x, int np,
 double basis_pw_linear(int k, double x, int np,
                        const double *x_p, const double *w_interp)
 {
-  double l_k, l_km1;
-
   /* special case for just 1 point: do same as in basis_pw_const */
   if(np<=1) return 1.;
 
-  /* set l_{k} */
+  /* x is left */
+  if(x < x_p[1])
+  {
+    switch(k)
+    {
+    case 0:
+      return (x - x_p[1])/(x_p[0] - x_p[1]);
+    case 1:
+      return (x - x_p[0])/(x_p[1] - x_p[0]);
+    default:
+      return 0.;
+    }
+  }
+
+  /* x is right */
+  if(x >= x_p[np-2])
+  {
+    int n0 = np-2;
+    int n1 = np-1;
+    int l = k - n0;
+    switch(l)
+    {
+    case 0:
+      return (x - x_p[n1])/(x_p[n0] - x_p[n1]);
+    case 1:
+      return (x - x_p[n0])/(x_p[n1] - x_p[n0]);
+    default:
+      return 0.;
+    }
+  }
+
+  /* x in middle: */
   if(k < np-1)
   {
     if(x >= x_p[k] && x < x_p[k+1])
-      l_k = (x - x_p[k+1])/(x_p[k] - x_p[k+1]);
-    else
-      l_k = 0.;
+      return (x - x_p[k+1])/(x_p[k] - x_p[k+1]);
   }
-  else
-  {
-    l_k = 0.;
-  }
-
-  /* set l_{k-1} */
-  if(k>0)
+  if(k > 0)
   {
     if(x >= x_p[k-1] && x < x_p[k])
-      l_km1 = (x - x_p[k-1]) / (x_p[k] - x_p[k-1]);
-    else if(k == np-1 && x == x_p[k]) /* include x=x_p[k] if last k */
-      l_km1 = 1.;
-    else
-      l_km1 = 0.;
-  }
-  else
-  {
-    l_km1 = 0.;
+      return (x - x_p[k-1]) / (x_p[k] - x_p[k-1]);
   }
 
-  return l_k + l_km1;
+  return 0.;
 }
 
 /* piecewise parabolic basis functions */

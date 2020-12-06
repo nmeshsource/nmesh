@@ -74,6 +74,8 @@ double basis_pw_const(int k, double x, int np,
                       const double *x_p, const double *w_interp);
 double basis_pw_linear(int k, double x, int np,
                        const double *x_p, const double *w_interp);
+double basis_pw_parab(int k, double x, int np,
+                      const double *x_p, const double *w_interp);
 double basis_array_interp(tNode *node, tArray *var, double Xb[3],
                           double basis(int k, double x, int np,
                                        const double *x_p,

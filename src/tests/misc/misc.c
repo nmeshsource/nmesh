@@ -119,7 +119,7 @@ int test_point_interpolation(tMesh *mesh)
     double x;
 
     printf("%d:", i);
-    for(x=-1.; x<=1.; x+=0.25)
+    for(x=-1.25; x<=1.25; x+=0.25)
     {
       f = basis_pw_const(i, x, 5, xp, NULL);
       printf("  %g: %g", x, f);
@@ -133,9 +133,23 @@ int test_point_interpolation(tMesh *mesh)
     double x;
 
     printf("%d:", i);
-    for(x=-1.; x<=1.; x+=0.25)
+    for(x=-1.25; x<=1.25; x+=0.25)
     {
       f = basis_pw_linear(i, x, 5, xp, NULL);
+      printf("  %g: %g", x, f);
+    }
+    printf("\n");
+  }
+  printf("basis_pw_parab:\n");
+  for(i=0; i<5; i++)
+  {
+    double xp[] = { -1., -0.5, 0., 0.5, 1. };
+    double x;
+
+    printf("%d:", i);
+    for(x=-1.25; x<=1.25; x+=0.25)
+    {
+      f = basis_pw_parab(i, x, 5, xp, NULL);
       printf("  %g: %g", x, f);
     }
     printf("\n");
@@ -152,15 +166,17 @@ int test_point_interpolation(tMesh *mesh)
   X[2]=0.7;
   printf("3d interp. in X[0] with Lagrange_of_x, basis_pw_linear, "
          "basis_pw_const:\n");
-  for(X[0]=-1.; X[0]<=1.; X[0]+=0.125)
+  for(X[0]=-1.125; X[0]<=1.125; X[0]+=0.125)
   {
     printf("X[0]=%+.3f ", X[0]);
     interp = basis_array_interp(nd, VarA(nd, vi), X, Lagrange_of_x);
-    printf(" Lag=%+.3f ", interp);
+    printf(" Lag=%+.4f ", interp);
+    interp = basis_array_interp(nd, VarA(nd, vi), X, basis_pw_parab);
+    printf(" prb=%+.4f ", interp);
     interp = basis_array_interp(nd, VarA(nd, vi), X, basis_pw_linear);
     printf(" lin=%+.3f ", interp);
     interp = basis_array_interp(nd, VarA(nd, vi), X, basis_pw_const);
-    printf(" con=%+.3f\n", interp);
+    printf(" con=%+.2f\n", interp);
   }
   /* reset nd->pt_typ */
   printf("reset pt_typ\n");
