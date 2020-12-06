@@ -276,22 +276,13 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
 /* compute div of flux */
 void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
 {
-  intList *pl = alloc_intList();
-
-  /* push all ints from scalarwave1_fv_p into pl */
-  str_to_intList(Gets(Par("scalarwave1_fv_p")), " ", pl);
-
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int p = node->pat->p;
-    int use_fv = in_intList(pl, p);
+    int use_fv = node->dat->info->use_fv;
 
     if(use_fv)
     {
-      /* force node into FV mode */
-      node->dat->info->use_fv = 1;
-
       /* linear interpolation to moved in point */
       rec1d_uface_to_uin_1(node, vlu, 1);
       /* WARNING: The interploation does not help for 2 FV neighbors!!!
@@ -304,7 +295,6 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
       scalarwave1_f_divf(node, vlu);
     }
   }
-  free_intList(pl);
 }
 
 /* RHS of: d_t u = - d_i f^i */
@@ -727,6 +717,9 @@ int scalarwave1_init(tMesh *mesh)
   else
     scalarwave1->numflux = scalarwave1_numflux1d_upwind;
 
+  /* set some nodes into fv mode */
+  scalarwave1_set_use_fv_flag(mesh);
+
   return 0;
 }
 
@@ -1036,4 +1029,28 @@ void scalarwave1_divf_FV_mesh(tMesh *mesh, tVarList *vlu)
     tNode *node = MyLnode;
     scalarwave1_divf_FV(node, vlu);
   }
+}
+
+/* set use_fv on some nodes */
+int scalarwave1_set_use_fv_flag(tMesh *mesh)
+{
+  intList *pl = alloc_intList();
+
+  /* push all ints from scalarwave1_fv_p into pl */
+  str_to_intList(Gets(Par("scalarwave1_fv_p")), " ", pl);
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int p = node->pat->p;
+    int use_fv = in_intList(pl, p);
+
+    if(use_fv)
+    {
+      /* put node into FV mode */
+      node->dat->info->use_fv = 1;
+    }
+  }
+  free_intList(pl);
+  return 0;
 }
