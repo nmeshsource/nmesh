@@ -86,6 +86,84 @@ double basis_pw_linear(int k, double x, int np,
   return l_k + l_km1;
 }
 
+/* piecewise parabolic basis functions */
+double basis_pw_parab(int k, double x, int np,
+                      const double *x_p, const double *w_interp)
+{
+  int m, n1, n2;
+  double xml, xmr, xmll, xmrr;
+
+  /* special case for less than 3 points */
+  if(np<3) return basis_pw_linear(k, x, np, x_p, w_interp);
+
+  if(k<=0) /* lowest k */
+  {
+    m = 0;
+    xmr = 0.5*(x_p[m] + x_p[m+1]);
+    xml = x_p[m] - (xmr - x_p[m]);
+    xmrr = 0.5*(x_p[m+1] + x_p[m+2]);
+    xmll = xml - (xmr - xml);
+    n1 = 1;
+    n2 = 2;
+
+    m = 0;
+    xmr = 0.5*(x_p[m+1] + x_p[m+2]);
+    xml = 0.5*(x_p[m] + x_p[m+1]);
+    if(np>3) xmrr = 0.5*(x_p[m+2] + x_p[m+3]);
+    else     xmrr = xmr + (xmr - xml);
+    xmll = xml - (xmr - xml);
+    n1 = 1;
+    n2 = 2;
+  }
+  else if(k<np-1) /* k in the middle */
+  {
+    m = k;
+    xml = 0.5*(x_p[m] + x_p[m-1]);
+    xmr = 0.5*(x_p[m] + x_p[m+1]);
+    if(k<np-2) xmrr = 0.5*(x_p[m+1] + x_p[m+2]);
+    else       xmrr = xmr + (xmr - xml);
+    if(k>=2) xmll = 0.5*(x_p[m-1] + x_p[m-2]);
+    else     xmll = xml - (xmr - xml);
+    n1 = k-1;
+    n2 = k+1;
+  }
+  else /* highest k */
+  {
+    m = np-1;
+    xml = 0.5*(x_p[m] + x_p[m-1]);
+    xmr = x_p[m] + (x_p[m] - xml);
+    xmll = 0.5*(x_p[m-1] + x_p[m-2]);
+    xmrr = xmr + (xmr - xml);
+    n1 = m-2;
+    n2 = m-1;
+
+    m = np-1;
+    xml = 0.5*(x_p[m-2] + x_p[m-1]);
+    xmr = 0.5*(x_p[m-1] + x_p[m]);
+    if(np>3) xmll = 0.5*(x_p[m-2] + x_p[m-3]);
+    else     xmll = xml - (xmr - xml);
+    xmrr = xmr + (xmr - xml);
+    n1 = m-2;
+    n2 = m-1;
+  }
+
+//printf();
+
+  if(x >= xml && x < xmr)
+    return  (     x - x_p[n1])*(     x - x_p[n2]) /
+           ((x_p[m] - x_p[n1])*(x_p[m] - x_p[n2]));
+
+  if(x >= xmll && x < xml)
+    return  (     x - x_p[m-2])*(     x - x_p[m-1]) /
+           ((x_p[m] - x_p[m-2])*(x_p[m] - x_p[m-1]));
+
+  if(x >= xmr && x < xmrr)
+    return  (     x - x_p[m+1])*(     x - x_p[m+2]) /
+           ((x_p[m] - x_p[m+1])*(x_p[m] - x_p[m+2]));
+
+  return 0.;
+}
+
 
 /***********************************************************************/
 /* interpolate using some basis */
