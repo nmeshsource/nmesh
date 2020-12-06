@@ -135,9 +135,13 @@ tSurface *init_surface(tNode *node, int face, int vi)
 
   /* set n */
   for(i=0; i<3; i++) n[i] = node->n[i];
-  alloc_mysurf = 1;
-  if(n[dir] == zones) alloc_mysurf = 0;
-  else                n[dir] = zones;
+  n[dir] = zones;
+
+  /* decide if we allocate mem for mysurf */
+  if( (node->n[dir] == zones) && (dat->info->use_fv == 0) )
+    alloc_mysurf = 0;
+  else
+    alloc_mysurf = 1;
 
   /* allocate or point my surface array */
   if(alloc_mysurf) s->mysurf = alloc_array(n);
