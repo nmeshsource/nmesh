@@ -48,18 +48,19 @@ typedef struct tDAT {
   struct tNODE *node;     /* pointer to node dat is in */
   int nv;                 /* number of vars */
   int nvenabled;          /* number of enabled vars */
-  int coords_set;         /* whether coord vars are enabled and set */
   struct tARRAY **v;      /* list of data pointers to vars, if v[vi]=NULL,
                              the var vi and its surfaces are not enabled */
   struct tSURFACE **s[6]; /* list of surfaces needed for data exchange,
                              e.g. s[0]=surfs in -X dir, s[3]=surfs in +Y dir,
                              if s[6][vi]=NULL var vi does not need exchange */
+  int surfs_set;          /* whether all nb surfaces are set (via MPI) */
+  int coords_set;         /* whether coord vars are enabled and set */
   struct tCOM *com[6];    /* com for each face */
   struct tINDIC **ic;     /* indicators such as min/max for each var,
                              e.g. ic[vi] has indicators for var vi  */
   struct tCOM *icom;      /* com for indc */
   struct tCOM *gcom;      /* com for ghosts */
-  tNodeInfo info[1];      /* extra info about node */
+  tNodeInfo info[1];      /* extra info about node (sent during loadbal.) */
 } tDat;
 
 /* surface data needed for node to neighbor node communication */

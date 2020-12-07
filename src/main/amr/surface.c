@@ -414,9 +414,10 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 void request_all_surfaces_exchange(tNode *node)
 {
   int face, ni;
+  tDat *dat = node->dat;
 
   /* do nothing if this node is on other proc */
-  if(!node->dat) return;
+  if(!dat) return;
 
   /* free req, send/recv arrays, before we start any send/recv */
   free_dat_reqs_after_Waitall_com_send(node);
@@ -433,6 +434,9 @@ void request_all_surfaces_exchange(tNode *node)
       request_surfaces_exchange_for_all_vars(node, face, ni);
     }
   }
+
+  /* signal that nb. surfaces on this node have not been received yet */
+  dat->surfs_set = 0;
 }
 
 /* request surface exchanges on all my nodes in the mesh
@@ -569,6 +573,9 @@ void get_all_surfaces(tNode *node)
     //FIXME: to conserve memory we should free nbsurf here!!!
     //free_nbsurf_only_forall_vars(node, face);
   }
+
+  /* signal that nb. surfaces on this node have been received now */
+  dat->surfs_set = 1;
 }
 
 /* get nbsurf for all nodes out of buffers and free the buffers */
