@@ -430,8 +430,9 @@ void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward)
     /* loop over 6 faces */
     for(f=0; f<6; f++)
     {
-      int dir = f/2;
-      int top = (f%2);
+      int face = forward ? f : 5-f;
+      int dir = face/2;
+      int top = (face%2);
       int sign = 2*top - 1;
       int pl = top*(n[dir] - 1);
       int i,j,k;
