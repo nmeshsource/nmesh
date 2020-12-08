@@ -10,7 +10,8 @@ enum
   FV_REC_1,                /* 1st order accurate reconstruction */
   FV_REC_WENO3if2away_1,   /* WENO3 if 2 away from face, else 1st order */
   FV_REC_WENO3if1away_1,   /* WENO3 if 1 away from face, else 1st order */
-  FV_REC_WENO3_2           /* WENO3 if 1 away from face, else 2nd? order*/
+  FV_REC_WENO3_2,          /* WENO3 if 1 away from face, else 2nd? order */
+  FV_REC_WENO3_2g          /* WENO3 if 1 away, else 2nd? order w. ghost */
 };
 
 /* structure that holds global dg pars */
@@ -66,5 +67,7 @@ double rec1d_p_WENO3_if1away(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENO3_if1away(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENO3_2g(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale);
 void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward);
 void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward);

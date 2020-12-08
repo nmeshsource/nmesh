@@ -304,7 +304,7 @@ double rec1d_m_WENO3_if1away(int n, const double *u, int im, double u_scale)
    The grid points at i=0 and i=n-1 are considerd to be moved in by h/4.
    The n-2 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
-double rec1d_p_WENO3_1_2(int n, const double *u, int im, double u_scale)
+double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
 {
   int lm;
 
@@ -353,7 +353,7 @@ double rec1d_p_WENO3_1_2(int n, const double *u, int im, double u_scale)
   /* should never get here: */
   errorexiti("im=%d out of range", im);
 }
-double rec1d_m_WENO3_1_2(int n, const double *u, int im, double u_scale)
+double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
 {
   int lm;
 
@@ -406,7 +406,7 @@ double rec1d_m_WENO3_1_2(int n, const double *u, int im, double u_scale)
 
 /* weight for the funny WENO3 at the outer side of the first/last midpoint */
 #define WENO3_DGghost_gamma1 1.
-#define WENO3_DGghost_gamma2 1e10
+#define WENO3_DGghost_gamma2 1.
 /* Question: is this correct??? */
 
 /* Use WENO3 inside, some 2nd order thing at the boundary, and a WENO3
@@ -415,7 +415,7 @@ double rec1d_m_WENO3_1_2(int n, const double *u, int im, double u_scale)
    The grid points at i=0 and i=n-1 are considered to be moved in by h/4.
    The n-2 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
-double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
+double rec1d_p_WENO3_2g(int n, const double *u, int im, double u_scale)
 {
   int lm;
 
@@ -463,7 +463,7 @@ double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
     }
   case -1:
     {
-      errorexit("p_WENO3_2 not implemented at left face");
+      errorexit("p_WENO3_2g not implemented at left face");
       double lw1 = -0.33333333333333333333333333333;
       double lw0 = 1. - lw1;
       return lw0*u[0] + lw1*u[1];
@@ -472,7 +472,7 @@ double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
   /* should never get here: */
   errorexiti("im=%d out of range", im);
 }
-double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
+double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale)
 {
   int lm;
 
@@ -520,7 +520,7 @@ double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
     }
   case -1:
     {
-      errorexit("m_WENO3_2 not implemented at right face");
+      errorexit("m_WENO3_2g not implemented at right face");
       double lw0 = -0.33333333333333333333333333333;
       double lw1 = 1. - lw0;
       return lw0*u[n-2] + lw1*u[n-1];

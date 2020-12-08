@@ -208,6 +208,8 @@ int dg_set_DGglobals(tMesh *mesh)
     DGglobals->fv_rec_mode = FV_REC_WENO3if2away_1;
   else if(Getv(fv_rec, "WENO3_2"))
     DGglobals->fv_rec_mode = FV_REC_WENO3_2;
+  else if(Getv(fv_rec, "WENO3_2g"))
+    DGglobals->fv_rec_mode = FV_REC_WENO3_2g;
   else
     errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
 
