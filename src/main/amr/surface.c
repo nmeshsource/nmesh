@@ -555,6 +555,9 @@ void get_all_surfaces(tNode *node)
 
   if(!dat) return;
 
+  /* set surfaces only once */
+  if(dat->surfs_set) return;
+
   for(face=0; face<6; face++)
   {
     /* get nbsurf for each neighbor */
