@@ -831,7 +831,7 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   case FV_REC_WENO3_2:
     rec1d_p = rec1d_p_WENO3_2;
     rec1d_m = rec1d_m_WENO3_2;
-    nghosts = 0;
+    nghosts = 1;
     break;
   default:
     errorexit("unknown DGglobals->fv_rec_mode");
