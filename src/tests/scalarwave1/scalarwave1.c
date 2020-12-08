@@ -795,6 +795,7 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   double (*rec1d_p)(int n, const double *u, int im, double u_scale);
   double (*rec1d_m)(int n, const double *u, int im, double u_scale);
   double u_scale = 1.; /* typical order of magnitude of fields */
+  int nghosts;         /* number of ghost points on each end */
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -814,19 +815,23 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
     /* reconstruct from both sides of midpoint at i0m */
     rec1d_p = rec1d_p_1;
     rec1d_m = rec1d_m_1;
+    nghosts = 0;
     break;
   /* use WENO3_1 from both sides of midpoint at i0m */
   case FV_REC_WENO3if2away_1:
     rec1d_p = rec1d_p_WENO3_if2away;
     rec1d_m = rec1d_m_WENO3_if2away;
+    nghosts = 0;
     break;
   case FV_REC_WENO3if1away_1:
     rec1d_p = rec1d_p_WENO3_if1away;
     rec1d_m = rec1d_m_WENO3_if1away;
+    nghosts = 0;
     break;
   case FV_REC_WENO3_2:
     rec1d_p = rec1d_p_WENO3_2;
     rec1d_m = rec1d_m_WENO3_2;
+    nghosts = 0;
     break;
   default:
     errorexit("unknown DGglobals->fv_rec_mode");
@@ -855,11 +860,17 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
     int maxn = max3(n[0],n[1],n[2]);
     double *Xbm = dmalloc(maxn);
     double *dXb = dmalloc(maxn);
-    double (*uc)[maxn] = dtensor(nvars*maxn);    //array for the 4 pi,cx,cy,cz
+    double *uc[nvars];          //4 pointers to data of the 4 pi,cx,cy,cz
+    int npg = maxn + 2*nghosts; //number of points in ucg[l]
+    double (*ucg)[npg] = dtensor(nvars*npg); //array for the 4 pi,cx,cy,cz
     double (*fnumR)[maxn] = dtensor(nvars*maxn); //array for the 4 fluxes
     double um_p[5]; /* array for the 5 pi,cx,cy,cz, phi */
     double um_m[5]; /* array for the 5 pi,cx,cy,cz, phi */
-    int dir;
+    int dir, m;
+
+    /* set uc to part of ucg without ghosts */
+    for(m=0; m<nvars; m++) uc[m] = &(ucg[m][nghosts]);
+    /* NOTE: now uc[m][-1] = ucg[m][0] i.e. ghost on left */
 
     /* write node into d because numflux needs this */
     d->node = node;
@@ -867,6 +878,9 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
       d->info = 1; // anything other than 0 triggers normals on midpoints
     else
       d->info = 0;
+
+    /* get nbsurf and ajsurf already */
+    if(nghosts) get_all_surfaces(node);
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
@@ -903,6 +917,22 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
           uc[1][i0] = cx[ccc];
           uc[2][i0] = cy[ccc];
           uc[3][i0] = cz[ccc];
+        }
+        /* fill in ghost points in uc with value from adjacent node */
+        if(nghosts)
+        {
+          int JK = Ind_n_norm(i,j,k, n, dir);
+          for(l=0; l<nvars; l++)
+          {
+            int vi = Vind(vlu, l);
+            double *uaj;
+            /* put adj. val on left face in left ghost: uc[l][-1] */
+            uaj = Varaj(node, vi, dir*2);
+            if(uaj) uc[l][-1] = uaj[JK];
+            /* get adj. val on right face in right ghost: uc[l][n] */
+            uaj = Varaj(node, vi, dir*2+1);
+            if(uaj) uc[l][n[dir]] = uaj[JK];
+          }
         }
 
         /* loop over points in dir */
@@ -1012,7 +1042,7 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
 
     /* release mem */
     free(fnumR);
-    free(uc);
+    free(ucg);
     free(dXb);
     free(Xbm);
     free_DGinfo(d);
