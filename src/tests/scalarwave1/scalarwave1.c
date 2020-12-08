@@ -929,9 +929,11 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
             /* put adj. val on left face in left ghost: uc[l][-1] */
             uaj = Varaj(node, vi, dir*2);
             if(uaj) uc[l][-1] = uaj[JK];
+            else    uc[l][-1] = 1e30; //large value that WENO should ignore
             /* get adj. val on right face in right ghost: uc[l][n] */
             uaj = Varaj(node, vi, dir*2+1);
             if(uaj) uc[l][n[dir]] = uaj[JK];
+            else    uc[l][n[dir]] = 1e30;
           }
         }
 
