@@ -796,7 +796,7 @@ int scalarwave1_analyze(tMesh *mesh)
   vlpush(vlu, ipi); /* u */
   vlpush(vlu, icx);
   vlpush(vlu, iphi);
-  if(ipir>=0 && node0 && VarA(node0, ipir))
+  if(ipir>=0)
   {
     vlpush(vlr, ipir); /* RHS of u */
     vlpush(vlr, icxr);
@@ -812,7 +812,8 @@ int scalarwave1_analyze(tMesh *mesh)
 
   /*  compute errors: u_err = u - u_correct */
   vladd(vle,  1.,vlu, -1.,vle);  // vle  = vlu - vle
-  vladd(vler, 1.,vlr, -1.,vler); // vler = vlr - vler
+  if(node0 && VarA(node0, ipir))   // if we have a node and storage for ipir
+    vladd(vler, 1.,vlr, -1.,vler); // vler = vlr - vler
 
   vlfree(vler);
   vlfree(vle);
