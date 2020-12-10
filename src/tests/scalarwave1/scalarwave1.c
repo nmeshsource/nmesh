@@ -639,7 +639,7 @@ int scalarwave1_set_profile(tVarList *vlu, tVarList *vlr)
   int iphir, ipir, icxr;
 
   /* get indices out of vlr if it is set */
-  if(vlr)
+  if(vlr && vlr->n == 5)
   {
     iphir = Vind(vlr, 4);
     ipir  = Vind(vlr, 0);
@@ -711,9 +711,6 @@ int scalarwave1_init(tMesh *mesh)
   //int if_czx = if_cxx + 6;
   int idivf_pi = Ind("scalarwave1_divf_pi");
   int idivf_cx = Ind("scalarwave1_divf_cx");
-  int iphie = Ind("scalarwave1_err_phi");
-  int ipie  = Ind("scalarwave1_err_pi");
-  int icxe  = Ind("scalarwave1_err_cx");
   tVarList *vlu = vlalloc(mesh);
   int numflux = Par("scalarwave1_numflux");
   int limiter = Par("scalarwave1_limiter");
@@ -731,9 +728,6 @@ int scalarwave1_init(tMesh *mesh)
   enablevar(mesh, if_cxx);
   enablevar(mesh, idivf_pi);
   enablevar(mesh, idivf_cx);
-  enablevar(mesh, iphie);
-  enablevar(mesh, ipie);
-  enablevar(mesh, icxe);
 
   /* move endpoints if fin. vol. */
   if(0 && Getv(Par("scalarwave1_nummethod"), "fv"))
@@ -786,50 +780,42 @@ int scalarwave1_init(tMesh *mesh)
 /* calculate errors in u */
 int scalarwave1_analyze(tMesh *mesh)
 {
-  int iphi = Ind("scalarwave1_phi");
   int ipi  = Ind("scalarwave1_pi");
   int icx  = Ind("scalarwave1_cx");
-  int iphie = Ind("scalarwave1_err_phi");
-  int ipie  = Ind("scalarwave1_err_pi");
-  int icxe  = Ind("scalarwave1_err_cx");
-  tVarList *vle = vlalloc(mesh);
+  int iphi = Ind("scalarwave1_phi");
+  int ipir  = MeshVarIndLax(mesh, "scalarwave1_pi_r");
+  int icxr  = MeshVarIndLax(mesh, "scalarwave1_cx_r");
+  int iphir = MeshVarIndLax(mesh, "scalarwave1_phi_r");
+  tVarList *vlu = vlalloc(mesh);
+  tVarList *vlr = vlalloc(mesh);
+  tVarList *vle, *vler; /* errors in u and RHS of u */
 
   if(PR) PRFs("\n");
 
-  vlpush(vle, ipie);
-  vlpush(vle, icxe);
-  vlpush(vle, iphie);
-
-  /* set correct profile in scalarwave1_err... */
-  scalarwave1_set_profile(vle, NULL);
-
-  /*  compute errors: u_err = u - u_correct */
-  formylnodes(mesh)
+  vlpush(vlu, ipi); /* u */
+  vlpush(vlu, icx);
+  vlpush(vlu, iphi);
+  if(ipir>=0)
   {
-    tNode *node = MyLnode;
-    double *phi = Vard(node, iphi);
-    double *pi  = Vard(node, ipi);
-    double *cx  = Vard(node, icx);
-    double *cy  = Vard(node, icx+1);
-    double *cz  = Vard(node, icx+2);
-    double *phie = Vard(node, iphie);
-    double *pie  = Vard(node, ipie);
-    double *cxe  = Vard(node, icxe);
-    double *cye  = Vard(node, icxe+1);
-    double *cze  = Vard(node, icxe+2);
-    int i;
-
-    forpoints(node, i)
-    {
-      pie[i] = pi[i]- pie[i];
-      cxe[i] = cx[i]- cxe[i];
-      cye[i] = cy[i]- cye[i];
-      cze[i] = cz[i]- cze[i];
-      phie[i] = phi[i]- phie[i];
-    }
+    vlpush(vlr, ipir); /* RHS of u */
+    vlpush(vlr, icxr);
+    vlpush(vlr, iphir);
   }
 
+  /* add vars for errors in vlu and vlr */
+  vle  = AddDuplicateEnable(vlu, "_err", AUXVAR, 0);
+  vler = AddDuplicateEnable(vlr, "_err", AUXVAR, 0);
+
+  /* set correct profile in vle and correct RHS in vlr */
+  scalarwave1_set_profile(vle, vler);
+
+  /*  compute errors: u_err = u - u_correct */
+  vladd(vle, 1.,vlu, -1.,vle); /* vle = vlu - vle */
+
+  vlfree(vler);
   vlfree(vle);
+  vlfree(vlr);
+  vlfree(vlu);
   return 0;
 }
 

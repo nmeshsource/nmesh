@@ -24,9 +24,6 @@ int nmesh_scalarwave1(tMesh *mesh)
   AddAuxVar("scalarwave1_f_c", "iJ", "flux for c_i: f_{c_i}^j");
   AddAuxVar("scalarwave1_divf_pi", "", "d_i f_{pi}^i");
   AddAuxVar("scalarwave1_divf_c", "i", "d_j f_{c_i}^j");
-  AddAuxVar("scalarwave1_err_phi", "", "error in phi");
-  AddAuxVar("scalarwave1_err_pi",  "", "error in pi");
-  AddAuxVar("scalarwave1_err_c",  "i", "error in c_i");
 
   /* parameters */
   AddPar("scalarwave1_profile", "sin", "initial profile [sin,square]");
