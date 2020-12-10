@@ -18,8 +18,8 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 
     if(pat && node->pat != pat) continue;
 
-    VolInt += NodeVolumeIntegral(node, vind, power, mode);
-
+    if(VarA(node, vind)) /* only count nodes where var vind has storage */
+      VolInt += NodeVolumeIntegral(node, vind, power, mode);
   }
   sum = VolInt;
   nMPI_Allreduce(&VolInt, &sum, 1, nMPI_DOUBLE, nMPI_SUM);
@@ -44,6 +44,8 @@ double MeshMaxLoc_local(tMesh *mesh, tPat *pat, int vind,
     int ijk;
 
     if(pat && node->pat != pat) continue;
+
+    if(VarA(node,vind) == NULL) continue;
 
     nmax = max_array(VarA(node,vind), &ijk);
     if(nmax > max)
@@ -73,6 +75,8 @@ double MeshMinLoc_local(tMesh *mesh, tPat *pat, int vind,
     int ijk;
 
     if(pat && node->pat != pat) continue;
+
+    if(VarA(node,vind) == NULL) continue;
 
     nmin = min_array(VarA(node,vind), &ijk);
     if(nmin < min)

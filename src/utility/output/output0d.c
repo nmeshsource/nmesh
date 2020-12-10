@@ -78,8 +78,8 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     int vi = vl->index[vli];
     char *name = VarName(vi);
 
-    /* get volume only once */
-    if(vli==0) Vol = MeshVolumeIntegral(mesh,pat, vi, 0.,0);
+    /* get volume only once, and use var X to the power 0.0 to compute it */
+    if(vli==0) Vol = MeshVolumeIntegral(mesh,pat, Ind("X"),0.0 ,0);
 
     VolInt = MeshVolumeIntegral(mesh,pat, vi, 1.,0);
     mean   = VolInt/Vol;
@@ -105,7 +105,12 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     for(ipt=0; ipt<Npt; ipt++)
     {
       if(node_pt[ipt])
-        val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
+      {
+        if(VarA(node_pt[ipt], vi))
+          val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
+        else
+          val_pt[ipt] = 0.; /* set to zero if var vi has no storage */
+      }
     }
 
 
