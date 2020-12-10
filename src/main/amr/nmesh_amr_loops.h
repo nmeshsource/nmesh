@@ -72,7 +72,7 @@
 #define MyLnode mesh->myln->ln[cat_][li_]->node
 
 /* get 1st leaf node on this proc from mesh, using cat_=0 and li_=0 */
-#define MyLnode0 mesh->myln->ln[0][0]->node
+#define MyLnode0 (mesh->myln->ln ? mesh->myln->ln[0][0]->node : 0)
 
 /* get node from myid */
 #define Lnode_myid(mesh, myid) \
