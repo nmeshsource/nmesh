@@ -42,7 +42,7 @@ timer_on = no # yes
 logfile_creation = no
 
 0douttime = 1
-0doutput = scalarwave1_pi scalarwave1_err_pi
+0doutput = scalarwave1_pi scalarwave1_pi_err
 
 1douttime = 1
 1doutput = scalarwave1_pi
