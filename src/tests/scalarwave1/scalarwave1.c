@@ -780,6 +780,7 @@ int scalarwave1_init(tMesh *mesh)
 /* calculate errors in u */
 int scalarwave1_analyze(tMesh *mesh)
 {
+  tNode *node0 = MyLnode0;
   int ipi  = Ind("scalarwave1_pi");
   int icx  = Ind("scalarwave1_cx");
   int iphi = Ind("scalarwave1_phi");
@@ -795,7 +796,7 @@ int scalarwave1_analyze(tMesh *mesh)
   vlpush(vlu, ipi); /* u */
   vlpush(vlu, icx);
   vlpush(vlu, iphi);
-  if(ipir>=0)
+  if(ipir>=0 && VarA(node0, ipir))
   {
     vlpush(vlr, ipir); /* RHS of u */
     vlpush(vlr, icxr);
@@ -810,8 +811,8 @@ int scalarwave1_analyze(tMesh *mesh)
   scalarwave1_set_profile(vle, vler);
 
   /*  compute errors: u_err = u - u_correct */
-  vladd(vle, 1.,vlu, -1.,vle);   /* vle = vlu - vle */
-  //vladd(vler, 1.,vlr, -1.,vler); /* vler = vlr - vler */
+  vladd(vle,  1.,vlu, -1.,vle);  // vle  = vlu - vle
+  vladd(vler, 1.,vlr, -1.,vler); // vler = vlr - vler
 
   vlfree(vler);
   vlfree(vle);
