@@ -556,7 +556,7 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
 }
 
 
-/* set profile in var with index iphi */
+/* set profile in array u */
 void scalarwave1_set_profile_pt(double xyz[3], double t, int nv, double *u)
 {
   double *kv = scalarwave1->k;
@@ -597,15 +597,58 @@ void scalarwave1_set_profile_pt(double xyz[3], double t, int nv, double *u)
   }
 }
 
-/* set profile in var with index iphi */
-int scalarwave1_set_profile(tVarList *vlu)
+/* set d/dt(profile) in array dudt */
+void scalarwave1_set_dt_profile_pt(double xyz[3], double t, int nv,
+                                   double *dudt)
+{
+  double *kv = scalarwave1->k;
+  double kx = kv[0];
+  double ky = kv[1];
+  double kz = kv[2];
+  double om = sqrt(kx*kx + ky*ky + kz*kz);
+  double u[5];
+
+  /* set u */
+  scalarwave1_set_profile_pt(xyz, t, nv, u);
+
+  /* profile */
+  if(scalarwave1->sin_profile)
+  {
+    /* set du/dt = d/dt (pi, cx,cy,cz, phi) */
+    dudt[0] = -om*om*u[4];
+    dudt[1] = -om*kx*u[4];
+    dudt[2] = -om*ky*u[4];
+    dudt[3] = -om*kz*u[4];
+    dudt[4] = u[0];
+  }
+  if(scalarwave1->square_profile)
+  {
+    errorexit("this is wrong!!!");
+  }
+}
+
+/* set profile in vlu and its RHS in vlr */
+int scalarwave1_set_profile(tVarList *vlu, tVarList *vlr)
 {
   tMesh *mesh = vlu->mesh;
   int ix =  Ind("x");
-  int iphi = Vind(vlu, 4);
+  int iphi = Vind(vlu, 4); /* get indices out of vlu */
   int ipi  = Vind(vlu, 0);
   int icx  = Vind(vlu, 1);
   double t = mesh->time;
+  int iphir, ipir, icxr;
+
+  /* get indices out of vlr if it is set */
+  if(vlr)
+  {
+    iphir = Vind(vlr, 4);
+    ipir  = Vind(vlr, 0);
+    icxr  = Vind(vlr, 1);
+  }
+  else
+  {
+    iphir = ipir = icxr = ipi; /* ipir = ipi means vlr is NULL */
+  }
 
   /* profile */
   formylnodes(mesh)
@@ -614,12 +657,18 @@ int scalarwave1_set_profile(tVarList *vlu)
     double *x = Vard(node, ix);
     double *y = Vard(node, ix+1);
     double *z = Vard(node, ix+2);
-    double *phi = Vard(node, iphi);
+    double *phi = Vard(node, iphi); /* u = (pi, cx,cy,cz, phi) */
     double *pi = Vard(node, ipi);
     double *cx = Vard(node, icx);
     double *cy = Vard(node, icx+1);
     double *cz = Vard(node, icx+2);
+    double *phir = Vard(node, iphir); /* RHS of u */
+    double *pir = Vard(node, ipir);
+    double *cxr = Vard(node, icxr);
+    double *cyr = Vard(node, icxr+1);
+    double *czr = Vard(node, icxr+2);
     double u5[5] = {0.};
+    double du5dt[5] = {0.};
     int i;
 
     forpoints(node, i)
@@ -633,6 +682,17 @@ int scalarwave1_set_profile(tVarList *vlu)
       cy[i]  = u5[2];
       cz[i]  = u5[3];
       phi[i] = u5[4];
+
+      /* get time deriv or RHS of u5 if ipir is set */
+      if(ipir != ipi)
+      {
+        scalarwave1_set_dt_profile_pt(xyz,t, 5, du5dt);
+        pir[i]  = du5dt[0];
+        cxr[i]  = du5dt[1];
+        cyr[i]  = du5dt[2];
+        czr[i]  = du5dt[3];
+        phir[i] = du5dt[4];
+      }
     }
   }
   return 0;
@@ -695,7 +755,7 @@ int scalarwave1_init(tMesh *mesh)
   }
 
   /* set initial profile, e.g. at t=0: set u=sin(x) */
-  scalarwave1_set_profile(vlu);
+  scalarwave1_set_profile(vlu, NULL);
 
   /* register u and its RHS with evolve */
   if(Getv(limiter, "MRS"))
@@ -741,7 +801,7 @@ int scalarwave1_analyze(tMesh *mesh)
   vlpush(vle, iphie);
 
   /* set correct profile in scalarwave1_err... */
-  scalarwave1_set_profile(vle);
+  scalarwave1_set_profile(vle, NULL);
 
   /*  compute errors: u_err = u - u_correct */
   formylnodes(mesh)
