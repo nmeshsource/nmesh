@@ -796,7 +796,7 @@ int scalarwave1_analyze(tMesh *mesh)
   vlpush(vlu, ipi); /* u */
   vlpush(vlu, icx);
   vlpush(vlu, iphi);
-  if(ipir>=0 && VarA(node0, ipir))
+  if(ipir>=0 && node0 && VarA(node0, ipir))
   {
     vlpush(vlr, ipir); /* RHS of u */
     vlpush(vlr, icxr);
