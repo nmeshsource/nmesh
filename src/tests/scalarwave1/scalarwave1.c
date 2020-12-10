@@ -810,7 +810,8 @@ int scalarwave1_analyze(tMesh *mesh)
   scalarwave1_set_profile(vle, vler);
 
   /*  compute errors: u_err = u - u_correct */
-  vladd(vle, 1.,vlu, -1.,vle); /* vle = vlu - vle */
+  vladd(vle, 1.,vlu, -1.,vle);   /* vle = vlu - vle */
+  //vladd(vler, 1.,vlr, -1.,vler); /* vler = vlr - vler */
 
   vlfree(vler);
   vlfree(vle);
