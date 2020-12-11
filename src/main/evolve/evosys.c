@@ -172,10 +172,10 @@ int evolve_init_evosys(tMesh *mesh)
     {
       tVarList *u   = ListEntry(evosys->u, i);
 
-      push_pVLList(evosys->w,   AddDuplicateEnable(u, "_w", 1,-1));
-      push_pVLList(evosys->rhs, AddDuplicateEnable(u, "_r", 1,0));
-      push_pVLList(evosys->u_p, AddDuplicateEnable(u, "_p", 1,0));
-      //push_pVLList(evosys->s[0], AddDuplicateEnable(u, "_s0", 1,0));
+      push_pVLList(evosys->w,   AddDuplicateEnable(u, "_w", AUXVAR,-1));
+      push_pVLList(evosys->rhs, AddDuplicateEnable(u, "_r", AUXVAR,0));
+      push_pVLList(evosys->u_p, AddDuplicateEnable(u, "_p", AUXVAR,0));
+      //push_pVLList(evosys->s[0], AddDuplicateEnable(u, "_s0", AUXVAR,0));
     }
     //printf("evosys->w = %p\n", evosys->w);
 
