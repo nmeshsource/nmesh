@@ -780,40 +780,39 @@ int scalarwave1_init(tMesh *mesh)
 /* calculate errors in u */
 int scalarwave1_analyze(tMesh *mesh)
 {
-  tNode *node0 = MyLnode0;
+  double time = mesh->time;
   int ipi  = Ind("scalarwave1_pi");
   int icx  = Ind("scalarwave1_cx");
   int iphi = Ind("scalarwave1_phi");
-  int ipir  = MeshVarIndLax(mesh, "scalarwave1_pi_r");
-  int icxr  = MeshVarIndLax(mesh, "scalarwave1_cx_r");
-  int iphir = MeshVarIndLax(mesh, "scalarwave1_phi_r");
   tVarList *vlu = vlalloc(mesh);
-  tVarList *vlr = vlalloc(mesh);
-  tVarList *vle, *vler; /* errors in u and RHS of u */
+  tVarList *vlr, *vle, *vler; /* RHS of u and errors in u and RHS of u */
 
   if(PR) PRFs("\n");
 
-  vlpush(vlu, ipi); /* u */
+  /* u */
+  vlpush(vlu, ipi);
   vlpush(vlu, icx);
   vlpush(vlu, iphi);
-  if(ipir>=0)
-  {
-    vlpush(vlr, ipir); /* RHS of u */
-    vlpush(vlr, icxr);
-    vlpush(vlr, iphir);
-  }
+
+  /* RHS of u */
+  vlr = AddDuplicateEnable(vlu, "_r", AUXVAR, 0);
 
   /* add vars for errors in vlu and vlr */
   vle  = AddDuplicateEnable(vlu, "_err", AUXVAR, 0);
   vler = AddDuplicateEnable(vlr, "_err", AUXVAR, 0);
 
-  /* set correct profile in vle and correct RHS in vlr */
-  scalarwave1_set_profile(vle, vler);
+  /* set correct profile in vle and correct RHS in vler */
+  if(time > 0.)
+  {
+    mesh->time -= mesh->dt; // decr. mesh->time to t where RHS was evaluated
+    scalarwave1_set_profile(vle, vler);
+    mesh->time = time;      // restore mesh->time
+  }
+  scalarwave1_set_profile(vle, NULL);
 
   /*  compute errors: u_err = u - u_correct */
   vladd(vle,  1.,vlu, -1.,vle);  // vle  = vlu - vle
-  if(node0 && VarA(node0, ipir))   // if we have a node and storage for ipir
-    vladd(vler, 1.,vlr, -1.,vler); // vler = vlr - vler
+  vladd(vler, 1.,vlr, -1.,vler); // vler = vlr - vler
 
   vlfree(vler);
   vlfree(vle);
