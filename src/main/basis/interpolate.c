@@ -498,3 +498,98 @@ void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d)
   forplaneN(dir, i,j,k, n, p)
     var->d[Ind_n(i,j,k, n)] = interp2d->d[ai++];
 }
+
+
+/***********************************************************************/
+/* Lagrange interpolation */
+/***********************************************************************/
+
+/* 3d interpolation:
+   interpolate to the point (Xb[0],Xb[1],Xb[2]) for field in array vals
+   the pts[3] arrays contain the point coords in the 3 dirs of vals */
+double Lagrange_array_interp(tArray *vals, double *pts[3], double Xb[3])
+{
+  int *n = vals->n;
+  double *w[3];  /* weights */
+  double *B[3];  /* basis */
+  int d, k;
+  double sum;
+
+  /* get arrays for basis and weights for n = vals->n */
+  for(d=0; d<3; d++)
+  {
+    w[d] = dmalloc(n[d]);
+    B[d] = dmalloc(n[d]);
+  }
+
+  /* set weights */
+  for(d=0; d<3; d++) Lagrange_winterp(n[d], pts[d], w[d]);
+
+  /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B[0],... */
+  for(d=0; d<3; d++)
+    for(k=0; k<n[0]; k++)
+      B[d][k] = Lagrange_of_x(k, Xb[d], n[d], pts[d], w[d]);
+
+  /* interpolate to (Xb[0],Xb[1],Xb[2]) */
+  sum = 0.;
+  //SGRID_LEVEL3_Pragma(omp parallel for reduction(+:sum))
+  for(k=0; k<n[2]; k++)
+  {
+    int j,i;
+    for(j=0; j<n[1]; j++)
+    for(i=0; i<n[0]; i++)
+      sum += vals->d[Ind_n(i,j,k, n)] * B[0][i] * B[1][j] * B[2][k];
+  }
+
+  /* free saved stuff */
+  for(d=2; d>=0; d--)
+  {
+    free(B[d]);
+    free(w[d]);
+  }
+  return sum;
+}
+
+/* Note1: the size of how much we extract from var depends on dimensions of
+   vals array
+   Note2: the only info we really retrieve from the node (in Xb3_n)
+          is node->pt_typ, but not node->n */
+void extract_vals_pts_around_Xb(tNode *node, tArray *var, double Xb[3],
+                                tArray *vals, double *pts[3])
+{
+  int *n = var->n;
+//  int *ne = vals->n;
+  tArray *Xb_n[3];   /* points */
+  int d, k;
+
+  /* get arrays with points and weights for n = var->n */
+  Xb3_n(node, n, Xb_n);
+
+  /* find 2 closest points in each dir */
+  for(d=0; d<3; d++)
+  {
+    double d1=DBL_MAX, d2=DBL_MAX;
+    int k1=-1, k2=-1;
+
+    for(k=0; k<n[d]; k++)
+    {
+      double x = Xb_n[d]->d[k];
+      double dist = fabs(x - Xb[d]);
+      if(dist < d1)
+      {
+        d2 = d1;
+        k2 = k1;
+        d1 = dist;
+        k1 = k;
+      }
+      else if(dist < d2)
+      {
+        d2 = dist;
+        k2 = k;
+      }
+    }
+    if(k2<0) exit(9);
+  }
+  //... set points in pts and then vals
+
+}
