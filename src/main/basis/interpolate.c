@@ -506,7 +506,8 @@ void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d)
 
 /* 3d interpolation:
    interpolate to the point (Xb[0],Xb[1],Xb[2]) for field in array vals
-   the pts[3] arrays contain the point coords in the 3 dirs of vals */
+   the pts[3] arrays contain the point coords in the 3 dirs of vals.
+   vals and pts[3] are set with extract_vals_pts_around_Xb */
 double Lagrange_array_interp(tArray *vals, double *pts[3], double Xb[3])
 {
   int *n = vals->n;
@@ -514,6 +515,8 @@ double Lagrange_array_interp(tArray *vals, double *pts[3], double Xb[3])
   double *B[3];  /* basis */
   int d, k;
   double sum;
+
+errorexit("Lagrange_array_interp is untested!!!");
 
   /* get arrays for basis and weights for n = vals->n */
   for(d=0; d<3; d++)
@@ -561,6 +564,8 @@ void extract_vals_pts_around_Xb(tNode *node, tArray *var, double Xb[3],
 //  int *ne = vals->n;
   tArray *Xb_n[3];   /* points */
   int d, k;
+
+errorexit("extract_vals_pts_around_Xb is unfinished!!!");
 
   /* get arrays with points and weights for n = var->n */
   Xb3_n(node, n, Xb_n);
