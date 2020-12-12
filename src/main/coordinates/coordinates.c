@@ -497,6 +497,31 @@ int coordinates_init_node(tNode *node)
 }
 
 
+/* initialize coordinates in each patch */
+int coordinates_init(tMesh *mesh)
+{
+  PRF;printf(":\n");
+
+  /* set some global vars */
+  coordinates->itmp1 = Ind("coordinates_tmp1");
+  coordinates->idet_dXbdx = Ind("det_dXbdx");
+  //PRF;printf(":  coordinates->idet_dXbdx=%d\n",  coordinates->idet_dXbdx);
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    coordinates_init_node(node);
+  }
+
+  return 0;
+}
+
+
+/********************************************************************/
+/* some functions to set metric for DG-surface terms */
+/********************************************************************/
+
+
 /* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 vars sqrtgdiag^i.
    We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
    in x-coords. */
@@ -610,27 +635,6 @@ void coordinates_set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3],
   free_array(agam);
   free_array(ainvM);
   free_array(adXdxT);
-}
-
-
-
-/* initialize coordinates in each patch */
-int coordinates_init(tMesh *mesh)
-{
-  PRF;printf(":\n");
-
-  /* set some global vars */
-  coordinates->itmp1 = Ind("coordinates_tmp1");
-  coordinates->idet_dXbdx = Ind("det_dXbdx");
-  //PRF;printf(":  coordinates->idet_dXbdx=%d\n",  coordinates->idet_dXbdx);
-
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    coordinates_init_node(node);
-  }
-
-  return 0;
 }
 
 
