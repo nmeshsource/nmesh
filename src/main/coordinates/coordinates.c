@@ -140,8 +140,6 @@ int coordinates_init_node(tNode *node)
   double *det_dXbdx = Vard(node, Ind("det_dXbdx"));
   double dXbdX[3];
   double det_dXbYbZb_dXYZ;
-  tArray *Ag[6]; /* arrays for 3-metric */
-  double *gxx, *gxy, *gxz, *gyy, *gyz, *gzz;
 
   /* do nothing if coords are set already or if vars are off */
   if(!dat) return 0;
@@ -149,24 +147,6 @@ int coordinates_init_node(tNode *node)
   if(!vars_on) return 0;
 
   if(PR) { PRF;printf(": nid%ld\n", node->nid); }
-
-  /* arrays for 3 metric */
-  if(i3metric>=0)
-  {
-    for(d=0; d<6; d++) Ag[d] = VarA(node, i3metric + d);
-    if(Ag[0]==NULL) errorexit("array for gxx is NULL!");
-  }
-  else
-  {
-    for(d=0; d<6; d++) Ag[d] = NULL;
-  }
-  /* pointers to 3 metric */
-  gxx = Arrd(Ag[0]);
-  gxy = Arrd(Ag[1]);
-  gxz = Arrd(Ag[2]);
-  gyy = Arrd(Ag[3]);
-  gyz = Arrd(Ag[4]);
-  gzz = Arrd(Ag[5]);
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
@@ -223,61 +203,8 @@ int coordinates_init_node(tNode *node)
 
   /* set sqrtdet2gamma on node faces */
   if(sqrtdet2gamma)
-  {
-    int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
-    /* arrays to compute 2 metric sqrtdet2gamma on faces */
-    tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
-    tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
-    tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
-    tArray *tmp = alloc_array2d(3,2);
-
-    for(f=0; f<6; f++)
-    {
-      int dir = f/2;
-      int p = (f%2)*(n[dir] - 1);
-      double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
-
-      forplaneN(dir, i,j,k, n, p)
-      {
-        double det2gam;
-        int ijk = Ind_n(i,j,k, n);
-        int JK = Ind_n_norm(i,j,k, n, dir);
-
-        /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
-        array_2dxdXb(node, ijk, dir, a2J);
-
-        /* if no 3-metric is specified, we assume it is flat */
-        if(i3metric<0)
-        {
-          /* compute 2-metric from a2J^T a2J */
-          mm_array0_norestrict(a2J,a2J, a2gam);
-        }
-        else
-        {
-          /* compute 2-metric from a2J^T a3gam a2J, where a3gam is 3x3 */
-          double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
-                             { gxy[ijk], gyy[ijk], gyz[ijk] },
-                             { gxz[ijk], gyz[ijk], gzz[ijk] } };
-          /* Put transpose of 3-metric into a3gamT.
-             Trick here is that C-arrays are row major. So when we put this
-             into the col. major a3gamT, we get the transpose automatically! */
-          point_array_d_to_data(a3gamT, M, 1);
-          mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
-          mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
-        }
-        det2gam = det_2_2_array(a2gam);
-        //NOTE: there should be a faster way to get det2gam. There should
-        //      be an analogue to \det(g)=\alpha^2\det(\gamma)
-        sqrtdet2gam[JK] = sqrt(det2gam);
-      }
-    }
-    /* free arrays */
-    free_array(tmp);
-    free_array(a2gam);
-    free_array(a2J);
-    free_array(a3gamT);
-  }
-
+    coordinates_set_sqrtdet2gamma_var(node, idXdx, i3metric,
+                                      Ind("sqrtdet2gamma0"));
   /* set sqrtgdiag */
   if(sqrtgdiag)
     coordinates_set_sqrtgdiag_var(node, idXdx, i3metric, Ind("sqrtgdiagx"));
@@ -520,6 +447,89 @@ int coordinates_init(tMesh *mesh)
 /********************************************************************/
 /* some functions to set metric for DG-surface terms */
 /********************************************************************/
+
+/* Write sqrt(det(2gamma)) on node faces into the 6 vars sqrtdet2gamma^i.
+   We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
+   in x-coords. */
+void coordinates_set_sqrtdet2gamma_var(tNode *node, int idXdx, int igxx,
+                                       int isqrtdet2gamma0)
+{
+  int *n = node->n;
+  /* arrays to compute 2 metric sqrtdet2gamma on faces */
+  tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
+  tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
+  tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+  tArray *tmp = alloc_array2d(3,2);
+  tArray *Ag[6]; /* arrays for 3-metric */
+  double *gxx, *gxy, *gxz, *gyy, *gyz, *gzz;
+  int i,j,k, d, f;
+
+  /* arrays for 3 metric */
+  if(igxx>=0)
+  {
+    for(d=0; d<6; d++) Ag[d] = VarA(node, igxx + d);
+    if(Ag[0]==NULL) errorexit("array for gxx is NULL!");
+  }
+  else
+  {
+    for(d=0; d<6; d++) Ag[d] = NULL;
+  }
+  /* pointers to 3 metric */
+  gxx = Arrd(Ag[0]);
+  gxy = Arrd(Ag[1]);
+  gxz = Arrd(Ag[2]);
+  gyy = Arrd(Ag[3]);
+  gyz = Arrd(Ag[4]);
+  gzz = Arrd(Ag[5]);
+
+  /* set sqrtdet2gam on each face */
+  for(f=0; f<6; f++)
+  {
+    int dir = f/2;
+    int p = (f%2)*(n[dir] - 1);
+    double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
+
+    forplaneN(dir, i,j,k, n, p)
+    {
+      double det2gam;
+      int ijk = Ind_n(i,j,k, n);
+      int JK = Ind_n_norm(i,j,k, n, dir);
+
+      /* get 2-Jacobian of dx/dXb, which is a 3x2 matrix */
+      array_2dxdXb(node, ijk, dir, a2J);
+
+      /* if no 3-metric is specified, we assume it is flat */
+      if(igxx<0)
+      {
+        /* compute 2-metric from a2J^T a2J */
+        mm_array0_norestrict(a2J,a2J, a2gam);
+      }
+      else
+      {
+        /* compute 2-metric from a2J^T a3gam a2J, where a3gam is 3x3 */
+        double M[3][3] = { { gxx[ijk], gxy[ijk], gxz[ijk] },
+                           { gxy[ijk], gyy[ijk], gyz[ijk] },
+                           { gxz[ijk], gyz[ijk], gzz[ijk] } };
+        /* Put transpose of 3-metric into a3gamT.
+           Trick here is that C-arrays are row major. So when we put this
+           into the col. major a3gamT, we get the transpose automatically! */
+        point_array_d_to_data(a3gamT, M, 1);
+        mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
+        mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
+      }
+      det2gam = det_2_2_array(a2gam);
+      //NOTE: there should be a faster way to get det2gam. There should
+      //      be an analogue to \det(g)=\alpha^2\det(\gamma)
+      sqrtdet2gam[JK] = sqrt(det2gam);
+    }
+  }
+
+  /* free arrays */
+  free_array(tmp);
+  free_array(a2gam);
+  free_array(a2J);
+  free_array(a3gamT);
+}
 
 
 /* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 vars sqrtgdiag^i.
