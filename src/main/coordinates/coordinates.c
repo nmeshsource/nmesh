@@ -280,21 +280,7 @@ int coordinates_init_node(tNode *node)
 
   /* set sqrtgdiag */
   if(sqrtgdiag)
-  {
-    int isqrtgdiagx = Ind("sqrtgdiagx");
-    /* 3 arrays for dXdx on midpoints */
-    tArray *AdXdx[3][3] =
-      { { VarA(node,idXdx),   VarA(node,idXdx+1), VarA(node,idXdx+2) },
-        { VarA(node,idXdx+3), VarA(node,idXdx+4), VarA(node,idXdx+5) },
-        { VarA(node,idXdx+6), VarA(node,idXdx+7), VarA(node,idXdx+8) } };
-    /* 3 arrays for sqrtgdiag on midpoints */
-    tArray *Asqrtgdiag[3] = { VarA(node, isqrtgdiagx),
-                              VarA(node, isqrtgdiagx+1),
-                              VarA(node, isqrtgdiagx+2) };
-
-    /* now set sqrtgdiag */
-    set_sqrtgdiag_array(node, AdXdx, Ag, Asqrtgdiag);
-  }
+    coordinates_set_sqrtgdiag_var(node, idXdx, i3metric, Ind("sqrtgdiagx"));
 
   /* set oC surface coords, for now this is off */
   for(f=0; f<6; f++)
@@ -498,9 +484,9 @@ int coordinates_init_node(tNode *node)
         errorexit("implement case where we use non-flat metric in DG");
 
       /* now set sqrtgdiag */
-      set_sqrtgdiag_array(node, AXm_dXdx, Am_g, AXm_sqrtgdiag);
-      set_sqrtgdiag_array(node, AYm_dXdx, Am_g, AYm_sqrtgdiag);
-      set_sqrtgdiag_array(node, AZm_dXdx, Am_g, AZm_sqrtgdiag);
+      coordinates_set_sqrtgdiag_array(node, AXm_dXdx, Am_g, AXm_sqrtgdiag);
+      coordinates_set_sqrtgdiag_array(node, AYm_dXdx, Am_g, AYm_sqrtgdiag);
+      coordinates_set_sqrtgdiag_array(node, AZm_dXdx, Am_g, AZm_sqrtgdiag);
     }
   }
 
@@ -511,11 +497,44 @@ int coordinates_init_node(tNode *node)
 }
 
 
+/* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 vars sqrtgdiag^i.
+   We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
+   in x-coords. */
+void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,
+                                   int isqrtgdiagx)
+{
+  /* 3 arrays for dXdx on midpoints */
+  tArray *AdXdx[3][3] =
+    { { VarA(node,idXdx),   VarA(node,idXdx+1), VarA(node,idXdx+2) },
+      { VarA(node,idXdx+3), VarA(node,idXdx+4), VarA(node,idXdx+5) },
+      { VarA(node,idXdx+6), VarA(node,idXdx+7), VarA(node,idXdx+8) } };
+  /* 3 arrays for sqrtgdiag on grid points */
+  tArray *Asqrtgdiag[3] = { VarA(node, isqrtgdiagx),
+                            VarA(node, isqrtgdiagx+1),
+                            VarA(node, isqrtgdiagx+2) };
+  tArray *Ag[6]; /* arrays for 3-metric */
+  int d;
+
+  /* set arrays for 3 metric */
+  if(igxx>=0)
+  {
+    for(d=0; d<6; d++) Ag[d] = VarA(node, igxx + d);
+    if(Ag[0]==NULL) errorexit("array for gxx is NULL!");
+  }
+  else
+  {
+    for(d=0; d<6; d++) Ag[d] = NULL;
+  }
+
+  /* now set sqrtgdiag */
+  coordinates_set_sqrtgdiag_array(node, AdXdx, Ag, Asqrtgdiag);
+}
+
 /* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 arrays Asqrtgdiag[i].
    We calculate Asqrtgdiag from dXdx[3][3] and the symm. 3-metric in Ag[6]
    in x-coords. */
-void set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3], tArray *Ag[6],
-                         tArray *Asqrtgdiag[3])
+void coordinates_set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3],
+                                     tArray *Ag[6], tArray *Asqrtgdiag[3])
 {
   /* arrays to compute sqrtgdiag */
   tArray *adXdxT = alloc_empty_array2d(3,3); /* 3x3 for coord. transf. */

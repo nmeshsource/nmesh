@@ -13,8 +13,10 @@ typedef struct {
 
 
 /* coordinates.c */
-void set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3], tArray *Ag[6],
-                         tArray *Asqrtgdiag[3]);
+void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,
+                                   int isqrtgdiagx);
+void coordinates_set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3],
+                                     tArray *Ag[6], tArray *Asqrtgdiag[3]);
 
 /* coordtrans_CubedSphere.c */
 double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
