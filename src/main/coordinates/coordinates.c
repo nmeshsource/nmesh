@@ -203,8 +203,7 @@ int coordinates_init_node(tNode *node)
 
   /* set sqrtdet2gamma on node faces */
   if(sqrtdet2gamma)
-    coordinates_set_sqrtdet2gamma_var(node, idXdx, i3metric,
-                                      Ind("sqrtdet2gamma0"));
+    coordinates_set_sqrtdet2gamma_var(node, i3metric, Ind("sqrtdet2gamma0"));
   /* set sqrtgdiag */
   if(sqrtgdiag)
     coordinates_set_sqrtgdiag_var(node, idXdx, i3metric, Ind("sqrtgdiagx"));
@@ -452,7 +451,7 @@ int coordinates_init(tMesh *mesh)
 /* Write sqrt(det(2gamma)) on node faces into the 6 vars sqrtdet2gamma^i.
    We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
    in x-coords. If igxx<0 we assume a flat 3-metric. */
-void coordinates_set_sqrtdet2gamma_var(tNode *node, int idXdx, int igxx,
+void coordinates_set_sqrtdet2gamma_var(tNode *node, int igxx,
                                        int isqrtdet2gamma0)
 {
   int *n = node->n;
