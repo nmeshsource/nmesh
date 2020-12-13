@@ -451,7 +451,7 @@ int coordinates_init(tMesh *mesh)
 
 /* Write sqrt(det(2gamma)) on node faces into the 6 vars sqrtdet2gamma^i.
    We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
-   in x-coords. */
+   in x-coords. If igxx<0 we assume a flat 3-metric. */
 void coordinates_set_sqrtdet2gamma_var(tNode *node, int idXdx, int igxx,
                                        int isqrtdet2gamma0)
 {
@@ -535,7 +535,7 @@ void coordinates_set_sqrtdet2gamma_var(tNode *node, int idXdx, int igxx,
 
 /* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 vars sqrtgdiag^i.
    We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
-   in x-coords. */
+   in x-coords. If igxx<0 we assume a flat 3-metric. */
 void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,
                                    int isqrtgdiagx)
 {
@@ -568,7 +568,7 @@ void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,
 
 /* Write sqrt(g^{XX,YY,ZZ}) (in Xb-coords) into the 3 arrays Asqrtgdiag[i].
    We calculate Asqrtgdiag from dXdx[3][3] and the symm. 3-metric in Ag[6]
-   in x-coords. */
+   in x-coords. If Ag[0]=NULL we assume a flat 3-metric.*/
 void coordinates_set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3],
                                      tArray *Ag[6], tArray *Asqrtgdiag[3])
 {
