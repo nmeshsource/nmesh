@@ -445,27 +445,8 @@ int coordinates_init(tMesh *mesh)
 
 
 /********************************************************************/
-/* some functions to set metric for DG-surface terms */
+/* some functions to set surface metric for DG-surface terms */
 /********************************************************************/
-
-/* set surface metric terms we need */
-void coordinates_set_surface_metric_var(tNode *node, int idXdx, int igxx,
-                                        int set_sqrtgdiag,
-                                        int isqrtgdiagx,
-                                        int set_sqrtdet2gamma,
-                                        int isqrtdet2gamma0)
-{
-  tMesh *mesh = node->pat->mesh;
-
-  /* set sqrtgdiag */
-  if(set_sqrtgdiag)
-    coordinates_set_sqrtgdiag_var(node, idXdx, igxx, Ind("sqrtgdiagx"));
-
-  /* set sqrtdet2gamma on node faces */
-  if(set_sqrtdet2gamma)
-    coordinates_set_sqrtdet2gamma_var(node, idXdx, igxx,
-                                      Ind("sqrtdet2gamma0"));
-}
 
 
 /* Write sqrt(det(2gamma)) on node faces into the 6 vars sqrtdet2gamma^i.

@@ -27,6 +27,12 @@ enum
 /* coordinates.c */
 int coordinates_init(tMesh *mesh);
 int coordinates_init_node(tNode *node);
+void coordinates_set_sqrtdet2gamma_var(tNode *node, int idXdx, int igxx,
+                                       int isqrtdet2gamma0);
+void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,
+                                   int isqrtgdiagx);
+void coordinates_set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3],
+                                     tArray *Ag[6], tArray *Asqrtgdiag[3]);
 int coordinates_get_label(tPat *pat);
 
 /* get_coords.c */
