@@ -658,35 +658,35 @@ double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale)
   switch(im)
   {
   case 0:
-    /*
     {
-      //reverse stencil and use m_WENO but include ghost: this is UNSTABLE!!!
-      double um[] = {u[-1], u[1], u[2]};
-      return rec1d_m_WENOm3_uniform(n, um, im, u_scale);
-    }
-    */
-    {
-      /* 2nd order acc. */
+      /* weights */
       tWENO3weight W3[1];
       W3->lw[0][0] = 0.5;
       W3->lw[0][1] = 0.5;
+      /* 1st order acc. rec. */
+      return (W3->lw[0][0]*u[0] + W3->lw[0][1]*u[1]);
+
+      /* use ghost u[-1] instead of u[0] (needs nghosts=1 in scalarwave.c):
+         This does not help. */
+      //return (W3->lw[0][0]*u[-1] + W3->lw[0][1]*u[1]);
+
+      /* 2nd order acc. rec. */
       W3->lw[1][0] = 1.5;
       W3->lw[1][1] = -0.5;
       W3->optw[1] = 0.25;//0.333333333333333333333333333333333333;
       W3->optw[0] = 1. - W3->optw[1];
-      /* 1st order acc. rec. */
-      return (W3->lw[0][0]*u[0] + W3->lw[0][1]*u[1]);
-      /* use ghost u[-1] instead of u[0] */
-      return (W3->lw[0][0]*u[-1] + W3->lw[0][1]*u[1]);
-      /* 2nd order acc. rec. */
       return W3->optw[0]*(W3->lw[0][0]*u[0] + W3->lw[0][1]*u[1]) +
              W3->optw[1]*(W3->lw[1][0]*u[1] + W3->lw[1][1]*u[2]);
-      /* use ghost u[-1] instead of u[0] */
-      return W3->optw[0]*(W3->lw[0][0]*u[-1] + W3->lw[0][1]*u[1]) +
-             W3->optw[1]*(W3->lw[1][0]*u[1] + W3->lw[1][1]*u[2]);
+      /* use ghost u[-1] instead of u[0] (needs nghosts=1 in scalarwave.c):
+         This does not help. */
+      //return W3->optw[0]*(W3->lw[0][0]*u[-1] + W3->lw[0][1]*u[1]) +
+      //       W3->optw[1]*(W3->lw[1][0]*u[1] + W3->lw[1][1]*u[2]);
     }
     /* reverse stencil and use m_WENO: this is UNSTABLE!!! */
-    return rec1d_m_WENOm3_uniform(n, u, im, u_scale);
+    //return rec1d_m_WENOm3_uniform(n, u, im, u_scale);
+    //reverse stencil and use m_WENO but with ghost: this is UNSTABLE!!!
+    //double um[] = {u[-1], u[1], u[2]};
+    //return rec1d_m_WENOm3_uniform(n, um, im, u_scale);
   case -1:
     return u[0];
   }
@@ -717,35 +717,35 @@ double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
   switch(lm)
   {
   case 0:
-    /*
     {
-      //reverse stencil and use m_WENO but include ghost: this is UNSTABLE!!!
-      double um[] = {u[n-3], u[n-2], u[n]};
-      return rec1d_p_WENOm3_uniform(n, um, im, u_scale);
-    }
-    */
-    {
-      /* 2nd order acc. */
+      /* weights */
       tWENO3weight W3[1];
-      W3->lw[0][0] = -0.5;
-      W3->lw[0][1] = 1.5;
       W3->lw[1][0] = 0.5;
       W3->lw[1][1] = 0.5;
-      W3->optw[0] = 0.25;//0.333333333333333333333333333333333333;
-      W3->optw[1] = 1. - W3->optw[0];
       /* 1st order acc. rec. */
       return (W3->lw[1][0]*u[n-2] + W3->lw[1][1]*u[n-1]);
-      /* use ghost u[n] instead of u[n-1] */
-      return (W3->lw[1][0]*u[n-2] + W3->lw[1][1]*u[n]);
+
+      /* use ghost u[n] instead of u[n-1] (needs nghosts=1 in scalarwave.c):
+         This does not help. */
+      //return (W3->lw[1][0]*u[n-2] + W3->lw[1][1]*u[n]);
+
       /* 2nd order acc. rec. */
+      W3->lw[0][0] = -0.5;
+      W3->lw[0][1] = 1.5;
+      W3->optw[0] = 0.25;//0.333333333333333333333333333333333333;
+      W3->optw[1] = 1. - W3->optw[0];
       return W3->optw[0]*(W3->lw[0][0]*u[n-3] + W3->lw[0][1]*u[n-2]) +
              W3->optw[1]*(W3->lw[1][0]*u[n-2] + W3->lw[1][1]*u[n-1]);
-      /* use ghost u[n] instead of u[n-1] */
-      return W3->optw[0]*(W3->lw[0][0]*u[n-3] + W3->lw[0][1]*u[n-2]) +
-             W3->optw[1]*(W3->lw[1][0]*u[n-2] + W3->lw[1][1]*u[n]);
+      /* use ghost u[n] instead of u[n-1] (needs nghosts=1 in scalarwave.c):
+         This does not help. */
+      //return W3->optw[0]*(W3->lw[0][0]*u[n-3] + W3->lw[0][1]*u[n-2]) +
+      //       W3->optw[1]*(W3->lw[1][0]*u[n-2] + W3->lw[1][1]*u[n]);
     }
     /* reverse stencil and use p_WENO: this is UNSTABLE!!! */
-    return rec1d_p_WENOm3_uniform(n, u, im, u_scale);
+    //return rec1d_p_WENOm3_uniform(n, u, im, u_scale);
+    //reverse stencil and use m_WENO but with ghost: this is UNSTABLE!!!
+    //double um[] = {u[n-3], u[n-2], u[n]};
+    //return rec1d_p_WENOm3_uniform(n, um, im, u_scale);
   case -1:
     return u[n-1];
   }
