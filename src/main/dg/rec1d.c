@@ -169,7 +169,7 @@ double rec1d_p_WENO3_at_last_minus_l(int n, const double *u, int l,
   return rec1d_p_WENO3(n,u, im, u_scale, W3);
 }
 
-/* use rec1d_p_WENO3 and set weights uniform grid */
+/* use rec1d_p_WENO3 and set weights for uniform grid */
 double rec1d_p_WENO3_uniform(int n, const double *u, int im, double u_scale)
 {
   tWENO3weight W3[1];
@@ -240,7 +240,7 @@ double rec1d_m_WENO3_at_last_minus_l(int n, const double *u, int l,
   return rec1d_m_WENO3(n,u, im, u_scale, W3);
 }
 
-/* use rec1d_m_WENO3 and set weights uniform grid */
+/* use rec1d_m_WENO3 and set weights for uniform grid */
 double rec1d_m_WENO3_uniform(int n, const double *u, int im, double u_scale)
 {
   tWENO3weight W3[1];
@@ -605,4 +605,104 @@ void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
     tNode *node = MyLnode;
     rec1d_uface_to_uin_1(node, vlu, forward);
   }
+}
+
+
+/*********************************************************************/
+/* WENOm3 is much like WENO3 but with different ideal weights */
+/*********************************************************************/
+#define WENOm3_3id_gamma1 0.25
+#define WENOm3_3id_gamma2 0.75
+
+/* use rec1d_p_WENO3 with weights for uniform grid */
+double rec1d_p_WENOm3_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO3weight W3[1];
+  W3->lw[0][0] = -0.5;
+  W3->lw[0][1] = 1.5;
+  W3->lw[1][0] = 0.5;
+  W3->lw[1][1] = 0.5;
+  W3->optw[0] = WENOm3_3id_gamma1;
+  W3->optw[1] = WENOm3_3id_gamma2;
+  return rec1d_p_WENO3(n,u, im, u_scale, W3);
+}
+
+/* use rec1d_m_WENO3 with weights for uniform grid */
+double rec1d_m_WENOm3_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO3weight W3[1];
+  W3->lw[0][0] = 0.5;
+  W3->lw[0][1] = 0.5;
+  W3->lw[1][0] = 1.5;
+  W3->lw[1][1] = -0.5;
+  W3->optw[0] = WENOm3_3id_gamma2;
+  W3->optw[1] = WENOm3_3id_gamma1;
+  return rec1d_m_WENO3(n,u, im, u_scale, W3);
+}
+
+
+/* Use WENOm3 inside and a reversed stencil at the boundary.
+   The n-2 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale)
+{
+  int lm;
+
+  /* inside */
+  if(im>0 && im<=n-2)
+    return rec1d_p_WENOm3_uniform(n, u, im, u_scale);
+
+  if(n<3) return rec1d_p_1(n, u, im, u_scale);
+
+  /* on left end */
+  switch(im)
+  {
+  case 0:
+    /* reverse stencil and use m_WENO */
+    return rec1d_m_WENOm3_uniform(n, u, im, u_scale);
+  case -1:
+    return u[0];
+  }
+
+  /* on right end: lm=0 is last midpoint lm=-1 is facepoint */
+  lm = (n-2) - im;
+  switch(lm)
+  {
+  case -1:
+    return u[n-1];
+  }
+
+  /* should never get here: */
+  errorexiti("im=%d out of range", im);
+}
+double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
+{
+  int lm;
+
+  /* inside */
+  if(im>=0 && im<=n-3)
+    return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+
+  if(n<3) return rec1d_m_1(n, u, im, u_scale);
+
+  /* on right end: lm=0 is last midpoint lm=-1 is facepoint */
+  lm = (n-2) - im;
+  switch(lm)
+  {
+  case 0:
+    /* reverse stencil and use p_WENO */
+    return rec1d_p_WENOm3_uniform(n, u, im, u_scale);
+  case -1:
+    return u[n-1];
+  }
+
+  /* on left end */
+  switch(im)
+  {
+  case -1:
+    return u[0];
+  }
+
+  /* should never get here: */
+  errorexiti("im=%d out of range", im);
 }
