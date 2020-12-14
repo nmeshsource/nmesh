@@ -608,9 +608,9 @@ void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
 }
 
 
-/*********************************************************************/
-/* WENOm3 is much like WENO3 but with different ideal weights */
-/*********************************************************************/
+/*************************************************************************/
+/* WENOm3 is much like WENO3 but with weights for uniform grid points */
+/*************************************************************************/
 // This makes the results asymmetric between left and right moving waves!!!:
 //#define WENOm3_3id_gamma1 0.25
 //#define WENOm3_3id_gamma2 0.75
@@ -645,7 +645,7 @@ double rec1d_m_WENOm3_uniform(int n, const double *u, int im, double u_scale)
 }
 
 
-/* Use WENOm3 inside and a reversed stencil at the boundary.
+/* Use WENOm3 inside and a linear stencil at the boundary.
    The n-2 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale)
