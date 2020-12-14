@@ -6,13 +6,13 @@
 /* reconstruction modes that we can have in DGglobals->fv_rec_mode */
 enum
 {
-  FV_REC_0=0,              /* reconstruction mode not set */
-  FV_REC_1,                /* 1st order accurate reconstruction */
-  FV_REC_WENO3if2away_1,   /* WENO3 if 2 away from face, else 1st order */
-  FV_REC_WENO3if1away_1,   /* WENO3 if 1 away from face, else 1st order */
-  FV_REC_WENO3_2,          /* WENO3 if 1 away from face, else 2nd? order */
-  FV_REC_WENO3_2g,         /* WENO3 if 1 away, else 2nd? order w. ghost */
-  FV_REC_WENOm3_2          /* WENO3 with modified weights */
+  FV_REC_0=0,             /* reconstruction mode not set */
+  FV_REC_1,               /* 1st order accurate reconstruction */
+  FV_REC_WENOm3_2,        /* non-standard WENO3 with modified opt. weights */
+  FV_REC_WENO3if2away_1,  /* WENO3 if 2 away from face, else 1st order */
+  FV_REC_WENO3if1away_1,  /* WENO3 if 1 away from face, else 1st order */
+  FV_REC_WENO3_2,         /* WENO3 if 1 away from face, else 2nd? order */
+  FV_REC_WENO3_2g         /* WENO3 if 1 away, else 2nd? order w. ghost */
 };
 
 /* structure that holds global dg pars */
