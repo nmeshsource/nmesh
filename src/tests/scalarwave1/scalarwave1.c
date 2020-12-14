@@ -284,7 +284,8 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
     if(use_fv)
     {
       /* linear interpolation to moved in point */
-      rec1d_uface_to_uin_1(node, vlu, 1);
+      if(DGglobals->fv_rec_mode > FV_REC_WENOm3_2)
+        rec1d_uface_to_uin_1(node, vlu, 1);
       /* WARNING: The interploation does not help for 2 FV neighbors!!!
                   BUT maybe it would help if going from FV to DG???  */
 
@@ -349,7 +350,8 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   TIMER_START;
 
   /* extrapolate u back to face on fv nodes */
-  rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
+  if(DGglobals->fv_rec_mode > FV_REC_WENOm3_2)
+    rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
 
   /* get flux terms on surfaces */
   dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
@@ -866,6 +868,11 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
     nghosts = 0;
     break;
   /* use WENO3_1 from both sides of midpoint at i0m */
+  case FV_REC_WENOm3_2:
+    rec1d_p = rec1d_p_WENOm3_2;
+    rec1d_m = rec1d_m_WENOm3_2;
+    nghosts = 0;
+    break;
   case FV_REC_WENO3if2away_1:
     rec1d_p = rec1d_p_WENO3_if2away;
     rec1d_m = rec1d_m_WENO3_if2away;
