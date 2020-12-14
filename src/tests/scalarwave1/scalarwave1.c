@@ -618,9 +618,9 @@ void scalarwave1_set_dt_profile_pt(double xyz[3], double t, int nv,
   {
     /* set du/dt = d/dt (pi, cx,cy,cz, phi) */
     dudt[0] = -om*om*u[4];
-    dudt[1] = -om*kx*u[4];
-    dudt[2] = -om*ky*u[4];
-    dudt[3] = -om*kz*u[4];
+    dudt[1] = om*kx*u[4];
+    dudt[2] = om*ky*u[4];
+    dudt[3] = om*kz*u[4];
     dudt[4] = u[0];
   }
   if(scalarwave1->square_profile)
