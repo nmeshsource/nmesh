@@ -162,8 +162,6 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   int l;
   double *u;
   double *uaj = NULL;
-  int use_fv = node->dat->info->use_fv;
-  int use_1st_order = use_fv && (DGglobals->fv_rec_mode!=FV_REC_WENO3_2);
 
   /* get face normal norm at point ijk */
   node_normal_at_ijk(node, f, ijk, norm);
@@ -181,63 +179,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
     uaj = Varaj(node, vi, f);
 
     /* cons var inside node */
-    if(1 || use_1st_order)
-    {
-      d->ui[l] = u[ijk];
-    }
-    else
-    {
-      double uu[2];
-      //pr_nodename(node);
-
-      /* does not work!!! */
-      switch(f)
-      {
-      case 0:
-        uu[0] = u[ijk];
-        uu[1] = u[ijk+1];
-        d->ui[l] = rec1d_m_WENO3_2(2,uu, -1, 1.);
-        //d->ui[l] = 1.333333333333333333*uu[0] - 0.333333333333333*uu[1];
-        //d->ui[l] = u[ijk];
-        break;
-
-      case 1:
-        uu[0] = u[ijk-1];
-        uu[1] = u[ijk];
-        d->ui[l] = rec1d_p_WENO3_2(2,uu, 1, 1.);
-        d->ui[l] = 1.333333333333333333*uu[1] - 0.333333333333333*uu[0];
-        d->ui[l] = u[ijk];
-        break;
-
-      default:
-        d->ui[l] = u[ijk];
-      /*
-      case 2:
-        uu[0] = u[ijk];
-        uu[1] = u[Ind_n(d->i, d->j + 1, d->k, n)];
-        d->ui[l] = rec1d_m_WENO3_2(2,uu, -1, 1.);
-        break;
-
-      case 3:
-        uu[1] = u[ijk];
-        uu[0] = u[Ind_n(d->i, d->j - 1, d->k, n)];
-        d->ui[l] = rec1d_p_WENO3_2(2,uu, 1, 1.);
-        break;
-
-      case 4:
-        uu[0] = u[ijk];
-        uu[1] = u[Ind_n(d->i, d->j, d->k + 1, n)];
-        d->ui[l] = rec1d_m_WENO3_2(2,uu, -1, 1.);
-        break;
-
-      case 5:
-        uu[1] = u[ijk];
-        uu[0] = u[Ind_n(d->i, d->j, d->k - 1, n)];
-        d->ui[l] = rec1d_p_WENO3_2(2,uu, 1, 1.);
-        break;
-      */
-      }
-    }
+    d->ui[l] = u[ijk];
 
     /* cons var on adjacent side */
     if(uaj) /* if there is an adjacent domain */
