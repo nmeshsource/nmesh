@@ -673,25 +673,6 @@ int scalarwave1_init(tMesh *mesh)
   enablevar(mesh, idivf_pi);
   enablevar(mesh, idivf_cx);
 
-  /* move endpoints if fin. vol. */
-  if(0 && Getv(Par("scalarwave1_nummethod"), "fv"))
-  {
-    int ix = Ind("x");
-
-    formylnodes(mesh)
-    {
-      tNode *node = MyLnode;
-      int *n = node->n;
-      double *x = Vard(node, ix);
-      double distXb[6];
-
-      /* find distance from faces to nearest midpoint */
-      set_nodemidpoints_to_face_distXb(node, distXb);
-      x[0]      += 0.5*distXb[0];
-      x[n[0]-1] -= 0.5*distXb[1];
-    }
-  }
-
   /* set initial profile, e.g. at t=0: set u=sin(x) */
   scalarwave1_set_profile(vlu, NULL);
 
