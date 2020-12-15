@@ -20,13 +20,41 @@ tnMPIvars nMPIvars[1];
 /* init global struct */
 int nMPIvars_init(tMesh *mesh)
 {
+  int comm_bits = Geti(Par("nMPI_communicator_bits"));
+  int ncomms = 1<<comm_bits;
+  int tag_ub;
   int i;
 
-  for(i=0; i<NCOMMS; i++)
+  /* get mem for communicators */
+  nMPIvars->comm = calloc(ncomms, sizeof(nMPIvars->comm[0]));
+  nMPIvars->ncomms = ncomms;
+  nMPIvars->comm_bits = comm_bits;
+
+  /* make communicators with nMPI_Comm_dup */
+  for(i=0; i<ncomms; i++)
   {
     nMPIvars->comm[i] = nMPI_COMM_NULL;
     nMPI_Comm_dup(main_comm, &(nMPIvars->comm[i]));
   }
+
+  /* get max number of MPI tags */
+  tag_ub = INT_MAX;
+  for(i=0; i<ncomms; i++)
+  {
+    int flag;
+    void *v;
+
+    nMPI_Comm_get_attr(nMPIvars->comm[i], nMPI_TAG_UB, &v, &flag);
+    if(flag)
+    {
+      int ub = *((int *)v); /* upper bound */
+      /* store min of ub */
+      if(ub < tag_ub)
+        tag_ub = ub;
+    }
+  }
+  nMPIvars->tag_ub = tag_ub;
+
   return 0;
 }
 
@@ -35,9 +63,13 @@ int nMPIvars_finalize(tMesh *mesh)
 {
   int i;
 
-  for(i=0; i<NCOMMS; i++)
+  /* delete communicators */
+  for(i=0; i<nMPIvars->ncomms; i++)
     if(nMPIvars->comm[i] != nMPI_COMM_NULL)
       nMPI_Comm_free(&(nMPIvars->comm[i]));
+
+  /* free mem for communicators */
+  free(nMPIvars->comm);
 
   return 0;
 }
@@ -45,26 +77,54 @@ int nMPIvars_finalize(tMesh *mesh)
 /* return nMPIvars->comm[i] */
 nMPI_Comm nMPIvars_get_comm(int i)
 {
-  if(i>=NCOMMS || i<0) return nMPI_COMM_NULL;
+  if(i>=nMPIvars->ncomms || i<0) return nMPI_COMM_NULL;
   return nMPIvars->comm[i];
 }
 int nMPIvars_get_ncomms(void)
 {
-  return NCOMMS;
+  return nMPIvars->ncomms;
+}
+int nMPIvars_get_tag_ub(void)
+{
+  return nMPIvars->tag_ub;
 }
 
+/* take a long tag number and split it into 2 pieces:
+   1. index commi of one of our communicators in nMPIvars->comm
+   2. smaller tag number */
+int nMPI_long_tag_to_commi_tag(long long_tag, int *commi, int *tag)
+{
+  int comm_bits = nMPIvars->comm_bits;
+  long ntag = long_tag>>comm_bits;
+  long ci = long_tag - (ntag<<comm_bits);
+
+  *commi = ci;
+  *tag   = ntag;
+
+   if(ntag>INT_MAX) return -1;
+   else return 0;
+}
 
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
 {
+  PRFs(":\n");
 #ifdef USEMPI
-  printf("MPI is compiled in. MPI_VERSION = %d\n", MPI_VERSION);
+  printf(" MPI is compiled in. MPI_VERSION = %d\n", MPI_VERSION);
 #else
-  printf("MPI is not compiled in. Posing as rank=%d and size=%d.\n",
+  printf(" MPI is not compiled in. Posing as rank=%d and size=%d.\n",
          noMPI_rank, noMPI_size);
 #endif
+  printf(" nMPIvars->comm_bits = %d\n", nMPIvars->comm_bits);
+  printf(" nMPIvars->ncomms = %d\n", nMPIvars_get_ncomms());
+  printf(" nMPIvars->tag_ub = %d\n", nMPIvars_get_tag_ub());
   return 0;
 }
+
+
+/********************************************************************/
+/* Wrappers for MPI functions */
+/********************************************************************/
 
 /* Wrappers for MPI_Init and MPI_Finalize */
 int nMPI_Init(int *pargc, char ***pargv)
@@ -154,6 +214,20 @@ int nMPI_barrier(void)
 #ifdef USEMPI
   PR0;
   ret = MPI_Barrier(WORLD);
+  PR1;
+#endif
+  return ret;
+}
+
+/* get MPI attribute */
+int nMPI_Comm_get_attr(nMPI_Comm comm, int comm_keyval,
+                       void *attribute_val, int *flag)
+{
+  int ret=0;
+  *flag=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Comm_get_attr(comm, comm_keyval, attribute_val, flag);
   PR1;
 #endif
   return ret;

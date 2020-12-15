@@ -10,16 +10,16 @@ int nmesh_nMPI(tMesh *mesh)
   printf("Adding nMPI\n");
 
   /* functions */
-  AddFun(FIRST, nMPI_print_compile_info);
-  AddFun(FIRST, nMPIvars_init);
+  AddFun(POST_PARAMETERS, nMPIvars_init);
+  AddFun(POST_PARAMETERS, nMPI_print_compile_info);
   AddFun(FINALIZEMESH, nMPIvars_finalize);
 
   /* variables */
   //AddVar("nMPI_temp1", "", "temporary variable");
 
   /* parameters */
-  //AddPar("nMPI_lowlatency", "no", 
-  //       "send many small rather than few large messages");
+  AddPar("nMPI_communicator_bits", "8", "the number of MPI communicators is "
+         "2^nMPI_communicator_bits");
 
   return 0;
 }

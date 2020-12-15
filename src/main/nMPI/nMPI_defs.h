@@ -30,6 +30,7 @@
 #define nMPI_MAXLOC     MPI_MAXLOC
 #define nMPI_MINLOC     MPI_MINLOC
 #define nMPI_DOUBLE_INT MPI_DOUBLE_INT
+#define nMPI_TAG_UB MPI_TAG_UB
 
 #else
 
@@ -54,5 +55,6 @@
 #define nMPI_MAXLOC     0
 #define nMPI_MINLOC     0
 #define nMPI_DOUBLE_INT 0
+#define nMPI_TAG_UB 0
 
 #endif

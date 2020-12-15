@@ -31,12 +31,15 @@ int nMPIvars_init(tMesh *mesh);
 int nMPIvars_finalize(tMesh *mesh);
 nMPI_Comm nMPIvars_get_comm(int i);
 int nMPIvars_get_ncomms(void);
+int nMPIvars_get_ntags_limit(void);
 int nMPI_Init(int *pargc, char ***pargv);
 int nMPI_Finalize(void);
 int nMPI_Abort(int errorcode);
 int nMPI_rank(void);
 int nMPI_size(void);
 int nMPI_barrier(void);
+int nMPI_Comm_get_attr(nMPI_Comm comm, int comm_keyval,
+                       void *attribute_val, int *flag);
 int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm);
 int nMPI_Comm_free(nMPI_Comm *comm);
 int nMPI_Send(const void *buf, int count, nMPI_Datatype datatype,
