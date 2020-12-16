@@ -60,7 +60,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                           void (*numflux)(tDGinfo *d))
 {
   int surface_metric = Par("coordinates_surface_metric");
-  double det2gam     = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
+  double det2g       = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
   double gdiag       = Getv(surface_metric, "sqrtgdiag");
   int isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
   int isqrtgdiagx             = Ind("sqrtgdiagx");
@@ -103,7 +103,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         int dir = face/2;
         int p = (face%2)*(n[dir] - 1);
         //double sig = 2*(face%2) - 1;
-        double *sqrtdet2gam = Vard(node, isqrtdet2g_o_det3gamma0+face);
+        double *sqrtd2g_o_d3g = Vard(node, isqrtdet2g_o_det3gamma0+face);
         double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
         double *Wq = Wquad(node, dir);
         double Wqmod = fabs(distXb[face]);
@@ -118,7 +118,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           int JK = Ind_n_norm(i,j,k, n, dir);
           int i0 = i0_norm(i,j,k, dir);
           double oow = 1./(Wq[i0]*mod0 + Wqmod*mod1);
-          double sdg_oJ_ow = sqrtdet2gam[JK] * fabs(ooJ[ijk]) * oow;
+          double sdg_oJ_ow = sqrtd2g_o_d3g[JK] * fabs(ooJ[ijk]) * oow;
           double gd_ow = sqrtgdiag[ijk] * oow;
           double Ffac;
           int l;
@@ -157,7 +157,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
             //}
 
             F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
-            r[ijk] -= F * (det2gam * sdg_oJ_ow + gdiag * gd_ow);
+            r[ijk] -= F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
 //if(l==0 && face==1)
 //{
 //printDGinfo(dgi);
