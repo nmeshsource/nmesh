@@ -221,6 +221,7 @@ double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
 
   /* set coeffs of var vi in c */
   v = VarA(node, vi);
+  if(!v) return 0.; /* return 0 as interp value if var vi has no storage */
   c = alloc_array(node->n);
   basis_array_analysis3(node, v, c);
 

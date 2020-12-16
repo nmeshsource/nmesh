@@ -105,12 +105,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     for(ipt=0; ipt<Npt; ipt++)
     {
       if(node_pt[ipt])
-      {
-        if(VarA(node_pt[ipt], vi))
-          val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
-        else
-          val_pt[ipt] = 0.; /* set to zero if var vi has no storage */
-      }
+        val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
     }
 
 
