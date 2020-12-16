@@ -105,8 +105,7 @@ int nMPI_long_tag_to_commi_tag(long long_tag, int *commi, int *tag)
   *commi = ci;
   *tag   = ntag;
 
-  if(ntag <= nMPIvars->tag_ub) return 0;
-  if(ntag > INT_MAX) return -2;
+  if(ci < nMPIvars->ncomms) return 0;
   return -1;
 }
 
