@@ -331,7 +331,8 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   else
   {
     /* nb is on other process so use MPI to exchange data */
-    int rq, nb_rank, s_tag, r_tag, lid, nb_lid;
+    long s_ltag, r_ltag;
+    int rq, nb_rank, s_tag, r_tag, lid, nb_lid, ci;
     nMPI_Comm s_comm, r_comm;
     tCom *com = dat->com[face];
     int nb_n[3], nb_N;
@@ -355,12 +356,12 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     //s_comm = node->comm;
     lid = calc_node_lid(node);
     nb_lid = calc_node_lid(nb);
-    s_tag = (nb_lid*64 + nb_ni)*6 + nb_f;
-    r_tag = (lid*64 + ni)*6 + face;
-    if(r_tag<0) r_tag = -r_tag;
-    if(s_tag<0) s_tag = -s_tag;
-    r_comm = nb->comm;
-    s_comm = node->comm;
+    s_ltag = (nb_lid*64 + nb_ni)*6 + nb_f;
+    r_ltag = (lid*64 + ni)*6 + face;
+    nMPI_long_tag_to_commi_tag(s_ltag, &ci, &s_tag);
+    s_comm = nMPIvars_get_comm(ci);
+    nMPI_long_tag_to_commi_tag(r_ltag, &ci, &r_tag);
+    r_comm = nMPIvars_get_comm(ci);
 
     /* alloc one segmented array for nbsurf of all nvars variables needed */
     s = dat->s[face][vi]; /* surface of 1st var that needs it on this face */
