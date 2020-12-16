@@ -18,7 +18,7 @@ int nmesh_nMPI(tMesh *mesh)
   //AddVar("nMPI_temp1", "", "temporary variable");
 
   /* parameters */
-  AddPar("nMPI_communicator_bits", "8", "the number of MPI communicators is "
+  AddPar("nMPI_communicator_bits", "9", "the number of MPI communicators is "
          "2^nMPI_communicator_bits");
 
   return 0;

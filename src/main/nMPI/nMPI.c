@@ -22,7 +22,7 @@ int nMPIvars_init(tMesh *mesh)
 {
   int comm_bits = Geti(Par("nMPI_communicator_bits"));
   int ncomms = 1<<comm_bits;
-  int tag_ub;
+  int tag_ub, tag_bits;
   int i;
 
   /* get mem for communicators */
@@ -54,6 +54,10 @@ int nMPIvars_init(tMesh *mesh)
     }
   }
   nMPIvars->tag_ub = tag_ub;
+
+  /* set tag_bits */
+  for(tag_bits=0; (tag_ub)>>tag_bits; tag_bits++);
+  nMPIvars->tag_bits = tag_bits;
 
   return 0;
 }
@@ -94,9 +98,9 @@ int nMPIvars_get_tag_ub(void)
    2. smaller tag number */
 int nMPI_long_tag_to_commi_tag(long long_tag, int *commi, int *tag)
 {
-  int comm_bits = nMPIvars->comm_bits;
-  long ntag = long_tag>>comm_bits;
-  long ci = long_tag - (ntag<<comm_bits);
+  int tag_bits = nMPIvars->tag_bits;
+  long ci = long_tag>>tag_bits;
+  long ntag = long_tag - (ci<<tag_bits);
 
   *commi = ci;
   *tag   = ntag;
@@ -116,9 +120,11 @@ int nMPI_print_compile_info(tMesh *mesh)
   printf(" MPI is not compiled in. Posing as rank=%d and size=%d.\n",
          noMPI_rank, noMPI_size);
 #endif
-  printf(" nMPIvars->comm_bits = %d\n", nMPIvars->comm_bits);
   printf(" nMPIvars->ncomms = %d\n", nMPIvars_get_ncomms());
+  printf(" nMPIvars->comm_bits = %d\n", nMPIvars->comm_bits);
   printf(" nMPIvars->tag_ub = %d\n", nMPIvars_get_tag_ub());
+  printf(" nMPIvars->tag_bits = %d\n", nMPIvars->tag_bits);
+
   return 0;
 }
 

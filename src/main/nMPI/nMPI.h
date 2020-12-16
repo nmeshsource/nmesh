@@ -9,6 +9,7 @@ typedef struct {
   int ncomms;        /* number of MPI communicators: ncomms = 2^comm_bits */
   nMPI_Comm *comm;   /* list of MPI communicators */
   int tag_ub;        /* min of upper bound of MPI tags over all in comm */
+  int tag_bits;      /* number of bits in tag_ub+1 */
 } tnMPIvars;
 
 
