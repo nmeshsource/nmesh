@@ -206,16 +206,11 @@ tNode *alloc_node(int initcomm)
   tNode *node = calloc(1, sizeof(*node));
   if(!node) errorexit("out of memory");
 
-  if(initcomm)
-  {
-    /* set node MPI communicator node->comm */
-    node->comm = nMPIvars_get_comm(initcomm-1);
-  }
-  else
-  {
-    // node->comm = nMPI_COMM_NULL;
-    node->comm = main_comm;
-  }
+  // /* set node MPI communicator node->comm */
+  //if(initcomm)
+  //  node->comm = nMPIvars_get_comm(initcomm-1);
+  //else
+  //  node->comm = main_comm;
 
   return node;
 }
@@ -1339,7 +1334,6 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac)
     {
       tNode *node = elem->node;
       tNode *parent = node->parent;
-      int i;
 
       if(node->dat)
       {
@@ -1357,10 +1351,10 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac)
       //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
 
       /* set node MPI communicator */
-      i = nMPIvars_get_ncomms();
-      i = node->nid % i;
-      node->comm = nMPIvars_get_comm(i);
-      //PRF;printf(": i=%d node->comm=%d\n", i, node->comm);
+      //i = nMPIvars_get_ncomms();
+      //i = node->nid % i;
+      //node->comm = nMPIvars_get_comm(i);
+      // //PRF;printf(": i=%d node->comm=%d\n", i, node->comm);
 
       /* check if we need to change node->dt and mesh->dt */
       if(auto_dt)

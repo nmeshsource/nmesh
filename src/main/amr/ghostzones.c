@@ -361,7 +361,8 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
     {
       /* nb is on other process so use MPI to exchange data */
       int buflen = (vl->n) * nc[0]*nc[1]*nc[2];
-      int rq, nb_rank, s_tag, r_tag;
+      long s_ltag, r_ltag;
+      int rq, nb_rank, s_tag, r_tag, ci;
       nMPI_Comm s_comm, r_comm;
       tCom *com = dat->gcom;
       double *sbuf, *rbuf; /* buffers for MPI */
@@ -374,12 +375,12 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
       nb_rank = nb->datrank;
       lid = calc_node_lid(node);
       nb_lid = calc_node_lid(nb);
-      s_tag = nb_lid*27 + nb_ni;
-      r_tag = lid*27 + ni;
-      if(r_tag<0) r_tag = -r_tag;
-      if(s_tag<0) s_tag = -s_tag;
-      r_comm = nb->comm;
-      s_comm = node->comm;
+      s_ltag = nb_lid*27 + nb_ni;
+      r_ltag = lid*27 + ni;
+      nMPI_long_tag_to_commi_tag(s_ltag, &ci, &s_tag);
+      s_comm = nMPIvars_get_comm(ci);
+      nMPI_long_tag_to_commi_tag(r_ltag, &ci, &r_tag);
+      r_comm = nMPIvars_get_comm(ci);
 
       /* alloc buffers for send/recv */
       rbuf = dmalloc(buflen);

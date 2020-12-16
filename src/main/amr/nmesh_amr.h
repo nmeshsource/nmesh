@@ -115,8 +115,8 @@ typedef struct tNODE {
   int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
   tDat *dat;              /* pointer to data (NULL if not on this proc) */
   int datrank;            /* rank of proc that rightfully has data */
-  nMPI_Comm comm;         /* MPI_comm for this node, could contain only ranks
-                             where dat is and where all neighb. have dat */
+  //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
+                            // where dat is and where all neighb. have dat
   /* items to do with neighbor communication need to go last: */
   struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
