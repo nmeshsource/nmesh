@@ -23,8 +23,9 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("dYd", "i", "coord derivative dY/dx^i"); // thing in between
   AddAuxVar("dZd", "i", "coord derivative dZ/dx^i"); // these 3 lines
   AddAuxVar("det_dXbdx", "", "determinant of dXb/dx");
-  AddAuxVar("sqrtdet2gamma","@", "sqrt(det(2gamma)), here 2gamma is 2-metric "
-            "induced on surface_f of node in Xb-coords");
+  AddAuxVar("sqrtdet2g_o_det3gamma","@", "sqrt(det(2g)/det(3gamma_ij)), here "
+            "2g is 2-metric induced on surface_f of node in Xb-coords and "
+            "3gamma_ij is 3-metric in x-coords");
   AddAuxVar("sqrtgdiag", "I", "sqrt of diagonal components of upper index "
             "3-metric in Xb-coords");
   AddAuxVar("coordinates_tmp1", "", "temp. space"); // don't put any-
@@ -44,8 +45,9 @@ int nmesh_coordinates(tMesh *mesh)
   /* parameters */
   AddPar("coordinates_verbose", "yes", "verbose [yes,no]");
   AddPar("coordinates_3metric", "", "[flat,any var name]");
-  AddPar("coordinates_surface_metric", "sqrtdet2gamma", "surface metric info "
-         "we set in coordinates_init_node [sqrtdet2gamma,sqrtgdiag]");
+  AddPar("coordinates_surface_metric", "sqrtdet2g_o_det3gamma", "surface "
+         "metric info we set e.g. in coordinates_init_node "
+         "[sqrtdet2g_o_det3gamma,sqrtgdiag]");
   AddPar("CubedSphere_sigma01_lmax", "8", "lmax for Ylm's "
          "used in FSurf_CubSph_sigma01_func");
 

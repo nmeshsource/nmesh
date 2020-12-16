@@ -60,10 +60,10 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                           void (*numflux)(tDGinfo *d))
 {
   int surface_metric = Par("coordinates_surface_metric");
-  double det2gam     = Getv(surface_metric, "sqrtdet2gamma");
+  double det2gam     = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
   double gdiag       = Getv(surface_metric, "sqrtgdiag");
-  int isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
-  int isqrtgdiagx     = Ind("sqrtgdiagx");
+  int isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
+  int isqrtgdiagx             = Ind("sqrtgdiagx");
   int iooJ = Ind("det_dXbdx");
 
   TIMER_START;
@@ -103,7 +103,7 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         int dir = face/2;
         int p = (face%2)*(n[dir] - 1);
         //double sig = 2*(face%2) - 1;
-        double *sqrtdet2gam = Vard(node, isqrtdet2gamma0+face);
+        double *sqrtdet2gam = Vard(node, isqrtdet2g_o_det3gamma0+face);
         double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
         double *Wq = Wquad(node, dir);
         double Wqmod = fabs(distXb[face]);

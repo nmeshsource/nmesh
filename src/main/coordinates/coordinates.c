@@ -19,8 +19,8 @@ int coordinates_coordvars_enabled(tNode *node)
   tDat *dat = node->dat;
   tCoordInfo *CI = pat->CI;
   int iX, ix, idXdx, idet_dXbdx;
-  int isqrtdet2gamma0, isqrtgdiagx;
-  int surface_metric, sqrtdet2gamma, sqrtgdiag;
+  int isqrtdet2g_o_det3gamma0, isqrtgdiagx;
+  int surface_metric, sqrtdet2g_o_det3gamma, sqrtgdiag;
   int itmp;
   int f, d;
 
@@ -35,14 +35,14 @@ int coordinates_coordvars_enabled(tNode *node)
   ix = Ind("x");
   idXdx = Ind("dXdx");
   idet_dXbdx = Ind("det_dXbdx");
-  isqrtdet2gamma0 = Ind("sqrtdet2gamma0");
+  isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
   isqrtgdiagx = Ind("sqrtgdiagx");
   itmp = Ind("coordinates_tmp1");
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
-  sqrtdet2gamma  = Getv(surface_metric, "sqrtdet2gamma");
-  sqrtgdiag      = Getv(surface_metric, "sqrtgdiag");
+  sqrtdet2g_o_det3gamma  = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
+  sqrtgdiag              = Getv(surface_metric, "sqrtgdiag");
 
   /* give all these memory: */
   enablevar_innode(node, iX);
@@ -58,8 +58,10 @@ int coordinates_coordvars_enabled(tNode *node)
   enablevar_innode(node, itmp);
   enablevar_innode(node, itmp+1);
   enablevar_innode(node, itmp+2);
-  if(1 || sqrtdet2gamma) enablevar_innode(node, isqrtdet2gamma0);
-  if(1 || sqrtgdiag)     enablevar_innode(node, isqrtgdiagx);
+  if(1 || sqrtdet2g_o_det3gamma)
+    enablevar_innode(node, isqrtdet2g_o_det3gamma0);
+  if(1 || sqrtgdiag)
+    enablevar_innode(node, isqrtgdiagx);
 
   /* give oC surface coords memory if node has corresponding surface */
   for(f=0; f<6; f++)
@@ -129,7 +131,7 @@ int coordinates_init_node(tNode *node)
   int iX = Ind("X");
   int ix = Ind("x");
   int idXdx = Ind("dXdx");
-  int surface_metric, sqrtdet2gamma, sqrtgdiag;
+  int surface_metric, sqrtdet2g_o_det3gamma, sqrtgdiag;
   int i3metric = MeshVarIndLax(mesh, Gets(Par("coordinates_3metric")));
   double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
   double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
@@ -150,8 +152,8 @@ int coordinates_init_node(tNode *node)
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
-  sqrtdet2gamma  = Getv(surface_metric, "sqrtdet2gamma");
-  sqrtgdiag      = Getv(surface_metric, "sqrtgdiag");
+  sqrtdet2g_o_det3gamma  = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
+  sqrtgdiag              = Getv(surface_metric, "sqrtgdiag");
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
@@ -201,9 +203,10 @@ int coordinates_init_node(tNode *node)
     }
   }
 
-  /* set sqrtdet2gamma on node faces */
-  if(sqrtdet2gamma)
-    coordinates_set_sqrtdet2gamma_var(node, i3metric, Ind("sqrtdet2gamma0"));
+  /* set sqrtdet2g_o_det3gamma on node faces */
+  if(sqrtdet2g_o_det3gamma)
+    coordinates_set_sqrtdet2g_o_det3gamma_var(node, i3metric,
+                                              Ind("sqrtdet2g_o_det3gamma0"));
   /* set sqrtgdiag */
   if(sqrtgdiag)
     coordinates_set_sqrtgdiag_var(node, idXdx, i3metric, Ind("sqrtgdiagx"));
@@ -448,17 +451,18 @@ int coordinates_init(tMesh *mesh)
 /********************************************************************/
 
 
-/* Write sqrt(det(2gamma)) on node faces into the 6 vars sqrtdet2gamma^i.
-   We calculate sqrtgdiag from var dXdx and the symm. 3-metric igxx
-   in x-coords. If igxx<0 we assume a flat 3-metric. */
-void coordinates_set_sqrtdet2gamma_var(tNode *node, int igxx,
-                                       int isqrtdet2gamma0)
+/* Write sqrt(det(2g)/det(3gamma_ij)) on node faces into the 6 vars
+   sqrtdet2g_o_det3gamma^i. We calculate sqrtdet2g_o_det3gamma from
+   var dXdx and the symm. 3-metric igxx in x-coords.
+   If igxx<0 we assume a flat 3-metric. */
+void coordinates_set_sqrtdet2g_o_det3gamma_var(tNode *node, int igxx,
+                                               int isqrtdet2g_o_det3gamma0)
 {
   int *n = node->n;
-  /* arrays to compute 2 metric sqrtdet2gamma on faces */
+  /* arrays to compute 2 metric sqrtdet2g_o_det3gamma on faces */
   tArray *a3gamT = alloc_empty_array2d(3,3); /* 3x3 for transp. of 3-metric */
   tArray *a2J = alloc_array2d(3,2);   /* 3x2 for 2-Jacobian */
-  tArray *a2gam = alloc_array2d(2,2); /* 2x2 for induced metric on surface */
+  tArray *a2g = alloc_array2d(2,2);   /* 2x2 for induced metric on surface */
   tArray *tmp = alloc_array2d(3,2);
   tArray *Ag[6]; /* arrays for 3-metric */
   double *gxx, *gxy, *gxz, *gyy, *gyz, *gzz;
@@ -482,16 +486,16 @@ void coordinates_set_sqrtdet2gamma_var(tNode *node, int igxx,
   gyz = Arrd(Ag[4]);
   gzz = Arrd(Ag[5]);
 
-  /* set sqrtdet2gam on each face */
+  /* set sqrtd2g_o_d3g on each face */
   for(f=0; f<6; f++)
   {
     int dir = f/2;
     int p = (f%2)*(n[dir] - 1);
-    double *sqrtdet2gam = Vard(node, isqrtdet2gamma0 + f);
+    double *sqrtd2g_o_d3g = Vard(node, isqrtdet2g_o_det3gamma0 + f);
 
     forplaneN(dir, i,j,k, n, p)
     {
-      double det2gam;
+      double det2g, det3gam;
       int ijk = Ind_n(i,j,k, n);
       int JK = Ind_n_norm(i,j,k, n, dir);
 
@@ -502,7 +506,8 @@ void coordinates_set_sqrtdet2gamma_var(tNode *node, int igxx,
       if(igxx<0)
       {
         /* compute 2-metric from a2J^T a2J */
-        mm_array0_norestrict(a2J,a2J, a2gam);
+        mm_array0_norestrict(a2J,a2J, a2g);
+        det3gam = 1.; /* 3-metric is assumed flat */
       }
       else
       {
@@ -515,18 +520,20 @@ void coordinates_set_sqrtdet2gamma_var(tNode *node, int igxx,
            into the col. major a3gamT, we get the transpose automatically! */
         point_array_d_to_data(a3gamT, M, 1);
         mm_array0(a3gamT,a2J, tmp); /* a3gam a2J -> tmp */
-        mm_array0(a2J,tmp, a2gam);  /* a2J^T tmp -> a2gam */
+        mm_array0(a2J,tmp, a2g);    /* a2J^T tmp -> a2g */
+        det3gam = det_3Dmatrix(M);  /* det of 3-metric */
+        if(det3gam <= 0.) det3gam = 1.; /* avoid NaNs */
       }
-      det2gam = det_2_2_array(a2gam);
-      //NOTE: there should be a faster way to get det2gam. There should
+      det2g = det_2_2_array(a2g);
+      //NOTE: there should be a faster way to get det2g. There should
       //      be an analogue to \det(g)=\alpha^2\det(\gamma)
-      sqrtdet2gam[JK] = sqrt(det2gam);
+      sqrtd2g_o_d3g[JK] = sqrt(det2g / det3gam);
     }
   }
 
   /* free arrays */
   free_array(tmp);
-  free_array(a2gam);
+  free_array(a2g);
   free_array(a2J);
   free_array(a3gamT);
 }
