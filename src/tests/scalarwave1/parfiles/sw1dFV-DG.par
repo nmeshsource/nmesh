@@ -36,7 +36,9 @@ amr_mesh_type = 3 BoxMesh Line
 amr_BoxMesh_dout = 1
 amr_luni = 0
 
-dg_outerBC_flux_fac = 1 0 0
+amr_dir_active0 = 1
+amr_dir_active1 = 0
+amr_dir_active2 = 0
 amr_n0 = 50
 amr_n1 = 1
 amr_n2 = 1
