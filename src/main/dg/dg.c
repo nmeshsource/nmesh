@@ -200,6 +200,7 @@ int dg_set_DGglobals(tMesh *mesh)
 {
   int fv_rec = Par("fv_rec");
 
+  /* set reconstruction mode */
   if(Getv(fv_rec, "1"))
     DGglobals->fv_rec_mode = FV_REC_1;
   else if(Getv(fv_rec, "WENOm3_2"))
@@ -214,6 +215,13 @@ int dg_set_DGglobals(tMesh *mesh)
     DGglobals->fv_rec_mode = FV_REC_WENO3_2g;
   else
     errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
+
+  /* set flux factors for outer BCs */
+  if( sscanf(Gets(Par("dg_outerBC_flux_fac")), "%lg %lg %lg",
+             &(DGglobals->outerBC_flux_fac[0]),
+             &(DGglobals->outerBC_flux_fac[1]),
+             &(DGglobals->outerBC_flux_fac[2])) != 3 )
+    errorexit("par dg_outerBC_flux_fac must contain 3 numbers");
 
   return 0;
 }
