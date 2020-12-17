@@ -232,10 +232,10 @@ int dg_print_DGglobals(tMesh *mesh)
   int d;
 
   PRFs(":\n");
-  printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
-  for(d=0; d<3; d++)
-    printf(" DGglobals->outerBC_flux_fac[%d] = %g\n", d,
-           DGglobals->outerBC_flux_fac[d]);
+  printf(" ->outerBC_flux_fac = {");
+  for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
+  printf(" }\n");
+  printf(" ->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
 
   return 0;
 }

@@ -18,8 +18,8 @@ enum
 /* structure that holds global dg pars */
 typedef struct {
   /* frequently used par values */
-  int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
   double outerBC_flux_fac[3]; /* values from par dg_outerBC_flux_fac */
+  int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
 } tDGglobals;
 
 
