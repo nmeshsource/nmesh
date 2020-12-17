@@ -172,6 +172,9 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
   scalarwave1_eigenval1d(mesh,nvars, d->lama,norm);
 
+  /* reset d->Ffac to default */
+  d->Ffac = 1.;
+
   /* loop over evo vars in vlu */
   forvl(vlu, l)
   {
@@ -208,10 +211,10 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
       /* get u5 = (pi, cx,cy,cz, phi) */
       scalarwave1_set_profile_pt(xyz,t, 5, u5);
       for(l=0; l<nvars; l++) d->ua[l] = u5[l];
-    }
 
-    /* set flux factor so that we can zero fluxes at outer boundary */
-    //d->Ffac = DGglobals->outerBC_flux_fac[dir];
+      /* set flux factor so that we can zero fluxes at outer boundary */
+      //d->Ffac = DGglobals->outerBC_flux_fac[dir];
+    }
   }
 
   /* get inner and adjacent fluxes fi, fa */
