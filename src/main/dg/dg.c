@@ -146,24 +146,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
             int ir = Vind(vlr,l);
             double *r = Vard_(node, ir);
             double F;
-            //int iu = Vind(vlu,l);
-            //double *uaj = Varaj(node, iu, face);
-
-            /* do something special on outer boundary */
-            //if(!uaj)
-            //{
-            //  if(dgi->lami[l] < 0.) dgi->fnum[l] = 0.;
-            //  else                  dgi->fnum[l] = dgi->fi[l];
-            //}
 
             F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
             r[ijk] -= F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
-//if(l==0 && face==1)
-//{
-//printDGinfo(dgi);
-//printf("nid%ld dgi->fnum[l]=%g gd_ow=%g dgi->fnum[l]*gd_ow=%g\n",
-//node->nid, dgi->fnum[l], gd_ow, dgi->fnum[l]*gd_ow);
-//}
           }
         }
       } /* end loop over faces */
