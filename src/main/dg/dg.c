@@ -6,6 +6,9 @@
 #include "dg.h"
 
 
+/* get glabal amr vars */
+extern tAMR amr[1];
+
 /* global vars for dg */
 tDGglobals DGglobals[1];
 
@@ -108,6 +111,9 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
         double *Wq = Wquad(node, dir);
         double Wqmod = fabs(distXb[face]);
         int i,j,k;
+
+        /* do nothing if dir is not active */
+        if(!Getb(amr->dir_active[dir])) continue;
 
         /* set DG face info */
         dgi->face = face;
@@ -217,10 +223,10 @@ int dg_print_DGglobals(tMesh *mesh)
   int d;
 
   PRFs(":\n");
-  printf(" ->outerBC_flux_fac = {");
+  printf(" DGglobals->outerBC_flux_fac = {");
   for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
   printf(" }\n");
-  printf(" ->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
+  printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
 
   return 0;
 }
