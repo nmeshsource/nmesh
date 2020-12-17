@@ -38,6 +38,11 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
   AddPar("amr_uniform_p", "", "patch list where we use uniform grid spacing");
 
+  /* pars that control how many dimensions we use */
+  AddPar("amr_dir_active0", "yes", "whether dir. 0 is used [yes,no]");
+  AddPar("amr_dir_active1", "yes", "whether dir. 1 is used [yes,no]");
+  AddPar("amr_dir_active2", "yes", "whether dir. 2 is used [yes,no]");
+
   /* refinement related pars for initial mesh creation */
   AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
   AddPar("amr_refine_p", "", "patch list that we refine one level further");

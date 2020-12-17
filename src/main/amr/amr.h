@@ -6,12 +6,6 @@
 /* world comm from main */
 extern nMPI_Comm main_comm;
 
-/* structure that holds global amr vars and pars */
-typedef struct {
-  int MPIexchange;  /* Par("amr_MPIexchange") */
-  int nghosts;      /* Par("amr_nghosts") */
-} tAMR;
-
 
 
 /* storage.c */

@@ -325,6 +325,18 @@ typedef struct tREF {
 #include "nmesh_amr_loops.h"
 
 /**************************************************************************/
+/* amr parameters */
+/**************************************************************************/
+
+/* structure that holds global amr vars and pars */
+typedef struct {
+  int dir_active[3]; /* Par("amr_dir_active0"), ... */
+  int MPIexchange;   /* Par("amr_MPIexchange") */
+  int nghosts;       /* Par("amr_nghosts") */
+} tAMR;
+
+
+/**************************************************************************/
 /* functions */
 /**************************************************************************/
 

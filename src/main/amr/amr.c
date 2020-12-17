@@ -23,17 +23,25 @@ int amr_init_global_pars(tMesh *mesh)
   int amr_N0 = Par("amr_N0");
   int amr_N1 = Par("amr_N1");
   int amr_N2 = Par("amr_N2");
+  int d;
 
   PRFs(":\n");
 
   /* set amr globals */
+  amr->dir_active[0] = Par("amr_dir_active0");
+  amr->dir_active[1] = Par("amr_dir_active1");
+  amr->dir_active[2] = Par("amr_dir_active2");
   amr->MPIexchange = Par("amr_MPIexchange");
   amr->nghosts     = Par("amr_nghosts");
 
   /* print global pars */
-  printf("amr->MPIexchange = par_%04d : Geti(amr->MPIexchange) = %d\n",
+  printf(" amr->dir_active =\n");
+  for(d=0; d<3; d++)
+    printf("      par_%04d : Getb(amr->dir_active[%d]) = %d\n",
+           amr->dir_active[d], d, Getb(amr->dir_active[d]));
+  printf(" amr->MPIexchange = par_%04d : Geti(amr->MPIexchange) = %d\n",
          amr->MPIexchange, Geti(amr->MPIexchange));
-  printf("amr->nghosts = par_%04d :     Geti(amr->nghosts) = %d\n",
+  printf(" amr->nghosts = par_%04d :     Geti(amr->nghosts) = %d\n",
          amr->nghosts, Geti(amr->nghosts));
 
   /* set amr_n0,... from amr_N0, ... */
