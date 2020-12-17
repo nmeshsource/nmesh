@@ -159,6 +159,9 @@ Things that need to be done urgently:
  -do tests in appendix of https://arxiv.org/pdf/1604.07999.pdf
  -TOV star in Cowling approx
 
+*replace GRHD->Ffac by DGglobals->outerBC_flux_fac
+*implement FV for GRHD
+
 *check if HLL flux is correct (compare with fv_HLL in
                                bamps' projects/grhdc/grhdc_FV.c)
 
