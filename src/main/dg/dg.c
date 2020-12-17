@@ -225,3 +225,17 @@ int dg_set_DGglobals(tMesh *mesh)
 
   return 0;
 }
+
+/* print what we have in DGglobals */
+int dg_print_DGglobals(tMesh *mesh)
+{
+  int d;
+
+  PRFs(":\n");
+  printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
+  for(d=0; d<3; d++)
+    printf(" DGglobals->outerBC_flux_fac[%d] = %g\n", d,
+           DGglobals->outerBC_flux_fac[d]);
+
+  return 0;
+}

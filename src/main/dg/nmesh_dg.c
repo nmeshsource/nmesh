@@ -14,6 +14,7 @@ int nmesh_dg(tMesh *mesh)
   AddFun(POST_PARAMETERS, WENOweights_init_globals);
   AddFun(FINALIZE,        WENOweights_free_globals);
   AddFun(POST_PARAMETERS, dg_set_DGglobals);
+  AddFun(POST_PARAMETERS, dg_print_DGglobals);
   AddFun(PRE_EVOLVE,      dg_set_DGglobals); // in case we update fv_rec
 
   /* variables */
