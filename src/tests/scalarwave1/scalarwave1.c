@@ -17,14 +17,16 @@ tscalarwave1 scalarwave1[1];
 /* func to init global vars/pars */
 int scalarwave1_init_global_pars(tMesh *mesh)
 {
-  char *vec = Gets(Par("scalarwave1_k"));
+  int d;
 
-  sscanf(vec, "%lg %lg %lg",
+  PRFs(":\n");
+
+  sscanf(Gets(Par("scalarwave1_k")), "%lg %lg %lg",
          &(scalarwave1->k[0]), &(scalarwave1->k[1]), &(scalarwave1->k[2]));
 
-  printf("setting: scalarwave1->k[0] = %g\n", scalarwave1->k[0]);
-  printf("setting: scalarwave1->k[1] = %g\n", scalarwave1->k[1]);
-  printf("setting: scalarwave1->k[2] = %g\n", scalarwave1->k[2]);
+  printf(" scalarwave1->k = {");
+  for(d=0; d<3; d++) printf(" %.16g", scalarwave1->k[d]);
+  printf(" }\n");
 
   scalarwave1->sin_profile    = Getv(Par("scalarwave1_profile"),"sin");
   scalarwave1->square_profile = Getv(Par("scalarwave1_profile"),"square");
