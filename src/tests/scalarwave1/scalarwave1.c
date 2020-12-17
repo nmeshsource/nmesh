@@ -209,6 +209,9 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
       scalarwave1_set_profile_pt(xyz,t, 5, u5);
       for(l=0; l<nvars; l++) d->ua[l] = u5[l];
     }
+
+    /* set flux factor so that we can zero fluxes at outer boundary */
+    //d->Ffac = DGglobals->outerBC_flux_fac[dir];
   }
 
   /* get inner and adjacent fluxes fi, fa */
