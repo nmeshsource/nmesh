@@ -942,6 +942,56 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
   r->time += ca * a->time;
 }
 
+/* add second var list to first on node surface: r += ca*a
+   with special treatment for ca = 1 and ca = -1 */
+void vladdto_nodefaces(tNode *node, tVarList *r, const double ca, tVarList *a)
+{
+  int l;
+  int *n = node->n;
+
+  if(ca == 0) return;
+  if( (!r) || (!a) ) return;
+
+  /* loop over vars in varlists */
+  for(l=0; l<min2(r->n, a->n); l++)
+  {
+    int ri = r->index[l];
+    int ai = a->index[l];
+    double *pr = Vard(node, ri);
+    double *pa = Vard(node, ai);
+    int i,j,k, ijk;
+
+    forfacepoints(i,j,k, n)
+    {
+      ijk = Ind_n(i,j,k,n);
+      pr[ijk] += ca * pa[ijk];
+    }
+  }
+}
+
+/* add second var list to first on node surface: r += ca*a
+   special treatment for ca = 1 and ca = -1 */
+void vladdto_faces(tVarList *r, const double ca, tVarList *a)
+{
+  tMesh *mesh;
+
+  if( (!r) || (!a) ) return;
+
+  mesh = r->mesh;
+
+  if(ca == 0) return;
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    vladdto_nodefaces(node, r, ca, a);
+  }
+
+  /* add times as well */
+  r->time += ca * a->time;
+}
+
+
 /* convert tVarList into intList: this works only if the initial
    members of tVarList and intList are the same!!! */
 intList *vl2intList(tVarList *v)

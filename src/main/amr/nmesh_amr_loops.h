@@ -216,6 +216,13 @@
   for (j = 0; j < n[1]; j++) \
   for (i = 0; i < n[0]; i++)
 
+/* loop over i,j,k but only include face points */
+#define forfacepoints(i,j,k, n) \
+  for (k = 0; k < n[2]; k++) \
+  for (j = 0; j < n[1]; j++) \
+  for (i = 0; i < n[0]; i++) \
+  if( (i==0 || i==n[0]-1) || (j==0 || j==n[1]-1) || (k==0 || k==n[2]-1) )
+
 /* loop over planes e.g. i=p plane */
 #define forplane0(i,j,k, n, p) \
   for(i=(p), k = 0; k < (n[2]); k++) \
