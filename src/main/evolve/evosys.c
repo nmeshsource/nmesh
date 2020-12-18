@@ -53,6 +53,8 @@ void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, char *name)
   tEvoSys *evosys = mesh->evosys;
   int i = index_pVLList(evosys->u, vl); /* get index i of vl in list */
 
+  if(i<0) errorexit("variable list vl not registered in evosys");
+
   /* set func pointer and name at index i */
   setatindex_FuncPointerList(evosys->f[bin], i, f);
   setatindex_StringList(evosys->f_name[bin], i, name);
