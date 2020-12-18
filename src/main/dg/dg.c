@@ -56,7 +56,8 @@ void free_DGinfo(tDGinfo *dgi)
 }
 
 
-/* Add surface flux terms with a choice of sign (sign=+1 or sign=-1).
+/* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
+   to vldf. We compute the fluxes from vlu.
    For the RHS in DG we need sign=-1 but div(flux) needs sign=+1. */
 int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
                                tVarList *vlu, tVarList *vls,
