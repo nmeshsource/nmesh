@@ -49,3 +49,11 @@ typedef tArray *pArr;        /* list_templates.h only works with numbers */
 #define TYP pArr             /* the pointer pArr is a number */
 #include "list_templates.c"
 #undef TYP
+
+/***************************************************************************/
+/* compile lists with entries of type (char *), i.e. strings */
+/***************************************************************************/
+typedef char *String;         /* list_templates.h only works with numbers */
+#define TYP String            /* the pointer String is a number */
+#include "list_templates.c"
+#undef TYP

@@ -14,6 +14,46 @@
    metric (another src) that depends on Z4. */
 
 
+
+/* register an evolution subsystem variable list vl in evosys */
+void evolve_register_vl(tVarList *vl)
+{
+  tEvoSys *evosys = vl->mesh->evosys;
+  char empty[] = "";
+  int b;
+
+  /* allocate lists u, f, f_name in evosys */
+  if(!evosys->u) evosys->u = alloc_pVLList();
+  for(b=0; b<NEVOFUNCBINS; b++)
+  {
+    if(!evosys->f[b])      evosys->f[b]      = alloc_FuncPointerList();
+    if(!evosys->f_name[b]) evosys->f_name[b] = alloc_StringList();
+  }
+
+  /* Add vl to list u in evosys. */
+  push_pVLList(evosys->u, vl);
+
+  /* Add NULL, empty to lists f, f_name in evosys,
+     which we can overwrite later. */
+  for(b=0; b<NEVOFUNCBINS; b++)
+  {
+    push_FuncPointerList(evosys->f[b], NULL);
+    push_StringList(evosys->f_name[b], empty);
+  }
+}
+
+/* Set a function in an evolution bin for the variable list vl in evosys */
+void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, char *name)
+{
+  tMesh *mesh = vl->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  int i = index_pVLList(evosys->u, vl); /* get index i of vl in list */
+
+  /* set func pointer and name at index i */
+  setatindex_FuncPointerList(evosys->f[bin], i, f);
+  setatindex_StringList(evosys->f_name[bin], i, name);
+}
+
 /* register a variable list u and its RHS in evosys. The func. pointers will
    be called in the order they appear here. rhs is the most important one
    and contains the RHS for the evo eqn of u. The others are there to apply
@@ -78,7 +118,6 @@ int evolve_free_evosys(tMesh *mesh)
   //free_pVLList(evosys->u); /* free list only, not content */
   for(b=0; b<NEVOFUNCBINS; b++)
     free_FuncPointerList(evosys->f[b]);
-
 
   /* now set all of evosys to zero */
   //evolve_print_evosys(mesh);

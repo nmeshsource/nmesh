@@ -27,3 +27,9 @@ typedef tArray *pArr;        /* list_templates.h only works with numbers */
 #define TYP pArr             /* the pointer pArr is a number */
 #include "list_templates.h"
 #undef TYP
+
+/* use lists with (char *) entries */
+typedef char *String;         /* list_templates.h only works with numbers */
+#define TYP String            /* the pointer String is a number */
+#include "list_templates.h"
+#undef TYP

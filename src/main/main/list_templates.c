@@ -154,6 +154,13 @@ void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
   for(i=0; i<u->n; i++) FN(drop,LIST(TYP))(v, u->e[i]);
 }
 
+/* set an existing entry (at index ind) in a list to the value vi */
+void FN(setatindex,LIST(TYP))(LIST(TYP) *v, int ind, TYP vi)
+{
+  if(ind<0 || ind >= v->n) return;
+  v->e[ind] = vi;
+}
+
 /* duplicate a list */
 LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v)
 {

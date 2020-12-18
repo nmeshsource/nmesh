@@ -3,11 +3,16 @@
 /* header file for global functions */
 
 
+/* macro to set a func for a varlist in an evolution bin */
+#define evolve_SetFun(bin, f, vl) evolve_SetEvoFun(bin, f, vl, MSTR(f))
+
 
 /* evolve.c */
 
 
 /* evosys.c */
+void evolve_register_vl(tVarList *vl);
+void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, char *name);
 void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
                 FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,

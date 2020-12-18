@@ -34,14 +34,15 @@ struct tNODE;   /* nodes are defined in main/amr/nmesh_amr.h */
 #define NEVOTEMP 6
 #define pVLL struct pVLLIST
 #define pFL struct FuncPointerLIST
+#define pSL struct StringLIST
 typedef struct tEVOSYS {
   pVLL *u;            /* list of VarLists with evo vars of entire system */
   pVLL *rhs;          /* RHS in du/dt = func(u, t), rhs is AuxVar */
   pVLL *w;            /* temp work list, needs to be an EvoVar just like u */
   pVLL *u_p;          /* u at previous time */
   pVLL *s[NEVOTEMP];  /* temp. storage for say RK stages */
-  pFL *f[NEVOFUNCBINS]; /* func. pointers */
-  // want to add string list with func names
+  pFL *f[NEVOFUNCBINS];      /* one list of func. pointers in each evo bin */
+  pSL *f_name[NEVOFUNCBINS]; /* one list of func. names in each evo bin */
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP

@@ -47,6 +47,7 @@ void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind);
 void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n);
 void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
+void FN(setatindex,LIST(TYP))(LIST(TYP) *v, int ind, TYP vi);
 LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v);
 int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi);
 int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi);
