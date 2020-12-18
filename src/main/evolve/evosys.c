@@ -129,7 +129,7 @@ int evolve_free_evosys(tMesh *mesh)
 }
 
 /* print evosys */
-void evolve_print_evosys(tMesh *mesh)
+void evolve_print_evosys__old(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
   int i;
@@ -174,6 +174,39 @@ void evolve_print_evosys(tMesh *mesh)
   }
 }
 
+/* print evosys */
+void evolve_print_evosys(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int b, i;
+
+  if(evosys->u)
+  {
+    for(b=0; b<NEVOFUNCBINS; b++)
+      if(evosys->f[b])
+      {
+        forList(evosys->f[b], i)
+        {
+          char *vname0, *vnameN;
+          tVarList *vl = ListEntry(evosys->u, i);
+
+          if(vl->n)
+          {
+            vname0 = VarName(Vind(vl, 0));
+            vnameN = VarName(Vind(vl, vl->n-1));
+          }
+          else
+          {
+            vname0 = vnameN = "";
+          }
+
+          if(ListEntry(evosys->f[b],i))
+            printf("            %s (%s ... %s)\n",
+                   ListEntry(evosys->f_name[b],i), vname0, vnameN);
+        }
+      }
+  }
+}
 
 /* make some vars and put them in evosys */
 int evolve_init_evosys(tMesh *mesh)

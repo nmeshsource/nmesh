@@ -65,13 +65,16 @@ void PrintMeshFun(tMesh *mesh, int step)
 
   if(!skel[step]) return;
 
-  printf("  func_T%02d:\n", step);
+  printf("func_T%02d:\n", step);
   for(t = skel[step]; t->next; t = t->next)
-    printf("            %s\n", t->name);
+  {
+    printf("          %s\n", t->name);
+    if(t->f == evolve_myln) evolve_print_evosys(mesh);
+  }
 }
 
 /* print functions in all function bins */
-void PrintMeshFuncs(tMesh *mesh)
+int PrintMeshFuncs(tMesh *mesh)
 {
   int step;
 
@@ -79,4 +82,5 @@ void PrintMeshFuncs(tMesh *mesh)
   printf("Function bin skeleton: functions are called in this order:\n");
   for(step=0; step<NFUNCBINS; step++) PrintMeshFun(mesh, step);
   prdivider(0);
+  return 0;
 }

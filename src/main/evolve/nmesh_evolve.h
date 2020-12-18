@@ -8,7 +8,7 @@
 
 
 /* evolve.c */
-
+int evolve_myln(tMesh *mesh);
 
 /* evosys.c */
 void evolve_register_vl(tVarList *vl);

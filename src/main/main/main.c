@@ -479,6 +479,9 @@ int evolve_mesh(tMesh *mesh)
 
   if(iterationmax <= 0) return 0;
 
+  /* print skeleton of function bins again, now with evo funcs */
+  PrintMeshFuncs(mesh);
+
   /* outermost evolution loop */
   while(mesh->iteration < iterationmax)
   { 

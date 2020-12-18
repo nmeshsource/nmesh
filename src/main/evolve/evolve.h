@@ -5,7 +5,6 @@
 
 
 /* evolve.c */
-int evolve_myln(tMesh *mesh);
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u);
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u);
 void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs);
@@ -14,7 +13,6 @@ int evolve_filter_evosys_mesh(tMesh *mesh);
 
 /* evosys.c */
 int evolve_free_evosys(tMesh *mesh);
-void evolve_print_evosys(tMesh *mesh);
 int evolve_init_evosys(tMesh *mesh);
 void evolve_request_surfaces(tNode *node, pVLList *u);
 
