@@ -152,15 +152,15 @@ int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
           /* get Ffac, this can be set in u_f_lam or numflux */
           Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
 
-          /* get F from dgi and add boundary flux terms to RHS */
+          /* get F from dgi and add boundary flux terms to vldf */
           forvl(vldf, l)
           {
-            int ir = Vind(vldf,l);
-            double *r = Vard_(node, ir);
+            int idf = Vind(vldf,l);
+            double *df = Vard_(node, idf);
             double F;
 
             F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
-            r[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
+            df[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
           }
         }
       } /* end loop over faces */
