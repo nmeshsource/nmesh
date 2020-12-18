@@ -56,11 +56,12 @@ void free_DGinfo(tDGinfo *dgi)
 }
 
 
-/* add surface flux terms */
-int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
-                          tVarList *vls,
-                          void (*u_f_lam)(tDGinfo *d),
-                          void (*numflux)(tDGinfo *d))
+/* Add surface flux terms with a choice of sign (sign=+1 or sign=-1).
+   For the RHS in DG we need sign=-1 but div(flux) needs sign=+1. */
+int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
+                               tVarList *vlu, tVarList *vls,
+                               void (*u_f_lam)(tDGinfo *d),
+                               void (*numflux)(tDGinfo *d))
 {
   int surface_metric = Par("coordinates_surface_metric");
   double det2g       = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
@@ -70,6 +71,10 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
   int iooJ = Ind("det_dXbdx");
 
   TIMER_START;
+
+  /* set overall sign by multiplying det2g and gdiag */
+  det2g *= sign;
+  gdiag *= sign;
 
   /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
      so we do not need to do it here */
@@ -147,14 +152,14 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
           Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
 
           /* get F from dgi and add boundary flux terms to RHS */
-          forvl(vlr, l)
+          forvl(vldf, l)
           {
-            int ir = Vind(vlr,l);
+            int ir = Vind(vldf,l);
             double *r = Vard_(node, ir);
             double F;
 
             F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
-            r[ijk] -= F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
+            r[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
           }
         }
       } /* end loop over faces */
@@ -166,6 +171,17 @@ int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
 
   return 0;
 }
+
+/* add surface flux terms of DG formulation to RHS */
+int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+                          tVarList *vls,
+                          void (*u_f_lam)(tDGinfo *d),
+                          void (*numflux)(tDGinfo *d))
+{
+  return dg_add_surface_fluxes_sign(mesh, -1., vlr, vlu, vls,
+                                    u_f_lam, numflux);
+}
+
 
 /* print */
 void printDGinfo(tDGinfo *d)
