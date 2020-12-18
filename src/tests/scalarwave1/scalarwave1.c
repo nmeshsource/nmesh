@@ -277,16 +277,18 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     double *divf_cx = Vard(node, idivf_cx);
     double *divf_cy = Vard(node, idivf_cx+1);
     double *divf_cz = Vard(node, idivf_cx+2);
+    int fc[6];
     int i;
 
     /* RHS at each point */
     forpoints(node, i)
     {
+      double interior = !(ind_on_nodeface(node, i, fc));
       rphi[i] = pi[i];
-      rpi[i] = -divf_pi[i];
-      rcx[i] = -divf_cx[i];
-      rcy[i] = -divf_cy[i];
-      rcz[i] = -divf_cz[i];
+      rpi[i] = -divf_pi[i] * interior; //only add divf if we are in interior
+      rcx[i] = -divf_cx[i] * interior;
+      rcy[i] = -divf_cy[i] * interior;
+      rcz[i] = -divf_cz[i] * interior;
     }
   }
 
@@ -297,18 +299,32 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 /* surface terms in RHS of: d_t u */
 int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 {
+  int idivf_pi = Ind("scalarwave1_divf_pi");
+  int idivf_cx = Ind("scalarwave1_divf_cx");
+  tVarList *vldivf;
+
   TIMER_START;
+
+  /* make var list with div of fluxes */
+  vldivf = vlalloc(mesh);
+  vlpush(vldivf, idivf_pi);
+  vlpush(vldivf, idivf_cx);
 
   /* extrapolate u back to face on fv nodes */
   if(DGglobals->fv_rec_mode > FV_REC_WENOm3_2)
     rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
 
-  /* get flux terms on surfaces */
-  dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
-                        scalarwave1_fluxes_pt, scalarwave1->numflux);
+  /* add flux terms on surfaces to divf */
+  dg_add_surface_fluxes_sign(mesh, 1., vldivf, vlu, NULL,
+                             scalarwave1_fluxes_pt, scalarwave1->numflux);
 
-  /* extrapolate RHS to face */
-  rec1d_uface_to_uin_1_mesh(mesh, vlr, 0);
+  /* extrapolate divf to face */
+  rec1d_uface_to_uin_1_mesh(mesh, vldivf, 0);
+
+  /* add divf on node surfaces */
+  vladdto_onfaces(vlr, -1., vldivf);
+
+  vlfree(vldivf);
 
   TIMER_STOP;
   return 0;
