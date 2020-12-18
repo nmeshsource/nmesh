@@ -3,6 +3,27 @@
 /* header file for coupled evolution systems */
 
 
+
+/* Function bins for tasks during one evolution sub step */
+enum
+{
+  PRESURF, //presurf; /* set vars needed before surf exchange, e.g. prims */
+  SETSRC,  //setsrc;  /* set some source terms, is called before volrhs */
+  VOLRHS,  //volrhs;  /* set vol. terms of RHS of evo eqns (after setsrc) */
+  SURFRHS, //surfrhs; /* add RHS terms from surf. fluxes (after volrhs) */
+
+
+  PRELIM,  //prelim; /* set vars that are needed early, e.g. gmunu */
+  LIMDATA, //limdata; /* produce data such as min,max on each node */
+                 /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
+                          must return number of data vals we need */
+  LIMITER,  //limiter; /* apply limiter on node using data from limdata */
+
+  NEVOFUNCBINS /* number of function bins in this enum */
+};
+
+
+
 /* lists of variable lists are defined in main/main/nmesh_main.h
    Here we just use an incomplete struct */
 struct pVLLIST; /* pVLLIST is defined in main/main/nmesh_main.h */
@@ -19,16 +40,8 @@ typedef struct tEVOSYS {
   pVLL *w;            /* temp work list, needs to be an EvoVar just like u */
   pVLL *u_p;          /* u at previous time */
   pVLL *s[NEVOTEMP];  /* temp. storage for say RK stages */
-  /* func. pointers that are called in this order: */
-  pFL *prelim;        /* set vars that are needed early, e.g. gmunu */
-  pFL *limdata;       /* produce data such as min,max on each node */
-                      /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
-                               must return number of data vals we need */
-  pFL *limiter;       /* apply limiter on node using data from limdata */
-  pFL *presurf;       /* set vars needed before surf exchange, e.g. prims */
-  pFL *setsrc;        /* set some source terms, is called before volrhs */
-  pFL *volrhs;        /* set vol. terms of RHS of evo eqns (after setsrc) */
-  pFL *surfrhs;       /* add RHS terms from surf. fluxes (after volrhs) */
+  pFL *f[NEVOFUNCBINS]; /* func. pointers */
+  // want to add string list with func names
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP

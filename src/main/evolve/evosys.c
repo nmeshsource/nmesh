@@ -24,26 +24,22 @@ void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer surfrhs)
 {
   tEvoSys *evosys = mesh->evosys;
+  int b;
 
   /* allocate lists in evosys */
   if(!evosys->u)       evosys->u       = alloc_pVLList();
-  if(!evosys->prelim)  evosys->prelim  = alloc_FuncPointerList();
-  if(!evosys->limdata) evosys->limdata = alloc_FuncPointerList();
-  if(!evosys->limiter) evosys->limiter = alloc_FuncPointerList();
-  if(!evosys->presurf) evosys->presurf = alloc_FuncPointerList();
-  if(!evosys->setsrc)  evosys->setsrc  = alloc_FuncPointerList();
-  if(!evosys->volrhs)  evosys->volrhs  = alloc_FuncPointerList();
-  if(!evosys->surfrhs) evosys->surfrhs = alloc_FuncPointerList();
+  for(b=0; b<NEVOFUNCBINS; b++)
+    if(!evosys->f[b]) evosys->f[b] = alloc_FuncPointerList();
 
   /* add u, rhs, src, ... to lists in evosys */
   push_pVLList(evosys->u, u);
-  push_FuncPointerList(evosys->prelim, prelim);
-  push_FuncPointerList(evosys->limdata, limdata);
-  push_FuncPointerList(evosys->limiter, limiter);
-  push_FuncPointerList(evosys->presurf, presurf);
-  push_FuncPointerList(evosys->setsrc, setsrc);
-  push_FuncPointerList(evosys->volrhs, volrhs);
-  push_FuncPointerList(evosys->surfrhs, surfrhs);
+  push_FuncPointerList(evosys->f[PRELIM], prelim);
+  push_FuncPointerList(evosys->f[LIMDATA], limdata);
+  push_FuncPointerList(evosys->f[LIMITER], limiter);
+  push_FuncPointerList(evosys->f[PRESURF], presurf);
+  push_FuncPointerList(evosys->f[SETSRC], setsrc);
+  push_FuncPointerList(evosys->f[VOLRHS], volrhs);
+  push_FuncPointerList(evosys->f[SURFRHS], surfrhs);
 }
 
 /* register a list of variable lists and its RHS, source functions and
@@ -61,7 +57,7 @@ void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
 int evolve_free_evosys(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
-  int i;
+  int i, b;
 
   /* do nothing if we have no vars to evolve */
   if(!evosys->u) return 0;
@@ -80,13 +76,9 @@ int evolve_free_evosys(tMesh *mesh)
   /* free Lists */
   printf("Freeing rhs lists for evolution:\n");
   //free_pVLList(evosys->u); /* free list only, not content */
-  free_FuncPointerList(evosys->prelim);
-  free_FuncPointerList(evosys->limdata);
-  free_FuncPointerList(evosys->limiter);
-  free_FuncPointerList(evosys->presurf);
-  free_FuncPointerList(evosys->setsrc);
-  free_FuncPointerList(evosys->volrhs);
-  free_FuncPointerList(evosys->surfrhs);
+  for(b=0; b<NEVOFUNCBINS; b++)
+    free_FuncPointerList(evosys->f[b]);
+
 
   /* now set all of evosys to zero */
   //evolve_print_evosys(mesh);
@@ -110,35 +102,35 @@ void evolve_print_evosys(tMesh *mesh)
     {
       printf("%d: ", i);
       prvarlist(ListEntry(evosys->u,i));
-      if(ListEntry(evosys->prelim,i))  printf("%d: prelim:  yes\n", i);
-      if(ListEntry(evosys->limdata,i)) printf("%d: limdata: yes\n", i);
-      if(ListEntry(evosys->limiter,i)) printf("%d: limiter: yes\n", i);
-      if(ListEntry(evosys->presurf,i)) printf("%d: presurf: yes\n", i);
-      if(ListEntry(evosys->setsrc,i))  printf("%d: setsrc:  yes\n", i);
-      if(ListEntry(evosys->volrhs,i))  printf("%d: volrhs:  yes\n", i);
-      if(ListEntry(evosys->surfrhs,i)) printf("%d: surfrhs: yes\n", i);
+      if(ListEntry(evosys->f[PRELIM],i))  printf("%d: PRELIM:  yes\n", i);
+      if(ListEntry(evosys->f[LIMDATA],i)) printf("%d: LIMDATA: yes\n", i);
+      if(ListEntry(evosys->f[LIMITER],i)) printf("%d: LIMITER: yes\n", i);
+      if(ListEntry(evosys->f[PRESURF],i)) printf("%d: PRESURF: yes\n", i);
+      if(ListEntry(evosys->f[SETSRC],i))  printf("%d: SETSRC:  yes\n", i);
+      if(ListEntry(evosys->f[VOLRHS],i))  printf("%d: VOLRHS:  yes\n", i);
+      if(ListEntry(evosys->f[SURFRHS],i)) printf("%d: SURFRHS: yes\n", i);
     }
   }
   printf("evolve function pointers are called in this order:\n");
-  if(evosys->limdata)
+  if(evosys->f[LIMDATA])
   {
-    forList(evosys->prelim, i)
-      if(ListEntry(evosys->prelim,i))  printf("%d: prelim\n", i);
-    forList(evosys->limdata, i)
-      if(ListEntry(evosys->limdata,i)) printf("%d: limdata\n", i);
-    forList(evosys->limiter, i)
-      if(ListEntry(evosys->limiter,i)) printf("%d: limiter\n", i);
+    forList(evosys->f[PRELIM], i)
+      if(ListEntry(evosys->f[PRELIM],i))  printf("%d: PRELIM\n", i);
+    forList(evosys->f[LIMDATA], i)
+      if(ListEntry(evosys->f[LIMDATA],i)) printf("%d: LIMDATA\n", i);
+    forList(evosys->f[LIMITER], i)
+      if(ListEntry(evosys->f[LIMITER],i)) printf("%d: LIMITER\n", i);
   }
-  if(evosys->volrhs)
+  if(evosys->f[VOLRHS])
   {
-    forList(evosys->presurf, i)
-      if(ListEntry(evosys->presurf,i)) printf("%d: presurf\n", i);
-    forList(evosys->setsrc, i)
-      if(ListEntry(evosys->setsrc,i))  printf("%d: setsrc\n", i);
-    forList(evosys->volrhs, i)
-      if(ListEntry(evosys->volrhs,i))  printf("%d: volrhs\n", i);
-    forList(evosys->surfrhs, i)
-      if(ListEntry(evosys->surfrhs,i)) printf("%d: surfrhs\n", i);
+    forList(evosys->f[PRESURF], i)
+      if(ListEntry(evosys->f[PRESURF],i)) printf("%d: PRESURF\n", i);
+    forList(evosys->f[SETSRC], i)
+      if(ListEntry(evosys->f[SETSRC],i))  printf("%d: SETSRC\n", i);
+    forList(evosys->f[VOLRHS], i)
+      if(ListEntry(evosys->f[VOLRHS],i))  printf("%d: VOLRHS\n", i);
+    forList(evosys->f[SURFRHS], i)
+      if(ListEntry(evosys->f[SURFRHS],i)) printf("%d: SURFRHS\n", i);
   }
 }
 
@@ -154,7 +146,7 @@ int evolve_init_evosys(tMesh *mesh)
 
   if(PR) PRFs(":\n");
 
-  if(!evosys->volrhs) errorexit("no RHS!");
+  if(!evosys->f[VOLRHS]) errorexit("no RHS!");
 
   /* if there are no aux vars add them */
   if(!evosys->rhs)
@@ -256,11 +248,11 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
     {
       tVarList *vl = ListEntry(evosys->u,i);
 
-      if(ListEntry(evosys->limdata,i))
+      if(ListEntry(evosys->f[LIMDATA],i))
       {
-        /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
+        /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, vl)
                  must return number of data vals we need */
-        int nvals = ListEntry(evosys->limdata,i)(NULL, vl);
+        int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, vl);
         if(nvals>0)
           init_all_myln_myindc_for_vl(mesh, vl, nvals);
       }
@@ -274,11 +266,11 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
     {
       tVarList *vl = ListEntry(evosys->w,i);
 
-      if(ListEntry(evosys->limdata,i))
+      if(ListEntry(evosys->f[LIMDATA],i))
       {
-        /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
+        /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, vl)
                  must return number of data vals we need */
-        int nvals = ListEntry(evosys->limdata,i)(NULL, vl);
+        int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, vl);
         if(nvals>0)
           init_all_myln_myindc_for_vl(mesh, vl, nvals);
       }

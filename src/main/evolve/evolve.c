@@ -112,12 +112,12 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     tVarList *vlr = ListEntry(rhs,i);
     tVarList *vlu = ListEntry(u,i);
 
-    if(ListEntry(evosys->presurf,i))
+    if(ListEntry(evosys->f[PRESURF],i))
     {
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
-        ListEntry(evosys->presurf,i)(node, vlr, vlu);
+        ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
       }
     }
   }
@@ -141,13 +141,13 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 
   /* set all sources */
   forList(u, i)
-    if(ListEntry(evosys->setsrc,i))
-      ListEntry(evosys->setsrc,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    if(ListEntry(evosys->f[SETSRC],i))
+      ListEntry(evosys->f[SETSRC],i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 
   /* set all volume RHSs */
   forList(u, i)
-    if(ListEntry(evosys->volrhs,i))
-      ListEntry(evosys->volrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    if(ListEntry(evosys->f[VOLRHS],i))
+      ListEntry(evosys->f[VOLRHS],i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 
   /* After we have done all we can without the surface data, we now wait
      until we get all the surface data: */
@@ -157,8 +157,8 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 
   /* add all surface RHSs */
   forList(u, i)
-    if(ListEntry(evosys->surfrhs,i))
-      ListEntry(evosys->surfrhs,i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    if(ListEntry(evosys->f[SURFRHS],i))
+      ListEntry(evosys->f[SURFRHS],i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
 }
 
 /* apply limiters to evo subsystems. */
@@ -175,13 +175,13 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
   {
     tVarList *vl = ListEntry(u,i);
 
-    if(ListEntry(evosys->prelim,i))
+    if(ListEntry(evosys->f[PRELIM],i))
     {
       /* call prelim functions */
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
-        ListEntry(evosys->prelim,i)(node, vl);
+        ListEntry(evosys->f[PRELIM],i)(node, vl);
       }
     }
   }
@@ -192,13 +192,13 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
     tVarList *vl = ListEntry(u,i);
 
     /* set limiter data in indicators (indc) */
-    if(ListEntry(evosys->limdata,i))
+    if(ListEntry(evosys->f[LIMDATA],i))
     {
       /* set data limiter needs in myindc arrays of each node */
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
-        ListEntry(evosys->limdata,i)(node, vl);
+        ListEntry(evosys->f[LIMDATA],i)(node, vl);
       }
 
       /* initiate indc exchange */
@@ -210,13 +210,13 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
     }
 
     /* apply limiter */
-    if(ListEntry(evosys->limiter,i))
+    if(ListEntry(evosys->f[LIMITER],i))
     {
       /* use limiter on each node */
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
-        int ret = ListEntry(evosys->limiter,i)(node, vl);
+        int ret = ListEntry(evosys->f[LIMITER],i)(node, vl);
 
         /* increase nlim if limiter was active, otherwise reset nlim */
         if(ret) node->dat->info->nlim += 1;
@@ -311,20 +311,20 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
 
   /* set all sources */
   forList(u, i)
-    if(ListEntry(evosys->setsrc,i))
-      ListEntry(evosys->setsrc,i)(node, ListEntry(rhs,i), ListEntry(u,i));
+    if(ListEntry(evosys->f[SETSRC],i))
+      ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i), ListEntry(u,i));
 
   /* set all vol. RHSs */
   forList(u, i)
-    if(ListEntry(evosys->volrhs,i))
-      ListEntry(evosys->volrhs,i)(node, ListEntry(rhs,i), ListEntry(u,i));
+    if(ListEntry(evosys->f[VOLRHS],i))
+      ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
 
   //Test:  get_all_surfaces(node);
 
   /* add all surf. RHSs */
   forList(u, i)
-    if(ListEntry(evosys->surfrhs,i))
-      ListEntry(evosys->surfrhs,i)(node, ListEntry(rhs,i), ListEntry(u,i));
+    if(ListEntry(evosys->f[SURFRHS],i))
+      ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
 
   /* do not free all surface info, because we call evolve_setrhs repeatedly */
   //if(0) evolve_free_surfaces(node, u);
