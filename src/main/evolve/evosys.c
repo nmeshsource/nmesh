@@ -18,9 +18,13 @@
 /* register an evolution subsystem variable list vl in evosys */
 void evolve_register_vl(tVarList *vl)
 {
-  tEvoSys *evosys = vl->mesh->evosys;
+  tEvoSys *evosys;
   char empty[] = "";
   int b;
+
+  /* if user passes in NULL we refuse */
+  if(!vl) errorexit("variable list vl can be empty but NULL is forbidden!");
+  evosys = vl->mesh->evosys;
 
   /* allocate lists u, f, f_name in evosys */
   if(!evosys->u) evosys->u = alloc_pVLList();
@@ -63,23 +67,17 @@ void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,
                 FuncPointer surfrhs)
 {
-  tEvoSys *evosys = mesh->evosys;
-  int b;
+  /* first register varlist */
+  evolve_register_vl(u);
 
-  /* allocate lists in evosys */
-  if(!evosys->u)       evosys->u       = alloc_pVLList();
-  for(b=0; b<NEVOFUNCBINS; b++)
-    if(!evosys->f[b]) evosys->f[b] = alloc_FuncPointerList();
-
-  /* add u, rhs, src, ... to lists in evosys */
-  push_pVLList(evosys->u, u);
-  push_FuncPointerList(evosys->f[PRELIM], prelim);
-  push_FuncPointerList(evosys->f[LIMDATA], limdata);
-  push_FuncPointerList(evosys->f[LIMITER], limiter);
-  push_FuncPointerList(evosys->f[PRESURF], presurf);
-  push_FuncPointerList(evosys->f[SETSRC], setsrc);
-  push_FuncPointerList(evosys->f[VOLRHS], volrhs);
-  push_FuncPointerList(evosys->f[SURFRHS], surfrhs);
+  /* now set funcs in the right bins */
+  evolve_SetFun(PRELIM, prelim, u);
+  evolve_SetFun(LIMDATA, limdata, u);
+  evolve_SetFun(LIMITER, limiter, u);
+  evolve_SetFun(PRESURF, presurf, u);
+  evolve_SetFun(SETSRC, setsrc, u);
+  evolve_SetFun(VOLRHS, volrhs, u);
+  evolve_SetFun(SURFRHS, surfrhs, u);
 }
 
 /* register a list of variable lists and its RHS, source functions and
@@ -117,7 +115,10 @@ int evolve_free_evosys(tMesh *mesh)
   printf("Freeing rhs lists for evolution:\n");
   //free_pVLList(evosys->u); /* free list only, not content */
   for(b=0; b<NEVOFUNCBINS; b++)
+  {
     free_FuncPointerList(evosys->f[b]);
+    free_StringList(evosys->f_name[b]);
+  }
 
   /* now set all of evosys to zero */
   //evolve_print_evosys(mesh);
