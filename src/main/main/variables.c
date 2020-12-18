@@ -942,9 +942,9 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
   r->time += ca * a->time;
 }
 
-/* add second var list to first on node surface: r += ca*a
-   with special treatment for ca = 1 and ca = -1 */
-void vladdto_nodefaces(tNode *node, tVarList *r, const double ca, tVarList *a)
+/* add second var list to first on node surface: r += ca*a */
+void vladdto_onfaces_node(tNode *node, tVarList *r,
+                          const double ca, tVarList *a)
 {
   int l;
   int *n = node->n;
@@ -969,9 +969,8 @@ void vladdto_nodefaces(tNode *node, tVarList *r, const double ca, tVarList *a)
   }
 }
 
-/* add second var list to first on node surface: r += ca*a
-   special treatment for ca = 1 and ca = -1 */
-void vladdto_faces(tVarList *r, const double ca, tVarList *a)
+/* add second var list to first on all node surfaces: r += ca*a */
+void vladdto_onfaces(tVarList *r, const double ca, tVarList *a)
 {
   tMesh *mesh;
 
@@ -984,7 +983,7 @@ void vladdto_faces(tVarList *r, const double ca, tVarList *a)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    vladdto_nodefaces(node, r, ca, a);
+    vladdto_onfaces_node(node, r, ca, a);
   }
 
   /* add times as well */
