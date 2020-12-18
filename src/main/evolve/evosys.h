@@ -7,17 +7,16 @@
 /* Function bins for tasks during one evolution sub step */
 enum
 {
-  PRESURF, //presurf; /* set vars needed before surf exchange, e.g. prims */
-  SETSRC,  //setsrc;  /* set some source terms, is called before volrhs */
-  VOLRHS,  //volrhs;  /* set vol. terms of RHS of evo eqns (after setsrc) */
-  SURFRHS, //surfrhs; /* add RHS terms from surf. fluxes (after volrhs) */
+  PRESURF,  /* set vars needed before surf exchange, e.g. prims */
+  SETSRC,   /* set some source terms, is called before volrhs */
+  VOLRHS,   /* set vol. terms of RHS of evo eqns (after setsrc) */
+  SURFRHS,  /* add RHS terms from surf. fluxes (after volrhs) */
 
-
-  PRELIM,  //prelim; /* set vars that are needed early, e.g. gmunu */
-  LIMDATA, //limdata; /* produce data such as min,max on each node */
-                 /* NOTE: ListEntry(evosys->limdata,i)(NULL, vl)
-                          must return number of data vals we need */
-  LIMITER,  //limiter; /* apply limiter on node using data from limdata */
+  PRELIM,   /* set vars that are needed early, e.g. gmunu */
+  LIMDATA,  /* produce data such as min,max on each node */
+            /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, vl)
+                     must return number of data vals we need */
+  LIMITER,  /* apply limiter on node using data from limdata */
 
   NEVOFUNCBINS /* number of function bins in this enum */
 };
