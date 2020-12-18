@@ -11,7 +11,7 @@
 #define DECL_STACK_ARRAY_with_segs(array, n_, Ne_, ns_) \
   tArray array[1]; \
   array->N = (n_[0]) * (n_[1]) * (n_[2]); \
-  for(int i=0; i<3; i++)  array->n[i] = n_[i]; \
+  for(int ddd_=0; ddd_<3; ddd_++)  array->n[ddd_] = n_[ddd_]; \
   array->Ne = (Ne_); \
   array->ns = (ns_); \
   array->d_nofree = 1; \
