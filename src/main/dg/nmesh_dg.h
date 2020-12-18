@@ -54,6 +54,10 @@ void numflux1d_HLL(tDGinfo *d);
 /* dg.c */
 tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls);
 void free_DGinfo(tDGinfo *dgi);
+int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
+                               tVarList *vlu, tVarList *vls,
+                               void (*u_f_lam)(tDGinfo *d),
+                               void (*numflux)(tDGinfo *d));
 int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                           tVarList *vls,
                           void (*u_f_lam)(tDGinfo *d),
