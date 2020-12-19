@@ -74,7 +74,7 @@ void PrintMeshFun(tMesh *mesh, int step)
 }
 
 /* print functions in all function bins */
-int PrintMeshFuncs(tMesh *mesh)
+void PrintMeshFuncs(tMesh *mesh)
 {
   int step;
 
@@ -82,5 +82,4 @@ int PrintMeshFuncs(tMesh *mesh)
   printf("Function bin skeleton: functions are called in this order:\n");
   for(step=0; step<NFUNCBINS; step++) PrintMeshFun(mesh, step);
   prdivider(0);
-  return 0;
 }
