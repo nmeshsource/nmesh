@@ -270,7 +270,7 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
       /* WARNING: The interploation does not help for 2 FV neighbors!!!
                   BUT maybe it would help if going from FV to DG???  */
 
-      //scalarwave1_divf_FV(node, vlu);
+      /* compute d_i f^i with finite vol. methods on one node */
       fv_divf(node, vldivf, vlu, fv_cons_rec1d_midpt,
               scalarwave1_fluxes_lam_from_ui_ua, scalarwave1->numflux);
     }
@@ -1094,15 +1094,6 @@ void scalarwave1_divf_FV(tNode *node, tVarList *vlu)
   vlfree(vldivf);
 }
 
-/* compute d_i f^i with finite vol. methods on mesh */
-void scalarwave1_divf_FV_mesh(tMesh *mesh, tVarList *vlu)
-{
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    scalarwave1_divf_FV(node, vlu);
-  }
-}
 
 /* set use_fv on some nodes */
 int scalarwave1_set_use_fv_flag(tMesh *mesh)
