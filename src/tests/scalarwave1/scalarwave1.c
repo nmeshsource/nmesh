@@ -222,10 +222,41 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
 }
 
+/* function that sets fluxes and eigenvals.
+   In: ui,ua, node,i,j,k. Out: fi,fa, lami,lama */
+void scalarwave1_fluxes_lam_from_ui_ua(tDGinfo *d)
+{
+  tNode *node = d->node;
+  tMesh *mesh = node->pat->mesh;
+  int *n = node->n;
+  int f = d->face;
+  int ijk = Ind_n(d->i,d->j,d->k, n);
+  int nvars = 5;
+  double norm[3];
+
+  /* get rnormal at midpoint ijk */
+  if(d->info & DGINFO_MIDPT)
+    node_normal_at_midpt_ijk(node, f, ijk, norm);
+  else /* or rather on grid point ijk */
+    node_normal_at_ijk(node, f, ijk, norm);
+
+  /* eigenval in dir norm */
+  scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
+  scalarwave1_eigenval1d(mesh,nvars, d->lama,norm);
+
+  /* get inner and adjacent fluxes fi, fa */
+  scalarwave1_flux1d(mesh,nvars, d->fi,norm, d->ui);
+  scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
+}
+
 
 /* compute div of flux */
 void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
 {
+  tVarList *vldivf = vlalloc(mesh);
+  vlpush(vldivf, Ind("scalarwave1_divf_pi"));
+  vlpush(vldivf, Ind("scalarwave1_divf_cx"));
+
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
@@ -239,13 +270,16 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
       /* WARNING: The interploation does not help for 2 FV neighbors!!!
                   BUT maybe it would help if going from FV to DG???  */
 
-      scalarwave1_divf_FV(node, vlu);
+      //scalarwave1_divf_FV(node, vlu);
+      fv_divf(node, vldivf, vlu, fv_cons_rec1d_midpt,
+              scalarwave1_fluxes_lam_from_ui_ua, scalarwave1->numflux);
     }
     else
     {
       scalarwave1_f_divf(node, vlu);
     }
   }
+  vlfree(vldivf);
 }
 
 /* RHS of: d_t u = - d_i f^i */

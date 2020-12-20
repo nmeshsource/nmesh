@@ -16,7 +16,7 @@ extern tDGglobals DGglobals[1];
    directly from arrays qc that contain cons vars at gridpoints.
    Note: fv->qc[l][i], um_p[l], um_m[l] are allocated in fv_divf.
    In: nvars, qc, npts, im, q_scale. Out: um_p, um_m */
-void fv_consq_to_um_rec1d_midpt(tFVinfo *fv)
+void fv_cons_rec1d_midpt(tFVinfo *fv)
 {
   int nvars   = fv->nvars;
   double **qc = fv->qc;     // qc[0..nvars-1][0..npts-1]
@@ -37,7 +37,7 @@ void fv_consq_to_um_rec1d_midpt(tFVinfo *fv)
 /* compute d_i f^i with finite vol. methods on one node.
    In:
      vlq are vars we reconstruct (e.g. cons. vars u)
-     rec1d_u_midpt = fv_consq_to_um_rec1d_midpt if we use cons vars for rec.
+     rec1d_u_midpt = fv_cons_rec1d_midpt if we use cons vars for rec.
      f_lam_midpt   = func. to get fluxes and eigenvals at a midpoint
      numflux       = numerical flux we want
    Out:

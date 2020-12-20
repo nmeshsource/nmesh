@@ -102,3 +102,10 @@ void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward);
 void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward);
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale);
+
+/* fv.c */
+void fv_cons_rec1d_midpt(tFVinfo *fv);
+void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
+             void (*rec1d_u_midpt)(tFVinfo *f),
+             void (*f_lam_midpt)(tDGinfo *d),
+             void (*numflux)(tDGinfo *d));
