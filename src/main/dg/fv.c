@@ -142,9 +142,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* write node into d because numflux needs this */
     d->node = node;
     if(norms_and_sqrtgdiag_on_midpoints)
-      d->info = 1; // anything other than 0 triggers normals on midpoints
+      d->info = DGINFO_MIDPT;
     else
-      d->info = 0;
+      d->info = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
     if(nghosts) get_all_surfaces(node);
