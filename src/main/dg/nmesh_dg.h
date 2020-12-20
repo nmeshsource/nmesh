@@ -41,8 +41,31 @@ typedef struct tDGINFO {
   double *fnum;   /* array of numerical fluxes f^* = f^i* n_i */
   double Ffac;    /* factor (usually 1) by which we multiply surface terms */
   tVarList *vls;  /* varlist with sources needed */
-  int info;       /* user defined extra info, 0 means default */
+  int info;       /* extra info, 0=DGINFO_NULL means default */
 } tDGinfo;
+
+/* meaning of bits in info field of DGINFO: */
+enum
+{
+  DGINFO_NULL  = 0,  /* default */
+  DGINFO_MIDPT = 1,  /* i,j,k is interpreted as a midpoint */
+};
+
+
+/* structure that contains info needed to reconstruct cons vars u */
+typedef struct tFVINFO {
+  int nvars;     /* num of q-vars, (q can be u) */
+  double **qc;   /* qc[l][i0] = val. of var q_l at grid point i0 */
+  int npts;      /* number of grid points, i.e. n[dir] */
+  int q_scale;   /* scale of q */
+  double (*rec1d_p)(int n, const double *q, int im, double q_scale);
+  double (*rec1d_m)(int n, const double *q, int im, double q_scale);
+  int im;        /* midpoint where we reconstruct cons var u[l] */
+  double *um_p;  /* um_p[l] is reconstructed u in positive direction (p) */
+  double *um_m;  /* um_m[l] is reconstructed u in negative direction (m) */
+} tFVinfo;
+
+
 
 
 /* numflux1d.c */
