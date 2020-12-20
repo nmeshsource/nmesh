@@ -51,6 +51,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   tMesh *mesh = vlq->mesh;
   int norms_and_sqrtgdiag_on_midpoints = 0;
   int nqvars = vlq->n;
+  int nfvars = vldivf->n;
   int sqrtgdiagx = Ind("sqrtgdiagx");
   int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
   /* func ptrs for reconstruction */
@@ -129,9 +130,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double *qc[nqvars];         //pointers to data of the q-fields
     int npg = maxn + 2*nghosts; //number of points in qcg[l]
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
-    double (*fnumR)[maxn] = dtensor(nqvars*maxn); //array for the fluxes
-    double *um_p = dmalloc(vldivf->n); // array for rec u at one point
-    double *um_m = dmalloc(vldivf->n);
+    double (*fnumR)[maxn] = dtensor(nfvars*maxn); //array for the fluxes
+    double *um_p = dmalloc(nfvars); // array for rec u at one point
+    double *um_m = dmalloc(nfvars);
     int l; /* field index */
     int dir;
 
