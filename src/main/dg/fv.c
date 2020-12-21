@@ -29,8 +29,8 @@ void fv_cons_rec1d_midpt(tFVinfo *fv)
   for(l=0; l<nq; l++)
   {
     /* reconstruct from both sides of midpoint at im */
-    fv->um_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
-    fv->um_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
+    fv->qm_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
+    fv->qm_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
   }
 }
 
@@ -131,8 +131,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     int npg = maxn + 2*nghosts; //number of points in qcg[l]
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
     double (*fnumR)[maxn] = dtensor(nfvars*maxn); //array for the fluxes
-    double *um_p = dmalloc(nfvars); // array for rec u at one point
-    double *um_m = dmalloc(nfvars);
+    double *qm_p = dmalloc(nfvars); // array for rec u at one point
+    double *qm_m = dmalloc(nfvars);
     int l; /* field index */
     int dir;
 
@@ -236,16 +236,16 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             fv->q_scale = q_scale;
             fv->rec1d_p = rec1d_p;
             fv->rec1d_m = rec1d_m;
-            fv->um_p = um_p;
-            fv->um_m = um_m;
+            fv->qm_p = qm_p;
+            fv->qm_m = qm_m;
             /* reconstruct fields q towards the midpoint at im0 and calc u */
             rec1d_u_midpt(fv);
 
             /* set fields ui,ua to reconstructed values */
             for(l=0; l<nfvars; l++)
             {
-              d->ui[l] = fv->um_p[l];
-              d->ua[l] = fv->um_m[l];
+              d->ui[l] = fv->qm_p[l];
+              d->ua[l] = fv->qm_m[l];
             }
 
             /* set index and face of this midpoint */
@@ -299,8 +299,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     } /* end dir-loop*/
 
     /* release mem */
-    free(um_m);
-    free(um_p);
+    free(qm_m);
+    free(qm_p);
     free(fnumR);
     free(qcg);
     free(dXb);
