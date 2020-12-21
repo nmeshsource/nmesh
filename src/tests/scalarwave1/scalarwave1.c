@@ -222,33 +222,6 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
 }
 
-/* function that sets fluxes and eigenvals.
-   In: ui,ua, node,i,j,k. Out: fi,fa, lami,lama */
-void scalarwave1_fluxes_lam_from_ui_ua(tDGinfo *d)
-{
-  tNode *node = d->node;
-  tMesh *mesh = node->pat->mesh;
-  int *n = node->n;
-  int f = d->face;
-  int ijk = Ind_n(d->i,d->j,d->k, n);
-  int nvars = 5;
-  double norm[3];
-
-  /* get normal at midpoint ijk */
-  if(d->info & DGINFO_MIDPT)
-    node_normal_at_midpt_ijk(node, f, ijk, norm);
-  else /* or rather on grid point ijk */
-    node_normal_at_ijk(node, f, ijk, norm);
-
-  /* eigenval in dir norm */
-  scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
-  scalarwave1_eigenval1d(mesh,nvars, d->lama,norm);
-
-  /* get inner and adjacent fluxes fi, fa */
-  scalarwave1_flux1d(mesh,nvars, d->fi,norm, d->ui);
-  scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
-}
-
 
 /* compute div of flux */
 void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
@@ -271,8 +244,8 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
                   BUT maybe it would help if going from FV to DG???  */
 
       /* compute d_i f^i with finite vol. methods on one node */
-      fv_divf(node, vldivf, vlu, fv_cons_rec1d_midpt,
-              scalarwave1_fluxes_lam_from_ui_ua, scalarwave1->numflux);
+      fv_divf(node, vldivf, vlu, scalarwave1_rec_fluxes_lam,
+              scalarwave1->numflux);
     }
     else
     {
@@ -831,4 +804,42 @@ int scalarwave1_set_use_fv_flag(tMesh *mesh)
   }
   free_intList(pl);
   return 0;
+}
+
+/* function that sets fluxes and eigenvals.
+   In: fv, d->node,i,j,k. Out: d->fi,fa,lami,lama */
+void scalarwave1_rec_fluxes_lam(tFVinfo *fv, tDGinfo *d)
+{
+  tNode *node = d->node;
+  tMesh *mesh = node->pat->mesh;
+  int *n = node->n;
+  int f = d->face;
+  int ijk = Ind_n(d->i,d->j,d->k, n);
+  int nvars = 5;
+  double norm[3];
+  int l;
+
+  /* get normal at midpoint ijk */
+  if(d->info & DGINFO_MIDPT)
+    node_normal_at_midpt_ijk(node, f, ijk, norm);
+  else /* or rather on grid point ijk */
+    node_normal_at_ijk(node, f, ijk, norm);
+
+  /* reconstruct at mid point */
+  fv_rec1d_q_midpt(fv);
+
+  /* in scalarwave1 q is u, so transfer qm_p,qm_m into ui,ua now */
+  for(l=0; l<fv->nq; l++)
+  {
+    d->ui[l] = fv->qm_p[l];
+    d->ua[l] = fv->qm_m[l];
+  }
+
+  /* eigenval in dir norm */
+  scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
+  scalarwave1_eigenval1d(mesh,nvars, d->lama,norm);
+
+  /* get inner and adjacent fluxes fi, fa */
+  scalarwave1_flux1d(mesh,nvars, d->fi,norm, d->ui);
+  scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
 }

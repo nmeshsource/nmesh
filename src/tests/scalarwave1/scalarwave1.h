@@ -21,3 +21,4 @@ int scalarwave1_init(tMesh *mesh);
 int scalarwave1_analyze(tMesh *mesh);
 void scalarwave1_divf_FV(tNode *node, tVarList *vlu);
 int scalarwave1_set_use_fv_flag(tMesh *mesh);
+void scalarwave1_rec_fluxes_lam(tFVinfo *fv, tDGinfo *d);

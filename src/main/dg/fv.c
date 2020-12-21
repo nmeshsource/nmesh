@@ -12,11 +12,11 @@ extern tDGglobals DGglobals[1];
 /* funcs needed for finite volume method in nmesh */
 /***********************************************************************/
 
-/* Function that reconstructs cons vars um at midpoint im,
-   directly from arrays qc that contain cons vars at gridpoints.
-   Note: fv->qc[l][i], um_p[l], um_m[l] are allocated in fv_divf.
-   In: nvars, qc, npts, im, q_scale. Out: um_p, um_m */
-void fv_cons_rec1d_midpt(tFVinfo *fv)
+/* Function that reconstructs q-vars at midpoint im,
+   directly from arrays qc that contain q-vars at gridpoints.
+   Note: fv->qc[l][i], qm_p[l], qm_m[l] are allocated in fv_divf.
+   In: nq, qc, npts, im, q_scale. Out: um_p, um_m */
+void fv_rec1d_q_midpt(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;     // qc[0..nvars-1][0..npts-1]
@@ -44,8 +44,7 @@ void fv_cons_rec1d_midpt(tFVinfo *fv)
      vldivf = div(f(u)) on all inner gridpoints or a piece of div(f(u)) on
               face points */
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
-             void (*rec1d_u_midpt)(tFVinfo *f),
-             void (*f_lam_midpt)(tDGinfo *d),
+             void (*rec1d_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*numflux)(tDGinfo *d))
 {
   tMesh *mesh = vlq->mesh;
@@ -238,24 +237,15 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             fv->rec1d_m = rec1d_m;
             fv->qm_p = qm_p;
             fv->qm_m = qm_m;
-            /* reconstruct fields q towards the midpoint at im0 and calc u */
-            rec1d_u_midpt(fv);
 
-            /* set fields ui,ua to reconstructed values */
-            for(l=0; l<nfvars; l++)
-            {
-              d->ui[l] = fv->qm_p[l];
-              d->ua[l] = fv->qm_m[l];
-            }
-
-            /* set index and face of this midpoint */
+            /* set index and face of the right midpoint */
             d->i = ic;
             d->j = jc;
             d->k = kc;
             d->face = dir*2 + 1;
 
-            /* once we have ui,ua get fluxes and eigenvalues */
-            f_lam_midpt(d);
+            /* reconstruct q,u and then set fluxes and eigenvalues in d */
+            rec1d_f_lam_midpt(fv, d);
 
             /* compute numerical flux */
             numflux(d);
