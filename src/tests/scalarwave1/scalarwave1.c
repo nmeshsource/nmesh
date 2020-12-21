@@ -806,7 +806,7 @@ int scalarwave1_set_use_fv_flag(tMesh *mesh)
   return 0;
 }
 
-/* function that sets fluxes and eigenvals.
+/* function that sets cons vars u, fluxes and eigenvals.
    In: fv, d->node,i,j,k. Out: d->fi,fa,lami,lama */
 void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
 {
