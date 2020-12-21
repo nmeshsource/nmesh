@@ -28,7 +28,7 @@ void fv_cons_rec1d_midpt(tFVinfo *fv)
   /* interpolate fields qc towards the midpoint at im */
   for(l=0; l<nvars; l++)
   {
-    /* reconstruct from both sides of midpoint at i0m */
+    /* reconstruct from both sides of midpoint at im */
     fv->um_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
     fv->um_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
   }
