@@ -244,7 +244,7 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
                   BUT maybe it would help if going from FV to DG???  */
 
       /* compute d_i f^i with finite vol. methods on one node */
-      fv_divf(node, vldivf, vlu, scalarwave1_rec_fluxes_lam,
+      fv_divf(node, vldivf, vlu, scalarwave1_rec_u_f_lam,
               scalarwave1->numflux);
     }
     else
@@ -808,7 +808,7 @@ int scalarwave1_set_use_fv_flag(tMesh *mesh)
 
 /* function that sets fluxes and eigenvals.
    In: fv, d->node,i,j,k. Out: d->fi,fa,lami,lama */
-void scalarwave1_rec_fluxes_lam(tFVinfo *fv, tDGinfo *d)
+void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
 {
   tNode *node = d->node;
   tMesh *mesh = node->pat->mesh;
