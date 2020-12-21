@@ -234,7 +234,7 @@ void scalarwave1_fluxes_lam_from_ui_ua(tDGinfo *d)
   int nvars = 5;
   double norm[3];
 
-  /* get rnormal at midpoint ijk */
+  /* get normal at midpoint ijk */
   if(d->info & DGINFO_MIDPT)
     node_normal_at_midpt_ijk(node, f, ijk, norm);
   else /* or rather on grid point ijk */
