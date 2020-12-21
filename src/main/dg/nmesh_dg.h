@@ -54,13 +54,16 @@ enum
 
 /* structure that contains info needed to reconstruct cons vars u */
 typedef struct tFVINFO {
-  int nvars;     /* num of q-vars, (q can be u) */
+  int nq;        /* num of q-vars, (q can be u) */
   double **qc;   /* qc[l][i0] = val. of var q_l at grid point i0 */
   int npts;      /* number of grid points, i.e. n[dir] */
   int q_scale;   /* scale of q */
   double (*rec1d_p)(int n, const double *q, int im, double q_scale);
   double (*rec1d_m)(int n, const double *q, int im, double q_scale);
   int im;        /* midpoint where we reconstruct cons var u[l] */
+  double *qm_p;  /* qm_p[l] is reconstructed q in positive direction (p) */
+  double *qm_m;  /* qm_m[l] is reconstructed q in negative direction (m) */
+  int nu;        /* num of cons u-vars */
   double *um_p;  /* um_p[l] is reconstructed u in positive direction (p) */
   double *um_m;  /* um_m[l] is reconstructed u in negative direction (m) */
 } tFVinfo;

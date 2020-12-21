@@ -18,7 +18,7 @@ extern tDGglobals DGglobals[1];
    In: nvars, qc, npts, im, q_scale. Out: um_p, um_m */
 void fv_cons_rec1d_midpt(tFVinfo *fv)
 {
-  int nvars   = fv->nvars;
+  int nq      = fv->nq;
   double **qc = fv->qc;     // qc[0..nvars-1][0..npts-1]
   int npts    = fv->npts;
   int im      = fv->im;     // im = 0..npts-2, im is midpt to right grdpt im
@@ -26,7 +26,7 @@ void fv_cons_rec1d_midpt(tFVinfo *fv)
   int l;
 
   /* interpolate fields qc towards the midpoint at im */
-  for(l=0; l<nvars; l++)
+  for(l=0; l<nq; l++)
   {
     /* reconstruct from both sides of midpoint at im */
     fv->um_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
@@ -229,13 +229,15 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             tFVinfo fv[1];
 
             /* set fv  */
-            fv->nvars = nqvars;
+            fv->nq = nqvars;
             fv->qc = qc;
             fv->npts = n[dir];
             fv->im = im0;
             fv->q_scale = q_scale;
             fv->rec1d_p = rec1d_p;
             fv->rec1d_m = rec1d_m;
+            fv->um_p = um_p;
+            fv->um_m = um_m;
             /* reconstruct fields q towards the midpoint at im0 and calc u */
             rec1d_u_midpt(fv);
 
