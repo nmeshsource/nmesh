@@ -240,7 +240,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             rec1d_u_midpt(fv);
 
             /* set fields ui,ua to reconstructed values */
-            for(l=0; l<nqvars; l++)
+            for(l=0; l<nfvars; l++)
             {
               d->ui[l] = fv->um_p[l];
               d->ua[l] = fv->um_m[l];
