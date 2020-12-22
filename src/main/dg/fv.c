@@ -37,14 +37,13 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
 /* compute d_i f^i with finite vol. methods on one node.
    In:
      vlq are vars we reconstruct (e.g. cons. vars u)
-     rec1d_u_midpt = fv_cons_rec1d_midpt if we use cons vars for rec.
-     f_lam_midpt   = func. to get fluxes and eigenvals at a midpoint
-     numflux       = numerical flux we want
+     rec1d_u_f_lam_midpt = rec. cons u, fluxes f & eiegnvals at a midpoint
+     numflux             = numerical flux we want
    Out:
      vldivf = div(f(u)) on all inner gridpoints or a piece of div(f(u)) on
               face points */
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
-             void (*rec1d_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
+             void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*numflux)(tDGinfo *d))
 {
   tMesh *mesh = vlq->mesh;
@@ -245,7 +244,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             d->face = dir*2 + 1;
 
             /* reconstruct q,u and then set fluxes and eigenvalues in d */
-            rec1d_f_lam_midpt(fv, d);
+            rec1d_u_f_lam_midpt(fv, d);
 
             /* compute numerical flux */
             numflux(d);
