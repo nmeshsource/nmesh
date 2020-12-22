@@ -130,8 +130,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     int npg = maxn + 2*nghosts; //number of points in qcg[l]
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
     double (*fnumR)[maxn] = dtensor(nfvars*maxn); //array for the fluxes
-    double *qm_p = dmalloc(nfvars); // array for rec u at one point
-    double *qm_m = dmalloc(nfvars);
+    double *qm_p = dmalloc(nqvars); // array for rec u at one point
+    double *qm_m = dmalloc(nqvars);
     int l; /* field index */
     int dir;
 
