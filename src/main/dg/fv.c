@@ -19,9 +19,9 @@ extern tDGglobals DGglobals[1];
 void fv_rec1d_q_midpt(tFVinfo *fv)
 {
   int nq      = fv->nq;
-  double **qc = fv->qc;     // qc[0..nvars-1][0..npts-1]
+  double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
   int npts    = fv->npts;
-  int im      = fv->im;     // im = 0..npts-2, im is midpt to right grdpt im
+  int im      = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
   int q_scale = fv->q_scale;
   int l;
 
