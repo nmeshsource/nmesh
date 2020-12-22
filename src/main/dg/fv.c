@@ -36,13 +36,14 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
 
 /* compute d_i f^i with finite vol. methods on one node.
    In:
-     vlq are vars we reconstruct (e.g. cons. vars u)
+     vlq are vars we reconstruct (we can use cons. vars u here)
+     vlu are cons. vars u
      rec1d_u_f_lam_midpt = rec. cons u, fluxes f & eiegnvals at a midpoint
      numflux             = numerical flux we want
    Out:
      vldivf = div(f(u)) on all inner gridpoints or a piece of div(f(u)) on
               face points */
-void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
+void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq, tVarList *vlu,
              void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*numflux)(tDGinfo *d))
 {

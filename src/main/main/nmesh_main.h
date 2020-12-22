@@ -192,6 +192,7 @@ void vlfree(tVarList *u);
 void vlpushone(tVarList *v, int vi);
 void vlpush(tVarList *v, int vi);
 void vlpushvl(tVarList *v, tVarList *u);
+void vldropn(tVarList *v, int n);
 int vlindex(tVarList *v, int vi);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
