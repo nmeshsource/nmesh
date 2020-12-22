@@ -114,7 +114,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq, tVarList *vlu,
 
   /* RHS */
   {
-    tDGinfo *d = alloc_DGinfo(vlq, NULL);
+    tDGinfo *d = alloc_DGinfo(vlu, NULL);
     double *m_sqrtgdiag[3][3] =
       { { Vard(node, iXm_sqrtgdiagx), Vard(node, iXm_sqrtgdiagx+1),
                                            Vard(node, iXm_sqrtgdiagx+2) },
