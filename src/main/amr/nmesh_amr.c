@@ -37,8 +37,8 @@ int nmesh_amr(tMesh *mesh)
          "cubed sphere patches: r1 = r1fac*dc");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
-  AddPar("amr_uniform_p", "", "patchlist with uniform grid spacing patches");
-  AddPar("amr_fv_p", "", "patchlist with fin.vol. and uniform grid spacing");
+  AddPar("amr_uniform_p", "", "list of patches with uniform grid spacing");
+  AddPar("amr_fv_p", "", "patches where we use finite volume");
 
   /* pars that control how many dimensions we use */
   AddPar("amr_dir_active0", "yes", "whether dir. 0 is used [yes,no]");
