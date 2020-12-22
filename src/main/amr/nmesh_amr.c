@@ -14,6 +14,7 @@ int nmesh_amr(tMesh *mesh)
   /* NOTE: amr_setup_mesh(mesh) is called directly from main */
   AddFun(FIRST, amr_print_thread_info);
   AddFun(POST_PARAMETERS, amr_init_global_pars);
+  AddFun(INITIALDATA, amr_set_use_fv_flag);
 
   /* variables */
   //AddAuxVar("Xb", "", "coord0 inside each node"); // we may not need these???
@@ -36,7 +37,8 @@ int nmesh_amr(tMesh *mesh)
          "cubed sphere patches: r1 = r1fac*dc");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
-  AddPar("amr_uniform_p", "", "patch list where we use uniform grid spacing");
+  AddPar("amr_uniform_p", "", "patchlist with uniform grid spacing patches");
+  AddPar("amr_fv_p", "", "patchlist with fin.vol. and uniform grid spacing");
 
   /* pars that control how many dimensions we use */
   AddPar("amr_dir_active0", "yes", "whether dir. 0 is used [yes,no]");

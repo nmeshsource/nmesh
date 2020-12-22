@@ -15,6 +15,7 @@ int realloc_myln_nncats(tMylnodes *myln, int nncats);
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 
 /* mesh.c */
+int amr_set_use_fv_flag(tMesh *mesh);
 int setup_box_mesh(tMesh *mesh);
 int setup_CubedSphere_mesh(tMesh *mesh);
 int setup_Shell_mesh(tMesh *mesh);

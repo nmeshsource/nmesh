@@ -727,9 +727,6 @@ int scalarwave1_init(tMesh *mesh)
   else
     scalarwave1->numflux = scalarwave1_numflux1d_upwind;
 
-  /* set some nodes into fv mode */
-  scalarwave1_set_use_fv_flag(mesh);
-
   return 0;
 }
 
@@ -781,30 +778,6 @@ int scalarwave1_analyze(tMesh *mesh)
 /***********************************************************************/
 /* funcs needed for finite volume method in nmesh */
 /***********************************************************************/
-
-/* set use_fv on some nodes */
-int scalarwave1_set_use_fv_flag(tMesh *mesh)
-{
-  intList *pl = alloc_intList();
-
-  /* push all ints from scalarwave1_fv_p into pl */
-  str_to_intList(Gets(Par("scalarwave1_fv_p")), " ", pl);
-
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int p = node->pat->p;
-    int use_fv = in_intList(pl, p);
-
-    if(use_fv)
-    {
-      /* put node into FV mode */
-      node->dat->info->use_fv = 1;
-    }
-  }
-  free_intList(pl);
-  return 0;
-}
 
 /* function that sets cons vars u, fluxes and eigenvals.
    In: fv, d->node,i,j,k. Out: d->ui,ua,fi,fa,lami,lama */

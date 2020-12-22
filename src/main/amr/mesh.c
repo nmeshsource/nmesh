@@ -33,26 +33,47 @@ tMesh *make_empty_mesh(int pr)
 /* choose grid points x_i and weights w_i for patch p */
 int choose_patch_points(tMesh *mesh, int p)
 {
-  int uniform_p = Par("amr_uniform_p");
-  int ret = P_LGL; /* default is Legendre Gauss-Lobatto */
+  int ret;
+  intList *pl = alloc_intList();
+
+  /* push all ints from amr_uniform_p into pl */
+  str_to_intList(Gets(Par("amr_uniform_p")), " ", pl);
 
   /* now check if patch p is mentioned in amr_uniform_p */
-  if(GetLen(uniform_p) > 0)
-  {
-    char *plist = Gets(uniform_p);
-    char *pl, *str, *sav;
+  if(in_intList(pl, p))
+    ret = P_UNIFORM;
+  else
+    ret = P_LGL; /* default is Legendre Gauss-Lobatto */
 
-    pl = strdup(plist);
-    for(str=strtok_r(pl, " ", &sav); str!=NULL;
-        str=strtok_r(NULL, " ", &sav))
-    {
-      int pp = atoi(str);
-      if(pp==p) { ret = P_UNIFORM; break; }
-    }
-    free(pl);
-  }
+  free_intList(pl);
   return ret;
 }
+
+/* set use_fv on some nodes */
+int amr_set_use_fv_flag(tMesh *mesh)
+{
+  intList *pl = alloc_intList();
+
+  /* push all ints from scalarwave1_fv_p into pl */
+  str_to_intList(Gets(Par("amr_fv_p")), " ", pl);
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int p = node->pat->p;
+    int use_fv = in_intList(pl, p);
+
+    if(use_fv)
+    {
+      /* put node into FV mode */
+      node->dat->info->use_fv = 1;
+    }
+  }
+  free_intList(pl);
+  return 0;
+}
+
+
 
 
 /* add a patch to the mesh */
