@@ -92,6 +92,12 @@ int init_gridpoints(tMesh *mesh)
 
         /* get analysis & synthesis matrix for Legendre basis */
         Legendre_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+
+        /* Lagrange interp. weights WL and diff matrix DT for Lagrange
+           interp. poly basis */
+        Lagrange_winterp(ni, Xb, WL);
+        Lagrange_DT(ni, Xb, WL, DT);
+
         break;
 
       default: /* set Legendre Gauss-Lobatto points, weights, ... */
@@ -101,11 +107,12 @@ int init_gridpoints(tMesh *mesh)
         /* get analysis & synthesis matrix for Legendre basis,
            could be useful for filtering, but not needed for interpolation */
         LGL_AT_ST_matrices(ni, Xb, Wq, AT, ST);
-      }
 
-      /* diff matrix DT for Lagrange interp. poly basis */
-      Lagrange_winterp(ni, Xb, WL);
-      Lagrange_DT(ni, Xb, WL, DT);
+        /* Lagrange interp. weights WL and diff matrix DT for Lagrange
+           interp. poly basis */
+        Lagrange_winterp(ni, Xb, WL);
+        Lagrange_DT(ni, Xb, WL, DT);
+      }
     }
     /* set Legendre polys as basis since AT and ST are for Legendre basis */
     gridpoints->basis[typ] = basis_normLegendreP;
