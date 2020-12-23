@@ -87,7 +87,7 @@ int init_gridpoints(tMesh *mesh)
       switch(typ)
       {
       case P_UNIFORM: /* set equally spaced points and their weights */
-        //uniform_x_wGaussquad(ni, Xb, Wq);
+        //uniform_x_wGaussquad(ni, Xb, Wq); //can give negative rms
         uniform_x_wTrapez(ni, Xb, Wq);
 
         /* get analysis & synthesis matrix for Legendre basis */
@@ -96,7 +96,8 @@ int init_gridpoints(tMesh *mesh)
         /* Lagrange interp. weights WL and diff matrix DT for Lagrange
            interp. poly basis */
         Lagrange_winterp(ni, Xb, WL);
-        Lagrange_DT(ni, Xb, WL, DT);
+        //Lagrange_DT(ni, Xb, WL, DT); // very inaccurate for large ni
+        fd_deriv_DT_uniform(ni, Xb, 1, DT);
 
         break;
 

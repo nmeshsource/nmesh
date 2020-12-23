@@ -88,6 +88,11 @@ void numflux1d_LLF(tDGinfo *d)
   /* build fluxes */
   for(i=0; i<nf; i++) 
     d->fnum[i] = 0.5*( d->fa[i] +  d->fi[i] - amax*(d->ua[i] - d->ui[i]) );
+
+//PRF;printf(": d->fnum =");
+//for(i=0; i<nf; i++) printf(" %g", d->fnum[i]);
+//printf("\n");
+//exit(77);
 }
 
 

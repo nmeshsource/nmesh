@@ -86,3 +86,73 @@ double Lagrange_prod2(int l, int m, double x, int np, const double *x_p)
   for(q=0; q<np; q++) if(q!=l && q!=m) prod *= (x - x_p[q]);
   return prod;
 }
+
+
+/* Set matrix DT for finite differences using a stencil of size 2sr+1 on a
+   uniform grid with n gridpoints in [-1,1]. sr is stencil radius */
+void fd_deriv_DT_uniform(int n, const double *x, int sr, double *DT)
+{
+  int ssz = 2*sr + 1; /* stencil size */
+  double *w_interp = malloc(ssz * sizeof(w_interp[0]));
+
+  /* for small n use Lagrange_DT for n points */
+  if(n <= ssz)
+  {
+    Lagrange_winterp(n, x, w_interp);
+    Lagrange_DT(n, x, w_interp, DT);
+  }
+  else /* use Lagrange_DT for ssz points */
+  {
+    double *xs = malloc(ssz * sizeof(xs[0]));
+    double *Dt = malloc(ssz*ssz * sizeof(w_interp[0]));
+    double h  = 2./(n-1);
+    double hs = 2./(ssz-1);
+    double fac = hs/h;
+    int i,j, is,js;
+
+    /* first zero DT */
+    for(i=0; i<n; i++)
+      for(j=0; j<n; j++)
+         DT[i*n + j] = 0.;
+
+    /* put ssz equally spaced points into xs */
+    for(i=0; i<ssz; i++) xs[i] = -1. + hs*i;
+
+    /* get diff mat Dt of size ssz*ssz */
+    Lagrange_winterp(ssz, xs, w_interp);
+    Lagrange_DT(ssz, xs, w_interp, Dt);
+
+    /* loop over DT entries */
+    for(i=0; i<n; i++)
+    {
+      int jmin;
+
+      if(i<sr) /* left end */
+      {
+        is = i;
+        jmin = 0;
+      }
+      else if(n-i <= sr) /* right end */
+      {
+        is = ssz - (n-i);
+        jmin = n - ssz;
+      }
+      else /* middle */
+      {
+        is = sr;
+        jmin = i - sr;
+      }
+
+      for(j=jmin; j<jmin+ssz; j++)
+      {
+        js = j - jmin;
+        DT[i*n + j] = Dt[is*ssz + js] * fac;
+      }
+    }
+
+    free(Dt);
+    free(xs);
+  }
+
+  free(w_interp);
+}
