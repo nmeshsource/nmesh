@@ -229,6 +229,16 @@ Things that need to be done urgently:
   Y-dir, and finally in the Z-dir. In this way we can communicate data from
   next-next nearest neighbors via the arrays in tSurface.
 
+*GHG may have bugs:
+ -since 9d1235bf030f0a I get differnt results
+ -Liwei fixed bugs in C3GH, that are probably still in GHG
+
+*GRHD + GHG may have bug
+ -In GRHD_vol_rhs.math I use cart_partials_... to set the derivs of the ADM
+  vars alpha, betax, gxx.
+ -These are principal terms!!! It may be better if GHG set these ADM derivs
+  from its evolved vars (without using cart_partials_...).
+
 
 Questions about bamps:
 ======================
