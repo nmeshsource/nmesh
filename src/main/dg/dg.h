@@ -11,7 +11,7 @@
    where lin.rec0 = lw[0][0]*u_0 + lw[0][1]*u_1
          lin.rec1 = lw[1][0]*u_1 + lw[1][1]*u_2  */
 typedef struct WENO3weight {
-  double lw[2][2]; //linear weights
+  double lw[2][2]; //normalized linear weights
   double optw[2];  //non-normalized optimal WENO3-weights
 } tWENO3weight;
 
@@ -21,6 +21,13 @@ typedef struct WENOweights {
   tWENO3weight **p_WENO3; /* array with weights for WENO3 in pos dir (p) */
   tWENO3weight **m_WENO3; /* array with weights for WENO3 in neg dir (m) */
 } tWENOweights;
+
+/* for WENO5 and WENOZ */
+typedef struct WENO5weight {
+  double qw[3][3]; //normalized quadratic weights
+  double optw[3];  //non-normalized optimal WENO5-weights
+} tWENO5weight;
+
 
 /* funcs in WENO.c */
 int WENOweights_init_globals(tMesh *mesh);

@@ -116,7 +116,7 @@ double rec1d_m_WENO3_uniform__old(int n, const double *u, int im, double u_scale
    Here we interpolate in the positive direction (p) from the left of the
    midpoint to the midpoint to obtain umid_p.
    We use u at the points i-1, i, i+1 */
-/* more general WENO that uses weights in global WENOweights var */
+/* more general WENO that uses weights in W3 */
 double rec1d_p_WENO3(int n, const double *u, int im, double u_scale,
                      tWENO3weight *W3)
 {
@@ -187,7 +187,7 @@ double rec1d_p_WENO3_uniform(int n, const double *u, int im, double u_scale)
    Here we interpolate in the negative direction (m) from the right of the
    midpoint to the midpoint to obtain umid_m.
    We use u at the points i, i+1, i+2 */
-/* more general WENO that uses weights in global WENOweights var */
+/* more general WENO that uses weights in W3 */
 double rec1d_m_WENO3(int n, const double *u, int im, double u_scale,
                      tWENO3weight *W3)
 {
