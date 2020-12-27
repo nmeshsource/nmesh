@@ -79,12 +79,23 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq, tVarList *vlu,
     rec1d_m = rec1d_m_1;
     nghosts = 0;
     break;
-  /* use WENO3_1 from both sides of midpoint at i0m */
+  /* use WENO3 from both sides of midpoint at i0m */
   case FV_REC_WENOm3_2:
     rec1d_p = rec1d_p_WENOm3_2;
     rec1d_m = rec1d_m_WENOm3_2;
     nghosts = 0;
     break;
+  case FV_REC_WENOm5_2:
+    rec1d_p = rec1d_p_WENOm5_2;
+    rec1d_m = rec1d_m_WENOm5_2;
+    nghosts = 0;
+    break;
+  case FV_REC_WENOmZ_2:
+    rec1d_p = rec1d_p_WENOmZ_2;
+    rec1d_m = rec1d_m_WENOmZ_2;
+    nghosts = 0;
+    break;
+  /* WENO3 experiments that didn't show good convergence: */
   case FV_REC_WENO3if2away_1:
     rec1d_p = rec1d_p_WENO3_if2away;
     rec1d_m = rec1d_m_WENO3_if2away;
