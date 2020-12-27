@@ -15,7 +15,7 @@ extern tDGglobals DGglobals[1];
 /* Function that reconstructs q-vars at midpoint im,
    directly from arrays qc that contain q-vars at gridpoints.
    Note: fv->qc[l][i], qm_p[l], qm_m[l] are allocated in fv_divf.
-   In: nq, qc, npts, im, q_scale. Out: um_p, um_m */
+   In: nq, qc, npts, im, q_scale. Out: qm_p, qm_m */
 void fv_rec1d_q_midpt(tFVinfo *fv)
 {
   int nq      = fv->nq;
