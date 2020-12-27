@@ -238,7 +238,7 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
     if(use_fv)
     {
       /* linear interpolation to moved in point */
-      if(DGglobals->fv_rec_mode > FV_REC_WENOm3_2)
+      if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
         rec1d_uface_to_uin_1(node, vlu, 1);
       /* WARNING: The interploation does not help for 2 FV neighbors!!!
                   BUT maybe it would help if going from FV to DG???  */
