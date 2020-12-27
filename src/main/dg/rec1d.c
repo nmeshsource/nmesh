@@ -302,7 +302,7 @@ double rec1d_m_WENO3_if1away(int n, const double *u, int im, double u_scale)
 
 /* Use WENO3 inside and some 2nd order thing at the boundary.
    The grid points at i=0 and i=n-1 are considerd to be moved in by h/4.
-   The n-2 midpoints are at im=0,...,n-2
+   The n-1 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
 double rec1d_p_WENO3_2(int n, const double *u, int im, double u_scale)
 {
@@ -413,7 +413,7 @@ double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale)
    with the WENO3_DGghost_gamma1/2 weights on the outer side of the
    first/last midpoint.
    The grid points at i=0 and i=n-1 are considered to be moved in by h/4.
-   The n-2 midpoints are at im=0,...,n-2
+   The n-1 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
 double rec1d_p_WENO3_2g(int n, const double *u, int im, double u_scale)
 {
@@ -646,7 +646,7 @@ double rec1d_m_WENOm3_uniform(int n, const double *u, int im, double u_scale)
 
 
 /* Use WENOm3 inside and a linear stencil at the boundary.
-   The n-2 midpoints are at im=0,...,n-2
+   The n-1 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale)
 {
@@ -763,4 +763,374 @@ double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
 
   /* should never get here: */
   errorexiti("im=%d out of range", im);
+}
+
+
+/*************************************************************************/
+/* WENO5 or WEONZ have more weights and use 5 points */
+/*************************************************************************/
+
+/* ideal weights*10 for WENO5 */
+#define WENO5_10id_gamma0 1
+#define WENO5_10id_gamma1 6
+#define WENO5_10id_gamma2 3
+#define WENO5_epsilon 1e-40
+
+
+/* Interpolate a field u to midpoint at i+1/2 with index im.
+   Here we interpolate in the positive direction (p) from the left of the
+   midpoint to the midpoint to obtain umid_p.
+   We use u at the points i-2, i-1, i, i+1, i+2 */
+/* more general WENO5 that uses weights W5 */
+double rec1d_p_WENO5(int n, const double *u, int im, double u_scale,
+                     tWENO5weight *W5)
+{
+  /* u at 5 grid points around point i=im */
+  double u_im2 = u[im-2];
+  double u_im1 = u[im-1];
+  double u_i   = u[im];
+  double u_ip1 = u[im+1];
+  double u_ip2 = u[im+2];
+
+  /* linear combinations of u used in smoothness indicators */
+  double b01 = u_im2 - 2.*u_im1 + u_i;
+  double b02 = u_im2 - 4.*u_im1 + 3.*u_i;
+
+  double b11 = u_im1 - 2.*u_i + u_ip1;
+  double b12 = u_im1 - u_ip1;
+
+  double b21 = u_i - 2.*u_ip1 + u_ip2;
+  double b22 = 3.*u_i - 4.*u_ip1 + u_ip2;
+
+  /* smoothness indicators, 13./12. = 1.083333333333333333333333 */
+  double b0 = (1.083333333333333333333333)*b01*b01 + 0.25*b02*b02;
+  double b1 = (1.083333333333333333333333)*b11*b11 + 0.25*b12*b12;
+  double b2 = (1.083333333333333333333333)*b21*b21 + 0.25*b22*b22;
+  double us2 = u_scale*u_scale;
+  double b0_p_eps = b0 + WENO5_epsilon*us2;
+  double b1_p_eps = b1 + WENO5_epsilon*us2;
+  double b2_p_eps = b2 + WENO5_epsilon*us2;
+
+  /* non-normalized weights */
+  double omegab0 = W5->optw[0]/(b0_p_eps*b0_p_eps);
+  double omegab1 = W5->optw[1]/(b1_p_eps*b1_p_eps);
+  double omegab2 = W5->optw[2]/(b2_p_eps*b2_p_eps);
+  double oo_omegab_sum = 1./(omegab0 + omegab1 + omegab2);
+
+  /* normalized weights */
+  double omega0 = omegab0 * oo_omegab_sum;
+  double omega1 = omegab1 * oo_omegab_sum;
+  double omega2 = omegab2 * oo_omegab_sum;
+
+  /* 3 quadratic reconstructions */
+  double u0 = W5->qw[0][0]*u_im2 + W5->qw[0][1]*u_im1 + W5->qw[0][2]*u_i;
+  double u1 = W5->qw[1][0]*u_im1 + W5->qw[1][1]*u_i   + W5->qw[1][2]*u_ip1;
+  double u2 = W5->qw[2][0]*u_i   + W5->qw[2][1]*u_ip1 + W5->qw[2][2]*u_ip2;
+
+  /* final reconstruction */
+  return omega0*u0 + omega1*u1 + omega2*u2;
+}
+
+/* Interpolate a field u to midpoint i+1/2 with index im.
+   Here we interpolate in the negative direction (m) from the right of the
+   midpoint to the midpoint to obtain umid_m.
+   We use u at the points i-1, i, i+1, i+2, i+3 */
+double rec1d_m_WENO5(int n, const double *u, int im, double u_scale,
+                     tWENO5weight *W5)
+{
+  /* u at 3 grid points around point i=im */
+  double u_im1 = u[im-1];
+  double u_i   = u[im];
+  double u_ip1 = u[im+1];
+  double u_ip2 = u[im+2];
+  double u_ip3 = u[im+3];
+
+  /* linear combinations of u used in smoothness indicators */
+  double b21 = u_ip1 - 2.*u_ip2 + u_ip3;
+  double b22 = 3.*u_ip1 - 4.*u_ip2 + u_ip3;
+
+  double b11 = u_i - 2.*u_ip1 + u_ip2;
+  double b12 = u_i - u_ip2;
+
+  double b01 = u_im1 - 2.*u_i + u_ip1;
+  double b02 = u_im1 - 4.*u_i + 3.*u_ip1;
+
+  /* smoothness indicators, 13./12. = 1.083333333333333333333333 */
+  double b2 = (1.083333333333333333333333)*b21*b21 + 0.25*b22*b22;
+  double b1 = (1.083333333333333333333333)*b11*b11 + 0.25*b12*b12;
+  double b0 = (1.083333333333333333333333)*b01*b01 + 0.25*b02*b02;
+  double us2 = u_scale*u_scale;
+  double b2_p_eps = b2 + WENO5_epsilon*us2;
+  double b1_p_eps = b1 + WENO5_epsilon*us2;
+  double b0_p_eps = b0 + WENO5_epsilon*us2;
+
+  /* non-normalized weights */
+  double omegab2 = W5->optw[2]/(b2_p_eps*b2_p_eps);
+  double omegab1 = W5->optw[1]/(b1_p_eps*b1_p_eps);
+  double omegab0 = W5->optw[0]/(b0_p_eps*b0_p_eps);
+  double oo_omegab_sum = 1./(omegab0 + omegab1 + omegab2);
+
+  /* normalized weights */
+  double omega2 = omegab2 * oo_omegab_sum;
+  double omega1 = omegab1 * oo_omegab_sum;
+  double omega0 = omegab0 * oo_omegab_sum;
+
+  /* 3 quadratic reconstructions */
+  double u2 = W5->qw[2][0]*u_ip1 + W5->qw[2][1]*u_ip2 + W5->qw[2][2]*u_ip3;
+  double u1 = W5->qw[1][0]*u_i   + W5->qw[1][1]*u_ip1 + W5->qw[1][2]*u_ip2;
+  double u0 = W5->qw[0][0]*u_im1 + W5->qw[0][1]*u_i   + W5->qw[0][2]*u_ip1;
+
+  /* final reconstruction */
+  return omega0*u0 + omega1*u1 + omega2*u2;
+}
+
+/* use rec1d_p_WENO5 with weights for uniform grid */
+double rec1d_p_WENO5_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO5weight W5[1];
+  const double oo6 = 1/6.;
+
+  W5->qw[0][0] =  2. * oo6;
+  W5->qw[0][1] = -7. * oo6;
+  W5->qw[0][2] = 11. * oo6;
+
+  W5->qw[1][0] = -     oo6;
+  W5->qw[1][1] =  5. * oo6;
+  W5->qw[1][2] =  2. * oo6;
+
+  W5->qw[2][0] =  2. * oo6;
+  W5->qw[2][1] =  5. * oo6;
+  W5->qw[2][2] = -     oo6;
+
+  W5->optw[0] = WENO5_10id_gamma0;
+  W5->optw[1] = WENO5_10id_gamma1;
+  W5->optw[2] = WENO5_10id_gamma2;
+  return rec1d_p_WENO5(n,u, im, u_scale, W5);
+}
+
+/* use rec1d_m_WENO5 with weights for uniform grid */
+double rec1d_m_WENO5_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO5weight W5[1];
+  const double oo6 = 1/6.;
+
+  W5->qw[2][2] =  2. * oo6;
+  W5->qw[2][1] = -7. * oo6;
+  W5->qw[2][0] = 11. * oo6;
+
+  W5->qw[1][2] = -     oo6;
+  W5->qw[1][1] =  5. * oo6;
+  W5->qw[1][0] =  2. * oo6;
+
+  W5->qw[0][2] =  2. * oo6;
+  W5->qw[0][1] =  5. * oo6;
+  W5->qw[0][0] = -     oo6;
+
+  W5->optw[0] = WENO5_10id_gamma2;
+  W5->optw[1] = WENO5_10id_gamma1;
+  W5->optw[2] = WENO5_10id_gamma0;
+  return rec1d_m_WENO5(n,u, im, u_scale, W5);
+}
+
+/* Use WENO5 inside and WENOm3_2 near boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOm5_m3_2(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=2 && im<=n-3)
+    return rec1d_p_WENO5_uniform(n, u, im, u_scale);
+  else
+    return rec1d_p_WENOm3_2(n, u, im, u_scale);
+}
+double rec1d_m_WENOm5_m3_2(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=1 && im<=n-4)
+    return rec1d_m_WENO5_uniform(n, u, im, u_scale);
+  else
+    return rec1d_m_WENOm3_2(n, u, im, u_scale);
+}
+
+
+/*************************************************************************/
+/* WEONZ is almost the same as WENO5, it just use the different factor
+   o_p_db02 when scaling the optimal WENO5 weights */
+/*************************************************************************/
+
+/* Interpolate a field u to midpoint at i+1/2 with index im.
+   Here we interpolate in the positive direction (p) from the left of the
+   midpoint to the midpoint to obtain umid_p.
+   We use u at the points i-2, i-1, i, i+1, i+2 */
+/* more general WENOZ that uses weights W5 */
+double rec1d_p_WENOZ(int n, const double *u, int im, double u_scale,
+                     tWENO5weight *W5)
+{
+  /* u at 5 grid points around point i=im */
+  double u_im2 = u[im-2];
+  double u_im1 = u[im-1];
+  double u_i   = u[im];
+  double u_ip1 = u[im+1];
+  double u_ip2 = u[im+2];
+
+  /* linear combinations of u used in smoothness indicators */
+  double b01 = u_im2 - 2.*u_im1 + u_i;
+  double b02 = u_im2 - 4.*u_im1 + 3.*u_i;
+
+  double b11 = u_im1 - 2.*u_i + u_ip1;
+  double b12 = u_im1 - u_ip1;
+
+  double b21 = u_i - 2.*u_ip1 + u_ip2;
+  double b22 = 3.*u_i - 4.*u_ip1 + u_ip2;
+
+  /* smoothness indicators, 13./12. = 1.083333333333333333333333 */
+  double b0 = (1.083333333333333333333333)*b01*b01 + 0.25*b02*b02;
+  double b1 = (1.083333333333333333333333)*b11*b11 + 0.25*b12*b12;
+  double b2 = (1.083333333333333333333333)*b21*b21 + 0.25*b22*b22;
+  double us2 = u_scale*u_scale;
+  double b0_p_eps = b0 + WENO5_epsilon*us2;
+  double b1_p_eps = b1 + WENO5_epsilon*us2;
+  double b2_p_eps = b2 + WENO5_epsilon*us2;
+  double o_p_db02 = 1. + fabs(b0 - b2);
+
+  /* non-normalized weights */
+  double omegab0 = W5->optw[0]*o_p_db02/(b0_p_eps);
+  double omegab1 = W5->optw[1]*o_p_db02/(b1_p_eps);
+  double omegab2 = W5->optw[2]*o_p_db02/(b2_p_eps);
+  double oo_omegab_sum = 1./(omegab0 + omegab1 + omegab2);
+
+  /* normalized weights */
+  double omega0 = omegab0 * oo_omegab_sum;
+  double omega1 = omegab1 * oo_omegab_sum;
+  double omega2 = omegab2 * oo_omegab_sum;
+
+  /* 3 quadratic reconstructions */
+  double u0 = W5->qw[0][0]*u_im2 + W5->qw[0][1]*u_im1 + W5->qw[0][2]*u_i;
+  double u1 = W5->qw[1][0]*u_im1 + W5->qw[1][1]*u_i   + W5->qw[1][2]*u_ip1;
+  double u2 = W5->qw[2][0]*u_i   + W5->qw[2][1]*u_ip1 + W5->qw[2][2]*u_ip2;
+
+  /* final reconstruction */
+  return omega0*u0 + omega1*u1 + omega2*u2;
+}
+
+/* Interpolate a field u to midpoint i+1/2 with index im.
+   Here we interpolate in the negative direction (m) from the right of the
+   midpoint to the midpoint to obtain umid_m.
+   We use u at the points i-1, i, i+1, i+2, i+3 */
+double rec1d_m_WENOZ(int n, const double *u, int im, double u_scale,
+                     tWENO5weight *W5)
+{
+  /* u at 3 grid points around point i=im */
+  double u_im1 = u[im-1];
+  double u_i   = u[im];
+  double u_ip1 = u[im+1];
+  double u_ip2 = u[im+2];
+  double u_ip3 = u[im+3];
+
+  /* linear combinations of u used in smoothness indicators */
+  double b21 = u_ip1 - 2.*u_ip2 + u_ip3;
+  double b22 = 3.*u_ip1 - 4.*u_ip2 + u_ip3;
+
+  double b11 = u_i - 2.*u_ip1 + u_ip2;
+  double b12 = u_i - u_ip2;
+
+  double b01 = u_im1 - 2.*u_i + u_ip1;
+  double b02 = u_im1 - 4.*u_i + 3.*u_ip1;
+
+  /* smoothness indicators, 13./12. = 1.083333333333333333333333 */
+  double b2 = (1.083333333333333333333333)*b21*b21 + 0.25*b22*b22;
+  double b1 = (1.083333333333333333333333)*b11*b11 + 0.25*b12*b12;
+  double b0 = (1.083333333333333333333333)*b01*b01 + 0.25*b02*b02;
+  double us2 = u_scale*u_scale;
+  double b2_p_eps = b2 + WENO5_epsilon*us2;
+  double b1_p_eps = b1 + WENO5_epsilon*us2;
+  double b0_p_eps = b0 + WENO5_epsilon*us2;
+  double o_p_db02 = 1. + fabs(b0 - b2);
+
+  /* non-normalized weights */
+  double omegab2 = W5->optw[2]*o_p_db02/(b2_p_eps);
+  double omegab1 = W5->optw[1]*o_p_db02/(b1_p_eps);
+  double omegab0 = W5->optw[0]*o_p_db02/(b0_p_eps);
+  double oo_omegab_sum = 1./(omegab0 + omegab1 + omegab2);
+
+  /* normalized weights */
+  double omega2 = omegab2 * oo_omegab_sum;
+  double omega1 = omegab1 * oo_omegab_sum;
+  double omega0 = omegab0 * oo_omegab_sum;
+
+  /* 3 quadratic reconstructions */
+  double u2 = W5->qw[2][0]*u_ip1 + W5->qw[2][1]*u_ip2 + W5->qw[2][2]*u_ip3;
+  double u1 = W5->qw[1][0]*u_i   + W5->qw[1][1]*u_ip1 + W5->qw[1][2]*u_ip2;
+  double u0 = W5->qw[0][0]*u_im1 + W5->qw[0][1]*u_i   + W5->qw[0][2]*u_ip1;
+
+  /* final reconstruction */
+  return omega0*u0 + omega1*u1 + omega2*u2;
+}
+
+/* use rec1d_p_WENOZ with weights for uniform grid */
+double rec1d_p_WENOZ_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO5weight W5[1];
+  const double oo6 = 1/6.;
+
+  W5->qw[0][0] =  2. * oo6;
+  W5->qw[0][1] = -7. * oo6;
+  W5->qw[0][2] = 11. * oo6;
+
+  W5->qw[1][0] = -     oo6;
+  W5->qw[1][1] =  5. * oo6;
+  W5->qw[1][2] =  2. * oo6;
+
+  W5->qw[2][0] =  2. * oo6;
+  W5->qw[2][1] =  5. * oo6;
+  W5->qw[2][2] = -     oo6;
+
+  W5->optw[0] = WENO5_10id_gamma0;
+  W5->optw[1] = WENO5_10id_gamma1;
+  W5->optw[2] = WENO5_10id_gamma2;
+  return rec1d_p_WENOZ(n,u, im, u_scale, W5);
+}
+
+/* use rec1d_m_WENOZ with weights for uniform grid */
+double rec1d_m_WENOZ_uniform(int n, const double *u, int im, double u_scale)
+{
+  tWENO5weight W5[1];
+  const double oo6 = 1/6.;
+
+  W5->qw[2][2] =  2. * oo6;
+  W5->qw[2][1] = -7. * oo6;
+  W5->qw[2][0] = 11. * oo6;
+
+  W5->qw[1][2] = -     oo6;
+  W5->qw[1][1] =  5. * oo6;
+  W5->qw[1][0] =  2. * oo6;
+
+  W5->qw[0][2] =  2. * oo6;
+  W5->qw[0][1] =  5. * oo6;
+  W5->qw[0][0] = -     oo6;
+
+  W5->optw[0] = WENO5_10id_gamma2;
+  W5->optw[1] = WENO5_10id_gamma1;
+  W5->optw[2] = WENO5_10id_gamma0;
+  return rec1d_m_WENOZ(n,u, im, u_scale, W5);
+}
+
+/* Use WENOZ inside and WENOm3_2 near boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOmZ_m3_2(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=2 && im<=n-3)
+    return rec1d_p_WENOZ_uniform(n, u, im, u_scale);
+  else
+    return rec1d_p_WENOm3_2(n, u, im, u_scale);
+}
+double rec1d_m_WENOmZ_m3_2(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=1 && im<=n-4)
+    return rec1d_m_WENOZ_uniform(n, u, im, u_scale);
+  else
+    return rec1d_m_WENOm3_2(n, u, im, u_scale);
 }
