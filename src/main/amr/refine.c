@@ -331,16 +331,8 @@ void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   }
 
   /* check for incoming broadcasts and then work on them */
-  if(ref->type == H_REFINE)
-  {
-    /* do h-refinement */
-    //hp_refine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
-    hp_refine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
-  }
-  else
-  {
-    /* do p-refinement */
-  }
+  //hp_refine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
+  hp_refine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
