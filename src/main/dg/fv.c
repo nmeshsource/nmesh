@@ -41,7 +41,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
      rec1d_u_f_lam_midpt = rec. cons u, fluxes f & eiegnvals at a midpoint
      numflux             = numerical flux we want
    Out:
-     vldivf = div(f(u)) on all inner gridpoints or a piece of div(f(u)) on
+     vldivf = div(f(u)) on all inner gridpoints and a piece of div(f(u)) on
               face points */
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq, tVarList *vlu,
              void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
