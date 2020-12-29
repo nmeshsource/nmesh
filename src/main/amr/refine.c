@@ -149,7 +149,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
     for(i=0; i<nnodes; i++)
     {
       tNode *parent;
-      int pt_typ[3], nc[3], *n, d;
+      int pt_typ[3], n[3];
 
       /* forward to node with nid[i] */
       //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
@@ -159,73 +159,9 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
       /* find parent */
       parent = elem->node;
 
-      /* default point type for children is taken from parent */
-      for(d=0; d<3; d++) pt_typ[d] = parent->pt_typ[d];
+      /* set n and pt_typ */
+      hp_refine_set_n_pt_typ(parent, ref, n, pt_typ);
 
-      /* pick n */
-      switch(ref->method)
-      {
-      case PARENT_nO2:
-        for(d=0; d<3; d++)
-        {
-          nc[d] = parent->n[d]/2;
-          if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
-        }
-        n = nc;
-        break;
-      case PARENT_nO2_P1:
-        for(d=0; d<3; d++)
-        {
-          nc[d] = parent->n[d]/2 + 1;
-        }
-        n = nc;
-        break;
-      case PARENT_nO2_P1IFnG3:
-        for(d=0; d<3; d++)
-        {
-          int pn = parent->n[d];
-          if(pn>3) nc[d] = pn/2 + 1; /* add 1, unless parent->n <= 3 */
-          else     nc[d] = pn/2;
-          if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
-        }
-        n = nc;
-        break;
-      case PARENT_nO2_P1MOD:
-        for(d=0; d<3; d++)
-        {
-          int pn = parent->n[d];
-          if(pn>3) nc[d] = pn/2 + 1;
-          else     nc[d] = pn - 1;
-          if(nc[d]<1) nc[d] = 1;  /* do not allow n[d]<1 */
-        }
-        n = nc;
-        break;
-      case GIVEN_n:
-        n = ref->n;
-        break;
-
-      case PARENT_n_P_LGL:
-        n = parent->n;
-        for(d=0; d<3; d++) pt_typ[d] = P_LGL;
-        break;
-      case PARENT_n_P_UNIFORM:
-        n = parent->n;
-        for(d=0; d<3; d++) pt_typ[d] = P_UNIFORM;
-        break;
-
-      case GIVEN_n_P_LGL:
-        n = ref->n;
-        for(d=0; d<3; d++) pt_typ[d] = P_LGL;
-        break;
-      case GIVEN_n_P_UNIFORM:
-        n = ref->n;
-        for(d=0; d<3; d++) pt_typ[d] = P_UNIFORM;
-        break;
-
-      case PARENT_n:
-      default:
-        n = parent->n;
-      }
       /* make children */
       children[i] = make8_child_nodes(parent, pt_typ, n);
 
