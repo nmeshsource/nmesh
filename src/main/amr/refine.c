@@ -778,7 +778,7 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 
 
 /***************************************************************************/
-/* functions we can call to refine in some particular way */
+/* helper functions */
 /***************************************************************************/
 
 /* helper func to reset rflag in all nodes */
@@ -792,6 +792,21 @@ void refine_set_rflag_forall_nodes(tMesh *mesh, int rflag)
   }
 }
 
+/* helper func to set use_fv flag in all nodes that have rflag set */
+void refine_set_use_fv_if_rflag(tMesh *mesh, int use_fv)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    if(node->rflag) node->dat->info->use_fv = use_fv;
+  }
+}
+
+
+/***************************************************************************/
+/* functions we can call to refine in some particular way */
+/***************************************************************************/
 
 /* Refine all nodes that have neighbors whose level is greater by an
    amount dl than that of each node. This makes only sense if dl>=1 */

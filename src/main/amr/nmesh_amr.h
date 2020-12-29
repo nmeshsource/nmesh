@@ -553,6 +553,7 @@ int resolve_shocks_using_nlim(tMesh *mesh);
 void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void refine_set_rflag_forall_nodes(tMesh *mesh, int rflag);
+void refine_set_use_fv_if_rflag(tMesh *mesh, int use_fv);
 void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref);
 void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref);
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);
