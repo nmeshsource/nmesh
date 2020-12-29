@@ -225,8 +225,11 @@ void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
   }
 }
 
-/* h-refine all nodes on all MPI procs if indicated by node->rflag */
-void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+/* h- or p-refine all nodes on all MPI procs if indicated by node->rflag.
+   If hrefine=1 we actually create child nodes,
+   if hrefine=0 we just change the number (and possibly the spacing)
+   of points */
+void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref, int hrefine)
 {
   int rank = nMPI_rank();
   int size = nMPI_size();
@@ -288,8 +291,16 @@ void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   }
 
   /* check for incoming broadcasts and then work on them */
-  //hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
-  hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
+  if(hrefine)
+  {
+    /* do h-refinement */
+    //hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
+    hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
+  }
+  else
+  {
+    /* do p-refinement */
+  }
 
   /* free ref_nid content */
   for(r=0; r<size; r++)
@@ -303,6 +314,12 @@ void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   free(ref_nid);
   free(nn);
   free(req);
+}
+
+/* h-refine all nodes on all MPI procs if indicated by node->rflag */
+void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+{
+  hp_refine_nodes_if_rflag(mesh, ref, 1);
 }
 
 
