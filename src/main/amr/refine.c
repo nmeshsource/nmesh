@@ -213,7 +213,18 @@ void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
       {
         /* work on ref_nid[r] */
         if(r != rank) /* r=rank has been done already above */
-          create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
+        {
+          if(ref->type == H_REFINE)
+          {
+            /* do h-refinement */
+            create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
+          }
+          else
+          {
+            /* do p-refinement */
+            errorexit("implement p-refinement");
+          }
+        }
         nn[r] = 0;
         done++;
       }
@@ -239,10 +250,19 @@ void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
       nMPI_Wait(&(req[r]), nMPI_STATUS_IGNORE);
 
       /* work on ref_nid[r] */
-      create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
-      nn[r] = 0;
+      if(ref->type == H_REFINE)
+      {
+        /* do h-refinement */
+        create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
+        nn[r] = 0;
+      }
+      else
+      {
+        /* do p-refinement */
+        errorexit("implement p-refinement");
+      }
     }
-  }
+  } /* end for loop */
 }
 
 /* h- or p-refine all nodes on all MPI procs if indicated by node->rflag.
