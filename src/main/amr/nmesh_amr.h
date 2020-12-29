@@ -552,6 +552,7 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 int resolve_shocks_using_nlim(tMesh *mesh);
 void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
+void refine_set_rflag_forall_nodes(tMesh *mesh, int rflag);
 void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref);
 void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref);
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);

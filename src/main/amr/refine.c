@@ -781,6 +781,18 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 /* functions we can call to refine in some particular way */
 /***************************************************************************/
 
+/* helper func to reset rflag in all nodes */
+void refine_set_rflag_forall_nodes(tMesh *mesh, int rflag)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    node->rflag = rflag;
+  }
+}
+
+
 /* Refine all nodes that have neighbors whose level is greater by an
    amount dl than that of each node. This makes only sense if dl>=1 */
 void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
