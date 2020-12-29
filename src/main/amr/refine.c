@@ -189,9 +189,9 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
    differs between different MPI procs!!! => nb index ni differs between
    MPI procs => request_surfaces_exchange_for_all_vars deadlocks because
    tags in there need a unique ni!!! */
-void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
-                                int *nn, long **ref_nid,
-                                int todo, tRef *ref)
+void hp_refine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
+                                  int *nn, long **ref_nid,
+                                  int todo, tRef *ref)
 {
   int rank = nMPI_rank(); /* my own rank */
   int size = nMPI_size();
@@ -235,9 +235,9 @@ void hrefine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
 }
 
 /* hrefine nids in the order of the MPI ranks. */
-void hrefine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
-                                int *nn, long **ref_nid,
-                                int todo, tRef *ref)
+void hp_refine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
+                                  int *nn, long **ref_nid,
+                                  int todo, tRef *ref)
 {
   int size = nMPI_size();
   int r;
@@ -334,8 +334,8 @@ void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   if(ref->type == H_REFINE)
   {
     /* do h-refinement */
-    //hrefine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
-    hrefine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
+    //hp_refine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
+    hp_refine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
   }
   else
   {
