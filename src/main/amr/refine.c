@@ -355,6 +355,13 @@ void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   hp_refine_nodes_if_rflag(mesh, ref);
 }
 
+/* p-refine all nodes on all MPI procs if indicated by node->rflag */
+void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+{
+  ref->type = P_REFINE;
+  hp_refine_nodes_if_rflag(mesh, ref);
+}
+
 
 /* remove nodes with nids in array nid0 and their 7 other siblings,
    We assume long *nid0 is sorted in ascending order.
