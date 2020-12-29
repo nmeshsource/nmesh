@@ -183,12 +183,50 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
   free(replace);
 }
 
-/* hrefine nids in the order in which we recv the MPI messages.
-   NOTE: The order in which we recv is not certain => we do not have the same
+/* p-refine nodes with nids in array, we assume nid[] is sorted in ascending
+   order. We do not update nids in here */
+void prefine_nid_list(tMesh *mesh, long nnodes, long *nid, tRef *ref)
+{
+  long i;
+
+  if(nnodes<=0) return;
+
+  NODELEVEL_Pragma(omp parallel)
+  {
+    tNlist *elem = mesh->lns;
+
+    NODELEVEL_Pragma(omp for)
+    for(i=0; i<nnodes; i++)
+    {
+      tNode *node;
+      int pt_typ[3], n[3];
+
+      /* forward to node with nid[i] */
+      //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
+      //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
+      for(; elem->node->nid != nid[i]; elem = elem->next) ;
+
+      /* find node */
+      node = elem->node;
+
+      /* set n and pt_typ */
+      hp_refine_set_n_pt_typ(node, ref, n, pt_typ);
+
+      /* p-refine by changing n and pt_typ of node */
+      update_node_n_pt_typ(node, n, pt_typ);
+    }
+  }
+}
+
+
+/* h- or p-refine nids in the order in which we recv the MPI messages.
+   NOTE for ref->type = H_REFINE:
+   The order in which we recv is not certain => we do not have the same
    order for all MPI procs. => order of node->nfaces and thus node->fnb
    differs between different MPI procs!!! => nb index ni differs between
    MPI procs => request_surfaces_exchange_for_all_vars deadlocks because
-   tags in there need a unique ni!!! */
+   tags in there need a unique ni!!!
+   But it may work with P_REFINE */
 void hp_refine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
                                   int *nn, long **ref_nid,
                                   int todo, tRef *ref)
@@ -222,7 +260,7 @@ void hp_refine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
           else
           {
             /* do p-refinement */
-            errorexit("implement p-refinement");
+            prefine_nid_list(mesh, nn[r], ref_nid[r], ref);
           }
         }
         nn[r] = 0;
@@ -234,7 +272,7 @@ void hp_refine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
   }
 }
 
-/* hrefine nids in the order of the MPI ranks. */
+/* h- or p-refine nids in the order of the MPI ranks. */
 void hp_refine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
                                   int *nn, long **ref_nid,
                                   int todo, tRef *ref)
@@ -254,13 +292,13 @@ void hp_refine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
       {
         /* do h-refinement */
         create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
-        nn[r] = 0;
       }
       else
       {
         /* do p-refinement */
-        errorexit("implement p-refinement");
+        prefine_nid_list(mesh, nn[r], ref_nid[r], ref);
       }
+      nn[r] = 0;
     }
   } /* end for loop */
 }
@@ -332,6 +370,7 @@ void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref)
 
   /* check for incoming broadcasts and then work on them */
   //hp_refine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
+  //Note: hp_refine_nids_in_recv_order may work for P_REFINE
   hp_refine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
 
   /* free ref_nid content */
