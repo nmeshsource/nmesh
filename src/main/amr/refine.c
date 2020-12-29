@@ -9,6 +9,90 @@
 
 
 
+/* Set n and pt_typ depending on ref->method. pnode is the parent node
+   if we do h-refinement, and the current node if we do a p-refinement. */
+void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
+{
+  int d;
+
+  /* default point type for refined node(s) is taken from pnode */
+  for(d=0; d<3; d++) pt_typ[d] = pnode->pt_typ[d];
+
+  /* pick n */
+  switch(ref->method)
+  {
+  case PARENT_nO2:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d]/2;
+      if(n[d]<1) n[d] = 1;  /* do not allow n[d]<1 */
+    }
+    break;
+  case PARENT_nO2_P1:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d]/2 + 1;
+    }
+    break;
+  case PARENT_nO2_P1IFnG3:
+    for(d=0; d<3; d++)
+    {
+      int pn = pnode->n[d];
+      if(pn>3) n[d] = pn/2 + 1; /* add 1, unless pnode->n <= 3 */
+      else     n[d] = pn/2;
+      if(n[d]<1) n[d] = 1;  /* do not allow n[d]<1 */
+    }
+    break;
+  case PARENT_nO2_P1MOD:
+    for(d=0; d<3; d++)
+    {
+      int pn = pnode->n[d];
+      if(pn>3) n[d] = pn/2 + 1;
+      else     n[d] = pn - 1;
+      if(n[d]<1) n[d] = 1;  /* do not allow n[d]<1 */
+    }
+    break;
+  case GIVEN_n:
+    for(d=0; d<3; d++) n[d] = ref->n[d];
+    break;
+
+  case PARENT_n_P_LGL:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d];
+      pt_typ[d] = P_LGL;
+    }
+    break;
+  case PARENT_n_P_UNIFORM:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d];
+      pt_typ[d] = P_UNIFORM;
+    }
+    break;
+
+  case GIVEN_n_P_LGL:
+    for(d=0; d<3; d++)
+    {
+      n[d] = ref->n[d];
+      pt_typ[d] = P_LGL;
+    }
+    break;
+  case GIVEN_n_P_UNIFORM:
+    for(d=0; d<3; d++)
+    {
+      n[d] = ref->n[d];
+      pt_typ[d] = P_UNIFORM;
+    }
+    break;
+
+  case PARENT_n:
+  default:
+    for(d=0; d<3; d++) n[d] = pnode->n[d];
+  }
+}
+
+
 /* h-refine nodes with nids in array, we assume long *nid is sorted in ascending
    order. We do not update nid's in here */
 void hrefine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
@@ -325,7 +409,7 @@ void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
 
 /* remove nodes with nids in array nid0 and their 7 other siblings,
    We assume long *nid0 is sorted in ascending order.
-   nid0[2*i]   has the node id of sibling0, 
+   nid0[2*i]   has the node id of sibling0,
    nid0[2*i+1] has the number of siblings that need unrefinement
    We do not update node->nid in here, but we change nid0 and return
    what is left to process, i.e. all nid0 where we had less than 8 siblings
@@ -567,7 +651,7 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
     if(i) sib[0] = sib[0]->nb[0];
     if(j) sib[0] = sib[0]->nb[2];
     if(k) sib[0] = sib[0]->nb[4];
- 
+
     /* check if we processed sib[0] already */
     if(sib[0] == sib0) continue;
     sib0 = sib[0]; /* save sib[0] as last one processed */

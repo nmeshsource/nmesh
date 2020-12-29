@@ -292,6 +292,13 @@ typedef struct tVARLIST {
 /* for mesh refinement */
 /**************************************************************************/
 
+/* refinement types: i.e. vals for var type in tRef */
+enum
+{
+  H_REFINE,      /* do h-refinement */
+  P_REFINE       /* do p-refinement */
+};
+
 /* refinement methods: i.e. vals for var method in tRef */
 enum
 {
@@ -310,6 +317,7 @@ enum
 
 /* struct that holds refinement method */
 typedef struct tREF {
+  int type;       /* H_REFINE, P_REFINE */
   int method;     /* NOREFINE, PARENT_n, ... */
   int n[3];       /* n to use if method=GIVEN_n */
 } tRef;
