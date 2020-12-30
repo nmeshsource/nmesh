@@ -1,6 +1,8 @@
 /* lists.c */
 /* Wolfgang Tichy, May 2017 */
 
+#include "sources.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
