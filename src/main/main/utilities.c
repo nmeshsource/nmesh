@@ -48,27 +48,40 @@ void prdivider(int n)
   fflush(stdout);
 }
 
+
+/* wrapper around clock_gettime */
+int getRealTime(struct timespec *tp)
+{
+  return clock_gettime(CLOCK_REALTIME, tp);
+}
+
 /* initialize time_in_s_at_nmesh_start */
 void initTimeIn_s(void)
 {
   struct timespec tp[1];
 
-  clock_gettime(CLOCK_REALTIME, tp);
+  getRealTime(tp);
   tp_at_nmesh_start->tv_sec  = tp->tv_sec;
   tp_at_nmesh_start->tv_nsec = tp->tv_nsec;
+}
+
+/* get time difference in seconds */
+double getTimeDiffIn_s(struct timespec tp1[1], struct timespec tp0[1])
+{
+  double t_in_s;
+
+  t_in_s  = (tp1->tv_sec - tp0->tv_sec);
+  t_in_s += 1e-9 * (tp1->tv_nsec - tp0->tv_nsec);
+
+  return t_in_s;
 }
 
 /* get current time in seconds */
 double getTimeIn_s(void)
 {
   struct timespec tp[1];
-  double t_in_s;
-
-  clock_gettime(CLOCK_REALTIME, tp);
-  t_in_s  = (tp->tv_sec - tp_at_nmesh_start->tv_sec);
-  t_in_s += 1e-9 * (tp->tv_nsec - tp_at_nmesh_start->tv_nsec);
-
-  return t_in_s;
+  getRealTime(tp);
+  return getTimeDiffIn_s(tp, tp_at_nmesh_start);
 }
 
 /* print current time */
