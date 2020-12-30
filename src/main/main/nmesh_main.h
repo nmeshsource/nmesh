@@ -232,7 +232,11 @@ NORET void errorexiti(const char *file, int line, const char *func,
 
 void Yo(double x);
 void prdivider(int n);
+int getRealTime(struct timespec *tp);
 void initTimeIn_s(void);
+void getTimeDiff(struct timespec dtp[1],
+                 struct timespec tp1[1], struct timespec tp0[1]);
+double getTimeDiffIn_s(struct timespec tp1[1], struct timespec tp0[1]);
 double getTimeIn_s(void);
 void prTimeIn_s(char *comment);
 void wait_for_debugger_if_NMESH_MPI_DEBUG(void);

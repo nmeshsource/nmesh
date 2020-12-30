@@ -309,3 +309,59 @@ void move_nodelist_to_rank(tNlist *list, int desrank)
 
   free_com(rcom);
 }
+
+
+/************************************************************************/
+/* functions to time what's happening on a node */
+/************************************************************************/
+
+/* reset load timer on this node */
+void loadtimer_reset(tNode *node)
+{
+  tDat *dat = node->dat;
+  if(dat)
+  {
+    dat->info->load_timer_running = 0;
+    dat->info->load_TimeIn_s      = 0.;
+  }
+}
+
+/* start load timer on this node */
+void loadtimer_start(tNode *node)
+{
+  tDat *dat = node->dat;
+  if(!dat) errorexit("I can only time nodes that I have");
+
+  /* save current time if timer is not running yet */
+  if( !(dat->info->load_timer_running) )
+  {
+    dat->info->load_timer_running = 1;
+    getRealTime(dat->info->load_start);
+  }
+  else
+  {
+    errorexit("load timer has already been started");
+  }
+}
+
+/* start load timer and add time spent to counter dat->info->load_TimeIn_s*/
+void loadtimer_stop(tNode *node)
+{
+  tDat *dat = node->dat;
+  if(!dat) errorexit("I can only time nodes that I have");
+
+  /* get time difference if timer was running */
+  if( (dat->info->load_timer_running) )
+  {
+    struct timespec tp[1];
+
+    getRealTime(tp);
+    dat->info->load_TimeIn_s += getTimeDiffIn_s(tp, dat->info->load_start);
+
+    dat->info->load_timer_running = 0;
+  }
+  else
+  {
+    errorexit("load timer is not running");
+  }
+}

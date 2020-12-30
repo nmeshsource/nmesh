@@ -1,6 +1,8 @@
 /* nmesh_amr.h */
 /* (c) Wolfgang Tichy 2/2019 */
 
+#include <time.h>    /* for struct timespec */
+
 /* declarations from other parts that we need here already */
 #include "thread_defs.h"
 #include "../main/skeleton.h"
@@ -41,6 +43,9 @@ typedef struct tNODEINFO {
   int use_fv;             /* whether we currently use fin. vol. in node */
   int nlim;               /* number of consectutive evo substeps in which
                              limiter was active */
+  int load_timer_running;        //1 if node load timer is running, else 0
+  struct timespec load_start[1]; //time when node load timer was started
+  double load_TimeIn_s;          //time spent on this node in seconds
 } tNodeInfo;
 
 /* the data within a node, this should be only on one proc */

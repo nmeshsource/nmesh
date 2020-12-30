@@ -78,6 +78,10 @@
 #define Lnode_myid(mesh, myid) \
   mesh->myln->ln[(myid) / mesh->myln->nm][(myid) % mesh->myln->nm]->node
 
+/* marcos to start and stop node load timers */
+#define LOAD_START loadtimer_start(node)
+#define LOAD_STOP  loadtimer_stop(node)
+
 /* loop over all points in a node */
 #define forpoints(node,ijk)  for(ijk=0; ijk < node->np; ijk++)
 

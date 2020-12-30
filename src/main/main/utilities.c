@@ -65,6 +65,21 @@ void initTimeIn_s(void)
   tp_at_nmesh_start->tv_nsec = tp->tv_nsec;
 }
 
+/* get time difference: dtp = tp1 - tp0 */
+void getTimeDiff(struct timespec dtp[1],
+                 struct timespec tp1[1], struct timespec tp0[1])
+{
+  dtp->tv_sec  = (tp1->tv_sec  - tp0->tv_sec);
+  dtp->tv_nsec = (tp1->tv_nsec - tp0->tv_nsec);
+}
+
+/* add time dtp to tp: tp = tp + dtp */
+void addtoTime(struct timespec tp[1], struct timespec dtp[1])
+{
+  tp->tv_sec  += dtp->tv_sec;
+  tp->tv_nsec += dtp->tv_nsec;
+}
+
 /* get time difference in seconds */
 double getTimeDiffIn_s(struct timespec tp1[1], struct timespec tp0[1])
 {
