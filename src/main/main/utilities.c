@@ -16,7 +16,7 @@
 
 
 /* global vars for timing */
-double time_in_s_at_nmesh_start = 0.; /* set in main.c */
+struct timespec tp_at_nmesh_start[1]; /* initTimeIn_s is called in main.c */
 extern tMesh *main_mesh;              /* mesh created in main */
 
 
@@ -51,11 +51,11 @@ void prdivider(int n)
 /* initialize time_in_s_at_nmesh_start */
 void initTimeIn_s(void)
 {
-  double t_in_s;
+  struct timespec tp[1];
 
-  time_in_s_at_nmesh_start = 0.;
-  t_in_s = getTimeIn_s();
-  time_in_s_at_nmesh_start = t_in_s;
+  clock_gettime(CLOCK_REALTIME, tp);
+  tp_at_nmesh_start->tv_sec  = tp->tv_sec;
+  tp_at_nmesh_start->tv_nsec = tp->tv_nsec;
 }
 
 /* get current time in seconds */
@@ -65,7 +65,8 @@ double getTimeIn_s(void)
   double t_in_s;
 
   clock_gettime(CLOCK_REALTIME, tp);
-  t_in_s = (tp->tv_sec - time_in_s_at_nmesh_start) + 1e-9 * tp->tv_nsec;
+  t_in_s  = (tp->tv_sec - tp_at_nmesh_start->tv_sec);
+  t_in_s += 1e-9 * (tp->tv_nsec - tp_at_nmesh_start->tv_nsec);
 
   return t_in_s;
 }
