@@ -365,3 +365,164 @@ void loadtimer_stop(tNode *node)
     errorexit("load timer is not running");
   }
 }
+
+
+
+/* Set array nodeload[] that contains the measured time each node used,
+   Also return the sum over nodeload[] */
+double load_set_nodeload_array(tMesh *mesh, double *nodeload)
+{
+  tNlist *elem;
+  double loadsum = 0.;
+
+  /* we assume that mesh->lns has the same order for all ranks */
+  fornodelist(mesh->lns, elem)
+  {
+    tNode *node = elem->node;
+    tDat *dat = node->dat;
+    int datrank = node->datrank;
+    long nid = node->nid;
+    double load = 0;
+
+    /* we need to broadcast nodeload from my nodes to all other ranks */
+    if(dat) load = node->dat->info->load_TimeIn_s;
+
+    nMPI_Bcast(&load,1, nMPI_DOUBLE, datrank);
+    nodeload[nid] = load;
+    loadsum += load;
+  }
+  return loadsum;
+}
+
+/* sum over leaf nodes (starting at ln0) until loadsum reaches the value
+   desired_load:
+   Return: leaf after the one where we reached desired_load.
+   In: ln0, desired_load[], nodeload.  Out: actual_load */
+tNlist *inc_leaf_until_desired_loadsum(tNlist *ln0, double desired_loadsum,
+                                       const double nodeload[],
+                                       double *actual_loadsum)
+{
+  tNlist *elem;
+  double sum = 0.;
+
+  fornodelist(ln0, elem)
+  {
+    tNode *node = elem->node;
+    long nid = node->nid;
+
+    sum += nodeload[nid];
+
+    if(sum >= desired_loadsum) break;
+  }
+
+  *actual_loadsum = sum;
+  if(elem) return elem->next;
+  else     return NULL;
+}
+
+/* Set rank_start[i] array.
+   It contains the first leaf that rank i should have */
+void load_set_desired_rank_start(tMesh *mesh, double desired_loadsum,
+                                 const double nodeload[],
+                                 tNlist **rank_start)
+{
+  tNlist *ln0, *ln1;
+  double actual_loadsum;
+  int i;
+
+  i = 0;
+  for(ln0 = mesh->lns; ln0; ln0 = ln1)
+  {
+    rank_start[i++] = ln0;
+    ln1 = inc_leaf_until_desired_loadsum(ln0, desired_loadsum,
+                                         nodeload, &actual_loadsum);
+  }
+}
+
+/* compute desired rank */
+int load_get_desiredrank(int nid, tNlist **rank_start, int size)
+{
+  int rank;
+
+  for(rank = 0; rank<size; rank++)
+  {
+    tNlist *ln0 = rank_start[rank];
+    tNode *node = ln0->node;
+    long nid0 = node->nid;
+
+    /* we assume that leaf node nids are assigned in ascending order */
+    if(nid >= nid0) break;
+  }
+  if(rank >= size)
+    errorexit("could not find the rank that should have nid");
+
+  return rank;
+}
+
+
+/* load balancing based on measured node loads */
+void load_balance_nodeload(tMesh *mesh)
+{
+  long nnodes = mesh->nln;
+  int size = nMPI_size();
+  double *nodeload = dmalloc(nnodes);
+  double totalload;
+  tNlist **rank_start = calloc(size, sizeof(rank_start[0]));
+  int desrank;
+  long nid;
+  tNlist *elem;
+  tNode *node;
+  tCom *scom = alloc_com(sizeof(double), 1);
+  tCom *rcom = alloc_com(sizeof(double), 1);
+
+  PRF;printf(": nnodes=%ld\n", nnodes);
+
+  /* get measured load for each node */
+  totalload = load_set_nodeload_array(mesh, nodeload);
+
+  /* set array with 1st desired leaf node for each rank */
+  load_set_desired_rank_start(mesh, totalload/size, nodeload, rank_start);
+
+
+
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
+
+  /* fill MPI send and recv buffers */
+  fornodelist(mesh->lns, elem)
+  {
+    node = elem->node;
+    nid = node->nid;
+
+    desrank = load_get_desiredrank(nid, rank_start, size);
+
+    if(node->datrank != desrank)
+      move_node_to_rank(node, desrank, scom, rcom, 1);
+  }
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);  /* free scom with all its buffers */
+  nMPI_Waitall_com_recv(rcom);
+
+  /* get var data out of recv buffer */
+  set_com_counters(rcom, 0,0);
+  fornodelist(mesh->lns, elem)
+  {
+    node = elem->node;
+    nid = node->nid;
+    desrank = desiredrank(nid, nnodes, size);
+    if(node->datrank != desrank)
+      move_node_to_rank(node, desrank, scom, rcom, 0);
+  }
+
+  free_com(rcom);
+
+  update_mesh_myln_node_nid(mesh);
+  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
+
+  /* now that nodes are elsewhere re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
+
+  /* free temp arrays */
+  free(rank_start);
+  free(nodeload);
+}
