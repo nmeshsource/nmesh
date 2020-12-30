@@ -382,10 +382,14 @@ double load_set_nodeload_array(tMesh *mesh, double *nodeload)
     tDat *dat = node->dat;
     int datrank = node->datrank;
     long nid = node->nid;
-    double load = 0;
+    double load = 0.;
 
     /* we need to broadcast nodeload from my nodes to all other ranks */
     if(dat) load = node->dat->info->load_TimeIn_s;
+
+    /* in case we forgot to measure the times, just set load to a very small
+       uniform number: */
+    if(load == 0.) load = 1e-50;
 
     nMPI_Bcast(&load,1, nMPI_DOUBLE, datrank);
     nodeload[nid] = load;
@@ -477,13 +481,11 @@ void load_balance_nodeload(tMesh *mesh)
 
   PRF;printf(": nnodes=%ld\n", nnodes);
 
-  /* get measured load for each node */
+  /* get measured load for each node (in nodeload) and also totalload */
   totalload = load_set_nodeload_array(mesh, nodeload);
 
-  /* set array with 1st desired leaf node for each rank */
+  /* set array rank_start with 1st desired leaf node for each rank */
   load_set_desired_rank_start(mesh, totalload/size, nodeload, rank_start);
-
-
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
