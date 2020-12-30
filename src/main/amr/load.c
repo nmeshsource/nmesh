@@ -469,8 +469,8 @@ void load_balance_nodeload(tMesh *mesh)
 {
   long nnodes = mesh->nln;
   int size = nMPI_size();
-  double *nodeload = dmalloc(nnodes);
   double totalload;
+  double *nodeload    = dmalloc(nnodes);
   tNlist **rank_start = calloc(size, sizeof(rank_start[0]));
   int desrank;
   long nid;
@@ -480,6 +480,18 @@ void load_balance_nodeload(tMesh *mesh)
   tCom *rcom = alloc_com(sizeof(double), 1);
 
   PRF;printf(": nnodes=%ld\n", nnodes);
+  if(!nodeload || !rank_start)
+  {
+    free_com(rcom);
+    free_com(scom);
+    free(rank_start);
+    free(nodeload);
+    printf("  WARNING: quitting ");PRF;
+    printf(" due to lack of memory!!!\n");
+    /* do fallback? */
+    //simple_load_balance(mesh);
+    return;
+  }
 
   /* get measured load for each node (in nodeload) and also totalload */
   totalload = load_set_nodeload_array(mesh, nodeload);
