@@ -12,7 +12,7 @@
 /**********************************************************************/
 
 /* compute desired rank */
-int desiredrank(int nid, int nnodes, int size)
+int desiredrank(long nid, long nnodes, int size)
 {
   double N = nnodes;
   double s = size;
@@ -30,6 +30,20 @@ void simple_load_balance(tMesh *mesh)
   tNode *node;
   int size = nMPI_size();
   int desrank;
+/*
+fornodelist(mesh->lns, elem)
+{
+node = elem->node;
+tDat *dat = node->dat;
+if(dat) dat->info->load_TimeIn_s = 1./(node->nid+1);
+}
+Yo(10);
+printmesh(mesh);
+load_balance_nodeload(mesh);
+Yo(20);
+printmesh(mesh);
+return;
+*/
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
 
@@ -395,6 +409,11 @@ double load_set_nodeload_array(tMesh *mesh, double *nodeload)
     nodeload[nid] = load;
     loadsum += load;
   }
+
+  PRFs(":\n");
+  for(long l=0; l<mesh->nln; l++)
+    printf("nodeload[%ld]=%g ", l, nodeload[l]);
+
   return loadsum;
 }
 
@@ -430,39 +449,43 @@ void load_set_desired_rank_start(tMesh *mesh, double desired_loadsum,
                                  const double nodeload[],
                                  tNlist **rank_start)
 {
+  int size = nMPI_size();
   tNlist *ln0, *ln1;
   double actual_loadsum;
-  int i;
+  int rank;
 
-  i = 0;
+  rank = 0;
   for(ln0 = mesh->lns; ln0; ln0 = ln1)
   {
-    rank_start[i++] = ln0;
+    if(rank >= size) break;
+    rank_start[rank++] = ln0;
     ln1 = inc_leaf_until_desired_loadsum(ln0, desired_loadsum,
                                          nodeload, &actual_loadsum);
   }
+  PRFs(":\n");
+  for(rank=0; rank<size; rank++)
+    printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->node->nid);
 }
 
 /* compute desired rank */
-int load_get_desiredrank(int nid, tNlist **rank_start, int size)
+int load_get_desiredrank(long nid, tNlist **rank_start, int size)
 {
   int rank;
 
-  for(rank = 0; rank<size; rank++)
+  for(rank = 0; rank<size-1; rank++)
   {
-    tNlist *ln0 = rank_start[rank];
-    tNode *node = ln0->node;
-    long nid0 = node->nid;
-
+    tNlist *ln1 = rank_start[rank+1];
+    tNode *node = ln1->node;
+    long nid1 = node->nid;
+    //PRF;printf(": rank=%d nid=%ld nid1=%ld\n", rank, nid, nid1);
     /* we assume that leaf node nids are assigned in ascending order */
-    if(nid >= nid0) break;
+    if(nid < nid1) break;
   }
   if(rank >= size)
     errorexit("could not find the rank that should have nid");
 
   return rank;
 }
-
 
 /* load balancing based on measured node loads */
 void load_balance_nodeload(tMesh *mesh)
@@ -479,7 +502,7 @@ void load_balance_nodeload(tMesh *mesh)
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
 
-  PRF;printf(": nnodes=%ld\n", nnodes);
+  PRF;printf(": nnodes=%ld ", nnodes);
   if(!nodeload || !rank_start)
   {
     free_com(rcom);
@@ -495,6 +518,7 @@ void load_balance_nodeload(tMesh *mesh)
 
   /* get measured load for each node (in nodeload) and also totalload */
   totalload = load_set_nodeload_array(mesh, nodeload);
+  printf("totalload=%g\n", totalload);
 
   /* set array rank_start with 1st desired leaf node for each rank */
   load_set_desired_rank_start(mesh, totalload/size, nodeload, rank_start);
@@ -507,9 +531,7 @@ void load_balance_nodeload(tMesh *mesh)
   {
     node = elem->node;
     nid = node->nid;
-
     desrank = load_get_desiredrank(nid, rank_start, size);
-
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 1);
   }
@@ -523,7 +545,7 @@ void load_balance_nodeload(tMesh *mesh)
   {
     node = elem->node;
     nid = node->nid;
-    desrank = desiredrank(nid, nnodes, size);
+    desrank = load_get_desiredrank(nid, rank_start, size);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
   }

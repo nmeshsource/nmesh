@@ -510,6 +510,7 @@ tNode *node_from_nodename(tMesh *mesh,  char *name);
 /* load.c */
 void simple_load_balance(tMesh *mesh);
 void move_nodelist_to_rank(tNlist *list, int desrank);
+void load_balance_nodeload(tMesh *mesh);
 
 /* amr.c */
 int amr_init_global_pars(tMesh *mesh);
