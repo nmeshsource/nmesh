@@ -521,7 +521,6 @@ tNode *node_from_nodename(tMesh *mesh,  char *name);
 /* load.c */
 void simple_load_balance(tMesh *mesh);
 void move_nodelist_to_rank(tNlist *list, int desrank);
-void load_balance_nodeload(tMesh *mesh);
 void load_balance(tMesh *mesh, int strategy);
 
 /* amr.c */
