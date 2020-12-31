@@ -391,6 +391,7 @@ void loadtimer_stop(tNode *node)
 double load_set_nodeload_array(tMesh *mesh, double *nodeload)
 {
   tNlist *elem;
+  double loadmin = 1e-50;
   double loadsum = 0.;
 
   /* we assume that mesh->lns has the same order for all ranks */
@@ -400,23 +401,23 @@ double load_set_nodeload_array(tMesh *mesh, double *nodeload)
     tDat *dat = node->dat;
     int datrank = node->datrank;
     long nid = node->nid;
-    double load = 0.;
+    double load = loadmin;
 
     /* we need to broadcast nodeload from my nodes to all other ranks */
     if(dat) load = node->dat->info->load_TimeIn_s;
 
     /* in case we forgot to measure the times, just set load to a very small
        uniform number: */
-    if(load == 0.) load = 1e-50;
+    if(load < loadmin) load = loadmin;
 
     nMPI_Bcast(&load,1, nMPI_DOUBLE, datrank);
     nodeload[nid] = load;
     loadsum += load;
   }
 
-  PRFs(":\n");
-  for(long l=0; l<mesh->nln; l++)
-    printf("nodeload[%ld]=%g ", l, nodeload[l]);
+  //PRFs(":\n");
+  //for(long l=0; l<mesh->nln; l++)
+  //  printf("nodeload[%ld]=%g ", l, nodeload[l]);
 
   return loadsum;
 }
@@ -466,9 +467,9 @@ void load_set_desired_rank_start(tMesh *mesh, double desired_loadsum,
     ln1 = inc_leaf_until_desired_loadsum(ln0, desired_loadsum,
                                          nodeload, &actual_loadsum);
   }
-  PRFs(":\n");
-  for(rank=0; rank<size; rank++)
-    printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->node->nid);
+  //PRFs(":\n");
+  //for(rank=0; rank<size; rank++)
+  //  printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->node->nid);
 }
 
 /* compute desired rank */
