@@ -381,6 +381,10 @@ void loadtimer_stop(tNode *node)
 }
 
 
+/************************************************************************/
+/* functions for load balancing based on node timings in
+   dat->info->load_TimeIn_s */
+/************************************************************************/
 
 /* Set array nodeload[] that contains the measured time each node used,
    Also return the sum over nodeload[] */
