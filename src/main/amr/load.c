@@ -31,17 +31,11 @@ int desiredrank_simple(tLoadinfo *li)
   return desrank;
 }
 
-/* simplistic load balancing */
+/* simplistic load balancing using desiredrank_simple */
 void simple_load_balance(tMesh *mesh)
 {
-  long nnodes = mesh->nln;
-  tNlist *elem;
-  tNode *node;
-  int desrank;
-
-load_balance(mesh, LOADBAL_SIMPLE);
-return;
 /*
+tNlist *elem;
 fornodelist(mesh->lns, elem)
 {
 node = elem->node;
@@ -55,50 +49,8 @@ Yo(20);
 printmesh(mesh);
 return;
 */
-  tCom *scom = alloc_com(sizeof(double), 1);
-  tCom *rcom = alloc_com(sizeof(double), 1);
-  tLoadinfo li[1];
 
-  PRF;printf(": nnodes=%ld\n", nnodes);
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
-  /* set const part of li */
-  li->nnodes = nnodes;
-  li->size   = nMPI_size();
-
-  /* fill MPI send and recv buffers */
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = node->nid;
-    desrank = desiredrank_simple(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 1);
-  }
-  nMPI_Waitall_com_send(scom);
-  free_com(scom);  /* free scom with all its buffers */
-  nMPI_Waitall_com_recv(rcom);
-
-  /* get var data out of recv buffer */
-  set_com_counters(rcom, 0,0);
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = node->nid;
-    desrank = desiredrank_simple(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 0);
-  }
-
-  free_com(rcom);
-
-  update_mesh_myln_node_nid(mesh);
-  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
-
-  /* now that nodes are elsewhere re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
+  load_balance(mesh, LOADBAL_SIMPLE);
 }
 
 /* return: number of variables and number of doubles inside dat */
