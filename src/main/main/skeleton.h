@@ -20,8 +20,8 @@ enum
   ANALYZE, 
   OUTPUT,
   POST_OUTPUT,
+  LOADBALANCING, /* before AMR, since refinements invalidate timings */
   AMR,
-  LOADBALANCING,
   FINALIZE,
   FINALIZEMESH,
   POST_FINALIZEMESH,

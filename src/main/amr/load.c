@@ -570,3 +570,19 @@ void load_balance(tMesh *mesh, int strategy)
   free(rank_start);
   free(nodeload);
 }
+
+/* function that can be scheduled in LOADBALANCING */
+int load_balance_if_needed(tMesh *mesh)
+{
+  int amr_load_balance = Par("amr_load_balance");
+
+  if(Getv(amr_load_balance, "timingbased"))
+  {
+    load_balance(mesh, LOADBAL_NODETIMES);
+  }
+  else if(Getv(amr_load_balance, "simple"))
+  {
+    load_balance(mesh, LOADBAL_SIMPLE);
+  }
+  return 0;
+}

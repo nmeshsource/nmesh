@@ -15,6 +15,7 @@ int nmesh_amr(tMesh *mesh)
   AddFun(FIRST, amr_print_thread_info);
   AddFun(POST_PARAMETERS, amr_init_global_pars);
   AddFun(INITIALDATA, amr_set_use_fv_flag);
+  AddFun(LOADBALANCING, load_balance_if_needed);
 
   /* variables */
   //AddAuxVar("Xb", "", "coord0 inside each node"); // we may not need these???
@@ -52,6 +53,9 @@ int nmesh_amr(tMesh *mesh)
          "number of nested sphere refinement levels");
   AddPar("amr_refine_sphere_radius", "10",
          "radius of innermost sphere in nested sphere refinement");
+
+  /* pars that determine how load is balanced */
+  AddPar("amr_load_balance", "no", "[no,simple,timingbased]");
 
   /* MPI related pars */
   AddPar("amr_MPIexchange", "1", "type of MPI exchange we use: "
