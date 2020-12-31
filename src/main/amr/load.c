@@ -546,7 +546,7 @@ void load_balance_nodeload(tMesh *mesh)
 
   /* set const part of li */
   li->rank_start = rank_start;
-  li->size       = nMPI_size();
+  li->size       = size;
 
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
