@@ -7,17 +7,25 @@
 #define PR 0
 
 
+/* object we pass around to figure out the desired rank of a node */
+typedef struct tLOADINFO {
+  long nid;
+  long nnodes;
+  int size;
+} tLOADinfo;
+
+
 /**********************************************************************/
 /* functions to move nodes between procs */
 /**********************************************************************/
 
 /* compute desired rank */
-int desiredrank(long nid, long nnodes, int size)
+int desiredrank(tLOADinfo *li)
 {
-  double N = nnodes;
-  double s = size;
+  double N = li->nnodes;
+  double s = li->size;
   double nperproc = N/s;
-  double desrank = nid/nperproc;
+  double desrank = li->nid/nperproc;
   return desrank;
 }
 
@@ -25,10 +33,8 @@ int desiredrank(long nid, long nnodes, int size)
 void simple_load_balance(tMesh *mesh)
 {
   long nnodes = mesh->nln;
-  long nid;
   tNlist *elem;
   tNode *node;
-  int size = nMPI_size();
   int desrank;
 /*
 fornodelist(mesh->lns, elem)
@@ -46,18 +52,23 @@ return;
 */
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
+  tLOADinfo li[1];
 
   PRF;printf(": nnodes=%ld\n", nnodes);
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
+  /* set const part of li */
+  li->nnodes = nnodes;
+  li->size   = nMPI_size();
+
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
-    nid = node->nid;
-    desrank = desiredrank(nid, nnodes, size);
+    li->nid = node->nid;
+    desrank = desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 1);
   }
@@ -70,8 +81,8 @@ return;
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
-    nid = node->nid;
-    desrank = desiredrank(nid, nnodes, size);
+    li->nid = node->nid;
+    desrank = desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
   }
