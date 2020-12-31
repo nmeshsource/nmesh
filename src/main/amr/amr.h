@@ -92,3 +92,6 @@ void get_all_myln_ghostdata(tMesh *mesh);
 
 /* amr.c */
 int amr_print_thread_info(tMesh *mesh);
+
+/* timing.c  */
+int timing_mm_speed(tMesh *mesh);
