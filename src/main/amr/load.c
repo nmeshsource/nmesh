@@ -38,18 +38,17 @@ void simple_load_balance(tMesh *mesh)
 tNlist *elem;
 fornodelist(mesh->lns, elem)
 {
-node = elem->node;
+tNode *node = elem->node;
 tDat *dat = node->dat;
 if(dat) dat->info->load_TimeIn_s = 1./(node->nid+1);
 }
-Yo(10);
-printmesh(mesh);
-load_balance_nodeload(mesh);
-Yo(20);
-printmesh(mesh);
+//Yo(10);
+//printmesh(mesh);
+load_balance(mesh, LOADBAL_NODETIMES);
+//Yo(20);
+//printmesh(mesh);
 return;
 */
-
   load_balance(mesh, LOADBAL_SIMPLE);
 }
 
