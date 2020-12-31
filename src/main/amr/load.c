@@ -459,86 +459,6 @@ int load_get_desiredrank(tLoadinfo *li)
   return rank;
 }
 
-/* load balancing based on measured node loads */
-void load_balance_nodeload(tMesh *mesh)
-{
-  long nnodes = mesh->nln;
-  int size = nMPI_size();
-  double totalload;
-  double *nodeload    = dmalloc(nnodes);
-  tNlist **rank_start = calloc(size, sizeof(rank_start[0]));
-  int desrank;
-  tNlist *elem;
-  tNode *node;
-  tCom *scom = alloc_com(sizeof(double), 1);
-  tCom *rcom = alloc_com(sizeof(double), 1);
-  tLoadinfo li[1];
-
-  PRF;printf(": nnodes=%ld ", nnodes);
-  if(!nodeload || !rank_start)
-  {
-    free_com(rcom);
-    free_com(scom);
-    free(rank_start);
-    free(nodeload);
-    printf("  WARNING: quitting ");PRF;
-    printf(" due to lack of memory!!!\n");
-    /* do fallback? */
-    //simple_load_balance(mesh);
-    return;
-  }
-
-  /* get measured load for each node (in nodeload) and also totalload */
-  totalload = load_set_nodeload_array(mesh, nodeload);
-  printf("totalload=%g\n", totalload);
-
-  /* set array rank_start with 1st desired leaf node for each rank */
-  load_set_desired_rank_start(mesh, totalload/size, nodeload, rank_start);
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
-  /* set const part of li */
-  li->rank_start = rank_start;
-  li->size       = size;
-
-  /* fill MPI send and recv buffers */
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = node->nid;
-    desrank = load_get_desiredrank(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 1);
-  }
-  nMPI_Waitall_com_send(scom);
-  free_com(scom);  /* free scom with all its buffers */
-  nMPI_Waitall_com_recv(rcom);
-
-  /* get var data out of recv buffer */
-  set_com_counters(rcom, 0,0);
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = node->nid;
-    desrank = load_get_desiredrank(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 0);
-  }
-
-  free_com(rcom);
-
-  update_mesh_myln_node_nid(mesh);
-  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
-
-  /* now that nodes are elsewhere re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
-
-  /* free temp arrays */
-  free(rank_start);
-  free(nodeload);
-}
-
 
 /* load balancing, where we can choose the balancing strategy:
    strategy = LOADBAL_SIMPLE, LOADBAL_NODETIMES, ... */
@@ -568,6 +488,7 @@ void load_balance(tMesh *mesh, int strategy)
   {
   case LOADBAL_NODETIMES:
 
+    /* load balancing based on measured node loads */
     nodeload   = dmalloc(nnodes);
     rank_start = calloc(size, sizeof(rank_start[0]));
     if(!nodeload || !rank_start)
