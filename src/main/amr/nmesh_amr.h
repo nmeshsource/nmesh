@@ -327,6 +327,17 @@ typedef struct tREF {
   int n[3];       /* n to use if method=GIVEN_n */
 } tRef;
 
+
+/**************************************************************************/
+/* for load balancing */
+/**************************************************************************/
+enum
+{
+  LOADBAL_SIMPLE,    /* each proc get the same number of nodes */
+  LOADBAL_NODETIMES  /* nodes are timed, each proc gets equal total times */
+};
+
+
 /**************************************************************************/
 /* useful defines */
 /**************************************************************************/
@@ -511,6 +522,7 @@ tNode *node_from_nodename(tMesh *mesh,  char *name);
 void simple_load_balance(tMesh *mesh);
 void move_nodelist_to_rank(tNlist *list, int desrank);
 void load_balance_nodeload(tMesh *mesh);
+void load_balance(tMesh *mesh, int strategy);
 
 /* amr.c */
 int amr_init_global_pars(tMesh *mesh);

@@ -22,7 +22,7 @@ typedef struct tLOADINFO {
 /**********************************************************************/
 
 /* compute desired rank */
-int desiredrank(tLoadinfo *li)
+int desiredrank_simple(tLoadinfo *li)
 {
   double N = li->nnodes;
   double s = li->size;
@@ -38,6 +38,9 @@ void simple_load_balance(tMesh *mesh)
   tNlist *elem;
   tNode *node;
   int desrank;
+
+load_balance(mesh, LOADBAL_SIMPLE);
+return;
 /*
 fornodelist(mesh->lns, elem)
 {
@@ -70,7 +73,7 @@ return;
   {
     node = elem->node;
     li->nid = node->nid;
-    desrank = desiredrank(li);
+    desrank = desiredrank_simple(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 1);
   }
@@ -84,7 +87,7 @@ return;
   {
     node = elem->node;
     li->nid = node->nid;
-    desrank = desiredrank(li);
+    desrank = desiredrank_simple(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
   }
@@ -568,6 +571,117 @@ void load_balance_nodeload(tMesh *mesh)
     node = elem->node;
     li->nid = node->nid;
     desrank = load_get_desiredrank(li);
+    if(node->datrank != desrank)
+      move_node_to_rank(node, desrank, scom, rcom, 0);
+  }
+
+  free_com(rcom);
+
+  update_mesh_myln_node_nid(mesh);
+  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
+
+  /* now that nodes are elsewhere re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
+
+  /* free temp arrays */
+  free(rank_start);
+  free(nodeload);
+}
+
+
+/* load balancing, where we can choose the balancing strategy:
+   strategy = LOADBAL_SIMPLE, LOADBAL_NODETIMES, ... */
+void load_balance(tMesh *mesh, int strategy)
+{
+  long nnodes = mesh->nln;
+  int size = nMPI_size();
+  tLoadinfo li[1];
+  int (*desiredrank)(tLoadinfo *li); /* func. pointer for distrib. strategy*/
+  int desrank;
+  tNlist *elem;
+  tNode *node;
+  tCom *scom;
+  tCom *rcom;
+  double totalload;            //only for LOADBAL_NODETIMES
+  double *nodeload = NULL;     //only for LOADBAL_NODETIMES
+  tNlist **rank_start = NULL;  //only for LOADBAL_NODETIMES
+
+  PRF;printf(": strategy=%d nnodes=%ld ", strategy, nnodes);
+
+  /* set const part of li needed for all strategies */
+  li->nnodes = nnodes;
+  li->size   = size;
+
+  /* set up stuff for each strategy */
+  switch(strategy)
+  {
+  case LOADBAL_NODETIMES:
+
+    nodeload   = dmalloc(nnodes);
+    rank_start = calloc(size, sizeof(rank_start[0]));
+    if(!nodeload || !rank_start)
+    {
+      free(rank_start);
+      free(nodeload);
+      printf("  WARNING: quitting ");PRF;
+      printf(" due to lack of memory!!!\n");
+      /* do fallback? */
+      //load_balance(mesh, LOADBAL_SIMPLE);
+      return;
+    }
+
+    /* get measured load for each node (in nodeload) and also totalload */
+    totalload = load_set_nodeload_array(mesh, nodeload);
+    printf("totalload=%g\n", totalload);
+
+    /* set array rank_start with 1st desired leaf node for each rank */
+    load_set_desired_rank_start(mesh, totalload/size, nodeload, rank_start);
+
+    /* set const part of li, and pick function to calc. desired rank */
+    li->rank_start = rank_start;
+    desiredrank = load_get_desiredrank;
+
+    break;
+
+  case LOADBAL_SIMPLE:
+
+    /* pick function to calc. desired rank */
+    desiredrank = desiredrank_simple;
+    printf("\n");
+
+    break;
+
+  default:
+    errorexit("unknown strategy");
+  }
+
+  /* for MPI data transfers */
+  scom = alloc_com(sizeof(double), 1);
+  rcom = alloc_com(sizeof(double), 1);
+
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
+
+  /* fill MPI send and recv buffers */
+  fornodelist(mesh->lns, elem)
+  {
+    node = elem->node;
+    li->nid = node->nid;
+    desrank = desiredrank(li);
+    if(node->datrank != desrank)
+      move_node_to_rank(node, desrank, scom, rcom, 1);
+  }
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);  /* free scom with all its buffers */
+  nMPI_Waitall_com_recv(rcom);
+
+  /* get var data out of recv buffer */
+  set_com_counters(rcom, 0,0);
+  fornodelist(mesh->lns, elem)
+  {
+    node = elem->node;
+    li->nid = node->nid;
+    desrank = desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
   }
