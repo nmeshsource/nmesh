@@ -12,7 +12,9 @@ typedef struct tLOADINFO {
   long nid;
   long nnodes;
   int size;
-} tLOADinfo;
+  tNlist **rank_start; /* rank_start[i] is one of mesh->lns for rank i,
+                          set in load_set_desired_rank_start */
+} tLoadinfo;
 
 
 /**********************************************************************/
@@ -20,7 +22,7 @@ typedef struct tLOADINFO {
 /**********************************************************************/
 
 /* compute desired rank */
-int desiredrank(tLOADinfo *li)
+int desiredrank(tLoadinfo *li)
 {
   double N = li->nnodes;
   double s = li->size;
@@ -52,7 +54,7 @@ return;
 */
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
-  tLOADinfo li[1];
+  tLoadinfo li[1];
 
   PRF;printf(": nnodes=%ld\n", nnodes);
 
@@ -484,21 +486,21 @@ void load_set_desired_rank_start(tMesh *mesh, double desired_loadsum,
 }
 
 /* compute desired rank */
-int load_get_desiredrank(long nid, tNlist **rank_start, int size)
+int load_get_desiredrank(tLoadinfo *li)
 {
   int rank;
 
-  for(rank = 0; rank<size-1; rank++)
+  for(rank = 0; rank < li->size-1; rank++)
   {
-    tNlist *ln1 = rank_start[rank+1];
+    tNlist *ln1 = li->rank_start[rank+1];
     tNode *node = ln1->node;
     long nid1 = node->nid;
-    //PRF;printf(": rank=%d nid=%ld nid1=%ld\n", rank, nid, nid1);
+    //PRF;printf(": rank=%d nid=%ld nid1=%ld\n", rank, li->nid, nid1);
     /* we assume that leaf node nids are assigned in ascending order */
-    if(nid < nid1) break;
+    if(li->nid < nid1) break;
   }
-  if(rank >= size)
-    errorexit("could not find the rank that should have nid");
+  if(rank >= li->size)
+    errorexit("could not find the rank that should have li->nid");
 
   return rank;
 }
@@ -512,11 +514,11 @@ void load_balance_nodeload(tMesh *mesh)
   double *nodeload    = dmalloc(nnodes);
   tNlist **rank_start = calloc(size, sizeof(rank_start[0]));
   int desrank;
-  long nid;
   tNlist *elem;
   tNode *node;
   tCom *scom = alloc_com(sizeof(double), 1);
   tCom *rcom = alloc_com(sizeof(double), 1);
+  tLoadinfo li[1];
 
   PRF;printf(": nnodes=%ld ", nnodes);
   if(!nodeload || !rank_start)
@@ -542,12 +544,16 @@ void load_balance_nodeload(tMesh *mesh)
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
+  /* set const part of li */
+  li->rank_start = rank_start;
+  li->size       = nMPI_size();
+
   /* fill MPI send and recv buffers */
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
-    nid = node->nid;
-    desrank = load_get_desiredrank(nid, rank_start, size);
+    li->nid = node->nid;
+    desrank = load_get_desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 1);
   }
@@ -560,8 +566,8 @@ void load_balance_nodeload(tMesh *mesh)
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
-    nid = node->nid;
-    desrank = load_get_desiredrank(nid, rank_start, size);
+    li->nid = node->nid;
+    desrank = load_get_desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
   }
