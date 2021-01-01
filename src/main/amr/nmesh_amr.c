@@ -13,7 +13,7 @@ int nmesh_amr(tMesh *mesh)
   /* functions */
   /* NOTE: amr_setup_mesh(mesh) is called directly from main */
   AddFun(FIRST, amr_print_thread_info);
-  AddFun(FIRST, timing_mm_speed);
+  //AddFun(FIRST, timing_mm_speed); // this is too slow right now
   AddFun(POST_PARAMETERS, amr_init_global_pars);
   AddFun(INITIALDATA, amr_set_use_fv_flag);
   AddFun(LOADBALANCING, load_balance_if_needed);
