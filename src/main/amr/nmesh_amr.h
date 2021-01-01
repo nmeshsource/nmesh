@@ -333,8 +333,9 @@ typedef struct tREF {
 /**************************************************************************/
 enum
 {
-  LOADBAL_SIMPLE,    /* each proc get the same number of nodes */
-  LOADBAL_NODETIMES  /* nodes are timed, each proc gets equal total times */
+  LOADBAL_SIMPLE,     //each proc gets the same number of nodes
+  LOADBAL_NODETIMES,  //nodes are timed, each proc gets equal total times
+  LOADBAL_NODETIMES_SPEEDS //like LOADBAL_NODETIMES but also use proc speed
 };
 
 

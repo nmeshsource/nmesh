@@ -7,6 +7,10 @@
 #define PR 0
 
 
+/* use timings */
+extern tTiming Timing[1];
+
+
 /* object we pass around to figure out the desired rank of a node */
 typedef struct tLOADINFO {
   long nid;
@@ -353,13 +357,44 @@ void loadtimer_stop(tNode *node)
    dat->info->load_TimeIn_s */
 /************************************************************************/
 
+/* send around timing results and save them in array speed[] */
+double load_set_speed_array(tMesh *mesh, double *speed)
+{
+  int size = nMPI_size();
+  double myspeed = Timing->mm_speed;
+  double speedmin = 1e-50;
+  int rank;
+
+  /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
+  if(myspeed <= speedmin) myspeed = 1.;
+
+  for(rank=0; rank<size; rank++)
+  {
+    if(rank == nMPI_rank()) speed[rank] = myspeed;
+    nMPI_Bcast(&(speed[rank]),1, nMPI_DOUBLE, rank);
+  }
+
+  PRFs(":\n");
+  for(rank=0; rank<size; rank++)
+    printf("speed[%d]=%g ", rank, speed[rank]);
+
+  return myspeed;
+}
+
+
 /* Set array nodeload[] that contains the measured time each node used,
    Also return the sum over nodeload[] */
-double load_set_nodeload_array(tMesh *mesh, double *nodeload)
+double load_set_nodeload_array(tMesh *mesh, const double *speed,
+                               double *nodeload)
 {
+  int rank = nMPI_rank();
+  double myspeed;
   tNlist *elem;
   double loadmin = 1e-50;
   double loadsum = 0.;
+
+  if(speed) myspeed = speed[rank];
+  else      myspeed = 1.;
 
   /* we assume that mesh->lns has the same order for all ranks */
   fornodelist(mesh->lns, elem)
@@ -371,7 +406,7 @@ double load_set_nodeload_array(tMesh *mesh, double *nodeload)
     double load = loadmin;
 
     /* we need to broadcast nodeload from my nodes to all other ranks */
-    if(dat) load = node->dat->info->load_TimeIn_s;
+    if(dat) load = node->dat->info->load_TimeIn_s * myspeed;
 
     /* in case we forgot to measure the times, just set load to a very small
        uniform number: */
@@ -393,19 +428,24 @@ double load_set_nodeload_array(tMesh *mesh, double *nodeload)
    desired_load:
    Return: leaf after the one where we reached desired_load.
    In: ln0, desired_load[], nodeload.  Out: actual_load */
-tNlist *inc_leaf_until_desired_loadsum(tNlist *ln0, double desired_loadsum,
+tNlist *inc_leaf_until_desired_loadsum(tNlist *ln0, const double *speed,
+                                       int rank, double desired_loadsum,
                                        const double nodeload[],
                                        double *actual_loadsum)
 {
   tNlist *elem;
-  double sum = 0.;
+  double rankspeed, sum;
 
+  if(speed) rankspeed = speed[rank];
+  else      rankspeed = 1.;
+
+  sum = 0.;
   fornodelist(ln0, elem)
   {
     tNode *node = elem->node;
     long nid = node->nid;
 
-    sum += nodeload[nid];
+    sum += nodeload[nid] / rankspeed;
 
     if(sum >= desired_loadsum) break;
   }
@@ -417,7 +457,8 @@ tNlist *inc_leaf_until_desired_loadsum(tNlist *ln0, double desired_loadsum,
 
 /* Set rank_start[i] array.
    It contains the first leaf that rank i should have */
-void load_set_desired_rank_start(tMesh *mesh, double desired_loadsum,
+void load_set_desired_rank_start(tMesh *mesh, const double *speed,
+                                 double desired_loadsum,
                                  const double nodeload[],
                                  tNlist **rank_start)
 {
@@ -431,7 +472,7 @@ void load_set_desired_rank_start(tMesh *mesh, double desired_loadsum,
   {
     if(rank >= size) break;
     rank_start[rank++] = ln0;
-    ln1 = inc_leaf_until_desired_loadsum(ln0, desired_loadsum,
+    ln1 = inc_leaf_until_desired_loadsum(ln0, speed, rank, desired_loadsum,
                                          nodeload, &actual_loadsum);
   }
   //PRFs(":\n");
@@ -476,6 +517,7 @@ void load_balance(tMesh *mesh, int strategy)
   double totalload;            //only for LOADBAL_NODETIMES
   double *nodeload = NULL;     //only for LOADBAL_NODETIMES
   tNlist **rank_start = NULL;  //only for LOADBAL_NODETIMES
+  double *speed = NULL;        //only for LOADBAL_NODETIMES_SPEEDS
 
   PRF;printf(": strategy=%d nnodes=%ld ", strategy, nnodes);
 
@@ -486,6 +528,20 @@ void load_balance(tMesh *mesh, int strategy)
   /* set up stuff for each strategy */
   switch(strategy)
   {
+  case LOADBAL_NODETIMES_SPEEDS:
+
+    speed = calloc(size, sizeof(speed[0]));
+    if(!speed)
+    {
+      free(speed);
+      printf("  WARNING: quitting ");PRF;
+      printf(" due to lack of memory!!!\n");
+      /* do fallback? */
+      //load_balance(mesh, LOADBAL_SIMPLE);
+      return;
+    }
+    load_set_speed_array(mesh, speed);
+
   case LOADBAL_NODETIMES:
 
     /* load balancing based on measured node loads */
@@ -503,11 +559,12 @@ void load_balance(tMesh *mesh, int strategy)
     }
 
     /* get measured load for each node (in nodeload) and also totalload */
-    totalload = load_set_nodeload_array(mesh, nodeload);
+    totalload = load_set_nodeload_array(mesh, speed, nodeload);
     printf("totalload=%g\n", totalload);
 
     /* set array rank_start with 1st desired leaf node for each rank */
-    load_set_desired_rank_start(mesh, totalload/size, nodeload, rank_start);
+    load_set_desired_rank_start(mesh, speed, totalload/size, nodeload,
+                                rank_start);
 
     /* set const part of li, and pick function to calc. desired rank */
     li->rank_start = rank_start;
@@ -569,6 +626,7 @@ void load_balance(tMesh *mesh, int strategy)
   /* free temp arrays */
   free(rank_start);
   free(nodeload);
+  free(speed);
 }
 
 /* function that can be scheduled in LOADBALANCING */
