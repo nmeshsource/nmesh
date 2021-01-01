@@ -46,9 +46,11 @@ tNode *node = elem->node;
 tDat *dat = node->dat;
 if(dat) dat->info->load_TimeIn_s = 1./(node->nid+1);
 }
+Timing->mm_speed = 1./(nMPI_rank()+1);
 //Yo(10);
 //printmesh(mesh);
-load_balance(mesh, LOADBAL_NODETIMES);
+//load_balance(mesh, LOADBAL_NODETIMES);
+load_balance(mesh, LOADBAL_NODETIMES_SPEEDS);
 //Yo(20);
 //printmesh(mesh);
 return;
@@ -362,6 +364,7 @@ double load_set_speed_array(tMesh *mesh, double *speed)
 {
   int size = nMPI_size();
   double myspeed = Timing->mm_speed;
+  double avspeed;
   double speedmin = 1e-50;
   int rank;
 
@@ -374,11 +377,15 @@ double load_set_speed_array(tMesh *mesh, double *speed)
     nMPI_Bcast(&(speed[rank]),1, nMPI_DOUBLE, rank);
   }
 
-  PRFs(":\n");
-  for(rank=0; rank<size; rank++)
-    printf("speed[%d]=%g ", rank, speed[rank]);
+  avspeed = 0.;
+  for(rank=0; rank<size; rank++) avspeed += speed[rank];
+  avspeed /= size;
 
-  return myspeed;
+  //PRFs(":\n");
+  //for(rank=0; rank<size; rank++)
+  //  printf("speed[%d]=%g ", rank, speed[rank]);
+
+  return avspeed;
 }
 
 
@@ -471,13 +478,15 @@ void load_set_desired_rank_start(tMesh *mesh, const double *speed,
   for(ln0 = mesh->lns; ln0; ln0 = ln1)
   {
     if(rank >= size) break;
-    rank_start[rank++] = ln0;
+    rank_start[rank] = ln0;
     ln1 = inc_leaf_until_desired_loadsum(ln0, speed, rank, desired_loadsum,
                                          nodeload, &actual_loadsum);
+    rank++;
   }
   //PRFs(":\n");
   //for(rank=0; rank<size; rank++)
-  //  printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->node->nid);
+  //  if(rank_start[rank])
+  //    printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->node->nid);
 }
 
 /* compute desired rank */
@@ -488,8 +497,18 @@ int load_get_desiredrank(tLoadinfo *li)
   for(rank = 0; rank < li->size-1; rank++)
   {
     tNlist *ln1 = li->rank_start[rank+1];
-    tNode *node = ln1->node;
-    long nid1 = node->nid;
+    tNode *node;
+    long nid1;
+
+    if(ln1)
+    {
+      node = ln1->node;
+      nid1 = node->nid;
+    }
+    else
+    {
+      break;
+    }
     //PRF;printf(": rank=%d nid=%ld nid1=%ld\n", rank, li->nid, nid1);
     /* we assume that leaf node nids are assigned in ascending order */
     if(li->nid < nid1) break;
@@ -518,6 +537,7 @@ void load_balance(tMesh *mesh, int strategy)
   double *nodeload = NULL;     //only for LOADBAL_NODETIMES
   tNlist **rank_start = NULL;  //only for LOADBAL_NODETIMES
   double *speed = NULL;        //only for LOADBAL_NODETIMES_SPEEDS
+  double avspeed = 1.;         //only for LOADBAL_NODETIMES_SPEEDS
 
   PRF;printf(": strategy=%d nnodes=%ld ", strategy, nnodes);
 
@@ -540,7 +560,7 @@ void load_balance(tMesh *mesh, int strategy)
       //load_balance(mesh, LOADBAL_SIMPLE);
       return;
     }
-    load_set_speed_array(mesh, speed);
+    avspeed = load_set_speed_array(mesh, speed);
 
   case LOADBAL_NODETIMES:
 
@@ -563,8 +583,8 @@ void load_balance(tMesh *mesh, int strategy)
     printf("totalload=%g\n", totalload);
 
     /* set array rank_start with 1st desired leaf node for each rank */
-    load_set_desired_rank_start(mesh, speed, totalload/size, nodeload,
-                                rank_start);
+    load_set_desired_rank_start(mesh, speed, (totalload/avspeed)/size,
+                                nodeload, rank_start);
 
     /* set const part of li, and pick function to calc. desired rank */
     li->rank_start = rank_start;
