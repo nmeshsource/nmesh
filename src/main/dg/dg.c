@@ -36,6 +36,17 @@ tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls)
   dgi->fnum = dmalloc(nvars);
   dgi->Ffac = 1.;
 
+  /* extra space for source terms */
+  if(vls)
+  {
+    dgi->si = dmalloc(vls->n); /* source vars inside this node */
+    dgi->sa = dmalloc(vls->n); /* source vars on adjacent side */
+  }
+  else
+  {
+    dgi->si = dgi->sa = NULL;
+  }
+
   return dgi;
 }
 
@@ -43,13 +54,18 @@ tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls)
 void free_DGinfo(tDGinfo *dgi)
 {
   /* free contents */
-  free(dgi->ui);
-  free(dgi->fi);
-  free(dgi->lami);
-  free(dgi->ua);
-  free(dgi->fa);
-  free(dgi->lama);
+  free(dgi->sa);
+  free(dgi->si);
+
   free(dgi->fnum);
+
+  free(dgi->lama);
+  free(dgi->fa);
+  free(dgi->ua);
+
+  free(dgi->lami);
+  free(dgi->fi);
+  free(dgi->ui);
 
   /* free dgi */
   free(dgi);

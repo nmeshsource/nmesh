@@ -43,6 +43,8 @@ typedef struct tDGINFO {
   double *fnum;   /* array of numerical fluxes f^* = f^i* n_i */
   double Ffac;    /* factor (usually 1) by which we multiply surface terms */
   tVarList *vls;  /* varlist with sources needed */
+  double *si;     /* array with source vars inside node at i,j,k */
+  double *sa;     /* array with source vars on adjacent side of i,j,k */
   int info;       /* extra info, 0=DGINFO_NULL means default */
 } tDGinfo;
 
