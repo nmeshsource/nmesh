@@ -318,7 +318,7 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   vlpush(vldivf, idivf_cx);
 
   /* extrapolate u back to face on fv nodes */
-  if(DGglobals->fv_rec_mode > FV_REC_WENOm3_2)
+  if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
     rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
 
   /* add flux terms on surfaces to divf */
