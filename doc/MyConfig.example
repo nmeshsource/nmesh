@@ -1,13 +1,18 @@
 # MyConfig
 #
 # The file MyConfig is included verbatim in the Makefile to determine which
-# libraries will be included in the build.
+# modules (or libraries) will be included in the build.
 
 # ------------------------------------------------------------------------
-# here are simple examples for libraries, they may be mutually exclusive
+# Here are simple examples for modules, they may be mutually exclusive.
+# modules we add:
 
-# projects we add:
+# compile test modules from main part of nmesh:
 libpaths += src/tests/advection1
+
+## add and compile modules from nmesh-projects repo:
+#repo = giter@mars.physics.fau.edu:nmesh-projects
+#projects += $(repo)/ScalarWave
 
 # ------------------------------------------------------------------------
 # override various options in the Makefile
