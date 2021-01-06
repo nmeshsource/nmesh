@@ -260,8 +260,11 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             /* reconstruct q,u and then set fluxes and eigenvalues in d */
             rec1d_u_f_lam_midpt(fv, d);
 
-            /* compute numerical flux */
-            numflux(d);
+            /* compute numerical flux directly after rec1d_u_f_lam_midpt,
+               if not set already in rec1d_u_f_lam_midpt */
+            if(numflux) numflux(d);
+
+            /* save d->fnum in fnumR for each field and point */
             forvl(vldivf, l)
               fnumR[l][im0] = d->fnum[l];
             /* we could now also compute fnumL with normL=-normR, but I think
