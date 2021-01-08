@@ -466,6 +466,7 @@ int evolve_mesh(tMesh *mesh)
 {
   int iterationmax = Geti(Par("iterations"));
   double timemax   = Getd(Par("finaltime"));
+  double ttol = mesh->dt * 1e-6;
   long double Te, te;     /* time = Te + te */
   int Te_evry = 1000000;  /* we let Te -> Te + te  every Te_evry */
 
@@ -488,7 +489,7 @@ int evolve_mesh(tMesh *mesh)
   /* outermost evolution loop */
   Te = mesh->time;
   te = 0.;
-  while(mesh->time < timemax)
+  while(mesh->time < timemax - ttol)
   {
     /* pre evolve */
     RunFun(PRE_EVOLVE);
