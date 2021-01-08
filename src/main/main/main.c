@@ -466,27 +466,32 @@ int evolve_mesh(tMesh *mesh)
 {
   int iterationmax = Geti(Par("iterations"));
   double timemax   = Getd(Par("finaltime"));
+  long double Te, te;     /* time = Te + te */
+  int Te_evry = 1000000;  /* we let Te -> Te + te  every Te_evry */
 
   prdivider(0);
   prTimeIn_s("WallTime at beginning of evolve_mesh: ");
 
-  if(timemax > 0)
-    iterationmax = timemax/mesh->dt + 0.5;
-
-  if(iterationmax > 0) 
+  if(timemax <= 0. && iterationmax > 0)
+  {
+    timemax = iterationmax * mesh->dt;
     printf("Evolving mesh until iteration %d at time %g\n",
-	   iterationmax, iterationmax * mesh->dt);
+           iterationmax, timemax);
+  }
+  if(timemax <= 0.) return 0;
 
-  if(iterationmax <= 0) return 0;
+  //printf("iterationmax=%d timemax=%g\n", iterationmax, timemax);
 
   /* print skeleton of function bins again, now with evo funcs */
   PrintMeshFuncs(mesh);
 
   /* outermost evolution loop */
-  while(mesh->iteration < iterationmax)
-  { 
+  Te = mesh->time;
+  te = 0.;
+  while(mesh->time < timemax)
+  {
     /* pre evolve */
-    RunFun(PRE_EVOLVE); 
+    RunFun(PRE_EVOLVE);
 
     /* make one evolution step */
     RunFun(EVOLVE);
@@ -495,15 +500,23 @@ int evolve_mesh(tMesh *mesh)
     RunFun(FILTER);
 
     /* post evolve */
-    RunFun(POST_EVOLVE); 
+    RunFun(POST_EVOLVE);
 
     /* the evolution step is complete now */
     mesh->iteration++;
-    mesh->time = mesh->iteration * mesh->dt;
+    /* accumulate time in te until it is time to increase Te */
+    te += mesh->dt;
+    if(mesh->iteration % Te_evry == 0)
+    {
+      Te += te; // adding only a larger accumulated te is better if
+      te = 0.;  // mesh->time >> mesh->dt
+    }
+    mesh->time = Te + te; /* best estimate for actual time */
 
     /* print some info */
+    //printf(" Te=%Lg te=%Lg  ", Te, te);
     printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
-    fflush(stdout); 
+    fflush(stdout);
 
     /* call analyze functions */
     RunFun(ANALYZE);
@@ -521,11 +534,11 @@ int evolve_mesh(tMesh *mesh)
     RunFun(AMR);
     RunFun(LOADBALANCING);
     //RunFun(REINIT);
-  
-    /* update since this may change during evolution, say when checkpointing */
-    timemax = Getd(Par("finaltime"));
-    iterationmax
-      = (timemax > 0) ? timemax/mesh->dt + 0.5 : Geti(Par("iterations"));
+
+    /* update since this may change during evolution */
+    timemax      = Getd(Par("finaltime"));
+    iterationmax = Geti(Par("iterations"));
+    if(timemax<=0. && iterationmax>0) timemax = iterationmax * mesh->dt;
   }
 
   /* write checkpoint at the end */
