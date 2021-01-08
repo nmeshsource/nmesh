@@ -181,8 +181,8 @@ void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
   tNlist *nlist  = rnlist;
   tNlist *cnlist = NULL;
 
-  fprintf(fp, "parent nodes, their child0->n, and optionally their "
-          "child0's point type:\n\n");
+  fprintf(fp, "parent nodes, their children's n, and optionally their "
+          "children's point type:\n\n");
 
   /* write all nodes in rnlist anf their children */
   while(nlist)
@@ -242,8 +242,8 @@ void checkpoint_write_node(FILE *fp, tNode *node)
 {
   tNode *child0 = node->child[0];
   char name[256];
-  int d;
-  int write_pt_typ = 0;
+  int chld, d;
+  int write_all_n, write_pt_typ;
 
   nodename(node, name,255);
 
@@ -264,20 +264,51 @@ void checkpoint_write_node(FILE *fp, tNode *node)
   fprintf(fp,   " leaf = %d\n", node->leaf);
   */
 
-  if(child0)
+  /* check if parent node and any child differ in pt_typ */
+  write_pt_typ = 0;
+  for(chld=0; chld<8; chld++)
   {
-    /* add info about child0, so that we can easily re-create children */
-    for(d=0; d<3; d++)
-      fprintf(fp, "%d\n", child0->n[d]);
-
-    /* check if parent node and child differ in pt_typ */
-    for(d=0; d<3; d++)
-      if(node->pt_typ[d] != child0->pt_typ[d]) {write_pt_typ = 1; break;}
-
-    if(write_pt_typ)
+    tNode *child = node->child[chld];
+    if(child)
+    {
       for(d=0; d<3; d++)
-        fprintf(fp, "P%d\n", child0->pt_typ[d]);
-  } /* end if(child0) */
+        if(node->pt_typ[d] != child->pt_typ[d]) { write_pt_typ=1; break; }
+    }
+    if(write_pt_typ) break;
+  }
+
+  /* check if any of the children differ in n from child0 */
+  write_all_n = 0;
+  for(chld=1; chld<8; chld++)
+  {
+    tNode *child = node->child[chld];
+    if(child0 && child)
+    {
+      for(d=0; d<3; d++)
+        if(child->n[d] != child0->n[d]) { write_all_n=1; break; }
+    }
+    if(write_all_n) break;
+  }
+
+  /* write n and pt_typ for child0 or for all children */
+  for(chld=0; chld<8; chld++)
+  {
+    tNode *child = node->child[chld];
+    if(child)
+    {
+      if(write_all_n || chld==0)
+      {
+        /* add info about child, so that we can easily re-create children */
+        for(d=0; d<3; d++)
+        {
+          fprintf(fp, "%d", child->n[d]);
+          if(write_pt_typ)
+            fprintf(fp, " %d", child->pt_typ[d]);
+          fprintf(fp, "\n");
+        }
+      }
+    } /* end if(child) */
+  }
 }
 
 

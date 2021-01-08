@@ -171,8 +171,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
     char buf[1000];
     char str[1000];
     tNode *parent;
-    int pt_typ[3]; /* point type we set for children */
-    int n[3];
+    int cn[8][3];      /* number of points in each child */
+    int cp_typ[8][3];  /* point type we set for each child */
     int p = -1; /* patch number read from file */
     int p_prev; /* previous patch number read from file */
     int lp = -1; /* ref. level of parent */
@@ -222,8 +222,9 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
         /* all node names contain an '_' */
         if(strstr(buf, "_"))
         {
+          int chld;
           int d;
-          tNlist *children, *lastchild;
+          tNlist *children, *lastchild, *child;
 
           /* strip trailing '\n' from buf */
           buf[strlen(buf)-1] = 0;
@@ -237,26 +238,31 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           //printf("buf=%s\n", buf);
           //printnode(parent);
 
-          /* read n for child0 */
-          for(d=0; d<3; d++)
-          {
-            off = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
-            n[d] = atoi(str);
-          }
-
-          /* read point type for child0 */
-          for(d=0; d<3; d++)
-          {
-            off = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
-            if(str[0]=='P')
+          /* init children n and pt_type to same as parent */
+          for(chld=0; chld<8; chld++)
+            for(d=0; d<3; d++)
             {
-              pt_typ[d] = atoi(str+1); /* read over initial P */
+              cn[chld][d]     = parent->n[d];
+              cp_typ[chld][d] = parent->pt_typ[d];
             }
-            else
+
+          /* read n and point type for child0, and potentially other
+             children */
+          for(chld=0; chld<8; chld++)
+          {
+            int ret;
+            for(d=0; d<3; d++)
             {
-              int dl;
-              for(dl=d; dl<3; dl++) pt_typ[dl] = parent->pt_typ[dl];
-              break;
+              ret = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
+              if(str[0]=='\n') /* if we get \n, read nothing */
+              {
+                cn[chld][d]     = cn[0][d];     /* take info from child0 */
+                cp_typ[chld][d] = cp_typ[0][d];
+                break;
+              }
+              off = ret; /* advance buffer offset off */
+              ret = sscanf(str, "%d%d", &(cn[chld][d]), &(cp_typ[chld][d]));
+              if(ret<2) cp_typ[chld][d] = cp_typ[0][d];
             }
           }
 
@@ -288,7 +294,20 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           }
 
           /* make 8 child nodes */
-          children = make8_child_nodes(parent, pt_typ, n);
+          children = make8_child_nodes(parent, cp_typ[0], cn[0]);
+
+          /* set n and pt_typ for each child if needed */
+          chld=0;
+          fornodelist(children, child)
+          {
+            tNode *cnode = child->node;
+            int update;
+            for(update=0, d=0; d<3; d++)
+              if(cnode->n[d]      != cn[chld][d] ||
+                 cnode->pt_typ[d] != cp_typ[chld][d]) { update=1; break; }
+            if(update) update_node_n_pt_typ(cnode, cn[chld], cp_typ[chld]);
+            chld++;
+          }
 
           /* update mesh->lns if needed and add children to leaf node list */
           if(elem == mesh->lns) mesh->lns = first_nodelist(children);
