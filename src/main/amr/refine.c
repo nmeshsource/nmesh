@@ -803,6 +803,21 @@ void refine_set_use_fv_if_rflag(tMesh *mesh, int use_fv)
   }
 }
 
+/* helper func to set use_fv flag in all nodes that have pt_typ */
+void refine_set_use_fv_if_pt_typ(tMesh *mesh, int pt_typ[3], int use_fv)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int d, equal;
+
+    equal=1;
+    for(d=0; d<3; d++)
+      if(node->pt_typ[d] != pt_typ[d]) { equal=0; break; }
+    if(equal) node->dat->info->use_fv = use_fv;
+  }
+}
 
 /***************************************************************************/
 /* functions we can call to refine in some particular way */
