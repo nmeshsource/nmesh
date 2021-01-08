@@ -466,7 +466,7 @@ int evolve_mesh(tMesh *mesh)
 {
   int iterationmax = Geti(Par("iterations"));
   double timemax   = Getd(Par("finaltime"));
-  double ttol = mesh->dt * 1e-6;
+  double ttol = max2(mesh->dt*1e-7, timemax*1e-14); //tolerance for time comp
   long double Te, te;     /* time = Te + te */
   int Te_evry = 1000000;  /* we let Te -> Te + te  every Te_evry */
 
