@@ -1090,7 +1090,7 @@ double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac)
   if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
   hmin = find_hmin(node, ijk0,ijk1);
   dtm = dtfac * hmin;
-  dtm = dtm*0.999999;
+  //dtm = dtm*0.999999;
 
   if(dtm < node->dt || node->dt <= 0.)
   {
