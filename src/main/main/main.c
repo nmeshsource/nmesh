@@ -532,8 +532,8 @@ int evolve_mesh(tMesh *mesh)
     RunFun(POST_OUTPUT);
 
     /* AMR and load balancing */
-    RunFun(AMR);
     RunFun(LOADBALANCING);
+    RunFun(AMR);
     //RunFun(REINIT);
 
     /* update since this may change during evolution */
