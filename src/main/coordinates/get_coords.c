@@ -435,6 +435,13 @@ void XYZ_of_ijk(tNode *node, int i, int j, int k, double X[3])
   XYZ_of_XbYbZb(node, X, X);
 }
 
+/* get X from point index ind */
+void XYZ_of_ind(tNode *node, int ind, double X[3])
+{
+  XbYbZb_of_ind(node, ind, X);
+  XYZ_of_XbYbZb(node, X, X);
+}
+
 /* get Xb from X */
 void XbYbZb_of_XYZ(tNode *node, double Xb[3], const double X[3])
 {
