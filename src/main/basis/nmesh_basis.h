@@ -86,6 +86,7 @@ double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
                             double basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp));
+void array_1d1d1d_coords_to_3d_coords(tArray *X1d[3], tArray *Xp[3]);
 void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3]);
 void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2]);
 void basis_interp_topoints(tNode *node, tArray *var,

@@ -360,6 +360,30 @@ double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
 }
 
 
+/* Take 3 1d arrays and make them into 3 3d arrays. This is useful to
+   convert the 3 1d Xb3[3] into real 3d point arrays Xp[3] with coords. */
+void array_1d1d1d_coords_to_3d_coords(tArray *X1d[3], tArray *Xp[3])
+{
+  int i,j,k, d;
+
+  for(d = 0; d < 3; d++)
+  {
+    double *X1dd = X1d[d]->d;
+    double *Xpd = Xp[d]->d;
+    int *n = Xp[d]->n;
+
+    for(k = 0; k < n[2]; k++)
+    for(j = 0; j < n[1]; j++)
+    for(i = 0; i < n[0]; i++)
+    {
+      int ind = Ind_n(i,j,k, n);
+      int l = i*(d==0) + j*(d==1) + k*(d==2);
+      Xpd[ind] = X1dd[l];
+    }
+  }
+}
+
+
 /* make 3 arrays Xp[0..2] that contain all points of a node. The
    arrays Xp[0..2] are in Xb coords. */
 void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3])
