@@ -394,6 +394,7 @@ void point_array_d_to_data(tArray *array, void *data, int nofree);
 int redimension_array(tArray *array, int n[3]);
 int redim_array(tArray *array, int n0, int n1, int n2);
 void free_array(tArray *array);
+void free_3_arrays(tArray *array[3]);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
 void free_mesh_patches_and_nodes(tMesh *mesh);
