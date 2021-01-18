@@ -371,13 +371,16 @@ void array_1d1d1d_coords_to_3d_coords(tArray *X1d[3], tArray *Xp[3])
     double *X1dd = X1d[d]->d;
     double *Xpd = Xp[d]->d;
     int *n = Xp[d]->n;
+    int d0 = (d==0);
+    int d1 = (d==1);
+    int d2 = (d==2);
 
     for(k = 0; k < n[2]; k++)
     for(j = 0; j < n[1]; j++)
     for(i = 0; i < n[0]; i++)
     {
       int ind = Ind_n(i,j,k, n);
-      int l = i*(d==0) + j*(d==1) + k*(d==2);
+      int l = i*d0 + j*d1 + k*d2;
       Xpd[ind] = X1dd[l];
     }
   }
