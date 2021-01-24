@@ -501,6 +501,7 @@ void printfacecorners(tPat *pat, int  f);
 void printnface(tNface *nface);
 void printnfaces_on_f(tNode *node, int f);
 void printnfaces(tNode *node);
+void printfref(tRef *ref);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);

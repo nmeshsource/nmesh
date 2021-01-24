@@ -751,3 +751,13 @@ void printnfaces(tNode *node)
   for(f=0; f<6; f++)
     printnfaces_on_f_prname(node, f, 0);
 }
+
+/* print tRef contents */
+void printfref(tRef *ref)
+{
+  int d;
+  printf("ref: ");
+  printf("->type=%d ->method=%d", ref->type, ref->method);
+  for(d=0; d<3; d++) printf(" ->n[%d]=%d", d, ref->n[d]);
+  printf("\n");
+}
