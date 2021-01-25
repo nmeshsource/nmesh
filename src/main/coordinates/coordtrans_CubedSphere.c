@@ -1083,10 +1083,11 @@ double drh2_dlam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
   double oodxi = 1./dxi;
   /* (L*lam + sig0)/A) */
   double L_lam_plus_sig0_oA = sinh( (dxi*rh2 + xi0)/w );
+  double L_lam_plus_sig0_oA_2 = L_lam_plus_sig0_oA*L_lam_plus_sig0_oA;
 
   /* rh2 = ( w*asinh((L*lam + sig0)/A) - xi0 ) * oodxi; */
-  /* drh2_dlam =  (w / sqrt((L*lam + sig0)/A)) * oodxi * L/A; */
-  return (w / sqrt(L_lam_plus_sig0_oA)) * oodxi * L/A;
+  /* drh2_dlam =  (w / sqrt( [(L*lam + sig0)/A]^2 + 1 )) * oodxi * L/A; */
+  return (w / sqrt(L_lam_plus_sig0_oA_2 + 1.)) * oodxi * L/A;
 }
 
 
