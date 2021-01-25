@@ -634,6 +634,15 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
   /* set label for this patch */
   pat->CI->label = coordinates_get_label(pat);
 
+  /* save stretch coeffs in pat->CI->co[] */
+  switch(pat->CI->label)
+  {
+  case CubedSphere_Stretch2:
+    pat->CI->co[0] = Getd(Par("amr_Stretch_w"));
+    pat->CI->co[1] = Getd(Par("amr_Stretch_A"));
+    break;
+  }
+
   //PRF;printf(" pat->p=%d xyz_of_XYZ=%p\n", pat->p, pat->xyz_of_XYZ);
   return pat->p; /* return index of this patch */
 }
