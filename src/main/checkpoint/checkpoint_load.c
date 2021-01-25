@@ -21,7 +21,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   long off, len;
   tPat *pat = NULL;
   char par[1000], val[1000];
-  int clabel=0, useF=0;
+  int useF=0;
   int n[] = { 0,0,0 };
   int pt_typ[] = { 0,0,0 };
   double bbox[] = { 0.,0.,0.,0.,0.,0. };
@@ -107,13 +107,19 @@ exit(8);
       if(strcmp(par, "xc[0]")==0) pat->CI->xc[0] = atof(val);
       if(strcmp(par, "xc[1]")==0) pat->CI->xc[1] = atof(val);
       if(strcmp(par, "xc[2]")==0) pat->CI->xc[2] = atof(val);
+      if(strcmp(par, "co[0]")==0) pat->CI->co[0] = atof(val);
+      if(strcmp(par, "co[1]")==0) pat->CI->co[1] = atof(val);
+      if(strcmp(par, "co[2]")==0) pat->CI->co[2] = atof(val);
+      if(strcmp(par, "co[3]")==0) pat->CI->co[3] = atof(val);
       if(strcmp(par, "dom")==0)   pat->CI->dom = atoi(val);
       if(strcmp(par, "type")==0)  pat->CI->type = atoi(val);
       if(strcmp(par, "use_FSurf")==0)  useF = atoi(val);
-      if(strcmp(par, "coordinates_get_label(pat)")==0)
+      if(strcmp(par, "label")==0 ||
+         strcmp(par, "coordinates_get_label(pat)")==0)
       {
         /* this signifies end of patch info, so now set final pat info */
-        clabel = atoi(val);
+        int clabel = atoi(val);
+        pat->CI->label = clabel;
         switch(clabel)
         {
         case CubedSphere:

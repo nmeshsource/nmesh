@@ -114,7 +114,7 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
 /* write non-pointer part of tCoordInfo */
 void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 {
-  int d, f, useF=0;
+  int d, f, i, useF=0;
 
   fprintf(fp, " CI->\n");
   /*
@@ -131,11 +131,17 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
   for(d=0; d<3; d++)
     fprintf(fp,   "  xc[%d] = %.19g\n", d, CI->xc[d]);
 
+  for(i=0; i<4; i++)
+    fprintf(fp,   "  co[%d] = %.19g\n", i, CI->co[i]);
+
   fprintf(fp,     "  dom = %d\n", CI->dom);
   fprintf(fp,     "  type = %d\n", CI->type);
 
   for(f=0; f<6; f++) if(CI->FSurf[f]) { useF = 1; break; }
   fprintf(fp,     "  use_FSurf = %d\n", useF);
+
+  /* this signifies end of patch info, so this needs to be last */
+  fprintf(fp,     "  label = %d\n", CI->label);
 }
 
 

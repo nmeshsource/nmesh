@@ -40,7 +40,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_OuterShellStretch", "no", "if and how we stretch outer "
          "shell [0,1,2]");
   //AddPar("amr_Stretch_w", "1", "width par for amr_OuterShellStretch");
-  //AddPar("amr_Stretch_A", "1", "");
+  //AddPar("amr_Stretch_A", "1", "amplitude par for amr_OuterShellStretch");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
   AddPar("amr_uniform_p", "", "list of patches with uniform grid spacing");
