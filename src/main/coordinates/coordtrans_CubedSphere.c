@@ -1050,8 +1050,8 @@ lam = ( A*sinh( ( (xi1-xi0)*rh2 + xi0 )/w ) - sig0 )/L
 double rh2_of_lam_sig0sig1(double lam, double sig0, double sig1)
 {
   double L = sig1-sig0;
-  double A = 1.;
-  double w = 1.;
+  double A = pat->CI->co[1];
+  double w = pat->CI->co[0];
   double xi0 = w*asinh(sig0/A);
   double xi1 = w*asinh(sig1/A);
   double dxi = xi1 - xi0;
@@ -1062,8 +1062,8 @@ double rh2_of_lam_sig0sig1(double lam, double sig0, double sig1)
 double lam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
 {
   double L = sig1-sig0;
-  double A = 1.;
-  double w = 1.;
+  double A = pat->CI->co[1];
+  double w = pat->CI->co[0];
   double xi0 = w*asinh(sig0/A);
   double xi1 = w*asinh(sig1/A);
   double dxi = xi1 - xi0;
@@ -1075,8 +1075,8 @@ double lam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
 double drh2_dlam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
 {
   double L = sig1-sig0;
-  double A = 1.;
-  double w = 1.;
+  double A = pat->CI->co[1];
+  double w = pat->CI->co[0];
   double xi0 = w*asinh(sig0/A);
   double xi1 = w*asinh(sig1/A);
   double dxi = xi1 - xi0;
