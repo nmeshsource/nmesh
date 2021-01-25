@@ -863,13 +863,15 @@ double drho_dlam_of_rho_sig0sig1(double rho, double sig0, double sig1)
 }
 
 /* Coord. trafos of for stretched Cubed Spheres */
-/* Coordtrafo (rho,A,B) -> (x,y,z) */
-int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
-                        const double rhoAB[3], double xyz[3])
+/* Coordtrafo (rho,A,B) -> (x,y,z), where rho = FuncOflam
+   call with e.g. lam_from_FuncOflam_sig0sig1 = lam_of_rho_sig0sig1 */
+int xyz_of_FuncOflamAB_CubSph(tPat *pat, tNode *node, int ind,
+  const double FuncOflamAB[3], double xyz[3],
+  double (*lam_from_FuncOflam_sig0sig1)(double rho, double sig0, double sig1))
 {
-  double rho = rhoAB[0]; /* set some local vars */
-  double A   = rhoAB[1];
-  double B   = rhoAB[2];
+  double rho = FuncOflamAB[0]; /* set some local vars */
+  double A   = FuncOflamAB[1];
+  double B   = FuncOflamAB[2];
   int type = pat->CI->type;
   double sigma0,sigma1, lam;
   double lamAB[3];
@@ -884,31 +886,33 @@ int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
   else
   {
     sigma0 = sigma1 = 0.;
-    errorexit("xyz_of_rhoAB_CubSph works only with CubedShell");
+    errorexit("works only with CubedShell");
   }
 
   /* get lam, and then set x,y,z */
-  lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
+  lam = lam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1);
   lamAB[0] = lam;
   lamAB[1] = A;
   lamAB[2] = B;
   return xyz_of_lamAB_CubSph(pat, node, ind, lamAB, xyz);
 }
 
-/* inverse (x,y,z) -> (rho,A,B) */
-int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
-                        double rhoAB[3], const double xyz[3])
+/* inverse (x,y,z) -> (rho,A,B), where rho = FuncOflam
+   call with e.g. FuncOflam_from_lam_sig0sig1 = rho_of_lam_sig0sig1 */
+int FuncOflamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
+  double FuncOflamAB[3], const double xyz[3],
+  double (*FuncOflam_from_lam_sig0sig1)(double lam, double sig0, double sig1))
 {
-  double *rho = &(rhoAB[0]);   /* set some local vars */
-  double *A   = &(rhoAB[1]);
-  double *B   = &(rhoAB[2]);
+  double *rho = &(FuncOflamAB[0]);   /* set some local vars */
+  double *A   = &(FuncOflamAB[1]);
+  double *B   = &(FuncOflamAB[2]);
   int type = pat->CI->type;
   int stat;
   double sigma0,sigma1, lam;
 
   /* get lam,A,B from x,y,z */
-  stat = lamAB_of_xyz_CubSph(pat, node, ind, rhoAB, xyz);
-  lam = rhoAB[0]; /* we wrote lamAB into rhoAB here */
+  stat = lamAB_of_xyz_CubSph(pat, node, ind, FuncOflamAB, xyz);
+  lam = FuncOflamAB[0]; /* we wrote lamAB into FuncOflamAB here */
 
   /* check type of trafo */
   if(type==CubedShell)
@@ -924,26 +928,31 @@ int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   }
 
   /* get rho from lambda */
-  *rho = rho_of_lam_sig0sig1(lam, sigma0,sigma1);
+  *rho = FuncOflam_from_lam_sig0sig1(lam, sigma0,sigma1);
   return stat;
 }
 
-/* compute derivs of inverse trafo */
-int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
-                       double xyz[3], double drhoABdxyz[3][3])
+/* Compute derivs of inverse trafo. Call with e.g.:
+   lam_from_FuncOflam_sig0sig1 = lam_of_rho_sig0sig1
+   dFuncOflam_dlam_from_FuncOflam_sig0sig1 = drho_dlam_of_rho_sig0sig1 */
+int dFuncOflamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind,
+  const double FuncOflamAB[3], double xyz[3], double dFuncOflamABdxyz[3][3],
+  double (*lam_from_FuncOflam_sig0sig1)(double rho, double sig0, double sig1),
+  double (*dFuncOflam_dlam_from_FuncOflam_sig0sig1)(double rho, double sig0,
+                                                    double sig1))
 {
-  double rho = rhoAB[0]; /* set some local vars */
-  double A   = rhoAB[1];
-  double B   = rhoAB[2];
-  double *drhodx = &(drhoABdxyz[0][0]),
-         *drhody = &(drhoABdxyz[0][1]),
-         *drhodz = &(drhoABdxyz[0][2]);
-  /* double *dAdx = &(drhoABdxyz[1][0]),
-           *dAdy = &(drhoABdxyz[1][1]),
-           *dAdz = &(drhoABdxyz[1][2]);
-  double   *dBdx = &(drhoABdxyz[2][0]),
-           *dBdy = &(drhoABdxyz[2][1]),
-           *dBdz = &(drhoABdxyz[2][2]); */
+  double rho = FuncOflamAB[0]; /* set some local vars */
+  double A   = FuncOflamAB[1];
+  double B   = FuncOflamAB[2];
+  double *drhodx = &(dFuncOflamABdxyz[0][0]),
+         *drhody = &(dFuncOflamABdxyz[0][1]),
+         *drhodz = &(dFuncOflamABdxyz[0][2]);
+  /* double *dAdx = &(dFuncOflamABdxyz[1][0]),
+           *dAdy = &(dFuncOflamABdxyz[1][1]),
+           *dAdz = &(dFuncOflamABdxyz[1][2]);
+  double   *dBdx = &(dFuncOflamABdxyz[2][0]),
+           *dBdy = &(dFuncOflamABdxyz[2][1]),
+           *dBdz = &(dFuncOflamABdxyz[2][2]); */
   int type = pat->CI->type;
   double sigma0,sigma1, lam, dlamdx,dlamdy,dlamdz, drho_dlam;
   double lamAB[3];
@@ -954,7 +963,7 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
     int isig0 = pat->CI->iSurf[0]; /* get index of var with sigma */
     int isig1 = pat->CI->iSurf[1]; /* get index of var with sigma */
     if(isig0>0 || isig1>0)
-      errorexit("drhoAB_dxyz_CubSph works only with constant sigmas");
+      errorexit("works only with constant sigmas");
 
     /* this gives a cubed sphere where both inner outer surfaces are curved */
     sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
@@ -967,17 +976,17 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
   }
 
   /* get lam and derivs of lam */
-  lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
+  lam = lam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1);
   lamAB[0] = lam;
   lamAB[1] = A;
   lamAB[2] = B;
-  dlamAB_dxyz_CubSph(pat, node, ind, lamAB, xyz, drhoABdxyz);
-  dlamdx = drhoABdxyz[0][0]; /* we wrote dlamABdxyz into drhoABdxyz */
-  dlamdy = drhoABdxyz[0][1];
-  dlamdz = drhoABdxyz[0][2];
+  dlamAB_dxyz_CubSph(pat, node, ind, lamAB, xyz, dFuncOflamABdxyz);
+  dlamdx = dFuncOflamABdxyz[0][0]; //we wrote dlamABdxyz into dFuncOflamABdxyz
+  dlamdy = dFuncOflamABdxyz[0][1];
+  dlamdz = dFuncOflamABdxyz[0][2];
 
   /* get drho_dlam */
-  drho_dlam = drho_dlam_of_rho_sig0sig1(rho, sigma0,sigma1);
+  drho_dlam = dFuncOflam_dlam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1);
 
   /* now set drhodx, drhody, drhodz */
   *drhodx = drho_dlam * dlamdx;
@@ -990,6 +999,34 @@ int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
      *drhodz += drho_dA * (*dAdz) + drho_dB * (*dBdz); */
   /* Note: drho_dA depends on dsigma_{0/1}/dA */
   return 0;
+}
+
+/* Now make funcs with the interface we actually need */
+
+/* Coord. trafos of for stretched Cubed Spheres */
+/* Coordtrafo (rho,A,B) -> (x,y,z) */
+int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
+                        const double rhoAB[3], double xyz[3])
+{
+  return xyz_of_FuncOflamAB_CubSph(pat, node, ind, rhoAB, xyz,
+                                   lam_of_rho_sig0sig1);
+}
+
+/* inverse (x,y,z) -> (rho,A,B) */
+int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
+                        double rhoAB[3], const double xyz[3])
+{
+  return FuncOflamAB_of_xyz_CubSph(pat, node, ind, rhoAB, xyz,
+                                   rho_of_lam_sig0sig1);
+}
+
+/* compute derivs of inverse trafo */
+int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
+                       double xyz[3], double drhoABdxyz[3][3])
+{
+  return dFuncOflamAB_dxyz_CubSph(pat, node, ind, rhoAB, xyz, drhoABdxyz,
+                                  lam_of_rho_sig0sig1,
+                                  drho_dlam_of_rho_sig0sig1);
 }
 
 
@@ -1052,132 +1089,29 @@ double drh2_dlam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
   return (w / sqrt(L_lam_plus_sig0_oA)) * oodxi * L/A;
 }
 
-/* Coord. trafos of for stretched Cubed Spheres */
+
+/* Coord. trafos of for Cubed Spheres stretched with lam_of_rh2_sig0sig1 */
 /* Coordtrafo (rh2,A,B) -> (x,y,z) */
 int xyz_of_rh2AB_CubSph(tPat *pat, tNode *node, int ind,
                         const double rh2AB[3], double xyz[3])
 {
-  double rh2 = rh2AB[0]; /* set some local vars */
-  double A   = rh2AB[1];
-  double B   = rh2AB[2];
-  int type = pat->CI->type;
-  double sigma0,sigma1, lam;
-  double lamAB[3];
-
-  /* check type of trafo */
-  if(type==CubedShell)
-  {
-    /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
-    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
-  }
-  else
-  {
-    sigma0 = sigma1 = 0.;
-    errorexit("xyz_of_rh2AB_CubSph works only with CubedShell");
-  }
-
-  /* get lam, and then set x,y,z */
-  lam = lam_of_rh2_sig0sig1(rh2, sigma0,sigma1);
-  lamAB[0] = lam;
-  lamAB[1] = A;
-  lamAB[2] = B;
-  return xyz_of_lamAB_CubSph(pat, node, ind, lamAB, xyz);
+  return xyz_of_FuncOflamAB_CubSph(pat, node, ind, rh2AB, xyz,
+                                   lam_of_rh2_sig0sig1);
 }
 
 /* inverse (x,y,z) -> (rh2,A,B) */
 int rh2AB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
                         double rh2AB[3], const double xyz[3])
 {
-  double *rh2 = &(rh2AB[0]);   /* set some local vars */
-  double *A   = &(rh2AB[1]);
-  double *B   = &(rh2AB[2]);
-  int type = pat->CI->type;
-  int stat;
-  double sigma0,sigma1, lam;
-
-  /* get lam,A,B from x,y,z */
-  stat = lamAB_of_xyz_CubSph(pat, node, ind, rh2AB, xyz);
-  lam = rh2AB[0]; /* we wrote lamAB into rh2AB here */
-
-  /* check type of trafo */
-  if(type==CubedShell)
-  {
-    /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, node, 0, ind, *A,*B);
-    sigma1 = CubedSphere_sigma(pat, node, 1, ind, *A,*B);
-  }
-  else
-  {
-    sigma0 = sigma1 = 0.;
-    errorexit("works only for CubedShell");
-  }
-
-  /* get rh2 from lambda */
-  *rh2 = rh2_of_lam_sig0sig1(lam, sigma0,sigma1);
-  return stat;
+  return FuncOflamAB_of_xyz_CubSph(pat, node, ind, rh2AB, xyz,
+                                   rh2_of_lam_sig0sig1);
 }
 
 /* compute derivs of inverse trafo */
 int drh2AB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rh2AB[3],
                        double xyz[3], double drh2ABdxyz[3][3])
 {
-  double rh2 = rh2AB[0]; /* set some local vars */
-  double A   = rh2AB[1];
-  double B   = rh2AB[2];
-  double *drh2dx = &(drh2ABdxyz[0][0]),
-         *drh2dy = &(drh2ABdxyz[0][1]),
-         *drh2dz = &(drh2ABdxyz[0][2]);
-  /* double *dAdx = &(drh2ABdxyz[1][0]),
-           *dAdy = &(drh2ABdxyz[1][1]),
-           *dAdz = &(drh2ABdxyz[1][2]);
-  double   *dBdx = &(drh2ABdxyz[2][0]),
-           *dBdy = &(drh2ABdxyz[2][1]),
-           *dBdz = &(drh2ABdxyz[2][2]); */
-  int type = pat->CI->type;
-  double sigma0,sigma1, lam, dlamdx,dlamdy,dlamdz, drh2_dlam;
-  double lamAB[3];
-
-  /* check type of trafo */
-  if(type==CubedShell)
-  {
-    int isig0 = pat->CI->iSurf[0]; /* get index of var with sigma */
-    int isig1 = pat->CI->iSurf[1]; /* get index of var with sigma */
-    if(isig0>0 || isig1>0)
-      errorexit("drh2AB_dxyz_CubSph works only with constant sigmas");
-
-    /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(pat, node, 0, ind, A,B);
-    sigma1 = CubedSphere_sigma(pat, node, 1, ind, A,B);
-  }
-  else
-  {
-    sigma0 = sigma1 = 0.;
-    errorexit("works only for CubedShell");
-  }
-
-  /* get lam and derivs of lam */
-  lam = lam_of_rh2_sig0sig1(rh2, sigma0,sigma1);
-  lamAB[0] = lam;
-  lamAB[1] = A;
-  lamAB[2] = B;
-  dlamAB_dxyz_CubSph(pat, node, ind, lamAB, xyz, drh2ABdxyz);
-  dlamdx = drh2ABdxyz[0][0]; /* we wrote dlamABdxyz into drh2ABdxyz */
-  dlamdy = drh2ABdxyz[0][1];
-  dlamdz = drh2ABdxyz[0][2];
-
-  /* get drh2_dlam */
-  drh2_dlam = drh2_dlam_of_rh2_sig0sig1(rh2, sigma0,sigma1);
-
-  /* now set drh2dx, drh2dy, drh2dz */
-  *drh2dx = drh2_dlam * dlamdx;
-  *drh2dy = drh2_dlam * dlamdy;
-  *drh2dz = drh2_dlam * dlamdz;
-
-  /* if sigmas are not const we need to add: */
-  /* *drh2dx += drh2_dA * (*dAdx) + drh2_dB * (*dBdx);
-     *drh2dy += drh2_dA * (*dAdy) + drh2_dB * (*dBdy);
-     *drh2dz += drh2_dA * (*dAdz) + drh2_dB * (*dBdz); */
-  /* Note: drh2_dA depends on dsigma_{0/1}/dA */
-  return 0;
+  return dFuncOflamAB_dxyz_CubSph(pat, node, ind, rh2AB, xyz, drh2ABdxyz,
+                                  lam_of_rh2_sig0sig1,
+                                  drh2_dlam_of_rh2_sig0sig1);
 }
