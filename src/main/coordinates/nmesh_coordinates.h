@@ -227,20 +227,6 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
                           double Din, double Dout, double ABrct[4]);
 int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc);
 
-/* coordtrans_CubedSphere.c */
-int xyz_of_lamAB_CubSph(tPat *pat, tNode *node, int ind,
-                        const double lamAB[3], double xyz[3]);
-int lamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
-                        double lamAB[3], const double xyz[3]);
-int dlamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double lamAB[3],
-                       double xyz[3], double dlamABdxyz[3][3]);
-int xyz_of_rhoAB_CubSph(tPat *pat, tNode *node, int ind,
-                        const double rhoAB[3], double xyz[3]);
-int rhoAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
-                        double rhoAB[3], const double xyz[3]);
-int drhoAB_dxyz_CubSph(tPat *pat, tNode *node, int ind, const double rhoAB[3],
-                       double xyz[3], double drhoABdxyz[3][3]);
-
 /* setup_Boxes.c */
 int add_Nbox_pats_indir(tMesh *mesh, double xc[3], double dout[3],
                         int N, int dir);

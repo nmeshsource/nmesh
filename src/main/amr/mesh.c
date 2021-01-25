@@ -343,8 +343,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
   double ssfac = Getd(Par("amr_CubedSphere_r0fac")); //DNSdata_OuterShellStart
   double obfac = Getd(Par("amr_CubedSphere_r1fac")); //DNSdata_OuterBoundary
-  /* do we use stretch in cubed spheres for outermost shell */
-  int stretch  = Getv(mesh_type, "StretchOuterShell");
+  int stretch; /* stretch type in cubed spheres for outermost shell */
   double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
   double xc[] = { 0., 0., 0. };
@@ -356,6 +355,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
   mesh->iteration = 0;
+
+  /* do we use stretch in cubed spheres for outermost shell */
+  stretch  = 0;
+  stretch += 1*( Getv(mesh_type, "StretchOuterShell") ||
+                 Getv(mesh_type, "OuterShellStretch") );
+  stretch += 2 * Getv(mesh_type, "OuterShellStretch2");
 
   /* remove all patches from mesh, so we can just add new pristine ones */
   remove_all_patches(mesh);

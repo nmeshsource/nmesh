@@ -545,17 +545,26 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
   int isigma1_dB = Ind("CubedSphere_dsigma1_dB");
 
   /* set coord trafos */
-  if(stretch==0)
+  switch(stretch)
   {
+  case 0: /* stretch = 0, i.e. no stretching */
     pat->xyz_of_XYZ = xyz_of_lamAB_CubSph;
     pat->XYZ_of_xyz = lamAB_of_xyz_CubSph;
     pat->dXYZ_dxyz  = dlamAB_dxyz_CubSph;
-  }
-  else
-  {
+    break;
+  case 1:
     pat->xyz_of_XYZ = xyz_of_rhoAB_CubSph;
     pat->XYZ_of_xyz = rhoAB_of_xyz_CubSph;
     pat->dXYZ_dxyz  = drhoAB_dxyz_CubSph;
+    break;
+  case 2:
+    pat->xyz_of_XYZ = xyz_of_rh2AB_CubSph;
+    pat->XYZ_of_xyz = rh2AB_of_xyz_CubSph;
+    pat->dXYZ_dxyz  = drh2AB_dxyz_CubSph;
+    errorexit("implement stretch=2");
+    break;
+  default:
+    errorexiti("stretch=%d is unkonwn", stretch);
   }
 
   /* set pat remaining parts of CI struct: */
