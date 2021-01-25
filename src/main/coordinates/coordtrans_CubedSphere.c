@@ -843,19 +843,20 @@ Then
 rho = (sig1/L)*( 1 - sig0/r )
 r   = sig0/( 1 - (L/sig1)*rho )
 */
-double rho_of_lam_sig0sig1(double lam, double sig0, double sig1)
+double rho_of_lam_sig0sig1(double lam, double sig0, double sig1, tPat *pat)
 {
   double L = sig1-sig0;
   return (sig1/L)*( 1.0 - sig0/(L*lam + sig0) );
 }
-double lam_of_rho_sig0sig1(double rho, double sig0, double sig1)
+double lam_of_rho_sig0sig1(double rho, double sig0, double sig1, tPat *pat)
 {
   double L = sig1-sig0;
   return (sig0/L)*( sig1/(sig1 - L*rho) - 1.0 );
 }
 
 /* Derivatives */
-double drho_dlam_of_rho_sig0sig1(double rho, double sig0, double sig1)
+double drho_dlam_of_rho_sig0sig1(double rho, double sig0, double sig1,
+                                 tPat *pat)
 {
   double L = sig1-sig0;
   double d = sig1 - L*rho;
@@ -867,7 +868,8 @@ double drho_dlam_of_rho_sig0sig1(double rho, double sig0, double sig1)
    call with e.g. lam_from_FuncOflam_sig0sig1 = lam_of_rho_sig0sig1 */
 int xyz_of_FuncOflamAB_CubSph(tPat *pat, tNode *node, int ind,
   const double FuncOflamAB[3], double xyz[3],
-  double (*lam_from_FuncOflam_sig0sig1)(double rho, double sig0, double sig1))
+  double (*lam_from_FuncOflam_sig0sig1)(double rho, double sig0, double sig1,
+                                        tPat *pat))
 {
   double rho = FuncOflamAB[0]; /* set some local vars */
   double A   = FuncOflamAB[1];
@@ -890,7 +892,7 @@ int xyz_of_FuncOflamAB_CubSph(tPat *pat, tNode *node, int ind,
   }
 
   /* get lam, and then set x,y,z */
-  lam = lam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1);
+  lam = lam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1, pat);
   lamAB[0] = lam;
   lamAB[1] = A;
   lamAB[2] = B;
@@ -901,7 +903,8 @@ int xyz_of_FuncOflamAB_CubSph(tPat *pat, tNode *node, int ind,
    call with e.g. FuncOflam_from_lam_sig0sig1 = rho_of_lam_sig0sig1 */
 int FuncOflamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   double FuncOflamAB[3], const double xyz[3],
-  double (*FuncOflam_from_lam_sig0sig1)(double lam, double sig0, double sig1))
+  double (*FuncOflam_from_lam_sig0sig1)(double lam, double sig0, double sig1,
+                                        tPat *pat))
 {
   double *rho = &(FuncOflamAB[0]);   /* set some local vars */
   double *A   = &(FuncOflamAB[1]);
@@ -928,7 +931,7 @@ int FuncOflamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
   }
 
   /* get rho from lambda */
-  *rho = FuncOflam_from_lam_sig0sig1(lam, sigma0,sigma1);
+  *rho = FuncOflam_from_lam_sig0sig1(lam, sigma0,sigma1, pat);
   return stat;
 }
 
@@ -937,9 +940,9 @@ int FuncOflamAB_of_xyz_CubSph(tPat *pat, tNode *node, int ind,
    dFuncOflam_dlam_from_FuncOflam_sig0sig1 = drho_dlam_of_rho_sig0sig1 */
 int dFuncOflamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind,
   const double FuncOflamAB[3], double xyz[3], double dFuncOflamABdxyz[3][3],
-  double (*lam_from_FuncOflam_sig0sig1)(double rho, double sig0, double sig1),
+  double (*lam_from_FuncOflam_sig0sig1)(double rho, double sig0, double sig1, tPat *pat),
   double (*dFuncOflam_dlam_from_FuncOflam_sig0sig1)(double rho, double sig0,
-                                                    double sig1))
+                                                    double sig1, tPat *pat))
 {
   double rho = FuncOflamAB[0]; /* set some local vars */
   double A   = FuncOflamAB[1];
@@ -976,7 +979,7 @@ int dFuncOflamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind,
   }
 
   /* get lam and derivs of lam */
-  lam = lam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1);
+  lam = lam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1, pat);
   lamAB[0] = lam;
   lamAB[1] = A;
   lamAB[2] = B;
@@ -986,7 +989,7 @@ int dFuncOflamAB_dxyz_CubSph(tPat *pat, tNode *node, int ind,
   dlamdz = dFuncOflamABdxyz[0][2];
 
   /* get drho_dlam */
-  drho_dlam = dFuncOflam_dlam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1);
+  drho_dlam = dFuncOflam_dlam_from_FuncOflam_sig0sig1(rho, sigma0,sigma1,pat);
 
   /* now set drhodx, drhody, drhodz */
   *drhodx = drho_dlam * dlamdx;
@@ -1047,7 +1050,7 @@ rh2 = (w*asinh((L*lam + sig0)/A) - xi0)/(xi1-xi0)
 So sinh( ( (xi1-xi0)*rh2 + xi0 )/w ) = (L*lam + sig0)/A
 lam = ( A*sinh( ( (xi1-xi0)*rh2 + xi0 )/w ) - sig0 )/L
 */
-double rh2_of_lam_sig0sig1(double lam, double sig0, double sig1)
+double rh2_of_lam_sig0sig1(double lam, double sig0, double sig1, tPat *pat)
 {
   double L = sig1-sig0;
   double A = pat->CI->co[1];
@@ -1059,7 +1062,7 @@ double rh2_of_lam_sig0sig1(double lam, double sig0, double sig1)
 
   return ( w*asinh((L*lam + sig0)/A) - xi0 ) * oodxi;
 }
-double lam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
+double lam_of_rh2_sig0sig1(double rh2, double sig0, double sig1, tPat *pat)
 {
   double L = sig1-sig0;
   double A = pat->CI->co[1];
@@ -1072,7 +1075,8 @@ double lam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
 }
 
 /* Derivatives */
-double drh2_dlam_of_rh2_sig0sig1(double rh2, double sig0, double sig1)
+double drh2_dlam_of_rh2_sig0sig1(double rh2, double sig0, double sig1,
+                                 tPat *pat)
 {
   double L = sig1-sig0;
   double A = pat->CI->co[1];
