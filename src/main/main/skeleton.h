@@ -6,7 +6,7 @@ enum
 {
   FIRST,
   POST_PARAMETERS,
-  INITMESH,
+  INITMESH,         /* happens only if there is no checkpoint restart */
   PRE_COORDINATES,
   COORDINATES,
   POST_COORDINATES,
@@ -20,7 +20,7 @@ enum
   ANALYZE, 
   OUTPUT,
   POST_OUTPUT,
-  LOADBALANCING, /* before AMR, since refinements invalidate timings */
+  LOADBALANCING,    /* before AMR, since refinements invalidate timings */
   AMR,
   FINALIZE,
   FINALIZEMESH,
