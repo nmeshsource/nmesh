@@ -561,7 +561,7 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
     pat->xyz_of_XYZ = xyz_of_rh2AB_CubSph;
     pat->XYZ_of_xyz = rh2AB_of_xyz_CubSph;
     pat->dXYZ_dxyz  = drh2AB_dxyz_CubSph;
-    errorexit("implement stretch=2");
+    errorexit("stretch=2 is unfinished because: A=w=1");
     break;
   default:
     errorexiti("stretch=%d is unkonwn", stretch);
