@@ -128,6 +128,9 @@ exit(8);
         case CubedSphere_Stretch1:
           set_1_CubedSphere_pat(pat, 1, useF);
           break;
+        case CubedSphere_Stretch2:
+          set_1_CubedSphere_pat(pat, 2, useF);
+          break;
         }
       }
     } /* end of if get_par_from_str */

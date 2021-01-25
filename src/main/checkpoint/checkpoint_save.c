@@ -106,8 +106,6 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
 
   //printCI(pat);
   checkpoint_write_CI(fp, pat->CI);
-  fprintf(fp, "coordinates_get_label(pat) = %d\n", coordinates_get_label(pat));
-  //fprintf(fp, "end-of-patch.\n");
 }
 
 
