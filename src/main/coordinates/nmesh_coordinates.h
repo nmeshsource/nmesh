@@ -9,7 +9,7 @@ enum
 {
   Cartesian=0,          /* Cartesian coords */
   CubedSphere,          /* cubed sphere coords xyz_of_lamAB_CubSph */
-  stretchedCubedSphere  /* stretched cubed sphere coords xyz_of_rhoAB_CubSph */
+  CubedSphere_Stretch1  /* stretched cubed sphere coords xyz_of_rhoAB_CubSph */
 };
 
 /* Extras for coordtrans_CubedSphere.c : Type of cubed sphere.

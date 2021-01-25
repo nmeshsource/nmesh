@@ -125,7 +125,7 @@ exit(8);
         case CubedSphere:
           set_1_CubedSphere_pat(pat, 0, useF);
           break;
-        case stretchedCubedSphere:
+        case CubedSphere_Stretch1:
           set_1_CubedSphere_pat(pat, 1, useF);
           break;
         }

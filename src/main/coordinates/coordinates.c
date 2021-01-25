@@ -674,7 +674,7 @@ int coordinates_get_label(tPat *pat)
   else if(xyz_of_XYZ == xyz_of_lamAB_CubSph)
     return CubedSphere;
   else if(xyz_of_XYZ == xyz_of_rhoAB_CubSph)
-    return stretchedCubedSphere;
+    return CubedSphere_Stretch1;
   else
     errorexit("implement label for this pat->xyz_of_XYZ");
 }
@@ -688,7 +688,7 @@ x_of_X coordinates_get_xyz_of_XYZ(int label)
     return NULL;
   case CubedSphere:
     return xyz_of_lamAB_CubSph;
-  case stretchedCubedSphere:
+  case CubedSphere_Stretch1:
     return xyz_of_rhoAB_CubSph;
   default:
     errorexiti("unknown or unimplemented label %i", label);
