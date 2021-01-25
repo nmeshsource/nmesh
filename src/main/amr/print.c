@@ -753,7 +753,7 @@ void printnfaces(tNode *node)
 }
 
 /* print tRef contents */
-void printfref(tRef *ref)
+void printref(tRef *ref)
 {
   int d;
   printf("ref: ");
