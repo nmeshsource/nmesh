@@ -502,6 +502,7 @@ void printnface(tNface *nface);
 void printnfaces_on_f(tNode *node, int f);
 void printnfaces(tNode *node);
 void printref(tRef *ref);
+void print_n_pt_typ(tNode *node);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);
