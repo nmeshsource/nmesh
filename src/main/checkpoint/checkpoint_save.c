@@ -281,7 +281,7 @@ void checkpoint_write_node(FILE *fp, tNode *node)
     if(write_pt_typ) break;
   }
 
-  /* check if any of the children differ in n from child0 */
+  /* check if any of the children differ in n or pt_typ from child0 */
   write_all_n = 0;
   for(chld=1; chld<8; chld++)
   {
@@ -289,7 +289,11 @@ void checkpoint_write_node(FILE *fp, tNode *node)
     if(child0 && child)
     {
       for(d=0; d<3; d++)
-        if(child->n[d] != child0->n[d]) { write_all_n=1; break; }
+        if( (child->n[d]      != child0->n[d]) ||
+            (child->pt_typ[d] != child0->pt_typ[d]) )
+        {
+          write_all_n=1; break;
+        }
     }
     if(write_all_n) break;
   }
