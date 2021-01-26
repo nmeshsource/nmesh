@@ -756,8 +756,9 @@ void printnfaces(tNode *node)
 void printref(tRef *ref)
 {
   int d;
-  printf("ref: ");
-  printf("->type=%d ->method=%d", ref->type, ref->method);
-  for(d=0; d<3; d++) printf(" ->n[%d]=%d", d, ref->n[d]);
+  printf("ref->  ");
+  printf("type=%d  method=%d", ref->type, ref->method);
+  printf("  n=");
+  for(d=0; d<3; d++) printf("%d ", ref->n[d]);
   printf("\n");
 }
