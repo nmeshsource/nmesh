@@ -241,7 +241,7 @@ void checkpoint_write_nodes_with_child0(FILE *fp, tNlist *nlist)
   }
 }
 
-/* write info about one node */
+/* Write info about one node. We write n and pt_typ of its children */
 void checkpoint_write_node(FILE *fp, tNode *node)
 {
   tNode *child0 = node->child[0];
