@@ -762,3 +762,15 @@ void printref(tRef *ref)
   for(d=0; d<3; d++) printf("%d ", ref->n[d]);
   printf("\n");
 }
+
+/* print point numbers and types */
+void print_n_pt_typ(tNode *node)
+{
+  int d;
+  pr_nodename(node);
+  printf("  n=");
+  for(d=0; d<3; d++) printf("%d ", node->n[d]);
+  printf(" pt_typ=");
+  for(d=0; d<3; d++) printf("%d ", node->pt_typ[d]);
+  printf("\n");
+}
