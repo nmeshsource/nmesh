@@ -276,7 +276,7 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 int finit(double x)
 {
   union {
-    unsigned long bits; /* must be same number of bytes as double */
+    uint64_t bits; /* must be same number of bytes as double */
     double d;
   } ud;
   ud.d = x;
