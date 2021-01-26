@@ -430,13 +430,13 @@ int setup_CubedSphere_mesh(tMesh *mesh)
     default:
       errorexiti("amr_mesh_type = %d CubedSpheres  <--not implemented", npats);
   }
-
+/*
 coordinates_init(mesh);
 outputPatchPlanes_meshvar(mesh, "x", 0,0);
 outputPatchPlanes_meshvar(mesh, "y", 0,0);
 outputPatchPlanes_meshvar(mesh, "z", 0,0);
 //exit(9);
-
+*/
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
