@@ -231,8 +231,8 @@ int sphere_around_full_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
   |            /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
   |           |      |     |      |   r1 is radius of outer sphere (sphere1)
   |           |      |_____|      |
-  |            \ __--       --__ /    if stretch=1 use xyz_of_rhoAB_CubSph
-   \            \               /     else         use lamAB_of_xyz_CubSph
+  |            \ __--       --__ /    if stretch=0 use xyz_of_lamAB_CubSph
+   \            \               /     if stretch=1 use xyz_of_rhoAB_CubSph
     |          _/\__         __/      in outermost CubedShell
      |       _/     \_______/
       \    _/
