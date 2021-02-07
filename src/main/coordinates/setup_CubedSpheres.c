@@ -309,10 +309,11 @@ int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
 {
   int pl;
   double Din[6], Dout[6];
-  int i;
+  int stretch1, i;
 
   /* make the full box and sphere0 around them */
-  pl = two_spheres_around_box_at_xc(mesh, xc, dc, r0, r1, stretch);
+  stretch1 = 0;
+  pl = two_spheres_around_box_at_xc(mesh, xc, dc, r0, r1, stretch1);
 
   /* set distances to make 6 more stretched cubed shells around sphere1 */
   for(i=0; i<6; i++)
