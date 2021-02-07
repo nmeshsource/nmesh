@@ -343,6 +343,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
   double ssfac = Getd(Par("amr_CubedSphere_r0fac")); //DNSdata_OuterShellStart
   double obfac = Getd(Par("amr_CubedSphere_r1fac")); //DNSdata_OuterBoundary
+  double r2fac = Getd(Par("amr_CubedSphere_r2fac"));
   /* stretch type in cubed spheres for outermost shell */
   int stretch = Geti(Par("amr_OuterShellStretch"));
   double rc[3];
@@ -410,6 +411,11 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       arrange_1pat12CubSph_into_full_cube(mesh, xc,
                                           csize*rf_surf1, rf_surf1, dc);
       break; */
+    case 19:
+      rc[1] = rc[2] = rc[0] = dc;
+      three_spheres_around_box_at_xc(mesh, xc, rc, ssfac*dc, obfac*dc,
+                                     r2fac*dc, stretch);
+      break;
     case 26:
       two_full_cubes_touching_at_x0(mesh, dc,
                                     csize*rf_surf1, rf_surf1,

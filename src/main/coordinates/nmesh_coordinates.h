@@ -218,6 +218,9 @@ int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
 int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
                                        double dc[3], double r0, double r1,
                                        int stretch);
+int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+                                   double r0, double r1, double r2,
+                                   int stretch);
 int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
                             double rin, double rout);
 int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1);

@@ -281,6 +281,49 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
   return pl;
 }
 
+/* put 6 more stretchedCubedShell's around the sphere from
+   two_spheres_around_box_at_xc
+                   ___________
+             _____/           \______
+          __/        _______         \_
+         /      ____/       \____      \
+       _- \-   /                 \   -/
+      /     \-       _______       -/
+     |     /  \-  __/       \__  -/   ...
+    |     /     \/             \/
+   /     /      /__           __\
+  |     |      /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
+  |     |     |      |     |      |   r1 is radius of middle sphere (sphere1)
+  |     |     |      |_____|      |   r2 is radius of outer sphere (sphere1)
+  |     |      \ __--       --__ /
+   \     \      \               /
+    |     \    _/\__         __/
+     |     \ _/     \_______/         if stretch=0 use xyz_of_lamAB_CubSph
+      \    _/                         if stretch=1 use xyz_of_rhoAB_CubSph
+       -_ /                           in outermost CubedShell
+         \      ...
+*/
+int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+                                   double r0, double r1, double r2,
+                                   int stretch)
+{
+  int pl;
+  double Din[6], Dout[6];
+  int i;
+
+  /* make the full box and sphere0 around them */
+  pl = two_spheres_around_box_at_xc(mesh, xc, dc, r0, r1, stretch);
+
+  /* set distances to make 6 more stretched cubed shells around sphere1 */
+  for(i=0; i<6; i++)
+  {
+    Din[i]  = r1;
+    Dout[i] = r2;
+  }
+  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
+  return pl;
+}
+
 /************************************************************************/
 /* make patches that surround an inner sphere */
 /************************************************************************/
