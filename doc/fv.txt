@@ -80,3 +80,148 @@ Def:   um_{-1/2} := u_{0}
 Then:  fp_{-1/2} = f(up_{-1/2})        fm_{-1/2} = f(um_{-1/2})
 Again we can use e.g. LLF to get f*_{-1/2}.
 [inside: (um_{-1/2}, fm_{-1/2}), adjacent: (up_{-1/2}, fp_{-1/2})]
+
+
+
+=====================================
+= Some more notes about fv and WENO =
+=====================================
+First of all, WENO works much better on a uniform grid. That is why
+
+      if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
+        rec1d_uface_to_uin_1(node, vlu, 1);
+
+in scalarwave1_set_divf is usually inactive before calling fv_divf. I.e. we
+do not interpolate to the point x first.
+o x |   o       o       o       o       o       o
+
+Rather we keep the grid as:
+ 0       1       2       3       4       5       6 <-- gridpoint number i
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+     0       1       2       3       4       5     <-- midpoint number im
+-1                                               6 <-- facepoints: im=-1, im=6
+
+We can use e.g. rec1d_p_WENOm3_2 and rec1d_m_WENOm3_2 to reconstruct form
+the left and right u on the interior midpoints. Points near or at the
+boundary are more complicated.  We can reconstruct like this:
+
+ |u l|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+
+Here:
+ -pW: use rec1d_p_WENOm3_2 to reconstruct u
+ -mW: use rec1d_m_WENOm3_2 to reconstruct u
+ -l: use linear interpolation using the the grid points (o) to the left
+  and right
+ -u: use the value of u at the gridpoint at the node boundary
+
+So for interior midpoints (im=0-5) we have a left and right value for u,
+i.e. up and um. From these 2 we can then get the 2 fluxes fp and fm.
+From fp and fm we calculate the numerical flux f* using e.g. LLF.
+Then we have:
+i=0     i=1     i=2     ...
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+    /        \
+   /          \
+ f*_{im=0}   f*_{im=1}   ...
+
+From f* at (im=0-5) we can then get divf = dx f on all interior
+gridpoints (i=1-5). I.e. for i=1,2,...,5 we use:
+
+divf_{i} = (f*_{im} - f*_{im-1})/h ,    where im = i.
+
+
+The boundary gridpoints (i=0 and i=6) are different:
+----------------------------------------------------
+The vol RHS calculation calls fv_divf which sets
+
+divf_{i=0} = f*_{im=0} / (h/2)
+
+This is incomplete, the correct answer should be
+divf_{i=0} = (f*_{im=0} - f*_{im=-1}) / (h/2)
+BUT we do not have f*_{im=-1} at this point yet.
+
+Later, after MPI communication is complete, the surf. RHS calculation adds
+
+-f*_{im=-1}) / (h/2)
+
+to divf_{i=0}. So that we now have
+divf_{i=0} = (f*_{im=0} - f*_{im=-1}) / (h/2)
+
+Note that f*_{im=-1} is computed from u_{i=0} and from u_adj which is
+the u at the boundary of the node to the left (using e.g. LLF).
+
+NOTE:  divf_{i=0} = (f*_{im=0} - f*_{im=-1}) / (h/2),  where:
+ o x |   o   |   o   |   o   |   o   |   o   |   o
+ |    \__
+ |       \__
+ |          \
+f*_{im=-1}   f*_{im=0}
+So divf_{i=0} is naturally located at x not o. For this reason
+scalarwave1_surf_rhs_u calls rec1d_uface_to_uin_1_mesh to interpolate
+divf_{i=0} from the point x to the boundary point o using linear
+interpolation
+  ________
+ | ^     ^
+ v |     |
+ o x     o       o       o       o       o       o
+
+divf_{i=0} <-- w divf_{i=0} + (1-w) divf_{i=1}     where w=4/3
+
+Recall:
+ |u l|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+     |
+     f*_{im=0}
+So f*_{im=0} has errors of O(h). Thus divf_{i=0} at x and also later at o
+also have errors of O(h).
+So the final linear interpolation rec1d_uface_to_uin_1_mesh will not improve
+the error, and thus may not be necessary.
+
+
+The 2D case:
+------------
+Consider now the cell near the top left in this 2D case:
+
+^ y, j
+|
+|   o       o       o       o       o       o       o
+|
+|   -
+|
+|   o x |   o       o       o       o       o       o
+|
+|   --
+|
+|   o       o       o       o       o       o       o
+|
+|
+|
+|   o       o       o       o       o       o       o
+|
+|
+|
+|   o       o       o       o       o       o       o
+|---------------------------------------------------------------> x, i
+Reconstructing u at -, -- and | can be done as in the 1D case.
+But now:
+ dx f^x  is naturally located at x
+ dy f^y  is naturally located at o
+
+Currently fv_divf adds them both together to obtain
+divf_{i=0,j=3} = dx f^x_{i=0} + dy f^y_{j=3}
+(But this makes no sense as they are from different points!)
+And then rec1d_uface_to_uin_1_mesh is called to interpolate
+divf_{i=0,j=3}, but this interpolation only makes sense for the
+ dx f^x  part not for the  dy f^y  part. Probably we should change our
+program so that  dx f^x  and  dy f^y  are stored separately, and only one
+(here dx f^x_{i=0}) is actually interpolated.
+
+HOWEVER, the interpolation was never really necessary since it does not
+improve the formal error at the node boundary. The error in dx f^x_{i=0}
+is O(h) before and after the interpolation. But note that e.g. dy f^y_{j=2}
+may have an error of only O(h^2), so when this gets interpolated in the
+x-direction we add an extra error of O(h), because
+dy f^y_{i=1} = dy f^y_{i=0} + O(h).
+Yet again this may not matter since dx f^x_{i=0} already has an error of
+O(h).
