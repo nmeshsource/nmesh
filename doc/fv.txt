@@ -219,3 +219,14 @@ program so that  dx f^x  and  dy f^y  are stored separately, and only one
 terms like dy f^y_{j=2} (which may have an error of only O(h^3)) we
 add errors of O(h), because
  dy f^y_{i=1} = dy f^y_{i=0} + O(h).
+
+
+Temp note:
+---------
+*change fv_divf s.t. it computes the the full div including surface terms
+ -this means we call get_all_surfaces(node) in fv_divf
+ -extend fnumR[l][i] so that for i=-1 we have flux at left face
+ -immediately interpolate terms like  dx f^x  from x to o, then add them
+  to divf. Then all terms are at facepoint o.
+ -remove any interpolation in e.g. scalarwave1_surf_rhs_u
+*change dg_add_surface_fluxes_sign such that it then skips fv nodes
