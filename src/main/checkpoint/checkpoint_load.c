@@ -267,7 +267,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
               {
                 cn[chld][d]     = cn[0][d];     /* take info from child0 */
                 cp_typ[chld][d] = cp_typ[0][d];
-                break;
+                continue;
               }
               off = ret; /* advance buffer offset off */
               ret = sscanf(str, "%d%d", &(cn[chld][d]), &(cp_typ[chld][d]));
