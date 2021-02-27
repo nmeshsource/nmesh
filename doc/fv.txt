@@ -111,9 +111,8 @@ boundary are more complicated.  We can reconstruct like this:
 Here:
  -pW: use rec1d_p_WENOm3_2 to reconstruct u
  -mW: use rec1d_m_WENOm3_2 to reconstruct u
- -l: use linear interpolation using the the grid points (o) to the left
-  and right
- -u: use the value of u at the gridpoint at the node boundary
+ -l: use linear interpolation using the gridpoints (o) to the left and right
+ -u: use the value of u at the gridpoint (o) at the node boundary
 
 So for interior midpoints (im=0-5) we have a left and right value for u,
 i.e. up and um. From these 2 we can then get the 2 fluxes fp and fm.
@@ -173,10 +172,11 @@ Recall:
  o   |   o   |   o   |   o   |   o   |   o   |   o
      |
      f*_{im=0}
-So f*_{im=0} has errors of O(h). Thus divf_{i=0} at x and also later at o
-also have errors of O(h).
-So the final linear interpolation rec1d_uface_to_uin_1_mesh will not improve
-the error, and thus may not be necessary.
+So f*_{im=0} has errors of O(h^2). Thus divf_{i=0} at x also has errors of
+O(h^2). Since divf_{at x} = divf_{at o} + O(h), it is clear that if we set
+divf_{at o} = divf_{at x} (i.e. if we just copy instead of interpolating)
+our divf_{at o} would now contain an error of O(h). This is why we should
+use linear interpolation, it keeps the error down to O(h^2).
 
 
 The 2D case:
@@ -215,13 +215,7 @@ And then rec1d_uface_to_uin_1_mesh is called to interpolate
 divf_{i=0,j=3}, but this interpolation only makes sense for the
  dx f^x  part not for the  dy f^y  part. Probably we should change our
 program so that  dx f^x  and  dy f^y  are stored separately, and only one
-(here dx f^x_{i=0}) is actually interpolated.
-
-HOWEVER, the interpolation was never really necessary since it does not
-improve the formal error at the node boundary. The error in dx f^x_{i=0}
-is O(h) before and after the interpolation. But note that e.g. dy f^y_{j=2}
-may have an error of only O(h^2), so when this gets interpolated in the
-x-direction we add an extra error of O(h), because
-dy f^y_{i=1} = dy f^y_{i=0} + O(h).
-Yet again this may not matter since dx f^x_{i=0} already has an error of
-O(h).
+(here dx f^x_{i=0}) is actually interpolated. Otherwise, if we interpolate
+terms like dy f^y_{j=2} (which may have an error of only O(h^3)) we
+add errors of O(h), because
+ dy f^y_{i=1} = dy f^y_{i=0} + O(h).
