@@ -245,7 +245,7 @@ void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
 
       /* compute d_i f^i with finite vol. methods on one node */
       fv_divf(node, vldivf, vlu, vlu,NULL, scalarwave1_rec_u_f_lam,
-              scalarwave1->numflux);
+              scalarwave1_fluxes_pt, scalarwave1->numflux);
     }
     else
     {
