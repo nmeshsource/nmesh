@@ -61,7 +61,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   double (*rec1d_m)(int n, const double *u, int im, double u_scale);
   double q_scale = 1.; /* typical order of magnitude of fields */
   int nghosts;         /* number of ghost points on each end */
-  int full_div = 0;    /* whether we set all of divf on faces */
+  int add_surface_fluxes = 0; /* whether we set all of divf on faces */
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -85,7 +85,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     break;
   /* use WENO3 from both sides of midpoint at i0m */
 //  case FV_REC_WENOu3_2::
-//    full_div = 1;
+//    add_surface_fluxes = 1;
   case FV_REC_WENOm3_2:
     rec1d_p = rec1d_p_WENOm3_2;
     rec1d_m = rec1d_m_WENOm3_2;
@@ -168,7 +168,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
       d->info = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
-    if(nghosts || full_div) get_all_surfaces(node);
+    if(nghosts || add_surface_fluxes) get_all_surfaces(node);
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
@@ -294,7 +294,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           }
 
           /* include flux terms on facepoints */
-          if(full_div)
+          if(add_surface_fluxes)
           {
             int d_face_sav = d->face; /* save parts of d we may alter */
             int d_info_sav = d->info;
