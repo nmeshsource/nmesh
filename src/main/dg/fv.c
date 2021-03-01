@@ -5,6 +5,9 @@
 #include "nmesh.h"
 #include "dg.h"
 
+/* get glabal amr vars */
+extern tAMR amr[1];
+
 /* use DGglobals */
 extern tDGglobals DGglobals[1];
 
@@ -62,6 +65,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   double q_scale = 1.; /* typical order of magnitude of fields */
   int nghosts;         /* number of ghost points on each end */
   int add_surface_fluxes = 0; /* whether we set all of divf on faces */
+
+//add_surface_fluxes=1;
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -173,6 +178,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
     {
+      int dir_active = Getb(amr->dir_active[dir]);
       double *sqrtgdiag = m_sqrtgdiag[dir][dir];
       int i,j,k;
 
@@ -284,23 +290,24 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           wm  = dXb[i0];
           if(norms_and_sqrtgdiag_on_midpoints)
           {
-            gd_ow_m  = i0lN * sqrtgdiag[ccc]/wm;
-            gd_ow_m1 = i0g0 * sqrtgdiag[cccm1]/wm;
+            gd_ow_m  = sqrtgdiag[ccc]/wm;
+            gd_ow_m1 = sqrtgdiag[cccm1]/wm;
           }
           else /* get sqrtgdiag on grid points */
           {
-            gd_ow_m  = i0lN * sqrtgdiag[ccc]/wm;
-            gd_ow_m1 = i0g0 * sqrtgdiag[ccc]/wm;
+            gd_ow_m  = sqrtgdiag[ccc]/wm;
+            gd_ow_m1 = sqrtgdiag[ccc]/wm;
           }
 
           /* include flux terms on facepoints */
-          if(add_surface_fluxes)
+          if(add_surface_fluxes && dir_active)
           {
             int d_face_sav = d->face; /* save parts of d we may alter */
             int d_info_sav = d->info;
 
             if(i0 == 0)
             {
+              /* set non-zero weight on left boundary */
               gd_ow_m1 = sqrtgdiag[ccc]/wm;
 
               /* compute numerical fluxes on the left side of node */
@@ -309,11 +316,12 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               u_f_lam(d);
               numflux(d);
 
-              /* save fluxes of left face in fnumR */
+              /* save fluxes of left face in fnumR, use fnumR = -fnumL */
               forvl(vldivf, l) fnumR[l][-1] = -( d->fnum[l] );
             }
             if(i0 == n[dir]-1)
             {
+              /* set non-zero weight on right boundary */
               gd_ow_m = sqrtgdiag[ccc]/wm;
 
               /* compute numerical fluxes on the right side of node */
@@ -329,6 +337,13 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             /* restore altered parts of d */
             d->face = d_face_sav;
             d->info = d_info_sav;
+          }
+          else
+          {
+            /* Set factors in flux on faces to zero.
+               Note: i0g0=0 on left face, i0lN=0 on right face */
+            gd_ow_m  = i0lN * gd_ow_m;
+            gd_ow_m1 = i0g0 * gd_ow_m1;
           }
 
           //printf("i0=%d im0=%d im0m1=%d: wm=%g gd_ow_m=%g gd_ow_m1=%g\n",
@@ -357,9 +372,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             double *divf = Vard_(node, idivf);
             double *df = di0fi0[l];
 
-            // introduce df = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1
-            // and interpol. it at ends, then:
-            // divf[ccc] += df;
+            // interpol. df at ends
+            // ...
             divf[ccc] += df[i0];
           }
         }
