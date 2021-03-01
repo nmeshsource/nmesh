@@ -149,6 +149,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     int npe = maxn + 2;          //number of points in fnumRe[l]
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
     double (*fnumRe)[npe] = calloc(nfvars, sizeof *fnumRe); //for fluxes
+    double (*di0fi0)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
     double *qm_m = dmalloc(nqvars);
     int l; /* field index */
@@ -225,7 +226,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           double i0g0, i0lN, gd_ow_m, gd_ow_m1, wm;
 
           /* if we have only 1 point do nothing, as there are no midpoints */
-          if(n[dir]<=1) break;
+//          if(n[dir]<=1) break;
 
           /* set points and their index */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
@@ -333,21 +334,33 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           //printf("i0=%d im0=%d im0m1=%d: wm=%g gd_ow_m=%g gd_ow_m1=%g\n",
           //i0, im0, im0m1, wm, gd_ow_m, gd_ow_m1);
 
-          /* get divf with FV method */
+          /* get piece of div(flux) in direction dir with FV method */
+          forvl(vldivf, l)
+          {
+            double *fnum = fnumR[l];
+            double *df = di0fi0[l];
+            df[i0] = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1;
+          }
+        } /* end i0 loop */
+
+        /* final loop over points in dir */
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+
+          /* add to divf */
           forvl(vldivf, l)
           {
             int idivf = Vind(vldivf,l);
             double *divf = Vard_(node, idivf);
-            double *fnum = fnumR[l];
+            double *df = di0fi0[l];
 
             // introduce df = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1
             // and interpol. it at ends, then:
             // divf[ccc] += df;
-
-            divf[ccc] += (fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1);
-//if(l==0)
-//printf("fnum[im0m1]=%g gd_ow_m1=%g fnum[im0m1]*gd_ow_m1=%g\n",
-//fnum[im0m1], gd_ow_m1, fnum[im0m1]*gd_ow_m1);
+            divf[ccc] += df[i0];
           }
         }
       } /* end plane loop */
@@ -356,6 +369,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* release mem */
     free(qm_m);
     free(qm_p);
+    free(di0fi0);
     free(fnumRe);
     free(qcg);
     free(dXb);
