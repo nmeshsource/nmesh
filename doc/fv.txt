@@ -83,9 +83,9 @@ Again we can use e.g. LLF to get f*_{-1/2}.
 
 
 
-=====================================
-= Some more notes about fv and WENO =
-=====================================
+=========================================
+= Some more notes about fv and WENOm3_2 =
+=========================================
 First of all, WENO works much better on a uniform grid. That is why
 
       if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
@@ -208,25 +208,25 @@ But now:
  dx f^x  is naturally located at x
  dy f^y  is naturally located at o
 
-Currently fv_divf adds them both together to obtain
+BUT if:  fv_divf_extrap = divf_extrap1
+---------------------------------------
+fv_divf adds them both together to obtain
 divf_{i=0,j=3} = dx f^x_{i=0} + dy f^y_{j=3}
 (But this makes no sense as they are from different points!)
-And then rec1d_uface_to_uin_1_mesh is called to interpolate
-divf_{i=0,j=3}, but this interpolation only makes sense for the
- dx f^x  part not for the  dy f^y  part. Probably we should change our
-program so that  dx f^x  and  dy f^y  are stored separately, and only one
-(here dx f^x_{i=0}) is actually interpolated. Otherwise, if we interpolate
-terms like dy f^y_{j=2} (which may have an error of only O(h^3)) we
-add errors of O(h), because
+Later rec1d_uface_to_uin_1_mesh is called to interpolate divf_{i=0,j=3},
+but this interpolation only makes sense for the  dx f^x  part, not for the
+dy f^y  part. Probably we should make sure that only one (here dx f^x_{i=0})
+is actually interpolated. Otherwise, if we interpolate terms like
+dy f^y_{j=2} (which may have an error of only O(h^3)) we add errors of O(h),
+because
  dy f^y_{i=1} = dy f^y_{i=0} + O(h).
 
-
-Temp note:
----------
-*change fv_divf s.t. it computes the the full div including surface terms
+If:  fv_divf_extrap = dnfn_extrap1
+----------------------------------
+*fv_divf computes the the full div including surface terms
  -this means we call get_all_surfaces(node) in fv_divf
- -extend fnumR[l][i] so that for i=-1 we have flux at left face
- -immediately interpolate terms like  dx f^x  from x to o, then add them
+ -fnumR[l][i] is extended so that for i=-1 we have flux at left face
+ -fv_divf interpolates terms like  dx f^x  from x to o, and then adds them
   to divf. Then all terms are at facepoint o.
- -remove any interpolation in e.g. scalarwave1_surf_rhs_u
-*change dg_add_surface_fluxes_sign such that it then skips fv nodes
+ -any interpolation in e.g. scalarwave1_surf_rhs_u is then switched off
+*dg_add_surface_fluxes_sign skips fv nodes in this case
