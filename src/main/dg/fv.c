@@ -64,9 +64,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   double (*rec1d_m)(int n, const double *u, int im, double u_scale);
   double q_scale = 1.; /* typical order of magnitude of fields */
   int nghosts;         /* number of ghost points on each end */
-  int add_surface_fluxes = 0; /* whether we set all of divf on faces */
-
-//add_surface_fluxes=1;
+  int add_surface_fluxes; /* whether we set all of divf on faces */
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -89,8 +87,6 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     nghosts = 0;
     break;
   /* use WENO3 from both sides of midpoint at i0m */
-//  case FV_REC_WENOu3_2::
-//    add_surface_fluxes = 1;
   case FV_REC_WENOm3_2:
     rec1d_p = rec1d_p_WENOm3_2;
     rec1d_m = rec1d_m_WENOm3_2;
@@ -130,6 +126,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   default:
     errorexit("unknown DGglobals->fv_rec_mode");
   }
+
+  /* do we add in the surface fluxes here already? */
+  add_surface_fluxes = DGglobals->fv_divf_adds_surface_fluxes;
 
   /* set var list for div of fluxes to zero */
   vlsetconstant_node(node, vldivf, 0.);

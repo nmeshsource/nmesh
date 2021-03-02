@@ -86,6 +86,7 @@ int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
   int isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
   int isqrtgdiagx             = Ind("sqrtgdiagx");
   int iooJ = Ind("det_dXbdx");
+  int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
 
   TIMER_START;
 
@@ -116,6 +117,9 @@ int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
       double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
       double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
       double distXb[6];
+
+      /* do nothing if fv_divf has already taken care of surface fluxes */
+      if(use_fv && skip_fv) continue;
 
       /* find distance from faces to nearest midpoint */
       set_nodemidpoints_to_face_distXb(node, distXb);
@@ -247,13 +251,25 @@ int dg_set_DGglobals(tMesh *mesh)
 
   /* set interpolation mode for div(flux) */
   if(Getv(fv_divf_interp, "no"))
+  {
     DGglobals->fv_divf_interp_mode = FV_NO_INTERP;
+    DGglobals->fv_divf_adds_surface_fluxes = 0;
+  }
   else if(Getv(fv_divf_interp, "divf_interp1"))
+  {
     DGglobals->fv_divf_interp_mode = FV_DIVF_INTERP1;
+    DGglobals->fv_divf_adds_surface_fluxes = 0;
+  }
   else if(Getv(fv_divf_interp, "dnfn_interp1"))
+  {
     DGglobals->fv_divf_interp_mode = FV_DNFN_INTERP1;
+    DGglobals->fv_divf_adds_surface_fluxes = 1;
+  }
   else
-    errorexits("unknown val %s in par fv_divf_interp.",Gets(fv_divf_interp));
+  {
+    errorexits("unknown value %s in par fv_divf_interp.",
+               Gets(fv_divf_interp));
+  }
 
   /* set flux factors for outer BCs */
   if( sscanf(Gets(Par("dg_outerBC_flux_fac")), "%lg %lg %lg",
@@ -277,6 +293,8 @@ int dg_print_DGglobals(tMesh *mesh)
   printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
   printf(" DGglobals->fv_divf_interp_mode = %d\n",
          DGglobals->fv_divf_interp_mode);
+  printf(" DGglobals->fv_divf_adds_surface_fluxes = %d\n",
+         DGglobals->fv_divf_adds_surface_fluxes);
 
   return 0;
 }

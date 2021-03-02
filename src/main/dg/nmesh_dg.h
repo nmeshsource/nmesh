@@ -27,6 +27,7 @@ typedef struct {
   double outerBC_flux_fac[3]; /* values from par dg_outerBC_flux_fac */
   int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
   int fv_divf_interp_mode;    /* div(f) interp. mode from fv_divf_interp */
+  int fv_divf_adds_surface_fluxes; //if 1 fv_divf adds surf. fluxes
 } tDGglobals;
 
 
