@@ -223,6 +223,7 @@ void printDGinfo(tDGinfo *d)
 int dg_set_DGglobals(tMesh *mesh)
 {
   int fv_rec = Par("fv_rec");
+  int fv_divf_interp = Par("fv_divf_interp");
 
   /* set reconstruction mode */
   if(Getv(fv_rec, "1"))
@@ -244,6 +245,16 @@ int dg_set_DGglobals(tMesh *mesh)
   else
     errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
 
+  /* set interpolation mode for div(flux) */
+  if(Getv(fv_divf_interp, "no"))
+    DGglobals->fv_divf_interp_mode = FV_NO_INTERP;
+  else if(Getv(fv_divf_interp, "divf_interp1"))
+    DGglobals->fv_divf_interp_mode = FV_DIVF_INTERP1;
+  else if(Getv(fv_divf_interp, "dnfn_interp1"))
+    DGglobals->fv_divf_interp_mode = FV_DNFN_INTERP1;
+  else
+    errorexits("unknown val %s in par fv_divf_interp.",Gets(fv_divf_interp));
+
   /* set flux factors for outer BCs */
   if( sscanf(Gets(Par("dg_outerBC_flux_fac")), "%lg %lg %lg",
              &(DGglobals->outerBC_flux_fac[0]),
@@ -264,6 +275,8 @@ int dg_print_DGglobals(tMesh *mesh)
   for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
   printf(" }\n");
   printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
+  printf(" DGglobals->fv_divf_interp_mode = %d\n",
+         DGglobals->fv_divf_interp_mode);
 
   return 0;
 }

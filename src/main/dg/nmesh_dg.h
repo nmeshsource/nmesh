@@ -3,7 +3,8 @@
 
 
 
-/* reconstruction modes that we can have in DGglobals->fv_rec_mode */
+/* reconstruction modes that we can have in DGglobals->fv_rec_mode,
+   as well as interpolation modes in DGglobals->fv_divf_interp_mode */
 enum
 {
   FV_REC_0=0,             /* reconstruction mode not set */
@@ -14,7 +15,10 @@ enum
   FV_REC_WENO3if2away_1,  /* WENO3 if 2 away from face, else 1st order */
   FV_REC_WENO3if1away_1,  /* WENO3 if 1 away from face, else 1st order */
   FV_REC_WENO3_2,         /* WENO3 if 1 away from face, else 2nd? order */
-  FV_REC_WENO3_2g         /* WENO3 if 1 away, else 2nd? order w. ghost */
+  FV_REC_WENO3_2g,        /* WENO3 if 1 away, else 2nd? order w. ghost */
+  FV_NO_INTERP,           /* do not iterpolate div(flux) */
+  FV_DIVF_INTERP1,        /* interpolate all of div(flux) = d_i f^i */
+  FV_DNFN_INTERP1         /* in d_i f^i interp. only term along face normal */
 };
 
 /* structure that holds global dg pars */
@@ -22,6 +26,7 @@ typedef struct {
   /* frequently used par values */
   double outerBC_flux_fac[3]; /* values from par dg_outerBC_flux_fac */
   int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
+  int fv_divf_interp_mode;    /* div(f) interp. mode from fv_divf_interp */
 } tDGglobals;
 
 

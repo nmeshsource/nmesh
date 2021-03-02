@@ -27,6 +27,8 @@ int nmesh_dg(tMesh *mesh)
   AddPar("dg_numerical_flux", "LLF", "numerical flux [LLF]");
   AddPar("fv_rec", "WENOm3_2", "how we reconstruct with fv [1,WENOm3_2,"
          "WENOm5_2,WENOmZ_2,WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
+  AddPar("fv_divf_interp", "divf_interp1", "how we interp div(f) [no,"
+         "divf_interp1,dnfn_interp1]");
 
   return 0;
 }
