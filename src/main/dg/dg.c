@@ -116,13 +116,16 @@ int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
       int use_fv = node->dat->info->use_fv;
       double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
       double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
-      double distXb[6];
+      double distXb[6] = {0};
 
-      /* do nothing if fv_divf has already taken care of surface fluxes */
-      if(use_fv && skip_fv) continue;
+      if(use_fv)
+      {
+        /* do nothing if fv_divf has already taken care of surface fluxes */
+        if(skip_fv) continue;
 
-      /* find distance from faces to nearest midpoint */
-      set_nodemidpoints_to_face_distXb(node, distXb);
+        /* find distance from faces to nearest midpoint */
+        set_nodemidpoints_to_face_distXb(node, distXb);
+      }
 
       /* set DG node info */
       dgi->node = node;
