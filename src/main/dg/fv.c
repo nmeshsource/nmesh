@@ -355,6 +355,10 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             double *fnum = fnumR[l];
             double *df = di0fi0[l];
             df[i0] = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1;
+
+            /* extrapolate df = d_i0 f^i0 to face */
+            if((extrap_mode == FV_DNFN_EXTRAP1) && (i0 == n[dir]-1))
+              rec1d_uface_to_uin_1_Carray(n[dir], df, 0);
           }
         } /* end i0 loop */
 
@@ -371,10 +375,6 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             int idivf = Vind(vldivf,l);
             double *divf = Vard_(node, idivf);
             double *df = di0fi0[l];
-
-            /* extrapolate df = d_i0 f^i0 to face */
-            if(extrap_mode == FV_DNFN_EXTRAP1)
-              rec1d_uface_to_uin_1_Carray(n[dir], df, 0);
 
             /* add d_i0 f^i0 term to div(flux) */
             divf[ccc] += df[i0];
