@@ -227,7 +227,7 @@ void printDGinfo(tDGinfo *d)
 int dg_set_DGglobals(tMesh *mesh)
 {
   int fv_rec = Par("fv_rec");
-  int fv_divf_interp = Par("fv_divf_interp");
+  int fv_divf_extrap = Par("fv_divf_extrap");
 
   /* set reconstruction mode */
   if(Getv(fv_rec, "1"))
@@ -249,26 +249,26 @@ int dg_set_DGglobals(tMesh *mesh)
   else
     errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
 
-  /* set interpolation mode for div(flux) */
-  if(Getv(fv_divf_interp, "no"))
+  /* set extrapolation mode for div(flux) */
+  if(Getv(fv_divf_extrap, "no"))
   {
-    DGglobals->fv_divf_interp_mode = FV_NO_INTERP;
+    DGglobals->fv_divf_extrap_mode = FV_NO_EXTRAP;
     DGglobals->fv_divf_adds_surface_fluxes = 0;
   }
-  else if(Getv(fv_divf_interp, "divf_interp1"))
+  else if(Getv(fv_divf_extrap, "divf_extrap1"))
   {
-    DGglobals->fv_divf_interp_mode = FV_DIVF_INTERP1;
+    DGglobals->fv_divf_extrap_mode = FV_DIVF_EXTRAP1;
     DGglobals->fv_divf_adds_surface_fluxes = 0;
   }
-  else if(Getv(fv_divf_interp, "dnfn_interp1"))
+  else if(Getv(fv_divf_extrap, "dnfn_extrap1"))
   {
-    DGglobals->fv_divf_interp_mode = FV_DNFN_INTERP1;
+    DGglobals->fv_divf_extrap_mode = FV_DNFN_EXTRAP1;
     DGglobals->fv_divf_adds_surface_fluxes = 1;
   }
   else
   {
-    errorexits("unknown value %s in par fv_divf_interp.",
-               Gets(fv_divf_interp));
+    errorexits("unknown value %s in par fv_divf_extrap.",
+               Gets(fv_divf_extrap));
   }
 
   /* set flux factors for outer BCs */
@@ -291,8 +291,8 @@ int dg_print_DGglobals(tMesh *mesh)
   for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
   printf(" }\n");
   printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
-  printf(" DGglobals->fv_divf_interp_mode = %d\n",
-         DGglobals->fv_divf_interp_mode);
+  printf(" DGglobals->fv_divf_extrap_mode = %d\n",
+         DGglobals->fv_divf_extrap_mode);
   printf(" DGglobals->fv_divf_adds_surface_fluxes = %d\n",
          DGglobals->fv_divf_adds_surface_fluxes);
 

@@ -531,6 +531,38 @@ double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale)
 }
 
 
+/* forward=1: convert from u at face to u at 0.25h in
+   forward=0: convert from u at 0.25h in to u at face */
+void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward)
+{
+  double c0 = 0.75;
+  double c1 = 1. - c0;
+  double w0,w1;
+  int i0;
+
+  if(forward) /* weights for linear interpolation*/
+  {
+    w0 = c0;
+    w1 = c1;
+  }
+  else /* weights for linear extrapolation*/
+  {
+    w0 = 1./c0;
+    w1 = -c1*w0;
+  }
+
+  /* no interpolation if only 1 or 2 points */
+  if(n<=2) return;
+
+  for(i0=0; i0<n; i0+=n-1)
+  {
+    int top = (i0>0);
+    int sign = 2*top - 1;
+    int i0in = i0 - sign;  /* one away from from face */
+
+    u[i0] = w0*u[i0] + w1*u[i0in];
+  }
+}
 
 /* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */

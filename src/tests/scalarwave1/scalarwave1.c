@@ -326,7 +326,8 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
                              scalarwave1_fluxes_pt, scalarwave1->numflux);
 
   /* extrapolate divf to face on fv nodes */
-  rec1d_uface_to_uin_1_mesh(mesh, vldivf, 0);
+  if(DGglobals->fv_divf_extrap_mode == FV_DIVF_EXTRAP1)
+    rec1d_uface_to_uin_1_mesh(mesh, vldivf, 0);
 
   /* add divf on node surfaces */
   vladdto_onfaces(vlr, -1., vldivf);

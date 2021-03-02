@@ -65,6 +65,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   double q_scale = 1.; /* typical order of magnitude of fields */
   int nghosts;         /* number of ghost points on each end */
   int add_surface_fluxes; /* whether we set all of divf on faces */
+  int extrap_mode = DGglobals->fv_divf_extrap_mode;
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -371,8 +372,11 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             double *divf = Vard_(node, idivf);
             double *df = di0fi0[l];
 
-            // interpol. df at ends
-            // ...
+            /* extrapolate df = d_i0 f^i0 to face */
+            if(extrap_mode == FV_DNFN_EXTRAP1)
+              rec1d_uface_to_uin_1_Carray(n[dir], df, 0);
+
+            /* add d_i0 f^i0 term to div(flux) */
             divf[ccc] += df[i0];
           }
         }
