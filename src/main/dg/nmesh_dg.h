@@ -12,6 +12,9 @@ enum
   FV_REC_WENOm3_2,        /* non-standard WENO3 with uniform opt. weights */
   FV_REC_WENOm5_2,        /* non-standard WENO5 with uniform opt. weights */
   FV_REC_WENOmZ_2,        /* non-standard WENOZ with uniform opt. weights */
+  FV_REC_WENOm3_1,        /* non-standard WENO3 with uniform opt. weights */
+  FV_REC_WENOm5_1,        /* non-standard WENO5 with uniform opt. weights */
+  FV_REC_WENOmZ_1,        /* non-standard WENOZ with uniform opt. weights */
   FV_REC_WENO3if2away_1,  /* WENO3 if 2 away from face, else 1st order */
   FV_REC_WENO3if1away_1,  /* WENO3 if 1 away from face, else 1st order */
   FV_REC_WENO3_2,         /* WENO3 if 1 away from face, else 2nd? order */
@@ -113,10 +116,16 @@ void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward);
 void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward);
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm5_2(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENOm5_1(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOm5_1(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOmZ_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOmZ_2(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENOmZ_1(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale);
 
 /* fv.c */
 void fv_rec1d_q_midpt(tFVinfo *fv);

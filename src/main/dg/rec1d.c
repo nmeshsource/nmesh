@@ -798,6 +798,69 @@ double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
 }
 
 
+/* Use WENOm3 inside and copy e.g. for im=0, i.e. near the boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale)
+{
+  int lm;
+
+  /* inside */
+  if(im>=1 && im<=n-2)
+    return rec1d_p_WENOm3_uniform(n, u, im, u_scale);
+
+  if(n<3) return rec1d_p_1(n, u, im, u_scale);
+
+  /* on left end */
+  switch(im)
+  {
+  case 0:
+  case -1:
+    return u[0];
+  }
+
+  /* on right end: lm=0 is last midpoint lm=-1 is facepoint */
+  lm = (n-2) - im;
+  switch(lm)
+  {
+  case -1:
+    return u[n-1];
+  }
+
+  /* should never get here: */
+  errorexiti("im=%d out of range", im);
+}
+double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale)
+{
+  int lm;
+
+  /* inside */
+  if(im>=0 && im<=n-3)
+    return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+
+  if(n<3) return rec1d_m_1(n, u, im, u_scale);
+
+  /* on right end: lm=0 is last midpoint lm=-1 is facepoint */
+  lm = (n-2) - im;
+  switch(lm)
+  {
+  case 0:
+  case -1:
+    return u[n-1];
+  }
+
+  /* on left end */
+  switch(im)
+  {
+  case -1:
+    return u[0];
+  }
+
+  /* should never get here: */
+  errorexiti("im=%d out of range", im);
+}
+
+
 /*************************************************************************/
 /* WENO5 or WEONZ have more weights and use 5 points */
 /*************************************************************************/
@@ -984,6 +1047,26 @@ double rec1d_m_WENOm5_2(int n, const double *u, int im, double u_scale)
     return rec1d_m_WENOm3_2(n, u, im, u_scale);
 }
 
+/* Use WENO5 inside and copy e.g. for im=0, i.e. near the boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOm5_1(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=2 && im<=n-3)
+    return rec1d_p_WENO5_uniform(n, u, im, u_scale);
+  else
+    return rec1d_p_WENOm3_1(n, u, im, u_scale);
+}
+double rec1d_m_WENOm5_1(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=1 && im<=n-4)
+    return rec1d_m_WENO5_uniform(n, u, im, u_scale);
+  else
+    return rec1d_m_WENOm3_1(n, u, im, u_scale);
+}
+
 
 /*************************************************************************/
 /* WEONZ is almost the same as WENO5, it just use the different factor
@@ -1165,4 +1248,24 @@ double rec1d_m_WENOmZ_2(int n, const double *u, int im, double u_scale)
     return rec1d_m_WENOZ_uniform(n, u, im, u_scale);
   else
     return rec1d_m_WENOm3_2(n, u, im, u_scale);
+}
+
+/* Use WENOZ inside and copy e.g. for im=0, i.e. near the boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOmZ_1(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=2 && im<=n-3)
+    return rec1d_p_WENOZ_uniform(n, u, im, u_scale);
+  else
+    return rec1d_p_WENOm3_1(n, u, im, u_scale);
+}
+double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=1 && im<=n-4)
+    return rec1d_m_WENOZ_uniform(n, u, im, u_scale);
+  else
+    return rec1d_m_WENOm3_1(n, u, im, u_scale);
 }

@@ -26,7 +26,8 @@ int nmesh_dg(tMesh *mesh)
          "'dg_outerBC_flux_fac = 1 0 0' for 1d meshes)");
   AddPar("dg_numerical_flux", "LLF", "numerical flux [LLF]");
   AddPar("fv_rec", "WENOm3_2", "how we reconstruct with fv [1,WENOm3_2,"
-         "WENOm5_2,WENOmZ_2,WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
+         "WENOm5_2,WENOmZ_2,WENOm3_1,WENOm5_1,WENOmZ_1,"
+         "WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
   AddPar("fv_divf_extrap", "divf_extrap1", "how we extrap div(f) [no,"
          "divf_extrap1,dnfn_extrap1]");
 
