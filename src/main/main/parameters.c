@@ -66,8 +66,15 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
   nbuffer = 0;
   if(Rank0_or_NoMPI)
   {
+    int IObufsz = 1048576;
+    char *IObuf = cmalloc(IObufsz); /* larger buffer for read */
+
     fp = fopen(parfile, "r");
-    if(!fp)
+    if(fp)
+    {
+      setvbuf(fp, IObuf, _IOFBF, IObufsz);
+    }
+    else
     {
       if(pr) printf("  parameter file \"%s\" does not exist!\n", parfile);
       if(fatal)
@@ -101,6 +108,7 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
     {
       nbuffer = 0;
     }
+    free(IObuf);
   }
 
   /* broadcast whether parfile exists */
