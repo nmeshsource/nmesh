@@ -19,17 +19,14 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
   FILE *fp;
   char *list, *saveptr, *name;
   int IObufsz = Geti(Par("fs_bufsize"));
-  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
   if(!Rank0) return 0;
 
   /* open destination file */
-  fp = fopen(fname, "wb");
+  fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
   if(!fp) errorexits("failed opening %s", fname);
-
-  /* attach IO buffer */
-  setvbuf(fp, IObuf, _IOFBF, IObufsz);
 
   fprintf(fp, "# parameters listed in checkpoint_save_pars\n");
 
@@ -46,8 +43,7 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
   }
 
   free(list);
-  fclose(fp);
-  free(IObuf);
+  fclose_buf(fp, &IObuf);
   return 0;
 }
 
@@ -61,17 +57,14 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
   FILE *fp;
   int p;
   int IObufsz = Geti(Par("fs_bufsize"));
-  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
   if(!Rank0) return 0;
 
   /* open destination file */
-  fp = fopen(fname, "wb");
+  fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
   if(!fp) errorexits("failed opening %s", fname);
-
-  /* attach IO buffer */
-  setvbuf(fp, IObuf, _IOFBF, IObufsz);
 
   /* header with some mesh info */
   fprintf(fp, "mesh->\n");
@@ -89,8 +82,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
     fprintf(fp, "\n");
   }
 
-  fclose(fp);
-  free(IObuf);
+  fclose_buf(fp, &IObuf);
   return 0;
 }
 
@@ -166,7 +158,7 @@ int checkpoint_save_nodes(tMesh *mesh, char *fname)
   tNlist *el;
   int p;
   int IObufsz = Geti(Par("fs_bufsize"));
-  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
   if(!Rank0) return 0;
@@ -182,18 +174,14 @@ int checkpoint_save_nodes(tMesh *mesh, char *fname)
   }
 
   /* open destination file */
-  fp = fopen(fname, "wb");
+  fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
   if(!fp) errorexits("failed opening %s", fname);
-
-  /* attach IO buffer */
-  setvbuf(fp, IObuf, _IOFBF, IObufsz);
 
   /* write all nodes */
   checkpoint_write_nodetrees(fp, rnlist);
 
-  fclose(fp);
+  fclose_buf(fp, &IObuf);
   free_nodelist(rnlist);
-  free(IObuf);
   return 0;
 }
 
@@ -349,7 +337,7 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
   FILE *fp;
   int vi, rk;
   int IObufsz = Geti(Par("fs_bufsize"));
-  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObuf; /* larger buffer for write */
 
   /* loop over all vars and put all impportant EvoVars into vl */
   for(vi=0; vi<mesh->nvdb; vi++)
@@ -364,17 +352,14 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
     if(rk == nMPI_rank())
     {
       /* open destination file */
-      if(Rank0) fp = fopen(fname, "wb");
-      else      fp = fopen(fname, "ab");
+      if(Rank0) fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
+      else      fp = fopen_buf(fname, "ab", &IObuf,IObufsz);
       if(!fp) errorexits("failed opening %s", fname);
-
-      /* attach IO buffer */
-      setvbuf(fp, IObuf, _IOFBF, IObufsz);
 
       /* write var list vl in little endian format */
       checkpoint_write_vl(fp, vl, 0);
 
-      fclose(fp);
+      fclose_buf(fp, &IObuf);
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
@@ -382,7 +367,6 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
   } /* end rk-loop */
 
   vlfree(vl);
-  free(IObuf);
   return 0;
 }
 
