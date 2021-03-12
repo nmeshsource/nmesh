@@ -37,7 +37,8 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* VTK_out.c */
 FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
-                char *nstr, int series);
+                char *nstr, int series,
+                char *IObuf, size_t IObufsiz);
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
                  int series, tOutpars *par);
 void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T);

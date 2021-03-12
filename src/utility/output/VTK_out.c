@@ -11,7 +11,8 @@
 
 /* open file for vtk writing */
 FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
-                char *nstr, int series)
+                char *nstr, int series,
+                char *IObuf, size_t IObufsiz)
 {
   char filename[1000];
   FILE *fp;
@@ -32,6 +33,9 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
   fp = fopen(filename, "wb");
   if(!fp)
     errorexits("failed opening %s", filename);
+
+  /* attach IO buffer */
+  setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
   //PRF;printf(": %s", filename); fflush(stdout);
 
@@ -192,6 +196,8 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
   int rk;
+  int IObufsz = Geti(Par("fs_bufsize"));
+  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -229,7 +235,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
           if(vtk || 1) /* can do only VTK right now */
           {
             /* VTK output: one file per time step in separate subdirectories */
-            fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1);
+            fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1, IObuf,IObufsz);
             write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
             fclose(fp);
           }
@@ -240,6 +246,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
+  free(IObuf);
 }
 
 /* 3d vtk output of coeffs */
@@ -251,6 +258,8 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
   int rk;
+  int IObufsz = Geti(Par("fs_bufsize"));
+  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -288,7 +297,8 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
           if(vtk || 1) /* can do only VTK right now */
           {
             /* VTK output: one file per time step in separate subdirectories */
-            FILE *fp = fopen_vtk(name, outdir, "co", ns, nseries-1);
+            FILE *fp = fopen_vtk(name, outdir, "co", ns, nseries-1,
+                                 IObuf,IObufsz);
             tArray *co = alloc_array(node->n);
 
             basis_array_analysis3(node, VarA(node, vi), co);
@@ -304,6 +314,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
+  free(IObuf);
 }
 
 /* quick array output in vtk format */
@@ -316,11 +327,14 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   char *outdir;
   tOutpars par[1];
   char ns[100];
+  int IObufsz;
+  char *IObuf;
 
   if(node)
   {
     mesh = node->pat->mesh;
     outdir = Gets(Par("outdir"));
+    IObufsz = Geti(Par("fs_bufsize"));
 
     /* find string that identifies node */
     nodename(node, ns,100);
@@ -328,8 +342,10 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   else
   {
     outdir = ".";
+    IObufsz = 1048576;
     ns[0] = 0;
   }
+  IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -343,9 +359,10 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   nseries = fake_it + 1;
 
   /* write files */
-  fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1);
+  fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1, IObuf,IObufsz);
   write3d_vtk(node, fp, va, fake_it,fake_t, nseries-1, par);
   fclose(fp);
+  free(IObuf);
 }
 
 /* quick var output in vtk format */
@@ -480,6 +497,8 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
   int rk;
+  int IObufsz = Geti(Par("fs_bufsize"));
+  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
   par->name          = name;
@@ -531,7 +550,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
           if(ijk[2]>=0)
           {
             /* VTK output: one file per time step in separate subdirectories */
-            fp = fopen_vtk(name, outdir, "XY", ns, nseries-1);
+            fp = fopen_vtk(name, outdir, "XY", ns, nseries-1, IObuf,IObufsz);
             write_plane_vtk(node, fp, 2,ijk, VarA(node, vi), It,T, nseries-1, par);
             fclose(fp);
           }
@@ -539,7 +558,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
           if(ijk[1]>=0)
           {
             /* VTK output: one file per time step in separate subdirectories */
-            fp = fopen_vtk(name, outdir, "XZ", ns, nseries-1);
+            fp = fopen_vtk(name, outdir, "XZ", ns, nseries-1, IObuf,IObufsz);
             write_plane_vtk(node, fp, 1,ijk, VarA(node, vi), It,T, nseries-1, par);
             fclose(fp);
           }
@@ -547,7 +566,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
           if(ijk[0]>=0)
           {
             /* VTK output: one file per time step in separate subdirectories */
-            fp = fopen_vtk(name, outdir, "YZ", ns, nseries-1);
+            fp = fopen_vtk(name, outdir, "YZ", ns, nseries-1, IObuf,IObufsz);
             write_plane_vtk(node, fp, 0,ijk, VarA(node, vi), It,T, nseries-1, par);
             fclose(fp);
           }
@@ -558,4 +577,5 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
+  free(IObuf);
 }
