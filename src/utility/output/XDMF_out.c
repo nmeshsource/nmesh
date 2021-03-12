@@ -65,7 +65,8 @@ char *B_E_grid =
 
 
 /* open file xmf file with XML description and position file pointer */
-FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time)
+FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time,
+                     char *IObuf, size_t IObufsiz)
 {
   FILE *fp;
   char fname[1000];
@@ -83,11 +84,19 @@ FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time)
     fp = fopen(fname, "w+");
     if(!fp) errorexits("Cannot open %s for writing", fname);
 
+    /* attach IO buffer */
+    setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+
     /* write fixed part of XML header into new file */
     fprintf(fp, "%s", B_head);
     fprintf(fp, "%s", B_temporal);
     fprintf(fp, "%s", E_temporal);
     fprintf(fp, "%s", E_head);
+  }
+  else
+  {
+    /* attach IO buffer */
+    setvbuf(fp, IObuf, _IOFBF, IObufsiz);
   }
 
   /* we want to append more data, which requires us to remove
@@ -112,7 +121,8 @@ void fclose_xdmf_xmf(FILE *fp)
 }
 
 /* open file to add more nodes still with the same Time Value */
-FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix)
+FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix,
+                                 char *IObuf, size_t IObufsiz)
 {
   FILE *fp;
   char fname[1000];
@@ -125,6 +135,9 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix)
   fp = fopen(fname, "r+");
   if(!fp) errorexit("cannot add if file was never created with fopen_xdmf_xmf");
 
+  /* attach IO buffer */
+  setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+
   /* remove E_spatial, E_temporal, E_head */
   offset = strlen(E_spatial) + strlen(E_temporal) + strlen(E_head);
   fseek(fp, -offset, SEEK_END);
@@ -133,7 +146,8 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix)
 }
 
 /* open a .bin file with raw binary data */
-FILE *fopen_bin(char *varname, char *outdir, char *suffix)
+FILE *fopen_bin(char *varname, char *outdir, char *suffix,
+                char *IObuf, size_t IObufsiz)
 {
   FILE *fp;
   char fname[1000];
@@ -141,6 +155,9 @@ FILE *fopen_bin(char *varname, char *outdir, char *suffix)
 
   fp = fopen(fname, "a");
   if(!fp) errorexits("Cannot open %s for writing", fname);
+
+  /* attach IO buffer */
+  setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
   return fp;
 }
@@ -206,6 +223,10 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
                   Getd(Par("outputY0")),
                   Getd(Par("outputZ0")) };
   int vli;
+  int bufsize  = Geti(Par("fs_bufsize"));
+  char *bufxmf = cmalloc(bufsize);
+  char *bufbin = cmalloc(bufsize);
+  char *bufxyz = cmalloc(bufsize);
 
   /* loop over varlist */
   for(vli=0; vli<vl->n; vli++)
@@ -221,12 +242,14 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
       if(rk == nMPI_rank())
       {
         if(Rank0) /* open xmf to start a new spatial series */
-          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm], Time);
+          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix[norm], Time,
+                                 bufxmf,bufsize);
         else /* just add to the same spatial series */
-          fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix[norm]);
+          fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix[norm],
+                                             bufxmf,bufsize);
 
         /* open binary file */
-        fpbin = fopen_bin(vname, outdir, suffix[norm]);
+        fpbin = fopen_bin(vname, outdir, suffix[norm], bufbin,bufsize);
 
         /* loop over all leaf nodes */
         formylnodes_noomp(mesh)
@@ -267,8 +290,8 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
-                FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm]);
-
+                FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm],
+                                        bufxyz,bufsize);
                 write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
                 fclose(fpxyz);
               }
@@ -293,6 +316,9 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
       nMPI_barrier();
     } /* end rk-loop */
   }
+  free(bufxyz);
+  free(bufbin);
+  free(bufxmf);
 }
 
 
@@ -310,6 +336,10 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   int ix = Ind( Gets(Par("output_xcoord")) );
   char *suffix = "xyz";
   int vli;
+  int bufsize  = Geti(Par("fs_bufsize"));
+  char *bufxmf = cmalloc(bufsize);
+  char *bufbin = cmalloc(bufsize);
+  char *bufxyz = cmalloc(bufsize);
 
   /* loop over varlist */
   for(vli=0; vli<vl->n; vli++)
@@ -325,12 +355,12 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
       if(rk == nMPI_rank())
       {
         if(Rank0) /* open xmf to start a new spatial series */
-          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix, Time);
+          fpxmf = fopen_xdmf_xmf(vname, outdir, suffix, Time, bufxmf,bufsize);
         else /* just add to the same spatial series */
-          fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix);
-
+          fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix,
+                                             bufxmf,bufsize);
         /* open binary file */
-        fpbin = fopen_bin(vname, outdir, suffix);
+        fpbin = fopen_bin(vname, outdir, suffix, bufbin,bufsize);
 
         /* loop over all leaf nodes */
         formylnodes_noomp(mesh)
@@ -358,7 +388,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
-                FILE *fpxyz = fopen_bin("xyz", outdir, suffix);
+                FILE *fpxyz = fopen_bin("xyz",outdir,suffix, bufxyz,bufsize);
 
                 write_3buffers(px,py,pz, np, dbl, fpxyz);
                 fclose(fpxyz);
@@ -382,6 +412,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
       nMPI_barrier();
     } /* end rk-loop */
   }
+  free(bufxyz);
+  free(bufbin);
+  free(bufxmf);
 }
 
 
