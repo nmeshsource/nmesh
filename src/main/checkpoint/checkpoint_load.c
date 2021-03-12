@@ -44,7 +44,7 @@ exit(8);
   if(Rank0)
   {
     FILE *fp;
-    int IObufsz = Geti(Par("fs_bufsize"));
+    int IObufsz = Geti(Par("fread_bufsize"));
     char *IObuf; /* larger buffer for file read */
 
     /* open file */
@@ -164,7 +164,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
   long extra = 1024;
   long nbuffer_allocd = first + extra;
   int file_end;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fread_bufsize"));
   char *IObuf;
 
   /* alloc buffer */
@@ -368,7 +368,7 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
   char *buffer;
   long nbuffer;
   int i;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fread_bufsize"));
   char *IObuf; /* larger buffer for file read */
 
   /* open file on rank0 */

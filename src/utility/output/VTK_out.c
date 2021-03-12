@@ -196,7 +196,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
   int rk;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
@@ -258,7 +258,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
   int rk;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
@@ -334,7 +334,7 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   {
     mesh = node->pat->mesh;
     outdir = Gets(Par("outdir"));
-    IObufsz = Geti(Par("fs_bufsize"));
+    IObufsz = Geti(Par("fwrite_bufsize"));
 
     /* find string that identifies node */
     nodename(node, ns,100);
@@ -497,7 +497,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *outdir = Gets(Par("outdir"));
   tOutpars par[1];
   int rk;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */

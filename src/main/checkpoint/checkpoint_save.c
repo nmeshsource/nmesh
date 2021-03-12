@@ -18,7 +18,7 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
 {
   FILE *fp;
   char *list, *saveptr, *name;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
@@ -56,7 +56,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
 {
   FILE *fp;
   int p;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
@@ -157,7 +157,7 @@ int checkpoint_save_nodes(tMesh *mesh, char *fname)
   tNlist *rnlist = NULL;
   tNlist *el;
   int p;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
@@ -336,7 +336,7 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
   tVarList *vl = vlalloc(mesh);
   FILE *fp;
   int vi, rk;
-  int IObufsz = Geti(Par("fs_bufsize"));
+  int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
 
   /* loop over all vars and put all impportant EvoVars into vl */

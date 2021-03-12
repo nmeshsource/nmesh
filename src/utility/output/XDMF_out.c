@@ -223,7 +223,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
                   Getd(Par("outputY0")),
                   Getd(Par("outputZ0")) };
   int vli;
-  int bufsize  = Geti(Par("fs_bufsize"));
+  int bufsize  = Geti(Par("fwrite_bufsize"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
@@ -336,7 +336,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   int ix = Ind( Gets(Par("output_xcoord")) );
   char *suffix = "xyz";
   int vli;
-  int bufsize  = Geti(Par("fs_bufsize"));
+  int bufsize  = Geti(Par("fwrite_bufsize"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
