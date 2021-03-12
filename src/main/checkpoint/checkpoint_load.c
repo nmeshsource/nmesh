@@ -44,9 +44,11 @@ exit(8);
   if(Rank0)
   {
     FILE *fp;
+    int IObufsz = Geti(Par("fs_bufsize"));
+    char *IObuf; /* larger buffer for file read */
 
     /* open file */
-    fp = fopen(fname, "rb");
+    fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
     if(!fp) errorexits("failed opening %s", fname);
 
     /* find number of bytes in file and write them into buffer */
@@ -54,7 +56,7 @@ exit(8);
     buffer = cmalloc(nbuffer);
     fread(buffer, sizeof(char), nbuffer, fp);
 
-    fclose(fp);
+    fclose_buf(fp, &IObuf);
   }
 
   /* broadcast buffer to all MPI ranks */
@@ -162,6 +164,8 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
   long extra = 1024;
   long nbuffer_allocd = first + extra;
   int file_end;
+  int IObufsz = Geti(Par("fs_bufsize"));
+  char *IObuf;
 
   /* alloc buffer */
   buffer = cmalloc(nbuffer_allocd);
@@ -169,7 +173,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
   /* open file on rank0 */
   if(Rank0)
   {
-    fp = fopen(fname, "rb");
+    fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
     if(!fp) errorexits("failed opening %s", fname);
   }
 
@@ -331,7 +335,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
   } while(!file_end);
 
   /* close file */
-  if(Rank0) fclose(fp);
+  if(Rank0) fclose_buf(fp, &IObuf);
 
   PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
              mesh->iteration, mesh->time);
@@ -364,11 +368,13 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
   char *buffer;
   long nbuffer;
   int i;
+  int IObufsz = Geti(Par("fs_bufsize"));
+  char *IObuf; /* larger buffer for file read */
 
   /* open file on rank0 */
   if(Rank0)
   {
-    fp = fopen(fname, "rb");
+    fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
     if(!fp) errorexits("failed opening %s", fname);
 
     /* get varlist from file */
@@ -446,7 +452,7 @@ exit(9);
   fflush(stdout);
 
   vlfree(vl);
-  if(Rank0) fclose(fp);
+  if(Rank0) fclose_buf(fp, &IObuf);
   return 0;
 }
 
