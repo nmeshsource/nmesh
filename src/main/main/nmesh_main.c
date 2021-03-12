@@ -41,6 +41,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("update_parameters_hours", "0.2",
          "hours after which we read nmesh_update_parameters.par");
 
+  AddPar("fs_bufsize", "1048576", "use setvbuf with this size for IO");
   AddPar("fs_sync", "no", "whether fs_sync is active [yes,no]");
 
   return 0;

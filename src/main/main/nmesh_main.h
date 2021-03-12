@@ -262,6 +262,9 @@ int str_to_intList(const char *str, const char *delim, intList *il);
 long str_from_buf(const char *buffer, long nbuffer, long offset,
                   char delim, char *str, long nstr, long *strlen);
 long nbytes_infile(FILE *fp);
+FILE *fopen_buf(const char *pathname, const char *mode,
+                char **buf, size_t bufsiz);
+int fclose_buf(FILE *fp, char **buf);
 int copy_file_into_dir(char *fname, char *dir);
 int system1(char *s1);
 int system2(char *s1, char *s2);
@@ -309,5 +312,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
                        double *MX, double *Mx);
 
 /* main.c */
+FILE *fopen_bufsize(tMesh *mesh, const char *pathname, const char *mode,
+                    char **buf);
 int fs_sync(tMesh *mesh);
 void finalize_all_and_exit(tMesh *mesh, int ec);

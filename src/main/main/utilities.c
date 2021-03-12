@@ -429,6 +429,28 @@ long nbytes_infile(FILE *fp)
 }
 
 
+/* Open a file where we use a buffer of size bufsiz (set with setvbuf).
+   The buffer buf is allocated here and needs to be freed later, e.g.
+   by calling fclose_buf. */
+FILE *fopen_buf(const char *pathname, const char *mode,
+                char **buf, size_t bufsiz)
+{
+  FILE *fp = fopen(pathname, mode);
+  *buf = cmalloc(bufsiz);
+  setvbuf(fp, *buf, _IOFBF, bufsiz);
+  return fp;
+}
+
+/* counterpart to fopen_buf, closes file and frees buf */
+int fclose_buf(FILE *fp, char **buf)
+{
+  int ret = fclose(fp);
+  free(*buf);
+  *buf = NULL;
+  return ret;
+}
+
+
 /* make copy of a file: cp fname newname */
 int copy_file(char *fname, char *newname)
 {
@@ -450,7 +472,7 @@ int copy_file(char *fname, char *newname)
   /* copy char by char */
   /* while( (ch=fgetc(in)) != EOF)
        fputc(ch, out);             */
-  buffer = calloc(BUFSIZE , sizeof(char));
+  buffer = malloc(BUFSIZE * sizeof(char));
   if(!buffer)
     errorexiti("copy_file: out of memory for buffer (%d chars)", BUFSIZE);
   do

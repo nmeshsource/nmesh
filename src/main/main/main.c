@@ -367,6 +367,15 @@ int move_previous_output_to_outdir(tMesh *mesh)
   return 0;
 }
 
+/* Open a file where we use a buffer with a size read from par fs_bufsize.
+   The buffer buf is allocated here and needs to be freed later, e.g.
+   by calling fclose_buf. */
+FILE *fopen_bufsize(tMesh *mesh, const char *pathname, const char *mode,
+                    char **buf)
+{
+  return fopen_buf(pathname, mode, buf, Geti(Par("fs_bufsize")));
+}
+
 /* commit filesystem caches to disk if desired */
 int fs_sync(tMesh *mesh)
 {
