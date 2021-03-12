@@ -447,10 +447,14 @@ FILE *fopen_buf(const char *pathname, const char *mode,
 /* counterpart to fopen_buf, closes file and frees buf */
 int fclose_buf(FILE *fp, char **buf)
 {
-  int ret = fclose(fp);
-  free(*buf);
-  *buf = NULL;
-  return ret;
+  if(fp)
+  {
+    int ret = fclose(fp);
+    free(*buf);
+    *buf = NULL;
+    return ret;
+  }
+  return EOF;
 }
 
 
