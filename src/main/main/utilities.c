@@ -436,8 +436,11 @@ FILE *fopen_buf(const char *pathname, const char *mode,
                 char **buf, size_t bufsiz)
 {
   FILE *fp = fopen(pathname, mode);
-  *buf = cmalloc(bufsiz);
-  setvbuf(fp, *buf, _IOFBF, bufsiz);
+  if(fp)
+  {
+    *buf = cmalloc(bufsiz);
+    setvbuf(fp, *buf, _IOFBF, bufsiz);
+  }
   return fp;
 }
 
