@@ -458,15 +458,18 @@ int copy_file(char *fname, char *newname)
   void *buffer;
   size_t BUFSIZE=16777216; /* 16MiB */
   size_t bcount;
+  size_t bufsiz = BUFSIZE/16;
+  char *inbuf;
+  char *outbuf;
 
   printf("copy_file(\"%s\", \"%s\");\n", fname, newname);
 
   /* open source file */
-  in = fopen(fname, "rb");
+  in = fopen_buf(fname, "rb", &inbuf,bufsiz);
   if(!in) errorexits("failed opening %s", fname);
 
   /* open destination file */
-  out = fopen(newname, "wb");
+  out = fopen_buf(newname, "wb", &outbuf,bufsiz);
   if(!out) errorexits("failed opening %s", newname);
 
   /* copy char by char */
@@ -482,8 +485,8 @@ int copy_file(char *fname, char *newname)
   } while(bcount==BUFSIZE);
   free(buffer);
 
-  fclose(out);
-  fclose(in);
+  fclose_buf(out, &outbuf);
+  fclose_buf(in, &inbuf);
   return 0;
 }
 
