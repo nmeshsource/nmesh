@@ -85,7 +85,7 @@ FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time,
     if(!fp) errorexits("Cannot open %s for writing", fname);
 
     /* attach IO buffer */
-    setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+    if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
     /* write fixed part of XML header into new file */
     fprintf(fp, "%s", B_head);
@@ -96,7 +96,7 @@ FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time,
   else
   {
     /* attach IO buffer */
-    setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+    if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
   }
 
   /* we want to append more data, which requires us to remove
@@ -136,7 +136,7 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix,
   if(!fp) errorexit("cannot add if file was never created with fopen_xdmf_xmf");
 
   /* attach IO buffer */
-  setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+  if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
   /* remove E_spatial, E_temporal, E_head */
   offset = strlen(E_spatial) + strlen(E_temporal) + strlen(E_head);
@@ -157,7 +157,7 @@ FILE *fopen_bin(char *varname, char *outdir, char *suffix,
   if(!fp) errorexits("Cannot open %s for writing", fname);
 
   /* attach IO buffer */
-  setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+  if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
   return fp;
 }

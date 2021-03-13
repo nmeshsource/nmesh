@@ -35,7 +35,7 @@ FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
     errorexits("failed opening %s", filename);
 
   /* attach IO buffer */
-  setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+  if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
   //PRF;printf(": %s", filename); fflush(stdout);
 
