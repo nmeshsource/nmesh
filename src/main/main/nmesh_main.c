@@ -42,7 +42,8 @@ int nmesh_main(tMesh *mesh)
          "hours after which we read nmesh_update_parameters.par");
 
   AddPar("fwrite_bufsize","1048576", "use setvbuf with this size for write");
-  AddPar("fread_bufsize", "8192",    "use setvbuf with this size for read");
+  AddPar("fread_bufsize", "0",       "setvbuf size for read, 0 means we "
+         "don't call setvbuf so that we use C's default buffering");
   AddPar("fs_sync", "no", "whether fs_sync is active [yes,no]");
 
   return 0;

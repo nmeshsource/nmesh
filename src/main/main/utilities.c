@@ -431,7 +431,8 @@ long nbytes_infile(FILE *fp)
 
 /* Open a file where we use a buffer of size bufsiz (set with setvbuf).
    The buffer buf is allocated here and needs to be freed later, e.g.
-   by calling fclose_buf. */
+   by calling fclose_buf. If bufsiz=0 no buffer is allocated and the default
+   buffers of the C library are used. */
 FILE *fopen_buf(const char *pathname, const char *mode,
                 char **buf, size_t bufsiz)
 {
