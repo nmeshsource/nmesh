@@ -225,6 +225,7 @@ int nmesh_update_parameters(tMesh *mesh)
   /* now do it if needed */
   if(do_update)
   {
+    char update_file[] = "nmesh_update_parameters.par";
     char *outdir = Gets(Par("outdir"));
     int pl = strlen(outdir) + 80;
     char *pars = cmalloc(pl);
@@ -232,16 +233,17 @@ int nmesh_update_parameters(tMesh *mesh)
     int parsread;
 
     /* read pars in file nmesh_update_parameters.par */
-    snprintf(pars,pl, "%s/%s", outdir, "nmesh_update_parameters.par");
+    snprintf(pars,pl, "%s/%s", outdir, update_file);
     parsread = nmesh_load_parameters(mesh, pars, 0, 0);
     if(parsread) { PRF;printf(":\n read \"%s\"\n", pars); }
 
     /* rename file, so that we do not update over and over again */
-    snprintf(pars2,pl, "%s/%s", outdir, "nmesh_update_parameters.par_done");
+    snprintf(pars2,pl, "%s/%s%s", outdir, update_file,"_done");
     rename(pars, pars2);
 
     /* update times */
     last_update_time = time;
+    free(pars2);
     free(pars);
   }
   return 0;
