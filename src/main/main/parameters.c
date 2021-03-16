@@ -229,21 +229,25 @@ int nmesh_update_parameters(tMesh *mesh)
     char *outdir = Gets(Par("outdir"));
     int pl = strlen(outdir) + 80;
     char *pars = cmalloc(pl);
-    char *pars2 = cmalloc(pl);
     int parsread;
 
     /* read pars in file nmesh_update_parameters.par */
     snprintf(pars,pl, "%s/%s", outdir, update_file);
     parsread = nmesh_load_parameters(mesh, pars, 0, 0);
-    if(parsread) { PRF;printf(":\n read \"%s\"\n", pars); }
+    if(parsread)
+    {
+      char *pars2 = cmalloc(pl);
 
-    /* rename file, so that we do not update over and over again */
-    snprintf(pars2,pl, "%s/%s%s", outdir, update_file,"_done");
-    rename(pars, pars2);
+      PRF;printf(":\n read \"%s\"\n", pars);
+
+      /* rename file, so that we do not update over and over again */
+      snprintf(pars2,pl, "%s/%s%s", outdir, update_file,"_done");
+      rename(pars, pars2);
+      free(pars2);
+    }
 
     /* update times */
     last_update_time = time;
-    free(pars2);
     free(pars);
   }
   return 0;
