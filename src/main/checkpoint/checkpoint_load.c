@@ -543,7 +543,7 @@ void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
   }
 }
 
-/* Add buf to buffer. To be use e.g. like this:
+/* Add buf to buffer. To be used e.g. like this:
      buffer = append_buf(buffer,nbuffer, buf,strlen(buf));  */
 char *append_buf(char *buffer, long *nbuffer, const char *buf, long nbuf)
 {
