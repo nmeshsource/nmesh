@@ -236,14 +236,15 @@ int nmesh_update_parameters(tMesh *mesh)
     parsread = nmesh_load_parameters(mesh, pars, 0, 0);
     if(parsread)
     {
-      char *pars2 = cmalloc(pl);
-
       PRF;printf(":\n read \"%s\"\n", pars);
-
-      /* rename file, so that we do not update over and over again */
-      snprintf(pars2,pl, "%s/%s%s", outdir, update_file,"_done");
-      rename(pars, pars2);
-      free(pars2);
+      if(Rank0)
+      {
+        char *pars2 = cmalloc(pl);
+        /* rename file, so that we do not update over and over again */
+        snprintf(pars2,pl, "%s/%s%s", outdir, update_file,"_done");
+        rename(pars, pars2);
+        free(pars2);
+      }
     }
 
     /* update times */
