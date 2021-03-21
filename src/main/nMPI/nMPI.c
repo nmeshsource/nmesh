@@ -301,6 +301,7 @@ int nMPI_Isend_double(double *buf, int blen, int dest, int tag,
 #ifdef USEMPI
   PR0;
   stat = MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
+  if(stat != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
   PR1;
 #endif
   return stat;
@@ -318,6 +319,7 @@ int nMPI_Irecv_double(double *buf, int blen, int src, int tag,
 #ifdef USEMPI
   PR0;
   stat = MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
+  if(stat != MPI_SUCCESS) errorexit("MPI_Irecv failed!\n");
   PR1;
 #endif
   return stat;
