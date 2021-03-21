@@ -883,12 +883,20 @@ int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
 /* wait for all send requests in com */
 int nMPI_Testall_com_send(tCom *com, int *flag)
 {
-  return nMPI_Testall(com->n_rq, com->send_rq, flag, com->send_stat);
+  int stat = nMPI_Testall(com->n_rq, com->send_rq, flag, com->send_stat);
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Testall failed!\n");
+#endif
+  return stat;
 }
 /* wait for all recv requests in com */
 int nMPI_Testall_com_recv(tCom *com, int *flag)
 {
-  return nMPI_Testall(com->n_rq, com->recv_rq, flag, com->recv_stat);
+  int stat = nMPI_Testall(com->n_rq, com->recv_rq, flag, com->recv_stat);
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Testall failed!\n");
+#endif
+  return stat;
 }
 /* wait for all requests in com */
 int nMPI_Testall_com(tCom *com, int *flag)
