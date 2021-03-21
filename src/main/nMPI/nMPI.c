@@ -344,11 +344,11 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 #ifdef USEMPI
   PR0;
   errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag, s_comm, s_req);
-  PR1;
   if(errS != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
   
   errR = MPI_Irecv(rbuf, nr, MPI_DOUBLE, rank_other, r_tag, r_comm, r_req);
   if(errR != MPI_SUCCESS) errorexit("MPI_Irecv failed!\n");
+  PR1;
 #endif
 }
 
