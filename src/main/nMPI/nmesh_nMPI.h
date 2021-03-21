@@ -92,8 +92,8 @@ int nMPI_Testall_com(tCom *com, int *flag);
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag,
                                  nMPI_Comm s_comm, nMPI_Comm r_comm);
-void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag,nMPI_Comm comm);
-void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag,nMPI_Comm comm);
+int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm);
+int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm);
 
 
 

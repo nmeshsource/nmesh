@@ -290,33 +290,37 @@ int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,
 }
 
 /* non-blocking send for double */
-void nMPI_Isend_double(double *buf, int blen, int dest, int tag,
-                       nMPI_Comm comm, nMPI_Req *req)
+int nMPI_Isend_double(double *buf, int blen, int dest, int tag,
+                      nMPI_Comm comm, nMPI_Req *req)
 {
+  int stat = 0;
   if(PR)
   {
     PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
   }
 #ifdef USEMPI
   PR0;
-  MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
+  stat = MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
   PR1;
 #endif
+  return stat;
 }
 
 /* non-blocking recv for double */
-void nMPI_Irecv_double(double *buf, int blen, int src, int tag,
-                       nMPI_Comm comm, nMPI_Req *req)
+int nMPI_Irecv_double(double *buf, int blen, int src, int tag,
+                      nMPI_Comm comm, nMPI_Req *req)
 {
+  int stat = 0;
   if(PR)
   {
     PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
   }
 #ifdef USEMPI
   PR0;
-  MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
+  stat = MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
   PR1;
 #endif
+  return stat;
 }
 
 /* exchange double buffers */
@@ -889,14 +893,16 @@ void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                           &(com->send_rq[rq]), &(com->recv_rq[rq]));
 }
 /* send only */
-void nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm)
+int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm)
 {
-  nMPI_Isend_double(com->send_buf[rq], com->send_buflen[rq], dest, tag, comm,
-                    &(com->send_rq[rq]));
+  int stat = nMPI_Isend_double(com->send_buf[rq], com->send_buflen[rq], dest,
+                               tag, comm, &(com->send_rq[rq]));
+  return stat;
 }
 /* recv only */
-void nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm)
+int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm)
 {
-  nMPI_Irecv_double(com->recv_buf[rq], com->recv_buflen[rq], src, tag, comm,
-                    &(com->recv_rq[rq]));
+  int stat = nMPI_Irecv_double(com->recv_buf[rq], com->recv_buflen[rq], src,
+                               tag, comm, &(com->recv_rq[rq]));
+  return stat;
 }
