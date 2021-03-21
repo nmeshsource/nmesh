@@ -784,13 +784,21 @@ void free_com_recv_i_buf(tCom *com)
 /* wait for all send requests in com */
 int nMPI_Waitall_com_send(tCom *com)
 {
-  return nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
+  int stat = nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Waitall failed!\n");
+#endif
+  return stat;
 }
 
 /* wait for all recv requests in com */
 int nMPI_Waitall_com_recv(tCom *com)
 {
-  return nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
+  int stat =  nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Waitall failed!\n");
+#endif
+  return stat;
 }
 
 /* wait for all requests in com */
@@ -809,47 +817,67 @@ int nMPI_Waitall_com(tCom *com)
 /* wait for send request rq to finish */
 int nMPI_Wait_com_send(tCom *com, int rq)
 {
+  int stat;
   if(PR)
   {
     PRFs(": ");
     print_com(com);
     printf("    rq=%d\n", rq);
   }
-  return nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
+  stat = nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Wait failed!\n");
+#endif
+  return stat;
 }
 /* wait for recv request rq to finish */
 int nMPI_Wait_com_recv(tCom *com, int rq)
 {
+  int stat;
   if(PR)
   {
     PRFs(": ");
     print_com(com);
     printf("    rq=%d\n", rq);
   }
-  return nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
+  stat = nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Wait failed!\n");
+#endif
+  return stat;
 }
 
 /* test if send request rq has finished */
 int nMPI_Test_com_send(tCom *com, int rq, int *flag)
 {
+  int stat;
   if(PR)
   {
     PRFs(": ");
     print_com(com);
     printf("    rq=%d\n", rq);
   }
-  return nMPI_Test(&(com->send_rq[rq]), flag, &(com->send_stat[rq]));
+  stat = nMPI_Test(&(com->send_rq[rq]), flag, &(com->send_stat[rq]));
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Test failed!\n");
+#endif
+  return stat;
 }
 /* test if recv request rq has finished */
 int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
 {
+  int stat;
   if(PR)
   {
     PRFs(": ");
     print_com(com);
     printf("    rq=%d\n", rq);
   }
-  return nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
+  stat = nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS) errorexit("nMPI_Test failed!\n");
+#endif
+  return stat;
 }
 
 /* wait for all send requests in com */
