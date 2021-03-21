@@ -301,7 +301,7 @@ int nMPI_Isend_double(double *buf, int blen, int dest, int tag,
 #ifdef USEMPI
   PR0;
   stat = MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
-  if(stat != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("MPI_Isend failed: %d!\n", stat);
   PR1;
 #endif
   return stat;
@@ -319,7 +319,7 @@ int nMPI_Irecv_double(double *buf, int blen, int src, int tag,
 #ifdef USEMPI
   PR0;
   stat = MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
-  if(stat != MPI_SUCCESS) errorexit("MPI_Irecv failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("MPI_Irecv failed: %d!\n", stat);
   PR1;
 #endif
   return stat;
@@ -346,10 +346,10 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 #ifdef USEMPI
   PR0;
   errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag, s_comm, s_req);
-  if(errS != MPI_SUCCESS) errorexit("MPI_Isend failed!\n");
+  if(errS != MPI_SUCCESS) errorexiti("MPI_Isend failed: %d!\n", errS);
   
   errR = MPI_Irecv(rbuf, nr, MPI_DOUBLE, rank_other, r_tag, r_comm, r_req);
-  if(errR != MPI_SUCCESS) errorexit("MPI_Irecv failed!\n");
+  if(errR != MPI_SUCCESS) errorexiti("MPI_Irecv failed: %d!\n", errR);
   PR1;
 #endif
 }
@@ -786,7 +786,7 @@ int nMPI_Waitall_com_send(tCom *com)
 {
   int stat = nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Waitall failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Waitall failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -796,7 +796,7 @@ int nMPI_Waitall_com_recv(tCom *com)
 {
   int stat =  nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Waitall failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Waitall failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -826,7 +826,7 @@ int nMPI_Wait_com_send(tCom *com, int rq)
   }
   stat = nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Wait failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Wait failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -842,7 +842,7 @@ int nMPI_Wait_com_recv(tCom *com, int rq)
   }
   stat = nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Wait failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Wait failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -859,7 +859,7 @@ int nMPI_Test_com_send(tCom *com, int rq, int *flag)
   }
   stat = nMPI_Test(&(com->send_rq[rq]), flag, &(com->send_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Test failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Test failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -875,7 +875,7 @@ int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
   }
   stat = nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Test failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Test failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -885,7 +885,7 @@ int nMPI_Testall_com_send(tCom *com, int *flag)
 {
   int stat = nMPI_Testall(com->n_rq, com->send_rq, flag, com->send_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Testall failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Testall failed: %d!\n", stat);
 #endif
   return stat;
 }
@@ -894,7 +894,7 @@ int nMPI_Testall_com_recv(tCom *com, int *flag)
 {
   int stat = nMPI_Testall(com->n_rq, com->recv_rq, flag, com->recv_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) errorexit("nMPI_Testall failed!\n");
+  if(stat != MPI_SUCCESS) errorexiti("nMPI_Testall failed: %d!\n", stat);
 #endif
   return stat;
 }
