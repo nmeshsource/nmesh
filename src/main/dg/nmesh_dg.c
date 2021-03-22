@@ -30,6 +30,8 @@ int nmesh_dg(tMesh *mesh)
          "WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
   AddPar("fv_divf_extrap", "divf_extrap1", "how we extrap div(f) [no,"
          "divf_extrap1,dnfn_extrap1]");
+  AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
+         "[linear,parabolic]");
 
   return 0;
 }

@@ -231,6 +231,7 @@ int dg_set_DGglobals(tMesh *mesh)
 {
   int fv_rec = Par("fv_rec");
   int fv_divf_extrap = Par("fv_divf_extrap");
+  int fv_surface_interp = Par("fv_surface_interp");
 
   /* set reconstruction mode */
   if(Getv(fv_rec, "1"))
@@ -280,6 +281,15 @@ int dg_set_DGglobals(tMesh *mesh)
                Gets(fv_divf_extrap));
   }
 
+  /* set surface interpolation mode */
+  if(Getv(fv_surface_interp,      "linear"))
+    DGglobals->fv_surface_interp_mode = FV_2DINTERP_LINEAR;
+  else if(Getv(fv_surface_interp, "parabolic"))
+    DGglobals->fv_surface_interp_mode = FV_2DINTERP_PARAB;
+  else
+    errorexits("unknown value %s in par fv_surface_interp.",
+               Gets(fv_surface_interp));
+
   /* set flux factors for outer BCs */
   if( sscanf(Gets(Par("dg_outerBC_flux_fac")), "%lg %lg %lg",
              &(DGglobals->outerBC_flux_fac[0]),
@@ -304,6 +314,8 @@ int dg_print_DGglobals(tMesh *mesh)
          DGglobals->fv_divf_extrap_mode);
   printf(" DGglobals->fv_divf_adds_surface_fluxes = %d\n",
          DGglobals->fv_divf_adds_surface_fluxes);
+  printf(" DGglobals->fv_surface_interp_mode = %d\n",
+         DGglobals->fv_surface_interp_mode);
 
   return 0;
 }

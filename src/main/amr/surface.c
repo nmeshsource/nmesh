@@ -6,6 +6,9 @@
 
 #define PR 0
 
+/* use DGglobals */
+extern tDGglobals DGglobals[1];
+
 /* functions to exchange surface data */
 
 /* Note:
@@ -738,7 +741,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tArray *(*Cb)[2];
   tDat *dat = node->dat;
   char str[100];
-
+  double (*interp1d_fv)(int k, double x, int np,
+                        const double *x_p, const double *w_interp);
   if(!dat) return;
 
   TIMER_START;
@@ -1099,6 +1103,20 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   }
 
   /* 2. use interpolation to get vars from neighbors to node */
+  /* choose 1d interpolator for basis_interp2d_toIpoints in fv case: */
+  switch(DGglobals->fv_surface_interp_mode)
+  {
+  case FV_2DINTERP_LINEAR:
+    interp1d_fv = basis_pw_linear;
+    break;
+  case FV_2DINTERP_PARAB:
+    interp1d_fv = basis_pw_parab;
+    break;
+  default:
+    errorexiti("illegal value: DGglobals->fv_surface_interp_mode = %d",
+               DGglobals->fv_surface_interp_mode);
+  }
+  /* now loop over all vars and interpolate */
   for(vi=0; vi<dat->nv; vi++)
   {
     tSurface *s = dat->s[f][vi];
@@ -1124,14 +1142,14 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         if(!found) errorexit("couldn't find nb face!!!");
         nb_dir = nb_f/2;
         /* For now we assume that pt_typ=P_UNIFORM means fin.vol., and that
-           we thus use linear instead of Lagrange interpolation!
+           we thus use e.g. linear instead of Lagrange interpolation!
            Later we may want to check nb->dat->info->use_fv, but this needs
            to be send via MPI... */
         od1 = Dir1_norm(nb_dir);
         od2 = Dir2_norm(nb_dir);
         if(nb->pt_typ[od1]==P_UNIFORM && nb->pt_typ[od2]==P_UNIFORM)
           basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
-                                   Cb[ni],Ip[ni], Res[ni], basis_pw_linear);
+                                   Cb[ni],Ip[ni], Res[ni], interp1d_fv);
         else /* Lagrange interpolation is the default */
           basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                    Cb[ni],Ip[ni], Res[ni], Lagrange_of_x);

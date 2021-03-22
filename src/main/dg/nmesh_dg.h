@@ -21,7 +21,9 @@ enum
   FV_REC_WENO3_2g,        /* WENO3 if 1 away, else 2nd? order w. ghost */
   FV_NO_EXTRAP,           /* do not iterpolate div(flux) */
   FV_DIVF_EXTRAP1,        /* extrapolate all of div(flux) = d_i f^i */
-  FV_DNFN_EXTRAP1         /* in d_i f^i extrap. only term along face normal */
+  FV_DNFN_EXTRAP1,        /* in d_i f^i extrap. only term along face normal */
+  FV_2DINTERP_LINEAR,     /* use linear interp. on fv node surface */
+  FV_2DINTERP_PARAB       /* use parabolic interp. on fv node surface */
 };
 
 /* structure that holds global dg pars */
@@ -31,6 +33,7 @@ typedef struct {
   int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
   int fv_divf_extrap_mode;    /* div(f) extrap. mode from fv_divf_extrap */
   int fv_divf_adds_surface_fluxes; //if 1 fv_divf adds surf. fluxes
+  int fv_surface_interp_mode; /* surf. interp. mode from fv_surface_interp */
 } tDGglobals;
 
 
