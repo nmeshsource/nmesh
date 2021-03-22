@@ -744,7 +744,7 @@ double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
 
   /* inside */
   if(im>=0 && im<=n-3)
-    return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+    return rec1d_m_WENOm3_uniform(n, u, im, u_scale);
 
   if(n<3) return rec1d_m_1(n, u, im, u_scale);
 
@@ -836,7 +836,7 @@ double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale)
 
   /* inside */
   if(im>=0 && im<=n-3)
-    return rec1d_m_WENO3_uniform(n, u, im, u_scale);
+    return rec1d_m_WENOm3_uniform(n, u, im, u_scale);
 
   if(n<3) return rec1d_m_1(n, u, im, u_scale);
 
