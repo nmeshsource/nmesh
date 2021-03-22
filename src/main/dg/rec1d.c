@@ -643,12 +643,14 @@ void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
 /*************************************************************************/
 /* WENOm3 is much like WENO3 but with weights for uniform grid points */
 /*************************************************************************/
-// This makes the results asymmetric between left and right moving waves!!!:
+// Before commit f6ae5a7, this made the results asymmetric between left and
+// right moving waves:
 //#define WENOm3_3id_gamma1 0.25
 //#define WENOm3_3id_gamma2 0.75
+// BUT with f6ae5a7 it may work and could be tested!!!
 /* So we just use the usual weights for uniform grids: */
-#define WENOm3_3id_gamma1 1
-#define WENOm3_3id_gamma2 2
+#define WENOm3_3id_gamma1 1.
+#define WENOm3_3id_gamma2 2.
 
 /* use rec1d_p_WENO3 with weights for uniform grid */
 double rec1d_p_WENOm3_uniform(int n, const double *u, int im, double u_scale)
