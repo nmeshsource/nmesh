@@ -6,7 +6,8 @@
 #include "nmesh.h"
 #include "dg.h"
 
-
+/* use DGglobals */
+extern tDGglobals DGglobals[1];
 
 
 /* Interpolate a field u to midpoint with index im.
@@ -645,12 +646,12 @@ void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
 /*************************************************************************/
 // Before commit f6ae5a7, this made the results asymmetric between left and
 // right moving waves:
-//#define WENOm3_3id_gamma1 0.25
-//#define WENOm3_3id_gamma2 0.75
-// BUT with f6ae5a7 it may work and could be tested!!!
-/* So we just use the usual weights for uniform grids: */
-#define WENOm3_3id_gamma1 1.
-#define WENOm3_3id_gamma2 2.
+// DGglobals->fv_WENOm3_optw[0] = 0.25 * 4;
+// DGglobals->fv_WENOm3_optw[1] = 0.75 * 4;
+// BUT with f6ae5a7 this weight ratio of 3 may work and could be tested!!!
+/* The default are the usual weights for uniform grids:
+   DGglobals->fv_WENOm3_optw[0] = 1.;
+   DGglobals->fv_WENOm3_optw[1] = 2.; */
 
 /* use rec1d_p_WENO3 with weights for uniform grid */
 double rec1d_p_WENOm3_uniform(int n, const double *u, int im, double u_scale)
@@ -660,8 +661,8 @@ double rec1d_p_WENOm3_uniform(int n, const double *u, int im, double u_scale)
   W3->lw[0][1] = 1.5;
   W3->lw[1][0] = 0.5;
   W3->lw[1][1] = 0.5;
-  W3->optw[0] = WENOm3_3id_gamma1;
-  W3->optw[1] = WENOm3_3id_gamma2;
+  W3->optw[0] = DGglobals->fv_WENOm3_optw[0];
+  W3->optw[1] = DGglobals->fv_WENOm3_optw[1];
   return rec1d_p_WENO3(n,u, im, u_scale, W3);
 }
 
@@ -673,8 +674,8 @@ double rec1d_m_WENOm3_uniform(int n, const double *u, int im, double u_scale)
   W3->lw[0][1] = 0.5;
   W3->lw[1][0] = 1.5;
   W3->lw[1][1] = -0.5;
-  W3->optw[0] = WENOm3_3id_gamma2;
-  W3->optw[1] = WENOm3_3id_gamma1;
+  W3->optw[0] = DGglobals->fv_WENOm3_optw[1];
+  W3->optw[1] = DGglobals->fv_WENOm3_optw[0];
   return rec1d_m_WENO3(n,u, im, u_scale, W3);
 }
 

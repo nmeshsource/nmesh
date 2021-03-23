@@ -232,6 +232,7 @@ int dg_set_DGglobals(tMesh *mesh)
   int fv_rec = Par("fv_rec");
   int fv_divf_extrap = Par("fv_divf_extrap");
   int fv_surface_interp = Par("fv_surface_interp");
+  double WENOm3_opt_weightratio = Getd(Par("fv_WENOm3_opt_weightratio"));
 
   /* set reconstruction mode */
   if(Getv(fv_rec, "1"))
@@ -290,6 +291,10 @@ int dg_set_DGglobals(tMesh *mesh)
     errorexits("unknown value %s in par fv_surface_interp.",
                Gets(fv_surface_interp));
 
+  /* set optimal weights for WENOm3 */
+  DGglobals->fv_WENOm3_optw[0] = 1.;
+  DGglobals->fv_WENOm3_optw[1] = WENOm3_opt_weightratio;
+
   /* set flux factors for outer BCs */
   if( sscanf(Gets(Par("dg_outerBC_flux_fac")), "%lg %lg %lg",
              &(DGglobals->outerBC_flux_fac[0]),
@@ -316,6 +321,8 @@ int dg_print_DGglobals(tMesh *mesh)
          DGglobals->fv_divf_adds_surface_fluxes);
   printf(" DGglobals->fv_surface_interp_mode = %d\n",
          DGglobals->fv_surface_interp_mode);
+  printf(" DGglobals->fv_WENOm3_optw = { %g %g }\n",
+         DGglobals->fv_WENOm3_optw[0], DGglobals->fv_WENOm3_optw[1]);
 
   return 0;
 }
