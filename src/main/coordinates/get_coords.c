@@ -1514,12 +1514,15 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
   }
 }
 
-/* write nm node midpoints (starting at id) in dir into Xbmd in Xb-coords */
+/* Write nm node midpoints (starting at id) in dir into Xbmd in Xb-coords.
+   If set_nodemidpoint_XbYbZb fails it returns 0. Then Xbm is never set, and
+   thus Xbmd may contain invalid values. We signal this by returning the 0
+   from set_nodemidpoint_XbYbZb in this case. */
 int set_nm_nodemidpoints_Xb_dir(tNode *node, int nm, int id, int dir,
                                 double *Xbmd)
 {
   double ret = 0;
-  double Xbm[3];
+  double Xbm[3] = {0}; //unnecessary init to fix gcc warning
   int i;
 
   switch(dir)
