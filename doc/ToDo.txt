@@ -353,6 +353,12 @@ Things that should be done:
 
 *investigate new c2p: https://arxiv.org/abs/2005.01821
 
+*FIXME: for GRHD + GHG: checkpoint saves GRHD cons and most prims + GHG
+ vars. It also saves ADM lapse, shift & 3-metric, but not ADM matter vars.
+ So if ham is computed and outputed directly after checkpoint load, the
+ result for ham is likely wrong. This is fixed only in the next evo step
+ when ADM matter vars are set from GRHD.
+
 *update set_all_myln_mysurf and request_all_myln_surfaces_exchange
  so that we also have min/max or averages in extra space of mysurf
  and nbsurf arrays <-- will NOT work!!! Because in a RK substep we need
