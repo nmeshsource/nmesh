@@ -532,36 +532,69 @@ double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale)
 }
 
 
+/* Compute u for rec1d_uface_to_uin_1_Carray. */
+/* forward=1: convert from u at face to u at 0.25h in
+   forward=0: convert from u at 0.25h in to u at face
+   In case s1=0 we have
+     if(forward) { w0 = c0;     w1 = c1;     }
+     else        { w0 = 1./c0;  w1 = -c1*w0; }
+   where c0 = 3/4, c1 = 1-c0 */
+double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
+                           double u_scale, double s1)
+{
+  int top = (i0>0);
+  int sign = 2*top - 1;
+  int i0in1 = i0 - sign;  /* one away from from face */
+  double c0 = 0.75;
+  double w0, w1;
+
+  if(forward) /* weight w0 for linear interpolation*/
+    w0 = c0;
+  else        /* weight w0 for linear extrapolation*/
+    w0 = 1./c0;
+
+  /* current w1 */
+  w1 = 1. - w0;
+
+  /* adjust weights towards 0th order extrapolation if s1>0 */
+  if(s1>0. && n>2)
+  {
+    int i0in2 = i0in1 - sign; /* 2 away from from face */
+    int i0in3 = i0in2 - sign; /* 3 away from from face */
+    double s, d1,d2,d3;
+    double eps = 1e-11;
+
+    if(n>3) d3 = u[i0in3] - u[i0in2];
+    else    d3 = 0.;
+    d2 = u[i0in2] - u[i0in1];
+    d1 = u[i0in1] - u[i0];
+
+    /* s = 0.5*(|u2-u1| + |u3-u2|) / (|u1-u0|/0.75 + eps*u_scale) */
+    s = 0.66666666666*(fabs(d2) + fabs(d3)) / (fabs(d1) + eps*u_scale);
+
+    /* w1 -> w1 * f(s), where f(s)=0 if s<s1, f(s)=1 otherwise */
+    if(s<s1) w1 = 0.;
+
+    /* get new w0 */
+    w0 = 1. - w1;
+  }
+
+  /* use w0 and w1 to extrapolate or interpolate u */
+  return w0*u[i0] + w1*u[i0in1];
+}
+
 /* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */
 void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward)
 {
-  double c0 = 0.75;
-  double c1 = 1. - c0;
-  double w0,w1;
   int i0;
-
-  if(forward) /* weights for linear interpolation*/
-  {
-    w0 = c0;
-    w1 = c1;
-  }
-  else /* weights for linear extrapolation*/
-  {
-    w0 = 1./c0;
-    w1 = -c1*w0;
-  }
 
   /* no interpolation if only 1 or 2 points */
   if(n<=2) return;
 
   for(i0=0; i0<n; i0+=n-1)
   {
-    int top = (i0>0);
-    int sign = 2*top - 1;
-    int i0in = i0 - sign;  /* one away from from face */
-
-    u[i0] = w0*u[i0] + w1*u[i0in];
+    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, 1, 0.);
   }
 }
 
