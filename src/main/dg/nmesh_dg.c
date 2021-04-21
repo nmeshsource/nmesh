@@ -31,6 +31,8 @@ int nmesh_dg(tMesh *mesh)
   AddPar("fv_WENOm3_opt_weightratio", "2", "2=standard, 3=mod value");
   AddPar("fv_divf_extrap", "dnfn_extrap1", "how we extrap div(f) [no,"
          "divf_extrap1,dnfn_extrap1]");
+  AddPar("fv_divf_extrap_s1", "0", "use 0th order extrapolation if "
+         "|u1-u0|/|u2-u1| < 0.75 s1, [0, 0.5, ...]");
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
          "[linear,parabolic]");
 

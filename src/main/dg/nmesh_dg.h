@@ -35,6 +35,8 @@ typedef struct {
   int fv_divf_adds_surface_fluxes; //if 1 fv_divf adds surf. fluxes
   int fv_surface_interp_mode; /* surf. interp. mode from fv_surface_interp */
   double fv_WENOm3_optw[2];   /* optimal weights for WENOm3 */
+  /* frequently used par indices */
+  int fv_divf_extrap_s1;      /* index of par fv_divf_extrap_s1 */
 } tDGglobals;
 
 

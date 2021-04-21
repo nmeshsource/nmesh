@@ -302,6 +302,9 @@ int dg_set_DGglobals(tMesh *mesh)
              &(DGglobals->outerBC_flux_fac[2])) != 3 )
     errorexit("par dg_outerBC_flux_fac must contain 3 numbers");
 
+  /* set some par indices */
+  DGglobals->fv_divf_extrap_s1 = Par("fv_divf_extrap_s1");
+
   return 0;
 }
 
@@ -323,6 +326,8 @@ int dg_print_DGglobals(tMesh *mesh)
          DGglobals->fv_surface_interp_mode);
   printf(" DGglobals->fv_WENOm3_optw = { %g %g }\n",
          DGglobals->fv_WENOm3_optw[0], DGglobals->fv_WENOm3_optw[1]);
+  printf(" DGglobals->fv_divf_extrap_s1 = par_%d\n",
+         DGglobals->fv_divf_extrap_s1);
 
   return 0;
 }

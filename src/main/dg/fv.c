@@ -66,6 +66,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int nghosts;         /* number of ghost points on each end */
   int add_surface_fluxes; /* whether we set all of divf on faces */
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
+  double extrap_s1 = Getd(DGglobals->fv_divf_extrap_s1);
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -379,7 +380,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           forvl(vldivf, l)
           {
             double *df = di0fi0[l];
-            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale, 0.);
+            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale, extrap_s1);
           }
 
         /* final loop over points in dir */
