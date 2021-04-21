@@ -379,7 +379,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           forvl(vldivf, l)
           {
             double *df = di0fi0[l];
-            rec1d_uface_to_uin_1_Carray(n[dir], df, 0);
+            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale, 0.);
           }
 
         /* final loop over points in dir */

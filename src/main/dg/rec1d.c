@@ -595,7 +595,8 @@ printf("u[%d]=%g d1=%g d2=%g d3=%g s=%g\n", i0, u[i0], d1,d2,d3, s);
 
 /* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */
-void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward)
+void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
+                                 double u_scale, double s1)
 {
   int i0;
 
@@ -604,7 +605,7 @@ void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward)
 
   for(i0=0; i0<n; i0+=n-1)
   {
-    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, 1, 0.);
+    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, u_scale, s1);
   }
 }
 
