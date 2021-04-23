@@ -1191,3 +1191,35 @@ void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
     r = r*0.5;
   }
 }
+
+
+/************************************************************************/
+/* p-refine under certain conditions */
+/************************************************************************/
+
+/* p-refine all nodes that have neighbors that have uniform grid spacing
+   in any direction */
+void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int f, ni;
+
+    /* mark nodes as to be refined if nb has uniform grid spacing */
+    for(f=0; f<6; f++)
+      for(ni=0; ni<node->nfnb[f]; ni++)
+      {
+        tNode *nb = node->fnb[f][ni];
+
+        if(nb->pt_typ[0]==P_UNIFORM ||
+           nb->pt_typ[1]==P_UNIFORM ||
+           nb->pt_typ[2]==P_UNIFORM)
+          node->rflag = ref->method;
+        /* FIXME: skip nodes that already have the same refinement as asked
+                  for in ref */
+      }
+  }
+  prefine_nodes_if_rflag(mesh, ref);
+}
