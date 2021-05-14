@@ -141,3 +141,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
              void (*numflux)(tDGinfo *d));
+
+/* dissipation.c */
+void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
+                         double dissfac);
+void dissipation_add_KO4_mesh(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+                              double dissfac);
