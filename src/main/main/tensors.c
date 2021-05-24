@@ -360,6 +360,22 @@ void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
     }
   }
 
+  if(strcmp(tensorindices, "iabj+ibaj") == 0 ||
+     strcmp(tensorindices, "i(ab)j") == 0) {
+    for(i = 0; i < 3; i++)
+    for(j = 0; j <= 3; j++)
+    for(k = j; k <= 3; k++)
+    for(l = 0; l < 3; l++)
+    {
+      sym[3*n+i] *= -1;
+      if(j > 0) sym[3*n+j-1] *= -1;
+      if(k > 0) sym[3*n+k-1] *= -1;
+      sym[3*n+l] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s%s%s", coord[i], coord4[j], coord4[k], coord[l]);
+    }
+  }
+
   /* 2d indices q,r,s,... \in [1,2] */
   if(strcmp(tensorindices, "q") == 0) {
     for(i = 0; i < 2; i++) {
