@@ -460,6 +460,32 @@ void vldropn(tVarList *v, int n)
   else          v->n -= n;
 }
 
+
+/* call vlpushone and return position pos where we put vi in varlist v */
+int vlpushone_pos(tVarList *v, int vi)
+{
+  int pos = v->n; /* position in v where vi will go */
+  vlpushone(v, vi);
+  return pos;
+}
+
+/* call vlpush and return position pos where we put vi in varlist v */
+int vlpush_pos(tVarList *v, int vi)
+{
+  int pos = v->n;
+  vlpush(v, vi);
+  return pos;
+}
+
+/* call vlpushvl and return position pos where we add u in varlist v */
+int vlpushvl_pos(tVarList *v, tVarList *u)
+{
+  int pos = v->n;
+  vlpushvl(v, u);
+  return pos;
+}
+
+
 /* duplicate variable list */
 tVarList *vlduplicate(tVarList *v)
 {
