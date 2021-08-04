@@ -129,6 +129,18 @@ void cart_partials_dUij_dk(tNode *node, int Uxx, int dUxxx)
     cart_partials_dU_di(node, Uxx + n, dUxxx + 3*n);
 }
 
+/* compute first derivs T_{ijk,l} of a tensor with T_{ijk} = T_{ikj}
+   or with T_{ijk} = T_{jik} (in both cases we have 18 comps in T) */
+void cart_partials_dTijk_dl(tNode *node, int Txxx, int dTxxxx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<18; n++)
+    cart_partials_dU_di(node, Txxx + n, dTxxxx + 3*n);
+}
+
+
 /* compute first derivs d_i U_{j} of a vector U_{j} in a node */
 void cart_partials_diUj(tNode *node, int Ux, int dUxx)
 {
@@ -159,7 +171,8 @@ void cart_partials_diUjk(tNode *node, int Uxx, int dUxxx)
     cart_3partials(node, Uxx+n, dUxxx+n, dUxxx+9+n, dUxxx+18+n);
 }
 
-/* compute first derivs d_i T_{jkl} of a tensor with T_{jkl} = T_{jlk} */
+/* compute first derivs d_i T_{jkl} of a tensor with T_{jkl} = T_{jlk}
+   or with T_{ijk} = T_{jik} (in both cases we have 18 comps in T) */
 void cart_partials_diTjkl(tNode *node, int Txxx, int dTxxxx)
 {
   int n;
