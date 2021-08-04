@@ -507,6 +507,12 @@ int vlindex(tVarList *v, int vi)
   return in;
 }
 
+/* sort index list in varlist v */
+void vlsort(tVarList *v)
+{
+  sort_int_array(v->n, v->index);
+}
+
 /* enable all variables in a variable list */
 void vlenable(tVarList *v)
 {
