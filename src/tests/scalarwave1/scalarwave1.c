@@ -693,7 +693,7 @@ int scalarwave1_init(tMesh *mesh)
 
   PRF;printf(": dt = %g\n", mesh->dt);
 
-  /* varlist */
+  /* varlist for evolution: vlu contains indices for (pi, cx,cy,cz, phi) */
   vlpush(vlu, ipi);
   vlpush(vlu, icx);
   vlpush(vlu, iphi);
