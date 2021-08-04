@@ -275,6 +275,7 @@ int system3(char *s1, char *s2, char *s3);
 void print_system_info(void);
 int system_emu(const char *command);
 int construct_argv(char *str, char ***argv);
+void sort_int_array(int n, int *ar);
 double *dmalloc(int n);
 int *imalloc(int n);
 char *cmalloc(int n);

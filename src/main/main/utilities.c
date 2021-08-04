@@ -719,6 +719,26 @@ int unlock_curr_til_EOF(FILE *out)
 }
 
 
+/* function to compare two ints for qsort */
+int qsort_compar_int(const void *x1, const void *x2)
+{
+  const int *p1 = x1;
+  const int *p2 = x2;
+  const int i1 = *p1;
+  const int i2 = *p2;
+
+  /* without overflow we could use: return i1 - i2; */
+  if(i1 < i2) return -1;
+  if(i1 > i2) return +1;
+  return 0;
+}
+/* sort array a of n integers */
+void sort_int_array(int n, int *ar)
+{
+  qsort(ar, n, sizeof(ar[0]), qsort_compar_int);
+}
+
+
 /* malloc memory (and check out of memory) for some simple cases */
 double *dmalloc(int n)
 {
