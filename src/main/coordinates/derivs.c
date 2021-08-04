@@ -159,6 +159,17 @@ void cart_partials_diUjk(tNode *node, int Uxx, int dUxxx)
     cart_3partials(node, Uxx+n, dUxxx+n, dUxxx+9+n, dUxxx+18+n);
 }
 
+/* compute first derivs d_i T_{jkl} of a tensor with T_{jkl} = T_{jlk} */
+void cart_partials_diTjkl(tNode *node, int Txxx, int dTxxxx)
+{
+  int n;
+
+  /* compute partial derivs of all components in node */
+  for(n=0; n<18; n++)
+    cart_3partials(node, Txxx+n, dTxxxx+n, dTxxxx+18+n, dTxxxx+36+n);
+}
+
+
 /***********************************************************************/
 /* 1st derivs of 4-vectors and 4-tensors */
 /***********************************************************************/
