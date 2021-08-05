@@ -555,7 +555,8 @@ void VLDisableFree(tVarList *vl)
    we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ...
    We copy all properties if type<0, surfacezones<0, but if one is
    non-negative we set it to this value. */
-tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
+tVarList *AddDuplicate_unsorted(tVarList *vl, char *postfix,
+                                int type, int surfacezones)
 {
   char name[1000];
   int i, j;
@@ -617,6 +618,43 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
     if(surfacezones>=0) newvar->surfacezones = surfacezones;
   }
   if(0) printf("mesh->nvdb is now %d\n", mesh->nvdb);
+
+  return newvl;
+}
+
+/* like AddDuplicate_unsorted, but sort varlist first so that new vars are
+   created in the usual order. Otherwise deriv functions such as
+   cart_partials_dTijk_dl may not work */
+tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
+{
+  tMesh *mesh;
+  tVarList *newvl;
+  tVarList *vl_s;
+  tVarList *newvl_s;
+  int i, j;
+
+  if(vl==NULL) return NULL;
+  mesh = vl->mesh;
+
+  newvl = vlalloc(mesh);
+  vl_s = vlduplicate(vl);
+
+  /* sort vl_s */
+  vlsort(vl_s);
+  /* now add all needed vars and get new sorted varlist newvl_s */
+  newvl_s = AddDuplicate_unsorted(vl_s, postfix, type, surfacezones);
+
+  /* use info in vl and its reordering vl_s to construct newvl with
+     same order as vl */
+  forvl(vl, i)
+  {
+    j = vlindex(vl_s, vl->index[i]); //j is pos of value vl->index[i] in vl_s
+    vlpushone(newvl, newvl_s->index[j]); //add value at pos j of newvl_s
+  }
+
+  /* free temp lists */
+  vlfree(newvl_s);
+  vlfree(vl_s);
 
   return newvl;
 }
