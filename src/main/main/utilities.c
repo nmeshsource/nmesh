@@ -738,6 +738,14 @@ void sort_int_array(int n, int *ar)
   qsort(ar, n, sizeof(ar[0]), qsort_compar_int);
 }
 
+/* search for key in a sorted int array, returns position in array */
+int search_sorted_int_array(int n, int *ar, int key)
+{
+  int *p = bsearch(&key, ar, n, sizeof(ar[0]), qsort_compar_int);
+  if(p) return (int) (p-ar);
+  else  return -1;
+}
+
 
 /* malloc memory (and check out of memory) for some simple cases */
 double *dmalloc(int n)

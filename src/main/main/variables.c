@@ -513,6 +513,13 @@ void vlsort(tVarList *v)
   sort_int_array(v->n, v->index);
 }
 
+/* Find position of first element vi in list v, returns -1 if not in list.
+   The varlist v has to be sorted already */
+int vlindex_if_sorted(tVarList *v, int vi)
+{
+  return search_sorted_int_array(v->n, v->index, vi);
+}
+
 /* enable all variables in a variable list */
 void vlenable(tVarList *v)
 {
@@ -648,7 +655,7 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
      same order as vl */
   forvl(vl, i)
   {
-    j = vlindex(vl_s, vl->index[i]); //j is pos of value vl->index[i] in vl_s
+    j = vlindex_if_sorted(vl_s, vl->index[i]); //j is pos of value vl->index[i] in vl_s
     vlpushone(newvl, newvl_s->index[j]); //add value at pos j of newvl_s
   }
 

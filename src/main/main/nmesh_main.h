@@ -198,6 +198,7 @@ int vlpush_pos(tVarList *v, int vi);
 int vlpushvl_pos(tVarList *v, tVarList *u);
 int vlindex(tVarList *v, int vi);
 void vlsort(tVarList *v);
+int vlindex_if_sorted(tVarList *v, int vi);
 tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
                              int type, int surfacezones);
@@ -277,6 +278,7 @@ void print_system_info(void);
 int system_emu(const char *command);
 int construct_argv(char *str, char ***argv);
 void sort_int_array(int n, int *ar);
+int search_sorted_int_array(int n, int *ar, int key);
 double *dmalloc(int n);
 int *imalloc(int n);
 char *cmalloc(int n);
