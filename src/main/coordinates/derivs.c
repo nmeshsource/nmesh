@@ -257,6 +257,65 @@ void cart_partials_diTjab(tNode *node, int Txtt, int dTxxtt)
     cart_3partials(node, Txtt+n, dTxxtt+n, dTxxtt+30+n, dTxxtt+60+n);
 }
 
+
+/***********************************************************************/
+/* 1st derivs of general tensors */
+/***********************************************************************/
+
+/* write number of components of var T0 and dT0 into nT and ndT, and also
+   check if dT0 has correct number of components for spatial derivs of T0 */
+void cart_partials_SetAndCheck_nT_ndT(tNode *node, int T0, int dT0,
+                                      int *nT, int *ndT)
+{
+  tMesh *mesh = node->pat->mesh;
+  *nT = MeshVarNComponents(mesh, T0);
+  *ndT = MeshVarNComponents(mesh, dT0);
+
+  if( (*ndT) != 3*(*nT) )
+  {
+    char *T = MeshVarName(mesh, T0);
+    char *dT = MeshVarName(mesh, dT0);
+    char *Tindices = MeshVarTensorIndices(mesh, T0);
+    char *dTindices = MeshVarTensorIndices(mesh, dT0);
+    printf("%s (T0=%d) with %s has nT=%d components\n",
+           T, T0, Tindices, *nT);
+    printf("%s (dT0=%d) with %s has ndT=%d components\n",
+           dT, dT0, dTindices, *ndT);
+    errorexit("To store all 3 spatial derivs we need ndT = 3*nT.");
+  }
+}
+
+/* Compute first derivs T_{... ,k} of an arbitrary tensor T. The derivative
+   index is understood to be the last index of the resultant dT, i.e.:
+   dT_{...k} = T_{... ,k} */
+void cart_partials_dTensor_di(tNode *node, int T0, int dT0)
+{
+  int nT, ndT, n;
+
+  /* get and check number of components in T0 and dT0 */
+  cart_partials_SetAndCheck_nT_ndT(node, T0,dT0, &nT, &ndT);
+
+  /* compute partial derivs of all components of Tensor */
+  for(n=0; n<nT; n++)
+    cart_partials_dU_di(node, T0 + n, dT0 + 3*n);
+}
+
+/* Compute first derivs d_i T of an arbitrary tensor T. The derivative
+   index is understood to be the first index of the resultant dT, i.e.:
+   dT_{i...} = d_i T_{...] */
+void cart_partials_diTensor(tNode *node, int T0, int dT0)
+{
+  int nT, ndT, n;
+
+  /* get and check number of components in T0 and dT0 */
+  cart_partials_SetAndCheck_nT_ndT(node, T0,dT0, &nT, &ndT);
+
+  /* compute partial derivs of all components of Tensor */
+  for(n=0; n<nT; n++)
+    cart_3partials(node, T0 + n, dT0 + n, dT0 + nT + n, dT0 + 2*nT + n);
+}
+
+
 /***********************************************************************/
 /* 2nd derivs of vectors and tensors */
 /***********************************************************************/
