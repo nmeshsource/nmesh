@@ -418,6 +418,32 @@ void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
   }
 }
 
+/* Compute 1st and 2nd derivs d_i T_{...} and d_i d_j T_{...} of a general
+   tensor T_{...}.  The resulting d_i d_j T_{...} needs to be defined as
+   symmetric in the first 2 indices. */
+void cart_partials_diTensor_didjTensor(tNode *node, int T0,
+                                       int dT0, int ddT0)
+{
+  int nT, nddT;
+  int n;
+
+  /* 1st derivs */
+  cart_partials_diTensor(node, T0, dT0);
+
+  /* get and check number of components of T and ddT */
+  cart_partials_SetAndCheck_nT_nddT(node, T0,ddT0, &nT, &nddT);
+
+  errorexit("2nd deriv part of this function is untested");
+
+  /* 2nd derivs */
+  for(n=0; n<nT; n++) //ddT is symm in first 2 indices => steps of 6*nT below
+  {
+    cart_3partials(node,dT0+     n, ddT0      +n,ddT0+ 6*nT+n,ddT0+12*nT+n);
+    cart_3partials(node,dT0+  nT+n, ddT0+ 6*nT+n,ddT0+18*nT+n,ddT0+24*nT+n);
+    cart_3partials(node,dT0+2*nT+n, ddT0+12*nT+n,ddT0+24*nT+n,ddT0+30*nT+n);
+  }
+}
+
 
 /***********************************************************************/
 /* compute just one Cart. deriv or the divergence */
