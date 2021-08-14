@@ -133,6 +133,8 @@ void cart_partials_dU_di_dU_dij(tNode *node, int U, int dUx, int ddUxx);
 void cart_partials_dUi_dj_dUi_djk(tNode *node, int Ux, int dUxx, int ddUxxx);
 void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
                                     int dSxxx, int ddSxxxx);
+void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
+                                           int dT0, int ddT0);
 int cart_di_Ui(tNode *node, int Ux, int divUi);
 
 /* utilities.c */

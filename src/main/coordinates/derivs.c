@@ -368,6 +368,58 @@ void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
 }
 
 /***********************************************************************/
+/* 2nd derivs of general tensors */
+/***********************************************************************/
+
+/* write number of components of var T0 and ddT0 into nT and nddT, and also
+   check if ddT0 has correct number of components for 2nd derivs of T0 */
+void cart_partials_SetAndCheck_nT_nddT(tNode *node, int T0, int ddT0,
+                                       int *nT, int *nddT)
+{
+  tMesh *mesh = node->pat->mesh;
+  *nT = MeshVarNComponents(mesh, T0);
+  *nddT = MeshVarNComponents(mesh, ddT0);
+
+  if( (*nddT) != 6*(*nT) ) /* ddT is symm. in deriv indices */
+  {
+    char *T = MeshVarName(mesh, T0);
+    char *ddT = MeshVarName(mesh, ddT0);
+    char *Tindices = MeshVarTensorIndices(mesh, T0);
+    char *ddTindices = MeshVarTensorIndices(mesh, ddT0);
+    printf("%s (T0=%d) with %s has nT=%d components\n",
+           T, T0, Tindices, *nT);
+    printf("%s (ddT0=%d) with %s has nddT=%d components\n",
+           ddT, ddT0, ddTindices, *nddT);
+    errorexit("To store all 6 2nd deriv components we need nddT = 6*nT.");
+  }
+}
+
+/* Compute 1st and 2nd derivs T_{... ,i} and T_{... ,ij} of a general
+   tensor T_{...}.  The resulting T_{... ,ij} needs to be defined as
+   symmetric in the last 2 indices. */
+void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
+                                           int dT0, int ddT0)
+{
+  int nT, nddT;
+  int n;
+
+  /* 1st derivs */
+  cart_partials_dTensor_di(node, T0, dT0);
+
+  /* get and check number of components of T and ddT */
+  cart_partials_SetAndCheck_nT_nddT(node, T0,ddT0, &nT, &nddT);
+
+  /* 2nd derivs */
+  for(n=0; n<nT; n++) /* ddT is symm in last 2 indices ==> fac 6 below */
+  {
+    cart_3partials(node, dT0+3*n ,  ddT0+6*n ,  ddT0+6*n+1, ddT0+6*n+2);
+    cart_3partials(node, dT0+3*n+1, ddT0+6*n+1, ddT0+6*n+3, ddT0+6*n+4);
+    cart_3partials(node, dT0+3*n+2, ddT0+6*n+2, ddT0+6*n+4, ddT0+6*n+5);
+  }
+}
+
+
+/***********************************************************************/
 /* compute just one Cart. deriv or the divergence */
 /***********************************************************************/
 
