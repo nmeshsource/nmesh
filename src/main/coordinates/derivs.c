@@ -97,7 +97,7 @@ void cart_partials_dU_di(tNode *node, int U, int dUx)
 }
 
 /***********************************************************************/
-/* 1st derivs of vectors and tensors */
+/* 1st derivs of some special 3-vectors and 3-tensors */
 /***********************************************************************/
 
 /* compute first derivs U_{i,j} of a vector U_{i} in a node */
@@ -184,7 +184,7 @@ void cart_partials_diTjkl(tNode *node, int Txxx, int dTxxxx)
 
 
 /***********************************************************************/
-/* 1st derivs of 4-vectors and 4-tensors */
+/* 1st derivs of some special 4-vectors and 4-tensors */
 /***********************************************************************/
 
 /* compute first derivs U_{a,i} of a vector U_{a} in a node */
