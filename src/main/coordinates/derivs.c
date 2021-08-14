@@ -277,10 +277,10 @@ void cart_partials_SetAndCheck_nT_ndT(tNode *node, int T0, int dT0,
     char *dT = MeshVarName(mesh, dT0);
     char *Tindices = MeshVarTensorIndices(mesh, T0);
     char *dTindices = MeshVarTensorIndices(mesh, dT0);
-    printf("%s (T0=%d) with %s has nT=%d components\n",
-           T, T0, Tindices, *nT);
-    printf("%s (dT0=%d) with %s has ndT=%d components\n",
-           dT, dT0, dTindices, *ndT);
+    printf("%s %s (T0=%d) has nT=%d components\n",
+           T, Tindices, T0, *nT);
+    printf("%s %s (dT0=%d) has ndT=%d components\n",
+           dT, dTindices, dT0, *ndT);
     errorexit("To store all 3 spatial derivs we need ndT = 3*nT.");
   }
 }
@@ -386,10 +386,10 @@ void cart_partials_SetAndCheck_nT_nddT(tNode *node, int T0, int ddT0,
     char *ddT = MeshVarName(mesh, ddT0);
     char *Tindices = MeshVarTensorIndices(mesh, T0);
     char *ddTindices = MeshVarTensorIndices(mesh, ddT0);
-    printf("%s (T0=%d) with %s has nT=%d components\n",
-           T, T0, Tindices, *nT);
-    printf("%s (ddT0=%d) with %s has nddT=%d components\n",
-           ddT, ddT0, ddTindices, *nddT);
+    printf("%s %s (T0=%d) has nT=%d components\n",
+           T, Tindices, T0, *nT);
+    printf("%s %s (ddT0=%d) has nddT=%d components\n",
+           ddT, ddTindices, ddT0, *nddT);
     errorexit("To store all 6 2nd deriv components we need nddT = 6*nT.");
   }
 }
