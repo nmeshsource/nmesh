@@ -302,7 +302,7 @@ void cart_partials_dTensor_di(tNode *node, int T0, int dT0)
 
 /* Compute first derivs d_i T of an arbitrary tensor T. The derivative
    index is understood to be the first index of the resultant dT, i.e.:
-   dT_{i...} = d_i T_{...] */
+   dT_{i...} = d_i T_{...} */
 void cart_partials_diTensor(tNode *node, int T0, int dT0)
 {
   int nT, ndT, n;
