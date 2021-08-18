@@ -260,6 +260,7 @@ double min3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
                         int *ai, int *imax);
 int finit(double x);
+int remove_chars_from_str(char *str, const char *del);
 void trim_whitespace(char *str);
 int get_par_from_str(const char *str, char *name, const char *delim,
                      char *value, int n);

@@ -293,6 +293,32 @@ int finit(double x)
 }
 
 
+/* remove all chars that occur in del from string str,
+   return number of removed chars */
+int remove_chars_from_str(char *str, const char *del)
+{
+  unsigned writ = 0, read = 0;
+  unsigned nstr = strlen(str);
+  unsigned ndel = strlen(del);
+  unsigned n;
+  int keep;
+
+  for(read=writ=0; read<nstr; read++)
+  {
+    /* do we keep char? */
+    keep = 1;
+    for(n=0; n<ndel; n++)
+      if(str[read] == del[n]) { keep=0; break; }
+
+    /* copy char we keep */
+    if(keep)
+      str[writ++] = str[read];
+  }
+  /* add nul at end of string */
+  str[writ]=0;
+  return nstr - writ;
+}
+
 /* remove all trailing and leading whitespaces */
 void trim_whitespace(char *str)
 {
