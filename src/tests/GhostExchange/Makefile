@@ -1,4 +1,4 @@
-# output/Makefile
+# GhostExchange/Makefile
 
 NAME := GhostExchange
 

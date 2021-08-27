@@ -1,4 +1,4 @@
-# output/Makefile
+# advection1/Makefile
 
 NAME := advection1
 

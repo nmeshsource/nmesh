@@ -1,4 +1,4 @@
-# output/Makefile
+# misc/Makefile
 
 NAME := misc
 

@@ -1,4 +1,4 @@
-# output/Makefile
+# burgers1/Makefile
 
 NAME := burgers1
 

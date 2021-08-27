@@ -1,4 +1,4 @@
-# output/Makefile
+# scalarwave1/Makefile
 
 NAME := scalarwave1
 

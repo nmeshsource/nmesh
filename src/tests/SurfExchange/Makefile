@@ -1,4 +1,4 @@
-# output/Makefile
+# SurfExchange/Makefile
 
 NAME := SurfExchange
 

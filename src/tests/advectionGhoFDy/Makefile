@@ -1,4 +1,4 @@
-# output/Makefile
+# advectionGhoFDy/Makefile
 
 NAME := advectionGhoFDy
 
