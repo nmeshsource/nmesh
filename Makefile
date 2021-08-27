@@ -62,6 +62,18 @@ libpaths += $(projectpaths)
 #libpaths += src/utility/NumericUtils
 
 # --------------------------------------------------------------------------
+# remove all paths in libpaths that do not contain a corresponding
+# nmesh_LIB.c file:
+
+# get all nmesh_LIB.c C-files we can find in libpaths
+libpathCfiles := $(foreach X, $(libpaths),\
+                   $(wildcard $(X)/nmesh_$(notdir $(X)).c))
+
+# use list of C files to make paths, afterwards remove trailing slashes
+libpaths := $(dir $(libpathCfiles))
+libpaths := $(patsubst %/, %, $(libpaths))
+
+# --------------------------------------------------------------------------
 # set CXX and CLINKER to CC if they are not set in MyConfig
 ifeq ($(CXX),)
 CXX = $(CC)
