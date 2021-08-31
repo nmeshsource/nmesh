@@ -4,6 +4,7 @@
 *.cc	text=auto
 *.cpp	text=auto
 *.m	text=auto
+*.wl	text=auto
 *.math	text=auto
 *.cpi	text=auto
 *.f	text=auto
