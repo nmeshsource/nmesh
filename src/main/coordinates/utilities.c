@@ -1052,7 +1052,7 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
                                    ijk0, ijk1);
 
   /* reduce hmin by half if we use fin.vol. (FV) */
-  if(ijk0>=0 && ijk1>=0)
+  if(*ijk0>=0 && *ijk1>=0)
   {
     int i0,j0,k0, i1,j1,k1, di,dj,dk;
     int dir = -1;
