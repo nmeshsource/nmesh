@@ -464,7 +464,7 @@ void vldropn(tVarList *v, int n)
 /* call vlpushone and return index idx of where we put vi in varlist v */
 int vlpushone_index(tVarList *v, int vi)
 {
-  int idx = v->n; /* position/index in v where vi will go */
+  int idx = v->n; /* position-index in v where vi will go */
   vlpushone(v, vi);
   return idx;
 }
@@ -472,7 +472,7 @@ int vlpushone_index(tVarList *v, int vi)
 /* call vlpush and return index idx of where we put vi in varlist v */
 int vlpush_index(tVarList *v, int vi)
 {
-  int idx = v->n; /* position/index in v where vi will go */
+  int idx = v->n; /* position-index in v where vi will go */
   vlpush(v, vi);
   return idx;
 }
@@ -480,7 +480,7 @@ int vlpush_index(tVarList *v, int vi)
 /* call vlpushvl and return index idx of where we add u in varlist v */
 int vlpushvl_index(tVarList *v, tVarList *u)
 {
-  int idx = v->n; /* position/index in v where vi will go */
+  int idx = v->n; /* position-index in v where vi will go */
   vlpushvl(v, u);
   return idx;
 }
