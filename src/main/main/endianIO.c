@@ -19,7 +19,7 @@
         mov    $0x1,%eax
         retq
    But it will also be inlined, and thus will cause no overhead at all! */
-static inline unsigned int byte_order_is_little()
+static inline unsigned int byte_order_is_little(void)
 {
   unsigned int ui = 1;
   unsigned char *s = (unsigned char *) &ui;
