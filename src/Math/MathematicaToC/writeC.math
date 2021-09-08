@@ -40,6 +40,15 @@ BeginCFunction[];
 (***************************************************************************)
 (* write definition of C variables *)
 
+prdecvarCarray[vars_, Carray_] := Module[{cvars, s, nf},
+  cvars = vars /. expfreeindices /. gluevar;
+  For[nf = 0, nf < Length[cvars], nf++,
+    s = StringForm["double *`` = &(``[``]);\n",
+                    cvars[[nf+1]], Carray, nf];
+    pr[s];
+  ];
+]
+
 prdecvar[vars_, index_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
