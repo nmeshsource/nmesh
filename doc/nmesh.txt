@@ -53,7 +53,7 @@ advection1.c        <-- main C code of module
 advection1.h        <-- header file visible to this module only
 nmesh_advection1.h  <-- globally visible header file
 
-In nmesh_advection1.c is stuff like:
+In nmesh_advection1.c there is stuff like:
   AddFun(INITIALDATA, advection1_init);
   // ^- schedules func advection1_init in time bin INITIALDATA
 
@@ -66,6 +66,10 @@ In nmesh_advection1.c is stuff like:
 When nmesh starts in main of src/main/main/main.c it goes through the time
 bins and calls the funcs in them. The time bins are defined in
 src/main/main/skeleton.h .
+
+Large modules tend to have a few additional C-files. Yet they usually do
+not have more header files, because all function prototypes normally go into
+one of the 2 header files.
 
 
 Looking at the output:
