@@ -12,10 +12,12 @@ int nmesh_main(tMesh *mesh)
 
   /* functions */
   AddFun(FIRST, print_endian_info);
+  AddFun(FIRST, CheckForBannedPars);
   AddFun(OUTPUT, write_all_timers);
   AddFun(POST_OUTPUT, nan_checker);
   AddFun(POST_OUTPUT, sysmon);
   AddFun(FINALIZEMESH, free_all_timers);
+  AddFun(POST_FINALIZEMESH, FreeBannedParList);
   AddFun(PRE_COORDINATES, nmesh_update_parameters);
   AddFun(PRE_EVOLVE, nmesh_update_parameters);
 

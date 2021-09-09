@@ -478,6 +478,18 @@ void printparameters(tMesh *mesh)
            i, pdb[i].name, pdb[i].value, pdb[i].description);
 }
 
+/* check all parameters */
+int CheckForBannedPars(tMesh *mesh)
+{
+  tPar *pdb = mesh->pdb;
+  int npdb = mesh->npdb;
+  int i;
+
+  for(i = 0; i < npdb; i++) ExitIfParBanned(pdb[i].name);
+
+  return 0;
+}
+
 
 /***************************************************************************/
 /* functions for external calls, we have macros for many of them, e.g.
