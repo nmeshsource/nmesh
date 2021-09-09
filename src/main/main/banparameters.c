@@ -63,7 +63,7 @@ void BanPar(const char *name, const char *ban_reason)
     errorexit("cannot ban the same par twice");
 
   /* add par name to bannedpars */
-  bp = calloc(1, 1);
+  bp = calloc(1, sizeof(bp[0]));
   bp->name = name;
   bp->ban_reason = ban_reason;
   push_pBannedList(bannedpars, bp);
