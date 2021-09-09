@@ -257,14 +257,14 @@ int setup_box_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  char *BoxMesh_xc = Gets(Par("amr_BoxMesh_xc"));
+  char *mesh_xc = Gets(Par("amr_mesh_xc"));
   double d = Getd(Par("amr_BoxMesh_dout"));
   double xc[]   = { 0., 0., 0. };
   double dout[] = { d, d, d };
 
   PRFs(":\n");
 
-  sscanf(BoxMesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
+  sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
   //pr3v("xc", xc);printf("\n");
 
   mesh->dt = Getd(Par("dt"));
@@ -349,8 +349,8 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
   double xc[] = { 0., 0., 0. };
-  char *BoxMesh_xc = Gets(Par("amr_BoxMesh_xc"));
-  sscanf(BoxMesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
+  char *mesh_xc = Gets(Par("amr_mesh_xc"));
+  sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
 
   PRFs(":\n");
 
@@ -455,8 +455,8 @@ int setup_Shell_mesh(tMesh *mesh)
   double rin  = Getd(Par("amr_Shell_rin"));
   double rout = Getd(Par("amr_Shell_rout"));
   double xc[] = { 0., 0., 0. };
-  char *BoxMesh_xc = Gets(Par("amr_BoxMesh_xc"));
-  sscanf(BoxMesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
+  char *mesh_xc = Gets(Par("amr_mesh_xc"));
+  sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
 
   PRFs(":\n");
 

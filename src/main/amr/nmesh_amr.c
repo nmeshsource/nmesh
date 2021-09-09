@@ -30,7 +30,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_n1", "5", "number of points in dir. 1 in one node");
   AddPar("amr_n2", "5", "number of points in dir. 2 in one node");
   AddPar("amr_nmax", "55", "max number of points in all 3 dir. in one node");
-  AddPar("amr_BoxMesh_xc", "0 0 0", "center for boxes");
+  AddPar("amr_mesh_xc", "0 0 0", "center for boxes or spheres");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
   AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
   AddPar("amr_CubedSphere_r0fac", "4", "size factor for outer radius r0 of "
@@ -77,6 +77,9 @@ int nmesh_amr(tMesh *mesh)
   /* bface pars */
   AddPar("bface_options", "face2_order3", "how we set some bface flags "
          "[none,face2_order0,face2_order1,face2_order2,face2_order3]");
+
+  /* Old parameters that are now banned */
+  BanPar("amr_BoxMesh_xc", "use amr_mesh_xc instead");
 
   return 0;
 }
