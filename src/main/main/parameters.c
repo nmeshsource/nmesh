@@ -268,6 +268,9 @@ void makeparameter(tMesh *mesh, const char *name, const char *value,
   if(0) {PRF;printf(" mesh=%p\n", (void *) mesh);}
   if(0) {PRF;printf(" %s = %s,  %s\n", name, value, description);}
 
+  /* check if name is blacklisted */
+  //ExitIfParInBlacklist(name);
+
   mesh->pdb = realloc(mesh->pdb, npdbmax*sizeof(tPar));
   if(!mesh->pdb) errorexit("out of memory for mesh->pdb");
 

@@ -103,6 +103,11 @@ int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal);
 num = sscanf(Gets(Par("parname")), "%s %s %s", str1, str2, str3);
 */
 
+/* blackpars.c */
+void BlacklistPar(const char *name, const char *blacklist_reason);
+int ExitIfParInBlacklist(const char *name);
+int FreeParBlacklist(tMesh *mesh);
+
 /* tensors.c */
 #define NINDEXLIST 100
 void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym);
