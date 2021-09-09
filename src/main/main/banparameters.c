@@ -63,7 +63,7 @@ void BanPar(const char *name, const char *ban_reason)
 
 
 /* look for par name in bannedpars */
-int ExitIfBannedPar(const char *name)
+int ExitIfParBanned(const char *name)
 {
   if(bannedpars)
   {
