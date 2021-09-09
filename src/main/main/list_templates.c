@@ -201,8 +201,8 @@ int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi)
    }
 */
 int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
-                             int (*prop)(), //(void *obj, TYP vi),
-                             void *obj)
+                             int (*prop)(), //(const void *obj, TYP vi),
+                             const void *obj)
 {
   int i;
   int in=-1; /* is not in list */
@@ -217,8 +217,8 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
    void copy(int d, int s){ d = s; }
 */
 void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
-                        void (*copy)(), //(void *obj, TYP d, TYP s),
-                        void *obj)
+                        void (*copy)(), //(const void *obj, TYP d, TYP s),
+                        const void *obj)
 {
   int i;
   for(i=0; i<dest->n; i++)
@@ -231,8 +231,8 @@ void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
 /* add contents: r = ca*a + cb*b */
 void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
-                       void (*add)(), //(void *obj, TYP r, double ca, TYP a, double cb, TYP b),
-                       void *obj)
+                       void (*add)(), //(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
+                       const void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
@@ -244,8 +244,8 @@ void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 
 /* add to contents: r += ca*a */
 void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
-                         void (*addto)(), //(void *obj, TYP r, double ca, TYP a),
-                         void *obj)
+                         void (*addto)(), //(const void *obj, TYP r, double ca, TYP a),
+                         const void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
@@ -256,14 +256,14 @@ void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 }
 
 /* free contents of r */
-void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj)
+void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj)
 {
   if(Free && r)
   {
     int i;
     for(i=0; i<r->n; i++)
     {
-      if(obj) Free(obj, r->e[i]); /* func that frees r */
+      if(obj) Free(obj, r->e[i]); /* func that frees r->e[i] */
       else    Free(r->e[i]);
     }
   }
@@ -271,7 +271,7 @@ void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj)
 }
 
 /* free contents of r and then r itself */
-void FN(freeall,LIST(TYP))(LIST(TYP) *r, void (*Free)(), void *obj)
+void FN(freeall,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj)
 {
   FN(freeclear,LIST(TYP))(r, Free, obj);
   FN(free,LIST(TYP))(r);
