@@ -43,7 +43,7 @@ void prFreeBannedParList(void)
 int prop_samenames(const void *name_ob, tBannedPar *bp)
 {
   const char *name = (const char *) name_ob;
-  printf("strcmp(%s, %s);\n", bp->name, name);
+  //printf("strcmp(%s, %s);\n", bp->name, name);
   return ( strcmp(name, bp->name)==0 );
 }
 
@@ -78,11 +78,12 @@ int ExitIfParBanned(const char *name)
   {
     /* look for name in bannedpars */
     int i = index_prop_pBannedList(bannedpars,0, prop_samenames, name);
-    PRF;printf(": %s -> i=%d\n", name, i);
+    //PRF;printf(": %s -> i=%d\n", name, i);
     if(i>=0)
     {
-      printf("Parameter %s is banned:\n", name);
-      printf("%s\n", bannedpars->e[i]->ban_reason);
+      prdivider('=');
+      printf("%s is banned:\n", name);
+      printf("  %s\n", bannedpars->e[i]->ban_reason);
       errorexits("Parameter %s is banned", name);
     }
     /* i=-1 means par name was not found */
