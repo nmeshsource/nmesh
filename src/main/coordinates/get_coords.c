@@ -1470,7 +1470,8 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
 
 
 /* write node mid point at i,j,k in dir into Xbm in Xb-coords,
-   return value is 1 if mid point is found */
+   return value is 1 if mid point is found
+   return value is 0 otherwise, then Xbm is not set! */
 int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
                             double Xbm[3])
 {
@@ -1478,7 +1479,7 @@ int set_nodemidpoint_XbYbZb(tNode *node, int i, int j, int k, int dir,
   int nm1 = n[dir]-1;
 
   /* return zero if there is only 1 regular grid point in dir */
-  if(nm1<=0) return 0;
+  if(nm1<=0) return 0; /* we do not set Xbm in this case */
 
   switch(dir)
   {
