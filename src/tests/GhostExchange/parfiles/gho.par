@@ -21,7 +21,7 @@ finaltime = 0
 # initial mesh
 
 amr_mesh_type = 1 BoxMesh
-amr_BoxMesh_xc = 0
+amr_mesh_xc = 0
 amr_BoxMesh_dout = 16
 amr_luni = 1
 
