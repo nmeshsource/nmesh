@@ -189,7 +189,7 @@ void evolve_print_evosys(tMesh *mesh)
       {
         forList(evosys->f[b], i)
         {
-          char *vname0, *vnameN;
+          const char *vname0, *vnameN;
           tVarList *vl = ListEntry(evosys->u, i);
 
           if(vl->n)
