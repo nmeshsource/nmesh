@@ -562,6 +562,8 @@ void load_balance(tMesh *mesh, int strategy)
     }
     avspeed = load_set_speed_array(mesh, speed);
 
+    /* FALLTHROUGH */
+
   case LOADBAL_NODETIMES:
 
     /* load balancing based on measured node loads */
