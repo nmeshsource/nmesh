@@ -17,10 +17,10 @@
 void tensorindexlist(const char *tensind, int *nilist, char **ilist, int *sym)
 {
   /* name of coordinates, could be made variable */
-  char *coord[]  = {"x", "y", "z"};
-  char *coord4[] = {"t", "x", "y", "z"};
-  char *coord2[] = {"u", "v"}; /* for 2d tensors with 2 coords e.g. Y,Z */
-  char *face[] = {"0","1","2","3","4","5"}; /* for tensors on node faces */
+  const char *coord[]  = {"x", "y", "z"};
+  const char *coord4[] = {"t", "x", "y", "z"};
+  const char *coord2[] = {"u", "v"}; //for 2d tensors with 2 coords e.g. Y,Z
+  const char *face[] = {"0","1","2","3","4","5"}; //for tensors on node faces
   int i, j, k, l, f;
   int n = 0;
   char *tensorindices = strdup(tensind);

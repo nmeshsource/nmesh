@@ -8,7 +8,7 @@
 
 
 /* functions needed */
-void write_sysmon(tMesh *mesh, double last_mesh_time, char *name,
+void write_sysmon(tMesh *mesh, double last_mesh_time, const char *name,
                   double time, double last_sysmon_time, double *data,
                   int addheader);
 
@@ -96,7 +96,7 @@ int sysmon(tMesh *mesh)
 }
 
 /* write sysmon results (in data) into file outdir/name */
-void write_sysmon(tMesh *mesh, double last_mesh_time, char *name,
+void write_sysmon(tMesh *mesh, double last_mesh_time, const char *name,
                   double time, double last_sysmon_time, double *data,
                   int addheader)
 {
