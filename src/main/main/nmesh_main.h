@@ -204,8 +204,9 @@ int vlpushvl_index(tVarList *v, tVarList *u);
 int vlindex(tVarList *v, int vi);
 void vlsort(tVarList *v);
 int vlindex_if_sorted(tVarList *v, int vi);
-tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones);
-tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
+tVarList *AddDuplicate(tVarList *vl, const char *postfix,
+                       int type, int surfacezones);
+tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones);
 void vlsetconstant_node(tNode *node, tVarList *u, const double c);
 void vlsetconstant(tVarList *u, const double c);
@@ -248,7 +249,7 @@ void getTimeDiff(struct timespec dtp[1],
                  struct timespec tp1[1], struct timespec tp0[1]);
 double getTimeDiffIn_s(struct timespec tp1[1], struct timespec tp0[1]);
 double getTimeIn_s(void);
-void prTimeIn_s(char *comment);
+void prTimeIn_s(const char *comment);
 void wait_for_debugger_if_NMESH_MPI_DEBUG(void);
 double min2(double x, double y);
 double min3(double x, double y, double z);
@@ -277,9 +278,9 @@ FILE *fopen_buf(const char *pathname, const char *mode,
                 char **buf, size_t bufsiz);
 int fclose_buf(FILE *fp, char **buf);
 int copy_file_into_dir(char *fname, char *dir);
-int system1(char *s1);
-int system2(char *s1, char *s2);
-int system3(char *s1, char *s2, char *s3);
+int system1(const char *s1);
+int system2(const char *s1, const char *s2);
+int system3(const char *s1, const char *s2, const char *s3);
 void print_system_info(void);
 int system_emu(const char *command);
 int construct_argv(char *str, char ***argv);

@@ -15,8 +15,8 @@ void AddMeshVar(tMesh *mesh, const char *name,
   int nilist;
   char *ilist[NINDEXLIST];
   int sym[3*NINDEXLIST];
-  char *symsigns[] = {"-", "0", "+"};
-  char **ss = symsigns+1;
+  const char *symsigns[] = {"-", "0", "+"};
+  const char **ss = symsigns+1;
   int i, j;
 
   if(0) {PRF;printf(": name=%s tensorindices=%s\n", name, tensorindices);}
@@ -562,7 +562,7 @@ void VLDisableFree(tVarList *vl)
    we want gxx_p, gxy_p, ...  and not gxx_pxx, gxx_pxy ...
    We copy all properties if type<0, surfacezones<0, but if one is
    non-negative we set it to this value. */
-tVarList *AddDuplicate_unsorted(tVarList *vl, char *postfix,
+tVarList *AddDuplicate_unsorted(tVarList *vl, const char *postfix,
                                 int type, int surfacezones)
 {
   char name[1000];
@@ -632,7 +632,8 @@ tVarList *AddDuplicate_unsorted(tVarList *vl, char *postfix,
 /* like AddDuplicate_unsorted, but sort varlist first so that new vars are
    created in the usual order. Otherwise deriv functions such as
    cart_partials_dTijk_dl may not work */
-tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
+tVarList *AddDuplicate(tVarList *vl, const char *postfix,
+                       int type, int surfacezones)
 {
   tMesh *mesh;
   tVarList *newvl;
@@ -667,7 +668,7 @@ tVarList *AddDuplicate(tVarList *vl, char *postfix, int type, int surfacezones)
 }
 
 /* add duplicate and enable variables */
-tVarList *AddDuplicateEnable(tVarList *vl, char *postfix,
+tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones)
 {
   tVarList *newvl;

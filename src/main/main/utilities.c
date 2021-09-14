@@ -100,7 +100,7 @@ double getTimeIn_s(void)
 }
 
 /* print current time */
-void prTimeIn_s(char *comment)
+void prTimeIn_s(const char *comment)
 {
   double t_in_s = getTimeIn_s();
   printf("%s%gs\n", comment, t_in_s);
@@ -545,7 +545,7 @@ int copy_file_into_dir(char *fname, char *dir)
 }
 
 /* use opendir to scan through dir and remove the entire dir */
-int remove_dir(char *dirname)
+int remove_dir(const char *dirname)
 {
   DIR *d;
   struct dirent *dir;
@@ -597,15 +597,15 @@ int remove_dir(char *dirname)
 
 /* call system with 1, 2 or 3 arguments, also call c-functions directly
    in some special case to avoid some unix shell commands */
-int system1(char *s1)
+int system1(const char *s1)
 {
   return system2(s1, "");
 }
-int system2(char *s1, char *s2) 
+int system2(const char *s1, const char *s2)
 {
   return system3(s1, s2, "");
 }
-int system3(char *s1, char *s2, char *s3) 
+int system3(const char *s1, const char *s2, const char *s3)
 {
   char command[10000];
   int status = 0;
