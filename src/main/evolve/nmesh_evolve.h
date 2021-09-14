@@ -12,7 +12,7 @@ int evolve_myln(tMesh *mesh);
 
 /* evosys.c */
 void evolve_register_vl(tVarList *vl);
-void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, char *name);
+void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, const char *name);
 void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
                 FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,

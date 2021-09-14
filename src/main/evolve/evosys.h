@@ -33,7 +33,7 @@ struct tNODE;   /* nodes are defined in main/amr/nmesh_amr.h */
 #define NEVOTEMP 6
 #define pVLL struct pVLLIST
 #define pFL struct FuncPointerLIST
-#define pSL struct StringLIST
+#define pSL struct constStringLIST
 typedef struct tEVOSYS {
   pVLL *u;            /* list of VarLists with evo vars of entire system */
   pVLL *rhs;          /* RHS in du/dt = func(u, t), rhs is AuxVar */

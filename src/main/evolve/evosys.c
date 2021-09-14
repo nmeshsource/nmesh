@@ -31,7 +31,7 @@ void evolve_register_vl(tVarList *vl)
   for(b=0; b<NEVOFUNCBINS; b++)
   {
     if(!evosys->f[b])      evosys->f[b]      = alloc_FuncPointerList();
-    if(!evosys->f_name[b]) evosys->f_name[b] = alloc_StringList();
+    if(!evosys->f_name[b]) evosys->f_name[b] = alloc_constStringList();
   }
 
   /* Add vl to list u in evosys. */
@@ -42,12 +42,12 @@ void evolve_register_vl(tVarList *vl)
   for(b=0; b<NEVOFUNCBINS; b++)
   {
     push_FuncPointerList(evosys->f[b], NULL);
-    push_StringList(evosys->f_name[b], empty);
+    push_constStringList(evosys->f_name[b], empty);
   }
 }
 
 /* Set a function in an evolution bin for the variable list vl in evosys */
-void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, char *name)
+void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, const char *name)
 {
   tMesh *mesh = vl->mesh;
   tEvoSys *evosys = mesh->evosys;
@@ -57,7 +57,7 @@ void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, char *name)
 
   /* set func pointer and name at index i */
   setatindex_FuncPointerList(evosys->f[bin], i, f);
-  setatindex_StringList(evosys->f_name[bin], i, name);
+  setatindex_constStringList(evosys->f_name[bin], i, name);
 }
 
 /* register a variable list u and its RHS in evosys. The func. pointers will
@@ -119,7 +119,7 @@ int evolve_free_evosys(tMesh *mesh)
   for(b=0; b<NEVOFUNCBINS; b++)
   {
     free_FuncPointerList(evosys->f[b]);
-    free_StringList(evosys->f_name[b]);
+    free_constStringList(evosys->f_name[b]);
   }
 
   /* now set all of evosys to zero */
