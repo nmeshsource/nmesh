@@ -36,7 +36,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* VTK_out.c */
-FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
+FILE *fopen_vtk(char *varname, const char *outdir, const char *suffix,
                 char *nstr, int series,
                 char *IObuf, size_t IObufsiz);
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
@@ -47,7 +47,8 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* XDMF_out.c */
 void output2d_xdmf(tVarList *vl, int It, double T);
-void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time);
+void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
+                      double Time);
 void output3d_xdmf(tVarList *vl, int It, double Time);
 size_t write_buffer(const double *buf, int buflen, int dbl, FILE *fp);
 size_t write_3buffers(const double *b1, const double *b2, const double *b3,
@@ -64,6 +65,6 @@ size_t fwrite_3buffers_idx(const void *p1, const void *p2, const void *p3,
 void output0d_vl(tVarList *vl, int It, double T);
 void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T);
 void output0d_filename(tMesh *mesh, char *filename, int len,
-                       char *name, char *type, tPat *pat);
+                       char *name, const char *type, tPat *pat);
 void output0d_value(char *filename, double time, double val,
                     int coords, double x[3]);

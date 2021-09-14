@@ -6,16 +6,16 @@
 
 
 /* output par prefixes */
-char *outpre[] = {"0d", "1d", "2d", "3d", "co"};
+const char *outpre[] = {"0d", "1d", "2d", "3d", "co"};
 int Nout = sizeof(outpre)/sizeof(outpre[0]); /* Nout=5 */
 
 /* various types of output */
-char outpt[] = "pt"; /* prefix of the Noutpt special 0doutput points */
-char *out0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
-char *out1d[] = {"X", "Y", "Z"};
-char *out2d[] = {"XY", "XZ", "YZ"};
-char *out3d[] = {"XYZ"};
-char *outco[] = {"co"};
+const char outpt[] = "pt"; /* prefix of the Noutpt special 0doutput points */
+const char *out0d[] = {"max", "min", "maxAbs", "VolInt", "rms", "meanAbs"};
+const char *out1d[] = {"X", "Y", "Z"};
+const char *out2d[] = {"XY", "XZ", "YZ"};
+const char *out3d[] = {"XYZ"};
+const char *outco[] = {"co"};
 
 #define LEN0d sizeof(out0d)/sizeof(out0d[0])
 #define LEN1d sizeof(out1d)/sizeof(out1d[0])

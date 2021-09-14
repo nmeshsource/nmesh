@@ -23,30 +23,30 @@
 
 /* XML format strings to make .xmf files using fprintf,
    based on bamps and https://www.paraview.org/Wiki/ParaView/Data_formats */
-char *B_head =
+const char *B_head =
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   "<Xdmf xmlns:xi=\"http://www.w3.org/2001/XInclude\" Version=\"2.1\">\n"
   "  <Domain>\n";
-char *E_head =
+const char *E_head =
   "  </Domain>\n"
   "</Xdmf>\n";
 
-char *B_temporal =
+const char *B_temporal =
   "    <Grid CollectionType=\"Temporal\" GridType=\"Collection\" Name=\"TCollection\">\n"
   "      <Geometry Type=\"None\"/>\n"
   "      <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-char *E_temporal =
+const char *E_temporal =
   "    </Grid>\n";
 
-char *B_spatial =
+const char *B_spatial =
   "      <Grid CollectionType=\"Spatial\" GridType=\"Collection\" Name=\"SCollection\">\n"
   "        <Time Value=\"%.9f\"/>\n"
   "        <Geometry Type=\"None\"/>\n"
   "        <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-char *E_spatial =
+const char *E_spatial =
   "      </Grid>\n";
 
-char *B_E_grid =
+const char *B_E_grid =
   "        <Grid Name=\"%s\">\n"
   "          <Time Value=\"%.9f\"/>\n"
   "          <Geometry Type=\"XYZ\">\n"
@@ -65,8 +65,8 @@ char *B_E_grid =
 
 
 /* open file xmf file with XML description and position file pointer */
-FILE *fopen_xdmf_xmf(char *varname, char *outdir, char *suffix, double time,
-                     char *IObuf, size_t IObufsiz)
+FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
+                     double time, char *IObuf, size_t IObufsiz)
 {
   FILE *fp;
   char fname[1000];
@@ -121,7 +121,8 @@ void fclose_xdmf_xmf(FILE *fp)
 }
 
 /* open file to add more nodes still with the same Time Value */
-FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix,
+FILE *fopen_add_spatial_xdmf_xmf(char *varname,
+                                 const char *outdir, const char *suffix,
                                  char *IObuf, size_t IObufsiz)
 {
   FILE *fp;
@@ -146,7 +147,7 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname, char *outdir, char *suffix,
 }
 
 /* open a .bin file with raw binary data */
-FILE *fopen_bin(char *varname, char *outdir, char *suffix,
+FILE *fopen_bin(const char *varname, const char *outdir, const char *suffix,
                 char *IObuf, size_t IObufsiz)
 {
   FILE *fp;
@@ -166,14 +167,14 @@ FILE *fopen_bin(char *varname, char *outdir, char *suffix,
 
 /* write XML grid description into .xmf file with file pointer fp */
 void write_xdmf_xmf(FILE *fp, long voffset, long xyzoffset,
-                    char *vname, char *suffix,
+                    char *vname, const char *suffix,
 		    char *nodename, double time,
 		    int n[3], int bin, int dbl)
 {
   char fname[1000];
   char fname_xyz[1000];
   int np = n[0] * n[1] * n[2];
-  char *format = (bin) ? "Binary" : "XML";
+  const char *format = (bin) ? "Binary" : "XML";
 
   /* filenames for field and also xyz data*/
   snprintf(fname, 1000, "%s.%s.bin", vname, suffix);
@@ -209,7 +210,8 @@ void output2d_xdmf(tVarList *vl, int It, double T)
 }
 
 /* output varlist in XDMF format in one plane */
-void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
+void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
+                      double Time)
 {
   tMesh *mesh = vl->mesh;
   int bin = 1; /* we can only do binary output right now */
@@ -218,7 +220,7 @@ void write_plane_xdmf(tVarList *vl, int norm, char *outdir, double Time)
   FILE *fpxmf, *fpbin;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
-  char *suffix[] = { "yz", "xz", "xy" };
+  const char *suffix[] = { "yz", "xz", "xy" };
   double X0[] = { Getd(Par("outputX0")),
                   Getd(Par("outputY0")),
                   Getd(Par("outputZ0")) };
@@ -334,7 +336,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   FILE *fpxmf, *fpbin;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
-  char *suffix = "xyz";
+  const char *suffix = "xyz";
   int vli;
   int bufsize  = Geti(Par("fwrite_bufsize"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */

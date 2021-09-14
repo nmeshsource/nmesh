@@ -10,7 +10,7 @@
 
 
 /* open file for vtk writing */
-FILE *fopen_vtk(char *varname, char *outdir, char *suffix,
+FILE *fopen_vtk(char *varname, const char *outdir, const char *suffix,
                 char *nstr, int series,
                 char *IObuf, size_t IObufsiz)
 {
@@ -324,7 +324,7 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
   tMesh *mesh;
   FILE *fp;
   int nseries;
-  char *outdir;
+  const char *outdir;
   tOutpars par[1];
   char ns[100];
   int IObufsz;

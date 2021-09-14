@@ -149,7 +149,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
 
 /* filename for 0d output */
 void output0d_filename(tMesh *mesh, char *filename, int len,
-                       char *name, char *type, tPat *pat)
+                       char *name, const char *type, tPat *pat)
 {
   char *outdir = Gets(Par("outdir"));
 
