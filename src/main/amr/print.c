@@ -546,7 +546,7 @@ void printarray_matrix2(tArray *A)
 
 
 /* print one bface */
-void printthisbface(tBface *bface, char *s)
+void printthisbface(tBface *bface, const char *s)
 {
   if(!bface) return;
   printf(" %s p%d f%d op%d", s, bface->pat->p,bface->f, bface->op);
@@ -621,13 +621,13 @@ void printallbfaces(tMesh *mesh)
 }
 
 /* print 3-vec */
-void pr3v(char *s, const double x[3])
+void pr3v(const char *s, const double x[3])
 {
   printf("%s=%g %g %g  ", s, x[0],x[1],x[2]);
 }
 
 /* print an array of long ints */
-void prlarray(char *s, long n, const long *ar)
+void prlarray(const char *s, long n, const long *ar)
 {
   long i;
   printf("%s[%ld] =", s, n);
@@ -684,7 +684,7 @@ void printfacecorners(tPat *pat, int  f)
 
 
 /* print one nface */
-void printthisnface(tNface *nface, char *s)
+void printthisnface(tNface *nface, const char *s)
 {
   char str[100];
 
