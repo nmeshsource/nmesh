@@ -177,7 +177,7 @@ Things that need to be done urgently:
 *check funs in refine.c
  +MPI part alone seems to work
  +threads alone seem to work if I use critical secs
- -test with MPI + threads, may need to init MPI differently...
+ -test with MPI + threads
 
 *implement mesh refinement of troubled cells/nodes
  +go from n_old, n_new= 1 + n_old/2, until we reach n_new=1
@@ -493,3 +493,6 @@ never worked properly:
  mom differe a lot.
 +on the other hand on tyrfing with gcc and -O3 -g -fsanitize=thread no
  problems are reported. Why???
++Also recall that the icc I had on koko had a bug that I wrote some Intel
+ engineer in Germany about. This probably explains the OpenMP problems with
+ ham and mom on koko.
