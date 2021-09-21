@@ -16,6 +16,8 @@ void output0d_vl(tVarList *vl, int It, double T)
   if(vl)
   {
     tMesh *mesh = vl->mesh;
+    int per_patch = Par("0doutput_per_patch");
+    int per_patch_limit, patch_output;
     int pi;
 
     TIMER_START;
@@ -24,8 +26,14 @@ void output0d_vl(tVarList *vl, int It, double T)
     output0d_mesh_vl(vl,NULL, It, T);
 
     /* 0d output for each patch separately */
-    forpatches(mesh, pi)
-      output0d_mesh_vl(vl, mesh->pat[pi], It, T);
+    per_patch_limit = Geti(per_patch); /* try to read number from par */
+    if(per_patch_limit==0)
+      patch_output = Getb(per_patch); /* if limit is zero, use yes/no */
+    else
+      patch_output = (mesh->npats <= per_patch_limit); /* use limit */
+    if(patch_output)
+      forpatches(mesh, pi)
+        output0d_mesh_vl(vl, mesh->pat[pi], It, T);
 
     TIMER_STOP;
   }

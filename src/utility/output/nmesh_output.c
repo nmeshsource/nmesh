@@ -31,6 +31,8 @@ int nmesh_output(tMesh *mesh)
 
   AddPar("0doutput_normtype", "integral",
 	 "how we compute norms such as rms [integral,L2norm]");
+  AddPar("0doutput_per_patch", "128", "output per patch [yes,no,#], here"
+         "the # means yes, but only if patchnumber does not exceed #");
 
   AddPar("0doutput", "", "variables to output norms for");
   AddPar("1doutput", "", "variables to output along axes");
