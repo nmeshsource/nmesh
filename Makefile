@@ -73,6 +73,11 @@ libpathCfiles := $(foreach X, $(libpaths),\
 libpaths := $(dir $(libpathCfiles))
 libpaths := $(patsubst %/, %, $(libpaths))
 
+# make list of all non-main modules to find possible physics parameters
+compiledphysics := $(patsubst src/main/%,,$(libpaths))
+compiledphysics := $(patsubst src/utility/%,,$(compiledphysics))
+compiledphysics := $(notdir $(compiledphysics))
+
 # --------------------------------------------------------------------------
 # set CXX and CLINKER to CC if they are not set in MyConfig
 ifeq ($(CXX),)
@@ -168,6 +173,8 @@ $(autoinclude): MyConfig $(mainheaders)
 
 $(autoinitial): MyConfig
 	@echo $(autotext) > $(autoinitial)
+	@echo "/* set compiledphysics string: */" >> $(autoinitial);
+	@echo compiledphysics=\"$(compiledphysics)\"\; >> $(autoinitial);
 	@echo "/* call nmesh initialization functions: */" >> $(autoinitial);
 	for X in $(libnames); do \
 	  echo nmesh\_$$X\(mesh\)\; >> $(autoinitial); \
@@ -197,7 +204,9 @@ printvars:
 	@echo PROJECTDIR=$(PROJECTDIR)
 	@echo projectpaths=$(projectpaths)
 	@echo projectnames=$(projectnames)
+	#@echo libpathCfiles=$(libpathCfiles)
 	@echo libpaths=$(libpaths)
+	@echo compiledphysics=$(compiledphysics)
 
 
 # targets to get git projects
