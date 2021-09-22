@@ -8,7 +8,8 @@
 
 /* global vars */
 nMPI_Comm main_comm;  /* MPI communicator made at start of main */
-tMesh *main_mesh;     /*contains the mesh made in main */
+tMesh *main_mesh;     /* contains the mesh made in main */
+const char *compiledphysics; /* set in nmesh_automatic_initialize.c */
 
 
 /* initialize libraries: calls the initializers for each module,
@@ -386,6 +387,29 @@ int fs_sync(tMesh *mesh)
 
   if(Getb(fs_sync)) sync();
 
+  return 0;
+}
+
+/* check if all in par physics has actually been compiled in */
+int check_compiledphysics(tMesh *mesh)
+{
+  char *physics = Gets(Par("physics"));
+  char *phys, *str, *sav;
+
+  printf("compiledphysics = %s\n", compiledphysics);
+  printf("physics = %s\n", physics);
+
+  /* loop over all in par physics and check if each is in compiledphysics */
+  phys = strdup(physics);
+  for(str=strtok_r(phys, " ", &sav); str!=NULL;
+      str=strtok_r(NULL, " ", &sav))
+  {
+    if(!strstr(compiledphysics, str))
+      errorexits("%s has not been compiled, "
+                 "but is included in the parameter physics.\n"
+                 "Hint: check your MyConfig and parameter file!", str);
+  }
+  free(phys);
   return 0;
 }
 

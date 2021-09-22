@@ -12,6 +12,7 @@ int nmesh_main(tMesh *mesh)
 
   /* functions */
   AddFun(FIRST, print_endian_info);
+  AddFun(FIRST, check_compiledphysics);
   AddFun(FIRST, CheckForBannedPars);
   AddFun(OUTPUT, write_all_timers);
   AddFun(POST_OUTPUT, nan_checker);
