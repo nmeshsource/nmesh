@@ -183,6 +183,7 @@ int amr_setup_mesh(tMesh *mesh)
       int p = atoi(str);
       if(p>=0) hrefine_pat(mesh, p);
     }
+    free(pl);
   }
 
   /* refine further in nested sphere regions */
