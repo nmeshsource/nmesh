@@ -204,7 +204,7 @@ printvars:
 	@echo PROJECTDIR=$(PROJECTDIR)
 	@echo projectpaths=$(projectpaths)
 	@echo projectnames=$(projectnames)
-	#@echo libpathCfiles=$(libpathCfiles)
+#	@echo libpathCfiles=$(libpathCfiles)
 	@echo libpaths=$(libpaths)
 	@echo compiledphysics=$(compiledphysics)
 
