@@ -5,15 +5,17 @@
 #include "nmesh.h"
 #include "limiter.h"
 
-/* parameter indices of some frequently used pars */
-int Par_limiter_alpha, Par_limiter_beta, Par_limiter_scaleBound;
+
+/* global struct with frequently used limiter pars */
+tlimiter limiter[1];
+
 
 /* func to init frequently used pars */
 int limiter_init_global_par_indices(tMesh *mesh)
 {
-  Par_limiter_alpha = Par("limiter_alpha");
-  Par_limiter_beta  = Par("limiter_beta");
-  Par_limiter_scaleBound  = Par("limiter_scaleBound");
+  limiter->alpha = Par("limiter_alpha");
+  limiter->beta  = Par("limiter_beta");
+  limiter->scaleBound  = Par("limiter_scaleBound");
   return 0;
 }
 
@@ -89,7 +91,7 @@ int limiter_MRS(tNode *node, tVarList *vl)
   if(!dat) return 0;
 
   /* set alpha_h from alpha (smaller alpha makes MRS more agressive) */
-  alpha = Getd(Par_limiter_alpha); //0.1; //5.0;
+  alpha = Getd(limiter->alpha); //0.1; //5.0;
   h = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   alpha_h = alpha * pow(h, 1.5);
 
@@ -242,7 +244,7 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   double *bb = node->bbox;
   tDat *dat;
   int vli, f, ni;
-  int scaleBound = Getb(Par_limiter_scaleBound);
+  int scaleBound = Getb(limiter->scaleBound);
   double alpha, beta, bos3, h, Mt_h, bound;
   const double sqrt3 = sqrt(3.);
   int i100, i010, i001;
@@ -258,10 +260,10 @@ int limiter_minmodB(tNode *node, tVarList *vl)
      is nornmalized to sqrt(2), while nmesh's basis_normLegendreP is
      normalized to 1. \tilde{M} := M * h, where h is the size of a node,
      and h=\Delta x^K in 1506.06140v2 */
-  alpha = Getd(Par_limiter_alpha);
+  alpha = Getd(limiter->alpha);
   h     = max3(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]);
   Mt_h  = alpha * h;
-  beta = Getd(Par_limiter_beta);
+  beta = Getd(limiter->beta);
   bos3 = beta/sqrt3;
 
   /* locations of coeffs */

@@ -2,6 +2,15 @@
 /* Wolfgang Tichy, April 2005 */
 
 
+/* structure that holds global limiter vars and pars */
+typedef struct tLIMITER {
+
+  int alpha;              /* Par("limiter_alpha") */
+  int beta;               /* Par("limiter_beta") */
+  int scaleBound;         /* Par("limiter_scaleBound") */
+} tlimiter;
+
+
 /* limiter.c */
 int limdata_MRS(tNode *node, tVarList *vl);
 int limiter_MRS(tNode *node, tVarList *vl);
