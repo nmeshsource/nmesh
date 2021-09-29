@@ -124,7 +124,11 @@
 #define forvl(vl, vli) \
   for(vli=0; vli<vl->n; vli++)
 
+/* get global var index from entry vli in VarList vl */
 #define Vind(vl, vli) vl->index[vli]
+
+/* get number of vars in VarList */
+#define VLn(vl) vl->n
 
 /* get integration weights for direc. dir on node */
 #define Wquad(node, dir) node_Wq(node,dir)->d
