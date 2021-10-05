@@ -239,9 +239,26 @@ Things that need to be done urgently:
  -These are principal terms!!! It may be better if GHG set these ADM derivs
   from its evolved vars (without using cart_partials_...).
 
-*FOCCZ4 may have a bug
- -The notation in 93e7f52 is strange but FOCCZ4_eigenvals seems to use only
-  x-components (U0???) of all fields. This can't be right.
+*check FOCCZ4
+ -FOCCZ4_eigenvals replaces stuf like g^xx or beta^x in paper simply by
+  g^nn or beta^n. Is this correct?
+
+
+*IDEA about fin. diff. (fd) in e.g. C3GH
+ -maybe C3GH + punc. needs fd not fv!!!
+ -change array_cart_partials to so that we have option to also use some fd
+  thing instead of basis_array_derivs
+ -see also tGridPoints, and note that fd_deriv_DT_uniform sets diff matrix
+  for centered derivs
+ -add matrix to tGridPoints with lop-sided fd drrivs
+ -make fd_lopderiv_DT_uniform
+ -maybe change fd_deriv_DT_uniform to replace arg sr by arg ssz???
+  (But then stencil is always lopsided for even ssz!)
+ -array_cart_partials need more args to choose which type of deriv we want
+ -adapt cart_partials_diTensor to have more args as well so that user in
+  e.g. in RHS for C3GH can decide what to do. Extra arg could be struct???
+ -do not change the many special things like cart_partials_dUa_di
+
 
 Questions about bamps:
 ======================
