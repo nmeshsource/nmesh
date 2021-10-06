@@ -68,7 +68,8 @@ double Lagrange_of_x(int k, double x, int np,
                      const double *x_p, const double *w_interp);
 double Lagrange_prod1(int l, double x, int np, const double *x_p);
 double Lagrange_prod2(int l, int m, double x, int np, const double *x_p);
-void fd_deriv_DT_uniform(int n, const double *x, int sr, double *DT);
+void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
+                            double *DT);
 
 /* interpolate.c */
 double basis_pw_const(int k, double x, int np,

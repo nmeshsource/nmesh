@@ -97,7 +97,8 @@ int init_gridpoints(tMesh *mesh)
            interp. poly basis */
         Lagrange_winterp(ni, Xb, WL);
         //Lagrange_DT(ni, Xb, WL, DT); // very inaccurate for large ni
-        fd_deriv_DT_uniform(ni, Xb, 1, DT);
+        fd_lopderiv_DT_uniform(ni, Xb, 3,0, DT);
+        //printarray(gridpoints->Dt[typ][ni]);
 
         break;
 

@@ -90,7 +90,7 @@ double Lagrange_prod2(int l, int m, double x, int np, const double *x_p)
 
 /* Set matrix DT for finite differences using a stencil of size 2sr+1 on a
    uniform grid with n gridpoints in [-1,1]. sr is stencil radius */
-void fd_deriv_DT_uniform(int n, const double *x, int sr, double *DT)
+void fd_deriv_DT_uniform__old(int n, const double *x, int sr, double *DT)
 {
   int ssz = 2*sr + 1; /* stencil size */
   double *w_interp = malloc(ssz * sizeof(w_interp[0]));
@@ -159,7 +159,7 @@ void fd_deriv_DT_uniform(int n, const double *x, int sr, double *DT)
 
 /* Set matrix DT for finite differences using a stencil of size ssz on a
    uniform grid with n gridpoints in [-1,1]. Shift stencil by lop to
-   the right (forward differencing) */
+   the right (forward differencing) or left if lop<0 */
 void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
                             double *DT)
 {
