@@ -109,8 +109,9 @@ int set_nm_nodemidpoint_distsXb_dir(tNode *node, int dir,
 void shift_Xb0_XbN_toward_Xbm0_XbmN(const double *Xbm, int n, double *Xb);
 
 /* derivs.c */
-int cart_partials(tNode *node, int ui, int dui[3]);
-void cart_partials_dU_di(tNode *node, int U, int dUx);
+int cart_partials(tNode *node, int ui, int dui[3], tDerivOpt *opt);
+void cart_partials_diScalar(tNode *node, int U, int dUx, tDerivOpt *opt);
+#define cart_partials_dU_di(node, U, dU) cart_partials_diScalar((node), (U), (dU), NULL)
 void cart_partials_dUi_dj(tNode *node, int Ux, int dUxx);
 void cart_partials_dSij_dk(tNode *node, int Sxx, int dSxxx);
 void cart_partials_dUij_dk(tNode *node, int Uxx, int dUxxx);
@@ -122,22 +123,23 @@ void cart_partials_diTjkl(tNode *node, int Txxx, int dTxxxx);
 void cart_partials_dUa_di(tNode *node, int Ut, int dUtx);
 void cart_partials_dSab_di(tNode *node, int Stt, int dSttx);
 void cart_partials_dUab_di(tNode *node, int Utt, int dUttx);
-#define cart_partials_diU(node, U, dU) cart_partials_dU_di((node), (U), (dU))
+#define cart_partials_diU(node, U, dU) cart_partials_diScalar((node), (U), (dU), NULL)
 void cart_partials_diUa(tNode *node, int Ut, int dUxt);
 void cart_partials_diSab(tNode *node, int Stt, int dSxtt);
 void cart_partials_diUab(tNode *node, int Utt, int dUxtt);
 void cart_partials_diTjab(tNode *node, int Txtt, int dTxxtt);
-void cart_partials_dTensor_di(tNode *node, int T0, int dT0);
-void cart_partials_diTensor(tNode *node, int T0, int dT0);
+void cart_partials_dTensor_di(tNode *node, int T0, int dT0, tDerivOpt *opt);
+void cart_partials_diTensor(tNode *node, int T0, int dT0, tDerivOpt *opt);
 void cart_partials_dU_di_dU_dij(tNode *node, int U, int dUx, int ddUxx);
 void cart_partials_dUi_dj_dUi_djk(tNode *node, int Ux, int dUxx, int ddUxxx);
 void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
                                     int dSxxx, int ddSxxxx);
 void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
-                                           int dT0, int ddT0);
+                                           int dT0, int ddT0, tDerivOpt *opt);
 void cart_partials_diTensor_didjTensor(tNode *node, int T0,
-                                       int dT0, int ddT0);
-int cart_di_Ui(tNode *node, int Ux, int divUi);
+                                       int dT0, int ddT0, tDerivOpt *opt);
+int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt);
+#define cart_di_Ui(node, Ux, divUi) cart_div3Vector((node), (Ux), (divUi), NULL)
 
 /* utilities.c */
 double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3]);
