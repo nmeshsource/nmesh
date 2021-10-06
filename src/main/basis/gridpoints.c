@@ -114,6 +114,9 @@ int init_gridpoints(tMesh *mesh)
         //printarray(gridpoints->Dt[typ][ni]);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT);
+        //printarray(gridpoints->Dpt[typ][ni]);
+        //printarray(gridpoints->Dmt[typ][ni]);
+        //if(ni==9) errorexit("fd diff. matrices are above");
 
         break;
 
