@@ -15,7 +15,6 @@ enum
 
 /* structure to hold points, weights and matrices for each point type */
 typedef struct tGRIDPOINTS {
-
   int nmax;                     /* max n we can have */
   struct tARRAY **Xb[P_NTYPES]; /* list of points (often LGL in [-1,1]) */
   struct tARRAY **Wq[P_NTYPES]; /* list of quadrature weights for Xb */
@@ -28,11 +27,18 @@ typedef struct tGRIDPOINTS {
 } tGridPoints;
 
 
+/* structure to hold options for deriv taking */
+typedef struct tDERIVOPT {
+  int lop;  /* lopsided stencil?: 0=centered, 1=forward, -1=backward fd */
+} tDerivOpt;
+
+
+
 /* global functions */
 
 /* basis.c */
-void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3]);
-int basis_var_derivs(tNode *node, int vi, int dvi[3]);
+void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3],
+                        tDerivOpt *opt);
 int basis_var_analysis3(tNode *node, int ui, int ci);
 int basis_var_synthesis3(tNode *node, int ui, int ci);
 void basis_array_analysis3(tNode *node, tArray *u, tArray *c);

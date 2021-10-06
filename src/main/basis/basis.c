@@ -27,23 +27,46 @@ int basis_init_globals(tMesh *mesh)
 /***********************************************************************/
 
 /* get deriv in direction dir of array var, result goes into dvar */
-void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar)
+void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar,
+                        tDerivOpt *opt)
 {
-  tArray *Dt = node_Dt(node,dir);
+  tArray *Dt;
+  if(!opt)
+  {
+    Dt = node_Dt(node,dir);
+  }
+  else /* check options */
+  {
+    switch(opt->lop)
+    {
+    case -1:
+      errorexit("backward");
+      Dt = node_Dt(node,dir);
+      break;
+    case 1:
+      errorexit("forward");
+      Dt = node_Dt(node,dir);
+      break;
+    default:
+      Dt = node_Dt(node,dir);
+    }
+  }
+  /* use Dt diff matrix */
   mm_array_indir(Dt, var, dir, dvar);
 }
 
 /* compute 1st derivs of array var in all 3 dirs,
    result goes into arrays dvar[0], dvar[1], dvar[2] */
-void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3])
+void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3],
+                        tDerivOpt *opt)
 {
   int dir;
   for(dir=0; dir<3; dir++)
-    basis_array_deriv1(node, dir, var, dvar[dir]);
+    basis_array_deriv1(node, dir, var, dvar[dir], opt);
 }
 
 /* get deriv in direction dir of var with index vi, result goes to var dvi */
-int basis_var_deriv1(tNode *node, int dir, int vi, int dvi)
+int basis_var_deriv1(tNode *node, int dir, int vi, int dvi, tDerivOpt *opt)
 {
   tArray *var, *dvar;
   tDat *dat = node->dat;
@@ -51,7 +74,7 @@ int basis_var_deriv1(tNode *node, int dir, int vi, int dvi)
   {
     var  = dat->v[vi];
     dvar = dat->v[dvi];
-    basis_array_deriv1(node, dir, var, dvar);
+    basis_array_deriv1(node, dir, var, dvar, opt);
     return 1;
   }
   else
@@ -60,7 +83,7 @@ int basis_var_deriv1(tNode *node, int dir, int vi, int dvi)
 
 /* compute 1st derivs in all 3 dirs,
    result goes into vars dvi[0], dvi[1], dvi[2] */
-int basis_var_derivs(tNode *node, int vi, int dvi[3])
+int basis_var_derivs(tNode *node, int vi, int dvi[3], tDerivOpt *opt)
 {
   tArray *var, *dvar;
   tDat *dat = node->dat;
@@ -71,7 +94,7 @@ int basis_var_derivs(tNode *node, int vi, int dvi[3])
     for(dir=0; dir<3; dir++)
     {
       dvar = dat->v[dvi[dir]];
-      basis_array_deriv1(node, dir, var, dvar);
+      basis_array_deriv1(node, dir, var, dvar, opt);
     }
     return 1;
   }

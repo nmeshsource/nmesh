@@ -25,7 +25,7 @@ int array_cart_partials(tNode *node, tArray *au, tArray *dau[3])
   if(!(dat->coords_set)) coordinates_init_node(node);
 
   /* take derivs with respect to Xb: du/dXb */
-  basis_array_derivs(node, au, dau);
+  basis_array_derivs(node, au, dau, NULL);
 
   /* get dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
