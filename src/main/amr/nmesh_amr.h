@@ -270,10 +270,10 @@ typedef struct tARRAY {
     long *l;    /* pointer to long data using same mem as double data */
     int *i; };  /* pointer to int data using same mem as double data */
   int d_nofree; /* d_nofree=1 if free_array should not free d */
-  int ns;       /* number of segments */
-  int si;       /* segment index */
+  int ns;       /* number of segments (usually 1) */
+  int si;       /* segment index (usually 0) */
   int info;     /* space to save extra info, e.g. MPI req. numbers or tags */
-  void *par;    /* pointer to some extra pars */
+  void *par;    /* pointer to some extra pars (usually NULL) */
 } tArray;
 /* NOTE: the anon. union is used to be able to store either double or int in
    tArray */
