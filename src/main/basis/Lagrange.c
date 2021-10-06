@@ -156,3 +156,96 @@ void fd_deriv_DT_uniform(int n, const double *x, int sr, double *DT)
 
   free(w_interp);
 }
+
+/* Set matrix DT for finite differences using a stencil of size ssz on a
+   uniform grid with n gridpoints in [-1,1]. Shift stencil by lop to
+   the right (forward differencing) */
+void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
+                            double *DT)
+{
+  int odd = (ssz%2);  /* odd=1 if stencil size ssz is odd */
+  int sszo2 = ssz/2;  /* stencil radius without forward or backward shift */
+  int sdl, sdr;       /* stencil radius on left and right after shift */
+  double *w_interp;
+
+  if(abs(lop)>sszo2)
+    errorexiti("stencil size ssz is too small for lop=%d", lop);
+
+  if(odd)
+  {
+    sdl = sszo2 - lop; /* stencil radius on the left after shift by lop */
+    sdr = sszo2 + lop; /* stencil radius on the right after shift by lop */
+
+  }
+  else
+  {
+    int pos = (lop>0);
+    if(lop==0) errorexit("for an even stencil size we need lop!=0");
+    sdl = sszo2 - lop - !pos;
+    sdr = sszo2 + lop -  pos;
+  }
+
+  /* mem for interpolation weights */
+  w_interp = malloc(ssz * sizeof(w_interp[0]));
+
+  /* for small n use Lagrange_DT for n points, here we cannot shift at all */
+  if(n <= ssz)
+  {
+    Lagrange_winterp(n, x, w_interp);
+    Lagrange_DT(n, x, w_interp, DT);
+  }
+  else /* use Lagrange_DT for ssz points */
+  {
+    double *xs = malloc(ssz * sizeof(xs[0]));
+    double *Dt = malloc(ssz*ssz * sizeof(w_interp[0]));
+    double h  = 2./(n-1);
+    double hs = 2./(ssz-1);
+    double fac = hs/h;
+    int i,j, is,js;
+
+    /* first zero DT */
+    for(i=0; i<n; i++)
+      for(j=0; j<n; j++)
+         DT[i*n + j] = 0.;
+
+    /* put ssz equally spaced points into xs */
+    for(i=0; i<ssz; i++) xs[i] = -1. + hs*i;
+
+    /* get diff mat Dt of size ssz*ssz */
+    Lagrange_winterp(ssz, xs, w_interp);
+    Lagrange_DT(ssz, xs, w_interp, Dt);
+
+    /* loop over DT entries */
+    for(i=0; i<n; i++)
+    {
+      int jmin;
+
+      if(i<sdl) /* left end */
+      {
+        is = i;
+        jmin = 0;
+      }
+      else if(n-i <= sdr) /* right end */
+      {
+        is = ssz - (n-i);
+        jmin = n - ssz;
+      }
+      else /* middle */
+      {
+        is = sdl;
+        jmin = i - sdl;
+      }
+
+      for(j=jmin; j<jmin+ssz; j++)
+      {
+        js = j - jmin;
+        DT[i*n + j] = Dt[is*ssz + js] * fac;
+      }
+    }
+
+    free(Dt);
+    free(xs);
+  }
+
+  free(w_interp);
+}
