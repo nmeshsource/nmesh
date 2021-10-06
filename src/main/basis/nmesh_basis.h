@@ -21,6 +21,8 @@ typedef struct tGRIDPOINTS {
   struct tARRAY **WL[P_NTYPES]; /* list of Lagrange interp. weights */
   struct tARRAY **Dt[P_NTYPES]; /* list of transp. differentiation matrices
                                  we store Dt[1...nmax][typ], typ=P_LGL,... */
+  struct tARRAY **Dpt[P_NTYPES]; /* transp. forward diff matrices */
+  struct tARRAY **Dmt[P_NTYPES]; /* transp. backward diff matrices */
   struct tARRAY **At[P_NTYPES]; /* list of transposed analysis matrices */
   struct tARRAY **St[P_NTYPES]; /* list of transposed synthesis matrices */
   double (*basis[P_NTYPES])(int l, double Xb, int np);//basis related to At,St

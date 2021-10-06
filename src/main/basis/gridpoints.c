@@ -38,6 +38,13 @@ int init_gridpoints(tMesh *mesh)
     if(!(gridpoints->Dt[typ]))
       errorexit("out of memory for diff. matrices");
 
+    gridpoints->Dpt[typ] = calloc(nmax+1, sizeof(gridpoints->Dpt[typ][0]));
+    if(!(gridpoints->Dpt[typ]))
+      errorexit("out of memory for forward diff. matrices");
+    gridpoints->Dmt[typ] = calloc(nmax+1, sizeof(gridpoints->Dmt[typ][0]));
+    if(!(gridpoints->Dmt[typ]))
+      errorexit("out of memory for backward diff. matrices");
+
     gridpoints->At[typ] = calloc(nmax+1, sizeof(gridpoints->At[typ][0]));
     if(!(gridpoints->At[typ]))
       errorexit("out of memory for ana. matrices");
@@ -56,6 +63,8 @@ int init_gridpoints(tMesh *mesh)
     for(typ=0; typ<P_NTYPES; typ++)
     {
       gridpoints->Dt[typ][ni] = alloc_array(n);
+      gridpoints->Dpt[typ][ni] = alloc_array(n);
+      gridpoints->Dmt[typ][ni] = alloc_array(n);
       gridpoints->At[typ][ni] = alloc_array(n);
       gridpoints->St[typ][ni] = alloc_array(n);
     }
@@ -80,6 +89,8 @@ int init_gridpoints(tMesh *mesh)
       double *Wq = gridpoints->Wq[typ][ni]->d;
       double *WL = gridpoints->WL[typ][ni]->d;
       double *DT = gridpoints->Dt[typ][ni]->d;
+      double *DpT = gridpoints->Dpt[typ][ni]->d;
+      double *DmT = gridpoints->Dmt[typ][ni]->d;
       double *AT = gridpoints->At[typ][ni]->d;
       double *ST = gridpoints->St[typ][ni]->d;
 
@@ -99,6 +110,8 @@ int init_gridpoints(tMesh *mesh)
         //Lagrange_DT(ni, Xb, WL, DT); // very inaccurate for large ni
         fd_lopderiv_DT_uniform(ni, Xb, 3,0, DT);
         //printarray(gridpoints->Dt[typ][ni]);
+        fd_lopderiv_DT_uniform(ni, Xb, 3,+1, DpT);
+        fd_lopderiv_DT_uniform(ni, Xb, 3,-1, DmT);
 
         break;
 
@@ -114,6 +127,8 @@ int init_gridpoints(tMesh *mesh)
            interp. poly basis */
         Lagrange_winterp(ni, Xb, WL);
         Lagrange_DT(ni, Xb, WL, DT);
+        Lagrange_DT(ni, Xb, WL, DpT);
+        Lagrange_DT(ni, Xb, WL, DmT);
       }
     }
     /* set Legendre polys as basis since AT and ST are for Legendre basis */
@@ -133,6 +148,8 @@ int free_gridpoints(tMesh *mesh)
     for(ni=1; ni<=gridpoints->nmax; ni++)
     {
       free_array(gridpoints->Dt[typ][ni]);
+      free_array(gridpoints->Dpt[typ][ni]);
+      free_array(gridpoints->Dmt[typ][ni]);
       free_array(gridpoints->At[typ][ni]);
       free_array(gridpoints->St[typ][ni]);
       free_array(gridpoints->Xb[typ][ni]);
@@ -140,6 +157,8 @@ int free_gridpoints(tMesh *mesh)
       free_array(gridpoints->WL[typ][ni]);
     }
     free(gridpoints->Dt[typ]);
+    free(gridpoints->Dpt[typ]);
+    free(gridpoints->Dmt[typ]);
     free(gridpoints->At[typ]);
     free(gridpoints->St[typ]);
     free(gridpoints->Xb[typ]);
