@@ -14,6 +14,8 @@ tGridPoints gridpoints[1];
 int init_gridpoints(tMesh *mesh)
 {
   int nmax = Geti(Par("amr_nmax"));
+  int stencilsize = Geti(Par("fd_stencilsize"));
+  int lopsidesize = Geti(Par("fd_lopsidesize"));
   int ni, typ;
 
   /* save nmax */
@@ -108,10 +110,10 @@ int init_gridpoints(tMesh *mesh)
            interp. poly basis */
         Lagrange_winterp(ni, Xb, WL);
         //Lagrange_DT(ni, Xb, WL, DT); // very inaccurate for large ni
-        fd_lopderiv_DT_uniform(ni, Xb, 3,0, DT);
+        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,0, DT);
         //printarray(gridpoints->Dt[typ][ni]);
-        fd_lopderiv_DT_uniform(ni, Xb, 3,+1, DpT);
-        fd_lopderiv_DT_uniform(ni, Xb, 3,-1, DmT);
+        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT);
+        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT);
 
         break;
 

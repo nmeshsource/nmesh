@@ -21,10 +21,12 @@ int nmesh_dg(tMesh *mesh)
   //AddAuxVar("dg_u",      "",    "test function");
    
   /* parameters */
+  /* Discontinous Galerkin (dg) pars */
   AddPar("dg_outerBC_flux_fac", "1 1 1", "factors in all 3 directions that "
          "can be used to switch off all surface flux terms (e.g. use "
          "'dg_outerBC_flux_fac = 1 0 0' for 1d meshes)");
   AddPar("dg_numerical_flux", "LLF", "numerical flux [LLF]");
+  /* Finite Volume (fv) pars */
   AddPar("fv_rec", "WENOm3_2", "how we reconstruct with fv [1,WENOm3_2,"
          "WENOm5_2,WENOmZ_2,WENOm3_1,WENOm5_1,WENOmZ_1,"
          "WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
@@ -35,6 +37,10 @@ int nmesh_dg(tMesh *mesh)
          "|u1-u0|/|u2-u1| < 0.75 s1, [0, 0.5, ...]");
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
          "[linear,parabolic]");
+  /* Finite Differences (fd) pars */
+  /* fv_surface_interp is also used for fd */
+  AddPar("fd_stencilsize", "3", "Fin.Diff. accuracy = fd_stencilsize-1");
+  AddPar("fd_lopsidesize", "1", "magnitude of shift in lop-sided stencils");
 
   return 0;
 }
