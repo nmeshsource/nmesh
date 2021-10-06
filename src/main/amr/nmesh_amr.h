@@ -557,6 +557,8 @@ void node_WL3(tNode *node, tArray *WL[3]);
 tArray *node_Dt(tNode *node, int dir);
 void Dt3_n(tNode *node, int n[3], tArray *Dt[3]);
 void node_Dt3(tNode *node, tArray *Dt[3]);
+tArray *node_Dpt(tNode *node, int dir);
+tArray *node_Dmt(tNode *node, int dir);
 tArray *node_At(tNode *node, int dir);
 void At3_n(tNode *node, int n[3], tArray *At[3]);
 void node_At3(tNode *node, tArray *At[3]);

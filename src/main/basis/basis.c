@@ -41,11 +41,11 @@ void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar,
     {
     case -1:
       errorexit("backward");
-      Dt = node_Dt(node,dir);
+      Dt = node_Dmt(node,dir);
       break;
     case 1:
       errorexit("forward");
-      Dt = node_Dt(node,dir);
+      Dt = node_Dpt(node,dir);
       break;
     default:
       Dt = node_Dt(node,dir);

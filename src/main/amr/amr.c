@@ -277,6 +277,18 @@ void node_Dt3(tNode *node, tArray *Dt[3])
   Dt3_n(node, node->n, Dt);
 }
 
+/* get Dpt in dir for a node out of gridpoints */
+tArray *node_Dpt(tNode *node, int dir)
+{
+  return gridpoints->Dpt[node->pt_typ[dir]][node->n[dir]];
+}
+
+/* get Dmt in dir for a node out of gridpoints */
+tArray *node_Dmt(tNode *node, int dir)
+{
+  return gridpoints->Dmt[node->pt_typ[dir]][node->n[dir]];
+}
+
 /* get At in dir for a node out of gridpoints */
 tArray *node_At(tNode *node, int dir)
 {
