@@ -392,11 +392,32 @@ errorexit("untested!");
   }
 }
 
+/* Compute first coord deriv dT/dX of an arbitrary tensor T. Here, either
+   the resultant dT has no derivative index, or the derivative index is
+   understood to be the last index of the resultant dT, i.e.:
+   dT_{...k} = T_{... ,k} */
+void coordinate_deriv1_dTensor_dX(tNode *node, int dir, int T0, int dT0,
+                                  tDerivOpt *opt)
+{
+  int nT, ndT, off, n;
+errorexit("untested!");
+  /* get and check number of components in T0 and dT0 */
+  coordinate_deriv1_SetAndCheck_nT_ndT(node, dir, T0,dT0, &nT, &ndT);
+
+  /* set offset par in dT where we put derivs */
+  if(ndT==3*nT) off = 1;
+  else          off = 0;
+
+  /* compute partial derivs of all components of Tensor */
+  for(n=0; n<nT; n++)
+    coordinate_deriv1(node, dir, T0 + n, dT0 + (1+2*off)*n + off*dir, opt);
+}
+
 /* Compute first coord deriv d_X T of an arbitrary tensor T. Here, either
    the resultant dT has no derivative index, or the derivative index is
    understood to be the first index of the resultant dT, i.e.:
    dT_{i...} = d_Xi T_{...} */
-void coordinate_deriv1_diTensor(tNode *node, int dir, int T0, int dT0,
+void coordinate_deriv1_dXTensor(tNode *node, int dir, int T0, int dT0,
                                 tDerivOpt *opt)
 {
   int nT, ndT, pos, n;
