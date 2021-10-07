@@ -20,6 +20,7 @@ void coordinate_array_deriv1(tNode *node, int dir, tArray *au, tArray *dau,
   double *du = Arrd(dau);
   double dXbdX[3];
   int ind;
+errorexit("untested!");
 
   /* take derivs with respect to Xb: du/dXb */
   basis_array_deriv1(node, dir, au, dau, opt);
@@ -38,6 +39,7 @@ int coordinate_deriv1(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
   tDat *dat = node->dat;
   tArray *au;
   tArray *dau;
+errorexit("untested!");
 
   if(!dat) return 0;
 
@@ -358,6 +360,57 @@ void cart_partials_diTensor(tNode *node, int T0, int dT0, tDerivOpt *opt)
   /* compute partial derivs of all components of Tensor */
   for(n=0; n<nT; n++)
     cart_3partials(node, T0 + n, dT0 + n, dT0 + nT + n, dT0 + 2*nT + n, opt);
+}
+
+
+/* write number of components of var T0 and dT0 into nT and ndT, and also
+   check if dT0 has correct number of components for one coord deriv of T0 */
+void coordinate_deriv1_SetAndCheck_nT_ndT(tNode *node, int dir,
+                                          int T0, int dT0, int *nT, int *ndT)
+{
+  tMesh *mesh = node->pat->mesh;
+  int ok;
+errorexit("untested!");
+
+  *nT = MeshVarNComponents(mesh, T0);
+  *ndT = MeshVarNComponents(mesh, dT0);
+
+  /* dT either has to have same number of comps or 3 times as many */
+  ok = ( (*ndT) == (*nT) ) || ( (*ndT) == 3*(*nT) );
+
+  if(!ok)
+  {
+    char *T = MeshVarName(mesh, T0);
+    char *dT = MeshVarName(mesh, dT0);
+    char *Tindices = MeshVarTensorIndices(mesh, T0);
+    char *dTindices = MeshVarTensorIndices(mesh, dT0);
+    printf("%s %s (T0=%d) has nT=%d components\n",
+           T, Tindices, T0, *nT);
+    printf("%s %s (dT0=%d) has ndT=%d components\n",
+           dT, dTindices, dT0, *ndT);
+    errorexit("To store one coordinate deriv we need ndT=nT, or ndT=3*nT.");
+  }
+}
+
+/* Compute first coord deriv d_X T of an arbitrary tensor T. Here, either
+   the resultant dT has no derivative index, or the derivative index is
+   understood to be the first index of the resultant dT, i.e.:
+   dT_{i...} = d_Xi T_{...} */
+void coordinate_deriv1_diTensor(tNode *node, int dir, int T0, int dT0,
+                                tDerivOpt *opt)
+{
+  int nT, ndT, pos, n;
+errorexit("untested!");
+  /* get and check number of components in T0 and dT0 */
+  coordinate_deriv1_SetAndCheck_nT_ndT(node, dir, T0,dT0, &nT, &ndT);
+
+  /* set position in dT where we put derivs */
+  if(ndT==3*nT) pos = dir*nT;
+  else          pos = 0;
+
+  /* compute partial derivs of all components of Tensor */
+  for(n=0; n<nT; n++)
+    coordinate_deriv1(node, dir, T0 + n, dT0 + pos + n, opt);
 }
 
 
