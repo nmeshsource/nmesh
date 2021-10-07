@@ -15,9 +15,9 @@ int nmesh_TestDerivs(tMesh *mesh)
   AddFun(ANALYZE, TestDerivs_analyze);
 
   /* variables */
-  AddAuxVar("TestDerivs_u",      "",    "test function");
-  AddAuxVar("TestDerivs_Err_du", "i",   "Error in 1st deriv of test function");
-  AddAuxVar("TestDerivs_Err_ddu","(ij)","Error in 2nd deriv of test function");
+  AddAuxVar("TestDerivs_u",      "",   "test function");
+  AddAuxVar("TestDerivs_Err_du", "i",  "Error in 1st deriv of test function");
+  AddAuxVar("TestDerivs_Err_ddu","ij", "Error in 2nd deriv of test function");
    
   /* parameters */
   AddPar("TestDerivs_A",     "1",   "amplitude of wave");

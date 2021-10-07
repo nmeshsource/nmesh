@@ -87,15 +87,20 @@ int TestDerivs_analyze(tMesh *mesh)
     double *uxx= Vard(node,Ind("TestDerivs_Err_dduxx"));
     double *uxy= Vard(node,Ind("TestDerivs_Err_dduxx")+1);
     double *uxz= Vard(node,Ind("TestDerivs_Err_dduxx")+2);
-    double *uyy= Vard(node,Ind("TestDerivs_Err_dduxx")+3);
-    double *uyz= Vard(node,Ind("TestDerivs_Err_dduxx")+4);
-    double *uzz= Vard(node,Ind("TestDerivs_Err_dduxx")+5);
+    double *uyx= Vard(node,Ind("TestDerivs_Err_dduxx")+3);
+    double *uyy= Vard(node,Ind("TestDerivs_Err_dduxx")+4);
+    double *uyz= Vard(node,Ind("TestDerivs_Err_dduxx")+5);
+    double *uzx= Vard(node,Ind("TestDerivs_Err_dduxx")+6);
+    double *uzy= Vard(node,Ind("TestDerivs_Err_dduxx")+7);
+    double *uzz= Vard(node,Ind("TestDerivs_Err_dduxx")+8);
 
     /* compute the derivs */
     cart_partials_dU_di(node, Ind("TestDerivs_u"), Ind("TestDerivs_Err_dux"));
-    cart_partials_dU_di(node, Ind("TestDerivs_Err_duz"), Ind("TestDerivs_Err_dduyy"));
-    cart_partials_dU_di(node, Ind("TestDerivs_Err_duy"), Ind("TestDerivs_Err_dduxz"));
+    cart_partials_dU_di(node, Ind("TestDerivs_Err_duz"), Ind("TestDerivs_Err_dduzx"));
+    cart_partials_dU_di(node, Ind("TestDerivs_Err_duy"), Ind("TestDerivs_Err_dduyx"));
     cart_partials_dU_di(node, Ind("TestDerivs_Err_dux"), Ind("TestDerivs_Err_dduxx"));
+//    cart_partials_dTensor_di(node, Ind("TestDerivs_Err_dux"),
+//                                   Ind("TestDerivs_Err_dduxx"), NULL);
 
     /* subtract true values */
     forpoints(node,i)
@@ -103,6 +108,7 @@ int TestDerivs_analyze(tMesh *mesh)
       double x = px[i];
       double y = py[i];
       double z = pz[i];
+      double U, Ux,Uy,Uz, Uxx,Uxy,Uxz, Uyx,Uyy,Uyz, Uzx, Uzy,Uzz;
 
       if(fabs(x)+fabs(y)+fabs(z)>1e299) continue; /* give up if x,y,z is inf */
       /*
@@ -134,16 +140,34 @@ int TestDerivs_analyze(tMesh *mesh)
       CForm[Simplify[D[u,z,z]/u]]
        = A*(-Power(sigmaz,2) + Power(z - z0,2))/Power(sigmaz,4)
       */
-      //printf("z0=%f ",z0);
-      ux[i] -= A*(-x + x0)/Power(sigmax,2) * u[i];
-      uy[i] -= A*(-y + y0)/Power(sigmay,2) * u[i];
-      uz[i] -= A*(-z + z0)/Power(sigmaz,2) * u[i];
-      uxx[i]-= A*(-Power(sigmax,2) + Power(x - x0,2))/Power(sigmax,4) * u[i];
-      uxy[i]-= A*((x - x0)*(y - y0))/(Power(sigmax,2)*Power(sigmay,2)) * u[i];
-      uxz[i]-= A*((x - x0)*(z - z0))/(Power(sigmax,2)*Power(sigmaz,2)) * u[i];
-      uyy[i]-= A*(-Power(sigmay,2) + Power(y - y0,2))/Power(sigmay,4) * u[i];
-      uyz[i]-= A*((y - y0)*(z - z0))/(Power(sigmay,2)*Power(sigmaz,2)) * u[i];
-      uzz[i]-= A*(-Power(sigmaz,2) + Power(z - z0,2))/Power(sigmaz,4) * u[i];
+      /* analytic derivs */
+      U = u[i];
+      Ux  = A*(-x + x0)/Power(sigmax,2) * U;
+      Uy  = A*(-y + y0)/Power(sigmay,2) * U;
+      Uz  = A*(-z + z0)/Power(sigmaz,2) * U;
+      Uxx = A*(-Power(sigmax,2) + Power(x - x0,2))/Power(sigmax,4) * U;
+      Uxy = A*((x - x0)*(y - y0))/(Power(sigmax,2)*Power(sigmay,2)) * U;
+      Uxz = A*((x - x0)*(z - z0))/(Power(sigmax,2)*Power(sigmaz,2)) * U;
+      Uyx = Uxy;
+      Uyy = A*(-Power(sigmay,2) + Power(y - y0,2))/Power(sigmay,4) * U;
+      Uyz = A*((y - y0)*(z - z0))/(Power(sigmay,2)*Power(sigmaz,2)) * U;
+      Uzx = Uxz;
+      Uzy = Uyz;
+      Uzz = A*(-Power(sigmaz,2) + Power(z - z0,2))/Power(sigmaz,4) * U;
+
+      /* subtract analytic derivs from numerical ones */
+      ux[i] -= Ux;
+      uy[i] -= Uy;
+      uz[i] -= Uz;
+      uxx[i]-= Uxx;
+      uxy[i]-= Uxy;
+      uxz[i]-= Uxz;
+      uyx[i]-= Uyx;
+      uyy[i]-= Uyy;
+      uyz[i]-= Uyz;
+      uzx[i]-= Uzx;
+      uzy[i]-= Uzy;
+      uzz[i]-= Uzz;
     }
   }
   return 0;
