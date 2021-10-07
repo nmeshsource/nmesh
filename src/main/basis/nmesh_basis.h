@@ -39,6 +39,8 @@ typedef struct tDERIVOPT {
 /* global functions */
 
 /* basis.c */
+void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar,
+                        tDerivOpt *opt);
 void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3],
                         tDerivOpt *opt);
 int basis_var_analysis3(tNode *node, int ui, int ci);

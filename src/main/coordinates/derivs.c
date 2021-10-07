@@ -9,6 +9,49 @@
 extern tcoordinates coordinates[1];
 
 
+/***********************************************************************/
+/* compute one deriv of a scalar with respect to one X^i coord */
+/***********************************************************************/
+
+/* compute coord deriv of u in array au, put du/dX^dir into array dau */
+void coordinate_array_deriv1(tNode *node, int dir, tArray *au, tArray *dau,
+                             tDerivOpt *opt)
+{
+  double *du = Arrd(dau);
+  double dXbdX[3];
+  int ind;
+
+  /* take derivs with respect to Xb: du/dXb */
+  basis_array_deriv1(node, dir, au, dau, opt);
+
+  /* get dXb/dX */
+  dXbYbZb_dXYZ(node, dXbdX);
+
+  /* scale: du/dX = dXb/dX du/dXb */
+  forpoints(node,ind)
+    du[ind] *= dXbdX[dir];
+}
+
+/* compute coord deriv, put du/dX^dir into var with index dui */
+int coordinate_deriv1(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
+{
+  tDat *dat = node->dat;
+  tArray *au;
+  tArray *dau;
+
+  if(!dat) return 0;
+
+  au  = dat->v[ui];
+  dau = dat->v[dui];
+
+  coordinate_array_deriv1(node, dir, au, dau, opt);
+  return 1;
+}
+
+/***********************************************************************/
+/* compute all 3 Cartesian 1st derivs of a scalar (using arrays) */
+/***********************************************************************/
+
 /* compute Cart. derivs of u in array au, put du/dx^m into arrays dau[0..2] */
 int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
                         tDerivOpt *opt)
