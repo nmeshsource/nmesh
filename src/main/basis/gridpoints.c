@@ -106,14 +106,19 @@ int init_gridpoints(tMesh *mesh)
         /* get analysis & synthesis matrix for Legendre basis */
         Legendre_AT_ST_matrices(ni, Xb, Wq, AT, ST);
 
-        /* Lagrange interp. weights WL and diff matrix DT for Lagrange
-           interp. poly basis */
+        /* Lagrange interp. weights WL */
         Lagrange_winterp(ni, Xb, WL);
-        //Lagrange_DT(ni, Xb, WL, DT); // very inaccurate for large ni
+
+        /* diff matrix DT for Lagrange interp. poly basis */
+        //Lagrange_DT(ni, Xb, WL, DT);
+        /* Lagrange_DT is very inaccurate for large ni on uniform grids and
+           can also lead to instabilities in the evolution */
+
+        /* finite difference diff matrix DT */
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,0, DT);
-        //printarray(gridpoints->Dt[typ][ni]);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT);
+        //printarray(gridpoints->Dt[typ][ni]);
         //printarray(gridpoints->Dpt[typ][ni]);
         //printarray(gridpoints->Dmt[typ][ni]);
         //if(ni==9) errorexit("fd diff. matrices are above");
