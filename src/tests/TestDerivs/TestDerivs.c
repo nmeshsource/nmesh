@@ -95,12 +95,22 @@ int TestDerivs_analyze(tMesh *mesh)
     double *uzz= Vard(node,Ind("TestDerivs_Err_dduxx")+8);
 
     /* compute the derivs */
-    cart_partials_dU_di(node, Ind("TestDerivs_u"), Ind("TestDerivs_Err_dux"));
-    cart_partials_dU_di(node, Ind("TestDerivs_Err_duz"), Ind("TestDerivs_Err_dduzx"));
-    cart_partials_dU_di(node, Ind("TestDerivs_Err_duy"), Ind("TestDerivs_Err_dduyx"));
-    cart_partials_dU_di(node, Ind("TestDerivs_Err_dux"), Ind("TestDerivs_Err_dduxx"));
-//    cart_partials_dTensor_di(node, Ind("TestDerivs_Err_dux"),
-//                                   Ind("TestDerivs_Err_dduxx"), NULL);
+    if(mesh->iteration % 2 == 0)
+    {
+      /* use ddu_ij = d_j (d_i u)  when mesh->iteration is even */
+      cart_partials_dTensor_di(node, Ind("TestDerivs_u"),
+                                     Ind("TestDerivs_Err_dux"), NULL);
+      cart_partials_dTensor_di(node, Ind("TestDerivs_Err_dux"),
+                                     Ind("TestDerivs_Err_dduxx"), NULL);
+    }
+    else
+    {
+      /* use ddu_ij = d_i (d_j u)  when mesh->iteration is odd */
+      cart_partials_diTensor(node, Ind("TestDerivs_u"),
+                                   Ind("TestDerivs_Err_dux"), NULL);
+      cart_partials_diTensor(node, Ind("TestDerivs_Err_dux"),
+                                   Ind("TestDerivs_Err_dduxx"), NULL);
+    }
 
     /* subtract true values */
     forpoints(node,i)
