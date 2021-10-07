@@ -83,7 +83,7 @@ int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
   /* transform to Cartesian coords */
   if(pat->dXYZ_dxyz)
   {
-    int idXd = Ind("dXdx");
+    int idXd = Ind("dXdx"); // NOTE: use coordinates->idXdx;
     double *dXdx[3][3]
               = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
                   {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
