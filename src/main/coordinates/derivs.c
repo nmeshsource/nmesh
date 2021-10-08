@@ -48,6 +48,49 @@ int coordinate_deriv1(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
   return 1;
 }
 
+/* Transform Cartesian vector components u^i to patch coord components U^I.
+   We can do it in place if aU = au. */
+int coordinate_dXdx_times_vector_array(tNode *node, tArray *au[3],
+                                       tArray *aU[3])
+{
+  tPat *pat = node->pat;
+  //tMesh *mesh = pat->mesh;
+  tDat *dat = node->dat;
+  double *u[] = { Arrd(au[0]), Arrd(au[1]), Arrd(au[2]) };
+  double *U[] = { Arrd(aU[0]), Arrd(aU[1]), Arrd(aU[2]) };
+  int ind, m,i;
+
+  if(!dat) return 0;
+
+  /* do we need to init. coords? */
+  if(!(dat->coords_set)) coordinates_init_node(node);
+
+  /* transform from Cartesian to patch coords */
+  if(pat->dXYZ_dxyz)
+  {
+    int idXd = coordinates->idXdx;
+    double *dXdx[3][3]
+              = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
+                  {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
+                  {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
+    /* compute Cartesian derivs at all points */
+    forpoints(node,ind)
+    {
+      double V[3];
+
+      /* Transform derivs from Cartesian to patch coords */
+      for(m=0; m<3; m++)
+      {
+        V[m] = 0.;
+        for(i=0; i<3; i++) V[m] += dXdx[m][i][ind] * u[i][ind];
+      }
+      /* copy V into U */
+      for(m=0; m<3; m++) U[m][ind] = V[m];
+    }
+  }
+  return 1;
+}
+
 /* Transform from coord derivs daU to Cartesian derivs dau.
    We can do it in place if dau = daU. */
 int coordinate_dXdx_times_1form_array(tNode *node, tArray *daU[3],
