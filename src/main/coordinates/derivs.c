@@ -48,12 +48,15 @@ int coordinate_deriv1(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
   return 1;
 }
 
-/* Transform from coord derivs to Cartesian derivs. We do it in place. */
-int coordinate_array_derivs_to_cart_partials(tNode *node, tArray *dau[3])
+/* Transform from coord derivs daU to Cartesian derivs dau.
+   We can do it in place if dau = daU. */
+int coordinate_dXdx_times_1form_array(tNode *node, tArray *daU[3],
+                                      tArray *dau[3])
 {
   tPat *pat = node->pat;
-  tMesh *mesh = pat->mesh;
+  //tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
+  double *dU[] = { Arrd(daU[0]), Arrd(daU[1]), Arrd(daU[2]) };
   double *du[] = { Arrd(dau[0]), Arrd(dau[1]), Arrd(dau[2]) };
   int ind, m,i;
 
@@ -65,7 +68,7 @@ int coordinate_array_derivs_to_cart_partials(tNode *node, tArray *dau[3])
   /* transform to Cartesian coords */
   if(pat->dXYZ_dxyz)
   {
-    int idXd = Ind("dXdx"); // NOTE: use coordinates->idXdx;
+    int idXd = coordinates->idXdx;
     double *dXdx[3][3]
               = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
                   {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
@@ -73,16 +76,16 @@ int coordinate_array_derivs_to_cart_partials(tNode *node, tArray *dau[3])
     /* compute Cartesian derivs at all points */
     forpoints(node,ind)
     {
-      double dv[3];
+      double dw[3];
 
       /* Transform derivs to Cartesian coords */
       for(m=0; m<3; m++)
       {
-        dv[m] = 0.;
-        for(i=0; i<3; i++) dv[m] += dXdx[i][m][ind] * du[i][ind];
+        dw[m] = 0.;
+        for(i=0; i<3; i++) dw[m] += dXdx[i][m][ind] * dU[i][ind];
       }
-      /* copy dv into du */
-      for(m=0; m<3; m++) du[m][ind] = dv[m];
+      /* copy dw into du */
+      for(m=0; m<3; m++) du[m][ind] = dw[m];
     }
   }
   return 1;
@@ -118,7 +121,7 @@ int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
   //  coordinate_array_deriv1(node,m, au, dau[m], opt);
 
   /* transform to Cartesian coords */
-  coordinate_array_derivs_to_cart_partials(node, dau);
+  coordinate_dXdx_times_1form_array(node, dau, dau);
   return 1;
 }
 
