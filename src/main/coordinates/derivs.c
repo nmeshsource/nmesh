@@ -20,7 +20,6 @@ void coordinate_array_deriv1(tNode *node, int dir, tArray *au, tArray *dau,
   double *du = Arrd(dau);
   double dXbdX[3];
   int ind;
-errorexit("untested!");
 
   /* take derivs with respect to Xb: du/dXb */
   basis_array_deriv1(node, dir, au, dau, opt);
@@ -39,7 +38,6 @@ int coordinate_deriv1(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
   tDat *dat = node->dat;
   tArray *au;
   tArray *dau;
-errorexit("untested!");
 
   if(!dat) return 0;
 
@@ -50,35 +48,19 @@ errorexit("untested!");
   return 1;
 }
 
-/***********************************************************************/
-/* compute all 3 Cartesian 1st derivs of a scalar (using arrays) */
-/***********************************************************************/
-
-/* compute Cart. derivs of u in array au, put du/dx^m into arrays dau[0..2] */
-int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
-                        tDerivOpt *opt)
+/* Transform from coord derivs to Cartesian derivs. We do it in place. */
+int coordinate_array_derivs_to_cart_partials(tNode *node, tArray *dau[3])
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
   double *du[] = { Arrd(dau[0]), Arrd(dau[1]), Arrd(dau[2]) };
-  double dXbdX[3];
   int ind, m,i;
 
   if(!dat) return 0;
 
   /* do we need to init. coords? */
   if(!(dat->coords_set)) coordinates_init_node(node);
-
-  /* take derivs with respect to Xb: du/dXb */
-  basis_array_derivs(node, au, dau, opt);
-
-  /* get dXb/dX */
-  dXbYbZb_dXYZ(node, dXbdX);
-
-  /* scale: du/dX = dXb/dX du/dXb */
-  forpoints(node,ind)
-    for(m=0; m<3; m++) du[m][ind] *= dXbdX[m];
 
   /* transform to Cartesian coords */
   if(pat->dXYZ_dxyz)
@@ -106,6 +88,40 @@ int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
   return 1;
 }
 
+/***********************************************************************/
+/* compute all 3 Cartesian 1st derivs of a scalar (using arrays) */
+/***********************************************************************/
+
+/* compute Cart. derivs of u in array au, put du/dx^m into arrays dau[0..2] */
+int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
+                        tDerivOpt *opt)
+{
+  tDat *dat = node->dat;
+  double *du[] = { Arrd(dau[0]), Arrd(dau[1]), Arrd(dau[2]) };
+  double dXbdX[3];
+  int ind, m;
+
+  if(!dat) return 0;
+
+  /* take derivs with respect to Xb: du/dXb */
+  basis_array_derivs(node, au, dau, opt);
+
+  /* get dXb/dX */
+  dXbYbZb_dXYZ(node, dXbdX);
+
+  /* scale: du/dX = dXb/dX du/dXb */
+  forpoints(node,ind)
+    for(m=0; m<3; m++) du[m][ind] *= dXbdX[m];
+
+  /* this is slightly slower than the 3 steps above: */
+  //for(m=0; m<3; m++)
+  //  coordinate_array_deriv1(node,m, au, dau[m], opt);
+
+  /* transform to Cartesian coords */
+  coordinate_array_derivs_to_cart_partials(node, dau);
+  return 1;
+}
+
 
 /* compute Cart. derivs, put du/dx^m into vars with index dui[0..2] */
 int cart_partials(tNode *node, int ui, int dui[3], tDerivOpt *opt)
@@ -115,7 +131,11 @@ int cart_partials(tNode *node, int ui, int dui[3], tDerivOpt *opt)
   tArray *dau[3];
 
   if(!dat) return 0;
-
+/*
+for(int dir=0; dir<3; dir++)
+  coordinate_deriv1(node, dir, ui, dui[dir], opt);
+return 1;
+*/
   au     = dat->v[ui];
   dau[0] = dat->v[dui[0]];
   dau[1] = dat->v[dui[1]];
@@ -370,7 +390,6 @@ void coordinate_deriv1_SetAndCheck_nT_ndT(tNode *node, int dir,
 {
   tMesh *mesh = node->pat->mesh;
   int ok;
-errorexit("untested!");
 
   *nT = MeshVarNComponents(mesh, T0);
   *ndT = MeshVarNComponents(mesh, dT0);
@@ -400,7 +419,7 @@ void coordinate_deriv1_dTensor_dX(tNode *node, int dir, int T0, int dT0,
                                   tDerivOpt *opt)
 {
   int nT, ndT, off, n;
-errorexit("untested!");
+
   /* get and check number of components in T0 and dT0 */
   coordinate_deriv1_SetAndCheck_nT_ndT(node, dir, T0,dT0, &nT, &ndT);
 
@@ -421,7 +440,7 @@ void coordinate_deriv1_dXTensor(tNode *node, int dir, int T0, int dT0,
                                 tDerivOpt *opt)
 {
   int nT, ndT, pos, n;
-errorexit("untested!");
+
   /* get and check number of components in T0 and dT0 */
   coordinate_deriv1_SetAndCheck_nT_ndT(node, dir, T0,dT0, &nT, &ndT);
 
