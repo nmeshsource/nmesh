@@ -131,11 +131,7 @@ int cart_partials(tNode *node, int ui, int dui[3], tDerivOpt *opt)
   tArray *dau[3];
 
   if(!dat) return 0;
-/*
-for(int dir=0; dir<3; dir++)
-  coordinate_deriv1(node, dir, ui, dui[dir], opt);
-return 1;
-*/
+
   au     = dat->v[ui];
   dau[0] = dat->v[dui[0]];
   dau[1] = dat->v[dui[1]];
