@@ -109,6 +109,8 @@ int set_nm_nodemidpoint_distsXb_dir(tNode *node, int dir,
 void shift_Xb0_XbN_toward_Xbm0_XbmN(const double *Xbm, int n, double *Xb);
 
 /* derivs.c */
+int coordinate_dXdx_times_1form_array(tNode *node, tArray *daU[3],
+                                      tArray *dau[3]);
 int cart_partials(tNode *node, int ui, int dui[3], tDerivOpt *opt);
 void cart_partials_diScalar(tNode *node, int U, int dUx, tDerivOpt *opt);
 #define cart_partials_dU_di(node, U, dU) cart_partials_diScalar((node), (U), (dU), NULL)
@@ -138,6 +140,10 @@ void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
                                            int dT0, int ddT0, tDerivOpt *opt);
 void cart_partials_diTensor_didjTensor(tNode *node, int T0,
                                        int dT0, int ddT0, tDerivOpt *opt);
+void coordinate_deriv1_dTensor_dX(tNode *node, int dir, int T0, int dT0,
+                                  tDerivOpt *opt);
+void coordinate_deriv1_dXTensor(tNode *node, int dir, int T0, int dT0,
+                                tDerivOpt *opt);
 int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt);
 #define cart_di_Ui(node, Ux, divUi) cart_div3Vector((node), (Ux), (divUi), NULL)
 

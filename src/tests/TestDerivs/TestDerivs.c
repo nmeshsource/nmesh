@@ -94,72 +94,80 @@ int TestDerivs_analyze(tMesh *mesh)
     double *uzy= Vard(node,Ind("TestDerivs_Err_dduxx")+7);
     double *uzz= Vard(node,Ind("TestDerivs_Err_dduxx")+8);
 
-mesh->iteration=1;
+    //mesh->iteration=2;
 
-    /* compute the derivs */
-    if(mesh->iteration % 2 == 0)
+    /* compute the derivs in different ways */
+    switch(mesh->iteration)
     {
+    case 0:
       /* use ddu_ij = d_j (d_i u)  when mesh->iteration is even */
       cart_partials_dTensor_di(node, Ind("TestDerivs_u"),
                                      Ind("TestDerivs_Err_dux"), NULL);
       cart_partials_dTensor_di(node, Ind("TestDerivs_Err_dux"),
                                      Ind("TestDerivs_Err_dduxx"), NULL);
-/*
-      coordinate_deriv1_dTensor_dX(node, 0, Ind("TestDerivs_Err_dux"),
-                                   Ind("TestDerivs_Err_dduxx"), NULL);
-      coordinate_deriv1_dTensor_dX(node, 1, Ind("TestDerivs_Err_dux"),
-                                   Ind("TestDerivs_Err_dduxx"), NULL);
-      coordinate_deriv1_dTensor_dX(node, 2, Ind("TestDerivs_Err_dux"),
-                                   Ind("TestDerivs_Err_dduxx"), NULL);
-      tArray *dau[3];
+      break;
 
-      dau[0] = VarA(node, Ind("TestDerivs_Err_dduxx"));
-      dau[1] = VarA(node, Ind("TestDerivs_Err_dduxy"));
-      dau[2] = VarA(node, Ind("TestDerivs_Err_dduxz"));
-      coordinate_dXdx_times_1form_array(node, dau);
+    case 1:
+      {
+        /* use ddu_ij = d_j (d_i u)  when mesh->iteration is even */
+        cart_partials_dTensor_di(node, Ind("TestDerivs_u"),
+                                 Ind("TestDerivs_Err_dux"), NULL);
+        coordinate_deriv1_dTensor_dX(node, 0, Ind("TestDerivs_Err_dux"),
+                                     Ind("TestDerivs_Err_dduxx"), NULL);
+        coordinate_deriv1_dTensor_dX(node, 1, Ind("TestDerivs_Err_dux"),
+                                     Ind("TestDerivs_Err_dduxx"), NULL);
+        coordinate_deriv1_dTensor_dX(node, 2, Ind("TestDerivs_Err_dux"),
+                                     Ind("TestDerivs_Err_dduxx"), NULL);
+        tArray *dau[3];
+        dau[0] = VarA(node, Ind("TestDerivs_Err_dduxx"));
+        dau[1] = VarA(node, Ind("TestDerivs_Err_dduxy"));
+        dau[2] = VarA(node, Ind("TestDerivs_Err_dduxz"));
+        coordinate_dXdx_times_1form_array(node, dau,dau);
+        dau[0] = VarA(node, Ind("TestDerivs_Err_dduyx"));
+        dau[1] = VarA(node, Ind("TestDerivs_Err_dduyy"));
+        dau[2] = VarA(node, Ind("TestDerivs_Err_dduyz"));
+        coordinate_dXdx_times_1form_array(node, dau,dau);
+        dau[0] = VarA(node, Ind("TestDerivs_Err_dduzx"));
+        dau[1] = VarA(node, Ind("TestDerivs_Err_dduzy"));
+        dau[2] = VarA(node, Ind("TestDerivs_Err_dduzz"));
+        coordinate_dXdx_times_1form_array(node, dau,dau);
+      }
+      break;
 
-      dau[0] = VarA(node, Ind("TestDerivs_Err_dduyx"));
-      dau[1] = VarA(node, Ind("TestDerivs_Err_dduyy"));
-      dau[2] = VarA(node, Ind("TestDerivs_Err_dduyz"));
-      coordinate_dXdx_times_1form_array(node, dau);
-
-      dau[0] = VarA(node, Ind("TestDerivs_Err_dduzx"));
-      dau[1] = VarA(node, Ind("TestDerivs_Err_dduzy"));
-      dau[2] = VarA(node, Ind("TestDerivs_Err_dduzz"));
-      coordinate_dXdx_times_1form_array(node, dau);
-*/
-    }
-    else
-    {
+    default:
       /* use ddu_ij = d_i (d_j u)  when mesh->iteration is odd */
       cart_partials_diTensor(node, Ind("TestDerivs_u"),
                                    Ind("TestDerivs_Err_dux"), NULL);
       cart_partials_diTensor(node, Ind("TestDerivs_Err_dux"),
                                    Ind("TestDerivs_Err_dduxx"), NULL);
-/*
-      coordinate_deriv1_dXTensor(node, 0, Ind("TestDerivs_Err_dux"),
-                                   Ind("TestDerivs_Err_dduxx"), NULL);
-      coordinate_deriv1_dXTensor(node, 1, Ind("TestDerivs_Err_dux"),
-                                   Ind("TestDerivs_Err_dduxx"), NULL);
-      coordinate_deriv1_dXTensor(node, 2, Ind("TestDerivs_Err_dux"),
-                                   Ind("TestDerivs_Err_dduxx"), NULL);
-      tArray *dau[3];
+      break;
 
-      dau[0] = VarA(node, Ind("TestDerivs_Err_dduxx"));
-      dau[1] = VarA(node, Ind("TestDerivs_Err_dduyx"));
-      dau[2] = VarA(node, Ind("TestDerivs_Err_dduzx"));
-      coordinate_dXdx_times_1form_array(node, dau);
-
-      dau[0] = VarA(node, Ind("TestDerivs_Err_dduxy"));
-      dau[1] = VarA(node, Ind("TestDerivs_Err_dduyy"));
-      dau[2] = VarA(node, Ind("TestDerivs_Err_dduzy"));
-      coordinate_dXdx_times_1form_array(node, dau);
-
-      dau[0] = VarA(node, Ind("TestDerivs_Err_dduxz"));
-      dau[1] = VarA(node, Ind("TestDerivs_Err_dduyz"));
-      dau[2] = VarA(node, Ind("TestDerivs_Err_dduzz"));
-      coordinate_dXdx_times_1form_array(node, dau);
-*/
+    case 3:
+      {
+        /* use ddu_ij = d_i (d_j u)  when mesh->iteration is odd */
+        cart_partials_diTensor(node, Ind("TestDerivs_u"),
+                               Ind("TestDerivs_Err_dux"), NULL);
+        coordinate_deriv1_dXTensor(node, 0, Ind("TestDerivs_Err_dux"),
+                                   Ind("TestDerivs_Err_dduxx"), NULL);
+        coordinate_deriv1_dXTensor(node, 1, Ind("TestDerivs_Err_dux"),
+                                   Ind("TestDerivs_Err_dduxx"), NULL);
+        coordinate_deriv1_dXTensor(node, 2, Ind("TestDerivs_Err_dux"),
+                                   Ind("TestDerivs_Err_dduxx"), NULL);
+        tArray *dau[3];
+        dau[0] = VarA(node, Ind("TestDerivs_Err_dduxx"));
+        dau[1] = VarA(node, Ind("TestDerivs_Err_dduyx"));
+        dau[2] = VarA(node, Ind("TestDerivs_Err_dduzx"));
+        coordinate_dXdx_times_1form_array(node, dau,dau);
+        dau[0] = VarA(node, Ind("TestDerivs_Err_dduxy"));
+        dau[1] = VarA(node, Ind("TestDerivs_Err_dduyy"));
+        dau[2] = VarA(node, Ind("TestDerivs_Err_dduzy"));
+        coordinate_dXdx_times_1form_array(node, dau,dau);
+        dau[0] = VarA(node, Ind("TestDerivs_Err_dduxz"));
+        dau[1] = VarA(node, Ind("TestDerivs_Err_dduyz"));
+        dau[2] = VarA(node, Ind("TestDerivs_Err_dduzz"));
+        coordinate_dXdx_times_1form_array(node, dau,dau);
+      }
+      break;
     }
 
     /* subtract true values */
