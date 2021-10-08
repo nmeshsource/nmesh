@@ -239,6 +239,21 @@ void set_const_array(tArray *A, double c)
   for(i=0; i<A->N; i++)  A->d[i] = c;
 }
 
+/* copy values from Src into Dest */
+void copy_array_data(tArray *Src, tArray *Dest)
+{
+  double *dest = Dest->d;
+  double *src  = Src->d;
+  if(dest != src)
+  {
+    int sN = Src->N;
+    int dN = Dest->N;
+    int N = (sN < dN) ? sN : dN; // min
+    int n = N * sizeof(Src->d[0]);
+    memcpy(dest, src, n);
+  }
+}
+
 /* take plane pA with normal dir from A and copy it into P to plane pP */
 void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP)
 {

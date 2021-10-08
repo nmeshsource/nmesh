@@ -453,6 +453,7 @@ void mm_array0(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array1(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array2(tArray *Aa, tArray *Ba, tArray *ABa);
 void set_const_array(tArray *A, double c);
+void copy_array_data(tArray *Src, tArray *Dest);
 void copy_array_plane(tArray *A, int dir, int pA, tArray *P, int pP);
 void copy_array_planes(int np, tArray *A, int dir, int pA,
                        tArray *P, int pP);

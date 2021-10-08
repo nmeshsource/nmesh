@@ -88,6 +88,12 @@ int coordinate_dXdx_times_vector_array(tNode *node, tArray *au[3],
       for(m=0; m<3; m++) U[m][ind] = V[m];
     }
   }
+  /* X^I is Cartesian, so copy components of au into aU if needed */
+  else if(aU != au)
+  {
+    for(m=0; m<3; m++)
+      copy_array_data(au[m], aU[m]);
+  }
   return 1;
 }
 
@@ -130,6 +136,12 @@ int coordinate_dXdx_times_1form_array(tNode *node, tArray *daU[3],
       /* copy dw into du */
       for(m=0; m<3; m++) du[m][ind] = dw[m];
     }
+  }
+  /* daU is Cartesian, so copy components of daU into dau if needed */
+  else if(dau != daU)
+  {
+    for(m=0; m<3; m++)
+      copy_array_data(daU[m], dau[m]);
   }
   return 1;
 }
