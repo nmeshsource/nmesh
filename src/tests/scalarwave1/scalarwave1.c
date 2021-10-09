@@ -789,6 +789,7 @@ void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
   tMesh *mesh = node->pat->mesh;
   int *n = node->n;
   int f = d->face;
+  int right_face = f%2;
   int ijk = Ind_n(d->i,d->j,d->k, n);
   int nvars = 5;
   double norm[3];
@@ -804,11 +805,20 @@ void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
   fv_rec1d_q_midpt(fv);
 
   /* in scalarwave1 q is u, so transfer qm_p,qm_m into ui,ua now */
-  for(l=0; l<fv->nq; l++)
-  {
-    d->ui[l] = fv->qm_p[l];
-    d->ua[l] = fv->qm_m[l];
-  }
+
+  /* right face means, use right midpoint */
+  if(right_face)
+    for(l=0; l<fv->nq; l++)
+    {
+      d->ui[l] = fv->qm_p[l];
+      d->ua[l] = fv->qm_m[l];
+    }
+  else
+    for(l=0; l<fv->nq; l++)
+    {
+      d->ui[l] = fv->qm_m[l];
+      d->ua[l] = fv->qm_p[l];
+    }
 
   /* eigenval in dir norm */
   scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
