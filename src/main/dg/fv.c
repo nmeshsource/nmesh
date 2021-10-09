@@ -42,7 +42,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
      vlq are vars we reconstruct (we can use cons. vars u here)
      vlu are cons. vars u
      vls are extra source vars we may need (can be NULL)
-     rec1d_u_f_lam_midpt = rec. cons u, fluxes f & eiegnvals at a midpoint
+     rec1d_u_f_lam_midpt = rec. cons u, fluxes f & eigenvals at a midpoint
      numflux             = numerical flux we want
    Out:
      vldivf = div(f(u)) on all inner gridpoints and a piece of div(f(u)) on
