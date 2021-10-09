@@ -150,8 +150,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   add_surface_fluxes = DGglobals->fv_divf_adds_surface_fluxes;
 
   /* do we use left fluxes? */
-  use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
-  use_left_flux=0;
+  use_left_flux = !Getb(DGglobals->fv_divf_use_only_right_flux);
 
   /* set var list for div of fluxes to zero */
   vlsetconstant_node(node, vldivf, 0.);
