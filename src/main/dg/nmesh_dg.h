@@ -37,6 +37,7 @@ typedef struct {
   double fv_WENOm3_optw[2];   /* optimal weights for WENOm3 */
   /* frequently used par indices */
   int fv_divf_extrap_s1;      /* index of par fv_divf_extrap_s1 */
+  int fv_divf_use_only_right_flux; //index of par fv_divf_use_only_right_flux
 } tDGglobals;
 
 

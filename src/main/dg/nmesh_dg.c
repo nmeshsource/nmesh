@@ -35,6 +35,8 @@ int nmesh_dg(tMesh *mesh)
          "divf_extrap1,dnfn_extrap1]");
   AddPar("fv_divf_extrap_s1", "0", "use 0th order extrapolation if "
          "|u1-u0|/|u2-u1| < 0.75 s1, [0, 0.5, ...]");
+  AddPar("fv_divf_use_only_right_flux", "yes", "if yes we only compute fnumR "
+         "and assume fnumL=-fnumR, otherwise we also compute fnumL [yes,no]");
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
          "[linear,parabolic]");
   /* Finite Differences (fd) pars */

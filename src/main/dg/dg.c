@@ -304,6 +304,7 @@ int dg_set_DGglobals(tMesh *mesh)
 
   /* set some par indices */
   DGglobals->fv_divf_extrap_s1 = Par("fv_divf_extrap_s1");
+  DGglobals->fv_divf_use_only_right_flux= Par("fv_divf_use_only_right_flux");
 
   return 0;
 }

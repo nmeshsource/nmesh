@@ -65,6 +65,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   double q_scale = 1.; /* typical order of magnitude of fields */
   int nghosts;         /* number of ghost points on each end */
   int add_surface_fluxes; /* whether we set all of divf on faces */
+  int use_left_flux;   /* whether we set and use the left fluxes in fnumL */
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
   double extrap_s1 = Getd(DGglobals->fv_divf_extrap_s1);
 
@@ -148,6 +149,10 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   /* do we add in the surface fluxes here already? */
   add_surface_fluxes = DGglobals->fv_divf_adds_surface_fluxes;
 
+  /* do we use left fluxes? */
+  use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
+  use_left_flux=0;
+
   /* set var list for div of fluxes to zero */
   vlsetconstant_node(node, vldivf, 0.);
 
@@ -166,11 +171,13 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double *Xbm = dmalloc(maxn);
     double *dXb = dmalloc(maxn);
     double *qc[nqvars];          //pointers to data of the q-fields
-    double *fnumR[nfvars];       //pointers to data of the fluxes
+    double *fnumR[nfvars];       //pointers to data of the right fluxes
+    double *fnumL[nfvars];       //pointers to data of the left fluxes
     int npg = maxn + 2*nghosts;  //number of points in qcg[l]
     int npe = maxn + 2;          //number of points in fnumRe[l]
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
     double (*fnumRe)[npe] = calloc(nfvars, sizeof *fnumRe); //for fluxes
+    double (*fnumLe)[npe] = calloc(nfvars, sizeof *fnumLe); //for fluxes
     double (*di0fi0)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
     double *qm_m = dmalloc(nqvars);
@@ -181,6 +188,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     for(l=0; l<nqvars; l++) qc[l] = &(qcg[l][nghosts]);
     /* NOTE: now qc[l][-1] = qcg[l][0] i.e. ghost on left */
     for(l=0; l<nfvars; l++) fnumR[l] = &(fnumRe[l][1]);
+    for(l=0; l<nfvars; l++) fnumL[l] = &(fnumLe[l][1]);
 
     /* write node into d because numflux needs this */
     d->node = node;
@@ -209,7 +217,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
         int i2 = i2_norm(i,j,k, dir);
         int i0;                       /* index orthogonal to plane */
-        int ic,jc,kc, ccc;
+        int ic,jc,kc, ccc;            /* index of gridpoints */
 
         /* fill field arrays qc, i0 runs orth. to plane */
         for(i0=0; i0<n[dir]; i0++)
@@ -266,6 +274,42 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
           cccm1 = Ind_n(im,jm,km, n);
 
+          /* set index and face of the left midpoint */
+          d->i = im;
+          d->j = jm;
+          d->k = km;
+          d->face = dir*2;
+
+          /* if we want to construct left fluxes AND
+             if i0 has a midpoint to its left */
+          if(use_left_flux && i0>0)
+          {
+            tFVinfo fv[1];
+
+            /* set fv  */
+            fv->nq = nqvars;
+            fv->qc = qc;
+            fv->npts = n[dir];
+            fv->im = im0m1;
+            fv->q_scale = q_scale;
+            fv->rec1d_p = rec1d_p;
+            fv->rec1d_m = rec1d_m;
+            fv->qm_p = qm_p;
+            fv->qm_m = qm_m;
+
+            /* reconstruct q,u and then set fluxes and eigenvalues in d */
+            rec1d_u_f_lam_midpt(fv, d);
+
+            /* compute numerical flux directly after rec1d_u_f_lam_midpt,
+               if not set already in rec1d_u_f_lam_midpt */
+            if(numflux) numflux(d);
+
+            /* save d->fnum in fnumL for each field and point */
+            forvl(vldivf, l)
+              fnumL[l][im0m1] = d->fnum[l];
+            //printDGinfo(d);
+          }
+
           /* set index and face of the right midpoint */
           d->i = ic;
           d->j = jc;
@@ -298,9 +342,11 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             /* save d->fnum in fnumR for each field and point */
             forvl(vldivf, l)
               fnumR[l][im0] = d->fnum[l];
-            /* we could now also compute fnumL with normL=-normR, but I think
-               this results in fnumL = -fnumR */
+            /* above we have a case for fnumL (with normL=-normR), but I think
+               this results in fnumL = -fnumR. So it should be enough to only
+               use fnumR. */
             //printDGinfo(d);
+            //if(d->fnum[0]>0.00000001 && i0==4) errorexit("STOP");
           }
 
           /* factors in flux terms on RHS at right and left midpoint */
@@ -335,6 +381,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
               /* save fluxes of left face in fnumR, use fnumR = -fnumL */
               forvl(vldivf, l) fnumR[l][-1] = -( d->fnum[l] );
+              if(use_left_flux)
+                forvl(vldivf, l) fnumL[l][-1] = d->fnum[l];
             }
             if(i0 == n[dir]-1)
             {
@@ -349,6 +397,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
               /* save fluxes of right face in fnumR */
               forvl(vldivf, l) fnumR[l][i0] = d->fnum[l];
+              if(use_left_flux)
+                forvl(vldivf, l) fnumL[l][i0] = -( d->fnum[l] );
+                                 /* ^-here we used fnumL = -fnumR */
             }
 
             /* restore altered parts of d */
@@ -367,12 +418,21 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           //i0, im0, im0m1, wm, gd_ow_m, gd_ow_m1);
 
           /* get piece of div(flux) in direction dir with FV method */
-          forvl(vldivf, l)
-          {
-            double *fnum = fnumR[l];
-            double *df = di0fi0[l];
-            df[i0] = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1;
-          }
+          if(use_left_flux)
+            forvl(vldivf, l)
+            {
+              double *fR = fnumR[l];
+              double *fL = fnumL[l];
+              double *df = di0fi0[l];
+              df[i0] = fR[i0]*gd_ow_m + fL[i0-1]*gd_ow_m1;
+            }
+          else /* fv like in BAM, where we only need right flux fnumR */
+            forvl(vldivf, l)
+            {
+              double *fnum = fnumR[l];
+              double *df = di0fi0[l];
+              df[i0] = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1;
+            }
         } /* end i0 loop */
 
         /* extrapolate df = d_i0 f^i0 to face */
@@ -408,6 +468,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     free(qm_m);
     free(qm_p);
     free(di0fi0);
+    free(fnumLe);
     free(fnumRe);
     free(qcg);
     free(dXb);
