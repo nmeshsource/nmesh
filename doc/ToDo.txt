@@ -243,21 +243,40 @@ Things that need to be done urgently:
  -FOCCZ4_eigenvals replaces stuf like g^xx or beta^x in paper simply by
   g^nn or beta^n. Is this correct?
 
-
 *IDEA about fin. diff. (fd) in e.g. C3GH
  -maybe C3GH + punc. needs fd not fv!!!
- -change array_cart_partials to so that we have option to also use some fd
-  thing instead of basis_array_derivs
- -see also tGridPoints, and note that fd_deriv_DT_uniform sets diff matrix
-  for centered derivs
- -add matrix to tGridPoints with lop-sided fd drrivs
- -make fd_lopderiv_DT_uniform
- -maybe change fd_deriv_DT_uniform to replace arg sr by arg ssz???
-  (But then stencil is always lopsided for even ssz!)
- -array_cart_partials need more args to choose which type of deriv we want
- -adapt cart_partials_diTensor to have more args as well so that user in
-  e.g. in RHS for C3GH can decide what to do. Extra arg could be struct???
- -do not change the many special things like cart_partials_dUa_di
+ -basis_array_deriv1 takes options now to select one of 3 diffmatrices
+ -init_gridpoints uses fd_lopderiv_DT_uniform to set the 3 diffmatrices,
+  (1 centered and 2 lopsided diffmatrices)
+ -cart_partials_diTensor has more args so that user in RHS (for e.g.
+  C3GH) can decide what to do. Extra arg is a struct or NULL.
+ -the many special things like cart_partials_dUa_di have no options and
+  always take centered derivs
+
+
+*Unit tests: Add testsuites as in old bam???
+
+
+*Add support for taking back a failed evo step (e.g. because node is troubled)
+ on one node
+ -make funcs called in evolve_setrhs_mesh under VOLRHS, SURFRHS (and
+  also SETSRC) node based (i.e. make first arg node NOT mesh).
+ -then we can add a bin after SURFRHS to check for trouble on each node and
+  act
+ -make dg_add_surface_fluxes_sign also node based. But where should we then
+  call alloc_DGinfo? In it? In evolve_setrhs_mesh? In user supplied func?
+ -add test parfiles for:
+  advection*,burger1,scalarwave1,ScalarWave,GRHD,GHG,C3GH,FOCCZ4
+ -need to change vol_rhs and surf_rhs funcs in
+  advection*,burger1,scalarwave1,ScalarWave,GRHD,GHG,C3GH,FOCCZ4:
+  +before changes in evolve_setrhs_mesh:
+   ~rewrite mesh based funcs first, so that they loop over nodes and
+    then simply call a node based func. Some var lists such as vldivf or vlpg
+    in GRHD_set_divfluxes (called by vol_rhs) then need to made global.
+   ~this way we can test before evolve_setrhs_mesh changes
+  +could use trick (as in TOVstar_set_boosted_Ein_data_node0) where we call
+   func for entire mesh from node based func, but only do the mesh work when
+   node arg has some particular value (node0).
 
 
 Questions about bamps:
@@ -394,6 +413,7 @@ Things that should be done:
 
 Cleanup:
 ========
+-remove fd_deriv_DT_uniform__old ???
 -remove ldescendants_along_face
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
