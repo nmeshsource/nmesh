@@ -61,16 +61,15 @@ void scalarwave1_eigenval1d(tNode *node, int ncons, double *lam, double norm[3])
 /* flux and its derivs for adv. eqn: f^i = n^i u */
 void scalarwave1_f_divf(tNode *node, tVarList *vlu)
 {
-  tMesh *mesh = vlu->mesh;
   int iphi = Vind(vlu, 4);
   int ipi  = Vind(vlu, 0);
   int icx  = Vind(vlu, 1);
-  int if_pix = Ind("scalarwave1_f_pix");
-  int if_cxx = Ind("scalarwave1_f_cxx");
+  int if_pix = scalarwave1->if_pix;
+  int if_cxx = scalarwave1->if_cxx;
   int if_cyx = if_cxx + 3;
   int if_czx = if_cxx + 6;
-  int idivf_pi = Ind("scalarwave1_divf_pi");
-  int idivf_cx = Ind("scalarwave1_divf_cx");
+  int idivf_pi = scalarwave1->idivf_pi;
+  int idivf_cx = scalarwave1->idivf_cx;
 
   /* compute derivs */
   {
@@ -217,8 +216,8 @@ void scalarwave1_set_divf(tNode *node, tVarList *vlu)
   int use_fv = node->dat->info->use_fv;
   tMesh *mesh = vlu->mesh;
   tVarList *vldivf = vlalloc(mesh);
-  vlpush(vldivf, Ind("scalarwave1_divf_pi"));
-  vlpush(vldivf, Ind("scalarwave1_divf_cx"));
+  vlpush(vldivf, scalarwave1->idivf_pi);
+  vlpush(vldivf, scalarwave1->idivf_cx);
 
   if(use_fv)
   {
@@ -243,13 +242,12 @@ void scalarwave1_set_divf(tNode *node, tVarList *vlu)
 /* RHS of: d_t u = - d_i f^i */
 int scalarwave1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
-  tMesh *mesh = vlu->mesh;
   int ipi = Vind(vlu, 0);
   int irpi = Vind(vlr, 0);
   int ircx = Vind(vlr, 1);
   int irphi = Vind(vlr, 4);
-  int idivf_pi = Ind("scalarwave1_divf_pi");
-  int idivf_cx = Ind("scalarwave1_divf_cx");
+  int idivf_pi = scalarwave1->idivf_pi;
+  int idivf_cx = scalarwave1->idivf_cx;
 
   /* set div of flux */
   scalarwave1_set_divf(node, vlu);
@@ -670,6 +668,12 @@ int scalarwave1_init(tMesh *mesh)
   int limiter = Par("scalarwave1_limiter");
 
   PRF;printf(": dt = %g\n", mesh->dt);
+
+  /* save some global var indices */
+  scalarwave1->if_pix = if_pix;
+  scalarwave1->if_cxx = if_cxx;
+  scalarwave1->idivf_pi = idivf_pi;
+  scalarwave1->idivf_cx = idivf_cx;
 
   /* varlist for evolution: vlu contains indices for (pi, cx,cy,cz, phi) */
   vlpush(vlu, ipi);

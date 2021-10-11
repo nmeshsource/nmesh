@@ -5,6 +5,11 @@
 
 /* structure that holds global scalarwave1 vars and pars */
 typedef struct {
+  /* saved indices of some vars */
+  int if_pix ; /* Ind("scalarwave1_f_pix") */
+  int if_cxx ; /* Ind("scalarwave1_f_cxx") */
+  int idivf_pi ; /* Ind("scalarwave1_divf_pi") */
+  int idivf_cx ; /* Ind("scalarwave1_divf_cx") */
   void (*numflux)(tDGinfo *d); // func pointer for numerical flux
   /* frequently used pars */
   double k[3];
