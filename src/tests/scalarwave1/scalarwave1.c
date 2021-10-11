@@ -36,7 +36,7 @@ int scalarwave1_init_global_pars(tMesh *mesh)
 
 
 /* fluxes in direction norm, u = (pi, cx,cy,cz, phi) */
-void scalarwave1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
+void scalarwave1_flux1d(tNode *node, int ncons, double *f, double norm[3],
                         double *u)
 {
   /* fluxes times norm */
@@ -48,7 +48,7 @@ void scalarwave1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
 }
 
 /* eigenvalues in direction norm */
-void scalarwave1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
+void scalarwave1_eigenval1d(tNode *node, int ncons, double *lam, double norm[3])
 {
   /* eigenvalues in some order */
   lam[0] = 1.0;
@@ -103,7 +103,7 @@ void scalarwave1_f_divf(tNode *node, tVarList *vlu)
       double f[5];
       double no[3] = { 1., 0., 0. };
 
-      scalarwave1_flux1d(mesh,5, f,no, u);
+      scalarwave1_flux1d(node,5, f,no, u);
       f_pi_x[i] = f[0];
       f_cx_x[i] = f[1];
       f_cy_x[i] = f[2];
@@ -111,7 +111,7 @@ void scalarwave1_f_divf(tNode *node, tVarList *vlu)
 
       no[0] = 0;
       no[1] = 1.;
-      scalarwave1_flux1d(mesh,5, f,no, u);
+      scalarwave1_flux1d(node,5, f,no, u);
       f_pi_y[i] = f[0];
       f_cx_y[i] = f[1];
       f_cy_y[i] = f[2];
@@ -119,7 +119,7 @@ void scalarwave1_f_divf(tNode *node, tVarList *vlu)
 
       no[1] = 0.;
       no[2] = 1.;
-      scalarwave1_flux1d(mesh,5, f,no, u);
+      scalarwave1_flux1d(node,5, f,no, u);
       f_pi_z[i] = f[0];
       f_cx_z[i] = f[1];
       f_cy_z[i] = f[2];
@@ -133,18 +133,6 @@ void scalarwave1_f_divf(tNode *node, tVarList *vlu)
     cart_di_Ui(node, if_czx, idivf_cx+2);
   }
 }
-
-/* flux and its derivs for adv. eqn: f^i = n^i u on mesh */
-void scalarwave1_f_divf_mesh(tMesh *mesh, tVarList *vlu)
-{
-  /* compute derivs on all nodes */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    scalarwave1_f_divf(node, vlu);
-  }
-}
-
 
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
@@ -169,8 +157,8 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   node_normal_at_ijk(node, f, ijk, norm);
 
   /* eigenval in dir norm */
-  scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
-  scalarwave1_eigenval1d(mesh,nvars, d->lama,norm);
+  scalarwave1_eigenval1d(node,nvars, d->lami,norm);
+  scalarwave1_eigenval1d(node,nvars, d->lama,norm);
 
   /* reset d->Ffac to default */
   d->Ffac = 1.;
@@ -218,46 +206,44 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   }
 
   /* get inner and adjacent fluxes fi, fa */
-  scalarwave1_flux1d(mesh,nvars, d->fi,norm, d->ui);
-  scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
+  scalarwave1_flux1d(node,nvars, d->fi,norm, d->ui);
+  scalarwave1_flux1d(node,nvars, d->fa,norm, d->ua);
 }
 
 
 /* compute div of flux */
-void scalarwave1_set_divf(tMesh *mesh, tVarList *vlu)
+void scalarwave1_set_divf(tNode *node, tVarList *vlu)
 {
+  int use_fv = node->dat->info->use_fv;
+  tMesh *mesh = vlu->mesh;
   tVarList *vldivf = vlalloc(mesh);
   vlpush(vldivf, Ind("scalarwave1_divf_pi"));
   vlpush(vldivf, Ind("scalarwave1_divf_cx"));
 
-  formylnodes(mesh)
+  if(use_fv)
   {
-    tNode *node = MyLnode;
-    int use_fv = node->dat->info->use_fv;
+    /* linear interpolation to moved in point */
+    if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
+      rec1d_uface_to_uin_1(node, vlu, 1);
+    /* WARNING: The interploation does not help for 2 FV neighbors!!!
+                BUT maybe it would help if going from FV to DG???  */
 
-    if(use_fv)
-    {
-      /* linear interpolation to moved in point */
-      if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
-        rec1d_uface_to_uin_1(node, vlu, 1);
-      /* WARNING: The interploation does not help for 2 FV neighbors!!!
-                  BUT maybe it would help if going from FV to DG???  */
-
-      /* compute d_i f^i with finite vol. methods on one node */
-      fv_divf(node, vldivf, vlu, vlu,NULL, scalarwave1_rec_u_f_lam,
-              scalarwave1_fluxes_pt, scalarwave1->numflux);
-    }
-    else
-    {
-      scalarwave1_f_divf(node, vlu);
-    }
+    /* compute d_i f^i with finite vol. methods on one node */
+    fv_divf(node, vldivf, vlu, vlu,NULL, scalarwave1_rec_u_f_lam,
+            scalarwave1_fluxes_pt, scalarwave1->numflux);
   }
+  else
+  {
+    scalarwave1_f_divf(node, vlu);
+  }
+
   vlfree(vldivf);
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int scalarwave1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int ipi = Vind(vlu, 0);
   int irpi = Vind(vlr, 0);
   int ircx = Vind(vlr, 1);
@@ -265,15 +251,11 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   int idivf_pi = Ind("scalarwave1_divf_pi");
   int idivf_cx = Ind("scalarwave1_divf_cx");
 
-  TIMER_START;
-
   /* set div of flux */
-  scalarwave1_set_divf(mesh, vlu);
+  scalarwave1_set_divf(node, vlu);
 
   /* RHS */
-  formylnodes(mesh)
   {
-    tNode *node = MyLnode;
     double *pi = Vard(node, ipi);
     double *rpi = Vard(node, irpi);
     double *rcx = Vard(node, ircx);
@@ -299,18 +281,16 @@ int scalarwave1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
     }
   }
 
-  TIMER_STOP;
   return 0;
 }
 
 /* surface terms in RHS of: d_t u */
-int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int scalarwave1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int idivf_pi = Ind("scalarwave1_divf_pi");
   int idivf_cx = Ind("scalarwave1_divf_cx");
   tVarList *vldivf;
-
-  TIMER_START;
 
   /* make var list with div of fluxes */
   vldivf = vlalloc(mesh);
@@ -319,22 +299,20 @@ int scalarwave1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 
   /* extrapolate u back to face on fv nodes */
   if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)
-    rec1d_uface_to_uin_1_mesh(mesh, vlu, 0);
+    rec1d_uface_to_uin_1(node, vlu, 0);
 
   /* add flux terms on surfaces to divf */
-  dg_add_surface_fluxes_sign(mesh, 1., vldivf, vlu, NULL,
+  dg_add_surface_fluxes_sign(node, 1., vldivf, vlu, NULL,
                              scalarwave1_fluxes_pt, scalarwave1->numflux);
 
   /* extrapolate divf to face on fv nodes */
   if(DGglobals->fv_divf_extrap_mode == FV_DIVF_EXTRAP1)
-    rec1d_uface_to_uin_1_mesh(mesh, vldivf, 0);
+    rec1d_uface_to_uin_1(node, vldivf, 0);
 
   /* add divf on node surfaces */
-  vladdto_onfaces(vlr, -1., vldivf);
+  vladdto_onfaces_node(node, vlr, -1., vldivf);
 
   vlfree(vldivf);
-
-  TIMER_STOP;
   return 0;
 }
 
@@ -786,7 +764,6 @@ int scalarwave1_analyze(tMesh *mesh)
 void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
 {
   tNode *node = d->node;
-  tMesh *mesh = node->pat->mesh;
   int *n = node->n;
   int f = d->face;
   int right_face = f%2;
@@ -821,10 +798,10 @@ void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
     }
 
   /* eigenval in dir norm */
-  scalarwave1_eigenval1d(mesh,nvars, d->lami,norm);
-  scalarwave1_eigenval1d(mesh,nvars, d->lama,norm);
+  scalarwave1_eigenval1d(node,nvars, d->lami,norm);
+  scalarwave1_eigenval1d(node,nvars, d->lama,norm);
 
   /* get inner and adjacent fluxes fi, fa */
-  scalarwave1_flux1d(mesh,nvars, d->fi,norm, d->ui);
-  scalarwave1_flux1d(mesh,nvars, d->fa,norm, d->ua);
+  scalarwave1_flux1d(node,nvars, d->fi,norm, d->ui);
+  scalarwave1_flux1d(node,nvars, d->fa,norm, d->ua);
 }

@@ -33,7 +33,7 @@ int advection1_init_global_pars(tMesh *mesh)
 
 
 /* flux in direction norm */
-void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
+void advection1_flux1d(tNode *node, int ncons, double *f, double norm[3],
                        double *u)
 {
   double *nd = advection1->direction;
@@ -43,7 +43,7 @@ void advection1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
 }
 
 /* eigenvalue in direction norm */
-void advection1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
+void advection1_eigenval1d(tNode *node, int ncons, double *lam, double norm[3])
 {
   double *nd = advection1->direction;
 
@@ -52,39 +52,33 @@ void advection1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3])
 }
 
 /* flux and its derivs for adv. eqn: f^i = n^i u */
-void advection1_f_df(tMesh *mesh, tVarList *vlu)
+void advection1_f_df(tNode *node, tVarList *vlu)
 {
+  int ifx  = advection1->ifx;
+  int idivf = advection1->idivf;
   int iu = vlu->index[0];
-  int ifx  = Ind("advection1_fx");
-  int idivf = Ind("advection1_divf");
+  double *u = Vard(node, iu);
+  double *fx = Vard(node, ifx);
+  double *fy = Vard(node, ifx+1);
+  double *fz = Vard(node, ifx+2);
+  int i;
 
-  /* compute derivs */
-  formylnodes(mesh)
+  /* flux at each point */
+  forpoints(node, i)
   {
-    tNode *node = MyLnode;
-    double *u = Vard(node, iu);
-    double *fx = Vard(node, ifx);
-    double *fy = Vard(node, ifx+1);
-    double *fz = Vard(node, ifx+2);
-    int i;
-
-    /* flux at each point */
-    forpoints(node, i)
-    {
-      double u_i = u[i];
-      double no[3] = { 1., 0., 0. };
-      advection1_flux1d(mesh,1, &(fx[i]),no, &u_i);
-      no[0] = 0;
-      no[1] = 1.;
-      advection1_flux1d(mesh,1, &(fy[i]),no, &u_i);
-      no[1] = 0.;
-      no[2] = 1.;
-      advection1_flux1d(mesh,1, &(fz[i]),no, &u_i);
-    }
-
-    /* flux derivs */
-    cart_di_Ui(node, ifx, idivf);
+    double u_i = u[i];
+    double no[3] = { 1., 0., 0. };
+    advection1_flux1d(node,1, &(fx[i]),no, &u_i);
+    no[0] = 0;
+    no[1] = 1.;
+    advection1_flux1d(node,1, &(fy[i]),no, &u_i);
+    no[1] = 0.;
+    no[2] = 1.;
+    advection1_flux1d(node,1, &(fz[i]),no, &u_i);
   }
+
+  /* flux derivs */
+  cart_di_Ui(node, ifx, idivf);
 }
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
@@ -107,7 +101,7 @@ void advection1_fluxes_pt(tDGinfo *d)
   node_normal_at_ijk(node, f, ijk, norm);
 
   /* eigenval in dir norm */
-  advection1_eigenval1d(mesh,nvars, d->lami,norm);
+  advection1_eigenval1d(node,nvars, d->lami,norm);
   d->lama[0] = d->lami[0]; // eigenval is same on both sides
 
   /* loop over evo vars in vlu */
@@ -169,17 +163,18 @@ void advection1_fluxes_pt(tDGinfo *d)
   } /* end loop over evo vars */
 
   /* get inner and adjacent fluxes fi, fa */
-  advection1_flux1d(mesh,nvars, d->fi,norm, d->ui);
-  advection1_flux1d(mesh,nvars, d->fa,norm, d->ua);
+  advection1_flux1d(node,nvars, d->fi,norm, d->ui);
+  advection1_flux1d(node,nvars, d->fa,norm, d->ua);
 }
 
 
 /* set a BC on outer boundary of each patch */
-void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+void advection1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
+  int ix = Ind("x");
   int ir = vlr->index[0];
   int iu = vlu->index[0];
-  int ix = Ind("x");
   double *nd = advection1->direction;
   double nx = nd[0];
   double ny = nd[1];
@@ -187,9 +182,7 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
   double nmag2 = (nx*nx + ny*ny + nz*nz);
 
   /* compute boundary flux terms */
-  formylnodes(mesh)
   {
-    tNode *node = MyLnode;
     tPat *pat = node->pat;
     int *n = node->n;
     double *r = Vard(node, ir);
@@ -228,46 +221,35 @@ void advection1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int advection1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int advection1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  int idivf = advection1->idivf;
   int ir = vlr->index[0];
-  int idivf = Ind("advection1_divf");
-
-  TIMER_START;
+  double *r  = Vard(node, ir);
+  double *divf = Vard(node, idivf);
+  int i;
 
   /* compute flux */
-  advection1_f_df(mesh, vlu);
+  advection1_f_df(node, vlu);
 
-  /* RHS */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    double *r  = Vard(node, ir);
-    double *divf = Vard(node, idivf);
-    int i;
+  /* RHS at each point */
+  forpoints(node, i)
+    r[i] = -divf[i];
 
-    /* RHS at each point */
-    forpoints(node, i)
-    {
-      r[i] = -divf[i];
-    }
-  }
-
-  TIMER_STOP;
   return 0;
 }
 
 /* surface terms in RHS of: d_t u */
-int advection1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int advection1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
   TIMER_START;
 
   /* get flux terms on surfaces */
-  dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
+  dg_add_surface_fluxes(node, vlr, vlu, NULL,
                         advection1_fluxes_pt, advection1->numflux);
 
   /* impose outer BC, if it wasn't done above by advection1_fluxes_pt */
-  if(!advection1->outerBC_influxes) advection1_u_BC(mesh, vlr, vlu);
+  if(!advection1->outerBC_influxes) advection1_u_BC(node, vlr, vlu);
 
   TIMER_STOP;
   return 0;
@@ -335,6 +317,10 @@ int advection1_init(tMesh *mesh)
   //double nmag2 = (nx*nx + ny*ny + nz*nz);
 
   PRF;printf(": dt = %g\n", mesh->dt);
+
+  /* save some global var indices */
+  advection1->ifx   = Ind("advection1_fx");
+  advection1->idivf = Ind("advection1_divf");
 
   /* varlist */
   vlpush(vlu, iu);

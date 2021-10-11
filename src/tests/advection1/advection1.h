@@ -5,6 +5,9 @@
 
 /* structure that holds global vars and pars */
 typedef struct {
+  /* saved indices of some vars */
+  int ifx;   /* Ind("advection1_fx"); */
+  int idivf; /* Ind("advection1_divf"); */
   void (*numflux)(tDGinfo *d);  /* func pointer for numerical flux */
   double direction[3];
   int outerBC_influxes;
