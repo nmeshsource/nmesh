@@ -413,7 +413,6 @@ Things that should be done:
 
 Cleanup:
 ========
--remove fd_deriv_DT_uniform__old ???
 -remove ldescendants_along_face
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
@@ -423,6 +422,9 @@ Cleanup:
  warning: ‘__s’ may be used uninitialized in this function [-Wmaybe-uninitialized]
  parameters.c: note: ‘__s’ was declared here
   int iterate_parameters"
+-remove fd_deriv_DT_uniform__old ???
+-fix "iterate_parameters": use commas to separate different parvalues
+
 
 Optimizations:
 ==============
