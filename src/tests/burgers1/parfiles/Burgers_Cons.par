@@ -1,0 +1,32 @@
+physics = burgers1
+
+dt = 0.05
+finaltime = 17
+
+errorexit = abort
+logfile_creation = no
+
+amr_mesh_type = 160 BoxMesh Line
+amr_mesh_xc = 7.95
+amr_BoxMesh_dout = 0.05
+
+evolve_method = Euler
+
+amr_n0 = 1
+amr_n1 = 1
+amr_n2 = 1
+
+iterate_parameters = no
+iterate_parameter1 = amr_n0  4 6 8 10 12
+iterate_parameter2 = amr_n1  4 6 8 10 12
+iterate_parameter3 = amr_n2  4 6 8 10 12
+
+
+#outputX0Y0Z0coord = Xb
+
+1doutiter = 1
+1doutput = burgers1_u burgers1_u_err burgers1_fx burgers1_fxx
+
+#2doutiter = 1
+#2doutput = burgers1_u burgers1_u_err
+##2dformat = gnuplot xdmf
