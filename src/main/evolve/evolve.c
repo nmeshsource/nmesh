@@ -142,12 +142,24 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   /* set all sources */
   forList(u, i)
     if(ListEntry(evosys->f[SETSRC],i))
-      ListEntry(evosys->f[SETSRC],i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    {
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+      }
+    }
 
   /* set all volume RHSs */
   forList(u, i)
     if(ListEntry(evosys->f[VOLRHS],i))
-      ListEntry(evosys->f[VOLRHS],i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    {
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+      }
+    }
 
   /* After we have done all we can without the surface data, we now wait
      until we get all the surface data: */
@@ -158,7 +170,13 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   /* add all surface RHSs */
   forList(u, i)
     if(ListEntry(evosys->f[SURFRHS],i))
-      ListEntry(evosys->f[SURFRHS],i)(mesh, ListEntry(rhs,i), ListEntry(u,i));
+    {
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+      }
+    }
 }
 
 /* apply limiters to evo subsystems. */

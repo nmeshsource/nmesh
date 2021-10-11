@@ -75,134 +75,129 @@ void free_DGinfo(tDGinfo *dgi)
 /* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
    to vldf. We compute the fluxes from vlu.
    For the RHS in DG we need sign=-1 but div(flux) needs sign=+1. */
-int dg_add_surface_fluxes_sign(tMesh *mesh, double sign, tVarList *vldf,
+int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
                                tVarList *vlu, tVarList *vls,
                                void (*u_f_lam)(tDGinfo *d),
                                void (*numflux)(tDGinfo *d))
 {
+  tDGinfo *dgi = alloc_DGinfo(vlu, vls);
+  tMesh *mesh = vlu->mesh;
   int surface_metric = Par("coordinates_surface_metric");
   double det2g       = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
   double gdiag       = Getv(surface_metric, "sqrtgdiag");
   int isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
   int isqrtgdiagx             = Ind("sqrtgdiagx");
   int iooJ = Ind("det_dXbdx");
+  int use_fv = node->dat->info->use_fv;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
-
-  TIMER_START;
-
-  /* set overall sign by multiplying det2g and gdiag */
-  det2g *= sign;
-  gdiag *= sign;
+  int add_surface_fluxes;
+  double distXb[6] = {0};
 
   /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
      so we do not need to do it here */
   ///* get surfaces so that we can compute fluxes */
   //get_all_myln_surfaces(mesh);
 
-  /* loop over nodes so we can add boundary flux terms */
-  NODELEVEL_Pragma(omp parallel)
+  /* set overall sign by multiplying det2g and gdiag */
+  det2g *= sign;
+  gdiag *= sign;
+
+  /* special fv cases */
+  if(use_fv)
   {
-    tDGinfo *dgi = alloc_DGinfo(vlu, vls); /* each thread gets its own dgi */
+    /* do nothing if fv_divf has already taken care of surface fluxes */
+    if(skip_fv) add_surface_fluxes = 0;
 
-    /* Note the following leaf node loop cannot be a taskloop because we
-       allocated one dgi per thread. But each task needs its own dgi!!!
-       And one thread may do more than one task... */
-    formylnodes_ompfor(mesh)
-    {
-      tNode *node = MyLnode;
-      int *n = node->n;
-      double *ooJ = Vard(node, iooJ);
-      int face;
-      int use_fv = node->dat->info->use_fv;
-      double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
-      double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
-      double distXb[6] = {0};
-
-      if(use_fv)
-      {
-        /* do nothing if fv_divf has already taken care of surface fluxes */
-        if(skip_fv) continue;
-
-        /* find distance from faces to nearest midpoint */
-        set_nodemidpoints_to_face_distXb(node, distXb);
-      }
-
-      /* set DG node info */
-      dgi->node = node;
-
-      for(face=0; face<6; face++)
-      {
-        int dir = face/2;
-        int p = (face%2)*(n[dir] - 1);
-        //double sig = 2*(face%2) - 1;
-        double *sqrtd2g_o_d3g = Vard(node, isqrtdet2g_o_det3gamma0+face);
-        double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
-        double *Wq = Wquad(node, dir);
-        double Wqmod = fabs(distXb[face]);
-        int i,j,k;
-
-        /* do nothing if dir is not active */
-        if(!Getb(amr->dir_active[dir])) continue;
-
-        /* set DG face info */
-        dgi->face = face;
-
-        forplaneN(dir, i,j,k, n, p)
-        {
-          int ijk = Ind_n(i,j,k, n);
-          int JK = Ind_n_norm(i,j,k, n, dir);
-          int i0 = i0_norm(i,j,k, dir);
-          double oow = 1./(Wq[i0]*mod0 + Wqmod*mod1);
-          double sdg_oJ_ow = sqrtd2g_o_d3g[JK] * fabs(ooJ[ijk]) * oow;
-          double gd_ow = sqrtgdiag[ijk] * oow;
-          double Ffac;
-          int l;
-
-          /* set DG i,j,k info */
-          dgi->i = i;
-          dgi->j = j;
-          dgi->k = k;
-          /* we do not use:  dgi->info = use_fv;
-             because our regular grid points on the faces already are
-             considered midpoints in fin. vol. approach */
-
-          /* set vars, fluxes and eigenvals on both sides */
-          u_f_lam(dgi);
-
-          /* compute numerical flux */
-          numflux(dgi);
-
-          /* get Ffac, this can be set in u_f_lam or numflux */
-          Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
-
-          /* get F from dgi and add boundary flux terms to vldf */
-          forvl(vldf, l)
-          {
-            int idf = Vind(vldf,l);
-            double *df = Vard_(node, idf);
-            double F;
-
-            F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
-            df[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
-          }
-        }
-      } /* end loop over faces */
-    }
-    free_DGinfo(dgi);
+    /* find distance from faces to nearest midpoint */
+    set_nodemidpoints_to_face_distXb(node, distXb);
+  }
+  else
+  {
+    add_surface_fluxes = 1;
   }
 
-  TIMER_STOP;
+  /* add boundary flux terms */
+  if(add_surface_fluxes)
+  {
+    int *n = node->n;
+    double *ooJ = Vard(node, iooJ);
+    int face;
+    double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
+    double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
 
+    /* set DG node info */
+    dgi->node = node;
+
+    for(face=0; face<6; face++)
+    {
+      int dir = face/2;
+      int p = (face%2)*(n[dir] - 1);
+      //double sig = 2*(face%2) - 1;
+      double *sqrtd2g_o_d3g = Vard(node, isqrtdet2g_o_det3gamma0+face);
+      double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
+      double *Wq = Wquad(node, dir);
+      double Wqmod = fabs(distXb[face]);
+      int i,j,k;
+
+      /* do nothing if dir is not active */
+      if(!Getb(amr->dir_active[dir])) continue;
+
+      /* set DG face info */
+      dgi->face = face;
+
+      forplaneN(dir, i,j,k, n, p)
+      {
+        int ijk = Ind_n(i,j,k, n);
+        int JK = Ind_n_norm(i,j,k, n, dir);
+        int i0 = i0_norm(i,j,k, dir);
+        double oow = 1./(Wq[i0]*mod0 + Wqmod*mod1);
+        double sdg_oJ_ow = sqrtd2g_o_d3g[JK] * fabs(ooJ[ijk]) * oow;
+        double gd_ow = sqrtgdiag[ijk] * oow;
+        double Ffac;
+        int l;
+
+        /* set DG i,j,k info */
+        dgi->i = i;
+        dgi->j = j;
+        dgi->k = k;
+        /* we do not use:  dgi->info = use_fv;
+           because our regular grid points on the faces already are
+           considered midpoints in fin. vol. approach */
+
+        /* set vars, fluxes and eigenvals on both sides */
+        u_f_lam(dgi);
+
+        /* compute numerical flux */
+        numflux(dgi);
+
+        /* get Ffac, this can be set in u_f_lam or numflux */
+        Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
+
+        /* get F from dgi and add boundary flux terms to vldf */
+        forvl(vldf, l)
+        {
+          int idf = Vind(vldf,l);
+          double *df = Vard_(node, idf);
+          double F;
+
+          F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
+          df[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
+        }
+      }
+    } /* end loop over faces */
+  }
+
+  free_DGinfo(dgi);
   return 0;
 }
 
 /* add surface flux terms of DG formulation to RHS */
-int dg_add_surface_fluxes(tMesh *mesh, tVarList *vlr, tVarList *vlu,
+int dg_add_surface_fluxes(tNode *node, tVarList *vlr, tVarList *vlu,
                           tVarList *vls,
                           void (*u_f_lam)(tDGinfo *d),
                           void (*numflux)(tDGinfo *d))
 {
-  return dg_add_surface_fluxes_sign(mesh, -1., vlr, vlu, vls,
+  return dg_add_surface_fluxes_sign(node, -1., vlr, vlu, vls,
                                     u_f_lam, numflux);
 }
 

@@ -41,7 +41,7 @@ int sysmon(tMesh *mesh)
   if(Rank0)
   {
     /* test based on walltime */
-    if((hours >= 0. && hours <= time_since_sysmon) || firstcall)
+    if(hours >= 0. && (hours <= time_since_sysmon || firstcall))
       do_sysmon = 1; /* yes, we want to write sysmon data */
   }
 

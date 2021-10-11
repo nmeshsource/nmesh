@@ -8,62 +8,43 @@
 
 
 /* RHS of: d_t u = -u */
-int evolve_test_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
-  /* get surfaces so that we can compute fluxes */
-  MPIexchange_get_all_myln_data(mesh);
+  double *u = Vard(node, vlu->index[0]);
+  double *r = Vard(node, vlr->index[0]);
+  int i;
 
-  /* RHS */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    double *u = Vard(node, vlu->index[0]);
-    double *r = Vard(node, vlr->index[0]);
-    int i;
+  /* RHS at each point */
+  forpoints(node, i) r[i] = -u[i];
 
-    /* RHS at each point */
-    forpoints(node, i) r[i] = -u[i];
-  }
   return 0;
 }
 
 /* RHS of: d_t v = s */
-int evolve_test_rhs_v(tMesh *mesh, tVarList *vlr, tVarList *vlv)
+int evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
 {
-  /* get surfaces so that we can compute fluxes */
-  MPIexchange_get_all_myln_data(mesh);
+  tMesh *mesh = vlv->mesh;
+  //double *v = Vard(node, vlv->index[0]);
+  double *r = Vard(node, vlr->index[0]);
+  double *s = Vard(node, Ind("evolve_test_s"));
+  int i;
 
-  /* RHS */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    //double *v = Vard(node, vlv->index[0]);
-    double *r = Vard(node, vlr->index[0]);
-    double *s = Vard(node, Ind("evolve_test_s"));
-    int i;
+  /* RHS at each point */
+  forpoints(node, i) r[i] = s[i];
 
-    /* RHS at each point */
-    forpoints(node, i) r[i] = s[i];
-  }
   return 0;
 }
 
 /* set source s for v: s = u */
-int evolve_test_src_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int evolve_test_src_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
-  /* get surfaces so that we can compute fluxes */
-  MPIexchange_get_all_myln_data(mesh);
+  tMesh *mesh = vlu->mesh;
+  double *u = Vard(node, vlu->index[0]);
+  double *s = Vard(node, Ind("evolve_test_s"));
+  int i;
 
-  /* Source */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    double *u = Vard(node, vlu->index[0]);
-    double *s = Vard(node, Ind("evolve_test_s"));
-    int i;
+  forpoints(node, i) s[i] = u[i];
 
-    forpoints(node, i) s[i] = u[i];
-  }
   return 0;
 }
 
