@@ -27,6 +27,9 @@ enum
 
 /* structure that holds global coordinates vars and pars */
 typedef struct {
+  /* some par values */
+  int sqrtdet2g_o_det3gamma; // 1 if Getv(Par("coordinates_surface_metric"), "sqrtdet2g_o_det3gamma");
+  /* some global var indices */
   int idXdx;        /* Ind("dXdx"); */
   int itmp1;        /* Ind("coordinates_tmp1") */
   int idet_dXbdx;   /* Ind("det_dXbdx") */

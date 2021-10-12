@@ -430,7 +430,11 @@ int coordinates_init_node(tNode *node)
 int coordinates_init(tMesh *mesh)
 {
   PRF;printf(":\n");
+  int surface_metric = Par("coordinates_surface_metric");
 
+  /* global par values */
+  coordinates->sqrtdet2g_o_det3gamma = Getv(surface_metric,
+                                            "sqrtdet2g_o_det3gamma");
   /* set some global vars */
   coordinates->idXdx = Ind("dXdx");
   coordinates->itmp1 = Ind("coordinates_tmp1");
