@@ -12,7 +12,7 @@ void (*burgers1_numflux)(tDGinfo *d);
 
 
 /* flux in direction norm */
-void burgers1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
+void burgers1_flux1d(tNode *node, int ncons, double *f, double norm[3],
                      double *u)
 {
   static int firstcall = 1;
@@ -20,6 +20,7 @@ void burgers1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
 
   if(firstcall)
   {
+    tMesh *mesh = node->pat->mesh;
     char *advdir = Gets(Par("burgers1_direction"));
     /* prop. dir.*/
     sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
@@ -31,7 +32,7 @@ void burgers1_flux1d(tMesh *mesh, int ncons, double *f, double norm[3],
 }
 
 /* eigenvalue in direction norm */
-void burgers1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3],
+void burgers1_eigenval1d(tNode *node, int ncons, double *lam, double norm[3],
                          double *u)
 {
   static int firstcall = 1;
@@ -39,6 +40,7 @@ void burgers1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3],
 
   if(firstcall)
   {
+    tMesh *mesh = node->pat->mesh;
     char *advdir = Gets(Par("burgers1_direction"));
     /* prop. dir.*/
     sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
@@ -50,44 +52,39 @@ void burgers1_eigenval1d(tMesh *mesh, int ncons, double *lam, double norm[3],
 }
 
 /* flux and its derivs for adv. eqn: f^i = n^i u */
-void burgers1_f_df(tMesh *mesh, tVarList *vlu)
+void burgers1_f_df(tNode *node, tVarList *vlu)
 {
-  int iu = vlu->index[0];
+  tMesh *mesh = vlu->mesh;
   int ifx = Ind("burgers1_fx");
   int idivf = Ind("burgers1_divf");
-  char *advdir = Gets(Par("burgers1_direction"));
-  double nx,ny,nz;
+  //char *advdir = Gets(Par("burgers1_direction"));
+  int iu = vlu->index[0];
+  //double nx,ny,nz;
+  double *u = Vard(node, iu);
+  double *fx = Vard(node, ifx);
+  double *fy = Vard(node, ifx+1);
+  double *fz = Vard(node, ifx+2);
+  int i;
 
   /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
+  //sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
 
-  /* compute derivs */
-  formylnodes(mesh)
+  /* flux at each point */
+  forpoints(node, i)
   {
-    tNode *node = MyLnode;
-    double *u = Vard(node, iu);
-    double *fx = Vard(node, ifx);
-    double *fy = Vard(node, ifx+1);
-    double *fz = Vard(node, ifx+2);
-    int i;
-
-    /* flux at each point */
-    forpoints(node, i)
-    {
-      double u_i = u[i];
-      double no[3] = { 1., 0., 0. };
-      burgers1_flux1d(mesh,1, &(fx[i]),no, &u_i);
-      no[0] = 0;
-      no[1] = 1.;
-      burgers1_flux1d(mesh,1, &(fy[i]),no, &u_i);
-      no[1] = 0.;
-      no[2] = 1.;
-      burgers1_flux1d(mesh,1, &(fz[i]),no, &u_i);
-    }
+    double u_i = u[i];
+    double no[3] = { 1., 0., 0. };
+    burgers1_flux1d(node,1, &(fx[i]),no, &u_i);
+    no[0] = 0;
+    no[1] = 1.;
+    burgers1_flux1d(node,1, &(fy[i]),no, &u_i);
+    no[1] = 0.;
+    no[2] = 1.;
+    burgers1_flux1d(node,1, &(fz[i]),no, &u_i);
+  }
 
    /* flux divergence */
    cart_di_Ui(node, ifx, idivf);
-  }
 }
 
 
@@ -97,7 +94,6 @@ void burgers1_fluxes_pt(tDGinfo *d)
 {
   tVarList *vlu = d->vlu;
   tNode *node = d->node;
-  tMesh *mesh = node->pat->mesh;
   int *n = node->n;
   int f = d->face;
   int dir = f/2;
@@ -125,103 +121,82 @@ void burgers1_fluxes_pt(tDGinfo *d)
   node_normal_at_ijk(node, f, ijk, norm);
 
   /* eigenval in dir norm */
-  burgers1_eigenval1d(mesh,nvars, d->lami,norm, d->ui);
-  burgers1_eigenval1d(mesh,nvars, d->lama,norm, d->ua);
+  burgers1_eigenval1d(node,nvars, d->lami,norm, d->ui);
+  burgers1_eigenval1d(node,nvars, d->lama,norm, d->ua);
 
   /* get inner and adjacent fluxes fi, fa */
-  burgers1_flux1d(mesh,nvars, d->fi,norm, d->ui);
-  burgers1_flux1d(mesh,nvars, d->fa,norm, d->ua);
+  burgers1_flux1d(node,nvars, d->fi,norm, d->ui);
+  burgers1_flux1d(node,nvars, d->fa,norm, d->ua);
 }
 
 
 /* set a BC on patch boundary */
-void burgers1_u_BC(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+void burgers1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
 {
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   //int ix = Ind("x");
-  //char *advdir = Gets(Par("burgers1_direction"));
-  //double nx,ny,nz, nmag2;
-
-  /* prop. dir.*/
-  //sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-  //nmag2 = (nx*nx + ny*ny + nz*nz);
 
   /* compute boundary flux terms */
-  formylnodes(mesh)
+  tPat *pat = node->pat;
+  int *n = node->n;
+  double *r = Vard(node, ir);
+  //double *x = Vard(node, ix);
+  //double *y = Vard(node, ix+1);
+  //double *z = Vard(node, ix+2);
+  //double t = node->time;
+  double norm[3];
+  int face, dir, p, i,j,k, ijk;
+
+  /* go over each face */
+  for(face=0; face<6; face++)
   {
-    tNode *node = MyLnode;
-    tPat *pat = node->pat;
-    int *n = node->n;
-    double *r = Vard(node, ir);
-    //double *x = Vard(node, ix);
-    //double *y = Vard(node, ix+1);
-    //double *z = Vard(node, ix+2);
-    //double t = node->time;
-    double norm[3];
-    int face, dir, p, i,j,k, ijk;
+    tBface *bfaces = pat->bfaces[face];
+    dir = face/2;
+    p = (face%2)*(n[dir] - 1);
 
-    /* go over each face */
-    for(face=0; face<6; face++)
-    {
-      tBface *bfaces = pat->bfaces[face];
-      dir = face/2;
-      p = (face%2)*(n[dir] - 1);
+    if(node->patface[face] && bfaces && bfaces->boundary)
+      forplaneN(dir, i,j,k, n, p)
+      {
+        ijk = Ind_n(i,j,k, n);
+        node_normal_at_ijk(node, face, ijk, norm);
 
-      if(node->patface[face] && bfaces && bfaces->boundary)
-        forplaneN(dir, i,j,k, n, p)
-        {
-          ijk = Ind_n(i,j,k, n);
-          node_normal_at_ijk(node, face, ijk, norm);
-
-          /* do nothing on boundary */
-          r[ijk] += 0.;
-        }
-    }
+        /* do nothing on boundary */
+        r[ijk] += 0.;
+      }
   }
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int burgers1_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int burgers1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
   int idivf = Ind("burgers1_divf");
-
-  TIMER_START;
+  double *r  = Vard(node, ir);
+  double *divf = Vard(node, idivf);
+  int i;
 
   /* compute flux */
-  burgers1_f_df(mesh, vlu);
+  burgers1_f_df(node, vlu);
 
-  /* RHS */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    double *r  = Vard(node, ir);
-    double *divf = Vard(node, idivf);
-    int i;
+  /* RHS at each point */
+  forpoints(node, i) r[i] = -divf[i];
 
-    /* RHS at each point */
-    forpoints(node, i) r[i] = -divf[i];
-  }
-
-  TIMER_STOP;
   return 0;
 }
 
 /* surface terms in RHS of: d_t u */
-int burgers1_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int burgers1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
-  TIMER_START;
-
   /* add boundary flux terms */
-  dg_add_surface_fluxes(mesh, vlr, vlu, NULL,
+  dg_add_surface_fluxes(node, vlr, vlu, NULL,
                         burgers1_fluxes_pt, burgers1_numflux);
 
   /* impose outer BC */
-  burgers1_u_BC(mesh, vlr, vlu);
+  burgers1_u_BC(node, vlr, vlu);
 
-  TIMER_STOP;
   return 0;
 }
 
