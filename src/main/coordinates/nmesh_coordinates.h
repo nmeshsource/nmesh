@@ -25,6 +25,16 @@ enum
 };
 
 
+/* structure that holds global coordinates vars and pars */
+typedef struct {
+  int idXdx;        /* Ind("dXdx"); */
+  int itmp1;        /* Ind("coordinates_tmp1") */
+  int idet_dXbdx;   /* Ind("det_dXbdx") */
+  int sqrtgdiagx;   /* Ind("dsqrtgdiag"); */
+} tcoordinates;
+
+
+
 /* coordinates.c */
 int coordinates_init(tMesh *mesh);
 int coordinates_init_node(tNode *node);

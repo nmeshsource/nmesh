@@ -6,8 +6,9 @@
 #include "dg.h"
 
 
-/* get glabal amr vars */
+/* get glabal amr and coordinate vars */
 extern tAMR amr[1];
+extern tcoordinates coordinates[1];
 
 /* global vars for dg */
 tDGglobals DGglobals[1];
@@ -86,8 +87,8 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
   double det2g       = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
   double gdiag       = Getv(surface_metric, "sqrtgdiag");
   int isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
-  int isqrtgdiagx             = Ind("sqrtgdiagx");
-  int iooJ = Ind("det_dXbdx");
+  int isqrtgdiagx = coordinates->sqrtgdiagx;
+  int iooJ        = coordinates->idet_dXbdx;
   int use_fv = node->dat->info->use_fv;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
   int add_surface_fluxes;
