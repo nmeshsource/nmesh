@@ -260,11 +260,12 @@ Things that need to be done urgently:
 *Add support for taking back a failed evo step (e.g. because node is troubled)
  on one node
  -make funcs called in evolve_setrhs_mesh under VOLRHS, SURFRHS (and
-  also SETSRC) node based (i.e. make first arg node NOT mesh).
+  also SETSRC) node based (i.e. make first arg node NOT mesh): DONE!
  -then we can add a bin after SURFRHS to check for trouble on each node and
   act
- -make dg_add_surface_fluxes_sign also node based. But where should we then
-  call alloc_DGinfo? In it? In evolve_setrhs_mesh? In user supplied func?
+ -make dg_add_surface_fluxes_sign also node based: DONE!
+  But where should we then call alloc_DGinfo? In it? In evolve_setrhs_mesh?
+  In user supplied func?: so far we call it in dg_add_surface_fluxes_sign
  -add test parfiles for:
   advection*,burger1,scalarwave1,ScalarWave,GRHD,GHG,C3GH,FOCCZ4
  -need to change vol_rhs and surf_rhs funcs in
