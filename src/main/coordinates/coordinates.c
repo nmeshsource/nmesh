@@ -439,7 +439,9 @@ int coordinates_init(tMesh *mesh)
   coordinates->idXdx = Ind("dXdx");
   coordinates->itmp1 = Ind("coordinates_tmp1");
   coordinates->idet_dXbdx = Ind("det_dXbdx");
-  coordinates->sqrtgdiagx = Ind("sqrtgdiagx");
+  coordinates->isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
+  coordinates->isqrtgdiagx = Ind("sqrtgdiagx");
+
   //PRF;printf(":  coordinates->idet_dXbdx=%d\n",  coordinates->idet_dXbdx);
 
   formylnodes(mesh)

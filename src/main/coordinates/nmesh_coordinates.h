@@ -33,7 +33,8 @@ typedef struct {
   int idXdx;        /* Ind("dXdx"); */
   int itmp1;        /* Ind("coordinates_tmp1") */
   int idet_dXbdx;   /* Ind("det_dXbdx") */
-  int sqrtgdiagx;   /* Ind("dsqrtgdiag"); */
+  int isqrtdet2g_o_det3gamma0; /* Ind("sqrtdet2g_o_det3gamma0") */
+  int isqrtgdiagx;  /* Ind("dsqrtgdiag"); */
 } tcoordinates;
 
 

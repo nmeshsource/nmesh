@@ -83,16 +83,17 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
 {
   tDGinfo *dgi = alloc_DGinfo(vlu, vls);
   tMesh *mesh = vlu->mesh;
-  int surface_metric = Par("coordinates_surface_metric");
-  double det2g       = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
-  double gdiag       = Getv(surface_metric, "sqrtgdiag");
-  int isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
-  int isqrtgdiagx = coordinates->sqrtgdiagx;
+  double det2g, gdiag;
+  int isqrtdet2g_o_det3gamma0 = coordinates->isqrtdet2g_o_det3gamma0;
+  int isqrtgdiagx = coordinates->isqrtgdiagx;
   int iooJ        = coordinates->idet_dXbdx;
   int use_fv = node->dat->info->use_fv;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
   int add_surface_fluxes;
   double distXb[6] = {0};
+
+  if(coordinates->sqrtdet2g_o_det3gamma) { det2g = 1.; gdiag = 0.; }
+  else                                   { det2g = 0.; gdiag = 1.; }
 
   /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
      so we do not need to do it here */
