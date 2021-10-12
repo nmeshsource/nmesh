@@ -23,131 +23,122 @@ int advectionFDy_init_global_pars(tMesh *mesh)
 
 
 /* RHS of: d_t u = - d_y u */
-int advectionFDy_vol_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int advectionFDy_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
   int ir = Vind(vlr, 0);
   int iu = Vind(vlu, 0);
 
-  /* RHS */
-  formylnodes(mesh)
+  double *u  = Vard(node, iu);
+  double *r  = Vard(node, ir);
+  int *n = node->n;
+  int dj = n[0];
+  int i,j,k;
+  //double hx = (node->bbox[1] - node->bbox[0])/n[0];
+  double hy = (node->bbox[3] - node->bbox[2])/n[1];
+  //double hz = (node->bbox[5] - node->bbox[4])/n[2];
+  //double oohx2 = 1./(2.*hx);
+  double oohy2 = 1./(2.*hy);
+  //double oohz2 = 1./(2.*hz);
+
+  /* RHS at each point in interior */
+  for(k = 0; k < n[2]; k++)
+  for(j = 2; j < n[1]; j++)
+  for(i = 0; i < n[0]; i++)
   {
-    tNode *node = MyLnode;
-    double *u  = Vard(node, iu);
-    double *r  = Vard(node, ir);
-    int *n = node->n;
-    int dj = n[0];
-    int i,j,k;
-    //double hx = (node->bbox[1] - node->bbox[0])/n[0];
-    double hy = (node->bbox[3] - node->bbox[2])/n[1];
-    //double hz = (node->bbox[5] - node->bbox[4])/n[2];
-    //double oohx2 = 1./(2.*hx);
-    double oohy2 = 1./(2.*hy);
-    //double oohz2 = 1./(2.*hz);
+    int ccc = Ind_n(i,j,k, n);
+    int cmc = ccc - dj;
+    int cMc = cmc - dj;
+    double uy = (3.*u[ccc] - 4.*u[cmc] + u[cMc])*oohy2;  /* FD deriv */
 
-    /* RHS at each point in interior */
-    for(k = 0; k < n[2]; k++)
-    for(j = 2; j < n[1]; j++)
-    for(i = 0; i < n[0]; i++)
-    {
-      int ccc = Ind_n(i,j,k, n);
-      int cmc = ccc - dj;
-      int cMc = cmc - dj;
-      double uy = (3.*u[ccc] - 4.*u[cmc] + u[cMc])*oohy2;  /* FD deriv */
-
-      r[ccc] = -uy;
-    }
+    r[ccc] = -uy;
   }
 
   return 0;
 }
 
 /* surface terms in RHS of: d_t u = -d_y u */
-int advectionFDy_surf_rhs_u(tMesh *mesh, tVarList *vlr, tVarList *vlu)
+int advectionFDy_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int ir = Vind(vlr, 0);
   int iu = Vind(vlu, 0);
   int ix = Ind("advectionFDy_x");
 
-  /* RHS */
-  formylnodes(mesh)
+  double *u = Vard(node, iu);
+  double *r = Vard(node, ir);
+  double *x = Vard(node, ix);
+  double *y = Vard(node, ix+1);
+  double *z = Vard(node, ix+2);
+  int *n = node->n;
+  int dj = n[0];
+  int i,j,k;
+  //double hx = (node->bbox[1] - node->bbox[0])/n[0];
+  double hy = (node->bbox[3] - node->bbox[2])/n[1];
+  //double hz = (node->bbox[5] - node->bbox[4])/n[2];
+  //double oohx2 = 1./(2.*hx);
+  double oohy2 = 1./(2.*hy);
+  //double oohz2 = 1./(2.*hz);
+  tArray *Au_aj[] = { VarAaj(node, iu, 0), VarAaj(node, iu, 1),
+                      VarAaj(node, iu, 2), VarAaj(node, iu, 3),
+                      VarAaj(node, iu, 4), VarAaj(node, iu, 5) };
+
+  /* RHS at each point at y-surface */
+  for(k = 0; k < n[2]; k++)
+  for(j = 0; j < 2;    j++)
+  for(i = 0; i < n[0]; i++)
   {
-    tNode *node = MyLnode;
-    double *u = Vard(node, iu);
-    double *r = Vard(node, ir);
-    double *x = Vard(node, ix);
-    double *y = Vard(node, ix+1);
-    double *z = Vard(node, ix+2);
-    int *n = node->n;
-    int dj = n[0];
-    int i,j,k;
-    //double hx = (node->bbox[1] - node->bbox[0])/n[0];
-    double hy = (node->bbox[3] - node->bbox[2])/n[1];
-    //double hz = (node->bbox[5] - node->bbox[4])/n[2];
-    //double oohx2 = 1./(2.*hx);
-    double oohy2 = 1./(2.*hy);
-    //double oohz2 = 1./(2.*hz);
-    tArray *Au_aj[] = { VarAaj(node, iu, 0), VarAaj(node, iu, 1),
-                        VarAaj(node, iu, 2), VarAaj(node, iu, 3),
-                        VarAaj(node, iu, 4), VarAaj(node, iu, 5) };
+    int ccc = Ind_n(i,j,k, n);
+    int cmc = ccc - dj;
+    double u_ccc = u[ccc];
+    double u_cmc, u_cMc, uy;
 
-    /* RHS at each point at y-surface */
-    for(k = 0; k < n[2]; k++)
-    for(j = 0; j < 2;    j++)
-    for(i = 0; i < n[0]; i++)
+
+    if(Au_aj[2]) /* there is a neighbor box */
     {
-      int ccc = Ind_n(i,j,k, n);
-      int cmc = ccc - dj;
-      double u_ccc = u[ccc];
-      double u_cmc, u_cMc, uy;
+      double *uaj = Au_aj[2]->d;
+      int    *naj = Au_aj[2]->n;
 
-
-      if(Au_aj[2]) /* there is a neighbor box */
+      if(j==1)
       {
-        double *uaj = Au_aj[2]->d;
-        int    *naj = Au_aj[2]->n;
-
-        if(j==1)
-        {
-          u_cmc = u[cmc];
-          u_cMc = uaj[Ind_n(i,1,k, naj)];
-        }
-        else
-        {
-          u_cmc = uaj[Ind_n(i,1,k, naj)];
-          u_cMc = uaj[Ind_n(i,0,k, naj)];
-        }
+        u_cmc = u[cmc];
+        u_cMc = uaj[Ind_n(i,1,k, naj)];
       }
-      else /* no neighbor */
+      else
       {
-        /* impose outer BC */
-        double t = mesh->time;
-        double u1[1];
-        double xyz[] = { x[ccc],y[ccc],z[ccc] };
-
-        /* set boundary values for u_cmc, u_cMc */
-        if(j==1)
-        {
-          xyz[1] -= 2.*hy;
-          advectionFDy_set_profile_pt(xyz,t, 1, u1);
-          u_cmc = u[cmc];
-          u_cMc = u1[0];
-        }
-        else
-        {
-          xyz[1] -= hy;
-          advectionFDy_set_profile_pt(xyz,t, 1, u1);
-          u_cmc = u1[0];
-          xyz[1] -= hy;
-          advectionFDy_set_profile_pt(xyz,t, 1, u1);
-          u_cMc = u1[0];
-        }
+        u_cmc = uaj[Ind_n(i,1,k, naj)];
+        u_cMc = uaj[Ind_n(i,0,k, naj)];
       }
-
-      /* FD deriv */
-      uy = (3.*u_ccc - 4.*u_cmc + u_cMc)*oohy2;
-
-      r[ccc] = -uy;
     }
+    else /* no neighbor */
+    {
+      /* impose outer BC */
+      double t = mesh->time;
+      double u1[1];
+      double xyz[] = { x[ccc],y[ccc],z[ccc] };
+
+      /* set boundary values for u_cmc, u_cMc */
+      if(j==1)
+      {
+        xyz[1] -= 2.*hy;
+        advectionFDy_set_profile_pt(xyz,t, 1, u1);
+        u_cmc = u[cmc];
+        u_cMc = u1[0];
+      }
+      else
+      {
+        xyz[1] -= hy;
+        advectionFDy_set_profile_pt(xyz,t, 1, u1);
+        u_cmc = u1[0];
+        xyz[1] -= hy;
+        advectionFDy_set_profile_pt(xyz,t, 1, u1);
+        u_cMc = u1[0];
+      }
+    }
+
+    /* FD deriv */
+    uy = (3.*u_ccc - 4.*u_cmc + u_cMc)*oohy2;
+
+    r[ccc] = -uy;
   }
 
   return 0;
