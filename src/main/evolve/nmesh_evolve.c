@@ -26,7 +26,7 @@ int nmesh_evolve(tMesh *mesh)
   AddPar("evolve_compute_change", "no", "compute change over 1 evo step [no,yes]");
 
   /* just a test, not needed for anything else */
-  if(Getv(Par("physics"), "evolve_test"))
+  if(Getv(Par("evolve_method"), "evolve_test"))
   {
     AddFun(INITIALDATA, evolve_test_init);
     AddFun(ANALYZE, evolve_test_analyze);
