@@ -67,7 +67,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int add_surface_fluxes; /* whether we set all of divf on faces */
   int use_left_flux;   /* whether we set and use the left fluxes in fnumL */
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
-  double extrap_s1 = Getd(DGglobals->fv_divf_extrap_s1);
+  double extrap_s1 = DGglobals->fv_divf_extrap_s1;
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
