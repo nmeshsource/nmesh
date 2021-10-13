@@ -301,7 +301,8 @@ int dg_set_DGglobals(tMesh *mesh)
 
   /* set some par indices */
   DGglobals->fv_divf_extrap_s1 = Par("fv_divf_extrap_s1");
-  DGglobals->fv_divf_use_only_right_flux= Par("fv_divf_use_only_right_flux");
+  DGglobals->fv_divf_use_only_right_flux
+    = Getb(Par("fv_divf_use_only_right_flux"));
 
   return 0;
 }
@@ -324,6 +325,10 @@ int dg_print_DGglobals(tMesh *mesh)
          DGglobals->fv_surface_interp_mode);
   printf(" DGglobals->fv_WENOm3_optw = { %g %g }\n",
          DGglobals->fv_WENOm3_optw[0], DGglobals->fv_WENOm3_optw[1]);
+//  printf(" DGglobals->fv_divf_extrap_s1 = %g\n",
+//         DGglobals->fv_divf_extrap_s1);
+  printf(" DGglobals->fv_divf_use_only_right_flux = %d\n",
+         DGglobals->fv_divf_use_only_right_flux);
   printf(" DGglobals->fv_divf_extrap_s1 = par_%d\n",
          DGglobals->fv_divf_extrap_s1);
 
