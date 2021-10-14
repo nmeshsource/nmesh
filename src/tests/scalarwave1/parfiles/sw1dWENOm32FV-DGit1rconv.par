@@ -1,0 +1,77 @@
+###################################################################
+# modules we use
+
+physics = scalarwave1
+
+errorexit = abort
+
+###################################################################
+# FV tests
+coordinates_surface_metric = sqrtgdiag
+coordinates_midpoint_data = yes
+amr_uniform_p = 1 # 0 1 2 3 4 5 6
+amr_fv_p = 1 # 0 2 3 4 5 6 7
+#scalarwave1_numflux = LLF
+#scalarwave1_rec = WENO3_1 if1away
+fv_rec = WENOm3_2
+
+###################################################################
+# checkpointing
+
+checkpoint = no # yes
+checkpoint_hours = 1
+checkpoint_hours_quit = 1.94
+
+###################################################################
+# evolution
+
+evolve_method = Euler # sspRK3 # RK4 # Euler
+#evolve_filter = yes
+#evolve_filter_s = 4
+dt = auto
+#finaltime = 5 # 0.5 # 0.4
+iterations = 1
+###################################################################
+# initial mesh
+
+amr_mesh_type = 3 BoxMesh Line
+amr_BoxMesh_dout = 1 # 0.25
+amr_luni = 0
+
+amr_dir_active0 = 1
+amr_dir_active1 = 0
+amr_dir_active2 = 0
+amr_n0 = 4
+amr_n1 = 1
+amr_n2 = 1
+
+amr_nmax = 100
+iterate_parameters = yes
+iterate_parameter1 = amr_n0  6 12 24 48 96
+#iterate_parameter2 = amr_n1  6 12 24 48 96
+
+###################################################################
+# initial data
+
+scalarwave1_k = 1
+
+###################################################################
+# output
+
+timer_on = no # yes
+
+logfile_creation = no
+
+#0douttime = 0.01
+0doutiter = 1
+0doutput = scalarwave1_pi scalarwave1_pi_err  scalarwave1_pi_r_err
+
+#1douttime = 0.01
+1doutiter = 1
+1doutput = scalarwave1_pi scalarwave1_pi_r
+           scalarwave1_pi_err  scalarwave1_pi_r_err
+
+#2douttime = 0.01
+2doutiter = 1
+2doutput = scalarwave1_pi scalarwave1_pi_err  scalarwave1_pi_r_err
+2dformat = xdmf
