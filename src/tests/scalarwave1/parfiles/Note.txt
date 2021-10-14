@@ -1,0 +1,15 @@
+w1dWENOm32FV-DGit1rconv.par
+---------------------------
+*does a conv. test for RHS with WENOm3_2
+tgraph.py -m sw1dWENOm32FV-DGit1rconv_*/scalarwave1_pi_r_err.1X
+*problem on the left boundary:
+ -the RHS (scalarwave1_pi_r_err.1X) converges to 0 ONLY at 1st order
+ -the next point in, also has a very large error that does no seem to
+  converge to 0 at 2nd order
+=> probably the next point in is the source of the problem!
+ |u l|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+     ^   ^
+     |   next point in has a problem with the RHS
+     here we use a num flux that seems contaminated by "l"
+*How can we fix this?
