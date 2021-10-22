@@ -21,6 +21,7 @@ void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
                                       FuncPointer volrhs, FuncPointer surfrhs,
                                       FuncPointer limdata,
                                       FuncPointer limiter);
+tVarList *evolve_get_rhs_vl(tVarList *vl);
 void evolve_print_evosys(tMesh *mesh);
 int var_added_by_evolve_init_evosys(tMesh *mesh, int vi);
 int evolve_init_communication_structs(tMesh *mesh);

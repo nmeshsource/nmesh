@@ -130,6 +130,29 @@ int evolve_free_evosys(tMesh *mesh)
   return 0;
 }
 
+/* find a vl that contains evo vars in mesh->evosys->u,
+   returns index within mesh->evosys->u, or -1 if not found */
+int evolve_get_index_of_vl(tVarList *vl)
+{
+  tMesh *mesh = vl->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  return index_pVLList(evosys->u, vl);
+}
+
+/* return RHS var list that corresponds to vl,
+   or return NULL if vl is not registered with evosys */
+tVarList *evolve_get_rhs_vl(tVarList *vl)
+{
+  tMesh *mesh = vl->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  int b = evolve_get_index_of_vl(vl);
+
+  if(b>=0 && evosys->rhs)
+    return ListEntry(evosys->rhs, b);
+  else
+    return NULL;
+}
+
 /* print evosys */
 void evolve_print_evosys__old(tMesh *mesh)
 {
