@@ -89,7 +89,7 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
   int iooJ        = coordinates->idet_dXbdx;
   int use_fv = node->dat->info->use_fv;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
-  int add_surface_fluxes;
+  int add_surface_fluxes = 1; /* by default we want to set fluxes here */
   double distXb[6] = {0};
 
   if(coordinates->sqrtdet2g_o_det3gamma) { det2g = 1.; gdiag = 0.; }
@@ -108,14 +108,15 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
   if(use_fv)
   {
     /* do nothing if fv_divf has already taken care of surface fluxes */
-    if(skip_fv) add_surface_fluxes = 0;
-
-    /* find distance from faces to nearest midpoint */
-    set_nodemidpoints_to_face_distXb(node, distXb);
-  }
-  else
-  {
-    add_surface_fluxes = 1;
+    if(skip_fv)
+    {
+      add_surface_fluxes = 0;
+    }
+    else
+    {
+      /* find distance from faces to nearest midpoint */
+      set_nodemidpoints_to_face_distXb(node, distXb);
+    }
   }
 
   /* add boundary flux terms */
