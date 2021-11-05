@@ -73,40 +73,56 @@ def make_IndexedObj_from_strlist(list):
         basestr = basestr.strip()
         #print(basestr,'|')
         cmd = basestr + ' = IndexedBase(\'' + basestr + '\')'
-        #print(cmd)
+        print(' ', cmd)
         exec(cmd, globals())
+
+
+#def recurse over contraction_structure to get final sum
+def sum_over_contraction_structure(ContrStruc):
+    sum = 0
+    # go over key and sum or call sum_over_contraction_structure again
+    #print('ContrStruc =', ContrStruc)
+    for key in ContrStruc:
+        sumpartset = ContrStruc[key] # set of sums that have the same key
+        #print('key =', key, '   type(key) =', type(key),
+        #      'ContrStruc[key] =', ContrStruc[key])
+
+        # case where no sums are needed
+        if key == None:
+            for elem in sumpartset:
+                sumpart = elem
+                sum += sumpart
+
+        # case where we need to sum
+        elif type(key) == tuple:
+            parts = 0
+            for elem in sumpartset:
+                sumpart = elem
+                for ind in key:
+                    # do sum over index ind and update sumpart
+                    sumpart = Sum(sumpart, (ind, ind.lower,ind.upper)).doit()
+                # then add sumpart to the parts for this case
+                parts += sumpart
+            # add the parts for this key to final sum
+            sum += parts
+
+        # case where we cannot sum yet
+        else:
+            # assume that sumpartset is a list of contr. structures
+            cs_list = sumpartset
+            parts = 0
+            for cs in cs_list:
+                parts += sum_over_contraction_structure(cs)
+            # add the parts for this key to final sum
+            sum += parts
+    return sum
+
 
 # expand all sums in the term rhs
 def expand_sums(rhs):
     tgi  = tensor.get_indices(rhs)
     tgcs = tensor.get_contraction_structure(rhs)
-    cs = list(tgcs) # get list of contraction_structure keys
-    sum = 0
-    # go over all keys in cs
-    for key in cs:
-        sumpartset = tgcs[key] # set of sums that have the same key
-        # go over all elements in sumpartset
-        part = 0
-        for elem in sumpartset:
-            sumpart = elem
-            # go over all indices in key
-            if key != None:
-                for ind in key:
-                    #print(ind)
-                    # do sum over index ind and update sumpart
-                    sumpart = Sum(sumpart, (ind, ind.lower,ind.upper)).doit()
-            # sumpart now has explicit sums over all indices
-            # so now check for symmetries in sumpart
-            # ...
-            # implement symmetries !!!
-            # ...
-            # then add sumpart to the parts for this key
-            part += sumpart
-            #print(part)
-        # add the part for this key to final sum
-        sum += part
-    #print('sum =')
-    #print(sum)
+    sum = sum_over_contraction_structure(tgcs)
     return sum
 
 
@@ -137,12 +153,19 @@ def expand_RHS_sums(eqs):
 
         #print(lhs, '=', rhs)
         tgi_l  = tensor.get_indices(lhs)
-        tgi_r  = tensor.get_indices(rhs)
         tgcs_l = tensor.get_contraction_structure(lhs)
-        tgcs_r = tensor.get_contraction_structure(rhs)
-        #print(tgi_l, tgi_r)
-        #print(tgcs_l, tgcs_r)
-        exprhs = expand_sums(rhs)
+
+        # check rhs is maybe just a constant number
+        sympified_rhs = sympify(rhs)
+        if sympified_rhs.is_Number:
+            exprhs = rhs # do nothing
+        else:
+            tgi_r  = tensor.get_indices(rhs)
+            tgcs_r = tensor.get_contraction_structure(rhs)
+            #print(tgi_l, tgi_r)
+            #print(tgcs_l, tgcs_r)
+            exprhs = expand_sums(rhs) # do sums in RHS
+
         RHS_list.append(exprhs)
         LHS_list.append(lhs)
     return [LHS_list, RHS_list]
