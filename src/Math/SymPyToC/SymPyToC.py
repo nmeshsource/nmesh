@@ -218,7 +218,7 @@ def all_EqnComponents(expanded_eqs):
             sympified_rhs = sympify(rhs)
             if sympified_rhs.is_Number:
                 # use same RHS for all components of LHS
-                rhs_comps == [rhs for t in lhs_allinds]
+                rhs_comps = [rhs for t in lhs_allinds]
             else:
                 # get all RHS components for this eqn_number
                 rhs_comps = [rhs.subs(s) for s in subrules]
@@ -567,7 +567,9 @@ def simplify_all_EqnComponents(simp, allEqs):
         for compn in range(len(allRHS[eq_i])):
             rhs = allRHS[eq_i][compn]
             if type(rhs) != str and type(rhs) != list and simp != None:
-                rhs = simp(rhs)
+                sympified_rhs = sympify(rhs)
+                if not sympified_rhs.is_Number:
+                    rhs = simp(rhs)
                 allRHS[eq_i][compn] = rhs
     return [allEqs[0], allRHS]
 
