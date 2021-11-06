@@ -101,14 +101,14 @@ def sums_in_contraction_structure(ContrStruc):
         for termkey in termsdict:
             print('termkey =',termkey)
     """
-    print('ContrStruc =', ContrStruc)
+    #print('ContrStruc =', ContrStruc)
 
     # dict with results for each key
     contres = {} # empty dict
 
     # go over keys and sum or call sum_over_contraction_structure again
     for key in ContrStruc:
-        print('key =',key)
+        #print('key =',key)
 
         # skip all keys that do not contain contraction indices
         if (key != None) and (type(key) != tuple):
@@ -123,12 +123,12 @@ def sums_in_contraction_structure(ContrStruc):
         contpartset = ContrStruc[key]
         contpartres = {} # empty dict
 
-        print('indlist =',indlist)
-        print('contpartset =',contpartset)
+        #print('indlist =',indlist)
+        #print('contpartset =',contpartset)
 
         # do all sub sums
         for contpart in contpartset:
-            print('contpart =',contpart)
+            #print('contpart =',contpart)
             subres = contpart
             if contpart in ContrStruc:
                 cslist = ContrStruc[contpart]
@@ -136,7 +136,7 @@ def sums_in_contraction_structure(ContrStruc):
                 for cs in cslist:
                     sums_in_cs = sums_in_contraction_structure(cs)
                     sums_in_cs_list.append(sums_in_cs)
-                print('sums_in_cs_list =',sums_in_cs_list)
+                #print('sums_in_cs_list =',sums_in_cs_list)
 
                 # insert results in sums_in_cs_list into contpart -> subres
                 for sums_in_cs in sums_in_cs_list:
@@ -144,13 +144,13 @@ def sums_in_contraction_structure(ContrStruc):
                         termsdict = sums_in_cs[inds2]
                         for termkey in termsdict:
                             res = termsdict[termkey]
-                            print('termkey =',termkey)
-                            print('res =',res)
+                            #print('termkey =',termkey)
+                            #print('res =',res)
                             subres = subres.subs(termkey, res)
-                            print('subres =',subres)
+                            #print('subres =',subres)
             # now use subres
             subp = subres
-            print('subp =',subp)
+            #print('subp =',subp)
             for ind in indlist:
                 # do sum over index ind and update subp
                 subp = Sum(subp, (ind, ind.lower,ind.upper)).doit()
