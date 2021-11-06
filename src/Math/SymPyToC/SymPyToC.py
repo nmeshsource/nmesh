@@ -208,12 +208,26 @@ def all_EqnComponents(expanded_eqs):
             for ind in range(len(indvals)):
                 sub.append( (lhs.indices[ind], indvals[ind],) )
             subrules.append(sub)
-        # get all RHS components for this eqn_number
+        # find all RHS components for this eqn_number
         rhs = expanded_eqs[1][eqn_number]
-        rhs_comps = [rhs.subs(s) for s in subrules]
+        #print('lhs =',lhs)
+        #print('rhs =',rhs)
+        #print('subrules =',subrules)
+        # make sure we can do subs on RHS
+        if type(lhs) != str:
+            sympified_rhs = sympify(rhs)
+            if sympified_rhs.is_Number:
+                # do nothing
+                rhs_comps == [rhs]
+            else:
+                # get all RHS components for this eqn_number
+                rhs_comps = [rhs.subs(s) for s in subrules]
+        else:
+            rhs_comps = [rhs]
         if rhs_comps == []:
             rhs_comps = [rhs]
-        #
+        #print('rhs_comps =',rhs_comps)
+
         LHS_list.append(lhs_comps)
         RHS_list.append(rhs_comps)
     return [LHS_list, RHS_list]
