@@ -217,8 +217,8 @@ def all_EqnComponents(expanded_eqs):
         if type(lhs) != str:
             sympified_rhs = sympify(rhs)
             if sympified_rhs.is_Number:
-                # do nothing
-                rhs_comps == [rhs]
+                # use same RHS for all components of LHS
+                rhs_comps == [rhs for t in lhs_allinds]
             else:
                 # get all RHS components for this eqn_number
                 rhs_comps = [rhs.subs(s) for s in subrules]
@@ -480,6 +480,8 @@ def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
     print('Applying substitution rules')
     for eq_i in range(len(allEqs[0])):
         for comp in range(len(allEqs[0][eq_i])):
+            #print('L =', allEqs[0][eq_i])
+            #print('R =', allEqs[1][eq_i])
             allEqs[0][eq_i][comp] = apply_subsrulesdict(subsruledict, allEqs[0][eq_i][comp])
             allEqs[1][eq_i][comp] = apply_subsrulesdict(subsruledict, allEqs[1][eq_i][comp])
 
