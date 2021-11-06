@@ -454,6 +454,7 @@ def apply_subsrulesdict(subsruledict, expr):
     # do nothing for strings
     if type(expr) == str:
         return expr
+
     # recurse for lists
     if type(expr) == list:
         exprlist = expr
@@ -461,6 +462,12 @@ def apply_subsrulesdict(subsruledict, expr):
             ex_new = apply_subsrulesdict(subsruledict, exprlist[expr_i])
             exprlist[expr_i] = ex_new
         return exprlist
+
+    # do nothing for numbers
+    sympified_expr = sympify(expr)
+    if sympified_expr.is_Number:
+        return expr # do nothing
+
     # if we get here it should be a real math expression
     new_expr = expr
     for key in subsruledict:
