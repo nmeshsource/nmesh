@@ -77,10 +77,30 @@ def make_IndexedObj_from_strlist(list):
         exec(cmd, globals())
 
 
-
-
-#def recurse over contraction_structure to get final sum
+#def recurse over contraction_structure to get final sum pieces
 def sums_in_contraction_structure(ContrStruc):
+    """
+    This function returns the dict contres. contres contain the same keys
+    dumm index keys as ContrStruc, whithout the keys that do not indicate
+    summation (i.e. the ones that are just terms).
+    The value corresponding to each key in contres, is itself a dict.
+    This dict contains all the terms that needed to be summed as keys,
+    and all the results of these partial sums as values. When we add
+    these individual sums we get the result of the entire contraction:
+    sum = 0
+    for indkey in contres:
+        termsdict = contres[indkey]
+        for termkey in termsdict:
+            sum += termsdict[termkey]
+
+    To see what's in there we can print it:
+    contres = sums_in_contraction_structure(ContrStruc)
+    for indkey in contres:
+        print('indkey =',indkey)
+        termsdict = contres[indkey]
+        for termkey in termsdict:
+            print('termkey =',termkey)
+    """
     print('ContrStruc =', ContrStruc)
 
     # dict with results for each key
@@ -143,15 +163,16 @@ def sums_in_contraction_structure(ContrStruc):
     return contres
 
 
-
-
-
-
-
-
-#def recurse over contraction_structure to get final sum
+#sum all terms is contraction_structure to get final sum
 def sum_over_contraction_structure(ContrStruc):
     contres = sums_in_contraction_structure(ContrStruc)
+    #print('sum_over_contraction_structure:')
+    ##print('contres =',contres)
+    #for indkey in contres:
+    #    print('indkey =',indkey)
+    #    termsdict = contres[indkey]
+    #    for termkey in termsdict:
+    #        print('termkey =',termkey)
     sum = 0
     for indkey in contres:
         termsdict = contres[indkey]
