@@ -77,45 +77,86 @@ def make_IndexedObj_from_strlist(list):
         exec(cmd, globals())
 
 
+
+
 #def recurse over contraction_structure to get final sum
-def sum_over_contraction_structure(ContrStruc, extrasuminds):
+def sums_in_contraction_structure(ContrStruc):
     print('ContrStruc =', ContrStruc)
 
+    # dict with results for each key
+    contres = {} # empty dict
+
     # go over keys and sum or call sum_over_contraction_structure again
-    sum = 0
     for key in ContrStruc:
-        #print('key =',key)
+        print('key =',key)
+
         # skip all keys that do not contain contraction indices
         if (key != None) and (type(key) != tuple):
             continue
 
         # assemble indicies we need to sum over
-        indlist = extrasuminds.copy()
+        indlist = []
         if type(key) == tuple:
             for ind in key:
                 indlist.append(ind)
-        print('indlist =',indlist, 'extrasuminds =',extrasuminds)
 
-        sumpartset = ContrStruc[key] # set of sums that have the same key
-        print('key =',key)
-        print('sumpartset =',sumpartset)
+        contpartset = ContrStruc[key]
+        contpartres = {} # empty dict
 
-        # go over all summation parts for this key
-        parts = 0
-        for sumpart in sumpartset:
-            # check if a sumpart is there as another key
-            if sumpart in ContrStruc:
-                cslist = ContrStruc[sumpart]
+        print('indlist =',indlist)
+        print('contpartset =',contpartset)
+
+        # do all sub sums
+        for contpart in contpartset:
+            print('contpart =',contpart)
+            subres = contpart
+            if contpart in ContrStruc:
+                cslist = ContrStruc[contpart]
+                sums_in_cs_list = []
                 for cs in cslist:
-                    parts += sum_over_contraction_structure(cs, indlist)
-            else:
-                subpart = sumpart
-                for ind in indlist:
-                    # do sum over index ind and update subpart
-                    subpart = Sum(subpart, (ind, ind.lower,ind.upper)).doit()
-                # then add sumpart to the parts for this case
-                parts += subpart
-        sum += parts
+                    sums_in_cs = sums_in_contraction_structure(cs)
+                    sums_in_cs_list.append(sums_in_cs)
+                print('sums_in_cs_list =',sums_in_cs_list)
+
+                # insert results in sums_in_cs_list into contpart -> subres
+                for sums_in_cs in sums_in_cs_list:
+                    for inds2 in sums_in_cs:
+                        termsdict = sums_in_cs[inds2]
+                        for termkey in termsdict:
+                            res = termsdict[termkey]
+                            print('termkey =',termkey)
+                            print('res =',res)
+                            subres = subres.subs(termkey, res)
+                            print('subres =',subres)
+            # now use subres
+            subp = subres
+            print('subp =',subp)
+            for ind in indlist:
+                # do sum over index ind and update subp
+                subp = Sum(subp, (ind, ind.lower,ind.upper)).doit()
+
+            # then add subp to the results dict
+            contpartres[contpart] = subp
+
+            contres[key] = contpartres
+
+    return contres
+
+
+
+
+
+
+
+
+#def recurse over contraction_structure to get final sum
+def sum_over_contraction_structure(ContrStruc):
+    contres = sums_in_contraction_structure(ContrStruc)
+    sum = 0
+    for indkey in contres:
+        termsdict = contres[indkey]
+        for termkey in termsdict:
+            sum += termsdict[termkey]
     return sum
 
 
@@ -123,7 +164,7 @@ def sum_over_contraction_structure(ContrStruc, extrasuminds):
 def expand_sums(rhs):
     tgi  = tensor.get_indices(rhs)
     tgcs = tensor.get_contraction_structure(rhs)
-    sum = sum_over_contraction_structure(tgcs, [])
+    sum = sum_over_contraction_structure(tgcs)
     return sum
 
 
