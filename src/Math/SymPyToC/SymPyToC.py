@@ -78,43 +78,44 @@ def make_IndexedObj_from_strlist(list):
 
 
 #def recurse over contraction_structure to get final sum
-def sum_over_contraction_structure(ContrStruc):
+def sum_over_contraction_structure(ContrStruc, extrasuminds):
+    print('ContrStruc =', ContrStruc)
+
+    # go over keys and sum or call sum_over_contraction_structure again
     sum = 0
-    # go over key and sum or call sum_over_contraction_structure again
-    #print('ContrStruc =', ContrStruc)
     for key in ContrStruc:
+        #print('key =',key)
+        # skip all keys that do not contain contraction indices
+        if (key != None) and (type(key) != tuple):
+            continue
+
+        # assemble indicies we need to sum over
+        indlist = extrasuminds.copy()
+        if type(key) == tuple:
+            for ind in key:
+                indlist.append(ind)
+        print('indlist =',indlist, 'extrasuminds =',extrasuminds)
+
         sumpartset = ContrStruc[key] # set of sums that have the same key
-        #print('key =', key, '   type(key) =', type(key),
-        #      'ContrStruc[key] =', ContrStruc[key])
+        print('key =',key)
+        print('sumpartset =',sumpartset)
 
-        # case where no sums are needed
-        if key == None:
-            for elem in sumpartset:
-                sumpart = elem
-                sum += sumpart
-
-        # case where we need to sum
-        elif type(key) == tuple:
-            parts = 0
-            for elem in sumpartset:
-                sumpart = elem
-                for ind in key:
-                    # do sum over index ind and update sumpart
-                    sumpart = Sum(sumpart, (ind, ind.lower,ind.upper)).doit()
+        # go over all summation parts for this key
+        parts = 0
+        for sumpart in sumpartset:
+            # check if a sumpart is there as another key
+            if sumpart in ContrStruc:
+                cslist = ContrStruc[sumpart]
+                for cs in cslist:
+                    parts += sum_over_contraction_structure(cs, indlist)
+            else:
+                subpart = sumpart
+                for ind in indlist:
+                    # do sum over index ind and update subpart
+                    subpart = Sum(subpart, (ind, ind.lower,ind.upper)).doit()
                 # then add sumpart to the parts for this case
-                parts += sumpart
-            # add the parts for this key to final sum
-            sum += parts
-
-        # case where we cannot sum yet
-        else:
-            # assume that sumpartset is a list of contr. structures
-            cs_list = sumpartset
-            parts = 0
-            for cs in cs_list:
-                parts += sum_over_contraction_structure(cs)
-            # add the parts for this key to final sum
-            sum += parts
+                parts += subpart
+        sum += parts
     return sum
 
 
@@ -122,7 +123,7 @@ def sum_over_contraction_structure(ContrStruc):
 def expand_sums(rhs):
     tgi  = tensor.get_indices(rhs)
     tgcs = tensor.get_contraction_structure(rhs)
-    sum = sum_over_contraction_structure(tgcs)
+    sum = sum_over_contraction_structure(tgcs, [])
     return sum
 
 
