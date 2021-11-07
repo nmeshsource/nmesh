@@ -332,7 +332,7 @@ def assemble_all_EqnComponents(tocompute):
 def get_AUTOVARS(Declvars, LHSvars):
     #print('Declvars =',Declvars)
     #print('LHSvars =',LHSvars)
-    AUTOVARS = []
+    AUTOVARS1 = []
     # make list of Indexed objects from string list Declvars
     DeclTens = []
     for decv in Declvars:
@@ -359,7 +359,13 @@ def get_AUTOVARS(Declvars, LHSvars):
                     break
 
         if lhs_is_in_DeclTens == False:
-            AUTOVARS.append(lhs)
+            AUTOVARS1.append(lhs)
+
+    # remove duplicates from AUTOVARS1
+    AUTOVARS = []
+    for av in AUTOVARS1:
+        if av not in AUTOVARS:
+            AUTOVARS.append(av)
 
     return AUTOVARS
 
