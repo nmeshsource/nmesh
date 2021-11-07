@@ -543,6 +543,9 @@ def apply_subsrulesdict(subsruledict, expr):
 
 # apply symmetries to all Eqn components
 def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
+    # remove Kdelta and LCeps3 first
+    allEqs = simplify_all_EqnComponents(replace_Kdelta, allEqs)
+    allEqs = simplify_all_EqnComponents(replace_LCeps3, allEqs)
     # make rules based on symmetries
     print('Making substitution rules from symmetries')
     subsruledict = make_subsrules_from_symmetries(symmetries)
@@ -594,9 +597,6 @@ def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
                 simpRHS[eq_i][0] = newRHS
     # set result
     allEqsComps = [simpLHS, simpRHS]
-    # apply some  more simplifications
-    allEqsComps = simplify_all_EqnComponents(replace_Kdelta, allEqsComps)
-    allEqsComps = simplify_all_EqnComponents(replace_LCeps3, allEqsComps)
     #print('===========')
     #print('Components:')
     #print('===========')
