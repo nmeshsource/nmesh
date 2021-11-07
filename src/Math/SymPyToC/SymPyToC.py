@@ -393,6 +393,12 @@ def findlistdiff(indices, sym):
             diff.append( (ind, ind2) )
     return diff
 
+# use to check if diff returned by findlistdiff in non-empty
+def exit_if_list_empty(li, message):
+    #print('li =',li)
+    if li == []:
+        raise SystemExit(message)
+
 # return swapped indexlist
 def swapped_indices(indexlist, diff):
     swpd = list(indexlist).copy()
@@ -464,6 +470,8 @@ def make_subsrules_from_symmetries(symmetries):
                         symkind = s[0]
                         sym     = s[1]
                         if symkind == '-':
+                            diff = findlistdiff(TI.indices, sym)
+                            exit_if_list_empty(diff, 'error in symmetry of {T}'.format(T=TI))
                             cmp_old = cmp
                             sign, cmp = SwapIndicesIfOrderIsImproved(cmp,
                                                              diff, symkind)
@@ -479,6 +487,7 @@ def make_subsrules_from_symmetries(symmetries):
                         symkind = s[0]
                         sym     = s[1]
                         diff = findlistdiff(TI.indices, sym)
+                        exit_if_list_empty(diff, 'error in symmetry of {T}'.format(T=TI))
                         # make sure this writes back into simpT:
                         cmp_old = cmp
                         sign, cmp = SwapIndicesIfOrderIsImproved(cmp,
