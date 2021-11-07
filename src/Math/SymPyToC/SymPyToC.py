@@ -559,7 +559,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
     print('Making substitution rules from symmetries')
     subsruledict = make_subsrules_from_symmetries(symmetries)
     # use subsruledict to simplyfy LHS and RHS
-    print('Applying substitution rules')
+    print('Applying symmetry substitution rules')
     for eq_i in range(len(allEqs[0])):
         for comp in range(len(allEqs[0][eq_i])):
             #print('L =', allEqs[0][eq_i])
@@ -568,7 +568,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
             allEqs[1][eq_i][comp] = apply_subsrulesdict(subsruledict, allEqs[1][eq_i][comp])
 
     # make list of Eqs that we actually need
-    print('Removing unneeded Equations')
+    print('Removing unneeded equations')
     simpLHS = []
     simpRHS = []
     for eq_i in range(len(allEqs[0])):
