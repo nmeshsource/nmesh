@@ -1,3 +1,6 @@
+# SymPyToC.py (a code generator)
+# Wolfgang Tichy 11/2021
+
 # we need mostly sympy and very little from numpy
 from sympy import *
 import numpy as np
