@@ -3,7 +3,7 @@
 
 # We need sympy. We import it in 2 different ways:
 import sympy
-#from sympy import *  #we need this to make eval(sympy.srepr(expr)) works
+#from sympy import *  #we need this to make eval(sympy.srepr(expr)) work
 
 # we need very little from numpy and a bit from some standard modules
 import numpy
