@@ -3,7 +3,7 @@
 
 # We need sympy. We import it in 2 different ways:
 import sympy
-from sympy import *
+#from sympy import *  #we need this to make eval(sympy.srepr(expr)) works
 
 # we need very little from numpy and a bit from some standard modules
 import numpy as np
@@ -676,7 +676,7 @@ def replace_Pow(expr):
     s = sympy.srepr(expr)
     s = s.replace('Pow', 'POWER')
     # get expr without Pow
-    expr1 = eval(s)
+    expr1 = sympy.sympify(s) # eval(s)
     # use wild card symbol w to match POWER(w,2) and POWER(w,3)
     w = sympy.Wild('w')
     #print(expr1)
