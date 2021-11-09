@@ -385,7 +385,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       break;
     case 6:
       rc[0] = rc[1] = rc[2] = dc;
-      if(Getv(mesh_type, "Shell"))
+      if(Getv(mesh_type, "Shell")) //<-REMOVE! This is covered in setup_Shell_mesh
         CubedSphere_shell_at_xc(mesh, xc, dc, ssfac*dc);
       else
         sphere_around_empty_box_at_xc(mesh, xc, rc, ssfac*dc);
@@ -450,11 +450,15 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
   return 0;
 }
 
+
 /* a shell made out of a number of cubed spheres */
 int setup_Shell_mesh(tMesh *mesh)
 {
   double rin  = Getd(Par("amr_Shell_rin"));
+  double r1   = Getd(Par("amr_Shell_r1"));
   double rout = Getd(Par("amr_Shell_rout"));
+  /* stretch type in cubed spheres for outermost shell */
+  int stretch = Geti(Par("amr_OuterShellStretch"));
   double xc[] = { 0., 0., 0. };
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
@@ -469,7 +473,14 @@ int setup_Shell_mesh(tMesh *mesh)
   remove_all_patches(mesh);
 
   /* setup cubed spheres in form of a shell */
-  CubedSphere_shell_at_xc(mesh, xc, rin, rout);
+  if(r1 < rin)
+  {
+    CubedSphere_shell_at_xc(mesh, xc, rin, rout);
+  }
+  else
+  {
+    two_CubedSphere_shells_at_xc(mesh, xc, rin, r1, rout, stretch);
+  }
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);

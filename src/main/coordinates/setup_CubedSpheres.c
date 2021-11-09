@@ -332,13 +332,13 @@ int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
 /* surround an inner excised sphere with cubed spheres to form a shell
          _______
       __/       \__
-     /      3      \
-    /____       ____\       rin is radius of inner excised sphere
+     /_     3     _\
+    /  \_       _/  \       rin is radius of inner excised sphere
    /     \_---_/     \      rout is radius of outer sphere
   |   0  /     \   1  |
   |      \_   _/      |
-   \ ____/ --- \____ /
-    \               /
+   \    _/ --- \_    /
+    \__/         \_ /
      \__    2    __/
         \_______/
 */
@@ -358,6 +358,50 @@ int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
   pl = add_6CubedSphere_pats(mesh, CubedShell,0,0, xc, Din,Dout);
   return pl;
 }
+
+/* put 6 stretchedCubedShell's around the sphere from
+   CubedSphere_shell_at_xc
+                   ___________
+             _____/           \______
+          __/                        \_
+         /                             \
+       _- \-                         -/
+      /     \-       _______       -/
+     |        \-  __/       \__  -/   ...
+    |           \/_           _\/
+   /            /  \_       _/  \
+  |            /     \_---_/     \    first shell extends from r0 to r1
+  |           |      /     \      |   second shell extends from r1 to r2
+  |           |      \_   _/      |
+  |            \    _/ --- \_    /    if stretch=0 use xyz_of_lamAB_CubSph
+   \            \__/         \_ /     if stretch=1 use xyz_of_rhoAB_CubSph
+    |          _/\__         __/      in outermost CubedShell
+     |       _/     \_______/
+      \    _/
+       -_ /
+         \      ...
+*/
+int two_CubedSphere_shells_at_xc(tMesh *mesh, double xc[3], double r0,
+                                 double r1, double r2, int stretch)
+{
+  int pl;
+  double Din[6], Dout[6];
+  int f;
+
+  /* make inner shell */
+  pl = CubedSphere_shell_at_xc(mesh, xc, r0, r1);
+
+  /* set distances to make 6 cubed spheres around the inner shell */
+  for(f=0; f<6; f++)
+  {
+    Din[f]  = r1;
+    Dout[f] = r2;
+  }
+  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
+
+  return pl;
+}
+
 
 /************************************************************************/
 /* make test patches */
