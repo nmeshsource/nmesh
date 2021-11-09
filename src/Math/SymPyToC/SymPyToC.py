@@ -1,10 +1,12 @@
 # SymPyToC.py (a code generator)
 # Wolfgang Tichy 11/2021
 
-# we need mostly sympy and very little from numpy
+# We need sympy. We import it in 2 different ways:
+import sympy
 from sympy import *
-import numpy as np
 
+# we need very little from numpy and a bit from some standard modules
+import numpy as np
 import itertools
 import textwrap
 
@@ -75,7 +77,7 @@ def make_IndexedObj_from_strlist(list):
         basestr = vari.split('[')[0]
         basestr = basestr.strip()
         #print(basestr,'|')
-        cmd = basestr + ' = IndexedBase(\'' + basestr + '\')'
+        cmd = basestr + ' = sympy.IndexedBase(\'' + basestr + '\')'
         print(' ', cmd)
         exec(cmd, globals())
 
@@ -156,7 +158,7 @@ def sums_in_contraction_structure(ContrStruc):
             #print('subp =',subp)
             for ind in indlist:
                 # do sum over index ind and update subp
-                subp = Sum(subp, (ind, ind.lower,ind.upper)).doit()
+                subp = sympy.Sum(subp, (ind, ind.lower,ind.upper)).doit()
 
             # then add subp to the results dict
             contpartres[contpart] = subp
@@ -186,8 +188,8 @@ def sum_over_contraction_structure(ContrStruc):
 
 # expand all sums in the term rhs
 def expand_sums(rhs):
-    tgi  = tensor.get_indices(rhs)
-    tgcs = tensor.get_contraction_structure(rhs)
+    tgi  = sympy.tensor.get_indices(rhs)
+    tgcs = sympy.tensor.get_contraction_structure(rhs)
     sum = sum_over_contraction_structure(tgcs)
     return sum
 
@@ -218,16 +220,16 @@ def expand_RHS_sums(eqs):
         #print(rhs)
 
         #print(lhs, '=', rhs)
-        tgi_l  = tensor.get_indices(lhs)
-        tgcs_l = tensor.get_contraction_structure(lhs)
+        tgi_l  = sympy.tensor.get_indices(lhs)
+        tgcs_l = sympy.tensor.get_contraction_structure(lhs)
 
         # check rhs is maybe just a constant number
-        sympified_rhs = sympify(rhs)
+        sympified_rhs = sympy.sympify(rhs)
         if sympified_rhs.is_Number:
             exprhs = rhs # do nothing
         else:
-            tgi_r  = tensor.get_indices(rhs)
-            tgcs_r = tensor.get_contraction_structure(rhs)
+            tgi_r  = sympy.tensor.get_indices(rhs)
+            tgcs_r = sympy.tensor.get_contraction_structure(rhs)
             #print(tgi_l, tgi_r)
             #print(tgcs_l, tgcs_r)
             exprhs = expand_sums(rhs) # do sums in RHS
@@ -244,7 +246,7 @@ def get_tuple_with_all_indexvals(T):
     Tshape = T.shape
     if Tshape == None:
         return ()
-    shap = tuple(Tshape) # maybe use:  tensor.get_indices(T)
+    shap = tuple(Tshape) # maybe use:  sympy.tensor.get_indices(T)
     l1 = list(np.ndindex(shap))
     l2 = [ind.lower for ind in T.indices]
     a1 = np.array(l1, dtype=int)
@@ -281,7 +283,7 @@ def all_EqnComponents(expanded_eqs):
         #print('subrules =',subrules)
         # make sure we can do subs on RHS
         if type(lhs) != str:
-            sympified_rhs = sympify(rhs)
+            sympified_rhs = sympy.sympify(rhs)
             if sympified_rhs.is_Number:
                 # use same RHS for all components of LHS
                 rhs_comps = [rhs for t in lhs_allinds]
@@ -351,7 +353,7 @@ def get_AUTOVARS(Declvars, LHSvars):
             typ_Tl   = type(Tl)
             if typ_decT != typ_Tl:
                 continue
-            if typ_Tl == tensor.indexed.Indexed:
+            if typ_Tl == sympy.tensor.indexed.Indexed:
                 if Tl.base == decT.base:
                     if Tl.shape == decT.shape:
                         lhs_is_in_DeclTens = True
@@ -545,7 +547,7 @@ def apply_subsrulesdict(subsruledict, expr):
         return exprlist
 
     # do nothing for numbers
-    sympified_expr = sympify(expr)
+    sympified_expr = sympy.sympify(expr)
     if sympified_expr.is_Number:
         return expr # do nothing
 
@@ -655,7 +657,7 @@ def simplify_all_EqnComponents(simp, allEqs):
         for compn in range(len(allRHS[eq_i])):
             rhs = allRHS[eq_i][compn]
             if type(rhs) != str and type(rhs) != list and simp != None:
-                sympified_rhs = sympify(rhs)
+                sympified_rhs = sympy.sympify(rhs)
                 if not sympified_rhs.is_Number:
                     rhs = simp(rhs)
                 allRHS[eq_i][compn] = rhs
@@ -663,20 +665,20 @@ def simplify_all_EqnComponents(simp, allEqs):
 
 
 # global Functions called POWER, POW2, POW3 to be used instead of Pow
-POWER = symbols('POWER', cls=Function)
-POW2  = symbols('POW2',  cls=Function)
-POW3  = symbols('POW3',  cls=Function)
+POWER = sympy.symbols('POWER', cls=sympy.Function)
+POW2  = sympy.symbols('POW2',  cls=sympy.Function)
+POW3  = sympy.symbols('POW3',  cls=sympy.Function)
 
 # replace the Pow function of sympy to get rid of all ** or pow in the
 # output
 def replace_Pow(expr):
     # get symbolic representation of expr, and replace Pow
-    s = srepr(expr)
+    s = sympy.srepr(expr)
     s = s.replace('Pow', 'POWER')
     # get expr without Pow
     expr1 = eval(s)
     # use wild card symbol w to match POWER(w,2) and POWER(w,3)
-    w = Wild('w')
+    w = sympy.Wild('w')
     #print(expr1)
     expr2 = expr1.replace(POWER(w,2), POW2(w))
     #print(expr2)
@@ -684,22 +686,22 @@ def replace_Pow(expr):
     return expr3
 
 # global IndexedBase objects for Kronecker delta and 3d Levi Civita symbol
-Kdelta = IndexedBase('Kdelta')
-LCeps3 = IndexedBase('LCeps3')
+Kdelta = sympy.IndexedBase('Kdelta')
+LCeps3 = sympy.IndexedBase('LCeps3')
 
-# replace Kdelta by KroneckerDelta
+# replace Kdelta by sympy.KroneckerDelta
 def replace_Kdelta(expr):
-    w1 = Wild('w1')
-    w2 = Wild('w2')
-    expr2 = expr.replace(Kdelta[w1,w2], KroneckerDelta(w1,w2))
+    w1 = sympy.Wild('w1')
+    w2 = sympy.Wild('w2')
+    expr2 = expr.replace(Kdelta[w1,w2], sympy.KroneckerDelta(w1,w2))
     return expr2
 
 #replace LCeps3 by LeviCivita
 def replace_LCeps3(expr):
-    w1 = Wild('w1')
-    w2 = Wild('w2')
-    w3 = Wild('w3')
-    expr2 = expr.replace(LCeps3[w1,w2,w3], LeviCivita(w1,w2,w3))
+    w1 = sympy.Wild('w1')
+    w2 = sympy.Wild('w2')
+    w3 = sympy.Wild('w3')
+    expr2 = expr.replace(LCeps3[w1,w2,w3], sympy.LeviCivita(w1,w2,w3))
     return expr2
 
 
@@ -727,7 +729,7 @@ def make_DeclList__old(IndexedObjList, fstr):
     # loop over all objects
     for obj in IndexedObjList:
         # set varbase, indices
-        if type(obj) == tensor.indexed.Indexed:
+        if type(obj) == sympy.tensor.indexed.Indexed:
             varbase = obj.base
             indices = obj.indices
         else:
@@ -771,7 +773,7 @@ def make_DeclList(List_of_IndexedObjLists, fstr):
         varcompindex = 0
         for obj in var:
             # set varbase, indices
-            if type(obj) == tensor.indexed.Indexed:
+            if type(obj) == sympy.tensor.indexed.Indexed:
                 varbase = obj.base
                 indices = obj.indices
             else:
@@ -885,7 +887,7 @@ def get_TensorOutputFormat(allEqs, AUTOVARS):
                     for var in varlist:
                         for obj in var:
                             # set varbase, indices
-                            if type(obj) == tensor.indexed.Indexed:
+                            if type(obj) == sympy.tensor.indexed.Indexed:
                                 varbase = obj.base
                                 indices = obj.indices
                             else:
