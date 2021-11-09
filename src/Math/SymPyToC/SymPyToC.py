@@ -6,7 +6,7 @@ import sympy
 #from sympy import *  #we need this to make eval(sympy.srepr(expr)) works
 
 # we need very little from numpy and a bit from some standard modules
-import numpy as np
+import numpy
 import itertools
 import textwrap
 
@@ -248,10 +248,10 @@ def get_tuple_with_all_indexvals(T):
     if Tshape == None:
         return ()
     shap = tuple(Tshape) # maybe use:  sympy.tensor.get_indices(T)
-    l1 = list(np.ndindex(shap))
+    l1 = list(numpy.ndindex(shap))
     l2 = [ind.lower for ind in T.indices]
-    a1 = np.array(l1, dtype=int)
-    a2 = np.array(l2, dtype=int)
+    a1 = numpy.array(l1, dtype=int)
+    a2 = numpy.array(l2, dtype=int)
     a = list(a1 + a2)
     tup = tuple(a)
     return tup
