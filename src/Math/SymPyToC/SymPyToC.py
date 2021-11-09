@@ -718,41 +718,6 @@ def make_CompString(indices):
     return comp
 
 
-# old version of make_DeclList
-def make_DeclList__old(IndexedObjList, fstr):
-    declist = []
-    # init counters
-    lastvarbase = None
-    listindex    = 0
-    varcompindex = 0
-    varid    = -1
-    # loop over all objects
-    for obj in IndexedObjList:
-        # set varbase, indices
-        if type(obj) == sympy.tensor.indexed.Indexed:
-            varbase = obj.base
-            indices = obj.indices
-        else:
-            varbase = obj
-            indices = []
-        # reset some counters if we encounter a new variable
-        if varbase != lastvarbase:
-            lastvarbase = varbase
-            varcompindex = 0
-            varid += 1
-        # construct string that labels component
-        comp = make_CompString(indices);
-        # string s for one declaration
-        s = fstr.format(VAR=varbase, COMP=comp, LI=listindex, CI=varcompindex,
-                        VARID=varid)
-        declist.append(s)
-        # increment some counters
-        listindex    += 1
-        varcompindex += 1
-        lastvarbase = varbase
-    return declist
-
-
 # Make a list of variable declarations from IndexedObjList and format
 # string fstr
 # make_DeclList can be used like this:
@@ -966,3 +931,36 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                     f.write(RHSstr)
                     f.write(';\n\n')
     return
+
+
+###########################################################################
+# Some utility functions
+###########################################################################
+
+# convert a rank 2 tensor into matrix
+def matrix_from_tensor(Tij):
+    T = Tij.base
+    indices = Tij.indices
+    ind0 = indices[0]
+    ind1 = indices[1]
+    Tlist = []
+    for rowind in range(ind0.lower, ind0.upper+1):
+        row = []
+        for colind in range(ind1.lower, ind1.upper+1):
+            row.append(T[rowind,colind])
+        Tlist.append(row)
+    M = sympy.Matrix(Tlist)
+    return M
+
+# compute det of rank 2 tensor Tij
+def matrixdet(Tij):
+    M = matrix_from_tensor(Tij)
+    return M.det()
+
+# compute inverse(Tij)*det(Tij) for a rank 2 tensor
+def matrixinvdet(Tij):
+    M = matrix_from_tensor(Tij)
+    Mdet = M.det()
+    Minv = M.inv()
+    Minvdet = sympy.simplify(Minv * Mdet)
+    return Minvdet

@@ -8,12 +8,12 @@ exec(compile(open(codegen).read(), codegen, 'exec'))
 ########################################################################
 # indices we need, and their min and max value in brackets
 ########################################################################
-i = Idx('i', (1, 3))
-j = Idx('j', (1, 3))
-k = Idx('k', (1, 3))
-l = Idx('l', (1, 3))
-m = Idx('m', (1, 3))
-n = Idx('n', (1, 3))
+i = sympy.Idx('i', (1, 3))
+j = sympy.Idx('j', (1, 3))
+k = sympy.Idx('k', (1, 3))
+l = sympy.Idx('l', (1, 3))
+m = sympy.Idx('m', (1, 3))
+n = sympy.Idx('n', (1, 3))
 
 ########################################################################
 # Program Text and Eqations (in one long string tuple)
@@ -124,9 +124,9 @@ allEqs = apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS)
 ########################################################################
 # run more sympy simplification operations on RHSs (this is optional)
 ########################################################################
-allEqs = simplify_all_EqnComponents(simplify, allEqs)
-#allEqs = simplify_all_EqnComponents(expand, allEqs)
-allEqs = simplify_all_EqnComponents(N, allEqs)
+allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
+#allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
+allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
 
 ########################################################################
 # now write all into a .c file
