@@ -41,9 +41,9 @@ import textwrap
 #
 # from sympy import *
 # x = IndexedBase('x')
-#j = Idx('j', (1, 3))
-#k = Idx('k', (1, 3))
-#n = Idx('n', (1, 3))
+# j = Idx('j', (1, 3))
+# k = Idx('k', (1, 3))
+# n = Idx('n', (1, 3))
 # f = 1/sqrt(Sum(x[k]**2, (k, 1, n)))
 # print(f.diff(x[j]))
 
@@ -190,6 +190,7 @@ def sum_over_contraction_structure(ContrStruc):
 def expand_sums(rhs):
     tgi  = sympy.tensor.get_indices(rhs)
     tgcs = sympy.tensor.get_contraction_structure(rhs)
+    #print('rhs = ',rhs, ' tgi =',tgi)
     sum = sum_over_contraction_structure(tgcs)
     return sum
 
@@ -955,7 +956,17 @@ def matrix_from_tensor(Tij):
 # compute det of rank 2 tensor Tij
 def matrixdet(Tij):
     M = matrix_from_tensor(Tij)
-    return M.det()
+    return M.det() #FIXME: this is not an Indexed obj
+
+# convert matrix M back to a rank 2 tensor with the index range given by
+# indices
+def matrix_to_tensor(M, indices):
+    #T = sympy.IndexedBase('T')
+    ind0 = indices[0]
+    ind1 = indices[1]
+    m0 = ind0 - ind0.lower
+    m1 = ind1 - ind1.lower
+    return M[m0,m1] #FIXME: this is not an Indexed obj
 
 # compute inverse(Tij)*det(Tij) for a rank 2 tensor
 def matrixinvdet(Tij):
@@ -963,4 +974,4 @@ def matrixinvdet(Tij):
     Mdet = M.det()
     Minv = M.inv()
     Minvdet = sympy.simplify(Minv * Mdet)
-    return Minvdet
+    return matrix_to_tensor(Minvdet, Tij.indices)
