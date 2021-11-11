@@ -123,7 +123,11 @@ def sums_in_contraction_structure(ContrStruc):
         indlist = []
         if type(key) == tuple:
             for ind in key:
-                indlist.append(ind)
+                sympd_ind = sympy.sympify(ind)
+                # Repeated integers are not indicies to be summer over.
+                # So only add indices that are not integers:
+                if not isinstance(sympd_ind, sympy.core.numbers.Integer):
+                    indlist.append(ind)
 
         contpartset = ContrStruc[key]
         contpartres = {} # empty dict
@@ -190,7 +194,7 @@ def sum_over_contraction_structure(ContrStruc):
 def expand_sums(rhs):
     tgi  = sympy.tensor.get_indices(rhs)
     tgcs = sympy.tensor.get_contraction_structure(rhs)
-    #print('rhs = ',rhs, ' tgi =',tgi)
+    #print('rhs = ',rhs, ' tgi =',tgi, ' tgcs =',tgcs)
     sum = sum_over_contraction_structure(tgcs)
     return sum
 
@@ -226,13 +230,14 @@ def expand_RHS_sums(eqs):
 
         # check rhs is maybe just a constant number
         sympified_rhs = sympy.sympify(rhs)
-        if sympified_rhs.is_Number:
+        # do nothing with rhs if it is a number or a matrix element
+        if sympified_rhs.is_Number or isinstance(sympified_rhs, sympy.matrices.expressions.matexpr.MatrixElement):
             exprhs = rhs # do nothing
         else:
             tgi_r  = sympy.tensor.get_indices(rhs)
             tgcs_r = sympy.tensor.get_contraction_structure(rhs)
-            #print(tgi_l, tgi_r)
-            #print(tgcs_l, tgcs_r)
+            #print(tgi_r, tgi_r)
+            #print(tgcs_r, tgcs_r)
             exprhs = expand_sums(rhs) # do sums in RHS
 
         RHS_list.append(exprhs)
