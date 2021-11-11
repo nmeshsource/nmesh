@@ -674,6 +674,7 @@ def simplify_all_EqnComponents(simp, allEqs):
 POWER = sympy.symbols('POWER', cls=sympy.Function)
 POW2  = sympy.symbols('POW2',  cls=sympy.Function)
 POW3  = sympy.symbols('POW3',  cls=sympy.Function)
+POW1INV = sympy.symbols('POW1INV',  cls=sympy.Function)
 POW2INV = sympy.symbols('POW2INV',  cls=sympy.Function)
 POW3INV = sympy.symbols('POW3INV',  cls=sympy.Function)
 
@@ -689,6 +690,7 @@ def replace_Pow(expr):
     w = sympy.Wild('w')
     expr1 = expr1.replace(POWER(w,2), POW2(w))
     expr1 = expr1.replace(POWER(w,3), POW3(w))
+    expr1 = expr1.replace(POWER(w,-1), POW1INV(w))
     expr1 = expr1.replace(POWER(w,-2), POW2INV(w))
     expr1 = expr1.replace(POWER(w,-3), POW3INV(w))
     #print(expr1)
