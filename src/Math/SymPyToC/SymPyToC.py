@@ -720,6 +720,51 @@ def replace_LCeps3(expr):
 # Functions translate Eqs into C or some other language
 ###########################################################################
 
+# check if a char s can be part of a varname
+def is_varname_char(s):
+    #print('s =',s)
+    A = ord('A')
+    Z = ord('Z')
+    US = ord('_')
+    z = ord('z')
+    ords = ord(s)
+    if (ords >= A) and (ords <= z):
+        if (ords <= Z) or (ords >= US):
+            return True
+    return False
+
+# replace all varstr in s by repl if there is no other variable name part
+# before and after varstr
+def replace_varname(s, varstr, repl):
+    varstr_len = len(varstr)
+    repl_len = len(repl)
+    s2 = s
+    ind = 0
+    while True:
+        s2_len = len(s2)
+        ind = s2.find(varstr, ind)
+        if ind == -1:
+            break
+        if ind > 0:
+            letterbefore = is_varname_char(s2[ind-1])
+        else:
+            letterbefore = False
+        ia = ind + varstr_len
+        if ia < s2_len:
+            letterafter = is_varname_char(s2[ia])
+        else:
+            letterafter = False
+        if (not letterbefore) and (not letterafter):
+            # replace:
+            #print('before replace:', s2)
+            s2 = s2[:ind] + repl + s2[ind+varstr_len:]
+            ind += repl_len
+            #print('after replace:', s2)
+        else:
+            ind += varstr_len
+    return s2
+
+
 # construct comp string from var indicies
 def make_CompString(indices):
     # construct string that labels component
@@ -934,8 +979,10 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                     RHSstr = str(RHS)
                     LHSstr = str(LHS)
                     for fmt in outformat:
-                        RHSstr = RHSstr.replace(*fmt)
-                        LHSstr = LHSstr.replace(*fmt)
+                        #RHSstr = RHSstr.replace(*fmt)
+                        #LHSstr = LHSstr.replace(*fmt)
+                        RHSstr = replace_varname(RHSstr, *fmt)
+                        LHSstr = replace_varname(LHSstr, *fmt)
                     RHSstr = textwrap.fill(RHSstr)
                     f.write(LHSstr)
                     f.write('\n=\n')
