@@ -725,12 +725,22 @@ def is_varname_char(s):
     #print('s =',s)
     A = ord('A')
     Z = ord('Z')
-    US = ord('_')
+    UnSc = ord('_')
     z = ord('z')
     ords = ord(s)
     if (ords >= A) and (ords <= z):
-        if (ords <= Z) or (ords >= US):
+        if (ords <= Z) or (ords >= UnSc):
             return True
+    return False
+
+# check if char is in 0,1,2,3,4,5,6,7,8,9
+def is_0_to_9(s):
+    #print('s =',s)
+    zero = ord('0')
+    nine = ord('9')
+    ords = ord(s)
+    if (ords >= zero) and (ords <= nine):
+        return True
     return False
 
 # replace all varstr in s by repl if there is no other variable name part
@@ -746,12 +756,13 @@ def replace_varname(s, varstr, repl):
         if ind == -1:
             break
         if ind > 0:
-            letterbefore = is_varname_char(s2[ind-1])
+            letterbefore = s2[ind-1].isidentifier()
         else:
             letterbefore = False
         ia = ind + varstr_len
         if ia < s2_len:
-            letterafter = is_varname_char(s2[ia])
+            s2a = s2[ia]
+            letterafter = s2a.isidentifier() or is_0_to_9(s2a)
         else:
             letterafter = False
         if (not letterbefore) and (not letterafter):
