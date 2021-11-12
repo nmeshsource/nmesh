@@ -124,7 +124,7 @@ def sums_in_contraction_structure(ContrStruc):
         if type(key) == tuple:
             for ind in key:
                 sympd_ind = sympy.sympify(ind)
-                # Repeated integers are not indicies to be summer over.
+                # Repeated integers are not indicies to be summed over.
                 # So only add indices that are not integers:
                 if not isinstance(sympd_ind, sympy.core.numbers.Integer):
                     indlist.append(ind)
@@ -146,17 +146,48 @@ def sums_in_contraction_structure(ContrStruc):
                     sums_in_cs = sums_in_contraction_structure(cs)
                     sums_in_cs_list.append(sums_in_cs)
                 #print('sums_in_cs_list =',sums_in_cs_list)
+                #print('before any subst: subres =',subres)
 
                 # insert results in sums_in_cs_list into contpart -> subres
+                subsrulesdict = {}
                 for sums_in_cs in sums_in_cs_list:
                     for inds2 in sums_in_cs:
                         termsdict = sums_in_cs[inds2]
                         for termkey in termsdict:
-                            res = termsdict[termkey]
-                            #print('termkey =',termkey)
-                            #print('res =',res)
-                            subres = subres.subs(termkey, res)
-                            #print('subres =',subres)
+                            subsrulesdict[termkey] = termsdict[termkey]
+                #print('subsrulesdict =',subsrulesdict)
+                #print('1. subres =',subres)
+                # use string replacement, because subs does not work
+                subres = str_replace_term(subres, subsrulesdict)
+                #subres = subres.subs(subsrulesdict, simultaneous=True)
+                # subs does not work for
+                # 'dt_D[k,i,j] = beta[l]*dD[l,k,i,j] -\
+                #        s*(-1/2*gTilde[m,i]*dB_symm[k,j,m] \
+                #            +1/3*gTilde[i,j]*dB_symm[k,m,mp]*Kdelta[m,mp])',
+
+                # NOTE: THIS also does not work for
+                # 'dt_D[k,i,j] = beta[l]*dD[l,k,i,j] -\
+                #        s*(-1/2*gTilde[m,i]*dB_symm[k,j,m] \
+                #            +1/3*gTilde[i,j]*dB_symm[k,m,mp]*Kdelta[m,mp])',
+                #for sums_in_cs in sums_in_cs_list:
+                #    for inds2 in sums_in_cs:
+                #        termsdict = sums_in_cs[inds2]
+                #        print('termsdict =',termsdict)
+                #        for termkey in termsdict:
+                #            res = termsdict[termkey]
+                #            print('termkey =',sympy.srepr(termkey))
+                #            print('res =',res)
+                #            print('1. subres =',sympy.srepr(subres))
+                #            subres_old = subres
+                #            subres = subres.subs(-termkey, -res)
+                #            if subres == subres_old:
+                #                print('Arrgh1')
+                #                subres = subres.subs(-termkey, -res)
+                #            print('2. subres =',subres)
+                #            if subres == subres_old:
+                #                exit(88)
+                #print('XXXXXXXXX subres =',subres)
+                #exit(99)
             # now use subres
             subp = subres
             #print('subp =',subp)
@@ -715,6 +746,31 @@ def replace_LCeps3(expr):
     expr2 = expr.replace(LCeps3[w1,w2,w3], sympy.LeviCivita(w1,w2,w3))
     return expr2
 
+# replace all keys in termsdict by their values in expr
+# here we use srepr, and then replace strings in expr
+def str_replace_term(expr, termsdict):
+    # make string from expr
+    s_expr = sympy.srepr(expr)
+    #print('SRT: expr =', expr)
+    #print('SRT: s_expr =', s_expr)
+    #print('SRT: termsdict =', termsdict)
+    # make string based dict
+    s_termsdict = {}
+    for term in termsdict:
+        term_new = termsdict[term]
+        s_term     = sympy.srepr(term)
+        s_term_new = sympy.srepr(term_new)
+        s_termsdict[s_term] = s_term_new
+    #print('SRT: s_termsdict =', s_termsdict)
+    # replace term strings in s_expr
+    for s_term in s_termsdict:
+        s_term_new = s_termsdict[s_term]
+        s_expr = s_expr.replace(s_term, s_term_new)
+    #print('SRT: RESULT: s_expr =', s_expr)
+    expr_new = sympy.sympify(s_expr)
+    #print('SRT: expr_new =', expr_new)
+    # return expression after replacement
+    return expr_new
 
 ###########################################################################
 # Functions translate Eqs into C or some other language
