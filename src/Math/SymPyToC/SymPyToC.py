@@ -64,9 +64,26 @@ def get_LHS_RHS_strlist(tocompute):
             line = eqn.split('=', 1)
             lhs = line[0].strip()
             rhs = line[1] # line[1].strip()
+            rhs = remove_spaces_before_lbracket(rhs)
         llist.append(lhs)
         rlist.append(rhs)
     return [llist,rlist]
+
+
+# remove spaces between Tensor name and bracket, e.g. T [i,j] -> T[i,j]
+def remove_spaces_before_lbracket(s):
+    s2 = s[:]
+    ind = 0
+    while True:
+        ind = s2.find(' [', ind)
+        if(ind == -1): break
+        print(ind, s2)
+        if ind >= 1:
+            s2 = s2[:ind] + s2[ind+1:]
+            ind -= 1
+        else:
+            ind += 1
+    return s2
 
 
 # make IndexedBase objects from a string list
@@ -562,6 +579,7 @@ def make_subsrules_from_symmetries(symmetries):
                 subsrules.append( [allT[ind], simpT[ind]] )
         if subsrules != []:
             subsruledict[TI] = subsrules
+    #print('subsruledict =',subsruledict)
     return subsruledict
 
 
