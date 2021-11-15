@@ -12,10 +12,10 @@ import textwrap
 
 ###########################################################################
 #
+#  * Eqs are input as a list of strings by user
+# read_LHS_RHS_strlist :
+#  * Eqs are split into a list of 2 string lists for LHS and RHS
 # assemble_all_EqnComponents :
-#  * Eqs are input as a list of strings
-#  * Eqs are then split into a list of 2 string lists for LHS and RHS
-#    (by get_LHS_RHS_strlist)
 #  * The 2 string lists are then converted into Indexed object lists
 #    (Commands like :Decl or :Text are left as strings in the LHS)
 #  * :Decl Commands first have just '.' as RHS
@@ -53,7 +53,7 @@ import textwrap
 ###########################################################################
 
 # convert tocompute string into [ [lhs0,lhs1, ...], [rhs0,rhs1, ...] ]
-def get_LHS_RHS_strlist(tocompute):
+def read_LHS_RHS_strlist(tocompute):
     llist = []
     rlist = []
     for eqn in tocompute:
@@ -63,7 +63,7 @@ def get_LHS_RHS_strlist(tocompute):
         else:
             line = eqn.split('=', 1)
             lhs = line[0].strip()
-            rhs = line[1] # line[1].strip()
+            rhs = line[1].strip()
             rhs = remove_spaces_before_lbracket(rhs)
         llist.append(lhs)
         rlist.append(rhs)
@@ -356,17 +356,13 @@ def all_EqnComponents(expanded_eqs):
 
 
 # return all components of all Eqns as sympy objects
-def assemble_all_EqnComponents(tocompute):
+# eqs needs to be computed with:
+# eqs = read_LHS_RHS_strlist(tocompute)
+# from user inputed stringlist tocompute which describes the equations
+# and declarations
+def assemble_all_EqnComponents(eqs):
     #global AUTOVARS
     print('SymPyToC.py:')
-    # print tensor Eqs
-    #print('==========')
-    #print('Equations:')
-    #print('==========')
-    #for s in tocompute:
-    #    print(s)
-    # make list of LHSs and RHSs of Eqns
-    eqs = get_LHS_RHS_strlist(tocompute)
     print('Processing declarations')
     Declvars, LHSvars = Declvars_LHSvars_FromEqs(eqs)
     # introduce sympy vars
@@ -617,7 +613,7 @@ def apply_subsrulesdict(subsruledict, expr):
 
 
 # apply symmetries to all Eqn components
-def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
+def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     # remove Kdelta and LCeps3 first
     allEqs = simplify_all_EqnComponents(replace_Kdelta, allEqs)
     allEqs = simplify_all_EqnComponents(replace_LCeps3, allEqs)
@@ -627,11 +623,24 @@ def apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS):
     # use subsruledict to simplyfy LHS and RHS
     print('Applying symmetry substitution rules')
     for eq_i in range(len(allEqs[0])):
+        LHS = Eqs[0][eq_i]
+        RHS = Eqs[1][eq_i]
+        subsdict = {}
+        if LHS[0] != ':':
+            print(' ', LHS, '=', RHS)
+            for key in subsruledict:
+                skey = str(key)
+                ind = skey.find('[')
+                skey = skey[:ind+1]
+                # if eqn contains term in subsruledict, add the rule to subsdict
+                if skey in RHS or skey in LHS:
+                    subsdict[key] = subsruledict[key]
+        else:
+            if LHS.startswith(':Decl:'):
+                subsdict = subsruledict
         for comp in range(len(allEqs[0][eq_i])):
-            #print('L =', allEqs[0][eq_i])
-            #print('R =', allEqs[1][eq_i])
-            allEqs[0][eq_i][comp] = apply_subsrulesdict(subsruledict, allEqs[0][eq_i][comp])
-            allEqs[1][eq_i][comp] = apply_subsrulesdict(subsruledict, allEqs[1][eq_i][comp])
+            allEqs[0][eq_i][comp] = apply_subsrulesdict(subsdict, allEqs[0][eq_i][comp])
+            allEqs[1][eq_i][comp] = apply_subsrulesdict(subsdict, allEqs[1][eq_i][comp])
 
     # make list of Eqs that we actually need
     print('Removing unneeded equations')

@@ -100,7 +100,8 @@ int main()
 ########################################################################
 # get all Eqn components and the undeclared vars that only appear on LHS
 ########################################################################
-allEqs, AUTOVARS = assemble_all_EqnComponents(tocompute)
+Eqs = read_LHS_RHS_strlist(tocompute)
+allEqs, AUTOVARS = assemble_all_EqnComponents(Eqs)
 
 ########################################################################
 # declare all symmetries for all variables we use
@@ -119,7 +120,8 @@ symmetries = {
 ########################################################################
 # apply symmetries and remove duplicates. This step takes the longest.
 ########################################################################
-allEqs = apply_symmetries_to_all_EqnComponents(symmetries, allEqs, AUTOVARS)
+allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs,
+                                               AUTOVARS)
 
 ########################################################################
 # run more sympy simplification operations on RHSs (this is optional)
