@@ -50,11 +50,11 @@ void exmpl_func(tVarList *vlu)
   double *{VAR}{COMP} = Mem; // Vard( node, Vind(vlu,{LI}) );
 ''',
 ''':Decl: cA; cS; : Access={VAR}{COMP}: Format =
-  double {VAR}{COMP} = 1.; // name={VAR} ID={VARID} comp={CI} listpos={LI}
+  double {VAR}{COMP} = 1.; // name={VAR} ID={VARID} compind={CI} listind={LI}
 ''',
 ''':Decl: AUTOVARS :
           Access={VAR}{COMP} : DeclFunc=make_DeclList : Format =
-  double {VAR}{COMP}; // name={VAR} ID={VARID} comp={CI} listpos={LI}
+  double {VAR}{COMP}; // name={VAR} ID={VARID} compind={CI} listind={LI}
 ''',
 
 r''':Text =
