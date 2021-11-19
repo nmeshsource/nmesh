@@ -9,6 +9,7 @@ import sympy
 import numpy
 import itertools
 import textwrap
+import pathlib
 
 ###########################################################################
 #
@@ -1029,6 +1030,16 @@ def write_Eqs(filename, allEqs, AUTOVARS):
 
     # now do the output
     with open(filename, 'w') as f:
+        # some counters
+        nEqs = 0
+        nmul = 0
+        ndiv = 0
+        nsum = 0
+        # write info
+        f.write('/* ' + pathlib.Path(filename).name + ' */\n')
+        f.write('/* Copyright (C) 2019-2021 Wolfgang Tichy */\n')
+        f.write('/* Produced with SymPyToC.py */\n\n')
+        # loop over Eqns
         for eq_i in range(len(allEqs[0])):
             Lvar = allEqs[0][eq_i]
             for comp in range(len(Lvar)):
@@ -1077,11 +1088,27 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                         #LHSstr = LHSstr.replace(*fmt)
                         RHSstr = replace_varname(RHSstr, *fmt)
                         LHSstr = replace_varname(LHSstr, *fmt)
+                    # operator count
+                    nEqs += 1
+                    nmul += RHSstr.count('*')
+                    ndiv += RHSstr.count('/')
+                    nsum += RHSstr.count('+') + RHSstr.count('-')
+                    # now write into file
                     RHSstr = textwrap.fill(RHSstr)
                     f.write(LHSstr)
                     f.write('\n=\n')
                     f.write(RHSstr)
                     f.write(';\n\n')
+        # write counters
+        f.write('\n')
+        f.write('/* ' + pathlib.Path(filename).name + ' */\n')
+        f.write('/* ')
+        f.write('nEqs = {}, '.format(nEqs))
+        f.write('nmul = {}, '.format(nmul))
+        f.write('ndiv = {}, '.format(ndiv))
+        f.write('nsum = {}, '.format(nsum))
+        f.write('nop = {}'.format(nmul+ndiv+nsum))
+        f.write(' */\n')
     return
 
 
