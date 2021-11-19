@@ -745,6 +745,23 @@ def replace_Pow(expr):
     s = s.replace('Pow', 'POWER')
     # get expr without Pow
     expr1 = sympy.sympify(s) # eval(s)
+    # use wild card symbols w0/1 to match POWER(w,2) and such ...
+    w0 = sympy.Wild('w0')
+    w1 = sympy.Wild('w1')
+    expr1 = expr1.replace(POWER(w1,2), POW2(w1))
+    expr1 = expr1.replace(POWER(w1,3), POW3(w1))
+    expr1 = expr1.replace(w0*POWER(w1,-1), w0/w1)
+    expr1 = expr1.replace(w0*POWER(w1,-2), w0/POW2(w1))
+    expr1 = expr1.replace(w0*POWER(w1,-3), w0/POW3(w1))
+    #print(expr1)
+    return expr1
+
+def replace_Pow__old(expr):
+    # get symbolic representation of expr, and replace Pow
+    s = sympy.srepr(expr)
+    s = s.replace('Pow', 'POWER')
+    # get expr without Pow
+    expr1 = sympy.sympify(s) # eval(s)
     # use wild card symbol w to match POWER(w,2) and POWER(w,3)
     w = sympy.Wild('w')
     expr1 = expr1.replace(POWER(w,2), POW2(w))
@@ -754,6 +771,7 @@ def replace_Pow(expr):
     expr1 = expr1.replace(POWER(w,-3), POW3INV(w))
     #print(expr1)
     return expr1
+
 
 # global IndexedBase objects for Kronecker delta and 3d Levi Civita symbol
 Kdelta = sympy.IndexedBase('Kdelta')
