@@ -1109,6 +1109,7 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                     # operator count
                     nEqs += 1
                     nmul += RHSstr.count('*')
+                    nmul += RHSstr.count('POW2') + 2*RHSstr.count('POW3')
                     ndiv += RHSstr.count('/')
                     nsum += RHSstr.count('+') + RHSstr.count('-')
                     # now write into file
