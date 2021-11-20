@@ -745,14 +745,13 @@ def replace_Pow(expr):
     s = s.replace('Pow', 'POWER')
     # get expr without Pow
     expr1 = sympy.sympify(s) # eval(s)
-    # use wild card symbols w0/1 to match POWER(w,2) and such ...
-    w0 = sympy.Wild('w0')
+    # use wild card symbol w1 to match POWER(w1,2) and such ...
     w1 = sympy.Wild('w1')
     expr1 = expr1.replace(POWER(w1,2), POW2(w1))
     expr1 = expr1.replace(POWER(w1,3), POW3(w1))
-    expr1 = expr1.replace(w0*POWER(w1,-1), w0/w1)
-    expr1 = expr1.replace(w0*POWER(w1,-2), w0/POW2(w1))
-    expr1 = expr1.replace(w0*POWER(w1,-3), w0/POW3(w1))
+    expr1 = expr1.replace(POWER(w1,-1), 1/w1)
+    expr1 = expr1.replace(POWER(w1,-2), 1/POW2(w1))
+    expr1 = expr1.replace(POWER(w1,-3), 1/POW3(w1))
     #print(expr1)
     return expr1
 
