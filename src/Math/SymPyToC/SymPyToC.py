@@ -10,6 +10,7 @@ import numpy
 import itertools
 import textwrap
 import pathlib
+import multiprocessing
 
 ###########################################################################
 #
@@ -96,7 +97,7 @@ def make_IndexedObj_from_strlist(list):
         basestr = basestr.strip()
         #print(basestr,'|')
         cmd = basestr + ' = sympy.IndexedBase(\'' + basestr + '\')'
-        print(' ', cmd)
+        #print(' ', cmd)
         exec(cmd, globals())
 
 
@@ -612,6 +613,16 @@ def apply_subsrulesdict(subsruledict, expr):
             new_expr = new_expr.subs(sub[0], sub[1][0] * sub[1][1])
     return new_expr
 
+# apply subsdict=Eq[2] to Eq[0] and Eq[1]
+# Eq is [lhs, rhs, subsdict]
+def apply_subsrulesdict_to_LHS_RHS(Eq):
+    subsdict = Eq[2]
+    lhs = Eq[0]
+    rhs = Eq[1]
+    lhs = apply_subsrulesdict(subsdict, lhs)
+    rhs = apply_subsrulesdict(subsdict, rhs)
+    return (lhs, rhs)
+
 
 # apply symmetries to all Eqn components
 def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
@@ -623,12 +634,14 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     subsruledict = make_subsrules_from_symmetries(symmetries)
     # use subsruledict to simplyfy LHS and RHS
     print('Applying symmetry substitution rules')
+    IDlist = []
+    Eqlist = []
     for eq_i in range(len(allEqs[0])):
         LHS = Eqs[0][eq_i]
         RHS = Eqs[1][eq_i]
         subsdict = {}
         if LHS[0] != ':':
-            print(' ', LHS, '=', RHS)
+            #print(' ', LHS, '=', RHS)
             for key in subsruledict:
                 skey = str(key)
                 ind = skey.find('[')
@@ -640,8 +653,19 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
             if LHS.startswith(':Decl:'):
                 subsdict = subsruledict
         for comp in range(len(allEqs[0][eq_i])):
-            allEqs[0][eq_i][comp] = apply_subsrulesdict(subsdict, allEqs[0][eq_i][comp])
-            allEqs[1][eq_i][comp] = apply_subsrulesdict(subsdict, allEqs[1][eq_i][comp])
+            if subsdict != {}:
+                IDlist.append([eq_i, comp])
+                Eqlist.append([allEqs[0][eq_i][comp], allEqs[1][eq_i][comp], subsdict])
+    # simplify Eqlist in parallel
+    with multiprocessing.Pool() as pool:
+        simpd = pool.map(apply_subsrulesdict_to_LHS_RHS, Eqlist)
+    # write results into allEqs
+    for id_n in range(len(IDlist)):
+        eq_i = IDlist[id_n][0]
+        comp = IDlist[id_n][1]
+        lhs_rhs = simpd[id_n]
+        allEqs[0][eq_i][comp] = lhs_rhs[0]
+        allEqs[1][eq_i][comp] = lhs_rhs[1]
 
     # make list of Eqs that we actually need
     print('Removing unneeded equations')
@@ -718,14 +742,23 @@ def remove_UnneededComps(Tcomps):
 def simplify_all_EqnComponents(simp, allEqs):
     print('Simplifying with', simp)
     allRHS = allEqs[1].copy()
+    RHSlist = []
     for eq_i in range(len(allRHS)):
         for compn in range(len(allRHS[eq_i])):
             rhs = allRHS[eq_i][compn]
             if type(rhs) != str and type(rhs) != list and simp != None:
                 sympified_rhs = sympy.sympify(rhs)
                 if not sympified_rhs.is_Number:
-                    rhs = simp(rhs)
-                allRHS[eq_i][compn] = rhs
+                    RHSlist.append([eq_i, compn, rhs])
+    # simplify RHSlist in parallel
+    with multiprocessing.Pool() as pool:
+        rsimp = pool.map(simp, [r[2] for r in RHSlist])
+    # put results into allRHS
+    for eln in range(len(RHSlist)):
+        eq_i  = RHSlist[eln][0]
+        compn = RHSlist[eln][1]
+        rhs = rsimp[eln]
+        allRHS[eq_i][compn] = rhs
     return [allEqs[0], allRHS]
 
 
