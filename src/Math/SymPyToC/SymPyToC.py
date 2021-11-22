@@ -831,6 +831,16 @@ def str_replace_term(expr, termsdict):
     # return expression after replacement
     return expr_new
 
+# this does not work as intended
+def factorout_common_terms(expr):
+    expr1 = expr
+    a = sympy.Wild('a')
+    x = sympy.Wild('x')
+    y = sympy.Wild('y')
+    expr1 = expr1.replace(a*x + a*y, a*(x + y))
+    return expr1
+
+
 ###########################################################################
 # Functions translate Eqs into C or some other language
 ###########################################################################
