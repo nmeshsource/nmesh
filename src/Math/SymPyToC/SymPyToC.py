@@ -766,9 +766,6 @@ def simplify_all_EqnComponents(simp, allEqs):
 POWER = sympy.symbols('POWER', cls=sympy.Function)
 POW2  = sympy.symbols('POW2',  cls=sympy.Function)
 POW3  = sympy.symbols('POW3',  cls=sympy.Function)
-POW1INV = sympy.symbols('POW1INV',  cls=sympy.Function)
-POW2INV = sympy.symbols('POW2INV',  cls=sympy.Function)
-POW3INV = sympy.symbols('POW3INV',  cls=sympy.Function)
 
 # replace the Pow function of sympy to get rid of all ** or pow in the
 # output
@@ -785,22 +782,6 @@ def replace_Pow(expr):
     expr1 = expr1.replace(POWER(w1,-1), 1/w1)
     expr1 = expr1.replace(POWER(w1,-2), 1/POW2(w1))
     expr1 = expr1.replace(POWER(w1,-3), 1/POW3(w1))
-    #print(expr1)
-    return expr1
-
-def replace_Pow__old(expr):
-    # get symbolic representation of expr, and replace Pow
-    s = sympy.srepr(expr)
-    s = s.replace('Pow', 'POWER')
-    # get expr without Pow
-    expr1 = sympy.sympify(s) # eval(s)
-    # use wild card symbol w to match POWER(w,2) and POWER(w,3)
-    w = sympy.Wild('w')
-    expr1 = expr1.replace(POWER(w,2), POW2(w))
-    expr1 = expr1.replace(POWER(w,3), POW3(w))
-    expr1 = expr1.replace(POWER(w,-1), POW1INV(w))
-    expr1 = expr1.replace(POWER(w,-2), POW2INV(w))
-    expr1 = expr1.replace(POWER(w,-3), POW3INV(w))
     #print(expr1)
     return expr1
 
