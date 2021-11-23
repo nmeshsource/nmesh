@@ -264,14 +264,18 @@ def expand_RHS_sums(eqs):
             RHS_list.append(rs)
             continue
 
-        cmd = 'lhs = ' + ls
-        #print(cmd)
-        exec(cmd, globals())
+        #cmd = 'lhs = ' + ls
+        ##print(cmd)
+        #exec(cmd, globals())
+        #print(ls)
+        lhs = eval(ls)
         #print(lhs)
 
-        cmd = 'rhs = ' + rs
-        #print(cmd)
-        exec(cmd, globals())
+        #cmd = 'rhs = ' + rs
+        ##print(cmd)
+        #exec(cmd, globals())
+        #print(rs)
+        rhs = eval(rs)
         #print(rhs)
 
         #print(lhs, '=', rhs)
