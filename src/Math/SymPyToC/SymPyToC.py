@@ -280,15 +280,20 @@ def expand_RHS_sums(eqs):
 
         # check rhs is maybe just a constant number
         sympified_rhs = sympy.sympify(rhs)
-        # do nothing with rhs if it is a number or a matrix element
-        if sympified_rhs.is_Number or isinstance(sympified_rhs, sympy.matrices.expressions.matexpr.MatrixElement):
+        # do nothing with rhs if it is a number
+        if sympified_rhs.is_Number:
             exprhs = rhs # do nothing
         else:
-            tgi_r  = sympy.tensor.get_indices(rhs)
-            tgcs_r = sympy.tensor.get_contraction_structure(rhs)
-            #print(tgi_r, tgi_r)
-            #print(tgcs_r, tgcs_r)
-            exprhs = expand_sums(rhs) # do sums in RHS
+            # try if we can get use get_indices on rhs
+            try:
+                tgi_r  = sympy.tensor.get_indices(rhs)
+                tgcs_r = sympy.tensor.get_contraction_structure(rhs)
+                #print(tgi_r, tgi_r)
+                #print(tgcs_r, tgcs_r)
+                exprhs = expand_sums(rhs) # do sums in RHS
+            # do nothing if get_indices fails, e.g. if we have a matrix element
+            except:
+                exprhs = rhs # do nothing
 
         RHS_list.append(exprhs)
         LHS_list.append(lhs)
