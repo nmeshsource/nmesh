@@ -772,9 +772,10 @@ def simplify_all_EqnComponents(simp, allEqs):
 
 
 # global Functions called POWER, POW2, POW3 to be used instead of Pow
-POWER = sympy.symbols('POWER', cls=sympy.Function)
-POW2  = sympy.symbols('POW2',  cls=sympy.Function)
-POW3  = sympy.symbols('POW3',  cls=sympy.Function)
+if __name__ == '__main__':
+    POWER = sympy.symbols('POWER', cls=sympy.Function)
+    POW2  = sympy.symbols('POW2',  cls=sympy.Function)
+    POW3  = sympy.symbols('POW3',  cls=sympy.Function)
 
 # replace the Pow function of sympy to get rid of all ** or pow in the
 # output
@@ -796,8 +797,9 @@ def replace_Pow(expr):
 
 
 # global IndexedBase objects for Kronecker delta and 3d Levi Civita symbol
-Kdelta = sympy.IndexedBase('Kdelta')
-LCeps3 = sympy.IndexedBase('LCeps3')
+if __name__ == '__main__':
+    Kdelta = sympy.IndexedBase('Kdelta')
+    LCeps3 = sympy.IndexedBase('LCeps3')
 
 # replace Kdelta by sympy.KroneckerDelta
 def replace_Kdelta(expr):
