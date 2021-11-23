@@ -764,6 +764,8 @@ def simplify_all_EqnComponents(simp, allEqs):
     # simplify RHSlist in parallel
     with multiprocessing.Pool() as pool:
         rsimp = pool.map(simp, [r[2] for r in RHSlist])
+    ## simplify RHSlist serially
+    #rsimp = list(map(simp, [r[2] for r in RHSlist]))
     # put results into allRHS
     for eln in range(len(RHSlist)):
         eq_i  = RHSlist[eln][0]
