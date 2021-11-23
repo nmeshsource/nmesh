@@ -145,7 +145,7 @@ def sums_in_contraction_structure(ContrStruc):
                 sympd_ind = sympy.sympify(ind)
                 # Repeated integers are not indicies to be summed over.
                 # So only add indices that are not integers:
-                if not isinstance(sympd_ind, sympy.core.numbers.Integer):
+                if not sympd_ind.is_number:
                     indlist.append(ind)
 
         contpartset = ContrStruc[key]
