@@ -20,7 +20,7 @@ typedef struct tGRIDPOINTS {
   struct tARRAY **Wq[P_NTYPES]; /* list of quadrature weights for Xb */
   struct tARRAY **WL[P_NTYPES]; /* list of Lagrange interp. weights */
   struct tARRAY **Dt[P_NTYPES]; /* list of transp. differentiation matrices
-                                 we store Dt[1...nmax][typ], typ=P_LGL,... */
+                                 we store Dt[typ][1...nmax], typ=P_LGL,... */
   struct tARRAY **Dpt[P_NTYPES]; /* transp. forward diff matrices */
   struct tARRAY **Dmt[P_NTYPES]; /* transp. backward diff matrices */
   struct tARRAY **At[P_NTYPES]; /* list of transposed analysis matrices */
