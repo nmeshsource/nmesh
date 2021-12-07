@@ -12,9 +12,17 @@
 
 /* Add Kreiss-Oliger dissipation terms to vlr. vlr can be varlist for RHS.
    Here we use the same Kreiss-Oliger 4th order derivative operator as in
-   BAM. This converges to 0 at O(h^2) in the grid spacing h. It doesn't
+   BAM ( https://arxiv.org/pdf/gr-qc/0610128.pdf ):
+   Note:
+   D_{+}^2 D_{-}^2 u -> (u[i-2] - 4u[i-1] + 6u[i] - 4u[i+1] + u[i+2])/h^4
+   BAM's d4stencil2nd in dissipation4 thus has { 1, -4,  6, -4, 1}
+   The diss. term in Eq. (63) for rho=1 and r=2 is:
+     \sigma (-h)^3 D_{+}^2 D_{-}^2 / 16 u
+     = -(\sigma/16)*(u[i-2] - 4u[i-1] + 6u[i] - 4u[i+1] + u[i+2])/h
+   So our dissfac below is given by dissfac = \sigma/16.
+   The diss term converges to 0 at O(h^2) in the grid spacing h. It doesn't
    really fit into the DG or FV scheme, but since we are already doing
-   several non-standard things, we could try this too.
+   several non-standard things, we can try this too.
    In:
      node
      vlu contains evolved fields
@@ -70,9 +78,9 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
 
-          /* set dissipation term */
-          dis[ccc] += -2.*dissfac*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
-                                              +     uc[i0-2] + uc[i0+2] ) *
+          /* add dissipation term */
+          dis[ccc] += -dissfac*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
+                                           +     uc[i0-2] + uc[i0+2] ) *
                       ooh;
         }
       } /* end loop over fields */
