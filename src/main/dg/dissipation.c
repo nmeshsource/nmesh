@@ -42,6 +42,7 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
   for(dir=0; dir<3; dir++)
   {
     double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
+    double dissfacoh = dissfac * ooh; /* dissfac/h */
     int i,j,k;
 
     /* do nothing if we have less than 5 grid points */
@@ -59,8 +60,8 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
       /* loop over fields */
       forvl(vlu, l)
       {
-        double *ul = Vard(node, Vind(vlu, l));  /* field data pointer */
-        double *dis = Vard(node, Vind(vlr, l)); /* diss term data pointer */
+        double *ul = Vard(node, Vind(vlu, l)); /* field data pointer */
+        double *rl = Vard(node, Vind(vlr, l)); /* RHS data pointer */
 
         /* fill field arrays uc, i0 runs orth. to plane */
         for(i0=0; i0<n[dir]; i0++)
@@ -78,10 +79,9 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
 
-          /* add dissipation term */
-          dis[ccc] += -dissfac*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
-                                           +     uc[i0-2] + uc[i0+2] ) *
-                      ooh;
+          /* add dissipation term to RHS */
+          rl[ccc] += -dissfacoh*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
+                                            +     uc[i0-2] + uc[i0+2] );
         }
       } /* end loop over fields */
     } /* end plane loop */
