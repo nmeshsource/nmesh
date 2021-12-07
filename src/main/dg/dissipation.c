@@ -71,8 +71,8 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
           ccc = Ind_n(ic,jc,kc, n);
 
           /* set dissipation term */
-          dis[ccc] += -2.*dissfac*(6.*uc[i0] + uc[i0-2] -
-                                   4.*(uc[i0+1] + uc[i0+1]) + uc[i0+2]) *
+          dis[ccc] += -2.*dissfac*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
+                                              +     uc[i0-2] + uc[i0+2] ) *
                       ooh;
         }
       } /* end loop over fields */
