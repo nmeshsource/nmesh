@@ -200,9 +200,11 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
 
-          /* set dissipation term */
-          dis = 0.;
-          for(s=-srad; s<=srad; s++) dis += sw[s+srad]*uc[i0+s];
+          /* Set dissipation term. Here we assume the stencil is symmetric
+             (i.e. same weight for uc[i0-s] and uc[i0+s]) and thus use only
+             the top half of sw. */
+          dis = sw[srad]*uc[i0];
+          for(s=1; s<=srad; s++) dis += sw[s+srad]*(uc[i0-s] + uc[i0+s]);
           dis *= dissfacoh;
 
           /* add dissipation term to RHS */

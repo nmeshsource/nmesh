@@ -147,3 +147,5 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
                          double dissfac);
 void dissipation_add_KO4_mesh(tMesh *mesh, tVarList *vlr, tVarList *vlu,
                               double dissfac);
+void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
+                              double dissfac, int order);
