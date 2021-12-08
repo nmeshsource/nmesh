@@ -101,3 +101,117 @@ void dissipation_add_KO4_mesh(tMesh *mesh, tVarList *vlr, tVarList *vlu,
     dissipation_add_KO4(node, vlr, vlu, dissfac);
   }
 }
+
+
+
+/* stencil weights for nth order diss operators on uniform grids */
+double sw4[]  = {1, -4,  6, -4, 1}; //4th order deriv stencil
+double sw6[]  = {1, -6, 15,-20, 15, -6, 1}; //6th order deriv stencil
+double sw8[]  = {1, -8, 28, -56, 70, -56, 28, -8, 1};
+double sw10[] = {1, -10, 45, -120, 210, -252, 210, -120, 45, -10, 1};
+double sw12[] = {1, -12, 66, -220, 495, -792, 924, -792, 495, -220, 66, -12, 1};
+
+
+/* Add Kreiss-Oliger dissipation terms to vlr. vlr can be varlist for RHS.
+   Here we use the same Kreiss-Oliger nth order derivative operator as in
+   BAM ( https://arxiv.org/pdf/gr-qc/0610128.pdf ).
+   In:
+     node
+     vlu contains evolved fields
+     dissfac is dissipation factor
+     order is the order of the derivative operator we want (r=order/2)
+   Out:
+     vlr is the varlist to which we add dissipation terms */
+void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
+                              double dissfac, int order)
+{
+  int *n = node->n;
+  double *bb = node->bbox;
+  int maxn = max3(n[0],n[1],n[2]);
+  double *uc = dtensor(maxn);
+  int dir;
+  double *sw;                   /* stencil weights */
+  double sgn = -1. + (order%4); /* overall sign */
+  int srad = order/2;           /* stencil radius */
+
+  /* choose stencil weights */
+  switch(order)
+  {
+  case 4:
+    sw = sw4;
+    break;
+  case 6:
+    sw = sw6;
+    break;
+  case 8:
+    sw = sw8;
+    break;
+  case 10:
+    sw = sw10;
+    break;
+  case 12:
+    sw = sw12;
+    break;
+  default:
+    errorexit("order must be 4,6,8,10,12");
+  }
+
+  /* add dissipation in each direction to RHS */
+  for(dir=0; dir<3; dir++)
+  {
+    double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
+    double dissfacoh = sgn * dissfac * ooh; /* (-1)^(1+order/2) dissfac/h */
+    int i,j,k;
+
+    /* do nothing if we have less than order+1 grid points */
+    if(n[dir]<=order) continue;
+
+    /* loop over plane */
+    forplaneN(dir, i,j,k, n, 0)
+    {
+      int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+      int i2 = i2_norm(i,j,k, dir);
+      int i0;                       /* index orthogonal to plane */
+      int ic,jc,kc, ccc;
+      int l;                        /* field index */
+
+      /* loop over fields */
+      forvl(vlu, l)
+      {
+        double *ul = Vard(node, Vind(vlu, l)); /* field data pointer */
+        double *rl = Vard(node, Vind(vlr, l)); /* RHS data pointer */
+
+        /* fill field arrays uc, i0 runs orth. to plane */
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+          /* set uc */
+          uc[i0] = ul[ccc];
+        }
+
+        /* loop over inner points in dir */
+        for(i0=srad; i0<n[dir]-srad; i0++)
+        {
+          double dis;
+          int s;
+
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+
+          /* set dissipation term */
+          dis = 0.;
+          for(s=-srad; s<=srad; s++) dis += sw[s+srad]*uc[i0+s];
+          dis *= dissfacoh;
+
+          /* add dissipation term to RHS */
+          rl[ccc] += dis;
+        }
+      } /* end loop over fields */
+    } /* end plane loop */
+  } /* end dir-loop*/
+
+  /* release mem */
+  free(uc);
+}
