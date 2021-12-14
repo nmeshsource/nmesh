@@ -101,9 +101,9 @@ Rather we keep the grid as:
      0       1       2       3       4       5     <-- midpoint number im
 -1                                               6 <-- facepoints: im=-1, im=6
 
-We can use e.g. rec1d_p_WENOm3_2 and rec1d_m_WENOm3_2 to reconstruct form
-the left and right u on the interior midpoints. Points near or at the
-boundary are more complicated.  We can reconstruct like this:
+We can use e.g. rec1d_p_WENOm3_2 and rec1d_m_WENOm3_2 to reconstruct u at the
+interior midpoints from the points to the left and right. Points near or at
+the boundary are more complicated.  We can reconstruct like this:
 
  |u l|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
  o   |   o   |   o   |   o   |   o   |   o   |   o
