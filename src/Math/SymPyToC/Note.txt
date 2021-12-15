@@ -1,0 +1,30 @@
+Problems with SymPyToC.py
+
+*crashes with sympy 1.7.1 (doesn't seem to crash with 1.9)
+time python3 ADMconstraints.py
+sometimes results in:
+Traceback (most recent call last):
+  File "/home/wolf/nmesh/src/Math/SymPyToC/ADMconstraints.py", line 300, in <module>
+    allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS)
+  File "../../Math/SymPyToC/SymPyToC.py", line 641, in apply_symmetries_to_all_EqnComponents
+    allEqs = simplify_all_EqnComponents(replace_Kdelta, allEqs)
+  File "../../Math/SymPyToC/SymPyToC.py", line 766, in simplify_all_EqnComponents
+    rsimp = pool.map(simp, [r[2] for r in RHSlist])
+  File "/usr/lib/python3.9/multiprocessing/pool.py", line 364, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+  File "/usr/lib/python3.9/multiprocessing/pool.py", line 771, in get
+    raise self._value
+  File "/usr/lib/python3.9/multiprocessing/pool.py", line 537, in _handle_tasks
+    put(task)
+  File "/usr/lib/python3.9/multiprocessing/connection.py", line 211, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.9/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle fabs: it's not the same object as __main__.fabs
+
+*If we use multiprocessing.set_start_method('spawn') at start of SymPyToC.py
+ it crashes. Why does this not work???
+
+*SymPyToC.py is not imported but rather used with exec(compile(...
+-This is done so that SymPyToC.py can put vars into the global namespace
+ of our script.
