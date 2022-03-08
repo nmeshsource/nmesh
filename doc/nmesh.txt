@@ -103,7 +103,7 @@ SRHDtestID
 ScalarWave
 
 # To get and compile all these you need to add the lines
-repo = giter@mars.physics.fau.edu:nmesh-projects
+repo = giter@quark.physics.fau.edu:nmesh-projects
 projects += $(repo)/Ein
 projects += $(repo)/ADM
 projects += $(repo)/EoS

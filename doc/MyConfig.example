@@ -11,7 +11,7 @@
 libpaths += src/tests/advection1
 
 ## add and compile modules from nmesh-projects repo:
-#repo = giter@mars.physics.fau.edu:nmesh-projects
+#repo = giter@quark.physics.fau.edu:nmesh-projects
 #projects += $(repo)/ScalarWave
 
 # ------------------------------------------------------------------------
