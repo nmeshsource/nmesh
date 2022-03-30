@@ -157,7 +157,7 @@ NOTE:  divf_{i=0} = (f*_{im=0} - f*_{im=-1}) / (h/2),  where:
  |          \
 f*_{im=-1}   f*_{im=0}
 So divf_{i=0} is naturally located at x not o. For this reason
-scalarwave1_surf_rhs_u calls rec1d_uface_to_uin_1_mesh to interpolate
+scalarwave1_surf_rhs_u calls rec1d_uface_to_uin_1 to interpolate
 divf_{i=0} from the point x to the boundary point o using linear
 interpolation
   ________
