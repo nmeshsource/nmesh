@@ -105,6 +105,7 @@ void dissipation_add_KO4_mesh(tMesh *mesh, tVarList *vlr, tVarList *vlu,
 
 
 /* stencil weights for nth order diss operators on uniform grids */
+double sw2[]  = {1, -2, 1}; //2nd order deriv stencil
 double sw4[]  = {1, -4,  6, -4, 1}; //4th order deriv stencil
 double sw6[]  = {1, -6, 15,-20, 15, -6, 1}; //6th order deriv stencil
 double sw8[]  = {1, -8, 28, -56, 70, -56, 28, -8, 1};
@@ -137,6 +138,9 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   /* choose stencil weights */
   switch(order)
   {
+  case 2:
+    sw = sw2;
+    break;
   case 4:
     sw = sw4;
     break;
@@ -153,7 +157,7 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
     sw = sw12;
     break;
   default:
-    errorexit("order must be 4,6,8,10,12");
+    errorexit("order must be 2,4,6,8,10,12");
   }
 
   /* add dissipation in each direction to RHS */
