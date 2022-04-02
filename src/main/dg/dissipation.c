@@ -42,7 +42,7 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
   for(dir=0; dir<3; dir++)
   {
     double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double dissfacoh = dissfac * ooh; /* dissfac/h */
+    double facoh = dissfac * ooh; /* dissfac/h */
     int i,j,k;
 
     /* do nothing if we have less than 5 grid points */
@@ -80,7 +80,7 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
           ccc = Ind_n(ic,jc,kc, n);
 
           /* add dissipation term to RHS */
-          rl[ccc] += -dissfacoh*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
+          rl[ccc] += -facoh*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
                                             +     uc[i0-2] + uc[i0+2] );
         }
       } /* end loop over fields */
@@ -164,7 +164,7 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   for(dir=0; dir<3; dir++)
   {
     double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double dissfacoh = sgn * dissfac * ooh; /* (-1)^(1+order/2) dissfac/h */
+    double facoh = sgn * dissfac * ooh; /* (-1)^(1+order/2) dissfac/h */
     int i,j,k;
 
     /* do nothing if we have less than order+1 grid points */
@@ -209,7 +209,7 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
              the top half of sw. */
           dis = sw[srad]*uc[i0];
           for(s=1; s<=srad; s++) dis += sw[s+srad]*(uc[i0-s] + uc[i0+s]);
-          dis *= dissfacoh;
+          dis *= facoh;
 
           /* add dissipation term to RHS */
           rl[ccc] += dis;
@@ -232,10 +232,15 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
      vlu contains evolved fields
      dissfac is dissipation factor
      order is the order of the derivative operator we want (r=order/2)
+     dfac  describes by which factor we change diss.fac. near boundary
+           E.g. if order=8: dfac[] = { 0, .7, .8, .9 } changes it by 0.7 one
+           point away, by 0.8 two points away, and 0.9 three points away from
+           boundary. At the boundary it is always unchanged, so dfac[0] is
+           always ignored, but dfac needs to have order/2 entries!
    Out:
      vlr is the varlist to which we add dissipation terms */
 void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
-                                     double dissfac, int order)
+                                     double dissfac, int order, double *dfac)
 {
   int *n = node->n;
   double *bb = node->bbox;
@@ -246,6 +251,7 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   int isw;                      /* index into sw of weights we want */
   double sgn = -1. + (order%4); /* overall sign */
   int srad = order/2;           /* stencil radius */
+//  double facoh_bou[srad];   /* diss. fac. near boundary*/
 
   /* choose stencil weight index */
   isw = srad - 1;
@@ -255,12 +261,17 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   for(dir=0; dir<3; dir++)
   {
     double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double dissfacoh = dissfac * ooh; /* dissfac/h */
-    double sdissfacoh = sgn * dissfacoh; /* (-1)^(1+order/2) dissfac/h */
+    double facoh = dissfac * ooh; /* dissfac/h */
+    double sfacoh = sgn * facoh; /* (-1)^(1+order/2) dissfac/h */
     int i,j,k;
 
     /* do nothing if we have less than order+1 grid points */
     if(n[dir]<=order) continue;
+
+    /* set facoh_bou, i.e. fac. near boundary */
+//    for(i=0; i<srad; i++)
+//      facoh_bou[i] = dissfac * ooh * dfac[i];
+
 
     /* loop over plane */
     forplaneN(dir, i,j,k, n, 0)
@@ -302,7 +313,7 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
              the top half of sw[isw]. */
           dis = sw[isw][srad]*uc[i0];
           for(s=1; s<=srad; s++) dis += sw[isw][s+srad]*(uc[i0-s] + uc[i0+s]);
-          dis *= sdissfacoh;
+          dis *= sfacoh;
 
           /* add dissipation term to RHS */
           rl[ccc] += dis;
@@ -330,8 +341,8 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
                the top half of sw[isw]. */
             dis = sw[is][sr]*uc[i0];
             for(s=1; s<=sr; s++) dis += sw[is][s+sr]*(uc[i0-s] + uc[i0+s]);
-            dis *= sign * dissfacoh; // FIXME
-            errorexit("fix wrong sign in dissfacoh");
+            dis *= sign * facoh; // FIXME
+            errorexit("fix wrong sign in facoh");
 
             /* add dissipation term to RHS */
             rl[ccc] += dis;
