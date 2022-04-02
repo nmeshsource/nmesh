@@ -19,7 +19,7 @@
    The diss. term in Eq. (63) for rho=1 and r=2 is:
      \sigma (-h)^3 D_{+}^2 D_{-}^2 / 16 u
      = -(\sigma/16)*(u[i-2] - 4u[i-1] + 6u[i] - 4u[i+1] + u[i+2])/h
-   So our dissfac below is given by dissfac = \sigma/16.
+   So our dissfac below is given by dissfac = \sigma.
    The diss term converges to 0 at O(h^2) in the grid spacing h. It doesn't
    really fit into the DG or FV scheme, but since we are already doing
    several non-standard things, we can try this too.
@@ -42,7 +42,7 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
   for(dir=0; dir<3; dir++)
   {
     double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double facoh = dissfac * ooh; /* dissfac/h */
+    double facoh = dissfac * ooh * 0.0625; /* dissfac/h * 1/16 */
     int i,j,k;
 
     /* do nothing if we have less than 5 grid points */
@@ -81,7 +81,7 @@ void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,
 
           /* add dissipation term to RHS */
           rl[ccc] += -facoh*( 6.*uc[i0] - 4.*(uc[i0-1] + uc[i0+1])
-                                            +     uc[i0-2] + uc[i0+2] );
+                                        +     uc[i0-2] + uc[i0+2] );
         }
       } /* end loop over fields */
     } /* end plane loop */
@@ -132,7 +132,7 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   double *uc = dtensor(maxn);
   int dir;
   double *sw;                   /* stencil weights */
-  double sgn = -1. + (order%4); /* overall sign */
+  double sgn = (-1. + (order%4))/(1 << order); /* (overall sign) / 2^order */
   int srad = order/2;           /* stencil radius */
 
   /* choose stencil weights */
@@ -249,7 +249,8 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   int dir;
   double *sw[] = {sw2, sw4, sw6, sw8, sw10, sw12};  /* stencil weights */
   int isw;                      /* index into sw of weights we want */
-  double sgn = -1. + (order%4); /* overall sign = (-1)^(1+order/2) */
+  /* overall sign = (-1)^(1+order/2) */
+  double sgn = (-1. + (order%4))/(1 << order); /* (overall sign) / 2^order */
   int srad = order/2;           /* stencil radius */
   int sr;
   double facoh_bou[srad];       /* diss. fac. near boundary*/
@@ -260,7 +261,7 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   if(isw<0 || isw> 5) errorexit("order must be 2,4,6,8,10,12");
 
   /* set signs near boundary */
-  for(sr=0; sr<srad; sr++) sgn_bou[sr] = -1. + 2*(sr%2);
+  for(sr=0; sr<srad; sr++) sgn_bou[sr] = (-1. + 2*(sr%2))/(1 << (2*sr));
 
   /* add dissipation in each direction to RHS */
   for(dir=0; dir<3; dir++)
