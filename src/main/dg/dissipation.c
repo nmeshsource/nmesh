@@ -226,7 +226,15 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
 /* Add dissipation terms to vlr. vlr can be varlist for RHS.
    In the interior we use the same Kreiss-Oliger nth order derivative
    operator as in dissipation_add_KO_order. But the order is dropped
-   successively to 2 when we approach the boundary
+   successively to 2 when we approach the boundary.
+   So it can do dissipation everywhere, except on the boundary.
+   E.g. if order=6 and these are the grid points (marked by o):
+o       o       o       o       o       o       o       o  . . .
+^       ^       ^       ^_______^_______^_______^_______^__
+|       |       |       6th order diss. of size O(h^5) in all of interior
+|       |       4th order diss. of size O(h^3)
+|       2nd order diss. of size O(h)
+no diss.
    In:
      node
      vlu contains evolved fields
