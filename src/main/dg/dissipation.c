@@ -231,16 +231,18 @@ void dissipation_add_KO_order(tNode *node, tVarList *vlr, tVarList *vlu,
      node
      vlu contains evolved fields
      dissfac is dissipation factor
-     order is the order of the derivative operator we want (r=order/2)
-     dfac  describes by which factor we change diss.fac. near boundary
-           E.g. if order=8: dfac[] = { 0, .7, .8, .9 } changes it by 0.7 one
+     order is the order of the derivative operator we want (r=order/2) in
+           the interior
+     cf    describes by which factor we change diss.fac. near boundary
+           E.g. if order=8: cf[] = { 0, .7, .8, .9 } changes it by 0.7 one
            point away, by 0.8 two points away, and 0.9 three points away from
-           boundary. At the boundary it is always unchanged, so dfac[0] is
-           always ignored, but dfac needs to have order/2 entries!
+           boundary. At the boundary it is always unchanged, so cf[0] is
+           always ignored, but cf needs to have order/2 entries!
    Out:
      vlr is the varlist to which we add dissipation terms */
-void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
-                                     double dissfac, int order, double *dfac)
+void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
+                                        tVarList *vlu, double dissfac,
+                                        int order, double *cf)
 {
   int *n = node->n;
   double *bb = node->bbox;
@@ -275,7 +277,7 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
 
     /* set facoh_bou, i.e. fac. near boundary */
     for(sr=0; sr<srad; sr++)
-      facoh_bou[sr] = sgn_bou[sr] * dissfac * ooh * dfac[sr];
+      facoh_bou[sr] = sgn_bou[sr] * dissfac * ooh * cf[sr];
 
     /* loop over plane */
     forplaneN(dir, i,j,k, n, 0)
@@ -359,4 +361,13 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
 
   /* release mem */
   free(uc);
+}
+
+/* same as dissipation_add_taperedKO_order_cf, but use same diss. factor for
+   all diss. orders near boundary and in interior */
+void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
+                                     double dissfac, int order)
+{
+  double cf[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  dissipation_add_taperedKO_order_cf(node, vlr, vlu, dissfac, order, cf);
 }
