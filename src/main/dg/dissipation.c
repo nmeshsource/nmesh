@@ -281,7 +281,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
     int i,j,k;
 
     /* do nothing if we have less than order+1 grid points */
-    if(n[dir]<=order) continue;
+    if(n[dir]<order) continue;
 
     /* set facoh_bou, i.e. fac. near boundary */
     for(sr=0; sr<srad; sr++)
@@ -338,7 +338,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
         {
           int is = ib-1;   /* current stencil index */
           double dis;
-          int s;
+          int cnt, s;
 
           /* set current stencil radius */
           sr = ib;
@@ -346,7 +346,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
           /* left boundary is at i0 = ib */
           /* right boundary is at i0 = n[dir]-1 - ib */
           /* => loop over left and right: */
-          for(i0 = ib; i0 < n[dir]-1; i0 += n[dir]-1 - 2*ib)
+          for(cnt=0, i0=ib; cnt<2; cnt++, i0+=n[dir]-1 - 2*ib)
           {
             ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
             ccc = Ind_n(ic,jc,kc, n);
