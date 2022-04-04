@@ -258,34 +258,49 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
   double *uc = dtensor(maxn);
   int dir;
   double *sw[] = {sw2, sw4, sw6, sw8, sw10, sw12};  /* stencil weights */
-  int isw;                      /* index into sw of weights we want */
-  /* overall sign = (-1)^(1+order/2) */
-  double sgn = (-1. + (order%4))/(1 << order); /* (overall sign) / 2^order */
-  int srad = order/2;           /* stencil radius */
+  int isw;                /* index into sw of weights we want */
+  int srad = order/2;     /* stencil radius */
   int sr;
-  double facoh_bou[srad];       /* diss. fac. near boundary*/
-  double sgn_bou[srad];         /* sign near boundary*/
+  double sgn_bou[srad+1]; /* signs near boundary, and last in interior */
+  double fac_bou[srad+1]; /* factors near boundary, and last in interior */
+  double facoh_bou[srad]; /* factors/h near boundary */
 
-  /* choose stencil weight index */
-  isw = srad - 1;
-  if(isw<0 || isw> 5) errorexit("order must be 2,4,6,8,10,12");
+  if(order%2 || order<2 || order>12)
+    errorexit("order must be 2,4,6,8,10,12");
 
-  /* set signs near boundary */
-  for(sr=0; sr<srad; sr++) sgn_bou[sr] = (-1. + 2*(sr%2))/(1 << (2*sr));
+  /* set signs/2^order near boundary, and in interior (last entry) */
+  /* overall sign = (-1)^(1+order/2), we also devide by 2^ord */
+  for(sr=0; sr<srad+1; sr++) sgn_bou[sr] = (-1. + 2*(sr%2))/(1 << (2*sr));
+
+  /* set fac_bou, i.e. fac. near boundary, and in interior (last entry) */
+  for(sr=0; sr<srad; sr++) fac_bou[sr] = sgn_bou[sr] * dissfac * cf[sr];
+  fac_bou[srad] = sgn_bou[srad] * dissfac;
 
   /* add dissipation in each direction to RHS */
   for(dir=0; dir<3; dir++)
   {
-    double ooh = (n[dir]-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double facoh = sgn * dissfac * ooh; /* (-1)^(1+order/2) dissfac/h */
+    int ndir = n[dir];
+    double ooh = (ndir-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
+    int ord;      /* order we actually use */
+    double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
     int i,j,k;
 
-    /* do nothing if we have less than order+1 grid points */
-    if(n[dir]<order) continue;
+    /* do nothing if we have too few grid points */
+    if(ndir<3) continue;
+
+    /* reduce ord if we have less than order+1 grid points */
+    if(ndir<=order) ord = ((ndir-1)/2) * 2;
+    else            ord = order;
+
+    /* reset stencil radius, and stencil weight index */
+    srad = ord/2;
+    isw = srad - 1;
+
+    /* set interior fac. */
+    facoh = fac_bou[srad] * ooh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
 
     /* set facoh_bou, i.e. fac. near boundary */
-    for(sr=0; sr<srad; sr++)
-      facoh_bou[sr] = sgn_bou[sr] * dissfac * ooh * cf[sr];
+    for(sr=0; sr<srad; sr++) facoh_bou[sr] = fac_bou[sr] * ooh;
 
     /* loop over plane */
     forplaneN(dir, i,j,k, n, 0)
@@ -304,7 +319,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
         double *rl = Vard(node, Vind(vlr, l)); /* RHS data pointer */
 
         /* fill field arrays uc, i0 runs orth. to plane */
-        for(i0=0; i0<n[dir]; i0++)
+        for(i0=0; i0<ndir; i0++)
         {
           /* set points and their index */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
@@ -314,7 +329,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
         }
 
         /* loop over inner points in dir */
-        for(i0=srad; i0<n[dir]-srad; i0++)
+        for(i0=srad; i0<ndir-srad; i0++)
         {
           double dis;
           int s;
@@ -344,9 +359,9 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
           sr = ib;
 
           /* left boundary is at i0 = ib */
-          /* right boundary is at i0 = n[dir]-1 - ib */
+          /* right boundary is at i0 = ndir-1 - ib */
           /* => loop over left and right: */
-          for(cnt=0, i0=ib; cnt<2; cnt++, i0+=n[dir]-1 - 2*ib)
+          for(cnt=0, i0=ib; cnt<2; cnt++, i0+=ndir-1 - 2*ib)
           {
             ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
             ccc = Ind_n(ic,jc,kc, n);
