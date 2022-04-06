@@ -10,9 +10,11 @@ typedef struct {
   int idivf; /* Ind("advection1_divf"); */
   void (*numflux)(tDGinfo *d);  /* func pointer for numerical flux */
   double direction[3];
-  int outerBC_influxes;
+  int outerBC_influxes; /* Par("advection1_outerBC_influxes") */
   int sin_profile;
   int square_profile;
+  int fd_dissfac;       /* Par("advection1_fd_dissfac") */
+  int fd_dissorder;     /* Par("advection1_fd_dissorder") */
 } tadvection1;
 
 

@@ -1,0 +1,70 @@
+###################################################################
+# modules we use
+
+physics = advection1
+
+errorexit = abort
+
+###################################################################
+# FV tests
+coordinates_surface_metric = sqrtgdiag
+coordinates_midpoint_data = yes
+amr_uniform_p = 1 # 0 1 2 3 4 5 6
+#amr_fv_p = 1 # 0 2 3 4 5 6 7
+#fv_rec = 1 # WENOmZ_2
+#advection1_numflux = LLF
+fd_stencilsize = 5
+fd_lopsidesize = 2
+
+###################################################################
+# checkpointing
+
+checkpoint = no # yes
+checkpoint_hours = 1
+checkpoint_hours_quit = 1.94
+
+###################################################################
+# evolution
+
+evolve_method = sspRK3 # RK4 # Euler
+#evolve_filter = yes
+#evolve_filter_s = 4
+dt = auto
+finaltime = 100 # 3 # 0.5 # 0.4
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 3 BoxMesh Line
+amr_BoxMesh_dout = 1
+amr_luni = 0
+
+amr_dir_active0 = 1
+amr_dir_active1 = 0
+amr_dir_active2 = 0
+amr_n0 = 50
+amr_n1 = 1
+amr_n2 = 1
+
+###################################################################
+# initial data
+
+advection1_direction = 1 0 0
+advection1_fd_dissorder = 6
+
+###################################################################
+# output
+
+timer_on = no # yes
+
+logfile_creation = no
+
+0douttime = 0.4
+0doutput = advection1_u advection1_u_err
+
+1douttime = 0.4
+1doutput = advection1_u advection1_u_err
+
+#2douttime = 0.4
+#2doutput = advection1_u # sqrtgdiagx Xm_sqrtgdiagx
+#2dformat = xdmf

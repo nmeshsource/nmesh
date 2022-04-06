@@ -28,6 +28,9 @@ int advection1_init_global_pars(tMesh *mesh)
   advection1->sin_profile      = Getv(Par("advection1_profile"),"sin");
   advection1->square_profile   = Getv(Par("advection1_profile"),"square");
 
+  advection1->fd_dissfac   = Par("advection1_fd_dissfac");
+  advection1->fd_dissorder = Par("advection1_fd_dissorder");
+
   return 0;
 }
 
@@ -61,6 +64,7 @@ void advection1_f_df(tNode *node, tVarList *vlu)
   double *fx = Vard(node, ifx);
   double *fy = Vard(node, ifx+1);
   double *fz = Vard(node, ifx+2);
+  tDerivOpt opt[1]; /* options for taking derivs */
   int i;
 
   /* flux at each point */
@@ -78,7 +82,10 @@ void advection1_f_df(tNode *node, tVarList *vlu)
   }
 
   /* flux derivs */
-  cart_di_Ui(node, ifx, idivf);
+  //cart_di_Ui(node, ifx, idivf); /* uses centered fd */
+  //opt->lop = -1; /* use one-sided fd with stencil shifted left */
+  opt->lop = 0;    /* use centered fd */
+  cart_div3Vector(node, ifx, idivf, opt); //opt decides if centered/one-sided
 }
 
 /* function that sets fluxes and eigenvals on both sides of a node surface.
@@ -223,6 +230,7 @@ void advection1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
 /* RHS of: d_t u = - d_i f^i */
 int advection1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 {
+  tMesh *mesh = vlu->mesh;
   int idivf = advection1->idivf;
   int ir = vlr->index[0];
   double *r  = Vard(node, ir);
@@ -235,6 +243,21 @@ int advection1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
   /* RHS at each point */
   forpoints(node, i)
     r[i] = -divf[i];
+
+  //forpoints(node, i) // zero r[i] to test diss terms only
+  //  r[i] = 0.;
+
+  if(node->pt_typ[0] == P_UNIFORM && !(node->dat->info->use_fv))
+  {
+    //dissipation_add_KO4(node, vlr, vlu, 0.8);
+    //dissipation_add_KO_order(node, vlr, vlu, 0.8, 4);
+    //dissipation_add_KO_order(node, vlr, vlu, 28, 6);
+    //double dfac[] = {0,0.015625,0.015625*2,0.015625*4,0.015625*8};
+    //dissipation_add_taperedKO_order_cf(node, vlr, vlu, 64., 6, cf);
+    dissipation_add_taperedKO_order(node, vlr, vlu,
+                                    Getd(advection1->fd_dissfac),
+                                    Geti(advection1->fd_dissorder));
+  }
 
   return 0;
 }
@@ -284,6 +307,8 @@ int advection1_set_profile(tMesh *mesh, int iu)
       forpoints(node, i)
       {
         u[i] = sin(nx*x[i] + ny*y[i] + nz*z[i] - nmag2*t);
+        //u[i] = pow(x[i], 2.);
+        //u[i] = i%2; /* saw tooth noise data */
       }
     if(advection1->square_profile)
       forpoints(node, i)

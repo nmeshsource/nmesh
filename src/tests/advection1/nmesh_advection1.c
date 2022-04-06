@@ -30,6 +30,9 @@ int nmesh_advection1(tMesh *mesh)
   AddPar("advection1_numflux", "upwind", "numerical flux [LLF,upwind]");
   AddPar("advection1_limiter", "none", "limiter [none,MRS,minmodB]");
   AddPar("advection1_outerBC_influxes", "yes", " [no,yes]");
+  AddPar("advection1_fd_dissfac",   "1", "dissipation factor [dissfac>=0]");
+  AddPar("advection1_fd_dissorder", "4", "derivative order of dissipation "
+         "[2,4,6,8,10,12]");
 
   AddPar("advection1_refine", "no", "use dynamic refinement [no,yes]");
   if(Getb(Par("advection1_refine")))
