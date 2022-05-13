@@ -21,7 +21,7 @@ libpaths += src/tests/advection1
 EXEC = nmesh
 EXECDIR = $(TOP)/exe
 
-# pick a C compiler
+# pick a C compiler, e.g. just cc or gcc or mpicc
 CC = gcc
 
 # optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
@@ -39,7 +39,7 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 #MPILIBS = -lmpi
 
 # other libraries needed, in some cases we need even -lrt for clock_gettime
-#SPECIALLIBS += -lgsl -lgslcblas
+#SPECIALLIBS += -lgsl -lgslcblas  # for GSL
 #SPECIALLIBS += -lrt
 
 # on UNIX without ru_maxrss in struct rusage (in getrusage), uncomment
