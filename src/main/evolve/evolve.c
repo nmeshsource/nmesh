@@ -106,27 +106,21 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 
   if(PR) PRFs(":\n");
 
-  /* set things before surface exchange, e.g. cons2prim */
-  forList(u, i)
-  {
-    tVarList *vlr = ListEntry(rhs,i);
-    tVarList *vlu = ListEntry(u,i);
-
-    if(ListEntry(evosys->f[PRESURF],i))
-    {
-      formylnodes(mesh)
-      {
-        tNode *node = MyLnode;
-        ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
-      }
-    }
-  }
-
-  /* set time on all nodes */
+  /* loop over all nodes before MPI requests */
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
 
+    /* set things before surface exchange, e.g. cons2prim */
+    forList(u, i)
+    {
+      tVarList *vlr = ListEntry(rhs,i);
+      tVarList *vlu = ListEntry(u,i);
+      if(ListEntry(evosys->f[PRESURF],i))
+        ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+    }
+
+    /* set time on all nodes */
     node->time = mesh->time;
     node->dt   = mesh->dt;
   }
@@ -139,27 +133,22 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
      I.e. we overlap the communication started by
      MPIexchange_request_all_myln_data with other calculations. */
 
-  /* set all sources */
-  forList(u, i)
-    if(ListEntry(evosys->f[SETSRC],i))
-    {
-      formylnodes(mesh)
-      {
-        tNode *node = MyLnode;
-        ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i), ListEntry(u,i));
-      }
-    }
+  /* loop over all nodes after MPI exchange has been requested */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
 
-  /* set all volume RHSs */
-  forList(u, i)
-    if(ListEntry(evosys->f[VOLRHS],i))
+    forList(u, i)
     {
-      formylnodes(mesh)
-      {
-        tNode *node = MyLnode;
+      /* set all sources */
+      if(ListEntry(evosys->f[SETSRC],i))
+        ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+
+      /* set all volume RHSs */
+      if(ListEntry(evosys->f[VOLRHS],i))
         ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
-      }
     }
+  }
 
   /* After we have done all we can without the surface data, we now wait
      until we get all the surface data: */
@@ -167,16 +156,16 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   /* get surfaces so that we can compute fluxes */
   MPIexchange_get_all_myln_data(mesh);
 
-  /* add all surface RHSs */
-  forList(u, i)
-    if(ListEntry(evosys->f[SURFRHS],i))
-    {
-      formylnodes(mesh)
-      {
-        tNode *node = MyLnode;
+  /* loop over all nodes, after MPI data has been received */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+
+    /* add all surface RHSs */
+    forList(u, i)
+      if(ListEntry(evosys->f[SURFRHS],i))
         ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
-      }
-    }
+  }
 }
 
 /* apply limiters to evo subsystems. */
