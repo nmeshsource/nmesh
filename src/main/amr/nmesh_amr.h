@@ -39,7 +39,7 @@ l=4        node
 /* extra info about node state that has nothing to do with neighbor info
    or connectivity */
 typedef struct tNODEINFO {
-  int troubled;           /* whether node is troubled (e.g. by shocks) */
+  int trouble;            /* trouble score in node (e.g. due to shocks) */
   int use_fv;             /* whether we currently use fin. vol. in node */
   int nlim;               /* number of consectutive evo substeps in which
                              limiter was active */
