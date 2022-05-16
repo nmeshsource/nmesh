@@ -68,6 +68,7 @@ int evolve_myln(tMesh *mesh)
   if(allnodes)
   {
     Evolve_mesh(mesh);
+    //evolve_set_trouble_score_mesh(mesh);
   }
   else /* evolve each node on its own */
   {
@@ -235,51 +236,62 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
   } /* end loop over list of varlists */
 }
 
-/* determine and set trouble score in each node,
+/* determine and set trouble score in a node,
    i.e. set node->dat->info->trouble */
-void evolve_set_trouble_score_mesh(tMesh *mesh)
+int evolve_set_trouble_score(tNode *node)
 {
+  tMesh *mesh = node->pat->mesh;
   tEvoSys *evosys = mesh->evosys;
   pVLList *u_p = evosys->u_p;
   pVLList *u   = evosys->u;
   pVLList *r   = evosys->rhs;
   int min_trouble = -1073741824;
+  int troubled = 0;
+  int i;
 
   if(PR) PRFs(":\n");
 
-  /* loop over all nodes and check for trouble */
+  /* check all evo systems for trouble and accumulate result in troubled */
+  forList(u, i)
+  {
+    tVarList *vlu_p = ListEntry(u_p,i);
+    tVarList *vlu   = ListEntry(u,i);
+    tVarList *vlr   = ListEntry(r,i);
+    if(ListEntry(evosys->f[TROUBLE],i))
+      troubled += ListEntry(evosys->f[TROUBLE],i)(node, vlr, vlu, vlu_p);
+  }
+
+  if(troubled>0) /* i.e. there is trouble now */
+  {
+    /* if there is trouble in this node, save trouble score in node info */
+    node->dat->info->trouble  = troubled;
+  }
+  else /* i.e. all is ok now */
+  {
+    /* if there was trouble, we zero the trouble score */
+    if(node->dat->info->trouble>0) node->dat->info->trouble  = 0;
+    /* if there was no trouble, we continuously lower the score */
+    else                           node->dat->info->trouble -= 1;
+  }
+
+  /* make sure trouble score does not become too negative */
+  if(node->dat->info->trouble < min_trouble)
+    node->dat->info->trouble = min_trouble;
+
+  return node->dat->info->trouble;
+}
+
+/* determine and set trouble score in each node,
+   i.e. set node->dat->info->trouble */
+void evolve_set_trouble_score_mesh(tMesh *mesh)
+{
+  if(PR) PRFs(":\n");
+
+  /* loop over all nodes, check for trouble, and node-info trouble score */
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int i;
-    int troubled = 0;
-
-    /* check all evo systems for trouble and accumulate result in troubled */
-    forList(u, i)
-    {
-      tVarList *vlu_p = ListEntry(u_p,i);
-      tVarList *vlu   = ListEntry(u,i);
-      tVarList *vlr   = ListEntry(r,i);
-      if(ListEntry(evosys->f[TROUBLE],i))
-        troubled += ListEntry(evosys->f[TROUBLE],i)(node, vlr, vlu, vlu_p);
-    }
-
-    if(troubled>0) /* i.e. there is trouble now */
-    {
-      /* if there is trouble in this node, save trouble score in node info */
-      node->dat->info->trouble  = troubled;
-    }
-    else /* i.e. all is ok now */
-    {
-      /* if there was trouble, we zero the trouble score */
-      if(node->dat->info->trouble>0) node->dat->info->trouble  = 0;
-      /* if there was no trouble, we continuously lower the score */
-      else                           node->dat->info->trouble -= 1;
-    }
-
-    /* make sure trouble score does not become too negative */
-    if(node->dat->info->trouble < min_trouble)
-      node->dat->info->trouble = min_trouble;
+    evolve_set_trouble_score(node);
   }
 }
 
