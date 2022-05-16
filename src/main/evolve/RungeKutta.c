@@ -56,10 +56,11 @@ void evolve_Euler_mesh(tMesh *mesh)
   double  t = mesh->time;
   double dt = mesh->dt;
   pVLList *u   = evosys->u;
+  pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
-  //pVLList *u_p = evosys->u_p;
 
+  copy_pVLList(u_p, u, vlcopy,0);         // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   addto_pVLList(u, dt, r, vladdto,0);     // u += r dt
@@ -165,10 +166,11 @@ void evolve_Euler(tNode *node)
   double  t = mesh->time;
   double dt = mesh->dt;
   pVLList *u   = evosys->u;
+  pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
-  //pVLList *u_p = evosys->u_p;
 
+  copy_pVLList(u_p, u, vlcopy_node, node);         // u_p = u
   node->time = t;
   evolve_setrhs(node, r, u, 1);                    // r  = RHS(u, t)
   addto_pVLList(u, dt, r, vladdto_node, node);     // u += r dt
