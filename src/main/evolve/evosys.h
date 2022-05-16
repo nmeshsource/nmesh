@@ -18,6 +18,8 @@ enum
                      must return number of data vals we need */
   LIMITER,  /* apply limiter on node using data from limdata */
 
+  TROUBLE,  /* calculate trouble score */
+
   NEVOFUNCBINS /* number of function bins in this enum */
 };
 
