@@ -154,52 +154,6 @@ tVarList *evolve_get_rhs_vl(tVarList *vl)
 }
 
 /* print evosys */
-void evolve_print_evosys__old(tMesh *mesh)
-{
-  tEvoSys *evosys = mesh->evosys;
-  int i;
-
-  PRFs(":\n");
-  if(evosys->u)
-  {
-    //pr_pVLList(evosys->u);
-    forList(evosys->u, i)
-    {
-      printf("%d: ", i);
-      prvarlist(ListEntry(evosys->u,i));
-      if(ListEntry(evosys->f[PRELIM],i))  printf("%d: PRELIM:  yes\n", i);
-      if(ListEntry(evosys->f[LIMDATA],i)) printf("%d: LIMDATA: yes\n", i);
-      if(ListEntry(evosys->f[LIMITER],i)) printf("%d: LIMITER: yes\n", i);
-      if(ListEntry(evosys->f[PRESURF],i)) printf("%d: PRESURF: yes\n", i);
-      if(ListEntry(evosys->f[SETSRC],i))  printf("%d: SETSRC:  yes\n", i);
-      if(ListEntry(evosys->f[VOLRHS],i))  printf("%d: VOLRHS:  yes\n", i);
-      if(ListEntry(evosys->f[SURFRHS],i)) printf("%d: SURFRHS: yes\n", i);
-    }
-  }
-  printf("evolve function pointers are called in this order:\n");
-  if(evosys->f[LIMDATA])
-  {
-    forList(evosys->f[PRELIM], i)
-      if(ListEntry(evosys->f[PRELIM],i))  printf("%d: PRELIM\n", i);
-    forList(evosys->f[LIMDATA], i)
-      if(ListEntry(evosys->f[LIMDATA],i)) printf("%d: LIMDATA\n", i);
-    forList(evosys->f[LIMITER], i)
-      if(ListEntry(evosys->f[LIMITER],i)) printf("%d: LIMITER\n", i);
-  }
-  if(evosys->f[VOLRHS])
-  {
-    forList(evosys->f[PRESURF], i)
-      if(ListEntry(evosys->f[PRESURF],i)) printf("%d: PRESURF\n", i);
-    forList(evosys->f[SETSRC], i)
-      if(ListEntry(evosys->f[SETSRC],i))  printf("%d: SETSRC\n", i);
-    forList(evosys->f[VOLRHS], i)
-      if(ListEntry(evosys->f[VOLRHS],i))  printf("%d: VOLRHS\n", i);
-    forList(evosys->f[SURFRHS], i)
-      if(ListEntry(evosys->f[SURFRHS],i)) printf("%d: SURFRHS\n", i);
-  }
-}
-
-/* print evosys */
 void evolve_print_evosys(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
