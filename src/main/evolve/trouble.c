@@ -123,3 +123,86 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
   else
     return Min_trb; /* no trouble, return smallest to signal need for dg */
 }
+
+
+/* set u = u_p, and then switch to fv */
+void evolve_prepare_do_over_mesh(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  double  t = mesh->time;
+  double dt = mesh->dt;
+  pVLList *u_p = evosys->u_p;
+  pVLList *u   = evosys->u;
+  tRef ref[1]; /* for ref info */
+
+  if(PR) PRFs(":\n");
+
+  /* go back to t-dt and set u = u_p */
+  copy_pVLList(u, u_p, vlcopy,0);
+  mesh->time = t-dt;
+
+  /* set refinement method */
+  ref->method = PARENT_n_P_UNIFORM; /* use uniform grid with same n */
+
+  /* loop over all nodes, and flag all troubled nodes for uniform grid */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+
+    /* make sure time on node is correct */
+    node->time = mesh->time;
+
+    /* mark troubled nodes as to be refined */
+    if(node->dat->info->trouble > 0)
+      node->rflag = ref->method;
+  }
+
+  /* do p-refinement to desired n and point type */
+  prefine_nodes_if_rflag(mesh, ref);
+
+  ///* also p-refine neighbors to make sure the star surface stays within fv
+  //   region when the radius changes a bit */
+  //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
+
+  /* update again, nids won't change but hmin and thus dt might */
+  update_mesh_myln_node_nid(mesh);
+
+  /* clear rflag on all leaf nodes */
+  refine_set_rflag_forall_nodes(mesh, 0);
+
+  /* balance load, now that some nodes use a different method */
+  //FIXME: do something better than simple_load_balance
+}
+
+/* switch back to dg */
+void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
+{
+  tRef ref[1]; /* for ref info */
+
+  if(PR) PRFs(":\n");
+
+  /* set refinement method */
+  ref->method = PARENT_n_P_LGL; /* use LGL grid with same n */
+
+  /* loop over all nodes, and flag all non-troubled nodes for LGL grid */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+
+    /* mark non-troubled nodes as to be refined */
+    if(node->dat->info->trouble < -10)
+      node->rflag = ref->method;
+  }
+
+  /* do p-refinement to desired n and point type */
+  prefine_nodes_if_rflag(mesh, ref);
+
+  /* update again, nids won't change but hmin and thus dt might */
+  update_mesh_myln_node_nid(mesh);
+
+  /* clear rflag on all leaf nodes */
+  refine_set_rflag_forall_nodes(mesh, 0);
+
+  /* balance load, now that some nodes use a different method */
+  //FIXME: do something better than simple_load_balance
+}

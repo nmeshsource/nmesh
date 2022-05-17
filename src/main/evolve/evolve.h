@@ -32,3 +32,5 @@ void evolve_sspRK3_mesh(tMesh *mesh);
 
 /* trouble.c */
 int evolve_set_trouble_score_mesh(tMesh *mesh);
+void evolve_prepare_do_over_mesh(tMesh *mesh);
+void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh);
