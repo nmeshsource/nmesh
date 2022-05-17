@@ -67,22 +67,24 @@ int evolve_myln(tMesh *mesh)
   /* how we evolve the mesh */
   if(allnodes)
   {
-    //int ts;
+    int ts;
 
     /* make one full evo step */
     Evolve_mesh(mesh);
 
     /* get trouble score, and redo step with fv or switch back to dg */
-    //ts = evolve_set_trouble_score_mesh(mesh);
-    //if(ts>0)
-    //{
-    //  evolve_prepare_do_over_mesh(mesh); //go back to u_p & switch to fv
-    //  Evolve_mesh(mesh);
-    //}
-    //else if(ts<-10)
-    //{
-    //  evolve_switch_nontroubled_nodes_mesh(mesh); //switch to dg
-    //}
+    ts = evolve_set_trouble_score_mesh(mesh);
+    ts = 0;
+    PRF;printf(": ts=%d\n", ts);
+    if(ts>0)
+    {
+      evolve_prepare_do_over_mesh(mesh); //go back to u_p & switch to fv
+      Evolve_mesh(mesh); /* redo evo step */
+    }
+    else if(ts<-10)
+    {
+      evolve_switch_nontroubled_nodes_mesh(mesh); //switch to dg
+    }
 
     /* we limit the final u only here */
     evolve_limiter_mesh(mesh, evosys->u);
