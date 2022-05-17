@@ -360,7 +360,11 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
   Zero_trb = zero_trb;
   nMPI_Allreduce(&zero_trb, &Zero_trb, 1, nMPI_INT, nMPI_BAND);
 
-  return Max_trb; /* returns max. trouble value of all nodes */
+  /* if there is bad trouble somewhere */
+  if(Max_trb>0)
+    return Max_trb; /* returns max. trouble value of all nodes */
+  else
+    return Min_trb; /* no trouble, return smallest to signal need for dg */
 }
 
 
