@@ -67,8 +67,15 @@ int evolve_myln(tMesh *mesh)
   /* how we evolve the mesh */
   if(allnodes)
   {
+    //int ts;
+
     Evolve_mesh(mesh);
-    //evolve_set_trouble_score_mesh(mesh);
+    //ts = evolve_set_trouble_score_mesh(mesh);
+    //if(ts>0)
+    //{
+    //  evolve_prepare_do_over_mesh(mesh); //go back to u_p & switch to fv
+    //  Evolve_mesh(mesh);
+    //}
   }
   else /* evolve each node on its own */
   {
