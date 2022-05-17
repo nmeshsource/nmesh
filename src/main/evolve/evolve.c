@@ -75,15 +75,22 @@ int evolve_myln(tMesh *mesh)
     /* get trouble score, and redo step with fv or switch back to dg */
     ts = evolve_set_trouble_score_mesh(mesh);
     ts = 0;
-    PRF;printf(": ts=%d\n", ts);
+    //PRF;printf(": ts=%d\n", ts);
     if(ts>0)
     {
-      evolve_prepare_do_over_mesh(mesh); //go back to u_p & switch to fv
-      Evolve_mesh(mesh); /* redo evo step */
+      /* go back to u_p and switch to fv */
+      evolve_prepare_do_over_mesh(mesh);
+      /* now that nodes are changed re-init surfaces & indc */
+      evolve_init_communication_structs(mesh);
+      /* redo evo step */
+      Evolve_mesh(mesh);
     }
     else if(ts<-10)
     {
-      evolve_switch_nontroubled_nodes_mesh(mesh); //switch to dg
+      /* switch to dg */
+      evolve_switch_nontroubled_nodes_mesh(mesh);
+      /* now that nodes are changed re-init surfaces & indc */
+      evolve_init_communication_structs(mesh);
     }
 
     /* we limit the final u only here */
