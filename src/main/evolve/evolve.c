@@ -328,7 +328,6 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
 {
   int Max_trb, max_trb=INT_MIN;
   int Min_trb, min_trb=INT_MAX;
-  int Zero_trb, zero_trb=1;
   if(PR) PRFs(":\n");
 
   /* loop over all nodes, check for trouble, and node-info trouble score */
@@ -344,8 +343,7 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
     tNode *node = MyLnode;
     int trb = node->dat->info->trouble;
     if(trb>max_trb) max_trb = trb; /* max trouble */
-    if(trb>min_trb) min_trb = trb; /* min trouble */
-    if(trb==0) zero_trb = 0; /* one node has trouble=0 */
+    if(trb<min_trb) min_trb = trb; /* min trouble */
   }
 
   /* Max over all ranks */
@@ -355,10 +353,6 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
   /* Min over all ranks */
   Min_trb = min_trb;
   nMPI_Allreduce(&min_trb, &Min_trb, 1, nMPI_INT, nMPI_MIN);
-
-  /* check if one rank has 0 */
-  Zero_trb = zero_trb;
-  nMPI_Allreduce(&zero_trb, &Zero_trb, 1, nMPI_INT, nMPI_BAND);
 
   /* if there is bad trouble somewhere */
   if(Max_trb>0)
