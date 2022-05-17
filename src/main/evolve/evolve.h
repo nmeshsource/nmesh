@@ -28,3 +28,7 @@ void evolve_Euler(tNode *node);
 void evolve_RK4_mesh(tMesh *mesh);
 void evolve_Euler_mesh(tMesh *mesh);
 void evolve_sspRK3_mesh(tMesh *mesh);
+
+
+/* trouble.c */
+int evolve_set_trouble_score_mesh(tMesh *mesh);
