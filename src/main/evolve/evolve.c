@@ -243,8 +243,17 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
   } /* end loop over list of varlists */
 }
 
-/* determine and set trouble score in a node,
-   i.e. set node->dat->info->trouble */
+/* Determine and set trouble score in a node,
+   i.e. set node->dat->info->trouble .
+   Note evosys->f[TROUBLE] returns a score of 1, 0, or -1:
+    1 trouble  =>  switch to more robust method (e.g. fv)
+    0 node ok with current method  =>  do nothing
+   -1 all ok   =>  switch to more accurate but delicate method (e.g. dg)
+   examples: if shock in dg return 1
+             if shock in fv return 0
+             if no shock in dg return 0
+             if no shock in fv return -1
+   Here we also accumulate the 1 and -1 scores and return them */
 int evolve_set_trouble_score(tNode *node)
 {
   tMesh *mesh = node->pat->mesh;
@@ -252,8 +261,8 @@ int evolve_set_trouble_score(tNode *node)
   pVLList *u_p = evosys->u_p;
   pVLList *u   = evosys->u;
   pVLList *r   = evosys->rhs;
-  int min_trouble = -1073741824;
-  int troubled = 0;
+  int max_trouble = 1073741824;
+  int troubled = -1; /* default is to assume all is very well */
   int i;
 
   if(node->dat == NULL) errorexit("node->dat is NULL");
@@ -266,26 +275,49 @@ int evolve_set_trouble_score(tNode *node)
     tVarList *vlu_p = ListEntry(u_p,i);
     tVarList *vlu   = ListEntry(u,i);
     tVarList *vlr   = ListEntry(r,i);
-    if(ListEntry(evosys->f[TROUBLE],i))
-      troubled += ListEntry(evosys->f[TROUBLE],i)(node, vlr, vlu, vlu_p);
+    int tr = 0;
+
+    /* run TROUBLE func */
+    if(troubled<=0) /* need to check only if there no trouble yet */
+      if(ListEntry(evosys->f[TROUBLE],i))
+        tr = ListEntry(evosys->f[TROUBLE],i)(node, vlr, vlu, vlu_p);
+
+    /* set troubled flag to 1, 0, or -1 (default above) */
+    if(tr>0) /* new trouble found, switch to fv */
+    {
+      troubled = 1;
+    }
+    else if(tr==0) /* ok, keep as is */
+    {
+      if(troubled<0) troubled = 0;
+    }
   }
 
+  /* set node->dat->info->trouble */
   if(troubled>0) /* i.e. there is trouble now */
   {
-    /* if there is trouble in this node, save trouble score in node info */
-    node->dat->info->trouble  = troubled;
+    /* if there was no trouble, we set the trouble score to 1 */
+    if(node->dat->info->trouble<=0) node->dat->info->trouble  = 1;
+    /* if there was trouble before, we continuously increase the score */
+    else                            node->dat->info->trouble += 1;
   }
-  else /* i.e. all is ok now */
+  else if(troubled==0) /* is ok, keep node as is */
   {
-    /* if there was trouble, we zero the trouble score */
-    if(node->dat->info->trouble>0) node->dat->info->trouble  = 0;
+    node->dat->info->trouble = 0;
+  }
+  else /* all is good, can switch back to dg */
+  {
+    /* if there was trouble, we set the trouble score to -1 */
+    if(node->dat->info->trouble>=0) node->dat->info->trouble  = -1;
     /* if there was no trouble, we continuously lower the score */
-    else                           node->dat->info->trouble -= 1;
+    else                            node->dat->info->trouble -= 1;
   }
 
-  /* make sure trouble score does not become too negative */
-  if(node->dat->info->trouble < min_trouble)
-    node->dat->info->trouble = min_trouble;
+  /* make sure trouble score does not become too large or small */
+  if(node->dat->info->trouble < -max_trouble)
+    node->dat->info->trouble = -max_trouble;
+  if(node->dat->info->trouble > max_trouble)
+    node->dat->info->trouble = max_trouble;
 
   return node->dat->info->trouble;
 }
@@ -295,6 +327,8 @@ int evolve_set_trouble_score(tNode *node)
 int evolve_set_trouble_score_mesh(tMesh *mesh)
 {
   int Max_trb, max_trb=INT_MIN;
+  int Min_trb, min_trb=INT_MAX;
+  int Zero_trb, zero_trb=1;
   if(PR) PRFs(":\n");
 
   /* loop over all nodes, check for trouble, and node-info trouble score */
@@ -309,12 +343,22 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
   {
     tNode *node = MyLnode;
     int trb = node->dat->info->trouble;
-    if(trb>max_trb) max_trb = trb;
+    if(trb>max_trb) max_trb = trb; /* max trouble */
+    if(trb>min_trb) min_trb = trb; /* min trouble */
+    if(trb==0) zero_trb = 0; /* one node has trouble=0 */
   }
 
   /* Max over all ranks */
   Max_trb = max_trb;
   nMPI_Allreduce(&max_trb, &Max_trb, 1, nMPI_INT, nMPI_MAX);
+
+  /* Min over all ranks */
+  Min_trb = min_trb;
+  nMPI_Allreduce(&min_trb, &Min_trb, 1, nMPI_INT, nMPI_MIN);
+
+  /* check if one rank has 0 */
+  Zero_trb = zero_trb;
+  nMPI_Allreduce(&zero_trb, &Zero_trb, 1, nMPI_INT, nMPI_BAND);
 
   return Max_trb; /* returns max. trouble value of all nodes */
 }

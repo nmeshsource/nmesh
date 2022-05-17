@@ -22,6 +22,8 @@
 #define nMPI_SUM  MPI_SUM
 #define nMPI_LAND MPI_LAND
 #define nMPI_LOR  MPI_LOR
+#define nMPI_BAND MPI_BAND
+#define nMPI_BOR  MPI_BOR
 #define nMPI_Datatype MPI_Datatype
 #define nMPI_CHAR     MPI_CHAR
 #define nMPI_INT      MPI_INT
@@ -47,6 +49,8 @@
 #define nMPI_SUM  0
 #define nMPI_LAND 0
 #define nMPI_LOR  0
+#define nMPI_BAND 0
+#define nMPI_BOR  0
 #define nMPI_Datatype int
 #define nMPI_CHAR     0
 #define nMPI_INT      0
