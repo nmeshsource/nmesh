@@ -249,6 +249,8 @@ int evolve_set_trouble_score(tNode *node)
   int troubled = 0;
   int i;
 
+  if(node->dat == NULL) errorexit("node->dat is NULL");
+
   if(PR) PRFs(":\n");
 
   /* check all evo systems for trouble and accumulate result in troubled */
@@ -283,8 +285,9 @@ int evolve_set_trouble_score(tNode *node)
 
 /* determine and set trouble score in each node,
    i.e. set node->dat->info->trouble */
-void evolve_set_trouble_score_mesh(tMesh *mesh)
+int evolve_set_trouble_score_mesh(tMesh *mesh)
 {
+  int Max_trb, max_trb=INT_MIN;
   if(PR) PRFs(":\n");
 
   /* loop over all nodes, check for trouble, and node-info trouble score */
@@ -293,6 +296,20 @@ void evolve_set_trouble_score_mesh(tMesh *mesh)
     tNode *node = MyLnode;
     evolve_set_trouble_score(node);
   }
+
+  /* now find rank-local max of node->dat->info->trouble */
+  formylnodes_noomp(mesh)
+  {
+    tNode *node = MyLnode;
+    int trb = node->dat->info->trouble;
+    if(trb>max_trb) max_trb = trb;
+  }
+
+  /* Max over all ranks */
+  Max_trb = max_trb;
+  nMPI_Allreduce(&max_trb, &Max_trb, 1, nMPI_INT, nMPI_MAX);
+
+  return Max_trb; /* returns max. trouble value of all nodes */
 }
 
 
