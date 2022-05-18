@@ -59,8 +59,8 @@ int evolve_set_trouble_score(tNode *node)
     troubled = 0;
   else /* all is very good */
     troubled = -1;
-  pr_nodename(node);
-  printf(" tr_max=%d troubled=%d", tr_max, troubled);
+  //pr_nodename(node);
+  //printf(" tr_max=%d troubled=%d", tr_max, troubled);
 
   /* set node->dat->info->trouble */
   if(troubled>0) /* i.e. there is trouble now */
@@ -88,7 +88,7 @@ int evolve_set_trouble_score(tNode *node)
   if(node->dat->info->trouble > max_trouble)
     node->dat->info->trouble = max_trouble;
 
-  printf(" ->trouble=%d\n", node->dat->info->trouble);
+  //printf(" ->trouble=%d\n", node->dat->info->trouble);
 
   return node->dat->info->trouble;
 }
