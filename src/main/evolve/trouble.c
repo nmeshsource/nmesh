@@ -32,7 +32,6 @@ int evolve_set_trouble_score(tNode *node)
   if(node->dat == NULL) errorexit("node->dat is NULL");
 
   if(PR) PRFs(":\n");
-  pr_nodename(node);
 
   /* check all evo systems for trouble and put max into tr_max */
   forList(u, i)
@@ -60,6 +59,7 @@ int evolve_set_trouble_score(tNode *node)
     troubled = 0;
   else /* all is very good */
     troubled = -1;
+  pr_nodename(node);
   printf(" tr_max=%d troubled=%d", tr_max, troubled);
 
   /* set node->dat->info->trouble */
