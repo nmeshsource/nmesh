@@ -134,12 +134,16 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *u   = evosys->u;
   tRef ref[1]; /* for ref info */
+  int pt_typ[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
 
   if(PR) PRFs(":\n");
 
   /* go back to t-dt and set u = u_p */
   copy_pVLList(u, u_p, vlcopy,0);
   mesh->time = t-dt;
+
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
 
   /* set refinement method */
   ref->method = PARENT_n_P_UNIFORM; /* use uniform grid with same n */
@@ -170,6 +174,12 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
 
+  /* switch on fv on all uniform nodes */
+  refine_set_use_fv_if_pt_typ(mesh, pt_typ, 1);
+
+  /* now that nodes are changed re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
+
   /* balance load, now that some nodes use a different method */
   //FIXME: do something better than simple_load_balance
 }
@@ -178,8 +188,12 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
+  int pt_typ[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
 
   if(PR) PRFs(":\n");
+
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
 
   /* set refinement method */
   ref->method = PARENT_n_P_LGL; /* use LGL grid with same n */
@@ -202,6 +216,12 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
+
+  /* switch on fv on all uniform nodes */
+  refine_set_use_fv_if_pt_typ(mesh, pt_typ, 1);
+
+  /* now that nodes are changed re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
 
   /* balance load, now that some nodes use a different method */
   //FIXME: do something better than simple_load_balance

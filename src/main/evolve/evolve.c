@@ -80,8 +80,6 @@ int evolve_myln(tMesh *mesh)
     {
       /* go back to u_p and switch to fv */
       evolve_prepare_do_over_mesh(mesh);
-      /* now that nodes are changed re-init surfaces & indc */
-      evolve_init_communication_structs(mesh);
       /* redo evo step */
       Evolve_mesh(mesh);
     }
@@ -89,8 +87,6 @@ int evolve_myln(tMesh *mesh)
     {
       /* switch to dg */
       evolve_switch_nontroubled_nodes_mesh(mesh);
-      /* now that nodes are changed re-init surfaces & indc */
-      evolve_init_communication_structs(mesh);
     }
 
     /* we limit the final u only here */
