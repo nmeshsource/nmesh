@@ -1,5 +1,5 @@
 /* evolve.c */
-/* Wolfgang Tichy, 2/2019 */
+/* Wolfgang Tichy, 5/2022 */
 
 #include "nmesh.h"
 #include "evolve.h"
