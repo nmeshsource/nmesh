@@ -392,28 +392,25 @@ void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
 
 #define LOGFLOOR 0.9*LOGARGFLOOR
 
-/* linear fit to log of unfiltered part of coeffs in ca,
-   returns: num of unfiltered coeffs n_unfilt and beta s.t.:
-   log(c_unfilt) ~ beta0*i + beta1*j + beta2*k + beta3 .
-   Note: when c_unfilt falls off exponentially we expect beta[0-2]<0 */
-double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
-                                double f_unfilt, int n_unfilt[3],
-                                double beta[4])
+/* linear fit to log of n_fit coeffs in ca,
+   returns: beta s.t.:
+   log(cu) ~ beta0*i + beta1*j + beta2*k + beta3 .
+   Note: when cu falls off exponentially we expect beta[0-2]<0 */
+double fit_n_coefflogs(tArray *ca, int n_fit[3], double beta[4])
 {
   double detXTX;
   int *n = ca->n;
   int i, j, k;
   tArray *cu;
 
-  /* find n of unfilt. coeffs */
-  unfiltered_range_of_expfilter(ca->n, alp,s, f_unfilt, n_unfilt);
-  cu = alloc_array(n_unfilt);
+  /* array for n_fit coeffs */
+  cu = alloc_array(n_fit);
 
-  /* write log of unfilt. coeffs ca into cu */
-  forijk(i,j,k, n_unfilt)
+  /* write log of n_fit coeffs of ca into cu */
+  forijk(i,j,k, n_fit)
   {
     int ia = Ind_n(i,j,k, n);
-    int iu = Ind_n(i,j,k, n_unfilt);
+    int iu = Ind_n(i,j,k, n_fit);
     cu->d[iu] = log(fabs(ca->d[ia]) + LOGFLOOR);
   }
 
@@ -422,8 +419,24 @@ double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
   detXTX = linear_fit_to_array(cu, beta);
   if(detXTX==0.) errorexit("linear_fit_to_array failed!");
 
+printf("cu");printarray(cu);
+
   free_array(cu);
   return detXTX;
+}
+
+/* linear fit to log of unfiltered part of coeffs in ca,
+   returns: num of unfiltered coeffs n_unfilt and beta s.t.:
+   log(c_unfilt) ~ beta0*i + beta1*j + beta2*k + beta3 .
+   Note: when c_unfilt falls off exponentially we expect beta[0-2]<0 */
+double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
+                                double f_unfilt, int n_unfilt[3],
+                                double beta[4])
+{
+  /* find n of unfilt. coeffs */
+  unfiltered_range_of_expfilter(ca->n, alp,s, f_unfilt, n_unfilt);
+
+  return fit_n_coefflogs(ca, n_unfilt, beta);
 }
 
 /* check if top unflitered coeffs are greater than fitted result */
