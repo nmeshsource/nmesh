@@ -74,7 +74,7 @@ int evolve_myln(tMesh *mesh)
 
     /* get trouble score, and redo step with fv or switch back to dg */
     ts = evolve_set_trouble_score_mesh(mesh);
-    ts = 0;
+    //ts = 0;
     //PRF;printf(": ts=%d\n", ts);
     if(ts>0)
     {
