@@ -419,8 +419,7 @@ double fit_n_coefflogs(tArray *ca, int n_fit[3], double beta[4])
   detXTX = linear_fit_to_array(cu, beta);
   if(detXTX==0.) errorexit("linear_fit_to_array failed!");
 
-printf("cu");printarray(cu);
-
+  //printf("cu");printarray(cu);
   free_array(cu);
   return detXTX;
 }
