@@ -34,7 +34,7 @@ int evolve_set_trouble_score(tNode *node)
   if(PR) PRFs(":\n");
   pr_nodename(node);
 
-  /* check all evo systems for trouble and accumulate result in troubled */
+  /* check all evo systems for trouble and put max into tr_max */
   forList(u, i)
   {
     tVarList *vlu_p = ListEntry(u_p,i);
@@ -53,7 +53,7 @@ int evolve_set_trouble_score(tNode *node)
     }
   }
 
-  /* set troubled flag to 1, 0, or -1 (default above) */
+  /* set troubled flag to 1, 0, or -1 */
   if(tr_max>0) /* new trouble found, switch to fv */
     troubled = 1;
   else if(tr_max==0 || tr_max==-max_trouble) /* ok, keep as is */
