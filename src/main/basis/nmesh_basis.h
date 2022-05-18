@@ -143,6 +143,7 @@ void expfilter_vl(tVarList *vl, double af, double sf);
 double linear_fit_result(double beta[4], int i, int j, int k);
 void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
                                    double f_unfilt, int n_unfilt[3]);
+double fit_n_coefflogs(tArray *ca, int n_fit[3], double beta[4]);
 double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
                                 double f_unfilt, int n_unfilt[3],
                                 double beta[4]);
