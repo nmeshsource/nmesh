@@ -26,11 +26,13 @@ int evolve_set_trouble_score(tNode *node)
   pVLList *r   = evosys->rhs;
   int max_trouble = 1073741824;
   int troubled = -1; /* default is to assume all is very well */
+  int tr_max = -max_trouble; /* init to low value */
   int i;
 
   if(node->dat == NULL) errorexit("node->dat is NULL");
 
   if(PR) PRFs(":\n");
+  pr_nodename(node);
 
   /* check all evo systems for trouble and accumulate result in troubled */
   forList(u, i)
@@ -38,23 +40,27 @@ int evolve_set_trouble_score(tNode *node)
     tVarList *vlu_p = ListEntry(u_p,i);
     tVarList *vlu   = ListEntry(u,i);
     tVarList *vlr   = ListEntry(r,i);
-    int tr = 0;
 
     /* run TROUBLE func */
-    if(troubled<=0) /* need to check only if there no trouble yet */
+    if(tr_max<=0) /* need to check only if there no trouble yet */
+    {
       if(ListEntry(evosys->f[TROUBLE],i))
+      {
+        int tr = 0;
         tr = ListEntry(evosys->f[TROUBLE],i)(node, vlr, vlu, vlu_p);
-
-    /* set troubled flag to 1, 0, or -1 (default above) */
-    if(tr>0) /* new trouble found, switch to fv */
-    {
-      troubled = 1;
-    }
-    else if(tr==0) /* ok, keep as is */
-    {
-      if(troubled<0) troubled = 0;
+        if(tr>tr_max) tr_max = tr;
+      }
     }
   }
+
+  /* set troubled flag to 1, 0, or -1 (default above) */
+  if(tr_max>0) /* new trouble found, switch to fv */
+    troubled = 1;
+  else if(tr_max==0) /* ok, keep as is */
+    troubled = 0;
+  else               /* all is very good */
+    troubled = -1;
+  printf(" tr_max=%d troubled=%d", tr_max, troubled);
 
   /* set node->dat->info->trouble */
   if(troubled>0) /* i.e. there is trouble now */
@@ -81,6 +87,8 @@ int evolve_set_trouble_score(tNode *node)
     node->dat->info->trouble = -max_trouble;
   if(node->dat->info->trouble > max_trouble)
     node->dat->info->trouble = max_trouble;
+
+  printf(" ->trouble=%d\n", node->dat->info->trouble);
 
   return node->dat->info->trouble;
 }
