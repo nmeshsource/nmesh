@@ -25,7 +25,7 @@ int evolve_set_trouble_score(tNode *node)
   pVLList *u   = evosys->u;
   pVLList *r   = evosys->rhs;
   int max_trouble = 1073741824;
-  int troubled = -1; /* default is to assume all is very well */
+  int troubled = 0; /* default is to assume that we change nothing */
   int tr_max = -max_trouble; /* init to low value */
   int i;
 
@@ -56,9 +56,9 @@ int evolve_set_trouble_score(tNode *node)
   /* set troubled flag to 1, 0, or -1 (default above) */
   if(tr_max>0) /* new trouble found, switch to fv */
     troubled = 1;
-  else if(tr_max==0) /* ok, keep as is */
+  else if(tr_max==0 || tr_max==-max_trouble) /* ok, keep as is */
     troubled = 0;
-  else               /* all is very good */
+  else /* all is very good */
     troubled = -1;
   printf(" tr_max=%d troubled=%d", tr_max, troubled);
 
