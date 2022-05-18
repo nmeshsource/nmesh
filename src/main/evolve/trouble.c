@@ -125,27 +125,19 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
 }
 
 
-/* set u = u_p, and then switch to fv */
-void evolve_prepare_do_over_mesh(tMesh *mesh)
+/* switch bewteen fv and dg based on node->dat->info->trouble flag */
+void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
 {
-  tEvoSys *evosys = mesh->evosys;
-  double  t = mesh->time;
-  double dt = mesh->dt;
-  pVLList *u_p = evosys->u_p;
-  pVLList *u   = evosys->u;
   tRef ref[1]; /* for ref info */
-  int pt_typ[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
+  int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
+  int ptLGL[] = { P_LGL, P_LGL, P_LGL };
 
   if(PR) PRFs(":\n");
-
-  /* go back to t-dt and set u = u_p */
-  copy_pVLList(u, u_p, vlcopy,0);
-  mesh->time = t-dt;
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
-  /* set refinement method */
+  /* set ref to uniform */
   ref->method = PARENT_n_P_UNIFORM; /* use uniform grid with same n */
 
   /* loop over all nodes, and flag all troubled nodes for uniform grid */
@@ -159,43 +151,17 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
     /* mark troubled nodes as to be refined */
     if(node->dat->info->trouble > 0)
       node->rflag = ref->method;
+    else
+      node->rflag = 0;
   }
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
-
   ///* also p-refine neighbors to make sure the star surface stays within fv
   //   region when the radius changes a bit */
   //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
 
-  /* update again, nids won't change but hmin and thus dt might */
-  update_mesh_myln_node_nid(mesh);
-
-  /* clear rflag on all leaf nodes */
-  refine_set_rflag_forall_nodes(mesh, 0);
-
-  /* switch on fv on all uniform nodes */
-  refine_set_use_fv_if_pt_typ(mesh, pt_typ, 1);
-
-  /* now that nodes are changed re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
-
-  /* balance load, now that some nodes use a different method */
-  //FIXME: do something better than simple_load_balance
-}
-
-/* switch back to dg */
-void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
-{
-  tRef ref[1]; /* for ref info */
-  int pt_typ[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
-
-  if(PR) PRFs(":\n");
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
-  /* set refinement method */
+  /* set ref to LGL */
   ref->method = PARENT_n_P_LGL; /* use LGL grid with same n */
 
   /* loop over all nodes, and flag all non-troubled nodes for LGL grid */
@@ -206,23 +172,65 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
     /* mark non-troubled nodes as to be refined */
     if(node->dat->info->trouble < -10)
       node->rflag = ref->method;
+    else
+      node->rflag = 0;
   }
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
-
-  /* update again, nids won't change but hmin and thus dt might */
-  update_mesh_myln_node_nid(mesh);
+  ///* also p-refine neighbors to make sure the star surface stays within fv
+  //   region when the radius changes a bit */
+  //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
 
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
 
+  /* update, nids won't change but hmin and thus dt might */
+  update_mesh_myln_node_nid(mesh);
+
   /* switch on fv on all uniform nodes */
-  refine_set_use_fv_if_pt_typ(mesh, pt_typ, 1);
+  refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
+
+  /* switch off fv on all LGL nodes */
+  refine_set_use_fv_if_pt_typ(mesh, ptLGL, 0);
 
   /* now that nodes are changed re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
 
   /* balance load, now that some nodes use a different method */
   //FIXME: do something better than simple_load_balance
+}
+
+
+/* set u = u_p, and then switch to fv */
+void evolve_prepare_do_over_mesh(tMesh *mesh)
+{
+  tEvoSys *evosys = mesh->evosys;
+  double  t = mesh->time;
+  double dt = mesh->dt;
+  pVLList *u_p = evosys->u_p;
+  pVLList *u   = evosys->u;
+
+  if(PR) PRFs(":\n");
+
+  /* go back to t-dt and set u = u_p */
+  copy_pVLList(u, u_p, vlcopy,0);
+  mesh->time = t-dt;
+
+  /* loop over all nodes, and set time */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    node->time = mesh->time;
+  }
+
+  /* switch nodes based on trouble flag */
+  evolve_trouble_switch_dg_fv_mesh(mesh);
+}
+
+/* switch back to dg */
+void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
+{
+  /* switch nodes based on trouble flag */
+  evolve_trouble_switch_dg_fv_mesh(mesh);
 }
