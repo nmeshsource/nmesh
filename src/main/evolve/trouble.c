@@ -195,8 +195,8 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   //   region when the radius changes a bit */
   //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
 
-  /* clear rflag on all leaf nodes */
-  refine_set_rflag_forall_nodes(mesh, 0);
+  /* NOTE: We do NOT clear the rflag here, so that we can later check which
+           nodes were modified */
 
   /* update, nids won't change but hmin and thus dt might */
   update_mesh_myln_node_nid(mesh);
@@ -239,13 +239,49 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
 
   /* switch nodes based on trouble flag */
   evolve_trouble_switch_dg_fv_mesh(mesh);
+
+  /* clear rflag on all leaf nodes */
+  refine_set_rflag_forall_nodes(mesh, 0);
 }
 
 /* switch back to dg */
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 {
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *u   = evosys->u;
+  pVLList *rhs = evosys->rhs;
+
   /* switch nodes based on trouble flag */
   evolve_trouble_switch_dg_fv_mesh(mesh);
+  /* now some aux vars (and others) are not set */
+
+  /* to update some vars call funcs in PRESURF, SETSRC, PRELIM
+     often PRESURF does cons2prim, SETSRC sets stress-energy,
+     PRELIM sets ADM metric */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int i;
+
+    /* set some things again, e.g. cons2prim */
+    if(node->rflag) /* we only need to do this on nodes that were refined */
+      forList(u, i)
+      {
+        tVarList *vlr = ListEntry(rhs,i);
+        tVarList *vlu = ListEntry(u,i);
+
+        //if(ListEntry(evosys->f[PRESURF],i))
+        //  ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+
+        if(ListEntry(evosys->f[SETSRC],i))
+          ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
+
+        if(ListEntry(evosys->f[PRELIM],i))
+          ListEntry(evosys->f[PRELIM],i)(node, vlu);
+      }
+     /* clear rflag */
+    node->rflag = 0;
+  }
 }
 
 /* Set myindc for u_p to get min/max of u_p needed for a RDMP trouble indicator.
