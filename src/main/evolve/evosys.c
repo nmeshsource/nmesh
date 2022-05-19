@@ -328,6 +328,24 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
       }
     } /* end forList */
   }
+
+  /* Set myindc also for u_p to allow for u_p min/max exchange in case a trouble
+     indicator needs this. Here we use limdata_MRS to get min/max/average. */
+  if(evosys->u_p)
+  {
+    forList(evosys->u_p, i)
+    {
+      tVarList *vl = ListEntry(evosys->u_p,i);
+
+      if(ListEntry(evosys->f[TROUBLE],i))
+      {
+        /* NOTE: limdata_MRS(NULL, vl) returns number of data vals we need */
+        int nvals = limdata_MRS(NULL, vl);
+        if(nvals>0)
+          init_all_myln_myindc_for_vl(mesh, vl, nvals);
+      }
+    } /* end forList */
+  }
 }
 
 /* free all indc on all nodes in the mesh for varlists in evosys */
@@ -338,7 +356,7 @@ void free_all_myln_myindc_in_evosys(tMesh *mesh)
 
   PRFs(":\n");
 
-  /* check if evo vars in u need myindc */
+  /* free myindc of u */
   if(evosys->u)
   {
     forList(evosys->u, i)
@@ -348,12 +366,22 @@ void free_all_myln_myindc_in_evosys(tMesh *mesh)
     } /* end forList */
   }
 
-  /* check if evo vars in w need myindc */
+  /* free myindc of w */
   if(evosys->w)
   {
     forList(evosys->w, i)
     {
       tVarList *vl = ListEntry(evosys->w,i);
+      free_all_myln_indc_for_vl(mesh, vl);
+    } /* end forList */
+  }
+
+  /* free myindc of u_p */
+  if(evosys->u_p)
+  {
+    forList(evosys->u_p, i)
+    {
+      tVarList *vl = ListEntry(evosys->u_p,i);
       free_all_myln_indc_for_vl(mesh, vl);
     } /* end forList */
   }
