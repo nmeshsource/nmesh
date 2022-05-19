@@ -144,14 +144,19 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   tRef ref[1]; /* for ref info */
   int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
   int ptLGL[] = { P_LGL, P_LGL, P_LGL };
-
+  int evolve_trouble_n_fv = Par("evolve_trouble_n_fv");
   if(PR) PRFs(":\n");
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
   /* set ref to uniform */
-  ref->method = PARENT_n_P_UNIFORM; /* use uniform grid with same n */
+  if(Getv(evolve_trouble_n_fv, "n_dg"))
+    ref->method = PARENT_n_P_UNIFORM;  /* use uniform grid with same n */
+  else if(Getv(evolve_trouble_n_fv, "2n_dg"))
+    ref->method = PARENT_2n_P_UNIFORM; /* use uniform grid with 2*n */
+  else
+    errorexit("evolve_trouble_n_fv has illegal value");
 
   /* loop over all nodes, and flag all troubled nodes for uniform grid */
   formylnodes(mesh)
@@ -175,7 +180,12 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
 
   /* set ref to LGL */
-  ref->method = PARENT_n_P_LGL; /* use LGL grid with same n */
+  if(Getv(evolve_trouble_n_fv, "n_dg"))
+    ref->method = PARENT_n_P_LGL;   /* use LGL grid with same n */
+  else if(Getv(evolve_trouble_n_fv, "2n_dg"))
+    ref->method = PARENT_nO2_P_LGL; /* use uniform grid with n/2 */
+  else
+    errorexit("evolve_trouble_n_fv has illegal value");
 
   /* loop over all nodes, and flag all non-troubled nodes for LGL grid */
   formylnodes(mesh)

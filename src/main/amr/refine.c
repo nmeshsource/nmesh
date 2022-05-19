@@ -71,6 +71,38 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
     }
     break;
 
+  case PARENT_nO2_P_LGL:
+    for(d=0; d<3; d++)
+    {
+      if(pnode->n[d]>1) n[d] = pnode->n[d]/2;
+      else              n[d] = pnode->n[d];   /* do not allow n=0 */
+      pt_typ[d] = P_LGL;
+    }
+    break;
+  case PARENT_nO2_P_UNIFORM:
+    for(d=0; d<3; d++)
+    {
+      if(pnode->n[d]>1) n[d] = pnode->n[d]/2;
+      else              n[d] = pnode->n[d];   /* do not allow n=0 */
+      pt_typ[d] = P_UNIFORM;
+    }
+    break;
+
+  case PARENT_2n_P_LGL:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d]*2;
+      pt_typ[d] = P_LGL;
+    }
+    break;
+  case PARENT_2n_P_UNIFORM:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d]*2;
+      pt_typ[d] = P_UNIFORM;
+    }
+    break;
+
   case GIVEN_n_P_LGL:
     for(d=0; d<3; d++)
     {
