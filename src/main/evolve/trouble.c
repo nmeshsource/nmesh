@@ -281,3 +281,79 @@ void evolve_collect_u_p_data_mesh(tMesh *mesh, pVLList *u_p)
     }
   } /* end forList */
 }
+
+/* Relaxed discrete maximum principle (RDMP) indicator as in 2109.11645
+   This indicator is originally from 1406.7416 (Eqs 23-25), where a
+   discrete maximum principle (DMP) that is relaxed by delta is introduced.
+   We implement it as in 2109.11645 (Eqs 65-66). */
+int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p)
+{
+  //tMesh *mesh = node->pat->mesh;
+  int fv = node->dat->info->use_fv;
+  tDat *dat;
+  int nvars = VLn(vlu);
+  int vli, f, ni;
+  double min_u_p[nvars], max_u_p[nvars];
+  double delta, delta0, epsilon;
+  double lower_lim, upper_lim;
+  int troubled;
+
+  dat = node->dat;
+  if(!dat) return 0;
+
+  /* find abs max and min of u_p and compare with u */
+  troubled = 0;
+  forvl(vlu_p, vli)
+  {
+    int iu = Vind(vlu, vli);
+    double *u = Vard(node, iu);
+    int ijk;
+    int iu_p = Vind(vlu_p, vli);
+    double min = dat->ic[iu_p]->myindc->d[1];    /* get my min(u_p) */
+    double max = dat->ic[iu_p]->myindc->d[2];    /* get my max(u_p) */
+    //double wbar = dat->ic[iu_p]->myindc->d[0];   /* get my average */
+
+    /* find min and max of u_p in neighbors + this node */
+    max_u_p[vli] = max;
+    min_u_p[vli] = min;
+    for(f=0; f<6; f++)
+      for(ni=0; ni<node->nfnb[f]; ni++)
+      {
+        double min_nb = dat->ic[iu_p]->nbindc[f][ni]->d[1];
+        double max_nb = dat->ic[iu_p]->nbindc[f][ni]->d[2];
+        if(min_nb < min_u_p[vli]) min_u_p[vli] = min_nb;
+        if(max_nb > max_u_p[vli]) max_u_p[vli] = max_nb;
+      }
+
+    /* set delta */
+    delta0 = 1e-7;
+    epsilon = 1e-3;
+    delta = max2(delta0, epsilon*(max_u_p[vli] - min_u_p[vli]));
+
+    /* set lower and upper allowed limits for u */
+    lower_lim = min_u_p[vli] - delta;
+    upper_lim = max_u_p[vli] + delta;
+
+    /* check if u is within range */
+    forpoints(node, ijk)
+      if(u[ijk] < lower_lim || u[ijk] > upper_lim)
+      {
+        troubled = 1; /* u is troubled at one point */
+        break;
+      }
+    if(troubled) /* if this u is troubled we don't need to check others */
+      break;
+  }
+
+  /* return trouble score */
+  if(troubled)
+  {
+    if(fv) return  0; /* keep fv */
+    else   return  1; /* switch to fv */
+  }
+  else
+  {
+    if(fv) return -1; /* switch to dg */
+    else   return  0; /* keep dg */
+  }
+}
