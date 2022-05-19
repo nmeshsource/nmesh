@@ -330,7 +330,7 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
   }
 
   /* Init myindc also for u_p to allow for u_p min/max exchange in case a trouble
-     indicator needs this. Here we use limdata_MRS to get min/max/average. */
+     indicator needs this. Here we use limdata_MRS to get min,max,average. */
   if(evosys->u_p)
   {
     forList(evosys->u_p, i)

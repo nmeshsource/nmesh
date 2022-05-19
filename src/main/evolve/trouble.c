@@ -242,3 +242,37 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   /* switch nodes based on trouble flag */
   evolve_trouble_switch_dg_fv_mesh(mesh);
 }
+
+/* Set myindc for u_p to get min/max of u_p needed for a RDMP trouble indicator.
+   Here we use limdata_MRS to get min,max,average. */
+void evolve_collect_u_p_data_mesh(tMesh *mesh, pVLList *u_p)
+{
+  tEvoSys *evosys = mesh->evosys;
+  int i;
+
+  if(PR) PRFs(":\n");
+
+  /* loop over list of varlists */
+  forList(u_p, i)
+  {
+    tVarList *vl = ListEntry(u_p,i);
+
+    /* set limiter data in indicators (indc) if trouble indicator needs it */
+    if(ListEntry(evosys->f[TROUBLE],i))
+    {
+      /* set data RDMP indicator needs in myindc arrays of each node */
+      formylnodes(mesh)
+      {
+        tNode *node = MyLnode;
+        limdata_MRS(node, vl); /* sets min,max,average */
+      }
+
+      /* initiate indc exchange */
+      request_all_myln_indc_exchange_for_vl(mesh, vl);
+      /* After this we could do work. MPI is now busy sending buffers */
+
+      /* now get the indicators and wait for MPI buffers if necessary */
+      get_all_myln_indc_for_vl(mesh, vl);
+    }
+  } /* end forList */
+}
