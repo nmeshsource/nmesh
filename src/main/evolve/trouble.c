@@ -178,7 +178,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     tNode *node = MyLnode;
 
     /* mark non-troubled nodes as to be refined */
-    if(node->dat->info->trouble < -10)
+    if(node->dat->info->trouble <= -NOTROUBLES)
       node->rflag = ref->method;
     else
       node->rflag = 0;

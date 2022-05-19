@@ -83,7 +83,7 @@ int evolve_myln(tMesh *mesh)
       /* redo evo step */
       Evolve_mesh(mesh);
     }
-    else if(ts<-10)
+    else if(ts<=-NOTROUBLES)
     {
       /* switch to dg */
       evolve_switch_nontroubled_nodes_mesh(mesh);
