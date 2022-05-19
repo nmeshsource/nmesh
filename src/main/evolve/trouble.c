@@ -103,7 +103,7 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
   int Min_trb, min_trb=INT_MAX;
   if(PR) PRFs(":\n");
 
-  /* collect min/max values all nodes and their of neighbors */
+  /* collect min/max values of all nodes and their of neighbors */
   evolve_collect_u_p_data_mesh(mesh, u_p);
 
   /* loop over all nodes, check for trouble, and node-info trouble score */
