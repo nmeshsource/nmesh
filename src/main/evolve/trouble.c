@@ -97,9 +97,14 @@ int evolve_set_trouble_score(tNode *node)
    i.e. set node->dat->info->trouble */
 int evolve_set_trouble_score_mesh(tMesh *mesh)
 {
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *u_p = evosys->u_p;
   int Max_trb, max_trb=INT_MIN;
   int Min_trb, min_trb=INT_MAX;
   if(PR) PRFs(":\n");
+
+  /* collect min/max values all nodes and their of neighbors */
+  evolve_collect_u_p_data_mesh(mesh, u_p);
 
   /* loop over all nodes, check for trouble, and node-info trouble score */
   formylnodes(mesh)
