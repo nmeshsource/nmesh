@@ -270,8 +270,8 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
         tVarList *vlr = ListEntry(rhs,i);
         tVarList *vlu = ListEntry(u,i);
 
-        //if(ListEntry(evosys->f[PRESURF],i))
-        //  ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+        if(ListEntry(evosys->f[PRESURF],i))
+          ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
 
         if(ListEntry(evosys->f[SETSRC],i))
           ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
