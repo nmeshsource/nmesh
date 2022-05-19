@@ -269,7 +269,7 @@ int evolve_init_communication_structs(tMesh *mesh)
   /* init node to nb surface exchanges */
   MPIexchange_init_all_myln(mesh);
 
-  /* int node to nb indc exchanges */
+  /* init node to nb indc exchanges */
   init_all_myln_myindc_in_evosys(mesh);
   return 0;
 }
