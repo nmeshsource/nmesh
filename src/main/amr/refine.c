@@ -91,14 +91,16 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
   case PARENT_2n_P_LGL:
     for(d=0; d<3; d++)
     {
-      n[d] = pnode->n[d]*2;
+      if(pnode->n[d]>1) n[d] = pnode->n[d]*2;
+      else              n[d] = pnode->n[d];   /* keep n=1 */
       pt_typ[d] = P_LGL;
     }
     break;
   case PARENT_2n_P_UNIFORM:
     for(d=0; d<3; d++)
     {
-      n[d] = pnode->n[d]*2;
+      if(pnode->n[d]>1) n[d] = pnode->n[d]*2;
+      else              n[d] = pnode->n[d];   /* keep n=1 */
       pt_typ[d] = P_UNIFORM;
     }
     break;
