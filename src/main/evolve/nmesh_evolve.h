@@ -30,4 +30,5 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh);
 void free_all_myln_myindc_in_evosys(tMesh *mesh);
 
 /* trouble.c */
-int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p);
+int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
+                        double deltafac, double delta0, double epsilon);

@@ -286,7 +286,8 @@ void evolve_collect_u_p_data_mesh(tMesh *mesh, pVLList *u_p)
    This indicator is originally from 1406.7416 (Eqs 23-25), where a
    discrete maximum principle (DMP) that is relaxed by delta is introduced.
    We implement it as in 2109.11645 (Eqs 65-66). */
-int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p)
+int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
+                        double deltafac, double delta0, double epsilon)
 {
   //tMesh *mesh = node->pat->mesh;
   int fv = node->dat->info->use_fv;
@@ -294,7 +295,7 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p)
   int nvars = VLn(vlu);
   int vli, f, ni;
   double min_u_p[nvars], max_u_p[nvars];
-  double delta, delta0, epsilon;
+  double delta;
   double lower_lim, upper_lim;
   int troubled;
 
@@ -326,9 +327,7 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p)
       }
 
     /* set delta */
-    delta0 = 1e-7;
-    epsilon = 1e-3;
-    delta = max2(delta0, epsilon*(max_u_p[vli] - min_u_p[vli]));
+    delta = deltafac * max2(delta0, epsilon*(max_u_p[vli] - min_u_p[vli]));
 
     /* set lower and upper allowed limits for u */
     lower_lim = min_u_p[vli] - delta;
