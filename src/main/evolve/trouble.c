@@ -336,7 +336,6 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
                         double deltafac, double delta0, double epsilon)
 {
   //tMesh *mesh = node->pat->mesh;
-  int fv = node->dat->info->use_fv;
   tDat *dat;
   int nvars = VLn(vlu);
   int vli, f, ni;
@@ -391,6 +390,14 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
   }
 
   /* return trouble score */
+  return trouble_score(node, troubled);
+}
+
+/* set trouble score ts based on whether node is troubled, and dg or fv */
+int trouble_score(tNode *node, int troubled)
+{
+  int fv = node->dat->info->use_fv;
+
   if(troubled)
   {
     if(fv) return  0; /* keep fv */
