@@ -41,7 +41,7 @@ l=4        node
    or connectivity */
 typedef struct tNODEINFO {
   int trouble;            /* trouble score in node (e.g. due to shocks) */
-  //tREF trouble_ref[1];
+  tRef trouble_ref[1];    /* refinement we use if we act on trouble score */
   int use_fv;             /* whether we currently use fin. vol. in node */
   int nlim;               /* number of consectutive evo substeps in which
                              limiter was active */
