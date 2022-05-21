@@ -5,6 +5,7 @@
 
 /* declarations from other parts that we need here already */
 #include "thread_defs.h"
+#include "refine.h"
 #include "../main/skeleton.h"
 #include "../main/variables.h"
 #include "../nMPI/nMPI_defs.h"
@@ -40,6 +41,7 @@ l=4        node
    or connectivity */
 typedef struct tNODEINFO {
   int trouble;            /* trouble score in node (e.g. due to shocks) */
+  //tREF trouble_ref[1];
   int use_fv;             /* whether we currently use fin. vol. in node */
   int nlim;               /* number of consectutive evo substeps in which
                              limiter was active */
@@ -291,45 +293,6 @@ typedef struct tVARLIST {
                    as vlduplicate, vlcopy, vlfree, ...). So the user has 
                    to manage it: e.g. free it, before calling vlfree. */
 } tVarList;
-
-
-/**************************************************************************/
-/* for mesh refinement */
-/**************************************************************************/
-
-/* refinement types: i.e. vals for var type in tRef */
-enum
-{
-  H_REFINE,      /* do h-refinement */
-  P_REFINE       /* do p-refinement */
-};
-
-/* refinement methods: i.e. vals for var method in tRef */
-enum
-{
-  NOREFINE,
-  PARENT_n,              /* use same n as parent */
-  PARENT_nO2,            /* use parent->n/2 */
-  PARENT_nO2_P1,         /* use parent->n/2 + 1 */
-  PARENT_nO2_P1IFnG3,    /* use parent->n/2 + 1*if(parent->n>3) */
-  PARENT_nO2_P1MOD,      /* use parent->n/2 + 1 or parent->n - 1 if n<=3 */
-  GIVEN_n,               /* use a n given by the user */
-  PARENT_n_P_LGL,        /* use same n as parent, and LGL gridpoints */
-  PARENT_n_P_UNIFORM,    /* use same n as parent, and UNIFORM gridpoints */
-  PARENT_nO2_P_LGL,      /* use parent->n/2, and LGL gridpoints */
-  PARENT_nO2_P_UNIFORM,  /* use parent->n/2, and UNIFORM gridpoints */
-  PARENT_2n_P_LGL,       /* use parent->n*2, and LGL gridpoints */
-  PARENT_2n_P_UNIFORM,   /* use parent->n*2, and UNIFORM gridpoints */
-  GIVEN_n_P_LGL,         /* use given n, and LGL gridpoints */
-  GIVEN_n_P_UNIFORM      /* use given n, and UNIFORM gridpoints */
-};
-
-/* struct that holds refinement method */
-typedef struct tREF {
-  int type;       /* H_REFINE, P_REFINE */
-  int method;     /* NOREFINE, PARENT_n, ... */
-  int n[3];       /* n to use if method=GIVEN_n */
-} tRef;
 
 
 /**************************************************************************/
