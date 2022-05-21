@@ -625,14 +625,14 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
 }
 
 /* free the node_old returned by update_node_n_pt_typ_return_node_old */
-void update_node_n_pt_typ_free_node_old(tNode *node_old)
+void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old)
 {
-  if(node_old->dat) free_dat(node_old->dat);
+  if(node_old->dat != node->dat) free_dat(node_old->dat);
   free(node_old);
 }
 
-/* Undo a call to update_node_n_pt_typ_return_node_old. This also frees
-   node_old. */
+/* Undo a call to update_node_n_pt_typ_return_node_old. This still does not
+   free node_old! */
 void update_node_n_pt_typ_undo_using_node_old(tNode *node, tNode *node_old)
 {
   /* free any newly allocated dat in node */
@@ -640,9 +640,6 @@ void update_node_n_pt_typ_undo_using_node_old(tNode *node, tNode *node_old)
 
   /* use info in node_old to restore node */
   memcpy(node, node_old, sizeof(node[0]));
-
-  /* now node_old is useless, so we free it */
-  free(node_old);
 }
 
 /* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
@@ -674,7 +671,7 @@ GRHD_Persson_trouble(node, Ind("GRHD_D"), 4.,6.);
 firstcall=0;
 }
 */
-  update_node_n_pt_typ_free_node_old(node_old);
+  update_node_n_pt_typ_free_node_old(node, node_old);
 }
 
 /* update node->n on one node, should be called for all 8 siblings */
