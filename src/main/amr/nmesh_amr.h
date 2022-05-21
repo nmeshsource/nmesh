@@ -590,6 +590,7 @@ void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl);
 void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 
 /* refine.c */
+void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ);
 int resolve_shocks_using_nlim(tMesh *mesh);
 void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
