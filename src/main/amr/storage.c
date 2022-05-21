@@ -633,10 +633,10 @@ void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old)
 
 /* Undo a call to update_node_n_pt_typ_return_node_old. This still does not
    free node_old! */
-void update_node_n_pt_typ_undo_using_node_old(tNode *node, tNode *node_old)
+void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
 {
   /* free any newly allocated dat in node */
-  if(node->dat) free_dat(node->dat);
+  free_dat(node->dat);
 
   /* use info in node_old to restore node */
   memcpy(node, node_old, sizeof(node[0]));
