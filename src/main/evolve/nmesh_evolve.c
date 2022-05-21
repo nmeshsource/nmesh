@@ -24,8 +24,6 @@ int nmesh_evolve(tMesh *mesh)
   AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1))^s}");
   AddPar("evolve_filter_s",   "32",   "s in e^{-alp (i/(n0-1))^s}");
   AddPar("evolve_compute_change", "no", "compute change over 1 evo step [no,yes]");
-  AddPar("evolve_trouble_n_fv", "n_dg", "given the n_dg in dg how we set the"
-         "n_fv we use in fv when troubled [n_dg,2n_dg]");
 
   /* just a test, not needed for anything else */
   if(Getv(Par("evolve_method"), "evolve_test"))
