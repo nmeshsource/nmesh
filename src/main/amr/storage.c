@@ -499,7 +499,7 @@ tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3])
 /* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
    { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
    should be called for all 8 siblings */
-void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
+void update_node_n_pt_typ__old(tNode *node, int *n, int *pt_typ)
 {
   tMesh *mesh = node->pat->mesh;
   int nvdb = mesh->nvdb;
@@ -556,6 +556,125 @@ void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
     /* init coords in this new node */
     coordinates_init_node(node);
   }
+}
+
+/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
+   should be called for all 8 siblings
+   NOTE: After calling update_node_n_pt_typ_return_node_old we have to call:
+           update_node_n_pt_typ_free_node_old(node_old);
+         to free the copy node_old that is allocated and returned here. */
+tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int nvdb = mesh->nvdb;
+  int d, vi;
+  tNode *node_old = calloc(1, sizeof(*node_old));
+  if(!node_old) errorexit("no memory for node_old");
+
+  /* backup old node info */
+  memcpy(node_old, node, sizeof(node_old[0]));
+
+  /* update node info */
+  if(n)
+  {
+    for(d=0; d<3; d++) node->n[d] = n[d];
+    node->np = n[0] * n[1] * n[2];
+  }
+  if(pt_typ)
+    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
+
+  /* if node has dat, we need to interpolate vars */
+  if(node_old->dat)
+  {
+    tArray *Xp[3];
+
+    /* alloc new dat for node */
+    node->dat = alloc_dat(node);
+
+    /* array memory to store points of node */
+    Xp[0] = alloc_array(n);
+    Xp[1] = alloc_array(n);
+    Xp[2] = alloc_array(n);
+    fill_3arrays_with_nodepoints(node, Xp);
+    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
+      could use: node_Xb3(node, Xp); to get new node points into Xp */
+
+    /* use interpolation to get vars from old dat to new node->dat */
+    for(vi=0; vi<nvdb; vi++)
+      if(node_old->dat->v[vi])
+      {
+        /* enable same vars in new dat as in dat_old */
+        enablevarcomp_innode(node, vi);
+
+        /* fill node->dat with interpolation data from old dat */
+        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        {
+          basis_interp_topoints(node_old, node_old->dat->v[vi],
+                                Xp, node->dat->v[vi], Lagrange_of_x);
+        }
+      } /* end: if parent has dat->v[vi] */
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
+
+    /* init coords in this new node */
+    coordinates_init_node(node);
+  }
+  return node_old;
+}
+
+/* free the node_old returned by update_node_n_pt_typ_return_node_old */
+void update_node_n_pt_typ_free_node_old(tNode *node_old)
+{
+  if(node_old->dat) free_dat(node_old->dat);
+  free(node_old);
+}
+
+/* Undo a call to update_node_n_pt_typ_return_node_old. This also frees
+   node_old. */
+void update_node_n_pt_typ_undo_using_node_old(tNode *node, tNode *node_old)
+{
+  /* free any newly allocated dat in node */
+  if(node->dat) free_dat(node->dat);
+
+  /* use info in node_old to restore node */
+  memcpy(node, node_old, sizeof(node[0]));
+
+  /* now node_old is useless, so we free it */
+  free(node_old);
+}
+
+/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
+   should be called for all 8 siblings */
+void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
+{
+  tNode *node_old;
+
+/*
+tMesh *mesh = node->pat->mesh;
+static int firstcall=1;
+if(node->nid==3 && node->time>0.099 && firstcall)
+{
+write_var(node, "GRHD_D", 1, -2,-node->time);
+vtk_output3dcoef_meshvar(mesh, "GRHD_D", -2, -node->time);
+Yo(88);
+GRHD_Persson_trouble(node, Ind("GRHD_D"), 4.,6.);
+}
+*/
+  node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
+/*
+if(node->nid==3 && node->time>0.099 && firstcall)
+{
+write_var(node, "GRHD_D", 1, -1,node->time);
+vtk_output3dcoef_meshvar(mesh, "GRHD_D", -1, node->time);
+Yo(99);
+GRHD_Persson_trouble(node, Ind("GRHD_D"), 4.,6.);
+firstcall=0;
+}
+*/
+  update_node_n_pt_typ_free_node_old(node_old);
 }
 
 /* update node->n on one node, should be called for all 8 siblings */
