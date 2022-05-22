@@ -146,7 +146,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   int ptLGL[] = { P_LGL, P_LGL, P_LGL };
   if(PR) PRFs(":\n");
 
-  /* save default for var ref */
+  /* set a save default for variable ref */
   ref->method = NOREFINE;
 
   /* free surfaces & indc since they will change now anyway */

@@ -618,6 +618,9 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
     free_array(Xp[1]);
     free_array(Xp[0]);
 
+    /* shallow copy of node_old->dat->info, to get e.g. load timers */
+    node->dat->info[0] = node_old->dat->info[0];
+
     /* init coords in this new node */
     coordinates_init_node(node);
   }
