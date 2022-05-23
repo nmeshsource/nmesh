@@ -1055,6 +1055,45 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
   return hmin;
 }
 
+/* Write opposite corner into ijk2 and find distance dist02 to it.
+   ijk2 is found by going from ijk0 through ijk1 until we get to a corner.
+   return 1 if ijk2 was found and set
+   return 0 if ijk0 or ijk1 are negative which is an error */
+int distance_to_opposite_corner_ijk2(tNode *node, int *ijk0, int *ijk1,
+                                        int *ijk2, double *dist02)
+{
+  int *n = node->n;
+
+  if(*ijk0>=0 && *ijk1>=0)
+  {
+    int i0,j0,k0, i1,j1,k1, di,dj,dk;
+    int i2,j2,k2;
+    double X0[3], X2[3];
+    /* get i,j,k vals of both points */
+    k0 = kOfInd_n(*ijk0, n);
+    j0 = jOfInd_n_k(*ijk0, n, k0);
+    i0 = iOfInd_n_jk(*ijk0, n, j0,k0);
+    k1 = kOfInd_n(*ijk1, n);
+    j1 = jOfInd_n_k(*ijk1, n, k1);
+    i1 = iOfInd_n_jk(*ijk1, n, j1,k1);
+    di = (i1 - i0);
+    dj = (j1 - j0);
+    dk = (k1 - k0);
+    /* construct index i2,j2,k2 of furthest point along di,dj,dk */
+    i2 = i0 + di*(n[0]-1);
+    j2 = j0 + dj*(n[1]-1);
+    k2 = k0 + dk*(n[2]-1);
+    *ijk2 = Ind_n(i2,j2,k2, n);
+    /* get X-coords of points at i0,j0,k0 and i2,j2,k2 */
+    XYZ_of_ijk(node, i0,j0,k0, X0);
+    XYZ_of_ijk(node, i2,j2,k2, X2);
+    /* set distance between X0 and X2 */
+    *dist02 = Cart_distance_X0_X1(node, X0,X2);
+    return 1;
+  }
+  return 0;
+}
+
 /* check if we should reduce dt because hmin is only half of what
    find_hmin finds if we use fin.vol. (FV) */
 int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
