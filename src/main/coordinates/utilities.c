@@ -5,6 +5,8 @@
 #include "coordinates.h"
 
 
+#define PR 0
+
 /* global vars */
 extern tcoordinates coordinates[1];
 
@@ -1199,6 +1201,7 @@ double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
   tMesh *mesh = node->pat->mesh;
   double dtm, hmin, dtmax;
   int ijk0[] = {-1}, ijk1[] = {-1};
+  int uni;
 
   if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
 
@@ -1215,16 +1218,21 @@ double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
 
   dtm = dtfac * dtmax;
   /* effectively hmin may be reduced by half if we use fin.vol. (FV) */
-  if(hmin_is_in_uniform_direction(node, ijk0,ijk1))
-    dtm = uniform_dtfac * dtmax;
+  uni = hmin_is_in_uniform_direction(node, ijk0,ijk1);
+  if(uni) dtm = uniform_dtfac * dtmax;
 
   if(dtm < node->dt || node->dt <= 0.)
-  {
     node->dt = dtm;
+
+  if(dtm < mesh->dt)
+  {
     mesh->dt = dtm;
-    PRFs(": ");pr_nodename(node);
-    printf(" pts = %d,%d: hmin = %g\n", ijk0[0],ijk1[0], hmin);
-    PRF;printf(": setting mesh->dt = %g\n", mesh->dt);
+    if(PR)
+    {
+      PRFs(": ");pr_nodename(node);
+      printf(" pts = %d,%d: hmin = %g\n", ijk0[0],ijk1[0], hmin);
+      PRF;printf(": uni=%d, setting mesh->dt = %g\n", uni, mesh->dt);
+    }
   }
   return dtm;
 }
