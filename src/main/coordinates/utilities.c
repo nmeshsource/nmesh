@@ -1060,7 +1060,7 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
    return 1 if ijk2 was found and set
    return 0 if ijk0 or ijk1 are negative which is an error */
 int distance_to_opposite_corner_ijk2(tNode *node, int *ijk0, int *ijk1,
-                                        int *ijk2, double *dist02)
+                                     int *ijk2, double *dist02)
 {
   int *n = node->n;
 
@@ -1094,6 +1094,51 @@ int distance_to_opposite_corner_ijk2(tNode *node, int *ijk0, int *ijk1,
   return 0;
 }
 
+/* Set the max possible 1D timestep dtmax in all 3 directions separately.
+   This func usually takes ijk0 from find_hmin as input.
+   The CFL fac dist/(2*n[0] - 1) is from page 16 of:
+   Galerkin methods. In Discontinuous Galerkin Methods, pages 3-50. Springer,
+   2000. Bernardo Cockburn and Chi-Wang Shu. Runge-Kutta discontinuous
+   Galerkin methods for convection-dominated problems. Journal of Scientific
+   Computing, 16(3):173–261, 2001.
+   nmesh-extra/resources/DG-Methods/Runge-Kutta_DG-Methods.pdf */
+int set_dtmax3_from_corner_ijk0(tNode *node, int *ijk0, double dtmax[3])
+{
+  int *n = node->n;
+
+  if(*ijk0>=0)
+  {
+    /* get i,j,k vals */
+    int k0 = kOfInd_n(*ijk0, n);
+    int j0 = jOfInd_n_k(*ijk0, n, k0);
+    int i0 = iOfInd_n_jk(*ijk0, n, j0,k0);
+    /* in i,j,k on other ends */
+    int ii = i0 ? 0 : n[0]-1;
+    int jj = j0 ? 0 : n[1]-1;
+    int kk = k0 ? 0 : n[2]-1;
+    /* pt index of other corner in all 3 dirs */
+    int ind[] = {Ind_n(ii,j0,k0, n), Ind_n(i0,jj,k0, n), Ind_n(i0,j0,kk, n)};
+    int dir;
+    double X_ijk0[3], X[3], dist;
+
+    /* set coords X_ijk0 of corner at ijk0 */
+    XYZ_of_ijk(node, i0,j0,k0, X_ijk0);
+
+    /* set dt_max from dist */
+    for(dir=0; dir<3; dir++)
+    {
+      XYZ_of_ind(node, ind[dir], X); //set X coords of other corner
+      dist  = Cart_distance_X0_X1(node, X_ijk0, X);
+      if(node->pt_typ[dir]==P_UNIFORM)
+        dtmax[dir] = dist / (n[dir] - 1);
+      else
+        dtmax[dir] = dist / (2*n[dir] - 1);
+    }
+    return 1;
+  }
+  return 0;
+}
+
 /* check if we should reduce dt because hmin is only half of what
    find_hmin finds if we use fin.vol. (FV) */
 int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
@@ -1118,8 +1163,14 @@ int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
     if(di==0 && dj==1 && dk==0) dir = 1;
     if(di==0 && dj==0 && dk==1) dir = 2;
     if(dir>=0)
+    {
       if(node->pt_typ[dir] == P_UNIFORM)
         return 1; /* FV cell near face has only half the usual length */
+    }
+    else
+    {
+      return 0;
+    }
   }
   return 0;
 }
