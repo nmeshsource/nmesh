@@ -1448,8 +1448,12 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac,
   /* delete mylns contents */
   realloc_myln_nncats(mesh->myln, 0);
 
-  /* go over leaves if  mesh->lns is not NULL */
+  /* go over leaves if mesh->lns is not NULL */
   if(mesh->lns)
+  {
+    double dt_old = mesh->dt;
+    if(auto_dt) mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to max value */
+
     fornodelist(mesh->lns, elem)
     {
       tNode *node = elem->node;
@@ -1479,9 +1483,14 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac,
       /* check if we need to change node->dt and mesh->dt */
       if(auto_dt)
         adapt_node_dt_and_mesh_dt(node, auto_dt, dtfac, uniform_dtfac);
-    }
+    } /* end fornodelist */
+
+    if(mesh->dt != dt_old) { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
+  }
   else /* mesh->lns is NULL, so free myln */
+  {
     realloc_myln_nncats(mesh->myln, 0);
+  }
 
   mesh->nln = nid;
   return nid;
