@@ -1182,7 +1182,9 @@ int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
     }
     else
     {
-      return 0;
+      if(di==1 && node->pt_typ[0] == P_UNIFORM) return 1;
+      if(dj==1 && node->pt_typ[1] == P_UNIFORM) return 1;
+      if(dk==1 && node->pt_typ[2] == P_UNIFORM) return 1;
     }
   }
   return 0;
@@ -1204,6 +1206,7 @@ double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac,
   /* get hmin, ijk0, ijk1 */
   hmin = find_hmin(node, ijk0,ijk1);
   dtmax = hmin;
+//dt_mode=1;
   if(dt_mode==01)
   {
     double dtlim[3];
