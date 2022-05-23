@@ -1438,7 +1438,8 @@ int total_nnodes_in_myln(tMylnodes *myln)
 /**********************************************************************/
 /* Update array of leaf nodes on this proc, set nid.
    Also update node->dt anf mesh->dt if auto_dt=1 */
-long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac)
+long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac,
+                                  double uniform_dtfac)
 {
   tNlist *elem;
   long nid = 0;
@@ -1477,7 +1478,7 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, int auto_dt, double dtfac)
 
       /* check if we need to change node->dt and mesh->dt */
       if(auto_dt)
-        adapt_node_dt_and_mesh_dt(node, dtfac);
+        adapt_node_dt_and_mesh_dt(node, dtfac, uniform_dtfac);
     }
   else /* mesh->lns is NULL, so free myln */
     realloc_myln_nncats(mesh->myln, 0);
@@ -1491,7 +1492,8 @@ long update_mesh_myln_node_nid(tMesh *mesh)
 {
   int auto_dt  = Getv(Par("dt"), "auto");
   double dtfac = Getd(Par("dtfac"));
-  return update_mesh_myln_node_nid_dt(mesh, auto_dt, dtfac);
+  double uniform_dtfac = Getd(Par("uniform_dtfac"));
+  return update_mesh_myln_node_nid_dt(mesh, auto_dt, dtfac, uniform_dtfac);
 }
 
 /* return nid or -1 */
@@ -1526,7 +1528,7 @@ tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
     mesh->lns = first_nodelist(list);
 
   /* update nids but leave node->dt alone */
-  update_mesh_myln_node_nid_dt(mesh, 0, 0.25);
+  update_mesh_myln_node_nid_dt(mesh, 0, 0.25, 0.125);
 
   return lnl;
 }

@@ -212,7 +212,8 @@ double det_2_2_array(tArray *aM);
 void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower);
 double Cart_distance_x0_x1(tNode *node, double x0[3], double x1[3]);
 double find_hmin(tNode *node, int *ijk1, int *ijk2);
-double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac);
+double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac,
+                                 double uniform_dtfac);
 void set_nodecenter_xyz(tNode *node, double x[3]);
 
 /* ComplexFunctions.c */

@@ -1051,7 +1051,16 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
   hmin = distance_to_closest_point(node, n[0]-1,n[1]-1,n[2]-1, hmin,
                                    ijk0, ijk1);
 
-  /* reduce hmin by half if we use fin.vol. (FV) */
+  //PRF;printf(": pts=%d,%d -> hmin=%g\n", *ijk0,*ijk1, hmin);
+  return hmin;
+}
+
+/* check if we should reduce dt because hmin is only half of what
+   find_hmin finds if we use fin.vol. (FV) */
+int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
+{
+  int *n = node->n;
+
   if(*ijk0>=0 && *ijk1>=0)
   {
     int i0,j0,k0, i1,j1,k1, di,dj,dk;
@@ -1071,17 +1080,16 @@ double find_hmin(tNode *node, int *ijk0, int *ijk1)
     if(di==0 && dj==0 && dk==1) dir = 2;
     if(dir>=0)
       if(node->pt_typ[dir] == P_UNIFORM)
-        hmin *= 0.5; /* FV cell near face has only half the usual length */
+        return 1; /* FV cell near face has only half the usual length */
   }
-
-  //PRF;printf(": pts=%d,%d -> hmin=%g\n", *ijk0,*ijk1, hmin);
-  return hmin;
+  return 0;
 }
 
 
 /* change node->dt and mesh->dt based on the smallest grid spacing hmin,
    return this dt  */
-double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac)
+double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac,
+                                 double uniform_dtfac)
 {
   tMesh *mesh = node->pat->mesh;
   double dtm, hmin;
@@ -1090,7 +1098,9 @@ double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac)
   if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
   hmin = find_hmin(node, ijk0,ijk1);
   dtm = dtfac * hmin;
-  //dtm = dtm*0.999999;
+  /* effectively hmin may be reduced by half if we use fin.vol. (FV) */
+  if(hmin_is_in_uniform_direction(node, ijk0,ijk1))
+    dtm = uniform_dtfac * hmin;
 
   if(dtm < node->dt || node->dt <= 0.)
   {
