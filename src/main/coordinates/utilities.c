@@ -1094,7 +1094,7 @@ int distance_to_opposite_corner_ijk2(tNode *node, int *ijk0, int *ijk1,
   return 0;
 }
 
-/* Set the max possible 1D timestep dtmax in all 3 directions separately.
+/* Set the max possible 1D timestep dtlim in all 3 directions separately.
    This func usually takes ijk0 from find_hmin as input.
    The CFL fac dist/(2*n[0] - 1) is from page 16 of:
    Galerkin methods. In Discontinuous Galerkin Methods, pages 3-50. Springer,
@@ -1102,7 +1102,7 @@ int distance_to_opposite_corner_ijk2(tNode *node, int *ijk0, int *ijk1,
    Galerkin methods for convection-dominated problems. Journal of Scientific
    Computing, 16(3):173–261, 2001.
    nmesh-extra/resources/DG-Methods/Runge-Kutta_DG-Methods.pdf */
-int set_dtmax3_from_corner_ijk0(tNode *node, int *ijk0, double dtmax[3])
+int set_dtlim3_from_corner_ijk0(tNode *node, int *ijk0, double dtlim[3])
 {
   int *n = node->n;
 
@@ -1143,9 +1143,9 @@ int set_dtmax3_from_corner_ijk0(tNode *node, int *ijk0, double dtmax[3])
       L = dx_o_dXb*2.;      //length of node assuming local dx_o_dXb is const
 
       if(node->pt_typ[dir]==P_UNIFORM)
-        dtmax[dir] = L / (n[dir] - 1);
+        dtlim[dir] = L / (n[dir] - 1);
       else
-        dtmax[dir] = L / (2*n[dir] - 1);
+        dtlim[dir] = L / (2*n[dir] - 1);
     }
     return 1;
   }
@@ -1194,16 +1194,28 @@ int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
 double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac,
                                  double uniform_dtfac)
 {
+  int dt_mode=0; // old value
   tMesh *mesh = node->pat->mesh;
-  double dtm, hmin;
+  double dtm, hmin, dtmax;
   int ijk0[] = {-1}, ijk1[] = {-1};
 
   if(mesh->dt < node->dt || node->dt <= 0.) node->dt = mesh->dt;
+
+  /* get hmin, ijk0, ijk1 */
   hmin = find_hmin(node, ijk0,ijk1);
-  dtm = dtfac * hmin;
+  dtmax = hmin;
+  if(dt_mode==01)
+  {
+    double dtlim[3];
+    int ret = set_dtlim3_from_corner_ijk0(node, ijk0, dtlim);
+    if(ret)
+      dtmax = min3(dtlim[0],dtlim[1],dtlim[2]);
+  }
+
+  dtm = dtfac * dtmax;
   /* effectively hmin may be reduced by half if we use fin.vol. (FV) */
   if(hmin_is_in_uniform_direction(node, ijk0,ijk1))
-    dtm = uniform_dtfac * hmin;
+    dtm = uniform_dtfac * dtmax;
 
   if(dtm < node->dt || node->dt <= 0.)
   {
