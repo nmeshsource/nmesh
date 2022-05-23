@@ -26,7 +26,8 @@ int nmesh_main(tMesh *mesh)
 
   /* parameters */
   AddPar("physics", "", "what problem to solve");
-  AddPar("dt", "auto", "time step dt [#,auto], for auto: dt = dtfac * hmin");
+  AddPar("dt", "auto", "time step dt [#,auto,auto2]. auto computes dt. "
+         "auto: dt=dtfac*hmin, auto2 (from CFL limit): dt=dtfac*dtlim");
   AddPar("dtfac", "0.25", "Courant factor in: dt = dtfac * hmin");
   AddPar("uniform_dtfac", "0.125", "Courant factor on uniform grids where: "
          "dt = uniform_dtfac * hmin");

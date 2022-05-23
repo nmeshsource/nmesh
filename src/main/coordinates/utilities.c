@@ -1193,7 +1193,7 @@ int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
 
 /* change node->dt and mesh->dt based on the smallest grid spacing hmin,
    return this dt  */
-double adapt_node_dt_and_mesh_dt(tNode *node, double dtfac,
+double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
                                  double uniform_dtfac)
 {
   int dt_mode=0; // old value
