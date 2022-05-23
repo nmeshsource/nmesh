@@ -1452,7 +1452,11 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
   if(mesh->lns)
   {
     double dt_old = mesh->dt;
-    if(auto_dt) mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to max value */
+    if(auto_dt)
+    {
+      if(dt>0.) mesh->dt = dt;
+      else      mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to max value */
+    }
 
     fornodelist(mesh->lns, elem)
     {
