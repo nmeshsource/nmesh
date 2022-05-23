@@ -1196,7 +1196,6 @@ int hmin_is_in_uniform_direction(tNode *node, int *ijk0, int *ijk1)
 double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
                                  double uniform_dtfac)
 {
-  int dt_mode=0; // old value
   tMesh *mesh = node->pat->mesh;
   double dtm, hmin, dtmax;
   int ijk0[] = {-1}, ijk1[] = {-1};
@@ -1206,8 +1205,7 @@ double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
   /* get hmin, ijk0, ijk1 */
   hmin = find_hmin(node, ijk0,ijk1);
   dtmax = hmin;
-//dt_mode=1;
-  if(dt_mode==01)
+  if(auto_dt==2)
   {
     double dtlim[3];
     int ret = set_dtlim3_from_corner_ijk0(node, ijk0, dtlim);
