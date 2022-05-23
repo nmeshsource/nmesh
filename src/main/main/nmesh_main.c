@@ -28,7 +28,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("physics", "", "what problem to solve");
   AddPar("dt", "auto", "time step dt [#,auto], for auto: dt = dtfac * hmin");
   AddPar("dtfac", "0.25", "Courant factor in: dt = dtfac * hmin");
-  AddPar("uniform_dtfac", "0.125", "Courant factor on uniform grids is: "
+  AddPar("uniform_dtfac", "0.125", "Courant factor on uniform grids where: "
          "dt = uniform_dtfac * hmin");
   AddPar("iterations", "0", "number of mesh iterations");
   AddPar("finaltime", "0", "iterate until mesh reaches this time");
