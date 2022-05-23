@@ -291,7 +291,7 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
   tEvoSys *evosys = mesh->evosys;
   int i;
 
-  PRFs(":\n");
+  if(PR) PRFs(":\n");
 
   /* check if evo vars in u need myindc */
   if(evosys->u)
@@ -354,7 +354,7 @@ void free_all_myln_myindc_in_evosys(tMesh *mesh)
   tEvoSys *evosys = mesh->evosys;
   int i;
 
-  PRFs(":\n");
+  if(PR) PRFs(":\n");
 
   /* free myindc of u */
   if(evosys->u)

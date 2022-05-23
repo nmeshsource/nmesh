@@ -94,7 +94,7 @@ void free_all_surfaces(tNode *node)
 /* free all surfaces on all nodes in the mesh */
 void free_all_myln_surfaces(tMesh *mesh)
 {
-  PRFs(":\n");
+  if(PR) PRFs(":\n");
   TIMER_START;
   formylnodes(mesh)
   {
@@ -178,7 +178,7 @@ int init_all_surfaces(tNode *node)
 /* init all surfaces on all nodes in the mesh */
 void init_all_myln_surfaces(tMesh *mesh)
 {
-  PRFs(":\n");
+  if(PR) PRFs(":\n");
   TIMER_START;
   formylnodes(mesh)
   {
