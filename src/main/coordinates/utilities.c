@@ -1108,31 +1108,44 @@ int set_dtmax3_from_corner_ijk0(tNode *node, int *ijk0, double dtmax[3])
 
   if(*ijk0>=0)
   {
-    /* get i,j,k vals */
-    int k0 = kOfInd_n(*ijk0, n);
-    int j0 = jOfInd_n_k(*ijk0, n, k0);
-    int i0 = iOfInd_n_jk(*ijk0, n, j0,k0);
-    /* in i,j,k on other ends */
-    int ii = i0 ? 0 : n[0]-1;
-    int jj = j0 ? 0 : n[1]-1;
-    int kk = k0 ? 0 : n[2]-1;
-    /* pt index of other corner in all 3 dirs */
-    int ind[] = {Ind_n(ii,j0,k0, n), Ind_n(i0,jj,k0, n), Ind_n(i0,j0,kk, n)};
+    double Xb_ijk0[3], X_ijk0[3];
+    double Xb_d[3];
     int dir;
-    double X_ijk0[3], X[3], dist;
 
-    /* set coords X_ijk0 of corner at ijk0 */
-    XYZ_of_ijk(node, i0,j0,k0, X_ijk0);
+    /* set Xb and X of ijk0 */
+    XbYbZb_of_ind(node, *ijk0, Xb_ijk0);
+    XYZ_of_XbYbZb(node, Xb_ijk0, X_ijk0);
+
+    /* get Xb_d[dir] by moving a bit in for each dir */
+    for(dir=0; dir<3; dir++)
+    {
+      /* we assume Xb_ijk0 is on node face */
+      if(Xb_ijk0[dir]>0.) Xb_d[dir] = +0.99;
+      else                Xb_d[dir] = -0.99;
+    }
 
     /* set dt_max from dist */
     for(dir=0; dir<3; dir++)
     {
-      XYZ_of_ind(node, ind[dir], X); //set X coords of other corner
+      double Xb_in[3];
+      double X[3], dist, dx_o_dXb, L;
+      int d;
+
+      /* set Xb-coords of points that are a bit in */
+      for(d=0; d<3; d++) Xb_in[d] = Xb_ijk0[d];
+      Xb_in[dir] = Xb_d[dir];
+
+      /* get dist between point a bit in and X_ijk0 */
+      XYZ_of_XbYbZb(node, Xb_in, X); // set X coords of point a bit in
       dist  = Cart_distance_X0_X1(node, X_ijk0, X);
+
+      dx_o_dXb = dist/0.01; //ratio between dist in x and Xb coords
+      L = dx_o_dXb*2.;      //length of node assuming local dx_o_dXb is const
+
       if(node->pt_typ[dir]==P_UNIFORM)
-        dtmax[dir] = dist / (n[dir] - 1);
+        dtmax[dir] = L / (n[dir] - 1);
       else
-        dtmax[dir] = dist / (2*n[dir] - 1);
+        dtmax[dir] = L / (2*n[dir] - 1);
     }
     return 1;
   }
