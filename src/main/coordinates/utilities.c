@@ -1116,7 +1116,7 @@ int set_dtmax3_from_corner_ijk0(tNode *node, int *ijk0, double dtmax[3])
     XbYbZb_of_ind(node, *ijk0, Xb_ijk0);
     XYZ_of_XbYbZb(node, Xb_ijk0, X_ijk0);
 
-    /* get Xb_d[dir] by moving a bit in for each dir */
+    /* get Xb_d[dir] by moving in by 0.01 for each dir */
     for(dir=0; dir<3; dir++)
     {
       /* we assume Xb_ijk0 is on node face */
