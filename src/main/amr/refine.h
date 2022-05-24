@@ -38,6 +38,6 @@ enum
 /* struct that holds refinement method */
 typedef struct tREF {
   int type;       /* H_REFINE, P_REFINE */
-  int method;     /* NOREFINE, PARENT_n, ... */
+  int method;     /* REF_METH_DONOTHING, PARENT_n, ... */
   int n[3];       /* n to use if method=GIVEN_n */
 } tRef;
