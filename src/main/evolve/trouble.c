@@ -152,7 +152,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
-  /* Set ref to uniform. All nodes with trouble>0 shold have trouble_ref
+  /* Set ref to uniform. All nodes with trouble>0 should have trouble_ref
      set to uniform already. */
   /* loop over all nodes, and flag all troubled nodes for uniform grid */
   formylnodes_noomp(mesh)
@@ -181,7 +181,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   //   region when the radius changes a bit */
   //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
 
-  /* Set ref to LGL. All nodes with trouble>0 shold have trouble_ref
+  /* Set ref to LGL. All nodes with trouble<0 should have trouble_ref
      set to LGL already. */
   /* loop over all nodes, and flag all non-troubled nodes for LGL grid */
   formylnodes_noomp(mesh)
