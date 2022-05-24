@@ -16,7 +16,7 @@ enum
 /* refinement methods: i.e. vals for var method in tRef */
 enum
 {
-  NOREFINE,
+  REF_METH_DONOTHING=0,  /* do nothing */
   PARENT_n,              /* use same n as parent */
   PARENT_nO2,            /* use parent->n/2 */
   PARENT_nO2_P1,         /* use parent->n/2 + 1 */
@@ -30,7 +30,9 @@ enum
   PARENT_2n_P_LGL,       /* use parent->n*2, and LGL gridpoints */
   PARENT_2n_P_UNIFORM,   /* use parent->n*2, and UNIFORM gridpoints */
   GIVEN_n_P_LGL,         /* use given n, and LGL gridpoints */
-  GIVEN_n_P_UNIFORM      /* use given n, and UNIFORM gridpoints */
+  GIVEN_n_P_UNIFORM,     /* use given n, and UNIFORM gridpoints */
+  NREF_METHODS,          /* number of valid refinement methods */
+  REF_METH_INVALID       /* invalid refinement method */
 };
 
 /* struct that holds refinement method */
