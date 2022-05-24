@@ -300,7 +300,7 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
   snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
 
   /* redirect stdout and stderr for rank0 */
-  if(Rank0 && !Getv(Par("logfile_creation"),"no"))
+  if(Rank0 && Getv(Par("logfile_creation"),"yes"))
   {
     //snprintf(so,999, "%s.log", outdir);
     snprintf(so,999, f, outdir, 0);
@@ -312,7 +312,7 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
   }
 
   /* rank0 announces that others will be redirected as well */
-  if(Rank0 && nMPI_size()>1)
+  if(Rank0 && nMPI_size()>1 && !Getv(Par("logfile_creation"),"none"))
   {
     snprintf(so,999, f, outdir, 1);
     prdivider(3);
@@ -323,7 +323,7 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
 
   /* redirect stdout and stderr. Do it for all MPI ranks>0
      all output is collected in e.g. outdir/stdout.001 ... */
-  if(nMPI_rank()>0)
+  if(nMPI_rank()>0 && !Getv(Par("logfile_creation"),"none"))
   {
     snprintf(so,999, f, outdir, nMPI_rank());
     freopen(so, mode, stdout);
