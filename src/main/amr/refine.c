@@ -862,7 +862,8 @@ void refine_set_use_fv_if_pt_typ(tMesh *mesh, int pt_typ[3], int use_fv)
    ref->method. */
 int refine_synchronize_ref_method(tRef *ref)
 {
-  int Max_method;
+  int Max_method = ref->method;
+
   nMPI_Allreduce(&(ref->method), &Max_method, 1, nMPI_INT, nMPI_MAX);
   ref->method = Max_method;
   return Max_method;
