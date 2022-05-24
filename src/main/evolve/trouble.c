@@ -142,12 +142,10 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
 void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
+  int firstit;
   int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
   int ptLGL[] = { P_LGL, P_LGL, P_LGL };
   if(PR) PRFs(":\n");
-
-  /* set a save default for variable ref */
-  ref->method = NOREFINE;
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
@@ -155,6 +153,8 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   /* Set ref to uniform. All nodes with trouble>0 should have trouble_ref
      set to uniform already. */
   /* loop over all nodes, and flag all troubled nodes for uniform grid */
+  firstit = 1;
+  ref->method = REF_METH_DONOTHING;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -165,8 +165,15 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     /* mark troubled nodes as to be refined */
     if(node->dat->info->trouble > 0)
     {
+      tRef *info_ref = node->dat->info->trouble_ref;
+
+      if(!firstit)
+        if(info_ref->method != ref->method)
+          errorexit("node with trouble > 0 must all have same trouble_ref");
+      firstit = 0;
+
       /* set ref and node->rflag, since ref is global don't use OpenMP! */
-      ref[0] = node->dat->info->trouble_ref[0];
+      ref[0] = info_ref[0];
       node->rflag = ref->method;
     }
     else
@@ -174,6 +181,9 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
       node->rflag = 0;
     }
   }
+
+  /* get ref->method from my proc to all others */
+//  refine_synchronize_ref_method(ref);
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
@@ -184,6 +194,8 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   /* Set ref to LGL. All nodes with trouble<0 should have trouble_ref
      set to LGL already. */
   /* loop over all nodes, and flag all non-troubled nodes for LGL grid */
+  firstit = 1;
+  ref->method = REF_METH_DONOTHING;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -191,8 +203,15 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     /* mark non-troubled nodes as to be refined */
     if(node->dat->info->trouble <= -NOTROUBLES)
     {
+      tRef *info_ref = node->dat->info->trouble_ref;
+
+      if(!firstit)
+        if(info_ref->method != ref->method)
+          errorexit("node with trouble > 0 must all have same trouble_ref");
+      firstit = 0;
+
       /* set ref and node->rflag, since ref is global don't use OpenMP! */
-      ref[0] = node->dat->info->trouble_ref[0];
+      ref[0] = info_ref[0];
       node->rflag = ref->method;
     }
     else
@@ -200,6 +219,9 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
       node->rflag = 0;
     }
   }
+
+  /* get ref->method from my proc to all others */
+//  refine_synchronize_ref_method(ref);
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
