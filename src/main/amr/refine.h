@@ -32,7 +32,7 @@ enum
   GIVEN_n_P_LGL,         /* use given n, and LGL gridpoints */
   GIVEN_n_P_UNIFORM,     /* use given n, and UNIFORM gridpoints */
   NREF_METHODS,          /* number of valid refinement methods */
-  REF_METH_INVALID       /* invalid refinement method */
+  REF_METH_INVALID //invalid refinement method, add nothing beyond this!!!
 };
 
 /* struct that holds refinement method */

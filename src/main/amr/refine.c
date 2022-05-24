@@ -352,6 +352,9 @@ void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   int *nn        = calloc(size, sizeof(nn[0]));
   long **ref_nid = calloc(size, sizeof(ref_nid[0]));
 
+  if(ref->method >= REF_METH_INVALID)
+    errorexit("ref->method >= REF_METH_INVALID");
+
   if(!my_nid || !req || !nn || !ref_nid)
     errorexit("no memory for my_nid, req, nn, ref_nid");
 
@@ -852,6 +855,19 @@ void refine_set_use_fv_if_pt_typ(tMesh *mesh, int pt_typ[3], int use_fv)
     if(equal) node->dat->info->use_fv = use_fv;
   }
 }
+
+/* Synchronize ref->method on all procs. This assumes that some procs have
+   ref->method=REF_METH_DONOTHING, while others have one particular
+   value that is higher. We use MPI_Allreduce to set them all to the max
+   ref->method. */
+int refine_synchronize_ref_method(tRef *ref)
+{
+  int Max_method;
+  nMPI_Allreduce(&(ref->method), &Max_method, 1, nMPI_INT, nMPI_MAX);
+  ref->method = Max_method;
+  return Max_method;
+}
+
 
 /***************************************************************************/
 /* functions we can call to refine in some particular way */
