@@ -183,7 +183,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   }
 
   /* get ref->method from my proc to all others */
-//  refine_synchronize_ref_method(ref);
+  refine_synchronize_ref_method(ref);
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
@@ -221,7 +221,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   }
 
   /* get ref->method from my proc to all others */
-//  refine_synchronize_ref_method(ref);
+  refine_synchronize_ref_method(ref);
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
