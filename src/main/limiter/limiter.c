@@ -161,7 +161,8 @@ errorexit("qbar or theta_i is not finite!");
     if(theta_i < 1.) nlim++;
   }
 
-  return nlim;
+  if(nlim) return 1; /* troubled, could decide to set some other bit */
+  else     return 0; /* not troubled */
 }
 
 
@@ -340,5 +341,6 @@ int limiter_minmodB(tNode *node, tVarList *vl)
 
   free_array(Ac);
 
-  return nlim;
+  if(nlim) return 1; /* troubled, could decide to set some other bit */
+  else     return 0; /* not troubled */
 }
