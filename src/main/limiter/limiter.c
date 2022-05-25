@@ -56,7 +56,7 @@ int limdata_MRS(tNode *node, tVarList *vl)
     dat->ic[iq]->myindc->d[1] = min_in_1d_array(q, np, &im);
     dat->ic[iq]->myindc->d[2] = max_in_1d_array(q, np, &im);
   }
-  return nvals;
+  return 0; /* signal that all is ok */
 }
 
 /* funcs in MRS limiter */
@@ -216,7 +216,7 @@ int limdata_c000_100_010_001(tNode *node, tVarList *vl)
   }
 
   free_array(Ac);
-  return nvals;
+  return 0; /* signal that all is ok */
 }
 
 
