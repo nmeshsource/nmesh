@@ -441,3 +441,10 @@ int trouble_reset_evo_troubled_mesh(tMesh *mesh)
   }
   return 0;
 }
+
+/* return flag that tells us whether there was any trouble during an evo
+   step i.e. during any RK substep */
+int evolve_evosteps_troubled(tNode *node)
+{
+  return node->dat->info->evo_troubled;
+}
