@@ -36,3 +36,4 @@ int evolve_set_trouble_score_mesh(tMesh *mesh);
 void evolve_prepare_do_over_mesh(tMesh *mesh);
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh);
 void evolve_collect_u_p_data_mesh(tMesh *mesh, pVLList *u_p);
+int trouble_reset_evo_troubled_mesh(tMesh *mesh);

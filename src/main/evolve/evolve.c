@@ -64,6 +64,9 @@ int evolve_myln(tMesh *mesh)
     vlcopy(u_ch, allu); /* u_ch = allu */
   }
 
+  /* since this is the start of an evo step reset evo_troubled flag here: */
+  trouble_reset_evo_troubled_mesh(mesh);
+
   /* how we evolve the mesh */
   if(allnodes)
   {
@@ -132,20 +135,22 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int i;
+    int i, troubled;
 
     /* set time on all nodes */
     node->time = mesh->time;
     node->dt   = mesh->dt;
 
     /* set things before surface exchange, e.g. cons2prim */
+    troubled = 0;
     forList(u, i)
     {
       tVarList *vlr = ListEntry(rhs,i);
       tVarList *vlu = ListEntry(u,i);
       if(ListEntry(evosys->f[PRESURF],i))
-        ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+        troubled |= ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
     }
+    node->dat->info->evo_troubled |= troubled;
   }
 
   /* do surface exchange on entire mesh */
@@ -160,18 +165,21 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int i;
+    int i, troubled;
 
+    troubled = 0;
     forList(u, i)
     {
       /* set all sources */
       if(ListEntry(evosys->f[SETSRC],i))
-        ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i), ListEntry(u,i));
-
+        troubled |= ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i),
+                                                   ListEntry(u,i));
       /* set all volume RHSs */
       if(ListEntry(evosys->f[VOLRHS],i))
-        ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+        troubled |= ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i),
+                                                   ListEntry(u,i));
     }
+    node->dat->info->evo_troubled |= troubled;
   }
 
   /* After we have done all we can without the surface data, we now wait
@@ -184,12 +192,15 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int i;
+    int i, troubled;
 
     /* add all surface RHSs */
+    troubled = 0;
     forList(u, i)
       if(ListEntry(evosys->f[SURFRHS],i))
-        ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+        troubled |= ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i),
+                                                    ListEntry(u,i));
+    node->dat->info->evo_troubled |= troubled;
   }
 }
 
@@ -213,7 +224,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
-        ListEntry(evosys->f[PRELIM],i)(node, vl);
+        int troubled = 0;
+        troubled |= ListEntry(evosys->f[PRELIM],i)(node, vl);
+        node->dat->info->evo_troubled |= troubled;
       }
     }
   }
@@ -230,7 +243,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
       formylnodes(mesh)
       {
         tNode *node = MyLnode;
-        ListEntry(evosys->f[LIMDATA],i)(node, vl);
+        int troubled = 0;
+        troubled |= ListEntry(evosys->f[LIMDATA],i)(node, vl);
+        node->dat->info->evo_troubled |= troubled;
       }
 
       /* initiate indc exchange */
@@ -253,6 +268,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
         /* increase nlim if limiter was active, otherwise reset nlim */
         if(ret) node->dat->info->nlim += 1;
         else    node->dat->info->nlim = 0;
+
+        /* also count a ret!=0 as trouble */
+        node->dat->info->evo_troubled |= ret;
       }
     }
   } /* end loop over list of varlists */

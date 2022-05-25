@@ -430,3 +430,14 @@ int trouble_score(tNode *node, int troubled)
     else   return  0; /* keep dg */
   }
 }
+
+/* reset evo_troubled flag on all nodes */
+int trouble_reset_evo_troubled_mesh(tMesh *mesh)
+{
+  formylnodes_noomp(mesh)
+  {
+    tNode *node = MyLnode;
+    node->dat->info->evo_troubled = 0;
+  }
+  return 0;
+}
