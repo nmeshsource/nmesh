@@ -651,29 +651,7 @@ void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
 void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
 {
   tNode *node_old;
-
-/*
-tMesh *mesh = node->pat->mesh;
-static int firstcall=1;
-if(node->nid==3 && node->time>0.099 && firstcall)
-{
-write_var(node, "GRHD_D", 1, -2,-node->time);
-vtk_output3dcoef_meshvar(mesh, "GRHD_D", -2, -node->time);
-Yo(88);
-GRHD_Persson_trouble(node, Ind("GRHD_D"), 4.,6.);
-}
-*/
   node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
-/*
-if(node->nid==3 && node->time>0.099 && firstcall)
-{
-write_var(node, "GRHD_D", 1, -1,node->time);
-vtk_output3dcoef_meshvar(mesh, "GRHD_D", -1, node->time);
-Yo(99);
-GRHD_Persson_trouble(node, Ind("GRHD_D"), 4.,6.);
-firstcall=0;
-}
-*/
   update_node_n_pt_typ_free_node_old(node, node_old);
 }
 
