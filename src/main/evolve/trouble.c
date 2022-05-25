@@ -229,8 +229,8 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   //   region when the radius changes a bit */
   //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
 
-  /* NOTE: We do NOT clear the rflag here, so that we can later check which
-           nodes were modified */
+  /* clear rflag on all leaf nodes */
+  refine_set_rflag_forall_nodes(mesh, 0);
 
   /* update, nids won't change but hmin and thus dt might */
   update_mesh_myln_node_nid(mesh);
@@ -273,9 +273,6 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
 
   /* switch nodes based on trouble flag */
   evolve_trouble_switch_dg_fv_mesh(mesh);
-
-  /* clear rflag on all leaf nodes */
-  refine_set_rflag_forall_nodes(mesh, 0);
 }
 
 /* switch back to dg */
@@ -298,7 +295,9 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
     int i;
 
     /* set some things again, e.g. cons2prim */
-    if(node->rflag) /* we only need to do this on nodes that were refined */
+    /* this is only needed on nodes that had a very neg. trouble score and
+       were thus converted to dg */
+    if(node->dat->info->trouble <= -NOTROUBLES)
       forList(u, i)
       {
         tVarList *vlr = ListEntry(rhs,i);
@@ -313,8 +312,6 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
         if(ListEntry(evosys->f[PRELIM],i))
           ListEntry(evosys->f[PRELIM],i)(node, vlu);
       }
-     /* clear rflag */
-    node->rflag = 0;
   }
 }
 
