@@ -410,8 +410,8 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
       break;
   }
 
-  /* return trouble score */
-  return trouble_score(node, troubled);
+  /* return whether there is trouble */
+  return troubled;
 }
 
 /* set trouble score ts based on whether node is troubled, and dg or fv */
