@@ -7,7 +7,7 @@
 #define PR 0
 
 /* Determine and set trouble score in a node,
-   i.e. set node->dat->info->trouble .
+   i.e. set node->dat->info->trbl_score .
    Note evosys->f[TROUBLE] returns a score of 1, 0, or -1:
     1 trouble  =>  switch to more robust method (e.g. fv)
     0 node ok with current method  =>  do nothing
@@ -62,39 +62,39 @@ int evolve_set_trouble_score(tNode *node)
   //pr_nodename(node);
   //printf(" tr_max=%d troubled=%d", tr_max, troubled);
 
-  /* set node->dat->info->trouble */
+  /* set node->dat->info->trbl_score */
   if(troubled>0) /* i.e. there is trouble now */
   {
     /* if there was no trouble, we set the trouble score to 1 */
-    if(node->dat->info->trouble<=0) node->dat->info->trouble  = 1;
+    if(node->dat->info->trbl_score<=0) node->dat->info->trbl_score  = 1;
     /* if there was trouble before, we continuously increase the score */
-    else                            node->dat->info->trouble += 1;
+    else                            node->dat->info->trbl_score += 1;
   }
   else if(troubled==0) /* is ok, keep node as is */
   {
-    node->dat->info->trouble = 0;
+    node->dat->info->trbl_score = 0;
   }
   else /* all is good, can switch back to dg */
   {
     /* if there was trouble, we set the trouble score to -1 */
-    if(node->dat->info->trouble>=0) node->dat->info->trouble  = -1;
+    if(node->dat->info->trbl_score>=0) node->dat->info->trbl_score  = -1;
     /* if there was no trouble, we continuously lower the score */
-    else                            node->dat->info->trouble -= 1;
+    else                            node->dat->info->trbl_score -= 1;
   }
 
   /* make sure trouble score does not become too large or small */
-  if(node->dat->info->trouble < -max_trouble)
-    node->dat->info->trouble = -max_trouble;
-  if(node->dat->info->trouble > max_trouble)
-    node->dat->info->trouble = max_trouble;
+  if(node->dat->info->trbl_score < -max_trouble)
+    node->dat->info->trbl_score = -max_trouble;
+  if(node->dat->info->trbl_score > max_trouble)
+    node->dat->info->trbl_score = max_trouble;
 
-  //printf(" ->trouble=%d\n", node->dat->info->trouble);
+  //printf(" ->trbl_score=%d\n", node->dat->info->trbl_score);
 
-  return node->dat->info->trouble;
+  return node->dat->info->trbl_score;
 }
 
 /* determine and set trouble score in each node,
-   i.e. set node->dat->info->trouble */
+   i.e. set node->dat->info->trbl_score */
 int evolve_set_trouble_score_mesh(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
@@ -113,11 +113,11 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
     evolve_set_trouble_score(node);
   }
 
-  /* now find rank-local max of node->dat->info->trouble */
+  /* now find rank-local max of node->dat->info->trbl_score */
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
-    int trb = node->dat->info->trouble;
+    int trb = node->dat->info->trbl_score;
     if(trb>max_trb) max_trb = trb; /* max trouble */
     if(trb<min_trb) min_trb = trb; /* min trouble */
   }
@@ -138,7 +138,7 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
 }
 
 
-/* switch bewteen fv and dg based on node->dat->info->trouble flag */
+/* switch bewteen fv and dg based on node->dat->info->trbl_score flag */
 void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
@@ -163,9 +163,9 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     node->time = mesh->time;
 
     /* mark troubled nodes as to be refined */
-    if(node->dat->info->trouble > 0)
+    if(node->dat->info->trbl_score > 0)
     {
-      tRef *info_ref = node->dat->info->trouble_ref;
+      tRef *info_ref = node->dat->info->trbl_ref;
 
       if(!firstit)
         if(info_ref->method != ref->method)
@@ -201,9 +201,9 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     tNode *node = MyLnode;
 
     /* mark non-troubled nodes as to be refined */
-    if(node->dat->info->trouble <= -NOTROUBLES)
+    if(node->dat->info->trbl_score <= -NOTROUBLES)
     {
-      tRef *info_ref = node->dat->info->trouble_ref;
+      tRef *info_ref = node->dat->info->trbl_ref;
 
       if(!firstit)
         if(info_ref->method != ref->method)
@@ -297,7 +297,7 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
     /* set some things again, e.g. cons2prim */
     /* this is only needed on nodes that had a very neg. trouble score and
        were thus converted to dg */
-    if(node->dat->info->trouble <= -NOTROUBLES)
+    if(node->dat->info->trbl_score <= -NOTROUBLES)
       forList(u, i)
       {
         tVarList *vlr = ListEntry(rhs,i);
