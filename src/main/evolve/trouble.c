@@ -286,7 +286,7 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   evolve_trouble_switch_dg_fv_mesh(mesh);
   /* now some aux vars (and others) are not set */
 
-  /* to update some vars call funcs in PRESURF, SETSRC, PRELIM
+  /* to update some vars by calling funcs in PRESURF, SETSRC
      often PRESURF does cons2prim, SETSRC sets stress-energy,
      PRELIM sets ADM metric */
   formylnodes(mesh)
@@ -309,8 +309,10 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
         if(ListEntry(evosys->f[SETSRC],i))
           ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
 
-        if(ListEntry(evosys->f[PRELIM],i))
-          ListEntry(evosys->f[PRELIM],i)(node, vlu);
+        /* we do not need to run PRELIM, since evolve_limiter_mesh will
+           run that right after evolve_switch_nontroubled_nodes_mesh */
+        /* if(ListEntry(evosys->f[PRELIM],i))
+             ListEntry(evosys->f[PRELIM],i)(node, vlu);*/
       }
   }
 }
