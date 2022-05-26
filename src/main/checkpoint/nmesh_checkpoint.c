@@ -10,6 +10,13 @@ int nmesh_checkpoint(tMesh *mesh)
   printf("Adding checkpoint\n");
 
   /* functions */
+  /* NOTE: checkpoint is not scheduled here because it is directly called
+           by function evolve_mesh from main.c. In evolve_mesh we have:
+     ...
+     RunFun(ANALYZE);
+     ...
+     checkpoint_save_if_needed(mesh, 0);
+     ...  */
 
   /* variables */
 
