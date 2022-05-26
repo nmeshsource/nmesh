@@ -278,43 +278,10 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
 /* switch back to dg */
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 {
-  tEvoSys *evosys = mesh->evosys;
-  pVLList *u   = evosys->u;
-  pVLList *rhs = evosys->rhs;
-
   /* switch nodes based on trouble flag */
   evolve_trouble_switch_dg_fv_mesh(mesh);
   /* now some aux vars (and others) are not set */
-
-  /* to update some vars by calling funcs in PRESURF, SETSRC
-     often PRESURF does cons2prim, SETSRC sets stress-energy,
-     PRELIM sets ADM metric */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int i;
-
-    /* set some things again, e.g. cons2prim */
-    /* this is only needed on nodes that had a very neg. trouble score and
-       were thus converted to dg */
-    if(node->dat->info->trbl_score <= -NOTROUBLES)
-      forList(u, i)
-      {
-        tVarList *vlr = ListEntry(rhs,i);
-        tVarList *vlu = ListEntry(u,i);
-
-        if(ListEntry(evosys->f[PRESURF],i))
-          ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
-
-        if(ListEntry(evosys->f[SETSRC],i))
-          ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
-
-        /* we do not need to run PRELIM, since evolve_limiter_mesh will
-           run that right after evolve_switch_nontroubled_nodes_mesh */
-        /* if(ListEntry(evosys->f[PRELIM],i))
-             ListEntry(evosys->f[PRELIM],i)(node, vlu);*/
-      }
-  }
+  /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
 }
 
 /* Set myindc for u_p to get min/max of u_p needed for a RDMP trouble indicator.

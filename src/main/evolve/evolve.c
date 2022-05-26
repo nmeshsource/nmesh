@@ -90,10 +90,15 @@ int evolve_myln(tMesh *mesh)
     {
       /* switch to dg */
       evolve_switch_nontroubled_nodes_mesh(mesh);
+      /* now some aux vars (and others) are not set */
     }
 
     /* we limit the final u only here */
     evolve_limiter_mesh(mesh, evosys->u);
+
+    /* update some vars by calling funcs in PRESURF, SETSRC
+       often PRESURF does cons2prim, SETSRC sets stress-energy */
+    evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs, evosys->u);
   }
   else /* evolve each node on its own */
   {
@@ -276,6 +281,41 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
   } /* end loop over list of varlists */
 }
 
+/* update some vars by calling funcs in PRESURF, SETSRC
+   often PRESURF does cons2prim, SETSRC sets stress-energy,
+   PRELIM sets ADM metric */
+void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
+                                                pVLList *rhs, pVLList *u)
+{
+  tEvoSys *evosys = mesh->evosys;
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int i;
+
+    /* set some things again, e.g. cons2prim */
+    /* this is only needed on nodes that had a very neg. trouble score and
+       were thus converted to dg */
+    if(node->dat->info->trbl_score <= -NOTROUBLES)
+      forList(u, i)
+      {
+        tVarList *vlr = ListEntry(rhs,i);
+        tVarList *vlu = ListEntry(u,i);
+
+        if(ListEntry(evosys->f[PRESURF],i))
+          ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+
+        if(ListEntry(evosys->f[SETSRC],i))
+          ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
+
+        /* we do not need to run PRELIM, since evolve_limiter_mesh will
+           run right before evolve_setsrc_mesh is called */
+        /* if(ListEntry(evosys->f[PRELIM],i))
+             ListEntry(evosys->f[PRELIM],i)(node, vlu);*/
+      }
+  }
+}
 
 /* apply filters to all evo subsystems */
 int evolve_filter_evosys_mesh(tMesh *mesh)
