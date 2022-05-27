@@ -219,44 +219,37 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
-  int i;
+  int j;
 
   if(PR) PRFs(":\n");
 
-  /* loop over list of varlists and call funcs that we need before limiters */
-  forList(u, i)
+  /* loop over all nodes before MPI requests */
+  formylnodes(mesh)
   {
-    tVarList *vl = ListEntry(u,i);
+    tNode *node = MyLnode;
+    int i, troubled;
 
-    if(ListEntry(evosys->f[PRELIM],i))
+    troubled = 0;
+    forList(u, i)
     {
-      /* call prelim functions */
-      formylnodes(mesh)
-      {
-        tNode *node = MyLnode;
-        int troubled = 0;
-        troubled |= ListEntry(evosys->f[PRELIM],i)(node, vl);
-        node->dat->info->evo_troubled |= troubled;
-      }
+      /* call funcs that we need before limiters */
+      if(ListEntry(evosys->f[PRELIM],i))
+        troubled |= ListEntry(evosys->f[PRELIM],i)(node, ListEntry(u,i));
+
+      /* set data limiter needs in myindc arrays of each node */
+      if(ListEntry(evosys->f[LIMDATA],i))
+        troubled |= ListEntry(evosys->f[LIMDATA],i)(node, ListEntry(u,i));
     }
+    node->dat->info->evo_troubled |= troubled;
   }
 
-  /* loop over list of varlists */
-  forList(u, i)
+  /* loop over list of varlists, to do MPI exchange */
+  forList(u, j)
   {
-    tVarList *vl = ListEntry(u,i);
-
-    /* set limiter data in indicators (indc) */
-    if(ListEntry(evosys->f[LIMDATA],i))
+    /* exchange data in indicators (indc) if needed */
+    if(ListEntry(evosys->f[LIMDATA],j))
     {
-      /* set data limiter needs in myindc arrays of each node */
-      formylnodes(mesh)
-      {
-        tNode *node = MyLnode;
-        int troubled = 0;
-        troubled |= ListEntry(evosys->f[LIMDATA],i)(node, vl);
-        node->dat->info->evo_troubled |= troubled;
-      }
+      tVarList *vl = ListEntry(u,j);
 
       /* initiate indc exchange */
       request_all_myln_indc_exchange_for_vl(mesh, vl);
@@ -265,15 +258,20 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
       /* now get the indicators and wait for MPI buffers if necessary */
       get_all_myln_indc_for_vl(mesh, vl);
     }
+  }
 
-    /* apply limiter */
-    if(ListEntry(evosys->f[LIMITER],i))
+  /* loop over all nodes after MPI requests */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int i;
+
+    forList(u, i)
     {
-      /* use limiter on each node */
-      formylnodes(mesh)
+      /* apply limiter */
+      if(ListEntry(evosys->f[LIMITER],i))
       {
-        tNode *node = MyLnode;
-        int ret = ListEntry(evosys->f[LIMITER],i)(node, vl);
+        int ret = ListEntry(evosys->f[LIMITER],i)(node, ListEntry(u,i));
 
         /* increase nlim if limiter was active, otherwise reset nlim */
         if(ret) node->dat->info->nlim += 1;
@@ -283,7 +281,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
         node->dat->info->evo_troubled |= ret;
       }
     }
-  } /* end loop over list of varlists */
+  }
 }
 
 /* update some vars by calling funcs in PRESURF, SETSRC
