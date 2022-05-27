@@ -250,7 +250,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
     if(ListEntry(evosys->f[LIMDATA],j))
     {
       tVarList *vl = ListEntry(u,j);
-
+      /* NOTE: we should combine the vl for each j into one long varlist,
+               and then call request_all_myln_indc_exchange_for_vl for it! */
       /* initiate indc exchange */
       request_all_myln_indc_exchange_for_vl(mesh, vl);
       /* After this we could do work. MPI is now busy sending buffers */
@@ -260,7 +261,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
     }
   }
 
-  /* loop over all nodes after MPI requests */
+  /* loop over all nodes after MPI exchange */
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
