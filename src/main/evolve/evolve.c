@@ -70,17 +70,17 @@ int evolve_myln(tMesh *mesh)
   /* how we evolve the mesh */
   if(allnodes)
   {
-    int ts;
+    int trouble_score;
 
     /* make one full evo step */
     Evolve_mesh(mesh);
 
     /* get trouble score, and redo step with fv or switch back to dg */
-    ts = evolve_set_trouble_score_mesh(mesh);
-    //ts = 0;
-    //PRF;printf(": ts=%d\n", ts);
-    if(ts>0)
+    trouble_score = evolve_set_trouble_score_mesh(mesh);
+    if(trouble_score>0)
     {
+      PRF;printf(": trouble_score=%d (bad) => take back step & "
+                 "switch troubled nodes\n", trouble_score);
       /* go back to u_p and switch to fv */
       evolve_prepare_do_over_mesh(mesh);
 
@@ -89,10 +89,13 @@ int evolve_myln(tMesh *mesh)
       evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
 
       /* redo evo step */
+      PRF;printf(": redo evo step\n");
       Evolve_mesh(mesh);
     }
-    else if(ts<=-NOTROUBLES)
+    else if(trouble_score<=-NOTROUBLES)
     {
+      PRF;printf(": trouble_score=%d (great) => switch nontroubled nodes\n",
+                 trouble_score);
       /* switch to dg */
       evolve_switch_nontroubled_nodes_mesh(mesh);
       /* now some aux vars (and others) are not set */
