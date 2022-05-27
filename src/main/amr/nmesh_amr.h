@@ -502,6 +502,7 @@ char *nodename(tNode *node, char *s, int slen);
 long node_location(tNode *node);
 tNode *node_from_location_str(tPat *pat, char *loc);
 tNode *node_from_nodename(tMesh *mesh,  char *name);
+int has_nodename(tNode *node, char *nname);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);

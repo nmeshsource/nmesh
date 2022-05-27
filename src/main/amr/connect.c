@@ -284,6 +284,17 @@ tNode *node_from_nodename(tMesh *mesh,  char *name)
   return node_from_location_str(pat, loc);
 }
 
+/* check if a node has the name in string nname */
+int has_nodename(tNode *node, char *nname)
+{
+  char myname[128];
+  nodename(node, myname,128);  /* get name of node into myname */
+  if(strcmp(myname, nname)==0) /* if myname=nname */
+    return 1;
+  else
+    return 0;
+}
+
 
 /* is node on a face? */
 int node_is_at_face(tNode *node, int face)
