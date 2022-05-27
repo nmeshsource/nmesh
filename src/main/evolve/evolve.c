@@ -83,6 +83,11 @@ int evolve_myln(tMesh *mesh)
     {
       /* go back to u_p and switch to fv */
       evolve_prepare_do_over_mesh(mesh);
+
+      /* now all new fv nodes have newly interpolated evo vars,
+         so we need to limit them again */
+      //evolve_limiter_again_troubled_nodes_mesh(mesh, evosys->u);
+
       /* redo evo step */
       Evolve_mesh(mesh);
     }
