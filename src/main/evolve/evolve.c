@@ -86,7 +86,7 @@ int evolve_myln(tMesh *mesh)
 
       /* now all new fv nodes have newly interpolated evo vars,
          so we need to limit them again */
-      //evolve_limiter_again_troubled_nodes_mesh(mesh, evosys->u);
+      evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
 
       /* redo evo step */
       Evolve_mesh(mesh);
