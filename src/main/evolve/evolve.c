@@ -236,18 +236,21 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     tNode *node = MyLnode;
     int i, troubled;
 
-    troubled = 0;
-    forList(u, i)
+    if(node->dat->info->trbl_score > minscore)
     {
-      /* call funcs that we need before limiters */
-      if(ListEntry(evosys->f[PRELIM],i))
-        troubled |= ListEntry(evosys->f[PRELIM],i)(node, ListEntry(u,i));
+      troubled = 0;
+      forList(u, i)
+      {
+        /* call funcs that we need before limiters */
+        if(ListEntry(evosys->f[PRELIM],i))
+          troubled |= ListEntry(evosys->f[PRELIM],i)(node, ListEntry(u,i));
 
-      /* set data limiter needs in myindc arrays of each node */
-      if(ListEntry(evosys->f[LIMDATA],i))
-        troubled |= ListEntry(evosys->f[LIMDATA],i)(node, ListEntry(u,i));
-    }
-    node->dat->info->evo_troubled |= troubled;
+        /* set data limiter needs in myindc arrays of each node */
+        if(ListEntry(evosys->f[LIMDATA],i))
+          troubled |= ListEntry(evosys->f[LIMDATA],i)(node, ListEntry(u,i));
+      }
+      node->dat->info->evo_troubled |= troubled;
+    } /* end if */
   }
 
   /* create varlist that needs MPI exchange */
@@ -275,21 +278,24 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     tNode *node = MyLnode;
     int i;
 
-    forList(u, i)
+    if(node->dat->info->trbl_score > minscore)
     {
-      /* apply limiter */
-      if(ListEntry(evosys->f[LIMITER],i))
+      forList(u, i)
       {
-        int ret = ListEntry(evosys->f[LIMITER],i)(node, ListEntry(u,i));
+        /* apply limiter */
+        if(ListEntry(evosys->f[LIMITER],i))
+        {
+          int ret = ListEntry(evosys->f[LIMITER],i)(node, ListEntry(u,i));
 
-        /* increase nlim if limiter was active, otherwise reset nlim */
-        if(ret) node->dat->info->nlim += 1;
-        else    node->dat->info->nlim = 0;
+          /* increase nlim if limiter was active, otherwise reset nlim */
+          if(ret) node->dat->info->nlim += 1;
+          else    node->dat->info->nlim = 0;
 
-        /* also count a ret!=0 as trouble */
-        node->dat->info->evo_troubled |= ret;
+          /* also count a ret!=0 as trouble */
+          node->dat->info->evo_troubled |= ret;
+        }
       }
-    }
+    } /* end if */
   }
 }
 
