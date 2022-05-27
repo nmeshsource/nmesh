@@ -30,19 +30,19 @@ void evolve_RK4_mesh(tMesh *mesh)
 
   add_pVLList(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
-  evolve_limiter_mesh(mesh, w);
+  evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt/3., r, vladdto,0);      // u += r dt/3
 
   add_pVLList(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
-  evolve_limiter_mesh(mesh, w);
+  evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt/3., r, vladdto,0);      // u += r dt/3
 
   add_pVLList(w, 1., u_p, dt, r, vladd,0);    // w  = u_p + r dt
   mesh->time = t+dt;
-  evolve_limiter_mesh(mesh, w);
+  evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);      // u += r dt/6
   mesh->time = t+dt;                          // we are now at t+dt
@@ -96,14 +96,14 @@ void evolve_sspRK3_mesh(tMesh *mesh)
 
   add_pVLList(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
   mesh->time = t+dt;                           // c_2=1 from Butcher tab.
-  evolve_limiter_mesh(mesh, w);
+  evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);       // u += r dt/6
 
   addto_pVLList(w, dt, r, vladdto,0);          // w += r dt
   add_pVLList(w, 0.75, u_p, 0.25, w, vladd,0); // w = 0.75*u_p + 0.25*w
   mesh->time = t+0.5*dt;                       // c_3=1/2 from Butcher tab.
-  evolve_limiter_mesh(mesh, w);
+  evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
   mesh->time = t+dt;                           // we are now at t+dt

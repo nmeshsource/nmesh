@@ -99,7 +99,7 @@ int evolve_myln(tMesh *mesh)
     }
 
     /* we limit the final u only here */
-    evolve_limiter_mesh(mesh, evosys->u);
+    evolve_limiter_mesh(mesh, evosys->u, 0);
 
     /* update some vars by calling funcs in PRESURF, SETSRC
        often PRESURF does cons2prim, SETSRC sets stress-energy */
@@ -214,13 +214,19 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   }
 }
 
-/* apply limiters to evo subsystems. */
+/* Apply limiters to evo subsystems. We do it only if trbl_score > minscore.
+   If opt=0 minscore=INT_MIN so that we always do it.
+   If opt=1 minscore=0       so that we do only for troubled nodes. */
 /* Version for entire mesh: */
-void evolve_limiter_mesh(tMesh *mesh, pVLList *u)
+void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 {
   tEvoSys *evosys = mesh->evosys;
   int j;
   tVarList *vl;
+  int minscore;
+
+  if(opt==1) minscore = 0;
+  else       minscore = INT_MIN;
 
   if(PR) PRFs(":\n");
 
@@ -322,6 +328,7 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
       }
   }
 }
+
 
 /* apply filters to all evo subsystems */
 int evolve_filter_evosys_mesh(tMesh *mesh)
