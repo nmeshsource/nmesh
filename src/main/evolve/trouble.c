@@ -400,6 +400,19 @@ int trouble_score(tNode *node, int troubled)
   }
 }
 
+/* print debug info for the node named "nname" */
+void trouble_print_if_name(tNode *node, char *nname, int trbl, char *text)
+{
+  int fv = node->dat->info->use_fv;
+  char myname[99];
+  nodename(node, myname,99);   /* get name of node into myname */
+  if(strcmp(myname, nname)==0) /* if myname=nname */
+  {
+    PRF;printf(": %s fv=%d, %s trbl=%d => score=%d\n", nname, fv, text,
+               trbl, trouble_score(node, trbl));
+  }
+}
+
 /* reset evo_troubled flag on all nodes */
 int trouble_reset_evo_troubled_mesh(tMesh *mesh)
 {
