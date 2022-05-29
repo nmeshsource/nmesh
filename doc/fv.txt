@@ -26,7 +26,7 @@ o   |   o   |   o   |   o   |   o   |   o   |   o
       f*_{i-1/2}       f*_{i+1/2}
 Note, RHS_i is the quantity that would be the divergence of the flux in the
 dg method.
-RHS_i = -(f*_{i-1/2} - f*_{i+1/2})/h works for all interior points.
+RHS_i = -(f*_{i+1/2} - f*_{i-1/2})/h works for all interior points.
 
 The points at the ends of the node are dealt with differently!
 First we interpret the final points to be moved in by h/4, so that we get e.g.:
@@ -230,3 +230,34 @@ If:  fv_divf_extrap = dnfn_extrap1
   to divf. Then all terms are at facepoint o.
  -any interpolation in e.g. scalarwave1_surf_rhs_u is then switched off
 *dg_add_surface_fluxes_sign skips fv nodes in this case
+
+
+=============================================================================
+
+
+fv with non-Cartesian coordinates X = X(x)
+==========================================
+Assume that we have just an advection equation
+d_t u + d_x f(u) = 0  with f(u)=u.
+Then if we set u=const we should always have d_t u =0.
+
+When we compute on the X-grid, we need to take differences like
+RHS = -(f*_{i+1/2} sqrtgdiag / w - f*_{i-1/2} sqrtgdiag / w).
+Here
+w         = distance between midpoints in X-coords and
+sqrtgdiag = \sqrt{\gamma^{\bar{i}\bar{i}}}, i.e. the sqrt of the diagonal
+            components of upper index 3-metric in Xb-coords.
+
+Since the fluxes f*_{i+1/2} and f*_{i-1/2} are reconstructed at midpoints
+one may think that sqrtgdiag (and any normals one may need) should also be
+the ones at these midpoints. In our example with u=const in the advection
+equation we get f*=const. But sqrtgdiag will be different on midpoint i-1/2
+and i+1/2. Thus RHS will not be 0!!! This is bad!
+So I expect that both sqrtgdiag factors in
+RHS = -(f*_{i+1/2} sqrtgdiag / w - f*_{i-1/2} sqrtgdiag / w)
+as well as any normals we need should be computed at gridpoint i, and NOT at
+the midpoints!!!
+
+Some time ago we introduced the par coordinates_midpoint_data, so that we
+can have dX/dx on X midpoints. From this we can then get sqrtgdiag, or the
+normals at the midpoints. It seems this should never be used!!!
