@@ -260,6 +260,16 @@ typedef struct tNFACE {
 
 
 /***********************************************************************/
+/* a single point */
+/***********************************************************************/
+/* all the info about one grid point */
+typedef struct tPOINT{
+  tNode *node;   // node we are on
+  int ijk;       // index of point in node
+} tPoint;
+
+
+/***********************************************************************/
 /* other useful objects */
 /***********************************************************************/
 /* arrays */
@@ -475,6 +485,8 @@ void printnfaces_on_f(tNode *node, int f);
 void printnfaces(tNode *node);
 void printref(tRef *ref);
 void print_n_pt_typ(tNode *node);
+void printvar_atpoint(tPoint *pt, int vi);
+void printvarlist_atpoint(tPoint *pt, tVarList *vl);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);

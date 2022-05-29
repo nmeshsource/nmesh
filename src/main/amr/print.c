@@ -774,3 +774,49 @@ void print_n_pt_typ(tNode *node)
   for(d=0; d<3; d++) printf("%d ", node->pt_typ[d]);
   printf("\n");
 }
+
+/* print info about one point */
+void printpoint(tPoint *pt)
+{
+  tNode *node = pt->node;
+  int ijk = pt->ijk;
+  pr_nodename(node);
+  printf(" ijk=%d\n", ijk);
+}
+
+/* print var at one point */
+void printvar_atpoint(tPoint *pt, int vi)
+{
+  tNode *node = pt->node;
+  int ijk = pt->ijk;
+  tMesh *mesh = node->pat->mesh;
+  char *name = VarName(vi);
+  tDat *dat = node->dat;
+  tArray *va = dat ? dat->v[vi] : NULL;
+
+  pr_nodename(node);
+  printf(" ijk=%d: %s", ijk, name);
+  if(va) printf("=%g", Arrd(va)[ijk]);
+  printf("\n");
+}
+
+/* print varlist at one point */
+void printvarlist_atpoint(tPoint *pt, tVarList *vl)
+{
+  if(vl)
+  {
+    int i, vi;
+
+    PRF;printf(": time=%g n=%d\n", vl->time, vl->n);
+    forvl(vl, i)
+    {
+      vi = Vind(vl, i);
+      printf("  %d Vind=%d ", i, vi);
+      printvar_atpoint(pt, vi);
+    }
+  }
+  else
+  {
+    PRF;printf(": NULL\n");
+  }
+}
