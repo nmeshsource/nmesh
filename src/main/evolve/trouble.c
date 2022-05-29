@@ -31,7 +31,7 @@ int evolve_set_trouble_score(tNode *node)
 
   if(node->dat == NULL) errorexit("node->dat is NULL");
 
-  if(PR) PRFs(":\n");
+  //if(PR) PRFs(":\n");
 
   /* check all evo systems for trouble and put max into tr_max */
   forList(u, i)
