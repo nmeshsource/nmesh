@@ -780,8 +780,14 @@ void printpoint(tPoint *pt)
 {
   tNode *node = pt->node;
   int ijk = pt->ijk;
+  double X[3], x[3];
+
+  XYZ_of_ind(node, ijk, X);
+  set_xyz(NULL,node, ijk, X, x);
+
   pr_nodename(node);
-  printf(" ijk=%d\n", ijk);
+  printf(" ijk=%d", ijk);
+  printf(" X=%g,%g,%g x=%g,%g,%g\n", X[0],X[1],X[2], x[0],x[1],x[2]);
 }
 
 /* print var at one point */

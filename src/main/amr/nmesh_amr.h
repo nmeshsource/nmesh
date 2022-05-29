@@ -485,6 +485,7 @@ void printnfaces_on_f(tNode *node, int f);
 void printnfaces(tNode *node);
 void printref(tRef *ref);
 void print_n_pt_typ(tNode *node);
+void printpoint(tPoint *pt);
 void printvar_atpoint(tPoint *pt, int vi);
 void printvarlist_atpoint(tPoint *pt, tVarList *vl);
 
