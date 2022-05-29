@@ -278,6 +278,8 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
 /* switch back to dg */
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 {
+  if(PR) PRFs(":\n");
+
   /* switch nodes based on trouble flag */
   evolve_trouble_switch_dg_fv_mesh(mesh);
   /* now some aux vars (and others) are not set */

@@ -110,7 +110,9 @@ int evolve_myln(tMesh *mesh)
 
     /* update some vars by calling funcs in PRESURF, SETSRC
        often PRESURF does cons2prim, SETSRC sets stress-energy */
-    evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs, evosys->u);
+    if(trouble_score!=0)
+      evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs,
+                                                 evosys->u);
   }
   else /* evolve each node on its own */
   {
@@ -313,6 +315,8 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
+
+  if(PR) PRFs(":\n");
 
   formylnodes(mesh)
   {
