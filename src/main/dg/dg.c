@@ -150,7 +150,7 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
 {
   int use_fv = node->dat->info->use_fv;
   return dg_add_surface_fluxes_sign_fvflag(node, sign, vldf, vlu, vls,
-                                    u_f_lam, numflux, use_fv);
+                                           u_f_lam, numflux, use_fv);
 }
 
 /* add surface flux terms of DG formulation to RHS */
