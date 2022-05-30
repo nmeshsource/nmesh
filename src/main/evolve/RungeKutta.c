@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "evolve.h"
 
-#define PR 1
+#define PR 0
 
 
 /*************************************************************************/
@@ -89,11 +89,11 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
 
-tNode *node = node_from_nodename(mesh, "0_2745");
-tPoint pt[] =  {{.node=node, .ijk=151}};
+  //tNode *node = node_from_nodename(mesh, "0_2745");
+  //tPoint pt[] =  {{.node=node, .ijk=151}};
 
   if(PR) PRFs(": 0\n");
-printvarlist_atpoint(pt, ListEntry(u,0));
+  //printvarlist_atpoint(pt, ListEntry(u,0));
   copy_pVLList(u_p, u, vlcopy,0);              // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);              // r  = RHS(u, t)
@@ -101,25 +101,25 @@ printvarlist_atpoint(pt, ListEntry(u,0));
 
   add_pVLList(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
   mesh->time = t+dt;                           // c_2=1 from Butcher tab.
-printvarlist_atpoint(pt, ListEntry(w,0));
+  //printvarlist_atpoint(pt, ListEntry(w,0));
   evolve_limiter_mesh(mesh, w, 0);
   if(PR) PRFs(": 1\n");
-printvarlist_atpoint(pt, ListEntry(w,0));
+  //printvarlist_atpoint(pt, ListEntry(w,0));
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);       // u += r dt/6
 
   addto_pVLList(w, dt, r, vladdto,0);          // w += r dt
   add_pVLList(w, 0.75, u_p, 0.25, w, vladd,0); // w = 0.75*u_p + 0.25*w
   mesh->time = t+0.5*dt;                       // c_3=1/2 from Butcher tab.
-printvarlist_atpoint(pt, ListEntry(w,0));
+  //printvarlist_atpoint(pt, ListEntry(w,0));
   evolve_limiter_mesh(mesh, w, 0);
   if(PR) PRFs(": 2\n");
-printvarlist_atpoint(pt, ListEntry(w,0));
+  //printvarlist_atpoint(pt, ListEntry(w,0));
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
   addto_pVLList(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
   mesh->time = t+dt;                           // we are now at t+dt
   if(PR) PRFs(": 3\n");
-printvarlist_atpoint(pt, ListEntry(u,0));
+  //printvarlist_atpoint(pt, ListEntry(u,0));
 }
 
 
