@@ -251,13 +251,15 @@ char *nodename(tNode *node, char *s, int slen)
 tNode *node_from_location_str(tPat *pat, char *loc)
 {
   tNode *node = pat->rnode;
-  int i, ijk;
+  int i;
   int len = strlen(loc);
 
   for(i=0; i<len; i++)
   {
-    ijk = loc[i] - '0';
-    node = node->child[ijk];
+    int ijk = loc[i] - '0';
+    tNode *child = node->child[ijk];
+    if(!child) errorexit("child does not exist");
+    node = child;
   }
   return node;
 }
@@ -275,6 +277,7 @@ tNode *node_from_nodename(tMesh *mesh,  char *name)
 
   /* get patch */
   p = atoi(name); /* atoi ignores '_' and all after it */
+  if(p>=mesh->npats || p<0) errorexiti("patch %d does not exist", p);
   pat = mesh->pat[p];
   //printf("name=%s => p=%d\n", name, p);
 
