@@ -232,19 +232,21 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   }
 }
 
-/* Apply limiters to evo subsystems. We do it only if trbl_score >= minscore.
-   If opt=0 minscore=INT_MIN so that we always do it.
-   If opt=1 minscore=1       so that we do only for troubled nodes. */
+/* Apply limiters to evo subsystems.
+   We do it only if trbl_score >= badlim or trbl_score<=goodlim.
+   If opt=0 badlim=INT_MIN so that we ALWAYS do it.
+   If opt=1 badlim=1       so that we do it only for switched nodes. */
 /* Version for entire mesh: */
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 {
   tEvoSys *evosys = mesh->evosys;
   int j;
   tVarList *vl;
-  int minscore;
+  int goodlim = -NOTROUBLES;
+  int badlim;
 
-  if(opt==1) minscore = 1;
-  else       minscore = INT_MIN;
+  if(opt==1) badlim = 1;
+  else       badlim = INT_MIN;
 
   if(PR) PRFs(":\n");
 
@@ -252,9 +254,10 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
+    int trbl_score = node->dat->info->trbl_score;
     int i, troubled;
 
-    if(node->dat->info->trbl_score >= minscore)
+    if(trbl_score >= badlim || trbl_score<=goodlim)
     {
       troubled = 0;
       forList(u, i)
@@ -294,9 +297,10 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
+    int trbl_score = node->dat->info->trbl_score;
     int i;
 
-    if(node->dat->info->trbl_score >= minscore)
+    if(trbl_score >= badlim || trbl_score<=goodlim)
     {
       forList(u, i)
       {
