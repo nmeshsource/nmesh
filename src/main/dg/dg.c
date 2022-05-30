@@ -13,65 +13,9 @@ extern tcoordinates coordinates[1];
 /* global vars for dg */
 tDGglobals DGglobals[1];
 
-
+/***************************************************************************/
 /* some funcions to add boundary fluxes of discontinous Galerkin (dg) */
-
-/* allocate DGinfo structure */
-tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls)
-{
-  tDGinfo *dgi = calloc(1, sizeof(dgi[0]));
-  int nvars = vlu->n;
-
-  /* set varlists */
-  dgi->vlu  = vlu; /* varlist with cons vars */
-  dgi->vls  = vls; /* varlist with needed source terms, could be NULL */
-
-  /* alloc mem for vars at point i,j,k */
-  dgi->ui   = dmalloc(nvars); /* cons. vars inside this node */
-  dgi->fi   = dmalloc(nvars);
-  dgi->lami = dmalloc(nvars);
-  dgi->ua   = dmalloc(nvars); /* cons. vars on adjacent side */
-  dgi->fa   = dmalloc(nvars);
-  dgi->lama = dmalloc(nvars);
-
-  dgi->fnum = dmalloc(nvars);
-  dgi->Ffac = 1.;
-
-  /* extra space for source terms */
-  if(vls)
-  {
-    dgi->si = dmalloc(vls->n); /* source vars inside this node */
-    dgi->sa = dmalloc(vls->n); /* source vars on adjacent side */
-  }
-  else
-  {
-    dgi->si = dgi->sa = NULL;
-  }
-
-  return dgi;
-}
-
-/* free DGinfo structure */
-void free_DGinfo(tDGinfo *dgi)
-{
-  /* free contents */
-  free(dgi->sa);
-  free(dgi->si);
-
-  free(dgi->fnum);
-
-  free(dgi->lama);
-  free(dgi->fa);
-  free(dgi->ua);
-
-  free(dgi->lami);
-  free(dgi->fi);
-  free(dgi->ui);
-
-  /* free dgi */
-  free(dgi);
-}
-
+/***************************************************************************/
 
 /* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
    to vldf. We compute the fluxes from vlu.
@@ -202,6 +146,63 @@ int dg_add_surface_fluxes(tNode *node, tVarList *vlr, tVarList *vlu,
 {
   return dg_add_surface_fluxes_sign(node, -1., vlr, vlu, vls,
                                     u_f_lam, numflux);
+}
+
+
+/* allocate DGinfo structure */
+tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls)
+{
+  tDGinfo *dgi = calloc(1, sizeof(dgi[0]));
+  int nvars = vlu->n;
+
+  /* set varlists */
+  dgi->vlu  = vlu; /* varlist with cons vars */
+  dgi->vls  = vls; /* varlist with needed source terms, could be NULL */
+
+  /* alloc mem for vars at point i,j,k */
+  dgi->ui   = dmalloc(nvars); /* cons. vars inside this node */
+  dgi->fi   = dmalloc(nvars);
+  dgi->lami = dmalloc(nvars);
+  dgi->ua   = dmalloc(nvars); /* cons. vars on adjacent side */
+  dgi->fa   = dmalloc(nvars);
+  dgi->lama = dmalloc(nvars);
+
+  dgi->fnum = dmalloc(nvars);
+  dgi->Ffac = 1.;
+
+  /* extra space for source terms */
+  if(vls)
+  {
+    dgi->si = dmalloc(vls->n); /* source vars inside this node */
+    dgi->sa = dmalloc(vls->n); /* source vars on adjacent side */
+  }
+  else
+  {
+    dgi->si = dgi->sa = NULL;
+  }
+
+  return dgi;
+}
+
+/* free DGinfo structure */
+void free_DGinfo(tDGinfo *dgi)
+{
+  /* free contents */
+  free(dgi->sa);
+  free(dgi->si);
+
+  free(dgi->fnum);
+
+  free(dgi->lama);
+  free(dgi->fa);
+  free(dgi->ua);
+
+  free(dgi->lami);
+  free(dgi->fi);
+  free(dgi->ui);
+
+  /* free dgi */
+  free(dgi);
 }
 
 
