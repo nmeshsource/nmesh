@@ -780,6 +780,10 @@ void printpoint(tPoint *pt)
 {
   tNode *node = pt->node;
   int ijk = pt->ijk;
+  int *n = node->n;
+  int k = kOfInd_n(ijk, n);
+  int j = jOfInd_n_k(ijk, n,k);
+  int i = iOfInd_n_jk(ijk, n,j,k);
   double X[3], x[3];
 
   XYZ_of_ind(node, ijk, X);
@@ -787,7 +791,9 @@ void printpoint(tPoint *pt)
 
   pr_nodename(node);
   printf(" ijk=%d", ijk);
-  printf(" X=%g,%g,%g x=%g,%g,%g\n", X[0],X[1],X[2], x[0],x[1],x[2]);
+  //printf(" X=%g,%g,%g x=%g,%g,%g\n", X[0],X[1],X[2], x[0],x[1],x[2]);
+  printf("=%d/%d,%d/%d,%d/%d x=%g,%g,%g\n", i,n[0], j,n[1], k,n[2],
+         x[0],x[1],x[2]);
 }
 
 /* print var at one point */
