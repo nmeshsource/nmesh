@@ -795,13 +795,14 @@ void printvar_atpoint(tPoint *pt, int vi)
 {
   tNode *node = pt->node;
   int ijk = pt->ijk;
+  int np = node->np;
   tMesh *mesh = node->pat->mesh;
   char *name = VarName(vi);
   tDat *dat = node->dat;
   tArray *va = dat ? dat->v[vi] : NULL;
 
   pr_nodename(node);
-  printf(" ijk=%d: %s", ijk, name);
+  printf(" ijk=%d/%d: %s", ijk,np, name);
   if(va) printf("=%g", Arrd(va)[ijk]);
   printf("\n");
 }
@@ -813,11 +814,11 @@ void printvarlist_atpoint(tPoint *pt, tVarList *vl)
   {
     int i, vi;
 
-    PRF;printf(": time=%g n=%d\n", vl->time, vl->n);
+    PRF;printf(": nvars=%d\n", VLn(vl));
     forvl(vl, i)
     {
       vi = Vind(vl, i);
-      printf("  %d Vind=%d ", i, vi);
+      printf(" %d vi=%d ", i, vi);
       printvar_atpoint(pt, vi);
     }
   }
