@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "evolve.h"
 
-#define PR 0
+#define PR 1
 
 /* Determine and set trouble score in a node,
    i.e. set node->dat->info->trbl_score .

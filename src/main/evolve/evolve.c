@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "evolve.h"
 
-#define PR 0
+#define PR 1
 
 /* The functions below are a little complex because they deal with lists of
    variable lists and a list of RHSs (one for each VarList). This was done to
@@ -82,12 +82,21 @@ int evolve_myln(tMesh *mesh)
       prdivider(0);
       PRF;printf(": trouble_score=%d (bad) => take back step & "
                  "switch troubled nodes\n", trouble_score);
+tNode *node = node_from_nodename(mesh, "0_2745");
+if(node->dat)
+printf("node->dat->info->trbl_score=%d\n", node->dat->info->trbl_score);
       /* go back to u_p and switch to fv */
       evolve_prepare_do_over_mesh(mesh);
 
+if(node->dat)
+printf("node->dat->info->trbl_score=%d\n", node->dat->info->trbl_score);
+tPoint pt[] =  {{.node=node, .ijk=151}};
+printvarlist_atpoint(pt, ListEntry(evosys->u,0));
       /* now all new fv nodes have newly interpolated evo vars,
          so we need to limit them again */
       evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
+if(node->dat)
+printf("node->dat->info->trbl_score=%d\n", node->dat->info->trbl_score);
 
       /* redo evo step */
       PRF;printf(": redo evo step\n");
@@ -223,9 +232,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   }
 }
 
-/* Apply limiters to evo subsystems. We do it only if trbl_score > minscore.
+/* Apply limiters to evo subsystems. We do it only if trbl_score >= minscore.
    If opt=0 minscore=INT_MIN so that we always do it.
-   If opt=1 minscore=0       so that we do only for troubled nodes. */
+   If opt=1 minscore=1       so that we do only for troubled nodes. */
 /* Version for entire mesh: */
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 {
@@ -234,7 +243,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   tVarList *vl;
   int minscore;
 
-  if(opt==1) minscore = 0;
+  if(opt==1) minscore = 1;
   else       minscore = INT_MIN;
 
   if(PR) PRFs(":\n");
@@ -245,7 +254,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     tNode *node = MyLnode;
     int i, troubled;
 
-    if(node->dat->info->trbl_score > minscore)
+    if(node->dat->info->trbl_score >= minscore)
     {
       troubled = 0;
       forList(u, i)
@@ -287,7 +296,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     tNode *node = MyLnode;
     int i;
 
-    if(node->dat->info->trbl_score > minscore)
+    if(node->dat->info->trbl_score >= minscore)
     {
       forList(u, i)
       {
