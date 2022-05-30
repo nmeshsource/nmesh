@@ -809,8 +809,15 @@ void printvar_atpoint(tPoint *pt, int vi)
 
   pr_nodename(node);
   printf(" ijk=%d/%d: %s", ijk,np, name);
-  if(va) printf("=%g\n", Arrd(va)[ijk]);
-  else   printf(": NULL\n");
+  if(ijk<np && ijk>=0)
+  {
+    if(va) printf("=%g\n", Arrd(va)[ijk]);
+    else   printf(": NULL\n");
+  }
+  else
+  {
+    printf(": ijk outside range\n");
+  }
 }
 
 /* print varlist at one point */
