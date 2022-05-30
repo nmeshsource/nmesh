@@ -19,11 +19,14 @@ tDGglobals DGglobals[1];
 
 /* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
    to vldf. We compute the fluxes from vlu.
-   For the RHS in DG we need sign=-1 but div(flux) needs sign=+1. */
-int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
-                               tVarList *vlu, tVarList *vls,
-                               void (*u_f_lam)(tDGinfo *d),
-                               void (*numflux)(tDGinfo *d))
+   For the RHS in DG we need sign=-1 but div(flux) needs sign=+1.
+   We also have the flag use_fv, to decide if whether fv mode is active at
+   all inside this function. */
+int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
+                          tVarList *vldf, tVarList *vlu, tVarList *vls,
+                          void (*u_f_lam)(tDGinfo *d),
+                          void (*numflux)(tDGinfo *d),
+                          int use_fv)
 {
   tDGinfo *dgi = alloc_DGinfo(vlu, vls);
   tMesh *mesh = vlu->mesh;
@@ -31,7 +34,6 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
   int isqrtdet2g_o_det3gamma0 = coordinates->isqrtdet2g_o_det3gamma0;
   int isqrtgdiagx = coordinates->isqrtgdiagx;
   int iooJ        = coordinates->idet_dXbdx;
-  int use_fv = node->dat->info->use_fv;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
   int add_surface_fluxes = 1; /* by default we want to set fluxes here */
   double distXb[6] = {0};
@@ -136,6 +138,19 @@ int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
 
   free_DGinfo(dgi);
   return 0;
+}
+
+/* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
+   to vldf. We compute the fluxes from vlu.
+   For the RHS in DG we need sign=-1 but div(flux) needs sign=+1. */
+int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
+                               tVarList *vlu, tVarList *vls,
+                               void (*u_f_lam)(tDGinfo *d),
+                               void (*numflux)(tDGinfo *d))
+{
+  int use_fv = node->dat->info->use_fv;
+  return dg_add_surface_fluxes_sign_fvflag(node, sign, vldf, vlu, vls,
+                                    u_f_lam, numflux, use_fv);
 }
 
 /* add surface flux terms of DG formulation to RHS */
