@@ -405,7 +405,7 @@ int trouble_score(tNode *node, int troubled)
 /* print debug info for the node named "nname" */
 void trouble_print_if_name(tNode *node, char *nname, int trbl, char *text)
 {
-  if(has_nodename(node, nname))
+  if(nodename_is(node, nname))
   {
     int fv = node->dat->info->use_fv;
     PRF;printf(": %s fv=%d, %s trbl=%d => score=%d\n", nname, fv, text,
