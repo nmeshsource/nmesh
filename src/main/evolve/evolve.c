@@ -110,8 +110,7 @@ int evolve_myln(tMesh *mesh)
 
     /* update some vars by calling funcs in PRESURF, SETSRC
        often PRESURF does cons2prim, SETSRC sets stress-energy */
-    //if(trouble_score<=-NOTROUBLES)
-    if(trouble_score!=0)
+    if(trouble_score<=-NOTROUBLES)
       evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs,
                                                  evosys->u);
   }
