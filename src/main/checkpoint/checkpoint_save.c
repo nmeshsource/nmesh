@@ -30,7 +30,7 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
 
   fprintf(fp, "# parameters listed in checkpoint_save_pars\n");
 
-  /* put vasl of checkpoint_save_pars in list,
+  /* put vals of checkpoint_save_pars in list,
      duplicate Gets(Par("checkpoint_save_pars")) because strtok_r
      will modify list */
   list = strdup( Gets(Par("checkpoint_save_pars")) );
