@@ -19,7 +19,7 @@
 void evolve_register_vl(tVarList *vl)
 {
   tEvoSys *evosys;
-  char empty[] = "";
+  static const char empty[] = "";
   int b;
 
   /* if user passes in NULL we refuse */
