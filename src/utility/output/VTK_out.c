@@ -85,6 +85,7 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n,
   } /* end else */
 }
 
+
 /*************************************************************************/
 /* functions for 3d output */
 /*************************************************************************/
@@ -323,6 +324,11 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
   free(IObuf);
 }
 
+
+/*************************************************************************/
+/* functions for quick debugging output, also 3d */
+/*************************************************************************/
+
 /* quick array output in vtk format */
 void write_array(tNode *node, tArray *va, char *name, int as_1d,
                  int fake_it, double fake_t)
@@ -393,11 +399,49 @@ void write_vl(tNode *node, tVarList *vl, int as_1d,
   tMesh *mesh = vl->mesh;
   int vli;
 
-  for(vli=0; vli<vl->n; vli++)
+  forvl(vl, vli)
   {
-    int vi = vl->index[vli];
+    int vi = Vind(vl, vli);
     char *vname = VarName(vi);
     write_var(node, vname, as_1d, fake_it, fake_t);
+  }
+}
+
+/* quick var output in vtk format on several nodes, given in e.g.
+   char nodenamelist[] = "0_5230 0_5231 0_5234 0_5235"; */
+void write_var_nodenamelist(tMesh *mesh, char *nodenamelist, char *varname,
+                            int as_1d, int fake_it, double fake_t)
+{
+  char *list, *saveptr, *nname;
+
+  /* duplicate nodenamelist because strtok_r will modify list */
+  list = strdup( nodenamelist );
+
+  /* loop over contents of list, and print pars */
+  for(nname=strtok_r(list, " ", &saveptr); nname!=NULL;
+      nname=strtok_r(NULL, " ", &saveptr))
+  {
+    tNode *node = node_from_nodename(mesh, nname);
+    write_var(node, varname, as_1d, fake_it, fake_t);
+  }
+
+  free(list);
+}
+
+/* quick varlist output in vtk format on several nodes, given in e.g.
+   char nodenamelist[] = "0_5230 0_5231 0_5234 0_5235"; */
+void write_vl_nodenamelist(char *nodenamelist, tVarList *vl,
+                           int as_1d, int fake_it, double fake_t)
+{
+  tMesh *mesh = vl->mesh;
+  int vli;
+
+  forvl(vl, vli)
+  {
+    int vi = Vind(vl, vli);
+    char *vname = VarName(vi);
+    write_var_nodenamelist(mesh, nodenamelist, vname,
+                           as_1d, fake_it, fake_t);
   }
 }
 
