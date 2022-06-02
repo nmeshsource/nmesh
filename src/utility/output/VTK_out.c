@@ -8,6 +8,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+/*************************************************************************/
+/* general functions */
+/*************************************************************************/
 
 /* open file for vtk writing */
 FILE *fopen_vtk(char *varname, const char *outdir, const char *suffix,
@@ -82,6 +85,9 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n,
   } /* end else */
 }
 
+/*************************************************************************/
+/* functions for 3d output */
+/*************************************************************************/
 
 /* 3d output of one array */
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
@@ -395,6 +401,10 @@ void write_vl(tNode *node, tVarList *vl, int as_1d,
   }
 }
 
+
+/*************************************************************************/
+/* functions for 2d output */
+/*************************************************************************/
 
 /* 2d output of one array */
 void write_plane_vtk(tNode *node, FILE *fp, int normal, int plane[],
