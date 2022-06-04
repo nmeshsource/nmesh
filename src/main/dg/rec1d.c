@@ -562,7 +562,7 @@ double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
     int i0in2 = i0in1 - sign; /* 2 away from from face */
     //int i0in3 = i0in2 - sign; /* 3 away from from face */
     double s, d1,d2; //,d3;
-    double eps = 1e-11;
+    double eps = 1e-100;
 
     //if(n>3) d3 = u[i0in3] - u[i0in2];
     //else    d3 = 0.;
