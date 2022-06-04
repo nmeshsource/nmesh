@@ -398,6 +398,9 @@ void translatevalue(char **value)
   if(strcmp(*value, "-2*pi") == 0) x = -2*PI;
   if(strcmp(*value, "-2pi")  == 0) x = -2*PI;
 
+  if(strcmp(*value,  "DBL_MAX")  == 0) x =  DBL_MAX;
+  if(strcmp(*value, "-DBL_MAX")  == 0) x = -DBL_MAX;
+
   if(x)
   {
     char newvalue[100];
