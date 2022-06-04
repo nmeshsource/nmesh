@@ -68,6 +68,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int use_left_flux;   /* whether we set and use the left fluxes in fnumL */
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
   double extrap_s1 = DGglobals->fv_divf_extrap_s1;
+  double extrap_s2 = DGglobals->fv_divf_extrap_s2;
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -439,7 +440,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           forvl(vldivf, l)
           {
             double *df = di0fi0[l];
-            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale, extrap_s1);
+            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale,
+                                        extrap_s1, extrap_s2);
           }
 
         /* final loop over points in dir */

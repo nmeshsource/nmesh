@@ -36,6 +36,7 @@ typedef struct {
   int fv_surface_interp_mode; /* surf. interp. mode from fv_surface_interp */
   double fv_WENOm3_optw[2];   /* optimal weights for WENOm3 */
   double fv_divf_extrap_s1;   /* value of par fv_divf_extrap_s1 */
+  double fv_divf_extrap_s2;   /* 2nd number in par fv_divf_extrap_s1 */
   int fv_divf_use_only_right_flux; //Boolean val of par fv_divf_use_only_right_flux
 } tDGglobals;
 
@@ -123,7 +124,7 @@ double rec1d_m_WENO3_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENO3_2g(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale);
 void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
-                                 double u_scale, double s1);
+                                 double u_scale, double s1, double s2);
 void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward);
 void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward);
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale);

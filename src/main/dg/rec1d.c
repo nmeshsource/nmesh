@@ -540,7 +540,7 @@ double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale)
      else        { w0 = 1./c0;  w1 = -c1*w0; }
    where c0 = 3/4, c1 = 1-c0 */
 double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
-                           double u_scale, double s1)
+                           double u_scale, double s1, double s2)
 {
   int top = (i0>0);
   int sign = 2*top - 1;
@@ -557,7 +557,7 @@ double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
   w1 = 1. - w0;
 
   /* adjust weights towards 0th order extrapolation if s1>0 */
-  if(s1>0. && n>2)
+  if( (s1>0. || s2<DBL_MAX) && n>2 )
   {
     int i0in2 = i0in1 - sign; /* 2 away from from face */
     //int i0in3 = i0in2 - sign; /* 3 away from from face */
@@ -578,8 +578,8 @@ double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
     /* s = (|u1-u0|/0.75) / (|u2-u1| + eps*u_scale) */
     s = 1.3333333333*fabs(d1) / (fabs(d2) + eps*u_scale);
 
-    /* w1 -> w1 * f(s), where f(s)=0 if s<s1, f(s)=1 otherwise */
-    if(s<s1) w1 = 0.;
+    /* w1 -> w1 * f(s), where f(s)=0 if s<s1 or s>=s2, otherwise f(s)=1 */
+    if(s<s1 || s>=s2) w1 = 0.;
 
 /*
 if(w1==0.)
@@ -596,7 +596,7 @@ printf("u[%d]=%g d1=%g d2=%g d3=%g s=%g\n", i0, u[i0], d1,d2,d3, s);
 /* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */
 void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
-                                 double u_scale, double s1)
+                                 double u_scale, double s1, double s2)
 {
   int i0;
 
@@ -605,7 +605,7 @@ void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
 
   for(i0=0; i0<n; i0+=n-1)
   {
-    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, u_scale, s1);
+    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, u_scale, s1, s2);
   }
 }
 
