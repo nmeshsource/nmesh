@@ -28,6 +28,42 @@ void Lagrange_winterp(int n, const double *x, double *w_interp)
 }
 
 
+/* WT's Notes:
+   Def.  k_j := \Pi_{m\neq j}(x_j - x_m),  c_j := 1/k_j
+   Then  l_j(x) := \Pi_{m\neq j}(x - x_m) / k_j = c_j \Pi_{m\neq j}(x - x_m)
+   Note: l_j(x_i) = \delta_{ji}
+   The deriv matrix is D_{ij} := d_x l_j(x_i).
+
+   d_x l_j(x) = c_j \sum_{l\neq j} \Pi_{m\neq j,l}(x - x_m)  (*)
+
+   If x \neq x_j (*) becomes
+   d_x l_j(x) = c_j \sum_{l\neq j} [\Pi_{m\neq l}(x - x_m)] / (x - x_j)
+              = [c_j / (x - x_j)]  \sum_{l\neq j} l_l(x) k_l
+   Now set x = x_i \neq x_j
+   d_x l_j(x_i) = [c_j / (x_i - x_j)] \sum_{l\neq j} \delta_{li} k_l
+    =  D_{ij}   = c_j /[c_i (x_i - x_j)] = (c_j/c_i) / (x_i - x_j)
+
+   If x = x_j we change (*) like this:
+   d_x l_j(x) = c_j [\Pi_{m\neq j}(x - x_m)] \sum_{l\neq j} 1 / (x - x_l)
+              = l_j(x) \sum_{l\neq j} 1 / (x - x_l)
+   So if x = x_j
+   D_{jj} = d_x l_j(x_j) = \sum_{l\neq j} 1 / (x_j - x_l)
+
+   Note also
+   \sum_{j\neq i} D_{ij} = \sum_{j\neq i} (c_j/c_i)/(x_i - x_j)
+   Now define k_{ij} := \Pi_{m\neq i,j}(x_i - x_m)
+   (c_j/c_i)/(x - x_j) = (k_i/k_j)/(x_i - x_j) = (k_i/k_j) k_{ij}/k_i
+                       = k_{ij}/k_j = ? <-- Not 1/ (x_j - x_i) !!!
+
+   On the other hand we know that we must have \sum_{j} D_{ij} = 0
+   Thus D_{ii} = - \sum_{j\neq i} D_{ij}
+
+   Why is \sum_{j} D_{ij} = 0? Well let's define f(x) := \sum_{j} l_j(x).
+   Then f(x_i) = 1 for all i, since l_j(x_i) = \delta_{ji}.
+   All l_j(x) are polynomials of degree N = n-1. So f(x) is a polynomial
+   of degree n-1 that is 1 on n points. Thus f(x) = 1 everywhere.
+   Hence d_x f(x) = d_x \sum_{j} l_j(x) = 0, and thus \sum_{j} D_{ij} = 0. */
+
 /* find matrix D for taking derivatives: D_{ij} = \partial_x l_j(x_i),
    this sets the transpose D^T if DT is interpreted as stored in
    column-major form */
