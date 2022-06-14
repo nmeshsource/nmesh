@@ -208,6 +208,9 @@ printvars:
 	@echo libpaths=$(libpaths)
 	@echo compiledphysics=$(compiledphysics)
 
+# touch all nmesh_*.c files so that the git revision gets updated
+touch_all_nmesh_c:
+	for X in $(libpathCfiles); do touch $$X; done
 
 # targets to get git projects
 git_clone:
