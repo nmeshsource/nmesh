@@ -37,11 +37,11 @@ $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
 # note that $@ is the matched target, $* is the stem of the target defined by %
 # we use:
 $(OBJDIR)/%.o: %.c $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CFLAGS) -o $@ -c $*.c
+	$(CC) $(CFLAGS) -o $@ -c $*.c -DMODULEREV="$$(git rev-parse --short HEAD)"
 
 # same, but build if it is a C++ file
 $(OBJDIR)/%.o: %.cc $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CXX) $(CFLAGS) -o $@ -c $*.cc
+	$(CXX) $(CFLAGS) -o $@ -c $*.cc -DMODULEREV="$$(git rev-parse --short HEAD)"
 
 ## First try for C and C++:
 ## [ Note: $(wildcard %.c*) should be the same as %.c*, but is not ]
