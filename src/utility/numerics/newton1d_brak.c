@@ -1,6 +1,9 @@
 /* newton1d_brak.c,  Wolfgang Tichy 6/2019 */
 
-#include "nmesh.h"
+#include <stdio.h>
+#include <math.h>
+
+//#include "nmesh.h"
 #include "numerics.h"
 
 

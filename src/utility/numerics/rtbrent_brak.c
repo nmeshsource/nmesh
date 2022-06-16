@@ -1,6 +1,9 @@
 /* rtbrent_brak.c,  Wolfgang Tichy 6/2019 */
 
-#include "nmesh.h"
+#include <stdio.h>
+#include <math.h>
+
+//#include "nmesh.h"
 #include "numerics.h"
 #define DOUBLE_EPS 1e-14 /* machine double floating point precision */
 
