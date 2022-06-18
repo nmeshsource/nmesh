@@ -56,11 +56,15 @@ int nmesh_amr(tMesh *mesh)
 
   /* refinement related pars for initial mesh creation */
   AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
-  AddPar("amr_refine_p", "", "patch list that we refine one level further");
-  AddPar("amr_refine_sphere_levels", "0",
-         "number of nested sphere refinement levels");
-  AddPar("amr_refine_sphere_radius", "10",
-         "radius of innermost sphere in nested sphere refinement");
+  AddPar("amr_hrefine_p", "", "patch list that we h-refine 1 level further");
+  //AddPar("amr_prefine_p", "", "patch list that we p-refine");
+  //AddPar("amr_prefine_n0", "10", "n0 if amr_prefine_p is used");
+  //AddPar("amr_prefine_n1", "10", "n1 if amr_prefine_p is used");
+  //AddPar("amr_prefine_n2", "10", "n2 if amr_prefine_p is used");
+  AddPar("amr_hrefine_sphere_levels", "0",
+         "number of nested sphere h-refinement levels");
+  AddPar("amr_hrefine_sphere_radius", "10",
+         "radius of innermost sphere in nested sphere h-refinement");
 
   /* pars that determine how load is balanced */
   AddPar("amr_load_balance", "no", "[no,simple,timingbased]");
@@ -81,6 +85,9 @@ int nmesh_amr(tMesh *mesh)
 
   /* Old parameters that are now banned */
   BanPar("amr_BoxMesh_xc", "use amr_mesh_xc instead");
+  BanPar("amr_refine_p", "use amr_hrefine_p instead");
+  BanPar("amr_refine_sphere_levels", "use amr_hrefine_sphere_levels instead");
+  BanPar("amr_refine_sphere_radius", "use amr_hrefine_sphere_radius instead");
 
   return 0;
 }

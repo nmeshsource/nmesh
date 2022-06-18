@@ -1202,13 +1202,13 @@ int hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
 /* h-refine concentric nested spherical regions
          _______
       __/       \__
-     /    _____    \     radius : radius of innermost sphere
-    /    /     \    \    xc     : center of spheres
-   /    /   _   \    \   levels : number of refinement levels we add
+     /    _____    \    radius : radius of innermost sphere
+    /    /     \    \   xc     : center of spheres
+   /    /   _   \    \  levels : number of refinement levels we add
   |    |   |_|   |    |
-   \    \       /    /   this should be controled by pars like:
-    \    \_____/    /    amr_refine_sphere_radius : radius of innermost sphere
-     \__         __/     amr_refine_sphere_levels : how many spheres we add
+   \    \       /    /  this should be controled by pars like:
+    \    \_____/    /   amr_hrefine_sphere_radius : radius of innermost sphere
+     \__         __/    amr_hrefine_sphere_levels : how many spheres we add
         \_______/
  */
 void hrefine_sphere(tMesh *mesh, double radius, double xc[3], int levels)

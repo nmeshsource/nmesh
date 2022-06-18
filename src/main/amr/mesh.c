@@ -144,9 +144,9 @@ int amr_setup_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
   int luni = Geti(Par("amr_luni"));
-  int refp = Par("amr_refine_p");
-  int sph_l = Geti(Par("amr_refine_sphere_levels"));
-  double sph_r = Geti(Par("amr_refine_sphere_radius"));
+  int hrefp = Par("amr_hrefine_p");
+  int sph_l = Geti(Par("amr_hrefine_sphere_levels"));
+  double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
   int ret;
 
@@ -170,10 +170,10 @@ int amr_setup_mesh(tMesh *mesh)
   /* refine mesh uniformly */
   hrefine_mesh_to_level_loadbalance(mesh, luni);
 
-  /* now refine the patches listed in amr_refine_p */
-  if(GetLen(refp) > 0)
+  /* now refine the patches listed in amr_hrefine_p */
+  if(GetLen(hrefp) > 0)
   {
-    char *plist = Gets(refp);
+    char *plist = Gets(hrefp);
     char *pl, *str, *sav;
 
     pl = strdup(plist);
