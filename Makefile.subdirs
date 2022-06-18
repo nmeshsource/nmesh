@@ -21,6 +21,10 @@ LIBDIR  = $(TOP)/lib
 OBJDIR  = $(LIBDIR)/obj/$(NAME)
 OBJSWITHPATH = $(addprefix $(OBJDIR)/,$(OBJS))
 
+# CCFLAGS has CFLAGS plus any other flags we want to add here
+CCFLAGS = $(CFLAGS)
+CCFLAGS += -DMODULEREV="$$(git rev-parse --short HEAD)"
+
 
 # main target: build library from object files. AR has these options:
 # d: delete files
@@ -37,11 +41,11 @@ $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
 # note that $@ is the matched target, $* is the stem of the target defined by %
 # we use:
 $(OBJDIR)/%.o: %.c $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CFLAGS) -o $@ -c $*.c -DMODULEREV="$$(git rev-parse --short HEAD)"
+	$(CC) $(CCFLAGS) -o $@ -c $*.c
 
 # same, but build if it is a C++ file
 $(OBJDIR)/%.o: %.cc $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CXX) $(CFLAGS) -o $@ -c $*.cc -DMODULEREV="$$(git rev-parse --short HEAD)"
+	$(CXX) $(CCFLAGS) -o $@ -c $*.cc
 
 ## First try for C and C++:
 ## [ Note: $(wildcard %.c*) should be the same as %.c*, but is not ]

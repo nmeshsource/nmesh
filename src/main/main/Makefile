@@ -17,6 +17,10 @@ LIBDIR  = $(TOP)/lib
 OBJDIR  = $(LIBDIR)/obj/$(NAME)
 OBJSWITHPATH = $(addprefix $(OBJDIR)/,$(OBJS))
 
+# CCFLAGS has CFLAGS plus any other flags we want to add here
+CCFLAGS = $(CFLAGS)
+CCFLAGS += -DMAINREV="$$(git rev-parse --short HEAD)"
+
 
 # main target: build the executable with the linker
 # note that $@ is the matched target
@@ -28,7 +32,7 @@ $(EXECDIR)/$(EXEC): $(OBJSWITHPATH) $(wildcard $(LIBDIR)/*)
 # $* is the stem of the target defined by %
 # MAINREV can be used to print the git revision in main
 $(OBJDIR)/%.o: %.c nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CFLAGS) -o $@ -c $*.c -DMAINREV="$$(git rev-parse --short HEAD)"
+	$(CC) $(CCFLAGS) -o $@ -c $*.c
 
 
 # dependencies on auto-generated files
