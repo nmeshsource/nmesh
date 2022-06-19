@@ -871,10 +871,10 @@ int refine_synchronize_ref_method(tRef *ref)
 
 
 /***************************************************************************/
-/* functions we can call to refine in some particular way */
+/* functions we can call to h-refine in some particular way */
 /***************************************************************************/
 
-/* Refine all nodes that have neighbors whose level is greater by an
+/* h-refine all nodes that have neighbors whose level is greater by an
    amount dl than that of each node. This makes only sense if dl>=1 */
 void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
 {
@@ -895,7 +895,7 @@ void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
   hrefine_nodes_if_rflag(mesh, ref);
 }
 
-/* refine all nodes that have finer neighbors */
+/* h-refine all nodes that have finer neighbors */
 void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
 {
   hrefine_nodes_if_nb_finer_by_dl(mesh, 1, ref);
@@ -932,8 +932,7 @@ void hrefine_pat__old(tMesh *mesh, int p)
 }
 
 
-
-/* refine all nodes up to level l */
+/* h-refine all nodes up to level l */
 void hrefine_mesh_to_level(tMesh *mesh, int l)
 {
   int i, ref;
@@ -1024,7 +1023,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
   } while(ref);
 }
 
-/* refine patch number p in mesh */
+/* h-refine patch number p in mesh */
 void hrefine_pat(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
