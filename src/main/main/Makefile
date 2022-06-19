@@ -32,7 +32,7 @@ $(EXECDIR)/$(EXEC): $(OBJSWITHPATH) $(wildcard $(LIBDIR)/*)
 # $* is the stem of the target defined by %
 # MAINREV can be used to print the git revision in main
 $(OBJDIR)/%.o: %.c nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CCFLAGS) -o $@ -c $*.c
+	$(CC) $(CCFLAGS)  -o $@  -c $*.c
 
 
 # dependencies on auto-generated files

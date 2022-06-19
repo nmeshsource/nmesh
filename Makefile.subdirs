@@ -41,11 +41,11 @@ $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
 # note that $@ is the matched target, $* is the stem of the target defined by %
 # we use:
 $(OBJDIR)/%.o: %.c $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CCFLAGS) -o $@ -c $*.c
+	$(CC) $(CCFLAGS)  -o $@  -c $*.c
 
 # same, but build if it is a C++ file
 $(OBJDIR)/%.o: %.cc $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CXX) $(CCFLAGS) -o $@ -c $*.cc
+	$(CXX) $(CCFLAGS)  -o $@  -c $*.cc
 
 ## First try for C and C++:
 ## [ Note: $(wildcard %.c*) should be the same as %.c*, but is not ]
