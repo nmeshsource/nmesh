@@ -580,3 +580,4 @@ void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref);
 void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref);
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref);
+void prefine_pat(tMesh *mesh, int p, int n[3]);

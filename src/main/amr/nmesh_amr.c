@@ -57,10 +57,10 @@ int nmesh_amr(tMesh *mesh)
   /* refinement related pars for initial mesh creation */
   AddPar("amr_luni", "0",  "level up to which each patch is refined initially");
   AddPar("amr_hrefine_p", "", "patch list that we h-refine 1 level further");
-  //AddPar("amr_prefine_p", "", "patch list that we p-refine");
-  //AddPar("amr_prefine_n0", "10", "n0 if amr_prefine_p is used");
-  //AddPar("amr_prefine_n1", "10", "n1 if amr_prefine_p is used");
-  //AddPar("amr_prefine_n2", "10", "n2 if amr_prefine_p is used");
+  AddPar("amr_prefine_p", "", "patch list that we p-refine");
+  AddPar("amr_prefine_n0", "10", "n0 if amr_prefine_p is used");
+  AddPar("amr_prefine_n1", "10", "n1 if amr_prefine_p is used");
+  AddPar("amr_prefine_n2", "10", "n2 if amr_prefine_p is used");
   AddPar("amr_hrefine_sphere_levels", "0",
          "number of nested sphere h-refinement levels");
   AddPar("amr_hrefine_sphere_radius", "10",

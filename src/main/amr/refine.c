@@ -1274,3 +1274,29 @@ void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref)
   }
   prefine_nodes_if_rflag(mesh, ref);
 }
+
+/* p-refine patch number p in mesh to have n[] points */
+void prefine_pat(tMesh *mesh, int p, int n[3])
+{
+  tPat *pat = mesh->pat[p];
+  tNlist *el;
+  tRef rf[1];
+  rf->method = GIVEN_n;
+  rf->n[0] = n[0];
+  rf->n[1] = n[1];
+  rf->n[2] = n[2];
+
+  fornodelist(mesh->lns, el)
+  {
+    tNode *node = el->node;
+    if(node->pat == pat) node->rflag = rf->method;
+    else                 node->rflag = 0;
+  }
+  prefine_nodes_if_rflag(mesh, rf);
+  update_mesh_myln_node_nid(mesh);
+  if(PR)
+  {
+    PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
+    printmesh(mesh);
+  }
+}

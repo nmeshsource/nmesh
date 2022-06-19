@@ -145,6 +145,7 @@ int amr_setup_mesh(tMesh *mesh)
   int mesh_type = Par("amr_mesh_type");
   int luni = Geti(Par("amr_luni"));
   int hrefp = Par("amr_hrefine_p");
+  int prefp = Par("amr_prefine_p");
   int sph_l = Geti(Par("amr_hrefine_sphere_levels"));
   double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
@@ -167,10 +168,10 @@ int amr_setup_mesh(tMesh *mesh)
   simple_load_balance(mesh);
   //printmesh(mesh);
 
-  /* refine mesh uniformly */
+  /* h-refine mesh uniformly */
   hrefine_mesh_to_level_loadbalance(mesh, luni);
 
-  /* now refine the patches listed in amr_hrefine_p */
+  /* now h-refine the patches listed in amr_hrefine_p */
   if(GetLen(hrefp) > 0)
   {
     char *plist = Gets(hrefp);
@@ -186,7 +187,7 @@ int amr_setup_mesh(tMesh *mesh)
     free(pl);
   }
 
-  /* refine further in nested sphere regions */
+  /* h-refine further in nested sphere regions */
   hrefine_sphere_loadbalance(mesh, sph_r, x0, sph_l);
 
 /*
@@ -230,6 +231,25 @@ hcoarsen_mesh_to_level(mesh, 2);
 simple_load_balance(mesh);
 hcoarsen_pat(mesh, 0);
 */
+
+  /* now p-refine the patches listed in amr_prefine_p */
+  if(GetLen(prefp) > 0)
+  {
+    int n[] = { Geti(Par("amr_prefine_n0")),
+                Geti(Par("amr_prefine_n1")),
+                Geti(Par("amr_prefine_n2")) };
+    char *plist = Gets(prefp);
+    char *pl, *str, *sav;
+
+    pl = strdup(plist);
+    for(str=strtok_r(pl, " ", &sav); str!=NULL;
+        str=strtok_r(NULL, " ", &sav))
+    {
+      int p = atoi(str);
+      if(p>=0) prefine_pat(mesh, p, n);
+    }
+    free(pl);
+  }
 
   /* load balance full mesh */
   simple_load_balance(mesh);
