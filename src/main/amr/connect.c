@@ -288,7 +288,7 @@ tNode *node_from_nodename(tMesh *mesh,  char *name)
 }
 
 /* check if a node has the name in string nname */
-int nodename_is(tNode *node, char *nname)
+int nodename_is(tNode *node, const char *nname)
 {
   char myname[128];
   nodename(node, myname,128);  /* get name of node into myname */

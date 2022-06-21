@@ -403,7 +403,8 @@ int trouble_score(tNode *node, int troubled)
 }
 
 /* print debug info for the node named "nname" */
-void trouble_print_if_name(tNode *node, char *nname, int trbl, char *text)
+void trouble_print_if_name(tNode *node, const char *nname,
+                           int trbl, const char *text)
 {
   if(nodename_is(node, nname))
   {
