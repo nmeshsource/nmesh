@@ -7,7 +7,7 @@
 /* struct with constans of nature */
 /***************************************************************************/
 
-/* constans of nature*/
+/* constants of nature*/
 struct tNATURECONSTS
 {
   const double c;
@@ -72,7 +72,7 @@ double Mass_GMc1_to_SI(double m)
   return m * GMsun/G;
 }
 
-/* mass density in SI */
+/* mass density in SI units */
 double MassDensity_GMc1_to_SI(double rho)
 {
   double L = Length_GMc1_to_SI(1.);
@@ -81,14 +81,14 @@ double MassDensity_GMc1_to_SI(double rho)
   return rho * Msun/L3;
 }
 
-/* energy density in SI */
+/* energy density in SI units */
 double EnergyDensity_GMc1_to_SI(double rho)
 {
   double c = natureconsts.c;
   return MassDensity_GMc1_to_SI(rho) * c*c;
 }
 
-/* pressure density in SI */
+/* pressure in SI units */
 double Pressure_GMc1_to_SI(double P)
 {
   double L = Length_GMc1_to_SI(1.);
