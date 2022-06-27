@@ -18,10 +18,33 @@ struct tNATURECONSTS
 /* values of consts of nature we use */
 struct tNATURECONSTS natureconsts =
 {
-  .c     = 299792458,        // [m/s],     c is defined to have this value
-  .G     = 6.67430e-11,      // [m^3/(kg s^2)], from https://physics.nist.gov/cgi-bin/cuu/Value?bg
-  .GMsun = 1.32712440018e20, // [m^3/s^2], standard gravitational parameter, measured using Kepler's law
+  .c     = 299792458,     // [m/s],          c is defined to have this value
+  .G     = 6.67430e-11,   // [m^3/(kg s^2)], from https://physics.nist.gov/cgi-bin/cuu/Value?bg
+  .GMsun = 1.32712440041279419e20, // [m^3/s^2], standard gravitational parameter
+  /* Note: GMsun can be very precisely measured using Kepler's law.
+     Also, any Msun listed anywhere is computed from:  Msun = GMsun/G.
+     Unfortunately G itself is not known as precisely.
+     On https://ssd.jpl.nasa.gov/astro_par.html :
+   GMsun = 1.32712440018e20 \pm 8e9 m^3/s^2
+     But this page also cites:
+      Park, R.S., et al., 2021, "The JPL Planetary and Lunar Ephemerides
+      DE440 and DE441", Astronomical Journal, 161:105.
+      https://ssd.jpl.nasa.gov/doc/Park.2021.AJ.DE440.pdf
+     In Tab. 2 it has:
+   GMsun = 1.32712440041279419e20 m^3/s^2 (estimated from DE440)
+     There is also:
+      E. V. Pitjeva, "Determination of the Value of the Heliocentric
+      Gravitational Constant (GMsun) from Modern Observations of Planets and
+      Spacecraft", Journal of Physical and Chemical Reference Data 44,
+      031210 (2015); https://doi.org/10.1063/1.4921980
+     In its abstract it says:
+   GMsun = 132 712 440 042 \pm 10 (km^3/s^2)
+     Within the error this is the same as the 1.32712440041279419e20 m^3/s^2
+     we use here.
+     On https://ssd.jpl.nasa.gov/planets/phys_par.html it lists only planets.
+  */
 };
+
 
 
 /***************************************************************************/
