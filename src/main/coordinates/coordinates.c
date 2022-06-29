@@ -96,6 +96,9 @@ int coordinates_coordvars_enabled(tNode *node)
     int iXm_dXdx = Ind("Xm_dXdx");
     int iYm_dXdx = Ind("Ym_dXdx");
     int iZm_dXdx = Ind("Zm_dXdx");
+    int iXm_det_dXbdx = Ind("Xm_det_dXbdx");
+    int iYm_det_dXbdx = Ind("Ym_det_dXbdx");
+    int iZm_det_dXbdx = Ind("Zm_det_dXbdx");
     int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
     int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
     int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
@@ -109,6 +112,10 @@ int coordinates_coordvars_enabled(tNode *node)
     enablevar_innode(node, iZm_dXdx);
     enablevar_innode(node, iZm_dXdx+3);
     enablevar_innode(node, iZm_dXdx+6);
+
+    enablevar_innode(node, iXm_det_dXbdx);
+    enablevar_innode(node, iYm_det_dXbdx);
+    enablevar_innode(node, iZm_det_dXbdx);
 
     enablevar_innode(node, iXm_sqrtgdiagx);
     enablevar_innode(node, iYm_sqrtgdiagx);
@@ -309,6 +316,9 @@ int coordinates_init_node(tNode *node)
     int iXm_dXdx = Ind("Xm_dXdx");
     int iYm_dXdx = Ind("Ym_dXdx");
     int iZm_dXdx = Ind("Zm_dXdx");
+    int iXm_det_dXbdx = Ind("Xm_det_dXbdx");
+    int iYm_det_dXbdx = Ind("Ym_det_dXbdx");
+    int iZm_det_dXbdx = Ind("Zm_det_dXbdx");
     int iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
     int iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
     int iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
@@ -324,11 +334,15 @@ int coordinates_init_node(tNode *node)
      {{Vard(node,iZm_dXdx),   Vard(node,iZm_dXdx+1), Vard(node,iZm_dXdx+2)},
       {Vard(node,iZm_dXdx+3), Vard(node,iZm_dXdx+4), Vard(node,iZm_dXdx+5)},
       {Vard(node,iZm_dXdx+6), Vard(node,iZm_dXdx+7), Vard(node,iZm_dXdx+8)} };
+    double *pXm_det_dXbdx = Vard(node, iXm_det_dXbdx);
+    double *pYm_det_dXbdx = Vard(node, iYm_det_dXbdx);
+    double *pZm_det_dXbdx = Vard(node, iZm_det_dXbdx);
     int *Xm_n = Arrn(VarA(node, iXm_dXdx));
     int *Ym_n = Arrn(VarA(node, iYm_dXdx));
     int *Zm_n = Arrn(VarA(node, iZm_dXdx));
 
-    /* set Xm_dXdx, Ym_dXdx, Zm_dXdx */
+    /* set Xm_dXdx, Ym_dXdx, Zm_dXdx,
+       and Xm_det_dXbdx, Ym_det_dXbdx, Zm_det_dXbdx */
     {
       forijk(i,j,k, n)
       {
@@ -358,6 +372,8 @@ int coordinates_init_node(tNode *node)
 
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pXm_dXdx[d][e][ijk] = dXdx[d][e];
+
+          pXm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
         if(gotYmid)
         {
@@ -367,6 +383,8 @@ int coordinates_init_node(tNode *node)
 
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pYm_dXdx[d][e][ijk] = dXdx[d][e];
+
+          pYm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
         if(gotZmid)
         {
@@ -376,6 +394,8 @@ int coordinates_init_node(tNode *node)
 
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pZm_dXdx[d][e][ijk] = dXdx[d][e];
+
+          pZm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
       } /* end forijk */
     }

@@ -64,6 +64,9 @@ int nmesh_coordinates(tMesh *mesh)
     AddAuxVar("Zm_dXd", "i", "dX/dx^i on Z mid points"); // don't put any-
     AddAuxVar("Zm_dYd", "i", "dY/dx^i on Z mid points"); // thing in between
     AddAuxVar("Zm_dZd", "i", "dZ/dx^i on Z mid points"); // these 3 lines
+    AddAuxVar("Xm_det_dXbdx", "", "det(dXb/dx) on X mid points");
+    AddAuxVar("Ym_det_dXbdx", "", "det(dXb/dx) on Y mid points");
+    AddAuxVar("Zm_det_dXbdx", "", "det(dXb/dx) on Z mid points");
     AddAuxVar("Xm_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
               "metric in Xb-coords on mid points in X-dir");
     AddAuxVar("Ym_sqrtgdiag", "I", "sqrt of diag comps of upper index 3-"
