@@ -10,6 +10,7 @@ int nmesh_coordinates(tMesh *mesh)
   printf("Adding coordinates\n");
 
   /* functions */
+  AddFun(POST_PARAMETERS, coordinates_set_globals);
   AddFun(COORDINATES, coordinates_init); //is also called in make_child_node!
 
   /* variables */

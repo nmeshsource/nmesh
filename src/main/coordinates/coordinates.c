@@ -467,8 +467,8 @@ int coordinates_init_node(tNode *node)
 }
 
 
-/* initialize coordinates in each patch */
-int coordinates_init(tMesh *mesh)
+/* set global coordinates vars */
+int coordinates_set_globals(tMesh *mesh)
 {
   PRF;printf(":\n");
   int surface_metric = Par("coordinates_surface_metric");
@@ -505,7 +505,14 @@ int coordinates_init(tMesh *mesh)
   }
 
   //PRF;printf(":  coordinates->idet_dXbdx=%d\n",  coordinates->idet_dXbdx);
+  return 0;
+}
 
+
+/* initialize coordinates in each node */
+int coordinates_init(tMesh *mesh)
+{
+  PRF;printf(":\n");
   formylnodes(mesh)
   {
     tNode *node = MyLnode;

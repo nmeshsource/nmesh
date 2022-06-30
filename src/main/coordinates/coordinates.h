@@ -7,7 +7,7 @@
 
 
 /* coordinates.c */
-
+int coordinates_set_globals(tMesh *mesh);
 
 /* coordtrans_CubedSphere.c */
 double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
