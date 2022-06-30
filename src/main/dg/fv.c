@@ -60,7 +60,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int nfvars = vldivf->n;
   int isqrtgdiagx = coordinates->isqrtgdiagx;
   int idet_dXbdx  = coordinates->idet_dXbdx;
-  int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
+  int iXm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz;
   int iXm_det_dXbdx, iYm_det_dXbdx, iZm_det_dXbdx;
   /* func ptrs for reconstruction */
   double (*rec1d_p)(int n, const double *u, int im, double u_scale);
@@ -75,16 +75,18 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
-    iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
-    iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
-    iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
-    iXm_det_dXbdx = Ind("Xm_det_dXbdx");
-    iYm_det_dXbdx = Ind("Ym_det_dXbdx");
-    iZm_det_dXbdx = Ind("Zm_det_dXbdx");
+    iXm_sqrtgdiagx = coordinates->iXm_sqrtgdiagx;
+    iYm_sqrtgdiagy = coordinates->iYm_sqrtgdiagy;
+    iZm_sqrtgdiagz = coordinates->iZm_sqrtgdiagz;
+    iXm_det_dXbdx = coordinates->iXm_det_dXbdx;
+    iYm_det_dXbdx = coordinates->iYm_det_dXbdx;
+    iZm_det_dXbdx = coordinates->iZm_det_dXbdx;
   }
   else
   {
-    iXm_sqrtgdiagx = iYm_sqrtgdiagx = iZm_sqrtgdiagx = isqrtgdiagx;
+    iXm_sqrtgdiagx = isqrtgdiagx;
+    iYm_sqrtgdiagy = isqrtgdiagx + 1;
+    iZm_sqrtgdiagz = isqrtgdiagx + 2;
     iXm_det_dXbdx = iYm_det_dXbdx = iZm_det_dXbdx = idet_dXbdx;
   }
 
@@ -169,13 +171,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double *g_sqrtgdiag[3] = { Vard(node, isqrtgdiagx), //sqrtgdiag on gridpts
                                Vard(node, isqrtgdiagx+1),
                                Vard(node, isqrtgdiagx+2) };
-    double *m_sqrtgdiag[3][3] =  //sqrtgdiag on midpoints
-      { { Vard(node, iXm_sqrtgdiagx), Vard(node, iXm_sqrtgdiagx+1),
-                                           Vard(node, iXm_sqrtgdiagx+2) },
-        { Vard(node, iYm_sqrtgdiagx), Vard(node, iYm_sqrtgdiagx+1),
-                                           Vard(node, iYm_sqrtgdiagx+2) },
-        { Vard(node, iZm_sqrtgdiagx), Vard(node, iZm_sqrtgdiagx+1),
-                                           Vard(node, iZm_sqrtgdiagx+2) } };
+    double *m_sqrtgdiag[3] = { Vard(node, iXm_sqrtgdiagx),//sqrtgdiag on midpts
+                               Vard(node, iYm_sqrtgdiagy),
+                               Vard(node, iZm_sqrtgdiagz) };
     double *g_det_dXbdx = Vard(node, idet_dXbdx); /* 1/J at gridpoint */
     double *m_det_dXbdx[3] = { Vard(node, iXm_det_dXbdx),  /* 1/J at Xmid */
                                Vard(node, iYm_det_dXbdx),  /* 1/J at Ymid */
@@ -219,7 +217,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     {
       int dir_active = Getb(amr->dir_active[dir]);
       double *sqrtgdiag  = g_sqrtgdiag[dir];
-      double *sqrtgdiagm = m_sqrtgdiag[dir][dir];
+      double *sqrtgdiagm = m_sqrtgdiag[dir];
       double *ooJ  = g_det_dXbdx;
       double *ooJm = m_det_dXbdx[dir];
       int i,j,k;
