@@ -299,7 +299,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
           /* if we want to construct left fluxes AND
              if i0 has a midpoint to its left */
-          if(use_left_flux && i0>0)
+          if(use_left_flux && i0g0)
           {
             tFVinfo fv[1];
 
@@ -334,7 +334,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           d->face = dir*2 + 1;
 
           /* if i0 has a midpoint to its right */
-          if(i0<n[dir]-1)
+          if(i0lN)
           {
             tFVinfo fv[1];
 
@@ -368,7 +368,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
           /* factors in flux terms on RHS at right and left midpoint */
           wm  = dXb[i0];
-          if(norms_and_sqrtgdiag_on_midpoints)
+          if(norms_and_sqrtgdiag_on_midpoints && i0g0 && i0lN)
           {
             Jgd_ow_m  = sqrtgdiagm[ccc]  /(ooJm[ccc] * wm);
             Jgd_ow_m1 = sqrtgdiagm[cccm1]/(ooJm[cccm1] * wm);
