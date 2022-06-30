@@ -441,13 +441,15 @@ int coordinates_init_node(tNode *node)
     /* now disable some vars that we don't really need later */
     if(!Getv(coordinates->midpoint_data, "all"))
     {
-      /* disable all 18 X/Y/Zm_dXdx */
-      for(i=0; i<9; i++)
-      {
-        disablevarcomp_innode(node, iXm_dXdx + i);
-        disablevarcomp_innode(node, iYm_dXdx + i);
-        disablevarcomp_innode(node, iZm_dXdx + i);
-      }
+      /* NOTE: We cannot disable the 18 X/Y/Zm_dXdx because we need them
+         to get the normals at midpoints! */
+      //for(i=0; i<9; i++)
+      //{
+      //  disablevarcomp_innode(node, iXm_dXdx + i);
+      //  disablevarcomp_innode(node, iYm_dXdx + i);
+      //  disablevarcomp_innode(node, iZm_dXdx + i);
+      //}
+
       /* keep only Xm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz enabled */
       disablevarcomp_innode(node, iXm_sqrtgdiagx + 1);
       disablevarcomp_innode(node, iXm_sqrtgdiagx + 2);
