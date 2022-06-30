@@ -452,6 +452,9 @@ int coordinates_init(tMesh *mesh)
   PRF;printf(":\n");
   int surface_metric = Par("coordinates_surface_metric");
 
+  /* some global par indices */
+  coordinates->midpoint_data = Par("coordinates_midpoint_data");
+
   /* global par values */
   coordinates->sqrtdet2g_o_det3gamma = Getv(surface_metric,
                                             "sqrtdet2g_o_det3gamma");

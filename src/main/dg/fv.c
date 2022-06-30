@@ -10,6 +10,7 @@ extern tAMR amr[1];
 
 /* use DGglobals */
 extern tDGglobals DGglobals[1];
+extern tcoordinates coordinates[1];
 
 /***********************************************************************/
 /* funcs needed for finite volume method in nmesh */
@@ -54,11 +55,13 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              void (*numflux)(tDGinfo *d))
 {
   tMesh *mesh = vlq->mesh;
-  int norms_and_sqrtgdiag_on_midpoints = 0;
+  int norms_and_sqrtgdiag_on_midpoints = Getb(coordinates->midpoint_data);
   int nqvars = vlq->n;
   int nfvars = vldivf->n;
-  int sqrtgdiagx = Ind("sqrtgdiagx");
+  int isqrtgdiagx = coordinates->isqrtgdiagx;
+  int idet_dXbdx  = coordinates->idet_dXbdx;
   int iXm_sqrtgdiagx, iYm_sqrtgdiagx, iZm_sqrtgdiagx;
+  int iXm_det_dXbdx, iYm_det_dXbdx, iZm_det_dXbdx;
   /* func ptrs for reconstruction */
   double (*rec1d_p)(int n, const double *u, int im, double u_scale);
   double (*rec1d_m)(int n, const double *u, int im, double u_scale);
@@ -75,10 +78,14 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
     iYm_sqrtgdiagx = Ind("Ym_sqrtgdiagx");
     iZm_sqrtgdiagx = Ind("Zm_sqrtgdiagx");
+    iXm_det_dXbdx = Ind("Xm_det_dXbdx");
+    iYm_det_dXbdx = Ind("Ym_det_dXbdx");
+    iZm_det_dXbdx = Ind("Zm_det_dXbdx");
   }
   else
   {
-    iXm_sqrtgdiagx = iYm_sqrtgdiagx = iZm_sqrtgdiagx = sqrtgdiagx;
+    iXm_sqrtgdiagx = iYm_sqrtgdiagx = iZm_sqrtgdiagx = isqrtgdiagx;
+    iXm_det_dXbdx = iYm_det_dXbdx = iZm_det_dXbdx = idet_dXbdx;
   }
 
   /* set func ptrs for rec. */
@@ -159,13 +166,20 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   /* RHS */
   {
     tDGinfo *d = alloc_DGinfo(vlu, vls);
-    double *m_sqrtgdiag[3][3] =
+    double *g_sqrtgdiag[3] = { Vard(node, isqrtgdiagx), //sqrtgdiag on gridpts
+                               Vard(node, isqrtgdiagx+1),
+                               Vard(node, isqrtgdiagx+2) };
+    double *m_sqrtgdiag[3][3] =  //sqrtgdiag on midpoints
       { { Vard(node, iXm_sqrtgdiagx), Vard(node, iXm_sqrtgdiagx+1),
                                            Vard(node, iXm_sqrtgdiagx+2) },
         { Vard(node, iYm_sqrtgdiagx), Vard(node, iYm_sqrtgdiagx+1),
                                            Vard(node, iYm_sqrtgdiagx+2) },
         { Vard(node, iZm_sqrtgdiagx), Vard(node, iZm_sqrtgdiagx+1),
                                            Vard(node, iZm_sqrtgdiagx+2) } };
+    double *g_det_dXbdx = Vard(node, idet_dXbdx); /* 1/J at gridpoint */
+    double *m_det_dXbdx[3] = { Vard(node, iXm_det_dXbdx),  /* 1/J at Xmid */
+                               Vard(node, iYm_det_dXbdx),  /* 1/J at Ymid */
+                               Vard(node, iZm_det_dXbdx) };
     int *n = node->n;
     int maxn = max3(n[0],n[1],n[2]);
     double *Xbm = dmalloc(maxn);
@@ -178,7 +192,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
     double (*fnumRe)[npe] = calloc(nfvars, sizeof *fnumRe); //for fluxes
     double (*fnumLe)[npe] = calloc(nfvars, sizeof *fnumLe); //for fluxes
-    double (*di0fi0)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i
+    double (*di0fi0J)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i*J
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
     double *qm_m = dmalloc(nqvars);
     int l; /* field index */
@@ -204,7 +218,10 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     for(dir=0; dir<3; dir++)
     {
       int dir_active = Getb(amr->dir_active[dir]);
-      double *sqrtgdiag = m_sqrtgdiag[dir][dir];
+      double *sqrtgdiag  = g_sqrtgdiag[dir];
+      double *sqrtgdiagm = m_sqrtgdiag[dir][dir];
+      double *ooJ  = g_det_dXbdx;
+      double *ooJm = m_det_dXbdx[dir];
       int i,j,k;
 
       /* get midpoints */
@@ -254,7 +271,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
         for(i0=0; i0<n[dir]; i0++)
         {
           int im0, im0m1, im,jm,km, cccm1;
-          double i0g0, i0lN, gd_ow_m, gd_ow_m1, wm;
+          double i0g0, i0lN, Jgd_ow_m, Jgd_ow_m1, wm;
 
           /* if we have only 1 point do nothing, as there are no midpoints */
 //          if(n[dir]<=1) break;
@@ -353,13 +370,13 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           wm  = dXb[i0];
           if(norms_and_sqrtgdiag_on_midpoints)
           {
-            gd_ow_m  = sqrtgdiag[ccc]/wm;
-            gd_ow_m1 = sqrtgdiag[cccm1]/wm;
+            Jgd_ow_m  = sqrtgdiagm[ccc]  /(ooJm[ccc] * wm);
+            Jgd_ow_m1 = sqrtgdiagm[cccm1]/(ooJm[cccm1] * wm);
           }
           else /* get sqrtgdiag on grid points */
           {
-            gd_ow_m  = sqrtgdiag[ccc]/wm;
-            gd_ow_m1 = sqrtgdiag[ccc]/wm;
+            Jgd_ow_m  = sqrtgdiag[ccc]/(ooJ[ccc] * wm);
+            Jgd_ow_m1 = sqrtgdiag[ccc]/(ooJ[ccc] * wm);
           }
 
           /* include flux terms on facepoints */
@@ -371,7 +388,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             if(i0 == 0)
             {
               /* set non-zero weight on left boundary */
-              gd_ow_m1 = sqrtgdiag[ccc]/wm;
+              Jgd_ow_m1 = sqrtgdiag[ccc]/(ooJ[ccc] * wm);
 
               /* compute numerical fluxes on the left side of node */
               d->face = dir*2;        /* normal points to the left */
@@ -387,7 +404,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             if(i0 == n[dir]-1)
             {
               /* set non-zero weight on right boundary */
-              gd_ow_m = sqrtgdiag[ccc]/wm;
+              Jgd_ow_m = sqrtgdiag[ccc]/(ooJ[ccc] * wm);
 
               /* compute numerical fluxes on the right side of node */
               d->face = dir*2 + 1;   /* normal points to the right */
@@ -410,37 +427,37 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           {
             /* Set factors in flux on faces to zero.
                Note: i0g0=0 on left face, i0lN=0 on right face */
-            gd_ow_m  = i0lN * gd_ow_m;
-            gd_ow_m1 = i0g0 * gd_ow_m1;
+            Jgd_ow_m  = i0lN * Jgd_ow_m;
+            Jgd_ow_m1 = i0g0 * Jgd_ow_m1;
           }
 
-          //printf("i0=%d im0=%d im0m1=%d: wm=%g gd_ow_m=%g gd_ow_m1=%g\n",
-          //i0, im0, im0m1, wm, gd_ow_m, gd_ow_m1);
+          //printf("i0=%d im0=%d im0m1=%d: wm=%g Jgd_ow_m=%g Jgd_ow_m1=%g\n",
+          //i0, im0, im0m1, wm, Jgd_ow_m, Jgd_ow_m1);
 
           /* get piece of div(flux) in direction dir with FV method */
           if(use_left_flux)
             forvl(vldivf, l)
             {
-              double *fR = fnumR[l];
-              double *fL = fnumL[l];
-              double *df = di0fi0[l];
-              df[i0] = fR[i0]*gd_ow_m + fL[i0-1]*gd_ow_m1;
+              double *fR  = fnumR[l];
+              double *fL  = fnumL[l];
+              double *dfJ = di0fi0J[l];
+              dfJ[i0] = fR[i0]*Jgd_ow_m + fL[i0-1]*Jgd_ow_m1;
             }
           else /* fv like in BAM, where we only need right flux fnumR */
             forvl(vldivf, l)
             {
               double *fnum = fnumR[l];
-              double *df = di0fi0[l];
-              df[i0] = fnum[i0]*gd_ow_m - fnum[i0-1]*gd_ow_m1;
+              double *dfJ = di0fi0J[l];
+              dfJ[i0] = fnum[i0]*Jgd_ow_m - fnum[i0-1]*Jgd_ow_m1;
             }
         } /* end i0 loop */
 
-        /* extrapolate df = d_i0 f^i0 to face */
+        /* extrapolate dfJ = d_i0 f^i0 J to face */
         if(extrap_mode == FV_DNFN_EXTRAP1)
           forvl(vldivf, l)
           {
-            double *df = di0fi0[l];
-            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale,
+            double *dfJ = di0fi0J[l];
+            rec1d_uface_to_uin_1_Carray(n[dir], dfJ, 0, q_scale,
                                         extrap_s1, extrap_s2);
           }
 
@@ -456,10 +473,10 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           {
             int idivf = Vind(vldivf,l);
             double *divf = Vard_(node, idivf);
-            double *df = di0fi0[l];
+            double *dfJ = di0fi0J[l];
 
-            /* add d_i0 f^i0 term to div(flux) */
-            divf[ccc] += df[i0];
+            /* add (d_i0 f^i0 J) / J term to div(flux) */
+            divf[ccc] += dfJ[i0] * ooJ[ccc];
           }
         }
       } /* end plane loop */
@@ -468,7 +485,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* release mem */
     free(qm_m);
     free(qm_p);
-    free(di0fi0);
+    free(di0fi0J);
     free(fnumLe);
     free(fnumRe);
     free(qcg);
