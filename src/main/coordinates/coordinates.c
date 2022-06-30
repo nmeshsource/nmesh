@@ -311,7 +311,7 @@ int coordinates_init_node(tNode *node)
     }
 
   /* set extra vars to store stuff in the middle between grid points */
-  if(Getb(Par("coordinates_midpoint_data")))
+  if(Getb(coordinates->midpoint_data))
   {
     int iXm_dXdx = Ind("Xm_dXdx");
     int iYm_dXdx = Ind("Ym_dXdx");
@@ -337,9 +337,9 @@ int coordinates_init_node(tNode *node)
     double *pXm_det_dXbdx = Vard(node, iXm_det_dXbdx);
     double *pYm_det_dXbdx = Vard(node, iYm_det_dXbdx);
     double *pZm_det_dXbdx = Vard(node, iZm_det_dXbdx);
-    int *Xm_n = Arrn(VarA(node, iXm_dXdx));
-    int *Ym_n = Arrn(VarA(node, iYm_dXdx));
-    int *Zm_n = Arrn(VarA(node, iZm_dXdx));
+    int *Xm_n = Arrn(VarA(node, iXm_det_dXbdx));
+    int *Ym_n = Arrn(VarA(node, iYm_det_dXbdx));
+    int *Zm_n = Arrn(VarA(node, iZm_det_dXbdx));
 
     /* set Xm_dXdx, Ym_dXdx, Zm_dXdx,
        and Xm_det_dXbdx, Ym_det_dXbdx, Zm_det_dXbdx */
@@ -437,7 +437,26 @@ int coordinates_init_node(tNode *node)
       coordinates_set_sqrtgdiag_array(node, AYm_dXdx, Am_g, AYm_sqrtgdiag);
       coordinates_set_sqrtgdiag_array(node, AZm_dXdx, Am_g, AZm_sqrtgdiag);
     }
-  }
+
+    /* now disable some vars that we don't really need later */
+    if(!Getv(coordinates->midpoint_data, "all"))
+    {
+      /* disable all 18 X/Y/Zm_dXdx */
+      for(i=0; i<9; i++)
+      {
+        disablevarcomp_innode(node, iXm_dXdx + i);
+        disablevarcomp_innode(node, iYm_dXdx + i);
+        disablevarcomp_innode(node, iZm_dXdx + i);
+      }
+      /* keep only Xm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz enabled */
+      disablevarcomp_innode(node, iXm_sqrtgdiagx + 1);
+      disablevarcomp_innode(node, iXm_sqrtgdiagx + 2);
+      disablevarcomp_innode(node, iYm_sqrtgdiagx + 0);
+      disablevarcomp_innode(node, iYm_sqrtgdiagx + 2);
+      disablevarcomp_innode(node, iZm_sqrtgdiagx + 0);
+      disablevarcomp_innode(node, iZm_sqrtgdiagx + 1);
+    }
+  } /* end of coordinates_midpoint_data case */
 
   /* mark coords as set */
   dat->coords_set = 1;
@@ -464,6 +483,24 @@ int coordinates_init(tMesh *mesh)
   coordinates->idet_dXbdx = Ind("det_dXbdx");
   coordinates->isqrtdet2g_o_det3gamma0 = Ind("sqrtdet2g_o_det3gamma0");
   coordinates->isqrtgdiagx = Ind("sqrtgdiagx");
+
+  if(Getb(coordinates->midpoint_data))
+  {
+    coordinates->iXm_det_dXbdx  = Ind("Xm_det_dXbdx");
+    coordinates->iYm_det_dXbdx  = Ind("Ym_det_dXbdx");
+    coordinates->iZm_det_dXbdx  = Ind("Zm_det_dXbdx");
+    coordinates->iXm_sqrtgdiagx = Ind("Xm_sqrtgdiagx");
+    coordinates->iYm_sqrtgdiagy = Ind("Ym_sqrtgdiagy");
+    coordinates->iZm_sqrtgdiagz = Ind("Zm_sqrtgdiagz");
+  }
+  else
+  {
+    coordinates->iXm_det_dXbdx = coordinates->iYm_det_dXbdx
+      = coordinates->iZm_det_dXbdx = coordinates->idXdx;
+    coordinates->iXm_sqrtgdiagx = coordinates->isqrtgdiagx;
+    coordinates->iYm_sqrtgdiagy = coordinates->isqrtgdiagx + 1;
+    coordinates->iZm_sqrtgdiagz = coordinates->isqrtgdiagx + 2;
+  }
 
   //PRF;printf(":  coordinates->idet_dXbdx=%d\n",  coordinates->idet_dXbdx);
 

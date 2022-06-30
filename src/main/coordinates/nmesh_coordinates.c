@@ -52,7 +52,7 @@ int nmesh_coordinates(tMesh *mesh)
 
   /* Variables to store some things in the middle between two regular grid
      points of a node */
-  AddPar("coordinates_midpoint_data", "no", "[no,yes]");
+  AddPar("coordinates_midpoint_data", "no", "[no,yes,yes all]");
   if(Getb(Par("coordinates_midpoint_data")))
   {
     AddAuxVar("Xm_dXd", "i", "dX/dx^i on X mid points"); // don't put any-
