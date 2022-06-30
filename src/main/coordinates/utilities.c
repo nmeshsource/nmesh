@@ -1230,8 +1230,8 @@ double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
     if(PR)
     {
       PRFs(": ");pr_nodename(node);
-      printf(" pts = %d,%d: hmin = %g\n", ijk0[0],ijk1[0], hmin);
-      PRF;printf(": uni=%d, setting mesh->dt = %g\n", uni, mesh->dt);
+      printf(" pts=%d,%d: hmin=%g dtmax=%g\n", ijk0[0],ijk1[0], hmin, dtmax);
+      PRF;printf(": uni=%d, setting mesh->dt=%g\n", uni, mesh->dt);
     }
   }
   return dtm;
