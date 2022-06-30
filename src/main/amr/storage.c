@@ -1833,9 +1833,10 @@ void disablevarcomp_innode(tNode *node, int i)
   if(dat==NULL) return;
 
   if(i>=dat->nv) errorexiti("var comp %i does not exist", i);
-  if(!dat->v[i])
+  if(dat->v[i])
   {
     free_array(dat->v[i]);
+    dat->v[i] = NULL;
     dat->nvenabled--;
     if(PR)
     {
