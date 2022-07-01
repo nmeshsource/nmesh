@@ -288,7 +288,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           //forvl(vldivf, l) fiC[l][i0] = 1e-14;
         }
 
-        /* interpolate fiC from face to point in by h/4 */
+        /* interpolate fiC from face to center of 1st cell that is away from
+           face by a distance h/4 */
         if(extrap_mode == FV_DNFN_EXTRAP1)
           forvl(vldivf, l)
           {
