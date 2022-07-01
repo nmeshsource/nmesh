@@ -405,6 +405,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       break;
     case 5:
       rc[0] = rc[1] = rc[2] = dc;
+      /* use only the 4 cubed spheres in the xy-plane: */
       sphere_around_full_box_at_xc(mesh,4, xc, rc, ssfac*dc);
       break;
     case 6:
