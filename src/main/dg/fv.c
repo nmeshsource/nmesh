@@ -204,12 +204,13 @@ use_left_flux = 1;
     for(l=0; l<nfvars; l++) FlxR[l] = &(FlxRe[l][1]);
     for(l=0; l<nfvars; l++) FlxL[l] = &(FlxLe[l][1]);
 
-    /* write node into d because numflux needs this */
-    d->node = node;
+    /* write node into d and dg because numflux needs this */
+    d->node = dg->node = node;
     if(norms_and_sqrtgdiag_on_midpoints)
       d->info = DGINFO_MIDPT;
     else
       d->info = DGINFO_NULL;
+    dg->info = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
     if(nghosts || add_surface_fluxes) get_all_surfaces(node);
@@ -321,9 +322,16 @@ use_left_flux = 1;
                if not set already in rec1d_u_f_lam_midpt */
             if(numflux) numflux(d);
 
-            /* save d->fnum - d->fi in FlxL for each field and point */
+            /* now get dg->fi on gridpoint */
+            dg->i = ic;
+            dg->j = jc;
+            dg->k = kc;
+            dg->face = dir*2;
+            u_f_lam(dg);
+
+            /* save d->fnum - dg->fi in FlxL for each field and point */
             forvl(vldivf, l)
-              FlxL[l][im0m1] = d->fnum[l] - d->fi[l];
+              FlxL[l][im0m1] = d->fnum[l] - 1*dg->fi[l];
             //printDGinfo(d);
           }
 
@@ -356,9 +364,16 @@ use_left_flux = 1;
                if not set already in rec1d_u_f_lam_midpt */
             if(numflux) numflux(d);
 
-            /* save d->fnum - d->fi in FlxR for each field and point */
+            /* now get dg->fi on gridpoint */
+            dg->i = ic;
+            dg->j = jc;
+            dg->k = kc;
+            dg->face = dir*2 + 1;
+            u_f_lam(dg);
+
+            /* save d->fnum - dg->fi in FlxR for each field and point */
             forvl(vldivf, l)
-              FlxR[l][im0] = d->fnum[l] - d->fi[l];
+              FlxR[l][im0] = d->fnum[l] - 1*dg->fi[l];
             /* above we have a case for FlxL (with normL=-normR), but I think
                this results in FlxL = -FlxR. So it should be enough to only
                use FlxR. */
@@ -382,7 +397,9 @@ use_left_flux = 1;
           /* include flux terms on facepoints */
           if(add_surface_fluxes && dir_active)
           {
-            copy_nonallocd_DGinfo(d, dg);
+            dg->i = ic;
+            dg->j = jc;
+            dg->k = kc;
 
             if(i0 == 0)
             {
@@ -396,9 +413,9 @@ use_left_flux = 1;
               numflux(dg);
 
               /* save fluxes of left face in FlxR, use FlxR = -FlxL */
-              forvl(vldivf, l) FlxR[l][-1] = -( dg->fnum[l] - dg->fi[l] );
+              forvl(vldivf, l) FlxR[l][-1] = -( dg->fnum[l] - 1*dg->fi[l] );
               if(use_left_flux)
-                forvl(vldivf, l) FlxL[l][-1] = dg->fnum[l] - dg->fi[l];
+                forvl(vldivf, l) FlxL[l][-1] = dg->fnum[l] - 1*dg->fi[l];
             }
             if(i0 == n[dir]-1)
             {
@@ -412,9 +429,9 @@ use_left_flux = 1;
               numflux(dg);
 
               /* save fluxes of right face in FlxR */
-              forvl(vldivf, l) FlxR[l][i0] = dg->fnum[l] - dg->fi[l];
+              forvl(vldivf, l) FlxR[l][i0] = dg->fnum[l] - 1*dg->fi[l];
               if(use_left_flux)
-                forvl(vldivf, l) FlxL[l][i0] = -( dg->fnum[l] - dg->fi[l] );
+                forvl(vldivf, l) FlxL[l][i0] = -( dg->fnum[l] - 1*dg->fi[l] );
                                  /* ^-here we used FlxL = -FlxR */
             }
           }
