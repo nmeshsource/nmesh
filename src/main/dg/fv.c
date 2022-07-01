@@ -161,6 +161,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
   /* do we use left fluxes? */
   use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
+use_left_flux = 1;
 
   /* set var list for div of fluxes to zero */
   vlsetconstant_node(node, vldivf, 0.);
@@ -168,6 +169,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   /* RHS */
   {
     tDGinfo *d = alloc_DGinfo(vlu, vls);
+    tDGinfo *dg = alloc_DGinfo(vlu, vls);
     double *g_sqrtgdiag[3] = { Vard(node, isqrtgdiagx), //sqrtgdiag on gridpts
                                Vard(node, isqrtgdiagx+1),
                                Vard(node, isqrtgdiagx+2) };
@@ -380,8 +382,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           /* include flux terms on facepoints */
           if(add_surface_fluxes && dir_active)
           {
-            int d_face_sav = d->face; /* save parts of d we may alter */
-            int d_info_sav = d->info;
+            copy_nonallocd_DGinfo(d, dg);
 
             if(i0 == 0)
             {
@@ -389,15 +390,15 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               Jgd_ow_m1 = sqrtgdiag[ccc]/(ooJ[ccc] * wm);
 
               /* compute numerical fluxes on the left side of node */
-              d->face = dir*2;        /* normal points to the left */
-              d->info = DGINFO_NULL;  /* facepoint is grid point */
-              u_f_lam(d);
-              numflux(d);
+              dg->face = dir*2;        /* normal points to the left */
+              dg->info = DGINFO_NULL;  /* facepoint is grid point */
+              u_f_lam(dg);
+              numflux(dg);
 
               /* save fluxes of left face in FlxR, use FlxR = -FlxL */
-              forvl(vldivf, l) FlxR[l][-1] = -( d->fnum[l] - d->fi[l] );
+              forvl(vldivf, l) FlxR[l][-1] = -( dg->fnum[l] - dg->fi[l] );
               if(use_left_flux)
-                forvl(vldivf, l) FlxL[l][-1] = d->fnum[l] - d->fi[l];
+                forvl(vldivf, l) FlxL[l][-1] = dg->fnum[l] - dg->fi[l];
             }
             if(i0 == n[dir]-1)
             {
@@ -405,21 +406,17 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               Jgd_ow_m = sqrtgdiag[ccc]/(ooJ[ccc] * wm);
 
               /* compute numerical fluxes on the right side of node */
-              d->face = dir*2 + 1;   /* normal points to the right */
-              d->info = DGINFO_NULL; /* facepoint is grid point */
-              u_f_lam(d);
-              numflux(d);
+              dg->face = dir*2 + 1;   /* normal points to the right */
+              dg->info = DGINFO_NULL; /* facepoint is grid point */
+              u_f_lam(dg);
+              numflux(dg);
 
               /* save fluxes of right face in FlxR */
-              forvl(vldivf, l) FlxR[l][i0] = d->fnum[l] - d->fi[l];
+              forvl(vldivf, l) FlxR[l][i0] = dg->fnum[l] - dg->fi[l];
               if(use_left_flux)
-                forvl(vldivf, l) FlxL[l][i0] = -( d->fnum[l] - d->fi[l] );
+                forvl(vldivf, l) FlxL[l][i0] = -( dg->fnum[l] - dg->fi[l] );
                                  /* ^-here we used FlxL = -FlxR */
             }
-
-            /* restore altered parts of d */
-            d->face = d_face_sav;
-            d->info = d_info_sav;
           }
           else
           {
@@ -489,6 +486,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     free(qcg);
     free(dXb);
     free(Xbm);
+    free_DGinfo(dg);
     free_DGinfo(d);
   }
 }
