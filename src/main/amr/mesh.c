@@ -403,53 +403,57 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       else
         two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
       break;
+    case 5:
+      rc[0] = rc[1] = rc[2] = dc;
+      sphere_around_full_box_at_xc(mesh,4, xc, rc, ssfac*dc);
+      break;
     case 6:
       rc[0] = rc[1] = rc[2] = dc;
       if(Getv(mesh_type, "Shell")) //<-REMOVE! This is covered in setup_Shell_mesh
-        CubedSphere_shell_at_xc(mesh, xc, dc, ssfac*dc);
+        CubedSphere_shell_at_xc(mesh,6, xc, dc, ssfac*dc);
       else
-        sphere_around_empty_box_at_xc(mesh, xc, rc, ssfac*dc);
+        sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
       break;
     case 7:
       rc[0] = rc[1] = rc[2] = dc;
-      sphere_around_full_box_at_xc(mesh, xc, rc, ssfac*dc);
+      sphere_around_full_box_at_xc(mesh,6, xc, rc, ssfac*dc);
       break;
     case 12:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      two_spheres_around_empty_box_at_xc(mesh, xc,
+      two_spheres_around_empty_box_at_xc(mesh,6, xc,
                                          rc, ssfac*dc, obfac*dc, stretch);
       break;
     case 13:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      two_spheres_around_box_at_xc(mesh, xc, rc, ssfac*dc, obfac*dc, stretch);
+      two_spheres_around_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc, stretch);
       break;
     /* 13 patches but with 2 centers as in sgrid:
     case 13:
       xc[1] = xc[2] = 0.0;
       xc[0] = dc;
-      arrange_1pat12CubSph_into_full_cube(mesh, xc,
+      arrange_1pat12CubSph_into_full_cube(mesh,6, xc,
                                           csize*rf_surf1, rf_surf1, dc);
       break; */
     case 19:
       rc[1] = rc[2] = rc[0] = dc;
-      three_spheres_around_box_at_xc(mesh, xc, rc, ssfac*dc, obfac*dc,
+      three_spheres_around_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc,
                                      r2fac*dc, stretch);
       break;
     case 26:
-      two_full_cubes_touching_at_x0(mesh, dc,
+      two_full_cubes_touching_at_x0(mesh,6, dc,
                                     csize*rf_surf1, rf_surf1,
                                     csize*rf_surf2, rf_surf2);
       break;
     case 32:
-      sphere_around_two_full_cubes_touching_at_x0(mesh, dc,
+      sphere_around_two_full_cubes_touching_at_x0(mesh,6, dc,
                                                   csize*rf_surf1, rf_surf1,
                                                   csize*rf_surf2, rf_surf2,
                                                   ssfac*dc);
       break;
     case 38:
-      two_spheres_around_two_full_cubes(mesh, dc,
+      two_spheres_around_two_full_cubes(mesh,6, dc,
                                         csize*rf_surf1, rf_surf1,
                                         csize*rf_surf2, rf_surf2,
                                         ssfac*dc, obfac*dc);
@@ -495,11 +499,11 @@ int setup_Shell_mesh(tMesh *mesh)
   /* setup cubed spheres in form of a shell */
   if(r1 < rin)
   {
-    CubedSphere_shell_at_xc(mesh, xc, rin, rout);
+    CubedSphere_shell_at_xc(mesh,6, xc, rin, rout);
   }
   else
   {
-    two_CubedSphere_shells_at_xc(mesh, xc, rin, r1, rout, stretch);
+    two_CubedSphere_shells_at_xc(mesh,6, xc, rin, r1, rout, stretch);
   }
 
   /* setup all bfaces and root node connections */

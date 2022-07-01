@@ -23,7 +23,7 @@
    |/________\|
 
    returns the index of the pat right after the last converted pat */
-int arrange_12CubSph_into_empty_cube(tMesh *mesh, double *xc,
+int arrange_12CubSph_into_empty_cube(tMesh *mesh, int N, double *xc,
                                      double din, double dmid, double dout)
 {
   int pl;
@@ -40,18 +40,18 @@ int arrange_12CubSph_into_empty_cube(tMesh *mesh, double *xc,
     Dout[i]= dout;
   }
   /* convert the 12 pats */
-  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0,1, xc, Din,Dmid);
-  pl = add_6CubedSphere_pats(mesh, innerCubedSphere,0,1, xc, Dmid,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, outerCubedSphere,0,1, xc, Din,Dmid);
+  pl = add_N_CubedSphere_pats(mesh, N, innerCubedSphere,0,1, xc, Dmid,Dout);
   return pl;
 }
 
 /* same as arrange_12CubSph_into_empty_cube, but add one cube at the center */
-int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, double *xc,
+int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, int N, double *xc,
                                         double din, double dmid, double dout)
 {
   int pl;
   pl = add_1cube_pat(mesh, xc, din);
-  pl = arrange_12CubSph_into_empty_cube(mesh, xc, din,dmid,dout);
+  pl = arrange_12CubSph_into_empty_cube(mesh,N, xc, din,dmid,dout);
   return pl;
 }
 
@@ -68,7 +68,7 @@ int arrange_1pat12CubSph_into_full_cube(tMesh *mesh, double *xc,
    | /      \ | /      \ |
    |/________\|/________\|
 */
-int two_full_cubes_touching_at_x0(tMesh *mesh, double dc,
+int two_full_cubes_touching_at_x0(tMesh *mesh, int N, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2)
 {
@@ -80,11 +80,11 @@ int two_full_cubes_touching_at_x0(tMesh *mesh, double dc,
 
   /* full cube 1 is centered at xc[1]=dc and has width 2dc */
   xc[0] = dc;
-  pl = arrange_1pat12CubSph_into_full_cube(mesh, xc, din1,dmid1, dc);
+  pl = arrange_1pat12CubSph_into_full_cube(mesh,N, xc, din1,dmid1, dc);
 
   /* full cube 2 is centered at xc[1]=-dc and has width 2dc */
   xc[0] = -dc;
-  pl = arrange_1pat12CubSph_into_full_cube(mesh, xc, din2,dmid2, dc);
+  pl = arrange_1pat12CubSph_into_full_cube(mesh,N, xc, din2,dmid2, dc);
 
   return pl;
 }
@@ -104,7 +104,7 @@ int two_full_cubes_touching_at_x0(tMesh *mesh, double dc,
      \__         __/
         \_______/
 */
-int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
+int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int N,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0)
 {
@@ -113,7 +113,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
   int i;
 
   /* make the 2 full cubes */
-  pl = two_full_cubes_touching_at_x0(mesh, dc, din1,dmid1, din2,dmid2);
+  pl = two_full_cubes_touching_at_x0(mesh,N, dc, din1,dmid1, din2,dmid2);
 
   /* set distances to make 6 more cubed spheres around these 2 full cubes */
   for(i=0; i<6; i++)
@@ -123,7 +123,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
     Dout[i] = r0;
   }
   xc[0] = xc[1] = xc[2] = 0.0;
-  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, outerCubedSphere,0,0, xc, Din,Dout);
   return pl;
 }
 
@@ -150,7 +150,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh,
        -_ /
          \      ...
 */
-int two_spheres_around_two_full_cubes(tMesh *mesh,
+int two_spheres_around_two_full_cubes(tMesh *mesh, int N,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1)
 {
@@ -159,7 +159,7 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
   int i;
 
   /* make the 2 full cubes and sphere0 around them */
-  pl = sphere_around_two_full_cubes_touching_at_x0(mesh, dc,
+  pl = sphere_around_two_full_cubes_touching_at_x0(mesh,N, dc,
                                                    din1,dmid1, din2,dmid2, r0);
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
@@ -168,7 +168,7 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
     Dout[i] = r1;
   }
   xc[0] = xc[1] = xc[2] = 0.0;
-  pl = add_6CubedSphere_pats(mesh, CubedShell,1,1, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,1,1, xc, Din,Dout);
   return pl;
 }
 
@@ -190,8 +190,8 @@ int two_spheres_around_two_full_cubes(tMesh *mesh,
      \__         __/
         \_______/
 */
-int sphere_around_empty_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
-                                  double r0)
+int sphere_around_empty_box_at_xc(tMesh *mesh, int N,
+                                  double xc[3], double dc[3], double r0)
 {
   int pl;
   double Din[6], Dout[6];
@@ -203,17 +203,17 @@ int sphere_around_empty_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
     Din[f]  = dc[f/2];
     Dout[f] = r0;
   }
-  pl = add_6CubedSphere_pats(mesh, outerCubedSphere,0,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, outerCubedSphere,0,0, xc, Din,Dout);
   return pl;
 }
 
 /* same as sphere_around_empty_box_at_xc, but add one box at the center */
-int sphere_around_full_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
-                                 double r0)
+int sphere_around_full_box_at_xc(tMesh *mesh, int N,
+                                 double xc[3], double dc[3], double r0)
 {
   int pl;
   pl = add_1box_pat(mesh, xc, dc);
-  pl = sphere_around_empty_box_at_xc(mesh, xc, dc, r0);
+  pl = sphere_around_empty_box_at_xc(mesh,N, xc, dc, r0);
   return pl;
 }
 
@@ -239,7 +239,8 @@ int sphere_around_full_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
        -_ /
          \      ...
 */
-int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+int two_spheres_around_box_at_xc(tMesh *mesh, int N,
+                                 double xc[3], double dc[3],
                                  double r0, double r1, int stretch)
 {
   int pl;
@@ -247,7 +248,7 @@ int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
   int i;
 
   /* make the full box and sphere0 around them */
-  pl = sphere_around_full_box_at_xc(mesh, xc, dc, r0);
+  pl = sphere_around_full_box_at_xc(mesh,N, xc, dc, r0);
 
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
@@ -255,12 +256,12 @@ int two_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,stretch,0, xc, Din,Dout);
   return pl;
 }
 
 /* same as two_spheres_around_box_at_xc, but put no box at center */
-int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
+int two_spheres_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
                                        double dc[3], double r0, double r1,
                                        int stretch)
 {
@@ -269,7 +270,7 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
   int i;
 
   /* make sphere0 around empty box */
-  pl = sphere_around_empty_box_at_xc(mesh, xc, dc, r0);
+  pl = sphere_around_empty_box_at_xc(mesh,N, xc, dc, r0);
 
   /* set distances to make 6 more stretched cubed shells around sphere0 */
   for(i=0; i<6; i++)
@@ -277,7 +278,7 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
     Din[i]  = r0;
     Dout[i] = r1;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,stretch,0, xc, Din,Dout);
   return pl;
 }
 
@@ -303,7 +304,8 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, double xc[3],
        -_ /                           in outermost CubedShell
          \      ...
 */
-int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
+int three_spheres_around_box_at_xc(tMesh *mesh, int N,
+                                   double xc[3], double dc[3],
                                    double r0, double r1, double r2,
                                    int stretch)
 {
@@ -313,7 +315,7 @@ int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
 
   /* make the full box and sphere0 around them */
   stretch1 = 0;
-  pl = two_spheres_around_box_at_xc(mesh, xc, dc, r0, r1, stretch1);
+  pl = two_spheres_around_box_at_xc(mesh,N, xc, dc, r0, r1, stretch1);
 
   /* set distances to make 6 more stretched cubed shells around sphere1 */
   for(i=0; i<6; i++)
@@ -321,7 +323,7 @@ int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
     Din[i]  = r1;
     Dout[i] = r2;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,stretch,0, xc, Din,Dout);
   return pl;
 }
 
@@ -342,7 +344,7 @@ int three_spheres_around_box_at_xc(tMesh *mesh, double xc[3], double dc[3],
      \__    2    __/
         \_______/
 */
-int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
+int CubedSphere_shell_at_xc(tMesh *mesh, int N, double xc[3],
                             double rin, double rout)
 {
   int pl;
@@ -355,7 +357,7 @@ int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
     Din[f]  = rin;
     Dout[f] = rout;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,0,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,0,0, xc, Din,Dout);
   return pl;
 }
 
@@ -381,7 +383,8 @@ int CubedSphere_shell_at_xc(tMesh *mesh, double xc[3],
        -_ /
          \      ...
 */
-int two_CubedSphere_shells_at_xc(tMesh *mesh, double xc[3], double r0,
+int two_CubedSphere_shells_at_xc(tMesh *mesh, int N,
+                                 double xc[3], double r0,
                                  double r1, double r2, int stretch)
 {
   int pl;
@@ -389,7 +392,7 @@ int two_CubedSphere_shells_at_xc(tMesh *mesh, double xc[3], double r0,
   int f;
 
   /* make inner shell */
-  pl = CubedSphere_shell_at_xc(mesh, xc, r0, r1);
+  pl = CubedSphere_shell_at_xc(mesh,N, xc, r0, r1);
 
   /* set distances to make 6 cubed spheres around the inner shell */
   for(f=0; f<6; f++)
@@ -397,7 +400,7 @@ int two_CubedSphere_shells_at_xc(tMesh *mesh, double xc[3], double r0,
     Din[f]  = r1;
     Dout[f] = r2;
   }
-  pl = add_6CubedSphere_pats(mesh, CubedShell,stretch,0, xc, Din,Dout);
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,stretch,0, xc, Din,Dout);
 
   return pl;
 }
