@@ -319,9 +319,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
                if not set already in rec1d_u_f_lam_midpt */
             if(numflux) numflux(d);
 
-            /* save d->fnum in flxL for each field and point */
+            /* save d->fnum - d->fi in flxL for each field and point */
             forvl(vldivf, l)
-              flxL[l][im0m1] = d->fnum[l];
+              flxL[l][im0m1] = d->fnum[l] - d->fi[l];
             //printDGinfo(d);
           }
 
@@ -354,9 +354,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
                if not set already in rec1d_u_f_lam_midpt */
             if(numflux) numflux(d);
 
-            /* save d->fnum in flxR for each field and point */
+            /* save d->fnum - d->fi in flxR for each field and point */
             forvl(vldivf, l)
-              flxR[l][im0] = d->fnum[l];
+              flxR[l][im0] = d->fnum[l] - d->fi[l];
             /* above we have a case for flxL (with normL=-normR), but I think
                this results in flxL = -flxR. So it should be enough to only
                use flxR. */
@@ -395,9 +395,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               numflux(d);
 
               /* save fluxes of left face in flxR, use flxR = -flxL */
-              forvl(vldivf, l) flxR[l][-1] = -( d->fnum[l] );
+              forvl(vldivf, l) flxR[l][-1] = -( d->fnum[l] - d->fi[l] );
               if(use_left_flux)
-                forvl(vldivf, l) flxL[l][-1] = d->fnum[l];
+                forvl(vldivf, l) flxL[l][-1] = d->fnum[l] - d->fi[l];
             }
             if(i0 == n[dir]-1)
             {
@@ -411,9 +411,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               numflux(d);
 
               /* save fluxes of right face in flxR */
-              forvl(vldivf, l) flxR[l][i0] = d->fnum[l];
+              forvl(vldivf, l) flxR[l][i0] = d->fnum[l] - d->fi[l];
               if(use_left_flux)
-                forvl(vldivf, l) flxL[l][i0] = -( d->fnum[l] );
+                forvl(vldivf, l) flxL[l][i0] = -( d->fnum[l] - d->fi[l] );
                                  /* ^-here we used flxL = -flxR */
             }
 
