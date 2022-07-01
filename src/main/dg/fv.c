@@ -68,7 +68,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   double q_scale = 1.; /* typical order of magnitude of fields */
   int nghosts;         /* number of ghost points on each end */
   int add_surface_fluxes; /* whether we set all of divf on faces */
-  int use_left_flux;   /* whether we set and use the left fluxes in FlxL */
+  int use_left_flux;   /* whether we set and use the left fluxes in fnumL */
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
   double extrap_s1 = DGglobals->fv_divf_extrap_s1;
   double extrap_s2 = DGglobals->fv_divf_extrap_s2;
@@ -185,14 +185,14 @@ use_left_flux = 1;
     double *Xbm = dmalloc(maxn);
     double *dXb = dmalloc(maxn);
     double *qc[nqvars];          //pointers to data of the q-fields
-    double *FlxR[nfvars];       //pointers to data of the right fluxes
-    double *FlxL[nfvars];       //pointers to data of the left fluxes
-    double *fiC[nfvars];        //pointers to data of the inner fluxes
+    double *fnumR[nfvars];       //pointers to data of the right fluxes
+    double *fnumL[nfvars];       //pointers to data of the left fluxes
+    double *fiC[nfvars];         //pointers to data of the inner fluxes
     int npg = maxn + 2*nghosts;  //number of points in qcg[l]
-    int npe = maxn + 2;          //number of points in FlxRe[l]
+    int npe = maxn + 2;          //number of points in fnumRe[l]
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
-    double (*FlxRe)[npe] = calloc(nfvars, sizeof *FlxRe); //for fluxes
-    double (*FlxLe)[npe] = calloc(nfvars, sizeof *FlxLe); //for fluxes
+    double (*fnumRe)[npe] = calloc(nfvars, sizeof *fnumRe); //for fluxes
+    double (*fnumLe)[npe] = calloc(nfvars, sizeof *fnumLe); //for fluxes
     double (*fiCe)[npe]  = calloc(nfvars, sizeof *fiCe); //for inner fluxes
     double (*di0fi0J)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i*J
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
@@ -203,9 +203,9 @@ use_left_flux = 1;
     /* set qc to part of qcg without ghosts */
     for(l=0; l<nqvars; l++) qc[l] = &(qcg[l][nghosts]);
     /* NOTE: now qc[l][-1] = qcg[l][0] i.e. ghost on left */
-    for(l=0; l<nfvars; l++) FlxR[l] = &(FlxRe[l][1]);
-    for(l=0; l<nfvars; l++) FlxL[l] = &(FlxLe[l][1]);
-    for(l=0; l<nfvars; l++) fiC[l]  = &(fiCe[l][1]);
+    for(l=0; l<nfvars; l++) fnumR[l] = &(fnumRe[l][1]);
+    for(l=0; l<nfvars; l++) fnumL[l] = &(fnumLe[l][1]);
+    for(l=0; l<nfvars; l++) fiC[l]   = &(fiCe[l][1]);
 
     /* write node into d and dg because numflux needs this */
     d->node = dg->node = node;
@@ -289,8 +289,8 @@ use_left_flux = 1;
           dg->j = jc;
           dg->k = kc;
           dg->face = dir*2 + 1; /* ==> normal points to the right */
-          u_f_lam(dg);
-          forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
+          //u_f_lam(dg);
+          //forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
 
           /* set 1d index of right and left midpoint and some flags if we
              are at endpoints */
@@ -333,10 +333,9 @@ use_left_flux = 1;
                if not set already in rec1d_u_f_lam_midpt */
             if(numflux) numflux(d);
 
-            /* save d->fnum - dg->fi in FlxL for each field and point */
+            /* save d->fnum in fnumL for each field and point */
             forvl(vldivf, l)
-              FlxL[l][im0m1] = d->fnum[l] - (-fiC[l][i0]);
-                                             //left normal = -right normal
+              fnumL[l][im0m1] = d->fnum[l];
             //printDGinfo(d);
           }
 
@@ -369,12 +368,12 @@ use_left_flux = 1;
                if not set already in rec1d_u_f_lam_midpt */
             if(numflux) numflux(d);
 
-            /* save d->fnum - dg->fi in FlxR for each field and point */
+            /* save d->fnum in fnumR for each field and point */
             forvl(vldivf, l)
-              FlxR[l][im0] = d->fnum[l] - fiC[l][i0];
-            /* above we have a case for FlxL (with normL=-normR), but I think
-               this results in FlxL = -FlxR. So it should be enough to only
-               use FlxR. */
+              fnumR[l][im0] = d->fnum[l];
+            /* above we have a case for fnumL (with normL=-normR), but I think
+               this results in fnumL = -fnumR. So it should be enough to only
+               use fnumR. */
             //printDGinfo(d);
             //if(d->fnum[0]>0.00000001 && i0==4) errorexit("STOP");
           }
@@ -410,12 +409,10 @@ use_left_flux = 1;
               u_f_lam(dg);
               numflux(dg);
 
-              /* save fluxes of left face in FlxR, use FlxR = -FlxL */
-              forvl(vldivf, l)
-                FlxR[l][-1] = -( dg->fnum[l] - (-fiC[l][i0]) );
+              /* save fluxes of left face in fnumR, use fnumR = -fnumL */
+              forvl(vldivf, l) fnumR[l][-1] = -( dg->fnum[l] );
               if(use_left_flux)
-                forvl(vldivf, l)
-                  FlxL[l][-1] = dg->fnum[l] - (-fiC[l][i0]);
+                forvl(vldivf, l) fnumL[l][-1] = dg->fnum[l];
             }
             if(i0 == n[dir]-1)
             {
@@ -428,11 +425,11 @@ use_left_flux = 1;
               u_f_lam(dg);
               numflux(dg);
 
-              /* save fluxes of right face in FlxR */
-              forvl(vldivf, l) FlxR[l][i0] = dg->fnum[l] - fiC[l][i0];
+              /* save fluxes of right face in fnumR */
+              forvl(vldivf, l) fnumR[l][i0] = dg->fnum[l];
               if(use_left_flux)
-                forvl(vldivf, l) FlxL[l][i0] = -( dg->fnum[l] - fiC[l][i0] );
-                                 /* ^-here we used FlxL = -FlxR */
+                forvl(vldivf, l) fnumL[l][i0] = -( dg->fnum[l] );
+                                 /* ^-here we used fnumL = -fnumR */
             }
           }
           else
@@ -450,17 +447,24 @@ use_left_flux = 1;
           if(use_left_flux)
             forvl(vldivf, l)
             {
-              double *fR  = FlxR[l];
-              double *fL  = FlxL[l];
               double *dfJ = di0fi0J[l];
-              dfJ[i0] = fR[i0]*Jgd_ow_m + fL[i0-1]*Jgd_ow_m1;
+              double *fR  = fnumR[l];
+              double *fL  = fnumL[l];
+              double *fi  = fiC[l];
+              double FR = fR[i0] - fi[i0]; //here we subtract fi w. rt norm
+              double FL = fL[i0-1] - (-fi[i0]);
+                                   // |___left normal = -right normal
+              dfJ[i0] = FR*Jgd_ow_m + FL*Jgd_ow_m1;
             }
-          else /* fv like in BAM, where we only need right flux FlxR */
+          else /* fv like in BAM, where we only need right flux fnumR */
             forvl(vldivf, l)
             {
-              double *Flx = FlxR[l];
               double *dfJ = di0fi0J[l];
-              dfJ[i0] = Flx[i0]*Jgd_ow_m - Flx[i0-1]*Jgd_ow_m1;
+              double *fR  = fnumR[l];
+              double *fi  = fiC[l];
+              double FR =  fR[i0] - fi[i0]; //here we subtract fi w. rt norm
+              double FL = -fR[i0-1] - (-fi[i0]);
+              dfJ[i0] = FR*Jgd_ow_m + FL*Jgd_ow_m1;
             }
         } /* end i0 loop */
 
@@ -499,8 +503,8 @@ use_left_flux = 1;
     free(qm_p);
     free(di0fi0J);
     free(fiCe);
-    free(FlxLe);
-    free(FlxRe);
+    free(fnumLe);
+    free(fnumRe);
     free(qcg);
     free(dXb);
     free(Xbm);
