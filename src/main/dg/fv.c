@@ -58,6 +58,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int norms_and_sqrtgdiag_on_midpoints = Getb(coordinates->midpoint_data);
   int nqvars = vlq->n;
   int nfvars = vldivf->n;
+  int have_XYZ_of_xyz = ( node->pat->XYZ_of_xyz ? 1 : 0 );
   int isqrtgdiagx = coordinates->isqrtgdiagx;
   int idet_dXbdx  = coordinates->idet_dXbdx;
   int iXm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz;
@@ -192,7 +193,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
     double (*fnumRe)[npe] = calloc(nfvars, sizeof *fnumRe); //for fluxes
     double (*fnumLe)[npe] = calloc(nfvars, sizeof *fnumLe); //for fluxes
-    double (*fiCe)[npe]  = calloc(nfvars, sizeof *fiCe); //for inner fluxes
+    double (*fiCe)[npe]   = calloc(nfvars, sizeof *fiCe); //for inner fluxes
     double (*di0fi0J)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i*J
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
     double *qm_m = dmalloc(nqvars);
@@ -271,23 +272,22 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
         }
 
         /* save dg->fi in fiC */
-        if(0)
-        for(i0=0; i0<n[dir]; i0++)
-        {
-          /* set points and their index */
-          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
-          ccc = Ind_n(ic,jc,kc, n);
+        if(have_XYZ_of_xyz)
+          for(i0=0; i0<n[dir]; i0++)
+          {
+            /* set points and their index */
+            ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+            ccc = Ind_n(ic,jc,kc, n);
 
-          /* now get dg->fi on gridpoint for normal pointing to the right */
-          dg->i = ic;
-          dg->j = jc;
-          dg->k = kc;
-          dg->face = dir*2 + 1; /* ==> normal points to the right */
-          u_f_lam(dg);
-          forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
-          //forvl(vldivf, l) fiC[l][i0] = 1e-14;
-        }
-
+            /* now get dg->fi on gridpoint for normal pointing to the right */
+            dg->i = ic;
+            dg->j = jc;
+            dg->k = kc;
+            dg->face = dir*2 + 1; /* ==> normal points to the right */
+            u_f_lam(dg);
+            forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
+            //forvl(vldivf, l) fiC[l][i0] = 1e-14;
+          }
         /* interpolate fiC from face to center of 1st cell that is away from
            face by a distance h/4 */
         if(extrap_mode == FV_DNFN_EXTRAP1)
