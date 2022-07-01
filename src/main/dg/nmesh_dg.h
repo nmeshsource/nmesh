@@ -110,6 +110,7 @@ int dg_add_surface_fluxes(tNode *node, tVarList *vlr, tVarList *vlu,
                           void (*numflux)(tDGinfo *d));
 tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls);
 void free_DGinfo(tDGinfo *dgi);
+void copy_nonallocd_DGinfo(tDGinfo *dsrc, tDGinfo *ddest);
 void printDGinfo(tDGinfo *d);
 
 /* rec1d.c */

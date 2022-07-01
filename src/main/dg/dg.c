@@ -129,6 +129,7 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
           double *df = Vard_(node, idf);
           double F;
 
+//F = (dgi->fnum[l] - dgi->fi[l]) * Ffac;
           F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
           df[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
         }
@@ -218,6 +219,33 @@ void free_DGinfo(tDGinfo *dgi)
 
   /* free dgi */
   free(dgi);
+}
+
+
+/* copy the parts of struct tDGINFO that are not allocated by alloc_DGinfo
+   from dsrc to ddest */
+void copy_nonallocd_DGinfo(tDGinfo *dsrc, tDGinfo *ddest)
+{
+  tDGinfo dbak[1];
+
+  /* shallow backup copy of ddest */
+  *dbak = *ddest;
+
+  /* shallow copy of dsrc, to get everthing from dsrc into ddest */
+  *ddest = *dsrc;
+
+  /* now restore the allocd parts of ddest from dbak */
+  ddest->ui   = dbak->ui;
+  ddest->fi   = dbak->fi;
+  ddest->lami = dbak->lami;
+  ddest->ua   = dbak->ua;
+  ddest->fa   = dbak->fa;
+  ddest->lama = dbak->lama;
+
+  ddest->fnum = dbak->fnum;
+
+  ddest->si   = dbak->si;
+  ddest->sa   = dbak->sa;
 }
 
 
