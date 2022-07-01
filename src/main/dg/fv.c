@@ -161,7 +161,6 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
   /* do we use left fluxes? */
   use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
-use_left_flux = 1;
 
   /* set var list for div of fluxes to zero */
   vlsetconstant_node(node, vldivf, 0.);
@@ -271,6 +270,34 @@ use_left_flux = 1;
           }
         }
 
+        /* save dg->fi in fiC */
+        if(0)
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+
+          /* now get dg->fi on gridpoint for normal pointing to the right */
+          dg->i = ic;
+          dg->j = jc;
+          dg->k = kc;
+          dg->face = dir*2 + 1; /* ==> normal points to the right */
+          u_f_lam(dg);
+          forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
+          //forvl(vldivf, l) fiC[l][i0] = 1e-14;
+        }
+
+        /* interpolate fiC from face to point in by h/4 */
+        if(extrap_mode == FV_DNFN_EXTRAP1)
+          forvl(vldivf, l)
+          {
+            double *fi = fiC[l];
+            rec1d_uface_to_uin_1_Carray(n[dir], fi, 1, q_scale,
+                                        extrap_s1, extrap_s2);
+          }
+
+
         /* loop over points in dir */
         for(i0=0; i0<n[dir]; i0++)
         {
@@ -283,14 +310,6 @@ use_left_flux = 1;
           /* set points and their index */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
-
-          /* now get dg->fi on gridpoint for normal pointing to the right */
-          dg->i = ic;
-          dg->j = jc;
-          dg->k = kc;
-          dg->face = dir*2 + 1; /* ==> normal points to the right */
-          //u_f_lam(dg);
-          //forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
 
           /* set 1d index of right and left midpoint and some flags if we
              are at endpoints */
