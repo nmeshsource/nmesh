@@ -71,8 +71,10 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
     int *n = node->n;
     double *ooJ = Vard(node, iooJ);
     int face;
-    double mod0 = (!use_fv);  /* set to 1 if we don't use fin. vol. */
+    int not_fv = !use_fv;
+    double mod0 = not_fv;     /* set to 1 if we don't use fin. vol. */
     double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
+    double s_fi = ( not_fv || ( node->pat->XYZ_of_xyz ? 1 : 0 ) );
 
     /* set DG node info */
     dgi->node = node;
@@ -129,8 +131,7 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
           double *df = Vard_(node, idf);
           double F;
 
-//F = (dgi->fnum[l] - dgi->fi[l]) * Ffac;
-          F = (dgi->fnum[l] - dgi->fi[l]*mod0) * Ffac;
+          F = (dgi->fnum[l] - dgi->fi[l]*s_fi) * Ffac;
           df[ijk] += F * (det2g * sdg_oJ_ow + gdiag * gd_ow);
         }
       }
