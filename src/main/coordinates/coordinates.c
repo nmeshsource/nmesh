@@ -7,6 +7,10 @@
 #define PR 0
 
 
+/* global pars from amr */
+//extern tAMR amr[1];
+
+
 /* frequently used global vars */
 tcoordinates coordinates[1];
 
@@ -134,6 +138,7 @@ int coordinates_init_node(tNode *node)
   tCoordInfo *CI = pat->CI;
   int *n = node->n;
   int i,j,k, d,e, f;
+  //int dir_active[3];
   int vars_on = coordinates_coordvars_enabled(node);
   int iX = Ind("X");
   int ix = Ind("x");
@@ -161,6 +166,9 @@ int coordinates_init_node(tNode *node)
   surface_metric = Par("coordinates_surface_metric");
   sqrtdet2g_o_det3gamma  = Getv(surface_metric, "sqrtdet2g_o_det3gamma");
   sqrtgdiag              = Getv(surface_metric, "sqrtgdiag");
+
+  /* store active dirs */
+  //for(d=0; d<3; d++) dir_active[d] = Getb(amr->dir_active[d]);
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
@@ -197,6 +205,7 @@ int coordinates_init_node(tNode *node)
         px[d][ijk] = x[d];
         for(e=0; e<3; e++) pdXdx[d][e][ijk] = dXdx[d][e];
       }
+      //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
       det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
     }
     else /* assume X,Y,Z are Cartesian*/
@@ -373,6 +382,7 @@ int coordinates_init_node(tNode *node)
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pXm_dXdx[d][e][ijk] = dXdx[d][e];
 
+          //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
           pXm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
         if(gotYmid)
@@ -384,6 +394,7 @@ int coordinates_init_node(tNode *node)
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pYm_dXdx[d][e][ijk] = dXdx[d][e];
 
+          //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
           pYm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
         if(gotZmid)
@@ -395,6 +406,7 @@ int coordinates_init_node(tNode *node)
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pZm_dXdx[d][e][ijk] = dXdx[d][e];
 
+          //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
           pZm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
       } /* end forijk */
