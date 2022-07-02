@@ -273,6 +273,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
         /* save dg->fi in fiC */
         if(have_XYZ_of_xyz)
+        {
           for(i0=0; i0<n[dir]; i0++)
           {
             /* set points and their index */
@@ -288,15 +289,16 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
             //forvl(vldivf, l) fiC[l][i0] = 1e-14;
           }
-        /* interpolate fiC from face to center of 1st cell that is away from
-           face by a distance h/4 */
-        if(extrap_mode == FV_DNFN_EXTRAP1)
-          forvl(vldivf, l)
-          {
-            double *fi = fiC[l];
-            rec1d_uface_to_uin_1_Carray(n[dir], fi, 1, q_scale,
+          /* interpolate fiC from face to center of 1st cell that is away from
+             face by a distance h/4 */
+          if(extrap_mode == FV_DNFN_EXTRAP1)
+            forvl(vldivf, l)
+            {
+              double *fi = fiC[l];
+              rec1d_uface_to_uin_1_Carray(n[dir], fi, 1, q_scale,
                                         extrap_s1, extrap_s2);
-          }
+            }
+        }
 
 
         /* loop over points in dir */
