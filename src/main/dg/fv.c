@@ -228,6 +228,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
       double *ooJm = m_det_dXbdx[dir];
       int i,j,k;
 
+      /* do nothing if dir is not active */
+      if(!dir_active) continue;
+
       /* get midpoints */
       set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
       set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
