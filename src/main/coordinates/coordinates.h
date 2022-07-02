@@ -55,3 +55,6 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
 /* setup_Boxes.c */
 int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
 int add_1cube_pat(tMesh *mesh, double *xc, double dout);
+
+/* utilities.c */
+void keep_only_active_dirs_in_dXdx(double dXdx[3][3], int dir_active[3]);

@@ -1259,3 +1259,22 @@ void set_nodecenter_xyz(tNode *node, double x[3])
   /* now get xc from X */
   set_xyz(NULL, node, -1, X, x);
 }
+
+
+/* remove entries from dX/dx matrix, so that */
+void keep_only_active_dirs_in_dXdx(double dXdx[3][3], int dir_active[3])
+{
+  int d, e;
+
+  /* zero inactive dirs */
+  for(d=0; d<3; d++)
+  {
+    for(e=0; e<3; e++)
+      dXdx[d][e] = dXdx[d][e] * (dir_active[d]*dir_active[e]);
+  }
+  /* put 1 on diagonal of inactive dirs */
+  for(d=0; d<3; d++)
+  {
+    if( !(dir_active[d]) ) dXdx[d][d] = 1.;
+  }
+}
