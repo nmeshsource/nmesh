@@ -58,3 +58,6 @@ int add_1cube_pat(tMesh *mesh, double *xc, double dout);
 
 /* utilities.c */
 void keep_only_active_dirs_in_dXdx(double dXdx[3][3], int dir_active[3]);
+
+/* tests.c */
+int coordinates_tests(tMesh *mesh);

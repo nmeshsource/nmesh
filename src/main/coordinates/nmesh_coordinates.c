@@ -79,5 +79,13 @@ int nmesh_coordinates(tMesh *mesh)
        drastically reduce the number of variables! */
   }
 
+  /* do some tests */
+  AddPar("coordinates_tests", "no", "[no,yes]");
+  if(Getb(Par("coordinates_tests")))
+  {
+    AddFun(POST_COORDINATES, coordinates_tests);
+    AddAuxVar("divb_J_sqrtgdiag_n","i", "d_{ib}(J sqrtgdiag^{ib} n^{ib}_i)");
+  }
+
   return 0;
 }
