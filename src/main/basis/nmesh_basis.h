@@ -43,6 +43,7 @@ void basis_array_deriv1(tNode *node, int dir, tArray *var, tArray *dvar,
                         tDerivOpt *opt);
 void basis_array_derivs(tNode *node, tArray *var, tArray *dvar[3],
                         tDerivOpt *opt);
+int basis_var_deriv1(tNode *node, int dir, int vi, int dvi, tDerivOpt *opt);
 int basis_var_analysis3(tNode *node, int ui, int ci);
 int basis_var_synthesis3(tNode *node, int ui, int ci);
 void basis_array_analysis3(tNode *node, tArray *u, tArray *c);
