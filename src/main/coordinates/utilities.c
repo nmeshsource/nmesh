@@ -169,6 +169,17 @@ double node_normal_at_midpt_left_of_ijk(tNode *node, int f, int ijk,
   else      return node_normal_at_ijk(node, f, ijk, nrm);
 }
 
+/* get normal at midpoint to left or right of gridpoint ijk */
+double node_normal_at_midpt_nextto_ijk(tNode *node, int f, int ijk,
+                                       double nrm[3])
+{
+  int right = f%2; /* decide if we want left or right midpt */
+  if(right)
+    return node_normal_at_midpt_right_of_ijk(node, f, ijk, nrm);
+  else
+    return node_normal_at_midpt_left_of_ijk(node, f, ijk, nrm);
+}
+
 
 /* get transpose of a 3x3 matrix. */
 void transp3Dmat_from_3Dmat(CONST double M[3][3], double transpM[3][3])
