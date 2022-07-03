@@ -95,9 +95,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   //int midpoint_data = coordinates->midpoint_data;
   //int sqrtdet2g_o_det3gamma = coordinates->sqrtdet2g_o_det3gamma;
   //int idXdx = coordinates->idXdx;
-  int itmp1 = coordinates->itmp1;
-  int itmp2 = itmp1 + 1;
-  int iooJ_Db_J_sqrtgdiag_nx = Ind("ooJ_Db_J_sqrtgdiag_nx");
+  //int itmp1 = coordinates->itmp1;
   int idet_dXbdx = coordinates->idet_dXbdx;
   //int isqrtdet2g_o_det3gamma0 = coordinates->isqrtdet2g_o_det3gamma0;
   //int isqrtgdiagx = coordinates->isqrtgdiagx;
@@ -109,98 +107,90 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   int iYm_sqrtgdiagy = coordinates->iYm_sqrtgdiagy;
   int iZm_sqrtgdiagz = coordinates->iZm_sqrtgdiagz;
   int im_sqrtgdiag[] = { iXm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz };
+  int iooJ_Db_J_sqrtgdiag_nx = Ind("ooJ_Db_J_sqrtgdiag_nx");
 
-  tVarList *vltmp2 = vlalloc(mesh);
   tVarList *vlooJ_Db_J_sqrtgdiag_n = vlalloc(mesh);
-  int ib, ii;
+  int maxn = max3(n[0],n[1],n[2]);
+  double *Xbm = dmalloc(maxn);
+  double *dXb = dmalloc(maxn);
+  int ii, dir;
 
-  vlpush(vltmp2, itmp2);
-
-  /* loop over i=ii of n^{\bar{i}_i */
+  /* loop over ii=i of n^{\bar{i}_i */
   for(ii=0; ii<3; ii++)
   {
-
-
+    /* zero var w. index iooJ_Db_J_sqrtgdiag_nx+ii */
     vlpushone(vlooJ_Db_J_sqrtgdiag_n, iooJ_Db_J_sqrtgdiag_nx+ii);
     vlsetconstant_node(node, vlooJ_Db_J_sqrtgdiag_n, 0.);
 
-    /* loop over ib=\bar{i} of n^{\bar{i}_i */
-    for(ib=0; ib<3; ib++)
+    /* loop over dir=\bar{i} of n^{\bar{i}_i */
+    for(dir=0; dir<3; dir++)
     {
-      double *tmp1 = Vard(node, itmp1);
-      double *sqrtgdiagm = Vard(node, im_sqrtgdiag[ib]);
-      double *ooJm = Vard(node, im_det_dXbdx[ib]);
+      double *sqrtgdiagm = Vard(node, im_sqrtgdiag[dir]);
+      double *ooJm = Vard(node, im_det_dXbdx[dir]);
       double *ooJ = Vard(node, idet_dXbdx);
-      int dir;
+      double *ooJ_Db_J_sqrtgdiag_n
+               = Vard(node, Vind(vlooJ_Db_J_sqrtgdiag_n, 0));
+      int i,j,k;
 
-      int maxn = max3(n[0],n[1],n[2]);
-      double *Xbm = dmalloc(maxn);
-      double *dXb = dmalloc(maxn);
+      /* get midpoints */
+      set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
+      set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
 
-
-      /* set tmp1 = \sqrt{g^{\bar{i}\bar{i}}} J * n^{\bar{i}}_i
-         for each \bar{i}=ib */
-      for(dir=0; dir<3; dir++)
+      /* set ooJ_Db_J_sqrtgdiag_nx =
+           (1/J) D_{\bar{i}} (J \sqrt{g^{\bar{i}\bar{i}}} n^{\bar{i}}_i)
+         for each \bar{i}=dir */
+      forplaneN(dir, i,j,k, n, 0)
       {
-        int i,j,k;
+        int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+        int i2 = i2_norm(i,j,k, dir);
+        int i0;                       /* index orthogonal to plane */
 
-        /* get midpoints */
-        set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
-        set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
-
-        forplaneN(dir, i,j,k, n, 0)
+        /* i0 runs orth. to plane */
+        for(i0=0; i0<n[dir]; i0++)
         {
-          int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
-          int i2 = i2_norm(i,j,k, dir);
-          int i0;                       /* index orthogonal to plane */
-          int ic,jc,kc, ccc;            /* index of gridpoints */
+          int ic,jc,kc, ccc;          /* index of gridpoints */
+          int im0,   cccR;            /* index of right midpoints */
+          int im0m1, cccL;            /* index of left midpoints */
+          int im,jm,km;
+          double i0g0, i0lN, wc;
+          double normR[3], normL[3];
 
-          /* i0 runs orth. to plane */
-          for(i0=0; i0<n[dir]; i0++)
-          {
-            int im0, im0m1, im,jm,km, cccm1;
-            double i0g0, i0lN, Jgd_ow_m, Jgd_ow_m1, wc;
+          /* set 1d index of left and right midpoint and some flags if we
+             are at endpoints */
+          if(i0>0) { i0g0=1; im0m1 = i0-1; }
+          else     { i0g0=0; im0m1 = i0; /* safe value */ }
+          if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
+          else            { i0lN=0; im0 = i0-1; /* safe value */ }
 
-            /* gridpoint index */
-            ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
-            ccc = Ind_n(ic,jc,kc, n);
+          /* gridpoint index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
 
-            /* set 1d index of right and left midpoint and some flags if we
-               are at endpoints */
-            if(i0>0) { i0g0=1; im0m1 = i0-1; }
-            else     { i0g0=0; im0m1 = i0; /* safe value */ }
-            if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
-            else            { i0lN=0; im0 = i0-1; /* safe value */ }
+          /* set right midpoint index */
+          ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
+          cccR = Ind_n(im,jm,km, n);
 
-            /* set left midpoint index */
-            ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
-            cccm1 = Ind_n(im,jm,km, n);
+          /* set left midpoint index */
+          ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+          cccL = Ind_n(im,jm,km, n);
 
-            double normR[3], normL[3];
-            node_normal_at_midpt_ijk(node, 2*ib, cccm1, normL);
-            //// DO I have correct cccm1 in norm of fv_divf???
-            node_normal_at_midpt_ijk(node, 2*ib+1, ccc, normR);
-            tmp1[ccc] =  (sqrtgdiagm[ccc]   / ooJm[ccc])   * normR[ii]
-                        +(sqrtgdiagm[cccm1] / ooJm[cccm1]) * normL[ii];
-            tmp1[ccc] *= ooJ[ccc]/wc;
-          }
+          node_normal_at_midpt_ijk(node, 2*dir, cccL, normL);
+          //// DO I have correct cccL in norm of fv_divf???
+          node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
+          wc = dXb[i0];
+          ooJ_Db_J_sqrtgdiag_n[ccc] =
+             (sqrtgdiagm[ccc]   / ooJm[ccc])   * normR[ii]
+            +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+          ooJ_Db_J_sqrtgdiag_n[ccc] *= ooJ[ccc]/wc;
         }
-      }
-
-
-      /* tmp2 = \partial_{\bar{i}} tmp1 */
-      basis_var_deriv1(node, ib, itmp1, itmp2, NULL);
-      /* ooJ_Db_J_sqrtgdiag_n += tmp2 */
-      vladdto_node(node, vlooJ_Db_J_sqrtgdiag_n, 1., vltmp2);
-
-      free(dXb);
-      free(Xbm);
+      } /* end forplaneN */
     }
     vldropn(vlooJ_Db_J_sqrtgdiag_n, 1);
   }
 
+  free(dXb);
+  free(Xbm);
   vlfree(vlooJ_Db_J_sqrtgdiag_n);
-  vlfree(vltmp2);
   return 0;
 }
 
@@ -213,12 +203,14 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
 int coordinates_tests(tMesh *mesh)
 {
   enablevar(mesh, Ind("divb_J_sqrtgdiag_nx"));
+  enablevar(mesh, Ind("ooJ_Db_J_sqrtgdiag_nx"));
 
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
 
     coordinates_set_divb_J_sqrtgdiag_n(node);
+    coordinates_set_ooJ_Db_J_sqrtgdiag_n(node);
   }
   return 0;
 }

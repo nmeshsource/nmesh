@@ -85,6 +85,8 @@ int nmesh_coordinates(tMesh *mesh)
   {
     AddFun(POST_COORDINATES, coordinates_tests);
     AddAuxVar("divb_J_sqrtgdiag_n","i", "d_{ib}(J sqrtgdiag^{ib} n^{ib}_i)");
+    AddAuxVar("ooJ_Db_J_sqrtgdiag_n","i",
+              "(1/J) D_{ib} (J sqrtgdiag^{ib} n^{ib}_i)");
   }
 
   return 0;
