@@ -189,6 +189,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             //This does the same:
             //node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
             //node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
+            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
+            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
 
             Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
             Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
@@ -207,6 +209,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             //This does the same:
             //node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
             //node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
+            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
+            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
 
             Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
             Jgd_L = sqrtgdiag[ccc] / ooJ[ccc];
@@ -225,6 +229,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             //This does the same:
             //node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
             //node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
+            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
+            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
 
             Jgd_R = sqrtgdiag[ccc] / ooJ[ccc];
             Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
