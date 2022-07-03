@@ -140,8 +140,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
       /* set ooJ_Db_J_sqrtgdiag_nx =
            (1/J) D_{\bar{i}} (J \sqrt{g^{\bar{i}\bar{i}}} n^{\bar{i}}_i)
          for each \bar{i}=dir */
-      //forplaneN(dir, i,j,k, n, 0)
-      forinnerplaneN(dir, i,j,k, n, 0)
+      //forinnerplaneN(dir, i,j,k, n, 0)
+      forplaneN(dir, i,j,k, n, 0)
       {
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
         int i2 = i2_norm(i,j,k, dir);
@@ -157,8 +157,9 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           double i0g0, i0lN, wc, tmp;
           double normR[3], normL[3];
           double norm[3];
+          double Jgd_R, Jgd_L;
 
-if(i0<=0 || i0>=n[dir]-1) continue;
+//if(i0<=0 || i0>=n[dir]-1) continue;
 
           /* set 1d index of left and right midpoint and some flags if we
              are at endpoints */
@@ -167,24 +168,61 @@ if(i0<=0 || i0>=n[dir]-1) continue;
           if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
           else            { i0lN=0; im0 = i0-1; /* safe value */ }
 
-          /* gridpoint index */
+          /* gridpoint index and weight */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
-
-          /* set right midpoint index */
-          ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
-          cccR = Ind_n(im,jm,km, n);
-
-          /* set left midpoint index */
-          ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
-          cccL = Ind_n(im,jm,km, n);
-
-          node_normal_at_midpt_ijk(node, 2*dir, cccL, normL);
-          //// DO I have correct cccL in norm of fv_divf???
-          node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
           wc = dXb[i0];
-          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+
+          if(i0g0 && i0lN) /* in middle */
+          {
+            /* set right midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
+            cccR = Ind_n(im,jm,km, n);
+
+            /* set left midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+            cccL = Ind_n(im,jm,km, n);
+
+            node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
+            node_normal_at_midpt_ijk(node, 2*dir, cccL, normL);
+            //// DO I have correct cccL in norm of fv_divf???
+
+            Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
+            Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
+          }
+          else if(i0g0==0) /* left end */
+          {
+            /* set right midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
+            cccR = Ind_n(im,jm,km, n);
+
+            /* left midpoint is i=0 gridpoint */
+            cccL = ccc;
+
+            node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
+            node_normal_at_ijk(node, 2*dir, ccc, normL);
+
+            Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
+            Jgd_L = sqrtgdiag[ccc] / ooJ[ccc];
+          }
+          else /* right end */
+          {
+            /* right midpoint is i=n[dir]-1 gridpoint */
+            cccR = ccc;
+
+            /* set left midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+            cccL = Ind_n(im,jm,km, n);
+
+            node_normal_at_ijk(node, 2*dir+1, cccR, normR);
+            node_normal_at_midpt_ijk(node, 2*dir, cccL, normL);
+
+            Jgd_R = sqrtgdiag[ccc] / ooJ[ccc];
+            Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
+          }
+
+          wc = dXb[i0];
+          tmp =  Jgd_R * normR[ii] + Jgd_L * normL[ii];
           tmp *= ooJ[ccc]/wc;
 
 //JUNK:
@@ -208,10 +246,15 @@ if(i0<=0 || i0>=n[dir]-1) continue;
 
           tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
                 +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
-//End JUNK
 
           tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
                 +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+          tmp *= ooJ[ccc]/wc;
+//End JUNK
+
+
+
+          tmp =  Jgd_R * normR[ii] + Jgd_L * normL[ii];
           tmp *= ooJ[ccc]/wc;
 
           ooJ_Db_J_sqrtgdiag_n[ccc] += tmp;
