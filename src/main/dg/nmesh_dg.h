@@ -111,6 +111,7 @@ int dg_add_surface_fluxes(tNode *node, tVarList *vlr, tVarList *vlu,
 tDGinfo *alloc_DGinfo(tVarList *vlu, tVarList *vls);
 void free_DGinfo(tDGinfo *dgi);
 void printDGinfo(tDGinfo *d);
+double node_normal_from_DGinfo(tDGinfo *d, double nrm[3]);
 
 /* rec1d.c */
 double rec1d_p_1(int n, const double *u, int im, double u_scale);
