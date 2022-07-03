@@ -255,6 +255,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
 
 
           tmp =  Jgd_R * normR[ii] + Jgd_L * normL[ii];
+          /* ^--this term should be extrapolated to the boundary if
+             one of the summands was not constructed on a real midpoint */
           tmp *= ooJ[ccc]/wc;
 
           ooJ_Db_J_sqrtgdiag_n[ccc] += tmp;
