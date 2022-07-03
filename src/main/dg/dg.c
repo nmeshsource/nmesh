@@ -382,3 +382,19 @@ int dg_print_DGglobals(tMesh *mesh)
 
   return 0;
 }
+
+
+/* get normal at gridpoint or midpoint to left or right of gridpoint ijk
+   depending on info in tDGinfo *d */
+double node_normal_from_DGinfo(tDGinfo *d, double nrm[3])
+{
+  tNode *node = d->node;
+  int ijk = Ind_n(d->i,d->j,d->k, node->n);
+  int f = d->face;
+
+  /* get normal at midpoint next to ijk */
+  if(d->info & DGINFO_MIDPT)
+    return node_normal_at_midpt_nextto_ijk(node, f, ijk, nrm);
+  else /* or rather on grid point ijk */
+    return node_normal_at_ijk(node, f, ijk, nrm);
+}

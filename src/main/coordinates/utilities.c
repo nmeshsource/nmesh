@@ -180,20 +180,6 @@ double node_normal_at_midpt_nextto_ijk(tNode *node, int f, int ijk,
     return node_normal_at_midpt_left_of_ijk(node, f, ijk, nrm);
 }
 
-/* get normal at midpoint to left or right of gridpoint ijk */
-double node_normal_from_DGinfo(tDGinfo *d, double nrm[3])
-{
-  tNode *node = d->node;
-  int ijk = Ind_n(d->i,d->j,d->k, node->n);
-  int f = d->face;
-
-  /* get normal at midpoint next to ijk */
-  if(d->info & DGINFO_MIDPT)
-    return node_normal_at_midpt_nextto_ijk(node, f, ijk, nrm);
-  else /* or rather on grid point ijk */
-    return node_normal_at_ijk(node, f, ijk, nrm);
-}
-
 
 /* get transpose of a 3x3 matrix. */
 void transp3Dmat_from_3Dmat(CONST double M[3][3], double transpM[3][3])
