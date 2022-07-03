@@ -289,6 +289,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             dg->k = kc;
             dg->face = dir*2 + 1; /* ==> normal points to the right */
             u_f_lam(dg);
+            errorexit("There need to be 2 fiC: "
+              "fiL = f^i nL_i and fiR = f^i nR_i. f^i is at gridpoint, "
+              "but nL_i and nR_i are normals at left anf right midpoints!!!");
             forvl(vldivf, l) fiC[l][i0] = dg->fi[l];
             //forvl(vldivf, l) fiC[l][i0] = 1e-14;
           }
