@@ -45,14 +45,12 @@ double patch_normal_at_XYZ(tPat *pat, int f, const double X[3], double n[3])
 }
 
 /* find normal vector (n[0],n[1],n[2]) of node face f at point ijk */
-double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
+double node_normal_from_idXdx_at_ijk(tNode *node, int idXdx, int f, int ijk,
+                                     double n[3])
 {
-  tPat *pat = node->pat;
-  tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
-  int dir = f/2;     /* get direction */
+  int dir = f/2;         /* get direction */
   int sig = 2*(f%2) - 1; /* get sign for outward direction */
-  int idXd = Ind("dXdx");
   double smag;
 
   if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
@@ -65,9 +63,9 @@ double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
   /* get normal from derivs */
   {
     double *pdXd[3][3]
-            = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
-                {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
-                {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
+        = { {Vard(node,idXdx),   Vard(node,idXdx+1), Vard(node,idXdx+2)},
+            {Vard(node,idXdx+3), Vard(node,idXdx+4), Vard(node,idXdx+5)},
+            {Vard(node,idXdx+6), Vard(node,idXdx+7), Vard(node,idXdx+8)} };
     n[0] = pdXd[dir][0][ijk];
     n[1] = pdXd[dir][1][ijk];
     n[2] = pdXd[dir][2][ijk];
@@ -82,47 +80,92 @@ double node_normal_at_ijk(tNode *node, int f, int ijk, double n[3])
   return smag;
 }
 
-/* find normal vector (n[0],n[1],n[2]) on face f at midpoint ijk */
-double node_normal_at_midpt_ijk(tNode *node, int f, int ijk, double n[3])
+/* find normal vector (n[0],n[1],n[2]) of node face f at point ijk */
+double node_normal_at_ijk(tNode *node, int f, int ijk, double nrm[3])
 {
-  tPat *pat = node->pat;
-  tMesh *mesh = pat->mesh;
-  tDat *dat = node->dat;
-  int dir = f/2;     /* get direction */
-  int sig = 2*(f%2) - 1; /* get sign for outward direction */
+  tMesh *mesh = node->pat->mesh;
+  return node_normal_from_idXdx_at_ijk(node, Ind("dXdx"), f, ijk, nrm);
+}
+
+/* find normal vector (n[0],n[1],n[2]) on face f at midpoint ijk */
+double node_normal_at_midpt_ijk(tNode *node, int f, int ijk, double nrm[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int dir = f/2;         /* get direction */
   int idXd;
-  double smag;
-
-  if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
-
-  if(!dat) return 0.;
 
   /* get correct var index */
-  if(dir==0)        idXd = Ind("Xm_dXdx");
-  else if (dir==1)  idXd = Ind("Ym_dXdx");
-  else              idXd = Ind("Zm_dXdx");
+  if(dir==0)      idXd = Ind("Xm_dXdx");
+  else if(dir==1) idXd = Ind("Ym_dXdx");
+  else            idXd = Ind("Zm_dXdx");
 
-  /* do we need to init. coords? */
-  if(!(dat->coords_set)) coordinates_init_node(node);
+  return node_normal_from_idXdx_at_ijk(node, idXd, f, ijk, nrm);
+}
 
-  /* get normal from derivs */
+/* Find normal vector (n[0],n[1],n[2]) on face f at midpoint to the right
+   of gridpoint ijk. If we are at right end we use normal at gridpoint ijk */
+double node_normal_at_midpt_right_of_ijk(tNode *node, int f, int ijk,
+                                         double nrm[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int *n = node->n;
+  int k = kOfInd_n(ijk,n);
+  int j = jOfInd_n_k(ijk,n,k);
+  int i = iOfInd_n_jk(ijk,n,j,k);
+  int dir = f/2; /* get direction */
+  int idXd;
+
+  if(dir==0)
   {
-    double *pdXd[3][3]
-            = { {Vard(node,idXd),   Vard(node,idXd+1), Vard(node,idXd+2)},
-                {Vard(node,idXd+3), Vard(node,idXd+4), Vard(node,idXd+5)},
-                {Vard(node,idXd+6), Vard(node,idXd+7), Vard(node,idXd+8)} };
-    n[0] = pdXd[dir][0][ijk];
-    n[1] = pdXd[dir][1][ijk];
-    n[2] = pdXd[dir][2][ijk];
+    if(i >= n[dir]-1) idXd = Ind("dXdx");
+    else              idXd = Ind("Xm_dXdx");
   }
+  else if(dir==1)
+  {
+    if(j >= n[dir]-1) idXd = Ind("dXdx");
+    else              idXd = Ind("Ym_dXdx");
+  }
+  else
+  {
+    if(k >= n[dir]-1) idXd = Ind("dXdx");
+    else              idXd = Ind("Ym_dXdx");
+  }
+  return node_normal_from_idXdx_at_ijk(node, idXd, f, ijk, nrm);
+}
 
-  /* normalize and set sign from sig */
-  smag = sig * sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
-  if(smag == 0.0) smag = sig;
-  n[0] /= smag;
-  n[1] /= smag;
-  n[2] /= smag;
-  return smag;
+/* Find normal vector (n[0],n[1],n[2]) on face f at midpoint to the left
+   of gridpoint ijk. If we are at left end we use normal at gridpoint */
+double node_normal_at_midpt_left_of_ijk(tNode *node, int f, int ijk,
+                                        double nrm[3])
+{
+  tMesh *mesh = node->pat->mesh;
+  int *n = node->n;
+  //int di = 1;
+  //int dj = n[0];
+  //int dk = n[0]*n[1];
+  int k = kOfInd_n(ijk,n);
+  int j = jOfInd_n_k(ijk,n,k);
+  int i = iOfInd_n_jk(ijk,n,j,k);
+  int ijkL;
+  int dir = f/2; /* get direction */
+  int idXd;
+
+  if(dir==0)
+  {
+    if(i<=0) { idXd = Ind("dXdx");     ijkL = ijk; }
+    else     { idXd = Ind("Xm_dXdx");  ijkL = Ind_n(i-1,j,k, n); }
+  }
+  else if(dir==1)
+  {
+    if(j<=0) { idXd = Ind("dXdx");     ijkL = ijk; }
+    else     { idXd = Ind("Ym_dXdx");  ijkL = Ind_n(i,j-1,k, n); }
+  }
+  else
+  {
+    if(k<=0) { idXd = Ind("dXdx");     ijkL = ijk; }
+    else     { idXd = Ind("Ym_dXdx");  ijkL = Ind_n(i,j,k-1, n); }
+  }
+  return node_normal_from_idXdx_at_ijk(node, idXd, f, ijkL, nrm);
 }
 
 
