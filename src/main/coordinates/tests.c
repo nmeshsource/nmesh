@@ -183,9 +183,12 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
             cccL = Ind_n(im,jm,km, n);
 
-            node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
-            node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
+            node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
+            node_normal_at_midpt_ijk(node, 2*dir, cccL, normL);
             //// DO I have correct cccL in norm of fv_divf???
+            //This does the same:
+            //node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
+            //node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
 
             Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
             Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
@@ -199,8 +202,11 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             /* left midpoint is i=0 gridpoint */
             cccL = ccc;
 
-            node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
-            node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
+            node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
+            node_normal_at_ijk(node, 2*dir, ccc, normL);
+            //This does the same:
+            //node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
+            //node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
 
             Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
             Jgd_L = sqrtgdiag[ccc] / ooJ[ccc];
@@ -214,8 +220,11 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
             cccL = Ind_n(im,jm,km, n);
 
-            node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
-            node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
+            node_normal_at_ijk(node, 2*dir+1, cccR, normR);
+            node_normal_at_midpt_ijk(node, 2*dir, cccL, normL);
+            //This does the same:
+            //node_normal_at_midpt_right_of_ijk(node, 2*dir+1, ccc, normR);
+            //node_normal_at_midpt_left_of_ijk(node, 2*dir, ccc, normL);
 
             Jgd_R = sqrtgdiag[ccc] / ooJ[ccc];
             Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
