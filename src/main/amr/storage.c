@@ -1912,7 +1912,6 @@ void disablevar_inpatch(tPat *pat, int i)
 /* enable all components of a variable on one mesh */
 void enablevar(tMesh *mesh, int i)
 {
-
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
@@ -1923,7 +1922,6 @@ void enablevar(tMesh *mesh, int i)
 /* disable all components of a variable on one mesh */
 void disablevar(tMesh *mesh, int i)
 {
-
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
