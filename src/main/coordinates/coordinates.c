@@ -8,7 +8,7 @@
 
 
 /* global pars from amr */
-//extern tAMR amr[1];
+extern tAMR amr[1];
 
 
 /* frequently used global vars */
@@ -138,7 +138,7 @@ int coordinates_init_node(tNode *node)
   tCoordInfo *CI = pat->CI;
   int *n = node->n;
   int i,j,k, d,e, f;
-  //int dir_active[3];
+  int dir_active[3];
   int vars_on = coordinates_coordvars_enabled(node);
   int iX = Ind("X");
   int ix = Ind("x");
@@ -168,7 +168,7 @@ int coordinates_init_node(tNode *node)
   sqrtgdiag              = Getv(surface_metric, "sqrtgdiag");
 
   /* store active dirs */
-  //for(d=0; d<3; d++) dir_active[d] = Getb(amr->dir_active[d]);
+  for(d=0; d<3; d++) dir_active[d] = Getb(amr->dir_active[d]);
 
   /* get det of dXb/dX */
   dXbYbZb_dXYZ(node, dXbdX);
@@ -200,12 +200,13 @@ int coordinates_init_node(tNode *node)
         errorexit("x is NAN");
       }
 
+      keep_only_active_dirs_in_dXdx(dXdx, dir_active);
+
       for(d=0; d<3; d++)
       {
         px[d][ijk] = x[d];
         for(e=0; e<3; e++) pdXdx[d][e][ijk] = dXdx[d][e];
       }
-      //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
       det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
     }
     else /* assume X,Y,Z are Cartesian*/
@@ -379,10 +380,11 @@ int coordinates_init_node(tNode *node)
           set_xyz_dXYZdxyz(pat, node, -1, X, x, dXdx);
           ijk = Ind_n(i,j,k, Xm_n);
 
+          keep_only_active_dirs_in_dXdx(dXdx, dir_active);
+
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pXm_dXdx[d][e][ijk] = dXdx[d][e];
 
-          //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
           pXm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
         if(gotYmid)
@@ -391,10 +393,11 @@ int coordinates_init_node(tNode *node)
           set_xyz_dXYZdxyz(pat, node, -1, X, x, dXdx);
           ijk = Ind_n(i,j,k, Ym_n);
 
+          keep_only_active_dirs_in_dXdx(dXdx, dir_active);
+
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pYm_dXdx[d][e][ijk] = dXdx[d][e];
 
-          //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
           pYm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
         if(gotZmid)
@@ -403,10 +406,11 @@ int coordinates_init_node(tNode *node)
           set_xyz_dXYZdxyz(pat, node, -1, X, x, dXdx);
           ijk = Ind_n(i,j,k, Zm_n);
 
+          keep_only_active_dirs_in_dXdx(dXdx, dir_active);
+
           for(d=0; d<3; d++)
             for(e=0; e<3; e++) pZm_dXdx[d][e][ijk] = dXdx[d][e];
 
-          //keep_only_active_dirs_in_dXdx(dXdx, dir_active);
           pZm_det_dXbdx[ijk] = det_dXbYbZb_dXYZ * det_3Dmatrix(dXdx);
         }
       } /* end forijk */
