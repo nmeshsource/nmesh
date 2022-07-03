@@ -98,7 +98,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   //int itmp1 = coordinates->itmp1;
   int idet_dXbdx = coordinates->idet_dXbdx;
   //int isqrtdet2g_o_det3gamma0 = coordinates->isqrtdet2g_o_det3gamma0;
-  //int isqrtgdiagx = coordinates->isqrtgdiagx;
+  int isqrtgdiagx = coordinates->isqrtgdiagx;
   int iXm_det_dXbdx = coordinates->iXm_det_dXbdx;
   int iYm_det_dXbdx = coordinates->iYm_det_dXbdx;
   int iZm_det_dXbdx = coordinates->iZm_det_dXbdx;
@@ -127,6 +127,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
     {
       double *sqrtgdiagm = Vard(node, im_sqrtgdiag[dir]);
       double *ooJm = Vard(node, im_det_dXbdx[dir]);
+      double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
       double *ooJ = Vard(node, idet_dXbdx);
       double *ooJ_Db_J_sqrtgdiag_n
                = Vard(node, Vind(vlooJ_Db_J_sqrtgdiag_n, 0));
@@ -139,7 +140,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
       /* set ooJ_Db_J_sqrtgdiag_nx =
            (1/J) D_{\bar{i}} (J \sqrt{g^{\bar{i}\bar{i}}} n^{\bar{i}}_i)
          for each \bar{i}=dir */
-      forplaneN(dir, i,j,k, n, 0)
+      //forplaneN(dir, i,j,k, n, 0)
+      forinnerplaneN(dir, i,j,k, n, 0)
       {
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
         int i2 = i2_norm(i,j,k, dir);
@@ -152,8 +154,11 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           int im0,   cccR;            /* index of right midpoints */
           int im0m1, cccL;            /* index of left midpoints */
           int im,jm,km;
-          double i0g0, i0lN, wc;
+          double i0g0, i0lN, wc, tmp;
           double normR[3], normL[3];
+          double norm[3];
+
+if(i0<=0 || i0>=n[dir]-1) continue;
 
           /* set 1d index of left and right midpoint and some flags if we
              are at endpoints */
@@ -178,10 +183,38 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           //// DO I have correct cccL in norm of fv_divf???
           node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
           wc = dXb[i0];
-          ooJ_Db_J_sqrtgdiag_n[ccc] =
-             (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-            +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
-          ooJ_Db_J_sqrtgdiag_n[ccc] *= ooJ[ccc]/wc;
+          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+          tmp *= ooJ[ccc]/wc;
+
+//JUNK:
+          node_normal_at_ijk(node, 2*dir+1, cccR, norm);
+
+          tmp = ooJm[cccR] - ooJ[cccR];
+          tmp = sqrtgdiagm[cccR] - sqrtgdiag[cccR];
+
+          tmp = normR[ii] -  norm[ii];
+
+          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+                -(sqrtgdiag[cccR] / ooJ[cccR]) * norm[ii];
+
+          node_normal_at_ijk(node, 2*dir+1, cccL, norm);
+          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
+                +(sqrtgdiag[cccL] / ooJ[cccL]) * norm[ii];
+
+//          node_normal_at_ijk(node, 2*dir+1, ccc, norm);
+//          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
+//                +(sqrtgdiag[ccc] / ooJ[ccc]) * norm[ii];
+
+          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+//End JUNK
+
+          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+          tmp *= ooJ[ccc]/wc;
+
+          ooJ_Db_J_sqrtgdiag_n[ccc] += tmp;
         }
       } /* end forplaneN */
     }
