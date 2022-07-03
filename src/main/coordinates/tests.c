@@ -179,7 +179,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           node_normal_at_midpt_ijk(node, 2*dir+1, cccR, normR);
           wc = dXb[i0];
           ooJ_Db_J_sqrtgdiag_n[ccc] =
-             (sqrtgdiagm[ccc]   / ooJm[ccc])   * normR[ii]
+             (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
             +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
           ooJ_Db_J_sqrtgdiag_n[ccc] *= ooJ[ccc]/wc;
         }
