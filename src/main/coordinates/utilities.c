@@ -107,30 +107,31 @@ double node_normal_at_midpt_ijk(tNode *node, int f, int ijk, double nrm[3])
 double node_normal_at_midpt_right_of_ijk(tNode *node, int f, int ijk,
                                          double nrm[3])
 {
-  tMesh *mesh = node->pat->mesh;
   int *n = node->n;
   int k = kOfInd_n(ijk,n);
   int j = jOfInd_n_k(ijk,n,k);
   int i = iOfInd_n_jk(ijk,n,j,k);
   int dir = f/2; /* get direction */
-  int idXd;
+  int midpt;
 
   if(dir==0)
   {
-    if(i >= n[dir]-1) idXd = Ind("dXdx");
-    else              idXd = Ind("Xm_dXdx");
+    if(i >= n[dir]-1) midpt=0;
+    else              midpt=1;
   }
   else if(dir==1)
   {
-    if(j >= n[dir]-1) idXd = Ind("dXdx");
-    else              idXd = Ind("Ym_dXdx");
+    if(j >= n[dir]-1) midpt=0;
+    else              midpt=1;
   }
   else
   {
-    if(k >= n[dir]-1) idXd = Ind("dXdx");
-    else              idXd = Ind("Ym_dXdx");
+    if(k >= n[dir]-1) midpt=0;
+    else              midpt=1;
   }
-  return node_normal_from_idXdx_at_ijk(node, idXd, f, ijk, nrm);
+
+  if(midpt) return node_normal_at_midpt_ijk(node, f, ijk, nrm);
+  else      return node_normal_at_ijk(node, f, ijk, nrm);
 }
 
 /* Find normal vector (n[0],n[1],n[2]) on face f at midpoint to the left
@@ -138,7 +139,6 @@ double node_normal_at_midpt_right_of_ijk(tNode *node, int f, int ijk,
 double node_normal_at_midpt_left_of_ijk(tNode *node, int f, int ijk,
                                         double nrm[3])
 {
-  tMesh *mesh = node->pat->mesh;
   int *n = node->n;
   //int di = 1;
   //int dj = n[0];
@@ -148,24 +148,25 @@ double node_normal_at_midpt_left_of_ijk(tNode *node, int f, int ijk,
   int i = iOfInd_n_jk(ijk,n,j,k);
   int ijkL;
   int dir = f/2; /* get direction */
-  int idXd;
+  int midpt;
 
   if(dir==0)
   {
-    if(i<=0) { idXd = Ind("dXdx");     ijkL = ijk; }
-    else     { idXd = Ind("Xm_dXdx");  ijkL = Ind_n(i-1,j,k, n); }
+    if(i<=0) { midpt=0;  ijkL = ijk; }
+    else     { midpt=1;  ijkL = Ind_n(i-1,j,k, n); }
   }
   else if(dir==1)
   {
-    if(j<=0) { idXd = Ind("dXdx");     ijkL = ijk; }
-    else     { idXd = Ind("Ym_dXdx");  ijkL = Ind_n(i,j-1,k, n); }
+    if(j<=0) { midpt=0;  ijkL = ijk; }
+    else     { midpt=1;  ijkL = Ind_n(i,j-1,k, n); }
   }
   else
   {
-    if(k<=0) { idXd = Ind("dXdx");     ijkL = ijk; }
-    else     { idXd = Ind("Ym_dXdx");  ijkL = Ind_n(i,j,k-1, n); }
+    if(k<=0) { midpt=0;  ijkL = ijk; }
+    else     { midpt=1;  ijkL = Ind_n(i,j,k-1, n); }
   }
-  return node_normal_from_idXdx_at_ijk(node, idXd, f, ijkL, nrm);
+  if(midpt) return node_normal_at_midpt_ijk(node, f, ijkL, nrm);
+  else      return node_normal_at_ijk(node, f, ijk, nrm);
 }
 
 
