@@ -84,7 +84,8 @@ int coordinates_set_divb_J_sqrtgdiag_n(tNode *node)
    the values at the two midpoints aroound each grid point.
    Save in var ooJ_Db_J_sqrtgdiag_nx.
    This should converge to zero, if sqrtgdiag is obtained by transforming
-   the flat metric. */
+   the flat metric. In the interior we expect 2nd order conv, at the
+   boundary 1st order conv. */
 int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
 {
   tPat *pat = node->pat;
@@ -140,7 +141,6 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
       /* set ooJ_Db_J_sqrtgdiag_nx =
            (1/J) D_{\bar{i}} (J \sqrt{g^{\bar{i}\bar{i}}} n^{\bar{i}}_i)
          for each \bar{i}=dir */
-      //forinnerplaneN(dir, i,j,k, n, 0)
       forplaneN(dir, i,j,k, n, 0)
       {
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
@@ -158,8 +158,6 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           double normR[3], normL[3];
           double norm[3];
           double Jgd_R, Jgd_L;
-
-//if(i0<=0 || i0>=n[dir]-1) continue;
 
           /* set 1d index of left and right midpoint and some flags if we
              are at endpoints */
@@ -235,11 +233,6 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             Jgd_R = sqrtgdiag[ccc] / ooJ[ccc];
             Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
           }
-
-          wc = dXb[i0];
-          tmp =  Jgd_R * normR[ii] + Jgd_L * normL[ii];
-          tmp *= ooJ[ccc]/wc;
-
 //JUNK:
           node_normal_at_ijk(node, 2*dir+1, cccR, norm);
 
@@ -266,8 +259,6 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
                 +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
           tmp *= ooJ[ccc]/wc;
 //End JUNK
-
-
 
           tmp =  Jgd_R * normR[ii] + Jgd_L * normL[ii];
           /* ^--this term should be extrapolated to the boundary if
