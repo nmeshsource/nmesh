@@ -957,11 +957,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           forvl(vldivf, l)
           {
             double *df = di0fi0[l];
-            double fR  = fnumR[l] - 0*fiR[l];
-            double fL  = fnumL[l] - 0*fiL[l];
-            //double FR = fR - fi; //here we subtract fi w. rt norm
-            //double FL = fL - (-fi);
-                               // |___left normal = -right normal
+            double fR  = fnumR[l] - fiR[l]; // fiR can be zero
+            double fL  = fnumL[l] - fiL[l]; // fiL can be zero
             df[i0] = Jgdow_R * fR + Jgdow_L * fL;
           }
         } /* end i0 loop */
