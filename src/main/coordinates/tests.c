@@ -110,6 +110,14 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   int im_sqrtgdiag[] = { iXm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz };
   int iooJ_Db_J_sqrtgdiag_nx = Ind("ooJ_Db_J_sqrtgdiag_nx");
 
+  double q_scale = 1.; /* typical order of magnitude of fields */
+  //int extrap_mode = DGglobals->fv_divf_extrap_mode;
+  //double extrap_s1 = DGglobals->fv_divf_extrap_s1;
+  //double extrap_s2 = DGglobals->fv_divf_extrap_s2;
+  int extrap_mode = FV_DNFN_EXTRAP1;
+  double extrap_s1 = 0;
+  double extrap_s2 = 1e300;
+
   tVarList *vlooJ_Db_J_sqrtgdiag_n = vlalloc(mesh);
 
   //int nqvars = vlq->n;
@@ -292,6 +300,16 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
              one of the summands was not constructed on a real midpoint */
         }
 
+        /* extrapolate di0fi0 to face */
+        if(extrap_mode == FV_DNFN_EXTRAP1)
+          forvl(vlooJ_Db_J_sqrtgdiag_n, l)
+          {
+            double *df = di0fi0[l];
+            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale,
+                                        extrap_s1, extrap_s2);
+          }
+
+        /* final loop over points in dir */
         for(i0=0; i0<n[dir]; i0++)
         {
           int ic,jc,kc, ccc;
