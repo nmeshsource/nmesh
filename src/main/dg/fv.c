@@ -48,7 +48,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
    Out:
      vldivf = div(f(u)) on all inner gridpoints and a piece of div(f(u)) on
               face points */
-void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
+void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
              void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
@@ -537,6 +537,459 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     free(dXb);
     free(Xbm);
     free_DGinfo(dg);
+    free_DGinfo(d);
+  }
+}
+
+
+
+
+/* compute d_i f^i with finite vol. methods on one node.
+   In:
+     vlq are vars we reconstruct (we can use cons. vars u here)
+     vlu are cons. vars u
+     vls are extra source vars we may need (can be NULL)
+     rec1d_u_f_lam_midpt = rec. cons u, fluxes f & eigenvals at a midpoint
+     numflux             = numerical flux we want
+   Out:
+     vldivf = div(f(u)) on all inner gridpoints and a piece of div(f(u)) on
+              face points */
+void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
+             tVarList *vlu, tVarList *vls,
+             void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
+             void (*u_f_lam)(tDGinfo *d),
+             void (*numflux)(tDGinfo *d))
+{
+  tMesh *mesh = vlq->mesh;
+  int nqvars = vlq->n;
+  int nfvars = vldivf->n;
+  int have_XYZ_of_xyz = ( node->pat->XYZ_of_xyz ? 1 : 0 );
+
+  int norms_and_sqrtgdiag_on_midpoints = Getb(coordinates->midpoint_data);
+  int idet_dXbdx = coordinates->idet_dXbdx;
+  int isqrtgdiagx = coordinates->isqrtgdiagx;
+  int iXm_det_dXbdx = coordinates->iXm_det_dXbdx;
+  int iYm_det_dXbdx = coordinates->iYm_det_dXbdx;
+  int iZm_det_dXbdx = coordinates->iZm_det_dXbdx;
+  int im_det_dXbdx[] = { iXm_det_dXbdx, iYm_det_dXbdx, iZm_det_dXbdx };
+  int iXm_sqrtgdiagx = coordinates->iXm_sqrtgdiagx;
+  int iYm_sqrtgdiagy = coordinates->iYm_sqrtgdiagy;
+  int iZm_sqrtgdiagz = coordinates->iZm_sqrtgdiagz;
+  int im_sqrtgdiag[] = { iXm_sqrtgdiagx, iYm_sqrtgdiagy, iZm_sqrtgdiagz };
+
+  /* func ptrs for reconstruction */
+  double (*rec1d_p)(int n, const double *u, int im, double u_scale);
+  double (*rec1d_m)(int n, const double *u, int im, double u_scale);
+  double q_scale = 1.; /* typical order of magnitude of fields */
+  int nghosts;         /* number of ghost points on each end */
+  int add_surface_fluxes; /* whether we set all of divf on faces */
+  int use_left_flux;   /* whether we set and use the left fluxes in fnumL */
+  int extrap_mode = DGglobals->fv_divf_extrap_mode;
+  double extrap_s1 = DGglobals->fv_divf_extrap_s1;
+  double extrap_s2 = DGglobals->fv_divf_extrap_s2;
+
+
+  /* set func ptrs for rec. */
+  switch(DGglobals->fv_rec_mode)
+  {
+  case FV_REC_1:
+    /* reconstruct from both sides of midpoint at i0m */
+    rec1d_p = rec1d_p_1;
+    rec1d_m = rec1d_m_1;
+    nghosts = 0;
+    break;
+  /* use WENO3 from both sides of midpoint at i0m */
+  case FV_REC_WENOm3_2:
+    rec1d_p = rec1d_p_WENOm3_2;
+    rec1d_m = rec1d_m_WENOm3_2;
+    nghosts = 0;
+    break;
+  case FV_REC_WENOm5_2:
+    rec1d_p = rec1d_p_WENOm5_2;
+    rec1d_m = rec1d_m_WENOm5_2;
+    nghosts = 0;
+    break;
+  case FV_REC_WENOmZ_2:
+    rec1d_p = rec1d_p_WENOmZ_2;
+    rec1d_m = rec1d_m_WENOmZ_2;
+    nghosts = 0;
+    break;
+  /* use WENO3 from both sides of midpoint, but copy near boundary */
+  case FV_REC_WENOm3_1:
+    rec1d_p = rec1d_p_WENOm3_1;
+    rec1d_m = rec1d_m_WENOm3_1;
+    nghosts = 0;
+    break;
+  case FV_REC_WENOm5_1:
+    rec1d_p = rec1d_p_WENOm5_1;
+    rec1d_m = rec1d_m_WENOm5_1;
+    nghosts = 0;
+    break;
+  case FV_REC_WENOmZ_1:
+    rec1d_p = rec1d_p_WENOmZ_1;
+    rec1d_m = rec1d_m_WENOmZ_1;
+    nghosts = 0;
+    break;
+  /* WENO3 experiments that didn't show good convergence: */
+  case FV_REC_WENO3if2away_1:
+    rec1d_p = rec1d_p_WENO3_if2away;
+    rec1d_m = rec1d_m_WENO3_if2away;
+    nghosts = 0;
+    break;
+  case FV_REC_WENO3if1away_1:
+    rec1d_p = rec1d_p_WENO3_if1away;
+    rec1d_m = rec1d_m_WENO3_if1away;
+    nghosts = 0;
+    break;
+  case FV_REC_WENO3_2:
+    rec1d_p = rec1d_p_WENO3_2;
+    rec1d_m = rec1d_m_WENO3_2;
+    nghosts = 0;
+    break;
+  case FV_REC_WENO3_2g:
+    rec1d_p = rec1d_p_WENO3_2g;
+    rec1d_m = rec1d_m_WENO3_2g;
+    nghosts = 1;
+    break;
+  default:
+    errorexit("unknown DGglobals->fv_rec_mode");
+  }
+
+  /* do we add in the surface fluxes here already? */
+  add_surface_fluxes = DGglobals->fv_divf_adds_surface_fluxes;
+
+  /* do we use left fluxes? */
+  use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
+
+  /* set var list for div of fluxes to zero */
+  vlsetconstant_node(node, vldivf, 0.);
+
+  /* RHS */
+  {
+    tDGinfo *d = alloc_DGinfo(vlu, vls);
+    int *n = node->n;
+    int maxn = max3(n[0],n[1],n[2]);
+    double *Xbm = dmalloc(maxn);
+    double *dXb = dmalloc(maxn);
+    double *qc[nqvars];          //pointers to data of the q-fields
+    double fnumR[nfvars];        //the right fluxes
+    double fnumL[nfvars];        //the left fluxes
+    double fiR[nfvars];          //the inner fluxes with normal on the right
+    double fiL[nfvars];          //the inner fluxes with normal on the left
+    int npg = maxn + 2*nghosts;  //number of points in qcg[l]
+    double (*qcg)[npg] = dtensor(nqvars*npg);     //array for the q-fields
+    double (*di0fi0)[maxn] = dtensor(nfvars*maxn); //array for d_i J*sgd*flux^i
+    double *qm_p = dmalloc(nqvars); // array for rec u at one point
+    double *qm_m = dmalloc(nqvars);
+    int l; /* field index */
+    int d_info_mid;
+    int dir;
+
+    /* set qc to part of qcg without ghosts */
+    for(l=0; l<nqvars; l++) qc[l] = &(qcg[l][nghosts]);
+    /* NOTE: now qc[l][-1] = qcg[l][0] i.e. ghost on left */
+
+    /* write node into d because numflux needs this */
+    d->node = node;
+    if(norms_and_sqrtgdiag_on_midpoints)
+      d_info_mid = DGINFO_MIDPT;
+    else
+      d_info_mid = DGINFO_NULL;
+
+    /* get nbsurf and ajsurf already */
+    if(nghosts || add_surface_fluxes) get_all_surfaces(node);
+
+    /* add fluxes in each direction to RHS */
+    for(dir=0; dir<3; dir++)
+    {
+      int dir_active = Getb(amr->dir_active[dir]);
+      double *sqrtgdiagm = Vard(node, im_sqrtgdiag[dir]);
+      double *ooJm = Vard(node, im_det_dXbdx[dir]);
+      double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
+      double *ooJ = Vard(node, idet_dXbdx);
+      int i,j,k;
+
+      /* do nothing if dir is not active */
+      if(!dir_active) continue;
+
+      /* get midpoints */
+      set_nm_nodemidpoints_Xb_dir(node, n[dir]-1,0, dir, Xbm);
+      set_nm_nodemidpoint_distsXb_dir(node, dir, Xbm, dXb);
+
+      /* loop over plane */
+      forplaneN(dir, i,j,k, n, 0)
+      {
+        int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+        int i2 = i2_norm(i,j,k, dir);
+        int i0;                       /* index orthogonal to plane */
+
+        /* fill field arrays qc, i0 runs orth. to plane */
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          int ic,jc,kc, ccc;          /* index of gridpoints */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+
+          forvl(vlq, l)
+          {
+            double *q = Vard(node, Vind(vlq, l));
+            qc[l][i0] = q[ccc];
+          }
+        }
+
+        /* fill in ghost points in qc with value from adjacent node */
+        if(nghosts)
+        {
+          int JK = Ind_n_norm(i,j,k, n, dir);
+          forvl(vlq, l)
+          {
+            int vi = Vind(vlq, l);
+            double *qaj;
+            /* put adj. val on left face in left ghost: qc[l][-1] */
+            qaj = Varaj(node, vi, dir*2);
+            if(qaj) qc[l][-1] = qaj[JK];
+            else    qc[l][-1] = 1e30; //large value that WENO should ignore
+            /* get adj. val on right face in right ghost: qc[l][n] */
+            qaj = Varaj(node, vi, dir*2+1);
+            if(qaj) qc[l][n[dir]] = qaj[JK];
+            else    qc[l][n[dir]] = 1e30;
+          }
+        }
+
+        /* loop over points in dir */
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          int ic,jc,kc, ccc;          /* index of gridpoints */
+          int im0,   cccR;            /* index of right midpoints */
+          int im0m1, cccL;            /* index of left midpoints */
+          int im,jm,km;
+          int i0g0, i0lN;
+          double wc;
+          double Jgdow_R, Jgdow_L;
+
+          /* set 1d index of left and right midpoint and some flags if we
+             are at endpoints */
+          if(i0>0) { i0g0=1; im0m1 = i0-1; }
+          else     { i0g0=0; im0m1 = i0; /* safe value */ }
+          if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
+          else            { i0lN=0; im0 = i0-1; /* safe value */ }
+
+          /* gridpoint index and weight */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+          wc = dXb[i0];
+
+          /* write gridpoint index into d */
+          d->i = ic;
+          d->j = jc;
+          d->k = kc;
+
+          /* set right midpoint index */
+          ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
+          cccR = Ind_n(im,jm,km, n);
+
+          /* set left midpoint index */
+          ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+          cccL = Ind_n(im,jm,km, n);
+
+          /* set all factors in flux once */
+          if(i0g0 && i0lN) /* in middle */
+          {
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+          else if(i0g0==0) /* left end */
+          {
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+          }
+          else /* right end */
+          {
+            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+
+          /* Set factors in flux on faces to zero, if we not add surface
+             terms.
+             Note: i0g0=0 on left face, i0lN=0 on right face */
+          if(!add_surface_fluxes)
+          {
+            Jgdow_R = i0lN * Jgdow_R;
+            Jgdow_L = i0g0 * Jgdow_L;
+          }
+
+          /* if i0 has a midpoint to its left */
+          if(i0g0)
+          {
+            if(use_left_flux)
+            {
+              tFVinfo fv[1];
+
+              /* set fv  */
+              fv->nq = nqvars;
+              fv->qc = qc;
+              fv->npts = n[dir];
+              fv->im = im0m1;
+              fv->q_scale = q_scale;
+              fv->rec1d_p = rec1d_p;
+              fv->rec1d_m = rec1d_m;
+              fv->qm_p = qm_p;
+              fv->qm_m = qm_m;
+
+              d->face = dir*2;
+              d->info = d_info_mid;
+
+              /* reconstruct q,u and then set fluxes and eigenvalues in d */
+              rec1d_u_f_lam_midpt(fv, d);
+
+              /* compute numerical flux directly after rec1d_u_f_lam_midpt,
+                 if not set already in rec1d_u_f_lam_midpt */
+              if(numflux) numflux(d);
+
+              /* save d->fnum in fnumL for each field and point */
+              forvl(vldivf, l) fnumL[l] = d->fnum[l];
+              //printDGinfo(d);
+            }
+            else /* do not separately compute the left flux*/
+            {
+              /* here we set fnumL = -fnumR_{previous point} */
+              forvl(vldivf, l) fnumL[l] = -fnumR[l];
+              /* for the first pt (i0=0) we do not get here and thus
+                 fnumR[l] has already been compouted */
+            }
+          }
+          else /* left end: we need fnumL for sure */
+          {
+            if(add_surface_fluxes)
+            {
+              /* compute numerical fluxes on the left side of node */
+              d->face = dir*2;        /* normal points to the left */
+              d->info = DGINFO_NULL;  /* facepoint is grid point */
+              u_f_lam(d);
+              numflux(d);
+
+              /* save d->fnum in fnumL for each field and point */
+              forvl(vldivf, l) fnumL[l] = d->fnum[l];
+            }
+            /* if add_surface_fluxes=0 we do not set fnumL at all */
+            //else
+            //{
+            //  forvl(vldivf, l) fnumL[l] = 0.;
+            //}
+          }
+
+          /* if i0 has a midpoint to its right */
+          if(i0lN)
+          {
+            tFVinfo fv[1];
+
+            /* set fv  */
+            fv->nq = nqvars;
+            fv->qc = qc;
+            fv->npts = n[dir];
+            fv->im = im0;
+            fv->q_scale = q_scale;
+            fv->rec1d_p = rec1d_p;
+            fv->rec1d_m = rec1d_m;
+            fv->qm_p = qm_p;
+            fv->qm_m = qm_m;
+
+            d->face = dir*2 + 1;
+            d->info = d_info_mid;
+
+            /* reconstruct q,u and then set fluxes and eigenvalues in d */
+            rec1d_u_f_lam_midpt(fv, d);
+
+            /* compute numerical flux directly after rec1d_u_f_lam_midpt,
+               if not set already in rec1d_u_f_lam_midpt */
+            if(numflux) numflux(d);
+
+            /* save d->fnum in fnumR for each field */
+            forvl(vldivf, l) fnumR[l] = d->fnum[l];
+            /* above we have a case for fnumL (with normL=-normR), but I think
+               this results in fnumL = -fnumR. So it should be enough to only
+               use fnumR. */
+            //printDGinfo(d);
+            //if(d->fnum[0]>0.00000001 && i0==4) errorexit("STOP");
+          }
+          else /* right end */
+          {
+            if(add_surface_fluxes)
+            {
+              /* compute numerical fluxes on the right side of node */
+              d->face = dir*2 + 1;   /* normal points to the right */
+              d->info = DGINFO_NULL; /* facepoint is grid point */
+              u_f_lam(d);
+              numflux(d);
+
+              /* save fluxes of right face in fnumR */
+              forvl(vldivf, l) fnumR[l] = d->fnum[l];
+            }
+            /* if add_surface_fluxes=0 we do not set fnumR at all */
+            //else
+            //{
+            //  forvl(vldivf, l) fnumR[l] = 0.;
+            //}
+          }
+
+
+          /* we still need the inner flux computed with normals from both
+             the left and right midpoints */
+          // ...
+
+
+          /* get piece of div(flux) in direction dir with FV method */
+          forvl(vldivf, l)
+          {
+            double *df = di0fi0[l];
+            double fR  = fnumR[l];
+            double fL  = fnumL[l];
+            //double FR = fR - fi; //here we subtract fi w. rt norm
+            //double FL = fL - (-fi);
+                               // |___left normal = -right normal
+            df[i0] = Jgdow_R * fR + Jgdow_L * fL;
+          }
+        } /* end i0 loop */
+
+        /* extrapolate df = d_i0 f^i0 to face */
+        if(extrap_mode == FV_DNFN_EXTRAP1)
+          forvl(vldivf, l)
+          {
+            double *df = di0fi0[l];
+            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale,
+                                        extrap_s1, extrap_s2);
+          }
+
+        /* final loop over points in dir */
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          int ic,jc,kc, ccc;          /* index of gridpoints */
+
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+
+          /* add to divf */
+          forvl(vldivf, l)
+          {
+            int idivf = Vind(vldivf,l);
+            double *divf = Vard_(node, idivf);
+            double *df = di0fi0[l];
+
+            /* add (d_i0 f^i0 J) / J term to div(flux) */
+            divf[ccc] += df[i0] * ooJ[ccc];
+          }
+        }
+      } /* end plane loop */
+    } /* end dir-loop*/
+
+    /* release mem */
+    free(qm_m);
+    free(qm_p);
+    free(di0fi0);
+    free(qcg);
+    free(dXb);
+    free(Xbm);
     free_DGinfo(d);
   }
 }
