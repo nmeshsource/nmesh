@@ -111,9 +111,14 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   int iooJ_Db_J_sqrtgdiag_nx = Ind("ooJ_Db_J_sqrtgdiag_nx");
 
   tVarList *vlooJ_Db_J_sqrtgdiag_n = vlalloc(mesh);
+
+  //int nqvars = vlq->n;
+  //int nfvars = vldivf->n;
+  int nfvars = 1;
   int maxn = max3(n[0],n[1],n[2]);
   double *Xbm = dmalloc(maxn);
   double *dXb = dmalloc(maxn);
+  double (*di0fi0)[maxn] = dtensor(nfvars*maxn); //array for d_i flux^i
   int ii, dir;
 
   /* loop over ii=i of n^{\bar{i}_i */
@@ -157,7 +162,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           double i0g0, i0lN, wc, tmp;
           double normR[3], normL[3];
           double norm[3];
-          double Jgd_R, Jgd_L;
+          double Jgdow_R, Jgdow_L;
 
           /* set 1d index of left and right midpoint and some flags if we
              are at endpoints */
@@ -170,6 +175,66 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
           ccc = Ind_n(ic,jc,kc, n);
           wc = dXb[i0];
+
+
+
+//NEW TRY:
+          /* if i0 has a midpoint to its left */
+          if(i0g0)
+          {
+            /* set left midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+            cccL = Ind_n(im,jm,km, n);
+
+            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
+          }
+
+          /* if i0 has a midpoint to its right */
+          if(i0lN)
+          {
+            /* set right midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
+            cccR = Ind_n(im,jm,km, n);
+
+            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
+          }
+
+          /* if i0 is in the middle */
+          if(i0g0 && i0lN)
+          {
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+          else /* if i0 is on one end */
+          {
+            /* get sqrtgdiag on grid points */
+            Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+            /* we need to later update one of them! */
+          }
+
+
+          if(i0g0==0) /* left end */
+          {
+            /* set right midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0);
+            cccR = Ind_n(im,jm,km, n);
+
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+          }
+          if(i0lN==0) /* right end */
+          {
+            /* set left midpoint index */
+            ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
+            cccL = Ind_n(im,jm,km, n);
+
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+
+
+
+
+// OLD, but correct:
 
           if(i0g0 && i0lN) /* in middle */
           {
@@ -190,8 +255,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
             node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
 
-            Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
-            Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
           }
           else if(i0g0==0) /* left end */
           {
@@ -210,8 +275,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
             node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
 
-            Jgd_R = sqrtgdiagm[cccR] / ooJm[cccR];
-            Jgd_L = sqrtgdiag[ccc] / ooJ[ccc];
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
           }
           else /* right end */
           {
@@ -230,9 +295,13 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
             node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
 
-            Jgd_R = sqrtgdiag[ccc] / ooJ[ccc];
-            Jgd_L = sqrtgdiagm[cccL] / ooJm[cccL];
+            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
           }
+
+
+
+
 //JUNK:
           node_normal_at_ijk(node, 2*dir+1, cccR, norm);
 
@@ -260,10 +329,10 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           tmp *= ooJ[ccc]/wc;
 //End JUNK
 
-          tmp =  Jgd_R * normR[ii] + Jgd_L * normL[ii];
+          tmp =  Jgdow_R * normR[ii] + Jgdow_L * normL[ii];
           /* ^--this term should be extrapolated to the boundary if
              one of the summands was not constructed on a real midpoint */
-          tmp *= ooJ[ccc]/wc;
+          tmp *= ooJ[ccc];
 
           ooJ_Db_J_sqrtgdiag_n[ccc] += tmp;
         }
@@ -272,6 +341,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
     vldropn(vlooJ_Db_J_sqrtgdiag_n, 1);
   }
 
+  free(di0fi0);
   free(dXb);
   free(Xbm);
   vlfree(vlooJ_Db_J_sqrtgdiag_n);
