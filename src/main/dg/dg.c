@@ -72,10 +72,12 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
     double *ooJ = Vard(node, iooJ);
     int face;
     int not_fv = !use_fv;
+    int have_Xofx = ( node->pat->XYZ_of_xyz ? 1 : 0 );
+    int subtr_fi  = DGglobals->fv_flux_is_fnum_minus_fi;
     double mod0 = not_fv;     /* set to 1 if we don't use fin. vol. */
     double mod1 = 1. - mod0;  /* set to 1 if we use fin. vol. */
     /* set s_fi=1 if we subtract inner flux dgi->fi in F */
-    double s_fi = ( not_fv || ( node->pat->XYZ_of_xyz ? 1 : 0 ) );
+    double s_fi = ( not_fv || (have_Xofx && subtr_fi) );
 
     /* set DG node info */
     dgi->node = node;
