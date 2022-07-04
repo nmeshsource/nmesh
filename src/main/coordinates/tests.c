@@ -151,6 +151,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
         int i2 = i2_norm(i,j,k, dir);
         int i0;                       /* index orthogonal to plane */
+        int l;
 
         /* i0 runs orth. to plane */
         for(i0=0; i0<n[dir]; i0++)
@@ -160,9 +161,8 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           int im0m1, cccL;            /* index of left midpoints */
           int im,jm,km;
           int i0g0, i0lN;
-          double wc, tmp;
+          double wc;
           double normR[3], normL[3];
-          double norm[3];
           double Jgdow_R, Jgdow_L;
 
           /* set 1d index of left and right midpoint and some flags if we
@@ -208,21 +208,24 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           if(i0g0)
           {
             node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
+            /* here we could reconstruct left flux */
+          }
+          else /* left end */
+          {
+            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
+            /* here we could use left flux on gridpoint */
           }
 
           /* if i0 has a midpoint to its right */
           if(i0lN)
           {
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
+            /* here we could reconstruct right flux */
           }
-
-          if(i0g0==0) /* left end */
-          {
-            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
-          }
-          if(i0lN==0) /* right end */
+          else /* right end */
           {
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
+            /* here we could use right flux on gridpoint */
           }
 
 // OLD, but correct:
@@ -255,38 +258,49 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
 
 
 //JUNK:
-          node_normal_at_ijk(node, 2*dir+1, cccR, norm);
-
-          tmp = ooJm[cccR] - ooJ[cccR];
-          tmp = sqrtgdiagm[cccR] - sqrtgdiag[cccR];
-
-          tmp = normR[ii] -  norm[ii];
-
-          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-                -(sqrtgdiag[cccR] / ooJ[cccR]) * norm[ii];
-
-          node_normal_at_ijk(node, 2*dir+1, cccL, norm);
-          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
-                +(sqrtgdiag[cccL] / ooJ[cccL]) * norm[ii];
-
-//          node_normal_at_ijk(node, 2*dir+1, ccc, norm);
+//          node_normal_at_ijk(node, 2*dir+1, cccR, norm);
+//
+//          tmp = ooJm[cccR] - ooJ[cccR];
+//          tmp = sqrtgdiagm[cccR] - sqrtgdiag[cccR];
+//
+//          tmp = normR[ii] -  norm[ii];
+//
+//          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+//                -(sqrtgdiag[cccR] / ooJ[cccR]) * norm[ii];
+//
+//          node_normal_at_ijk(node, 2*dir+1, cccL, norm);
 //          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
-//                +(sqrtgdiag[ccc] / ooJ[ccc]) * norm[ii];
-
-          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
-
-          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
-          tmp *= ooJ[ccc]/wc;
+//                +(sqrtgdiag[cccL] / ooJ[cccL]) * norm[ii];
+//
+////          node_normal_at_ijk(node, 2*dir+1, ccc, norm);
+////          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
+////                +(sqrtgdiag[ccc] / ooJ[ccc]) * norm[ii];
+//
+//          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+//                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+//
+//          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
+//                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
+//          tmp *= ooJ[ccc]/wc;
+//          tmp =  Jgdow_R * normR[ii] + Jgdow_L * normL[ii];
 //End JUNK
 
-          tmp =  Jgdow_R * normR[ii] + Jgdow_L * normL[ii];
+
+          forvl(vlooJ_Db_J_sqrtgdiag_n, l)
+            di0fi0[l][i0] = Jgdow_R * normR[ii] + Jgdow_L * normL[ii];
           /* ^--this term should be extrapolated to the boundary if
              one of the summands was not constructed on a real midpoint */
-          tmp *= ooJ[ccc];
+        }
 
-          ooJ_Db_J_sqrtgdiag_n[ccc] += tmp;
+        for(i0=0; i0<n[dir]; i0++)
+        {
+          int ic,jc,kc, ccc;
+
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+
+          forvl(vlooJ_Db_J_sqrtgdiag_n, l)
+            ooJ_Db_J_sqrtgdiag_n[ccc] += di0fi0[l][i0] * ooJ[ccc];
         }
       } /* end forplaneN */
     }
