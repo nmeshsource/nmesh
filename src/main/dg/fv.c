@@ -584,6 +584,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int nghosts;         /* number of ghost points on each end */
   int add_surface_fluxes; /* whether we set all of divf on faces */
   int use_left_flux;   /* whether we set and use the left fluxes in fnumL */
+  int subtract_fi = DGglobals->fv_flux_is_fnum_minus_fi;
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
   double extrap_s1 = DGglobals->fv_divf_extrap_s1;
   double extrap_s2 = DGglobals->fv_divf_extrap_s2;
@@ -939,7 +940,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
           /* we still need the inner flux computed with normals from both
              the left and right midpoints */
-          if(0 && have_XYZ_of_xyz)
+          if(have_XYZ_of_xyz && subtract_fi)
           {
             /* now get d->fi on gridpoint for normal pointing to the right */
             d->info  = d_info_midnorm;
