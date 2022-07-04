@@ -152,8 +152,8 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   double *u;
   double *uaj = NULL;
 
-  /* get face normal norm at point ijk */
-  node_normal_at_ijk(node, f, ijk, norm);
+  /* set normal based on d->info */
+  node_normal_from_DGinfo(d, norm);
 
   /* eigenval in dir norm */
   scalarwave1_eigenval1d(node,nvars, d->lami,norm);
@@ -318,10 +318,10 @@ int scalarwave1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 void scalarwave1_numflux1d_upwind(tDGinfo *d)
 {
   int nf = 4; /* only 4 modes besides phi */
-  tNode *node = d->node;
-  int f = d->face;
+  //tNode *node = d->node;
+  //int f = d->face;
   //int dir = f/2;
-  int ijk;
+  //int ijk;
   int l,m,s;
   double lam_p[4][4];// = {{0.}};  //positive eigenvalue diagonal matrix
   double lam_n[4][4];// = {{0.}};  //negative eigenvalue diagonal matrix
@@ -334,23 +334,8 @@ void scalarwave1_numflux1d_upwind(tDGinfo *d)
   double norm[3];
   double nx, ny, nz;
 
-  /* standard DG point */
-  if(d->info == 0)
-  {
-    int *n = node->n;
-    ijk = Ind_n(d->i,d->j,d->k, n);
-    //JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
-    /* get face normal norm at point ijk */
-    node_normal_at_ijk(node, f, ijk, norm);
-  }
-  else /* interpret i,j,k as midpoint indices */
-  {
-    int *n = node->n;
-    ijk = Ind_n(d->i,d->j,d->k, n);
-    //JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
-    /* get normal norm at midpoint ijk */
-    node_normal_at_midpt_ijk(node, f, ijk, norm);
-  }
+  /* set normal based on d->info */
+  node_normal_from_DGinfo(d, norm);
 
   /* set face normal */
   nx = norm[0];
@@ -768,19 +753,16 @@ int scalarwave1_analyze(tMesh *mesh)
 void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
 {
   tNode *node = d->node;
-  int *n = node->n;
+  //int *n = node->n;
   int f = d->face;
   int right_face = f%2;
-  int ijk = Ind_n(d->i,d->j,d->k, n);
+  //int ijk = Ind_n(d->i,d->j,d->k, n);
   int nvars = 5;
   double norm[3];
   int l;
 
-  /* get normal at midpoint ijk */
-  if(d->info & DGINFO_MIDPT)
-    node_normal_at_midpt_ijk(node, f, ijk, norm);
-  else /* or rather on grid point ijk */
-    node_normal_at_ijk(node, f, ijk, norm);
+  /* get normal at midpoint left or right of ijk */
+  node_normal_from_DGinfo(d, norm);
 
   /* reconstruct at mid point */
   fv_rec1d_q_midpt(fv);
