@@ -868,7 +868,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             {
               /* compute numerical fluxes on the left side of node */
               d->face = dir*2;        /* normal points to the left */
-              d->info = DGINFO_NULL;  /* facepoint is grid point */
+              d->info = DGINFO_NULL;  /* facepoint is gridpoint */
               u_f_lam(d);
               numflux(d);
 
@@ -921,8 +921,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             if(add_surface_fluxes)
             {
               /* compute numerical fluxes on the right side of node */
-              d->face = dir*2 + 1;   /* normal points to the right */
-              d->info = DGINFO_NULL; /* facepoint is grid point */
+              d->face = dir*2 + 1;    /* normal points to the right */
+              d->info = DGINFO_NULL;  /* facepoint is gridpoint */
               u_f_lam(d);
               numflux(d);
 
@@ -942,7 +942,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           if(0 && have_XYZ_of_xyz)
           {
             /* now get d->fi on gridpoint for normal pointing to the right */
-            d->info = d_info_midnorm;
+            d->info  = d_info_midnorm;
+            d->info |= DGINFO_INNONLY; /* it's enough to get ui,fi only */
 
             d->face = dir*2 + 1; /* ==> normal points to the right */
             u_f_lam(d);
