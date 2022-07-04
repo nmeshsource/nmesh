@@ -689,6 +689,10 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     for(l=0; l<nqvars; l++) qc[l] = &(qcg[l][nghosts]);
     /* NOTE: now qc[l][-1] = qcg[l][0] i.e. ghost on left */
 
+    /* init some vars with 0 */
+    forvl(vldivf, l)
+      fiR[l] = fiL[l] = fnumR[l] = fnumL[l] = 0.;
+
     /* write node into d because numflux needs this */
     d->node = node;
     if(norms_and_sqrtgdiag_on_midpoints)
@@ -809,7 +813,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
           }
 
-          /* Set factors in flux on faces to zero, if we not add surface
+          /* Set factors in flux on faces to zero, if we don't add surface
              terms.
              Note: i0g0=0 on left face, i0lN=0 on right face */
           if(!add_surface_fluxes)
@@ -935,15 +939,26 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
           /* we still need the inner flux computed with normals from both
              the left and right midpoints */
-          // ...
+          if(0 && have_XYZ_of_xyz)
+          {
+            /* now get d->fi on gridpoint for normal pointing to the right */
+            d->info = d_info_mid;
 
+            d->face = dir*2 + 1; /* ==> normal points to the right */
+            u_f_lam(d);
+            forvl(vldivf, l) fiR[l] = d->fi[l];
+
+            d->face = dir*2;     /* ==> normal points to the left */
+            u_f_lam(d);
+            forvl(vldivf, l) fiL[l] = d->fi[l];
+          }
 
           /* get piece of div(flux) in direction dir with FV method */
           forvl(vldivf, l)
           {
             double *df = di0fi0[l];
-            double fR  = fnumR[l];
-            double fL  = fnumL[l];
+            double fR  = fnumR[l] - 0*fiR[l];
+            double fL  = fnumL[l] - 0*fiL[l];
             //double FR = fR - fi; //here we subtract fi w. rt norm
             //double FL = fL - (-fi);
                                // |___left normal = -right normal
