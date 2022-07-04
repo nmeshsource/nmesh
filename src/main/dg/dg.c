@@ -304,6 +304,10 @@ int dg_set_DGglobals(tMesh *mesh)
   else
     errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
 
+  /* save how we get fv flux */
+  if(Getv(Par("fv_flux"), "fnum_minus_fi"))
+    DGglobals->fv_flux_is_fnum_minus_fi = 1;
+
   /* set extrapolation mode for div(flux) */
   if(Getv(fv_divf_extrap, "no"))
   {
@@ -365,6 +369,8 @@ int dg_print_DGglobals(tMesh *mesh)
   for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
   printf(" }\n");
   printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
+  printf(" DGglobals->fv_flux_is_fnum_minus_fi = %d\n",
+         DGglobals->fv_flux_is_fnum_minus_fi);
   printf(" DGglobals->fv_divf_extrap_mode = %d\n",
          DGglobals->fv_divf_extrap_mode);
   printf(" DGglobals->fv_divf_adds_surface_fluxes = %d\n",
