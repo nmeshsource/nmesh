@@ -186,6 +186,24 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           cccL = Ind_n(im,jm,km, n);
 
 //NEW TRY:
+          /* set all factors once */
+          if(i0g0 && i0lN) /* in middle */
+          {
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+          else if(i0g0==0) /* left end */
+          {
+            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
+            Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+          }
+          else /* right end */
+          {
+            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
+            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+
+
           /* if i0 has a midpoint to its left */
           if(i0g0)
           {
@@ -198,35 +216,16 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
           }
 
-          /* if i0 is in the middle */
-          if(i0g0 && i0lN)
-          {
-            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
-            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
-          }
-          else /* if i0 is on one end */
-          {
-            /* get sqrtgdiag on grid points */
-            Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
-            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
-            /* we need to later update one of them! */
-          }
-
           if(i0g0==0) /* left end */
           {
             node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
-
-            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
           }
           if(i0lN==0) /* right end */
           {
             node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
-
-            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
           }
 
 // OLD, but correct:
-//
 //
 //          if(i0g0 && i0lN) /* in middle */
 //          {
@@ -252,7 +251,6 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
 //            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
 //            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
 //          }
-
 
 
 
