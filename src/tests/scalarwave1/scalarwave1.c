@@ -146,6 +146,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   int dir = f/2;
   int ijk = Ind_n(d->i,d->j,d->k, n);
   int JK = Ind_n_norm(d->i,d->j,d->k, n, dir);
+  int calc_aj = !( (d->info) & DGINFO_INNONLY );
   int nvars = vlu->n;
   double norm[3];
   int l;
@@ -157,7 +158,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
 
   /* eigenval in dir norm */
   scalarwave1_eigenval1d(node,nvars, d->lami,norm);
-  scalarwave1_eigenval1d(node,nvars, d->lama,norm);
+  if(calc_aj) scalarwave1_eigenval1d(node,nvars, d->lama,norm);
 
   /* reset d->Ffac to default */
   d->Ffac = 1.;
@@ -168,7 +169,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
     int vi = Vind(vlu,l);
 
     u = Vard_(node, vi);
-    uaj = Varaj(node, vi, f);
+    if(calc_aj) uaj = Varaj(node, vi, f);
 
     /* cons var inside node */
     d->ui[l] = u[ijk];
@@ -179,7 +180,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
   }
 
   /* no adjacent u, i.e. we are on outer boundary */
-  if(!uaj) /* we check the last uaj here. */
+  if(!uaj && calc_aj) /* we check the last uaj here. */
   {
     int ix = Ind("x");
     double *x = Vard_(node, ix);
@@ -206,7 +207,7 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
 
   /* get inner and adjacent fluxes fi, fa */
   scalarwave1_flux1d(node,nvars, d->fi,norm, d->ui);
-  scalarwave1_flux1d(node,nvars, d->fa,norm, d->ua);
+  if(calc_aj) scalarwave1_flux1d(node,nvars, d->fa,norm, d->ua);
 }
 
 
