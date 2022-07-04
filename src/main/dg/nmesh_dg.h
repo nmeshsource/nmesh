@@ -67,8 +67,10 @@ typedef struct tDGINFO {
 /* meaning of bits in info field of DGINFO: */
 enum
 {
-  DGINFO_NULL  = 0,  /* default */
-  DGINFO_MIDPT = 1,  /* i,j,k is interpreted as a midpoint */
+  DGINFO_NULL      = 0,  /* default */
+  DGINFO_MIDPTNORM = 1,  /* use midpoint normal */
+  DGINFO_INNONLY   = 2,  /* set lami, ui, fi only */
+  DGINFO_ADJONLY   = 4,  /* set lama, ua, fa only */
 };
 
 

@@ -210,7 +210,7 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* write node into d and dg because numflux needs this */
     d->node = dg->node = node;
     if(norms_and_sqrtgdiag_on_midpoints)
-      d->info = DGINFO_MIDPT;
+      d->info = DGINFO_MIDPTNORM;
     else
       d->info = DGINFO_NULL;
     dg->info = DGINFO_NULL;
@@ -696,7 +696,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* write node into d because numflux needs this */
     d->node = node;
     if(norms_and_sqrtgdiag_on_midpoints)
-      d_info_mid = DGINFO_MIDPT;
+      d_info_mid = DGINFO_MIDPTNORM;
     else
       d_info_mid = DGINFO_NULL;
 

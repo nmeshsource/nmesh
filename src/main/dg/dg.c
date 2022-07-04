@@ -393,7 +393,7 @@ double node_normal_from_DGinfo(tDGinfo *d, double nrm[3])
   int f = d->face;
 
   /* get normal at midpoint next to ijk */
-  if(d->info & DGINFO_MIDPT)
+  if(d->info & DGINFO_MIDPTNORM)
     return node_normal_at_midpt_nextto_ijk(node, f, ijk, nrm);
   else /* or rather on grid point ijk */
     return node_normal_at_ijk(node, f, ijk, nrm);
