@@ -682,7 +682,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
     double *qm_m = dmalloc(nqvars);
     int l; /* field index */
-    int d_info_mid;
+    int d_info_midnorm;
     int dir;
 
     /* set qc to part of qcg without ghosts */
@@ -696,9 +696,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     /* write node into d because numflux needs this */
     d->node = node;
     if(norms_and_sqrtgdiag_on_midpoints)
-      d_info_mid = DGINFO_MIDPTNORM;
+      d_info_midnorm = DGINFO_MIDPTNORM;
     else
-      d_info_mid = DGINFO_NULL;
+      d_info_midnorm = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
     if(nghosts || add_surface_fluxes) get_all_surfaces(node);
@@ -841,7 +841,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               fv->qm_m = qm_m;
 
               d->face = dir*2;
-              d->info = d_info_mid;
+              d->info = d_info_midnorm;
 
               /* reconstruct q,u and then set fluxes and eigenvalues in d */
               rec1d_u_f_lam_midpt(fv, d);
@@ -899,7 +899,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             fv->qm_m = qm_m;
 
             d->face = dir*2 + 1;
-            d->info = d_info_mid;
+            d->info = d_info_midnorm;
 
             /* reconstruct q,u and then set fluxes and eigenvalues in d */
             rec1d_u_f_lam_midpt(fv, d);
@@ -942,7 +942,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           if(0 && have_XYZ_of_xyz)
           {
             /* now get d->fi on gridpoint for normal pointing to the right */
-            d->info = d_info_mid;
+            d->info = d_info_midnorm;
 
             d->face = dir*2 + 1; /* ==> normal points to the right */
             u_f_lam(d);
