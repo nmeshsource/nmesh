@@ -514,7 +514,7 @@ int coordinates_set_globals(tMesh *mesh)
   else
   {
     coordinates->iXm_det_dXbdx = coordinates->iYm_det_dXbdx
-      = coordinates->iZm_det_dXbdx = coordinates->idXdx;
+      = coordinates->iZm_det_dXbdx = coordinates->idet_dXbdx;
     coordinates->iXm_sqrtgdiagx = coordinates->isqrtgdiagx;
     coordinates->iYm_sqrtgdiagy = coordinates->isqrtgdiagx + 1;
     coordinates->iZm_sqrtgdiagz = coordinates->isqrtgdiagx + 2;
