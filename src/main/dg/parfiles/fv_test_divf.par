@@ -1,0 +1,66 @@
+###################################################################
+# modules we use
+
+physics = scalarwave1 # only needed to setup ajsurf...
+
+errorexit = abort
+
+###################################################################
+# FV tests
+coordinates_surface_metric = sqrtgdiag
+coordinates_midpoint_data = yes
+amr_uniform_p = 0 2 4 # 0 1 2 3 4 5 6
+amr_fv_p      = 0 2 4 # 0 1 2 3 4 5 6 7
+#scalarwave1_numflux = LLF
+fv_rec = WENOmZ_2
+fv_flux = fnum
+#fv_surface_interp = parabolic
+#fv_WENOm3_opt_weightratio = 3 # 2
+#fv_divf_extrap = no # dnfn_extrap1 # no # divf_extrap1
+#fv_divf_extrap_s1 = 0.5
+#fv_divf_use_only_right_flux = no
+
+###################################################################
+# evolution
+
+evolve_method = Euler # sspRK3 # RK4
+dt = auto
+#finaltime = 1
+iterations = 1
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 7 CubedSpheres
+amr_luni = 0 # 1
+
+amr_n0 = 5
+amr_n1 = 5
+amr_n2 = 5
+
+iterate_parameters = yes
+iterate_parameter1 = amr_n0  7 13 25
+iterate_parameter2 = amr_n1  7 13 25
+iterate_parameter3 = amr_n2  7 13 25
+
+###################################################################
+# initial data
+
+scalarwave1_k = 0.8  -0.5  0.33166247903554
+
+###################################################################
+# output
+
+logfile_creation = no
+
+fv_tests = yes
+
+0doutiter = 1
+0doutput = scalarwave1_pi_r_err  fv_test_divfx
+
+1doutiter = 1
+1doutput = scalarwave1_pi_r_err  x y z  fv_test_divfx
+
+2doutiter = 1
+2doutput = scalarwave1_pi_r_err  x y z  fv_test_divfx
+2dformat = gnuplot # xdmf
