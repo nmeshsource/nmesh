@@ -99,13 +99,18 @@ int fv_tests(tMesh *mesh)
 {
   tVarList *vldivf = vlalloc(mesh);
 
-  enablevar(mesh, Ind("fv_test_divfx"));
   vlpush(vldivf, Ind("fv_test_divfx"));
 
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    fv_test_fv_divf(node, vldivf);
+    int use_fv = node->dat->info->use_fv;
+
+    if(use_fv)
+    {
+      enablevar_innode(node, Ind("fv_test_divfx"));
+      fv_test_fv_divf(node, vldivf);
+    }
   }
   vlfree(vldivf);
   return 0;
