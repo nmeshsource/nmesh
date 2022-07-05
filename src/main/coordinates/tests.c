@@ -235,64 +235,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
             /* here we could use right flux on gridpoint */
           }
 
-// OLD, but correct:
-//
-//          if(i0g0 && i0lN) /* in middle */
-//          {
-//            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
-//            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
-//
-//            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
-//            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
-//          }
-//          else if(i0g0==0) /* left end */
-//          {
-//            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
-//            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
-//
-//            Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
-//            Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
-//          }
-//          else /* right end */
-//          {
-//            node_normal_at_midpt_nextto_ijk(node, 2*dir+1, ccc, normR);
-//            node_normal_at_midpt_nextto_ijk(node, 2*dir, ccc, normL);
-//
-//            Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
-//            Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
-//          }
-
-
-
-//JUNK:
-//          node_normal_at_ijk(node, 2*dir+1, cccR, norm);
-//
-//          tmp = ooJm[cccR] - ooJ[cccR];
-//          tmp = sqrtgdiagm[cccR] - sqrtgdiag[cccR];
-//
-//          tmp = normR[ii] -  norm[ii];
-//
-//          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-//                -(sqrtgdiag[cccR] / ooJ[cccR]) * norm[ii];
-//
-//          node_normal_at_ijk(node, 2*dir+1, cccL, norm);
-//          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
-//                +(sqrtgdiag[cccL] / ooJ[cccL]) * norm[ii];
-//
-////          node_normal_at_ijk(node, 2*dir+1, ccc, norm);
-////          tmp =  (sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii]
-////                +(sqrtgdiag[ccc] / ooJ[ccc]) * norm[ii];
-//
-//          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-//                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
-//
-//          tmp =  (sqrtgdiagm[cccR] / ooJm[cccR]) * normR[ii]
-//                +(sqrtgdiagm[cccL] / ooJm[cccL]) * normL[ii];
-//          tmp *= ooJ[ccc]/wc;
-//          tmp =  Jgdow_R * normR[ii] + Jgdow_L * normL[ii];
-//End JUNK
-
-
+          /* get fv-deriv */
           forvl(vlooJ_Db_J_sqrtgdiag_n, l)
             di0fi0[l][i0] = Jgdow_R * normR[ii] + Jgdow_L * normL[ii];
           /* ^--this term should be extrapolated to the boundary if
