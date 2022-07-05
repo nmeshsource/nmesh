@@ -80,6 +80,8 @@ int fv_test_fv_divf(tNode *node, tVarList *vldivf)
 
     fv_divf(node, vldivf_i, vlu,vlu,NULL,
             test_rec_flux[i], test_flux[i], test_flux[i]);
+    dg_add_surface_fluxes_sign(node, 1., vldivf, vlu, NULL,
+                               test_flux[i], test_flux[i]);
 
     vldropn(vldivf_i, 0);
   }
@@ -97,8 +99,8 @@ int fv_tests(tMesh *mesh)
 {
   tVarList *vldivf = vlalloc(mesh);
 
-  enablevar(mesh, Ind("fv_test_divf"));
-  vlpush(vldivf, Ind("fv_test_divf"));
+  enablevar(mesh, Ind("fv_test_divfx"));
+  vlpush(vldivf, Ind("fv_test_divfx"));
 
   formylnodes(mesh)
   {

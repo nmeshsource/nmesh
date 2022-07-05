@@ -51,7 +51,7 @@ int nmesh_dg(tMesh *mesh)
   AddPar("fv_tests", "no", "[no,yes]");
   if(Getb(Par("fv_tests")))
   {
-    AddFun(POST_COORDINATES, fv_tests);
+    AddFun(EVOLVE, fv_tests);
     AddAuxVar("fv_test_divf", "i", "d_k f_{test,i}^k, here "
               "f_{test,i}^k = n_i^k, n_i^k = is i-comp of normal in dir k");
   }
