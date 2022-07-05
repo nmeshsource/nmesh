@@ -97,6 +97,12 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     min = MeshExtremumLoc(mesh,pat, vi, 0, &p, nodeloc, &ijk, X, xmin);
     max = MeshExtremumLoc(mesh,pat, vi, 1, &p, nodeloc, &ijk, X, xmax);
 
+    /* if max<min there was no node with any data, then we skip the output */
+    if(finit(min) && finit(max))
+    {
+      if(max<min) continue;
+    }
+
     /* maxAbs and its pos. */
     if(fabs(max)>fabs(min))
     {
