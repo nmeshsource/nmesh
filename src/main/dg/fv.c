@@ -272,7 +272,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           if(i0>0) { i0g0=1; im0m1 = i0-1; }
           else     { i0g0=0; im0m1 = i0; /* safe value */ }
           if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
-          else            { i0lN=0; im0 = i0-1; /* safe value */ }
+          else            { i0lN=0; im0 = (i0-1)*(i0>0); /* safe value */ }
 
           /* gridpoint index and weight */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
