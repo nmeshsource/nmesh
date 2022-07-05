@@ -272,7 +272,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           if(i0>0) { i0g0=1; im0m1 = i0-1; }
           else     { i0g0=0; im0m1 = i0; /* safe value */ }
           if(i0<n[dir]-1) { i0lN=1; im0 = i0; }
-          else            { i0lN=0; im0 = (i0-1)*(i0>0); /* safe value */ }
+          else            { i0lN=0; im0 = i0-1; /* safe value */ }
 
           /* gridpoint index and weight */
           ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
@@ -298,15 +298,19 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
             Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
           }
-          else if(i0g0==0) /* left end */
+          else if(i0g0==0 && i0lN) /* left end */
           {
             Jgdow_R = sqrtgdiagm[cccR] / (ooJm[cccR] * wc);
             Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
           }
-          else /* right end */
+          else if(i0g0 && i0lN==0) /* right end */
           {
             Jgdow_R = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
             Jgdow_L = sqrtgdiagm[cccL] / (ooJm[cccL] * wc);
+          }
+          else /* there is only 1 point */
+          {
+            Jgdow_R = Jgdow_L = sqrtgdiag[ccc] / (ooJ[ccc] * wc);
           }
 
           /* Set factors in flux on faces to zero, if we don't add surface
