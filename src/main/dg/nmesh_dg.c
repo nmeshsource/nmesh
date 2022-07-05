@@ -51,7 +51,7 @@ int nmesh_dg(tMesh *mesh)
   AddPar("fv_tests", "no", "[no,yes]");
   if(Getb(Par("fv_tests")))
   {
-    AddFun(EVOLVE, fv_tests);
+    AddFun(EVOLVE, fv_tests); //put in EVOLVE since fv_divf needs nb. surf
     AddAuxVar("fv_test_divf", "i", "d_k f^k(u_i), where we simply set "
               "f^k(u_x) = (1,0,0), f^k(u_y) = (0,1,0), f^k(u_z) = (0,0,1) so "
               "d_k f^k(u_i) = (1/J) d_{kb} (J sqrt(g^{kb,kb} n^{kb}_i) "
