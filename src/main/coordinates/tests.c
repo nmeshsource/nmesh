@@ -7,7 +7,7 @@
 
 /* global vars */
 extern tcoordinates coordinates[1];
-
+extern tDGglobals DGglobals[1];
 
 
 
@@ -111,12 +111,12 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   int iooJ_Db_J_sqrtgdiag_nx = Ind("ooJ_Db_J_sqrtgdiag_nx");
 
   double q_scale = 1.; /* typical order of magnitude of fields */
-  //int extrap_mode = DGglobals->fv_divf_extrap_mode;
-  //double extrap_s1 = DGglobals->fv_divf_extrap_s1;
-  //double extrap_s2 = DGglobals->fv_divf_extrap_s2;
-  int extrap_mode = FV_DNFN_EXTRAP1;
-  double extrap_s1 = 0;
-  double extrap_s2 = 1e300;
+  int extrap_mode = DGglobals->fv_divf_extrap_mode;
+  double extrap_s1 = DGglobals->fv_divf_extrap_s1;
+  double extrap_s2 = DGglobals->fv_divf_extrap_s2;
+  //int extrap_mode = FV_DNFN_EXTRAP1;
+  //double extrap_s1 = 0;
+  //double extrap_s2 = 1e300;
 
   tVarList *vlooJ_Db_J_sqrtgdiag_n = vlalloc(mesh);
 
@@ -193,7 +193,6 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
           ijk_inplaneN(dir, im,jm,km, i1,i2,im0m1);
           cccL = Ind_n(im,jm,km, n);
 
-//NEW TRY:
           /* set all factors once */
           if(i0g0 && i0lN) /* in middle */
           {
