@@ -47,5 +47,14 @@ int nmesh_dg(tMesh *mesh)
   AddPar("fd_stencilsize", "3", "Fin.Diff. accuracy = fd_stencilsize-1");
   AddPar("fd_lopsidesize", "1", "magnitude of shift in lop-sided stencils");
 
+  /* do some tests */
+  AddPar("fv_tests", "no", "[no,yes]");
+  if(Getb(Par("fv_tests")))
+  {
+    AddFun(POST_COORDINATES, fv_tests);
+    AddAuxVar("fv_test_divf", "i", "d_k f_{test,i}^k, here "
+              "f_{test,i}^k = n_i^k, n_i^k = is i-comp of normal in dir k");
+  }
+
   return 0;
 }
