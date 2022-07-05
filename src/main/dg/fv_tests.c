@@ -80,7 +80,7 @@ int fv_test_fv_divf(tNode *node, tVarList *vldivf)
 
     fv_divf(node, vldivf_i, vlu,vlu,NULL,
             test_rec_flux[i], test_flux[i], test_flux[i]);
-    dg_add_surface_fluxes_sign(node, 1., vldivf, vlu, NULL,
+    dg_add_surface_fluxes_sign(node, 1., vldivf_i, vlu, NULL,
                                test_flux[i], test_flux[i]);
 
     vldropn(vldivf_i, 1);
