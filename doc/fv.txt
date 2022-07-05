@@ -235,29 +235,103 @@ If:  fv_divf_extrap = dnfn_extrap1
 =============================================================================
 
 
-fv with non-Cartesian coordinates X = X(x)
-==========================================
+fv with non-Cartesian coordinates Xb = Xb(x)
+============================================
 Assume that we have just an advection equation
-d_t u + d_x f(u) = 0  with f(u)=u.
-Then if we set u=const we should always have d_t u =0.
+du/dt + df(u)/dx = 0  with f(u)=u.
+Then if we set u=const we should always have du/dt = 0.
 
-When we compute on the X-grid, we need to take differences like
-RHS = -(f*_{i+1/2} sqrtgdiag / w - f*_{i-1/2} sqrtgdiag / w).
-Here
-w         = distance between midpoints in X-coords and
-sqrtgdiag = \sqrt{\gamma^{\bar{i}\bar{i}}}, i.e. the sqrt of the diagonal
-            components of upper index 3-metric in Xb-coords.
+Of course we need to transform from x to Xb = \bar{X} coords.
 
-Since the fluxes f*_{i+1/2} and f*_{i-1/2} are reconstructed at midpoints
-one may think that sqrtgdiag (and any normals one may need) should also be
-the ones at these midpoints. In our example with u=const in the advection
-equation we get f*=const. But sqrtgdiag will be different on midpoint i-1/2
-and i+1/2. Thus RHS will not be 0!!! This is bad!
-So I expect that both sqrtgdiag factors in
-RHS = -(f*_{i+1/2} sqrtgdiag / w - f*_{i-1/2} sqrtgdiag / w)
-as well as any normals we need should be computed at gridpoint i, and NOT at
-the midpoints!!!
+Def: kb := \bar{k}  and  x^{kb} := \bar{X}^{\bar{k}}
+     d       := \partial
+     dx^i    := \partial x^i
+     dx^{kb} := \partial x^{kb}
 
-Some time ago we introduced the par coordinates_midpoint_data, so that we
-can have dX/dx on X midpoints. From this we can then get sqrtgdiag, or the
-normals at the midpoints. It seems this should never be used!!!
+The normal along the x^{kb} coord line is then
+n^{kb}_i = a dx^{kb}/dx^i
+
+Here a is const determined from the normalization:
+1 = \gamma^{ij} n^{kb}_i n^{kb}_j = a^2 dx^{kb}/dx^i \gamma^{ij} dx^{kb}/dx^j
+Thus 1/a = \sqrt{dx^{kb}/dx^i \gamma^{ij} dx^{kb}/dx^j}
+         =: \sqrt{\gamma^{kb,kb}
+
+Def: M^{kb}_i := dx^{kb}/dx^i
+     J        := 1/det(M^{kb}_i)
+     f^{kb}   := dx^{kb}/dx^i f^i
+
+Recall df^i/dx^i = (1/J) d(J f^{kb})/dx^{kb}
+This comes from
+df^i/dx^i = (1/\sqrt{\bar{\gamma}}) d(\sqrt{\bar{\gamma}} f^{kb})/dx^{kb}
+where we note:
+\bar{\gamma}_{ib,jb} = dx^i/dx^{ib} dx^j/dx^{jb} \delta_{ij}
+==> det(\bar{\gamma}_{ib,jb}) = det( M^{-1} (M^{-1})^T ) = 1/det(M)^2
+==> \sqrt{\bar{\gamma}} = \sqrt{det(\bar{\gamma}_{ib,jb})}
+                        = 1/J
+
+Now f^{kb} = dx^{kb}/dx^i f^i = (1/a) n^{kb}_i f^i
+           = \sqrt{\gamma^{kb,kb} n^{kb}_i f^i
+           = \sqrt{\gamma^{kb,kb} f
+where we have define f := n^{kb}_i f^i
+                     -----------------
+So finally
+  ------------------------------------------------------------------
+  df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}        (1)
+  ------------------------------------------------------------------
+
+Numerically we compute this from
+-------------------------------------------------------------
+df^i/dx^i = (1/J_C) \sum_{kb}
+            [ (J\sqrt{\gamma^{kb,kb})_R f^*_R           (A)
+             +(J\sqrt{\gamma^{kb,kb})_L f^*_L ] / w
+-------------------------------------------------------------
+
+   o    |    o    |    o
+        L    C    R
+
+where f^*_R = (n^{kb}_i)_R f^{*i}_R,  f^*_L = (n^{kb}_i)_L f^{*i}_L
+involve right and left pointing normals at the midpoints R and L.
+w = h = distance between midpoints in Xb-coords
+
+From the DG method we can also infer that instead of just f^* we should
+use (f^* - f), where f is the actual inner flux at point C.
+Then
+---------------------------------------------------------------------
+df^i/dx^i = (1/J_C) \sum_{kb}
+            [ (J\sqrt{\gamma^{kb,kb})_R (f^*_R - f_R)           (B)
+             +(J\sqrt{\gamma^{kb,kb})_L (f^*_L - f_L) ] / w
+---------------------------------------------------------------------
+where f_R = (n^{kb}_i)_R f^i_C,  f_L = (n^{kb}_i)_L f^i_C
+and both involve the flux f^i at the same point C.
+
+For Cartesian coords
+J = \sqrt{\gamma^{kb,kb}) = 1, (n^{kb}_i)_R = (n^{kb}_i)_L = const
+then f^i cancels out.
+
+Test cases:
+-----------
+If f^i = (1,0,0) = const  ==>  n^{kb}_i f^i = n^{kb}_x
+==> f_R   = (n^{kb}_x)_R,  f_L   = (n^{kb}_x)_L
+    f^*_R = (n^{kb}_x)_R   f^*_L = (n^{kb}_x)_L
+
+In the continuum case (1) is now
+df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb} n^{kb}_x)/dx^{kb}
+          = df^i/dx^i = d(1)/dx^i + 0 = 0
+
+coordinates_set_divb_J_sqrtgdiag_n computes this deriv numerically.
+
+(B) says
+df^i/dx^k = 0
+as in the continuum limit.
+
+(A) says
+df^i/dx^i = (1/J_C) \sum_{kb}
+            [ (J\sqrt{\gamma^{kb,kb})_R (n^{kb}_x)_R
+             +(J\sqrt{\gamma^{kb,kb})_L (n^{kb}_x)_L ] / w
+This converges to 0 with O(w)^2 = O(h)^2, since it approximates (1)
+which is 0.
+
+coordinates_set_ooJ_Db_J_sqrtgdiag_n and fv_test_fv_divf both compute
+either (A) or (B).
+We get (A) if par  fv_flux = fnum
+We get (B) if par  fv_flux = fnum_minus_fi
