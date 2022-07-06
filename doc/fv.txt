@@ -348,7 +348,7 @@ little surprising as we reconstruct like this:
 I.e. on both ends there is a place (l) where we renstruct with only linear
 interpolation. This might spoil 2nd order conv.
 
-First tests with fv-dg on cubed spheres with scalarwave1 in 3d seemm to show
+First tests with fv-dg on cubed spheres with scalarwave1 in 3d seem to show
 only 1st order conv. That would be very disappointing...
 
 
