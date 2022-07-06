@@ -1,0 +1,16 @@
+About how to normalize normal vectors, fluxes, and eigenvalues
+==============================================================
+
+For GRHD, GHG, C3GH and FOCCZ4 we have equations of the form
+d_t u + A^i d_i u = s
+to solve. For this we need to compute the eigenvalues of A = n_i A^i as well
+"fluxes" A u = n_i A^i u. In all of these expressions there is an n_i. nmesh
+has the function node_normal_at_ijk that calculates a n_i normalized with
+respect to the flat metric. I think this is the n_i we need to use with the
+DG method used by nmesh when we calculate n_i A^i. However, I do remember
+that Liwei also makes his own normal vector s_i that is normalized with
+respect to the physical metric \gamma_{ij}. But for fluxes and eigenvalues
+Liwei is currently using n_i. Liwei says that he also tried with s_i
+together with the other form of DG which is also self consistent, but where
+everything is normalized with \gamma_{ij}. Liwei: "In the end, these two
+forms performed the same, at least for the tests I have done."
