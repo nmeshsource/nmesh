@@ -335,3 +335,30 @@ coordinates_set_ooJ_Db_J_sqrtgdiag_n and fv_test_fv_divf both compute
 either (A) or (B).
 We get (A) if par  fv_flux = fnum
 We get (B) if par  fv_flux = fnum_minus_fi
+
+
+Convergence test results for the scheme above
+=============================================
+
+WT has done fv-dg tests with scalarwave1 in 2d on Cartesian domains (see APS
+talk 2022). It seems that we get 2nd order convergence or better. This is a
+little surprising as we reconstruct like this:
+ |u l|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+I.e. on both ends there is a place (l) where we renstruct with only linear
+interpolation. This might spoil 2nd order conv.
+
+First tests with fv-dg on cubed spheres with scalarwave1 in 3d seemm to show
+only 1st order conv. That would be very disappointing...
+
+
+Flux reconstruction
+===================
+
+For GRHD we reconstruct the primitive variables on the midpoint and then
+compute fluxes from them. Maybe it would be better to directly reconstruct
+[ J\sqrt{\gamma^{kb,kb} (f^* - f) ] on the midpoints. This may be more
+accurate, and then we do not need J and \sqrt{\gamma^{kb,kb} on the
+midpoints at all.
+Does anybody do flux reconstruction instead of primitive (or conservative)
+variable reconstruction? Search literature...
