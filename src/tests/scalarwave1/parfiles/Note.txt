@@ -13,3 +13,10 @@ tgraph.py -m sw1dWENOm32FV-DGit1rconv_*/scalarwave1_pi_r_err.1X
      |   next point in has a problem with the RHS
      here we use a num flux that seems contaminated by "l"
 *How can we fix this?
+*But maybe it does not matter: see sw3dWENOZ.par
+
+sw3dWENOZ.par
+-------------
+*does a conv. test for WENOmZ_2
+tgraph.py -m sw3dWENOZ_?/scalarwave1_pi_err_rms.2t
+*seems to converge with 2nd order to zero
