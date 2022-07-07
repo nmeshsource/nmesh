@@ -348,8 +348,18 @@ little surprising as we reconstruct like this:
 I.e. on both ends there is a place (l) where we renstruct with only linear
 interpolation. This might spoil 2nd order conv.
 
-First tests with fv-dg on cubed spheres with scalarwave1 in 3d seem to show
-only 1st order conv. That would be very disappointing...
+First tests with fv-dg on cubed spheres with scalarwave1 in 3d seemed to
+show only 1st order conv. But it seems the problem comes from these two
+pars (probably mostly the first one):
+  fv_flux = fnum_minus_fi
+  fv_surface_interp = parabolic
+In src/tests/scalarwave1/parfiles/sw3dWENOZ.par we use:
+  fv_rec = WENOmZ_2
+  fv_flux = fnum
+  fv_surface_interp = linear
+  fv_divf_extrap = dnfn_extrap1
+  fv_divf_extrap_s1 = 0.5
+This works much better, and it looks like 2nd order convergent!!!
 
 
 Flux reconstruction
