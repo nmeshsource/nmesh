@@ -38,8 +38,9 @@ int nmesh_dg(tMesh *mesh)
          "|u1-u0|/|u2-u1| < 0.75 s1, [0, 0.5, ...]");
   AddPar("fv_divf_extrap_s2", "DBL_MAX", "use 0th order extrapolation if "
          "|u1-u0|/|u2-u1| > 0.75 s2, [1e50, 1e5, ...]");
-  AddPar("fv_divf_use_only_right_flux", "yes", "if yes we only compute fnumR "
-         "and assume fnumL=-fnumR, otherwise we also compute fnumL [yes,no]");
+  AddPar("fv_divf_use_only_right_flux", "yes", "if yes we only compute "
+         "fnumR_{i} for gridpoint i and assume fnumL_{i} = -fnumR_{i-1}. "
+         "Otherwise we also compute fnumL_{i} [yes,no]");
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
          "[linear,parabolic]");
   /* Finite Differences (fd) pars */

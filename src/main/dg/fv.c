@@ -354,7 +354,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               forvl(vldivf, l) fnumL[l] = d->fnum[l];
               //printDGinfo(d);
             }
-            else /* do not separately compute the left flux*/
+            else /* do not separately compute the left flux */
             {
               /* here we set fnumL = -fnumR_{previous point} */
               forvl(vldivf, l) fnumL[l] = -fnumR[l];
