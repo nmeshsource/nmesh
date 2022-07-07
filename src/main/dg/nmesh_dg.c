@@ -31,7 +31,7 @@ int nmesh_dg(tMesh *mesh)
          "WENOm5_2,WENOmZ_2,WENOm3_1,WENOm5_1,WENOmZ_1,"
          "WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
   AddPar("fv_WENOm3_opt_weightratio", "2", "2=standard, 3=mod value");
-  AddPar("fv_flux", "fnum_minus_fi", "[fnum_minus_fi, fnum]");
+  AddPar("fv_flux", "fnum", "[fnum_minus_fi, fnum]");
   AddPar("fv_divf_extrap", "dnfn_extrap1", "how we extrap div(f) [no,"
          "divf_extrap1,dnfn_extrap1]");
   AddPar("fv_divf_extrap_s1", "0", "use 0th order extrapolation if "
