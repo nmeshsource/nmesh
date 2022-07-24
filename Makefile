@@ -13,8 +13,8 @@ RELAPROJECTDIR = src/projects
 PROJECTDIR = $(TOP)/$(RELAPROJECTDIR)
 
 # default for variables used in all cases
-CC      = gcc	# gcc or icc
-CXX     =	# g++ or icpc
+CC      = cc	# gcc, clang, or icc
+CXX     =	# g++, clang++, or icpc
 CLINKER =	# will be used only in src/main/main/Makefile for linking
 AR      = ar	# ar command we use to build library from object files
 
