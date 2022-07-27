@@ -280,6 +280,13 @@ Things that need to be done urgently:
    node arg has some particular value (node0).
 
 
+*Inculde Jacobian when interpolating from DG to FV:
+ -Nils Deppe says they interpolate uJ not just u if they switch from DG to
+  FV.
+ -to go from FV to DG they do somehting much more complicated that ensures
+  DG -> FV -> DG is the identity map
+
+
 Questions about bamps:
 ======================
 *Wave Eqn:
