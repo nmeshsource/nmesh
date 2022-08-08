@@ -250,10 +250,13 @@ int limiter_minmodB(tNode *node, tVarList *vl)
   const double sqrt3 = sqrt(3.);
   int i100, i010, i001;
   int nlim;
-  tArray *Ac = alloc_array(n);
+  tArray *Ac;
 
   dat = node->dat;
   if(!dat) return 0;
+
+  /* alloc array for coeffs */
+  Ac = alloc_array(n);
 
   /* set pars (smaller alpha makes minmodB more agressive):
      alpha corresponds to \tilde{M} of 1506.06140v2, up to a possible
