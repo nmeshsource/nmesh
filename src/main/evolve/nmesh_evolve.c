@@ -11,7 +11,7 @@ int nmesh_evolve(tMesh *mesh)
 
   /* functions */
   AddFun(EVOLVE, evolve_myln);
-  AddFun(EVOLVE, evolve_filter_evosys_mesh);
+  AddFun(FILTER, evolve_filter_evosys_mesh);
   AddFun(FINALIZEMESH, evolve_free_evosys);
   AddFun(POST_PARAMETERS, evolve_free_evosys);
 
