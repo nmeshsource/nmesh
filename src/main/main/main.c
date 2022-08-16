@@ -475,8 +475,13 @@ int inidata_mesh(tMesh *mesh)
   /* load next stage of checkpoint, or save checkpoint */
   if(chkpt1)
   {
+    /* load an unfiltered checkpoint */
     checkpoint_load_stage(mesh, "", 1);
-    RunFun(POST_CHECKPOINT_LOAD);
+    RunFun(POST_CHECKPOINT_LOAD); /* do things right after loading */
+    /* Run the things that are after checkpoint_save_if_needed
+       in evolve_mesh, that are not already called after this block. */
+    RunFun(FILTER);
+    RunFun(POST_EVOLVE);
     //checkpoint_save_if_needed(mesh, 1);
     //write_mesh(mesh, -1, -2);
     //errorexit("stop");
@@ -535,12 +540,6 @@ int evolve_mesh(tMesh *mesh)
     /* make one evolution step */
     RunFun(EVOLVE);
 
-    /* apply filters after the full evolution step */
-    RunFun(FILTER);
-
-    /* post evolve */
-    RunFun(POST_EVOLVE);
-
     /* the evolution step is complete now */
     mesh->iteration++;
     /* accumulate time in te until it is time to increase Te */
@@ -552,6 +551,16 @@ int evolve_mesh(tMesh *mesh)
     }
     mesh->time = Te + te; /* best estimate for actual time */
 
+    /* save an unfiltered checkpoint,
+       save for sure if time is beyond timemax */
+    checkpoint_save_if_needed(mesh, mesh->time >= timemax - ttol);
+
+    /* apply filters after the full evolution step */
+    RunFun(FILTER);
+
+    /* post evolve */
+    RunFun(POST_EVOLVE);
+
     /* print some info */
     //printf(" Te=%Lg te=%Lg  ", Te, te);
     printf(" iteration %d, time=%g\n", mesh->iteration, mesh->time);
@@ -559,9 +568,6 @@ int evolve_mesh(tMesh *mesh)
 
     /* call analyze functions */
     RunFun(ANALYZE);
-
-    /* save checkpoint */
-    checkpoint_save_if_needed(mesh, 0);
 
     /* call output functions, say for variable output */
     RunFun(OUTPUT);
@@ -580,8 +586,6 @@ int evolve_mesh(tMesh *mesh)
     if(timemax<=0. && iterationmax>0) timemax = iterationmax * mesh->dt;
   }
 
-  /* write checkpoint at the end */
-  checkpoint_save_if_needed(mesh, 1);
   prTimeIn_s("WallTime at end of evolve_mesh: ");
 
   return 0;
