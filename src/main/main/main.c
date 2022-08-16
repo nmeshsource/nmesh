@@ -476,6 +476,7 @@ int inidata_mesh(tMesh *mesh)
   if(chkpt1)
   {
     checkpoint_load_stage(mesh, "", 1);
+    RunFun(POST_CHECKPOINT_LOAD);
     //checkpoint_save_if_needed(mesh, 1);
     //write_mesh(mesh, -1, -2);
     //errorexit("stop");

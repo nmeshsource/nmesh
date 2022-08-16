@@ -15,6 +15,7 @@ enum
   PRE_INITIALDATA,
   INITIALDATA,
   POST_INITIALDATA,
+  POST_CHECKPOINT_LOAD, /* after checkpoint_load_stage(mesh, "", 1); */
 
   //timebins called repeatedly in evolve_mesh while mesh->time < timemax:
   PRE_EVOLVE,
