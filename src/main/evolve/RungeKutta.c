@@ -46,6 +46,8 @@ void evolve_RK4_mesh(tMesh *mesh)
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   addto_pVLList(u, dt/6., r, vladdto,0);      // u += r dt/6
   mesh->time = t+dt;                          // we are now at t+dt
+  /* The new u is not limited yet!
+     A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
 
 /* Euler step */
@@ -64,6 +66,8 @@ void evolve_Euler_mesh(tMesh *mesh)
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   addto_pVLList(u, dt, r, vladdto,0);     // u += r dt
   mesh->time = t+dt;                      // we are now at t+dt
+  /* The new u is not limited yet!
+     A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
 
 /* third order strong stability preserving Runge-Kutta scheme from
@@ -120,6 +124,8 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   mesh->time = t+dt;                           // we are now at t+dt
   if(PR) PRFs(": 3\n");
   //printvarlist_atpoint(pt, ListEntry(u,0));
+  /* The new u is not limited yet!
+     A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
 
 
