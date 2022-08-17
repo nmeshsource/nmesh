@@ -238,6 +238,11 @@ Things that need to be done urgently:
   vars alpha, betax, gxx.
  -These are principal terms!!! It may be better if GHG set these ADM derivs
   from its evolved vars (without using cart_partials_...).
+ +"GRHD_set_dalpha_dbeta = no" stops use of cart_partials_... in GRHD
+ +since 2964a20 GHG sets ADM metric vars and ALL their first derivs
+
+*GRHD + C3GH has a bug!
+ -a fix like 2964a20 for GHG is missing
 
 *check FOCCZ4
  -FOCCZ4_eigenvals replaces stuf like g^xx or beta^x in paper simply by
@@ -405,6 +410,7 @@ Things that should be done:
  So if ham is computed and outputed directly after checkpoint load, the
  result for ham is likely wrong. This is fixed only in the next evo step
  when ADM matter vars are set from GRHD.
+ GRHD should probably set ADM matter vars and P in POST_CHECKPOINT_LOAD
 
 *update set_all_myln_mysurf and request_all_myln_surfaces_exchange
  so that we also have min/max or averages in extra space of mysurf
