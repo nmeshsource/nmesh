@@ -158,6 +158,10 @@ void cart_partials_dU_di_dU_dij(tNode *node, int U, int dUx, int ddUxx);
 void cart_partials_dUi_dj_dUi_djk(tNode *node, int Ux, int dUxx, int ddUxxx);
 void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
                                     int dSxxx, int ddSxxxx);
+void cart_partials_ddTensor_dij(tNode *node,
+                                int dT0, int ddT0, tDerivOpt *opt);
+void cart_partials_didjTensor(tNode *node,
+                              int dT0, int ddT0, tDerivOpt *opt);
 void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
                                            int dT0, int ddT0, tDerivOpt *opt);
 void cart_partials_diTensor_didjTensor(tNode *node, int T0,

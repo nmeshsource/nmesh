@@ -560,7 +560,83 @@ void cart_partials_dSij_dk_dSij_dkl(tNode *node, int Sxx,
 }
 
 /***********************************************************************/
-/* 2nd derivs of general tensors */
+/* 2nd derivs of general tensors from pre-existing 1st derivs */
+/***********************************************************************/
+
+/* write number of components of var dT0 and ddT0 into ndT and nddT, and also
+   check if ddT0 has correct number of components for 2nd derivs of T0 */
+void cart_partials_SetAndCheck_nT_ndT_nddT(tNode *node, int dT0, int ddT0,
+                                           int *nT, int *ndT, int *nddT)
+{
+  tMesh *mesh = node->pat->mesh;
+  *ndT = MeshVarNComponents(mesh, dT0);
+  *nddT = MeshVarNComponents(mesh, ddT0);
+
+  /* number of components of tensor T0 that resulted in tensor deriv dT0 */
+  *nT = *ndT/3;
+
+  if( (*nddT) != 6*(*nT) ) /* ddT is symm. in deriv indices */
+  {
+    char *dT = MeshVarName(mesh, dT0);
+    char *ddT = MeshVarName(mesh, ddT0);
+    char *dTindices = MeshVarTensorIndices(mesh, dT0);
+    char *ddTindices = MeshVarTensorIndices(mesh, ddT0);
+    printf("%s %s (dT0=%d) has ndT=%d components\n",
+           dT, dTindices, dT0, *ndT);
+    printf("Thus the tensor without derivs (T0) must have nT=%d components\n",
+           *nT);
+    printf("%s %s (ddT0=%d) has nddT=%d components\n",
+           ddT, ddTindices, ddT0, *nddT);
+    errorexit("To store all 6 2nd deriv components we need nddT = 6*nT.");
+  }
+}
+
+/* Compute 2nd derivs T_{... ,ij} from 1st derivs T_{... ,i} of a general
+   tensor T_{...}. The resulting T_{... ,ij} needs to be defined as
+   symmetric in the last 2 indices. */
+void cart_partials_ddTensor_dij(tNode *node,
+                                int dT0, int ddT0, tDerivOpt *opt)
+{
+  int nT, ndT, nddT;
+  int n;
+
+  /* get and check number of components of dT and ddT and also set nT */
+  cart_partials_SetAndCheck_nT_ndT_nddT(node, dT0,ddT0, &nT, &ndT, &nddT);
+
+  /* 2nd derivs */
+  for(n=0; n<nT; n++) /* ddT is symm in last 2 indices ==> fac 6 below */
+  {
+    cart_3partials(node, dT0+3*n ,  ddT0+6*n ,  ddT0+6*n+1, ddT0+6*n+2, opt);
+    cart_3partials(node, dT0+3*n+1, ddT0+6*n+1, ddT0+6*n+3, ddT0+6*n+4, opt);
+    cart_3partials(node, dT0+3*n+2, ddT0+6*n+2, ddT0+6*n+4, ddT0+6*n+5, opt);
+  }
+}
+
+/* Compute 2nd derivs d_i d_j T_{...} from 1st derivs d_i T_{...} of a
+   general tensor T_{...}.  The resulting d_i d_j T_{...} needs to be
+   defined as symmetric in the first 2 indices. */
+void cart_partials_didjTensor(tNode *node,
+                              int dT0, int ddT0, tDerivOpt *opt)
+{
+  int nT, ndT, nddT;
+  int n;
+
+  /* get and check number of components of dT and ddT and also set nT */
+  cart_partials_SetAndCheck_nT_ndT_nddT(node, dT0,ddT0, &nT, &ndT, &nddT);
+
+  errorexit("2nd deriv part of this function is untested");
+
+  /* 2nd derivs */
+  for(n=0; n<nT; n++) //ddT is symm in first 2 indices => steps of 6*nT below
+  {
+    cart_3partials(node,dT0+     n, ddT0      +n,ddT0+ 6*nT+n,ddT0+12*nT+n, opt);
+    cart_3partials(node,dT0+  nT+n, ddT0+ 6*nT+n,ddT0+18*nT+n,ddT0+24*nT+n, opt);
+    cart_3partials(node,dT0+2*nT+n, ddT0+12*nT+n,ddT0+24*nT+n,ddT0+30*nT+n, opt);
+  }
+}
+
+/***********************************************************************/
+/* 1st and 2nd derivs of general tensors */
 /***********************************************************************/
 
 /* write number of components of var T0 and ddT0 into nT and nddT, and also
@@ -593,7 +669,6 @@ void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
                                            int dT0, int ddT0, tDerivOpt *opt)
 {
   int nT, nddT;
-  int n;
 
   /* 1st derivs */
   cart_partials_dTensor_di(node, T0, dT0, opt);
@@ -602,12 +677,7 @@ void cart_partials_dTensor_di_ddTensor_dij(tNode *node, int T0,
   cart_partials_SetAndCheck_nT_nddT(node, T0,ddT0, &nT, &nddT);
 
   /* 2nd derivs */
-  for(n=0; n<nT; n++) /* ddT is symm in last 2 indices ==> fac 6 below */
-  {
-    cart_3partials(node, dT0+3*n ,  ddT0+6*n ,  ddT0+6*n+1, ddT0+6*n+2, opt);
-    cart_3partials(node, dT0+3*n+1, ddT0+6*n+1, ddT0+6*n+3, ddT0+6*n+4, opt);
-    cart_3partials(node, dT0+3*n+2, ddT0+6*n+2, ddT0+6*n+4, ddT0+6*n+5, opt);
-  }
+  cart_partials_ddTensor_dij(node, dT0, ddT0, opt);
 }
 
 /* Compute 1st and 2nd derivs d_i T_{...} and d_i d_j T_{...} of a general
@@ -617,7 +687,6 @@ void cart_partials_diTensor_didjTensor(tNode *node, int T0,
                                        int dT0, int ddT0, tDerivOpt *opt)
 {
   int nT, nddT;
-  int n;
 
   /* 1st derivs */
   cart_partials_diTensor(node, T0, dT0, opt);
@@ -625,15 +694,8 @@ void cart_partials_diTensor_didjTensor(tNode *node, int T0,
   /* get and check number of components of T and ddT */
   cart_partials_SetAndCheck_nT_nddT(node, T0,ddT0, &nT, &nddT);
 
-  errorexit("2nd deriv part of this function is untested");
-
   /* 2nd derivs */
-  for(n=0; n<nT; n++) //ddT is symm in first 2 indices => steps of 6*nT below
-  {
-    cart_3partials(node,dT0+     n, ddT0      +n,ddT0+ 6*nT+n,ddT0+12*nT+n, opt);
-    cart_3partials(node,dT0+  nT+n, ddT0+ 6*nT+n,ddT0+18*nT+n,ddT0+24*nT+n, opt);
-    cart_3partials(node,dT0+2*nT+n, ddT0+12*nT+n,ddT0+24*nT+n,ddT0+30*nT+n, opt);
-  }
+  cart_partials_didjTensor(node, dT0, ddT0, opt);
 }
 
 
