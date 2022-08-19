@@ -464,9 +464,6 @@ int inidata_mesh(tMesh *mesh)
   RunFun(INITIALDATA);
   RunFun(POST_INITIALDATA);
 
-  /* initial data is just another new time slice */
-  RunFun(POST_EVOLVE);
-
   /* initial data complete */
   prdivider(0);
   printf("Done with initialization\n");
@@ -481,15 +478,14 @@ int inidata_mesh(tMesh *mesh)
     /* Run the things that are after checkpoint_save_if_needed
        in evolve_mesh, that are not already called after this block. */
     RunFun(FILTER);
-    RunFun(POST_EVOLVE);
-    //checkpoint_save_if_needed(mesh, 1);
-    //write_mesh(mesh, -1, -2);
-    //errorexit("stop");
   }
   else
   {
     checkpoint_save_if_needed(mesh, 1);
   }
+
+  /* initial data is just another new time slice */
+  RunFun(POST_EVOLVE);
 
   /* analyze initial data or data from checkpoint */
   RunFun(ANALYZE);
