@@ -13,6 +13,7 @@
 #include <sys/types.h>   /* for pid_t */
 #include <sys/wait.h>    /* for wait */
 #include <dirent.h>      /* for opendir */
+#include <fenv.h>        /* for feenableexcept */
 
 
 /* global vars for timing */
@@ -290,6 +291,21 @@ int finit(double x)
     return 0;
   else
     return 1;
+}
+
+/* if MyConfig contains, e.g.
+   DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
+   we enable the corresponding floating point exceptions */
+int enable_FPEEXCEPTIONS(void)
+{
+  PRF;
+#ifdef FPEEXCEPTIONS
+  printf(": feenableexcept(%s);\n", MSTR_OFVAL(FPEEXCEPTIONS));
+  return feenableexcept(FPEEXCEPTIONS);
+#else
+  printf(": none.\n");
+  return 0;
+#endif
 }
 
 

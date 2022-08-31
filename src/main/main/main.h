@@ -19,3 +19,6 @@ int CheckForBannedPars(tMesh *mesh);
 
 /* sysmon.c */
 int sysmon(tMesh *mesh);
+
+/* utilities.c */
+int enable_FPEEXCEPTIONS(void);
