@@ -40,10 +40,10 @@ int main(int argc, char **argv)
 
   /* start the main parts of nmesh: */
   read_command_line(mesh, argc, argv);
-  enable_FPEEXCEPTIONS();
   parse_parameter_file(mesh, Gets(Par("parameterfile")));
   parse_command_line_options(mesh);
   make_output_directory(mesh);
+  enable_FPEEXCEPTIONS();
   print_system_info();
   initialize_libraries(mesh);
   TIMER_START;
