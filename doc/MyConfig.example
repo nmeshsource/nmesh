@@ -47,3 +47,6 @@ OFLAGS = -std=c99 -g # -O3 # -fopenmp # -g # -Wall -Werror
 
 # on old compilers without NORET=_Noreturn, uncomment the line below
 #DFLAGS += -DNO_C11
+
+# generate SIGFPE on NANs, works only on GNU, BSD or similar systems
+#DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
