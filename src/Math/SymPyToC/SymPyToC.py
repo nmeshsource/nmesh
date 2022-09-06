@@ -10,9 +10,10 @@ import numpy
 import itertools
 import textwrap
 import pathlib
-import multiprocessing
-if __name__ == '__main__':
-    multiprocessing.set_start_method('fork')
+
+# by default we do not use multiprocessing, and set the pool to None
+SymPyToC_pool = None
+
 
 ###########################################################################
 #
@@ -668,8 +669,11 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
                 IDlist.append([eq_i, comp])
                 Eqlist.append([allEqs[0][eq_i][comp], allEqs[1][eq_i][comp], subsdict])
     # simplify Eqlist in parallel
-    with multiprocessing.Pool() as pool:
-        simpd = pool.map(apply_subsrulesdict_to_LHS_RHS, Eqlist)
+    if SymPyToC_pool != None:
+        simpd = SymPyToC_pool.map(apply_subsrulesdict_to_LHS_RHS, Eqlist)
+    # simplify RHSlist serially
+    else:
+        simpd = list(map(apply_subsrulesdict_to_LHS_RHS, Eqlist))
     # write results into allEqs
     for id_n in range(len(IDlist)):
         eq_i = IDlist[id_n][0]
@@ -762,10 +766,11 @@ def simplify_all_EqnComponents(simp, allEqs):
                 if not sympified_rhs.is_Number:
                     RHSlist.append([eq_i, compn, rhs])
     # simplify RHSlist in parallel
-    with multiprocessing.Pool() as pool:
-        rsimp = pool.map(simp, [r[2] for r in RHSlist])
-    ## simplify RHSlist serially
-    #rsimp = list(map(simp, [r[2] for r in RHSlist]))
+    if SymPyToC_pool != None:
+        rsimp = SymPyToC_pool.map(simp, [r[2] for r in RHSlist])
+    # simplify RHSlist serially
+    else:
+        rsimp = list(map(simp, [r[2] for r in RHSlist]))
     # put results into allRHS
     for eln in range(len(RHSlist)):
         eq_i  = RHSlist[eln][0]
@@ -776,10 +781,10 @@ def simplify_all_EqnComponents(simp, allEqs):
 
 
 # global Functions called POWER, POW2, POW3 to be used instead of Pow
-if __name__ == '__main__':
-    POWER = sympy.symbols('POWER', cls=sympy.Function)
-    POW2  = sympy.symbols('POW2',  cls=sympy.Function)
-    POW3  = sympy.symbols('POW3',  cls=sympy.Function)
+#if __name__ == '__main__':
+POWER = sympy.symbols('POWER', cls=sympy.Function)
+POW2  = sympy.symbols('POW2',  cls=sympy.Function)
+POW3  = sympy.symbols('POW3',  cls=sympy.Function)
 
 # replace the Pow function of sympy to get rid of all ** or pow in the
 # output
@@ -801,9 +806,9 @@ def replace_Pow(expr):
 
 
 # global IndexedBase objects for Kronecker delta and 3d Levi Civita symbol
-if __name__ == '__main__':
-    Kdelta = sympy.IndexedBase('Kdelta')
-    LCeps3 = sympy.IndexedBase('LCeps3')
+#if __name__ == '__main__':
+Kdelta = sympy.IndexedBase('Kdelta')
+LCeps3 = sympy.IndexedBase('LCeps3')
 
 # replace Kdelta by sympy.KroneckerDelta
 def replace_Kdelta(expr):

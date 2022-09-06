@@ -11,6 +11,7 @@
 codegen = '../../Math/SymPyToC/SymPyToC.py'
 exec(compile(open(codegen).read(), codegen, 'exec'))
 
+
 ########################################################################
 # indices we need, and their min and max value in brackets
 ########################################################################
@@ -22,8 +23,10 @@ e = sympy.Idx('e', (1, 3))
 #f = sympy.Idx('f', (1, 3))
 
 # define some functions that we only use in C
-fabs = sympy.symbols('fabs', cls=sympy.Function)
-Cal  = sympy.symbols('Cal', cls=sympy.Function)
+#fabs = sympy.symbols('fabs', cls=sympy.Function)
+#Cal  = sympy.symbols('Cal', cls=sympy.Function)
+fabs = sympy.Function('fabs')
+Cal  = sympy.Function('Cal')
 
 
 ########################################################################
@@ -246,68 +249,84 @@ tocompute = (
   ':Text = }  /* end of function */\n\n',
 )
 
+if __name__ == '__main__':
+  ########################################################################
+  # Create pool of processes. Can use multiprocessing or multiprocess
+  ########################################################################
+  import multiprocessing as mp
+  #mp.set_start_method('fork')
+  #mp.set_start_method('spawn')
+  #mp.set_start_method('forkserver')
+  #import multiprocess as mp
+  SymPyToC_pool = mp.Pool()
 
-########################################################################
-# get all Eqn components and the undeclared vars that only appear on LHS
-########################################################################
-Eqs = read_LHS_RHS_strlist(tocompute)
-allEqs, AUTOVARS = assemble_all_EqnComponents(Eqs)
+  ########################################################################
+  # get all Eqn components and the undeclared vars that only appear on LHS
+  ########################################################################
+  Eqs = read_LHS_RHS_strlist(tocompute)
+  allEqs, AUTOVARS = assemble_all_EqnComponents(Eqs)
 
-########################################################################
-# declare all symmetries for all variables we use
-########################################################################
-symmetries = {
-g[a,b] :        { '+': ( [b,a], ) },
-K[a,b] :        { '+': ( [b,a], ) },
-R[a,b] :        { '+': ( [b,a], ) },
-ginv[a,b] :     { '+': ( [b,a], ) },
-#ddpop[a,b] :    { '+': ( [b,a], ) },
-S[a,b] :        { '+': ( [b,a], ) },
+  ########################################################################
+  # declare all symmetries for all variables we use
+  ########################################################################
+  symmetries = {
+  g[a,b] :        { '+': ( [b,a], ) },
+  K[a,b] :        { '+': ( [b,a], ) },
+  R[a,b] :        { '+': ( [b,a], ) },
+  ginv[a,b] :     { '+': ( [b,a], ) },
+  #ddpop[a,b] :    { '+': ( [b,a], ) },
+  S[a,b] :        { '+': ( [b,a], ) },
 
-delg[c,a,b] :   { '+': ( [c,b,a], ) },
-delK[c,a,b] :   { '+': ( [c,b,a], ) },
-deldelg[a,b,c,d] :  { '+': ( [b,a,c,d], ) },
-deldelg[a,b,c,d] :  { '+': ( [a,b,d,c], ) },
-ddalpha[a,b] :      { '+': ( [b,a], ) },
+  delg[c,a,b] :   { '+': ( [c,b,a], ) },
+  delK[c,a,b] :   { '+': ( [c,b,a], ) },
+  deldelg[a,b,c,d] :  { '+': ( [b,a,c,d], ) },
+  deldelg[a,b,c,d] :  { '+': ( [a,b,d,c], ) },
+  ddalpha[a,b] :      { '+': ( [b,a], ) },
 
-codelK[c,a,b] :  { '+': ( [c,b,a], ) },
-cdKudd[c,a,b] :  { '+': ( [c,b,a], ) },
+  codelK[c,a,b] :  { '+': ( [c,b,a], ) },
+  cdKudd[c,a,b] :  { '+': ( [c,b,a], ) },
 
-RA[a,b] :        { '+': ( [b,a], ) },
-RB[a,b] :        { '+': ( [b,a], ) },
-RC[a,b] :        { '+': ( [b,a], ) },
-RD[a,b] :        { '+': ( [b,a], ) },
-codelKA[c,a,b] : { '+': ( [c,b,a], ) },
-codelKB[c,a,b] : { '+': ( [c,b,a], ) },
-codelKC[c,a,b] : { '+': ( [c,b,a], ) },
-#cdKuddA[c,a,b] : { '+': ( [c,b,a], ) },
-#cdKuddB[c,a,b] : { '+': ( [c,b,a], ) },
-#cdKuddC[c,a,b] : { '+': ( [c,b,a], ) },
+  RA[a,b] :        { '+': ( [b,a], ) },
+  RB[a,b] :        { '+': ( [b,a], ) },
+  RC[a,b] :        { '+': ( [b,a], ) },
+  RD[a,b] :        { '+': ( [b,a], ) },
+  codelKA[c,a,b] : { '+': ( [c,b,a], ) },
+  codelKB[c,a,b] : { '+': ( [c,b,a], ) },
+  codelKC[c,a,b] : { '+': ( [c,b,a], ) },
+  #cdKuddA[c,a,b] : { '+': ( [c,b,a], ) },
+  #cdKuddB[c,a,b] : { '+': ( [c,b,a], ) },
+  #cdKuddC[c,a,b] : { '+': ( [c,b,a], ) },
 
-#OD2[c,a,b] :     { '+': ( [c,b,a], ) },
+  #OD2[c,a,b] :     { '+': ( [c,b,a], ) },
 
-dg[a,b,c] :      { '+': ( [b,a,c], ) },
-dK[a,b,c] :      { '+': ( [b,a,c], ) },
+  dg[a,b,c] :      { '+': ( [b,a,c], ) },
+  dK[a,b,c] :      { '+': ( [b,a,c], ) },
 
-ddg[a,b,c,d] :   { '+': ( [b,a,c,d], ) },
-ddg[a,b,c,d] :   { '+': ( [a,b,d,c], ) },
-}
+  ddg[a,b,c,d] :   { '+': ( [b,a,c,d], ) },
+  ddg[a,b,c,d] :   { '+': ( [a,b,d,c], ) },
+  }
 
 
-########################################################################
-# apply symmetries and remove duplicates. This step takes the longest.
-########################################################################
-allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS)
+  ########################################################################
+  # apply symmetries and remove duplicates. This step takes the longest.
+  ########################################################################
+  allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS)
 
-########################################################################
-# run more sympy simplification operations on RHSs (this is optional)
-########################################################################
-allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
-#allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
-allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
+  ########################################################################
+  # run more sympy simplification operations on RHSs (this is optional)
+  ########################################################################
+  allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
+  #allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
+  allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
 
-########################################################################
-# now write all into a .c file
-########################################################################
-cfilename = __file__.replace('.py', '.c')
-write_Eqs(cfilename, allEqs, AUTOVARS)
+  ########################################################################
+  # now write all into a .c file
+  ########################################################################
+  cfilename = __file__.replace('.py', '.c')
+  write_Eqs(cfilename, allEqs, AUTOVARS)
+
+  ########################################################################
+  # close pool of processes
+  ########################################################################
+  if SymPyToC_pool != None:
+    SymPyToC_pool.close()

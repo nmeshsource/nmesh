@@ -97,41 +97,59 @@ int main()
 ''',
 )
 
-########################################################################
-# get all Eqn components and the undeclared vars that only appear on LHS
-########################################################################
-Eqs = read_LHS_RHS_strlist(tocompute)
-allEqs, AUTOVARS = assemble_all_EqnComponents(Eqs)
 
-########################################################################
-# declare all symmetries for all variables we use
-########################################################################
-symmetries = {
-    S[i,j] :   {  '+': ( [j,i], ) },
-    A[i,j] :   {  '-': ( [j,i], ) },
-    T[k,l,m] : {   '+': ( [l,k,m], [k,m,l], ) },
-    SS[k,l,m] : {  '+': ( [l,k,m], [k,m,l], ) },
-    AA[k,l,m] : {  '-': ( [l,k,m], [k,m,l], ) },
-##    T[i,j,k,l,m] : {  '+': ( [j,i,k,l,m], [i,j,l,k,m] ),
-##                      '-': ( [i,j,k,m,l], ) }
-}
+if __name__ == '__main__':
+  ########################################################################
+  # Create pool of processes. Can use multiprocessing or multiprocess
+  ########################################################################
+  import multiprocessing as mp
+  #mp.set_start_method('fork')
+  #mp.set_start_method('spawn')
+  #mp.set_start_method('forkserver')
+  #import multiprocess as mp
+  SymPyToC_pool = mp.Pool()
+
+  ########################################################################
+  # get all Eqn components and the undeclared vars that only appear on LHS
+  ########################################################################
+  Eqs = read_LHS_RHS_strlist(tocompute)
+  allEqs, AUTOVARS = assemble_all_EqnComponents(Eqs)
+
+  ########################################################################
+  # declare all symmetries for all variables we use
+  ########################################################################
+  symmetries = {
+      S[i,j] :   {  '+': ( [j,i], ) },
+      A[i,j] :   {  '-': ( [j,i], ) },
+      T[k,l,m] : {   '+': ( [l,k,m], [k,m,l], ) },
+      SS[k,l,m] : {  '+': ( [l,k,m], [k,m,l], ) },
+      AA[k,l,m] : {  '-': ( [l,k,m], [k,m,l], ) },
+  ##    T[i,j,k,l,m] : {  '+': ( [j,i,k,l,m], [i,j,l,k,m] ),
+  ##                      '-': ( [i,j,k,m,l], ) }
+  }
 
 
-########################################################################
-# apply symmetries and remove duplicates. This step takes the longest.
-########################################################################
-allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs,
-                                               AUTOVARS)
+  ########################################################################
+  # apply symmetries and remove duplicates. This step takes the longest.
+  ########################################################################
+  allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs,
+                                                 AUTOVARS)
 
-########################################################################
-# run more sympy simplification operations on RHSs (this is optional)
-########################################################################
-allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
-#allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
-allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
+  ########################################################################
+  # run more sympy simplification operations on RHSs (this is optional)
+  ########################################################################
+  allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
+  #allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
+  allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
 
-########################################################################
-# now write all into a .c file
-########################################################################
-cfilename = __file__.replace('.py', '.c')
-write_Eqs(cfilename, allEqs, AUTOVARS)
+  ########################################################################
+  # now write all into a .c file
+  ########################################################################
+  cfilename = __file__.replace('.py', '.c')
+  write_Eqs(cfilename, allEqs, AUTOVARS)
+
+  ########################################################################
+  # close pool of processes
+  ########################################################################
+  if SymPyToC_pool != None:
+    SymPyToC_pool.close()
