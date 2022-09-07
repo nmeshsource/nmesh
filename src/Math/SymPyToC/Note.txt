@@ -1,5 +1,9 @@
 Problems with SymPyToC.py
 
+*SymPyToC.py is not imported but rather used with exec(compile(...
+-This is done so that SymPyToC.py can put vars into the global namespace
+ of our script. I'm not sure if this can actually cause any problems...
+
 *crashes with sympy 1.7.1 (doesn't seem to crash with 1.9)
 time python3 ADMconstraints.py
 sometimes results in:
@@ -22,30 +26,7 @@ Traceback (most recent call last):
     cls(buf, protocol).dump(obj)
 _pickle.PicklingError: Can't pickle fabs: it's not the same object as __main__.fabs
 
-*If we use multiprocessing.set_start_method('spawn') at start of SymPyToC.py
- it crashes. Why does this not work???
-
-*SymPyToC.py is not imported but rather used with exec(compile(...
--This is done so that SymPyToC.py can put vars into the global namespace
- of our script.
-
-
-*to make  multiprocessing.set_start_method('spawn')  work,
- we could try this:
-
-+add this to beginning of SymPyToC.py
-SymPyToC_pool = None
-
-+replace all "with multiprocessing.Pool() as pool:" by
-if SymPyToC_pool != None:
-    simpd = SymPyToC_pool.map(apply_subsrulesdict_to_LHS_RHS, Eqlist)
-else:
-    simpd = map(apply_subsrulesdict_to_LHS_RHS, Eqlist)
-
-+add these to example.py at beginning and at end:
-if __name__ == '__main__':
-    multiprocessing.set_start_method('fork')
-    SymPyToC_pool = multiprocessing.Pool()
-... rest of example ...
-if __name__ == '__main__':
-    SymPyToC_pool.close()
+*I found hints that dill is better than pickle. So we should use the
+ module multiprocess instead of multiprocessing, because multiprocess is
+ supposed to use dill. BUT on Debian 11, multiprocess somehow also produces
+ a PicklingError. So probably something in Debian 11 is not setup right...
