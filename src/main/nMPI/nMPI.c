@@ -119,6 +119,8 @@ int nMPI_print_compile_info(tMesh *mesh)
   printf(" MPI is not compiled in. Posing as rank=%d and size=%d.\n",
          noMPI_rank, noMPI_size);
 #endif
+  printf(" nMPI_rank() = %d\n", nMPI_rank());
+  printf(" nMPI_size() = %d\n", nMPI_size());
   printf(" nMPIvars->ncomms = %d\n", nMPIvars_get_ncomms());
   printf(" nMPIvars->comm_bits = %d\n", nMPIvars->comm_bits);
   printf(" nMPIvars->tag_ub = %d\n", nMPIvars_get_tag_ub());
