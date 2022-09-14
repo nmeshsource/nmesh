@@ -131,12 +131,12 @@ int sphere_around_two_full_cubes_touching_at_x0(tMesh *mesh, int N,
 /* put 6 stretchedCubedShell's around the sphere from
    sphere_around_two_full_cubes_touching_at_x0
                    ___________
-             _____/           \______
+             _____/    r1     \______
           __/                        \_
          /                             \
        _- \-                         -/
       /     \-       _______       -/
-     |        \-  __/       \__  -/   ...
+     |        \-  __/  r0   \__  -/   ...
     |           \/             \/
    /            /__           __\
   |            /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
@@ -220,12 +220,12 @@ int sphere_around_full_box_at_xc(tMesh *mesh, int N,
 /* put 6 stretchedCubedShell's around the sphere from
    sphere_around_full_box_at_xc
                    ___________
-             _____/           \______
+             _____/    r1     \______
           __/                        \_
          /                             \
        _- \-                         -/
       /     \-       _______       -/
-     |        \-  __/       \__  -/   ...
+     |        \-  __/  r0   \__  -/   ...
     |           \/             \/
    /            /__           __\
   |            /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
@@ -285,17 +285,17 @@ int two_spheres_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
 /* put 6 more stretchedCubedShell's around the sphere from
    two_spheres_around_box_at_xc
                    ___________
-             _____/           \______
+             _____/    r2     \______
           __/        _______         \_
-         /      ____/       \____      \
+         /      ____/  r1   \____      \
        _- \-   /                 \   -/
       /     \-       _______       -/
-     |     /  \-  __/       \__  -/   ...
+     |     /  \-  __/  r0   \__  -/   ...
     |     /     \/             \/
    /     /      /__           __\
   |     |      /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
   |     |     |      |     |      |   r1 is radius of middle sphere (sphere1)
-  |     |     |      |_____|      |   r2 is radius of outer sphere (sphere1)
+  |     |     |      |_____|      |   r2 is radius of outer sphere (sphere2)
   |     |      \ __--       --__ /
    \     \      \               /
     |     \    _/\__         __/
@@ -364,12 +364,12 @@ int CubedSphere_shell_at_xc(tMesh *mesh, int N, double xc[3],
 /* put 6 stretchedCubedShell's around the sphere from
    CubedSphere_shell_at_xc
                    ___________
-             _____/           \______
+             _____/    r2     \______
           __/                        \_
          /                             \
        _- \-                         -/
       /     \-       _______       -/
-     |        \-  __/       \__  -/   ...
+     |        \-  __/  r1   \__  -/   ...
     |           \/_           _\/
    /            /  \_       _/  \
   |            /     \_---_/     \    first shell extends from r0 to r1
