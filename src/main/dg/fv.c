@@ -439,7 +439,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
           /* we still need the inner flux computed with normals from both
              the left and right midpoints */
-          if(have_XYZ_of_xyz && subtract_fi)
+          if(subtract_fi && have_XYZ_of_xyz)
           {
             /* now get d->fi on gridpoint for normal pointing to the right */
             d->info  = d_info_midnorm;
