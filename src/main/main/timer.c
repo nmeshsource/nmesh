@@ -193,7 +193,7 @@ int write_all_timers(tMesh *mesh)
   total = t->time;
 
   /* open file */
-  snprintf(f, 100, "%%s/timer.%%0%dd", (int) log10(nMPI_size())+1);
+  snprintf(f, 100, "%%s/timer.%%0%dd", (int) log10(nMPI_size()-1)+1);
   snprintf(s, 1000, f, outdir, nMPI_rank());
   fp = fopen(s, "a");
   if(!fp) errorexits("could not open %s", s);

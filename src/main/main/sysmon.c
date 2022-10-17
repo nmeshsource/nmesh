@@ -81,7 +81,7 @@ int sysmon(tMesh *mesh)
       char form[100];
       char name[100];
       /* filename format and file name for files */
-      snprintf(form,99, "sysmon.%%0%dd", (int) log10(nMPI_size())+1);
+      snprintf(form,99, "sysmon.%%0%dd", (int) log10(nMPI_size()-1)+1);
       snprintf(name,99, form, nMPI_rank());
       write_sysmon(mesh, last_mesh_time, name,
                    time, last_sysmon_time, dat, firstcall);

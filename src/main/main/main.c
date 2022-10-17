@@ -298,7 +298,7 @@ int redirect_stdout_and_stderr(tMesh *mesh, const char *mode)
   char so[1000];
 
   /* filename format for stdout files */
-  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size())+1);
+  snprintf(f,99, "%%s/stdout.%%0%dd", (int) log10(nMPI_size()-1)+1);
 
   /* redirect stdout and stderr for rank0 */
   if(Rank0 && Getv(Par("logfile_creation"),"yes"))

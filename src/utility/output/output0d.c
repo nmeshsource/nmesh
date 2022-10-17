@@ -170,7 +170,7 @@ void output0d_filename(tMesh *mesh, char *filename, int len,
   if(pat) /* we output only in one patch */
   {
     char fmt[100];
-    snprintf(fmt,99, "%%s/%%s_%%s.%%0%ddt", (int) log10(mesh->npats)+1);
+    snprintf(fmt,99, "%%s/%%s_%%s.%%0%ddt", (int) log10(mesh->npats-1)+1);
     snprintf(filename,len, fmt, outdir, name, type, pat->p);
   }
   else /* we output on the entire mesh */
