@@ -139,7 +139,7 @@ int nMPI_Init(int *pargc, char ***pargv)
 {
   int ret=0;
 #ifdef USEMPI
-#ifdef USEOMP
+#if defined(USEOMP) && !defined(PLAIN_MPI_INIT)
   int required = MPI_THREAD_FUNNELED; /* only masterthread makes MPI calls */
   int provided;
   ret = MPI_Init_thread(pargc, pargv, required, &provided);
