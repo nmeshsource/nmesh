@@ -1,0 +1,69 @@
+Compilers
+=========
+Most of the time nmesh is compiled on Linux using gcc or clang, and
+sometimes icc. This usually works without problems.
+
+Usually we also want MPI so that in MyConfig we add:
+CC = mpicc
+DFLAGS += -DUSEMPI
+The mpicc is just a wrapper that invokes the underlying compiler.
+
+Since all supercomputers use Linux, that pretty much covers most cases.
+
+
+Warnings
+========
+By default nmesh is compiled with
+WARN = -Wall
+This catches many problems, and all such warnings should be fixed.
+
+
+Misleading Warnings
+===================
+On systems with older versions of the C-library glibc (e.g. version 2.17),
+warnings about a variable __s may occur even though nmesh has no variable
+__s, e.g.:
+VTK_out.c: In function ‘write_var_nodenamelist’:
+VTK_out.c:424:19: warning: ‘__s’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+     tNode *node = node_from_nodename(mesh, nname);
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+These warnings should be ignored, because they are due to a problem in glibc's
+strtok_r and similar functions. The problem causes no real errors just
+warnings, and is not present in later versions, e.g. glibc 2.31.
+BTW, the glibc version can be checked by typing:
+ldd --version
+
+
+Crazy Apple stuff
+=================
+Some people seem to think that Apple Macs contain a Unix that is just as
+good as BSD or Linux. That is wrong! Apple started from BSD, but then
+modified it in ways that are incompatible with BSD even. For example, the
+Posix function getrusage writes into a struct that is supposed to contain
+the an entry called ru_maxrss. This enrty exists in Linux, BSD and
+practically all other Unix versions. Yet Apple decided to remove this field.
+One can only get it back if we add:
+DFLAGS += -D_DARWIN_C_SOURCE
+to MyConfig. And even worse, ru_maxrss should contain the number of
+kilobytes used, but on Macs it contains the number of bytes even with
+-D_DARWIN_C_SOURCE. In addition, the Apple compiler seems to often fail at
+the final linking step: "ld: symbol(s) not found for architecture...". The
+latter seems to be related to symbols coming from global variables, that are
+defined outside functions (at file scope), e.g. "int ex1;". According to the
+C-standard such variables are automatically initialized to 0. However, the
+compiler marks the symbol as "C" (i.e. common, can be checked with nm). When
+we then create a module library by invoking Apple's ar (from inside the
+Makefile), this library's table of contents is missing all symbols marked as
+"C". And then the compiler cannot find these symbols. This nonsense only
+happens with the ar from MacOS. The ar on Linux puts all symbols into the
+table of contents, so that linking can succeed. One way around this on Macs,
+is to add
+OFLAGS += -fno-common
+to MyConfig. Then the compiler marks the symbols as "B" instead, and Apple's
+ar adds them the table of contents, so that linking can work. Another way
+around this is to explicitly change all global variable declarations in
+nmesh from something like "int ex1;" to "int ex1=0;". But who came up with
+all this nonsense at Apple? After all Sec. 6.9.2-2 of the C99-standard
+clearly states that "int ex1;" will have the same behavior as "int ex1=0;"
+On Apple, the former causes linker errors. No such probelm happens on
+Linux...
