@@ -266,7 +266,7 @@ rm_projects_code:
 	rm -f donothing_Makefile
 
 rm_code:
-	make rm_MemoryMan_code
-	make rm_Math_code
-	make rm_utility_code
-	make rm_projects_code
+	$(MAKE) rm_MemoryMan_code
+	$(MAKE) rm_Math_code
+	$(MAKE) rm_utility_code
+	$(MAKE) rm_projects_code
