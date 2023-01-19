@@ -278,7 +278,11 @@ def expand_RHS_sums(eqs):
         ##print(cmd)
         #exec(cmd, globals())
         #print(rs)
-        rhs = eval(rs)
+        try:
+            rhs = eval(rs)
+        except:
+            print('SymPyToC: Error in RHS of:')
+            print(ls, '=', rs)
         #print(rhs)
 
         #print(lhs, '=', rhs)
