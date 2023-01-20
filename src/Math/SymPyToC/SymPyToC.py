@@ -484,7 +484,8 @@ def OrderingDefects(arr):
             iter = iter - 1
         else:
             iarr[iter],iarr[ind_to_swap] = iarr[ind_to_swap],iarr[iter]
-            count_of_perms = count_of_perms + 1
+            if arr[iter] != arr[ind_to_swap]:
+                count_of_perms = count_of_perms + 1
     return count_of_perms
 
 # find where lists like [i,j,k] and [i,k,j] differ
@@ -530,6 +531,7 @@ def SwapIndicesIfOrderIsImproved(Tcomp, diff, symkind):
     indsindiff = [ indices[t[0]] for t in diff]
     swapindiff = [ swpdindices[t[0]] for t in diff]
     #if Tcomp == T[1,2,2,1,3]:
+    #if Tcomp == gamupdo[2,2,1,3]:
     #    print('*', Tcomp, diff, symkind,':')
     #    print('  ', indices,'->',swpdindices,':',
     #          indsindiff,OrderingDefects(indsindiff),
