@@ -475,9 +475,9 @@ def OrderingDefects(arr):
     # convert iarr into list
     iarr = list(iarr)
 
-    # count number permutations to order iarr
-    iter = len(iarr) - 1
+    # count number of permutations needed to order iarr
     count_of_perms = 0
+    iter = len(iarr) - 1
     while(iter>=0):
         ind_to_swap = iarr[iter]
         if(ind_to_swap == iter):
