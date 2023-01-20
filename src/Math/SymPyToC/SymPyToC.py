@@ -281,8 +281,8 @@ def expand_RHS_sums(eqs):
         try:
             rhs = eval(rs)
         except:
-            print('SymPyToC: Error in RHS of:')
             print(ls, '=', rs)
+            raise SystemExit('^-- error in RHS.')
         #print(rhs)
 
         #print(lhs, '=', rhs)
