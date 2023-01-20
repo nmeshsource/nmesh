@@ -448,7 +448,7 @@ def get_AUTOVARS(Declvars, LHSvars):
 ###########################################################################
 
 # count how many ordering defects a tuple has
-def OrderingDefects(tup):
+def OrderingDefects__old(tup):
     ndefects = 0
     tprev = tup[0]
     for t in tup:
@@ -460,9 +460,12 @@ def OrderingDefects(tup):
     return ndefects
 
 # count how many ordering defects an array (or tuple) has
-def OrderingDefects__new(arr):
+def OrderingDefects(arr):
+    len_arr = len(arr)
+    if len_arr == 0:
+        return 0
     # make tuple list: [ (arr[0],0), (arr[1],1), ... ]
-    Arr = [ (arr[i],i) for i in range(len(arr)) ]
+    Arr = [ (arr[i],i) for i in range(len_arr) ]
     # sort Arr on first tuple entries
     Arr.sort()
     # get index array iarr after sorting
@@ -508,6 +511,13 @@ def swapped_indices(indexlist, diff):
     for tup in diff:
         swpd[tup[1]] = indexlist[tup[0]]
     return swpd
+
+# find only the parts of indices, and swpdindices that differ
+def GetDifferingIndices(indices, swpdindices):
+    diff = findlistdiff(indices, swpdindices)
+    indsindiff = [ indices[t[0]] for t in diff]
+    swapindiff = [ swpdindices[t[0]] for t in diff]
+    return indsindiff, swapindiff
 
 # return tensor comp with indices swaped if this improves ordering
 def SwapIndicesIfOrderIsImproved(Tcomp, diff, symkind):
@@ -600,7 +610,8 @@ def make_subsrules_from_symmetries(symmetries):
                           signfac = 0
                         signfac *= sign
                     # if this symmetry improves or keeps order quality, we save it
-                    if OrderingDefects(cmp.indices) <= OrderingDefects(comp_new.indices):
+                    indsindiff, swapindiff = GetDifferingIndices(cmp.indices, comp_new.indices)
+                    if OrderingDefects(indsindiff) <= OrderingDefects(swapindiff):
                         sign_new = signfac
                         comp_new = cmp
                     # if we already know it's zero save that
