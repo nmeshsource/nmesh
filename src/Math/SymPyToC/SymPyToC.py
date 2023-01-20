@@ -448,7 +448,7 @@ def get_AUTOVARS(Declvars, LHSvars):
 ###########################################################################
 
 # count how many ordering defects a tuple has
-def OrderingDefects(tup):
+def OrderingDefects__old(tup):
     if len(tup) == 0:
         return 0
     ndefects = 0
@@ -462,7 +462,7 @@ def OrderingDefects(tup):
     return ndefects
 
 # count how many ordering defects an array (or tuple) has
-def OrderingDefects__new(arr):
+def OrderingDefects(arr):
     len_arr = len(arr)
     if len_arr == 0:
         return 0
@@ -611,15 +611,14 @@ def make_subsrules_from_symmetries(symmetries):
                         if sign==-1 and cmp == cmp_old:
                           signfac = 0
                         signfac *= sign
-                    # if this symmetry improves or keeps order quality, we save it
-                    indsindiff, swapindiff = GetDifferingIndices(cmp.indices, comp_new.indices)
-                    if OrderingDefects(indsindiff) <= OrderingDefects(swapindiff):
-                        sign_new = signfac
-                        comp_new = cmp
-                    # if we already know it's zero save that
-                    if signfac == 0:
-                        sign_new = signfac
-                        comp_new = cmp
+                    # save what symmetries did
+                    sign_new = signfac
+                    comp_new = cmp
+                    # break if the sign is already zero
+                    if sign_new == 0:
+                        break;
+                if sign_new == 0:
+                    break;
             # we have tried all symmetry perms several times,
             # now save best result
             simpT[ci] = [sign_new, comp_new]
