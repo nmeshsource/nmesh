@@ -448,7 +448,7 @@ def get_AUTOVARS(Declvars, LHSvars):
 ###########################################################################
 
 # count how many ordering defects a tuple has
-def OrderingDefects__old(tup):
+def OrderingDefects(tup):
     ndefects = 0
     tprev = tup[0]
     for t in tup:
@@ -460,7 +460,7 @@ def OrderingDefects__old(tup):
     return ndefects
 
 # count how many ordering defects an array (or tuple) has
-def OrderingDefects(arr):
+def OrderingDefects__new(arr):
     # make tuple list: [ (arr[0],0), (arr[1],1), ... ]
     Arr = [ (arr[i],i) for i in range(len(arr)) ]
     # sort Arr on first tuple entries
