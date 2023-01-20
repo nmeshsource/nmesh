@@ -448,7 +448,7 @@ def get_AUTOVARS(Declvars, LHSvars):
 ###########################################################################
 
 # count how many ordering defects a tuple has
-def OrderingDefects(tup):
+def OrderingDefects__old(tup):
     ndefects = 0
     tprev = tup[0]
     for t in tup:
@@ -459,8 +459,32 @@ def OrderingDefects(tup):
         tprev = t
     return ndefects
 
+# count how many ordering defects an array (or tuple) has
+def OrderingDefects(arr):
+    # make tuple list: [ (arr[0],0), (arr[1],1), ... ]
+    Arr = [ (arr[i],i) for i in range(len(arr)) ]
+    # sort Arr on first tuple entries
+    Arr.sort()
+    # get index array iarr after sorting
+    sorted_arr, iarr = zip(*Arr)
+    # convert iarr into list
+    iarr = list(iarr)
+
+    # count number permutations to order iarr
+    iter = len(iarr) - 1
+    count_of_perms = 0
+    while(iter>=0):
+        ind_to_swap = iarr[iter]
+        if(ind_to_swap == iter):
+            iter = iter - 1
+        else:
+            iarr[iter],iarr[ind_to_swap] = iarr[ind_to_swap],iarr[iter]
+            count_of_perms = count_of_perms + 1
+    return count_of_perms
+
 # find where lists like [i,j,k] and [i,k,j] differ
 def findlistdiff(indices, sym):
+    #print('findlistdiff:', indices, sym)
     diff = []
     indnum = len(indices)
     for ind in range(indnum):
@@ -487,7 +511,7 @@ def swapped_indices(indexlist, diff):
 
 # return tensor comp with indices swaped if this improves ordering
 def SwapIndicesIfOrderIsImproved(Tcomp, diff, symkind):
-    #print(':', Tcomp, diff, symkind)
+    #print('SwapIndicesIfOrderIsImproved:', Tcomp, diff, symkind)
     indices = Tcomp.indices
     swpdindices = swapped_indices(indices, diff)
     #print(diff, indices, swpdindices)
@@ -534,8 +558,8 @@ def make_subsrules_from_symmetries(symmetries):
         for ci in range(len(allT)):
             comp = allT[ci]
             simpT.append([])
-            #print(comp)
-            #print(slist, sym_perms)
+            #print('# Working on', comp)
+            ##print(slist, sym_perms)
             comp_new = comp
             sign_new = 1
             # iterate as many times as there are permutations
