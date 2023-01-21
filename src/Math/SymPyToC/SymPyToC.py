@@ -472,7 +472,8 @@ def OrderingDefects(arr):
     Arr.sort()
     # get index array iarr after sorting
     sorted_arr, iarr = zip(*Arr)
-    # convert iarr into list
+    # convert sorted_arr, iarr into list
+    sorted_arr = list(sorted_arr)
     iarr = list(iarr)
 
     # count number of permutations needed to order iarr
@@ -483,8 +484,11 @@ def OrderingDefects(arr):
         if(ind_to_swap == iter):
             iter = iter - 1
         else:
+            # swap in iarr
             iarr[iter],iarr[ind_to_swap] = iarr[ind_to_swap],iarr[iter]
-            if sorted_arr[iarr[iter]] != sorted_arr[iarr[ind_to_swap]]:
+            if sorted_arr[ind_to_swap] != sorted_arr[iter]:
+                # also swap in sorted_arr since they differ
+                sorted_arr[iter],sorted_arr[ind_to_swap] = sorted_arr[ind_to_swap],sorted_arr[iter]
                 count_of_perms = count_of_perms + 1
     return count_of_perms
 
