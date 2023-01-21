@@ -484,7 +484,7 @@ def OrderingDefects(arr):
             iter = iter - 1
         else:
             iarr[iter],iarr[ind_to_swap] = iarr[ind_to_swap],iarr[iter]
-            if arr[iter] != arr[ind_to_swap]:
+            if sorted_arr[iarr[iter]] != sorted_arr[iarr[ind_to_swap]]:
                 count_of_perms = count_of_perms + 1
     return count_of_perms
 
