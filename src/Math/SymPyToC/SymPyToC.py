@@ -849,6 +849,8 @@ def simplify_all_EqnComponents(simp, allEqs):
 POWER = sympy.symbols('POWER', cls=sympy.Function)
 POW2  = sympy.symbols('POW2',  cls=sympy.Function)
 POW3  = sympy.symbols('POW3',  cls=sympy.Function)
+SQRT  = sympy.symbols('SQRT',  cls=sympy.Function)
+CBRT  = sympy.symbols('CBRT',  cls=sympy.Function)
 
 # replace the Pow function of sympy to get rid of all ** or pow in the
 # output
@@ -865,6 +867,10 @@ def replace_Pow(expr):
     expr1 = expr1.replace(POWER(w1,-1), 1/w1)
     expr1 = expr1.replace(POWER(w1,-2), 1/POW2(w1))
     expr1 = expr1.replace(POWER(w1,-3), 1/POW3(w1))
+    expr1 = expr1.replace(POWER(w1,1/2), SQRT(w1))
+    expr1 = expr1.replace(POWER(w1,1/3), CBRT(w1))
+    expr1 = expr1.replace(POWER(w1,-1/2), 1/SQRT(w1))
+    expr1 = expr1.replace(POWER(w1,-1/3), 1/CBRT(w1))
     #print(expr1)
     return expr1
 
