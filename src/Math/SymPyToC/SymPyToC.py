@@ -628,12 +628,19 @@ def make_subsrules_from_symmetries(symmetries):
                         if sign==-1 and cmp == cmp_old:
                           signfac = 0
                         signfac *= sign
-                    # save what symmetries did
-                    sign_new = signfac
-                    comp_new = cmp
-                    # break if the sign is already zero
-                    if sign_new == 0:
+                    # if this symmetry improves or keeps order quality, we save it
+                    if OrderingDefects(cmp.indices) <= OrderingDefects(comp_new.indices):
+                    #indsindiff, swapindiff = GetDifferingIndices(cmp.indices, comp_new.indices)
+                    #if OrderingDefects(indsindiff) <= OrderingDefects(swapindiff):
+                        sign_new = signfac
+                        comp_new = cmp
+                    # if we already know it's zero save that
+                    if signfac == 0:
+                        sign_new = signfac
+                        comp_new = cmp
+                        # break if the sign is already zero
                         break;
+                # break if the sign is already zero
                 if sign_new == 0:
                     break;
             # we have tried all symmetry perms several times,
