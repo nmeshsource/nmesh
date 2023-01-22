@@ -462,7 +462,7 @@ def OrderingDefects__old(tup):
     return ndefects
 
 # count how many ordering defects an array (or tuple) has
-def OrderingDefects(arr):
+def OrderingDefects_NumSwapsToGetPerfectOrder(arr):
     len_arr = len(arr)
     if len_arr == 0:
         return 0
@@ -491,6 +491,17 @@ def OrderingDefects(arr):
                 sorted_arr[iter],sorted_arr[ind_to_swap] = sorted_arr[ind_to_swap],sorted_arr[iter]
                 count_of_perms = count_of_perms + 1
     return count_of_perms
+
+# assign ordering defect score to an array
+def OrderingDefects(arr):
+    len_arr = len(arr)
+    bas = max(arr) + 1
+    n = bas**(len_arr-1)
+    num = 0
+    for e in arr:
+        num = num + e*n
+        n = n/bas
+    return num
 
 # find where lists like [i,j,k] and [i,k,j] differ
 def findlistdiff(indices, sym):
