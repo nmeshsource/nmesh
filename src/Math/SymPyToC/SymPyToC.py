@@ -777,7 +777,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
 
     # use subsruledict to simplify RHS
     print('Applying symmetry substitution rules to RHS')
-    print('    (^-Fixme: most of the time is spent for RHS of AUTOVARS)')
+    print('    (^-Fixme: most of the time is spent for RHS of :Decl: AUTOVARS)')
     IDlist = []
     Eqlist = []
     for i in range(len(simpLHS)):
