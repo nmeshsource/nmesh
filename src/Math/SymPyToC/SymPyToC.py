@@ -689,6 +689,14 @@ def apply_subsrulesdict(subsruledict, expr):
             new_expr = new_expr.subs(sub[0], sub[1][0] * sub[1][1])
     return new_expr
 
+# apply subsdict=expr_subsdict[1] to expr_subsdict[0]
+# expr_subsdict is [expr, subsdict]
+def apply_subsrulesdict_to_Expr(expr_subsdict):
+    subsdict = expr_subsdict[1]
+    expr = expr_subsdict[0]
+    expr = apply_subsrulesdict(subsdict, expr)
+    return expr
+
 # apply subsdict=Eq[2] to Eq[0] and Eq[1]
 # Eq is [lhs, rhs, subsdict]
 def apply_subsrulesdict_to_LHS_RHS(Eq):
@@ -708,8 +716,8 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     # make rules based on symmetries
     print('Making substitution rules from symmetries')
     subsruledict = make_subsrules_from_symmetries(symmetries)
-    # use subsruledict to simplyfy LHS and RHS
-    print('Applying symmetry substitution rules')
+    # use subsruledict to simplify LHS
+    print('Applying symmetry substitution rules to LHS')
     IDlist = []
     Eqlist = []
     for eq_i in range(len(allEqs[0])):
@@ -723,33 +731,30 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
                 ind = skey.find('[')
                 skey = skey[:ind+1]
                 # if eqn contains term in subsruledict, add the rule to subsdict
-                if skey in RHS or skey in LHS:
+                if skey in LHS:
                     subsdict[key] = subsruledict[key]
-        else:
-            if LHS.startswith(':Decl:'):
-                subsdict = subsruledict
         for comp in range(len(allEqs[0][eq_i])):
             if subsdict != {}:
                 IDlist.append([eq_i, comp])
-                Eqlist.append([allEqs[0][eq_i][comp], allEqs[1][eq_i][comp], subsdict])
-    # simplify Eqlist in parallel
+                Eqlist.append([allEqs[0][eq_i][comp], subsdict])
+    # simplify Eqlist with LHS-list in parallel
     if SymPyToC_pool != None:
-        simpd = SymPyToC_pool.map(apply_subsrulesdict_to_LHS_RHS, Eqlist)
-    # simplify RHSlist serially
+        simpd = SymPyToC_pool.map(apply_subsrulesdict_to_Expr, Eqlist)
+    # simplify Eqlist with LHS-list serially
     else:
-        simpd = list(map(apply_subsrulesdict_to_LHS_RHS, Eqlist))
+        simpd = list(map(apply_subsrulesdict_to_Expr, Eqlist))
     # write results into allEqs
     for id_n in range(len(IDlist)):
         eq_i = IDlist[id_n][0]
         comp = IDlist[id_n][1]
-        lhs_rhs = simpd[id_n]
-        allEqs[0][eq_i][comp] = lhs_rhs[0]
-        allEqs[1][eq_i][comp] = lhs_rhs[1]
+        lhs = simpd[id_n]
+        allEqs[0][eq_i][comp] = lhs
 
     # make list of Eqs that we actually need
     print('Removing unneeded equations')
     simpLHS = []
     simpRHS = []
+    simp_eq_i = []
     for eq_i in range(len(allEqs[0])):
         # record which LHS side comps we may want to keep
         compstokeep = []
@@ -768,6 +773,43 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
             RHScomps.append(allEqs[1][eq_i][nnn])
         simpLHS.append(list(LHScomps))
         simpRHS.append(list(RHScomps))
+        simp_eq_i.append(eq_i)
+
+    # use subsruledict to simplify RHS
+    print('Applying symmetry substitution rules to RHS')
+    IDlist = []
+    Eqlist = []
+    for i in range(len(simpLHS)):
+        eq_i = simp_eq_i[i]
+        LHS = Eqs[0][eq_i]
+        RHS = Eqs[1][eq_i]
+        subsdict = {}
+        if LHS[0] != ':' or LHS.startswith(':Decl:'):
+            #print(' ', LHS, '=', RHS)
+            strRHS = str(RHS)
+            for key in subsruledict:
+                skey = str(key)
+                ind = skey.find('[')
+                skey = skey[:ind+1]
+                # if eqn contains term in subsruledict, add the rule to subsdict
+                if skey in strRHS:
+                    subsdict[key] = subsruledict[key]
+        for comp in range(len(simpRHS[i])):
+            if subsdict != {}:
+                IDlist.append([i, comp])
+                Eqlist.append([simpRHS[i][comp], subsdict])
+    # simplify Eqlist with RHS-list in parallel
+    if SymPyToC_pool != None:
+        simpd = SymPyToC_pool.map(apply_subsrulesdict_to_Expr, Eqlist)
+    # simplify Eqlist with RHS-list serially
+    else:
+        simpd = list(map(apply_subsrulesdict_to_Expr, Eqlist))
+    # write results into simpRHS
+    for id_n in range(len(IDlist)):
+        i    = IDlist[id_n][0]
+        comp = IDlist[id_n][1]
+        rhs = simpd[id_n]
+        simpRHS[i][comp] = rhs
 
     # go over RHS of :Decl lines (for now they are all lists)
     print('Removing unneeded declarations')
