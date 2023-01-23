@@ -777,6 +777,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
 
     # use subsruledict to simplify RHS
     print('Applying symmetry substitution rules to RHS')
+    print('    (^-Fixme: most of the time is spent for RHS of AUTOVARS)')
     IDlist = []
     Eqlist = []
     for i in range(len(simpLHS)):
@@ -813,6 +814,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
 
     # go over RHS of :Decl lines (for now they are all lists)
     print('Removing unneeded declarations')
+    print('    (^-Fixme: could just scan all LHSs to see what is needed)')
     for eq_i in range(len(simpLHS)):
         LHScomp0 = simpLHS[eq_i][0]
         # if we have a :Decl command
