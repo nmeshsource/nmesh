@@ -1251,10 +1251,20 @@ def get_TensorOutputFormat(allEqs, AUTOVARS):
 
 # go over final eqs and output them into a file
 def write_Eqs(filename, allEqs, AUTOVARS):
+    global SymPyToC_pool
     # replace terms like 1.0*x by x
     allEqs = simplify_all_EqnComponents(replace_1x_by_x, allEqs)
     # replace Pow in all expressions
     allEqs = simplify_all_EqnComponents(replace_Pow, allEqs)
+    # try to factor out some numbers:
+    # For some reason this works only in non-parallel mode. And worse,
+    # any call like simplify_all_EqnComponents(replace_Pow, allEqs) will
+    # undo sympy.gcd_terms. Why is that??? Weird!!!
+    pool = SymPyToC_pool  # save pool
+    SymPyToC_pool = None  # switch off parallelization
+    allEqs = simplify_all_EqnComponents(sympy.gcd_terms, allEqs)
+    #allEqs = simplify_all_EqnComponents(sympy.factor_terms, allEqs)
+    SymPyToC_pool = pool  # restore pool
 
     # construct outformat
     outformat = get_TensorOutputFormat(allEqs, AUTOVARS)
