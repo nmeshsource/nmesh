@@ -656,6 +656,16 @@ def make_subsrules_from_symmetries(symmetries):
     #print('subsruledict =',subsruledict)
     return subsruledict
 
+# change subsruledict to a form where the keys are the tensor components
+# and the values the substiontitions that we got from symmetries
+def compsubsdict_from_subsruledict(subsruledict):
+    compsubsdict = {}
+    for key in subsruledict:
+        val = subsruledict[key]
+        for subsrule in val:
+            compsubsdict[subsrule[0]] = subsrule[1]
+    return compsubsdict
+
 
 ###########################################################################
 # Functions to simplify using the rules we derived from symmetries
@@ -706,6 +716,24 @@ def apply_subsrulesdict_to_LHS_RHS(Eq):
     lhs = apply_subsrulesdict(subsdict, lhs)
     rhs = apply_subsrulesdict(subsdict, rhs)
     return (lhs, rhs)
+
+# apply compsubsdict to Tlist
+def apply_compsubsdict_to_Tlist(compsubsdict, Tlist):
+    newTlist = []
+    for complist in Tlist:
+        newTlist.append(complist)
+        for ci in range(len(complist)):
+            comp = complist[ci]
+            # use tensor-comp as key
+            try:
+                # get sub rule if key exists
+                sub = compsubsdict[comp]
+            except:
+                # if key does not exist do nothing
+                continue
+            comp = comp.subs(comp, sub[0] * sub[1])
+            complist[ci] = comp
+    return newTlist
 
 
 # apply symmetries to all Eqn components
@@ -777,7 +805,6 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
 
     # use subsruledict to simplify RHS
     print('Applying symmetry substitution rules to RHS')
-    print('    (^-Fixme: most of the time is spent for RHS of :Decl: AUTOVARS)')
     IDlist = []
     Eqlist = []
     for i in range(len(simpLHS)):
@@ -795,6 +822,11 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
                 # if eqn contains term in subsruledict, add the rule to subsdict
                 if skey in strRHS:
                     subsdict[key] = subsruledict[key]
+            # if it's Decl we simplify right here
+            if LHS.startswith(':Decl:'):
+                compsubsdict = compsubsdict_from_subsruledict(subsdict)
+                simpRHS[i][0] = apply_compsubsdict_to_Tlist(compsubsdict, simpRHS[i][0])
+                subsdict = {} # to stop double simplification
         for comp in range(len(simpRHS[i])):
             if subsdict != {}:
                 IDlist.append([i, comp])
@@ -814,7 +846,6 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
 
     # go over RHS of :Decl lines (for now they are all lists)
     print('Removing unneeded declarations')
-    print('    (^-Fixme: could just scan all LHSs to see what is needed)')
     for eq_i in range(len(simpLHS)):
         LHScomp0 = simpLHS[eq_i][0]
         # if we have a :Decl command
