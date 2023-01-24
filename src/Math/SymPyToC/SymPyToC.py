@@ -1022,6 +1022,13 @@ def factorout_common_terms(expr):
     expr1 = expr1.replace(a*x + a*y, a*(x + y))
     return expr1
 
+# simplify 1.0*x to x
+def replace_1x_by_x(expr):
+    expr1 = expr
+    expr1 = expr1.nsimplify()
+    expr1 = expr1.n()
+    return expr1
+
 
 ###########################################################################
 # Functions translate Eqs into C or some other language
@@ -1244,7 +1251,9 @@ def get_TensorOutputFormat(allEqs, AUTOVARS):
 
 # go over final eqs and output them into a file
 def write_Eqs(filename, allEqs, AUTOVARS):
-    # first replace Pow in all expressions
+    # replace terms like 1.0*x by x
+    allEqs = simplify_all_EqnComponents(replace_1x_by_x, allEqs)
+    # replace Pow in all expressions
     allEqs = simplify_all_EqnComponents(replace_Pow, allEqs)
 
     # construct outformat
