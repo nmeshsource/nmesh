@@ -1262,8 +1262,8 @@ def write_Eqs(filename, allEqs, AUTOVARS):
     # undo sympy.gcd_terms. Why is that??? Weird!!!
     pool = SymPyToC_pool  # save pool
     SymPyToC_pool = None  # switch off parallelization
-    allEqs = simplify_all_EqnComponents(sympy.gcd_terms, allEqs)
-    #allEqs = simplify_all_EqnComponents(sympy.factor_terms, allEqs)
+    allEqs = simplify_all_EqnComponents(sympy.factor_terms, allEqs)
+    #allEqs = simplify_all_EqnComponents(sympy.gcd_terms, allEqs)
     SymPyToC_pool = pool  # restore pool
 
     # construct outformat
