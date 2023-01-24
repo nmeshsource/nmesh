@@ -280,9 +280,12 @@ def expand_RHS_sums(eqs):
         #print(rs)
         try:
             rhs = eval(rs)
-        except:
+        except Exception as e:
+            print('Error in RHS of:')
+            print('----------------')
             print(ls, '=', rs)
-            raise SystemExit('^-- error in RHS.')
+            print('----------------')
+            raise(e)
         #print(rhs)
 
         #print(lhs, '=', rhs)
