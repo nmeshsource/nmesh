@@ -101,7 +101,14 @@ def make_IndexedObj_from_strlist(list):
         #print(basestr,'|')
         cmd = basestr + ' = sympy.IndexedBase(\'' + basestr + '\')'
         #print(' ', cmd)
-        exec(cmd, globals())
+        try:
+            exec(cmd, globals())
+        except Exception as e:
+            print('Error in variable name:')
+            print('-----------------------')
+            print(vari)
+            print('-----------------------')
+            raise(e)
 
 
 #def recurse over contraction_structure to get final sum pieces
@@ -415,7 +422,14 @@ def get_AUTOVARS(Declvars, LHSvars):
         DeclTens.append(eval(decv))
     # loop over LHSs
     for lhs in LHSvars:
-        Tl = eval(lhs)
+        try:
+            Tl = eval(lhs)
+        except Exception as e:
+            print('Error in LHS:')
+            print('-------------')
+            print(lhs)
+            print('-------------')
+            raise(e)
 
         # check if Tl is in DeclTens
         lhs_is_in_DeclTens = False
