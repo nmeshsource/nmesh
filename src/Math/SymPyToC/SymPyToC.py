@@ -1025,8 +1025,9 @@ def factorout_common_terms(expr):
 # simplify 1.0*x to x
 def replace_1x_by_x(expr):
     expr1 = expr
-    expr1 = expr1.nsimplify()
-    expr1 = expr1.n()
+    #expr1 = expr1.nsimplify()
+    #expr1 = expr1.n()
+    expr1 = expr1.subs(1.0, 1)
     return expr1
 
 
@@ -1264,6 +1265,7 @@ def write_Eqs(filename, allEqs, AUTOVARS):
     SymPyToC_pool = None  # switch off parallelization
     allEqs = simplify_all_EqnComponents(sympy.factor_terms, allEqs)
     #allEqs = simplify_all_EqnComponents(sympy.gcd_terms, allEqs)
+    allEqs = simplify_all_EqnComponents(replace_1x_by_x, allEqs)
     SymPyToC_pool = pool  # restore pool
 
     # construct outformat
