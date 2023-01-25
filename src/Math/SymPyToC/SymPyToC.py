@@ -54,7 +54,7 @@ SymPyToC_pool = None
 
 
 ###########################################################################
-# Functions set up tensor equations
+# Functions to set up tensor equations
 ###########################################################################
 
 # convert tocompute string into [ [lhs0,lhs1, ...], [rhs0,rhs1, ...] ]
@@ -111,7 +111,7 @@ def make_IndexedObj_from_strlist(list):
             raise(e)
 
 
-#def recurse over contraction_structure to get final sum pieces
+#recurse over contraction_structure to get final sum pieces
 def sums_in_contraction_structure(ContrStruc):
     """
     This function returns the dict contres. contres contains the same
@@ -1281,7 +1281,7 @@ def write_Eqs(filename, allEqs, AUTOVARS):
         nsum = 0
         # write info
         f.write('/* ' + pathlib.Path(filename).name + ' */\n')
-        f.write('/* Copyright (C) 2019-2021 Wolfgang Tichy */\n')
+        f.write('/* Copyright (C) 2020-2023 Wolfgang Tichy */\n')
         f.write('/* Produced with SymPyToC.py */\n\n')
         # loop over Eqns
         for eq_i in range(len(allEqs[0])):
