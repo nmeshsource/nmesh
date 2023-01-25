@@ -114,9 +114,9 @@ def make_IndexedObj_from_strlist(list):
 #def recurse over contraction_structure to get final sum pieces
 def sums_in_contraction_structure(ContrStruc):
     """
-    This function returns the dict contres. contres contain the same keys
-    dumm index keys as ContrStruc, whithout the keys that do not indicate
-    summation (i.e. the ones that are just terms).
+    This function returns the dict contres. contres contains the same
+    keys as ContrStruc. Some keys are dummy indices that need to be summed
+    over, and some keys are None indicating that no sum is needed.
     The value corresponding to each key in contres, is itself a dict.
     This dict contains all the terms that needed to be summed as keys,
     and all the results of these partial sums as values. When we add
