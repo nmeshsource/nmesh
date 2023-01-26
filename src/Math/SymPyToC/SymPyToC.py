@@ -1283,10 +1283,12 @@ def write_Eqs(filename, allEqs, AUTOVARS):
         f.write('/* ' + pathlib.Path(filename).name + ' */\n')
         f.write('/* Copyright (C) 2020-2023 Wolfgang Tichy */\n')
         f.write('/* Produced with SymPyToC.py */\n\n')
+        LHS = 'Nothing yet'
         # loop over Eqns
         for eq_i in range(len(allEqs[0])):
             Lvar = allEqs[0][eq_i]
             for comp in range(len(Lvar)):
+                prevLHS = LHS
                 LHS = Lvar[comp]
                 # Commands
                 if type(LHS) == str:
@@ -1340,11 +1342,12 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                     nsum += RHSstr.count('+') + RHSstr.count('-')
                     # now write into file
                     RHSstr = textwrap.fill(RHSstr)
-                    f.write('\n')
+                    if type(prevLHS) == str:
+                        f.write('\n')
                     f.write(LHSstr)
                     f.write('\n=\n')
                     f.write(RHSstr)
-                    f.write(';\n')
+                    f.write(';\n\n')
         # write counters
         f.write('\n')
         f.write('/* ' + pathlib.Path(filename).name + ' */\n')
