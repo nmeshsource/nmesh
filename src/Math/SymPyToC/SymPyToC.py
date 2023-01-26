@@ -797,28 +797,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
 
     # make list of Eqs that we actually need
     print('Removing unneeded equations')
-    simpLHS = []
-    simpRHS = []
-    simp_eq_i = []
-    for eq_i in range(len(allEqs[0])):
-        # record which LHS side comps we may want to keep
-        compstokeep = []
-        for comp in range(len(allEqs[0][eq_i])):
-            LHSstr = str(allEqs[0][eq_i][comp]);
-            if(LHSstr[0] == '0' or LHSstr[0] == '-'):
-                continue
-            compstokeep.append(comp)
-        # get rid of duplicates in LHS within compstokeep
-        LHScomps = []
-        RHScomps = []
-        for nnn in compstokeep:
-            if allEqs[0][eq_i][nnn] in LHScomps:
-                continue
-            LHScomps.append(allEqs[0][eq_i][nnn])
-            RHScomps.append(allEqs[1][eq_i][nnn])
-        simpLHS.append(list(LHScomps))
-        simpRHS.append(list(RHScomps))
-        simp_eq_i.append(eq_i)
+    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination(allEqs)
 
     # use subsruledict to simplify RHS
     print('Applying symmetry substitution rules to RHS')
@@ -861,20 +840,17 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
         rhs = simpd[id_n]
         simpRHS[i][comp] = rhs
 
+    ## mark unused AUTOVARS Equations by putting in zeros
+    #mark_unused_AUTOVARS(simpLHS, simpRHS)
+
+    ## update list of Eqs that we actually need
+    #print('Removing unused equations')
+    #simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
+
     # go over RHS of :Decl lines (for now they are all lists)
     print('Removing unneeded declarations')
-    for eq_i in range(len(simpLHS)):
-        LHScomp0 = simpLHS[eq_i][0]
-        # if we have a :Decl command
-        if type(LHScomp0) == str:
-            if LHScomp0.startswith(':Decl:'):
-                RHS = simpRHS[eq_i][0]
-                # go over lists of lists in RHS
-                newRHS = []
-                for var in RHS:
-                    pruned = remove_UnneededComps(var)
-                    newRHS.append(pruned)
-                simpRHS[eq_i][0] = newRHS
+    remove_UnneededDeclarations(simpLHS, simpRHS)
+
     # set result
     allEqsComps = [simpLHS, simpRHS]
     #print('===========')
@@ -885,6 +861,51 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     #        print(allEqsComps[0][eq_i][comp], '=', allEqsComps[1][eq_i][comp])
     return allEqsComps
 
+
+# make simpLHS, simpRHS, simp_eq_i, which contain the lists of Eqs that
+# we actually need
+def Eqs_to_keep_after_SymmetryElimination(allEqs):
+    simpLHS = []
+    simpRHS = []
+    simp_eq_i = []
+    for eq_i in range(len(allEqs[0])):
+        # record which LHS side comps we may want to keep
+        compstokeep = []
+        for comp in range(len(allEqs[0][eq_i])):
+            LHSstr = str(allEqs[0][eq_i][comp]);
+            if(LHSstr[0] == '0' or LHSstr[0] == '-'):
+                continue
+            compstokeep.append(comp)
+        # get rid of duplicates in LHS within compstokeep
+        LHScomps = []
+        RHScomps = []
+        for nnn in compstokeep:
+            if allEqs[0][eq_i][nnn] in LHScomps:
+                continue
+            LHScomps.append(allEqs[0][eq_i][nnn])
+            RHScomps.append(allEqs[1][eq_i][nnn])
+        simpLHS.append(list(LHScomps))
+        simpRHS.append(list(RHScomps))
+        simp_eq_i.append(eq_i)
+    return simpLHS, simpRHS, simp_eq_i
+
+
+# go over RHS of :Decl lines and remove unneeded parts
+def remove_UnneededDeclarations(simpLHS, simpRHS):
+    for eq_i in range(len(simpLHS)):
+        LHS = simpLHS[eq_i]
+        if len(LHS) > 0:
+            LHScomp0 = simpLHS[eq_i][0]
+            # if we have a :Decl command
+            if type(LHScomp0) == str:
+                if LHScomp0.startswith(':Decl:'):
+                    RHS = simpRHS[eq_i][0]
+                    # go over lists of lists in RHS
+                    newRHS = []
+                    for var in RHS:
+                        pruned = remove_UnneededComps(var)
+                        newRHS.append(pruned)
+                    simpRHS[eq_i][0] = newRHS
 
 # Remove duplicates, zeros or comps with minus from a tensor component list.
 # Such terms can occur after applying symmetries
@@ -903,6 +924,62 @@ def remove_UnneededComps(Tcomps):
             continue
         tokeep.append(comp)
     return tokeep
+
+
+# make simpLHS, simpRHS, simp_eq_i, which contain the lists of Eqs that
+# we actually need
+def mark_unused_AUTOVARS(simpLHS, simpRHS):
+    # get autovar list from RHS of :Decl: AUTOVARS
+    auto_eq_i = -1
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl command
+        if type(LHScomp0) == str:
+            if LHScomp0.startswith(':Decl:'):
+                if 'AUTOVARS' in LHScomp0:
+                    auto_eq_i = eq_i
+                    autoTcompList = simpRHS[eq_i][0]
+                    break;
+    if auto_eq_i < 0:
+        return
+    #print(autoTcompList)
+    # find entries in autocomps they are in no RHS
+    unused = []
+    for autocomps in autoTcompList:
+        for acomp in autocomps:
+            found = False
+            # go over all RHS
+            for eq_i in range(len(simpLHS)):
+                LHScomp0 = simpLHS[eq_i][0]
+                # if we have a :Decl or :Text command go to next Eqn
+                if type(LHScomp0) == str:
+                    continue
+                RHS = simpRHS[eq_i]
+                for RHScomp in RHS:
+                    try:
+                        terms = RHScomp.free_symbols
+                        if acomp in RHScomp.free_symbols:
+                            found = True
+                            break
+                    except:
+                        continue
+                if found:
+                    break
+            if not found:
+                unused.append(acomp)
+    #print(unused)
+    # replace unused comps in AUTOVARS by 0
+    for autocomps in autoTcompList:
+        for i in range(len(autocomps)):
+            if autocomps[i] in unused:
+                autocomps[i] = 0
+    # replace unused comps in all LHS-comps by 0
+    for LHS in simpLHS:
+        if type(LHS[0]) == str:
+            continue
+        for i in range(len(LHS)):
+            if LHS[i] in unused:
+                LHS[i] = 0
 
 
 ###########################################################################
