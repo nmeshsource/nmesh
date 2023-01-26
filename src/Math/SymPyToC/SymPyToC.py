@@ -926,8 +926,7 @@ def remove_UnneededComps(Tcomps):
     return tokeep
 
 
-# make simpLHS, simpRHS, simp_eq_i, which contain the lists of Eqs that
-# we actually need
+#mark unused AUTOVARS Equations by putting in zeros
 def mark_unused_AUTOVARS(simpLHS, simpRHS):
     # get autovar list from RHS of :Decl: AUTOVARS
     auto_eq_i = -1
