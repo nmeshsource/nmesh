@@ -841,6 +841,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
         simpRHS[i][comp] = rhs
 
     ## mark unused AUTOVARS Equations by putting in zeros
+    #print('Marking unused equations')
     #mark_unused_AUTOVARS(simpLHS, simpRHS)
 
     ## update list of Eqs that we actually need
@@ -946,6 +947,7 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
     unused = []
     for autocomps in autoTcompList:
         for acomp in autocomps:
+            astr = str(acomp)
             found = False
             # go over all RHS
             for eq_i in range(len(simpLHS)):
@@ -955,10 +957,18 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
                     continue
                 RHS = simpRHS[eq_i]
                 for RHScomp in RHS:
+                    #if str(acomp)=='Rs'  and eq_i==7:
+                    #    print(acomp, RHScomp, RHScomp.free_symbols)
+                    #    print(type(acomp), type(RHScomp.free_symbols))
+                    #    for s in RHScomp.free_symbols: print(type(s))
+                    #    print(acomp in RHScomp.free_symbols)
                     try:
                         terms = RHScomp.free_symbols
-                        if acomp in RHScomp.free_symbols:
-                            found = True
+                        for t in terms:
+                            if astr == str(t):
+                                found = True
+                                break
+                        if found:
                             break
                     except:
                         continue
