@@ -1340,10 +1340,11 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                     nsum += RHSstr.count('+') + RHSstr.count('-')
                     # now write into file
                     RHSstr = textwrap.fill(RHSstr)
+                    f.write('\n')
                     f.write(LHSstr)
                     f.write('\n=\n')
                     f.write(RHSstr)
-                    f.write(';\n\n')
+                    f.write(';\n')
         # write counters
         f.write('\n')
         f.write('/* ' + pathlib.Path(filename).name + ' */\n')
