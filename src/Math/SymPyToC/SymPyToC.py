@@ -1,8 +1,9 @@
 # SymPyToC.py (a code generator)
 # Wolfgang Tichy 11/2021
 
-# We need sympy. We import it in 2 different ways:
+# We need sympy.
 import sympy
+# We can import it also in a 2nd way:
 #from sympy import *  #we need this to make eval(sympy.srepr(expr)) work
 
 # we need very little from numpy and a bit from some standard modules
