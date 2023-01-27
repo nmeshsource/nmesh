@@ -74,7 +74,7 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
     {
       if(pr) printf("  parameter file \"%s\" does not exist!\n", parfile);
       if(fatal)
-        errorexits("Could not open parameter file \"%s\"\n", parfile);
+        errorexits("Could not open parameter file \"%s\"", parfile);
       else
         file_exists = 0; /* signals error reading file */
     }

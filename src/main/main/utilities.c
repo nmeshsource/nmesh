@@ -852,6 +852,12 @@ NORET void finalexit(int ec)
   else                                            exit(ec);
 }
 
+/* Function to print errno. Use as: print_errno(stdout, errno); */
+void print_errno(FILE *fp, int ErrNo)
+{
+  if(ErrNo) fprintf(fp, "ErrNo %d: %s\n", ErrNo, strerror(ErrNo));
+}
+
 /* errorexit functions */
 /* note that nmesh_main.h defines a macro so that the user does not have
    to specify __FILE__ , __LINE__ and __func__ to describe where the
@@ -863,28 +869,34 @@ NORET void finalexit(int ec)
 NORET void errorexit(const char *file, int line, const char *func,
                      const char *s)
 {
+  int ErrNo = errno;
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: %s\n", s);
+  print_errno(stdout, ErrNo);
   finalexit(1);
 }
 
 NORET void errorexits(const char *file, int line, const char *func,
                       const char *s, const char *t)
 {
+  int ErrNo = errno;
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: ");
   fprintf(stdout, s, t);
   fprintf(stdout, "\n");
+  print_errno(stdout, ErrNo);
   finalexit(1);
 }
 
 NORET void errorexiti(const char *file, int line, const char *func,
                       const char *s, int i)
 {
+  int ErrNo = errno;
   fprintf(stdout, "%s:%d: error in %s\n", file, line, func);
   fprintf(stdout, "Error: ");
   fprintf(stdout, s, i);
   fprintf(stdout, "\n");
+  print_errno(stdout, ErrNo);
   finalexit(1);
 }
 /************************************************************************/
