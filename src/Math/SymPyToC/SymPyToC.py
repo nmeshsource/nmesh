@@ -14,7 +14,12 @@ import pathlib
 
 # by default we do not use multiprocessing, and set the pool to None
 SymPyToC_pool = None
-
+# Note: sympy has issues with multiprocessing!
+# E.g. https://github.com/sympy/sympy/issues/21121
+# Or, if I have one of these at the top of my file (e.g. ADMconstraints.py)
+# fabs = sympy.symbols('fabs', cls=sympy.Function)
+# fabs = sympy.Function('fabs')
+# I sometimes get pickling errors!!!
 
 ###########################################################################
 #
