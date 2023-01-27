@@ -840,13 +840,13 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
         rhs = simpd[id_n]
         simpRHS[i][comp] = rhs
 
-    ## mark unused AUTOVARS Equations by putting in zeros
-    #print('Marking unused equations')
-    #mark_unused_AUTOVARS(simpLHS, simpRHS)
+    # mark unused AUTOVARS Equations by putting in zeros
+    print('Marking unused equations')
+    mark_unused_AUTOVARS(simpLHS, simpRHS)
 
-    ## update list of Eqs that we actually need
-    #print('Removing unused equations')
-    #simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
+    # update list of Eqs that we actually need
+    print('Removing unused equations')
+    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
     # go over RHS of :Decl lines (for now they are all lists)
     print('Removing unneeded declarations')
@@ -943,40 +943,34 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
     if auto_eq_i < 0:
         return
     #print(autoTcompList)
-    # find entries in autocomps they are in no RHS
+    # make list with free_symbols in all RHS
+    RHSvars = set()
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl or :Text command go to next Eqn
+        if type(LHScomp0) == str:
+            continue
+        RHS = simpRHS[eq_i]
+        for RHScomp in RHS:
+            #print('RHScomp =',RHScomp)
+            try:
+                terms = RHScomp.free_symbols
+            except:
+                terms = set()
+            #print(terms)
+            RHSvars = RHSvars.union(terms)
+    #print('RHSvars =', RHSvars)
+    # convert to string set
+    RHSvars = list(map(str, RHSvars))
+
+    # find entries in autocomps they are in not in RHSvars
     unused = []
     for autocomps in autoTcompList:
         for acomp in autocomps:
             astr = str(acomp)
-            found = False
-            # go over all RHS
-            for eq_i in range(len(simpLHS)):
-                LHScomp0 = simpLHS[eq_i][0]
-                # if we have a :Decl or :Text command go to next Eqn
-                if type(LHScomp0) == str:
-                    continue
-                RHS = simpRHS[eq_i]
-                for RHScomp in RHS:
-                    #if str(acomp)=='Rs'  and eq_i==7:
-                    #    print(acomp, RHScomp, RHScomp.free_symbols)
-                    #    print(type(acomp), type(RHScomp.free_symbols))
-                    #    for s in RHScomp.free_symbols: print(type(s))
-                    #    print(acomp in RHScomp.free_symbols)
-                    try:
-                        terms = RHScomp.free_symbols
-                        for t in terms:
-                            if astr == str(t):
-                                found = True
-                                break
-                        if found:
-                            break
-                    except:
-                        continue
-                if found:
-                    break
-            if not found:
+            if not astr in RHSvars:
                 unused.append(acomp)
-    #print(unused)
+    #print('unused =', unused)
     # replace unused comps in AUTOVARS by 0
     for autocomps in autoTcompList:
         for i in range(len(autocomps)):
