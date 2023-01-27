@@ -54,6 +54,30 @@ SymPyToC_pool = None
 
 
 ###########################################################################
+# Functions to set up indices and C-functions
+###########################################################################
+# execute commands to define indices and functions
+# e.g. indices = { (1,3): 'i j k l m n'}
+#      funcs = 'fabs Cal'
+def make_DefsFromStrings(indices, funcs):
+    for key in indices:
+        vars = indices[key]
+        varlist = vars.split()
+        tstr = str(key)
+        for var in varlist:
+            s = var + " = sympy.Idx('" + var + "', " + tstr + ")"
+            #s = var + " = Idx('" + var + "', " + tstr + ")"
+            print(s)
+            exec(s, globals())
+    flist = funcs.split()
+    for fs in flist:
+        s = fs + " = sympy.Function('" + fs + "')"
+        #s = fs + " = Function('" + fs + "')"
+        print(s)
+        exec(s, globals())
+
+
+###########################################################################
 # Functions to set up tensor equations
 ###########################################################################
 
