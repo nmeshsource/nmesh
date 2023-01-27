@@ -855,7 +855,9 @@ NORET void finalexit(int ec)
 /* Function to print errno. Use as: print_errno(stdout, errno); */
 void print_errno(FILE *fp, int ErrNo)
 {
-  if(ErrNo) fprintf(fp, "ErrNo %d: %s\n", ErrNo, strerror(ErrNo));
+  tMesh *mesh = main_mesh;
+  if(mesh && GetvLax(Par("errorexit"), "errno"))
+    if(ErrNo) fprintf(fp, "ErrNo %d: %s\n", ErrNo, strerror(ErrNo));
 }
 
 /* errorexit functions */

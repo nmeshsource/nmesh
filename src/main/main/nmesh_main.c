@@ -35,7 +35,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("finaltime", "0", "iterate until mesh reaches this time");
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
 
-  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+  AddPar("errorexit", "exit", "how we stop on errors [exit,abort,errno]");
   AddPar("logfile_creation", "yes","create logfile [yes,no,none]");
 
   AddPar("timer_on", "no", "whether we use timers [yes,no]");
