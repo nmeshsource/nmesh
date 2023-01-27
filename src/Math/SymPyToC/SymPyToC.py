@@ -840,6 +840,10 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
         rhs = simpd[id_n]
         simpRHS[i][comp] = rhs
 
+    # go over RHS of :Decl lines (for now they are all lists)
+    print('Removing unneeded declarations')
+    remove_UnneededDeclarations(simpLHS, simpRHS)
+
     # mark unused AUTOVARS Equations by putting in zeros
     print('Marking unused equations')
     mark_unused_AUTOVARS(simpLHS, simpRHS)
@@ -847,10 +851,6 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     # update list of Eqs that we actually need
     print('Removing unused equations')
     simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
-
-    # go over RHS of :Decl lines (for now they are all lists)
-    print('Removing unneeded declarations')
-    remove_UnneededDeclarations(simpLHS, simpRHS)
 
     # set result
     allEqsComps = [simpLHS, simpRHS]
@@ -1211,7 +1211,9 @@ def make_DeclList(List_of_IndexedObjLists, fstr):
             # string s for one declaration
             s = fstr.format(VAR=varbase, COMP=comp, LI=listindex, CI=varcompindex,
                             VARID=varid)
-            declist.append(s)
+            # add anything that is not zero
+            if obj != 0:
+                declist.append(s)
             # increment some counters
             varcompindex += 1
             listindex    += 1
