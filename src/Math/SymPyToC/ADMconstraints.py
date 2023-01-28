@@ -124,10 +124,9 @@ tocompute = (
   'delK[a,b,c] = dK[b,c, a]',         # OD[K[b,c], a]    #  del[a, K[b,c]]
 
   # inverse physical metric
-  'g_matrixdet = matrixdet(g[a,b])',
-  'g_matrixinvdet[a,b] = matrixinvdet(g[a,b])',
-  'detginv = 1/g_matrixdet',
-  'ginv[a,b] = detginv * g_matrixinvdet[a,b]',
+  'ginvdet[a,b] = matrixinvdet(g[a,b])',
+  'detg = ginvdet[1,c]*g[1,c]',
+  'ginv[a,b] = ginvdet[a,b] / detg',
 
   # connection of physical metric
   'gammado[c,a,b] = 1/2*(delg[a,b,c] + delg[b,a,c] - delg[c,a,b])',
@@ -198,8 +197,8 @@ tocompute = (
       # compute fabs of some terms in R separately
       'RA[a,b] = ginv[c,d] * (-deldelg[c,d,a,b])',
       'RB[a,b] = ginv[c,d] * ( deldelg[a,c,b,d])',
-      'RC[a,b] = ginv[c,d] * ( gamma[e,a,c]*gammado[e,b,d])',
-      'RD[a,b] = ginv[c,d] * (-gamma[e,a,b]*gammado[e,c,d])',
+      'RC[a,b] = ginv[c,d] * ( gamgam[a,c,b,d])',
+      'RD[a,b] = ginv[c,d] * (-gamgam[a,b,c,d])',
       'RA = ginv[a,b]*RA[a,b]',
       'RB = ginv[a,b]*RB[a,b]',
       'RC = ginv[a,b]*RC[a,b]',
@@ -261,7 +260,8 @@ if __name__ == '__main__':
   #mp.set_start_method('spawn')
   #mp.set_start_method('forkserver')
   #import multiprocess as mp
-  SymPyToC_pool = mp.Pool()
+  mp_pool = mp.Pool()
+  SymPyToC_pool = mp_pool
 
   ########################################################################
   # get all Eqn components and the undeclared vars that only appear on LHS
@@ -321,6 +321,15 @@ if __name__ == '__main__':
   # apply symmetries and remove duplicates. This step takes the longest.
   ########################################################################
   allEqs = apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS)
+
+  ########################################################################
+  # run user defined simplifications on RHSs (this is optional)
+  ########################################################################
+  SymPyToC_pool = None # switch off paralellization pool, because of pickle...
+  collect_ginv = lambda expr : expr.collect([ginv[1,1],ginv[1,2],ginv[1,3],
+                                             ginv[2,2],ginv[2,3],ginv[3,3]])
+  allEqs = simplify_all_EqnComponents(collect_ginv, allEqs)
+  SymPyToC_pool = mp_pool # reset pool
 
   ########################################################################
   # run more sympy simplification operations on RHSs (this is optional)
