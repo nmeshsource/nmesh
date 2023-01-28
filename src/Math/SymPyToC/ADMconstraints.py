@@ -118,7 +118,6 @@ tocompute = (
 ''':Decl: PI
 ''',
 
-
   # partial derivatives
   'delg[c,a,b] = dg[a,b, c]',         # OD[g[a,b], c]    # del[c,g[a,b]]
   'deldelg[a,b,c,d] = ddg[c,d, a,b]', # OD2[g[c,d], a,b] # deldel[a,b,g[c,d]]
@@ -135,12 +134,16 @@ tocompute = (
   'gamma[c,a,b] = ginv[c,d]*gammado[d,a,b]',
 
   # curvature of physical metric
-  'gamma_gammado[a,b, c,d] = gamma[e,a,b]*gammado[e,c,d]',
+  'gamgam[a,b, c,d] = gamma[e,a,b]*gammado[e,c,d]',
+  #'R[a,b] = ginv[c,d]*( 1/2*(\
+  #  - deldelg[c,d,a,b] - deldelg[a,b,c,d] + \
+  #    deldelg[a,c,b,d] + deldelg[b,c,a,d]) +\
+  #    gamma[e,a,c]*gammado[e,b,d] - \
+  #    gamma[e,a,b]*gammado[e,c,d])',
   'R[a,b] = ginv[c,d]*( 1/2*(\
     - deldelg[c,d,a,b] - deldelg[a,b,c,d] + \
       deldelg[a,c,b,d] + deldelg[b,c,a,d]) +\
-      gamma[e,a,c]*gammado[e,b,d] - \
-      gamma[e,a,b]*gammado[e,c,d])',
+    + gamgam[a,c,b,d] - gamgam[a,b,c,d])',
   'R = ginv[a,b]*R[a,b]',
 
   # extrinsic curvature terms
@@ -279,9 +282,17 @@ if __name__ == '__main__':
 
   delg[c,a,b] :   { '+': ( [c,b,a], ) },
   delK[c,a,b] :   { '+': ( [c,b,a], ) },
-  deldelg[a,b,c,d] :  { '+': ( [b,a,c,d], ) },
-  deldelg[a,b,c,d] :  { '+': ( [a,b,d,c], ) },
+  deldelg[a,b,c,d] :  { '+': ( [b,a,c,d], [a,b,d,c], ) },
   ddalpha[a,b] :      { '+': ( [b,a], ) },
+
+  gamma[c,a,b] :   { '+': ( [c,b,a], ) },
+  gammado[c,a,b] : { '+': ( [c,b,a], ) },
+  #(* hidden symmetries for contraction! careful, not general *)
+  #   gamma/: gamma[a_, b_, c_] gammado[a_, d_, e_] :=
+  #   gammado[a, b, c] gamma[a, d, e] /; !OrderedQ[{{b,c},{d,e}}]
+  # INSTEAD we use the var:
+  #'gamgam[a,b,c,d] = gamma[e,a,b]*gammado[e,c,d]',
+  gamgam[a,b,c,d] : { '+': ( [b,a,c,d], [a,b,d,c], [c,d,a,b], ) },
 
   codelK[c,a,b] :  { '+': ( [c,b,a], ) },
   cdKudd[c,a,b] :  { '+': ( [c,b,a], ) },
@@ -302,8 +313,7 @@ if __name__ == '__main__':
   dg[a,b,c] :      { '+': ( [b,a,c], ) },
   dK[a,b,c] :      { '+': ( [b,a,c], ) },
 
-  ddg[a,b,c,d] :   { '+': ( [b,a,c,d], ) },
-  ddg[a,b,c,d] :   { '+': ( [a,b,d,c], ) },
+  ddg[a,b,c,d] :   { '+': ( [b,a,c,d], [a,b,d,c], ) },
   }
 
 
@@ -315,7 +325,7 @@ if __name__ == '__main__':
   ########################################################################
   # run more sympy simplification operations on RHSs (this is optional)
   ########################################################################
-  allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
+  #allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
   #allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
   allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
 
