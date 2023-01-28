@@ -875,11 +875,11 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     remove_UnneededDeclarations(simpLHS, simpRHS)
 
     # mark unused AUTOVARS Equations by putting in zeros
-    print('Marking unused equations')
+    print('Marking unused AUTOVARS equations')
     mark_unused_AUTOVARS(simpLHS, simpRHS)
 
     # update list of Eqs that we actually need
-    print('Removing unused equations')
+    print('Removing unused AUTOVARS equations')
     simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
     # set result
