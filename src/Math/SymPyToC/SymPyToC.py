@@ -420,7 +420,7 @@ def all_EqnComponents(expanded_eqs):
 # and declarations
 def assemble_all_EqnComponents(eqs):
     #global AUTOVARS
-    print('SymPyToC.py:')
+    print('SymPyToC.py:', __file__)
     print('Processing declarations')
     Declvars, LHSvars = Declvars_LHSvars_FromEqs(eqs)
     # introduce sympy vars
