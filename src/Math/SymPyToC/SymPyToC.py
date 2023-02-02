@@ -129,6 +129,8 @@ def make_IndexedObj_from_strlist(list):
         basestr = vari.split('[')[0]
         basestr = basestr.strip()
         #print(basestr,'|')
+        if basestr in globals():
+            continue
         cmd = basestr + ' = sympy.IndexedBase(\'' + basestr + '\')'
         #print(' ', cmd)
         try:
