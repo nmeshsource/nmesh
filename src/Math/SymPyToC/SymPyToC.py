@@ -1434,8 +1434,9 @@ def write_Eqs(filename, allEqs, AUTOVARS):
                         text = comstr[ind:]
                         ind = comstr.find('=', ind)
                         text = comstr[ind+1:]
-                        if text[0] == '\n':
-                            text = text[1:]
+                        if len(text) > 0:
+                            if text[0] == '\n':
+                                text = text[1:]
                         fstr = text
                         decs = DeclFunc(allEqs[1][eq_i][comp], fstr)
                         for line in decs:
