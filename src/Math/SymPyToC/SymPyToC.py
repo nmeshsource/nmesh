@@ -879,6 +879,8 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     # mark unused Declarations by putting in zeros
     print('Marking unused declarations')
     mark_unused_VarDeclarations(simpLHS, simpRHS)
+    #print(simpLHS)
+    #print(simpRHS)
 
     # mark unused AUTOVARS Equations by putting in zeros
     print('Marking unused AUTOVARS equations')
@@ -1021,12 +1023,16 @@ def mark_unused_VarDeclarations(simpLHS, simpRHS):
             if LHScomp0.startswith(':Decl:'):
                 TcompList = simpRHS[eq_i][0]
                 # replace unused comps in TcompList by 0
+                #print(LHScomp0)
+                #print(TcompList)
                 for comps in TcompList:
                     for i in range(len(comps)):
                         acomp = comps[i]
                         astr = str(acomp)
                         if not astr in usedVars:
                             comps[i] = 0
+                #print(LHScomp0)
+                #print(TcompList)
 
 #mark unused AUTOVARS Equations by putting in zeros
 def mark_unused_AUTOVARS(simpLHS, simpRHS):
@@ -1413,6 +1419,9 @@ def get_TensorOutputFormat(allEqs, AUTOVARS):
                     varlist = allEqs[1][eq_i][nnn]
                     for var in varlist:
                         for obj in var:
+                            # do nothing if varcomp is 0
+                            if(obj) == 0:
+                                continue
                             # set varbase, indices
                             if type(obj) == sympy.tensor.indexed.Indexed:
                                 varbase = obj.base
