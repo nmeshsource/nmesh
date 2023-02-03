@@ -1211,6 +1211,19 @@ def make_CompString(indices):
         comp += str(ind)
     return comp
 
+# construct prefix and suffix strings
+def make_PreSufStrings(varbase, sep):
+    vs = str(varbase)
+    i_l = vs.find(sep)
+    if i_l >= 0:
+        vsuf = vs[i_l+1:]
+        i_r = vs.rfind(sep)
+        vpre = vs[:i_r]
+    else:
+        vpre = vs
+        vsuf = vs
+    return vpre, vsuf
+
 # Make a list of variable declarations from IndexedObjList and format
 # string fstr
 # make_DeclList can be used like this:
@@ -1240,8 +1253,7 @@ def make_DeclList(List_of_IndexedObjLists, fstr):
             # construct string that labels component
             comp = make_CompString(indices)
             # construct prefix and suffix strings
-            vs = str(varbase).split('_')
-            vpre, vsuf = vs[0], vs[-1]
+            vpre, vsuf = make_PreSufStrings(varbase, '_')
             # string s for one declaration
             s = fstr.format(VAR=varbase, COMP=comp, LI=listindex, CI=varcompindex,
                             VARID=varid, VARPRE=vpre, VARSUF=vsuf)
