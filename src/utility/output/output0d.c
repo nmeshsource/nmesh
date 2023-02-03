@@ -46,6 +46,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   tMesh *mesh = vl->mesh;
   char filename[1000];
   double max, min, maxAbs, rms, mean, VolInt;
+  int add_xyz = Getb(Par("0doutput_add_xyz"));
   int p, ijk, ipt;
   char nodeloc[105]; /* node location string inside patch */
   double X[3], xmin[3], xmax[3], *xmaxAbs;
@@ -137,13 +138,13 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
       output0d_value(filename, T, rms, 0, NULL);
 
       output0d_filename(mesh, filename,999, name, "min", pat);
-      output0d_value(filename, T, min, 1, xmin);
+      output0d_value(filename, T, min, add_xyz, xmin);
 
       output0d_filename(mesh, filename,999, name, "max", pat);
-      output0d_value(filename, T, max, 1, xmax);
+      output0d_value(filename, T, max, add_xyz, xmax);
 
       output0d_filename(mesh, filename,999, name, "maxAbs", pat);
-      output0d_value(filename, T, maxAbs, 1, xmaxAbs);
+      output0d_value(filename, T, maxAbs, add_xyz, xmaxAbs);
 
       /* output value of var at some points */
       for(ipt=0; ipt<Npt; ipt++)

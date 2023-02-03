@@ -33,6 +33,8 @@ int nmesh_output(tMesh *mesh)
 	 "how we compute norms such as rms [integral,L2norm]");
   AddPar("0doutput_per_patch", "128", "output per patch [yes,no,#], here"
          "the # means yes, but only if patchnumber does not exceed #");
+  AddPar("0doutput_add_xyz", "yes", "add location x,y,z of min/max to"
+         "datafiles after min/max values [yes,no]");
 
   AddPar("0doutput", "", "variables to output norms for");
   AddPar("1doutput", "", "variables to output along axes");
