@@ -876,6 +876,10 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     print('Removing unneeded declarations')
     remove_UnneededDeclarations(simpLHS, simpRHS)
 
+    # mark unused Declarations by putting in zeros
+    print('Marking unused declarations')
+    mark_unused_VarDeclarations(simpLHS, simpRHS)
+
     # mark unused AUTOVARS Equations by putting in zeros
     print('Marking unused AUTOVARS equations')
     mark_unused_AUTOVARS(simpLHS, simpRHS)
@@ -958,6 +962,71 @@ def remove_UnneededComps(Tcomps):
         tokeep.append(comp)
     return tokeep
 
+# make list with free_symbols in all RHS
+def get_UsedLhsVarSet(simpLHS):
+    LHSvars = set()
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl or :Text command go to next Eqn
+        if type(LHScomp0) == str:
+            continue
+        LHS = simpLHS[eq_i]
+        for LHScomp in LHS:
+            #print('LHScomp =',LHScomp)
+            try:
+                terms = LHScomp.free_symbols
+            except:
+                terms = set()
+            #print(terms)
+            LHSvars = LHSvars.union(terms)
+    #print('LHSvars =', LHSvars)
+    # convert to string set
+    LHSvars = set(map(str, LHSvars))
+    return LHSvars
+
+# make list with free_symbols in all RHS
+def get_UsedRhsVarSet(simpLHS, simpRHS):
+    RHSvars = set()
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl or :Text command go to next Eqn
+        if type(LHScomp0) == str:
+            continue
+        RHS = simpRHS[eq_i]
+        for RHScomp in RHS:
+            #print('RHScomp =',RHScomp)
+            try:
+                terms = RHScomp.free_symbols
+            except:
+                terms = set()
+            #print(terms)
+            RHSvars = RHSvars.union(terms)
+    #print('RHSvars =', RHSvars)
+    # convert to string set
+    RHSvars = set(map(str, RHSvars))
+    return RHSvars
+
+# mark vars as unused if they do not appear in any LHS or RHS
+def mark_unused_VarDeclarations(simpLHS, simpRHS):
+    # all used vars
+    usedVars = set()
+    usedVars = usedVars.union(get_UsedLhsVarSet(simpLHS))
+    usedVars = usedVars.union(get_UsedRhsVarSet(simpLHS, simpRHS))
+    # go over all :Decl: lines
+    Decl_eq_i = []
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl command
+        if type(LHScomp0) == str:
+            if LHScomp0.startswith(':Decl:'):
+                TcompList = simpRHS[eq_i][0]
+                # replace unused comps in TcompList by 0
+                for comps in TcompList:
+                    for i in range(len(comps)):
+                        acomp = comps[i]
+                        astr = str(acomp)
+                        if not astr in usedVars:
+                            comps[i] = 0
 
 #mark unused AUTOVARS Equations by putting in zeros
 def mark_unused_AUTOVARS(simpLHS, simpRHS):
@@ -976,25 +1045,8 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
         return
     #print(autoTcompList)
     # make list with free_symbols in all RHS
-    RHSvars = set()
-    for eq_i in range(len(simpLHS)):
-        LHScomp0 = simpLHS[eq_i][0]
-        # if we have a :Decl or :Text command go to next Eqn
-        if type(LHScomp0) == str:
-            continue
-        RHS = simpRHS[eq_i]
-        for RHScomp in RHS:
-            #print('RHScomp =',RHScomp)
-            try:
-                terms = RHScomp.free_symbols
-            except:
-                terms = set()
-            #print(terms)
-            RHSvars = RHSvars.union(terms)
-    #print('RHSvars =', RHSvars)
-    # convert to string set
-    RHSvars = list(map(str, RHSvars))
-
+    RHSvars = get_UsedRhsVarSet(simpLHS, simpRHS)
+    RHSvars = list(RHSvars)
     # find entries in autocomps they are in not in RHSvars
     unused = []
     for autocomps in autoTcompList:
