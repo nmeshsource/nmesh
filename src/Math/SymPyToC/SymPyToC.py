@@ -959,6 +959,28 @@ def remove_UnneededComps(Tcomps):
     return tokeep
 
 # make list with free_symbols in all RHS
+def get_UsedLhsVarSet(simpLHS):
+    LHSvars = set()
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl or :Text command go to next Eqn
+        if type(LHScomp0) == str:
+            continue
+        LHS = simpLHS[eq_i]
+        for LHScomp in LHS:
+            #print('LHScomp =',LHScomp)
+            try:
+                terms = LHScomp.free_symbols
+            except:
+                terms = set()
+            #print(terms)
+            LHSvars = LHSvars.union(terms)
+    #print('LHSvars =', LHSvars)
+    # convert to string set
+    LHSvars = set(map(str, LHSvars))
+    return LHSvars
+
+# make list with free_symbols in all RHS
 def get_UsedRhsVarSet(simpLHS, simpRHS):
     RHSvars = set()
     for eq_i in range(len(simpLHS)):
@@ -976,7 +998,7 @@ def get_UsedRhsVarSet(simpLHS, simpRHS):
             #print(terms)
             RHSvars = RHSvars.union(terms)
     #print('RHSvars =', RHSvars)
-    # convert to string list
+    # convert to string set
     RHSvars = set(map(str, RHSvars))
     return RHSvars
 
