@@ -876,6 +876,10 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     print('Removing unneeded declarations')
     remove_UnneededDeclarations(simpLHS, simpRHS)
 
+    # mark unused Declarations by putting in zeros
+    print('Marking unused declarations')
+    mark_unused_VarDeclarations(simpLHS, simpRHS)
+
     # mark unused AUTOVARS Equations by putting in zeros
     print('Marking unused AUTOVARS equations')
     mark_unused_AUTOVARS(simpLHS, simpRHS)
@@ -1001,6 +1005,28 @@ def get_UsedRhsVarSet(simpLHS, simpRHS):
     # convert to string set
     RHSvars = set(map(str, RHSvars))
     return RHSvars
+
+# mark vars as unused if they do not appear in any LHS or RHS
+def mark_unused_VarDeclarations(simpLHS, simpRHS):
+    # all used vars
+    usedVars = set()
+    usedVars = usedVars.union(get_UsedLhsVarSet(simpLHS))
+    usedVars = usedVars.union(get_UsedRhsVarSet(simpLHS, simpRHS))
+    # go over all :Decl: lines
+    Decl_eq_i = []
+    for eq_i in range(len(simpLHS)):
+        LHScomp0 = simpLHS[eq_i][0]
+        # if we have a :Decl command
+        if type(LHScomp0) == str:
+            if LHScomp0.startswith(':Decl:'):
+                TcompList = simpRHS[eq_i][0]
+                # replace unused comps in TcompList by 0
+                for comps in TcompList:
+                    for i in range(len(comps)):
+                        acomp = comps[i]
+                        astr = str(acomp)
+                        if not astr in usedVars:
+                            comps[i] = 0
 
 #mark unused AUTOVARS Equations by putting in zeros
 def mark_unused_AUTOVARS(simpLHS, simpRHS):
