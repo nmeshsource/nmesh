@@ -1059,6 +1059,8 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
     # find entries in autocomps they are in not in RHSvars
     unused = []
     for autocomps in autoTcompList:
+        if len(autocomps) <= 1: # only count as unused if more than 1 comp
+            continue
         for acomp in autocomps:
             astr = str(acomp)
             if not astr in RHSvars:
