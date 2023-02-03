@@ -959,7 +959,7 @@ def remove_UnneededComps(Tcomps):
     return tokeep
 
 # make list with free_symbols in all RHS
-def get_UsedRhsVarList(simpLHS, simpRHS):
+def get_UsedRhsVarSet(simpLHS, simpRHS):
     RHSvars = set()
     for eq_i in range(len(simpLHS)):
         LHScomp0 = simpLHS[eq_i][0]
@@ -977,7 +977,7 @@ def get_UsedRhsVarList(simpLHS, simpRHS):
             RHSvars = RHSvars.union(terms)
     #print('RHSvars =', RHSvars)
     # convert to string list
-    RHSvars = list(map(str, RHSvars))
+    RHSvars = set(map(str, RHSvars))
     return RHSvars
 
 #mark unused AUTOVARS Equations by putting in zeros
@@ -997,7 +997,8 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
         return
     #print(autoTcompList)
     # make list with free_symbols in all RHS
-    RHSvars = get_UsedRhsVarList(simpLHS, simpRHS)
+    RHSvars = get_UsedRhsVarSet(simpLHS, simpRHS)
+    RHSvars = list(RHSvars)
     # find entries in autocomps they are in not in RHSvars
     unused = []
     for autocomps in autoTcompList:
