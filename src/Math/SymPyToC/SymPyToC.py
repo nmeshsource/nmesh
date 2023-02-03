@@ -1026,11 +1026,14 @@ def mark_unused_VarDeclarations(simpLHS, simpRHS):
                 #print(LHScomp0)
                 #print(TcompList)
                 for comps in TcompList:
-                    for i in range(len(comps)):
+                    len_comps = len(comps)
+                    if len_comps <= 1: # only replace if more than 1 comp
+                        continue
+                    for i in range(len_comps):
                         acomp = comps[i]
                         astr = str(acomp)
                         if not astr in usedVars:
-                            comps[i] = 0
+                            comps[i] = 0 # use 0 to mark as unused
                 #print(LHScomp0)
                 #print(TcompList)
 
