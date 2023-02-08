@@ -21,9 +21,6 @@ SymPyToC_pool = None
 # fabs = sympy.Function('fabs')
 # I sometimes get pickling errors!!!
 
-# default we do remove the declarations of all vars that are not used in Eqs
-SymPyToC_RemoveUnusedDeclarations = True
-
 
 ###########################################################################
 #
@@ -790,7 +787,8 @@ def apply_compsubsdict_to_Tlist(compsubsdict, Tlist):
 
 
 # apply symmetries to all Eqn components
-def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
+def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS,
+                                          RemoveUnusedDeclarations=True):
     # remove Kdelta and LCeps3 first
     allEqs = simplify_all_EqnComponents(replace_Kdelta, allEqs)
     allEqs = simplify_all_EqnComponents(replace_LCeps3, allEqs)
@@ -881,7 +879,7 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS):
     remove_UnneededDeclarations(simpLHS, simpRHS)
 
     # mark unused Declarations by putting in zeros
-    if SymPyToC_RemoveUnusedDeclarations == True:
+    if RemoveUnusedDeclarations == True:
         print('Marking unused declarations')
         mark_unused_VarDeclarations(simpLHS, simpRHS)
         #print(simpLHS)
