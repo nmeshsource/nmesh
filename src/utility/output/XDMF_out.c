@@ -78,8 +78,12 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   /* open file such that we can append and seek backwards */
   fp = fopen(fname, "r+");
 
-  /* create file if it could not be opened */
-  if(!fp)
+  if(fp)
+  {
+    /* attach IO buffer */
+    if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+  }
+  else /* create file if it could not be opened */
   {
     fp = fopen(fname, "w+");
     if(!fp) errorexits("Cannot open %s for writing", fname);
@@ -92,11 +96,6 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
     fprintf(fp, "%s", B_temporal);
     fprintf(fp, "%s", E_temporal);
     fprintf(fp, "%s", E_head);
-  }
-  else
-  {
-    /* attach IO buffer */
-    if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
   }
 
   /* we want to append more data, which requires us to remove
