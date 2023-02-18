@@ -217,7 +217,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
   long voffset, xyzoffset;
-  FILE *fpxmf, *fpbin;
+  FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
   const char *suffix[] = { "yz", "xz", "xy" };
@@ -250,8 +250,10 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
           fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix[norm],
                                              bufxmf,bufsize);
 
-        /* open binary file */
+        /* open binary files */
         fpbin = fopen_bin(vname, outdir, suffix[norm], bufbin,bufsize);
+        if(vli==0) /* write xyz only for first var in list */
+          fpxyz = fopen_bin("xyz", outdir, suffix[norm], bufxyz,bufsize);
 
         /* loop over all leaf nodes */
         formylnodes_noomp(mesh)
@@ -292,10 +294,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
-                FILE *fpxyz = fopen_bin("xyz", outdir, suffix[norm],
-                                        bufxyz,bufsize);
                 write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
-                fclose(fpxyz);
               }
 
               /* we wrote 3 things (x,y,z) for each var */
@@ -312,6 +311,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
         /* close files on this proc now */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf);
+        if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
@@ -333,7 +333,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
   long voffset, xyzoffset;
-  FILE *fpxmf, *fpbin;
+  FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
   const char *suffix = "xyz";
@@ -361,8 +361,10 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         else /* just add to the same spatial series */
           fpxmf = fopen_add_spatial_xdmf_xmf(vname, outdir, suffix,
                                              bufxmf,bufsize);
-        /* open binary file */
+        /* open binary files */
         fpbin = fopen_bin(vname, outdir, suffix, bufbin,bufsize);
+        if(vli==0) /* write xyz only for first var in list */
+          fpxyz = fopen_bin("xyz",outdir,suffix, bufxyz,bufsize);
 
         /* loop over all leaf nodes */
         formylnodes_noomp(mesh)
@@ -390,10 +392,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
-                FILE *fpxyz = fopen_bin("xyz",outdir,suffix, bufxyz,bufsize);
-
                 write_3buffers(px,py,pz, np, dbl, fpxyz);
-                fclose(fpxyz);
               }
 
               /* we wrote 3 things (x,y,z) for each var */
@@ -408,6 +407,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         /* close files on this proc now */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf);
+        if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
