@@ -76,7 +76,7 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
 
   /* open file such that we can append and seek backwards */
-  fp = fopen(fname, "r+"); // could we use "a" here???
+  fp = fopen(fname, "r+"); //with "a" fseek below would fail
   if(fp) /* file actually exists */
   {
     /* attach IO buffer */
