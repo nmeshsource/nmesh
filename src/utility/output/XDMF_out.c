@@ -76,16 +76,20 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
 
   /* open file such that we can append and seek backwards */
-  fp = fopen(fname, "r+");
-
-  if(fp)
+  fp = fopen(fname, "r+"); // could we use "a" here???
+  if(fp) /* file actually exists */
   {
     /* attach IO buffer */
     if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
+
+    /* we want to append more data, which requires us to remove
+       the last E_temporal and E_head */
+    offset = strlen(E_temporal) + strlen(E_head);
+    fseek(fp, -offset, SEEK_END);
   }
-  else /* create file if it could not be opened */
+  else /* if file does not exist yet */
   {
-    fp = fopen(fname, "w+");
+    fp = fopen(fname, "w");
     if(!fp) errorexits("Cannot open %s for writing", fname);
 
     /* attach IO buffer */
@@ -94,14 +98,7 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
     /* write fixed part of XML header into new file */
     fprintf(fp, "%s", B_head);
     fprintf(fp, "%s", B_temporal);
-    fprintf(fp, "%s", E_temporal);
-    fprintf(fp, "%s", E_head);
   }
-
-  /* we want to append more data, which requires us to remove
-     the last E_temporal and E_head */
-  offset = strlen(E_temporal) + strlen(E_head);
-  fseek(fp, -offset, SEEK_END);
 
   /* start new collection of nodes */
   fprintf(fp, B_spatial, time);
@@ -110,12 +107,15 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
 }
 
 /* write ends and close .xmf file */
-void fclose_xdmf_xmf(FILE *fp)
+void fclose_xdmf_xmf(FILE *fp, int E_markers)
 {
   /* close collections and header */
-  fprintf(fp, "%s", E_spatial);
-  fprintf(fp, "%s", E_temporal);
-  fprintf(fp, "%s", E_head);
+  if(E_markers)
+  {
+    fprintf(fp, "%s", E_spatial);
+    fprintf(fp, "%s", E_temporal);
+    fprintf(fp, "%s", E_head);
+  }
   fclose(fp);
 }
 
@@ -126,21 +126,21 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname,
 {
   FILE *fp;
   char fname[1000];
-  long offset;
+  //long offset;
 
   /* name of XML file */
   snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
 
   /* open file such that we can append and seek backwards */
-  fp = fopen(fname, "r+");
+  fp = fopen(fname, "a");
   if(!fp) errorexit("cannot add if file was never created with fopen_xdmf_xmf");
 
   /* attach IO buffer */
   if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
 
-  /* remove E_spatial, E_temporal, E_head */
-  offset = strlen(E_spatial) + strlen(E_temporal) + strlen(E_head);
-  fseek(fp, -offset, SEEK_END);
+  ///* remove E_spatial, E_temporal, E_head */
+  //offset = strlen(E_spatial) + strlen(E_temporal) + strlen(E_head);
+  //fseek(fp, -offset, SEEK_END);
 
   return fp;
 }
@@ -235,9 +235,10 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
     int vi = vl->index[vli];
     char *vname = VarName(vi);
     int rk;
+    int size = nMPI_size();
 
     /* MPI motivated loop to assign work */
-    for(rk=0; rk<nMPI_size(); rk++)
+    for(rk=0; rk<size; rk++)
     {
       /* do work when it is my turn */
       if(rk == nMPI_rank())
@@ -309,7 +310,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
         }
         /* close files on this proc now */
         fclose(fpbin);
-        fclose_xdmf_xmf(fpxmf);
+        fclose_xdmf_xmf(fpxmf, rk==size-1); /* last rank puts end markers */
         if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
@@ -348,9 +349,10 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
     int vi = vl->index[vli];
     char *vname = VarName(vi);
     int rk;
+    int size = nMPI_size();
 
     /* MPI motivated loop to assign work */
-    for(rk=0; rk<nMPI_size(); rk++)
+    for(rk=0; rk<size; rk++)
     {
       /* do work when it is my turn */
       if(rk == nMPI_rank())
@@ -405,7 +407,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         }
         /* close files on this proc now */
         fclose(fpbin);
-        fclose_xdmf_xmf(fpxmf);
+        fclose_xdmf_xmf(fpxmf, rk==size-1); /* last rank puts end markers */
         if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
