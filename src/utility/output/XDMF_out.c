@@ -304,9 +304,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
           }
         }
         /* close files on this proc now */
+        if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf, rk==size-1); /* last rank puts end markers */
-        if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
@@ -401,9 +401,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
           }
         }
         /* close files on this proc now */
+        if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fclose(fpbin);
         fclose_xdmf_xmf(fpxmf, rk==size-1); /* last rank puts end markers */
-        if(vli==0) fclose(fpxyz); /* done only for first var in list */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
