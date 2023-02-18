@@ -126,7 +126,6 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname,
 {
   FILE *fp;
   char fname[1000];
-  //long offset;
 
   /* name of XML file */
   snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
@@ -137,10 +136,6 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname,
 
   /* attach IO buffer */
   if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
-
-  ///* remove E_spatial, E_temporal, E_head */
-  //offset = strlen(E_spatial) + strlen(E_temporal) + strlen(E_head);
-  //fseek(fp, -offset, SEEK_END);
 
   return fp;
 }
