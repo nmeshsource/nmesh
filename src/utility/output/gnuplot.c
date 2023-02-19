@@ -271,7 +271,9 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
   char Yfil[1000];
   char Zfil[1000];
   int IObufsz = Geti(Par("fwrite_bufsize"));
-  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObufX = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObufY = cmalloc(IObufsz); /* larger buffer for write */
+  char *IObufZ = cmalloc(IObufsz); /* larger buffer for write */
   char fmt[100];
   int rk;
 
@@ -318,7 +320,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
               snprintf(Xfil, 999, fmt, Gets(Par("outdir")),name, p, "X");
               fX = fopen(Xfil, "a");
               if(!fX) errorexits("failed opening %s", Xfil);
-              if(IObufsz) setvbuf(fX, IObuf, _IOFBF, IObufsz);
+              if(IObufsz) setvbuf(fX, IObufX, _IOFBF, IObufsz);
               writTx=1; /* add line with time*/
             }
             write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T,writTx);
@@ -335,7 +337,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
               snprintf(Yfil, 999, fmt, Gets(Par("outdir")),name, p, "Y");
               fY = fopen(Yfil, "a");
               if(!fY) errorexits("failed opening %s", Yfil);
-              if(IObufsz) setvbuf(fY, IObuf, _IOFBF, IObufsz);
+              if(IObufsz) setvbuf(fY, IObufY, _IOFBF, IObufsz);
               writTy=1; /* add line with time*/
             }
             write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T,writTy);
@@ -352,7 +354,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
               snprintf(Zfil, 999, fmt, Gets(Par("outdir")),name, p, "Z");
               fZ = fopen(Zfil, "a");
               if(!fZ) errorexits("failed opening %s", Zfil);
-              if(IObufsz) setvbuf(fZ, IObuf, _IOFBF, IObufsz);
+              if(IObufsz) setvbuf(fZ, IObufZ, _IOFBF, IObufsz);
               writTz=1; /* add line with time*/
             }
             write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T,writTz);
@@ -360,15 +362,17 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
           }
         }
       } /* end formylnodes_noomp */
-      if(fX) fclose(fX);
-      if(fY) fclose(fY);
       if(fZ) fclose(fZ);
+      if(fY) fclose(fY);
+      if(fX) fclose(fX);
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
-  free(IObuf);
+  free(IObufZ);
+  free(IObufY);
+  free(IObufX);
 }
 
 /* 1d output in gnuplot format for one var */
