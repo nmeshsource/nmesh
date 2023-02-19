@@ -274,6 +274,10 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
   char *IObufX = cmalloc(IObufsz); /* larger buffer for write */
   char *IObufY = cmalloc(IObufsz); /* larger buffer for write */
   char *IObufZ = cmalloc(IObufsz); /* larger buffer for write */
+  int npats = mesh->npats;
+  int *pheadX = calloc(npats, sizeof(pheadX[0]));
+  int *pheadY = calloc(npats, sizeof(pheadY[0]));
+  int *pheadZ = calloc(npats, sizeof(pheadZ[0]));
   char fmt[100];
   int rk;
 
@@ -298,7 +302,6 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
         {
           int p = node->pat->p;
           int ijk[3];
-          int writTx, writTy, writTz;
 
           //TODO: use different Xb0 for diff patches
           double X0[] = { Getd(Par("outputX0")),
@@ -321,10 +324,10 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
               fX = fopen(Xfil, "a");
               if(!fX) errorexits("failed opening %s", Xfil);
               if(IObufsz) setvbuf(fX, IObufX, _IOFBF, IObufsz);
-              writTx=1; /* add line with time*/
+              if(!pheadX[p]) fprintf(fX, "# \"time = %.15g\"\n", T);
+              pheadX[p] = 1;
             }
-            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T,writTx);
-            writTx=0;
+            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T,0);
           }
 
           /* Y-axis:  X = X0, Z = Z0 */
@@ -338,10 +341,10 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
               fY = fopen(Yfil, "a");
               if(!fY) errorexits("failed opening %s", Yfil);
               if(IObufsz) setvbuf(fY, IObufY, _IOFBF, IObufsz);
-              writTy=1; /* add line with time*/
+              if(!pheadY[p]) fprintf(fY, "# \"time = %.15g\"\n", T);
+              pheadY[p] = 1;
             }
-            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T,writTy);
-            writTy=0;
+            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T,0);
           }
 
           /* Z-axis:  X = X0, Y = Y0 */
@@ -355,10 +358,10 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
               fZ = fopen(Zfil, "a");
               if(!fZ) errorexits("failed opening %s", Zfil);
               if(IObufsz) setvbuf(fZ, IObufZ, _IOFBF, IObufsz);
-              writTz=1; /* add line with time*/
+              if(!pheadZ[p]) fprintf(fZ, "# \"time = %.15g\"\n", T);
+              pheadZ[p] = 1;
             }
-            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T,writTz);
-            writTz=0;
+            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T,0);
           }
         }
       } /* end formylnodes_noomp */
@@ -367,9 +370,16 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
       if(fX) fclose(fX);
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
+    /* broadcast new phead to everyone else */
+    nMPI_Bcast(pheadX,npats, nMPI_INT, rk);
+    nMPI_Bcast(pheadY,npats, nMPI_INT, rk);
+    nMPI_Bcast(pheadZ,npats, nMPI_INT, rk);
     /* wait until everyone is here */
     nMPI_barrier();
   } /* end rk-loop */
+  free(pheadZ);
+  free(pheadY);
+  free(pheadX);
   free(IObufZ);
   free(IObufY);
   free(IObufX);
