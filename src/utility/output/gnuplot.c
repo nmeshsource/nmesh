@@ -89,7 +89,7 @@ void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
 
 /* write along a line in direc. dir */
 void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
-                      tArray *va, int Iter, double Time)
+                      tArray *va, int Iter, double Time, int WriteTime)
 {
   tArray *p1;
   double Xb[3], X[3];
@@ -100,7 +100,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
 
   if(pv==NULL) return;
 
-  fprintf(fp, "# \"time = %.15g\"", Time);
+  if(WriteTime) fprintf(fp, "# \"time = %.15g\"", Time);
 
   imin = jmin = kmin=0;
   imax = va->n[0] - 1;
@@ -116,7 +116,8 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     if(axis[2]>kmax) kmin = kmax;
     else             kmin = kmax = axis[2];
     XYZ_of_ijk(node, 0,jmin,kmin, X);
-    fprintf(fp, ", j=%d, k=%d, Y=%.15g, Z=%.15g\n", jmin, kmin, X[1], X[2]);
+    if(WriteTime)
+      fprintf(fp, ", j=%d, k=%d, Y=%.15g, Z=%.15g\n", jmin, kmin, X[1], X[2]);
     break;
   case 1:
     p1 = node_Xb(node, 1);
@@ -125,7 +126,8 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     if(axis[2]>kmax) kmin = kmax;
     else             kmin = kmax = axis[2];
     XYZ_of_ijk(node, imin,0,kmin, X);
-    fprintf(fp, ", i=%d, k=%d, X=%.15g, Z=%.15g\n", imin, kmin, X[0], X[2]);
+    if(WriteTime)
+      fprintf(fp, ", i=%d, k=%d, X=%.15g, Z=%.15g\n", imin, kmin, X[0], X[2]);
     break;
   case 2:
     p1 = node_Xb(node, 2);
@@ -134,7 +136,8 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     if(axis[1]>jmax) jmin = jmax;
     else             jmin = jmax = axis[1];
     XYZ_of_ijk(node, imin,jmin,0, X);
-    fprintf(fp, ", i=%d, j=%d, X=%.15g, Y=%.15g\n", imin, jmin, X[0], X[1]);
+    if(WriteTime)
+      fprintf(fp, ", i=%d, j=%d, X=%.15g, Y=%.15g\n", imin, jmin, X[0], X[1]);
     break;
   default:
     p1=NULL;
@@ -223,7 +226,7 @@ void gnuplot_output1d_pernode_meshvar(tMesh *mesh, char *name,
             fX = fopen(Xfil, "a");
             if(!fX) errorexits("failed opening %s", Xfil);
             if(IObufsz) setvbuf(fX, IObuf, _IOFBF, IObufsz);
-            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T);
+            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T,1);
             fclose(fX);
           }
 
@@ -234,7 +237,7 @@ void gnuplot_output1d_pernode_meshvar(tMesh *mesh, char *name,
             fY = fopen(Yfil, "a");
             if(!fY) errorexits("failed opening %s", Yfil);
             if(IObufsz) setvbuf(fY, IObuf, _IOFBF, IObufsz);
-            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T);
+            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T,1);
             fclose(fY);
           }
 
@@ -245,7 +248,7 @@ void gnuplot_output1d_pernode_meshvar(tMesh *mesh, char *name,
             fZ = fopen(Zfil, "a");
             if(!fZ) errorexits("failed opening %s", Zfil);
             if(IObufsz) setvbuf(fZ, IObuf, _IOFBF, IObufsz);
-            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T);
+            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T,1);
             fclose(fZ);
           }
         }
@@ -309,7 +312,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
             fX = fopen(Xfil, "a");
             if(!fX) errorexits("failed opening %s", Xfil);
             if(IObufsz) setvbuf(fX, IObuf, _IOFBF, IObufsz);
-            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T);
+            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T,1);
             fclose(fX);
           }
 
@@ -320,7 +323,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
             fY = fopen(Yfil, "a");
             if(!fY) errorexits("failed opening %s", Yfil);
             if(IObufsz) setvbuf(fY, IObuf, _IOFBF, IObufsz);
-            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T);
+            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T,1);
             fclose(fY);
           }
 
@@ -331,7 +334,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
             fZ = fopen(Zfil, "a");
             if(!fZ) errorexits("failed opening %s", Zfil);
             if(IObufsz) setvbuf(fZ, IObuf, _IOFBF, IObufsz);
-            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T);
+            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T,1);
             fclose(fZ);
           }
         }

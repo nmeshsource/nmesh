@@ -31,7 +31,7 @@ void outputco_vl(tVarList *vl, int It, double T);
 void write_plane_ascii(tNode *node, FILE *fp, int normal, int plane[],
                        tArray *va, int Iter, double Time);
 void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
-                      tArray *va, int Iter, double Time);
+                      tArray *va, int Iter, double Time, int WriteTime);
 void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T);
 
