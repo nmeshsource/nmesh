@@ -94,13 +94,16 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
   tArray *p1;
   double Xb[3], X[3];
   double *pv = va->d;
+  char ns[100];
   int i,j,k;
   int imin, jmin, kmin;
   int imax, jmax, kmax;
 
   if(pv==NULL) return;
 
-  if(WriteTime) fprintf(fp, "# \"time = %.15g\"", Time);
+  node_location_str(node, ns,100);
+
+  if(WriteTime) fprintf(fp, "# \"time = %.15g\" ", Time);
 
   imin = jmin = kmin=0;
   imax = va->n[0] - 1;
@@ -116,8 +119,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     if(axis[2]>kmax) kmin = kmax;
     else             kmin = kmax = axis[2];
     XYZ_of_ijk(node, 0,jmin,kmin, X);
-    if(WriteTime)
-      fprintf(fp, ", j=%d, k=%d, Y=%.15g, Z=%.15g\n", jmin, kmin, X[1], X[2]);
+    fprintf(fp, "#%s: j=%d, k=%d, Y=%.15g, Z=%.15g\n", ns, jmin, kmin, X[1], X[2]);
     break;
   case 1:
     p1 = node_Xb(node, 1);
@@ -126,8 +128,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     if(axis[2]>kmax) kmin = kmax;
     else             kmin = kmax = axis[2];
     XYZ_of_ijk(node, imin,0,kmin, X);
-    if(WriteTime)
-      fprintf(fp, ", i=%d, k=%d, X=%.15g, Z=%.15g\n", imin, kmin, X[0], X[2]);
+    fprintf(fp, "#%s: i=%d, k=%d, X=%.15g, Z=%.15g\n", ns, imin, kmin, X[0], X[2]);
     break;
   case 2:
     p1 = node_Xb(node, 2);
@@ -136,8 +137,7 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
     if(axis[1]>jmax) jmin = jmax;
     else             jmin = jmax = axis[1];
     XYZ_of_ijk(node, imin,jmin,0, X);
-    if(WriteTime)
-      fprintf(fp, ", i=%d, j=%d, X=%.15g, Y=%.15g\n", imin, jmin, X[0], X[1]);
+    fprintf(fp, "#%s: i=%d, j=%d, X=%.15g, Y=%.15g\n", ns, imin, jmin, X[0], X[1]);
     break;
   default:
     p1=NULL;
