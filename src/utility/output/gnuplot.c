@@ -165,7 +165,8 @@ void write_line_ascii(tNode *node, FILE *fp, int dir, int axis[],
 
 
 /* 1d output in gnuplot format for one var */
-void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
+void gnuplot_output1d_pernode_meshvar(tMesh *mesh, char *name,
+                                      int It, double T)
 {
   int vi = Ind(name);
   FILE *fX, *fY, *fZ;
@@ -256,6 +257,102 @@ void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
   } /* end rk-loop */
   free(IObuf);
 }
+
+/* 1d output in gnuplot format for one var, where we combine data
+   from all nodes in one patch */
+void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
+                                     int It, double T)
+{
+  int vi = Ind(name);
+  FILE *fX, *fY, *fZ;
+  char Xfil[1000];
+  char Yfil[1000];
+  char Zfil[1000];
+  int IObufsz = Geti(Par("fwrite_bufsize"));
+  char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
+  char fmt[100];
+  int rk;
+
+  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s", (int) log10(mesh->npats-1)+1);
+
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      /* loop over all leaf nodes */
+      formylnodes_noomp(mesh)
+      {
+        tNode *node = MyLnode;
+
+        if(node->dat)
+        if(node->dat->v[vi])
+        {
+          int p = node->pat->p;
+          int ijk[3];
+
+          //TODO: use diffferent Xb0 for diff patches
+          double X0[] = { Getd(Par("outputX0")),
+                          Getd(Par("outputY0")),
+                          Getd(Par("outputZ0")) };
+
+          /* find indices of nearest, if all are negative, node does not have
+             outputX0, outputY0, outputZ0 */
+          nearest_lowernode_ijk_of_XYZ(node, ijk, X0);
+
+          /* write files */
+          /* X-axis:  Y = Y0, Z = Z0 */
+          if(ijk[1]>=0 && ijk[2]>=0)
+          {
+            snprintf(Xfil, 999, fmt, Gets(Par("outdir")),name, p, "X");
+            fX = fopen(Xfil, "a");
+            if(!fX) errorexits("failed opening %s", Xfil);
+            if(IObufsz) setvbuf(fX, IObuf, _IOFBF, IObufsz);
+            write_line_ascii(node, fX, 0, ijk, VarA(node, vi), It,T);
+            fclose(fX);
+          }
+
+          /* Y-axis:  X = X0, Z = Z0 */
+          if(ijk[0]>=0 && ijk[2]>=0)
+          {
+            snprintf(Yfil, 999, fmt, Gets(Par("outdir")),name, p, "Y");
+            fY = fopen(Yfil, "a");
+            if(!fY) errorexits("failed opening %s", Yfil);
+            if(IObufsz) setvbuf(fY, IObuf, _IOFBF, IObufsz);
+            write_line_ascii(node, fY, 1, ijk, VarA(node, vi), It,T);
+            fclose(fY);
+          }
+
+          /* Z-axis:  X = X0, Y = Y0 */
+          if(ijk[0]>=0 && ijk[1]>=0)
+          {
+            snprintf(Zfil, 999, fmt, Gets(Par("outdir")),name, p, "Z");
+            fZ = fopen(Zfil, "a");
+            if(!fZ) errorexits("failed opening %s", Zfil);
+            if(IObufsz) setvbuf(fZ, IObuf, _IOFBF, IObufsz);
+            write_line_ascii(node, fZ, 2, ijk, VarA(node, vi), It,T);
+            fclose(fZ);
+          }
+        }
+      } /* end formylnodes_noomp */
+      fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
+    }
+    /* wait until everyone is here */
+    nMPI_barrier();
+  } /* end rk-loop */
+  free(IObuf);
+}
+
+/* 1d output in gnuplot format for one var */
+void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T)
+{
+  int pernode = Getv(Par("1dformat"), "pernode");
+
+  if(pernode) gnuplot_output1d_pernode_meshvar(mesh, name, It, T);
+  else        gnuplot_output1d_perpat_meshvar(mesh, name, It, T);
+}
+
 
 /* 2d output in gnuplot format for one var */
 void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)

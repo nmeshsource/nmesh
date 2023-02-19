@@ -48,6 +48,8 @@ int nmesh_output(tMesh *mesh)
   AddPar("3doutputall", "yes", "whether to output all components");
   AddPar("cooutputall", "yes", "whether to output all components");
 
+  AddPar("1dformat", "gnuplot pernode",
+	 "format for 1d output [gnuplot;pernode]");
   AddPar("2dformat", "gnuplot",
 	 "format for 2d output [xdmf,gnuplot,vtk,text,binary,float,double]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "
