@@ -1088,6 +1088,9 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
                 autocomps[i] = 0
     # replace unused comps in all LHS-comps by 0
     for LHS in simpLHS:
+        # if there are no components in LHS go to next Eqn
+        if len(LHS) < 1:
+            continue
         if type(LHS[0]) == str:
             continue
         for i in range(len(LHS)):

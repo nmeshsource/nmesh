@@ -143,6 +143,11 @@ if __name__ == '__main__':
   allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
 
   ########################################################################
+  # try to find and remove unused components (this is optional)
+  ########################################################################
+  allEqs = remove_unused_Components(allEqs)
+
+  ########################################################################
   # now write all into a .c file
   ########################################################################
   cfilename = __file__.replace('.py', '.c')
