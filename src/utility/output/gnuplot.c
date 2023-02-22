@@ -181,7 +181,7 @@ void gnuplot_output1d_pernode_meshvar(tMesh *mesh, char *name,
   char fmt[100];
   int rk;
 
-  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s%%s", (int) log10(mesh->npats-1)+1);
+  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s%%s", (int) log10(mesh->npats)+1);
 
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
@@ -281,7 +281,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
   char fmt[100];
   int rk;
 
-  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s", (int) log10(mesh->npats-1)+1);
+  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s", (int) log10(mesh->npats)+1);
 
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
@@ -410,7 +410,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char fmt[100];
   int rk;
 
-  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s%%s", (int) log10(mesh->npats-1)+1);
+  snprintf(fmt,99, "%%s/%%s.%%0%dd%%s%%s", (int) log10(mesh->npats)+1);
 
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
