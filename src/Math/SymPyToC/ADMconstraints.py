@@ -237,8 +237,7 @@ tocompute = (
                    fabs(ginv[b,c]*codelK[a,b,c]) + fabs(momrhs[a])',
     ':Text = }\n',
 
-    ':Text ='
-    'denom = denom1 + denom2 + denom3;',
+    'denom = denom[1] + denom[2] + denom[3]',
 
     'normmom[a] = Cal(denom <= 0.0, 0.0, mom[a]/denom)',
 
@@ -341,7 +340,7 @@ if __name__ == '__main__':
   ########################################################################
   # try to find and remove unused components (this is optional)
   ########################################################################
-  #allEqs = remove_unused_Components(allEqs)
+  allEqs = remove_unused_Components(allEqs)
 
   ########################################################################
   # now write all into a .c file
