@@ -36,7 +36,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
 
   AddPar("errorexit", "exit", "how we stop on errors [exit,abort,errno]");
-  AddPar("logfile_creation", "yes","create logfile [yes,no,none]");
+  AddPar("logfile_creation", "yes","create logfile [yes,no,/dev/null,none]");
 
   AddPar("timer_on", "no", "whether we use timers [yes,no]");
   AddPar("timer_MPI_barrier", "no", "barrier in timer [yes,no]");
