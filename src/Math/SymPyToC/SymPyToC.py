@@ -1101,10 +1101,6 @@ def remove_unused_Components(allEqs, RemoveUnusedDeclarations=True):
     # make list of Eqs that we actually need
     simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination(allEqs)
 
-    # go over RHS of :Decl lines (for now they are all lists)
-    print('Removing unneeded declarations')
-    remove_UnneededDeclarations(simpLHS, simpRHS)
-
     # mark unused AUTOVARS Equations by putting in zeros
     print('Marking unused AUTOVARS equations')
     mark_unused_AUTOVARS(simpLHS, simpRHS)
@@ -1119,10 +1115,6 @@ def remove_unused_Components(allEqs, RemoveUnusedDeclarations=True):
         mark_unused_VarDeclarations(simpLHS, simpRHS)
         #print(simpLHS)
         #print(simpRHS)
-
-        # update list of Eqs that we actually need
-        print('Removing unused AUTOVARS equations')
-        simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
     # set result
     allEqsComps = [simpLHS, simpRHS]
