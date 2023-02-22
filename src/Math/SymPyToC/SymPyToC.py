@@ -878,6 +878,14 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS,
     print('Removing unneeded declarations')
     remove_UnneededDeclarations(simpLHS, simpRHS)
 
+    # mark unused AUTOVARS Equations by putting in zeros
+    print('Marking unused AUTOVARS equations')
+    mark_unused_AUTOVARS(simpLHS, simpRHS)
+
+    # update list of Eqs that we actually need
+    print('Removing unused AUTOVARS equations')
+    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
+
     # mark unused Declarations by putting in zeros
     if RemoveUnusedDeclarations == True:
         print('Marking unused declarations')
@@ -885,12 +893,8 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS,
         #print(simpLHS)
         #print(simpRHS)
 
-    # mark unused AUTOVARS Equations by putting in zeros
-    print('Marking unused AUTOVARS equations')
-    mark_unused_AUTOVARS(simpLHS, simpRHS)
-
     # update list of Eqs that we actually need
-    print('Removing unused AUTOVARS equations')
+    print('Removing unused declarations')
     simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
     # set result
@@ -971,6 +975,10 @@ def remove_UnneededComps(Tcomps):
 def get_UsedLhsVarSet(simpLHS):
     LHSvars = set()
     for eq_i in range(len(simpLHS)):
+        #print(simpLHS[eq_i], len(simpLHS[eq_i]))
+        # if there are no components on LHS go to next Eqn
+        if len(simpLHS[eq_i]) < 1:
+            continue
         LHScomp0 = simpLHS[eq_i][0]
         # if we have a :Decl or :Text command go to next Eqn
         if type(LHScomp0) == str:
@@ -993,6 +1001,10 @@ def get_UsedLhsVarSet(simpLHS):
 def get_UsedRhsVarSet(simpLHS, simpRHS):
     RHSvars = set()
     for eq_i in range(len(simpLHS)):
+        #print(simpLHS[eq_i], len(simpLHS[eq_i]))
+        # if there are no components on LHS go to next Eqn
+        if len(simpLHS[eq_i]) < 1:
+            continue
         LHScomp0 = simpLHS[eq_i][0]
         # if we have a :Decl or :Text command go to next Eqn
         if type(LHScomp0) == str:
@@ -1020,6 +1032,10 @@ def mark_unused_VarDeclarations(simpLHS, simpRHS):
     # go over all :Decl: lines
     Decl_eq_i = []
     for eq_i in range(len(simpLHS)):
+        #print(simpLHS[eq_i], len(simpLHS[eq_i]))
+        # if there are no components on LHS go to next Eqn
+        if len(simpLHS[eq_i]) < 1:
+            continue
         LHScomp0 = simpLHS[eq_i][0]
         # if we have a :Decl command
         if type(LHScomp0) == str:
