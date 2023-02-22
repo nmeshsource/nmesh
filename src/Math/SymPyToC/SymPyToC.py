@@ -878,6 +878,13 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS,
     print('Removing unneeded declarations')
     remove_UnneededDeclarations(simpLHS, simpRHS)
 
+    # mark unused Declarations by putting in zeros
+    if RemoveUnusedDeclarations == True:
+        print('Marking unused declarations')
+        mark_unused_VarDeclarations(simpLHS, simpRHS)
+        #print(simpLHS)
+        #print(simpRHS)
+
     # mark unused AUTOVARS Equations by putting in zeros
     print('Marking unused AUTOVARS equations')
     mark_unused_AUTOVARS(simpLHS, simpRHS)
@@ -886,16 +893,16 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS,
     print('Removing unused AUTOVARS equations')
     simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
-    # mark unused Declarations by putting in zeros
-    if RemoveUnusedDeclarations == True:
-        print('Marking unused declarations')
-        mark_unused_VarDeclarations(simpLHS, simpRHS)
-        #print(simpLHS)
-        #print(simpRHS)
-
-    # update list of Eqs that we actually need
-    print('Removing unused declarations')
-    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
+    ## mark unused Declarations by putting in zeros
+    #if False: # RemoveUnusedDeclarations == True:
+    #    print('Marking unused declarations')
+    #    mark_unused_VarDeclarations(simpLHS, simpRHS)
+    #    #print(simpLHS)
+    #    #print(simpRHS)
+    #
+    #    # update list of Eqs that we actually need
+    #    print('Removing unused declarations')
+    #    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
     # set result
     allEqsComps = [simpLHS, simpRHS]
