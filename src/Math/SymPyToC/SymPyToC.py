@@ -893,17 +893,6 @@ def apply_symmetries_to_all_EqnComponents(symmetries, Eqs, allEqs, AUTOVARS,
     print('Removing unused AUTOVARS equations')
     simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
 
-    ## mark unused Declarations by putting in zeros
-    #if False: # RemoveUnusedDeclarations == True:
-    #    print('Marking unused declarations')
-    #    mark_unused_VarDeclarations(simpLHS, simpRHS)
-    #    #print(simpLHS)
-    #    #print(simpRHS)
-    #
-    #    # update list of Eqs that we actually need
-    #    print('Removing unused declarations')
-    #    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
-
     # set result
     allEqsComps = [simpLHS, simpRHS]
     #print('===========')
@@ -1104,6 +1093,46 @@ def mark_unused_AUTOVARS(simpLHS, simpRHS):
         for i in range(len(LHS)):
             if LHS[i] in unused:
                 LHS[i] = 0
+
+
+# After simplification, some components may not be used anymore.
+# So we remove them here.
+def remove_unused_Components(allEqs, RemoveUnusedDeclarations=True):
+    # make list of Eqs that we actually need
+    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination(allEqs)
+
+    # go over RHS of :Decl lines (for now they are all lists)
+    print('Removing unneeded declarations')
+    remove_UnneededDeclarations(simpLHS, simpRHS)
+
+    # mark unused AUTOVARS Equations by putting in zeros
+    print('Marking unused AUTOVARS equations')
+    mark_unused_AUTOVARS(simpLHS, simpRHS)
+
+    # update list of Eqs that we actually need
+    print('Removing unused AUTOVARS equations')
+    simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
+
+    # mark unused Declarations by putting in zeros
+    if RemoveUnusedDeclarations == True:
+        print('Marking unused declarations')
+        mark_unused_VarDeclarations(simpLHS, simpRHS)
+        #print(simpLHS)
+        #print(simpRHS)
+
+        # update list of Eqs that we actually need
+        print('Removing unused AUTOVARS equations')
+        simpLHS, simpRHS, simp_eq_i = Eqs_to_keep_after_SymmetryElimination([simpLHS, simpRHS])
+
+    # set result
+    allEqsComps = [simpLHS, simpRHS]
+    #print('===========')
+    #print('Components:')
+    #print('===========')
+    #for eq_i in range(len(allEqsComps[0])):
+    #    for comp in range(len(allEqsComps[0][eq_i])):
+    #        print(allEqsComps[0][eq_i][comp], '=', allEqsComps[1][eq_i][comp])
+    return allEqsComps
 
 
 ###########################################################################
