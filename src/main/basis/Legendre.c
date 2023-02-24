@@ -348,6 +348,30 @@ void LG_x_wquad(int np, double *x, double *w)
   }
 }
 
+/* Integral I over a sphere:
+   I = \int_0^{2\pi} d\phi [ \int_0^{\pi} d\theta \sin(\theta) f(\phi,\theta) ]
+        ~ (\pi/n) \sum_{j=0}^{2n-1} \sum_{i=0}^{n-1} w_i f(\phi_j,\theta_i)
+   where we use 2n points in the phi-dir:
+     \phi_j = \pi j/n,      j \in [0,2n-1]
+   and n points in the theta-dir:
+     \theta_i = acos(x_i),  i \in [0,n-1]
+     (the x_i are the Legendre Gauss nodes with weights w_i)
+   NOTE: f[j][i] = f(\phi_j,\theta_i), i.e. phi is first!!!
+   We need to get w[i] via LG_x_wquad(n,x,w); */
+double LG_integrate_f_phi_theta(int n, const double *w,
+                                CONST double f[2*n][n])
+{
+  int i, j;
+  double I = 0.;
+
+  for(j=0; j<2*n; j++)
+    for(i=0; i<n; i++)
+      I += f[j][i] * w[i];
+
+  I *= PI/n;
+  return I;
+}
+
 
 /* ************************************************************************ */
 /* various functions needed for equally spaced points or nodes              */
