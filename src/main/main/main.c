@@ -27,22 +27,6 @@ int main(int argc, char **argv)
 {
   tMesh *mesh;
 
-  double x[222], w[222];
-  int np = 4;
-  double f[2*np][np];
-  //LGL_x_wquad(np, x, w);
-  LG_x_wquad(np, x, w);
-  for(int j=0; j<2*np; j++)
-    for(int i=0; i<np; i++)
-      f[j][i] = sin(2*0.5*acos(x[i]));
-
-  for(int i=0; i<np; i++)
-    printf("i=%d x=%g w=%g\n", i, x[i], w[i]);
-
-  printf("I/2pi = %g\n", LG_integrate_f_phi_theta(np, w, f)/(2*PI));
-
-  exit(8);
-
   nMPI_Init(&argc, &argv);
   wait_for_debugger_if_NMESH_MPI_DEBUG();
   nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
