@@ -66,6 +66,7 @@ double basis_normLegendreP(int i, double x, int np);
 void LGL_x_wquad(int npoints, double *x, double *w);
 void LGL_AT_ST_matrices(int n, const double *x, const double *w,
                         double *AT, double *ST);
+void LG_x_wquad(int npoints, double *x, double *w);
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w);
 void uniform_x_wGaussquad(int npoints, double *x, double *w);
 void uniform_x_wTrapez(int npoints, double *x, double *w);

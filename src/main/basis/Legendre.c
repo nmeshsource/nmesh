@@ -284,6 +284,72 @@ void LGL_AT_ST_matrices(int n, const double *x, const double *w,
 
 
 /* ************************************************************************ */
+/* various functions needed for Legendre Gauss-points or nodes      */
+/* ************************************************************************ */
+
+/* Legendre Gauss nodes x_i (zeros of P_np(x)) and integration weights w_i
+   (see Gauss' formula on p. 887 of Milton Abramowitz and Irene A. Stegun)
+   N = degree, so there are np = N+1 points */
+void LG_x_wquad(int np, double *x, double *w)
+{
+  int N = np-1;
+  double np2 = np*np;
+  int i,j;
+  double P, dP, Q, dQ, y, dy;
+  int Newton_itmax = 100;
+  double Newton_rel_dytol = 1e-15;
+
+  /* special case for just 1 point */
+  if(N == 0)
+  {
+    x[N] = 0.;
+    if(w) w[N] = 2.;
+    return;
+  }
+
+  /* get nodes in (-1,0] */
+  for(j = 0; j <= N/2; j++)
+  {
+    if(j == N/2.0)  /* same as: if( (N%2==0 && j==N/2) ) */
+    {
+      y = 0.;
+    }
+    else
+    {
+      /* guess for node */
+      y = -( 1. - 1./(8.*np2) + 1./(8.*np2*np) ) * cos((4*j+3)*PI/(4*np+2.));
+      //printf("guess y=%g", y);
+
+      /* find y such that P(y) = 0,
+         use Newton method to refine guess from line above */
+      for(i = 0; i < Newton_itmax; i++)
+      {
+        Legendre_P_dP_Q_dQ(np, y, &P, &dP, &Q, &dQ);
+        dy = - P / dP;
+        y += dy;
+        if(fabs(dy) < fabs(Newton_rel_dytol * y)) break;
+      }
+      //printf(" => y=%g\n", y);
+    }
+
+    /* set x array for [0,1] and [-1,0] */
+    x[N-j] = -y;
+    x[j]   =  y;
+
+    /* set dP */
+    Legendre_P_dP_Q_dQ(np, y, &P, &dP, &Q, &dQ);
+    //printf("      y=%g P=%g dP=%g\n", y, P, dP);
+
+    if(w)
+    {
+      w[j] = 2.0/((1. - y*y) * dP*dP);
+      w[N-j] = w[j];
+    }
+  }
+}
+
+
+/* ************************************************************************ */
 /* various functions needed for equally spaced points or nodes              */
 /* ************************************************************************ */
 
