@@ -18,3 +18,5 @@ int free_gridpoints(tMesh *mesh);
 
 /* Fourier.c */
 void Fourier_coeffs(int N, const double u[], double c[]);
+void set_TrafoArray(tArray *At,
+                    void (*get_coeffs)(int N, const double *u, double *c));
