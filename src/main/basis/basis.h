@@ -17,4 +17,4 @@ int init_gridpoints(tMesh *mesh);
 int free_gridpoints(tMesh *mesh);
 
 /* Fourier.c */
-void Fourier_coeffs(int N, double c[], const double u[]);
+void Fourier_coeffs(int N, const double u[], double c[]);

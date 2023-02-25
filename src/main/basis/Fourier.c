@@ -56,7 +56,7 @@ void Fourier_int(int N, const double c[], double cint[], double L)
   cint[0] = 0.5*n*L*c[0]/((double) N);
 */
   for(j=0; j<N; j++) u[j]=j*L/N;
-  Fourier_coeffs(N, cint, u); /* get coeffs of the integral of 1 */
+  Fourier_coeffs(N, u, cint); /* get coeffs of the integral of 1 */
   for(j=0; j<N; j++) cint[j] *= c[0]/N;
 
   /* add terms coming from integrating everything but the c[0] term */
@@ -75,7 +75,7 @@ void Fourier_int(int N, const double c[], double cint[], double L)
 /* compute Four coeffs c[0...N-1] from function u
    at x_k = k/N, k=0,...,N-1
 NOTE: Fourier_coeffs returns c[] that are N times of those of four_coeffs_alt */
-void Fourier_coeffs(int N, double c[], const double u[])
+void Fourier_coeffs(int N, const double u[], double c[])
 {
   int k, j;
   double Re_c_j, Im_c_j, PI2oN;
@@ -156,7 +156,7 @@ void Fourier_test_print(int N)
   for(i=0; i<N; i++)
     f[i] = 2*PI*i/N;
 
-  Fourier_coeffs(N, c, f);
+  Fourier_coeffs(N, f, c);
   Fourier_eval(N, c, f2);
   Fourier_int(N, c, cint, L);
   Fourier_deriv(N, c, cder, L);
