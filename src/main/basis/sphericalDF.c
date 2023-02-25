@@ -13,6 +13,16 @@
 
 
 
+/* set theta_i, phi_j for sphericalDF */
+void sphericalDF_theta_phi(int i, int j, const int *n,
+                           double *theta_i, double *phi_j)
+{
+  int N = n[0];
+  double thm = 2*PI*i/N;
+  *theta_i = thm + PI/((1+N%2)*N);
+  *phi_j   = 2*PI*j/n[1];
+}
+
 
 /* Integrate over a 2-sphere where we have double covering, because
    0 <= theta < 2pi
