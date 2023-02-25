@@ -7,8 +7,8 @@
 
 /* sphericalDF arrays have data with
    d[Ind_n(i,j,k,n)] is such that
-   i <--> theta
-   j <--> phi
+   i <--> theta \in [0,2pi)
+   j <--> phi   \in [0,2pi)
    k <--> 3rd dim. e.g. for integral against several sph. harmonics */
 
 
