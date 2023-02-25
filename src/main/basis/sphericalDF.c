@@ -39,20 +39,31 @@ I.e. we integrate over a 2d array
    Out: 1d array Uk with 2d integral uijk over theta and phi for each k */
 void sphericalDF_2dIntegral(tArray *uijk, tArray *Uk)
 {
+  int *n = Arrn(uijk);
+  double *u = Arrd(uijk);
+  double *U = Arrd(Uk);
+  tArray *Cik = alloc_array2d(n[0], n[2]);
+  double *C = Arrd(Cik);
   /* make ana matrix At for Fourier in theta-dir */
   // call func
 
   /* integrate over phi, and write result into 2d arr Uik */
-  for(k
+  for(k=0; k<n[2]; k++)
   {
-    for(i
+    for(i=0; i<n[0]; i++)
     {
+      double c0;
       /* sum uijk over j: sum -> Uik */
+      c0 = 0.;
+      for(j=0; j<n[1]; j++)  c0 += u[Ind_n(i,j,k,n)];
+      C[i + n[2]*k] = c0;
     }
 
     /* get Fourier coeffs Cik using At, maybe can use Uik to store Cik */
+    mm_array0_norestrict(At, Cik, ACik);
 
     // use coeffs as in spec_sphericalDF2dIntegral_at_radial_index_i
     // to find integral, write into Uk
   }
+  free_array(Cik);
 }
