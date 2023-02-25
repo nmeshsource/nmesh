@@ -104,3 +104,30 @@ void sphericalDF_2dIntegral(tArray *auijk, tArray *aUk)
   free_array(aCik);
   free_array(aUik);
 }
+
+
+/* copy sphericalDF array into double covered regions */
+void sphericalDF_copy_to_doubleCoveredPoints(tArray *AsDF)
+{
+  double *arr = Arrd(AsDF);
+  int *n = Arrn(AsDF);
+  int n0 = n[0], n1 = n[1], n2 = n[2];
+  int k;
+
+  /* check if we can copy data into double covered regions */
+  if( n0%2 || n1%2 )
+    errorexit("n0 and n1 must be even!");
+
+  /* copy arr into double covered regions */
+  for(k = 0; k < n2; k++)
+  {
+    int i,j;
+    for(j = 0;    j < n1/2; j++)
+      for(i = n0/2; i < n0; i++)
+        arr[Ind_n(i,j,k ,n)] = arr[Ind_n(n0-i-1,j+n1/2,k ,n)];
+
+    for(j = n1/2; j < n1; j++)
+      for(i = n0/2; i < n0; i++)
+        arr[Ind_n(i,j,k ,n)] = arr[Ind_n(n0-i-1,j-n1/2,k ,n)];
+  }
+}
