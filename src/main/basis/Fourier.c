@@ -146,10 +146,50 @@ double Fourier_basisfunc(int N, int k, double X, double L)
 }
 
 
+/* init a np*np matrix M used to compute coeffs */
+void set_TrafoMatrix(int np, double *M,
+                     void (*get_coeffs)(int N, const double *u, double *c))
+{
+  int i,j;
+  double *u = (double *) calloc(np, sizeof(double));
+  double *c = (double *) calloc(np, sizeof(double));
+
+  if( !(u && c) ) errorexit("out of memory for u, c");
+
+  /* read matrix from functions */
+  for(j=0; j<np; j++)
+  {
+    u[j]=1.0;
+
+    get_coeffs(np, u, c);
+
+    /* set M */
+    for(i=0; i<np; i++) M[np*i + j] = c[i];
+
+    u[j]=0.0;
+  }
+  free(u);
+  free(c);
+}
+
+/* put matrix from set_TrafoMatrix into N*N array */
+void set_TrafoArray(tArray *At,
+                    void (*get_coeffs)(int N, const double *u, double *c))
+{
+  int *n = Arrn(At);
+  double *M = Arrd(At);
+
+  set_TrafoMatrix(n[0], M, get_coeffs);
+}
+
+
 /* print test results */
 void Fourier_test_print(int N)
 {
-  double f[N], c[N], cder[N], cint[N], f2[N], f3[N];
+  double f[N], c[N], cder[N], cint[N], f2[N], f3[N], c2[N];
+  tArray *At = alloc_array2d(N,N);
+  tArray *F = alloc_empty_array2d(N,1);
+  tArray *C = alloc_empty_array2d(N,1);
   double L=2*PI;
   int i;
 
@@ -173,6 +213,20 @@ void Fourier_test_print(int N)
   for(i=0; i<N; i++)
     printf("%.3e %.2e %.2e %.9e %.9e %.9e\n",
            f[i], f2[i]-f[i], f3[i]-f[i], c[i], cder[i], cint[i]);
+
+  set_TrafoArray(At, Fourier_coeffs);
+  //printarray(At);
+  point_array_d_to_data(F, f, 1);
+  point_array_d_to_data(C, c2, 1);
+  mm_array0(At, F, C);
+  for(i=0; i<N; i++)
+  {
+    //printf("c2-c=%.17e\n", c2[i]-c[i]);
+    if(fabs(c2[i]-c[i])>1e-12) errorexit("c2 != c");
+  }
+  free_array(C);
+  free_array(F);
+  free_array(At);
 }
 
 /* start test */
