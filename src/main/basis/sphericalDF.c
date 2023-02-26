@@ -177,6 +177,7 @@ void sphericalDF_test(void)
   tArray *aI;
   double *f;
   int i,j,k;
+  double th,ph;
 
   n[0] = n[1] = 8;
   n[2] = 7;
@@ -189,7 +190,6 @@ void sphericalDF_test(void)
     for(j=0; j<n[1]; j++)
     for(i=0; i<n[0]; i++)
     {
-      double th,ph;
       sphericalDF_theta_phi(i,j, n, &th, &ph);
       //thm=i*2*PI/n[0];
 
@@ -223,6 +223,9 @@ void sphericalDF_test(void)
   printf("f");printarray(aF);
   sphericalDF_copy_to_doubleCoveredPoints(aF);
   printf("f");printarray(aF);
+
+  sphericalDF_theta_phi(0,0, n, &th, &ph);
+  printf("first point: th=%g\n", th);
 
   sphericalDF_2dIntegral(aF, aI);
   printf("I");printarray(aI);

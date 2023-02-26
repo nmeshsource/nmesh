@@ -398,6 +398,117 @@ void LG_integrate_f_theta_phi_test(void)
   printf("I/pi^2 = %g\n", LG_integrate_f_theta_phi(np, w, f)/(PI*PI));
 }
 
+/* set arrays with Legendre-Gauss points and weights in one dir */
+void LG_set_Xb_Wq(tArray *Xb, tArray *Wq)
+{
+  double *x   = Arrd(Xb);
+  double *w   = Arrd(Wq);
+  int *np = Arrn(Xb);
+  int *nw = Arrn(Wq);
+  if(np[0] != nw[0]) errorexit("we need np[0] = nw[0]");
+  LG_x_wquad(np[0], x, w);
+}
+
+/* set theta_i, phi_j for sphericalDF */
+void LG_2Sphere_get_zi_theta_phi(tArray *Zb, int i, int j,
+                                 double *z_i, double *theta_i, double *phi_j)
+{
+  double *z = Arrd(Zb);
+  int n0 = Arrn(Zb)[0];
+  int n1 = 2*n0;
+  *z_i     = z[i];
+  *theta_i = acos(*z_i);
+  *phi_j   = 2*PI*j/n1;
+}
+
+/* Integrate over a 2-sphere:
+   U_k = \int_0^{pi) dtheta \int_0^{2pi) dphi u(theta,phi,k) |sin(theta)|
+       = \int_0^{2pi) dphi \int_{-1}^{1} dz u(z,phi,k)
+   In:  3d array auijk = u(z_i, phi_j, k) = u(theta_i, phi_j, k)
+        Here theta_i = acos(z_i),  z_i are Gauss nodes \in (-1,1)
+             phi_j   = 2*PI*j/n1                     n1 = n_phi
+   Out: 1d array aUk with 2d integral I_k for each k  */
+void LG_2SphereIntegral(tArray *auijk, tArray *Wq, tArray *aUk)
+{
+  double *uijk = Arrd(auijk);
+  double *w    = Arrd(Wq);
+  double *Uk   = Arrd(aUk);
+  int *n = Arrn(auijk);
+  int n0 = n[0], n1 = n[1];
+  int k;
+
+  if(n1 != 2*n0) errorexit("we need n[1] = 2*n[0]");
+  for(k=0; k<n[2]; k++)
+  {
+    double *uij = &(uijk[n0*n1*k]);
+    Uk[k] = LG_integrate_f_theta_phi(n0, w, uij);
+  }
+}
+
+/* test for LG_2SphereIntegral */
+void LG_2SphereIntegral_test(void)
+{
+  int np = 4;
+  tArray *Zb = alloc_array1d(np);
+  tArray *Wq = alloc_array1d(np);
+  int n[] = {np, 2*np, 7};
+  tArray *auijk = alloc_array(n);
+  tArray *aUk   = alloc_array1d(n[2]);
+  double *uijk = Arrd(auijk);
+  double *Uk   = Arrd(aUk);
+  int i,j,k;
+  double z, th, ph;
+
+  /* set points in z-dir and weights */
+  LG_set_Xb_Wq(Zb, Wq);
+
+  for(k=0; k<n[2]; k++)
+    for(j=0; j<2*np; j++)
+      for(i=0; i<np; i++)
+      {
+        LG_2Sphere_get_zi_theta_phi(Zb, i,j, &z, &th, &ph);
+        //printf("%g\n", acos(z)-th);
+
+        switch(k)
+        {
+        case 0:
+          uijk[Ind_n(i,j,k,n)] = (i+1) + 10*(j+1);
+          break;
+        case 1:
+          uijk[Ind_n(i,j,k,n)] = 1./(4*PI);
+          break;
+        case 2:
+          uijk[Ind_n(i,j,k,n)] = cos(ph)*cos(ph)/(4*PI);
+          break;
+        case 3:
+          uijk[Ind_n(i,j,k,n)] = sin(th)*sin(th)*cos(ph)*cos(ph)/(PI);
+          break;
+        case 4:
+          uijk[Ind_n(i,j,k,n)] = cos(th)/(4*PI);
+          break;
+        case 5:
+          uijk[Ind_n(i,j,k,n)] = cos(th)*cos(th)/(2*PI);
+          break;
+        case 6:
+          uijk[Ind_n(i,j,k,n)] = sin(th)/(PI*PI);
+          break;
+        }
+      }
+
+  LG_2Sphere_get_zi_theta_phi(Zb, np-1,0, &z, &th, &ph);
+  printf("last point: z=%g th=%g\n", z, th);
+  LG_2SphereIntegral(auijk, Wq, aUk);
+  printf("I");printarray(aUk);
+
+  printf("\\int sin^2(th)/pi^2 = %g\n", Uk[6]);
+  free_array(aUk);
+  free_array(auijk);
+  free_array(Wq);
+  free_array(Zb);
+}
+
+
+
 /* ************************************************************************ */
 /* various functions needed for equally spaced points or nodes              */
 /* ************************************************************************ */
