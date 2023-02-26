@@ -625,3 +625,32 @@ errorexit("extract_vals_pts_around_Xb is unfinished!!!");
   //... set points in pts and then vals
 
 }
+
+
+/***********************************************************************/
+/* interpolate to a given x,y,z */
+/***********************************************************************/
+
+/* find node and Xb of xyz[3] and then use use basis_array_interp
+   to interpolate var ivar onto xyz[3] */
+double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
+                            double basis(int k, double x, int np,
+                                         const double *x_p,
+                                         const double *w_interp))
+{
+  double vinterp;
+  double X[3], Xb[3];
+  tNode *node = node_XYZ_of_xyz_mesh(mesh, X, xyz);
+
+  if(!node) errorexit("could not find point xyz");
+
+  if(node->dat)
+  {
+    XbYbZb_of_XYZ(node, Xb, X);
+    vinterp = basis_array_interp(node, VarA(node, ivar), Xb, basis);
+  }
+
+  nMPI_Bcast(&vinterp, 1, nMPI_DOUBLE, node->datrank);
+
+  return vinterp;
+}
