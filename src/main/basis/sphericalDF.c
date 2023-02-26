@@ -63,15 +63,16 @@ void sphericalDF_2dIntegral(tArray *auijk, tArray *aUk)
     }
   }
 
-  //printf("auijk"); printarray(auijk);
-  printf("aUik"); printarray(aUik);
-
   /* make analysis matrix At for Fourier in theta-dir */
   set_TrafoArray(At, Fourier_coeffs);
 
   /* get Fourier coeffs aCik using At */
   mm_array0(At, aUik, aCik);
-  printf("aCik"); printarray(aCik);
+
+  ////printf("auijk"); printarray(auijk);
+  //printf("At"); printarray(At);
+  //printf("aUik"); printarray(aUik);
+  //printf("aCik"); printarray(aCik);
 
   /* use coeffs in aCik to find integral over theta for every k */
   L = PI2; /* assume theta goes from 0 to 2Pi */
@@ -86,24 +87,38 @@ void sphericalDF_2dIntegral(tArray *auijk, tArray *aUk)
 
     /* Note:
        if we expand in terms of coeffs we get:
-       u(theta) = a_0
-                 +\sum_{m=1}^{N-1}[ a_m cos(m \theta) + b_m sin(m \theta) ]
-       we need I = \int_0^{\pi} u(theta) sin(\theta) d\theta
+       u(theta) = aa_0
+                 +2\sum_{n=1}^{N-1}[ aa_n cos(n theta) + bb_n sin(n theta) ]
+       we need I = \int_0^{\pi} u(theta) sin(theta) dtheta
        Integrate[Sin[x], {x, 0,Pi}]
         = 2
-       Simplify[ Integrate[Sin[m*x]*Sin[x], {x, 0,Pi}] ]
+       Simplify[ Integrate[Sin[x]*Sin[x], {x, 0,Pi}] ]
+        = Pi/2
+       Simplify[ Integrate[Sin[n*x]*Sin[x], {x, 0,Pi}] ]
         = 0
-       Simplify[ Integrate[Cos[m*x]*Sin[x], {x, 0,Pi}] ]
-        = (1 + (-1)^m)/(1 - m^2)
+       Simplify[ Integrate[Cos[n*x]*Sin[x], {x, 0,Pi}] ]
+        = (1 + (-1)^n)/(1 - n^2)
        ==>
-       I = a_0 * 2 + \sum_{n=1}^{N/2} a_{2n} * 2/(1 - n^2)      */
+       I = aa_0 * 2 + 2bb_1 * Pi/2 + 2\sum_{even n} aa_n * 2/(1 - n^2)
+       ---------------------------------------------------------------
+       BUT we really expand in thm not theta = thm + PI/((1+N%2)*N)
+       Thus we get the coeffs
+       c_n := a_n + i b_n
+       and
+       u(thm) = c_0 + 2\sum_{n=1}^{N-1} c_n e^{-i n thm}
+              = c_0 + 2\sum_{n=1}^{N-1} c_n e^{-i n theta} e^{i 2Pi d n}
+       where d = 1./(2.*(1+N%2)*N)
+       Thus
+       u(theta) = cc_0 + 2\sum_{n=1}^{N-1} cc_n e^{-i n theta}
+       with cc_n = e^{i 2Pi d n} c_n =: aa_n + i bb_n
+       ==> aa_n = cos(2Pi d n) Re_c_n - sin(2Pi d n) Im_c_n
+           bb_n = sin(2Pi d n) Re_c_n + cos(2Pi d n) Im_c_n   */
 
     /* sum over all theta-integrated terms */
     sum = (1.0/PI) * Cik[0 + n0*k];
-    printf("%d sum=%g\n", k, sum);
-    sum += 0.5*( sin(PI2*d) * Cik[1 + n0*k]
-                +cos(PI2*d) * Cik[2 + n0*k] );
-    printf("%d sum=%g\n", k, sum);
+    if(N >= 3)
+      sum += 0.5*( sin(PI2*d) * Cik[1 + n0*k]
+                  +cos(PI2*d) * Cik[2 + n0*k] );
     for(n=2;n<N/2;n+=2)
     {
       Re_c_n = Cik[2*n-1 + n0*k];  /* c[2*n-1]; */
@@ -116,7 +131,6 @@ void sphericalDF_2dIntegral(tArray *auijk, tArray *aUk)
 
     /* adjust sum for L and N to obtain integral over theta */
     sum *= L/N;
-    printf("%d sum=%g\n", k, sum);
 
     /* write integral into Uk */
     Uk[k] = sum;
@@ -162,8 +176,7 @@ void sphericalDF_test(void)
   double *f;
   int i,j,k;
 
-
-  n[0] = n[1] = 4;
+  n[0] = n[1] = 16;
   n[2] = 3;
   aF = alloc_array(n);
   aI = alloc_array1d(n[2]);
@@ -176,6 +189,7 @@ void sphericalDF_test(void)
     {
       double th,ph;
       sphericalDF_theta_phi(i,j, n, &th, &ph);
+      //thm=i*2*PI/n[0];
 
       switch(k)
       {
@@ -183,16 +197,16 @@ void sphericalDF_test(void)
         f[Ind_n(i,j,k,n)] = 1;//+j;
         break;
       case 1:
-        f[Ind_n(i,j,k,n)] = cos(ph);
+        f[Ind_n(i,j,k,n)] = cos(ph/2);
         break;
       case 2:
-        f[Ind_n(i,j,k,n)] = cos(2*th);//*sin(th);
+        f[Ind_n(i,j,k,n)] = sin(1*th);//*sin(th);
         break;
       }
     }
   }
 
-  printf("f");printarray(aF);
+  //printf("f");printarray(aF);
   sphericalDF_2dIntegral(aF, aI);
   printf("I");printarray(aI);
 
