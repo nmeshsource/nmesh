@@ -26,10 +26,12 @@ void sphericalDF_theta_phi(int i, int j, const int *n,
 
 /* Integrate over a 2-sphere where we have double covering, because
    0 <= theta < 2pi
+   But we still compute:
+   I_k = \int_0^{pi) dtheta \int_0^{2pi) dphi u(theta,phi,k) |sin(theta)|
    In:  3d array auijk = u(theta_i, phi_j, k)
         Here theta_i = 2*PI*i/n0 + PI/((1+n0%2)*n0)  n0 = n_theta
              phi_j   = 2*PI*j/n1                     n1 = n_phi
-   Out: 1d array aUk with 2d integral uijk over theta and phi for each k
+   Out: 1d array aUk with 2d integral I_k for each k
    Steps we take to  integrate over a 2d array:
    -do phi-integral for every theta -> 1d array(theta)
    -integrate 1d-array(theta), for this we need ana matrix At for Fourier */
@@ -151,7 +153,7 @@ void sphericalDF_copy_to_doubleCoveredPoints(tArray *AsDF)
 
   /* check if we can copy data into double covered regions */
   if( n0%2 || n1%2 )
-    errorexit("n0 and n1 must be even!");
+    errorexit("n[0] and n[1] must be even!");
 
   /* copy arr into double covered regions */
   for(k = 0; k < n2; k++)
@@ -176,8 +178,8 @@ void sphericalDF_test(void)
   double *f;
   int i,j,k;
 
-  n[0] = n[1] = 16;
-  n[2] = 3;
+  n[0] = n[1] = 6;
+  n[2] = 6;
   aF = alloc_array(n);
   aI = alloc_array1d(n[2]);
   f = Arrd(aF);
@@ -194,19 +196,31 @@ void sphericalDF_test(void)
       switch(k)
       {
       case 0:
-        f[Ind_n(i,j,k,n)] = 1;//+j;
+        f[Ind_n(i,j,k,n)] = (i+1) + 10*(j+1);
         break;
       case 1:
-        f[Ind_n(i,j,k,n)] = cos(ph/2);
+        f[Ind_n(i,j,k,n)] = 1./(4*PI);
         break;
       case 2:
-        f[Ind_n(i,j,k,n)] = sin(1*th);//*sin(th);
+        f[Ind_n(i,j,k,n)] = cos(ph)*cos(ph)/(4*PI);
+        break;
+      case 3:
+        f[Ind_n(i,j,k,n)] = sin(th)*sin(th)*cos(ph)*cos(ph)/(PI);
+        break;
+      case 4:
+        f[Ind_n(i,j,k,n)] = cos(th)/(4*PI);
+        break;
+      case 5:
+        f[Ind_n(i,j,k,n)] = cos(th)*cos(th)/(2*PI);
         break;
       }
     }
   }
 
-  //printf("f");printarray(aF);
+  printf("f");printarray(aF);
+  sphericalDF_copy_to_doubleCoveredPoints(aF);
+  printf("f");printarray(aF);
+
   sphericalDF_2dIntegral(aF, aI);
   printf("I");printarray(aI);
 
