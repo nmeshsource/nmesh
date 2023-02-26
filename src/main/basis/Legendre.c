@@ -348,7 +348,11 @@ void LG_x_wquad(int np, double *x, double *w)
   }
 }
 
-/* Integral I over a sphere:
+/* KENDALL ATKINSON, "NUMERICAL INTEGRATION ON THE SPHERE",
+   J. Austral. Math. Soc. (Series B) 23 (1982), 332-347
+   https://www.cambridge.org/core/services/aop-cambridge-core/content/view/1E811EF7FC701F86F8F530C020F65AC8/S0334270000000278a.pdf/numerical-integration-on-the-sphere.pdf
+
+   Integral I over a sphere:
    I = \int_0^{2\pi} d\phi [ \int_0^{\pi} d\theta \sin(\theta) f(\theta,\phi) ]
      ~ (\pi/n) \sum_{j=0}^{2n-1} \sum_{i=0}^{n-1} w_i f(\theta_i,\phi_j)
    where we use 2n points in the phi-dir:
@@ -356,6 +360,10 @@ void LG_x_wquad(int np, double *x, double *w)
    and n points in the theta-dir:
      \theta_i = acos(x_i),  i \in [0,n-1]
      (the x_i are the Legendre Gauss nodes with weights w_i)
+
+   "With this choice of node points and weights, I integrates exactly any
+    polynomial f(x, y, z) of degree less than 2n."
+
    Note: f[i + j*n] = f(\theta_i,\phi_j,),
    We need to get w[i] via LG_x_wquad(n,x,w); */
 double LG_integrate_f_theta_phi(int n, const double *w,
