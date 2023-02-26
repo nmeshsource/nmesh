@@ -27,17 +27,6 @@ int main(int argc, char **argv)
 {
   tMesh *mesh;
 
-void Fourier_test(void);
-  Fourier_test();
-
-void sphericalDF_test(void);
-  sphericalDF_test();
-
-void LG_integrate_f_theta_phi_test(void);
-  LG_integrate_f_theta_phi_test();
-
-  exit(8);
-
   nMPI_Init(&argc, &argv);
   wait_for_debugger_if_NMESH_MPI_DEBUG();
   nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
