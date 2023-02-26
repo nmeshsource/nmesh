@@ -178,8 +178,8 @@ void sphericalDF_test(void)
   double *f;
   int i,j,k;
 
-  n[0] = n[1] = 6;
-  n[2] = 6;
+  n[0] = n[1] = 8;
+  n[2] = 7;
   aF = alloc_array(n);
   aI = alloc_array1d(n[2]);
   f = Arrd(aF);
@@ -212,6 +212,9 @@ void sphericalDF_test(void)
         break;
       case 5:
         f[Ind_n(i,j,k,n)] = cos(th)*cos(th)/(2*PI);
+        break;
+      case 6:
+        f[Ind_n(i,j,k,n)] = sin(th)/(PI*PI);
         break;
       }
     }

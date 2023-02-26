@@ -380,6 +380,23 @@ double LG_integrate_f_theta_phi(int n, const double *w,
   return I;
 }
 
+/* test for LG_integrate_f_theta_phi */
+void LG_integrate_f_theta_phi_test(void)
+{
+  double x[222], w[222];
+  int np = 4;
+  double f[2*np*np];
+  //LGL_x_wquad(np, x, w);
+  LG_x_wquad(np, x, w);
+  for(int j=0; j<2*np; j++)
+    for(int i=0; i<np; i++)
+      f[i + np*j] = sin(2*0.5*acos(x[i]));
+
+  for(int i=0; i<np; i++)
+    printf("i=%d x=%g w=%g\n", i, x[i], w[i]);
+
+  printf("I/pi^2 = %g\n", LG_integrate_f_theta_phi(np, w, f)/(PI*PI));
+}
 
 /* ************************************************************************ */
 /* various functions needed for equally spaced points or nodes              */

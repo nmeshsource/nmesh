@@ -33,6 +33,9 @@ void Fourier_test(void);
 void sphericalDF_test(void);
   sphericalDF_test();
 
+void LG_integrate_f_theta_phi_test(void);
+  LG_integrate_f_theta_phi_test();
+
   exit(8);
 
   nMPI_Init(&argc, &argv);
