@@ -68,7 +68,7 @@ void LGL_AT_ST_matrices(int n, const double *x, const double *w,
                         double *AT, double *ST);
 void LG_x_wquad(int npoints, double *x, double *w);
 void LG_set_Xb_Wq(tArray *Xb, tArray *Wq);
-void LG_2Sphere_get_zi_theta_phi(tArray *Zb, int i, int j,
+void LG_2Sphere_get_zi_theta_phi(tArray *Zb, int nphi, int i, int j,
                                  double *z_i, double *theta_i, double *phi_j);
 void LG_2SphereIntegral(tArray *auijk, tArray *Wq, tArray *aUk);
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w);

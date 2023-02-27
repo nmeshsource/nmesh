@@ -410,15 +410,13 @@ void LG_set_Xb_Wq(tArray *Xb, tArray *Wq)
 }
 
 /* set theta_i, phi_j for sphericalDF */
-void LG_2Sphere_get_zi_theta_phi(tArray *Zb, int i, int j,
+void LG_2Sphere_get_zi_theta_phi(tArray *Zb, int nphi, int i, int j,
                                  double *z_i, double *theta_i, double *phi_j)
 {
   double *z = Arrd(Zb);
-  int n0 = Arrn(Zb)[0];
-  int n1 = 2*n0;
   *z_i     = z[i];
   *theta_i = acos(*z_i);
-  *phi_j   = 2*PI*j/n1;
+  *phi_j   = 2*PI*j/nphi;
 }
 
 /* Integrate over a 2-sphere:
@@ -462,10 +460,10 @@ void LG_2SphereIntegral_test(void)
   LG_set_Xb_Wq(Zb, Wq);
 
   for(k=0; k<n[2]; k++)
-    for(j=0; j<2*np; j++)
-      for(i=0; i<np; i++)
+    for(j=0; j<n[1]; j++)
+      for(i=0; i<n[0]; i++)
       {
-        LG_2Sphere_get_zi_theta_phi(Zb, i,j, &z, &th, &ph);
+        LG_2Sphere_get_zi_theta_phi(Zb,n[1], i,j, &z, &th, &ph);
         //printf("%g\n", acos(z)-th);
 
         switch(k)
@@ -494,7 +492,7 @@ void LG_2SphereIntegral_test(void)
         }
       }
 
-  LG_2Sphere_get_zi_theta_phi(Zb, np-1,0, &z, &th, &ph);
+  LG_2Sphere_get_zi_theta_phi(Zb,n[1], n[0]-1,0, &z, &th, &ph);
   printf("last point: z=%g th=%g\n", z, th);
   LG_2SphereIntegral(auijk, Wq, aUk);
   printf("I");printarray(aUk);
