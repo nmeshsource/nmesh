@@ -642,6 +642,10 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, xyz);
 
+  //pr3v("xyz", xyz);
+  //pr3v("X", X);
+  //printf("node->nid=%ld node->datrank=%d\n", node->nid, node->datrank);
+
   if(!node) errorexit("could not find point xyz");
 
   if(node->dat)
@@ -650,7 +654,9 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
     vinterp = basis_array_interp(node, VarA(node, ivar), Xb, basis);
   }
 
+  //printf("vinterp=%g\n", vinterp);
   nMPI_Bcast(&vinterp, 1, nMPI_DOUBLE, node->datrank);
+  //printf("vinterp=%g\n", vinterp);
 
   return vinterp;
 }
