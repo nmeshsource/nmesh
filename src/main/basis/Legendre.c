@@ -365,18 +365,18 @@ void LG_x_wquad(int np, double *x, double *w)
     polynomial f(x, y, z) of degree less than 2n."
 
    Note: f[i + j*n] = f(\theta_i,\phi_j,),
-   We need to get w[i] via LG_x_wquad(n,x,w); */
-double LG_integrate_f_theta_phi(int n, const double *w,
-                                const double f[2*n * n])
+   We need to get w[i] via LG_x_wquad(n,x,w); and usually nphi = 2*ntheta */
+double LG_integrate_f_theta_phi(int ntheta, int nphi, const double *w,
+                                const double f[nphi * ntheta])
 {
   int i, j;
   double I = 0.;
 
-  for(j=0; j<2*n; j++)
-    for(i=0; i<n; i++)
-      I += f[j*n + i] * w[i];
+  for(j=0; j<nphi; j++)
+    for(i=0; i<ntheta; i++)
+      I += f[j*ntheta + i] * w[i];
 
-  I *= PI/n;
+  I *= 2.*PI/nphi;
   return I;
 }
 
@@ -395,7 +395,7 @@ void LG_integrate_f_theta_phi_test(void)
   for(int i=0; i<np; i++)
     printf("i=%d x=%g w=%g\n", i, x[i], w[i]);
 
-  printf("I/pi^2 = %g\n", LG_integrate_f_theta_phi(np, w, f)/(PI*PI));
+  printf("I/pi^2 = %g\n", LG_integrate_f_theta_phi(np,2*np, w, f)/(PI*PI));
 }
 
 /* set arrays with Legendre-Gauss points and weights in one dir */
@@ -437,11 +437,10 @@ void LG_2SphereIntegral(tArray *auijk, tArray *Wq, tArray *aUk)
   int n0 = n[0], n1 = n[1];
   int k;
 
-  if(n1 != 2*n0) errorexit("we need n[1] = 2*n[0]");
   for(k=0; k<n[2]; k++)
   {
     double *uij = &(uijk[n0*n1*k]);
-    Uk[k] = LG_integrate_f_theta_phi(n0, w, uij);
+    Uk[k] = LG_integrate_f_theta_phi(n0,n1, w, uij);
   }
 }
 
