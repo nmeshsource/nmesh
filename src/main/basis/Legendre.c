@@ -448,7 +448,7 @@ void LG_2SphereIntegral_test(void)
   int np = 4;
   tArray *Zb = alloc_array1d(np);
   tArray *Wq = alloc_array1d(np);
-  int n[] = {np, 2*np, 7};
+  int n[] = {np, 2*np, 8};
   tArray *auijk = alloc_array(n);
   tArray *aUk   = alloc_array1d(n[2]);
   double *uijk = Arrd(auijk);
@@ -488,6 +488,10 @@ void LG_2SphereIntegral_test(void)
           break;
         case 6:
           uijk[Ind_n(i,j,k,n)] = sin(th)/(PI*PI);
+          break;
+        case 7: // (1 - signum(PI*x + y))/(4*PI)
+          uijk[Ind_n(i,j,k,n)] =
+            (1. - signum( PI*sin(th)*cos(ph) + sin(th)*sin(ph) ))/(4*PI);
           break;
         }
       }
