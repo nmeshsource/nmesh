@@ -1365,11 +1365,14 @@ def make_DeclList(List_of_IndexedObjLists, fstr):
                 indices = []
             # construct string that labels component
             comp = make_CompString(indices)
+            if varcompindex == 0:
+                comp0 = comp
             # construct prefix and suffix strings
             vpre, vsuf = make_PreSufStrings(varbase, '_')
             # string s for one declaration
-            s = fstr.format(VAR=varbase, COMP=comp, LI=listindex, CI=varcompindex,
-                            VARID=varid, VARPRE=vpre, VARSUF=vsuf)
+            s = fstr.format(VAR=varbase, COMP=comp, COMP0=comp0,
+                            LI=listindex, CI=varcompindex, VARID=varid,
+                            VARPRE=vpre, VARSUF=vsuf)
             # add anything that is not zero
             if obj != 0:
                 declist.append(s)
