@@ -239,6 +239,14 @@ install_git_hooks:
 	cp git_hooks/pre-commit .git/hooks
 	for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/.git/hooks" ]; then cp git_hooks/pre-commit $(PROJECTDIR)/$$N/.git/hooks; fi done
 
+# target to build extra utilities
+cc_utilities:
+	$(MAKE) -C utilities
+
+# target to run unit tests
+unittests: cc_utilities
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh unittests.sh; fi done
+
 
 # remove code that is not needed once the corresponding libs have been built
 rm_MemoryMan_code:
