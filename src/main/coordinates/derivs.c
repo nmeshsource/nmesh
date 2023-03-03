@@ -624,14 +624,15 @@ void cart_partials_didjTensor(tNode *node,
   /* get and check number of components of dT and ddT and also set nT */
   cart_partials_SetAndCheck_nT_ndT_nddT(node, dT0,ddT0, &nT, &ndT, &nddT);
 
-  errorexit("2nd deriv part of this function is untested");
+  //printf("nT=%d ndT=%d nddT=%d\n", nT, ndT, nddT);
+  //errorexit("2nd deriv part of this function is untested");
 
   /* 2nd derivs */
-  for(n=0; n<nT; n++) //ddT is symm in first 2 indices => steps of 6*nT below
+  for(n=0; n<nT; n++) //each 2nd deriv ddT has nT comps => steps of nT below
   {
-    cart_3partials(node,dT0+     n, ddT0      +n,ddT0+ 6*nT+n,ddT0+12*nT+n, opt);
-    cart_3partials(node,dT0+  nT+n, ddT0+ 6*nT+n,ddT0+18*nT+n,ddT0+24*nT+n, opt);
-    cart_3partials(node,dT0+2*nT+n, ddT0+12*nT+n,ddT0+24*nT+n,ddT0+30*nT+n, opt);
+    cart_3partials(node,dT0+     n, ddT0      +n,ddT0+  nT+n,ddT0+2*nT+n, opt);
+    cart_3partials(node,dT0+  nT+n, ddT0+   nT+n,ddT0+3*nT+n,ddT0+4*nT+n, opt);
+    cart_3partials(node,dT0+2*nT+n, ddT0+ 2*nT+n,ddT0+4*nT+n,ddT0+5*nT+n, opt);
   }
 }
 
