@@ -630,9 +630,9 @@ void cart_partials_didjTensor(tNode *node,
   /* 2nd derivs */
   for(n=0; n<nT; n++) //each 2nd deriv ddT has nT comps => steps of nT below
   {
-    cart_3partials(node,dT0+     n, ddT0      +n,ddT0+  nT+n,ddT0+2*nT+n, opt);
-    cart_3partials(node,dT0+  nT+n, ddT0+   nT+n,ddT0+3*nT+n,ddT0+4*nT+n, opt);
-    cart_3partials(node,dT0+2*nT+n, ddT0+ 2*nT+n,ddT0+4*nT+n,ddT0+5*nT+n, opt);
+    cart_3partials(node,dT0+     n, ddT0     +n,ddT0+  nT+n,ddT0+2*nT+n, opt);
+    cart_3partials(node,dT0+  nT+n, ddT0+  nT+n,ddT0+3*nT+n,ddT0+4*nT+n, opt);
+    cart_3partials(node,dT0+2*nT+n, ddT0+2*nT+n,ddT0+4*nT+n,ddT0+5*nT+n, opt);
   }
 }
 
