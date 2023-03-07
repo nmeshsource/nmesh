@@ -1643,6 +1643,12 @@ tDat *alloc_dat(tNode *node)
   dat = calloc(1, sizeof(tDat));
   if(!dat) errorexit("out of memory for dat");
 
+  /* set patch number and node location string in dat->info->nodeloc */
+  dat->info->p = node->pat->p;
+  dat->info->l = node->l;
+  node_location_str(node, dat->info->loc, LOCSMAX);
+
+  /* set rest of dat: */
   dat->node = node;
   dat->nv = nv;
   if(nv==0) return dat;
