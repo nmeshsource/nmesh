@@ -186,68 +186,94 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 //...
 
 
-/* look in elm array arr to find nbs of elm on face f */
-void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
-                         int *nfnb, tElm **fnb)
+
+/* pick nb location (with index inbu2) at 2 levels up from elm,
+   and write loc into nbu2eloc */
+void amr_get_nbu2loc(const tElm *elm, int f, int inbu2,
+                     tEloc nbu2eloc[1])
+{
+  /* pick nb loc (with index inbu2) at 2 levels up */
+  nbu2eloc->p = 000; //???
+  nbu2eloc->l = l+2; //???
+  nbu2eloc->loc = "12352"; //???
+}
+
+
+/* Look in elm array arr to find the nb of elm on face f with nb index
+   inbu2. inbu2 is the index of the fnb that is 2 levels up.*/
+void amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
+                  int f, int inbu2,
+                  tElm *fnb[1])
 {
   tElm *nbelm;
   size_t off, num;
   tEloc *eloc = elm->eloc;
-  tEloc nbeloc[1];
+  tEloc nbu2eloc[1];
   tEloc nbfeloc[1];
 
-  /* find nb at same level */
-  nbeloc->p = 000; //???
-  nbeloc->l = l; //???
-  nbeloc->loc = "12352"; //???
+  /* pick nb loc (with index inbu2) at 2 levels up */
+  amr_get_nbu2loc(elm, f, inbu2, nbu2eloc);
 
   /* init */
-  *nfnb = 0 ;
   off = 0;
   num = narr;
 
-  if(nbfeloc->l > 2)
+  if(nbfeloc->l > 4)
   {
-    /* search for grand parent of nbeloc (l-2) */
-    nbfeloc[0] = nbeloc[0];
-    nbfeloc->l = nbeloc->l - 2;
+    /* search for grand-grand-grand parent of nbu2eloc (l-4) */
+    nbfeloc[0] = nbu2eloc[0];
+    nbfeloc->l = nbu2eloc->l - 4;
     nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
     if(!nbelm) return;
   }
 
   /* save nbelm, may need to alloc fnb ??? */
-  fnb[*nfnb] = nbelm;
-  *nfnb = 1;
+  fnb[0] = nbelm;
   if(num<=1) return; /* if there is only one */
 
-  if(nbfeloc->l > 1)
+  if(nbfeloc->l > 3)
   {
-    /* search for parent of nbeloc (l-1) */
-    nbfeloc[0] = nbeloc[0];
-    nbfeloc->l = nbeloc->l - 1;
+    /* search for grand-grand parent of nbu2eloc (l-3) */
+    nbfeloc[0] = nbu2eloc[0];
+    nbfeloc->l = nbu2eloc->l - 3;
     nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
     if(!nbelm) return;
   }
 
   /* save nbelm, may need to alloc fnb ??? */
-  fnb[*nfnb] = nbelm;
-  *nfnb = 1;
+  fnb[0] = nbelm;
   if(num<=1) return; /* if there is only one */
 
-  /* search for nbeloc */
-  nbfeloc[0] = nbeloc[0];
-  nbfeloc->l = nbeloc->l - 1;
+  /* search for grand parent of nbu2eloc (l-2) */
+  nbfeloc[0] = nbu2eloc[0];
+  nbfeloc->l = nbu2eloc->l - 2;
   nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
   if(!nbelm) return;
 
   /* save nbelm, may need to alloc fnb ??? */
-  fnb[*nfnb] = nbelm;
-  *nfnb = 1;
+  fnb[0] = nbelm;
   if(num<=1) return; /* if there is only one */
 
-  /* if we get here, there are several neighbors */
-  //...
-  errorexit("deal with several neighbors");
+  /* search for parent of nbu2eloc (l-1) */
+  nbfeloc[0] = nbu2eloc[0];
+  nbfeloc->l = nbu2eloc->l - 1;
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+  if(!nbelm) return;
+
+  /* save nbelm, may need to alloc fnb ??? */
+  fnb[0] = nbelm;
+  if(num<=1) return; /* if there is only one */
+
+  /* search for nbu2eloc (l) */
+  nbfeloc[0] = nbu2eloc[0];
+  nbfeloc->l = nbu2eloc->l;
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+  if(!nbelm) return;
+
+  /* save nbelm, may need to alloc fnb ??? */
+  fnb[0] = nbelm;
+  if(num<=1) return; /* if there is only one */
+  else errorexit("2 levels up there should be only one nb");
 }
 
 /* return -1,0,1 if loc is before,at,after elem location */
