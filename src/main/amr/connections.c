@@ -7,15 +7,15 @@
 
 
 
-/* find ijk from loc */
+/* find ijk from l,loc by reading last in loc */
 int connections_get_ijk(int l, const char loc[LOCSMAX])
 {
   if(l<1) return 0;
   return loc[l-1] - '0';
 }
 
-/* return 1 if ijk touches node-face */
-int connections_ijk_is_at_nodeface(int ijk, int face)
+/* return 1 if ijk face touches parentnode-face */
+int connections_ijk_is_at_parentface(int ijk, int face)
 {
   int ns[] = {2,2,2};
   /* set node's i,j,k */
@@ -63,23 +63,24 @@ int connections_get_inner_nb_ijk(int ijk, int dir)
 
 /* Out: return value: number of faces l,loc is on
         patface[f] = 1 if l,loc is on patch face f */
-int connections_loc_on_patch_face(int l, const char loc[LOCSMAX],
-                                  int patface[6])
+int connections_loc_on_patchface(int l, const char loc[LOCSMAX],
+                                 int patface[6])
 {
-  int i, f, npatfaces;
+  int ll, f, npatfaces;
 
+  /* set result if l=0 */
   npatfaces = 6;
   for(f=0; f<6; f++) patface[f] = 1;
 
-  if(l<1) return npatfaces;
+  if(l<1) return npatfaces; // <--- not needed
 
-  for(i=0; i<l; i++)
+  for(ll=1; ll<=l; ll++)
   {
-    int ijk = connections_get_ijk(i, loc);
+    int ijk = connections_get_ijk(ll, loc);
 
     for(f=0; f<6; f++)
     {
-      if(!connections_ijk_is_at_nodeface(ijk, f))
+      if(!connections_ijk_is_at_parentface(ijk, f))
       {
         npatfaces--;
         patface[f] = 0;
@@ -99,7 +100,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   int nfaces, patface[6];
   int ijk;
 
-  nfaces = connections_loc_on_patch_patface(l,loc, patface);
+  nfaces = connections_loc_on_patchface(l,loc, patface);
 
   if(patface[face])
   {
@@ -120,7 +121,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   ijk = connections_get_ijk(l, loc);
   nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
 
-  if(connections_ijk_is_at_nodeface(ijk, face))
+  if(connections_ijk_is_at_parentface(ijk, face))
   {
     char pnbloc[LOCSMAX]; /* location of parent nb */
     /* l-1,loc is parent */
@@ -205,22 +206,28 @@ void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
   off = 0;
   num = narr;
 
-  /* search for grand parent of nbeloc (l-2) */
-  nbfeloc[0] = nbeloc[0];
-  nbfeloc->l = nbeloc->l - 2;
-  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-  if(!nbelm) return;
+  if(nbfeloc->l > 2)
+  {
+    /* search for grand parent of nbeloc (l-2) */
+    nbfeloc[0] = nbeloc[0];
+    nbfeloc->l = nbeloc->l - 2;
+    nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+    if(!nbelm) return;
+  }
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[*nfnb] = nbelm;
   *nfnb = 1;
   if(num<=1) return; /* if there is only one */
 
-  /* search for parent of nbeloc (l-1) */
-  nbfeloc[0] = nbeloc[0];
-  nbfeloc->l = nbeloc->l - 1;
-  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-  if(!nbelm) return;
+  if(nbfeloc->l > 1)
+  {
+    /* search for parent of nbeloc (l-1) */
+    nbfeloc[0] = nbeloc[0];
+    nbfeloc->l = nbeloc->l - 1;
+    nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+    if(!nbelm) return;
+  }
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[*nfnb] = nbelm;
