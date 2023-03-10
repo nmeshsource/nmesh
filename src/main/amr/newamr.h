@@ -23,8 +23,11 @@
 //   if(nv==0) return dat;
 
 
-#define LOCSMAX 128
 
+//NOTE: we need wolfGIT/c/linux_list.h
+
+
+#define LOCSMAX 128
 
 /* a leaf node or element */
 typedef struct tELM {

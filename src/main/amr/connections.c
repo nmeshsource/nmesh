@@ -168,7 +168,12 @@ void amr_get_fnb(tEl *el, int patface, int *nfnb, tEl **fnb)
 
 
 /* function to find nb in all myelm */
-//...
+//... use wolfGIT/c/binarysearch.c
+// 1. search using comparfunc that is equal even grandparents agree
+// 2. search using comparfunc that is equal even parents agree
+// 3. search using comparfunc that is equal if elm themselves agree
+// 4. search using comparfunc that is equal if ...
+
 
 /* function to find nb in all nbelm */
 //...
