@@ -155,19 +155,25 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 
 
 /**/
-tEl *amr_get_parent(tEl *el)
+tElm *amr_get_parent(tElm *elm)
 {
 return NULL;
 }
 
 
-void amr_get_fnb(tEl *el, int patface, int *nfnb, tEl **fnb)
+void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 {
 }
 
 
+/* myelm contains all elms on this proc
+   nbelm contains all elms that are neighbors on other procs
+   both can be searched to find a specific nb of one elm in myelm. */
 
-/* function to find nb in all myelm */
+/* NOTE: myelm and nbelm need to be sorted (use qsort) for searching
+   we also keep a linked list for myelm to easily remove or add elms */
+
+/* we need: function to find nb in all myelm */
 //... use wolfGIT/c/binarysearch.c
 // 1. search using comparfunc that is equal even grandparents agree
 // 2. search using comparfunc that is equal even parents agree
@@ -175,5 +181,99 @@ void amr_get_fnb(tEl *el, int patface, int *nfnb, tEl **fnb)
 // 4. search using comparfunc that is equal if ...
 
 
-/* function to find nb in all nbelm */
+/* we need: function to find nb in all nbelm */
 //...
+
+
+/* look in elm array arr to find nbs of elm on face f */
+void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
+                         int *nfnb, tElm **fnb)
+{
+  tElm *nbelm;
+  size_t off, num;
+  tEloc *eloc = elm->eloc;
+  tEloc nbeloc[1];
+  tEloc nbfeloc[1];
+
+  /* find nb at same level */
+  nbeloc->p = 000; //???
+  nbeloc->l = l; //???
+  nbeloc->loc = "12352"; //???
+
+  /* init */
+  *nfnb = 0 ;
+  off = 0;
+  num = narr;
+
+  /* search for grand parent of nbeloc (l-2) */
+  nbfeloc[0] = nbeloc[0];
+  nbfeloc->l = nbeloc->l - 2;
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), loccmp, NULL);
+  if(!nbelm) return;
+
+  /* save nbelm, may need to alloc fnb ??? */
+  fnb[*nfnb] = nbelm;
+  *nfnb = 1;
+  if(num<=1) return; /* if there is only one */
+
+  /* search for parent of nbeloc (l-1) */
+  nbfeloc[0] = nbeloc[0];
+  nbfeloc->l = nbeloc->l - 1;
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), loccmp, NULL);
+  if(!nbelm) return;
+
+  /* save nbelm, may need to alloc fnb ??? */
+  fnb[*nfnb] = nbelm;
+  *nfnb = 1;
+  if(num<=1) return; /* if there is only one */
+
+  /* search for nbeloc */
+  nbfeloc[0] = nbeloc[0];
+  nbfeloc->l = nbeloc->l - 1;
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), loccmp, NULL);
+  if(!nbelm) return;
+
+  /* save nbelm, may need to alloc fnb ??? */
+  fnb[*nfnb] = nbelm;
+  *nfnb = 1;
+  if(num<=1) return; /* if there is only one */
+
+  /* if we get here, there are several neighbors */
+  //...
+  errorexit("deal with several neighbors");
+}
+
+/* return -1,0,1 if loc is before,at,after elem location */
+int loccmp(const void *loc, const void *elem, void *arg)
+{
+  tEloc *lc = (tEloc *) loc;
+  tElm *elm = (tElm *) elem;
+  tEloc *el = elm->eloc;
+  int i;
+
+  /* if not in same patch p move right or left in search */
+  if(lc->p > el->p) return  1; /* after */
+  if(lc->p < el->p) return -1; /* before */
+
+  /* ok, if we get here, lc and el are in same patch */
+  if(el->l >= lc->l)
+  {
+    for(i=0; i<lc->l; i++)
+    {
+      if(lc->loc[i] == el->loc[i]) continue;
+      if(lc->loc[i] >  el->loc[i]) return  1;
+      else                         return -1
+    }
+    return 0; /* lc and el are equal up the first lc->l */
+  }
+  else
+  {
+    for(i=0; i<el->l; i++)
+    {
+      if(lc->loc[i] == el->loc[i]) continue;
+      if(lc->loc[i] >  el->loc[i]) return  1;
+      else                         return -1
+    }
+    return 1; /* make binarysearch move to right */
+  }
+}

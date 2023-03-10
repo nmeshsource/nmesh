@@ -27,14 +27,19 @@
 //NOTE: we need wolfGIT/c/linux_list.h
 
 
+/* location of an element */
 #define LOCSMAX 128
+typedef struct tELOC {
+  int p;                  /* patch number */
+  int l;                  /* refinement level of this node */
+  char loc[LOCSMAX];      /* node location string, giving loc. in patch */
+} tEloc;
+
 
 /* a leaf node or element */
 typedef struct tELM {
   struct list_head list;  /* all elms form a linked list */
-  int p;                  /* patch number */
-  int l;                  /* refinement level of this node */
-  char loc[LOCSMAX];      /* node location string, giving loc. in patch */
+  tEloc eloc[1];          /* elm location */
 
   double dt;              /* time step in node */
   double time;            /* current time in node */
