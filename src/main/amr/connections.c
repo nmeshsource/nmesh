@@ -199,16 +199,33 @@ void amr_get_nbu2loc(const tElm *elm, int f, int inbu2,
 }
 
 
-/* Look in elm array arr to find the nb of elm on face f with nb index
-   inbu2. inbu2 is the index of the fnb that is 2 levels up.*/
-void amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
-                  int f, int inbu2,
-                  tElm *fnb[1])
+/* Look in elm array arr to find all nb of elm on face f with nb loc
+   that is 2 levels up.*/
+void amr_set_fnb(int narr, const tElm **arr, const tElm *elm, int f,
+                 tElm *fnb[11111])
+{
+  int inbu2;
+  tEloc nbu2eloc[1];
+
+  for inbu2
+  {
+    /* pick nb loc (with index inbu2) at 2 levels up */
+    amr_get_nbu2loc(elm, f, inbu2, nbu2eloc);
+    lf = amr_set1_fnb(narr,arr, elm, f, nbu2eloc, fnb[nbi]);
+    if lf ...
+  }
+
+}
+
+/* Look in elm array arr to find the nb of elm on face f with nb loc
+   nbu2eloc. nbu2eloc is a nb that is 2 levels up.*/
+int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
+                 int f, tEloc nbu2eloc[1],
+                 tElm *fnb[1])
 {
   tElm *nbelm;
   size_t off, num;
   tEloc *eloc = elm->eloc;
-  tEloc nbu2eloc[1];
   tEloc nbfeloc[1];
 
   /* pick nb loc (with index inbu2) at 2 levels up */
@@ -224,12 +241,12 @@ void amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
     nbfeloc[0] = nbu2eloc[0];
     nbfeloc->l = nbu2eloc->l - 4;
     nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-    if(!nbelm) return;
+    if(!nbelm) return -9999;
   }
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return; /* if there is only one */
+  if(num<=1) return -4; /* if there is only one */
 
   if(nbfeloc->l > 3)
   {
@@ -237,44 +254,48 @@ void amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
     nbfeloc[0] = nbu2eloc[0];
     nbfeloc->l = nbu2eloc->l - 3;
     nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-    if(!nbelm) return;
+    if(!nbelm) return -4;
   }
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return; /* if there is only one */
+  if(num<=1) return -3; /* if there is only one */
 
   /* search for grand parent of nbu2eloc (l-2) */
   nbfeloc[0] = nbu2eloc[0];
   nbfeloc->l = nbu2eloc->l - 2;
   nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-  if(!nbelm) return;
+  if(!nbelm) return -3;
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return; /* if there is only one */
+  if(num<=1) return -2; /* if there is only one */
 
   /* search for parent of nbu2eloc (l-1) */
   nbfeloc[0] = nbu2eloc[0];
   nbfeloc->l = nbu2eloc->l - 1;
   nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-  if(!nbelm) return;
+  if(!nbelm) return -2;
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return; /* if there is only one */
+  if(num<=1) return -1; /* if there is only one */
 
   /* search for nbu2eloc (l) */
   nbfeloc[0] = nbu2eloc[0];
   nbfeloc->l = nbu2eloc->l;
   nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-  if(!nbelm) return;
+  if(!nbelm) return -1;
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return; /* if there is only one */
+  if(num<=1) return 0; /* if there is only one */
   else errorexit("2 levels up there should be only one nb");
 }
+
+
+
+
 
 /* return -1,0,1 if loc is before,at,after elem location */
 int lecmp(const void *loc, const void *elem, void *arg)
