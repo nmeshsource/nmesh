@@ -164,3 +164,11 @@ return NULL;
 void amr_get_fnb(tEl *el, int patface, int *nfnb, tEl **fnb)
 {
 }
+
+
+
+/* function to find nb in all myelm */
+//...
+
+/* function to find nb in all nbelm */
+//...
