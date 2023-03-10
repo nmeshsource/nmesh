@@ -37,21 +37,9 @@ l=4        node
 */
 
 
-/* info that describes one leaf node (or element) */
-#define LOCSMAX 128
-typedef struct tEL {
-  int p;                  /* patch number */
-  int l;                  /* refinement level of this node */
-  char loc[LOCSMAX];      /* node location string, giving loc. in patch */
-} tEl;
-
-
 /* extra info about node state that has nothing to do with neighbor info
    or connectivity */
 typedef struct tNODEINFO {
-  int p;                  /* patch number */
-  int l;                  /* refinement level of this node */
-  char loc[LOCSMAX];      /* node location string, giving loc. in patch */
   int evo_troubled;       /* is 1 if node was troubled during RK substep */
   int trbl_score;         /* trouble score in node (e.g. due to shocks) */
   tRef trbl_ref[1];       /* refinement we use if we act on trouble score */

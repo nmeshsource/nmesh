@@ -79,7 +79,7 @@ int connections_loc_on_patch_face(int l, const char loc[LOCSMAX],
 
     for(f=0; f<6; f++)
     {
-      if(!connections_ijk_is_at_patface(ijk, f))
+      if(!connections_ijk_is_at_nodeface(ijk, f))
       {
         npatfaces--;
         patface[f] = 0;
