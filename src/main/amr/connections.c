@@ -208,7 +208,7 @@ void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
   /* search for grand parent of nbeloc (l-2) */
   nbfeloc[0] = nbeloc[0];
   nbfeloc->l = nbeloc->l - 2;
-  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), loccmp, NULL);
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
   if(!nbelm) return;
 
   /* save nbelm, may need to alloc fnb ??? */
@@ -219,7 +219,7 @@ void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
   /* search for parent of nbeloc (l-1) */
   nbfeloc[0] = nbeloc[0];
   nbfeloc->l = nbeloc->l - 1;
-  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), loccmp, NULL);
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
   if(!nbelm) return;
 
   /* save nbelm, may need to alloc fnb ??? */
@@ -230,7 +230,7 @@ void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
   /* search for nbeloc */
   nbfeloc[0] = nbeloc[0];
   nbfeloc->l = nbeloc->l - 1;
-  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), loccmp, NULL);
+  nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
   if(!nbelm) return;
 
   /* save nbelm, may need to alloc fnb ??? */
@@ -244,11 +244,20 @@ void amr_AllocAndSet_fnb(int narr, const tElm **arr, const tElm *elm, int f,
 }
 
 /* return -1,0,1 if loc is before,at,after elem location */
-int loccmp(const void *loc, const void *elem, void *arg)
+int lecmp(const void *loc, const void *elem, void *arg)
 {
   tEloc *lc = (tEloc *) loc;
   tElm *elm = (tElm *) elem;
-  tEloc *el = elm->eloc;
+  tEloc *elc = elm->eloc;
+  return loccmp(lc, elc);
+}
+
+
+/* return -1,0,1 if loc is before,at,after eloc */
+int loccmp(const void *loc, const void *eloc)
+{
+  tEloc *lc = (tEloc *) loc;
+  tEloc *el = (tEloc *) eloc;
   int i;
 
   /* if not in same patch p move right or left in search */
