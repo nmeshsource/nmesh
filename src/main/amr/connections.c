@@ -227,6 +227,7 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
   size_t off, num;
   tEloc *eloc = elm->eloc;
   tEloc nbfeloc[1];
+  int mor;
 
   /* pick nb loc (with index inbu2) at 2 levels up */
   amr_get_nbu2loc(elm, f, inbu2, nbu2eloc);
@@ -246,7 +247,8 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return -4; /* if there is only one */
+  mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+  if(!mor) return -4; /* if there is only one */
 
   if(nbfeloc->l > 3)
   {
@@ -259,7 +261,8 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return -3; /* if there is only one */
+  mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+  if(!mor) return -3; /* if there is only one */
 
   /* search for grand parent of nbu2eloc (l-2) */
   nbfeloc[0] = nbu2eloc[0];
@@ -269,7 +272,8 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return -2; /* if there is only one */
+  mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+  if(!mor) return -2; /* if there is only one */
 
   /* search for parent of nbu2eloc (l-1) */
   nbfeloc[0] = nbu2eloc[0];
@@ -279,7 +283,8 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return -1; /* if there is only one */
+  mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+  if(!mor) return -1; /* if there is only one */
 
   /* search for nbu2eloc (l) */
   nbfeloc[0] = nbu2eloc[0];
@@ -289,7 +294,8 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
   /* save nbelm, may need to alloc fnb ??? */
   fnb[0] = nbelm;
-  if(num<=1) return 0; /* if there is only one */
+  mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+  if(!mor) return 0; /* if there is only one */
   else errorexit("2 levels up there should be only one nb");
 }
 
