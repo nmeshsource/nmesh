@@ -43,6 +43,8 @@ typedef struct tELM {
 
   double dt;              /* time step in node */
   double time;            /* current time in node */
+  struct tPAT *pat;       // replace one day by: struct tMESH *mesh;
+  double bbox[6];         /* bounding box (in X,Y,Z) of this node */
   int n[3];               /* number of points in X,Y,Z-directions */
   int rflag;              /* flag for refining node */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */

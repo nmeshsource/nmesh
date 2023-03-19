@@ -142,10 +142,157 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 }
 
 
+/****************************************************************************/
+/* functions to initialize tElm */
+/****************************************************************************/
+
+/* find patch of elm and save it in elm->pat */
+void amr_set_elm_pat(tMesh *mesh, tElm *elm)
+{
+  tEloc *eloc = elm->eloc;
+  int p = eloc->p;
+  elm->pat = mesh->pat[p]
+}
+
+/* find bbox of elm and save it in elm->bbox */
+void amr_set_elm_bbox(tElm *elm)
+{
+  tPat *pat = elm->pat;
+  tEloc *eloc = elm->eloc;
+  int l = eloc->l; /* get level number */
+  double *bbox  = elm->bbox;
+  double LX[3];
+  int f, d, ll;
+
+  /* copy patch bbox values, and put lengths into LX */
+  for(f=0; f<6; f++) bbox[f] = pat->bbox[f];
+  for(d=0; d<3; d++) LX[d]   = bbox[2*d+1] - bbox[2*d];
+
+  /* cut pat->bbox values into 2 for each level */
+  for(ll=1; ll<=l; ll++)
+  {
+    int ijk = connections_get_ijk(ll, loc);
+    for(d=0; d<3; d++)
+    {
+      int bt = 1 << d; /* bit we check: bt = 1, 2, or 4 */
+      LX[d] /= 2.;
+      if(ijk & bt) bbox[2*d] = bbox[2*d+1] - LX[2*d];
+      else         bbox[2*d+1] = bbox[2*d] + LX[2*d];
+    }
+  }
+}
+
+
+/****************************************************************************/
+
+
+//////////////////////////////////////////////////////////////////////////
+// replaces l_XYZ_of_xyz
+//FIXME: pick a good file for this func
+//       maybe around l_XYZ_of_xyz in main/coordinates/get_coords.c
+/* set X and return 1 if x is inside this elm, otherwise return 0 */
+int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
+{
+  tPat *pat = node->pat;
+  int d, stat=0;
+
+  /* get X */
+  if(pat->XYZ_of_xyz)
+    stat = pat->XYZ_of_xyz(pat, node,ind, X, x);
+  else
+    for(d=0; d<3; d++) X[d] = x[d];
+
+  if(stat) return 0;
+
+  for(d=0; d<3; d++)
+    if(dless(X[d],node->bbox[2*d]) || dless(node->bbox[2*d+1],X[d]))
+      return 0;
+
+  /* round X to inside box */
+  for(d=0; d<3; d++)
+  {
+    if(X[d] < node->bbox[2*d])   X[d] = node->bbox[2*d];
+    if(X[d] > node->bbox[2*d+1]) X[d] = node->bbox[2*d+1];
+  }
+
+  return 1;
+}
+////////////////////////////////////////////////////////////////////////////
 
 
 
+/*
+in add_nfaces_outside_patch study:
 
+      nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
+
+      touch = common_facepoints(node,face, nb,nb_f);
+
+in common_facepoints study:
+  f1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
+
+*/
+
+
+// equivalent to find_nodefacepoints_in_nbface:
+/* find out if any elm points on face f are on face nb_f of elm nb */
+int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
+{
+  double *bbox  = elm->bbox;
+  int dir = f/2;
+  int n[] = { 3,3,3 };        /* we use 3 points */
+  double X0[3], LX[3], dX[3]; /* grid of points */
+  int dd;
+  int i,j,k, plane, ret0, ret;
+
+  /* make a grid of points, that excludes endpoints */
+  for(dd=0; dd<3; dd++)
+  {
+    X0[dd] = bbox[2*dd];
+    LX[dd] = bbox[2*dd+1] - X0[dd];
+    dX[dd] = LX[dd]/(n[dd]);
+    X0[dd] += dX[dd] * 0.5;
+  }
+
+  /* loop over points */
+  plane = (n[dir] - 1) * (f%2);
+  forplaneN(dir, i,j,k, n, plane)
+  {
+    double X[3], x[3], oX[3];
+    int nbface[6];
+
+    /* point grid, that never includes edges */
+    X[0] = X0[0] + dX[0] * i;
+    X[1] = X0[1] + dX[1] * j;
+    X[2] = X0[2] + dX[2] * k;
+
+    /* pick one of X,Y,Z on boundary */
+    X[dir] = bbox[f];
+
+    /* get x,y,z of X,Y,Z and then oX,oY,oZ in nb */
+    set_xyz(NULL, elm,-1, X, x);
+    ret0 = elmXYZ_of_xyz(nb,-1, oX, x);
+
+    /* try another point, if this one is not in nb */
+    if(!ret0) continue;
+
+    /* check if this point is on nb face */
+    ret = XYZ_on_face(nb->pat, nbface, oX);
+
+    /* if this point is only in face nb_f of nb we are done */
+    if(ret==1 && nbface[nb_f]) return 1;
+
+    /* if this point is in several faces try another point */
+    if(ret>1) continue;
+
+    if(ret==0)
+    {
+      errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
+    }
+  }
+
+  return 0;
+}
 
 
 
