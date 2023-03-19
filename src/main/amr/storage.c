@@ -993,6 +993,7 @@ void free_patch(tPat *pat)
 {
   tMesh *mesh = pat->mesh;
   tNlist *elem;
+  struct list_head *pos, *sav;
 
   if(!pat) return;
 
@@ -1001,6 +1002,19 @@ void free_patch(tPat *pat)
   /* free all in CI coordinfo, and also all bfaces  */
   free_pat_CI(pat);
   remove_all_bfaces(pat);
+
+
+  /* remove all elms in this patch from mesh->myelm_head */
+  list_for_each_safe(pos, sav, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    if(elm->pat == pat)
+    {
+      list_del(&elm->list);
+      free_elm_and_elm_dat(elm);
+    }
+  }
+
 
   /* remove all nodes in this patch from mesh->lns */
   /* 1. look at all except the head mesh->lns */
