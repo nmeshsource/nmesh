@@ -203,21 +203,22 @@ int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
 
   /* get X */
   if(pat->XYZ_of_xyz)
-    stat = pat->XYZ_of_xyz(pat, node,ind, X, x);
+    //stat = pat->XYZ_of_xyz(pat, (tNode *)elm,ind, X, x);
+    stat = pat->XYZ_of_xyz(pat, elm,ind, X, x);
   else
     for(d=0; d<3; d++) X[d] = x[d];
 
   if(stat) return 0;
 
   for(d=0; d<3; d++)
-    if(dless(X[d],node->bbox[2*d]) || dless(node->bbox[2*d+1],X[d]))
+    if(dless(X[d],elm->bbox[2*d]) || dless(elm->bbox[2*d+1],X[d]))
       return 0;
 
   /* round X to inside box */
   for(d=0; d<3; d++)
   {
-    if(X[d] < node->bbox[2*d])   X[d] = node->bbox[2*d];
-    if(X[d] > node->bbox[2*d+1]) X[d] = node->bbox[2*d+1];
+    if(X[d] < elm->bbox[2*d])   X[d] = elm->bbox[2*d];
+    if(X[d] > elm->bbox[2*d+1]) X[d] = elm->bbox[2*d+1];
   }
 
   return 1;
@@ -275,6 +276,7 @@ int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
     X[dir] = bbox[f];
 
     /* get x,y,z of X,Y,Z and then oX,oY,oZ in nb */
+    //set_xyz(NULL, (tNode *)elm,-1, X, x);
     set_xyz(NULL, elm,-1, X, x);
     ret0 = elmXYZ_of_xyz(nb,-1, oX, x);
 
