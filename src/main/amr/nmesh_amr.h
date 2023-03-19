@@ -6,6 +6,7 @@
 /* declarations from other parts that we need here already */
 #include "thread_defs.h"
 #include "refine.h"
+#include "../main/linux_list.h"
 #include "../main/skeleton.h"
 #include "../main/variables.h"
 #include "../nMPI/nMPI_defs.h"
@@ -35,6 +36,77 @@ l=4        node
   We have one tree per patch.
   The ends of the tree are called leaf nodes.
 */
+
+
+/* The leaf nodes are the nodes we do all our calculations in and thus the
+   the most important nodes. In fact it may be good to keep only the leaf
+   nodes to save memory.
+   We also call a leaf nodes an element or elm for short. */
+
+/* location of an element (or elm) */
+#define LOCSMAX 128
+typedef struct tELOC {
+  int p;                  /* patch number */
+  int l;                  /* refinement level of this node */
+  char loc[LOCSMAX];      /* node location string, giving loc. in patch */
+} tEloc;
+
+/* a leaf node or element called elm */
+//THIS is we want for later:
+//typedef struct tELM {
+//  struct list_head list;  /* all elms form a linked list */
+//  tEloc eloc[1];          /* elm location */
+//
+//  double dt;              /* time step in node */
+//  double time;            /* current time in node */
+//  struct tPAT *pat;       // replace one day by: struct tMESH *mesh;
+//  double bbox[6];         /* bounding box (in X,Y,Z) of this node */
+//  int n[3];               /* number of points in X,Y,Z-directions */
+//  int rflag;              /* flag for refining node */
+//  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
+//  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
+//  int datrank;            /* rank of proc that rightfully has data */
+//  struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
+//} tElm;
+//// at the moment tElm has quite a few parts the nmesh tNode had as well.
+//// we may want to streamline this later
+//Temporarily we use this for compatibility with tNode:
+typedef struct tELM {
+  double dt;              /* time step in node */
+  double time;            /* current time in node */
+  struct tPAT *pat;       /* pointer to patch that contains node */
+  struct tNODE *parent;   /* pointer to parent node */
+  struct tNODE *child[8]; /* list of pointers to childeren nodes */
+  double bbox[6];         /* bounding box (in X,Y,Z) of this node */
+  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
+  int n[3];               /* number of points in X,Y,Z-directions */
+  int np;                 /* np = n[0] * n[1] * n[2]; */
+  int l;                  /* refinement level of this node */
+  int leaf;               /* is 1 if this is a leaf node */
+  int rflag;              /* flag for refining node */
+  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
+  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
+  //int lid;                /* local node ID */
+  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
+  struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
+  int datrank;            /* rank of proc that rightfully has data */
+  //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
+                            // where dat is and where all neighb. have dat
+  /* items to do with neighbor communication need to go last: */
+  struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
+                             nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
+  int nfnb[6];            /* number of face neighbor nodes */
+  struct tNODE **fnb[6];  /* list of neighbor nodes on face, contains info
+                             condensed out of nfaces */
+  struct tNFACE *nfaces[6]; /* 1st nface of this node,
+                               kept up to date by update_node_fnb */
+  struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
+                                     and its nbs are currently being updated */
+
+  struct list_head list;  /* all elms form a linked list */
+  tEloc eloc[1];          /* elm location */
+
+} tElm;
 
 
 /* extra info about node state that has nothing to do with neighbor info
@@ -205,6 +277,15 @@ typedef struct tMESH {
   long nln;          /* total number of leaf nodes */
   tMylnodes myln[1]; /* elements of lns owned by this proc */
   tMUTEX mutex[1];   /* mutex for mesh */
+
+  /* newamr stuff */
+  struct list_head myelm_head; /* list head for elms on this proc */
+  long  nmyelm;      /* number of elms on this proc */
+  tElm **myelm;      /* list of pointers to elms on this proc */
+                     /* myelm and myelm_head list are copies of each other */
+  long  nnbelm;      /* number of nb elms on other procs */
+  tElm **nbelm;      /* list of pointers to nb elms on other procs */
+
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:
 use space filling curve as in
