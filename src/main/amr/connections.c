@@ -279,7 +279,7 @@ int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
 
 /*
 in add_nfaces_outside_patch study:
-
+                            =====
       nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
 
       touch = common_facepoints(node,face, nb,nb_f);
