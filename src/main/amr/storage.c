@@ -240,39 +240,50 @@ void free_elm_and_elm_dat(tElm *elm)
 }
 
 
-/* make root node */
-tElm *make_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank)
+/* make root node element and add it to mesh */
+tElm *make_and_add_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank)
 {
-  tElm *elm = alloc_elm(0);
-  tEloc *eloc = elm->eloc;
-  int i;
-
-  /* fill in info */
-  eloc->p = pat->p;
-  eloc->l = 0; /* root node */
-  eloc->loc[0] = 0;
-  amr_set_elm_pat(pat->mesh, elm);
-  amr_set_elm_bbox(elm);
-
-  /* save n and pt_typ for root node */
-  for(i=0; i<3; i++)
-  {
-    elm->n[i] = n[i];
-    elm->pt_typ[i] = pt_typ[i];
-  }
-  elm->np = n[0] * n[1] * n[2];
-  elm->nid = -1;    /* mark nid as not set */
-
-  /* see where dat needs to be allocated */
-  elm->datrank = datrank;
+  /* make root element only on the MPI rank that owns it */
   if(nMPI_rank()==datrank)
+  {
+    tMesh *mesh = pat->mesh;
+    tElm *elm = alloc_elm(0);
+    tEloc *eloc = elm->eloc;
+    int i;
+
+    /* fill in info */
+    eloc->p = pat->p;
+    eloc->l = 0; /* root node */
+    eloc->loc[0] = 0;
+    amr_set_elm_pat(mesh, elm);
+    amr_set_elm_bbox(elm);
+
+    /* save n and pt_typ for root node */
+    for(i=0; i<3; i++)
+    {
+      elm->n[i] = n[i];
+      elm->pt_typ[i] = pt_typ[i];
+    }
+    elm->np = n[0] * n[1] * n[2];
+    elm->nid = -1;    /* mark nid as not set */
+
+    /* see where dat needs to be allocated */
+    elm->datrank = datrank;
     elm->dat = alloc_dat(elm);
 
-  /* first set fnb */
-  //update_node_fnb_only(node);
-//FIXME!!!!
+    /* first set fnb */
+    //update_node_fnb_only(node);
+    //FIXME ???
 
-  return elm;
+    /* add new root element to list mesh->myelm_head */
+    list_add_tail(&elm->list, &mesh->myelm_head);
+
+    return elm;
+  }
+  else
+  {
+    return NULL;
+  }
 }
 
 
@@ -1024,6 +1035,9 @@ tMesh *alloc_mesh(int npats)
   if(!mesh) errorexit("out of memory for mesh");
 
   realloc_patlist_in_mesh(mesh, npats);
+
+  /* init list heads in mesh */
+  INIT_LIST_HEAD(&mesh->myelm_head);
 
   /* init mesh mutex */
   MUTEX_INIT(mesh->mutex);

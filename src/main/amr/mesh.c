@@ -125,6 +125,9 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
+  /* setup root node element */
+  make_and_add_root_elm(pat, pt_typ, nroot, datrank);
+
   //if(1) print_matrices_innode(pat->rnode);
   //exit(88);
 
