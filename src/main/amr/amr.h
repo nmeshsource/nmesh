@@ -9,7 +9,7 @@ extern nMPI_Comm main_comm;
 
 
 /* storage.c */
-tNode *alloc_elm(int initcomm);
+tElm *alloc_elm(int initcomm);
 void free_elm(tElm *elm);
 void free_elm_and_elm_dat(tElm *elm);
 tNode *destroy_children(tNode *parent);
@@ -98,3 +98,7 @@ int amr_print_thread_info(tMesh *mesh);
 
 /* timing.c  */
 int timing_mm_speed(tMesh *mesh);
+
+/* connections.c */
+void amr_set_elm_pat(tMesh *mesh, tElm *elm);
+void amr_set_elm_bbox(tElm *elm);

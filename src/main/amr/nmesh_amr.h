@@ -243,7 +243,7 @@ typedef struct tPAT {
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bfaces[6]; /* 1st bface of this patch on each face */
-  tNode *rnode;         /* root node in this patch */
+  tNode *rnode; //FIXME: REMOVE /* root node in this patch */
   //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
 } tPat;
 /* Note: each patch has Bfaces as in sgrid. But instead of pointlists we use

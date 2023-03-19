@@ -231,8 +231,8 @@ void amr_set_elm_bbox(tElm *elm)
     {
       int bt = 1 << d; /* bit we check: bt = 1, 2, or 4 */
       LX[d] /= 2.;
-      if(ijk & bt) bbox[2*d] = bbox[2*d+1] - LX[2*d];
-      else         bbox[2*d+1] = bbox[2*d] + LX[2*d];
+      if(ijk & bt) bbox[2*d] = bbox[2*d+1] - LX[d];
+      else         bbox[2*d+1] = bbox[2*d] + LX[d];
     }
   }
 }

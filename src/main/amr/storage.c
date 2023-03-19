@@ -201,9 +201,9 @@ void free_3_arrays(tArray *array[3])
 /****************************************************************************/
 
 /* allocate one elm */
-tNode *alloc_elm(int initcomm)
+tElm *alloc_elm(int initcomm)
 {
-  tNode *elm = calloc(1, sizeof(*elm));
+  tElm *elm = calloc(1, sizeof(*elm));
   if(!elm) errorexit("out of memory");
 
   // /* set elm MPI communicator elm->comm */
@@ -237,6 +237,42 @@ void free_elm_and_elm_dat(tElm *elm)
   free_dat(elm->dat);
 
   free_elm(elm);
+}
+
+
+/* make root node */
+tElm *make_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank)
+{
+  tElm *elm = alloc_elm(0);
+  tEloc *eloc = elm->eloc;
+  int i;
+
+  /* fill in info */
+  eloc->p = pat->p;
+  eloc->l = 0; /* root node */
+  eloc->loc[0] = 0;
+  amr_set_elm_pat(pat->mesh, elm);
+  amr_set_elm_bbox(elm);
+
+  /* save n and pt_typ for root node */
+  for(i=0; i<3; i++)
+  {
+    elm->n[i] = n[i];
+    elm->pt_typ[i] = pt_typ[i];
+  }
+  elm->np = n[0] * n[1] * n[2];
+  elm->nid = -1;    /* mark nid as not set */
+
+  /* see where dat needs to be allocated */
+  elm->datrank = datrank;
+  if(nMPI_rank()==datrank)
+    elm->dat = alloc_dat(elm);
+
+  /* first set fnb */
+  //update_node_fnb_only(node);
+//FIXME!!!!
+
+  return elm;
 }
 
 
