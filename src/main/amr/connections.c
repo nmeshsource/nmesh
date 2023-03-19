@@ -5,6 +5,10 @@
 #include "amr.h"
 
 
+// move this into .h file
+int lecmp(const void *loc, const void *elem, void *arg);
+int loccmp(const void *loc, const void *eloc);
+
 
 
 /* find ijk from l,loc by reading last in loc */
@@ -42,7 +46,7 @@ int connections_get_inner_nb_ijk(int ijk, int dir)
   int ns[] = {2,2,2};
   int i,j,k;  /* index of loc */
 
-  if(l<1) return 0;
+  //if(l<1) return 0;
 
   /* get i,j,k */
   k = kOfInd_n(ijk, ns);
@@ -98,14 +102,14 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
                                               char nbloc[LOCSMAX])
 {
   int nfaces, patface[6];
-  int ijk;
+  int ijk, nb_ijk;
 
   nfaces = connections_loc_on_patchface(l,loc, patface);
 
   if(patface[face])
   {
     errorexit("deal with pat face");
-
+    /*
     tPat *pat = node->pat;
     tBface *bfaces = pat->bfaces[face];
     // loop over bfaces
@@ -113,7 +117,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
     // same as: for(bface=bfaces; bface; bface=bface->next) ;
 
     //if(bfaces && bfaces->boundary==OUTERBOUND)
-
+    */
   }
 
 
@@ -151,7 +155,7 @@ void amr_set_elm_pat(tMesh *mesh, tElm *elm)
 {
   tEloc *eloc = elm->eloc;
   int p = eloc->p;
-  elm->pat = mesh->pat[p]
+  elm->pat = mesh->pat[p];
 }
 
 /* find bbox of elm and save it in elm->bbox */
@@ -160,6 +164,7 @@ void amr_set_elm_bbox(tElm *elm)
   tPat *pat = elm->pat;
   tEloc *eloc = elm->eloc;
   int l = eloc->l; /* get level number */
+  char *loc = eloc->loc;
   double *bbox  = elm->bbox;
   double LX[3];
   int f, d, ll;
@@ -193,7 +198,7 @@ void amr_set_elm_bbox(tElm *elm)
 /* set X and return 1 if x is inside this elm, otherwise return 0 */
 int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
 {
-  tPat *pat = node->pat;
+  tPat *pat = elm->pat;
   int d, stat=0;
 
   /* get X */
@@ -372,7 +377,7 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 {
   tElm *nbelm;
   size_t off, num;
-  tEloc *eloc = elm->eloc;
+  //tEloc *eloc = elm->eloc;
   tEloc nbfeloc[1];
   int mor;
 
@@ -453,9 +458,9 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 /* return -1,0,1 if loc is before,at,after elem location */
 int lecmp(const void *loc, const void *elem, void *arg)
 {
-  tEloc *lc = (tEloc *) loc;
-  tElm *elm = (tElm *) elem;
-  tEloc *elc = elm->eloc;
+  const tEloc *lc = (const tEloc *) loc;
+  const tElm *elm = (const tElm *) elem;
+  const tEloc *elc = elm->eloc;
   return loccmp(lc, elc);
 }
 
@@ -463,8 +468,8 @@ int lecmp(const void *loc, const void *elem, void *arg)
 /* return -1,0,1 if loc is before,at,after eloc */
 int loccmp(const void *loc, const void *eloc)
 {
-  tEloc *lc = (tEloc *) loc;
-  tEloc *el = (tEloc *) eloc;
+  const tEloc *lc = (const tEloc *) loc;
+  const tEloc *el = (const tEloc *) eloc;
   int i;
 
   /* if not in same patch p move right or left in search */
@@ -478,7 +483,7 @@ int loccmp(const void *loc, const void *eloc)
     {
       if(lc->loc[i] == el->loc[i]) continue;
       if(lc->loc[i] >  el->loc[i]) return  1;
-      else                         return -1
+      else                         return -1;
     }
     return 0; /* lc and el are equal up the first lc->l */
   }
@@ -488,7 +493,7 @@ int loccmp(const void *loc, const void *eloc)
     {
       if(lc->loc[i] == el->loc[i]) continue;
       if(lc->loc[i] >  el->loc[i]) return  1;
-      else                         return -1
+      else                         return -1;
     }
     return 1; /* make binarysearch move to right */
   }
