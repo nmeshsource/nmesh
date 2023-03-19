@@ -10,6 +10,9 @@ int lecmp(const void *loc, const void *elem, void *arg);
 int loccmp(const void *loc, const void *eloc);
 
 
+/****************************************************************************/
+/* primitive funxtion that work on integers and strings */
+/****************************************************************************/
 
 /* find ijk from l,loc by reading last in loc */
 int connections_get_ijk(int l, const char loc[LOCSMAX])
@@ -40,7 +43,7 @@ int connections_ijk_is_at_parentface(int ijk, int face)
   return -1;
 }
 
-/* get ijk of nb in same level, assuming ijk is not on patch face */
+/* return ijk of nb in same level, assuming ijk is not on patch face */
 int connections_get_inner_nb_ijk(int ijk, int dir)
 {
   int ns[] = {2,2,2};
@@ -348,8 +351,8 @@ void amr_get_nbu2loc(const tElm *elm, int f, int inbu2,
 {
   /* pick nb loc (with index inbu2) at 2 levels up */
   nbu2eloc->p = 000; //???
-  nbu2eloc->l = l+2; //???
-  nbu2eloc->loc = "12352"; //???
+  nbu2eloc->l = elm->eloc->l+2; //???
+  //nbu2eloc->loc = "12352"; //???
 }
 
 
@@ -361,12 +364,15 @@ void amr_set_fnb(int narr, const tElm **arr, const tElm *elm, int f,
   int inbu2;
   tEloc nbu2eloc[1];
 
-  for inbu2
+  //for inbu2:
   {
+    int lf;
+    int nbi=0; //???
+
     /* pick nb loc (with index inbu2) at 2 levels up */
     amr_get_nbu2loc(elm, f, inbu2, nbu2eloc);
     lf = amr_set1_fnb(narr,arr, elm, f, nbu2eloc, fnb[nbi]);
-    if lf ...
+    //if lf ...
   }
 
 }
@@ -384,6 +390,7 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
   int mor;
 
   /* pick nb loc (with index inbu2) at 2 levels up */
+  int inbu2=0; //???
   amr_get_nbu2loc(elm, f, inbu2, nbu2eloc);
 
   /* init */
