@@ -5,13 +5,60 @@
 #include "amr.h"
 
 
-// move this into .h file
-int lecmp(const void *loc, const void *elem, void *arg);
-int loccmp(const void *loc, const void *eloc);
 
 
 /****************************************************************************/
-/* primitive funxtion that work on integers and strings */
+/* functions that determine the order of element locations */
+/****************************************************************************/
+
+/* Function that orders locations described in in tEloc:
+   return -1,0,1 if loc is before,at,after eloc
+   This can be use in qsort. */
+int loccmp(const void *loc, const void *eloc)
+{
+  const tEloc *lc = (const tEloc *) loc;
+  const tEloc *el = (const tEloc *) eloc;
+  int i;
+
+  /* if not in same patch p move right or left in search */
+  if(lc->p > el->p) return  1; /* after */
+  if(lc->p < el->p) return -1; /* before */
+
+  /* ok, if we get here, lc and el are in same patch */
+  if(el->l >= lc->l)
+  {
+    for(i=0; i<lc->l; i++)
+    {
+      if(lc->loc[i] == el->loc[i]) continue;
+      if(lc->loc[i] >  el->loc[i]) return  1;
+      else                         return -1;
+    }
+    return 0; /* lc and el are equal up the first lc->l */
+  }
+  else
+  {
+    for(i=0; i<el->l; i++)
+    {
+      if(lc->loc[i] == el->loc[i]) continue;
+      if(lc->loc[i] >  el->loc[i]) return  1;
+      else                         return -1;
+    }
+    return 1; /* make binarysearch move to right */
+  }
+}
+
+/* return -1,0,1 if loc is before,at,after elem location,
+   this is used in binarysearch */
+int lecmp(const void *loc, const void *elem, void *arg)
+{
+  const tEloc *lc = (const tEloc *) loc;
+  const tElm *elm = (const tElm *) elem;
+  const tEloc *elc = elm->eloc;
+  return loccmp(lc, elc);
+}
+
+/****************************************************************************/
+/* primitive functions that work on integers and strings */
 /****************************************************************************/
 
 /* find ijk from l,loc by reading last in loc */
@@ -458,52 +505,4 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
   mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
   if(!mor) return 0; /* if there is only one */
   else errorexit("2 levels up there should be only one nb");
-}
-
-
-
-
-
-/* return -1,0,1 if loc is before,at,after elem location */
-int lecmp(const void *loc, const void *elem, void *arg)
-{
-  const tEloc *lc = (const tEloc *) loc;
-  const tElm *elm = (const tElm *) elem;
-  const tEloc *elc = elm->eloc;
-  return loccmp(lc, elc);
-}
-
-
-/* return -1,0,1 if loc is before,at,after eloc */
-int loccmp(const void *loc, const void *eloc)
-{
-  const tEloc *lc = (const tEloc *) loc;
-  const tEloc *el = (const tEloc *) eloc;
-  int i;
-
-  /* if not in same patch p move right or left in search */
-  if(lc->p > el->p) return  1; /* after */
-  if(lc->p < el->p) return -1; /* before */
-
-  /* ok, if we get here, lc and el are in same patch */
-  if(el->l >= lc->l)
-  {
-    for(i=0; i<lc->l; i++)
-    {
-      if(lc->loc[i] == el->loc[i]) continue;
-      if(lc->loc[i] >  el->loc[i]) return  1;
-      else                         return -1;
-    }
-    return 0; /* lc and el are equal up the first lc->l */
-  }
-  else
-  {
-    for(i=0; i<el->l; i++)
-    {
-      if(lc->loc[i] == el->loc[i]) continue;
-      if(lc->loc[i] >  el->loc[i]) return  1;
-      else                         return -1;
-    }
-    return 1; /* make binarysearch move to right */
-  }
 }

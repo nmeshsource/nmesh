@@ -196,6 +196,50 @@ void free_3_arrays(tArray *array[3])
 }
 
 
+/****************************************************************************/
+/* elm storage */
+/****************************************************************************/
+
+/* allocate one elm */
+tNode *alloc_elm(int initcomm)
+{
+  tNode *elm = calloc(1, sizeof(*elm));
+  if(!elm) errorexit("out of memory");
+
+  // /* set elm MPI communicator elm->comm */
+  //if(initcomm)
+  //  elm->comm = nMPIvars_get_comm(initcomm-1);
+  //else
+  //  elm->comm = main_comm;
+
+  return elm;
+}
+
+/* free one elm only, leaves dat hanging */
+void free_elm(tElm *elm)
+{
+  int face;
+
+  if(!elm) return;
+
+  /* free surface neigbhor list */
+  for(face=0; face<6; face++) free(elm->fnb[face]);
+
+  free(elm);
+}
+
+/* free one elm and its dat */
+void free_elm_and_elm_dat(tElm *elm)
+{
+  if(!elm) return;
+
+  /* free variable data */
+  free_dat(elm->dat);
+
+  free_elm(elm);
+}
+
+
 /**************************************************************************/
 /* node storage */
 /**************************************************************************/

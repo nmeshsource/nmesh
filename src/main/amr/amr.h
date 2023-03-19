@@ -9,6 +9,9 @@ extern nMPI_Comm main_comm;
 
 
 /* storage.c */
+tNode *alloc_elm(int initcomm);
+void free_elm(tElm *elm);
+void free_elm_and_elm_dat(tElm *elm);
 tNode *destroy_children(tNode *parent);
 tNlist *remove8siblings_in_mesh_lns(tNlist *sib);
 int realloc_myln_nncats(tMylnodes *myln, int nncats);
