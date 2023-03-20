@@ -1,0 +1,21 @@
+
+About refinement:
+=================
+*we should be able to do local refines now,
+ just nb lists and nid's need to be updated afterwards
+
+*in create_children_no_nid_update of main/amr/refine.c :
+ remove diff with master ( git diff master main/amr/refine.c ), i.e this:
++  /* replace all parent elms we have on this proc with their children */
++  NODELEVEL_Pragma(omp parallel)
++  {
++    ...
++  }
+
+*make new refinement funcs, append their name with __new or _local
+ e.g. make new:
+   hp_refine_nodes_if_rflag
+   remove_nodes_if_rflag
+ these 2 also need new equivalents of:
+   create_children_no_nid_update
+   destroy_nodes_no_nid_update
