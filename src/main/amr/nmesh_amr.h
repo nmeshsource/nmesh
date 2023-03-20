@@ -108,6 +108,13 @@ typedef struct tELM {
 
 } tElm;
 
+// in case we need it, we can also make more linked element lists:
+///* a linked list of elements */
+//typedef struct tELIST {
+//  struct list_head list;
+//  tElm *elm;
+//} tElist;
+
 
 /* extra info about node state that has nothing to do with neighbor info
    or connectivity */

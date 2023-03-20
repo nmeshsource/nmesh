@@ -237,6 +237,17 @@ void amr_set_elm_bbox(tElm *elm)
   }
 }
 
+/* set eloc of child */
+int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc)
+{
+  int l   = parentloc->l;
+  eloc->p = parentloc->p;
+  eloc->l = l + 1;
+  strncpy(eloc->loc, parentloc->loc, LOCSMAX);
+  eloc->loc[l]   = '0' + ijk;
+  eloc->loc[l+1] = 0;
+  return l+1;
+}
 
 /****************************************************************************/
 

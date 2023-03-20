@@ -287,6 +287,122 @@ tElm *make_and_add_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank)
 }
 
 
+/* make a child node element */
+tElm *make_child_elm(tElm *parent, int pt_typ[3], int n[3], int ijk)
+{
+  tMesh *mesh = parent->pat->mesh;
+  tElm *elm = alloc_elm(0);
+  int d, vi,nvdb;
+
+  /* transfer parent time info */
+  elm->time = parent->time;
+  elm->dt = parent->dt;  // FIXME: For now all elms have same dt
+
+  /* mark nid as not set */
+  elm->nid = -1;
+
+  /* fill in info */
+  amr_set_child_eloc(parent->eloc, ijk, elm->eloc);
+  amr_set_elm_pat(mesh, elm);
+  amr_set_elm_bbox(elm);
+
+  for(d=0; d<3; d++)
+  {
+    elm->n[d] = n[d];
+    elm->pt_typ[d] = pt_typ[d]; /* save point type */
+  }
+  elm->np = n[0] * n[1] * n[2];
+
+  nvdb = elm->pat->mesh->nvdb;
+
+  /* default is same proc as parent */
+  elm->datrank = parent->datrank;
+
+  /* if parent has dat the child will have it too */
+  if(parent->dat)
+  {
+    tArray *Xp[3];
+
+    /* alloc dat for child */
+    elm->dat = alloc_dat(elm);
+
+    /* array memory to store points of elm */
+    Xp[0] = alloc_array(n);
+    Xp[1] = alloc_array(n);
+    Xp[2] = alloc_array(n);
+    fill_3arrays_with_nodepoints(elm, Xp);
+    /* convert from Xb of elm to X to Xb of parent */
+    array_XYZ_of_XbYbZb(elm, Xp, Xp);
+    array_XbYbZb_of_XYZ(parent, Xp, Xp);
+
+    /* use interpolation to get vars from parent to child elm */
+    for(vi=0; vi<nvdb; vi++)
+      if(parent->dat->v[vi])
+      {
+        /* enable same vars in this dat as in parent->dat */
+        enablevarcomp_innode(elm, vi);
+
+        /* fill elm->dat with interpolation data from parent */
+        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        {
+          basis_interp_topoints(parent, parent->dat->v[vi],
+                                Xp, elm->dat->v[vi], Lagrange_of_x);
+        }
+      } /* end: if parent has dat->v[vi] */
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
+
+    /* init coords in this new elm */
+    coordinates_init_node(elm);
+  }
+  return elm;
+}
+
+/* make 8 children, insert them into mesh->myelm_head, and return child0 */
+tElm *replace_parent_by_8children(tElm *parent, int pt_typ[3], int n[3])
+{
+  //tMesh *mesh = parent->pat->mesh;
+  struct list_head elist;
+  tElm *elm, *elm0;
+  int ijk;
+
+  INIT_LIST_HEAD(&elist);
+
+  /* make children */
+  for(ijk=0; ijk<8; ijk++)
+  {
+    elm = make_child_elm(parent, pt_typ, n, ijk);
+    if(elm) list_add_tail(&elm->list, &elist);
+    if(ijk==0) elm0 = elm; /* save first child */
+  }
+
+  /* #pragma omp critical (change_mesh_myelm_list) */
+  /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
+           if I use a named critical section!
+           So replace "GEN_Pragma(omp critical (change_mesh_myelm_list))"
+           by "GEN_Pragma(omp critical)" when debugging races!!! */
+  //GEN_Pragma(omp critical (change_mesh_myelm_list))
+  GEN_Pragma(omp critical)
+  {
+    /* now replace parent by elist in mesh->myelm_head */
+    list_splice(&elist, &parent->list);
+    list_del(&parent->list);
+  }
+
+  /* free parent and all data on parent */
+  free_elm_and_elm_dat(parent);
+
+  //printf("Created:\n");
+  //printnodes_in_list(nlist);
+
+  return elm0;
+}
+
+// we STILL need the equivalent of
+//tNode *destroy_children(tNode *parent)
+// is also needs to be then used in refine.c
+
 /**************************************************************************/
 /* node storage */
 /**************************************************************************/

@@ -170,6 +170,37 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
 
   if(nnodes<=0) return;
 
+
+  /* replace all parent elms we have on this proc with their children */
+  NODELEVEL_Pragma(omp parallel)
+  {
+    struct list_head *pos = &mesh->myelm_head;
+
+    NODELEVEL_Pragma(omp for)
+    for(i=0; i<nnodes; i++)
+    {
+      tElm *parent;
+      int pt_typ[3], n[3];
+
+      /* get elm with nid[i] */
+      list_for_each_continue(pos, &mesh->myelm_head)
+      {
+        parent = list_entry(pos, tElm, list);
+        if(parent->nid == nid[i]) break;
+        parent = NULL;
+      }
+      if(parent)
+      {
+        /* set n and pt_typ */
+        hp_refine_set_n_pt_typ(parent, ref, n, pt_typ);
+
+        /* make children */
+        replace_parent_by_8children(parent, pt_typ, n);
+      }
+    }
+  }
+
+
   /* get mem. */
   replace  = calloc(nnodes, sizeof(replace[0]));
   children = calloc(nnodes, sizeof(children[0]));
