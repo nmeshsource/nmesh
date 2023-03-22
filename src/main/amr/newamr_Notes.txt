@@ -1,3 +1,8 @@
+General:
+========
+*maybe typdef only tElm and then
+#define tNode tElm
+
 
 About refinement:
 =================
