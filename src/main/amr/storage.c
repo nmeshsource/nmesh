@@ -241,7 +241,7 @@ void free_elm_and_elm_dat(tElm *elm)
 
 
 /* make root node element and add it to mesh */
-tElm *make_and_add_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank)
+tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
 {
   /* make root element only on the MPI rank that owns it */
   if(nMPI_rank()==datrank)

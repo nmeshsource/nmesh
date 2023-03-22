@@ -12,7 +12,7 @@ extern nMPI_Comm main_comm;
 tElm *alloc_elm(int initcomm);
 void free_elm(tElm *elm);
 void free_elm_and_elm_dat(tElm *elm);
-tElm *make_and_add_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank);
+tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 tNode *destroy_children(tNode *parent);
 tNlist *remove8siblings_in_mesh_lns(tNlist *sib);
