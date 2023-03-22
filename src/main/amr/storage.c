@@ -288,7 +288,7 @@ tElm *make_and_add_root_elm(tPat *pat, int pt_typ[3], int n[3], int datrank)
 
 
 /* make a child node element */
-tElm *make_child_elm(tElm *parent, int pt_typ[3], int n[3], int ijk)
+tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
 {
   tMesh *mesh = parent->pat->mesh;
   tElm *elm = alloc_elm(0);
@@ -360,7 +360,7 @@ tElm *make_child_elm(tElm *parent, int pt_typ[3], int n[3], int ijk)
 }
 
 /* make 8 children, insert them into mesh->myelm_head, and return child0 */
-tElm *replace_parent_by_8children(tElm *parent, int pt_typ[3], int n[3])
+tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
 {
   //tMesh *mesh = parent->pat->mesh;
   struct list_head elist;
@@ -372,7 +372,7 @@ tElm *replace_parent_by_8children(tElm *parent, int pt_typ[3], int n[3])
   /* make children */
   for(ijk=0; ijk<8; ijk++)
   {
-    elm = make_child_elm(parent, pt_typ, n, ijk);
+    elm = make_child_elm(parent, n, pt_typ, ijk);
     if(elm) list_add_tail(&elm->list, &elist);
     if(ijk==0) elm0 = elm; /* save first child */
   }

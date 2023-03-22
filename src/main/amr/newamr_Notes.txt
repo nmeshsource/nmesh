@@ -17,10 +17,11 @@ About refinement:
 +    ...
 +  }
 
-*make new refinement funcs, append their name with __new or _local
+*make new refinement funcs:
  e.g. make new:
-   hp_refine_nodes_if_rflag
-   remove_nodes_if_rflag
- these 2 also need new equivalents of:
+   hp_refine_nodes_if_rflag -> hp_refine_elms_if_rflag
+   remove_nodes_if_rflag    -> remove_elms_if_rflag???
+ the 2 old oned also needed:
    create_children_no_nid_update
    destroy_nodes_no_nid_update
+ but the new versions operate more rank local, and may not them!

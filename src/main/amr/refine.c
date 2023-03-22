@@ -195,7 +195,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
         hp_refine_set_n_pt_typ(parent, ref, n, pt_typ);
 
         /* make children */
-        replace_parent_by_8children(parent, pt_typ, n);
+        replace_parent_by_8children(parent, n, pt_typ);
       }
     }
   }
@@ -247,6 +247,7 @@ void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
   free(children);
   free(replace);
 }
+
 
 /* p-refine nodes with nids in array, we assume nid[] is sorted in ascending
    order. We do not update nids in here */
@@ -455,10 +456,49 @@ void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref)
   free(req);
 }
 
+// ====
+// NEW:
+// ====
+/* h- or p-refine all elms if indicated by elm->rflag.
+   If we h-refine we actually create child elms,
+   otherwise we just change the number (and possibly the spacing)
+   of points */
+void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
+{
+  struct list_head *pos, *sav;
+
+  /* loop over list with elms */
+  list_for_each_safe(pos, sav, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    int pt_typ[3], n[3];
+
+    /* refine only if rflag is set */
+    if(elm->rflag > 0)
+    {
+      /* set n and pt_typ */
+      hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
+
+      if(ref->type == H_REFINE) /* replace elm with its children */
+      {
+        replace_parent_by_8children(elm, n, pt_typ);
+      }
+      else /* p-refine by changing n and pt_typ of elm */
+      {
+        update_node_n_pt_typ(elm, n, pt_typ);
+      }
+    }
+  }
+  /* NOTE: This does not update the list mesh->myelm!
+           Only the linked list mesh->myelm_head is changed here */
+}
+
+
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   ref->type = H_REFINE;
+  //FIXME: this should call hp_refine_elms_if_rflag
   hp_refine_nodes_if_rflag(mesh, ref);
 }
 
