@@ -4,6 +4,12 @@ General:
 #define tNode tElm
 
 
+About load bal:
+===============
+*make load bal func for elms first, because this is needed for
+ remove_elms_if_rflag, where we need all 8 on same rank to de-refine.
+
+
 About refinement:
 =================
 *we should be able to do local refines now,
