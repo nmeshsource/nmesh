@@ -8,6 +8,21 @@ About load bal:
 ===============
 *make load bal func for elms first, because this is needed for
  remove_elms_if_rflag, where we need all 8 on same rank to de-refine.
+*maybe keep all 8 siblings together on 1 MPI rank, then any AMR criterion
+ can check locally (without MPI communication) if de-refinement (8sib->1parent)
+ should happen.
+ -but not, if one of the siblings gets refined further
+ -how do we store this info about other siblings???
+  +could store a flag sib_ref that says if sibling is refined???
+  -sounds complicated, maybe don't keep them together after all???
+  +or have flag keep_together=1 on each sibling that gets zero'd if
+   one is later refined? But how does this flag get 1 again?
+=> maybe don't try to keep them together:
+    Rather make AMR-func that checks all 8 and sets ref flag to de-ref.
+    Then a loadbal func can gather all 8, if all 8 agree that they
+    should be de-refined.
+    *check how destroy_nodes_no_nid_update currently works,
+     do it compare ref flags on all 8???
 
 
 About refinement:
