@@ -14,6 +14,7 @@ Make an info exchange function (elm_exchange_between_nbranks):
   and also some aggregate numbers such as:
   +number of elms on each rank
   +total speed and nodeload sums as in load_set_nodeload_array for each rank
+ -save this info for rank on left and right in tMesh.
 
 *This way we have ref flag of next rank and know if sibling on other side
  exists and e.g. needs to be de-refined.
