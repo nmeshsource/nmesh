@@ -4,6 +4,21 @@ General:
 #define tNode tElm
 
 
+MPI exchange:
+=============
+| rank0         | rank1         | rank2         |
+|elmA  ...  elmB|elmA  ...  elmB|elmA  ...  elmB|
+
+Make an info exchange function (elm_exchange_between_nbranks):
+ -exchange first and last elm between rank_i and rank_i+1,
+  and also some aggregate numbers such as:
+  +number of elms on each rank
+  +total speed and nodeload sums as in load_set_nodeload_array for each rank
+
+*This way we have ref flag of next rank and know if sibling on other side
+ exists and e.g. needs to be de-refined.
+
+
 About load bal:
 ===============
 *make load bal func for elms first, because this is needed for
@@ -38,3 +53,10 @@ About refinement:
    create_children_no_nid_update
    destroy_nodes_no_nid_update
  but the new versions operate more rank local, and may not them!
+
+*de-refine is trickier. We  can remove all 8 siblings only if none are
+ refined themsleves AND if ALL are flagged for de-ref.
+ +check among all locally available siblings and set their ref flags to zero
+  if any one sibling has ref=0.
+ +then call elm_exchange_between_nbranks from above, and again zero ref
+  flags if siblings on nb rank have zero flag, or are refined themselves...
