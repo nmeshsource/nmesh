@@ -572,4 +572,9 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
 
   /* wait until all MPI requests are done */
   nMPI_Waitall(nreqs, req, stat);
+
+  /**/
+  /*FIXME: update rflag by using nb rank info,
+           if all 8 siblings are on different ranks,
+           run MPI exchanges up to 5 times more */
 }
