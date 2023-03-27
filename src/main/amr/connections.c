@@ -517,3 +517,49 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
   if(!mor) return 0; /* if there is only one */
   else errorexit("2 levels up there should be only one nb");
 }
+
+
+/****************************************************************************/
+/* functions to exchange info between rank_i and rank_i+1 */
+/****************************************************************************/
+
+/* exchange first and last elm between neigboring ranks
+  Out: myfl  <-- first and last elm on this rank
+       rm1fl <-- first and last on rank-1
+       rp1fl <-- first and last on rank+1 */
+void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
+                                    tElmfl rm1fl[1], tElmfl rp1fl[1])
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int tag;
+  /* 1st and last entry in mesh->myelm_head list (can be NULL) */
+  tElm *first = list_first_entry_or_null(&mesh->myelm_head, tElm, list);
+  tElm *last  = NULL;
+
+  /* if first != NULL there are entries */
+  if(first)
+  {
+    last = list_last_entry(&mesh->myelm_head, tElm, list);
+    myfl->elm_fl[0] = first[0]; /* shallow copy */
+    myfl->elm_fl[1] = last[0];  /* shallow copy */
+    myfl->nelms = mesh->nmyelm;
+  }
+  else /* zero all of myfl */
+  {
+    memset(&myfl[0], 0, sizeof(myfl[0]));
+  }
+
+  tag = 1;
+  if(rank > 0)       /* send info to rank-1 */
+    nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank-1, tag,
+               WORLD, &req[0]);
+  if(rank < size-1)  /* Receive info from rank+1 */
+    nMPI_Irecv((char *)rp1fl,sizeof(rp1fl[0]), nMPI_CHAR, rank+1, tag);
+
+  tag = 2;
+  if(rank < size-1)  /* send info to rank+1 */
+    nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank+1, tag);
+  if(rank > 0)       /* Receive info from rank-1 */
+    nMPI_Irecv((char *)rm1fl,sizeof(rm1fl[0]), nMPI_CHAR, rank-1, tag);
+}

@@ -115,6 +115,16 @@ typedef struct tELM {
 //  tElm *elm;
 //} tElist;
 
+/* for MPI exchange between neighboring ranks */
+typedef struct tELMFL {
+  tElm elm_fl[2]; /* first and last elm on rank */
+  int nelms;      /* number of elms on rank */
+} tElmfl;
+typedef struct tNBR {
+  tElmfl fl_m1[1]; /* first and last elm on rank-1 */
+  tElmfl fl_p1[1]; /* first and last elm on rank+1 */
+} tNbr;
+
 
 /* extra info about node state that has nothing to do with neighbor info
    or connectivity */
@@ -292,6 +302,7 @@ typedef struct tMESH {
                      /* myelm and myelm_head list are copies of each other */
   long  nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
+  tNbr nbr[1];       /* info about elms on neighbor ranks */
 
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:
