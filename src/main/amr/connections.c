@@ -532,7 +532,9 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
-  int tag;
+  nMPI_Req req[4];
+  nMPI_Stat stat[4];
+  int nreqs, tag;
   /* 1st and last entry in mesh->myelm_head list (can be NULL) */
   tElm *first = list_first_entry_or_null(&mesh->myelm_head, tElm, list);
   tElm *last  = NULL;
@@ -550,16 +552,24 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
     memset(&myfl[0], 0, sizeof(myfl[0]));
   }
 
+  /* MPI exchanges */
+  nreqs = 0;
   tag = 1;
   if(rank > 0)       /* send info to rank-1 */
     nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank-1, tag,
-               WORLD, &req[0]);
+               WORLD, &req[nreqs++]);
   if(rank < size-1)  /* Receive info from rank+1 */
-    nMPI_Irecv((char *)rp1fl,sizeof(rp1fl[0]), nMPI_CHAR, rank+1, tag);
+    nMPI_Irecv((char *)rp1fl,sizeof(rp1fl[0]), nMPI_CHAR, rank+1, tag,
+               WORLD, &req[nreqs++]);
 
   tag = 2;
   if(rank < size-1)  /* send info to rank+1 */
-    nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank+1, tag);
+    nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank+1, tag,
+               WORLD, &req[nreqs++]);
   if(rank > 0)       /* Receive info from rank-1 */
-    nMPI_Irecv((char *)rm1fl,sizeof(rm1fl[0]), nMPI_CHAR, rank-1, tag);
+    nMPI_Irecv((char *)rm1fl,sizeof(rm1fl[0]), nMPI_CHAR, rank-1, tag,
+               WORLD, &req[nreqs++]);
+
+  /* wait until all MPI requests are done */
+  nMPI_Waitall(nreqs, req, stat);
 }
