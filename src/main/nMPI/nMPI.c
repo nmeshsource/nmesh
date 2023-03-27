@@ -291,47 +291,48 @@ int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,
   return stat;
 }
 
-/* non-blocking send for double */
-int nMPI_Isend_double(double *buf, int blen, int dest, int tag,
-                      nMPI_Comm comm, nMPI_Req *req)
+/* general non-blocking send */
+int nMPI_Isend(const void *buf, int count, nMPI_Datatype datatype,
+               int dest, int tag, nMPI_Comm comm, nMPI_Req *req)
 {
   int stat = 0;
   if(PR)
   {
-    PRF;printf(": %d to %d, blen=%d tag=%d\n", nMPI_rank(), dest, blen, tag);
+    PRF;printf(": %d to %d, count=%d tag=%d\n", nMPI_rank(), dest, count, tag);
   }
 #ifdef USEMPI
   PR0;
-  stat = MPI_Isend(buf, blen, MPI_DOUBLE, dest, tag, comm, req);
+  stat = MPI_Isend(buf, count, datatype, dest, tag, comm, req);
   if(stat != MPI_SUCCESS) errorexiti("MPI_Isend failed: %d!\n", stat);
   PR1;
 #endif
   return stat;
 }
 
-/* non-blocking recv for double */
-int nMPI_Irecv_double(double *buf, int blen, int src, int tag,
-                      nMPI_Comm comm, nMPI_Req *req)
+/* general non-blocking recv */
+int nMPI_Irecv(void *buf, int count, nMPI_Datatype datatype,
+               int src, int tag, nMPI_Comm comm, nMPI_Req *req)
 {
   int stat = 0;
   if(PR)
   {
-    PRF;printf(": %d from %d, blen=%d tag=%d\n", nMPI_rank(), src, blen, tag);
+    PRF;printf(": %d from %d, count=%d tag=%d\n", nMPI_rank(), src, count, tag);
   }
 #ifdef USEMPI
   PR0;
-  stat = MPI_Irecv(buf, blen, MPI_DOUBLE, src, tag, comm, req);
+  stat = MPI_Irecv(buf, count, datatype, src, tag, comm, req);
   if(stat != MPI_SUCCESS) errorexiti("MPI_Irecv failed: %d!\n", stat);
   PR1;
 #endif
   return stat;
 }
 
-/* exchange double buffers */
-void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
-                             int rank_other, int s_tag, int r_tag,
-                             nMPI_Comm s_comm, nMPI_Comm r_comm,
-                             nMPI_Req *s_req, nMPI_Req *r_req)
+/* exchange general buffers */
+void nMPI_Isend_Irecv(void *sbuf, int ns, void *rbuf, int nr,
+                      nMPI_Datatype datatype,
+                      int rank_other, int s_tag, int r_tag,
+                      nMPI_Comm s_comm, nMPI_Comm r_comm,
+                      nMPI_Req *s_req, nMPI_Req *r_req)
 {
 #ifdef USEMPI
   int errS, errR;
@@ -347,13 +348,37 @@ void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
   //fflush(stdout);
 #ifdef USEMPI
   PR0;
-  errS = MPI_Isend(sbuf, ns, MPI_DOUBLE, rank_other, s_tag, s_comm, s_req);
+  errS = MPI_Isend(sbuf, ns, datatype, rank_other, s_tag, s_comm, s_req);
   if(errS != MPI_SUCCESS) errorexiti("MPI_Isend failed: %d!\n", errS);
   
-  errR = MPI_Irecv(rbuf, nr, MPI_DOUBLE, rank_other, r_tag, r_comm, r_req);
+  errR = MPI_Irecv(rbuf, nr, datatype, rank_other, r_tag, r_comm, r_req);
   if(errR != MPI_SUCCESS) errorexiti("MPI_Irecv failed: %d!\n", errR);
   PR1;
 #endif
+}
+
+/* non-blocking send for double */
+int nMPI_Isend_double(double *buf, int blen, int dest, int tag,
+                      nMPI_Comm comm, nMPI_Req *req)
+{
+  return nMPI_Isend(buf,blen, nMPI_DOUBLE, dest, tag, comm, req);
+}
+
+/* non-blocking recv for double */
+int nMPI_Irecv_double(double *buf, int blen, int src, int tag,
+                      nMPI_Comm comm, nMPI_Req *req)
+{
+  return nMPI_Irecv(buf,blen, nMPI_DOUBLE, src, tag, comm, req);
+}
+
+/* exchange double buffers */
+void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
+                             int rank_other, int s_tag, int r_tag,
+                             nMPI_Comm s_comm, nMPI_Comm r_comm,
+                             nMPI_Req *s_req, nMPI_Req *r_req)
+{
+  nMPI_Isend_Irecv(sbuf,ns, rbuf,nr, nMPI_DOUBLE,
+                   rank_other, s_tag, r_tag, s_comm, r_comm, s_req, r_req);
 }
 
 /* check on requests */
@@ -916,9 +941,9 @@ int nMPI_Testall_com(tCom *com, int *flag)
 }
 
 /* do send and recv request rq of com */
-void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
-                                 int rank_other, int s_tag, int r_tag,
-                                 nMPI_Comm s_comm, nMPI_Comm r_comm)
+void nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
+                          int rank_other, int s_tag, int r_tag,
+                          nMPI_Comm s_comm, nMPI_Comm r_comm)
 {
   if(PR)
   {
@@ -927,22 +952,44 @@ void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
     printf("    rq=%d rank_other=%d s_tag=%d r_tag=%d\n",
            rq, rank_other, s_tag, r_tag);
   }
-  nMPI_Isend_Irecv_double(com->send_buf[rq], com->send_buflen[rq],
-                          com->recv_buf[rq], com->recv_buflen[rq],
-                          rank_other, s_tag, r_tag, s_comm, r_comm,
-                          &(com->send_rq[rq]), &(com->recv_rq[rq]));
+  nMPI_Isend_Irecv(com->send_buf[rq], com->send_buflen[rq],
+                   com->recv_buf[rq], com->recv_buflen[rq],
+                   datatype, rank_other, s_tag, r_tag, s_comm, r_comm,
+                   &(com->send_rq[rq]), &(com->recv_rq[rq]));
+}
+/* send only */
+int nMPI_Isend_com(tCom *com, int rq, nMPI_Datatype datatype,
+                   int dest, int tag, nMPI_Comm comm)
+{
+  int stat = nMPI_Isend(com->send_buf[rq], com->send_buflen[rq], datatype,
+                        dest, tag, comm, &(com->send_rq[rq]));
+  return stat;
+}
+/* recv only */
+int nMPI_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
+                   int src, int tag, nMPI_Comm comm)
+{
+  int stat = nMPI_Irecv(com->recv_buf[rq], com->recv_buflen[rq], datatype,
+                        src, tag, comm, &(com->recv_rq[rq]));
+  return stat;
+}
+
+
+/* do send and recv request rq of com for double */
+void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
+                                 int rank_other, int s_tag, int r_tag,
+                                 nMPI_Comm s_comm, nMPI_Comm r_comm)
+{
+  nMPI_Isend_Irecv_com(com,rq, nMPI_DOUBLE,
+                       rank_other, s_tag, r_tag, s_comm, r_comm);
 }
 /* send only */
 int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm)
 {
-  int stat = nMPI_Isend_double(com->send_buf[rq], com->send_buflen[rq], dest,
-                               tag, comm, &(com->send_rq[rq]));
-  return stat;
+  return nMPI_Isend_com(com,rq, nMPI_DOUBLE, dest, tag, comm);
 }
 /* recv only */
 int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm)
 {
-  int stat = nMPI_Irecv_double(com->recv_buf[rq], com->recv_buflen[rq], src,
-                               tag, comm, &(com->recv_rq[rq]));
-  return stat;
+  return nMPI_Irecv_com(com,rq, nMPI_DOUBLE, src, tag, comm);
 }
