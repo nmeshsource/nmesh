@@ -240,6 +240,43 @@ void free_elm_and_elm_dat(tElm *elm)
 }
 
 
+/* allocate and set mesh->myelm array from mesh->myelm_head */
+void alloc_and_set_mesh_myelm(tMesh *mesh)
+{
+  long ei;
+  struct list_head *pos;
+
+  /* free whatever we had so far in myelm */
+  free(mesh->myelm);
+  mesh->myelm = NULL;
+
+  /* get number of elms on this rank */
+  mesh->nmyelm = list_count_nodes(&mesh->myelm_head);
+  /* return if there are no elms */
+  if(mesh->nmyelm == 0) return;
+
+  /* alloc sufficient space */
+  mesh->myelm = calloc(mesh->nmyelm, sizeof(mesh->myelm[0]));
+  if(!mesh->myelm) errorexit("no memory for mesh->myelm");
+
+  /* store entries of list mesh->myelm_head in array mesh->myelm */
+  ei = 0;
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    mesh->myelm[ei] = list_entry(pos, tElm, list);
+    ei++;
+  }
+}
+
+/* free array mesh->myelm array */
+void free_mesh_myelm(tMesh *mesh)
+{
+  free(mesh->myelm);
+  mesh->myelm = NULL;
+  mesh->nmyelm = 0;
+}
+
+
 /* make root node element and add it to mesh */
 tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
 {
@@ -1232,6 +1269,9 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
   mesh->lns = NULL;
   realloc_myln_nncats(mesh->myln, 0);
 
+  /* free mesh->myelm */
+  free_mesh_myelm(mesh);
+
   /* set patch and node stuff to 0 */
   mesh->npats = 0;
   mesh->pat = NULL;
@@ -1646,6 +1686,13 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
   tNlist *elem;
   long nid = 0;
   //int lid = 0;
+
+
+
+  /* set elm array */
+  alloc_and_set_mesh_myelm(mesh);
+
+
 
   /* delete mylns contents */
   realloc_myln_nncats(mesh->myln, 0);

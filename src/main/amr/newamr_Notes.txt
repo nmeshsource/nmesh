@@ -50,7 +50,7 @@ About refinement:
  e.g. make new:
    hp_refine_nodes_if_rflag -> hp_refine_elms_if_rflag
    remove_nodes_if_rflag    -> remove_elms_if_rflag??? <-not done yet
- the 2 old oned also needed:
+ the 2 old ones also needed:
    create_children_no_nid_update
    destroy_nodes_no_nid_update
  but the new versions operate more rank local, and may not them!
