@@ -542,7 +542,10 @@ int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
 /**********************************************************************/
 /* deal with tCom struct for MPI */
 /**********************************************************************/
-/* create a com */
+/* create a com:
+   if free_buf=1: send_buf[i] recv_buf[i] will be freed for all i
+                  in realloc_com_reqs or free_com
+   Note: com->entrysize=entrysize is not used by anything so far */
 tCom *alloc_com(int entrysize, int free_buf)
 {
   tCom *com;
@@ -623,9 +626,9 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
     if(!com->recv_buflen) errorexit("out of memory for com->recv_buflen");
 
     /* realloc buffer lists */
-    com->send_buf = realloc(com->send_buf, n_rq_new*com->entrysize);
+    com->send_buf = realloc(com->send_buf, n_rq_new*sizeof(void *));
     if(!com->send_buf) errorexit("out of memory for com->send_buf");
-    com->recv_buf = realloc(com->recv_buf, n_rq_new*com->entrysize);
+    com->recv_buf = realloc(com->recv_buf, n_rq_new*sizeof(void *));
     if(!com->recv_buf) errorexit("out of memory for com->recv_buf");
 
     /* zero new stuff */
@@ -634,11 +637,11 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
       memset(com->send_rq + n_rq, 0, sizeof(com->send_rq[0])*(n_rq_new-n_rq));
       memset(com->send_stat + n_rq, 0, sizeof(com->send_stat[0])*(n_rq_new-n_rq));
       memset(com->send_buflen + n_rq, 0, sizeof(com->send_buflen[0])*(n_rq_new-n_rq));
-      memset(com->send_buf + n_rq, 0, com->entrysize*(n_rq_new-n_rq));
+      memset(com->send_buf + n_rq, 0, sizeof(void *)*(n_rq_new-n_rq));
       memset(com->recv_rq + n_rq, 0, sizeof(com->recv_rq[0])*(n_rq_new-n_rq));
       memset(com->recv_stat + n_rq, 0, sizeof(com->recv_stat[0])*(n_rq_new-n_rq));
       memset(com->recv_buflen + n_rq, 0, sizeof(com->recv_buflen[0])*(n_rq_new-n_rq));
-      memset(com->recv_buf + n_rq, 0, com->entrysize*(n_rq_new-n_rq));
+      memset(com->recv_buf + n_rq, 0, sizeof(void *)*(n_rq_new-n_rq));
     }
   }
   else
