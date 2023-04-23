@@ -702,7 +702,8 @@ void get_nbr_rank_info(tMesh *mesh)
 
   /* for MPI data transfers */
   //FIXME: why sizeof(double)???, should 2nd arg be 0 or 1????
-  com = alloc_com(sizeof(double), 0);
+  //com = alloc_com(sizeof(double), 0);
+  com = alloc_com(sizeof(char), 0);
 
   //alloc_com is stupid!!! Its 1st arg should always be sizeof(void *)
 
