@@ -802,10 +802,41 @@ void simple_elm_load_balance(tMesh *mesh)
   //free(speed);
 }
 
+
+
+/**/
+int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
+{
+  double ops_bal_sum = *((double *) ar);
+  double ops_elm_sum = *((double *) key);
+  return 0000;
+}
+
+/**/
+int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
+{
+  size_t off, num;
+  off = 0;
+  num = size;
+  if(bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
+                     sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, NULL))
+  {
+
+
+  }
+  else
+  {
+    return 0;
+    errorexit("cannot find ops_elm_sum in ops_bal_sum[]");
+  }
+}
+
 /**/
 void load_balance_elms(tMesh *mesh)
 {
   int size = nMPI_size();
+  int rank = nMPI_rank();
+  int rk;
   double myspeed = Timing->mm_speed;
   double speedmin = 1e-50;
   double avspeed = 1.;
@@ -813,7 +844,9 @@ void load_balance_elms(tMesh *mesh)
   struct list_head *pos;
   double ops0, myops, allops, myw;
   double ops_bal, op0, op1;
+  double *ops_bal_sum = NULL;
   double myT = 0.;
+  double w;
 
   /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
   if(myspeed <= speedmin) myspeed = 1.;
@@ -825,25 +858,27 @@ void load_balance_elms(tMesh *mesh)
   allops = Timing->allops;
 
   /* get speeds on all ranks */
-  speed = calloc(size, sizeof(speed[0]));
-  if(!speed)
-  {
-    free(speed);
-    printf("  WARNING: quitting ");PRF;
-    printf(" due to lack of memory!!!\n");
-    /* do fallback? */
-    //load_balance(mesh, LOADBAL_SIMPLE);
-    return;
-  }
+  speed       = calloc(size, sizeof(speed[0]));
+  ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
+  if(!speed || !ops_bal_sum)
+    errorexit("no memory from speed or ops_bal_sum");
   avspeed = load_set_speed_array(mesh, speed);
 
-  /* get weight based on speeds */
-  myw = myspeed/(avspeed*size); /* my weight */
-  ops_bal = myw * allops;       /* ops I should have for balance */
+  /* ops needed for load balance */
+  w = speed[0]/(avspeed*size); /* weight for rank0 */
+  ops_bal_sum[0] = w * allops; /* ops rank0 should have for balance */
+  for(rk=1; rk<size; rk++)
+  {
+    w = speed[rk]/(avspeed*size); /* weight for rank rk */
+    /* sum over ops that rank 0 to rank rk should have */
+    ops_bal_sum[rk] = ops_bal_sum[rk-1] + w * allops;
+  }
 
   /* get boundaries op0 and op1 into which ops_bal has to fall
      within allops */
-  // ...
+  op1 = ops_bal_sum[rank];
+  if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
+  else       op0 = 0.;
 
   /* send all that is not within my boundaries */
   list_for_each(pos, &mesh->myelm_head)
