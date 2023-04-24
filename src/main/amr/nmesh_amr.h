@@ -422,6 +422,9 @@ enum
 typedef struct tTIMING {
   double mm1_speed;
   double mm_speed;
+  double myops;  /* myops = speed * myT */
+  double ops0;   /* ops0 = \sum_{r=0}^{myrank-1} myops(rank=r) */
+  double allops; /* allops = \sum_{r=0}^{size-1} myops(rank=r) */
 } tTiming;
 
 

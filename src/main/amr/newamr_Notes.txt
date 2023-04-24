@@ -61,3 +61,27 @@ About refinement:
   if any one sibling has ref=0.
  +then call elm_exchange_between_nbranks from above, and again zero ref
   flags if siblings on nb rank have zero flag, or are refined themselves...
+
+
+
+More about load bal:
+====================
+on one rank r we have:
+T_r = time to do something (e.g. a RK step) on all nodes on this rank
+T_r = \sum_elm t_elm
+v_r = speed of rank
+ops_r = v_r * T_r = # of operations actually done on this rank
+
+total ops:
+ops = \sum_r ops_r
+
+distribution weights:
+w_r = v_r / (\sum_ri v_ri)
+
+*let's give each rank this many ops
+ops_bal_r = w_r * ops
+*on rank: loop over elms until  ops = v_r \sum_elm t_elm  reaches ops_bal_r
+
+*from ops_r get:
+ ops_tot_r = \sum_{ri=0}^r ops_ri
+ we build this by sending ops_tot_r from r to r+1

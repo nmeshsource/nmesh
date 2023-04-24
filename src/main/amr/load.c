@@ -741,6 +741,8 @@ void simple_elm_load_balance(tMesh *mesh)
   tCom *scom;
   tCom *rcom;
 
+  errorexit("this function is not used!");
+
   PRF;printf(": nnodes=%ld ", nnodes);
 
   /* set const part of li needed for all strategies */
@@ -798,4 +800,61 @@ void simple_elm_load_balance(tMesh *mesh)
   //free(rank_start);
   //free(nodeload);
   //free(speed);
+}
+
+/**/
+void load_balance_elms(tMesh *mesh)
+{
+  int size = nMPI_size();
+  double myspeed = Timing->mm_speed;
+  double speedmin = 1e-50;
+  double avspeed = 1.;
+  double *speed = NULL;
+  struct list_head *pos;
+  double ops0, myops, allops, myw;
+  double ops_bal, op0, op1;
+  double myT = 0.;
+
+  /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
+  if(myspeed <= speedmin) myspeed = 1.;
+
+  /* get how ops are currently distributed */
+  timing_set_myops_ops0_allops(mesh);
+  ops0   = Timing->ops0;
+  myops  = Timing->myops;
+  allops = Timing->allops;
+
+  /* get speeds on all ranks */
+  speed = calloc(size, sizeof(speed[0]));
+  if(!speed)
+  {
+    free(speed);
+    printf("  WARNING: quitting ");PRF;
+    printf(" due to lack of memory!!!\n");
+    /* do fallback? */
+    //load_balance(mesh, LOADBAL_SIMPLE);
+    return;
+  }
+  avspeed = load_set_speed_array(mesh, speed);
+
+  /* get weight based on speeds */
+  myw = myspeed/(avspeed*size); /* my weight */
+  ops_bal = myw * allops;       /* ops I should have for balance */
+
+  /* get boundaries op0 and op1 into which ops_bal has to fall
+     within allops */
+  // ...
+
+  /* send all that is not within my boundaries */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    if(dat) myT += dat->info->load_TimeIn_s;
+    if(myspeed*myT < op0) ;//???
+  }
+
+  /* receive all that should be within my boundaries */
+  // ...
+
 }

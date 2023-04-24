@@ -96,3 +96,59 @@ int timing_mm_speed(tMesh *mesh)
 
   return 0;
 }
+
+/* set number of operations myops that were done on this rank */
+int timing_set_myops(tMesh *mesh)
+{
+  double myspeed = Timing->mm_speed;
+  double speedmin = 1e-50;
+  struct list_head *pos;
+  double myT = 0.;
+
+  /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
+  if(myspeed <= speedmin) myspeed = 1.;
+
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    if(dat) myT += dat->info->load_TimeIn_s;
+  }
+  Timing->myops = myspeed * myT;
+  return 0;
+}
+
+/* set total number of operations ops0 done on all ranks below current one */
+int timing_set_myops_ops0_allops(tMesh *mesh)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  double ops1;
+
+  /* set myops first */
+  timing_set_myops(mesh);
+
+  /* receive ops0 from rank-1, unless we are rank0 */
+  if(rank > 0)
+  {
+    /* we use blocking MPI here */
+    nMPI_Recv(&(Timing->ops0),1, nMPI_DOUBLE, rank-1, 123);
+    /* This blocks until we actually get ops0 from previous rank.
+       We do not want to go any further until we have ops0. */
+  }
+
+  /* send ops0+myops to rank+1 */
+  ops1 = Timing->ops0 + Timing->myops;
+  if(rank < size-1)
+  {
+    /* we use blocking MPI here */
+    nMPI_Send(&(ops1),1, nMPI_DOUBLE, rank+1, 123);
+    /* this blocks until ops1 is in some network buffer */
+  }
+
+  /* last rank knows total number of operations allops, so broadcast it */
+  Timing->allops = ops1;
+  nMPI_Bcast(&(Timing->allops),1, nMPI_DOUBLE, size-1);
+
+  return 0;
+}

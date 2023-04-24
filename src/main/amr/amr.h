@@ -100,6 +100,7 @@ int amr_print_thread_info(tMesh *mesh);
 
 /* timing.c  */
 int timing_mm_speed(tMesh *mesh);
+int timing_set_myops_ops0_allops(tMesh *mesh);
 
 /* connections.c */
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
