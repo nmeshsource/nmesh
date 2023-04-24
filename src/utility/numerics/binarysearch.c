@@ -94,3 +94,64 @@ int binarysearchmore(const void *key, const void *base0,
 
     return more;
 }
+
+
+/* Look for key in base0[i] for i in [*base0offset, *base0offset + *num-1].
+   +If key is found exactly:
+     sets *base0offset to the i where key is, sets *num=1
+     Returns pointer to the base0[i] that has the key
+   +If key is between 2 values:
+     sets *base0offset to the i left of key , sets *num=2
+     Returns pointer to the base0[i]
+   +If key is not bracketed at all:
+     Returns NULL */
+void *bisectionsearch(const void *key, const void *base0,
+                      size_t *base0offset, size_t *num, size_t size,
+                      int (*compar)(const void *, const void *, void *),
+                      void *arg)
+{
+    int cmp, cmp_a, cmp_b;
+    const void *p;
+    size_t pos, pos_a, pos_b;
+    size_t off = *base0offset;
+    size_t nf;
+
+    pos_a = off;
+    pos_b = off + (*num)-1;
+
+    nf = 1;
+
+    pos = pos_a;
+    p = (const char *) base0 + pos * size;
+    cmp_a = (*compar)(key, p, arg);
+    if(cmp_a == 0) goto FoundKey;
+
+    pos = pos_b;
+    p = (const char *) base0 + pos * size;
+    cmp_b = (*compar)(key, p, arg);
+    if(cmp_b == 0) goto FoundKey;
+
+    /* no bracket */
+    if(cmp_a*cmp_b > 0)
+        return NULL;
+
+    /* tighten bracket */
+    while((pos = (pos_a + pos_b)/2) > pos_a)
+    {
+        p = (const char *) base0 + pos * size;
+        cmp = (*compar)(key, p, arg);
+        if(cmp == 0) goto FoundKey;
+        if(cmp*cmp_b > 0) { pos_b = pos;  cmp_b = cmp; }
+        else              { pos_a = pos;  cmp_a = cmp; }
+    }
+
+    /* we still have a bracket */
+    nf = 2;
+    pos = pos_a;
+    p = (const char *) base0 + pos * size;
+
+FoundKey:
+    *base0offset = pos;
+    *num = nf;
+    return (void *)p;
+}
