@@ -59,6 +59,10 @@ int nMPIvars_init(tMesh *mesh)
   for(tag_bits=0; (tag_ub)>>tag_bits; tag_bits++);
   nMPIvars->tag_bits = tag_bits;
 
+  /* set some MPI_Datatypes */
+  nMPI_Type_contiguous(sizeof(tElm), nMPI_CHAR, &(nMPIvars->TELM));
+  nMPI_Type_commit(&(nMPIvars->TELM));
+
   return 0;
 }
 
@@ -108,6 +112,7 @@ int nMPI_long_tag_to_commi_tag(long long_tag, int *commi, int *tag)
   if(ci < nMPIvars->ncomms) return 0;
   return -1;
 }
+
 
 /* print some compile info */
 int nMPI_print_compile_info(tMesh *mesh)
@@ -260,6 +265,30 @@ int nMPI_Comm_free(nMPI_Comm *comm)
 #ifdef USEMPI
   PR0;
   ret = MPI_Comm_free(comm);
+  PR1;
+#endif
+  return ret;
+}
+
+/* Create a new contiguous datatype */
+int nMPI_Type_contiguous(int count, nMPI_Datatype oldtype,
+                         nMPI_Datatype *newtype)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Type_contiguous(count, oldtype, newtype);
+  PR1;
+#endif
+  return ret;
+}
+/* Make a new datatype available */
+int nMPI_Type_commit(nMPI_Datatype *datatype)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Type_commit(datatype);
   PR1;
 #endif
   return ret;
