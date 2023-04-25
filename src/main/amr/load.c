@@ -886,6 +886,7 @@ void load_balance_elms(tMesh *mesh)
   /* find all elms that are not within my boundaries */
   list_for_each(pos, &mesh->myelm_head)
   {
+    int desrank;
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     if(!dat) errorexit("this elm must have dat");
