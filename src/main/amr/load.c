@@ -804,30 +804,33 @@ void simple_elm_load_balance(tMesh *mesh)
 
 
 
-/**/
+/* comparison function for load_desired_rank */
 int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
 {
   double ops_bal_sum = *((double *) ar);
   double ops_elm_sum = *((double *) key);
-  return 0000;
+  double max = *((double *) arg);
+  double diff = (ops_elm_sum - ops_bal_sum)/max;
+  return diff * 10000;
 }
 
-/**/
+/* find rank we want to put elm on */
 int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
 {
+  double max = ops_bal_sum[size-1];
   size_t off, num;
   off = 0;
   num = size;
   if(bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
-                     sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, NULL))
+                     sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, &max))
   {
-
-
+    if(num == 2) return off+1;
+    else         return off;
   }
   else
   {
-    return 0;
-    errorexit("cannot find ops_elm_sum in ops_bal_sum[]");
+    if(off == 0) return 0;
+    else         return size-1;
   }
 }
 
@@ -880,16 +883,23 @@ void load_balance_elms(tMesh *mesh)
   if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
   else       op0 = 0.;
 
-  /* send all that is not within my boundaries */
+  /* find all elms that are not within my boundaries */
   list_for_each(pos, &mesh->myelm_head)
   {
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
-    if(dat) myT += dat->info->load_TimeIn_s;
-    if(myspeed*myT < op0) ;//???
+    if(!dat) errorexit("this elm must have dat");
+
+    myT += dat->info->load_TimeIn_s;
+    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
+
+    if(desrank != elm->datrank) ;//tell desrank that we will send it elm
   }
 
-  /* receive all that should be within my boundaries */
+  /* send all that we have told about */
+  // ...
+
+  /* receive all that I have been told about */
   // ...
 
 }
