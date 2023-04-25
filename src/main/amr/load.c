@@ -839,7 +839,7 @@ void load_balance_elms(tMesh *mesh)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
-  int rk;
+  int rk, torank;
   double myspeed = Timing->mm_speed;
   double speedmin = 1e-50;
   double avspeed = 1.;
@@ -850,6 +850,8 @@ void load_balance_elms(tMesh *mesh)
   double *ops_bal_sum = NULL;
   double myT = 0.;
   double w;
+  long *ns_elms = NULL;
+  tCom *scom, *rcom;
 
   /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
   if(myspeed <= speedmin) myspeed = 1.;
@@ -861,10 +863,10 @@ void load_balance_elms(tMesh *mesh)
   allops = Timing->allops;
 
   /* get speeds on all ranks */
-  speed       = calloc(size, sizeof(speed[0]));
   ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
+  speed       = calloc(size, sizeof(speed[0]));
   if(!speed || !ops_bal_sum)
-    errorexit("no memory from speed or ops_bal_sum");
+    errorexit("no memory for speed or ops_bal_sum");
   avspeed = load_set_speed_array(mesh, speed);
 
   /* ops needed for load balance */
@@ -877,6 +879,13 @@ void load_balance_elms(tMesh *mesh)
     ops_bal_sum[rk] = ops_bal_sum[rk-1] + w * allops;
   }
 
+  /* we do not need speed array any longer */
+  free(speed);
+
+  /* memory for number of elms we send to each rank */
+  ns_elms = calloc(size, sizeof(ns_elms[0]));
+  if(!ns_elms) errorexit("no memory for ns_elms");
+
   /* get boundaries op0 and op1 into which ops_bal has to fall
      within allops */
   op1 = ops_bal_sum[rank];
@@ -884,6 +893,7 @@ void load_balance_elms(tMesh *mesh)
   else       op0 = 0.;
 
   /* find all elms that are not within my boundaries */
+  torank = -1;
   list_for_each(pos, &mesh->myelm_head)
   {
     int desrank;
@@ -893,14 +903,106 @@ void load_balance_elms(tMesh *mesh)
 
     myT += dat->info->load_TimeIn_s;
     desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
-
-    if(desrank != elm->datrank) ;//tell desrank that we will send it elm
+    if(desrank != torank)
+      torank = desrank;
+    ns_elms[torank] += 1;
   }
 
-  /* send all that we have told about */
-  // ...
+  /* tell rank rk that I will send it ns_elms[rk] elms, and
+     recv from rank rk how many (nr_elms[rk]) I will get */
+  scom = alloc_com(sizeof(long), 0);
+  rcom = alloc_com(sizeof(long), 0);
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
 
-  /* receive all that I have been told about */
-  // ...
+      /* tell that I send ns_elms to others */
+      rq = append_buffers_to_com(scom, &(ns_elms[rk]),1, NULL,0);
+      nMPI_Isend_com(scom, rq, nMPI_LONG, rk, 100, WORLD);
 
+      /* recv nr_elms from others */
+      rq = append_buffers_to_com(rcom, NULL,0, &(nr_elms[rk]),1);
+      nMPI_Irecv_com(rcom, rq, nMPI_LONG, rk, 100, WORLD);
+    }
+
+  /* alloc s_elms[rk] */
+  //...
+
+  /* set s_elms that has all elms that are not within my boundaries */
+  torank = -1;
+  //FIXME: need list_for_each_safe
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    int desrank, i;
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    if(!dat) errorexit("this elm must have dat");
+
+    myT += dat->info->load_TimeIn_s;
+    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
+    if(desrank != torank)
+    {
+      torank = desrank;
+      i = 0;
+    }
+    s_elms[torank][i++] = elm[0]; // shallow copy
+    //remove this elm from list //change list_for_each to list_for_each_safe
+  }
+
+  free(ops_bal_sum);
+
+  /* send all the elms that we have told about to the other ranks */
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
+
+      rq = append_buffers_to_com(scom, &(s_elms[rk][0]),ns_elms[rk], NULL,0);
+      nMPI_Isend_com(scom, rq, nMPIvars->TELM, rk, 200, WORLD);
+    }
+
+  /* wait for recvs in rcom */
+  nMPI_Waitall_com_recv(rcom);
+
+  /* make new rcom */
+  free_com(rcom);
+  rcom = alloc_com(sizeof(long), 0);
+
+  /* remove s_elms */
+  //...
+
+  free(ns_elms);
+  /* free s_elms */
+
+
+  /* alloc r_elms[rk] */
+  //...
+
+  /* recv all the elms that others have sent, i.e. receive all that I have
+     been told about */
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
+
+      rq = append_buffers_to_com(rcom, NULL,0, &(r_elms[rk][0]),nr_elms[rk]);
+      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM, rk, 100, WORLD);
+    }
+
+  /* wait for recvs in rcom */
+  nMPI_Waitall_com_recv(rcom);
+  free_com(rcom);
+
+
+  /* insert r_elms */
+  //...
+
+  free(nr_elms);
+  /* free r_elms */
+
+
+  /* wait for sends in scom */
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);
 }
