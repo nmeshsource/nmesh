@@ -133,7 +133,14 @@ void *bisectionsearch(const void *key, const void *base0,
 
     /* no bracket */
     if(cmp_a*cmp_b > 0)
+    {
+        if(abs(cmp_a) > abs(cmp_b))
+          *base0offset = (*num)-1;
+        else
+          *base0offset = 0;
+        *num = 0;
         return NULL;
+    }
 
     /* tighten bracket */
     while((pos = (pos_a + pos_b)/2) > pos_a)
