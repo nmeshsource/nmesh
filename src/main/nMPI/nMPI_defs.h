@@ -29,6 +29,7 @@
 #define nMPI_INT      MPI_INT
 #define nMPI_DOUBLE   MPI_DOUBLE
 #define nMPI_LONG     MPI_LONG
+#define nMPI_UNSIGNED_LONG MPI_UNSIGNED_LONG
 #define nMPI_MAXLOC     MPI_MAXLOC
 #define nMPI_MINLOC     MPI_MINLOC
 #define nMPI_DOUBLE_INT MPI_DOUBLE_INT
@@ -56,6 +57,7 @@
 #define nMPI_INT      0
 #define nMPI_DOUBLE   0
 #define nMPI_LONG     0
+#define nMPI_UNSIGNED_LONG 0
 #define nMPI_MAXLOC     0
 #define nMPI_MINLOC     0
 #define nMPI_DOUBLE_INT 0
