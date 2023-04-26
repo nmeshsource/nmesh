@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdlib.h>
 
 /* Perform a binary search, in way very similar to bsearch_r.
 
