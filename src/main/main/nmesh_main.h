@@ -292,7 +292,7 @@ char *cmalloc(int n);
 void *pmalloc(int n);
 void *dtensor(size_t size);
 void *pcalloc(size_t n);
-void *rows_calloc(size_t nx, size_t ny[nx], size_t size);
+void *rows_calloc(size_t nx, unsigned long ny[nx], size_t size);
 void rows_free(void *g, size_t nx);
 
 /* endianIO.c */

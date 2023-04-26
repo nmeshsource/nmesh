@@ -848,7 +848,7 @@ void *pcalloc(size_t n)
    Each p[i] is pointing to ny[i]*size bytes of memory.
    To access the memory we use p[i][j].
    For ease of use we return a generic pointer. */
-void *rows_calloc(size_t nx, size_t ny[nx], size_t size)
+void *rows_calloc(size_t nx, unsigned long ny[nx], size_t size)
 {
   void **p = pcalloc(nx);  /* pointer we actully want */
   void *g;                 /* generic pointer */
