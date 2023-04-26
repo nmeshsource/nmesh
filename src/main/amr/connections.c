@@ -536,8 +536,11 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
   nMPI_Stat stat[4];
   int nreqs, tag;
   /* 1st and last entry in mesh->myelm_head list (can be NULL) */
-  tElm *first = list_first_entry_or_null(&mesh->myelm_head, tElm, list);
+  tElm *first = NULL;
   tElm *last  = NULL;
+
+  if(!list_empty(&mesh->myelm_head))
+    first = list_first_entry(&mesh->myelm_head, tElm, list);
 
   /* if first != NULL there are entries */
   if(first)
