@@ -841,9 +841,7 @@ void load_balance_elms(tMesh *mesh)
   int size = nMPI_size();
   int rank = nMPI_rank();
   int rk, torank;
-  double myspeed = Timing->mm_speed;
-  double speedmin = 1e-50;
-  double avspeed = 1.;
+  double avspeed, myspeed;
   double *speed = NULL;
   struct list_head *pos;
   double ops0, allops;
@@ -853,9 +851,6 @@ void load_balance_elms(tMesh *mesh)
   tCom *scom, *rcom;
   int   *ns_elms, *nr_elms; /* number of elms to send or recv for each rank */
   tElm0 **s_elms, **r_elms; /* s_elms[3][7] elm7 to be sent to rank3 */
-
-  /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
-  if(myspeed <= speedmin) myspeed = 1.;
 
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
@@ -869,6 +864,7 @@ void load_balance_elms(tMesh *mesh)
   if(!speed || !ops_bal_sum)
     errorexit("no memory for speed or ops_bal_sum");
   avspeed = load_set_speed_array(mesh, speed);
+  myspeed = speed[rank];
 
   /* ops needed for load balance */
   w = speed[0]/(avspeed*size); /* weight for rank0 */
