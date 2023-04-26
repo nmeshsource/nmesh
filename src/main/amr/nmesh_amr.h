@@ -206,26 +206,15 @@ typedef struct tINDIC {
 
 /* a node */
 typedef struct tNODE {
-  double dt;              /* time step in node */
-  double time;            /* current time in node */
+  ELMHEADER
+  /* stuff below this line is not copied when elm is sent to another rank */
+  struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
+  //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
+                            // where dat is and where all neighb. have dat
   struct tPAT *pat;       /* pointer to patch that contains node */
   struct tNODE *parent;   /* pointer to parent node */
   struct tNODE *child[8]; /* list of pointers to childeren nodes */
-  double bbox[6];         /* bounding box (in X,Y,Z) of this node */
-  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
-  int n[3];               /* number of points in X,Y,Z-directions */
-  int np;                 /* np = n[0] * n[1] * n[2]; */
-  int l;                  /* refinement level of this node */
-  int leaf;               /* is 1 if this is a leaf node */
-  int rflag;              /* flag for refining node */
-  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
-  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
-  //int lid;                /* local node ID */
-  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
-  tDat *dat;              /* pointer to data (NULL if not on this proc) */
-  int datrank;            /* rank of proc that rightfully has data */
-  //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
-                            // where dat is and where all neighb. have dat
+
   /* items to do with neighbor communication need to go last: */
   struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
