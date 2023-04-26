@@ -837,7 +837,7 @@ void *dtensor(size_t size)
 }
 
 /* alloc n pointers */
-void *pcalloc(int n)
+void *pcalloc(size_t n)
 {
   void *p = calloc(n, sizeof(void *));
   if(!p) errorexiti("out of memory (%d void *)", n);
@@ -848,11 +848,11 @@ void *pcalloc(int n)
    Each p[i] is pointing to ny[i]*size bytes of memory.
    To access the memory we use p[i][j].
    For ease of use we return a generic pointer. */
-void *rows_calloc(int nx, int ny[nx], size_t size)
+void *rows_calloc(size_t nx, size_t ny[nx], size_t size)
 {
   void **p = pcalloc(nx);  /* pointer we actully want */
   void *g;                 /* generic pointer */
-  int i;
+  size_t i;
 
   for(i=0; i<nx; i++)
   {
@@ -863,10 +863,10 @@ void *rows_calloc(int nx, int ny[nx], size_t size)
   return g; /* return generic pointer */
 }
 /* free memory allocated with rows_calloc */
-void rows_free(void *g, int nx)
+void rows_free(void *g, size_t nx)
 {
   void **p = g; /* cast generic pointer g back into (void **) */
-  int i;
+  size_t i;
   for(i=0; i<nx; i++) free(p[i]);
   free(p);
 }

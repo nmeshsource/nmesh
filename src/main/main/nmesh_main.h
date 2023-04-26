@@ -291,8 +291,9 @@ int *imalloc(int n);
 char *cmalloc(int n);
 void *pmalloc(int n);
 void *dtensor(size_t size);
-void *rows_calloc(int nx, int ny[nx], size_t size);
-void rows_free(void *g, int nx);
+void *pcalloc(size_t n);
+void *rows_calloc(size_t nx, size_t ny[nx], size_t size);
+void rows_free(void *g, size_t nx);
 
 /* endianIO.c */
 size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);
