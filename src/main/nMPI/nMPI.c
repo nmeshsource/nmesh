@@ -60,8 +60,8 @@ int nMPIvars_init(tMesh *mesh)
   nMPIvars->tag_bits = tag_bits;
 
   /* set some MPI_Datatypes */
-  nMPI_Type_contiguous(sizeof(tElm), nMPI_CHAR, &(nMPIvars->TELM));
-  nMPI_Type_commit(&(nMPIvars->TELM));
+  nMPI_Type_contiguous(sizeof(tElm0), nMPI_CHAR, &(nMPIvars->TELM0));
+  nMPI_Type_commit(&(nMPIvars->TELM0));
 
   return 0;
 }
