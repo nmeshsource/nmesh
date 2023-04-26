@@ -928,7 +928,7 @@ void load_balance_elms(tMesh *mesh)
     }
 
   /* alloc s_elms[rk] */
-  s_elms = (tElm0 **) rows_calloc(size, ns_elms, sizeof(tElm0));
+  s_elms = rows_calloc(size, ns_elms, sizeof(tElm0));
 
   /* set s_elms that has all elms that are not within my boundaries */
   torank = -1;
@@ -976,11 +976,11 @@ void load_balance_elms(tMesh *mesh)
 
   free(ns_elms);
   /* free s_elms */
-  rows_free((void **) s_elms, size);
+  rows_free(s_elms, size);
 
 
   /* alloc r_elms[rk] */
-  r_elms = (tElm0 **) rows_calloc(size, nr_elms, sizeof(tElm0));
+  r_elms = rows_calloc(size, nr_elms, sizeof(tElm0));
 
   /* recv all the elms that others have sent, i.e. receive all that I have
      been told about */
@@ -1003,7 +1003,7 @@ void load_balance_elms(tMesh *mesh)
 
   free(nr_elms);
   /* free r_elms */
-  rows_free((void **) r_elms, size);
+  rows_free(r_elms, size);
 
   /* wait for sends in scom */
   nMPI_Waitall_com_send(scom);
