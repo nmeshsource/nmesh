@@ -844,27 +844,33 @@ void *pcalloc(int n)
   return p;
 }
 
-/* alloc nx rows of pointers: pointer i is p[i] (with i=[0,...,nx-1])
-   each p[i] is pointing to ny[nx]*size bytes memory
-   to access the memory we use p[i][j] */
-void **rows_calloc(int nx, int ny[nx], size_t size)
+/* Alloc nx rows of pointers: pointer i is p[i] (with i=[0,...,nx-1])
+   Each p[i] is pointing to ny[nx]*size bytes memory.
+   To access the memory we use p[i][j].
+   For ease of use we return a generic pointer. */
+void *rows_calloc(int nx, int ny[nx], size_t size)
 {
-  void **p = pcalloc(nx);
+  void **p = pcalloc(nx);  /* pointer we actully want */
+  void *g;                 /* generic pointer */
   int i;
+
   for(i=0; i<nx; i++)
   {
     p[i] = calloc(ny[i], size);
     if(!p[i]) errorexiti("no memory for %d bytes", ny[i]*size);
   }
-  return p;
+  g = p;    /* convert p into generic pointer */
+  return g; /* return generic pointer */
 }
 /* free memory allocated with rows_calloc */
-void rows_free(void **p, int nx)
+void rows_free(void *g, int nx)
 {
+  void **p = g; /* cast generic pointer g back into (void **) */
   int i;
   for(i=0; i<nx; i++) free(p[i]);
   free(p);
 }
+
 
 /********************************************/
 /* Functions that have to do with errorexit */
