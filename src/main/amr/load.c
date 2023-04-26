@@ -812,7 +812,7 @@ int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
   double ops_elm_sum = *((const double *) key);
   double max = *((double *) arg);
   double diff = (ops_elm_sum - ops_bal_sum)/max;
-  return diff * 10000;
+  return diff * (INT_MAX/4);
 }
 
 /* find rank we want to put elm on */
