@@ -836,6 +836,36 @@ void *dtensor(size_t size)
   return p;
 }
 
+/* alloc n pointers */
+void *pcalloc(int n)
+{
+  void *p = calloc(n, sizeof(void *));
+  if(!p) errorexiti("out of memory (%d void *)", n);
+  return p;
+}
+
+/* alloc nx rows of pointers: pointer i is p[i] (with i=[0,...,nx-1])
+   each p[i] is pointing to ny[nx]*size bytes memory
+   to access the memory we use p[i][j] */
+void **rows_calloc(int nx, int ny[nx], size_t size)
+{
+  void **p = pcalloc(nx);
+  int i;
+  for(i=0; i<nx; i++)
+  {
+    p[i] = calloc(ny[i], size);
+    if(!p[i]) errorexiti("no memory for %d bytes", ny[i]*size);
+  }
+  return p;
+}
+/* free memory allocated with rows_calloc */
+void rows_free(void **p, int nx)
+{
+  int i;
+  for(i=0; i<nx; i++) free(p[i]);
+  free(p);
+}
+
 /********************************************/
 /* Functions that have to do with errorexit */
 /********************************************/

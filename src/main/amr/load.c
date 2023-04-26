@@ -7,8 +7,9 @@
 #define PR 0
 
 
-/* use timings */
+/* use timings and some MPI datatypes */
 extern tTiming Timing[1];
+extern tnMPIvars nMPIvars[1];
 
 
 /* object we pass around to figure out the desired rank of a node */
@@ -807,8 +808,8 @@ void simple_elm_load_balance(tMesh *mesh)
 /* comparison function for load_desired_rank */
 int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
 {
-  double ops_bal_sum = *((double *) ar);
-  double ops_elm_sum = *((double *) key);
+  double ops_bal_sum = *((const double *) ar);
+  double ops_elm_sum = *((const double *) key);
   double max = *((double *) arg);
   double diff = (ops_elm_sum - ops_bal_sum)/max;
   return diff * 10000;
@@ -845,13 +846,13 @@ void load_balance_elms(tMesh *mesh)
   double avspeed = 1.;
   double *speed = NULL;
   struct list_head *pos;
-  double ops0, myops, allops, myw;
-  double ops_bal, op0, op1;
+  double ops0, allops;
   double *ops_bal_sum = NULL;
   double myT = 0.;
   double w;
-  long *ns_elms = NULL;
   tCom *scom, *rcom;
+  int   *ns_elms, *nr_elms; /* number of elms to send or recv for each rank */
+  tElm0 **s_elms, **r_elms; /* s_elms[3][7] elm7 to be sent to rank3 */
 
   /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
   if(myspeed <= speedmin) myspeed = 1.;
@@ -859,7 +860,7 @@ void load_balance_elms(tMesh *mesh)
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
   ops0   = Timing->ops0;
-  myops  = Timing->myops;
+  //myops  = Timing->myops;
   allops = Timing->allops;
 
   /* get speeds on all ranks */
@@ -886,11 +887,11 @@ void load_balance_elms(tMesh *mesh)
   ns_elms = calloc(size, sizeof(ns_elms[0]));
   if(!ns_elms) errorexit("no memory for ns_elms");
 
-  /* get boundaries op0 and op1 into which ops_bal has to fall
-     within allops */
-  op1 = ops_bal_sum[rank];
-  if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
-  else       op0 = 0.;
+  ///* get boundaries op0 and op1 into which ops_bal has to fall
+  //   within allops */
+  //op1 = ops_bal_sum[rank];
+  //if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
+  //else       op0 = 0.;
 
   /* find all elms that are not within my boundaries */
   torank = -1;
@@ -927,7 +928,7 @@ void load_balance_elms(tMesh *mesh)
     }
 
   /* alloc s_elms[rk] */
-  //...
+  s_elms = (tElm0 **) rows_calloc(size, ns_elms, sizeof(tElm0));
 
   /* set s_elms that has all elms that are not within my boundaries */
   torank = -1;
@@ -946,7 +947,8 @@ void load_balance_elms(tMesh *mesh)
       torank = desrank;
       i = 0;
     }
-    s_elms[torank][i++] = elm[0]; // shallow copy
+    memcpy(&(s_elms[torank][i]), elm, sizeof(tElm0));
+    i++;
     //remove this elm from list //change list_for_each to list_for_each_safe
   }
 
@@ -959,7 +961,7 @@ void load_balance_elms(tMesh *mesh)
       int rq;
 
       rq = append_buffers_to_com(scom, &(s_elms[rk][0]),ns_elms[rk], NULL,0);
-      nMPI_Isend_com(scom, rq, nMPIvars->TELM, rk, 200, WORLD);
+      nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 200, WORLD);
     }
 
   /* wait for recvs in rcom */
@@ -974,10 +976,11 @@ void load_balance_elms(tMesh *mesh)
 
   free(ns_elms);
   /* free s_elms */
+  rows_free((void **) s_elms, size);
 
 
   /* alloc r_elms[rk] */
-  //...
+  r_elms = (tElm0 **) rows_calloc(size, nr_elms, sizeof(tElm0));
 
   /* recv all the elms that others have sent, i.e. receive all that I have
      been told about */
@@ -987,7 +990,7 @@ void load_balance_elms(tMesh *mesh)
       int rq;
 
       rq = append_buffers_to_com(rcom, NULL,0, &(r_elms[rk][0]),nr_elms[rk]);
-      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM, rk, 100, WORLD);
+      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 100, WORLD);
     }
 
   /* wait for recvs in rcom */
@@ -1000,7 +1003,7 @@ void load_balance_elms(tMesh *mesh)
 
   free(nr_elms);
   /* free r_elms */
-
+  rows_free((void **) r_elms, size);
 
   /* wait for sends in scom */
   nMPI_Waitall_com_send(scom);

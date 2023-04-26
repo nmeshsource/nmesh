@@ -6,6 +6,18 @@
 /* marco to do: if(Rank0) */
 #define Rank0 (!nMPI_rank())
 
+
+/* structure that holds global nMPI vars */
+typedef struct {
+  int comm_bits;     /* number of bits we use for MPI communicators */
+  int ncomms;        /* number of MPI communicators: ncomms = 2^comm_bits */
+  nMPI_Comm *comm;   /* list of MPI communicators */
+  int tag_ub;        /* min of upper bound of MPI tags over all in comm */
+  int tag_bits;      /* number of bits in tag_ub+1 */
+  nMPI_Datatype TELM0; //MPI_Datatype for tElm from 0-offsetof(tElm, dat)
+} tnMPIvars;
+
+
 /* for MPI communication this can help */
 typedef struct tCOM {
   int n_rq;             /* number of send/recv requests */
@@ -50,6 +62,10 @@ int nMPI_Send(const void *buf, int count, nMPI_Datatype datatype,
               int dest, int tag);
 int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,
               int source, int tag);
+int nMPI_Isend(const void *buf, int count, nMPI_Datatype datatype,
+               int dest, int tag, nMPI_Comm comm, nMPI_Req *req);
+int nMPI_Irecv(void *buf, int count, nMPI_Datatype datatype,
+               int src, int tag, nMPI_Comm comm, nMPI_Req *req);
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
 int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
                    nMPI_Datatype datatype, nMPI_Op op);
@@ -95,6 +111,10 @@ int nMPI_Testall_com(tCom *com, int *flag);
 void nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
                           int rank_other, int s_tag, int r_tag,
                           nMPI_Comm s_comm, nMPI_Comm r_comm);
+int nMPI_Isend_com(tCom *com, int rq, nMPI_Datatype datatype,
+                   int dest, int tag, nMPI_Comm comm);
+int nMPI_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
+                   int src, int tag, nMPI_Comm comm);
 void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                  int rank_other, int s_tag, int r_tag,
                                  nMPI_Comm s_comm, nMPI_Comm r_comm);

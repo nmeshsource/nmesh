@@ -51,47 +51,58 @@ typedef struct tELOC {
   char loc[LOCSMAX];      /* node location string, giving loc. in patch */
 } tEloc;
 
+
 /* a leaf node or element called elm */
+/* Beginning of tElm */
 //THIS is we want for later:
-//typedef struct tELM {
-//  struct list_head list;  /* all elms form a linked list */
-//  tEloc eloc[1];          /* elm location */
-//
-//  double dt;              /* time step in node */
-//  double time;            /* current time in node */
-//  struct tPAT *pat;       // replace one day by: struct tMESH *mesh;
-//  double bbox[6];         /* bounding box (in X,Y,Z) of this node */
-//  int n[3];               /* number of points in X,Y,Z-directions */
-//  int rflag;              /* flag for refining node */
-//  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
-//  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
-//  int datrank;            /* rank of proc that rightfully has data */
-//  struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
-//} tElm;
+/*
+#define ELMHEADER \
+  struct list_head list;  // all elms form a linked list \
+  tEloc eloc[1];          // elm location \
+  double dt;              // time step in node \
+  double time;            // current time in node \
+  double bbox[6];         // bounding box (in X,Y,Z) of this node \
+  int n[3];               // number of points in X,Y,Z-directions \
+  int rflag;              // flag for refining node \
+  long nid;               // node ID, updated by update_mesh_myln_node_nid \
+  int pt_typ[3];          // e.g. pt_typ[1]=P_LGL => LGL in dir1 of node \
+  int datrank;            // rank of proc that rightfully has data
+typedef struct tELM {
+  ELMHEADER
+  // stuff below this line is not copied when elm is sent to another rank
+  struct tDAT *dat;       // pointer to data (NULL if not on this proc)
+  struct tPAT *pat;       // replace one day by: struct tMESH *mesh;
+} tElm;
+*/
 //// at the moment tElm has quite a few parts the nmesh tNode had as well.
 //// we may want to streamline this later
 //Temporarily we use this for compatibility with tNode:
+#define ELMHEADER \
+  struct list_head list;  /* all elms form a linked list */ \
+  tEloc eloc[1];          /* elm location */ \
+  double dt;              /* time step in node */ \
+  double time;            /* current time in node */ \
+  double bbox[6];         /* bounding box (in X,Y,Z) of this node */ \
+  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */ \
+  int n[3];               /* number of points in X,Y,Z-directions */ \
+  int np;                 /* np = n[0] * n[1] * n[2]; */ \
+  int l;                  /* refinement level of this node */ \
+  int leaf;               /* is 1 if this is a leaf node */ \
+  int rflag;              /* flag for refining node */ \
+  int ijk;                /* node index (0-7), i.e. child number wrt. parent */ \
+  long nid;               /* node ID, updated by update_mesh_myln_node_nid */ \
+  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */ \
+  int datrank;            /* rank of proc that rightfully has data */
 typedef struct tELM {
-  double dt;              /* time step in node */
-  double time;            /* current time in node */
+  ELMHEADER
+  /* stuff below this line is not copied when elm is sent to another rank */
+  struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
+  //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
+                            // where dat is and where all neighb. have dat
   struct tPAT *pat;       /* pointer to patch that contains node */
   struct tNODE *parent;   /* pointer to parent node */
   struct tNODE *child[8]; /* list of pointers to childeren nodes */
-  double bbox[6];         /* bounding box (in X,Y,Z) of this node */
-  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
-  int n[3];               /* number of points in X,Y,Z-directions */
-  int np;                 /* np = n[0] * n[1] * n[2]; */
-  int l;                  /* refinement level of this node */
-  int leaf;               /* is 1 if this is a leaf node */
-  int rflag;              /* flag for refining node */
-  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
-  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
-  //int lid;                /* local node ID */
-  int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */
-  struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
-  int datrank;            /* rank of proc that rightfully has data */
-  //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
-                            // where dat is and where all neighb. have dat
+
   /* items to do with neighbor communication need to go last: */
   struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
@@ -102,11 +113,12 @@ typedef struct tELM {
                                kept up to date by update_node_fnb */
   struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
                                      and its nbs are currently being updated */
-
-  struct list_head list;  /* all elms form a linked list */
-  tEloc eloc[1];          /* elm location */
-
 } tElm;
+
+/* data type for only header part of tElm */
+typedef struct tELM0 {
+  ELMHEADER
+} tElm0;
 
 // in case we need it, we can also make more linked element lists:
 ///* a linked list of elements */
