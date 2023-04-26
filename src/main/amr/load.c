@@ -843,14 +843,15 @@ void load_balance_elms(tMesh *mesh)
   int rk, torank;
   double avspeed, myspeed;
   double *speed = NULL;
-  struct list_head *pos;
+  struct list_head *pos, *sav;
   double ops0, allops;
   double *ops_bal_sum = NULL;
   double myT = 0.;
   double w;
   tCom *scom, *rcom;
-  int   *ns_elms, *nr_elms; /* number of elms to send or recv for each rank */
-  tElm0 **s_elms, **r_elms; /* s_elms[3][7] elm7 to be sent to rank3 */
+  unsigned long *ns_elms, *nr_elms; // number of elms to send or recv for each rank
+  tElm0 **s_elms, **r_elms; // s_elms[3][7] elm7 to be sent to rank3 */
+  //unsigned long nkeep; // number of elms we keep on this rank
 
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
@@ -904,7 +905,14 @@ void load_balance_elms(tMesh *mesh)
     if(desrank != torank)
       torank = desrank;
     ns_elms[torank] += 1;
+    dat->info->desrank = torank; /* store rank where this elm should go */
   }
+  /* I don't send to myself, so zero ns_elms[rank] */
+  //nkeep = ns_elms[rank];
+  ns_elms[rank] = 0;
+
+  /* from here on ops_bal_sum is no longer needed */
+  free(ops_bal_sum);
 
   /* tell rank rk that I will send it ns_elms[rk] elms, and
      recv from rank rk how many (nr_elms[rk]) I will get */
@@ -917,11 +925,11 @@ void load_balance_elms(tMesh *mesh)
 
       /* tell that I send ns_elms to others */
       rq = append_buffers_to_com(scom, &(ns_elms[rk]),1, NULL,0);
-      nMPI_Isend_com(scom, rq, nMPI_LONG, rk, 100, WORLD);
+      nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD);
 
       /* recv nr_elms from others */
       rq = append_buffers_to_com(rcom, NULL,0, &(nr_elms[rk]),1);
-      nMPI_Irecv_com(rcom, rq, nMPI_LONG, rk, 100, WORLD);
+      nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD);
     }
 
   /* alloc s_elms[rk] */
@@ -929,29 +937,30 @@ void load_balance_elms(tMesh *mesh)
 
   /* set s_elms that has all elms that are not within my boundaries */
   torank = -1;
-  //FIXME: need list_for_each_safe
-  list_for_each(pos, &mesh->myelm_head)
+  list_for_each_safe(pos, sav, &mesh->myelm_head)
   {
-    int desrank, i;
+    int desrank;
+    unsigned long i;
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     if(!dat) errorexit("this elm must have dat");
 
-    myT += dat->info->load_TimeIn_s;
-    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
+    desrank = dat->info->desrank;
     if(desrank != torank)
     {
       torank = desrank;
       i = 0;
     }
-    memcpy(&(s_elms[torank][i]), elm, sizeof(tElm0));
-    i++;
-    //remove this elm from list //change list_for_each to list_for_each_safe
+    if(torank != rank)
+    {
+      memcpy(&(s_elms[torank][i]), elm, sizeof(tElm0));
+      i++;
+      /* Remove this elm from list. But elm is still in mesh->myelm. */
+      list_del(&elm->list);
+    }
   }
 
-  free(ops_bal_sum);
-
-  /* send all the elms that we have told about to the other ranks */
+  /* now send all the elms that we have told about, to the other ranks */
   for(rk=0; rk<size; rk++)
     if(rk != rank)
     {
@@ -967,14 +976,6 @@ void load_balance_elms(tMesh *mesh)
   /* make new rcom */
   free_com(rcom);
   rcom = alloc_com(sizeof(long), 0);
-
-  /* remove s_elms */
-  //...
-
-  free(ns_elms);
-  /* free s_elms */
-  rows_free(s_elms, size);
-
 
   /* alloc r_elms[rk] */
   r_elms = rows_calloc(size, nr_elms, sizeof(tElm0));
@@ -994,15 +995,41 @@ void load_balance_elms(tMesh *mesh)
   nMPI_Waitall_com_recv(rcom);
   free_com(rcom);
 
-
-  /* insert r_elms */
-  //...
-
-  free(nr_elms);
-  /* free r_elms */
-  rows_free(r_elms, size);
-
-  /* wait for sends in scom */
+  /* wait for sends in scom, then free all send related stuff */
   nMPI_Waitall_com_send(scom);
   free_com(scom);
+  free(ns_elms);
+  rows_free(s_elms, size);
+
+  /* insert r_elms after current end of list */
+  for(rk=rank+1; rk<size; rk++)
+  {
+    unsigned long i;
+    for(i=0; i<nr_elms[rk]; i++)
+    {
+      tElm *elm = alloc_elm(0); /* fresh new elm */
+      memcpy(elm, &(r_elms[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
+      /* now add elm to the end of list in mesh */
+      list_add_tail(&elm->list, &mesh->myelm_head);
+    }
+  }
+
+  /* insert r_elms before current beginning of list */
+  pos = &mesh->myelm_head; /* position where we insert */
+  for(rk=0; rk<rank-1; rk++)
+  {
+    unsigned long i;
+    for(i=0; i<nr_elms[rk]; i++)
+    {
+      tElm *elm = alloc_elm(0); /* fresh new elm */
+      memcpy(elm, &(r_elms[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
+      /* now add elm after pos */
+      list_add(&elm->list, pos);
+      pos = &elm->list; /* move insert position by one */
+    }
+  }
+
+  /* free all received elm0 */
+  free(nr_elms);
+  rows_free(r_elms, size);
 }

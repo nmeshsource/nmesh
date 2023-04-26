@@ -520,7 +520,7 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
 
 /****************************************************************************/
-/* functions to exchange info between rank_i and rank_i+1 */
+/* functions to exchange info between rank_i and rank_{i \pm 1} */
 /****************************************************************************/
 
 /* exchange first and last elm between neigboring ranks
@@ -580,4 +580,22 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
   /*FIXME: update rflag by using nb rank info,
            if all 8 siblings are on different ranks,
            run MPI exchanges up to 5 times more */
+}
+
+/****************************************************************************/
+/* functions to build elm lists */
+/****************************************************************************/
+
+/* copy list in mesh->myelm_head into array mesh->myelm */
+long update_mesh_myelm_from_myelm_head(tMesh *mesh)
+{
+  struct list_head *pos;
+  long i = 0;
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    mesh->myelm[i++] = elm;
+  }
+  mesh->nmyelm = i;
+  return mesh->nmyelm;
 }

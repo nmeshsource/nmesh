@@ -150,6 +150,7 @@ typedef struct tNODEINFO {
   int load_timer_running;        //1 if node load timer is running, else 0
   struct timespec load_start[1]; //time when node load timer was started
   double load_TimeIn_s;          //time spent on this node in seconds
+  int desrank;            /* rank that should have this node/elm */
 } tNodeInfo;
 
 /* the data within a node, this should be only on one proc */

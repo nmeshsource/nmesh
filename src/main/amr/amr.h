@@ -106,3 +106,4 @@ int timing_set_myops_ops0_allops(tMesh *mesh);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
+long update_mesh_myelm_from_myelm_head(tMesh *mesh);
