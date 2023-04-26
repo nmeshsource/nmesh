@@ -845,7 +845,7 @@ void *pcalloc(int n)
 }
 
 /* Alloc nx rows of pointers: pointer i is p[i] (with i=[0,...,nx-1])
-   Each p[i] is pointing to ny[nx]*size bytes memory.
+   Each p[i] is pointing to ny[i]*size bytes of memory.
    To access the memory we use p[i][j].
    For ease of use we return a generic pointer. */
 void *rows_calloc(int nx, int ny[nx], size_t size)
