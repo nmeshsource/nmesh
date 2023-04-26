@@ -883,9 +883,10 @@ void load_balance_elms(tMesh *mesh)
   /* we do not need speed array any longer */
   free(speed);
 
-  /* memory for number of elms we send to each rank */
+  /* memory for number of elms we send to or recv from each rank */
   ns_elms = calloc(size, sizeof(ns_elms[0]));
-  if(!ns_elms) errorexit("no memory for ns_elms");
+  nr_elms = calloc(size, sizeof(nr_elms[0]));
+  if(!ns_elms || !nr_elms) errorexit("no memory for ns_elms or nr_elms");
 
   ///* get boundaries op0 and op1 into which ops_bal has to fall
   //   within allops */
