@@ -8,6 +8,19 @@
 tTiming Timing[1];
 
 
+
+/* print global Timing struct */
+void printTiming(void)
+{
+  printf("Timing->\n");
+  printf("  mm1_speed = %g\n", Timing->mm1_speed);
+  printf("  mm_speed = %g\n", Timing->mm_speed);
+  printf("  myops = %g\n", Timing->myops);
+  printf("  ops0 = %g\n", Timing->ops0);
+  printf("  allops = %g\n", Timing->allops);
+}
+
+
 /* get time for one matrix mul. */
 double time_mm_array0(tArray *At, tArray *B, tArray *AB)
 {
@@ -102,6 +115,7 @@ int timing_set_myops(tMesh *mesh)
 {
   double myspeed = Timing->mm_speed;
   double speedmin = 1e-50;
+  double loadTmin = 1e-50;
   struct list_head *pos;
   double myT = 0.;
 
@@ -112,7 +126,13 @@ int timing_set_myops(tMesh *mesh)
   {
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
-    if(dat) myT += dat->info->load_TimeIn_s;
+    if(dat)
+    {
+      double et = dat->info->load_TimeIn_s;
+      /* if we forgot to measure load_TimeIn_s of elm, just set et=loadTmin */
+      if(et <= loadTmin) et = loadTmin;
+      myT += et;
+    }
   }
   Timing->myops = myspeed * myT;
   return 0;
