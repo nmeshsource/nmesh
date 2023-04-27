@@ -131,13 +131,13 @@ void *bisectionsearch(const void *key, const void *base0,
     pos = pos_a;
     p = (const char *) base0 + pos * size;
     cmp_a = (*compar)(key, p, arg);
-    printf("cmp_a=%d\n", cmp_a);
+    //printf("cmp_a=%d\n", cmp_a);
     if(cmp_a == 0) goto FoundKey;
 
     pos = pos_b;
     p = (const char *) base0 + pos * size;
     cmp_b = (*compar)(key, p, arg);
-    printf("cmp_b=%d\n", cmp_b);
+    //printf("cmp_b=%d\n", cmp_b);
     if(cmp_b == 0) goto FoundKey;
 
     /* no bracket */
