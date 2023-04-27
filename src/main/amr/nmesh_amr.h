@@ -71,7 +71,8 @@ typedef struct tELM {
   ELMHEADER
   // stuff below this line is not copied when elm is sent to another rank
   struct tDAT *dat;       // pointer to data (NULL if not on this proc)
-  struct tPAT *pat;       // replace one day by: struct tMESH *mesh;
+  //struct tMESH *mesh;     // pointer to mesh that contains elm
+  struct tPAT *pat;       // remove one day, since we have mesh
 } tElm;
 */
 //// at the moment tElm has quite a few parts the nmesh tNode had as well.
@@ -97,9 +98,10 @@ typedef struct tELM {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
+  //struct tMESH *mesh;     // pointer to mesh that contains elm
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
                             // where dat is and where all neighb. have dat
-  struct tPAT *pat;       /* pointer to patch that contains node */
+  struct tPAT *pat;       // remove one day, since we have mesh
   struct tNODE *parent;   /* pointer to parent node */
   struct tNODE *child[8]; /* list of pointers to childeren nodes */
 
@@ -210,6 +212,7 @@ typedef struct tNODE {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
+  //struct tMESH *mesh;     // pointer to mesh that contains elm
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
                             // where dat is and where all neighb. have dat
   struct tPAT *pat;       /* pointer to patch that contains node */
