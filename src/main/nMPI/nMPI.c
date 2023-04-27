@@ -173,21 +173,21 @@ int nMPI_Init(int *pargc, char ***pargv)
 int nMPI_Finalize(void)
 {
   int ret=0;
-  fclose(stderr);
-  fclose(stdout);
 #ifdef USEMPI
   PR0;
   ret = MPI_Finalize();
   PR1;
 #endif
+  fclose(stderr);
+  fclose(stdout);
   return ret;
 }
 
 /* abort MPI in case of errorexit */
 int nMPI_Abort(int errorcode)
 {
-  fclose(stderr);
-  fclose(stdout);
+  fflush(stderr);
+  fflush(stdout);
 #ifdef USEMPI
   PR0;
   return MPI_Abort(WORLD, errorcode);
