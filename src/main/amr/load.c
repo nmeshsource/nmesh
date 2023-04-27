@@ -729,6 +729,8 @@ void get_nbr_rank_info(tMesh *mesh)
   free_com(com);
 }
 
+
+//FIXME: This function does not work. Remove it!!!
 /* simple load balance giving equal numbers of elms to each rank */
 void simple_elm_load_balance(tMesh *mesh)
 {
@@ -805,6 +807,79 @@ void simple_elm_load_balance(tMesh *mesh)
 
 
 
+
+
+/* Move data (dat) for elms that have been moved.
+   Here we assume:
+   -no dat has been moved yet
+   -the list in mesh->myelm_head has been updated to contain all elms
+    we want on this rank (but some have no dat yet)
+   -the list in mesh->myelm contains the elms that we had before the update,
+    and thus has all the elms for which we still have dat */
+void load_exchange_dat_after_moving_elms(tMesh *mesh)
+{
+  int rank = nMPI_rank();
+  struct list_head *pos;
+  tCom *scom, *rcom;
+  long i;
+
+  /* for MPI data transfers */
+  scom = alloc_com(sizeof(double), 1);
+  rcom = alloc_com(sizeof(double), 1);
+
+  /* loop over mesh->myelm and send dat from elms that have a
+     dat->info->desrank different from my rank */
+  for(i=0; i<mesh->nmyelm; i++)
+  {
+    int desrank;
+    tElm *elm = mesh->myelm[i];
+    tDat *dat = elm->dat;
+    if(!dat) errorexit("this elm must have dat");
+
+    desrank = dat->info->desrank;
+
+    /* fill MPI send buffers */
+    if(rank != desrank)
+      move_node_to_rank(elm, desrank, scom, rcom, 1);
+  }
+
+  /* loop over mesh->myelm_head list and recv dat from elms that have a
+     datrank different from my rank */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    int datrank = elm->datrank;
+    tDat *dat = elm->dat;
+
+    /* redundant error checks */
+    if(!dat)
+    { if(datrank == rank) errorexit("dat=NULL but datrank=rank"); }
+    else
+    { if(datrank != rank) errorexit("dat!=NULL but datrank!=rank"); }
+
+    /* setup MPI recv buffers */
+    if(datrank != rank)
+      move_node_to_rank(elm, rank, scom, rcom, 1);
+  }
+
+  /* wait for MPI sends and recvs */
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);  /* free scom with all its buffers */
+  nMPI_Waitall_com_recv(rcom);
+
+  /* get var data out of recv buffers */
+  set_com_counters(rcom, 0,0);
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    if(elm->datrank != rank)
+      move_node_to_rank(elm, rank, scom, rcom, 0);
+  }
+
+  free_com(rcom);  /* free scom with all its buffers */
+}
+
+
 /* comparison function for load_desired_rank */
 int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
 {
@@ -835,7 +910,15 @@ int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
   }
 }
 
-/**/
+/* main load balancing function for elms:
+   -We first determine how many elms (ns_elms[rk]) we send to another rank rk.
+   -Then we tell the other ranks about it, and find out how many we will
+    receive from them.
+   -Then we pack the els we want to send into s_elms[rk], and remove them
+    from our mesh->myelm_head list.
+   -Then we send and recv the elm-headers (tElm0 type).
+   -Finally we need to exchange the dat, for all elms that are now supposed
+    to be elsewhere. */
 void load_balance_elms(tMesh *mesh)
 {
   int size = nMPI_size();
@@ -1032,4 +1115,23 @@ void load_balance_elms(tMesh *mesh)
   /* free all received elm0 */
   free(nr_elms);
   rows_free(r_elms, size);
+
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
+
+  /* move dat to correct ranks now */
+  load_exchange_dat_after_moving_elms(mesh);
+
+//NOTE: call long update_mesh_myelm_from_myelm_head(tMesh *mesh) here
+//      or make update_mesh_myln_node_nid call it???
+
+//FIXME: adapt  update_mesh_myln_node_nid
+  update_mesh_myln_node_nid(mesh);
+  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
+
+
+//FIXME: call function that set's up elm->fnb and such...
+
+  /* now that nodes are elsewhere re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
 }
