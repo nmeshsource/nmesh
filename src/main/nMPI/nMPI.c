@@ -201,9 +201,9 @@ int nMPI_rank(void)
 {
   int rank = noMPI_rank;
 #ifdef USEMPI
-  PR0;
+  //PR0;
   MPI_Comm_rank(WORLD, &rank);
-  PR1;
+  //PR1;
 #endif
   return rank;
 }
