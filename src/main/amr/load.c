@@ -889,7 +889,10 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
 
     /* remove elms that we don't have anymore */
     if(rank != desrank)
+    {
       free_elm(elm);
+      mesh->myelm[i] = NULL;
+    }
   }
 }
 
