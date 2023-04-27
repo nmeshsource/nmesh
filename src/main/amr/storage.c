@@ -215,12 +215,15 @@ tElm *alloc_elm(int initcomm)
   return elm;
 }
 
-/* free one elm only, leaves dat hanging */
+/* free one elm and its dat */
 void free_elm(tElm *elm)
 {
   int face;
 
   if(!elm) return;
+
+  /* free variable data */
+  free_dat(elm->dat);
 
   /* free surface neigbhor list */
   for(face=0; face<6; face++) free(elm->fnb[face]);
@@ -228,20 +231,9 @@ void free_elm(tElm *elm)
   free(elm);
 }
 
-/* free one elm and its dat */
-void free_elm_and_elm_dat(tElm *elm)
-{
-  if(!elm) return;
-
-  /* free variable data */
-  free_dat(elm->dat);
-
-  free_elm(elm);
-}
-
 
 /* allocate and set mesh->myelm array from mesh->myelm_head */
-void alloc_and_set_mesh_myelm(tMesh *mesh)
+long alloc_and_set_mesh_myelm(tMesh *mesh)
 {
   long ei;
   struct list_head *pos;
@@ -253,7 +245,7 @@ void alloc_and_set_mesh_myelm(tMesh *mesh)
   /* get number of elms on this rank */
   mesh->nmyelm = list_count_nodes(&mesh->myelm_head);
   /* return if there are no elms */
-  if(mesh->nmyelm == 0) return;
+  if(mesh->nmyelm == 0) return 0;
 
   /* alloc sufficient space */
   mesh->myelm = calloc(mesh->nmyelm, sizeof(mesh->myelm[0]));
@@ -266,6 +258,8 @@ void alloc_and_set_mesh_myelm(tMesh *mesh)
     mesh->myelm[ei] = list_entry(pos, tElm, list);
     ei++;
   }
+  if(ei != mesh->nmyelm) errorexit("Whaaaat??????");
+  return mesh->nmyelm;
 }
 
 /* free array mesh->myelm array */
@@ -428,7 +422,7 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   }
 
   /* free parent and all data on parent */
-  free_elm_and_elm_dat(parent);
+  free_elm(parent);
 
   //printf("Created:\n");
   //printnodes_in_list(nlist);
@@ -1164,7 +1158,7 @@ void free_patch(tPat *pat)
     if(elm->pat == pat)
     {
       list_del(&elm->list);
-      free_elm_and_elm_dat(elm);
+      free_elm(elm);
     }
   }
 
