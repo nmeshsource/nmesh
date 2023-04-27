@@ -883,9 +883,9 @@ NORET void finalexit(int ec)
   fflush(stderr);
   fflush(stdout);
   sync();
-  nMPI_Abort(ec);
   if(mesh && GetvLax(Par("errorexit"), "abort"))  abort();
-  else                                            exit(ec);
+  nMPI_Abort(ec);
+  exit(ec);
 }
 
 /* Function to print errno. Use as: print_errno(stdout, errno); */
