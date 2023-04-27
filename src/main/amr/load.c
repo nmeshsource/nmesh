@@ -1081,7 +1081,7 @@ fflush(stdout);
     for(i=0; i<nr_elms[rk]; i++)
     {
       tElm *elm = alloc_elm_init_pat(mesh, r_elms[i]->eloc->p); /* fresh elm */
-      memcpy(elm, &(r_elms[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
+      memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
       /* now add elm to the end of list in mesh */
       list_add_tail(&elm->list, &mesh->myelm_head);
     }
@@ -1095,7 +1095,18 @@ fflush(stdout);
     for(i=0; i<nr_elms[rk]; i++)
     {
       tElm *elm = alloc_elm_init_pat(mesh, r_elms[i]->eloc->p); /* fresh elm */
-      memcpy(elm, &(r_elms[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
+      memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
+
+printf("r_elms[i]=%p elm=%p\n", r_elms[i], elm);
+int k;
+for(k=0; k<20; k++) printf("%x ", ((char *) r_elms[i])[k] );
+printf("\n");
+for(k=0; k<20; k++) printf("%x ", ((char *) elm)[k] );
+printf("\n");
+Yo(666);
+//fflush(stdout);
+//if(rank==1) abort();
+
       /* now add elm after pos */
       list_add(&elm->list, pos);
       pos = &elm->list; /* move insert position by one */
