@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
-#define PR 0
+#define PR 1
 #define PR0 if(PR){PRF;printf(": calling MPI function...\n");fflush(stdout);}
 #define PR1 if(PR){PRF;printf(": done.\n");fflush(stdout);}
 
