@@ -9,7 +9,8 @@ extern nMPI_Comm main_comm;
 
 
 /* storage.c */
-tElm *alloc_elm(int initcomm);
+tElm *alloc_elm(tMesh *mesh);
+tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 void free_elm(tElm *elm);
 tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
@@ -99,6 +100,7 @@ void get_all_myln_ghostdata(tMesh *mesh);
 int amr_print_thread_info(tMesh *mesh);
 
 /* timing.c  */
+void printTiming(void);
 int timing_mm_speed(tMesh *mesh);
 int timing_set_myops_ops0_allops(tMesh *mesh);
 

@@ -201,17 +201,22 @@ void free_3_arrays(tArray *array[3])
 /****************************************************************************/
 
 /* allocate one elm */
-tElm *alloc_elm(int initcomm)
+tElm *alloc_elm(tMesh *mesh)
 {
   tElm *elm = calloc(1, sizeof(*elm));
   if(!elm) errorexit("out of memory");
 
-  // /* set elm MPI communicator elm->comm */
-  //if(initcomm)
-  //  elm->comm = nMPIvars_get_comm(initcomm-1);
-  //else
-  //  elm->comm = main_comm;
+  //FIXME: once elm has mesh, set it here
+  //elm->mesh = mesh;
 
+  return elm;
+}
+
+/* also init pat: REMOVE this func once we do not need elm->pat anymore */
+tElm *alloc_elm_init_pat(tMesh *mesh, int p)
+{
+  tElm *elm = alloc_elm(mesh);
+  elm->pat = mesh->pat[p];
   return elm;
 }
 
@@ -278,7 +283,7 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
   if(nMPI_rank()==datrank)
   {
     tMesh *mesh = pat->mesh;
-    tElm *elm = alloc_elm(0);
+    tElm *elm = alloc_elm(mesh);
     tEloc *eloc = elm->eloc;
     int i;
 
@@ -322,7 +327,7 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
 tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
 {
   tMesh *mesh = parent->pat->mesh;
-  tElm *elm = alloc_elm(0);
+  tElm *elm = alloc_elm(mesh);
   int d, vi,nvdb;
 
   /* transfer parent time info */
