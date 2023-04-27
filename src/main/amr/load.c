@@ -875,8 +875,22 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     if(elm->datrank != rank)
       move_node_to_rank(elm, rank, scom, rcom, 0);
   }
-
   free_com(rcom);  /* free scom with all its buffers */
+
+  /* free all elms in mesh->myelm, that now are on another rank */
+  for(i=0; i<mesh->nmyelm; i++)
+  {
+    int desrank;
+    tElm *elm = mesh->myelm[i];
+    tDat *dat = elm->dat;
+    if(!dat) errorexit("this elm must have dat");
+
+    desrank = dat->info->desrank;
+
+    /* remove elms that we don't have anymore */
+    if(rank != desrank)
+      free_elm(elm);
+  }
 }
 
 
@@ -1122,8 +1136,7 @@ void load_balance_elms(tMesh *mesh)
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
 
-//NOTE: call long update_mesh_myelm_from_myelm_head(tMesh *mesh) here
-//      or make update_mesh_myln_node_nid call it???
+//NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
 
 //FIXME: adapt  update_mesh_myln_node_nid
   update_mesh_myln_node_nid(mesh);
@@ -1131,6 +1144,7 @@ void load_balance_elms(tMesh *mesh)
 
 
 //FIXME: call function that set's up elm->fnb and such...
+//       maybe also update_mesh_myln_node_nid ???
 
   /* now that nodes are elsewhere re-init surfaces & indc */
   evolve_init_communication_structs(mesh);

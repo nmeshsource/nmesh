@@ -585,17 +585,4 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
 /****************************************************************************/
 /* functions to build elm lists */
 /****************************************************************************/
-
-/* copy list in mesh->myelm_head into array mesh->myelm */
-long update_mesh_myelm_from_myelm_head(tMesh *mesh)
-{
-  struct list_head *pos;
-  long i = 0;
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    tElm *elm = list_entry(pos, tElm, list);
-    mesh->myelm[i++] = elm;
-  }
-  mesh->nmyelm = i;
-  return mesh->nmyelm;
-}
+//...
