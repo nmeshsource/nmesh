@@ -165,7 +165,7 @@ int amr_setup_mesh(tMesh *mesh)
   else if(Getv(mesh_type, "3patchl2_mesh"))
     ret = setup_3patchl2_mesh(mesh);
   else
-    ret = setup_test_mesh(mesh);
+    ret = setup_elm_mesh1(mesh); //ret = setup_test_mesh(mesh);
 
   /* load balance root nodes */
   simple_load_balance(mesh);
@@ -517,9 +517,61 @@ int setup_Shell_mesh(tMesh *mesh)
 }
 
 
+/***************************************************************************/
+/* all the functions below are only for elm testing and can be
+   removed later */
+/***************************************************************************/
+
+int setup_elm_mesh1(tMesh *mesh)
+{
+  int amr_n0 = Geti(Par("amr_n0"));
+  int amr_n1 = Geti(Par("amr_n1"));
+  int amr_n2 = Geti(Par("amr_n2"));
+  int n[] = { amr_n0, amr_n1, amr_n2 };
+  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
+  double bbox0[6] = { -4,4, -2,2, -1,1 };
+  double bbox1[6] = { -4,0,  2,4, -1,1 };
+  double bbox2[6] = {  0,4,  2,4, -1,1 };
+  struct list_head *pos;
+
+  PRFs(":\n");
+
+  mesh->dt = Getd(Par("dt"));
+  mesh->time = 0.;
+  mesh->iteration = 0;
+
+  remove_all_patches(mesh);
+  add_patch(mesh, bbox0, pt_typ, n, 0);
+  add_patch(mesh, bbox1, pt_typ, n, 0);
+  add_patch(mesh, bbox2, pt_typ, n, 0);
+
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+
+  //printmesh(mesh);
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    printelm(list_entry(pos, tElm, list));
+  }
+
+  //simple_load_balance(mesh);
+  load_balance_elms(mesh);
+
+  //printmesh(mesh);
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    printelm(list_entry(pos, tElm, list));
+  }
+
+exit(9);
+  return 0;
+}
+
+
+
 
 /***************************************************************************/
-/* all the functions below were just for early testing and could possibly
+/* all the functions below were just for very early testing and could be
    removed now */
 /***************************************************************************/
 

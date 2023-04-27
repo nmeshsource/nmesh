@@ -94,6 +94,14 @@ void printCI(tPat *pat)
   }
 }
 
+void printelm(tElm *e)
+{
+  printf("%d_%s: nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
+          e->eloc->p, e->eloc->loc, e->nid,
+          e->bbox[0], e->bbox[1], e->bbox[2],
+          e->bbox[3], e->bbox[4],e->bbox[5], e->leaf, e->dat ? "yes" : "no");
+}
+
 void printnd(tNode *n)
 {
   char s[100];

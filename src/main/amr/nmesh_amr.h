@@ -554,6 +554,7 @@ double min_array(tArray *A, int *ind);
 void printmesh(tMesh *g);
 void printpatch(tPat *box);
 void printCI(tPat *pat);
+void printelm(tElm *e);
 void printnd(tNode *n) ;
 void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);
