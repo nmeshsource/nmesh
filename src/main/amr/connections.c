@@ -205,6 +205,7 @@ void amr_set_elm_pat(tMesh *mesh, tElm *elm)
 {
   tEloc *eloc = elm->eloc;
   int p = eloc->p;
+  //elm->pat = elm->mesh->pat[p];
   elm->pat = mesh->pat[p];
 }
 
