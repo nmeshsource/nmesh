@@ -96,6 +96,13 @@ int binarysearchmore(const void *key, const void *base0,
 }
 
 
+/* return a*b as double to avoid int overflows */
+double intProd2double(int a, int b)
+{
+    double x=a, y=b;
+    return x*y;
+}
+
 /* Look for key in base0[i] for i in [*base0offset, *base0offset + *num-1].
    +If key is found exactly:
      sets *base0offset to the i where key is, sets *num=1
@@ -124,15 +131,17 @@ void *bisectionsearch(const void *key, const void *base0,
     pos = pos_a;
     p = (const char *) base0 + pos * size;
     cmp_a = (*compar)(key, p, arg);
+    printf("cmp_a=%d\n", cmp_a);
     if(cmp_a == 0) goto FoundKey;
 
     pos = pos_b;
     p = (const char *) base0 + pos * size;
     cmp_b = (*compar)(key, p, arg);
+    printf("cmp_b=%d\n", cmp_b);
     if(cmp_b == 0) goto FoundKey;
 
     /* no bracket */
-    if(cmp_a*cmp_b > 0)
+    if(intProd2double(cmp_a,cmp_b) > 0.)
     {
         if(abs(cmp_a) > abs(cmp_b))
           *base0offset = (*num)-1;
@@ -148,8 +157,8 @@ void *bisectionsearch(const void *key, const void *base0,
         p = (const char *) base0 + pos * size;
         cmp = (*compar)(key, p, arg);
         if(cmp == 0) goto FoundKey;
-        if(cmp*cmp_b > 0) { pos_b = pos;  cmp_b = cmp; }
-        else              { pos_a = pos;  cmp_a = cmp; }
+        if(intProd2double(cmp, cmp_b) > 0.) { pos_b = pos;  cmp_b = cmp; }
+        else                                { pos_a = pos;  cmp_a = cmp; }
     }
 
     /* we still have a bracket */
