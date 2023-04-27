@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 1
+#define PR 0
 
 
 /* use timings and some MPI datatypes */
@@ -800,8 +800,10 @@ fflush(stdout);
 Yo(800);
   /* wait for MPI sends and recvs */
   nMPI_Waitall_com_send(scom);
+Yo(801);
   free_com(scom);  /* free scom with all its buffers */
   nMPI_Waitall_com_recv(rcom);
+Yo(802);
 
   /* get var data out of recv buffers */
   set_com_counters(rcom, 0,0);
@@ -899,6 +901,9 @@ void load_balance_elms(tMesh *mesh)
   unsigned long *ns_elms, *nr_elms; // number of elms to send or recv for each rank
   tElm0 **s_elms, **r_elms; // s_elms[3][7] elm7 to be sent to rank3 */
   //unsigned long nkeep; // number of elms we keep on this rank
+
+Yo(1);
+printf("  mesh->nmyelm=%d\n", mesh->nmyelm);
 
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
@@ -1121,6 +1126,9 @@ Yo(666);
   evolve_free_communication_structs(mesh);
 
 Yo(200);
+PRF;printf(": %d in mesh->myelm_head\n", list_count_nodes(&mesh->myelm_head));
+printf("  mesh->nmyelm=%d\n", mesh->nmyelm);
+
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
 Yo(300);
@@ -1129,7 +1137,8 @@ Yo(300);
 
 //FIXME: adapt  update_mesh_myln_node_nid
   update_mesh_myln_node_nid(mesh);
-  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
+  PRF;printf(": --> %d on this proc\n", mesh->nmyelm);
+printf(": --> %d on this proc\n", list_count_nodes(&mesh->myelm_head));
 
 
 //FIXME: call function that set's up elm->fnb and such...

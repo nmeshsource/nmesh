@@ -88,6 +88,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
   int i, dir;
   int pt_typ[3];
 
+  PRFs(":\n");
+
   /* check if we have enough space for diff. and other matrices */
   for(dir=0; dir<3; dir++)
     if(nroot[dir] > nmax)
@@ -125,6 +127,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
   nlist = alloc_nodelist(pat->rnode);
   append_nodelist_to_mesh_lns_myln(mesh, nlist);
 
+
+Yo(10000);
   /* setup root node element */
   make_and_add_root_elm(pat, nroot, pt_typ, datrank);
 
@@ -547,6 +551,9 @@ int setup_elm_mesh1(tMesh *mesh)
   add_patch(mesh, bbox1, pt_typ, n, 0);
   add_patch(mesh, bbox2, pt_typ, n, 0);
   add_patch(mesh, bbox3, pt_typ, n, 0);
+
+  /* set elm array */
+  alloc_and_set_mesh_myelm(mesh);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);

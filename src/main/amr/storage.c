@@ -249,6 +249,7 @@ long alloc_and_set_mesh_myelm(tMesh *mesh)
 
   /* get number of elms on this rank */
   mesh->nmyelm = list_count_nodes(&mesh->myelm_head);
+  PRF;printf(": mesh->nmyelm=%d\n", mesh->nmyelm);
   /* return if there are no elms */
   if(mesh->nmyelm == 0) return 0;
 
