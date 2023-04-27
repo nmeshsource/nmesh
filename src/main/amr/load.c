@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "amr.h"
 
-#define PR 0
+#define PR 1
 
 
 /* use timings and some MPI datatypes */
@@ -185,7 +185,8 @@ void move_node_to_rank(tNode *node, int desrank,
   if(setbufs) /* setup buffers and fill them */
   {
     if(PR) { PRF;printf(": nid%ld datrank%d rank%d desrank%d\n",
-                        node->nid, node->datrank, rank, desrank); }
+                        node->nid, node->datrank, rank, desrank);
+             fflush(stdout); }
     if(rank == node->datrank)
     {
       /* alloc and fill buffer */
@@ -240,6 +241,9 @@ void move_node_to_rank(tNode *node, int desrank,
   }
   else /* retrieve data from buffers */
   {
+    if(PR) { PRF;printf(": nid%ld datrank%d rank%d desrank%d\n",
+                        node->nid, node->datrank, rank, desrank);
+             fflush(stdout); }
     if(rank == desrank)
     {
       /* now unpack the buffers */
@@ -730,83 +734,6 @@ void get_nbr_rank_info(tMesh *mesh)
 }
 
 
-//FIXME: This function does not work. Remove it!!!
-/* simple load balance giving equal numbers of elms to each rank */
-void simple_elm_load_balance(tMesh *mesh)
-{
-  long nnodes = mesh->nln;
-  int size = nMPI_size();
-  tLoadinfo li[1];
-  int (*desiredrank)(tLoadinfo *li); /* func. pointer for distrib. strategy*/
-  int desrank;
-  tNlist *elem;
-  tNode *node;
-  tCom *scom;
-  tCom *rcom;
-
-  errorexit("this function is not used!");
-
-  PRF;printf(": nnodes=%ld ", nnodes);
-
-  /* set const part of li needed for all strategies */
-  li->nnodes = nnodes;
-  li->size   = size;
-
-
-
-    /* pick function to calc. desired rank */
-    desiredrank = desiredrank_simple;
-    printf("\n");
-
-
-
-  /* for MPI data transfers */
-  scom = alloc_com(sizeof(double), 1);
-  rcom = alloc_com(sizeof(double), 1);
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
-  /* fill MPI send and recv buffers */
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = node->nid;
-    desrank = desiredrank(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 1);
-  }
-  nMPI_Waitall_com_send(scom);
-  free_com(scom);  /* free scom with all its buffers */
-  nMPI_Waitall_com_recv(rcom);
-
-  /* get var data out of recv buffer */
-  set_com_counters(rcom, 0,0);
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = node->nid;
-    desrank = desiredrank(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 0);
-  }
-
-  free_com(rcom);
-
-  update_mesh_myln_node_nid(mesh);
-  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
-
-  /* now that nodes are elsewhere re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
-
-  /* free temp arrays */
-  //free(rank_start);
-  //free(nodeload);
-  //free(speed);
-}
-
-
-
 
 
 /* Move data (dat) for elms that have been moved.
@@ -822,6 +749,8 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
   struct list_head *pos;
   tCom *scom, *rcom;
   long i;
+
+  PRFs(":\n");
 
   /* for MPI data transfers */
   scom = alloc_com(sizeof(double), 1);
@@ -842,7 +771,10 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     if(rank != desrank)
       move_node_to_rank(elm, desrank, scom, rcom, 1);
   }
-
+Yo(200);
+//printf("mesh=%p\n", mesh);
+//printf("&mesh->myelm_head=%p\n", &(mesh->myelm_head));
+fflush(stdout);
   /* loop over mesh->myelm_head list and recv dat from elms that have a
      datrank different from my rank */
   list_for_each(pos, &mesh->myelm_head)
@@ -857,11 +789,15 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     else
     { if(datrank != rank) errorexit("dat!=NULL but datrank!=rank"); }
 
+
+printf("elm=%p\n", elm);
+fflush(stdout);
+
     /* setup MPI recv buffers */
     if(datrank != rank)
       move_node_to_rank(elm, rank, scom, rcom, 1);
   }
-
+Yo(800);
   /* wait for MPI sends and recvs */
   nMPI_Waitall_com_send(scom);
   free_com(scom);  /* free scom with all its buffers */
@@ -875,7 +811,7 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     if(elm->datrank != rank)
       move_node_to_rank(elm, rank, scom, rcom, 0);
   }
-  free_com(rcom);  /* free scom with all its buffers */
+  free_com(rcom);  /* free rcom with all its buffers */
 
   /* free all elms in mesh->myelm, that now are on another rank */
   for(i=0; i<mesh->nmyelm; i++)
@@ -904,18 +840,29 @@ int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
   double ops_elm_sum = *((const double *) key);
   double max = *((double *) arg);
   double diff = (ops_elm_sum - ops_bal_sum)/max;
-  return diff * (INT_MAX/4);
+  int ret = diff * (INT_MAX/4);
+printf("ops_bal_sum=%g ops_elm_sum=%g max=%g  diff=%g ret=%d\n",
+ops_bal_sum, ops_elm_sum, max, diff, ret);
+  return ret;
 }
 
 /* find rank we want to put elm on */
 int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
 {
+  void *val;
   double max = ops_bal_sum[size-1];
   size_t off, num;
   off = 0;
   num = size;
-  if(bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
-                     sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, &max))
+
+printf("off=%zu num=%zu\n", off, num);
+printf("base: ops_bal_sum[0]=%g\n", ops_bal_sum[0]);
+printf("base: ops_bal_sum[1]=%g\n", ops_bal_sum[1]);
+printf("key: ops_elm_sum=%g\n", ops_elm_sum);
+  val = bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
+                        sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, &max);
+printf("val=%p off=%zu num=%zu\n", val, off, num);
+  if(val)
   {
     if(num == 2) return off+1;
     else         return off;
@@ -955,6 +902,7 @@ void load_balance_elms(tMesh *mesh)
 
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
+printTiming();
   ops0   = Timing->ops0;
   //myops  = Timing->myops;
   allops = Timing->allops;
@@ -966,6 +914,9 @@ void load_balance_elms(tMesh *mesh)
     errorexit("no memory for speed or ops_bal_sum");
   avspeed = load_set_speed_array(mesh, speed);
   myspeed = speed[rank];
+
+//speed[1]=1.6; avspeed=1.3;
+printf("avspeed=%g speed[0]=%g speed[1]=%g\n", avspeed, speed[0], speed[1]);
 
   /* ops needed for load balance */
   w = speed[0]/(avspeed*size); /* weight for rank0 */
@@ -995,13 +946,19 @@ void load_balance_elms(tMesh *mesh)
   torank = -1;
   list_for_each(pos, &mesh->myelm_head)
   {
+    double et, loadTmin = 1e-50;
     int desrank;
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     if(!dat) errorexit("this elm must have dat");
 
-    myT += dat->info->load_TimeIn_s;
+    et = dat->info->load_TimeIn_s;
+    /* if we forgot to measure load_TimeIn_s of elm, just set et=loadTmin */
+    if(et <= loadTmin) et = loadTmin;
+    myT += et;
     desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
+printelm(elm);
+printf("desrank=%d\n", desrank);
     if(desrank != torank)
       torank = desrank;
     ns_elms[torank] += 1;
@@ -1032,6 +989,8 @@ void load_balance_elms(tMesh *mesh)
       nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD);
     }
 
+//fflush(stdout);
+//nMPI_Waitall_com_recv(rcom);
   /* alloc s_elms[rk] */
   s_elms = rows_calloc(size, ns_elms, sizeof(tElm0));
 
@@ -1064,10 +1023,12 @@ void load_balance_elms(tMesh *mesh)
   for(rk=0; rk<size; rk++)
     if(rk != rank)
     {
-      int rq;
-
-      rq = append_buffers_to_com(scom, &(s_elms[rk][0]),ns_elms[rk], NULL,0);
-      nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 200, WORLD);
+      if(ns_elms[rk])
+      {
+        int rq;
+        rq=append_buffers_to_com(scom, &(s_elms[rk][0]),ns_elms[rk], NULL,0);
+        nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 200, WORLD);
+      }
     }
 
   /* wait for recvs in rcom */
@@ -1077,6 +1038,15 @@ void load_balance_elms(tMesh *mesh)
   free_com(rcom);
   rcom = alloc_com(sizeof(long), 0);
 
+
+Yo(100);
+for(rk=0; rk<size; rk++)
+{
+printf("rk=%d ns_elms[rk]=%zu nr_elms[rk]=%zu\n", rk, ns_elms[rk], nr_elms[rk]);
+}
+fflush(stdout);
+
+
   /* alloc r_elms[rk] */
   r_elms = rows_calloc(size, nr_elms, sizeof(tElm0));
 
@@ -1085,10 +1055,13 @@ void load_balance_elms(tMesh *mesh)
   for(rk=0; rk<size; rk++)
     if(rk != rank)
     {
-      int rq;
-
-      rq = append_buffers_to_com(rcom, NULL,0, &(r_elms[rk][0]),nr_elms[rk]);
-      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 100, WORLD);
+      if(nr_elms[rk])
+      {
+        int rq;
+        rq=append_buffers_to_com(rcom, NULL,0, &(r_elms[rk][0]),nr_elms[rk]);
+        //nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 100, WORLD);
+        nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 200, WORLD);
+      }
     }
 
   /* wait for recvs in rcom */
@@ -1107,7 +1080,7 @@ void load_balance_elms(tMesh *mesh)
     unsigned long i;
     for(i=0; i<nr_elms[rk]; i++)
     {
-      tElm *elm = alloc_elm(0); /* fresh new elm */
+      tElm *elm = alloc_elm_init_pat(mesh, r_elms[i]->eloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
       /* now add elm to the end of list in mesh */
       list_add_tail(&elm->list, &mesh->myelm_head);
@@ -1116,12 +1089,12 @@ void load_balance_elms(tMesh *mesh)
 
   /* insert r_elms before current beginning of list */
   pos = &mesh->myelm_head; /* position where we insert */
-  for(rk=0; rk<rank-1; rk++)
+  for(rk=0; rk<rank; rk++)
   {
     unsigned long i;
     for(i=0; i<nr_elms[rk]; i++)
     {
-      tElm *elm = alloc_elm(0); /* fresh new elm */
+      tElm *elm = alloc_elm_init_pat(mesh, r_elms[i]->eloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
       /* now add elm after pos */
       list_add(&elm->list, pos);
@@ -1136,8 +1109,10 @@ void load_balance_elms(tMesh *mesh)
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
+Yo(200);
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
+Yo(300);
 
 //NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
 
@@ -1149,6 +1124,8 @@ void load_balance_elms(tMesh *mesh)
 //FIXME: call function that set's up elm->fnb and such...
 //       maybe also update_mesh_myln_node_nid ???
 
+Yo(900);
   /* now that nodes are elsewhere re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
+Yo(1000);
 }

@@ -532,7 +532,9 @@ int setup_elm_mesh1(tMesh *mesh)
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
+  double bbox3[6] = {  4,8,  2,4, -1,1 };
   struct list_head *pos;
+  int i;
 
   PRFs(":\n");
 
@@ -544,14 +546,18 @@ int setup_elm_mesh1(tMesh *mesh)
   add_patch(mesh, bbox0, pt_typ, n, 0);
   add_patch(mesh, bbox1, pt_typ, n, 0);
   add_patch(mesh, bbox2, pt_typ, n, 0);
+  add_patch(mesh, bbox3, pt_typ, n, 0);
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
   //printmesh(mesh);
+  i=0;
   list_for_each(pos, &mesh->myelm_head)
   {
-    printelm(list_entry(pos, tElm, list));
+    tElm *elm = list_entry(pos, tElm, list);
+    elm->nid = i++; /* nid is used as tag which must be >=0 */
+    printelm(elm);
   }
 
   //simple_load_balance(mesh);
@@ -563,6 +569,8 @@ int setup_elm_mesh1(tMesh *mesh)
     printelm(list_entry(pos, tElm, list));
   }
 
+//nMPI
+MPI_Barrier(WORLD);
 exit(9);
   return 0;
 }
