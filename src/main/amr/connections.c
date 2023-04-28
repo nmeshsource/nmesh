@@ -87,7 +87,7 @@ int connections_ijk_is_at_parentface(int ijk, int face)
   case 5:  return k;
   default: errorexit("face must be 0,1,2,3,4,5");
   }
-  return -1;
+  return -1; /* cannot get here */
 }
 
 /* return ijk of nb in same level, assuming ijk is not on patch face */
@@ -194,6 +194,12 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   }
   return l;
 }
+
+/****************************************************************************/
+/* functions that work on eloc */
+/****************************************************************************/
+
+//void
 
 /****************************************************************************/
 /* functions that work on elm */
@@ -414,6 +420,19 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 
 
 
+/* pick nb location on face f of elm (currently in same patch and thus
+   on same level), and write its loc into nbeloc */
+void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
+                           tEloc nbeloc[1], int *nbface)
+{
+  const tEloc *eloc = elm->eloc;
+
+  nbeloc->p = eloc->p; // so far look in same pat
+  nbeloc->l = eloc->l;
+  connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
+                                            nbeloc->loc);
+}
+
 /* pick nb location (with index inbu2) at 2 levels up from elm,
    and write loc into nbu2eloc */
 void amr_get_nbu2loc(const tElm *elm, int f, int inbu2,
@@ -447,6 +466,8 @@ void amr_set_fnb(int narr, const tElm **arr, const tElm *elm, int f,
 
 }
 
+////////////////////////
+//1st TRY: look at amr_set_fnb_list
 /* Look in elm array arr to find the nb of elm on face f with nb loc
    nbu2eloc. nbu2eloc is a nb that is 2 levels up.*/
 int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
@@ -529,6 +550,79 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
   if(!mor) return 0; /* if there is only one */
   else errorexit("2 levels up there should be only one nb");
 }
+
+//////////////////////
+// 2nd TRY:
+/* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
+   elm on face elmface with nb loc nbeloc and nb face nb_f.
+   *nbeloc is a nb at the level we start searching (usually the same
+    as elm->eloc->l).
+   *But we start searching 1st for nbeloc's ancestor on level l0.
+   *Before calling amr_set_fnb_list set nb_f and nbeloc by calling
+     amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);    */
+int amr_set_fnb_list(long narr, const tElm **arr, size_t off0, size_t num0,
+                     int nb_f, tEloc nbeloc[1], int l0,
+                     tElm *fnb[1])
+{
+  tElm *nbelm;
+  size_t off, num;
+  //tEloc *eloc = elm->eloc;
+  tEloc nbfeloc[1];
+  tEloc cheloc[1];
+  int l, lret;
+  int lmax = nbeloc->l;;
+  int mor, ijk;
+
+  /* init */
+  off = off0;
+  num = num0;
+
+  for(l = l0; l <= lmax; l++)
+  {
+    /* search for ancestor of nbeloc of level l */
+    nbfeloc[0] = nbeloc[0];
+    nbfeloc->l = l;
+    nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+    if(!nbelm) return -nbeloc->l - 1000; /* found nothing */
+
+    /* save nbelm, may need to alloc fnb ??? */
+    fnb[0] = nbelm;
+    mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+    if(!mor)  /* if there is only one */
+    {
+      //add nbelm to list we return
+      //...
+      return l;
+    }
+  }
+
+  /* if we get here, nb at nbeloc has children */
+
+  /* search on children one level higher */
+  l = nbeloc->l + 1;
+  cheloc[0] = nbeloc[0];
+  cheloc->l = l;
+  /* we set cheloc->loc[l] below */
+
+  /* default return value */
+  lret = -l - 1000; /* found nothing */
+
+  /* get the 4 children elocs on nb face nb_f */
+  for(ijk = 0; ijk<8; ijk++) /* loop over children */
+    if(connections_ijk_is_at_parentface(ijk, nb_f))
+    {
+      int ret;
+      /* child ijk */
+      cheloc->loc[l] = ijk + '0';
+      ret = amr_set_fnb_list(narr, arr, off, num, nb_f, cheloc, l,  fnb);
+      if(ret >=0) lret = l; /* record success */
+    }
+
+  /* finally signal failure or success with at least one nb child */
+  return lret;
+}
+
+
 
 
 /****************************************************************************/
