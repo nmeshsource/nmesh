@@ -1085,7 +1085,7 @@ fflush(stdout);
     unsigned long i;
     for(i=0; i<nr_elms[rk]; i++)
     {
-      tElm *elm = alloc_elm_init_pat(mesh, r_elms[i]->eloc->p); /* fresh elm */
+      tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
       /* now add elm to the end of list in mesh */
       list_add_tail(&elm->list, &mesh->myelm_head);
@@ -1099,7 +1099,7 @@ fflush(stdout);
     unsigned long i;
     for(i=0; i<nr_elms[rk]; i++)
     {
-      tElm *elm = alloc_elm_init_pat(mesh, r_elms[i]->eloc->p); /* fresh elm */
+      tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
 
 printf("r_elms[i]=%p elm=%p\n", r_elms[i], elm);
@@ -1133,6 +1133,7 @@ printf("  mesh->nmyelm=%d\n", mesh->nmyelm);
   load_exchange_dat_after_moving_elms(mesh);
 Yo(300);
 
+//alloc_and_set_mesh_myelm(mesh);
 //NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
 
 //FIXME: adapt  update_mesh_myln_node_nid

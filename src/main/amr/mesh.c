@@ -555,6 +555,10 @@ int setup_elm_mesh1(tMesh *mesh)
   /* set elm array */
   alloc_and_set_mesh_myelm(mesh);
 
+  //enablevar(mesh, Ind("advection1_u"));
+  if(nMPI_rank()==0)
+    enablevarcomp_innode(mesh->myelm[2], Ind("advection1_u"));
+
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
@@ -569,6 +573,47 @@ int setup_elm_mesh1(tMesh *mesh)
 
   //simple_load_balance(mesh);
   load_balance_elms(mesh);
+
+  //printmesh(mesh);
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    printelm(list_entry(pos, tElm, list));
+  }
+
+Yo(33);
+  /* refine!!! */
+  for(i=0; i<mesh->nmyelm; i++)
+  {
+    tElm *elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
+    int n[] = {3,4,5};
+    int pt_typ[] = {0,0,0};
+    printelm(elm);
+    if(elm->nid==2)
+    {
+      Yo(34);
+      replace_parent_by_8children(elm, n, pt_typ);
+    }
+    //printf("elm->nid=%ld\n", elm->nid);
+  }
+  /* update nids */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    elm->nid = i++; /* nid is used as tag which must be >=0 */
+  }
+  /* update rest */
+  alloc_and_set_mesh_myelm(mesh);
+  load_balance_elms(mesh);
+  alloc_and_set_mesh_myelm(mesh);
+
+
+  /* print a var */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    printvar_innode(elm, Ind("advection1_u"));
+  }
+
 
   //printmesh(mesh);
   list_for_each(pos, &mesh->myelm_head)
