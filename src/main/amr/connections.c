@@ -195,6 +195,17 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   return l;
 }
 
+/****************************************************************************/
+/* functions that work on elm */
+/****************************************************************************/
+
+/* get ijk of elm */
+int elm_get_ijk(tElm *elm)
+{
+  tEloc *eloc = elm->eloc;
+  return connections_get_ijk(eloc->l, eloc->loc);
+}
+
 
 /****************************************************************************/
 /* functions to initialize tElm */

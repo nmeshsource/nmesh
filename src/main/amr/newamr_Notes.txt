@@ -61,6 +61,9 @@ About refinement:
   if any one sibling has ref=0.
  +then call elm_exchange_between_nbranks from above, and again zero ref
   flags if siblings on nb rank have zero flag, or are refined themselves...
+ +OR: just set elm et contrib to myT to 0 if(elm_get_ijk(elm)!=0)
+  But NOTE: in load_balance_elms there is this if:
+            "if(et <= loadTmin) et = loadTmin;" which could screw this up!!!
 
 
 
