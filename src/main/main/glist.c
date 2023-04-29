@@ -12,7 +12,7 @@
 /* alloc one element in a generic list, can be freed with just free() */
 tGlist *glist_elem_alloc(void)
 {
-  tGlist *elem = calloc(1, sizeof(elem[0]));
+  tGlist *elem = malloc(sizeof(elem[0]));
   if(!elem) errorexit("no memory for elem");
   return elem;
 }
