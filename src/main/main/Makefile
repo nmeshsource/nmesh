@@ -4,7 +4,7 @@ NAME := main
 
 OBJS := nmesh_main.o main.o parameters.o skeleton.o tensors.o utilities.o \
 	variables.o endianIO.o lists.o timer.o nan_checker.o norms.o \
-	sysmon.o banparameters.o
+	sysmon.o banparameters.o glist.o
 
 ############################################################################
 # NOTE: main is special, so we do not use Makefile.subdirs here

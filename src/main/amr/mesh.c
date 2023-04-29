@@ -538,6 +538,8 @@ int setup_elm_mesh1(tMesh *mesh)
   double bbox2[6] = {  0,4,  2,4, -1,1 };
   double bbox3[6] = {  4,8,  2,4, -1,1 };
   struct list_head *pos;
+  struct list_head fnb_head;
+  tElm *elm;
   int i;
 
   PRFs(":\n");
@@ -566,7 +568,7 @@ int setup_elm_mesh1(tMesh *mesh)
   i=0;
   list_for_each(pos, &mesh->myelm_head)
   {
-    tElm *elm = list_entry(pos, tElm, list);
+    elm = list_entry(pos, tElm, list);
     elm->nid = i++; /* nid is used as tag which must be >=0 */
     printelm(elm);
   }
@@ -584,7 +586,7 @@ Yo(33);
   /* refine!!! */
   for(i=0; i<mesh->nmyelm; i++)
   {
-    tElm *elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
+    elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
     int n[] = {3,4,5};
     int pt_typ[] = {0,0,0};
     printelm(elm);
@@ -598,7 +600,7 @@ Yo(33);
   /* update nids */
   list_for_each(pos, &mesh->myelm_head)
   {
-    tElm *elm = list_entry(pos, tElm, list);
+    elm = list_entry(pos, tElm, list);
     elm->nid = i++; /* nid is used as tag which must be >=0 */
   }
   /* update rest */
@@ -610,7 +612,7 @@ Yo(33);
   /* print a var */
   list_for_each(pos, &mesh->myelm_head)
   {
-    tElm *elm = list_entry(pos, tElm, list);
+    elm = list_entry(pos, tElm, list);
     printvar_innode(elm, Ind("advection1_u"));
   }
 
@@ -618,6 +620,17 @@ Yo(33);
   //printmesh(mesh);
   list_for_each(pos, &mesh->myelm_head)
   {
+    printelm(list_entry(pos, tElm, list));
+  }
+
+  // try to find nb
+  INIT_LIST_HEAD(&fnb_head);
+  elm = mesh->myelm[2];
+  amr_set_fnb_list(elm, 1, mesh->nmyelm, mesh->myelm, &fnb_head);
+  printf("%d in fnb_head\n", list_count_nodes(&fnb_head));
+  list_for_each(pos, &fnb_head)
+  {
+    elm = list_entry(pos, tGlist, list)->entry;
     printelm(list_entry(pos, tElm, list));
   }
 

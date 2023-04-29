@@ -303,6 +303,11 @@ size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp);
 int return_BYTE_ORDER_LITTLE(void);
 int print_endian_info(tMesh *mesh);
 
+/* glist.c */
+void glist_entry_add(void *entry, struct list_head *head);
+void glist_entry_add_tail(void *entry, struct list_head *head);
+void glist_elem_del(tGlist *elem);
+
 /* timer.c */
 int write_all_timers(tMesh *mesh);
 int free_all_timers(tMesh *mesh);

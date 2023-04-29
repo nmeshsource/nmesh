@@ -122,12 +122,12 @@ typedef struct tELM0 {
   ELMHEADER
 } tElm0;
 
-// in case we need it, we can also make more linked element lists:
-///* a linked list of elements */
-//typedef struct tELIST {
-//  struct list_head list;
-//  tElm *elm;
-//} tElist;
+/* in case we need it, we can also make more linked element lists */
+/* a linked list of generic pointers */
+typedef struct tGLIST {
+  void *entry; /* could be entry=elm */
+  struct list_head list;
+} tGlist;
 
 /* for MPI exchange between neighboring ranks */
 typedef struct tELMFL {

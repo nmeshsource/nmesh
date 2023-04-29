@@ -553,68 +553,70 @@ int amr_set1_fnb(int narr, const tElm **arr, const tElm *elm,
 
 //////////////////////
 // 2nd TRY:
-/* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
-   elm on face elmface with nb loc nbeloc and nb face nb_f.
-   *nbeloc is a nb at the level we start searching (usually the same
-    as elm->eloc->l).
-   *But we start searching 1st for nbeloc's ancestor on level l0.
-   *Before calling amr_set_fnb_list set nb_f and nbeloc by calling
-     amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);    */
-int amr_set_fnb_list(long narr, const tElm **arr, size_t off0, size_t num0,
-                     int nb_f, tEloc nbeloc[1], int l0,
-                     tElm *fnb[1])
+/* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
+   with loc s_eloc and face s_f.
+   *s_eloc is a loc where we start searching
+   *But we start searching 1st for s_eloc's ancestor on level l0.
+   *Return list with elms on face s_f */
+int amr_set_eloc_face_list(long narr, const tElm **arr,
+                           size_t off0, size_t num0,
+                           tEloc s_eloc[1], int s_f, int l0,
+                           struct list_head *f_elms_head)
 {
-  tElm *nbelm;
+  tElm *f_elm;
   size_t off, num;
   //tEloc *eloc = elm->eloc;
-  tEloc nbfeloc[1];
+  tEloc f_eloc[1];
   tEloc cheloc[1];
   int l, lret;
-  int lmax = nbeloc->l;;
+  int lmax = s_eloc->l;;
   int mor, ijk;
 
   /* init */
   off = off0;
   num = num0;
 
+  PRFs(":\n");
+
   for(l = l0; l <= lmax; l++)
   {
-    /* search for ancestor of nbeloc of level l */
-    nbfeloc[0] = nbeloc[0];
-    nbfeloc->l = l;
-    nbelm = binarysearch(nbfeloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-    if(!nbelm) return -nbeloc->l - 1000; /* found nothing */
+Yo(l);
+    /* search for ancestor of s_eloc of level l */
+    f_eloc[0] = s_eloc[0];
+    f_eloc->l = l;
+    f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+    if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
-    /* save nbelm, may need to alloc fnb ??? */
-    fnb[0] = nbelm;
-    mor=binarysearchmore(nbfeloc, arr, narr, sizeof(*arr), nbelm, lecmp, NULL);
+    /* is there only one f_elm? */
+    mor=binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp, NULL);
     if(!mor)  /* if there is only one */
     {
-      //add nbelm to list we return
-      //...
+      //add f_elm to list and then return
+      glist_entry_add_tail(f_elm, f_elms_head);
       return l;
     }
   }
+  /* if we get here, nb at s_eloc has children */
 
-  /* if we get here, nb at nbeloc has children */
-
+Yo(l);
   /* search on children one level higher */
-  l = nbeloc->l + 1;
-  cheloc[0] = nbeloc[0];
+  l = s_eloc->l + 1;
+  cheloc[0] = s_eloc[0];
   cheloc->l = l;
   /* we set cheloc->loc[l] below */
 
   /* default return value */
   lret = -l - 1000; /* found nothing */
 
-  /* get the 4 children elocs on nb face nb_f */
+  /* get the 4 children elocs on nb face s_f */
   for(ijk = 0; ijk<8; ijk++) /* loop over children */
-    if(connections_ijk_is_at_parentface(ijk, nb_f))
+    if(connections_ijk_is_at_parentface(ijk, s_f))
     {
       int ret;
       /* child ijk */
       cheloc->loc[l] = ijk + '0';
-      ret = amr_set_fnb_list(narr, arr, off, num, nb_f, cheloc, l,  fnb);
+      ret = amr_set_eloc_face_list(narr, arr, off, num, cheloc, s_f, l,
+                                   f_elms_head);
       if(ret >=0) lret = l; /* record success */
     }
 
@@ -622,7 +624,24 @@ int amr_set_fnb_list(long narr, const tElm **arr, size_t off0, size_t num0,
   return lret;
 }
 
+/* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
+   elm on face elmface. */
+int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
+                     struct list_head *fnb_head)
+{
+  tEloc nbeloc[1];
+  int nb_f;
 
+  PRFs(":\n");
+
+  /* Before calling amr_set_eloc_face_list, set nb_f and nbeloc by calling
+     amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */
+  amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);
+  printf("nbeloc->loc=%s nb_f=%d\n", nbeloc->loc, nb_f);
+
+  return
+    amr_set_eloc_face_list(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+}
 
 
 /****************************************************************************/
