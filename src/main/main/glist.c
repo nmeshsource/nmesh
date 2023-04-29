@@ -40,3 +40,15 @@ void glist_elem_del(tGlist *elem)
   list_del(&elem->list);
   free(elem);
 }
+
+/* remove and free the tGlist element from list which contains entry,
+   but do not free entry */
+void glist_entry_del(void *entry)
+{
+  tGlist *elem = container_of(&entry, tGlist, entry);
+  errorexit("Too dangerous: It works ONLY if we use the pointer entry that "
+            "is actually in tGlist. It fails if we use another one"
+            " (e.g. elm)!!!");
+  list_del(&elem->list);
+  free(elem);
+}
