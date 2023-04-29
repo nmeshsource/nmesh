@@ -585,7 +585,8 @@ Yo(l);
     f_eloc[0] = s_eloc[0];
     f_eloc->l = l;
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-printf("off=%zu num=%zu ?=%zu\n", off, num, (size_t) (f_elm - *arr));
+printf("off=%zu num=%zu f_elm=%p ?=%zu\n",
+off, num, f_elm, (size_t) (f_elm - *arr));
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
