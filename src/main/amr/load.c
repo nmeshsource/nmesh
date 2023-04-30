@@ -834,6 +834,46 @@ Yo(802);
   }
 }
 
+/* Info about load balancing of elms:
+   ==================================
+   *in each elm we have:
+    t_elm = elm->dat->info->load_TimeIn_s
+
+   *on one rank r we have:
+    T_r = time to do something (e.g. a RK step) on all elms on this rank
+    T_r = \sum_elm t_elm
+    ops_r = # of operations actually done on this rank
+          = v_r * T_r -> Timing->myops
+            here: v_r = Timing->mm_speed -> speed[r]
+
+   *total ops:
+    allops = \sum_r ops_r -> Timing->allops
+
+   *starting point of ops on each rank r:
+    ops0_r = \sum_{ri=0}^{r-1} ops_ri -> ops0
+
+   *distribution weights:
+    w_r = v_r / (\sum_ri v_ri)
+
+   *let's give each rank this many ops
+    ops_bal_r = w_r * allops
+
+   *we construct:
+    ops_bal_sum[r] = \sum_{ri=0}^r ops_bal_ri
+
+   *On rank r we want to have all elms that have an
+      ops(elm) := ops0 + v_r \sum_elm t_elm
+    between ops_bal_sum[r-1] and ops_bal_sum[r].
+   *All elms that are not within this range will be sent to the rank
+    where they fall into this range. All elms on other ranks that fall in
+    this range will be revcd from the other rank.
+
+   *We first exchange the numbers to be sent and recvd (ns_elms[r] and
+    nr_elms[r]) per rank r.
+   *Once we have ns_elms[r] and nr_elms[r] we then exchange the elms via MPI.
+   *After this we use load_exchange_dat_after_moving_elms (which uses the
+    old move_node_to_rank) to exchange the dat between the ranks.
+*/
 
 /* comparison function for load_desired_rank */
 int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
