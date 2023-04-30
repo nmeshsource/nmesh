@@ -661,7 +661,6 @@ Yo(33.1);
   list_for_each(pos, &fnb_head)
   {
     elm = glist_entry(pos);
-    if(elm!=elm1) errorexit("AAAARRRRRRRR");
     printelm(elm);
   }
 
