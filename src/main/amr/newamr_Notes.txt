@@ -53,7 +53,7 @@ About refinement:
  the 2 old ones also needed:
    create_children_no_nid_update
    destroy_nodes_no_nid_update
- but the new versions operate more rank local, and may not them!
+ but the new versions operate more rank local, and may not need them!
 
 *de-refine is trickier. We  can remove all 8 siblings only if none are
  refined themsleves AND if ALL are flagged for de-ref.
