@@ -151,10 +151,71 @@ int connections_loc_on_patchface(int l, const char loc[LOCSMAX],
   return npatfaces;
 }
 
-/* Out: nbloc */
+
+/* get nbloc,nf of neighbor on face of elm with l,loc,face
+   BUT this func works only if the face is not on patch face.
+   In:  l, loc, face
+   Out: nbloc, nb_f */
 int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
                                               int face,
                                               char nbloc[LOCSMAX], int *nb_f)
+{
+  int nfaces, patface[6];
+  int ijk, nb_ijk;
+
+  PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
+
+  nfaces = connections_loc_on_patchface(l,loc, patface);
+
+  if(patface[face])
+  {
+    errorexit("deal with pat face");
+    errorexiti("face%d of loc is on patch surface", face);
+    /*
+    tPat *pat = node->pat;
+    tBface *bfaces = pat->bfaces[face];
+    // loop over bfaces
+    forbfacesonface(pat, f, bface) ;
+    // same as: for(bface=bfaces; bface; bface=bface->next) ;
+
+    //if(bfaces && bfaces->boundary==OUTERBOUND)
+    */
+  }
+
+
+  /* find ijk of node and ijk of nb */
+  ijk = connections_get_ijk(l, loc);
+  nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
+  *nb_f  = face^1;
+  printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
+
+  if(connections_ijk_is_at_parentface(ijk, face))
+  {
+    char pnbloc[LOCSMAX]; /* location of parent nb */
+    PRF;printf(" at parentface\n");
+
+    /* l-1,loc is parent */
+    connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc, nb_f);
+    pnbloc[l] = 0; /* add string-end marker */
+    strncpy(nbloc, pnbloc, LOCSMAX);
+    nbloc[l-1] = nb_ijk;
+    if(l<LOCSMAX) nbloc[l] = 0;
+    return l;
+  }
+  else
+  {
+    strncpy(nbloc, loc, LOCSMAX);
+    nbloc[l-1] = nb_ijk + '0';
+    return l;
+  }
+  return l;
+}
+
+/* get nbloc,nf of neighbor on face of elm with l,loc,face
+   In:  l, loc, face
+   Out: nbloc, nb_f */
+int connections_get_nb_loc_face(int l, const char loc[LOCSMAX], int face,
+                                char nbloc[LOCSMAX], int *nb_f)
 {
   int nfaces, patface[6];
   int ijk, nb_ijk;
@@ -205,6 +266,11 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   }
   return l;
 }
+
+
+
+
+
 
 /****************************************************************************/
 /* functions that work on eloc */
