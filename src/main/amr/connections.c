@@ -200,23 +200,24 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 }
 
 /* get nbloc,nf of neighbor on face of elm with l,loc,face
-   In:  l, loc, face
-   Out: nbloc, nb_f */
-int connections_get_nb_loc_face(int l, const char loc[LOCSMAX], int face,
-                                char nbloc[LOCSMAX], int *nb_f)
+   In:  elm, face
+   Out: nbeloc,nbface */
+int connections_get_nb_eloc_face(const tElm *elm, int face,
+                                 tEloc nbeloc[1], int *nbface)
 {
-  int nfaces, patface[6];
-  int ijk, nb_ijk;
+  const tEloc *eloc = elm->eloc;
+  int patface[6]; //, nfaces;
+  int l;
 
-  PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
+  PRFs(": ");printeloc(eloc);printf(" face=%d\n", face);
 
-  nfaces = connections_loc_on_patchface(l,loc, patface);
-
+  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  /* deal with more complicated case where face is on patch surface */
   if(patface[face])
   {
     errorexit("deal with pat face");
     /*
-    tPat *pat = node->pat;
+    tPat *pat = elm->pat;
     tBface *bfaces = pat->bfaces[face];
     // loop over bfaces
     forbfacesonface(pat, f, bface) ;
@@ -224,34 +225,16 @@ int connections_get_nb_loc_face(int l, const char loc[LOCSMAX], int face,
 
     //if(bfaces && bfaces->boundary==OUTERBOUND)
     */
+    l=-9999;
   }
-
-
-  /* find ijk of node and ijk of nb */
-  ijk = connections_get_ijk(l, loc);
-  nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
-  *nb_f  = face^1;
-  printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
-
-  if(connections_ijk_is_at_parentface(ijk, face))
+  else /* face is a refinement boundary in patch interior */
   {
-    char pnbloc[LOCSMAX]; /* location of parent nb */
-    PRF;printf(" at parentface\n");
+    nbeloc->p = eloc->p;
+    nbeloc->l = eloc->l;
+    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, face,
+                                                  nbeloc->loc, nbface);
+  }
 
-    /* l-1,loc is parent */
-    connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc, nb_f);
-    pnbloc[l] = 0; /* add string-end marker */
-    strncpy(nbloc, pnbloc, LOCSMAX);
-    nbloc[l-1] = nb_ijk;
-    if(l<LOCSMAX) nbloc[l] = 0;
-    return l;
-  }
-  else
-  {
-    strncpy(nbloc, loc, LOCSMAX);
-    nbloc[l-1] = nb_ijk + '0';
-    return l;
-  }
   return l;
 }
 
@@ -493,6 +476,8 @@ void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
                            tEloc nbeloc[1], int *nbface)
 {
   const tEloc *eloc = elm->eloc;
+
+  //FIXME: call connections_get_nb_eloc_face
 
   nbeloc->p = eloc->p; // so far look in same pat
   nbeloc->l = eloc->l;
