@@ -102,7 +102,7 @@ void printeloc(tEloc *eloc)
 void printeloc_s(tEloc *eloc, char *s)
 {
   printeloc(eloc);
-  printf("%s\n", s);
+  printf("%s", s);
 }
 
 void printelm(tElm *e)
