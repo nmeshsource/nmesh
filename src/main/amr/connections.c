@@ -446,39 +446,6 @@ void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
                                             nbeloc->loc, nbface);
 }
 
-/* pick nb location (with index inbu2) at 2 levels up from elm,
-   and write loc into nbu2eloc */
-void amr_get_nbu2loc(const tElm *elm, int f, int inbu2,
-                     tEloc nbu2eloc[1])
-{
-  /* pick nb loc (with index inbu2) at 2 levels up */
-  nbu2eloc->p = 000; //???
-  nbu2eloc->l = elm->eloc->l+2; //???
-  //nbu2eloc->loc = "12352"; //???
-}
-
-
-/* Look in elm array arr to find all nb of elm on face f with nb loc
-   that is 2 levels up.*/
-void amr_set_fnb(int narr, const tElm **arr, const tElm *elm, int f,
-                 tElm *fnb[11111])
-{
-  int inbu2;
-  tEloc nbu2eloc[1];
-
-  //for inbu2:
-  {
-    int lf;
-    int nbi=0; //???
-
-    /* pick nb loc (with index inbu2) at 2 levels up */
-    amr_get_nbu2loc(elm, f, inbu2, nbu2eloc);
-    lf = amr_set1_fnb(narr,arr, elm, f, nbu2eloc, fnb[nbi]);
-    //if lf ...
-  }
-
-}
-
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
    with loc s_eloc and face s_f.
    *s_eloc is a loc where we start searching
