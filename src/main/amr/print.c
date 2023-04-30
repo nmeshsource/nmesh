@@ -94,18 +94,18 @@ void printCI(tPat *pat)
   }
 }
 
-void printeloc(tEloc *eloc)
+void printeloc(const tEloc *eloc)
 {
   printf("%d_%s", eloc->p, eloc->loc);
 }
 
-void printeloc_s(tEloc *eloc, char *s)
+void printeloc_s(const tEloc *eloc, char *s)
 {
   printeloc(eloc);
   printf("%s", s);
 }
 
-void printelm(tElm *e)
+void printelm(const tElm *e)
 {
   printeloc(e->eloc);
   printf(": nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
@@ -114,7 +114,7 @@ void printelm(tElm *e)
          e->leaf, e->dat ? "yes" : "no");
 }
 
-void printelmarray(long nelms, tElm **elm)
+void printelmarray(long nelms, const tElm **elm)
 {
   long i;
   printf("%ld elms: ", nelms);

@@ -52,7 +52,8 @@ int loccmp(const void *loc, const void *eloc)
 int lecmp(const void *loc, const void *elem, void *arg)
 {
   const tEloc *lc = (const tEloc *) loc;
-  const tElm **elm_arr = (const tElm **) elem;
+  //const tElm **elm_arr = elem; //(const tElm **) elem;
+  const tElm *const*elm_arr = elem; //(const tElm **) elem;
   const tEloc *elc = elm_arr[0]->eloc;
   int cmp = loccmp(lc, elc);
   PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
