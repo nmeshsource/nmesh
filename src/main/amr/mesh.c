@@ -660,7 +660,8 @@ Yo(33.1);
   printf("%d in fnb_head\n", list_count_nodes(&fnb_head));
   list_for_each(pos, &fnb_head)
   {
-    elm = list_entry(pos, tGlist, list)->entry;
+    elm = glist_entry(pos);
+    if(elm!=elm1) errorexit("AAAARRRRRRRR");
     printelm(elm);
   }
 
