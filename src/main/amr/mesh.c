@@ -597,6 +597,35 @@ Yo(33);
     }
     //printf("elm->nid=%ld\n", elm->nid);
   }
+
+  /* update nids */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    elm = list_entry(pos, tElm, list);
+    elm->nid = i++; /* nid is used as tag which must be >=0 */
+  }
+  /* update rest */
+  alloc_and_set_mesh_myelm(mesh);
+  load_balance_elms(mesh);
+  alloc_and_set_mesh_myelm(mesh);
+
+
+Yo(33.1);
+  /* refine again !!! */
+  for(i=0; i<mesh->nmyelm; i++)
+  {
+    elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
+    int n[] = {3,4,5};
+    int pt_typ[] = {0,0,0};
+    printelm(elm);
+    if(elm->nid==7)
+    {
+      Yo(34);
+      replace_parent_by_8children(elm, n, pt_typ);
+    }
+    //printf("elm->nid=%ld\n", elm->nid);
+  }
+
   /* update nids */
   list_for_each(pos, &mesh->myelm_head)
   {
@@ -625,9 +654,9 @@ Yo(33);
 
   // try to find nb
   INIT_LIST_HEAD(&fnb_head);
-  elm = mesh->myelm[2];
+  elm = mesh->myelm[12];
   if(nMPI_rank()==0)
-    amr_set_fnb_list(elm, 1, mesh->nmyelm, mesh->myelm, &fnb_head);
+    amr_set_fnb_list(elm, 2, mesh->nmyelm, mesh->myelm, &fnb_head);
   printf("%d in fnb_head\n", list_count_nodes(&fnb_head));
   list_for_each(pos, &fnb_head)
   {

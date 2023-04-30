@@ -153,12 +153,12 @@ int connections_loc_on_patchface(int l, const char loc[LOCSMAX],
 /* Out: nbloc */
 int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
                                               int face,
-                                              char nbloc[LOCSMAX])
+                                              char nbloc[LOCSMAX], int *nb_f)
 {
   int nfaces, patface[6];
   int ijk, nb_ijk;
 
-  PRF;printf(": l=%d loc=%s\n", l, loc);
+  PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
   nfaces = connections_loc_on_patchface(l,loc, patface);
 
@@ -180,15 +180,16 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   /* find ijk of node and ijk of nb */
   ijk = connections_get_ijk(l, loc);
   nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
-  printf("  ijk=%d nb_ijk=%d\n", ijk, nb_ijk);
+  *nb_f  = face^1;
+  printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
 
   if(connections_ijk_is_at_parentface(ijk, face))
   {
     char pnbloc[LOCSMAX]; /* location of parent nb */
-    PRF;printf("at parentface\n");
+    PRF;printf(" at parentface\n");
 
     /* l-1,loc is parent */
-    connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc);
+    connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc, nb_f);
     pnbloc[l] = 0; /* add string-end marker */
     strncpy(nbloc, pnbloc, LOCSMAX);
     nbloc[l-1] = nb_ijk;
@@ -268,6 +269,8 @@ void amr_set_elm_bbox(tElm *elm)
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc)
 {
   int l   = parentloc->l;
+  if(l >= LOCSMAX-1)
+    errorexit("parentloc is at limit ==> no further child possible!");
   eloc->p = parentloc->p;
   eloc->l = l + 1;
   strncpy(eloc->loc, parentloc->loc, LOCSMAX);
@@ -439,7 +442,7 @@ void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
   nbeloc->p = eloc->p; // so far look in same pat
   nbeloc->l = eloc->l;
   connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
-                                            nbeloc->loc);
+                                            nbeloc->loc, nbface);
 }
 
 /* pick nb location (with index inbu2) at 2 levels up from elm,
@@ -634,8 +637,8 @@ Yo(l);
     {
       int ret;
       /* child ijk */
-      cheloc->loc[l+1] = ijk + '0';
-      cheloc->loc[l+2] = 0;
+      cheloc->loc[l-1] = ijk + '0';
+      if(l<LOCSMAX) cheloc->loc[l] = 0;
       ret = amr_set_eloc_face_list(narr, arr, off, num, cheloc, s_f, l,
                                    f_elms_head);
       if(ret >=0) lret = l; /* record success */
