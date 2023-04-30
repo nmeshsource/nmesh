@@ -114,6 +114,15 @@ void printelm(tElm *e)
          e->leaf, e->dat ? "yes" : "no");
 }
 
+void printelmarray(long nelms, tElm **elm)
+{
+  long i;
+  printf("%ld elms: ", nelms);
+  for(i=0; i<nelms; i++)
+    printeloc_s(elm[i]->eloc, " ");
+  printf("\n");
+}
+
 void printnd(tNode *n)
 {
   char s[100];

@@ -52,9 +52,13 @@ int loccmp(const void *loc, const void *eloc)
 int lecmp(const void *loc, const void *elem, void *arg)
 {
   const tEloc *lc = (const tEloc *) loc;
-  const tElm *elm = (const tElm *) elem;
-  const tEloc *elc = elm->eloc;
-  return loccmp(lc, elc);
+  const tElm **elm_arr = (const tElm **) elem;
+  const tEloc *elc = elm_arr[0]->eloc;
+  int cmp = loccmp(lc, elc);
+  PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
+  printf("--> cmp=%d\n", cmp);
+  //printelm(elm_arr[0]);
+  return cmp;
 }
 
 /****************************************************************************/
@@ -576,7 +580,9 @@ int amr_set_eloc_face_list(long narr, const tElm **arr,
   off = off0;
   num = num0;
 
-  PRFs(":\n");
+  PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
+  printeloc_s(s_eloc, "\n  ");
+  printelmarray(narr, arr);
 
   for(l = l0; l <= lmax; l++)
   {
@@ -586,7 +592,7 @@ Yo(l);
     f_eloc->l = l;
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
 
-printf("******** This changes all the time:\n");
+//printf("******** This changes all the time:\n");
 printf("off=%zu num=%zu f_elm=%p ?=%zu\n",
 off, num, f_elm, (size_t) (f_elm - *arr));
 
@@ -594,6 +600,7 @@ off, num, f_elm, (size_t) (f_elm - *arr));
 
     /* is there only one f_elm? */
     mor=binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp, NULL);
+printf("mor=%d\n", mor);
     if(!mor)  /* if there is only one */
     {
       //add f_elm to list and then return
@@ -603,6 +610,7 @@ off, num, f_elm, (size_t) (f_elm - *arr));
   }
   /* if we get here, nb at s_eloc has children */
 
+Yo(555);
 Yo(l);
   /* search on children one level higher */
   l = s_eloc->l + 1;
@@ -615,6 +623,7 @@ Yo(l);
 
   /* get the 4 children elocs on nb face s_f */
   for(ijk = 0; ijk<8; ijk++) /* loop over children */
+  {
     if(connections_ijk_is_at_parentface(ijk, s_f))
     {
       int ret;
@@ -624,8 +633,10 @@ Yo(l);
                                    f_elms_head);
       if(ret >=0) lret = l; /* record success */
     }
+  }
 
   /* finally signal failure or success with at least one nb child */
+  printf("final lret=%d\n", lret);
   return lret;
 }
 
@@ -634,15 +645,17 @@ Yo(l);
 int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
+  tEloc *eloc = elm->eloc;
   tEloc nbeloc[1];
   int nb_f;
 
-  PRFs(":\n");
+  PRFs(": ");printeloc(elm->eloc);printf(" f=%d", elmface);
 
   /* Before calling amr_set_eloc_face_list, set nb_f and nbeloc by calling
      amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */
   amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);
-  printf("nbeloc->loc=%s nb_f=%d\n", nbeloc->loc, nb_f);
+  printf(" -> nbeloc=");printeloc(nbeloc);
+  printf(" nb_f=%d\n", nb_f);
 
   return
     amr_set_eloc_face_list(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
