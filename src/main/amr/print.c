@@ -94,12 +94,24 @@ void printCI(tPat *pat)
   }
 }
 
+void printeloc(tEloc *eloc)
+{
+  printf("%d_%s", eloc->p, eloc->loc);
+}
+
+void printeloc_s(tEloc *eloc, char *s)
+{
+  printeloc(eloc);
+  printf("%s\n", s);
+}
+
 void printelm(tElm *e)
 {
-  printf("%d_%s: nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
-          e->eloc->p, e->eloc->loc, e->nid,
-          e->bbox[0], e->bbox[1], e->bbox[2],
-          e->bbox[3], e->bbox[4],e->bbox[5], e->leaf, e->dat ? "yes" : "no");
+  printeloc(e->eloc);
+  printf(": nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
+         e->nid,
+         e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5],
+         e->leaf, e->dat ? "yes" : "no");
 }
 
 void printnd(tNode *n)
