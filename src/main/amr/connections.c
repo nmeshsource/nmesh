@@ -168,20 +168,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   nfaces = connections_loc_on_patchface(l,loc, patface);
 
   if(patface[face])
-  {
-    errorexit("deal with pat face");
     errorexiti("face%d of loc is on patch surface", face);
-    /*
-    tPat *pat = node->pat;
-    tBface *bfaces = pat->bfaces[face];
-    // loop over bfaces
-    forbfacesonface(pat, f, bface) ;
-    // same as: for(bface=bfaces; bface; bface=bface->next) ;
-
-    //if(bfaces && bfaces->boundary==OUTERBOUND)
-    */
-  }
-
 
   /* find ijk of node and ijk of nb */
   ijk = connections_get_ijk(l, loc);
