@@ -158,6 +158,8 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   int nfaces, patface[6];
   int ijk, nb_ijk;
 
+  PRF;printf(": l=%d loc=%s\n", l, loc);
+
   nfaces = connections_loc_on_patchface(l,loc, patface);
 
   if(patface[face])
@@ -178,10 +180,13 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   /* find ijk of node and ijk of nb */
   ijk = connections_get_ijk(l, loc);
   nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
+  printf("  ijk=%d nb_ijk=%d\n", ijk, nb_ijk);
 
   if(connections_ijk_is_at_parentface(ijk, face))
   {
     char pnbloc[LOCSMAX]; /* location of parent nb */
+    PRF;printf("at parentface\n");
+
     /* l-1,loc is parent */
     connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc);
     pnbloc[l] = 0; /* add string-end marker */
@@ -193,7 +198,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   else
   {
     strncpy(nbloc, loc, LOCSMAX);
-    nbloc[l-1] = nb_ijk;
+    nbloc[l-1] = nb_ijk + '0';
     return l;
   }
   return l;
@@ -567,7 +572,7 @@ int amr_set_eloc_face_list(long narr, const tElm **arr,
                            tEloc s_eloc[1], int s_f, int l0,
                            struct list_head *f_elms_head)
 {
-  tElm *f_elm;
+  tElm **f_elm;
   size_t off, num;
   //tEloc *eloc = elm->eloc;
   tEloc f_eloc[1];
@@ -593,8 +598,9 @@ Yo(l);
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
 
 //printf("******** This changes all the time:\n");
-printf("off=%zu num=%zu f_elm=%p ?=%zu\n",
-off, num, f_elm, (size_t) (f_elm - *arr));
+printf("off=%zu num=%zu  f_elm pos=%zu\n",
+off, num, (size_t) ((const tElm **)f_elm - arr));
+printf("got ");printelm(*f_elm);
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
@@ -604,7 +610,7 @@ printf("mor=%d\n", mor);
     if(!mor)  /* if there is only one */
     {
       //add f_elm to list and then return
-      glist_entry_add_tail(f_elm, f_elms_head);
+      glist_entry_add_tail(*f_elm, f_elms_head);
       return l;
     }
   }
@@ -616,7 +622,7 @@ Yo(l);
   l = s_eloc->l + 1;
   cheloc[0] = s_eloc[0];
   cheloc->l = l;
-  /* we set cheloc->loc[l] below */
+  /* we set cheloc->loc below */
 
   /* default return value */
   lret = -l - 1000; /* found nothing */
@@ -628,7 +634,8 @@ Yo(l);
     {
       int ret;
       /* child ijk */
-      cheloc->loc[l] = ijk + '0';
+      cheloc->loc[l+1] = ijk + '0';
+      cheloc->loc[l+2] = 0;
       ret = amr_set_eloc_face_list(narr, arr, off, num, cheloc, s_f, l,
                                    f_elms_head);
       if(ret >=0) lret = l; /* record success */
@@ -654,8 +661,7 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
   /* Before calling amr_set_eloc_face_list, set nb_f and nbeloc by calling
      amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */
   amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);
-  printf(" -> nbeloc=");printeloc(nbeloc);
-  printf(" nb_f=%d\n", nb_f);
+  printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
 
   return
     amr_set_eloc_face_list(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);

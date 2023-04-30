@@ -632,7 +632,7 @@ Yo(33);
   list_for_each(pos, &fnb_head)
   {
     elm = list_entry(pos, tGlist, list)->entry;
-    printelm(list_entry(pos, tElm, list));
+    printelm(elm);
   }
 
 //nMPI
