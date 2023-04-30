@@ -160,12 +160,13 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
                                               int face,
                                               char nbloc[LOCSMAX], int *nb_f)
 {
-  int nfaces, patface[6];
+  int patface[6];
   int ijk, nb_ijk;
 
   PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
-  nfaces = connections_loc_on_patchface(l,loc, patface);
+  //nfaces = connections_loc_on_patchface(l,loc, patface);
+  connections_loc_on_patchface(l,loc, patface);
 
   if(patface[face])
     errorexiti("face%d of loc is on patch surface", face);
