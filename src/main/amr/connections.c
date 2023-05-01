@@ -206,6 +206,7 @@ int connections_make_nbelocface_list(const tElm *elm, int elmface,
                                      struct list_head *nbelocface_head)
 {
   const tEloc *eloc = elm->eloc;
+  struct list_head *pos, *sav;
   int patface[6]; //, nfaces;
   int l;
 
@@ -216,35 +217,19 @@ int connections_make_nbelocface_list(const tElm *elm, int elmface,
   if(patface[elmface])
   {
     tPat *pat = elm->pat;
-    struct list_head *pos, *sav;
+    tBface *bface;
+    tEloc nbeloc[1];
+    int nb_f;
     struct list_head fnb_head;
 
-    errorexit("deal with pat face");
-    /*
-    tBface *bfaces = pat->bfaces[face];
-    // loop over bfaces
-    forbfacesonface(pat, f, bface) ;
-    // same as: for(bface=bfaces; bface; bface=bface->next) ;
-
-    //if(bfaces && bfaces->boundary==OUTERBOUND)
-    */
-
-    tBface *bface;
-    tNlist *nbl, *nblist1, *elem;
     INIT_LIST_HEAD(&fnb_head);
-    tEloc nbeloc[1];
-    int nc, nb_f;
-    int nnb = 0;   /* number of nfaces added */
 
-    /* we use list_for_each_safe_continue, so init pos */
-    pos = &fnb_head;
+    errorexit("deal with pat face");
 
     /* loop over all bfaces on face and find nb */
     forbfacesonface(pat, elmface, bface)
     {
       tBface *obface = bface->obface;
-      tElm *nb;
-      int touch;
 
       /* do nothing if no other patch face */
       if(!obface) continue;
@@ -254,73 +239,55 @@ int connections_make_nbelocface_list(const tElm *elm, int elmface,
       nbeloc->loc[0] = 0;
       nb_f = obface->f;
 
-      //dummies:
-      tNode *node = elm;
-      nb          = obface->pat->rnode;
-
-      /* save pos that os currently last in list (before we add new stuff) */
-      pos = fnb_head.prev;
-
       /* add all elms in arr on face nb_f to list fnb_head */
     //amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, &fnb_head);
 
-      /* go over fnb_head and remove all who do not have common face points
-         with the elm */
-      list_for_each_safe_continue(pos, sav, &fnb_head)
+      /* Go over fnb_head and add all with common face points with the elm
+         to list nbelocface_head. Then finally delete fnb_head. */
+      list_for_each_safe(pos, sav, &fnb_head)
       {
         /* get neigh. and check if elm and nb have common points */
         tGlist *elem = list_entry(pos, tGlist, list);
-        nb = elem->entry;
-        touch = elm_common_facepoints(elm,elmface, nb,nb_f);
-        /* remove elem with nb from list fnb_head */
-        if(!touch)
+        tElm *nb = elem->entry;
+        int touch = elm_common_facepoints(elm,elmface, nb,nb_f);
+
+        /* if they have common points add nb-eloc and nb-face
+           to nbelocface_head list */
+        if(touch)
         {
-          /* remove elem with nb from list fnb_head */
-          glist_elem_del(elem);
+          tElocFace *nbelocface = malloc(sizeof(nbelocface[0]));
+          nbelocface->eloc[0] = nb->eloc[0];
+          nbelocface->face    = nb_f;
+          glist_entry_add(nbelocface, nbelocface_head);
         }
+
+        /* remove elem with nb from list fnb_head */
+        glist_elem_del(elem);
       }
+    } /* end forbfacesonface */
 
-//****************************************
-
-//      /* add all in nblist1 as nfaces */
-//      fornodelist(nblist1, elem)
-//      {
-//        nb = elem->node;
-//        add_nface(node, elmface, nb, nb_f);
-//        nnb++; /* count neighbors */
-//      }
-
-//      /* free node lists */
-//      free_nodelist(nblist1);
-//    }
-    }
-
-
-    /*
-    tPat *pat = elm->pat;
-    tBface *bfaces = pat->bfaces[face];
-    // loop over bfaces
-    forbfacesonface(pat, f, bface) ;
-    // same as: for(bface=bfaces; bface; bface=bface->next) ;
-
-    //if(bfaces && bfaces->boundary==OUTERBOUND)
-    */
+    /* FIXME: what shoule we return here ???? */
     l=-9999;
   }
   else /* elmface is a refinement boundary in patch interior */
   {
     tEloc nbeloc[1];
     int nbface;
-    tElocFace *nbelocfac;
+    tElocFace *nbelocface;
 
     nbeloc->p = eloc->p;
     nbeloc->l = eloc->l;
     l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
                                                   nbeloc->loc, &nbface);
-    nbelocfac = malloc(sizeof(nbelocfac[0]));
-    nbelocfac->eloc[0] = nbeloc[0];
-    nbelocfac->face = nbface;
-    glist_entry_add(nbelocfac, nbelocface_head);
+    nbelocface = malloc(sizeof(nbelocface[0]));
+    nbelocface->eloc[0] = nbeloc[0];
+    nbelocface->face = nbface;
+    glist_entry_add(nbelocface, nbelocface_head);
+  }
+
+  list_for_each(pos, nbelocface_head)
+  {
+    printelocface(glist_entry(pos));
   }
 
   return l;

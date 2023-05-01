@@ -128,7 +128,7 @@ typedef struct tGLIST {
   void *entry; /* could be entry=elm */
   struct list_head list;
 } tGlist;
-#define glist_entry(ptr) list_entry(ptr, tGlist, list)->entry;
+#define glist_entry(ptr) list_entry(ptr, tGlist, list)->entry
 
 
 /* for MPI exchange between neighboring ranks */

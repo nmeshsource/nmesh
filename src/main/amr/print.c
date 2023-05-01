@@ -123,6 +123,12 @@ void printelmarray(long nelms, const tElm **elm)
   printf("\n");
 }
 
+void printelocface(const tElocFace *ef)
+{
+  printeloc(ef->eloc);
+  printf(" f=%d\n", ef->face);
+}
+
 void printnd(tNode *n)
 {
   char s[100];
