@@ -216,7 +216,7 @@ int connections_make_nbelocface_list(const tElm *elm, int elmface,
   if(patface[elmface])
   {
     tPat *pat = elm->pat;
-    struct list_head *pos;
+    struct list_head *pos, *sav;
     struct list_head fnb_head;
 
     errorexit("deal with pat face");
@@ -236,11 +236,14 @@ int connections_make_nbelocface_list(const tElm *elm, int elmface,
     int nc, nb_f;
     int nnb = 0;   /* number of nfaces added */
 
+    /* we use list_for_each_safe_continue, so init pos */
+    pos = &fnb_head;
 
     /* loop over all bfaces on face and find nb */
     forbfacesonface(pat, elmface, bface)
     {
       tBface *obface = bface->obface;
+      tElm *nb;
       int touch;
 
       /* do nothing if no other patch face */
@@ -253,79 +256,44 @@ int connections_make_nbelocface_list(const tElm *elm, int elmface,
 
       //dummies:
       tNode *node = elm;
-      tNode *nb   = obface->pat->rnode;
+      nb          = obface->pat->rnode;
 
+      /* save pos that os currently last in list (before we add new stuff) */
+      pos = fnb_head.prev;
 
+      /* add all elms in arr on face nb_f to list fnb_head */
+    //amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, &fnb_head);
 
-      /* so now we have a neighbor loc, but is it childless? */
-      nc = count_children(nb);
-      if(nc==0) /* neighbor has 0 children */
+      /* go over fnb_head and remove all who do not have common face points
+         with the elm */
+      list_for_each_safe_continue(pos, sav, &fnb_head)
       {
-        nblist1 = alloc_nodelist(nb);
-      }
-      else
-      {
-        if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
-
-        /* find nblist1 with all leaves on face nb_f */
-        nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
-      }
-
-
-
-
-      /* beginning of nblist1 */
-      nbl = first_nodelist(nblist1);
-
-      /* go over nbl and remove all who do not have common face points
-         with the node */
-      nblist1 = NULL;
-      fornodelist(nbl, elem)
-      {
-      nbl_loop_start:
-
-        /* get neigh. and check if node and nb have common points */
-        nb = elem->node;
-        touch = common_facepoints(elm,elmface, nb,nb_f);
-        if(touch)
+        /* get neigh. and check if elm and nb have common points */
+        tGlist *elem = list_entry(pos, tGlist, list);
+        nb = elem->entry;
+        touch = elm_common_facepoints(elm,elmface, nb,nb_f);
+        /* remove elem with nb from list fnb_head */
+        if(!touch)
         {
-          nblist1 = elem; /* save elem that touches our node */
-          continue;
+          /* remove elem with nb from list fnb_head */
+          glist_elem_del(elem);
         }
-
-
-        /* remove nb=elem->node from nbl */
-        elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
-        if(elem) goto nbl_loop_start;
-        else     break;
       }
 
-      /* rewind nblist1 so that the fornodelist loop below works */
-      nblist1 = first_nodelist(nblist1);
+//****************************************
 
-      /* add all in nblist1 as nfaces */
-      fornodelist(nblist1, elem)
-      {
-        nb = elem->node;
-        add_nface(node, elmface, nb, nb_f);
-        nnb++; /* count neighbors */
-      }
+//      /* add all in nblist1 as nfaces */
+//      fornodelist(nblist1, elem)
+//      {
+//        nb = elem->node;
+//        add_nface(node, elmface, nb, nb_f);
+//        nnb++; /* count neighbors */
+//      }
 
-      /* free node lists */
-      free_nodelist(nblist1);
+//      /* free node lists */
+//      free_nodelist(nblist1);
+//    }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /*
@@ -550,8 +518,19 @@ int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
   return 0;
 }
 
+/* check if elm and nb has common points on faces f and nb_f
+   since res in find_elmfacepoints_in_nbface is low, try it both ways */
+int elm_common_facepoints(tElm *elm, int f, tElm *nb, int nb_f)
+{
+  int f1, f2;
 
+  f1 = find_elmfacepoints_in_nbface(elm,f, nb,nb_f);
+  if(f1) return 1;
 
+  f2 = find_elmfacepoints_in_nbface(nb,nb_f, elm,f);
+
+  return f2 || f1;
+}
 
 
 
