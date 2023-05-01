@@ -202,20 +202,129 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 /* get nbloc,nf of neighbor on face of elm with l,loc,face
    In:  elm, face
    Out: nbeloc,nbface */
-int connections_get_nb_eloc_face(const tElm *elm, int face,
+int connections_get_nb_eloc_face(const tElm *elm, int elmface,
                                  tEloc nbeloc[1], int *nbface)
 {
   const tEloc *eloc = elm->eloc;
   int patface[6]; //, nfaces;
   int l;
 
-  PRFs(": ");printeloc(eloc);printf(" face=%d\n", face);
+  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
   connections_loc_on_patchface(eloc->l, eloc->loc, patface);
-  /* deal with more complicated case where face is on patch surface */
-  if(patface[face])
+  /* deal with more complicated case where elmface is on patch surface */
+  if(patface[elmface])
   {
+    tPat *pat = elm->pat;
+
     errorexit("deal with pat face");
+    /*
+    tBface *bfaces = pat->bfaces[face];
+    // loop over bfaces
+    forbfacesonface(pat, f, bface) ;
+    // same as: for(bface=bfaces; bface; bface=bface->next) ;
+
+    //if(bfaces && bfaces->boundary==OUTERBOUND)
+    */
+
+    tBface *bface;
+    tNlist *nbl, *nblist1, *elem;
+    tEloc nbeloc[1];
+    int nc, nb_f;
+    int nnb = 0;   /* number of nfaces added */
+
+
+    /* loop over all bfaces on face and find nb */
+    forbfacesonface(pat, elmface, bface)
+    {
+      tBface *obface = bface->obface;
+      int touch;
+
+      /* do nothing if no other patch face */
+      if(!obface) continue;
+
+      /* eloc and face of root elm in other patch */
+      nbeloc->l      = 0;
+      nbeloc->loc[0] = 0;
+      nb_f = obface->f;
+
+      //dummies:
+      tNode *node = elm;
+      tNode *nb   = obface->pat->rnode;
+
+
+
+      /* so now we have a neighbor loc, but is it childless? */
+      nc = count_children(nb);
+      if(nc==0) /* neighbor has 0 children */
+      {
+        nblist1 = alloc_nodelist(nb);
+      }
+      else
+      {
+        if(nc!=8) errorexiti("nb has %d children, not 8!!!", nc);
+
+        /* find nblist1 with all leaves on face nb_f */
+        nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
+      }
+
+
+
+
+      /* beginning of nblist1 */
+      nbl = first_nodelist(nblist1);
+
+      /* go over nbl and remove all who do not have common face points
+         with the node */
+      nblist1 = NULL;
+      fornodelist(nbl, elem)
+      {
+      nbl_loop_start:
+
+        /* get neigh. and check if node and nb have common points */
+        nb = elem->node;
+        touch = common_facepoints(elm,elmface, nb,nb_f);
+        if(touch)
+        {
+          nblist1 = elem; /* save elem that touches our node */
+          continue;
+        }
+
+
+        /* remove nb=elem->node from nbl */
+        elem = remove1_in_nodelist(elem, 1); /* now elem has the next one */
+        if(elem) goto nbl_loop_start;
+        else     break;
+      }
+
+      /* rewind nblist1 so that the fornodelist loop below works */
+      nblist1 = first_nodelist(nblist1);
+
+      /* add all in nblist1 as nfaces */
+      fornodelist(nblist1, elem)
+      {
+        nb = elem->node;
+        add_nface(node, elmface, nb, nb_f);
+        nnb++; /* count neighbors */
+      }
+
+      /* free node lists */
+      free_nodelist(nblist1);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /*
     tPat *pat = elm->pat;
     tBface *bfaces = pat->bfaces[face];
@@ -227,11 +336,11 @@ int connections_get_nb_eloc_face(const tElm *elm, int face,
     */
     l=-9999;
   }
-  else /* face is a refinement boundary in patch interior */
+  else /* elmface is a refinement boundary in patch interior */
   {
     nbeloc->p = eloc->p;
     nbeloc->l = eloc->l;
-    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, face,
+    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
                                                   nbeloc->loc, nbface);
   }
 
@@ -490,10 +599,10 @@ void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
    *s_eloc is a loc where we start searching
    *But we start searching 1st for s_eloc's ancestor on level l0.
    *Return list with elms on face s_f */
-int amr_set_eloc_face_list(long narr, const tElm **arr,
-                           size_t off0, size_t num0,
-                           tEloc s_eloc[1], int s_f, int l0,
-                           struct list_head *f_elms_head)
+int amr_elms_on_eloc_face(long narr, const tElm **arr,
+                          size_t off0, size_t num0,
+                          tEloc s_eloc[1], int s_f, int l0,
+                          struct list_head *f_elms_head)
 {
   tElm **f_elm;
   size_t off, num;
@@ -559,8 +668,8 @@ Yo(l);
       /* child ijk */
       cheloc->loc[l-1] = ijk + '0';
       if(l<LOCSMAX) cheloc->loc[l] = 0;
-      ret = amr_set_eloc_face_list(narr, arr, off, num, cheloc, s_f, l,
-                                   f_elms_head);
+      ret = amr_elms_on_eloc_face(narr, arr, off, num, cheloc, s_f, l,
+                                  f_elms_head);
       if(ret >=0) lret = l; /* record success */
     }
   }
@@ -581,13 +690,13 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
 
   PRFs(": ");printeloc(elm->eloc);printf(" f=%d", elmface);
 
-  /* Before calling amr_set_eloc_face_list, set nb_f and nbeloc by calling
+  /* Before calling amr_elms_on_eloc_face, set nb_f and nbeloc by calling
      amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */
   amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);
   printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
 
   return
-    amr_set_eloc_face_list(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
 }
 
 
