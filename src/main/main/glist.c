@@ -58,7 +58,7 @@ void glist_entry_del(void *entry)
 void glist_free_elems_and_entries(struct list_head *head, void (*Free)())
 {
   struct list_head *pos, *sav;
-  list_for_each_safe(pos, sav, head)
+  list_for_each_prev_safe(pos, sav, head)
   {
     tGlist *elem = list_entry(pos, tGlist, list);
     void *entry = elem->entry;
