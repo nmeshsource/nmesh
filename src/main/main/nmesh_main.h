@@ -307,6 +307,8 @@ int print_endian_info(tMesh *mesh);
 void glist_entry_add(void *entry, struct list_head *head);
 void glist_entry_add_tail(void *entry, struct list_head *head);
 void glist_elem_del(tGlist *elem);
+void glist_free_elems_and_entries(struct list_head *head, void (*Free)());
+void glist_free_elems(struct list_head *head);
 
 /* timer.c */
 int write_all_timers(tMesh *mesh);

@@ -671,15 +671,23 @@ Yo(l);
    on same level), and write its loc into nbeloc */
 void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
                            tEloc nbeloc[1], int *nbface)
+//                           struct list_head *nbelocface_head)
 {
   const tEloc *eloc = elm->eloc;
 
   //FIXME: call connections_get_nb_eloc_face
 
+  connections_get_nb_eloc_face(elm,elmface, nbeloc,nbface);
+
+//  glist_entry_add_tail()
+//void glist_entry_add_tail(void *entry, struct list_head *head)
+
+/*
   nbeloc->p = eloc->p; // so far look in same pat
   nbeloc->l = eloc->l;
   connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
                                             nbeloc->loc, nbface);
+*/
 }
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
@@ -688,10 +696,15 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
   tEloc *eloc = elm->eloc;
+  //tElocFace elocface[1];
+  //struct list_head nbelocface_head;
   tEloc nbeloc[1];
   int nb_f;
 
   PRFs(": ");printeloc(elm->eloc);printf(" f=%d", elmface);
+
+  INIT_LIST_HEAD(&nbelocface_head);
+
 
   /* Before calling amr_elms_on_eloc_face, set nb_f and nbeloc by calling
      amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */

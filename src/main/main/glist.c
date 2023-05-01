@@ -52,3 +52,23 @@ void glist_entry_del(void *entry)
   list_del(&elem->list);
   free(elem);
 }
+
+/* free all entries in glist andremove one tGlist element from list, and also free the element,
+   but do not free its entry */
+void glist_free_elems_and_entries(struct list_head *head, void (*Free)())
+{
+  struct list_head *pos, *sav;
+  list_for_each_safe(pos, sav, head)
+  {
+    tGlist *elem = list_entry(pos, tGlist, list);
+    void *entry = elem->entry;
+    if(Free) Free(entry);
+    glist_elem_del(elem);
+  }
+}
+
+/* free all tGlist elements as to clear list, but do not free entries */
+void glist_free_elems(struct list_head *head)
+{
+  glist_free_elems_and_entries(head, NULL);
+}

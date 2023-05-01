@@ -7,6 +7,13 @@
 extern nMPI_Comm main_comm;
 
 
+/* struct that has has both eloc and a face */
+typedef struct tELOCFACE {
+  tEloc eloc[1];
+  int face;
+} tElocFace;
+
+
 
 /* storage.c */
 tElm *alloc_elm(tMesh *mesh);
