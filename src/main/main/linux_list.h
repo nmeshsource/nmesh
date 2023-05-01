@@ -700,6 +700,20 @@ static inline void list_splice_tail_init(struct list_head *list,
 	     !list_is_head(pos, (head)); \
 	     pos = n, n = pos->next)
 
+/* WT:
+ * list_for_each_safe_continue - continue iteration over list safe against
+                                 removal of list entries
+ * @pos:	the &struct list_head to use as a loop cursor.
+ * @n:		another &struct list_head to use as temporary storage
+ * @head:	the head for your list.
+ *
+ * like list_for_each_safe, but continue to iterate over the list,
+ * continuing after the current position. */
+#define list_for_each_safe_continue(pos, n, head) \
+	for (pos = pos->next, n = pos->next; \
+	     !list_is_head(pos, (head)); \
+	     pos = n, n = pos->next)
+
 /**
  * list_for_each_prev_safe - iterate over a list backwards safe against removal of list entry
  * @pos:	the &struct list_head to use as a loop cursor.
