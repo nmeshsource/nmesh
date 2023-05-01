@@ -201,10 +201,9 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 
 /* get nbloc,nf of neighbor on face of elm with l,loc,face
    In:  elm, face
-   Out: nbeloc,nbface */
+   Out: will append to list nbelocface_head */
 int connections_set_nbelocface_list(const tElm *elm, int elmface,
                                     struct list_head *nbelocface_head)
-//                                 tEloc nbeloc[1], int *nbface)
 {
   const tEloc *eloc = elm->eloc;
   int patface[6]; //, nfaces;
@@ -679,26 +678,13 @@ Yo(l);
 /* pick nb location on face f of elm (currently in same patch and thus
    on same level), and write its loc into nbeloc */
 void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
-                           tEloc nbeloc[1], int *nbface)
-//                           struct list_head *nbelocface_head)
+                           struct list_head *nbelocface_head)
 {
-  const tEloc *eloc = elm->eloc;
+  connections_set_nbelocface_list(elm,elmface, nbelocface_head);
 
-  //FIXME: call connections_set_nbelocface_list
-
-struct list_head nbelocface_head;
-INIT_LIST_HEAD(&nbelocface_head);
-  connections_set_nbelocface_list(elm,elmface, &nbelocface_head);
-
-tElocFace *elocface = list_first_entry(&nbelocface_head, tGlist, list)->entry;
-nbeloc[0] = elocface->eloc[0];
-*nbface =  elocface->face;
-/*
-  nbeloc->p = eloc->p; // so far look in same pat
-  nbeloc->l = eloc->l;
-  connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
-                                            nbeloc->loc, nbface);
-*/
+tElocFace *elocface = list_first_entry(nbelocface_head, tGlist, list)->entry;
+PRFs(": 1st entry in nbelocface_head: ");
+printeloc_s(elocface, " WWWWWWWWWWWWWWWWWWWW\n");
 }
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
@@ -706,27 +692,29 @@ nbeloc[0] = elocface->eloc[0];
 int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
-  tEloc *eloc = elm->eloc;
-  //tElocFace elocface[1];
   struct list_head nbelocface_head;
-  tEloc nbeloc[1];
-  int nb_f;
+  struct list_head *pos;
 
   PRFs(": ");printeloc(elm->eloc);printf(" f=%d", elmface);
 
+  /* Before calling amr_elms_on_eloc_face, set &nbelocface_head by calling
+     amr_get_nbeloc_nbface */
   INIT_LIST_HEAD(&nbelocface_head);
+  amr_get_nbeloc_nbface(elm, elmface, &nbelocface_head);
 
+  list_for_each(pos, &nbelocface_head)
+  {
+    tElocFace *ef = glist_entry(pos);
+    tEloc *nbeloc = ef->eloc;
+    int nb_f = ef->face;
 
-  /* Before calling amr_elms_on_eloc_face, set nb_f and nbeloc by calling
-     amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */
-  amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);
-
-
-
-  printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
-
-  return
+    printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
     amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+  }
+
+  /* free all in &nbelocface_head */
+  glist_free_elems_and_entries(&nbelocface_head, free);
+  return 0;
 }
 
 
