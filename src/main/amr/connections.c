@@ -202,8 +202,8 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 /* get nbloc,nf of neighbor on face of elm with l,loc,face
    In:  elm, face
    Out: will append to list nbelocface_head */
-int connections_set_nbelocface_list(const tElm *elm, int elmface,
-                                    struct list_head *nbelocface_head)
+int connections_make_nbelocface_list(const tElm *elm, int elmface,
+                                     struct list_head *nbelocface_head)
 {
   const tEloc *eloc = elm->eloc;
   int patface[6]; //, nfaces;
@@ -680,7 +680,7 @@ Yo(l);
 void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
                            struct list_head *nbelocface_head)
 {
-  connections_set_nbelocface_list(elm,elmface, nbelocface_head);
+  connections_make_nbelocface_list(elm,elmface, nbelocface_head);
 
 tElocFace *elocface = list_first_entry(nbelocface_head, tGlist, list)->entry;
 PRFs(": 1st entry in nbelocface_head: ");
