@@ -216,6 +216,8 @@ int connections_get_nb_eloc_face(const tElm *elm, int elmface,
   if(patface[elmface])
   {
     tPat *pat = elm->pat;
+    struct list_head *pos;
+    struct list_head fnb_head;
 
     errorexit("deal with pat face");
     /*
@@ -229,6 +231,7 @@ int connections_get_nb_eloc_face(const tElm *elm, int elmface,
 
     tBface *bface;
     tNlist *nbl, *nblist1, *elem;
+    INIT_LIST_HEAD(&fnb_head);
     tEloc nbeloc[1];
     int nc, nb_f;
     int nnb = 0;   /* number of nfaces added */
@@ -579,21 +582,6 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 
 
 
-/* pick nb location on face f of elm (currently in same patch and thus
-   on same level), and write its loc into nbeloc */
-void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
-                           tEloc nbeloc[1], int *nbface)
-{
-  const tEloc *eloc = elm->eloc;
-
-  //FIXME: call connections_get_nb_eloc_face
-
-  nbeloc->p = eloc->p; // so far look in same pat
-  nbeloc->l = eloc->l;
-  connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
-                                            nbeloc->loc, nbface);
-}
-
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
    with loc s_eloc and face s_f.
    *s_eloc is a loc where we start searching
@@ -677,6 +665,21 @@ Yo(l);
   /* finally signal failure or success with at least one nb child */
   printf("final lret=%d\n", lret);
   return lret;
+}
+
+/* pick nb location on face f of elm (currently in same patch and thus
+   on same level), and write its loc into nbeloc */
+void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
+                           tEloc nbeloc[1], int *nbface)
+{
+  const tEloc *eloc = elm->eloc;
+
+  //FIXME: call connections_get_nb_eloc_face
+
+  nbeloc->p = eloc->p; // so far look in same pat
+  nbeloc->l = eloc->l;
+  connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
+                                            nbeloc->loc, nbface);
 }
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
