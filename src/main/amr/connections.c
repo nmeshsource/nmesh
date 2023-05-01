@@ -202,8 +202,9 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 /* get nbloc,nf of neighbor on face of elm with l,loc,face
    In:  elm, face
    Out: nbeloc,nbface */
-int connections_get_nb_eloc_face(const tElm *elm, int elmface,
-                                 tEloc nbeloc[1], int *nbface)
+int connections_set_nbelocface_list(const tElm *elm, int elmface,
+                                    struct list_head *nbelocface_head)
+//                                 tEloc nbeloc[1], int *nbface)
 {
   const tEloc *eloc = elm->eloc;
   int patface[6]; //, nfaces;
@@ -341,10 +342,18 @@ int connections_get_nb_eloc_face(const tElm *elm, int elmface,
   }
   else /* elmface is a refinement boundary in patch interior */
   {
+    tEloc nbeloc[1];
+    int nbface;
+    tElocFace *nbelocfac;
+
     nbeloc->p = eloc->p;
     nbeloc->l = eloc->l;
     l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
-                                                  nbeloc->loc, nbface);
+                                                  nbeloc->loc, &nbface);
+    nbelocfac = malloc(sizeof(nbelocfac[0]));
+    nbelocfac->eloc[0] = nbeloc[0];
+    nbelocfac->face = nbface;
+    glist_entry_add(nbelocfac, nbelocface_head);
   }
 
   return l;
@@ -675,13 +684,15 @@ void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
 {
   const tEloc *eloc = elm->eloc;
 
-  //FIXME: call connections_get_nb_eloc_face
+  //FIXME: call connections_set_nbelocface_list
 
-  connections_get_nb_eloc_face(elm,elmface, nbeloc,nbface);
+struct list_head nbelocface_head;
+INIT_LIST_HEAD(&nbelocface_head);
+  connections_set_nbelocface_list(elm,elmface, &nbelocface_head);
 
-//  glist_entry_add_tail()
-//void glist_entry_add_tail(void *entry, struct list_head *head)
-
+tElocFace *elocface = list_first_entry(&nbelocface_head, tGlist, list)->entry;
+nbeloc[0] = elocface->eloc[0];
+*nbface =  elocface->face;
 /*
   nbeloc->p = eloc->p; // so far look in same pat
   nbeloc->l = eloc->l;
@@ -697,7 +708,7 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
 {
   tEloc *eloc = elm->eloc;
   //tElocFace elocface[1];
-  //struct list_head nbelocface_head;
+  struct list_head nbelocface_head;
   tEloc nbeloc[1];
   int nb_f;
 
@@ -709,6 +720,9 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
   /* Before calling amr_elms_on_eloc_face, set nb_f and nbeloc by calling
      amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f); */
   amr_get_nbeloc_nbface(elm, elmface, nbeloc, &nb_f);
+
+
+
   printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
 
   return
