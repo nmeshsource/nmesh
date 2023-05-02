@@ -665,7 +665,7 @@ Yo(33.1);
   }
 
 //nMPI
-MPI_Barrier(WORLD);
+nMPI_barrier();
 exit(9);
   return 0;
 }
