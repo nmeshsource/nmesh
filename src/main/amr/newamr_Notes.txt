@@ -1,3 +1,11 @@
+BUGS:
+=====
+*In the master branch (at e4a071f6a) there is a bug in the bfaces.
+ It can be triggered by changing src/main/amr/mesh.c . This change is
+ in the branch master_bug (at 1c705303). We can get it with:
+   git checkout master_bug
+
+
 General:
 ========
 *maybe typdef only tElm and then
