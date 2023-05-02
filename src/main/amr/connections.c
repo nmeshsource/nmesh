@@ -186,7 +186,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
     connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc, nb_f);
     pnbloc[l] = 0; /* add string-end marker */
     strncpy(nbloc, pnbloc, LOCSMAX);
-    nbloc[l-1] = nb_ijk; // <--FIXME: is there a +'0' missing???
+    nbloc[l-1] = nb_ijk + '0';
     if(l<LOCSMAX) nbloc[l] = 0;
     return l;
   }
