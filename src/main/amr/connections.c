@@ -199,99 +199,6 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
   return l;
 }
 
-/* get nbloc,nf of neighbor on face of elm with l,loc,face
-   In:  elm, face
-   Out: will append to list nbelocface_head */
-int connections_make_nbelocface_list(const tElm *elm, int elmface,
-                                     struct list_head *nbelocface_head)
-{
-  const tEloc *eloc = elm->eloc;
-  struct list_head *pos, *sav;
-  int patface[6]; //, nfaces;
-  int l;
-
-  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
-
-  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
-  /* deal with more complicated case where elmface is on patch surface */
-  if(patface[elmface])
-  {
-    tPat *pat = elm->pat;
-    tBface *bface;
-    tEloc nbeloc[1];
-    int nb_f;
-    struct list_head fnb_head;
-
-    INIT_LIST_HEAD(&fnb_head);
-
-    errorexit("deal with pat face");
-
-    /* loop over all bfaces on face and find nb */
-    forbfacesonface(pat, elmface, bface)
-    {
-      tBface *obface = bface->obface;
-
-      /* do nothing if no other patch face */
-      if(!obface) continue;
-
-      /* eloc and face of root elm in other patch */
-      nbeloc->l      = 0;
-      nbeloc->loc[0] = 0;
-      nb_f = obface->f;
-
-      /* add all elms in arr on face nb_f to list fnb_head */
-    //amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, &fnb_head);
-
-      /* Go over fnb_head and add all with common face points with the elm
-         to list nbelocface_head. Then finally delete fnb_head. */
-      list_for_each_safe(pos, sav, &fnb_head)
-      {
-        /* get neigh. and check if elm and nb have common points */
-        tGlist *elem = list_entry(pos, tGlist, list);
-        tElm *nb = elem->entry;
-        int touch = elm_common_facepoints(elm,elmface, nb,nb_f);
-
-        /* if they have common points add nb-eloc and nb-face
-           to nbelocface_head list */
-        if(touch)
-        {
-          tElocFace *nbelocface = malloc(sizeof(nbelocface[0]));
-          nbelocface->eloc[0] = nb->eloc[0];
-          nbelocface->face    = nb_f;
-          glist_entry_add(nbelocface, nbelocface_head);
-        }
-
-        /* remove elem with nb from list fnb_head */
-        glist_elem_del(elem);
-      }
-    } /* end forbfacesonface */
-
-    /* FIXME: what shoule we return here ???? */
-    l=-9999;
-  }
-  else /* elmface is a refinement boundary in patch interior */
-  {
-    tEloc nbeloc[1];
-    int nbface;
-    tElocFace *nbelocface;
-
-    nbeloc->p = eloc->p;
-    nbeloc->l = eloc->l;
-    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
-                                                  nbeloc->loc, &nbface);
-    nbelocface = malloc(sizeof(nbelocface[0]));
-    nbelocface->eloc[0] = nbeloc[0];
-    nbelocface->face = nbface;
-    glist_entry_add(nbelocface, nbelocface_head);
-  }
-
-  list_for_each(pos, nbelocface_head)
-  {
-    printelocface(glist_entry(pos));
-  }
-
-  return l;
-}
 
 
 
@@ -621,45 +528,196 @@ Yo(l);
   return lret;
 }
 
-/* pick nb location on face f of elm (currently in same patch and thus
-   on same level), and write its loc into nbeloc */
-void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
-                           struct list_head *nbelocface_head)
-{
-  connections_make_nbelocface_list(elm,elmface, nbelocface_head);
 
-tElocFace *elocface = list_first_entry(nbelocface_head, tGlist, list)->entry;
-PRFs(": 1st entry in nbelocface_head: ");
-printeloc_s(elocface, " WWWWWWWWWWWWWWWWWWWW\n");
+/* remove this decl: */
+int amr_elms_on_eloc_face(long narr, const tElm **arr,
+                          size_t off0, size_t num0,
+                          tEloc s_eloc[1], int s_f, int l0,
+                          struct list_head *f_elms_head);
+
+
+/* get nbloc,nf of neighbor on face of elm with l,loc,face
+   In:  elm, face
+   Out: will append to list nbelocface_head */
+int connections_make_nbelocface_list(const tElm *elm, int elmface,
+                                     struct list_head *nbelocface_head)
+{
+  const tEloc *eloc = elm->eloc;
+  struct list_head *pos, *sav;
+  int patface[6]; //, nfaces;
+  int l;
+
+  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
+
+  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  /* deal with more complicated case where elmface is on patch surface */
+  if(patface[elmface])
+  {
+    tPat *pat = elm->pat;
+    tBface *bface;
+    tEloc nbeloc[1];
+    int nb_f;
+    struct list_head fnb_head;
+
+    INIT_LIST_HEAD(&fnb_head);
+
+    errorexit("deal with pat face");
+
+    /* loop over all bfaces on face and find nb */
+    forbfacesonface(pat, elmface, bface)
+    {
+      tBface *obface = bface->obface;
+
+      /* do nothing if no other patch face */
+      if(!obface) continue;
+
+      /* eloc and face of root elm in other patch */
+      nbeloc->l      = 0;
+      nbeloc->loc[0] = 0;
+      nb_f = obface->f;
+
+      /* add all elms in arr on face nb_f to list fnb_head */
+    //amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, &fnb_head);
+
+      /* Go over fnb_head and add all with common face points with the elm
+         to list nbelocface_head. Then finally delete fnb_head. */
+      list_for_each_safe(pos, sav, &fnb_head)
+      {
+        /* get neigh. and check if elm and nb have common points */
+        tGlist *elem = list_entry(pos, tGlist, list);
+        tElm *nb = elem->entry;
+        int touch = elm_common_facepoints(elm,elmface, nb,nb_f);
+
+        /* if they have common points add nb-eloc and nb-face
+           to nbelocface_head list */
+        if(touch)
+        {
+          tElocFace *nbelocface = malloc(sizeof(nbelocface[0]));
+          nbelocface->eloc[0] = nb->eloc[0];
+          nbelocface->face    = nb_f;
+          glist_entry_add(nbelocface, nbelocface_head);
+        }
+
+        /* remove elem with nb from list fnb_head */
+        glist_elem_del(elem);
+      }
+    } /* end forbfacesonface */
+
+    /* FIXME: what shoule we return here ???? */
+    l=-9999;
+  }
+  else /* elmface is a refinement boundary in patch interior */
+  {
+    errorexit("we should never get here");
+
+    tEloc nbeloc[1];
+    int nbface;
+    tElocFace *nbelocface;
+
+    nbeloc->p = eloc->p;
+    nbeloc->l = eloc->l;
+    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
+                                                  nbeloc->loc, &nbface);
+    nbelocface = malloc(sizeof(nbelocface[0]));
+    nbelocface->eloc[0] = nbeloc[0];
+    nbelocface->face = nbface;
+    glist_entry_add(nbelocface, nbelocface_head);
+  }
+
+  list_for_each(pos, nbelocface_head)
+  {
+    printelocface(glist_entry(pos));
+  }
+
+  return l;
 }
+
+
+
+
+
+//
+///* pick nb location on face f of elm (currently in same patch and thus
+//   on same level), and write its loc into nbeloc */
+//void amr_get_nbeloc_nbface(const tElm *elm, int elmface,
+//                           struct list_head *nbelocface_head)
+//{
+//  connections_make_nbelocface_list(elm,elmface, nbelocface_head);
+//
+//tElocFace *elocface = list_first_entry(nbelocface_head, tGlist, list)->entry;
+//PRFs(": 1st entry in nbelocface_head: ");
+//printeloc_s(elocface, " WWWWWWWWWWWWWWWWWWWW\n");
+//}
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
    elm on face elmface. */
 int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
-  struct list_head nbelocface_head;
-  struct list_head *pos;
+  const tEloc *eloc = elm->eloc;
+  struct list_head *pos, *sav;
+  int patface[6]; //, nfaces;
+  int l;
 
-  PRFs(": ");printeloc(elm->eloc);printf(" f=%d", elmface);
+  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
-  /* Before calling amr_elms_on_eloc_face, set &nbelocface_head by calling
-     amr_get_nbeloc_nbface */
-  INIT_LIST_HEAD(&nbelocface_head);
-  amr_get_nbeloc_nbface(elm, elmface, &nbelocface_head);
-
-  list_for_each(pos, &nbelocface_head)
+  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  /* simple case where elmface is inside the patch */
+  if(!patface[elmface])
   {
-    tElocFace *ef = glist_entry(pos);
-    tEloc *nbeloc = ef->eloc;
-    int nb_f = ef->face;
+    tEloc nbeloc[1];
+    int nbface;
+    nbeloc->p = eloc->p;
+    nbeloc->l = eloc->l;
+    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
+                                                  nbeloc->loc, &nbface);
+    printf(" -> nbeloc=");printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nbface, 0, fnb_head);
+  }
+  else /* complicated case where elmface is on patch surface */
+  {
+    struct list_head nbelocface_head;
+    struct list_head *pos;
 
-    printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
-    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+    errorexit("elmface is on patch surface !!!");
+
+    /* Before calling amr_elms_on_eloc_face, set &nbelocface_head by calling
+     amr_get_nbeloc_nbface */
+    INIT_LIST_HEAD(&nbelocface_head);
+    connections_make_nbelocface_list(elm, elmface, &nbelocface_head);
+
+    list_for_each(pos, &nbelocface_head)
+    {
+      tElocFace *ef = glist_entry(pos);
+      tEloc *nbeloc = ef->eloc;
+      int nb_f = ef->face;
+
+      printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
+      amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+    }
+
+    /* free all in &nbelocface_head */
+    glist_free_elems_and_entries(&nbelocface_head, free);
   }
 
-  /* free all in &nbelocface_head */
-  glist_free_elems_and_entries(&nbelocface_head, free);
+//OLD:
+//  /* Before calling amr_elms_on_eloc_face, set &nbelocface_head by calling
+//     amr_get_nbeloc_nbface */
+//  INIT_LIST_HEAD(&nbelocface_head);
+//  amr_get_nbeloc_nbface(elm, elmface, &nbelocface_head);
+//
+//  list_for_each(pos, &nbelocface_head)
+//  {
+//    tElocFace *ef = glist_entry(pos);
+//    tEloc *nbeloc = ef->eloc;
+//    int nb_f = ef->face;
+//
+//    printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
+//    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+//  }
+//
+//  /* free all in &nbelocface_head */
+//  glist_free_elems_and_entries(&nbelocface_head, free);
   return 0;
 }
 
