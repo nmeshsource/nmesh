@@ -156,12 +156,11 @@ int connections_loc_on_patchface(int l, const char loc[LOCSMAX],
    BUT this func works only if the face is not on patch face.
    In:  l, loc, face
    Out: nbloc, nb_f */
-int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
-                                              int face,
-                                              char nbloc[LOCSMAX], int *nb_f)
+int connections_get_nbloc_InsidePat(int l, const char loc[LOCSMAX], int face,
+                                    char nbloc[LOCSMAX], int *nb_f)
 {
   int patface[6];
-  int ijk, nb_ijk;
+  int ijk, nb_ijk, lret;
 
   PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
@@ -179,21 +178,25 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
 
   if(connections_ijk_is_at_parentface(ijk, face))
   {
-    char pnbloc[LOCSMAX]; /* location of parent nb */
+    //char pnbloc[LOCSMAX]; /* location of parent nb */
     PRF;printf(" at parentface\n");
+    //printf(" pnbloc=%s\n", pnbloc);
 
-    /* l-1,loc is parent */
-    connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc, nb_f);
-    pnbloc[l] = 0; /* add string-end marker */
-    strncpy(nbloc, pnbloc, LOCSMAX);
-    nbloc[l-1] = nb_ijk + '0';
-    if(l<LOCSMAX) nbloc[l] = 0;
-    return l;
+    /* l-1,loc is parent, write parent nb loc into nbloc */
+    lret = connections_get_nbloc_InsidePat(l-1,loc, face, nbloc, nb_f);
+    //pnbloc[l-1] = 0; /* add string-end marker */
+    //printf(" pnbloc=%s\n", pnbloc);
+    //strncpy(nbloc, pnbloc, LOCSMAX);
+    printf("  nbloc=%s\n", nbloc);
+    //nbloc[l-1] = nb_ijk + '0';
+    //printf(" nbloc=%s\n", nbloc);
+    return lret;
   }
   else
   {
     strncpy(nbloc, loc, LOCSMAX);
     nbloc[l-1] = nb_ijk + '0';
+    if(l<LOCSMAX) nbloc[l] = 0; /* add string-end marker */
     return l;
   }
   return l;
@@ -622,7 +625,6 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
   const tEloc *eloc = elm->eloc;
   struct list_head *pos, *sav;
   int patface[6]; //, nfaces;
-  int l;
 
   PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
@@ -631,39 +633,25 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
   if(!patface[elmface])
   {
     tEloc nbeloc[1];
-    int nbface;
+    int nbface, l0;
     nbeloc->p = eloc->p;
-    nbeloc->l = eloc->l;
-    l = connections_get_nbloc_SameLevel_InsidePat(eloc->l, eloc->loc, elmface,
-                                                  nbeloc->loc, &nbface);
-    printf(" -> nbeloc=");printeloc(nbeloc);printf(" nbface=%d\n", nbface);
-    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nbface, 0, fnb_head);
-    //FIXME: we should pass in a better l0 (not just 0) coming from
-    //       connections_get_nbloc_SameLevel_InsidePat
+for(l0=0; l0<10; l0++) nbeloc->loc[l0] = 'X';
+printf("nbeloc->l=%d\n", nbeloc->l);
+    l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
+                                         nbeloc->loc, &nbface);
+    nbeloc->l = l0;
+    printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    printf("nbeloc->l=%d\n", nbeloc->l);
+    //FIXME: we should pass in a better l0 (not just 0), i.e. the one coming
+    //       from connections_get_nbloc_InsidePat
+    //l0=0;
+    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nbface, l0, fnb_head);
   }
   else /* complicated case where elmface is on patch surface */
   {
     amr_set_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
   }
 
-//OLD:
-//  /* Before calling amr_elms_on_eloc_face, set &nbelocface_head by calling
-//     amr_get_nbeloc_nbface */
-//  INIT_LIST_HEAD(&nbelocface_head);
-//  connections_make_nbelocface_list(elm, elmface, &nbelocface_head);
-//
-//  list_for_each(pos, &nbelocface_head)
-//  {
-//    tElocFace *ef = glist_entry(pos);
-//    tEloc *nbeloc = ef->eloc;
-//    int nb_f = ef->face;
-//
-//    printf(" -> nbeloc=");printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
-//    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
-//  }
-//
-//  /* free all in &nbelocface_head */
-//  glist_free_elems_and_entries(&nbelocface_head, free);
   return 0;
 }
 
