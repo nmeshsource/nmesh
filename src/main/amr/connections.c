@@ -186,7 +186,7 @@ int connections_get_nbloc_SameLevel_InsidePat(int l, const char loc[LOCSMAX],
     connections_get_nbloc_SameLevel_InsidePat(l-1,loc, face, pnbloc, nb_f);
     pnbloc[l] = 0; /* add string-end marker */
     strncpy(nbloc, pnbloc, LOCSMAX);
-    nbloc[l-1] = nb_ijk;
+    nbloc[l-1] = nb_ijk; // <--FIXME: is there a +'0' missing???
     if(l<LOCSMAX) nbloc[l] = 0;
     return l;
   }
@@ -638,6 +638,8 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                                                   nbeloc->loc, &nbface);
     printf(" -> nbeloc=");printeloc(nbeloc);printf(" nbface=%d\n", nbface);
     amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nbface, 0, fnb_head);
+    //FIXME: we should pass in a better l0 (not just 0) coming from
+    //       connections_get_nbloc_SameLevel_InsidePat
   }
   else /* complicated case where elmface is on patch surface */
   {
