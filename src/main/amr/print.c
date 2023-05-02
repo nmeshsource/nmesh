@@ -96,7 +96,10 @@ void printCI(tPat *pat)
 
 void printeloc(const tEloc *eloc)
 {
-  printf("%d_%s", eloc->p, eloc->loc);
+  int i;
+  printf("%d_", eloc->p);
+  for(i=0; i<eloc->l; i++) printf("%c", eloc->loc[i]);
+  //if(eloc->l < strlen(eloc->loc)) printf("{eloc->l<strlen}");
 }
 
 void printeloc_s(const tEloc *eloc, char *s)
