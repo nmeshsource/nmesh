@@ -467,7 +467,8 @@ int amr_elms_on_eloc_face(long narr, const tElm **arr,
   num = num0;
 
   PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
-  printeloc_s(s_eloc, "\n  ");
+  printeloc(s_eloc);
+  printf(" s_f=%d\n  ", s_f);
   printelmarray(narr, arr);
 
   for(l = l0; l <= lmax; l++)
@@ -554,10 +555,17 @@ int amr_set_patchface_fnb_list(tElm *elm, int elmface,
   if(!patface[elmface])
     errorexit("call this for patch faces only!!!");
 
+printbfaces_on_f(pat, elmface);
+
   /* loop over all bfaces on face and find nb */
   forbfacesonface(pat, elmface, bface)
   {
     tBface *obface = bface->obface;
+
+    printf("bface\n");
+    printbface(bface);
+    printf("obface\n");
+    printbface(obface);
 
     /* do nothing if no other patch face */
     if(!obface) continue;
@@ -565,11 +573,13 @@ int amr_set_patchface_fnb_list(tElm *elm, int elmface,
     /* eloc and face of root elm in other patch */
     nbeloc->l      = 0;
     nbeloc->loc[0] = 0;
+    nbeloc->p      = obface->pat->p;
     nb_f = obface->f;
 
     /* set pos to last entry to start of list_for_each_safe_continue below */
     pos = fnb_head->prev;
 
+    printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
     /* add all elms in arr on face nb_f to list fnb_head */
     amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
 
