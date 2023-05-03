@@ -96,3 +96,74 @@ ops_bal_r = w_r * ops
 *from ops_r get:
  ops_tot_r = \sum_{ri=0}^r ops_ri
  we build this by sending ops_tot_r from r to r+1
+
+
+About nid:
+==========
+*use maybe: unsigned long nid; //not size_t because we don't have MPI_SIZE_T
+*then also:
+ #define  NID_INVALID  (ULONG_MAX)
+ #define  NID_REMOVED  (ULONG_MAX-1)
+ (these 2 are -1 and -2 when converted to long)
+*also add oid to save old value of nid (e.g. after refine)
+*make nids again, in a way that just numbers all elms over all ranks
+ consecutively
+*then nids do not change because of load bal
+*also form the nid alone we can tell the rank, if we store the 1st nid of
+ every rank in the tMesh on each rank;
+
+About refine:
+=============
+*if we refine certain nids get removed
+*nids only need to be updated after we refine
+*to refine we remove the parent from mesh->myelm_head and set the
+ corresponding pointer in mest->myelm to NULL
+
+About fnb info and such:
+========================
+*instead of node->nfaces introduce fnbid[6], make this a regular var:
+  AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for *fnbid[6]");
+  MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), EXCHVAR); //to send via MPI
+  //change refine-interpolation such that EXCHVARs get skipped like AUXVARs
+ fnbid[f] contains unsigned long // e.g. fnbid[f][3] = nid of nb #3 on face f
+*fnbid needs to be set using the nb elm finding funcs I made
+*from fnbid we can then set the elm->fnb pointers
+*we also copy all elms from other ranks that are nb of one of our elms
+ we put them into either: a linked elm list: struct list_head nbelm_head;
+                          or an array-list:  tElm **nbelm;
+*when we refine an elm:
+ -signal all nb elms that the elm is gone now by setting the
+  corresponding nb->fnb pointer to NULL.
+ -all rank local elms that have fnbid[f] but with a NULL nb->fnb[f] need
+  to update their entire fnbid[f] and nb->fnb[f]
+ -Since there need to be all kinds of changes to the nbelm list anyway,
+  we just erase it.
+  But before we do so we write a NULL into corresponding elm->fnb pointers
+  of all my elms, to signal that their fnbid[f] & fnb[f] need to be updated.
+ -now we have only our own elms, but lots of them have missing nb info
+ -next we update all elm->nid everywhere (may save the old nids in elm->oid)
+ -update all fnbid[f] where fnb[f] is not NULL by reading new nid via fnb[f]
+  and invalidate all fnbid[f] where fnb[f] is NULL
+ -Then update fnbid[f] for all faces of my elms that have an invalid fnbid[f].
+  This will need MPI to find nb elms on other ranks!
+ -PROBLEM: afterward we want to do load bal, that will probably erase nbelm
+           as above. It will also invalidate a lot of elm->fnb.
+           On the other hand fnbid[f] remains valid, so it should be
+           sent via MPI (like regular vars are!)
+ -the load bal should update all missing elm->fnb from fnbid
+
+Load bal and fnb info:
+======================
+*the elms from other ranks in nbelm need to be erased, we should NULL all
+ elm->fnb that point to them
+*how do we get the fnbid[f] from other ranks???:
+ make vars that contain the 6 vars fnbid[0-5]:
+  AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for *fnbid[6]");
+  MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), EXCHVAR); //to send via MPI
+  //change refine-interpolation such that EXCHVARs get skipped like AUXVARs
+ -it should be safe to redim the arrays in amr_elm_fnbid0-5
+*since we still have complete fnbid[f] after balancing, recreate all missing
+ elm->fnb from them
+*also get copies of elms from other ranks, that are nb of any of my elms
+*then update all nb info (in the elms copied from other ranks we may not
+ need fnbid)
