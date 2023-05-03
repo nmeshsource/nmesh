@@ -77,7 +77,8 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
   for(nvars=0, *ndoubles=0, vi=0; vi<dat->nv; vi++)
     if(dat->v[vi])
     {
-      *ndoubles += (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=AUXVAR);
+      int vt = MeshVarType(mesh, vi);
+      *ndoubles += (dat->v[vi]->N) * (vt!=AUXVAR);
       if(PR) { PRF;printf(": vi=%d ndoubles=%d\n", vi, *ndoubles); }
       nvars++;
     }
@@ -121,7 +122,8 @@ double *buffer_with_all_needed_dat_vars(tDat *dat, int *buflen)
     /* add to buffer if eneabled and not auxiliary var */
     if(dat->v[vi])
     {
-      N = (dat->v[vi]->N) * (MeshVarType(mesh, vi)!=AUXVAR);
+      int vt = MeshVarType(mesh, vi);
+      N = (dat->v[vi]->N) * (vt!=AUXVAR);
       buf[bi++] = vi;
       buf[bi++] = N;
       memcpy(buf+bi, dat->v[vi]->d, N * sizeof(double));
@@ -156,6 +158,7 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
     vi = buf[bi++];
     N  = buf[bi++];
     enablevarcomp_innode(node, vi);
+    if(N > dat->v[vi]->N) redim_array(dat->v[vi], N,1,1); //CHECK
     memcpy(dat->v[vi]->d, buf+bi, N * sizeof(double));
     bi += N;
     if(PR) { PRF;printf(": vi=%d bi=%d\n", vi, bi); }
