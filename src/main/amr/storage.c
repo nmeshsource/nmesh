@@ -376,11 +376,12 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
     for(vi=0; vi<nvdb; vi++)
       if(parent->dat->v[vi])
       {
+        int vt = MeshVarType(mesh, vi);
         /* enable same vars in this dat as in parent->dat */
         enablevarcomp_innode(elm, vi);
 
         /* fill elm->dat with interpolation data from parent */
-        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
           basis_interp_topoints(parent, parent->dat->v[vi],
                                 Xp, elm->dat->v[vi], Lagrange_of_x);
@@ -637,11 +638,12 @@ tNode *make_child_node(tNode *parent, int pt_typ[3], int n[3], int ijk)
     for(vi=0; vi<nvdb; vi++)
       if(parent->dat->v[vi])
       {
+        int vt = MeshVarType(mesh, vi);
         /* enable same vars in this dat as in parent->dat */
         enablevarcomp_innode(node, vi);
 
         /* fill node->dat with interpolation data from parent */
-        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
           basis_interp_topoints(parent, parent->dat->v[vi],
                                 Xp, node->dat->v[vi], Lagrange_of_x);
@@ -782,11 +784,12 @@ void update_node_n_pt_typ__old(tNode *node, int *n, int *pt_typ)
     for(vi=0; vi<nvdb; vi++)
       if(node_old->dat->v[vi])
       {
+        int vt = MeshVarType(mesh, vi);
         /* enable same vars in new dat as in dat_old */
         enablevarcomp_innode(node, vi);
 
         /* fill node->dat with interpolation data from old dat */
-        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
           basis_interp_topoints(node_old, node_old->dat->v[vi],
                                 Xp, node->dat->v[vi], Lagrange_of_x);
@@ -848,11 +851,12 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
     for(vi=0; vi<nvdb; vi++)
       if(node_old->dat->v[vi])
       {
+        int vt = MeshVarType(mesh, vi);
         /* enable same vars in new dat as in dat_old */
         enablevarcomp_innode(node, vi);
 
         /* fill node->dat with interpolation data from old dat */
-        if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
           basis_interp_topoints(node_old, node_old->dat->v[vi],
                                 Xp, node->dat->v[vi], Lagrange_of_x);
@@ -1009,8 +1013,9 @@ tNode *destroy_children(tNode *parent)
     /* 2. use interpolation to get vars from child to parent */
     for(vi=0; vi<nvdb; vi++)
     {
+      int vt = MeshVarType(mesh, vi);
       /* fill parent->dat with interpolation data from child */
-      if(MeshVarType(mesh, vi)!=AUXVAR) /* exclude Aux. vars */
+      if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
       {
         if(child0->dat->v[vi])
         {
