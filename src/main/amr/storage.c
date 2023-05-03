@@ -209,6 +209,8 @@ tElm *alloc_elm(tMesh *mesh)
   //FIXME: once elm has mesh, set it here
   //elm->mesh = mesh;
 
+  elm->nid = NID_INVALID;  /* mark nid as not set */
+
   return elm;
 }
 
@@ -302,7 +304,7 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
       elm->pt_typ[i] = pt_typ[i];
     }
     elm->np = n[0] * n[1] * n[2];
-    elm->nid = -1;    /* mark nid as not set */
+    elm->nid = NID_INVALID;    /* mark nid as not set */
 
     /* see where dat needs to be allocated */
     elm->datrank = datrank;
@@ -336,7 +338,7 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
   elm->dt = parent->dt;  // FIXME: For now all elms have same dt
 
   /* mark nid as not set */
-  elm->nid = -1;
+  elm->nid = NID_INVALID;
 
   /* fill in info */
   amr_set_child_eloc(parent->eloc, ijk, elm->eloc);

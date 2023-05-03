@@ -20,10 +20,10 @@ tMesh:    ---------------------mesh-----------------------------------------
 tPat:     |-----patch0-----|-------patch1-------|--patch2----|...
 tNode:     node node ...     node node node ...  node node ...
                    ^
-  The nodes shown here are the leaf nodes. They are kept in 
-  linked lists in tMylnodes.
+  The nodes shown here are the leaf nodes. They are our computational
+  elements and are also called elm (short for element).
 
-  Each node has a tDat struct that can be empty if the data is on another
+  Each elm has a tDat struct that can be empty if the data is on another
   proc. The tDat struct contains lists of arrays, one for each variable.
 
   Also, each node is part of an oct-tree. Here we only show 2 instead of 8:
@@ -34,7 +34,7 @@ l=2     __node__            node     __node__            node
 l=3  node      _node_                       node
 l=4        node 
   We have one tree per patch.
-  The ends of the tree are called leaf nodes.
+  The ends of the tree are called leaf nodes or elms.
 */
 
 
@@ -42,6 +42,9 @@ l=4        node
    the most important nodes. In fact it may be good to keep only the leaf
    nodes to save memory.
    We also call a leaf nodes an element or elm for short. */
+
+/* new element IDs (nid)s are set to this value */
+#define  NID_INVALID  (ULONG_MAX)
 
 /* location of an element (or elm) */
 #define LOCSMAX 128
