@@ -64,7 +64,7 @@ typedef struct tELOC {
   double bbox[6];         // bounding box (in X,Y,Z) of this node \
   int n[3];               // number of points in X,Y,Z-directions \
   int rflag;              // flag for refining node \
-  long nid;               // node ID, updated by update_mesh_myln_node_nid \
+  unsigned long nid;      // node ID, updated by update_mesh_myln_node_nid \
   int pt_typ[3];          // e.g. pt_typ[1]=P_LGL => LGL in dir1 of node \
   int datrank;            // rank of proc that rightfully has data
 typedef struct tELM {
@@ -73,6 +73,8 @@ typedef struct tELM {
   struct tDAT *dat;       // pointer to data (NULL if not on this proc)
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   struct tPAT *pat;       // remove one day, since we have mesh
+  int nfnb[6];            // number of face neighbor nodes
+  struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
 } tElm;
 */
 //// at the moment tElm has quite a few parts the nmesh tNode had as well.
