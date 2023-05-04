@@ -568,6 +568,115 @@ int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat)
   return status;
 }
 
+/* alloc size bytes of memory */
+int nMPI_Alloc_mem(size_t size, nMPI_Info info, void *baseptr)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Alloc_mem(size, info, baseptr);
+  PR1;
+#else
+  // *baseptr = calloc(1, size);
+  *( (char **) baseptr ) = calloc(1, size);
+#endif
+  return status;
+}
+
+/* free memory allocated with nMPI_Alloc_mem */
+int nMPI_Free_mem(void *base)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Free_mem(base);
+  PR1;
+#else
+  free(base);
+#endif
+  return status;
+}
+
+/* alloc and create window of size bytes */
+int nMPI_Win_allocate(size_t size, int disp_unit, nMPI_Info info,
+                      nMPI_Comm comm, void *baseptr, nMPI_Win *win)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+#if MPI_VERSION >= 2
+  status = MPI_Win_allocate(size, disp_unit, info, comm, baseptr, win);
+#else
+  status = MPI_Alloc_mem(size, info, baseptr);
+  status = MPI_Win_create(*( (char **) baseptr ), size, disp_unit,
+                          info, comm, win);
+#endif
+  PR1;
+#else
+  // *baseptr = calloc(1, size);
+  *( (char **) baseptr ) = calloc(1, size);
+#endif
+  return status;
+}
+
+/* create MPI window for RMA */
+int nMPI_Win_create(void *base, size_t size, int disp_unit,
+                    nMPI_Info info, nMPI_Comm comm, nMPI_Win *win)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Win_create(base, size,disp_unit, info, comm, win);
+  PR1;
+#endif
+  return status;
+}
+
+/* remove a previously created window */
+int nMPI_Win_free(nMPI_Win *win)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Win_free(win);
+  PR1;
+#endif
+  return status;
+}
+
+/* Copies data from the origin memory to the target */
+int nMPI_Put(void *origin_addr, int origin_count,
+             nMPI_Datatype origin_datatype,
+             int target_rank, size_t target_disp, int target_count,
+             nMPI_Datatype target_datatype, nMPI_Win win)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Put(origin_addr, origin_count, origin_datatype, target_rank,
+                   target_disp, target_count, target_datatype, win);
+  PR1;
+#endif
+  return status;
+}
+
+/* Get data from a memory window on a remote process */
+int nMPI_Get(void *origin_addr, int origin_count,
+             nMPI_Datatype origin_datatype,
+             int target_rank, size_t target_disp, int target_count,
+             nMPI_Datatype target_datatype, nMPI_Win win)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Get(origin_addr, origin_count, origin_datatype, target_rank,
+                   target_disp, target_count, target_datatype, win);
+  PR1;
+#endif
+  return status;
+}
+
+
 /**********************************************************************/
 /* deal with tCom struct for MPI */
 /**********************************************************************/
