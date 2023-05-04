@@ -1690,49 +1690,62 @@ int total_nnodes_in_myln(tMylnodes *myln)
 /**********************************************************************/
 /* functions to update elm->nid */
 /**********************************************************************/
-/* Update array of leaf nodes on this proc, set nid.
-   Also update node->dt and mesh->dt if auto_dt!=0 */
-long update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
-                       double dtfac, double uniform_dtfac)
+/* Update array of elms on this proc, set nids.
+   Also update elm->dt and mesh->dt if auto_dt!=0 */
+ulong update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
+                        double dtfac, double uniform_dtfac)
 {
-  tNlist *elem;
-  ulong nid = 0;
-  //int lid = 0;
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int rk;
+  struct list_head *pos;
+  ulong nid;
+  double dt_old = mesh->dt;
+  if(auto_dt)
+  {
+    if(dt>0.) mesh->dt = dt;
+    else      mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to giant value */
+  }
 
-  //FIXME: should this be here
+  /* set all my nids and Bcast my mesh->nidlim to each rank rk */
+  nid = 0;
+  for(rk=0; rk<size; rk++)
+  {
+    if(rk == rank)
+    {
+      /* set my dt info and all my nids */
+      list_for_each(pos, &mesh->myelm_head)
+      {
+        tElm *elm = list_entry(pos, tElm, list);
+
+        /* check if we need to change elm->dt and mesh->dt */
+        if(auto_dt)
+          adapt_node_dt_and_mesh_dt(elm, auto_dt, dtfac, uniform_dtfac);
+
+        /* set my nid */
+        elm->nid = nid++;
+      }
+      /* last elm->nid+1 is nidlim for me */
+      mesh->nidlim[rk] = nid;
+    }
+    /* we use blocking MPI here */
+    nMPI_Bcast(&(mesh->nidlim[rk]),1, nMPI_UNSIGNED_LONG, rk);
+    /* This blocks until we get mesh->nidlim[rk] from rank rk. */
+
+    /* update nid to start value for next rk iteration */
+    nid = mesh->nidlim[rk];
+  }
+
+  //FIXME: should this be here???
   /* set elm array */
   alloc_and_set_mesh_myelm(mesh);
 
-  //list_for
-  {
-    double dt_old = mesh->dt;
-    if(auto_dt)
-    {
-      if(dt>0.) mesh->dt = dt;
-      else      mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to max value */
-    }
+  /* if there are no nodes do not update dt mesh->dt */
+  if(nid==0)
+    mesh->dt = dt_old;
+  if(mesh->dt != dt_old)
+  { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
 
-    fornodelist(mesh->lns, elem)
-    {
-      tNode *node = elem->node;
-
-      if(node->dat)
-      {
-        /* for now we put all leaves in cat. 0 */
-        addto_myln_ln_c(mesh->myln, 0, elem);
-      }
-      /* set nid and invalidate parent's nid */
-      node->nid = nid++;
-
-      /* check if we need to change node->dt and mesh->dt */
-      if(auto_dt)
-        adapt_node_dt_and_mesh_dt(node, auto_dt, dtfac, uniform_dtfac);
-    } /* end fornodelist */
-
-    if(mesh->dt != dt_old) { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
-  }
-
-  mesh->nln = nid;
   return nid;
 }
 
@@ -1748,13 +1761,6 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
   tNlist *elem;
   long nid = 0;
   //int lid = 0;
-
-
-
-  /* set elm array */
-  alloc_and_set_mesh_myelm(mesh);
-
-
 
   /* delete mylns contents */
   realloc_myln_nncats(mesh->myln, 0);
@@ -1812,7 +1818,7 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
 }
 
 /* update array of leaf nodes on this proc, set nid */
-long update_mesh_myln_node_nid(tMesh *mesh)
+ulong update_mesh_myln_node_nid(tMesh *mesh)
 {
   int Par_dt   = Par("dt");
   double dt    = Getd(Par_dt);
@@ -1820,8 +1826,14 @@ long update_mesh_myln_node_nid(tMesh *mesh)
   int auto_dt  = 1*Getv(Par_dt, "auto") + 2*Getv(Par_dt, "auto2");
   double dtfac = Getd(Par("dtfac"));
   double uniform_dtfac = Getd(Par("uniform_dtfac"));
-  return update_mesh_myln_node_nid_dt(mesh, dt, auto_dt,
-                                      dtfac, uniform_dtfac);
+  ulong ret;
+
+  ret = update_elm_nid_dt(mesh, dt, auto_dt, dtfac, uniform_dtfac);
+
+  //FIXME: remove this call
+  ret = update_mesh_myln_node_nid_dt(mesh, dt, auto_dt,
+                                     dtfac, uniform_dtfac);
+  return ret;
 }
 
 /* return nid or -1 */
