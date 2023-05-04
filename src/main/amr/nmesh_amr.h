@@ -109,18 +109,18 @@ typedef struct tELM {
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
                             // where dat is and where all neighb. have dat
   struct tPAT *pat;       // remove one day, since we have mesh
-  struct tNODE *parent;   /* pointer to parent node */
-  struct tNODE *child[8]; /* list of pointers to childeren nodes */
+  struct tELM *parent;    /* pointer to parent node */
+  struct tELM *child[8];  /* list of pointers to childeren nodes */
 
   /* items to do with neighbor communication need to go last: */
-  struct tNODE *nb[6];    /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
+  struct tELM *nb[6];     /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
   int nfnb[6];            /* number of face neighbor nodes */
-  struct tNODE **fnb[6];  /* list of neighbor nodes on face, contains info
+  struct tELM **fnb[6];   /* list of neighbor nodes on face, contains info
                              condensed out of nfaces */
   struct tNFACE *nfaces[6]; /* 1st nface of this node,
                                kept up to date by update_node_fnb */
-  struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
+  struct tELM *volatile nc_lock; /* if not NULL, connections of node nc_lock
                                      and its nbs are currently being updated */
 } tElm;
 
@@ -166,7 +166,7 @@ typedef struct tNODEINFO {
 
 /* the data within a node, this should be only on one proc */
 typedef struct tDAT {
-  struct tNODE *node;     /* pointer to node dat is in */
+  struct tELM *node;//FIXME call it elm /* pointer to node dat is in */
   int nv;                 /* number of vars */
   int nvenabled;          /* number of enabled vars */
   struct tARRAY **v;      /* list of data pointers to vars, if v[vi]=NULL,
@@ -217,6 +217,7 @@ typedef struct tINDIC {
 
 
 /* a node */
+#if 0
 typedef struct tNODE {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
@@ -239,6 +240,9 @@ typedef struct tNODE {
   struct tNODE *volatile nc_lock; /* if not NULL, connections of node nc_lock
                                      and its nbs are currently being updated */
 } tNode;
+#else
+typedef tElm tNode;
+#endif
 
 /* a linked list of nodes */
 typedef struct tNLIST {
