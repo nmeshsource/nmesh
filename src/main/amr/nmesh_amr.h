@@ -69,7 +69,7 @@ typedef struct tELOC {
   double bbox[6];         // bounding box (in X,Y,Z) of this node \
   int n[3];               // number of points in X,Y,Z-directions \
   int rflag;              // flag for refining node \
-  unsigned long nid;      // node ID, updated by update_mesh_myln_node_nid \
+  ulong nid;              // node ID, updated by update_mesh_myln_node_nid \
   int pt_typ[3];          // e.g. pt_typ[1]=P_LGL => LGL in dir1 of node \
   int datrank;            // rank of proc that rightfully has data
 typedef struct tELM {
@@ -396,7 +396,7 @@ typedef struct tARRAY {
   union {       /* anon. union with host data (add one more for GPU data) */
     double *d;  /* pointer to double data */
     long *l;    /* pointer to long data using same mem as double data */
-    unsigned long *ul; /* unsigned long data using same mem as double data */
+    ulong *ul;  /* ptr to unsigned long data using same mem as double data */
     int *i; };  /* pointer to int data using same mem as double data */
   int d_nofree; /* d_nofree=1 if free_array should not free d */
   int ns;       /* number of segments (usually 1) */

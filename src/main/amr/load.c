@@ -941,9 +941,9 @@ void load_balance_elms(tMesh *mesh)
   double myT = 0.;
   double w;
   tCom *scom, *rcom;
-  unsigned long *ns_elms, *nr_elms; // number of elms to send or recv for each rank
+  ulong *ns_elms, *nr_elms; // number of elms to send or recv for each rank
   tElm0 **s_elms, **r_elms; // s_elms[3][7] elm7 to be sent to rank3 */
-  //unsigned long nkeep; // number of elms we keep on this rank
+  //ulong nkeep; // number of elms we keep on this rank
 
 Yo(1);
 printf("  mesh->nmyelm=%d\n", mesh->nmyelm);
@@ -1047,7 +1047,7 @@ printf("desrank=%d\n", desrank);
   list_for_each_safe(pos, sav, &mesh->myelm_head)
   {
     int desrank;
-    unsigned long i;
+    ulong i;
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     if(!dat) errorexit("this elm must have dat");
@@ -1125,7 +1125,7 @@ fflush(stdout);
   /* insert r_elms after current end of list */
   for(rk=rank+1; rk<size; rk++)
   {
-    unsigned long i;
+    ulong i;
     for(i=0; i<nr_elms[rk]; i++)
     {
       tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */
@@ -1139,7 +1139,7 @@ fflush(stdout);
   pos = &mesh->myelm_head; /* position where we insert */
   for(rk=0; rk<rank; rk++)
   {
-    unsigned long i;
+    ulong i;
     for(i=0; i<nr_elms[rk]; i++)
     {
       tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */

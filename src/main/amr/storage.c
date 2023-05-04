@@ -1691,7 +1691,7 @@ long update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
                        double dtfac, double uniform_dtfac)
 {
   tNlist *elem;
-  unsigned long nid = 0;
+  ulong nid = 0;
   //int lid = 0;
 
   //FIXME: should this be here
