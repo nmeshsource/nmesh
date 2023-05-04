@@ -793,7 +793,7 @@ fflush(stdout);
     { if(datrank != rank) errorexit("dat!=NULL but datrank!=rank"); }
 
 
-printf("elm=%p\n", elm);
+printf("elm=%p\n", (void *) elm);
 fflush(stdout);
 
     /* setup MPI recv buffers */
@@ -946,7 +946,7 @@ void load_balance_elms(tMesh *mesh)
   //ulong nkeep; // number of elms we keep on this rank
 
 Yo(1);
-printf("  mesh->nmyelm=%d\n", mesh->nmyelm);
+printf("  mesh->nmyelm=%lu\n", mesh->nmyelm);
 
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
@@ -1145,7 +1145,7 @@ fflush(stdout);
       tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
 
-printf("r_elms[i]=%p elm=%p\n", r_elms[i], elm);
+printf("r_elms[i]=%p elm=%p\n", (void *) r_elms[i], (void *) elm);
 int k;
 for(k=0; k<20; k++) printf("%x ", ((char *) r_elms[i])[k] );
 printf("\n");
@@ -1169,8 +1169,8 @@ Yo(666);
   evolve_free_communication_structs(mesh);
 
 Yo(200);
-PRF;printf(": %d in mesh->myelm_head\n", list_count_nodes(&mesh->myelm_head));
-printf("  mesh->nmyelm=%d\n", mesh->nmyelm);
+PRF;printf(": %zu in mesh->myelm_head\n", list_count_nodes(&mesh->myelm_head));
+printf("  mesh->nmyelm=%lu\n", mesh->nmyelm);
 
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
@@ -1181,8 +1181,8 @@ Yo(300);
 
 //FIXME: adapt  update_mesh_myln_node_nid
   update_mesh_myln_node_nid(mesh);
-  PRF;printf(": --> %d on this proc\n", mesh->nmyelm);
-printf(": --> %d on this proc\n", list_count_nodes(&mesh->myelm_head));
+  PRF;printf(": --> %lu on this proc\n", mesh->nmyelm);
+printf(": --> %zu on this proc\n", list_count_nodes(&mesh->myelm_head));
 
 
 //FIXME: call function that set's up elm->fnb and such...

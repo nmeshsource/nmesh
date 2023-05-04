@@ -482,10 +482,9 @@ Yo(l);
     f_eloc->l = l;
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
 
-//printf("******** This changes all the time:\n");
-printf("off=%zu num=%zu  f_elm pos=%zu\n",
-off, num, (size_t) ((const tElm **)f_elm - arr));
-printf("got ");printelm(*f_elm);
+//printf("off=%zu num=%zu  f_elm pos=%zu\n",
+//off, num, (size_t) ((const tElm **)f_elm - arr));
+//printf("got ");printelm(*f_elm);
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
@@ -623,7 +622,6 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
   const tEloc *eloc = elm->eloc;
-  struct list_head *pos, *sav;
   int patface[6]; //, nfaces;
 
   PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
