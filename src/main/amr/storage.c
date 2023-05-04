@@ -222,6 +222,23 @@ tElm *alloc_elm_init_pat(tMesh *mesh, int p)
   return elm;
 }
 
+/* alloc a new elm using ELMHEADER info */
+tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader)
+{
+  int p = elmheader->eloc->p;
+  tElm *elm = alloc_elm(mesh);
+
+  /* first copy entire elmheader into new elm */
+  memcpy(elm, elmheader, sizeof(elmheader[0]));
+
+  /* now set anything else we need */
+  //FIXME: once elm has mesh, set it here
+  //elm->mesh = mesh;
+
+  elm->pat = mesh->pat[p];
+  return elm;
+}
+
 /* free one elm and its dat */
 void free_elm(tElm *elm)
 {

@@ -18,6 +18,7 @@ typedef struct tELOCFACE {
 /* storage.c */
 tElm *alloc_elm(tMesh *mesh);
 tElm *alloc_elm_init_pat(tMesh *mesh, int p);
+tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
 void free_elm(tElm *elm);
 tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
