@@ -312,13 +312,14 @@ typedef struct tMESH {
 
   /* newamr stuff */
   struct list_head myelm_head; /* list head for elms on this proc */
-  long  nmyelm;      /* number of elms on this proc */
+  ulong nmyelm;      /* number of elms on this proc */
   tElm **myelm;      /* list of pointers to elms on this proc */
                      /* myelm and myelm_head list are copies of each other */
-  long  nnbelm;      /* number of nb elms on other procs */
+  ulong nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
+  ulong *nidlim;     /* (last nid on rank rk) = nidlim[rk]-1 */
+  // do we need this???:
   tNbr nbr[1];       /* info about elms on neighbor ranks */
-
 
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:

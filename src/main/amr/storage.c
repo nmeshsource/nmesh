@@ -1208,6 +1208,8 @@ tMesh *alloc_mesh(int npats)
   mesh = calloc(1, sizeof(*mesh));
   if(!mesh) errorexit("out of memory for mesh");
 
+  mesh->nidlim = calloc(nMPI_size(), sizeof(mesh->nidlim[0]));
+
   realloc_patlist_in_mesh(mesh, npats);
 
   /* init list heads in mesh */
@@ -1305,6 +1307,9 @@ void free_mesh_contents_exceptMeshFuns(tMesh *mesh)
 
   /* free mesh mutex */
   MUTEX_DESTROY(mesh->mutex);
+
+  /* free mesh->nidlim at the end */
+  free(mesh->nidlim);
 }
 
 /* free all mesh contents */
