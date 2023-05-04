@@ -67,6 +67,7 @@ int nMPI_Isend(const void *buf, int count, nMPI_Datatype datatype,
 int nMPI_Irecv(void *buf, int count, nMPI_Datatype datatype,
                int src, int tag, nMPI_Comm comm, nMPI_Req *req);
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat);
+int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat);
 int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
                    nMPI_Datatype datatype, nMPI_Op op);
 int nMPI_Reduce(const void *sendbuf, void *recvbuf, int count,
@@ -75,7 +76,21 @@ int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root);
 int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
                 int root, nMPI_Req *request);
 int nMPI_Test(nMPI_Req *request, int *flag, nMPI_Stat *stat);
-int nMPI_Wait(nMPI_Req *req, nMPI_Stat *stat);
+int nMPI_Alloc_mem(size_t size, nMPI_Info info, void *baseptr);
+int nMPI_Free_mem(void *base);
+int nMPI_Win_allocate(size_t size, int disp_unit, nMPI_Info info,
+                      nMPI_Comm comm, void *baseptr, nMPI_Win *win);
+int nMPI_Win_create(void *base, size_t size, int disp_unit,
+                    nMPI_Info info, nMPI_Comm comm, nMPI_Win *win);
+int nMPI_Win_free(nMPI_Win *win);
+int nMPI_Put(void *origin_addr, int origin_count,
+             nMPI_Datatype origin_datatype,
+             int target_rank, size_t target_disp, int target_count,
+             nMPI_Datatype target_datatype, nMPI_Win win);
+int nMPI_Get(void *origin_addr, int origin_count,
+             nMPI_Datatype origin_datatype,
+             int target_rank, size_t target_disp, int target_count,
+             nMPI_Datatype target_datatype, nMPI_Win win);
 
 tCom *alloc_com(int entrysize, int free_buf);
 void free_com(tCom *com);

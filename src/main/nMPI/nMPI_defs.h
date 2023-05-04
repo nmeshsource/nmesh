@@ -34,8 +34,9 @@
 #define nMPI_MINLOC     MPI_MINLOC
 #define nMPI_DOUBLE_INT MPI_DOUBLE_INT
 #define nMPI_TAG_UB MPI_TAG_UB
-#define nMPI_Win  MPI_Win
-#define nMPI_Info MPI_Info
+#define nMPI_Win       MPI_Win
+#define nMPI_Info      MPI_Info
+#define nMPI_INFO_NULL MPI_INFO_NULL
 
 #else
 
@@ -64,7 +65,8 @@
 #define nMPI_MINLOC     0
 #define nMPI_DOUBLE_INT 0
 #define nMPI_TAG_UB 0
-#define nMPI_Win  int
-#define nMPI_Info int
+#define nMPI_Win       int
+#define nMPI_Info      int
+#define nMPI_INFO_NULL 0
 
 #endif
