@@ -5,6 +5,10 @@ BUGS:
  in the branch master_bug (at 1c705303). We can get it with:
    git checkout master_bug
 
+FIX these:
+==========
+*mesh->nbelm needs to be freed somewhere
+
 
 General:
 ========
@@ -122,9 +126,9 @@ About refine:
 About fnb info and such:
 ========================
 *instead of node->nfaces introduce fnbid[6], make this a regular var:
-  AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for *fnbid[6]");
-  MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), EXCHVAR); //to send via MPI
-  //change refine-interpolation such that EXCHVARs get skipped like AUXVARs
+  AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for fnbid[6]");
+  MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), LBTVAR); //to send via MPI
+  //change refine-interpolation such that LBTVARs get skipped like AUXVARs
  fnbid[f] contains unsigned long // e.g. fnbid[f][3] = nid of nb #3 on face f
 *fnbid needs to be set using the nb elm finding funcs I made
 *from fnbid we can then set the elm->fnb pointers
@@ -159,8 +163,8 @@ Load bal and fnb info:
 *how do we get the fnbid[f] from other ranks???:
  make vars that contain the 6 vars fnbid[0-5]:
   AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for *fnbid[6]");
-  MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), EXCHVAR); //to send via MPI
-  //change refine-interpolation such that EXCHVARs get skipped like AUXVARs
+  MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), LBTVAR); //to send via MPI
+  //change refine-interpolation such that LBTVARs get skipped like AUXVARs
  -it should be safe to redim the arrays in amr_elm_fnbid0-5
 *since we still have complete fnbid[f] after balancing, recreate all missing
  elm->fnb from them
