@@ -315,9 +315,13 @@ typedef struct tMESH {
   ulong nmyelm;      /* number of elms on this proc */
   tElm **myelm;      /* list of pointers to elms on this proc */
                      /* myelm and myelm_head list are copies of each other */
+  struct list_head nbelm_head; /* list head for elms on other procs */
+  // do we want nbelm_head or this (not both)???:
   ulong nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
+
   ulong *nidlim;     /* (last nid on rank rk) = nidlim[rk]-1 */
+
   // do we need this???:
   tNbr nbr[1];       /* info about elms on neighbor ranks */
 
