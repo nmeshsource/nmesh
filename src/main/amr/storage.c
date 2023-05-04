@@ -1683,6 +1683,56 @@ int total_nnodes_in_myln(tMylnodes *myln)
 }
 
 /**********************************************************************/
+/* functions to update elm->nid */
+/**********************************************************************/
+/* Update array of leaf nodes on this proc, set nid.
+   Also update node->dt and mesh->dt if auto_dt!=0 */
+long update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
+                       double dtfac, double uniform_dtfac)
+{
+  tNlist *elem;
+  unsigned long nid = 0;
+  //int lid = 0;
+
+  //FIXME: should this be here
+  /* set elm array */
+  alloc_and_set_mesh_myelm(mesh);
+
+  //list_for
+  {
+    double dt_old = mesh->dt;
+    if(auto_dt)
+    {
+      if(dt>0.) mesh->dt = dt;
+      else      mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to max value */
+    }
+
+    fornodelist(mesh->lns, elem)
+    {
+      tNode *node = elem->node;
+
+      if(node->dat)
+      {
+        /* for now we put all leaves in cat. 0 */
+        addto_myln_ln_c(mesh->myln, 0, elem);
+      }
+      /* set nid and invalidate parent's nid */
+      node->nid = nid++;
+
+      /* check if we need to change node->dt and mesh->dt */
+      if(auto_dt)
+        adapt_node_dt_and_mesh_dt(node, auto_dt, dtfac, uniform_dtfac);
+    } /* end fornodelist */
+
+    if(mesh->dt != dt_old) { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
+  }
+
+  mesh->nln = nid;
+  return nid;
+}
+
+
+/**********************************************************************/
 /* functions to update the nodelist and node array in mesh */
 /**********************************************************************/
 /* Update array of leaf nodes on this proc, set nid.

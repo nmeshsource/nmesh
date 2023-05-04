@@ -37,14 +37,17 @@ l=4        node
   The ends of the tree are called leaf nodes or elms.
 */
 
-
 /* The leaf nodes are the nodes we do all our calculations in and thus the
    the most important nodes. In fact it may be good to keep only the leaf
    nodes to save memory.
    We also call a leaf nodes an element or elm for short. */
 
+/* abbreviation for unsigned long */
+typedef unsigned long ulong;
+
 /* new element IDs (nid)s are set to this value */
 #define  NID_INVALID  (ULONG_MAX)
+
 
 /* location of an element (or elm) */
 #define LOCSMAX 128
@@ -53,7 +56,6 @@ typedef struct tELOC {
   int l;                  /* refinement level of this node */
   char loc[LOCSMAX];      /* node location string, giving loc. in patch */
 } tEloc;
-
 
 /* a leaf node or element called elm */
 /* Beginning of tElm */
@@ -286,7 +288,7 @@ typedef struct tPAT {
    patch that share bfaces on the two node faces. */
 
 
-/* several patches and thus a list of leaf nodes make up the 
+/* several patches and thus a list of leaf nodes make up the
    computational mesh */
 typedef struct tMESH {
   double dt;         /* time step */
@@ -302,6 +304,7 @@ typedef struct tMESH {
   tEvoSys evosys[1]; /* contains lists of VarLists and RHS for evolve */
   int npats;         /* number of patches */
   tPat **pat;        /* list of pointers to patches */
+  //OLD stuff we can remove soon
   tNlist *lns;       /* start of linked list of all leaf nodes */
   long nln;          /* total number of leaf nodes */
   tMylnodes myln[1]; /* elements of lns owned by this proc */
@@ -315,6 +318,7 @@ typedef struct tMESH {
   long  nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
   tNbr nbr[1];       /* info about elms on neighbor ranks */
+
 
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:
@@ -413,7 +417,7 @@ typedef struct tVARLIST {
   void *vlPars; /* A pointer that is usually NULL, but can point to some
                    object that contains special extra pars or info. This
                    pointer is not touched by the funcs in variables.c (such
-                   as vlduplicate, vlcopy, vlfree, ...). So the user has 
+                   as vlduplicate, vlcopy, vlfree, ...). So the user has
                    to manage it: e.g. free it, before calling vlfree. */
 } tVarList;
 
