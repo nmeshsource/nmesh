@@ -62,7 +62,6 @@ typedef struct tELOC {
 //THIS is we want for later:
 /*
 #define ELMHEADER \
-  struct list_head list;  // all elms form a linked list \
   tEloc eloc[1];          // elm location \
   double dt;              // time step in node \
   double time;            // current time in node \
@@ -80,6 +79,7 @@ typedef struct tELM {
   struct tPAT *pat;       // remove one day, since we have mesh
   int nfnb[6];            // number of face neighbor nodes
   struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
+  struct list_head list;  // all elms form a linked list
 } tElm;
 */
 //// at the moment tElm has quite a few parts the nmesh tNode had as well.

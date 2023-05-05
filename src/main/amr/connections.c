@@ -5,6 +5,7 @@
 #include "amr.h"
 
 
+extern tnMPIvars nMPIvars[1];
 
 
 /****************************************************************************/
@@ -622,7 +623,7 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
   const tEloc *eloc = elm->eloc;
-  int patface[6]; //, nfaces;
+  int patface[6];
 
   PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
@@ -652,6 +653,137 @@ printf("nbeloc->l=%d\n", nbeloc->l);
 
   return 0;
 }
+
+/* set all fnb for all elms on all ranks */
+int amr_set_all_fnbs(tMesh *mesh)
+{
+  struct list_head *pos;
+  struct list_head ef0_head[6]; // one list for each face
+  ulong nmyef0[6];              // total number of elms
+  int f, rk;
+  int rank=nMPI_rank();
+  int size=nMPI_size();
+
+  for(f=0; f<6; f++) { INIT_LIST_HEAD(&ef0_head[f]); nmyef0[f]=0; }
+
+  /* find all my elmfaces that have fnb=NULL */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+
+    /* go over elm-faces */
+    for(f=0; f<6; f++)
+    {
+      /* if fnb=NULL nb info is not there yet */
+      if(!elm->fnb[f])
+      {
+        glist_entry_add_tail(elm, &ef0_head[f]);
+        nmyef0[f] += 1;
+      }
+    }
+  }
+  /* now we have 6 lists ef0_head[f] that contain elms where the fnb info
+     needs to be updated. */
+
+
+  /* send my lists to the other ranks */
+  for(rk=0; rk<size; rk++)
+  {
+    int nef0[6];
+
+    for(f=0; f<6; f++) nef0[f] = nmyef0[f];
+
+    /* send nmyef0[f] of rank rk to others */
+    nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
+
+    /* make list for each face an send them... */
+    for(f=0; f<6; f++)
+    {
+      if(nef0[f])
+      {
+        // get &ef0_head[f] into elmhead array ef0
+        tElm0 *ef0 = calloc(nef0[f], sizeof(ef0[0])); //FIXME: call calloc_err
+        struct list_head *pos0;
+        ulong i;
+
+        i=0;
+        list_for_each(pos0, &ef0_head[f])
+        {
+          tElm *elm = glist_entry(pos0);
+          memcpy(&ef0[i], elm, sizeof(ef0[0]));
+          i++;
+        }
+        if(nef0[f]!=i) errorexit("nef0[f]!=i");
+
+        /* braodcast all elmheaders in ef0 fro rank rk to all*/
+        nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+
+        /* all ranks do work on ef0 array */
+        for(i=0; i<nef0[f]; i++)
+        {
+          tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
+          struct list_head *pos1;
+          struct list_head fnb_head;
+          int j, nnb;
+          ulong *nb_nid;
+
+          INIT_LIST_HEAD(&fnb_head);
+
+          nnb = //FIXME: make amr_set_fnb_list return # of elems in fnb_head
+          amr_set_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm, &fnb_head);
+
+
+          nb_nid = calloc(nnb, sizeof(nb_nid[0]));//FIXME: call calloc_err
+
+          j=0;
+          list_for_each(pos1, &fnb_head)
+          {
+            tElm *nb = glist_entry(pos);
+            nb_nid[j] = nb->nid;
+            //NOTE: should we just send on nid, or entire elmheader???
+            j++;
+          }
+          if(nnb!=j) errorexit("nnb!=j");
+
+          // need to make a larger array with |nnb|nb_nid[0...nnb-1]
+          free(nb_nid);
+
+
+          free_elm(elmi);
+        }
+        //...  ???
+
+        free(ef0);
+      }
+    }
+    /*
+    nMPI_Bcast(larger array,??, nMPI_UNSIGNED_LONG, rk);
+    */
+  }
+
+
+
+
+
+
+
+
+
+
+
+  char *buf;
+  int sz1 = sizeof(buf[0]);
+  nMPI_Win win;
+
+  /* make a RMA window through which we communicate all */
+  nMPI_Win_allocate(1000*sz1, sz1, nMPI_INFO_NULL, WORLD, &buf, &win);
+
+  /* send elm0 to all MPI ranks */
+
+  nMPI_Win_free(&win);
+  return 0;
+}
+
 
 
 /****************************************************************************/
