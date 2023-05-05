@@ -695,6 +695,8 @@ Yo(33.2);
     printelm(elm);
   }
 
+  test_peloc();
+
 //nMPI
 nMPI_barrier();
 exit(9);

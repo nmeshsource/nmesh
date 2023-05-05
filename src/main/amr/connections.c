@@ -205,15 +205,132 @@ int connections_get_nbloc_InsidePat(int l, const char loc[LOCSMAX], int face,
 
 
 
-
-
-
-
 /****************************************************************************/
 /* functions that work on eloc */
 /****************************************************************************/
 
-//void
+void eloc_from_peloc(tEloc eloc[1], tPeloc peloc[1])
+{
+  unsigned char *ploc = peloc->ploc;
+  char *loc  = eloc->loc;
+  int i, p1,p2, b1,b2, bi1,bi2;
+  unsigned char ch, c1,c2;
+  //p2=0;
+  /* trivial copies */
+  eloc->nid = peloc->nid;
+  eloc->p = peloc->p;
+  eloc->l = peloc->l;
+
+  /* translate ploc to loc */
+  for(i=0; i<LOCSMAX; i++)
+  {
+    int i3 = i*3;
+    b1 = i3;        /* bit number of 1st bit in ploc */
+    b2 = i3+2;      /* bit number of 3rd bit in ploc */
+
+    p1 = b1/8;      /* position of 1st byte in ploc */
+
+    bi1 = b1 % 8;   /* starting bit index we need in c1 */
+    bi2 = b2 % 8;   /* starting bit index we need in c2 */
+
+    /* if all is in c1 */
+    c1 = ploc[p1];
+    ch = c1>>bi1;   /* shift 1st bit into correct position */
+    ch = ch & 7;    /* keep only lowest 3 bits */
+    //printf("ch=%o\n",ch);
+    if(bi2<2) /* not all is in c1 */
+    {
+      p2 = b2/8;       /* position of 2nd byte in ploc */
+      c2 = ploc[p2];
+      //printf("c2=%o\n",c2);
+      c2 = c2<<(2-bi2); /* shift 3rd bit into correct position */
+      //printf("c2=%o\n",c2);
+      c2 = c2 & 7;     /* keep only lowest 3 bits */
+      //printf("c2=%o\n",c2);
+      ch = ch | c2;
+    }
+    loc[i] = ch + '0'; /* set loc */
+
+    //PRF;printf(": i=%d  b1=%d b2=%d bi1=%d bi2=%d p1=%d p2=%d %c(%d)<-%o",
+    //i, b1,b2, bi1,bi2, p1,p2, loc[i],loc[i]-'0', ploc[p1]);
+    //if(bi2<2) printf(",%o", ploc[p2]);
+    //printf("\n");
+  }
+}
+
+void eloc_to_peloc(tEloc eloc[1], tPeloc peloc[1])
+{
+  unsigned char *ploc = peloc->ploc;
+  char *loc  = eloc->loc;
+  int i, p1,p2, b1,b2, bi1,bi2;
+  unsigned char ch, c1,c2, pc;
+p2=0;
+  /* trivial copies */
+  peloc->nid = eloc->nid;
+  peloc->p = eloc->p;
+  peloc->l = eloc->l;
+  ploc[0] = 0; /* init first char in ploc */
+
+  /* translate ploc to loc */
+  ploc[0] = 0; /**/
+  for(i=0; i<LOCSMAX; i++)
+  {
+    int i3 = i*3;
+    b1 = i3;        /* bit number of 1st bit in ploc */
+    b2 = i3+2;      /* bit number of 3rd bit in ploc */
+
+    p1 = b1/8;      /* position of 1st byte in ploc */
+
+    bi1 = b1 % 8;   /* starting bit index we need in c1 */
+    bi2 = b2 % 8;   /* starting bit index we need in c2 */
+
+    ch = loc[i] - '0';
+    ch = ch & 7;
+    c1 = ch<<bi1;   /* shift 1st bit into correct position */
+    pc = ploc[p1];
+    //pc = pc<<(8-bi1);    /* clear all left of bi1 */
+    //pc = pc>>(8-bi1);    /* clear is not needed if ploc[0]=0 */
+    ploc[p1] = pc | c1; /* then add the bits form c1 */
+
+    if(bi2<2) /* not all is in one ploc */
+    {
+      c2 = ch>>(2-bi2); /* shift 3rd bit into correct position */
+      p2 = b2/8;        /* position of 2nd byte in ploc */
+      ploc[p2] = c2;    /* this also zeros all above the bit bi2 */
+    }
+    //PRF;printf(": i=%d  b1=%d b2=%d bi1=%d bi2=%d p1=%d p2=%d %c(%d)->%o",
+    //i, b1,b2, bi1,bi2, p1,p2, loc[i],loc[i]-'0', ploc[p1]);
+    //if(bi2<2) printf(",%o", ploc[p2]);
+    //printf("\n");
+  }
+}
+
+/* test eloc_to_peloc and eloc_from_peloc */
+void test_peloc(void)
+{
+  tEloc eloc[1];
+  tEloc eloc2[1];
+  tEloc eloc3[1];
+  tPeloc peloc[1];
+  int i;
+
+  for(i=0; i<LOCSMAX; i++) eloc->loc[i] = 63+'0';
+  eloc->p=4;
+  eloc->l=22;
+  eloc->nid=77;
+  strcpy(eloc->loc, "123456789012345");
+  printeloc_s(eloc, "\n");
+
+  eloc_to_peloc(eloc, peloc);
+  eloc_from_peloc(eloc2, peloc);
+
+  eloc_to_peloc(eloc2, peloc);
+  eloc_from_peloc(eloc3, peloc);
+
+  printeloc_s(eloc2, "\n");
+  printeloc_s(eloc3, "\n");
+}
+
 
 /****************************************************************************/
 /* functions that work on elm */
@@ -746,6 +863,7 @@ int amr_set_all_fnbs(tMesh *mesh)
           if(nnb!=j) errorexit("nnb!=j");
 
           // need to make a larger array with |nnb|nb_nid[0...nnb-1]
+          // or make larger array with |nnb|{32byte_struct}[0...nnb-1]
           free(nb_nid);
 
 
