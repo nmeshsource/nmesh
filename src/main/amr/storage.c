@@ -225,7 +225,7 @@ tElm *alloc_elm_init_pat(tMesh *mesh, int p)
 /* alloc a new elm using ELMHEADER info */
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader)
 {
-  int p = elmheader->eloc->p;
+  int p = elmheader->peloc->p;
   tElm *elm = alloc_elm(mesh);
 
   /* first copy entire elmheader into new elm */
@@ -304,13 +304,13 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
   {
     tMesh *mesh = pat->mesh;
     tElm *elm = alloc_elm(mesh);
-    tEloc *eloc = elm->eloc;
+    tPeloc *peloc = elm->peloc;
     int i;
 
     /* fill in info */
-    eloc->p = pat->p;
-    eloc->l = 0; /* root node */
-    eloc->loc[0] = 0;
+    peloc->p = pat->p;
+    peloc->l = 0; /* root node */
+    peloc->ploc[0] = 0;
     amr_set_elm_pat(mesh, elm);
     amr_set_elm_bbox(elm);
 
@@ -358,7 +358,7 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
   elm->nid = NID_INVALID;
 
   /* fill in info */
-  amr_set_child_eloc(parent->eloc, ijk, elm->eloc);
+  amr_set_child_peloc(parent->peloc, ijk, elm->peloc);
   amr_set_elm_pat(mesh, elm);
   amr_set_elm_bbox(elm);
 

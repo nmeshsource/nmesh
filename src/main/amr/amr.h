@@ -113,6 +113,9 @@ int timing_mm_speed(tMesh *mesh);
 int timing_set_myops_ops0_allops(tMesh *mesh);
 
 /* connections.c */
+void eloc_from_peloc(tEloc eloc[1], const tPeloc peloc[1]);
+void eloc_to_peloc(const tEloc eloc[1], tPeloc peloc[1]);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
+int amr_set_child_peloc(tPeloc *parentpeloc, int ijk, tPeloc *peloc);

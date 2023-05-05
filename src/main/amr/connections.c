@@ -55,8 +55,12 @@ int lecmp(const void *loc, const void *elem, void *arg)
   const tEloc *lc = (const tEloc *) loc;
   //const tElm **elm_arr = elem; //(const tElm **) elem;
   const tElm *const*elm_arr = elem; //(const tElm **) elem;
-  const tEloc *elc = elm_arr[0]->eloc;
-  int cmp = loccmp(lc, elc);
+  const tPeloc *pelc = elm_arr[0]->peloc;
+  tEloc elc[1];
+  int cmp;
+
+  eloc_from_peloc(elc, pelc);
+  cmp = loccmp(lc, elc);
   PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   printf("--> cmp=%d\n", cmp);
   //printelm(elm_arr[0]);
@@ -209,11 +213,10 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 /* functions that work on eloc */
 /****************************************************************************/
 
-void eloc_from_peloc(tEloc eloc[1], tPeloc peloc[1])
+void eloc_from_peloc(tEloc eloc[1], const tPeloc peloc[1])
 {
-  unsigned char *ploc = peloc->ploc;
+  const unsigned char *ploc = peloc->ploc;
   char *loc  = eloc->loc;
-  int l;
   int i, p1,p2, b1,b2, bi1,bi2;
   unsigned char ch, c1,c2;
   //p2=0;
@@ -262,10 +265,10 @@ void eloc_from_peloc(tEloc eloc[1], tPeloc peloc[1])
      just decrease l in eloc */
 }
 
-void eloc_to_peloc(tEloc eloc[1], tPeloc peloc[1])
+void eloc_to_peloc(const tEloc eloc[1], tPeloc peloc[1])
 {
   unsigned char *ploc = peloc->ploc;
-  char *loc  = eloc->loc;
+  const char *loc  = eloc->loc;
   int i, p1,p2, b1,b2, bi1,bi2;
   unsigned char ch, c1,c2, pc;
   //p2=0;
@@ -348,7 +351,9 @@ void test_peloc(void)
 /* get ijk of elm */
 int elm_get_ijk(tElm *elm)
 {
-  tEloc *eloc = elm->eloc;
+  tPeloc *peloc = elm->peloc;
+  tEloc eloc[1];
+  eloc_from_peloc(eloc, peloc);
   return connections_get_ijk(eloc->l, eloc->loc);
 }
 
@@ -360,8 +365,8 @@ int elm_get_ijk(tElm *elm)
 /* find patch of elm and save it in elm->pat */
 void amr_set_elm_pat(tMesh *mesh, tElm *elm)
 {
-  tEloc *eloc = elm->eloc;
-  int p = eloc->p;
+  tPeloc *peloc = elm->peloc;
+  int p = peloc->p;
   //elm->pat = elm->mesh->pat[p];
   elm->pat = mesh->pat[p];
 }
@@ -370,12 +375,16 @@ void amr_set_elm_pat(tMesh *mesh, tElm *elm)
 void amr_set_elm_bbox(tElm *elm)
 {
   tPat *pat = elm->pat;
-  tEloc *eloc = elm->eloc;
-  int l = eloc->l; /* get level number */
-  char *loc = eloc->loc;
+  tPeloc *peloc = elm->peloc;
+  int l = peloc->l; /* get level number */
   double *bbox  = elm->bbox;
   double LX[3];
   int f, d, ll;
+  tEloc eloc[1];
+  char *loc;
+
+  eloc_from_peloc(eloc, peloc);
+  loc = eloc->loc;
 
   /* copy patch bbox values, and put lengths into LX */
   for(f=0; f<6; f++) bbox[f] = pat->bbox[f];
@@ -395,17 +404,20 @@ void amr_set_elm_bbox(tElm *elm)
   }
 }
 
-/* set eloc of child */
-int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc)
+/* set peloc of child */
+int amr_set_child_peloc(tPeloc *parentpeloc, int ijk, tPeloc *peloc)
 {
-  int l   = parentloc->l;
+  tEloc eloc[1];
+  int l = parentpeloc->l;
   if(l >= NLOCS-1)
-    errorexit("parentloc is at limit ==> no further child possible!");
-  eloc->p = parentloc->p;
-  eloc->l = l + 1;
-  strncpy(eloc->loc, parentloc->loc, NLOCS);
+    errorexit("parentpeloc is at limit ==> no further child possible!");
+  peloc->p = parentpeloc->p;
+  peloc->l = l + 1;
+  peloc->nid = NID_INVALID;
+  eloc_from_peloc(eloc, parentpeloc);
   eloc->loc[l]   = '0' + ijk;
   eloc->loc[l+1] = 0;
+  eloc_to_peloc(eloc, peloc);
   return l+1;
 }
 
@@ -668,7 +680,6 @@ int amr_set_patchface_fnb_list(tElm *elm, int elmface,
                                long narr, const tElm **arr,
                                struct list_head *fnb_head)
 {
-  const tEloc *eloc = elm->eloc;
   int patface[6]; //, nfaces;
   int l;
   tPat *pat = elm->pat;
@@ -676,7 +687,10 @@ int amr_set_patchface_fnb_list(tElm *elm, int elmface,
   tEloc nbeloc[1];
   int nb_f;
   struct list_head *pos, *sav;
+  const tPeloc *peloc = elm->peloc;
+  tEloc eloc[1];
 
+  eloc_from_peloc(eloc, peloc);
   PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
   /* sanity check */
@@ -733,7 +747,10 @@ printbfaces_on_f(pat, elmface);
   list_for_each(pos, fnb_head)
   {
     tElm *fnb = glist_entry(pos);
-    printeloc_s(fnb->eloc, " ");
+    tPeloc *fnbpeloc = fnb->peloc;
+    tEloc fnbeloc[1];
+    eloc_from_peloc(fnbeloc, fnbpeloc);
+    printeloc_s(fnbeloc, " ");
   }
   printf("\n");
 
@@ -748,8 +765,11 @@ printbfaces_on_f(pat, elmface);
 int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
                      struct list_head *fnb_head)
 {
-  const tEloc *eloc = elm->eloc;
   int patface[6];
+  const tPeloc *peloc = elm->peloc;
+  tEloc eloc[1];
+
+  eloc_from_peloc(eloc, peloc);
 
   PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 

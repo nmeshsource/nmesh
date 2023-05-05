@@ -1128,7 +1128,7 @@ fflush(stdout);
     ulong i;
     for(i=0; i<nr_elms[rk]; i++)
     {
-      tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */
+      tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].peloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
       /* now add elm to the end of list in mesh */
       list_add_tail(&elm->list, &mesh->myelm_head);
@@ -1142,7 +1142,7 @@ fflush(stdout);
     ulong i;
     for(i=0; i<nr_elms[rk]; i++)
     {
-      tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].eloc->p); /* fresh elm */
+      tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].peloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
 
 printf("r_elms[i]=%p elm=%p\n", (void *) r_elms[i], (void *) elm);

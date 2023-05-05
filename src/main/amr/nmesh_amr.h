@@ -64,7 +64,7 @@ typedef struct tELOC {
 typedef struct tPELOC {
   unsigned short int p; // patch number (in 2 bytes)
   unsigned char l;      // refinement level of this node (in 1 byte)
-  char ploc[NPBYTES];   // packed loc (3 bits per level)
+  unsigned char ploc[NPBYTES];  // packed loc (3 bits per level)
   unsigned long nid;    // node ID, updated by update_mesh_myln_node_nid
 } tPeloc;
 
@@ -97,7 +97,7 @@ typedef struct tELM {
 //Temporarily we use this for compatibility with tNode:
 #define ELMHEADER \
   struct list_head list;  /* all elms form a linked list */ \
-  tEloc eloc[1];          /* elm location */ \
+  /* tEloc eloc[1]; */          /* elm location */ \
   tPeloc peloc[1];        /* elm location in packed form */ \
   double dt;              /* time step in node */ \
   double time;            /* current time in node */ \
