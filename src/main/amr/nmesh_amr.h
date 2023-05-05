@@ -51,11 +51,11 @@ typedef unsigned long ulong;
 
 /* location of an element (or elm) */
 #define NPBYTES 21
-#define LOCSMAX (8*NPBYTES)/3
+#define NLOCS   ((8*NPBYTES)/3)
 typedef struct tELOC {
   int p;                  /* patch number */
   int l;                  /* refinement level of this node */
-  char loc[LOCSMAX];      /* node location string, giving loc. in patch */
+  char loc[NLOCS];        /* node location string, giving loc. in patch */
   unsigned long nid;      /* node ID, updated by update_mesh_myln_node_nid */
 } tEloc;
 

@@ -68,7 +68,7 @@ int lecmp(const void *loc, const void *elem, void *arg)
 /****************************************************************************/
 
 /* find ijk from l,loc by reading last in loc */
-int connections_get_ijk(int l, const char loc[LOCSMAX])
+int connections_get_ijk(int l, const char loc[NLOCS])
 {
   if(l<1) return 0;
   return loc[l-1] - '0';
@@ -123,7 +123,7 @@ int connections_get_inner_nb_ijk(int ijk, int dir)
 
 /* Out: return value: number of faces l,loc is on
         patface[f] = 1 if l,loc is on patch face f */
-int connections_loc_on_patchface(int l, const char loc[LOCSMAX],
+int connections_loc_on_patchface(int l, const char loc[NLOCS],
                                  int patface[6])
 {
   int ll, f, npatfaces;
@@ -157,8 +157,8 @@ int connections_loc_on_patchface(int l, const char loc[LOCSMAX],
    BUT this func works only if the face is not on patch face.
    In:  l, loc, face
    Out: nbloc, nb_f */
-int connections_get_nbloc_InsidePat(int l, const char loc[LOCSMAX], int face,
-                                    char nbloc[LOCSMAX], int *nb_f)
+int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
+                                    char nbloc[NLOCS], int *nb_f)
 {
   int patface[6];
   int ijk, nb_ijk, lret;
@@ -179,7 +179,7 @@ int connections_get_nbloc_InsidePat(int l, const char loc[LOCSMAX], int face,
 
   if(connections_ijk_is_at_parentface(ijk, face))
   {
-    //char pnbloc[LOCSMAX]; /* location of parent nb */
+    //char pnbloc[NLOCS]; /* location of parent nb */
     PRF;printf(" at parentface\n");
     //printf(" pnbloc=%s\n", pnbloc);
 
@@ -187,7 +187,7 @@ int connections_get_nbloc_InsidePat(int l, const char loc[LOCSMAX], int face,
     lret = connections_get_nbloc_InsidePat(l-1,loc, face, nbloc, nb_f);
     //pnbloc[l-1] = 0; /* add string-end marker */
     //printf(" pnbloc=%s\n", pnbloc);
-    //strncpy(nbloc, pnbloc, LOCSMAX);
+    //strncpy(nbloc, pnbloc, NLOCS);
     printf("  nbloc=%s\n", nbloc);
     //nbloc[l-1] = nb_ijk + '0';
     //printf(" nbloc=%s\n", nbloc);
@@ -195,9 +195,9 @@ int connections_get_nbloc_InsidePat(int l, const char loc[LOCSMAX], int face,
   }
   else
   {
-    strncpy(nbloc, loc, LOCSMAX);
+    strncpy(nbloc, loc, NLOCS);
     nbloc[l-1] = nb_ijk + '0';
-    if(l<LOCSMAX) nbloc[l] = 0; /* add string-end marker */
+    if(l<NLOCS) nbloc[l] = 0; /* add string-end marker */
     return l;
   }
   return l;
@@ -213,6 +213,7 @@ void eloc_from_peloc(tEloc eloc[1], tPeloc peloc[1])
 {
   unsigned char *ploc = peloc->ploc;
   char *loc  = eloc->loc;
+  int l;
   int i, p1,p2, b1,b2, bi1,bi2;
   unsigned char ch, c1,c2;
   //p2=0;
@@ -222,7 +223,7 @@ void eloc_from_peloc(tEloc eloc[1], tPeloc peloc[1])
   eloc->l = peloc->l;
 
   /* translate ploc to loc */
-  for(i=0; i<LOCSMAX; i++)
+  for(i=0; i<NLOCS; i++)
   {
     int i3 = i*3;
     b1 = i3;        /* bit number of 1st bit in ploc */
@@ -256,6 +257,9 @@ void eloc_from_peloc(tEloc eloc[1], tPeloc peloc[1])
     //if(bi2<2) printf(",%o", ploc[p2]);
     //printf("\n");
   }
+  /* do not add string end marker in loc[eloc->l], this would kill
+     stuff below eloc->l which we intend to keep, because sometimes we
+     just decrease l in eloc */
 }
 
 void eloc_to_peloc(tEloc eloc[1], tPeloc peloc[1])
@@ -264,16 +268,17 @@ void eloc_to_peloc(tEloc eloc[1], tPeloc peloc[1])
   char *loc  = eloc->loc;
   int i, p1,p2, b1,b2, bi1,bi2;
   unsigned char ch, c1,c2, pc;
-p2=0;
+  //p2=0;
   /* trivial copies */
   peloc->nid = eloc->nid;
   peloc->p = eloc->p;
   peloc->l = eloc->l;
-  ploc[0] = 0; /* init first char in ploc */
+  ploc[0] = 0;         /* init first char in ploc */
+  //ploc[NPBYTES-1] = 0; /* init last char in ploc */
 
   /* translate ploc to loc */
   ploc[0] = 0; /**/
-  for(i=0; i<LOCSMAX; i++)
+  for(i=0; i<NLOCS; i++)
   {
     int i3 = i*3;
     b1 = i3;        /* bit number of 1st bit in ploc */
@@ -284,8 +289,10 @@ p2=0;
     bi1 = b1 % 8;   /* starting bit index we need in c1 */
     bi2 = b2 % 8;   /* starting bit index we need in c2 */
 
-    ch = loc[i] - '0';
-    ch = ch & 7;
+    ch = loc[i];
+    //if(ch == 0) break; //Note: do not brak like this!!!
+    //ch = ch - '0';
+    ch = ch & 7; // this also subtracts '0'
     c1 = ch<<bi1;   /* shift 1st bit into correct position */
     pc = ploc[p1];
     //pc = pc<<(8-bi1);    /* clear all left of bi1 */
@@ -314,11 +321,13 @@ void test_peloc(void)
   tPeloc peloc[1];
   int i;
 
-  for(i=0; i<LOCSMAX; i++) eloc->loc[i] = 63+'0';
-  eloc->p=4;
-  eloc->l=22;
-  eloc->nid=77;
-  strcpy(eloc->loc, "123456789012345");
+  for(i=0; i<NLOCS-1; i++) eloc->loc[i] = 7+'0';
+  eloc->loc[NLOCS-1]= 5+'0';
+  eloc->p=9;
+  eloc->l=19;
+  eloc->nid=98;
+  strcpy(eloc->loc, "1234567564321012345");
+  eloc->loc[44] = '1';
   printeloc_s(eloc, "\n");
 
   eloc_to_peloc(eloc, peloc);
@@ -390,11 +399,11 @@ void amr_set_elm_bbox(tElm *elm)
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc)
 {
   int l   = parentloc->l;
-  if(l >= LOCSMAX-1)
+  if(l >= NLOCS-1)
     errorexit("parentloc is at limit ==> no further child possible!");
   eloc->p = parentloc->p;
   eloc->l = l + 1;
-  strncpy(eloc->loc, parentloc->loc, LOCSMAX);
+  strncpy(eloc->loc, parentloc->loc, NLOCS);
   eloc->loc[l]   = '0' + ijk;
   eloc->loc[l+1] = 0;
   return l+1;
@@ -637,7 +646,7 @@ Yo(l);
       int ret;
       /* child ijk */
       cheloc->loc[l-1] = ijk + '0';
-      if(l<LOCSMAX) cheloc->loc[l] = 0;
+      if(l<NLOCS) cheloc->loc[l] = 0;
       ret = amr_elms_on_eloc_face(narr, arr, off, num, cheloc, s_f, l,
                                   f_elms_head);
       if(ret >=0) lret = l; /* record success */
