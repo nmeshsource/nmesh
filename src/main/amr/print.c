@@ -115,7 +115,7 @@ void printeloc(const tEloc *eloc)
     if(ch) printf("%c", ch);
     else   printf(".");
   }
-  //printf(" nid%lu", eloc->nid);
+  //printf(" eid%lu", eloc->eid);
 }
 
 void printeloc_s(const tEloc *eloc, char *s)
@@ -129,8 +129,8 @@ void printelm(const tElm *e)
   tEloc eloc[1];
   eloc_from_eploc(eloc, e->eploc);
   printeloc(eloc);
-  printf(": nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
-         e->nid,
+  printf(": eid%lu nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
+         e->eploc->eid, e->nid,
          e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5],
          e->leaf, e->dat ? "yes" : "no");
 }

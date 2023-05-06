@@ -45,8 +45,8 @@ l=4        node
 /* abbreviation for unsigned long */
 typedef unsigned long ulong;
 
-/* new element IDs (nid)s are set to this value */
-#define  NID_INVALID  (ULONG_MAX)
+/* new element IDs (eid)s are set to this value */
+#define  EID_INVALID  (ULONG_MAX)
 
 
 /* location of an element (or elm) */
@@ -55,8 +55,8 @@ typedef unsigned long ulong;
 typedef struct tELOC {
   int p;                  /* patch number */
   int l;                  /* refinement level of this node */
-  char loc[NLOCS];        /* node location string, giving loc. in patch */
-  unsigned long nid;      /* node ID, updated by update_mesh_myln_node_nid */
+  char loc[NLOCS];        /* elm location string, giving loc. in patch */
+  unsigned long eid;      /* elm ID, updated by update_mesh_myln_node_nid */
 } tEloc;
 
 /* location of an element (or elm) in packed form
@@ -65,7 +65,7 @@ typedef struct tEPLOC {
   unsigned short int p; // patch number (in 2 bytes)
   unsigned char l;      // refinement level of this node (in 1 byte)
   unsigned char ploc[NPBYTES];  // packed loc (3 bits per level)
-  unsigned long nid;    // node ID, updated by update_mesh_myln_node_nid
+  unsigned long eid;    // elm ID, updated by update_mesh_myln_node_nid
 } tEploc;
 
 /* a leaf node or element called elm */
@@ -335,7 +335,7 @@ typedef struct tMESH {
   ulong nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
 
-  ulong *nidlim;     /* (last nid on rank rk) = nidlim[rk]-1 */
+  ulong *eidlim;     /* (last eid on rank rk) = eidlim[rk]-1 */
 
   // do we need this???:
   tNbr nbr[1];       /* info about elms on neighbor ranks */

@@ -221,7 +221,7 @@ void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
   unsigned char ch, c1,c2;
   //p2=0;
   /* trivial copies */
-  eloc->nid = eploc->nid;
+  eloc->eid = eploc->eid;
   eloc->p = eploc->p;
   eloc->l = eploc->l;
 
@@ -273,7 +273,7 @@ void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
   unsigned char ch, c1,c2, pc;
   //p2=0;
   /* trivial copies */
-  eploc->nid = eloc->nid;
+  eploc->eid = eloc->eid;
   eploc->p = eloc->p;
   eploc->l = eloc->l;
   ploc[0] = 0;         /* init first char in ploc */
@@ -330,7 +330,7 @@ void test_eploc(void)
   eloc->loc[NLOCS-1]= 5+'0';
   eloc->p=9;
   eloc->l=19;
-  eloc->nid=98;
+  eloc->eid=98;
   strcpy(eloc->loc, "1234567564321012345");
   eloc->loc[44] = '1';
   printeloc_s(eloc, "\n");
@@ -416,7 +416,7 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc)
   eloc_from_eploc(eloc, parenteploc);
   eloc->p = parenteploc->p;
   eloc->l = l + 1;
-  eloc->nid = NID_INVALID;
+  eloc->eid = EID_INVALID;
   eloc->loc[l]   = '0' + ijk;
   eloc->loc[l+1] = 0;
   eloc_to_eploc(eloc, eploc);
@@ -873,7 +873,7 @@ int amr_set_all_fnbs(tMesh *mesh)
           struct list_head *pos1;
           struct list_head fnb_head;
           int j, nnb;
-          ulong *nb_nid;
+          ulong *nb_eid;
 
           INIT_LIST_HEAD(&fnb_head);
 
@@ -881,21 +881,21 @@ int amr_set_all_fnbs(tMesh *mesh)
           amr_set_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm, &fnb_head);
 
 
-          nb_nid = calloc(nnb, sizeof(nb_nid[0]));//FIXME: call calloc_err
+          nb_eid = calloc(nnb, sizeof(nb_eid[0]));//FIXME: call calloc_err
 
           j=0;
           list_for_each(pos1, &fnb_head)
           {
             tElm *nb = glist_entry(pos);
-            nb_nid[j] = nb->nid;
-            //NOTE: should we just send on nid, or entire elmheader???
+            nb_eid[j] = nb->eploc->eid;
+            //NOTE: should we just send on eid, or eploc, or entire elmheader???
             j++;
           }
           if(nnb!=j) errorexit("nnb!=j");
 
-          // need to make a larger array with |nnb|nb_nid[0...nnb-1]
+          // need to make a larger array with |nnb|nb_eid[0...nnb-1]
           // or make larger array with |nnb|{32byte_struct}[0...nnb-1]
-          free(nb_nid);
+          free(nb_eid);
 
 
           free_elm(elmi);

@@ -209,7 +209,7 @@ tElm *alloc_elm(tMesh *mesh)
   //FIXME: once elm has mesh, set it here
   //elm->mesh = mesh;
 
-  elm->nid = NID_INVALID;  /* mark nid as not set */
+  elm->eploc->eid = EID_INVALID;  /* mark eid as not set */
 
   return elm;
 }
@@ -307,6 +307,10 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
     tEploc *eploc = elm->eploc;
     int i;
 
+    /* check for overflow in eploc->p */
+    i = (1 << (sizeof(eploc->p)*8)) - 1;
+    if(pat->p > i) errorexiti("cannot have more than %d patches", i);
+
     /* fill in info */
     eploc->p = pat->p;
     eploc->l = 0; /* root node */
@@ -321,7 +325,7 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
       elm->pt_typ[i] = pt_typ[i];
     }
     elm->np = n[0] * n[1] * n[2];
-    elm->nid = NID_INVALID;    /* mark nid as not set */
+    elm->eploc->eid = EID_INVALID;    /* mark eid as not set */
 
     /* see where dat needs to be allocated */
     elm->datrank = datrank;
@@ -354,8 +358,8 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
   elm->time = parent->time;
   elm->dt = parent->dt;  // FIXME: For now all elms have same dt
 
-  /* mark nid as not set */
-  elm->nid = NID_INVALID;
+  /* mark eid as not set */
+  elm->eploc->eid = EID_INVALID;
 
   /* fill in info */
   amr_set_child_eploc(parent->eploc, ijk, elm->eploc);
@@ -1225,7 +1229,7 @@ tMesh *alloc_mesh(int npats)
   mesh = calloc(1, sizeof(*mesh));
   if(!mesh) errorexit("out of memory for mesh");
 
-  mesh->nidlim = calloc(nMPI_size(), sizeof(mesh->nidlim[0]));
+  mesh->eidlim = calloc(nMPI_size(), sizeof(mesh->eidlim[0]));
 
   realloc_patlist_in_mesh(mesh, npats);
 
@@ -1325,8 +1329,8 @@ void free_mesh_contents_exceptMeshFuns(tMesh *mesh)
   /* free mesh mutex */
   MUTEX_DESTROY(mesh->mutex);
 
-  /* free mesh->nidlim at the end */
-  free(mesh->nidlim);
+  /* free mesh->eidlim at the end */
+  free(mesh->eidlim);
 }
 
 /* free all mesh contents */
@@ -1705,18 +1709,18 @@ int total_nnodes_in_myln(tMylnodes *myln)
 }
 
 /**********************************************************************/
-/* functions to update elm->nid */
+/* functions to update elm->eploc->eid */
 /**********************************************************************/
-/* Update array of elms on this proc, set nids.
+/* Update array of elms on this proc, set eids.
    Also update elm->dt and mesh->dt if auto_dt!=0 */
-ulong update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
+ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
                         double dtfac, double uniform_dtfac)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
   int rk;
   struct list_head *pos;
-  ulong nid;
+  ulong eid;
   double dt_old = mesh->dt;
   if(auto_dt)
   {
@@ -1724,13 +1728,13 @@ ulong update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
     else      mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to giant value */
   }
 
-  /* set all my nids and Bcast my mesh->nidlim to each rank rk */
-  nid = 0;
+  /* set all my eids and Bcast my mesh->eidlim to each rank rk */
+  eid = 0;
   for(rk=0; rk<size; rk++)
   {
     if(rk == rank)
     {
-      /* set my dt info and all my nids */
+      /* set my dt info and all my eids */
       list_for_each(pos, &mesh->myelm_head)
       {
         tElm *elm = list_entry(pos, tElm, list);
@@ -1739,18 +1743,18 @@ ulong update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
         if(auto_dt)
           adapt_node_dt_and_mesh_dt(elm, auto_dt, dtfac, uniform_dtfac);
 
-        /* set my nid */
-        elm->nid = nid++;
+        /* set my eid */
+        elm->eploc->eid = eid++;
       }
-      /* last elm->nid+1 is nidlim for me */
-      mesh->nidlim[rk] = nid;
+      /* last elm->eploc->eid+1 is eidlim for me */
+      mesh->eidlim[rk] = eid;
     }
     /* we use blocking MPI here */
-    nMPI_Bcast(&(mesh->nidlim[rk]),1, nMPI_UNSIGNED_LONG, rk);
-    /* This blocks until we get mesh->nidlim[rk] from rank rk. */
+    nMPI_Bcast(&(mesh->eidlim[rk]),1, nMPI_UNSIGNED_LONG, rk);
+    /* This blocks until we get mesh->eidlim[rk] from rank rk. */
 
-    /* update nid to start value for next rk iteration */
-    nid = mesh->nidlim[rk];
+    /* update eid to start value for next rk iteration */
+    eid = mesh->eidlim[rk];
   }
 
   //FIXME: should this be here???
@@ -1758,12 +1762,12 @@ ulong update_elm_nid_dt(tMesh *mesh, double dt, int auto_dt,
   alloc_and_set_mesh_myelm(mesh);
 
   /* if there are no nodes do not update dt mesh->dt */
-  if(nid==0)
+  if(eid==0)
     mesh->dt = dt_old;
   if(mesh->dt != dt_old)
   { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
 
-  return nid;
+  return eid;
 }
 
 
@@ -1845,7 +1849,7 @@ ulong update_mesh_myln_node_nid(tMesh *mesh)
   double uniform_dtfac = Getd(Par("uniform_dtfac"));
   ulong ret;
 
-  ret = update_elm_nid_dt(mesh, dt, auto_dt, dtfac, uniform_dtfac);
+  ret = update_elm_eid_dt(mesh, dt, auto_dt, dtfac, uniform_dtfac);
 
   //FIXME: remove this call
   ret = update_mesh_myln_node_nid_dt(mesh, dt, auto_dt,
