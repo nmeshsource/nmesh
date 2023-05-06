@@ -137,7 +137,7 @@ void printelm(const tElm *e)
          e->leaf, e->dat ? "yes" : "no");
 }
 
-void printelmarray(long nelms, const tElm **elm)
+void printelmarray(long nelms, tElm **elm)
 {
   long i;
   printf("%ld elms: ", nelms);

@@ -660,7 +660,7 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
    *s_eloc is a loc where we start searching
    *But we start searching 1st for s_eloc's ancestor on level l0.
    *Return list with elms on face s_f */
-int amr_elms_on_eloc_face(long narr, const tElm **arr,
+int amr_elms_on_eloc_face(long narr, tElm **arr,
                           size_t off0, size_t num0,
                           tEloc s_eloc[1], int s_f, int l0,
                           struct list_head *f_elms_head)
@@ -747,7 +747,7 @@ Yo(l);
    In:  elm,elmface, narr,arr
    Out: will append to list nbelocface_head */
 int amr_set_patchface_fnb_list(tElm *elm, int elmface,
-                               long narr, const tElm **arr,
+                               long narr, tElm **arr,
                                struct list_head *fnb_head)
 {
   int patface[6]; //, nfaces;
@@ -831,8 +831,9 @@ printbfaces_on_f(pat, elmface);
 
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
-   elm on face elmface. */
-int amr_set_fnb_list(tElm *elm, int elmface, long narr, const tElm **arr,
+   elm on face elmface.
+   In: elm,elmface, narr,arr  =>  Out: fnb_head */
+int amr_set_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
                      struct list_head *fnb_head)
 {
   int patface[6];
