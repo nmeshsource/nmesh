@@ -18,23 +18,27 @@
 
 tMesh:    ---------------------mesh-----------------------------------------
 tPat:     |-----patch0-----|-------patch1-------|--patch2----|...
-tNode:     node node ...     node node node ...  node node ...
-                   ^
-  The nodes shown here are the leaf nodes. They are our computational
-  elements and are also called elm (short for element).
+tElm:      elm elm ...      elm elm elm ...      elm elm  ...
+                ^
+  The elements (elm) shown here are our computational subdomains in each
+  patch.
 
   Each elm has a tDat struct that can be empty if the data is on another
   proc. The tDat struct contains lists of arrays, one for each variable.
 
-  Also, each node is part of an oct-tree. Here we only show 2 instead of 8:
+  The elms are the leaf nodes of an oct-tree. Here we show the structure
+  in one patch starting from a root-node. Each part of the tree is a node
+  The leaf nodes are marked as elm. We only show 2 children instead of 8:
 level
-l=0                  ___________rnode_____________
-l=1          ______node______             ______node______
-l=2     __node__            node     __node__            node
-l=3  node      _node_                       node
-l=4        node 
+l=0                  _________root-node______________________
+l=1          ______node_________                     ______node______
+l=2     __node__        |------elm-------|       _node__     |-------elm-----|
+l=3 |-elm---|   _node_                   |---elm---|---elm---|
+l=4         |-elm-|-elm-|
   We have one tree per patch.
-  The ends of the tree are called leaf nodes or elms.
+  The ends of the tree are called leaf nodes (marked as elm here).
+  The elms cover our entire computational domain. Since the elms are nodes
+  themselves we sometimes call them nodes as well.
 */
 
 /* The leaf nodes are the nodes we do all our calculations in and thus the
