@@ -98,7 +98,7 @@ void printeloc(const tEloc *eloc)
 {
   char ch;
   int i;
-  int len = strnlen(eloc->loc, NLOCS);
+  //int len = strnlen(eloc->loc, NLOCS);
   printf("%d_", eloc->p);
   for(i=0; i<eloc->l; i++)
   {
@@ -109,12 +109,14 @@ void printeloc(const tEloc *eloc)
   //printf("|");
   //if(eloc->l > len) printf(">");
   //if(eloc->l < len) printf("<");
-  if(0) for(i=eloc->l; i<len; i++)
+  #if 0
+  for(i=eloc->l; i<len; i++)
   {
     ch = eloc->loc[i];
     if(ch) printf("%c", ch);
     else   printf(".");
   }
+  #endif
   //printf(" eid%lu", eloc->eid);
 }
 
