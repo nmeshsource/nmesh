@@ -59,7 +59,9 @@ int lecmp(const void *loc, const void *elem, void *arg)
   tEloc elc[1];
   int cmp;
 
+  /* we could optimize this by caching un unpacked loc in each elm: */
   eloc_from_eploc(elc, pelc);
+
   cmp = loccmp(lc, elc);
   PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   printf("--> cmp=%d\n", cmp);
@@ -373,13 +375,14 @@ void amr_set_elm_pat(tMesh *mesh, tElm *elm)
   elm->pat = mesh->pat[p];
 }
 
-/* find bbox of elm and save it in elm->bbox */
-void amr_set_elm_bbox(tElm *elm)
+/* find bbox of elmheader elm0 and save it in elm0->bbox */
+void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0)
 {
-  tPat *pat = elm->pat;
-  tEploc *eploc = elm->eploc;
+  tEploc *eploc = elm0->eploc;
+  int p = eploc->p; /* get patch number */
   int l = eploc->l; /* get level number */
-  double *bbox  = elm->bbox;
+  tPat *pat = mesh->pat[p];
+  double *bbox  = elm0->bbox;
   double LX[3];
   int f, d, ll;
   tEloc eloc[1];
@@ -405,6 +408,16 @@ void amr_set_elm_bbox(tElm *elm)
     }
   }
 }
+
+/* find bbox of elm and save it in elm->bbox */
+void amr_set_elm_bbox(tElm *elm)
+{
+  tMesh* mesh = elm->pat->mesh;
+  char *e = (char *) elm;
+  tElm0 *elm0 = (tElm0 *) e;
+  amr_set_elm0_bbox(mesh, elm0);
+}
+
 
 /* set eploc of child */
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc)
@@ -841,7 +854,8 @@ int amr_set_all_fnbs(tMesh *mesh)
 
     for(f=0; f<6; f++) nef0[f] = nmyef0[f];
 
-    /* send nmyef0[f] of rank rk to others */
+    /* send nmyef0[f] of rank rk to others, to tell how many elms I
+       want to find face nbs of */
     nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
 
     /* make list for each face an send them... */
@@ -851,6 +865,7 @@ int amr_set_all_fnbs(tMesh *mesh)
       {
         // get &ef0_head[f] into elmhead array ef0
         tElm0 *ef0 = calloc(nef0[f], sizeof(ef0[0])); //FIXME: call calloc_err
+        //hey maybe we should just send tEploc not tElm0!!!???
         struct list_head *pos0;
         ulong i;
 
@@ -863,8 +878,9 @@ int amr_set_all_fnbs(tMesh *mesh)
         }
         if(nef0[f]!=i) errorexit("nef0[f]!=i");
 
-        /* braodcast all elmheaders in ef0 fro rank rk to all*/
+        /* broadcast all elmheaders in ef0 from rank rk to all */
         nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+                              //^^^^^^^^^^^^^^^^ is this right???
 
         /* all ranks do work on ef0 array */
         for(i=0; i<nef0[f]; i++)
