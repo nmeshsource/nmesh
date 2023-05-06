@@ -310,6 +310,7 @@ void connections_loc_to_ploc(const char loc[NLOCS],
   }
 }
 
+/* unpack eploc into eloc */
 void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
 {
   const unsigned char *ploc = eploc->ploc;
@@ -324,6 +325,7 @@ void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
   connections_loc_from_ploc(loc, ploc);
 }
 
+/* pack eloc into eploc */
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
 {
   unsigned char *ploc = eploc->ploc;
