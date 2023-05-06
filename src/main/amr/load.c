@@ -1145,16 +1145,6 @@ fflush(stdout);
       tElm *elm = alloc_elm_init_pat(mesh, r_elms[rk][i].peloc->p); /* fresh elm */
       memcpy(elm, &(r_elms[rk][i]), sizeof(tElm0)); /* init elm from r_elms[i] */
 
-printf("r_elms[i]=%p elm=%p\n", (void *) r_elms[i], (void *) elm);
-int k;
-for(k=0; k<20; k++) printf("%x ", ((char *) r_elms[i])[k] );
-printf("\n");
-for(k=0; k<20; k++) printf("%x ", ((char *) elm)[k] );
-printf("\n");
-Yo(666);
-//fflush(stdout);
-//if(rank==1) abort();
-
       /* now add elm after pos */
       list_add(&elm->list, pos);
       pos = &elm->list; /* move insert position by one */
