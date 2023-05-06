@@ -463,32 +463,52 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc)
 /* functions to initialize tElm0 */
 /****************************************************************************/
 
-/* */
+/* compare two ulong numbers */
+int cmp_ulong(const void *key, const void *ar, void *arg)
+{
+  ulong eid = *((const ulong *) key);
+  ulong eidlim = *((const ulong *) ar);
+  /* return eid - eidlim; // is not overflow safe */
+  if(eid > eidlim) return 1;
+  if(eid < eidlim) return -1;
+  return 0;
+}
+
+/* return the rank that an elm with eploc is on */
+int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
+{
+  int size = nMPI_size();
+  ulong *eidlim = mesh->eidlim;
+  ulong eid = eploc->eid;
+  ulong *li;
+  size_t off, num;
+
+  /* if eid is on rank rk: eidlim[rk-1] <= eid < eidlim[rk] */
+  if(eid >= eidlim[size-1])
+    errorexit("eid is outside the bounds of mesh->eidlim");
+
+  if(eid < eidlim[0]) return 0; //rank0
+
+  /* search in eidlim for eid */
+  off = 0;
+  num = size;
+  li=bisectionsearch(&eid, eidlim, &off, &num, sizeof(eidlim[0]),
+                     cmp_ulong, NULL);
+  if(!li) errorexit("mesh->eidlim seems wrong");
+
+  return off+1;
+}
+
+/* init elm0 data as far as possible from eploc */
 void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
 {
-  ulong eid = eploc->eid;
-
   /* set eploc in elm0 */
   elm0->eploc[0] = eploc[0];
 
-  /* now set what we can */
+  /* set bbox and datrank, all else in elm0 remains unchanged */
   amr_set_elm0_bbox(mesh, elm0);
-
-  /* */
-  //bsearch()
-
-  //mesh->eidlim
-
-//void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0)
-
+  elm0->datrank = amr_rank_of_elm_eploc(mesh, eploc);
 }
-
-/* */
-//tElm0 *amr_elm0_from_eploc(tMesh* mesh, tEploc *eploc)
-//{
-//}
-
-
 
 
 /****************************************************************************/
