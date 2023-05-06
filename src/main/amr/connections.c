@@ -280,7 +280,7 @@ void eloc_to_peloc(const tEloc eloc[1], tPeloc peloc[1])
   //ploc[NPBYTES-1] = 0; /* init last char in ploc */
 
   /* translate ploc to loc */
-  ploc[0] = 0; /**/
+  //ploc[0] = 0; // not needed
   for(i=0; i<NLOCS; i++)
   {
     int i3 = i*3;
@@ -298,8 +298,8 @@ void eloc_to_peloc(const tEloc eloc[1], tPeloc peloc[1])
     ch = ch & 7; // this also subtracts '0'
     c1 = ch<<bi1;   /* shift 1st bit into correct position */
     pc = ploc[p1];
-    //pc = pc<<(8-bi1);    /* clear all left of bi1 */
-    //pc = pc>>(8-bi1);    /* clear is not needed if ploc[0]=0 */
+    pc = pc<<(8-bi1);   /* clear all left of bi1 */
+    pc = pc>>(8-bi1);   /* still needed if ploc[0]=0 */
     ploc[p1] = pc | c1; /* then add the bits form c1 */
 
     if(bi2<2) /* not all is in one ploc */
@@ -323,6 +323,8 @@ void test_peloc(void)
   tEloc eloc3[1];
   tPeloc peloc[1];
   int i;
+
+  for(i=0; i<NPBYTES-1; i++) peloc->ploc[i] = 255;
 
   for(i=0; i<NLOCS-1; i++) eloc->loc[i] = 7+'0';
   eloc->loc[NLOCS-1]= 5+'0';

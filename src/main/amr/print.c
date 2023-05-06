@@ -107,8 +107,8 @@ void printeloc(const tEloc *eloc)
     else   printf(".");
   }
   //printf("|");
-  if(eloc->l > len) printf(">");
-  if(eloc->l < len) printf("<");
+  //if(eloc->l > len) printf(">");
+  //if(eloc->l < len) printf("<");
   if(0) for(i=eloc->l; i<len; i++)
   {
     ch = eloc->loc[i];
