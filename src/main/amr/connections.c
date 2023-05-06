@@ -741,9 +741,9 @@ Yo(l);
   lret = -l - 1000; /* found nothing */
 
   /* get the 4 children elocs on nb face s_f */
-  for(ijk = 0; ijk<8; ijk++) /* loop over children */
+  for(ijk = 0; ijk<8; ijk++) /* loop over all children */
   {
-    if(connections_ijk_is_at_parentface(ijk, s_f))
+    if(connections_ijk_is_at_parentface(ijk, s_f)) /* only 4 are relevant */
     {
       int ret;
       /* child ijk */
@@ -771,7 +771,8 @@ int amr_set_patchface_fnb_list(tElm *elm, int elmface,
                                struct list_head *fnb_head)
 {
   int patface[6]; //, nfaces;
-  int l;
+  int l  = - 9999; /* found nothing */
+  int l2 = l;
   tPat *pat = elm->pat;
   tBface *bface;
   tEloc nbeloc[1];
@@ -780,6 +781,7 @@ int amr_set_patchface_fnb_list(tElm *elm, int elmface,
   const tEploc *eploc = elm->eploc;
   tEloc eloc[1];
 
+  /* unpack eploc */
   eloc_from_eploc(eloc, eploc);
   PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
@@ -814,7 +816,7 @@ printbfaces_on_f(pat, elmface);
 
     printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
     /* add all elms in arr on face nb_f to list fnb_head */
-    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+    l2=amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
 
     /* Go over newly added part of fnb_head list and remove all that have no
        face points in common with the elm */
@@ -827,11 +829,10 @@ printbfaces_on_f(pat, elmface);
 
       if(!touch) /* remove elem with nb from list fnb_head */
         glist_elem_del(elem);
+      else
+        l = fmax(l,l2);
     }
   } /* end forbfacesonface */
-
-  /* FIXME: what should we return here ???? */
-  l=-9999;
 
   PRFs(": fnb list\n");
   list_for_each(pos, fnb_head)
@@ -901,6 +902,7 @@ int amr_set_all_fnbs(tMesh *mesh)
   int rank=nMPI_rank();
   int size=nMPI_size();
 
+  /* init */
   for(f=0; f<6; f++) { INIT_LIST_HEAD(&ef0_head[f]); nmyef0[f]=0; }
 
   /* find all my elmfaces that have fnb=NULL */
