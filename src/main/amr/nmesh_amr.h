@@ -87,6 +87,7 @@ typedef struct tELM {
   struct tDAT *dat;       // pointer to data (NULL if not on this proc)
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   struct tPAT *pat;       // remove one day, since we have mesh
+  //char loc[NLOCS];      // unpacked elm location
   int nfnb[6];            // number of face neighbor nodes
   struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
   struct list_head list;  // all elms form a linked list
@@ -97,7 +98,6 @@ typedef struct tELM {
 //Temporarily we use this for compatibility with tNode:
 #define ELMHEADER \
   struct list_head list;  /* all elms form a linked list */ \
-  /* tEloc eloc[1]; */          /* elm location */ \
   tEploc eploc[1];        /* elm location in packed form */ \
   double dt;              /* time step in node */ \
   double time;            /* current time in node */ \

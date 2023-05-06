@@ -7,8 +7,8 @@ BUGS:
 
 FIX these:
 ==========
-*mesh->nbelm needs to be freed somewhere
-
+*mesh->
+ myelm, nbelm, eidlim  all need to be freed somewhere
 
 General:
 ========
