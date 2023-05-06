@@ -215,17 +215,13 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 /* functions that work on eloc */
 /****************************************************************************/
 
-void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
+/* unpack ploc into loc */
+void connections_loc_from_ploc(char loc[NLOCS],
+                               const unsigned char ploc[NPBYTES])
 {
-  const unsigned char *ploc = eploc->ploc;
-  char *loc  = eloc->loc;
   int i, p1,p2, b1,b2, bi1,bi2;
   unsigned char ch, c1,c2;
   //p2=0;
-  /* trivial copies */
-  eloc->eid = eploc->eid;
-  eloc->p = eploc->p;
-  eloc->l = eploc->l;
 
   /* translate ploc to loc */
   for(i=0; i<NLOCS; i++)
@@ -267,17 +263,14 @@ void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
      just decrease l in eloc */
 }
 
-void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
+/* pack loc into ploc */
+void connections_loc_to_ploc(const char loc[NLOCS],
+                             unsigned char ploc[NPBYTES])
 {
-  unsigned char *ploc = eploc->ploc;
-  const char *loc  = eloc->loc;
   int i, p1,p2, b1,b2, bi1,bi2;
   unsigned char ch, c1,c2, pc;
   //p2=0;
-  /* trivial copies */
-  eploc->eid = eloc->eid;
-  eploc->p = eloc->p;
-  eploc->l = eloc->l;
+
   ploc[0] = 0;         /* init first char in ploc */
   //ploc[NPBYTES-1] = 0; /* init last char in ploc */
 
@@ -315,6 +308,34 @@ void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
     //if(bi2<2) printf(",%o", ploc[p2]);
     //printf("\n");
   }
+}
+
+void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
+{
+  const unsigned char *ploc = eploc->ploc;
+  char *loc  = eloc->loc;
+
+  /* trivial copies */
+  eloc->eid = eploc->eid;
+  eloc->p = eploc->p;
+  eloc->l = eploc->l;
+
+  /* translate ploc to loc */
+  connections_loc_from_ploc(loc, ploc);
+}
+
+void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
+{
+  unsigned char *ploc = eploc->ploc;
+  const char *loc  = eloc->loc;
+
+  /* trivial copies */
+  eploc->eid = eloc->eid;
+  eploc->p = eloc->p;
+  eploc->l = eloc->l;
+
+  /* translate ploc to loc */
+  connections_loc_to_ploc(loc, ploc);
 }
 
 /* test eloc_to_eploc and eloc_from_eploc */
