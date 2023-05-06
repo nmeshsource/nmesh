@@ -22,13 +22,13 @@
     the last interval should contain them all, even though it may be too wide.
    +Returns pointer to the base0[i] that has the key if the key was found,
     otherwise it returns NULL. */
-void *binarysearch(const void *key, const void *base0,
+void *binarysearch(const void *key, void *base0,
                    size_t *base0offset, size_t *num, size_t size,
                    int (*compar)(const void *, const void *, void *),
                    void *arg)
 {
     int cmp;
-    const void *p;
+    void *p;
     size_t lim, pos;
     size_t off = *base0offset;
 
@@ -41,7 +41,7 @@ void *binarysearch(const void *key, const void *base0,
         //       *base0offset, *num, off, lim);
 
         pos = off + (lim >> 1);
-        p = (const char *) base0 + pos* size;
+        p = (char *) base0 + pos* size;
         cmp = (*compar)(key, p, arg);
         if(cmp == 0)
         {
@@ -112,13 +112,13 @@ double intProd2double(int a, int b)
      Returns pointer to the base0[i]
    +If key is not bracketed at all:
      Returns NULL */
-void *bisectionsearch(const void *key, const void *base0,
+void *bisectionsearch(const void *key, void *base0,
                       size_t *base0offset, size_t *num, size_t size,
                       int (*compar)(const void *, const void *, void *),
                       void *arg)
 {
     int cmp, cmp_a, cmp_b;
-    const void *p;
+    void *p;
     size_t pos, pos_a, pos_b;
     size_t off = *base0offset;
     size_t nf;
@@ -129,13 +129,13 @@ void *bisectionsearch(const void *key, const void *base0,
     nf = 1;
 
     pos = pos_a;
-    p = (const char *) base0 + pos * size;
+    p = (char *) base0 + pos * size;
     cmp_a = (*compar)(key, p, arg);
     //printf("cmp_a=%d\n", cmp_a);
     if(cmp_a == 0) goto FoundKey;
 
     pos = pos_b;
-    p = (const char *) base0 + pos * size;
+    p = (char *) base0 + pos * size;
     cmp_b = (*compar)(key, p, arg);
     //printf("cmp_b=%d\n", cmp_b);
     if(cmp_b == 0) goto FoundKey;
@@ -154,7 +154,7 @@ void *bisectionsearch(const void *key, const void *base0,
     /* tighten bracket */
     while((pos = (pos_a + pos_b)/2) > pos_a)
     {
-        p = (const char *) base0 + pos * size;
+        p = (char *) base0 + pos * size;
         cmp = (*compar)(key, p, arg);
         if(cmp == 0) goto FoundKey;
         if(intProd2double(cmp, cmp_b) > 0.) { pos_b = pos;  cmp_b = cmp; }
@@ -164,7 +164,7 @@ void *bisectionsearch(const void *key, const void *base0,
     /* we still have a bracket */
     nf = 2;
     pos = pos_a;
-    p = (const char *) base0 + pos * size;
+    p = (char *) base0 + pos * size;
 
 FoundKey:
     *base0offset = pos;

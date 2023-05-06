@@ -460,6 +460,38 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc)
 }
 
 /****************************************************************************/
+/* functions to initialize tElm0 */
+/****************************************************************************/
+
+/* */
+void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
+{
+  ulong eid = eploc->eid;
+
+  /* set eploc in elm0 */
+  elm0->eploc[0] = eploc[0];
+
+  /* now set what we can */
+  amr_set_elm0_bbox(mesh, elm0);
+
+  /* */
+  //bsearch()
+
+  //mesh->eidlim
+
+//void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0)
+
+}
+
+/* */
+//tElm0 *amr_elm0_from_eploc(tMesh* mesh, tEploc *eploc)
+//{
+//}
+
+
+
+
+/****************************************************************************/
 
 
 //////////////////////////////////////////////////////////////////////////

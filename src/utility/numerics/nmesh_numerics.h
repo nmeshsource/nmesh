@@ -29,7 +29,7 @@ int gaussjordan_inv(int n, double a[]);
 int M_to_Minv_gaussjordan(int n, const double M[], double Minv[]);
 
 /* binarysearch.c */
-void *binarysearch(const void *key, const void *base0,
+void *binarysearch(const void *key, void *base0,
                    size_t *base0offset, size_t *num, size_t size,
                    int (*compar)(const void *, const void *, void *),
                    void *arg);
@@ -37,7 +37,7 @@ int binarysearchmore(const void *key, const void *base0,
                      size_t nmemb, size_t size, const void *result,
                      int (*compar)(const void *, const void *, void *),
                      void *arg);
-void *bisectionsearch(const void *key, const void *base0,
+void *bisectionsearch(const void *key, void *base0,
                       size_t *base0offset, size_t *num, size_t size,
                       int (*compar)(const void *, const void *, void *),
                       void *arg);
