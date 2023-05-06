@@ -411,10 +411,10 @@ int amr_set_child_peloc(tPeloc *parentpeloc, int ijk, tPeloc *peloc)
   int l = parentpeloc->l;
   if(l >= NLOCS-1)
     errorexit("parentpeloc is at limit ==> no further child possible!");
-  peloc->p = parentpeloc->p;
-  peloc->l = l + 1;
-  peloc->nid = NID_INVALID;
   eloc_from_peloc(eloc, parentpeloc);
+  eloc->p = parentpeloc->p;
+  eloc->l = l + 1;
+  eloc->nid = NID_INVALID;
   eloc->loc[l]   = '0' + ijk;
   eloc->loc[l+1] = 0;
   eloc_to_peloc(eloc, peloc);
