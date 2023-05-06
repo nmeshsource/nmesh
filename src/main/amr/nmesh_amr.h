@@ -60,20 +60,20 @@ typedef struct tELOC {
 } tEloc;
 
 /* location of an element (or elm) in packed form
-   NPBYTES can 13,21,29,37 for optimal sizeof(tPeloc) */
-typedef struct tPELOC {
+   NPBYTES can 13,21,29,37 for optimal sizeof(tEploc) */
+typedef struct tEPLOC {
   unsigned short int p; // patch number (in 2 bytes)
   unsigned char l;      // refinement level of this node (in 1 byte)
   unsigned char ploc[NPBYTES];  // packed loc (3 bits per level)
   unsigned long nid;    // node ID, updated by update_mesh_myln_node_nid
-} tPeloc;
+} tEploc;
 
 /* a leaf node or element called elm */
 /* Beginning of tElm */
 //THIS is we want for later:
 /*
 #define ELMHEADER \
-  tPeloc peloc[1];        // elm location \
+  tEploc eploc[1];        // elm location \
   double dt;              // time step in node \
   double time;            // current time in node \
   double bbox[6];         // bounding box (in X,Y,Z) of this node \
@@ -98,7 +98,7 @@ typedef struct tELM {
 #define ELMHEADER \
   struct list_head list;  /* all elms form a linked list */ \
   /* tEloc eloc[1]; */          /* elm location */ \
-  tPeloc peloc[1];        /* elm location in packed form */ \
+  tEploc eploc[1];        /* elm location in packed form */ \
   double dt;              /* time step in node */ \
   double time;            /* current time in node */ \
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */ \

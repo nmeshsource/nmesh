@@ -127,7 +127,7 @@ void printeloc_s(const tEloc *eloc, char *s)
 void printelm(const tElm *e)
 {
   tEloc eloc[1];
-  eloc_from_peloc(eloc, e->peloc);
+  eloc_from_eploc(eloc, e->eploc);
   printeloc(eloc);
   printf(": nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
          e->nid,
@@ -142,7 +142,7 @@ void printelmarray(long nelms, const tElm **elm)
   for(i=0; i<nelms; i++)
   {
     tEloc eloc[1];
-    eloc_from_peloc(eloc, elm[i]->peloc);
+    eloc_from_eploc(eloc, elm[i]->eploc);
     printeloc_s(eloc, " ");
   }
   printf("\n");
