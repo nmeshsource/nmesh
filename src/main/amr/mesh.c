@@ -565,7 +565,7 @@ int setup_elm_mesh1(tMesh *mesh)
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
   //printmesh(mesh);
-  i=0;
+  i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
     elm = list_entry(pos, tElm, list);
@@ -590,16 +590,16 @@ Yo(33);
     int n[] = {3,4,5};
     int pt_typ[] = {0,0,0};
     printelm(elm);
-    if(elm->nid==2)
+    if(elm->eploc->eid==2)
     {
       Yo(34);
       replace_parent_by_8children(elm, n, pt_typ);
     }
-    //printf("elm->nid=%ld\n", elm->nid);
+    //printf("elm->eploc->eid=%ld\n", elm->eploc->eid);
   }
 
   /* update nids */
-  i=0;
+  i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
     elm = list_entry(pos, tElm, list);
@@ -619,16 +619,16 @@ Yo(33.1);
     int n[] = {3,4,5};
     int pt_typ[] = {0,0,0};
     printelm(elm);
-    if(elm->nid==7)
+    if(elm->eploc->eid==7)
     {
       Yo(34);
       replace_parent_by_8children(elm, n, pt_typ);
     }
-    //printf("elm->nid=%ld\n", elm->nid);
+    //printf("elm->eploc->eid=%ld\n", elm->eploc->eid);
   }
 
   /* update nids */
-  i=0;
+  i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
     elm = list_entry(pos, tElm, list);
@@ -648,16 +648,16 @@ Yo(33.2);
     int n[] = {3,4,5};
     int pt_typ[] = {0,0,0};
     printelm(elm);
-    if(elm->nid==7)
+    if(elm->eploc->eid==7)
     {
       Yo(34);
       replace_parent_by_8children(elm, n, pt_typ);
     }
-    //printf("elm->nid=%ld\n", elm->nid);
+    //printf("elm->eploc->eid=%ld\n", elm->eploc->eid);
   }
 
   /* update nids */
-  i=0;
+  i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
     elm = list_entry(pos, tElm, list);
