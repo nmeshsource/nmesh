@@ -195,6 +195,32 @@ void free_3_arrays(tArray *array[3])
   free_array(array[0]);
 }
 
+/* copy n bytes from a tArray (at bytestride-position pos) into dest */
+void *memcpy_from_array(const tArray *ar, size_t bytestride, size_t pos,
+                        void *dest, size_t n)
+{
+  return memcpy(dest, ar->d + bytestride*pos, n);
+}
+
+/* copy n bytes into a tArray at bytestride-position pos */
+void *memcpy_to_array(tArray *ar, size_t bytestride, size_t pos,
+                      const void *src, size_t n)
+{
+  return memcpy(ar->d + bytestride*pos, src, n);
+}
+/* same as memcpy_to_array but redim array ar */
+void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
+                            const void *src, size_t n)
+{
+  size_t nbytes = bytestride*pos + n; //min number of bytes needed in ar->d
+  size_t sd = sizeof(ar->d[0]);       //sizeof double
+  size_t nd = (nbytes+sd-1)/sd;       //num. of doubles in nbytes
+
+  redim_array(ar, nd,1,1);
+
+  return memcpy(ar->d + bytestride*pos, src, n);
+}
+
 
 /****************************************************************************/
 /* elm storage */
