@@ -940,13 +940,12 @@ int amr_set_all_fnbs(tMesh *mesh)
     /* make list for each face and send them... */
     for(f=0; f<6; f++)
     {
-      /* large array where we will store all nbs of all the nef0[f] elms */
-      tArray *ef0_nbs = alloc_array1d(sizeof(tEploc));
+      /* large array where we will store all nbs of all the nef0[f] elms,
+         layout is:
+          ef0_nbs = |nef0[f]|nnb0|nb_eploc[0...nnb0-1]|
+                            |nnb1|nb_eploc[0...nnb1-1]|... */
+      tArray *ef0_nbs = alloc_array1d((4*sizeof(tEploc))/8);
       ulong ef0_nbs_idx = 0;
-
-      /* put a zero at the start  */
-      memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                            &(ef0_nbs_idx), sizeof(ulong));
 
       /* there is something to do only if nef0[f]>0 */
       if(nef0[f])
@@ -984,10 +983,9 @@ int amr_set_all_fnbs(tMesh *mesh)
         for(i=0; i<nef0[f]; i++)
         {
           tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
-          struct list_head *pos1;
+          struct list_head *pos1, *sav;
           struct list_head fnb_head;
           int j, nnb;
-          tEploc *nb_eploc;
 
           INIT_LIST_HEAD(&fnb_head);
 
@@ -995,33 +993,28 @@ int amr_set_all_fnbs(tMesh *mesh)
           nnb = amr_set_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
                                  &fnb_head);
 
-          /* memory for eploc of each nb in nb_head list */
-          nb_eploc = checked_calloc(nnb, sizeof(nb_eploc[0]));
-
-          /* get nb eploc into nb_eploc array */
-          j=0;
-          list_for_each(pos1, &fnb_head)
-          {
-            tElm *nb = glist_entry(pos);
-            nb_eploc[j] = nb->eploc[0];
-            j++;
-          }
-          if(nnb!=j) errorexit("nnb!=j");
-
           /* fill the ef0_nbs array, layout is:
           ef0_nbs = |nef0[f]|nnb0|nb_eploc[0...nnb0-1]|
                             |nnb1|nb_eploc[0...nnb1-1]|... */
           memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                                 &(nnb), sizeof(nnb));
           ef0_nbs_idx++;
-          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                &(nb_eploc[0]), sizeof(nb_eploc[0])*nnb);
-          ef0_nbs_idx += nnb;
+          /* get nb eploc into ef0_nbs array */
+          j=0;
+          list_for_each_safe(pos1, sav, &fnb_head)
+          {
+            tGlist *elem = list_entry(pos1, tGlist, list);
+            tElm *nb = elem->entry;
+            memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                                  nb->eploc, sizeof(tEploc));
+            ef0_nbs_idx++;
+            j++;
+            /* once nb->eploc is in ef0_nbs, del elem with nb */
+            glist_elem_del(elem);
+          }
+          if(nnb!=j) errorexit("nnb!=j");
 
-
-
-          /* now from the nbs of this elmi  and also elmi */
-          free(nb_eploc);
+          /* now &fnb_head is freed, so just free the elmi */
           free_elm(elmi);
         }
 
