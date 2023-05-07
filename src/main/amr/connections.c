@@ -1022,6 +1022,8 @@ int amr_set_all_fnbs(tMesh *mesh)
 
         //we now need to send the ef0_nbs arrays of each rank to rank rk
         //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
+        // see https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
+        //--> use MPI_Gather
         // all need to send, and only rk receives
 
         // ???
