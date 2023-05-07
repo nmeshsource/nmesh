@@ -946,7 +946,7 @@ int amr_set_all_fnbs(tMesh *mesh)
 
       /* put a zero at the start  */
       memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                       &(ef0_nbs_idx), sizeof(ulong));
+                            &(ef0_nbs_idx), sizeof(ulong));
 
       /* there is something to do only if nef0[f]>0 */
       if(nef0[f])
@@ -977,7 +977,7 @@ int amr_set_all_fnbs(tMesh *mesh)
         /* init ef0_nbs and put 1st value into array */
         ef0_nbs_idx = 0;
         memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                         &(nef0[f]), sizeof(nef0[f]));
+                              &(nef0[f]), sizeof(nef0[f]));
         ef0_nbs_idx++;
 
         /* all ranks do work on ef0 array and find all nbs of all in ef0 */
