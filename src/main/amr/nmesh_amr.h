@@ -516,6 +516,12 @@ int redimension_array(tArray *array, int n[3]);
 int redim_array(tArray *array, int n0, int n1, int n2);
 void free_array(tArray *array);
 void free_3_arrays(tArray *array[3]);
+void *memcpy_from_array(const tArray *ar, size_t bytestride, size_t pos,
+                        void *dest, size_t n);
+void *memcpy_to_array(tArray *ar, size_t bytestride, size_t pos,
+                      const void *src, size_t n);
+void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
+                            const void *src, size_t n);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
 void free_mesh_patches_and_nodes(tMesh *mesh);

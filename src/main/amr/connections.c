@@ -370,34 +370,6 @@ void test_eploc(void)
   printeloc_s(eloc3, "\n");
 }
 
-/* put data (of n bytes) into a tArray at position of eploc i */
-void memcpy_to_array_at_bytestridepos(tArray *ar, ulong i, size_t bytestride,
-                                      const void *src, size_t n)
-{
-  ulong sz = bytestride;
-  ulong sd = sizeof(ar->d[0]); // sizeof double
-  ulong nd = (sz+sd-1)/sd;     // num. of doubles in bytestride bytes
-  ulong ff = nd*sd;            // num. of bytes equiv to nd doubles
-  ulong nd_in_n = (n+sd-1)/sd; // num. of doubles in n
-  ulong len = nd*i + nd_in_n;
-
-  redim_array(ar, len,1,1);
-
-  memcpy(ar->d + ff*i, src, n);
-}
-
-/* get data (of n bytes) from a tArray at position of eploc i */
-void memcpy_from_array_at_bytestridepos(tArray *ar, ulong i,
-                                        size_t bytestride,
-                                        void *dest, size_t n)
-{
-  ulong sz = bytestride;
-  ulong sd = sizeof(ar->d[0]); // sizeof double
-  ulong nd = (sz+sd-1)/sd;     // num. of doubles in bytestride bytes
-  ulong ff = nd*sd;            // num. of bytes equiv to nd doubles
-  memcpy(ar->d + ff*i, dest, n);
-}
-
 
 /****************************************************************************/
 /* functions that work on elm */
@@ -973,7 +945,7 @@ int amr_set_all_fnbs(tMesh *mesh)
       ulong ef0_nbs_idx = 0;
 
       /* put a zero at the start  */
-      memcpy_to_array_at_bytestridepos(ef0_nbs, ef0_nbs_idx, sizeof(tEploc),
+      memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                                        &(ef0_nbs_idx), sizeof(ulong));
 
       /* there is something to do only if nef0[f]>0 */
@@ -1004,7 +976,7 @@ int amr_set_all_fnbs(tMesh *mesh)
 
         /* init ef0_nbs and put 1st value into array */
         ef0_nbs_idx = 0;
-        memcpy_to_array_at_bytestridepos(ef0_nbs, ef0_nbs_idx, sizeof(tEploc),
+        memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                                          &(nef0[f]), sizeof(nef0[f]));
         ef0_nbs_idx++;
 
@@ -1039,14 +1011,11 @@ int amr_set_all_fnbs(tMesh *mesh)
           /* fill the ef0_nbs array, layout is:
           ef0_nbs = |nef0[f]|nnb0|nb_eploc[0...nnb0-1]|
                             |nnb1|nb_eploc[0...nnb1-1]|... */
-          memcpy_to_array_at_bytestridepos(ef0_nbs, ef0_nbs_idx,
-                                           sizeof(tEploc),
-                                           &(nnb), sizeof(nnb));
+          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                                &(nnb), sizeof(nnb));
           ef0_nbs_idx++;
-          memcpy_to_array_at_bytestridepos(ef0_nbs, ef0_nbs_idx,
-                                           sizeof(tEploc),
-                                           &(nb_eploc[0]),
-                                           sizeof(nb_eploc[0])*nnb);
+          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                                &(nb_eploc[0]), sizeof(nb_eploc[0])*nnb);
           ef0_nbs_idx += nnb;
 
 
