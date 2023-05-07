@@ -893,9 +893,9 @@ ops_bal_sum, ops_elm_sum, max, diff, ret);
 
 /* find rank we want to put elm on
    In: size,ops_bal_sum  =>  Out: ops_elm_sum */
-int load_desired_rank(int size, double *ops_bal_sum, double ops_elm_sum)
+int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
 {
-  void *val;
+  const void *val;
   double max = ops_bal_sum[size-1];
   size_t off, num;
   off = 0;

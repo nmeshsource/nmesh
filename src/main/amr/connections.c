@@ -480,7 +480,7 @@ int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
   int size = nMPI_size();
   ulong *eidlim = mesh->eidlim;
   ulong eid = eploc->eid;
-  ulong *li;
+  const ulong *li;
   size_t off, num;
 
   /* if eid is on rank rk: eidlim[rk-1] <= eid < eidlim[rk] */
@@ -685,7 +685,7 @@ int amr_elms_on_eloc_face(long narr, tElm **arr,
                           tEloc s_eloc[1], int s_f, int l0,
                           struct list_head *f_elms_head)
 {
-  tElm **f_elm;
+  tElm *const*f_elm;
   size_t off, num;
   //tEloc *eloc = elm->eloc;
   tEloc f_eloc[1];
