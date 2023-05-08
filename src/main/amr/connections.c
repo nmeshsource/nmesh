@@ -349,18 +349,21 @@ void test_eploc(void)
   tEploc eploc[1];
   int i;
 
-  for(i=0; i<NPBYTES-1; i++) eploc->ploc[i] = 255;
+  for(i=0; i<NPBYTES; i++) eploc->ploc[i] = 255;
 
-  for(i=0; i<NLOCS-1; i++) eloc->loc[i] = 7+'0';
-  eloc->loc[NLOCS-1]= 5+'0';
+  for(i=0; i<NLOCS; i++) eloc->loc[i] = (i%8) +'0';
+  eloc->loc[NLOCS-1]= 4+'0';
   eloc->p=9;
-  eloc->l=19;
+  eloc->l=NLOCS;
   eloc->eid=98;
   strcpy(eloc->loc, "1234567564321012345");
-  eloc->loc[44] = '1';
+  eloc->loc[NLOCS-3] = '1';
   printeloc_s(eloc, "\n");
 
+  //printf("eploc->ploc[NPBYTES-1]=%o\n", eploc->ploc[NPBYTES-1]);
   eloc_to_eploc(eloc, eploc);
+  //eploc->ploc[NPBYTES-1]=128 + 32+  8+4 + 1;
+  //printf("eploc->ploc[NPBYTES-1]=%o\n", eploc->ploc[NPBYTES-1]);
   eloc_from_eploc(eloc2, eploc);
 
   eloc_to_eploc(eloc2, eploc);
