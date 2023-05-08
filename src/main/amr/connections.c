@@ -945,7 +945,8 @@ int amr_set_all_fnbs(tMesh *mesh)
           ef0_nbs = |nef0[f]|nnb0|nb_eploc[0...nnb0-1]|
                             |nnb1|nb_eploc[0...nnb1-1]|... */
       tArray *ef0_nbs = alloc_array1d((4*sizeof(tEploc))/8);
-      ulong ef0_nbs_idx = 0;
+      ulong ef0_nbs_idx = 0; /* index of next entry to add */
+      ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
       /* there is something to do only if nef0[f]>0 */
       if(nef0[f])
@@ -1017,19 +1018,63 @@ int amr_set_all_fnbs(tMesh *mesh)
           /* now &fnb_head is freed, so just free the elmi */
           free_elm(elmi);
         }
-
-        //...  ???
-
-        //we now need to send the ef0_nbs arrays of each rank to rank rk
-        //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
-        // see https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
-        //--> use MPI_Gather
-        // all need to send, and only rk receives
-
-        // ???
-
         free(ef0);
       } /* end if(nef0[f]) */
+
+      /* number of tEploc sized entries in ef0_nbs */
+      nmyEplocs = ef0_nbs_idx;
+
+      //we now need to send the ef0_nbs arrays of each rank to rank rk
+      //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
+      // see https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
+      //--> use MPI_Gather
+      // all need to send, and only rk receives
+
+      if(rank != rk) /* send to rank rk */
+      {
+        /* first send number of tEploc sized entries in ef0_nbs */
+        nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
+
+        /* now send contents of ef0_nbs */
+        nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
+
+      }
+      else /* rank rk revcs from all others */
+      {
+        ulong *N_eplocs = checked_calloc(size, sizeof(N_eplocs[0]));
+        int r;
+
+        /* revc number of tEploc sized entries from each rank r */
+        for(r=0; r<size; r++)
+        {
+          if(r != rk)
+            nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000);
+          else
+            N_eplocs[r] = nmyEplocs;
+        }
+
+        /* revc contents of ef0_nbs from each rank r */
+        for(r=0; r<size; r++)
+        {
+          void *buf=0; // <--FIXME
+
+          if(r != rk)
+            nMPI_Recv(buf, N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
+          else
+            N_eplocs[r] = nmyEplocs;
+        }
+
+
+        // FIXME: we should probably not send for each face separately!!
+        //        move for f loop further in and save info for all f in
+        //        ef0_nbs.
+
+
+
+        free(N_eplocs);
+      }
+
+
 
       free_array(ef0_nbs);
     } /* end loop over face f */

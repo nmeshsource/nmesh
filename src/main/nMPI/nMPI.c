@@ -62,6 +62,8 @@ int nMPIvars_init(tMesh *mesh)
   /* set some MPI_Datatypes */
   nMPI_Type_contiguous(sizeof(tElm0), nMPI_CHAR, &(nMPIvars->TELM0));
   nMPI_Type_commit(&(nMPIvars->TELM0));
+  nMPI_Type_contiguous(sizeof(tEploc), nMPI_CHAR, &(nMPIvars->TEPLOC));
+  nMPI_Type_commit(&(nMPIvars->TEPLOC));
 
   return 0;
 }

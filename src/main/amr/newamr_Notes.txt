@@ -102,24 +102,27 @@ ops_bal_r = w_r * ops
  we build this by sending ops_tot_r from r to r+1
 
 
-About nid:
-==========
-*use maybe: unsigned long nid; //not size_t because we don't have MPI_SIZE_T
+About nid/eid:
+==============
+*we now call it eid instead of nid
+*use maybe: unsigned long eid; //not size_t because we don't have MPI_SIZE_T
 *then also:
  #define  NID_INVALID  (ULONG_MAX)
  #define  NID_REMOVED  (ULONG_MAX-1)
  (these 2 are -1 and -2 when converted to long)
-*also add oid to save old value of nid (e.g. after refine)
-*make nids again, in a way that just numbers all elms over all ranks
+*also add oid to save old value of eid (e.g. after refine)
+*make eids again, in a way that just numbers all elms over all ranks
  consecutively
-*then nids do not change because of load bal
-*also form the nid alone we can tell the rank, if we store the 1st nid of
+*then eids do not change because of load bal
+*also form the eid alone we can tell the rank, if we store the 1st eid of
  every rank in the tMesh on each rank;
+*think: DO we need eid/nid at all? Maybe eploc(without eid) + datrank is
+        enough???
 
 About refine:
 =============
-*if we refine certain nids get removed
-*nids only need to be updated after we refine
+*if we refine certain eids get removed
+*eids only need to be updated after we refine
 *to refine we remove the parent from mesh->myelm_head and set the
  corresponding pointer in mest->myelm to NULL
 
@@ -129,7 +132,7 @@ About fnb info and such:
   AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for fnbid[6]");
   MeshVarSetType(mesh, Ind("amr_elm_fnbid0"), LBTVAR); //to send via MPI
   //change refine-interpolation such that LBTVARs get skipped like AUXVARs
- fnbid[f] contains unsigned long // e.g. fnbid[f][3] = nid of nb #3 on face f
+ fnbid[f] contains unsigned long // e.g. fnbid[f][3] = eid of nb #3 on face f
 *fnbid needs to be set using the nb elm finding funcs I made
 *from fnbid we can then set the elm->fnb pointers
 *we also copy all elms from other ranks that are nb of one of our elms
@@ -140,13 +143,16 @@ About fnb info and such:
   corresponding nb->fnb pointer to NULL.
  -all rank local elms that have fnbid[f] but with a NULL nb->fnb[f] need
   to update their entire fnbid[f] and nb->fnb[f]
+  +maybe some of this update can be done locally:
+   ~e.g. each elm knows all about it's siblings (if they are not refined)
+   ~maybe just run a nb-info update after the refine locally on each rank
  -Since there need to be all kinds of changes to the nbelm list anyway,
   we just erase it.
   But before we do so we write a NULL into corresponding elm->fnb pointers
   of all my elms, to signal that their fnbid[f] & fnb[f] need to be updated.
  -now we have only our own elms, but lots of them have missing nb info
- -next we update all elm->nid everywhere (may save the old nids in elm->oid)
- -update all fnbid[f] where fnb[f] is not NULL by reading new nid via fnb[f]
+ -next we update all elm->eid everywhere (may save the old eids in elm->oid)
+ -update all fnbid[f] where fnb[f] is not NULL by reading new eid via fnb[f]
   and invalidate all fnbid[f] where fnb[f] is NULL
  -Then update fnbid[f] for all faces of my elms that have an invalid fnbid[f].
   This will need MPI to find nb elms on other ranks!

@@ -15,6 +15,7 @@ typedef struct {
   int tag_ub;        /* min of upper bound of MPI tags over all in comm */
   int tag_bits;      /* number of bits in tag_ub+1 */
   nMPI_Datatype TELM0; //MPI_Datatype for tElm from 0-offsetof(tElm, dat)
+  nMPI_Datatype TEPLOC; //MPI_Datatype for tEploc
 } tnMPIvars;
 
 
