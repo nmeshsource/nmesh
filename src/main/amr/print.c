@@ -120,7 +120,7 @@ void printeloc(const tEloc *eloc)
   //printf(" eid%lu", eloc->eid);
 }
 
-void printeloc_s(const tEloc *eloc, char *s)
+void printeloc_s(const tEloc *eloc, const char *s)
 {
   printeloc(eloc);
   printf("%s", s);

@@ -600,7 +600,7 @@ void printmesh(tMesh *g);
 void printpatch(tPat *box);
 void printCI(tPat *pat);
 void printeloc(const tEloc *eloc);
-void printeloc_s(const tEloc *eloc, char *s);
+void printeloc_s(const tEloc *eloc, const char *s);
 void printelm(const tElm *e);
 void printelmarray(long nelms, tElm **elm);
 void printnd(tNode *n) ;
