@@ -908,7 +908,7 @@ int amr_set_all_fnbs(tMesh *mesh)
   /* init */
   for(f=0; f<6; f++) { INIT_LIST_HEAD(&ef0_head[f]); nmyef0[f]=0; }
 
-  /* find all my elmfaces that have fnb=NULL (all ranks do this) */
+  /* find all my elmfaces that have nfnb<0 (all ranks do this) */
   list_for_each(pos, &mesh->myelm_head)
   {
     tElm *elm = list_entry(pos, tElm, list);
@@ -916,8 +916,8 @@ int amr_set_all_fnbs(tMesh *mesh)
     /* go over elm-faces */
     for(f=0; f<6; f++)
     {
-      /* if fnb=NULL nb info is not there yet */
-      if(!elm->fnb[f])
+      /* if nfnb<0 nb info is not there yet */
+      if(elm->nfnb[f] < 0)
       {
         glist_entry_add_tail(elm, &ef0_head[f]);
         nmyef0[f] += 1;
@@ -932,10 +932,10 @@ int amr_set_all_fnbs(tMesh *mesh)
   {
     int nef0[6];
     /* ef0_nbs is a large array, where we will store all nbs of all the
-       nef0[f] elms on rank rk, for all faces f. Its layout is:
+       nef0[f] elms rank rk needs nb info about, for all faces f. Layout is:
         ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
-                          |nnb1|nb_eploc[0...nnb1-1]|
-                          ...
+                          |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
+                          ...                            sizeof(tEploc) bytes
                   |nef0[5]|nnb0|nb_eploc[0...nnb0-1]|
                           |nnb1|nb_eploc[0...nnb1-1]|
                           ... */
@@ -1048,9 +1048,10 @@ int amr_set_all_fnbs(tMesh *mesh)
       nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
 
     }
-    else /* rank rk revcs from all others */
+    else /* rank=rk: i.e. I am rank rk and will revc from all others */
     {
       ulong *N_eplocs = checked_calloc(size, sizeof(N_eplocs[0]));
+      tEploc **eplocs;
       int r;
 
       /* revc number of tEploc sized entries from each rank r */
@@ -1062,20 +1063,31 @@ int amr_set_all_fnbs(tMesh *mesh)
           N_eplocs[r] = nmyEplocs;
       }
 
+      /* make recv buffers for data that is recvd */
+      eplocs = rows_calloc(size, N_eplocs, sizeof(eplocs[0][0]));
+      /* but rank rk does not need a recv buffer, because it has all
+         in ef0_nbs->d already, so we use that here */
+      free(eplocs[rk]);
+      /* transfer ef0_nbs->d from ef0_nbs to eplocs[rk] */
+      eplocs[rk] = (void *) ef0_nbs->d; //eplocs[rk] is in my tArray ef0_nbs
+      ef0_nbs->d_nofree=1;
+      free_array(ef0_nbs);
+      ef0_nbs = alloc_array1d(1); /* dummy that will be freed below */
+      ef0_nbs_idx = 0;
+
       /* revc contents of ef0_nbs from each rank r */
       for(r=0; r<size; r++)
       {
-        void *buf=0; // <--FIXME
-
         if(r != rk)
-          nMPI_Recv(buf, N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
+          nMPI_Recv(eplocs[r], N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
         else
-          N_eplocs[r] = nmyEplocs;
+          eplocs[rk] = ef0_nbs->d; //eplocs[rk] is in my tArray ef0_nbs
       }
+      rows_free(eplocs, size);
       free(N_eplocs);
     }
 
-    /* we could reuse the array but for now we just free it */
+    /* we could reuse the large tArray, but for now we just free it */
     free_array(ef0_nbs);
   } /* end loop over rk */
 

@@ -87,14 +87,14 @@ typedef struct tEPLOC {
   int datrank;            // rank of proc that rightfully has data
 typedef struct tELM {
   ELMHEADER
-  // stuff below this line is not copied when elm is sent to another rank
+  // stuff below ELMHEADER is not copied when elm is sent to another rank
   struct tDAT *dat;       // pointer to data (NULL if not on this proc)
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   struct tPAT *pat;       // remove one day, since we have mesh
-  //char loc[NLOCS];      // unpacked elm location
   int nfnb[6];            // number of face neighbor nodes
   struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
   struct list_head list;  // all elms form a linked list
+  //char loc[NLOCS];      // unpacked elm location
 } tElm;
 */
 //// at the moment tElm has quite a few parts the nmesh tNode had as well.

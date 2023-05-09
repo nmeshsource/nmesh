@@ -140,8 +140,8 @@ About fnb info and such:
                           or an array-list:  tElm **nbelm;
 *when we refine an elm:
  -signal all nb elms that the elm is gone now by setting the
-  corresponding nb->fnb pointer to NULL.
- -all rank local elms that have fnbid[f] but with a NULL nb->fnb[f] need
+  corresponding nb->nfnb to -nfnb-1.
+ -all rank local elms that have fnbid[f] but with neg. nb->nfnb[f] need
   to update their entire fnbid[f] and nb->fnb[f]
   +maybe some of this update can be done locally:
    ~e.g. each elm knows all about it's siblings (if they are not refined)
@@ -150,12 +150,12 @@ About fnb info and such:
    ~maybe just run a nb-info update after the refine locally on each rank
  -Since there need to be all kinds of changes to the nbelm list anyway,
   we just erase it.
-  But before we do so we write a NULL into corresponding elm->fnb pointers
+  But before we do so we set the corresponding elm->nfnb to -nfnb-1
   of all my elms, to signal that their fnbid[f] & fnb[f] need to be updated.
  -now we have only our own elms, but lots of them have missing nb info
  -next we update all elm->eid everywhere (may save the old eids in elm->oid)
- -update all fnbid[f] where fnb[f] is not NULL by reading new eid via fnb[f]
-  and invalidate all fnbid[f] where fnb[f] is NULL
+ -update all fnbid[f] where nfnb[f] is not neg. by reading new eid via fnb[f]
+  and invalidate all fnbid[f] where nfnb[f] is neg.
  -Then update fnbid[f] for all faces of my elms that have an invalid fnbid[f].
   This will need MPI to find nb elms on other ranks!
  -PROBLEM: afterward we want to do load bal, that will probably erase nbelm
@@ -166,8 +166,8 @@ About fnb info and such:
 
 Load bal and fnb info:
 ======================
-*the elms from other ranks in nbelm need to be erased, we should NULL all
- elm->fnb that point to them
+*the elms from other ranks in nbelm need to be erased, we should make all
+ elm->nfnb<0 that point to them
 *how do we get the fnbid[f] from other ranks???:
  make vars that contain the 6 vars fnbid[0-5]:
   AddAuxVar("amr_elm_fnbid", "@", "vars that contain arrays for *fnbid[6]");
