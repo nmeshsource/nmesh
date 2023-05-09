@@ -931,6 +931,17 @@ int amr_set_all_fnbs(tMesh *mesh)
   for(rk=0; rk<size; rk++)
   {
     int nef0[6];
+    /* ef0_nbs is a large array, where we will store all nbs of all the
+       nef0[f] elms on rank rk, for all faces f. Its layout is:
+        ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
+                          |nnb1|nb_eploc[0...nnb1-1]|
+                          ...
+                  |nef0[5]|nnb0|nb_eploc[0...nnb0-1]|
+                          |nnb1|nb_eploc[0...nnb1-1]|
+                          ... */
+    tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
+    ulong ef0_nbs_idx = 0; /* index of next entry to add */
+    ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
     /* rank rk copies his nmyef0 into nef0 */
     if(rank == rk)
@@ -940,16 +951,16 @@ int amr_set_all_fnbs(tMesh *mesh)
        wants to find face nbs of */
     nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
 
+    /* init ef0_nbs index counter */
+    ef0_nbs_idx = 0;
+
     /* make list for each face and send them... */
     for(f=0; f<6; f++)
     {
-      /* large array where we will store all nbs of all the nef0[f] elms,
-         layout is:
-          ef0_nbs = |nef0[f]|nnb0|nb_eploc[0...nnb0-1]|
-                            |nnb1|nb_eploc[0...nnb1-1]|... */
-      tArray *ef0_nbs = alloc_array1d((4*sizeof(tEploc))/8);
-      ulong ef0_nbs_idx = 0; /* index of next entry to add */
-      ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
+      /* put nef0[f] into ef0_nbs array */
+      memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                            &(nef0[f]), sizeof(nef0[f]));
+      ef0_nbs_idx++;
 
       /* there is something to do only if nef0[f]>0 */
       if(nef0[f])
@@ -977,12 +988,6 @@ int amr_set_all_fnbs(tMesh *mesh)
         nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
                                //^^^^^^^^^^^^^^^-is this right???
 
-        /* init ef0_nbs and put 1st value into array */
-        ef0_nbs_idx = 0;
-        memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                              &(nef0[f]), sizeof(nef0[f]));
-        ef0_nbs_idx++;
-
         /* all ranks do work on ef0 array and find all nbs of all in ef0 */
         for(i=0; i<nef0[f]; i++)
         {
@@ -997,18 +1002,18 @@ int amr_set_all_fnbs(tMesh *mesh)
           nnb = amr_set_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
                                  &fnb_head);
 
-          /* fill the ef0_nbs array, layout is:
-          ef0_nbs = |nef0[f]|nnb0|nb_eploc[0...nnb0-1]|
-                            |nnb1|nb_eploc[0...nnb1-1]|... */
+          /* put nnb into ef0_nbs array */
           memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                                 &(nnb), sizeof(nnb));
           ef0_nbs_idx++;
+
           /* get nb eploc into ef0_nbs array */
           j=0;
           list_for_each_safe(pos1, sav, &fnb_head)
           {
             tGlist *elem = list_entry(pos1, tGlist, list);
             tElm *nb = elem->entry;
+            /* put nb->eploc into ef0_nbs array */
             memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                                   nb->eploc, sizeof(tEploc));
             ef0_nbs_idx++;
@@ -1022,70 +1027,57 @@ int amr_set_all_fnbs(tMesh *mesh)
           free_elm(elmi);
         }
         free(ef0);
-      } /* end if(nef0[f]) */
-
-      /* number of tEploc sized entries in ef0_nbs */
-      nmyEplocs = ef0_nbs_idx;
-
-      //we now need to send the ef0_nbs arrays of each rank to rank rk
-      //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
-      // see https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
-      //--> use MPI_Gather
-      // all need to send, and only rk receives
-
-      if(rank != rk) /* send to rank rk */
-      {
-        /* first send number of tEploc sized entries in ef0_nbs */
-        nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
-
-        /* now send contents of ef0_nbs */
-        nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
-
       }
-      else /* rank rk revcs from all others */
-      {
-        ulong *N_eplocs = checked_calloc(size, sizeof(N_eplocs[0]));
-        int r;
-
-        /* revc number of tEploc sized entries from each rank r */
-        for(r=0; r<size; r++)
-        {
-          if(r != rk)
-            nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000);
-          else
-            N_eplocs[r] = nmyEplocs;
-        }
-
-        /* revc contents of ef0_nbs from each rank r */
-        for(r=0; r<size; r++)
-        {
-          void *buf=0; // <--FIXME
-
-          if(r != rk)
-            nMPI_Recv(buf, N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
-          else
-            N_eplocs[r] = nmyEplocs;
-        }
-
-
-        // FIXME: we should probably not send for each face separately!!
-        //        move for f loop further in and save info for all f in
-        //        ef0_nbs.
-
-
-
-        free(N_eplocs);
-      }
-
-
-
-      free_array(ef0_nbs);
     } /* end loop over face f */
 
+    /* number of tEploc sized entries in ef0_nbs */
+    nmyEplocs = ef0_nbs_idx;
+
+    //we now need to send the ef0_nbs arrays of each rank to rank rk
+    //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
+    // see https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
+    //--> use MPI_Gather
+    // all need to send, and only rk receives
+
+    if(rank != rk) /* send to rank rk */
+    {
+      /* first send number of tEploc sized entries in ef0_nbs */
+      nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
+
+      /* now send contents of ef0_nbs */
+      nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
+
+    }
+    else /* rank rk revcs from all others */
+    {
+      ulong *N_eplocs = checked_calloc(size, sizeof(N_eplocs[0]));
+      int r;
+
+      /* revc number of tEploc sized entries from each rank r */
+      for(r=0; r<size; r++)
+      {
+        if(r != rk)
+          nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000);
+        else
+          N_eplocs[r] = nmyEplocs;
+      }
+
+      /* revc contents of ef0_nbs from each rank r */
+      for(r=0; r<size; r++)
+      {
+        void *buf=0; // <--FIXME
+
+        if(r != rk)
+          nMPI_Recv(buf, N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
+        else
+          N_eplocs[r] = nmyEplocs;
+      }
+      free(N_eplocs);
+    }
+
+    /* we could reuse the array but for now we just free it */
+    free_array(ef0_nbs);
   } /* end loop over rk */
-
-
-
 
 
 
