@@ -145,6 +145,8 @@ About fnb info and such:
   to update their entire fnbid[f] and nb->fnb[f]
   +maybe some of this update can be done locally:
    ~e.g. each elm knows all about it's siblings (if they are not refined)
+   ~We can also check if parent fnb are rank local, if yes we can do the nb
+    update rank local as well
    ~maybe just run a nb-info update after the refine locally on each rank
  -Since there need to be all kinds of changes to the nbelm list anyway,
   we just erase it.
