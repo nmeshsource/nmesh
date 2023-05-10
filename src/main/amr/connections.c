@@ -1069,7 +1069,7 @@ int amr_set_all_fnbs(tMesh *mesh)
          in ef0_nbs->d already, so we use that here */
       free(eplocs[rk]);
       /* transfer ef0_nbs->d from ef0_nbs to eplocs[rk] */
-      eplocs[rk] = (void *) ef0_nbs->d; //eplocs[rk] is in my tArray ef0_nbs
+      eplocs[rk] = ef0_nbs->eploc; //eplocs[rk] is in my tArray ef0_nbs
       ef0_nbs->d_nofree=1;
       free_array(ef0_nbs);
       ef0_nbs = alloc_array1d(1); /* dummy that will be freed below */
@@ -1080,9 +1080,14 @@ int amr_set_all_fnbs(tMesh *mesh)
       {
         if(r != rk)
           nMPI_Recv(eplocs[r], N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
-        else
-          eplocs[rk] = ef0_nbs->d; //eplocs[rk] is in my tArray ef0_nbs
+        /* Note: eplocs[rk] already has what was in ef0_nbs->d before */
       }
+
+
+      /* read eplocs[r] to build nb data in rank rk */
+      // ...
+
+
       rows_free(eplocs, size);
       free(N_eplocs);
     }
