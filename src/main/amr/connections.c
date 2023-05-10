@@ -1084,10 +1084,74 @@ int amr_set_all_fnbs(tMesh *mesh)
       }
 
 
-      /* read eplocs[r] to build nb data in rank rk */
-      // ...
+      /**********************************************/
+      /* read eplocs[r] to build nb info on rank rk */
+      /**********************************************/
+      {
+        for(r=0; r<size; r++)
+        {
+          ulong epi;
+          /* each eplocs[r] is a tEploc array, where we will store all nbs of
+             all the nef0[f] elms rank rk needs nb info about, for all faces f.
+             Layout is:
+             eplocs[r] = |nelms[0]|nnb0|nb_eploc[0...nnb0-1]|
+                                  |nnb1|nb_eploc[0...nnb1-1]|
+                                  ...
+                         |nelms[5]|nnb0|nb_eploc[0...nnb0-1]|
+                                  |nnb1|nb_eploc[0...nnb1-1]|
+                                  ... */
+          epi = 0;
+          for(f=0; f<6; f++)
+          {
+            union { tEploc e; ulong ul; } e2ul;
+            struct list_head *pos1;
+            ulong nelms, ei;
+
+            /* pos of 1st elm in ef0_head[f] list */
+            pos1 = ef0_head[f].next;
+
+            /* get number of elms nelms out of eplocs[r] */
+            e2ul.e = eplocs[r][epi++];
+            nelms  = e2ul.ul;
+            for(ei=0; ei<nelms; ei++)
+            {
+              tGlist *elem;
+              tElm *elm;
+              ulong nnb, ni;
+
+              /* get elm from list ef0_head[f] */
+              elem = list_entry(pos1, tGlist, list);
+              elm  = elem->entry;
+              pos1 = pos1->next; /* go forward now, because we del below */
+
+              /* get number of nbs out of eplocs[r] */
+              e2ul.e = eplocs[r][epi++];
+              nnb    = e2ul.ul;
+
+              /* loop over nbs */
+              for(ni=0; ni<nnb; ni++)
+              {
+                tEploc nb_eploc;
+
+                /* get nb out of eplocs[r] */
+                nb_eploc = eplocs[r][epi++];
+
+                /* add info about nb in nb_eploc to elm */
+                //... FIXME: finish this
+              }
+
+              /* once we have set all the nbs of elm we can remove elm from
+                 ef0_head[f] list */
+              glist_elem_del(elem);
+            }
+          } /* end for f */
+          // free elocs[r]
+          //...
+        }
+      } /* end func that build nb info from elocs[r] */
 
 
+      /* the eplocs has been all read now, so free it */
       rows_free(eplocs, size);
       free(N_eplocs);
     }
@@ -1098,11 +1162,7 @@ int amr_set_all_fnbs(tMesh *mesh)
 
 
 
-
-
-
-
-
+  // NONSENSE:
   char *buf;
   int sz1 = sizeof(buf[0]);
   nMPI_Win win;
@@ -1113,6 +1173,8 @@ int amr_set_all_fnbs(tMesh *mesh)
   /* send elm0 to all MPI ranks */
 
   nMPI_Win_free(&win);
+
+
   return 0;
 }
 
