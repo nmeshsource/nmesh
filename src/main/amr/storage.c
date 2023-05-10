@@ -216,6 +216,8 @@ void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
   size_t sd = sizeof(ar->d[0]);       //sizeof double
   size_t nd = (nbytes+sd-1)/sd;       //num. of doubles in nbytes
 
+  //printf("bytestride=%zu pos=%zu nbytes=%zu sd=%zu nd=%zu\n",
+  //        bytestride, pos, nbytes, sd, nd);
   redim_array(ar, nd,1,1);
 
   return memcpy(ar->c + bytestride*pos, src, n);
