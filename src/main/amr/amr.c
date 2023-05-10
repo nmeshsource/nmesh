@@ -28,13 +28,19 @@ int amr_init_global_pars(tMesh *mesh)
   PRFs(":\n");
 
   /* set amr globals */
+  amr->elm_nbinfo0 = Ind("amr_elm_nbinfo0");
+
+  /* set amr globals */
   amr->dir_active[0] = Par("amr_dir_active0");
   amr->dir_active[1] = Par("amr_dir_active1");
   amr->dir_active[2] = Par("amr_dir_active2");
   amr->MPIexchange = Par("amr_MPIexchange");
   amr->nghosts     = Par("amr_nghosts");
 
-  /* print global pars */
+  /* print global vars and pars */
+  printf(" amr->elm_nbinfo0 = var_%04d : VarName(amr->elm_nbinfo0) = %s\n",
+         amr->elm_nbinfo0, VarName(amr->elm_nbinfo0));
+
   printf(" amr->dir_active =\n");
   for(d=0; d<3; d++)
     printf("      par_%04d : Getb(amr->dir_active[%d]) = %d\n",

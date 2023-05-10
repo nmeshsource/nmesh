@@ -19,6 +19,8 @@ int nmesh_amr(tMesh *mesh)
   AddFun(LOADBALANCING, load_balance_if_needed);
 
   /* variables */
+  AddAuxVar("amr_elm_nbinfo", "@", "vars with tEploc arrays for nbinfo[6]");
+  MeshVarSetType(mesh, Ind("amr_elm_nbinfo0"), LBTVAR); //transf. in loadbal.
   //AddAuxVar("Xb", "", "coord0 inside each node"); // we may not need these???
   //AddAuxVar("Yb", "", "coord1 inside each node");
   //AddAuxVar("Zb", "", "coord2 inside each node");

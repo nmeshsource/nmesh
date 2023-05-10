@@ -6,6 +6,7 @@
 
 
 extern tnMPIvars nMPIvars[1];
+extern tAMR amr[1];
 
 
 /****************************************************************************/
@@ -853,6 +854,58 @@ printbfaces_on_f(pat, elmface);
 
 
 
+/* use a list of nb eplocs to set the var elm_nbinfo on one face */
+void amr_set_elm_nbinfo_from_eploc(tElm *elm, int face,
+                                   ulong nnb, const tEploc eploc[nnb])
+{
+  int i_nbinfo = amr->elm_nbinfo0 + face;
+  tArray *nbinfo = VarA(elm, i_nbinfo);
+  int *nbinfo_i;
+  ulong nbinfo_nnb;
+  ulong ni;
+
+  /* make sure var amr_elm_nbinfo is on */
+  enablevarcomp_innode(elm, i_nbinfo);
+
+  /* read current info */
+  nbinfo     = VarA(elm, i_nbinfo);
+  nbinfo_nnb = nbinfo->ul[0];
+  if(nbinfo_nnb==0) /* no nb info yet at all */
+  {
+    /* write all of nnb,eploc into var amr_elm_nbinfo */
+    /* 1st eploc of amr_elm_nbinfo is number of nbs */
+    memcpy_to_array_redim(Arrd(nbinfo), sizeof(tEploc), 0,
+                               &nnb, sizeof(nnb));
+    /* all following eplocs contain nbs */
+    memcpy_to_array_redim(Arrd(nbinfo), sizeof(tEploc), 1,
+                               eploc, sizeof(eploc[0])*nnb);
+  }
+  else /* combine info in amr_elm_nbinfo and info in nnb,eploc */
+  {
+    /* loop over nbs */
+    for(ni=0; ni<nnb; ni++)
+    {
+
+
+    tEploc nb_eploc;
+
+    /* get nb out of eploc */
+    nb_eploc = eploc[ni];
+
+    /* add info about nb in nb_eploc to elm */
+    //... FIXME: finish this
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
    elm on face elmface.
@@ -1117,7 +1170,7 @@ int amr_set_all_fnbs(tMesh *mesh)
             {
               tGlist *elem;
               tElm *elm;
-              ulong nnb, ni;
+              ulong nnb;
 
               /* get elm from list ef0_head[f] */
               elem = list_entry(pos1, tGlist, list);
@@ -1128,17 +1181,23 @@ int amr_set_all_fnbs(tMesh *mesh)
               e2ul.e = eplocs[r][epi++];
               nnb    = e2ul.ul;
 
-              /* loop over nbs */
-              for(ni=0; ni<nnb; ni++)
+              //Use amr_set_elm_nbinfo_from_eploc, instead of:
               {
-                tEploc nb_eploc;
+                ulong ni;
+                /* loop over nbs */
+                for(ni=0; ni<nnb; ni++)
+                {
+                  tEploc nb_eploc;
 
-                /* get nb out of eplocs[r] */
-                nb_eploc = eplocs[r][epi++];
+                  /* get nb out of eplocs[r] */
+                  nb_eploc = eplocs[r][epi++];
 
-                /* add info about nb in nb_eploc to elm */
-                //... FIXME: finish this
+                  /* add info about nb in nb_eploc to elm */
+                  //... FIXME: finish this
+                }
               }
+              //after func call:
+              //epi += nnb;
 
               /* once we have set all the nbs of elm we can remove elm from
                  ef0_head[f] list */
