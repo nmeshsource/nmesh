@@ -422,6 +422,7 @@ typedef struct tARRAY {
     long *l;    /* pointer to long data using same mem as double data */
     ulong *ul;  /* ptr to unsigned long data using same mem as double data */
     tEploc *eploc; /* ptr to tEploc data using same mem as double data */
+    char *c;    /* pointer to char data using same mem as double data */
     int *i; };  /* pointer to int data using same mem as double data */
   int d_nofree; /* d_nofree=1 if free_array should not free d */
   int ns;       /* number of segments (usually 1) */
