@@ -223,6 +223,14 @@ void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
   return memcpy(ar->c + bytestride*pos, src, n);
 }
 
+/* return number of tEplocs in array */
+int array_Neplocs(tArray *ar)
+{
+  size_t se = sizeof(ar->eploc[0]);  //sizeof eploc
+  size_t sd = sizeof(ar->d[0]);      //sizeof double
+  size_t nbytes = sd * ar->N;        //number of bytes in ar
+  return (nbytes)/se;                //number of eplocs in nbytes
+}
 
 /****************************************************************************/
 /* elm storage */

@@ -126,6 +126,19 @@ void printeloc_s(const tEloc *eloc, const char *s)
   printf("%s", s);
 }
 
+void printeploc(const tEploc *eploc)
+{
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, eploc);
+  printeloc(eloc);
+}
+void printeploc_s(const tEploc *eploc, const char *s)
+{
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, eploc);
+  printeloc_s(eloc, s);
+}
+
 void printelm(const tElm *e)
 {
   tEloc eloc[1];
@@ -154,6 +167,14 @@ void printelocface(const tElocFace *ef)
 {
   printeloc(ef->eloc);
   printf(" f=%d\n", ef->face);
+}
+
+void print_amr_elm_nbinfo(tElm *elm, int face)
+{
+  tMesh *mesh = elm->pat->mesh;
+  int i_nbinfo = Ind("amr_elm_nbinfo0") + face;
+  tArray *nbinfo = VarA(elm, i_nbinfo);
+  printarray_eploc(nbinfo, 0);
 }
 
 void printnd(tNode *n)
@@ -561,7 +582,7 @@ void printarray_int(tArray *A)
   printarray_sel(A, 0);
 }
 
-/* print an array */
+/* print a matrix in an array */
 void printarray_matrix0(tArray *A)
 {
   int i,J;
@@ -576,7 +597,7 @@ void printarray_matrix0(tArray *A)
   }
 }
 
-/* print an array */
+/* print a matrix in an array */
 void printarray_matrix1(tArray *A)
 {
   int j,J;
@@ -604,6 +625,37 @@ void printarray_matrix2(tArray *A)
       printf(" %g", A->d[k + dJ*J]);
     printf("\n");
   }
+}
+
+/* print an array */
+void printarray_eploc(tArray *A, int details)
+{
+  int neplocs;
+  int i;
+  if(!A)
+  {
+    printf(" <NULL array>\n");
+    if(details) printf("\n");
+    return;
+  }
+  neplocs = array_Neplocs(A); //num. of nbs we already have
+
+  if(details)
+  {
+    printf("->n[] = {%d,%d,%d}", A->n[0],A->n[1],A->n[2]);
+    if(A->si) printf("  si=%d", A->si);
+    printf(" => neplocs=%d", neplocs);
+    printf("\n ");
+  }
+
+  for(i=0; i<neplocs; i++)
+  {
+    tEloc eloc[1];
+    eloc_from_eploc(eloc, &(A->eploc[i]));
+    printeloc(eloc);
+    if(i<neplocs-1) printf(" ");
+  }
+  if(details) printf("\n");
 }
 
 

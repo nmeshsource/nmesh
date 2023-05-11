@@ -697,6 +697,54 @@ Yo(33.2);
 
   test_eploc();
 
+
+
+  tArray *arr = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
+  ulong ui = 3;
+  ulong nef = 1*(255<<24) + (3<<16) + 11;
+  tEploc eploc[7];
+  tEloc eloc0;
+  tEloc eloc;
+  double *pd;
+  ulong *pu;
+
+  eloc0.p=16;
+  eloc0.l=7;
+  eloc0.eid=16;
+  for(i=0; i<NLOCS; i++) eloc0.loc[i]=5 + '0';
+  //strcpy(eloc0.loc, "1234567");
+  eloc_to_eploc(&eloc0, &eploc[0]);
+  eloc_from_eploc(&eloc, &eploc[0]);
+  printeloc_s(&eloc, "\n");
+
+  redim_array(arr, 50,1,1);
+  forarray(arr, i) arr->d[i] = 1;
+
+  printf("nef=%lu\n", nef);
+  memcpy_to_array_redim(arr, sizeof(tEploc), ui,
+                        &nef, 8);
+  printarray(arr);
+
+  memcpy_to_array_redim(arr, sizeof(tEploc), ui,
+                        &eploc[0], sizeof(tEploc));
+  printarray(arr);
+  printf("from arr: ");
+  eloc_from_eploc(&eloc, &(arr->eploc[ui]));
+  printeloc_s(&eloc, "\n");
+  printf("arr");printarray_eploc(arr, 1);
+
+  elm = mesh->myelm[6];
+  for(i=1; i<6; i++) eploc[i] = eploc[0];
+  for(i=1; i<6; i++) eploc[i].l = i;
+
+  amr_elm_nbinfo_add_nbeploc(elm, 3, 3,&eploc[0]);
+  printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
+  amr_elm_nbinfo_add_nbeploc(elm, 3, 2,&eploc[3]);
+  printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
+  //amr_elm_nbinfo_add_nbeploc(elm, 3, 2,&eploc[1]);
+  //printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
+
+
 //nMPI
 nMPI_barrier();
 exit(9);

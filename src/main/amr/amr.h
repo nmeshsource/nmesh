@@ -16,6 +16,7 @@ typedef struct tELOCFACE {
 
 
 /* storage.c */
+int array_Neplocs(tArray *ar);
 tElm *alloc_elm(tMesh *mesh);
 tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);

@@ -375,6 +375,25 @@ void test_eploc(void)
 }
 
 
+/* check if a eplockey is in the array eploc
+   return val: 1st position in peloc, where eplockey is found,
+               -1 id not found */
+int eploc_key_in_eplocarray(const tEploc *eplockey,
+                            ulong n, const tEploc eploc[n])
+{
+  ulong i;
+
+  //printf("n=%lu eplockey=",n);printeploc_s(eplockey, ":\n");
+  for(i=0; i<n; i++)
+  {
+    int dif = memcmp(eplockey, &(eploc[i]), sizeof(eploc[0]));
+    //printf("%lu:",i);printeploc(&eploc[i]);printf("dif=%i\n",dif);
+    if(dif==0) return i;
+  }
+  return -1;
+}
+
+
 /****************************************************************************/
 /* functions that work on elm */
 /****************************************************************************/
@@ -854,56 +873,49 @@ printbfaces_on_f(pat, elmface);
 
 
 
-/* use a list of nb eplocs to set the var elm_nbinfo on one face */
-void amr_set_elm_nbinfo_from_eploc(tElm *elm, int face,
-                                   ulong nnb, const tEploc eploc[nnb])
+/* add a list of nbeplocs to the var amr_elm_nbinfo on one face */
+void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
+                                int nnb, const tEploc nbeploc[nnb])
 {
   int i_nbinfo = amr->elm_nbinfo0 + face;
-  tArray *nbinfo = VarA(elm, i_nbinfo);
-  int *nbinfo_i;
-  ulong nbinfo_nnb;
-  ulong ni;
+  tArray *nbinfo;
 
-  /* make sure var amr_elm_nbinfo is on */
-  enablevarcomp_innode(elm, i_nbinfo);
-
-  /* read current info */
-  nbinfo     = VarA(elm, i_nbinfo);
-  nbinfo_nnb = nbinfo->ul[0];
-  if(nbinfo_nnb==0) /* no nb info yet at all */
+  /* -if nbinfo is enabled we assume it has some nbs already
+      and that we now want to add nbeploc
+     -if it is not enabled we assume it has been cleared before and we
+      just set it to nbeploc */
+  nbinfo = VarA(elm, i_nbinfo);
+  if(!nbinfo) /* no nb info yet at all */
   {
-    /* write all of nnb,eploc into var amr_elm_nbinfo */
-    /* 1st eploc of amr_elm_nbinfo is number of nbs */
-    memcpy_to_array_redim(Arrd(nbinfo), sizeof(tEploc), 0,
-                               &nnb, sizeof(nnb));
-    /* all following eplocs contain nbs */
-    memcpy_to_array_redim(Arrd(nbinfo), sizeof(tEploc), 1,
-                               eploc, sizeof(eploc[0])*nnb);
+    /* switch on var */
+    enablevarcomp_innode(elm, i_nbinfo);
+    nbinfo = VarA(elm, i_nbinfo);
+
+    /* write all of nbeploc into var amr_elm_nbinfo */
+    memcpy_to_array_redim(nbinfo, sizeof(tEploc), 0,
+                          nbeploc, sizeof(nbeploc[0])*nnb);
   }
-  else /* combine info in amr_elm_nbinfo and info in nnb,eploc */
+  else /* combine info in amr_elm_nbinfo and info in nnb,nbeploc */
   {
-    /* loop over nbs */
+    int nbinfo_nnb = array_Neplocs(nbinfo); //num. of nbs we already have
+    int ni;
+
+    /* loop over nbs to check if they had been added earlier already,
+       this should never happen! */
     for(ni=0; ni<nnb; ni++)
     {
-
-
-    tEploc nb_eploc;
-
-    /* get nb out of eploc */
-    nb_eploc = eploc[ni];
-
-    /* add info about nb in nb_eploc to elm */
-    //... FIXME: finish this
+      int ret = eploc_key_in_eplocarray(&(nbeploc[ni]),
+                                        nbinfo_nnb, nbinfo->eploc);
+      //printf("ret=%d\n", ret);
+      if(ret>=0)
+        errorexiti("nbeploc[%d] is already in nbinfo->eploc", ret);
     }
+
+    /* add all of nbeploc to var amr_elm_nbinfo */
+    memcpy_to_array_redim(nbinfo, sizeof(tEploc), nbinfo_nnb,
+                          nbeploc, sizeof(nbeploc[0])*nnb);
   }
 }
-
-
-
-
-
-
-
 
 
 
@@ -1181,23 +1193,9 @@ int amr_set_all_fnbs(tMesh *mesh)
               e2ul.e = eplocs[r][epi++];
               nnb    = e2ul.ul;
 
-              //Use amr_set_elm_nbinfo_from_eploc, instead of:
-              {
-                ulong ni;
-                /* loop over nbs */
-                for(ni=0; ni<nnb; ni++)
-                {
-                  tEploc nb_eploc;
-
-                  /* get nb out of eplocs[r] */
-                  nb_eploc = eplocs[r][epi++];
-
-                  /* add info about nb in nb_eploc to elm */
-                  //... FIXME: finish this
-                }
-              }
-              //after func call:
-              //epi += nnb;
+              /* all nbs in eplocs[r] to var amr_elm_nbinfo */
+              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, eplocs[r]);
+              epi += nnb;
 
               /* once we have set all the nbs of elm we can remove elm from
                  ef0_head[f] list */
