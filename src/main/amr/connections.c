@@ -700,7 +700,7 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
    with loc s_eloc and face s_f.
-   *s_eloc is a loc where we start searching
+   *s_eloc is a loc want to search for
    *But we start searching 1st for s_eloc's ancestor on level l0.
    *Return list with elms on face s_f */
 int amr_elms_on_eloc_face(long narr, tElm **arr,
@@ -714,8 +714,12 @@ int amr_elms_on_eloc_face(long narr, tElm **arr,
   tEloc f_eloc[1];
   tEloc cheloc[1];
   int l, lret;
-  int lmax = s_eloc->l;;
+  int lmax = s_eloc->l;
   int mor, ijk;
+
+  /* We start searching 1st for s_eloc's ancestor on level l0,
+     thus l0 cannot be bigger than lmax s_eloc->l. */
+  if(l0>lmax) errorexit("l0>lmax");
 
   /* init */
   off = off0;
