@@ -940,16 +940,11 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     tEloc nbeloc[1];
     int nbface, l0;
     nbeloc->p = eloc->p;
-for(l0=0; l0<10; l0++) nbeloc->loc[l0] = 'X';
-printf("nbeloc->l=%d\n", nbeloc->l);
     l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
     nbeloc->l = l0;
     printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
     printf("nbeloc->l=%d\n", nbeloc->l);
-    //FIXME: we should pass in a better l0 (not just 0), i.e. the one coming
-    //       from connections_get_nbloc_InsidePat
-    //l0=0;
     amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nbface, l0, fnb_head);
   }
   else /* complicated case where elmface is on patch surface */

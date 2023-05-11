@@ -903,7 +903,7 @@ int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
 
 printf("off=%zu num=%zu\n", off, num);
 printf("base: ops_bal_sum[0]=%g\n", ops_bal_sum[0]);
-printf("base: ops_bal_sum[1]=%g\n", ops_bal_sum[1]);
+//printf("base: ops_bal_sum[1]=%g\n", ops_bal_sum[1]);
 printf("key: ops_elm_sum=%g\n", ops_elm_sum);
   val = bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
                         sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, &max);
@@ -964,8 +964,8 @@ printTiming();
   avspeed = load_set_speed_array(mesh, speed);
   myspeed = speed[rank];
 
-//speed[1]=1.6; avspeed=1.3;
-printf("avspeed=%g speed[0]=%g speed[1]=%g\n", avspeed, speed[0], speed[1]);
+////speed[1]=1.6; avspeed=1.3;
+//printf("avspeed=%g speed[0]=%g speed[1]=%g\n", avspeed, speed[0], speed[1]);
 
   /* ops needed for load balance */
   w = speed[0]/(avspeed*size); /* weight for rank0 */
