@@ -459,9 +459,9 @@ void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0)
 void amr_set_elm_bbox(tElm *elm)
 {
   tMesh* mesh = elm->pat->mesh;
-  char *e = (char *) elm;
-  tElm0 *elm0 = (tElm0 *) e;
-  amr_set_elm0_bbox(mesh, elm0);
+  union { tElm *elm; tElm0 *elm0; } e2e0;
+  e2e0.elm = elm;
+  amr_set_elm0_bbox(mesh, e2e0.elm0);
 }
 
 
@@ -1222,19 +1222,17 @@ int amr_set_all_fnbs(tMesh *mesh)
   } /* end loop over rk */
 
 
-
-  // NONSENSE:
-  char *buf;
-  int sz1 = sizeof(buf[0]);
-  nMPI_Win win;
-
-  /* make a RMA window through which we communicate all */
-  nMPI_Win_allocate(1000*sz1, sz1, nMPI_INFO_NULL, WORLD, &buf, &win);
-
-  /* send elm0 to all MPI ranks */
-
-  nMPI_Win_free(&win);
-
+  //  // NONSENSE:
+  //  char *buf;
+  //  int sz1 = sizeof(buf[0]);
+  //  nMPI_Win win;
+  //
+  //  /* make a RMA window through which we communicate all */
+  //  nMPI_Win_allocate(1000*sz1, sz1, nMPI_INFO_NULL, WORLD, &buf, &win);
+  //
+  //  /* send elm0 to all MPI ranks */
+  //
+  //  nMPI_Win_free(&win);
 
   return 0;
 }
