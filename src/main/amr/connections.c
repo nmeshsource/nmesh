@@ -705,7 +705,8 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
    *If s_eloc has children we increase the level number l
    Out: list f_elms_head of elms with loc s_eloc and face s_f
    Returns: On success: level number of descendant(s) of s_eloc
-   Returns: On failure: an int below -999 */
+   Returns: On failure: an int below -999
+   Note: elems in f_elms_head have to be freed later! */
 int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
                                     size_t off0, size_t num0,
                                     tEloc s_eloc[1], int s_f, int l0,
@@ -795,7 +796,8 @@ Yo(l);
 
 /* find a neighbors on patchface of elm,elmface in elmarray narr,arr
    In:  elm,elmface, narr,arr
-   Out: will append to list nbelocface_head */
+   Out: will append to list fnb_head
+   Note: elems in fnb_head have to be freed later! */
 int amr_make_patchface_fnb_list(tElm *elm, int elmface,
                                 long narr, tElm **arr,
                                 struct list_head *fnb_head)
@@ -930,7 +932,7 @@ void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
    elm on face elmface.
    In: elm,elmface, narr,arr  =>  Out: fnb_head, Returns list length
-   Note: elems in fnb_head has to be freed later! */
+   Note: elems in fnb_head have to be freed later! */
 int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
                       struct list_head *fnb_head)
 {
