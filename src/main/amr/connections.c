@@ -706,10 +706,10 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
    Out: list f_elms_head of elms with loc s_eloc and face s_f
    Returns: On success: level number of descendant(s) of s_eloc
    Returns: On failure: an int below -999 */
-int amr_elms_on_eloc_face(long narr, tElm **arr,
-                          size_t off0, size_t num0,
-                          tEloc s_eloc[1], int s_f, int l0,
-                          struct list_head *f_elms_head)
+int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
+                                    size_t off0, size_t num0,
+                                    tEloc s_eloc[1], int s_f, int l0,
+                                    struct list_head *f_elms_head)
 {
   tElm *const*f_elm;
   size_t off, num;
@@ -779,8 +779,8 @@ Yo(l);
       /* child ijk */
       cheloc->loc[l-1] = ijk + '0';
       if(l<NLOCS) cheloc->loc[l] = 0;
-      ret = amr_elms_on_eloc_face(narr, arr, off, num, cheloc, s_f, l,
-                                  f_elms_head);
+      ret = amr_make_elms_on_eloc_face_list(narr, arr, off, num, cheloc, s_f,
+                                            l, f_elms_head);
       if(ret >=0) lret = l; /* record success */
     }
   }
@@ -846,7 +846,8 @@ printbfaces_on_f(pat, elmface);
 
     printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
     /* add all elms in arr on face nb_f to list fnb_head */
-    l2=amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nb_f, 0, fnb_head);
+    l2=amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nb_f,
+                                       0, fnb_head);
 
     /* Go over newly added part of fnb_head list and remove all that have no
        face points in common with the elm */
@@ -953,7 +954,8 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     nbeloc->l = l0;
     printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
     printf("nbeloc->l=%d\n", nbeloc->l);
-    amr_elms_on_eloc_face(narr, arr, 0, narr, nbeloc, nbface, l0, fnb_head);
+    amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nbface,
+                                    l0, fnb_head);
   }
   else /* complicated case where elmface is on patch surface */
   {
