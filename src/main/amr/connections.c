@@ -796,9 +796,9 @@ Yo(l);
 /* find a neighbors on patchface of elm,elmface in elmarray narr,arr
    In:  elm,elmface, narr,arr
    Out: will append to list nbelocface_head */
-int amr_set_patchface_fnb_list(tElm *elm, int elmface,
-                               long narr, tElm **arr,
-                               struct list_head *fnb_head)
+int amr_make_patchface_fnb_list(tElm *elm, int elmface,
+                                long narr, tElm **arr,
+                                struct list_head *fnb_head)
 {
   int patface[6]; //, nfaces;
   int l  = - 9999; /* found nothing */
@@ -959,7 +959,7 @@ int amr_set_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   }
   else /* complicated case where elmface is on patch surface */
   {
-    amr_set_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
+    amr_make_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
   }
 
   return list_count_nodes(fnb_head);
