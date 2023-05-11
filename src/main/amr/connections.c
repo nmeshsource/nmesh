@@ -736,21 +736,20 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
 
   for(l = l0; l <= lmax; l++)
   {
-Yo(l);
     /* search for ancestor of s_eloc of level l */
     f_eloc[0] = s_eloc[0];
     f_eloc->l = l;
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
 
-//printf("off=%zu num=%zu  f_elm pos=%zu\n",
-//off, num, (size_t) ((const tElm **)f_elm - arr));
-//printf("got ");printelm(*f_elm);
+    //printf("off=%zu num=%zu  f_elm pos=%zu\n",
+    //       off, num, (size_t) ((const tElm **)f_elm - arr));
+    //printf("got ");printelm(*f_elm);
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
     /* is there only one f_elm? */
     mor=binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp, NULL);
-printf("mor=%d\n", mor);
+    //printf("mor=%d\n", mor);
     if(!mor)  /* if there is only one */
     {
       //add f_elm to list and then return
@@ -760,8 +759,6 @@ printf("mor=%d\n", mor);
   }
   /* if we get here, nb at s_eloc has children */
 
-Yo(555);
-Yo(l);
   /* search on children one level higher */
   l = s_eloc->l + 1;
   cheloc[0] = s_eloc[0];
@@ -787,7 +784,7 @@ Yo(l);
   }
 
   /* finally signal failure or success with at least one nb child */
-  printf("final lret=%d\n", lret);
+  //printf("final lret=%d\n", lret);
   return lret;
 }
 
