@@ -921,7 +921,8 @@ void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
    elm on face elmface.
-   In: elm,elmface, narr,arr  =>  Out: fnb_head, Returns list length */
+   In: elm,elmface, narr,arr  =>  Out: fnb_head, Returns list length
+   Note: elems in fnb_head has to be freed later! */
 int amr_set_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
                      struct list_head *fnb_head)
 {

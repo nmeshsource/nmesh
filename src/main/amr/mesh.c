@@ -747,7 +747,7 @@ Yo(33.2);
 
 //nMPI
 nMPI_barrier();
-exit(9);
+finalize_all_and_exit(mesh, 9); //<--exit code 9
   return 0;
 }
 
