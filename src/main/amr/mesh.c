@@ -687,7 +687,7 @@ Yo(33.2);
   INIT_LIST_HEAD(&fnb_head);
   elm = mesh->myelm[6];
   if(nMPI_rank()==0)
-    amr_set_fnb_list(elm, 1, mesh->nmyelm, mesh->myelm, &fnb_head);
+    amr_make_fnb_list(elm, 1, mesh->nmyelm, mesh->myelm, &fnb_head);
   printf("%d in fnb_head\n", list_count_nodes(&fnb_head));
   list_for_each(pos, &fnb_head)
   {
