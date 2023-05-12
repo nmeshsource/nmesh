@@ -309,6 +309,7 @@ tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
 {
   tArray *Wq = node_Wq(node,dir);
   int Ivar_realloc;
+  int nr[] = {-1,-1,-1};
 
   if(PR)
   {
@@ -324,7 +325,8 @@ tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
   mm_array_indir(Wq, var, dir, Ivar);
 
   /* re-dim Ivar array to 1 in the direction we just integrated */
-  Ivar_realloc = redim_array(Ivar, dir==0, dir==1, dir==2);
+  nr[dir] = 1;
+  Ivar_realloc = redimension_array(Ivar, nr);
   if(Ivar_realloc) errorexit("Ivar was too small");
 
   return Ivar;
