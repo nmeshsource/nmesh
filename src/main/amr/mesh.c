@@ -694,6 +694,7 @@ Yo(33.2);
     elm = glist_entry(pos);
     printelm(elm);
   }
+  glist_free_elems(&fnb_head);
 
   test_eploc();
 
@@ -743,7 +744,7 @@ Yo(33.2);
   printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
   //amr_elm_nbinfo_add_nbeploc(elm, 3, 2,&eploc[1]);
   //printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
-
+  free_array(arr);
 
 
   amr_set_all_fnbs(mesh);
@@ -753,6 +754,7 @@ Yo(33.2);
 
 //nMPI
 nMPI_barrier();
+RunFun(FINALIZE);
 finalize_all_and_exit(mesh, 9); //<--exit code 9
   return 0;
 }
