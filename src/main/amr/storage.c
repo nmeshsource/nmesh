@@ -213,8 +213,8 @@ void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
                             const void *src, size_t n)
 {
   size_t nbs = (n+bytestride-1)/bytestride; //num. bytestrides in n bytes
-  //size_t nbytes = bytestride*pos + n; //min number of bytes needed in ar->c
-  size_t nbytes = bytestride*(pos+nbs); //min number of bytes needed in ar->c
+  size_t nbytes0 = bytestride*pos + n;  //min number of bytes needed in ar->c
+  size_t nbytes = bytestride*(pos+nbs); //number of bytes used in redim
   size_t sd = sizeof(ar->d[0]);         //sizeof double
   size_t nd = (nbytes+sd-1)/sd;         //num. of doubles in nbytes
 
@@ -222,6 +222,9 @@ void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
   //        bytestride, pos, nbytes, sd, nd);
   redim_array(ar, nd,1,1);
 
+  /* zero part of ar->c that memcpy will not write to */
+  memset(ar->c + bytestride*pos + n, 0, nbytes-nbytes0);
+  /* copy src into ar->c */
   return memcpy(ar->c + bytestride*pos, src, n);
 }
 
