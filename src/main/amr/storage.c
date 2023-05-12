@@ -143,7 +143,7 @@ int redimension_array_with_segs(tArray *array, int n[3], int Ne, int ns)
   int reallocd_d = 0;
   int i;
 
-  for(i=0; i<3; i++) if(n[i]>0) array->n[i] = n[i];
+  for(i=0; i<3; i++) if(n[i]>=0) array->n[i] = n[i];
   array->N = array->n[0] * array->n[1] * array->n[2];
   array->Ne = Ne;
   array->ns = ns;
