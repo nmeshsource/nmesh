@@ -212,9 +212,11 @@ void *memcpy_to_array(tArray *ar, size_t bytestride, size_t pos,
 void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
                             const void *src, size_t n)
 {
-  size_t nbytes = bytestride*pos + n; //min number of bytes needed in ar->c
-  size_t sd = sizeof(ar->d[0]);       //sizeof double
-  size_t nd = (nbytes+sd-1)/sd;       //num. of doubles in nbytes
+  size_t nbs = (n+bytestride-1)/bytestride; //num. bytestrides in n bytes
+  //size_t nbytes = bytestride*pos + n; //min number of bytes needed in ar->c
+  size_t nbytes = bytestride*(pos+nbs); //min number of bytes needed in ar->c
+  size_t sd = sizeof(ar->d[0]);         //sizeof double
+  size_t nd = (nbytes+sd-1)/sd;         //num. of doubles in nbytes
 
   //printf("bytestride=%zu pos=%zu nbytes=%zu sd=%zu nd=%zu\n",
   //        bytestride, pos, nbytes, sd, nd);
