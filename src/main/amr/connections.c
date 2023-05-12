@@ -1239,6 +1239,18 @@ int amr_set_all_fnbs(tMesh *mesh)
 
 
 
+
+// ??????????????????????????????
+
+/* make a new elm (e.g. for mesh->nbelm) from just its loc info in eploc */
+tElm *amr_make_elmcopy_for_eploc(tMesh *mesh, tEploc *eploc)
+{
+  tElm *elm = alloc_elm(mesh);
+  int datrank = amr_rank_of_elm_eploc(mesh, eploc);
+  return NULL;
+}
+
+
 /****************************************************************************/
 /* functions to exchange info between rank_i and rank_{i \pm 1} */
 /****************************************************************************/

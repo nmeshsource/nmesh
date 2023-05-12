@@ -163,6 +163,15 @@ void printelm(const tElm *e)
   printelm0(e2e0.elm0, "");
   printf(" dat:%s\n", e->dat ? "yes" : "no");
 
+  printf(" nbi =");
+  for(i=0; i<6; i++)
+  {
+    printf(" {");
+    print_amr_elm_nbinfo(e, i);
+    printf(" }");
+  }
+  printf("\n");
+
   printf(" fnb =");
   for(i=0; i<6; i++)
   {
@@ -173,7 +182,6 @@ void printelm(const tElm *e)
     printf(" }");
   }
   printf("\n");
-  //printf(" ");printnfaces(n);
 }
 
 void printelmarray(long nelms, tElm **elm)
@@ -660,8 +668,7 @@ void printarray_eploc(tArray *A, int details)
   int i;
   if(!A)
   {
-    printf(" <NULL array>\n");
-    if(details) printf("\n");
+    if(details) printf(" <NULL array>\n");
     return;
   }
   neplocs = array_Neplocs(A); //num. of nbs we already have
@@ -676,9 +683,7 @@ void printarray_eploc(tArray *A, int details)
 
   for(i=0; i<neplocs; i++)
   {
-    tEloc eloc[1];
-    eloc_from_eploc(eloc, &(A->eploc[i]));
-    printeloc(eloc);
+    printeploc(&(A->eploc[i]));
     if(i<neplocs-1) printf(" ");
   }
   if(details) printf("\n");
