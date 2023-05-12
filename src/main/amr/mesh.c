@@ -745,6 +745,12 @@ Yo(33.2);
   //printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
 
 
+
+  amr_set_all_fnbs(mesh);
+  printmyelms(mesh);
+
+
+
 //nMPI
 nMPI_barrier();
 finalize_all_and_exit(mesh, 9); //<--exit code 9

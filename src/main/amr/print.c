@@ -197,6 +197,15 @@ void printelmarray(long nelms, tElm **elm)
   printf("\n");
 }
 
+void printmyelms(tMesh *mesh)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    printelm(elm);
+  }
+}
+
 void printelocface(const tElocFace *ef)
 {
   printeloc(ef->eloc);
@@ -683,8 +692,8 @@ void printarray_eploc(tArray *A, int details)
 
   for(i=0; i<neplocs; i++)
   {
+    printf(" ");
     printeploc(&(A->eploc[i]));
-    if(i<neplocs-1) printf(" ");
   }
   if(details) printf("\n");
 }

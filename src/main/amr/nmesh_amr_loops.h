@@ -17,6 +17,13 @@
 /****************************************************************************/
 /* loops that should be used in most modules                                */
 /****************************************************************************/
+/* preliminary elm macros, include OMP from nodes stuff later */
+#define formyelms(mesh) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+#define MyElm mesh->myelm[ei_]
+
+
+
 /* loop over my leaf nodes on this proc without OpenMP */
 /* Note: for node in ln[c][i]: myid = myln->nm*c + i */
 #define formylnodes_noomp(mesh) \
