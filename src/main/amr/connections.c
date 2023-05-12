@@ -64,9 +64,9 @@ int lecmp(const void *loc, const void *elem, void *arg)
   eloc_from_eploc(elc, pelc);
 
   cmp = loccmp(lc, elc);
-  PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
-  printf("--> cmp=%d\n", cmp);
-  //printelm(elm_arr[0]);
+  //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
+  //printf("--> cmp=%d\n", cmp);
+  ////printelm(elm_arr[0]);
   return cmp;
 }
 
@@ -170,7 +170,7 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
   int patface[6];
   int ijk, nb_ijk, lret;
 
-  PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
+  //PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
   //nfaces = connections_loc_on_patchface(l,loc, patface);
   connections_loc_on_patchface(l,loc, patface);
@@ -182,22 +182,22 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
   ijk = connections_get_ijk(l, loc);
   nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
   *nb_f  = face^1;
-  printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
+  //printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
 
   if(connections_ijk_is_at_parentface(ijk, face))
   {
-    //char pnbloc[NLOCS]; /* location of parent nb */
-    PRF;printf(" at parentface\n");
-    //printf(" pnbloc=%s\n", pnbloc);
+    ////char pnbloc[NLOCS]; /* location of parent nb */
+    //PRF;printf(" at parentface\n");
+    ////printf(" pnbloc=%s\n", pnbloc);
 
     /* l-1,loc is parent, write parent nb loc into nbloc */
     lret = connections_get_nbloc_InsidePat(l-1,loc, face, nbloc, nb_f);
-    //pnbloc[l-1] = 0; /* add string-end marker */
-    //printf(" pnbloc=%s\n", pnbloc);
-    //strncpy(nbloc, pnbloc, NLOCS);
-    printf("  nbloc=%s\n", nbloc);
-    //nbloc[l-1] = nb_ijk + '0';
-    //printf(" nbloc=%s\n", nbloc);
+    ////pnbloc[l-1] = 0; /* add string-end marker */
+    ////printf(" pnbloc=%s\n", pnbloc);
+    ////strncpy(nbloc, pnbloc, NLOCS);
+    //printf("  nbloc=%s\n", nbloc);
+    ////nbloc[l-1] = nb_ijk + '0';
+    ////printf(" nbloc=%s\n", nbloc);
     return lret;
   }
   else
@@ -729,10 +729,10 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
   off = off0;
   num = num0;
 
-  PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
-  printeloc(s_eloc);
-  printf(" s_f=%d\n  ", s_f);
-  printelmarray(narr, arr);
+  //PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
+  //printeloc(s_eloc);
+  //printf(" s_f=%d\n  ", s_f);
+  //printelmarray(narr, arr);
 
   for(l = l0; l <= lmax; l++)
   {
@@ -812,24 +812,24 @@ int amr_make_patchface_fnb_list(tElm *elm, int elmface,
 
   /* unpack eploc */
   eloc_from_eploc(eloc, eploc);
-  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
+  //PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
   /* sanity check */
   connections_loc_on_patchface(eloc->l, eloc->loc, patface);
   if(!patface[elmface])
     errorexit("call this for patch faces only!!!");
 
-printbfaces_on_f(pat, elmface);
+  //printbfaces_on_f(pat, elmface);
 
   /* loop over all bfaces on face and find nb */
   forbfacesonface(pat, elmface, bface)
   {
     tBface *obface = bface->obface;
 
-    printf("bface\n");
-    printbface(bface);
-    printf("obface\n");
-    printbface(obface);
+    //printf("bface\n");
+    //printbface(bface);
+    //printf("obface\n");
+    //printbface(obface);
 
     /* do nothing if no other patch face */
     if(!obface) continue;
@@ -843,7 +843,7 @@ printbfaces_on_f(pat, elmface);
     /* set pos to last entry to start of list_for_each_safe_continue below */
     pos = fnb_head->prev;
 
-    printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
+    //printeloc(nbeloc);printf(" nb_f=%d\n", nb_f);
     /* add all elms in arr on face nb_f to list fnb_head */
     l2=amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nb_f,
                                        0, fnb_head);
@@ -864,16 +864,14 @@ printbfaces_on_f(pat, elmface);
     }
   } /* end forbfacesonface */
 
-  PRFs(": fnb list\n");
-  list_for_each(pos, fnb_head)
-  {
-    tElm *fnb = glist_entry(pos);
-    tEploc *fnbeploc = fnb->eploc;
-    tEloc fnbeloc[1];
-    eloc_from_eploc(fnbeloc, fnbeploc);
-    printeloc_s(fnbeloc, " ");
-  }
-  printf("\n");
+  //PRFs(": fnb list\n");
+  //list_for_each(pos, fnb_head)
+  //{
+  //  tElm *fnb = glist_entry(pos);
+  //  tEploc *fnbeploc = fnb->eploc;
+  //  printeploc_s(fnbeploc, " ");
+  //}
+  //printf("\n");
 
   return l;
 }
@@ -938,8 +936,7 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   tEloc eloc[1];
 
   eloc_from_eploc(eloc, eploc);
-
-  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
+  //PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
   connections_loc_on_patchface(eloc->l, eloc->loc, patface);
   /* simple case where elmface is inside the patch */
@@ -951,8 +948,8 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
     nbeloc->l = l0;
-    printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
-    printf("nbeloc->l=%d\n", nbeloc->l);
+    //printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    //printf("nbeloc->l=%d\n", nbeloc->l);
     amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nbface,
                                     l0, fnb_head);
   }
@@ -999,7 +996,7 @@ int amr_set_all_fnbs(tMesh *mesh)
   /* print what we have so far */
   for(f=0; f<6; f++)
   {
-    PRF;printf(": &ef0_head[%d]:\n", f);
+    PRF;printf(": nmyef0[f]=%lu  &ef0_head[%d]:\n", nmyef0[f], f);
     list_for_each(pos, &ef0_head[f])
     {
       tElm *elm = glist_entry(pos);
@@ -1007,6 +1004,9 @@ int amr_set_all_fnbs(tMesh *mesh)
     }
     printf("\n");
   }
+
+printf("XXXXXX count=%lu\n", list_count_nodes(&ef0_head[0]));
+printf("XXXXXX rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
 
   /* send my lists to the other ranks */
   for(rk=0; rk<size; rk++)
@@ -1025,13 +1025,17 @@ int amr_set_all_fnbs(tMesh *mesh)
     ulong ef0_nbs_idx = 0; /* index of next entry to add */
     ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
+printf("YYYYYYY rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
+
     /* rank rk copies his nmyef0 into nef0 */
     if(rank == rk)
       for(f=0; f<6; f++) nef0[f] = nmyef0[f];
 
     /* rank rk sends his nef0[f] to all others, to tell how many elms he
        wants to find face nbs of */
+printf("111111 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
     nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
+printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
 
     /* init ef0_nbs index counter */
     ef0_nbs_idx = 0;
