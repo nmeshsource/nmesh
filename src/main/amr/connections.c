@@ -996,6 +996,20 @@ int amr_set_all_fnbs(tMesh *mesh)
   /* now we have 6 lists ef0_head[f] that contain elms where the fnb info
      needs to be updated. */
 
+  /* print what we have so far */
+
+  for(f=0; f<6; f++)
+  {
+    PRF;printf(": f=%d:\n");
+    list_for_each(pos, &ef0_head[f])
+    {
+      tElm *elm = glist_entry(pos);
+      printeploc_s(elm->eploc, " ");
+    }
+    printf("\n");
+  }
+exit(9);
+
   /* send my lists to the other ranks */
   for(rk=0; rk<size; rk++)
   {

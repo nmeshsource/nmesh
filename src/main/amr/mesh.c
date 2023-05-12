@@ -747,6 +747,14 @@ Yo(33.2);
   free_array(arr);
 
 
+  /* set signal to update all fnb */
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    for(int f=0; f<6; f++)  elm->nfnb[f] = -1;
+  }
+
+
   amr_set_all_fnbs(mesh);
   printmyelms(mesh);
 
