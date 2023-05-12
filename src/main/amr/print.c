@@ -139,27 +139,22 @@ void printeploc_s(const tEploc *eploc, const char *s)
   printeloc_s(eloc, s);
 }
 
-void printelm0(const tElm0 *e, char *s)
+void printelm0(const tElm0 *e, const char *s)
 {
   printeploc(e->eploc);
   printf(": eid%lu [%g,%g]x[%g,%g]x[%g,%g] datrank=%d",
          e->eploc->eid,
          e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5],
          e->datrank);
-  printf(""
+  printf("%s", s);
 }
 
 void printelm(const tElm *e)
 {
   union { const tElm *elm; tElm0 *elm0; } e2e0;
   e2e0.elm = e;
-  printelm0(e2e0.elm0);
+  printelm0(e2e0.elm0, "");
   printf(" dat: %s\n", e->dat ? "yes" : "no");
-
-  printf(": eid%lu nid%ld [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
-         e->eploc->eid, e->nid,
-         e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5],
-         e->leaf, e->dat ? "yes" : "no");
 }
 
 void printelmarray(long nelms, tElm **elm)
