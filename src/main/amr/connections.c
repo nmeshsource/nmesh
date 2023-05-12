@@ -997,10 +997,9 @@ int amr_set_all_fnbs(tMesh *mesh)
      needs to be updated. */
 
   /* print what we have so far */
-
   for(f=0; f<6; f++)
   {
-    PRF;printf(": f=%d:\n");
+    PRF;printf(": &ef0_head[%d]:\n", f);
     list_for_each(pos, &ef0_head[f])
     {
       tElm *elm = glist_entry(pos);
@@ -1008,7 +1007,6 @@ int amr_set_all_fnbs(tMesh *mesh)
     }
     printf("\n");
   }
-exit(9);
 
   /* send my lists to the other ranks */
   for(rk=0; rk<size; rk++)
@@ -1023,6 +1021,7 @@ exit(9);
                           |nnb1|nb_eploc[0...nnb1-1]|
                           ... */
     tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
+    //tArray *ef0_nbs = alloc_array1d((1*sizeof(tEploc))/sizeof(double));
     ulong ef0_nbs_idx = 0; /* index of next entry to add */
     ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
@@ -1044,6 +1043,10 @@ exit(9);
       memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                             &(nef0[f]), sizeof(nef0[f]));
       ef0_nbs_idx++;
+
+      //printf("ADD nef0[f] int, next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
+      //printarray_eploc(ef0_nbs, 1);
+      //exit(16);
 
       /* there is something to do only if nef0[f]>0 */
       if(nef0[f])
@@ -1090,6 +1093,12 @@ exit(9);
                                 &(nnb), sizeof(nnb));
           ef0_nbs_idx++;
 
+
+          //printf("ADD nnb int, next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
+          //printarray_eploc(ef0_nbs, 1);
+          //exit(66);
+
+
           /* get nb eploc into ef0_nbs array */
           j=0;
           list_for_each_safe(pos1, sav, &fnb_head)
@@ -1101,6 +1110,12 @@ exit(9);
                                   nb->eploc, sizeof(tEploc));
             ef0_nbs_idx++;
             j++;
+
+            //printf("next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
+            //printarray_eploc(ef0_nbs, 1);
+            //exit(67);
+
+
             /* once nb->eploc is in ef0_nbs, del elem with nb */
             glist_elem_del(elem);
           }
@@ -1115,6 +1130,10 @@ exit(9);
 
     /* number of tEploc sized entries in ef0_nbs */
     nmyEplocs = ef0_nbs_idx;
+
+    printf("nmyEplocs=%lu\n", nmyEplocs);
+    printarray_eploc(ef0_nbs, 1);
+    //exit(65);
 
     //we now need to send the ef0_nbs arrays of each rank to rank rk
     //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
@@ -1196,6 +1215,10 @@ exit(9);
             /* get number of elms nelms out of eplocs[r] */
             e2ul.e = eplocs[r][epi++];
             nelms  = e2ul.ul;
+
+            printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
+            printeploc_s(&(eplocs[r][epi-1]),"\n");
+
             for(ei=0; ei<nelms; ei++)
             {
               tGlist *elem;
@@ -1211,8 +1234,13 @@ exit(9);
               e2ul.e = eplocs[r][epi++];
               nnb    = e2ul.ul;
 
+              printeploc_s(elm->eploc, " ");
+              printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
+              if(nnb) printeploc(&(eplocs[r][epi]));
+              printf("\n");
+
               /* all nbs in eplocs[r] to var amr_elm_nbinfo */
-              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, eplocs[r]);
+              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(eplocs[r][epi]));
               epi += nnb;
 
               /* once we have set all the nbs of elm we can remove elm from

@@ -746,6 +746,8 @@ Yo(33.2);
   //printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
   free_array(arr);
 
+  disablevar_innode(elm, Ind("amr_elm_nbinfo0"));
+
 
   /* set signal to update all fnb */
   formyelms(mesh)
