@@ -141,20 +141,39 @@ void printeploc_s(const tEploc *eploc, const char *s)
 
 void printelm0(const tElm0 *e, const char *s)
 {
-  printeploc(e->eploc);
-  printf(": eid%lu [%g,%g]x[%g,%g]x[%g,%g] datrank=%d",
+  int i, patface[6];
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, e->eploc);
+  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  printeloc(eloc);
+  printf(": eid%lu [%g,%g]x[%g,%g]x[%g,%g]",
          e->eploc->eid,
-         e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5],
-         e->datrank);
+         e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5]);
+  printf(" patface=");
+  for(i=0; i<6; i++) printf("%d", patface[i]);
+  printf(" datrank=%d", e->datrank);
   printf("%s", s);
 }
 
 void printelm(const tElm *e)
 {
+  int i, j;
   union { const tElm *elm; tElm0 *elm0; } e2e0;
   e2e0.elm = e;
   printelm0(e2e0.elm0, "");
-  printf(" dat: %s\n", e->dat ? "yes" : "no");
+  printf(" dat:%s\n", e->dat ? "yes" : "no");
+
+  printf(" fnb =");
+  for(i=0; i<6; i++)
+  {
+    //printf(" %d:{", i);
+    printf(" {");
+    //for(j=0; j<e->nfnb[i]; j++) printf(" %ld", get_node_nid(e->fnb[i][j]));
+    for(j=0; j<e->nfnb[i]; j++) printeploc(e->fnb[i][j]->eploc);
+    printf(" }");
+  }
+  printf("\n");
+  //printf(" ");printnfaces(n);
 }
 
 void printelmarray(long nelms, tElm **elm)
