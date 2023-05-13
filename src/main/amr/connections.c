@@ -1289,6 +1289,47 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 }
 
 
+/* Update elm->fnb[f] from the amr_elm_nbinfo0+f var if elm->nfnb[f] < 0 */
+int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
+{
+  int rank = nMPI_rank();
+
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int f;
+
+    for(f=0; f<6; f++)
+    {
+      int i_nbinfo = amr->elm_nbinfo0 + f;
+      tArray *nbinfo = VarA(elm, i_nbinfo);
+      int i, neplocs;
+
+      if(!nbinfo) continue; /* do nothing if there is no nbinfo */
+
+      neplocs = array_Neplocs(nbinfo); //num. of nbs we have
+      for(i=0; i<neplocs; i++)
+      {
+        tEploc *eploc = &(nbinfo->eploc[i]);
+        int datrank = amr_rank_of_elm_eploc(mesh, eploc);
+
+        if(datrank == rank) /* get elm of eploc from mesh->myelm */
+        {
+          /* find nbinfo->eploc[i] in mesh->myelm */
+          //...
+        }
+        else /* get elm of eploc from mesh->myelm of rank datrank */
+        {
+          //...
+        }
+        /**/
+      }
+    } /* end loop over f */
+  }
+
+  return 0;
+}
+
 
 
 // ??????????????????????????????
