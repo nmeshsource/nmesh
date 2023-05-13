@@ -1011,7 +1011,7 @@ printf("XXXXXX rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
   /* send my lists to the other ranks */
   for(rk=0; rk<size; rk++)
   {
-    int nef0[6];
+    ulong nef0[6];
     /* ef0_nbs is a large array, where we will store all nbs of all the
        nef0[f] elms rank rk needs nb info about, for all faces f. Layout is:
         ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
@@ -1043,7 +1043,7 @@ printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
     /* make list for each face and send them... */
     for(f=0; f<6; f++)
     {
-      /* put nef0[f] into ef0_nbs array */
+      /* put the number nef0[f] into ef0_nbs array */
       memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                             &(nef0[f]), sizeof(nef0[f]));
       ef0_nbs_idx++;
@@ -1084,15 +1084,15 @@ printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
           tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
           struct list_head *pos1, *sav;
           struct list_head fnb_head;
-          int j, nnb;
+          ulong j, nnb;
 
           INIT_LIST_HEAD(&fnb_head);
 
-          /* put nbs of elmi into fnb_head list */
+          /* put the nbs of elmi into fnb_head list */
           nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
                                   &fnb_head);
 
-          /* put nnb into ef0_nbs array */
+          /* put the number nnb into ef0_nbs array */
           memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
                                 &(nnb), sizeof(nnb));
           ef0_nbs_idx++;
@@ -1220,6 +1220,9 @@ printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
             e2ul.e = eplocs[r][epi++];
             nelms  = e2ul.ul;
 
+            printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
+
+
             printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
             printeploc_s(&(eplocs[r][epi-1]),"\n");
 
@@ -1247,16 +1250,14 @@ printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
               amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(eplocs[r][epi]));
               epi += nnb;
 
-              /* once we have set all the nbs of elm we can remove elm from
-                 ef0_head[f] list */
-              glist_elem_del(elem);
+              /* cannot del elem from ef0_head[f] list here, because it is
+                 needed for every r */
             }
           } /* end for f */
-          // free elocs[r]
-          //...
         }
-      } /* end func that build nb info from elocs[r] */
-
+        /* now clear the 6 ef0_head[f] lists */
+        for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
+      } /* end func that builds nb-info from elocs[r] */
 
       /* the eplocs has been all read now, so free it */
       rows_free(eplocs, size);
