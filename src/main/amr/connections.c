@@ -522,6 +522,20 @@ int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
   return off+1;
 }
 
+/* return the index into mesh->myelm (on the rank it is) that an elm
+   with eploc is on */
+void amr_elmindex_and_datrank_of_elm_eploc(tMesh* mesh, tEploc *eploc,
+                                           ulong *elmindex, int *datrank)
+{
+  ulong *eidlim = mesh->eidlim;
+  ulong eid = eploc->eid;
+
+  *datrank = amr_rank_of_elm_eploc(mesh, eploc);
+
+  if(*datrank==0) *elmindex = eid;
+  else            *elmindex = eid - eidlim[*datrank-1];
+}
+
 /* init elm0 data as far as possible from eploc */
 void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
 {
@@ -1305,17 +1319,33 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
       tArray *nbinfo = VarA(elm, i_nbinfo);
       int i, neplocs;
 
-      if(!nbinfo) continue; /* do nothing if there is no nbinfo */
+      /* if there is no nbinfo there are no nbs */
+      if(!nbinfo)
+      {
+        if(elm->fnb[f] != NULL)
+        {
+          free(elm->fnb[f]);
+          elm->nfnb[f] = 0;
+          elm->fnb[f]  = NULL;
+        }
+      }
 
+      if(elm->nfnb[f] >= 0) /* elm->fnb[f] is already set */
+        continue; /* do nothing */
+
+      /* add nbs in nbinfo to fnb */
       neplocs = array_Neplocs(nbinfo); //num. of nbs we have
       for(i=0; i<neplocs; i++)
       {
         tEploc *eploc = &(nbinfo->eploc[i]);
-        int datrank = amr_rank_of_elm_eploc(mesh, eploc);
+        int datrank;
+        ulong nbidx;
+
+        amr_elmindex_and_datrank_of_elm_eploc(mesh,eploc, &nbidx, &datrank);
 
         if(datrank == rank) /* get elm of eploc from mesh->myelm */
         {
-          /* find nbinfo->eploc[i] in mesh->myelm */
+          //tElm *nb = mesh->myelm[nbidx];
           //...
         }
         else /* get elm of eploc from mesh->myelm of rank datrank */
