@@ -608,7 +608,7 @@ void printeploc(const tEploc *eploc);
 void printeploc_s(const tEploc *eploc, const char *s);
 void printelm(const tElm *e);
 void printelmarray(long nelms, tElm **elm);
-void print_amr_elm_nbinfo(tElm *elm, int face);
+void print_amr_elm_nbinfo(const tElm *elm, int face);
 void printnd(tNode *n) ;
 void printnode(tNode *n);
 void printnode_and_neighbors(tNode *n);

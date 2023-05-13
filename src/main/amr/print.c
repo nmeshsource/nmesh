@@ -157,7 +157,7 @@ void printelm0(const tElm0 *e, const char *s)
 
 void printelm(const tElm *e)
 {
-  int i, j;
+  int i;
   union { const tElm *elm; tElm0 *elm0; } e2e0;
   e2e0.elm = e;
   printelm0(e2e0.elm0, "");
@@ -171,10 +171,11 @@ void printelm(const tElm *e)
     printf(" }");
   }
   printf("\n");
-
+  /*
   printf(" fnb =");
   for(i=0; i<6; i++)
   {
+    int j;
     //printf(" %d:{", i);
     printf(" {");
     //for(j=0; j<e->nfnb[i]; j++) printf(" %ld", get_node_nid(e->fnb[i][j]));
@@ -182,6 +183,7 @@ void printelm(const tElm *e)
     printf(" }");
   }
   printf("\n");
+  */
 }
 
 void printelmarray(long nelms, tElm **elm)
@@ -212,7 +214,7 @@ void printelocface(const tElocFace *ef)
   printf(" f=%d\n", ef->face);
 }
 
-void print_amr_elm_nbinfo(tElm *elm, int face)
+void print_amr_elm_nbinfo(const tElm *elm, int face)
 {
   tMesh *mesh = elm->pat->mesh;
   int i_nbinfo = Ind("amr_elm_nbinfo0") + face;
