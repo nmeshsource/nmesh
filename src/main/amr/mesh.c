@@ -746,7 +746,7 @@ Yo(33.2);
   //printf("amr_elm_nbinfo3: ");print_amr_elm_nbinfo(elm, 3);printf("\n");
   free_array(arr);
 
-  disablevar_innode(elm, Ind("amr_elm_nbinfo0"));
+  //disablevar_innode(elm, Ind("amr_elm_nbinfo0"));
 
 
   /* set signal to update all fnb */
@@ -757,7 +757,7 @@ Yo(33.2);
   }
 
 
-  amr_set_all_fnbs(mesh);
+  amr_update_elm_nbinfo_if_nfnb_negative(mesh);
   printmyelms(mesh);
 
 

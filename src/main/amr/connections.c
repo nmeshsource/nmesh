@@ -961,8 +961,9 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   return list_count_nodes(fnb_head);
 }
 
-/* set all fnb for all elms on all ranks */
-int amr_set_all_fnbs(tMesh *mesh)
+/* Update amr_elm_nbinfo vars on all faces where elm->nfnb[f] < 0.
+   This is done for all elms on all ranks */
+int amr_update_elm_nbinfo_if_nfnb_negative(tMesh *mesh)
 {
   struct list_head *pos;
   struct list_head ef0_head[6]; // one list for each face
@@ -985,6 +986,9 @@ int amr_set_all_fnbs(tMesh *mesh)
       /* if nfnb<0 nb info is not there yet */
       if(elm->nfnb[f] < 0)
       {
+        /* erase all nb info in var amr_elm_nbinfo[f] */
+        disablevarcomp_innode(elm, amr->elm_nbinfo0+f);
+        /* add elm to list of elms that need nb-info */
         glist_entry_add_tail(elm, &ef0_head[f]);
         nmyef0[f] += 1;
       }
@@ -1033,9 +1037,9 @@ printf("YYYYYYY rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
 
     /* rank rk sends his nef0[f] to all others, to tell how many elms he
        wants to find face nbs of */
-printf("111111 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
+printf("111111 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
     nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
-printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
+printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 
     /* init ef0_nbs index counter */
     ef0_nbs_idx = 0;
@@ -1292,8 +1296,8 @@ printf("222222 rank%d rk%d nef0[0]=%d\n", rank, rk, nef0[0]);
 /* make a new elm (e.g. for mesh->nbelm) from just its loc info in eploc */
 tElm *amr_make_elmcopy_for_eploc(tMesh *mesh, tEploc *eploc)
 {
-  tElm *elm = alloc_elm(mesh);
-  int datrank = amr_rank_of_elm_eploc(mesh, eploc);
+//  tElm *elm = alloc_elm(mesh);
+//  int datrank = amr_rank_of_elm_eploc(mesh, eploc);
   return NULL;
 }
 

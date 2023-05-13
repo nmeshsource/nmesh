@@ -114,9 +114,12 @@ int timing_mm_speed(tMesh *mesh);
 int timing_set_myops_ops0_allops(tMesh *mesh);
 
 /* connections.c */
+int connections_loc_on_patchface(int l, const char loc[NLOCS],
+                                 int patface[6]);
 void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
+int amr_update_elm_nbinfo_if_nfnb_negative(tMesh *mesh);

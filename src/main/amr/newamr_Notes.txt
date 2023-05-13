@@ -114,7 +114,7 @@ About nid/eid:
 *make eids again, in a way that just numbers all elms over all ranks
  consecutively
 *then eids do not change because of load bal
-*also form the eid alone we can tell the rank, if we store the 1st eid of
+*also from the eid alone we can tell the rank, if we store the 1st eid of
  every rank in the tMesh on each rank;
 *think: DO we need eid/nid at all? Maybe eploc(without eid) + datrank is
         enough???
@@ -124,7 +124,7 @@ About refine:
 *if we refine certain eids get removed
 *eids only need to be updated after we refine
 *to refine we remove the parent from mesh->myelm_head and set the
- corresponding pointer in mest->myelm to NULL
+ corresponding pointer in mesh->myelm to NULL
 
 About fnb info and such:
 ========================
@@ -132,7 +132,7 @@ About fnb info and such:
   AddAuxVar("amr_elm_nbinfo", "@", "vars that contain arrays for nbinfo[6]");
   MeshVarSetType(mesh, Ind("amr_elm_nbinfo0"), LBTVAR); //to send via MPI
   //change refine-interpolation such that LBTVARs get skipped like AUXVARs
- nbinfo[f] contains unsigned long // e.g. nbinfo[f][3] = eid of nb #3 on face f
+ nbinfo[f] contains tEploc // e.g. nbinfo[f]->eploc[3] is nb #3 on face f
 *nbinfo needs to be set using the nb elm finding funcs I made
 *from nbinfo we can then set the elm->fnb pointers
 *we also copy all elms from other ranks that are nb of one of our elms
