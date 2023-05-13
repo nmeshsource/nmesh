@@ -617,5 +617,7 @@ void finalize_all_and_exit(tMesh *mesh, int ec)
   free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
+  fflush(stderr);
+  fflush(stdout);
   exit(ec);
 }
