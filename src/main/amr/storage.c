@@ -1763,6 +1763,7 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
   struct list_head *pos;
   ulong eid;
   double dt_old = mesh->dt;
+  double dt_new;
   if(auto_dt)
   {
     if(dt>0.) mesh->dt = dt;
@@ -1805,6 +1806,11 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
   /* if there are no nodes do not update dt mesh->dt */
   if(eid==0)
     mesh->dt = dt_old;
+
+  /* now make sure we use the min dt of all ranks */
+  dt_new = mesh->dt;
+  nMPI_Allreduce(&dt_new, &(mesh->dt), 1, nMPI_DOUBLE, nMPI_MIN);
+
   if(mesh->dt != dt_old)
   { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
 
