@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "nMPI.h"
 
-#define PR 0
+#define PR 1
 #define PR0 if(PR){PRF;printf(": calling MPI function...\n");fflush(stdout);}
 #define PR1 if(PR){PRF;printf(": done.\n");fflush(stdout);}
 
@@ -301,6 +301,10 @@ int nMPI_Send(const void *buf, int count, nMPI_Datatype datatype,
               int dest, int tag)
 {
   int stat = 0;
+  if(PR)
+  {
+    PRF;printf(": %d to %d, count=%d tag=%d\n", nMPI_rank(), dest, count, tag);
+  }
 #ifdef USEMPI
   PR0;
   stat = MPI_Send(buf,count, datatype, dest, tag, WORLD);
@@ -314,6 +318,11 @@ int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,
               int source, int tag)
 {
   int stat = 0;
+  if(PR)
+  {
+    PRF;printf(": %d from %d, count=%d tag=%d\n",
+               nMPI_rank(), source, count, tag);
+  }
 #ifdef USEMPI
   PR0;
   stat = MPI_Recv(buf,count, datatype, source, tag, WORLD, MPI_STATUS_IGNORE);
@@ -507,6 +516,10 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root)
 {
   int status = 0;
+  if(PR)
+  {
+    PRF;printf(": count=%d root=%d\n", count, root);
+  }
 #ifdef USEMPI
   PR0;
   status = MPI_Bcast(buffer, count, datatype, root, WORLD);
