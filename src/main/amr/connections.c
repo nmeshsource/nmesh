@@ -1396,13 +1396,13 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         tEploc *eploc = &(nbinfo->eploc[i]);
         int datrank;
         ulong nbidx;
-        tElm *nb;
 
         amr_elmindex_and_datrank_of_elm_eploc(mesh,eploc, &nbidx, &datrank);
 
         if(datrank == rank) /* get elm of eploc from mesh->myelm */
         {
-          nb = mesh->myelm[nbidx];
+          tElm *nb = mesh->myelm[nbidx];
+          elm->fnb[f][i] = nb;
         }
         else /* get elm of eploc from mesh->myelm of rank datrank */
         {
@@ -1410,6 +1410,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
              because it need to be called also by the sending rank */
           tElm **f_elm;
           /* make a new empty elm that is missing some info, like elm->n */
+          tElm *nb;
           tElm0 nb0[1] = {0}; /* initialze all to zero */
 
           /* copy eploc and datrank into nb0, and set bbox */
@@ -1433,11 +1434,12 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
             amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
           }
           /* NOTE: nb->n and nb->np need to be set later!!! */
+
+          /* finally also point at this nb */
+          elm->fnb[f][i] = nb;
+          /* FIXME: add elm also to nb->fnb[nb_f][nb_i]:
+             need to figure out nb_f */
         }
-        /* finally also point at this nb */
-        elm->fnb[f][i] = nb;
-        /* FIXME: add elm also to nb->fnb[nb_f][nb_i]:
-           need to figure out nb_f */
       }
     } /* end loop over f */
   }
