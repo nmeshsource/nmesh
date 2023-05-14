@@ -793,8 +793,8 @@ fflush(stdout);
     { if(datrank != rank) errorexit("dat!=NULL but datrank!=rank"); }
 
 
-printf("elm=%p\n", (void *) elm);
-fflush(stdout);
+//printf("elm=%p\n", (void *) elm);
+//fflush(stdout);
 
     /* setup MPI recv buffers */
     if(datrank != rank)
@@ -907,7 +907,7 @@ printf("base: ops_bal_sum[0]=%g\n", ops_bal_sum[0]);
 printf("key: ops_elm_sum=%g\n", ops_elm_sum);
   val = bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
                         sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, &max);
-printf("val=%p off=%zu num=%zu\n", val, off, num);
+//printf("val=%p off=%zu num=%zu\n", val, off, num);
   if(val)
   {
     if(num == 2) return off+1;
