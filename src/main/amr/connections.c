@@ -1504,6 +1504,8 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
           /* add elm also to nb->fnb[nb_f][nb_i] */
           amr_add_elm_to_nbelm_fnb(elm, f, i);
+          /* This is done locally and may miss nbs of the elms in nbelm,
+             that are on yet other ranks! */
         }
       }
     } /* end loop over f */
@@ -1511,35 +1513,6 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
   return 0;
 }
-
-/* Set elm->fnb for the elms in mesh->nbelm. This is done locally and may miss
-   nbs of the elms in nbelm, that are on yet other ranks! */
-//int amr_set_local_fnb_in_mesh_nbelm(tMesh *mesh)
-//{
-//
-//  formyelms(mesh)
-//  {
-//    tElm *elm = MyElm;
-//    int f, ni;
-//    for(f=0; f<6; f++)
-//    {
-//      int nfnb = elm->nfnb[f];
-//      for(ni=0; ni<nfnb; ni++)
-//      {
-//        tElm *nb = elm->fnb[f][ni];
-//
-//      }
-//    }
-//  }
-//
-//
-//  for(ei=0; ei<mesh->nnbelm; ei++)
-//  {
-//    tElm *nb = mesh->nbelm[ei];
-//    if()
-//    mynnb[nb->datrank]++;
-//  }
-//}
 
 
 // /* get the full elmheader for all elms in mesh->nbelm from the other rank */
