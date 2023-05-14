@@ -745,12 +745,11 @@ tElm **amr_elmarray_bsearch(ulong narr, tElm **arr, tElm *elm)
   tElm **f_elm;
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
-  PRF;printelmarray(narr, arr);
-  //PRF;printf(": bsearch ");
-  printeloc_s(eloc," ");
+  //PRF;printelmarray(narr, arr);
+  //printeloc_s(eloc," ");
   f_elm = bsearch(eloc, arr, narr, sizeof(arr[0]), lecmp_q);
-  if(f_elm) printf("found\n");
-  else      printf("not found\n");
+  //if(f_elm) printf("found\n");
+  //else      printf("not found\n");
   return f_elm;
 }
 
