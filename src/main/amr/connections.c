@@ -54,13 +54,13 @@ int loccmp(const void *loc, const void *eloc)
 int lecmp(const void *loc, const void *elem, void *arg)
 {
   const tEloc *lc = (const tEloc *) loc;
-  //const tElm **elm_arr = elem; //(const tElm **) elem;
-  const tElm *const*elm_arr = elem; //(const tElm **) elem;
+  //const tElm **elm_arr = elem;
+  const tElm *const*elm_arr = elem;
   const tEploc *pelc = elm_arr[0]->eploc;
   tEloc elc[1];
   int cmp;
 
-  /* we could optimize this by caching un unpacked loc in each elm: */
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm: */
   eloc_from_eploc(elc, pelc);
 
   cmp = loccmp(lc, elc);
