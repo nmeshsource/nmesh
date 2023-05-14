@@ -13,6 +13,12 @@ extern tAMR amr[1];
 /* functions that determine the order of element locations */
 /****************************************************************************/
 
+/* We need functions to find elm in myelm or nbelm.
+   For this we use binarysearch.
+   Note: myelm and nbelm need to be sorted (use qsort) for searching.
+   We also keep a linked list for myelm to easily remove or add elms */
+
+
 /* Function that orders locations described in in tEloc:
    return -1,0,1 if loc is before,at,after eloc
    This can be use in qsort. */
@@ -676,9 +682,7 @@ int elm_common_facepoints(tElm *elm, int f, tElm *nb, int nb_f)
 }
 
 
-
-
-
+//FIXME: Is this needed?
 
 /**/
 tElm *amr_get_parent(tElm *elm)
@@ -692,25 +696,10 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 }
 
 
-/* myelm contains all elms on this proc
-   nbelm contains all elms that are neighbors on other procs
-   both can be searched to find a specific nb of one elm in myelm. */
 
-/* NOTE: myelm and nbelm need to be sorted (use qsort) for searching
-   we also keep a linked list for myelm to easily remove or add elms */
-
-/* we need: function to find nb in all myelm */
-//... use wolfGIT/c/binarysearch.c
-// 1. search using comparfunc that is equal even grandparents agree
-// 2. search using comparfunc that is equal even parents agree
-// 3. search using comparfunc that is equal if elm themselves agree
-// 4. search using comparfunc that is equal if ...
-
-
-/* we need: function to find nb in all nbelm */
-//...
-
-
+/****************************************************************************/
+/* functions that use tEloc or tEploc to find to find and send elms */
+/****************************************************************************/
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
    with loc s_eloc and face s_f.
