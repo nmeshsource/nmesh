@@ -80,8 +80,8 @@ int lecmp(const void *loc, const void *elem, void *arg)
    this is used in binarysearch */
 int eecmp(const void *key_elem, const void *elem, void *arg)
 {
-  const tElm *kelm = key_elem;
-  const tEploc *keploc = kelm->eploc;
+  const tElm *const*kelm = key_elem;
+  const tEploc *keploc = kelm[0]->eploc;
   const tElm *const*elm_arr = elem;
   const tEploc *eploc = elm_arr[0]->eploc;
   tEloc klc[1], elc[1];
@@ -92,6 +92,9 @@ int eecmp(const void *key_elem, const void *elem, void *arg)
   eloc_from_eploc(elc, eploc);
 
   cmp = loccmp(klc, elc);
+  //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
+  //printf("--> cmp=%d\n", cmp);
+  ////printelm(elm_arr[0]);
   return cmp;
 }
 
@@ -742,7 +745,12 @@ tElm **amr_elmarray_bsearch(ulong narr, tElm **arr, tElm *elm)
   tElm **f_elm;
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
+  PRF;printelmarray(narr, arr);
+  //PRF;printf(": bsearch ");
+  printeloc_s(eloc," ");
   f_elm = bsearch(eloc, arr, narr, sizeof(arr[0]), lecmp_q);
+  if(f_elm) printf("found\n");
+  else      printf("not found\n");
   return f_elm;
 }
 
