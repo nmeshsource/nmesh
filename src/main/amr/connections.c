@@ -1313,6 +1313,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
     tElm *elm = MyElm;
     int f;
 
+    /* go over all 6 faces of elm */
     for(f=0; f<6; f++)
     {
       int i_nbinfo = amr->elm_nbinfo0 + f;
@@ -1333,8 +1334,17 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
       if(elm->nfnb[f] >= 0) /* elm->fnb[f] is already set */
         continue; /* do nothing */
 
-      /* add nbs in nbinfo to fnb */
+      /* If we get here, we add the nbs in nbinfo to fnb */
       neplocs = array_Neplocs(nbinfo); //num. of nbs we have
+
+      /* first free and then allocate room for neighbors */
+      free(elm->fnb[f]);
+      elm->nfnb[f] = neplocs;
+      elm->fnb[f]  = NULL;
+      if(neplocs)
+        elm->fnb[f] = checked_calloc(neplocs, sizeof(elm->fnb[f][0]));
+
+      /* now set fnb on face f */
       for(i=0; i<neplocs; i++)
       {
         tEploc *eploc = &(nbinfo->eploc[i]);
@@ -1345,14 +1355,27 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
         if(datrank == rank) /* get elm of eploc from mesh->myelm */
         {
-          //tElm *nb = mesh->myelm[nbidx];
-          //...
+          tElm *nb = mesh->myelm[nbidx];
+          elm->fnb[f][i] = nb;
         }
         else /* get elm of eploc from mesh->myelm of rank datrank */
         {
-          //...
+          /* something like move_node_to_rank would not work here
+             because it need to be called also by the sending rank */
+          /* make a new empty elm that is missing some info, like elm->n */
+          tElm *nb;
+          tElm0 nb0[1];
+
+          /* copy eploc and datrank into nb0, and set bbox */
+          nb0->eploc[0] = eploc[0];
+          nb0->datrank  = datrank;
+          amr_set_elm0_bbox(mesh, nb0);
+
+          /* make new nb-elm */
+          nb = alloc_elm_of_elmheader(mesh, nb0);
+          // where do we store this new nb-elm???
+          // how do we get its ->n and ->N ???
         }
-        /**/
       }
     } /* end loop over f */
   }
