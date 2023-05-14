@@ -1396,13 +1396,13 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         tEploc *eploc = &(nbinfo->eploc[i]);
         int datrank;
         ulong nbidx;
+        tElm *nb;
 
         amr_elmindex_and_datrank_of_elm_eploc(mesh,eploc, &nbidx, &datrank);
 
         if(datrank == rank) /* get elm of eploc from mesh->myelm */
         {
-          tElm *nb = mesh->myelm[nbidx];
-          elm->fnb[f][i] = nb;
+          nb = mesh->myelm[nbidx];
         }
         else /* get elm of eploc from mesh->myelm of rank datrank */
         {
@@ -1410,8 +1410,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
              because it need to be called also by the sending rank */
           tElm **f_elm;
           /* make a new empty elm that is missing some info, like elm->n */
-          tElm *nb;
-          tElm0 nb0[] = {0}; /* initialze all to zero */
+          tElm0 nb0[1] = {0}; /* initialze all to zero */
 
           /* copy eploc and datrank into nb0, and set bbox */
           nb0->eploc[0] = eploc[0];
@@ -1434,10 +1433,11 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
             amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
           }
           /* NOTE: nb->n and nb->np need to be set later!!! */
-
-          /* finally also point at this nb */
-          elm->fnb[f][i] = nb;
         }
+        /* finally also point at this nb */
+        elm->fnb[f][i] = nb;
+        /* FIXME: add elm also to nb->fnb[nb_f][nb_i]:
+           need to figure out nb_f */
       }
     } /* end loop over f */
   }
@@ -1445,17 +1445,130 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
   return 0;
 }
 
+/* Set elm->fnb for the elms in mesh->nbelm. This is done locally and may miss
+   nbs of the elms in nbelm, that are on yet other ranks! */
+//int amr_set_local_fnb_in_mesh_nbelm(tMesh *mesh)
+//{
+//
+//  formyelms(mesh)
+//  {
+//    tElm *elm = MyElm;
+//    int f, ni;
+//    for(f=0; f<6; f++)
+//    {
+//      int nfnb = elm->nfnb[f];
+//      for(ni=0; ni<nfnb; ni++)
+//      {
+//        tElm *nb = elm->fnb[f][ni];
+//
+//      }
+//    }
+//  }
+//
+//
+//  for(ei=0; ei<mesh->nnbelm; ei++)
+//  {
+//    tElm *nb = mesh->nbelm[ei];
+//    if()
+//    mynnb[nb->datrank]++;
+//  }
+//}
 
 
-// ??????????????????????????????
-
-/* make a new elm (e.g. for mesh->nbelm) from just its loc info in eploc */
-tElm *amr_make_elmcopy_for_eploc(tMesh *mesh, tEploc *eploc)
-{
-//  tElm *elm = alloc_elm(mesh);
-//  int datrank = amr_rank_of_elm_eploc(mesh, eploc);
-  return NULL;
-}
+// /* get the full elmheader for all elms in mesh->nbelm from the other rank */
+// int amr_get_nbelm_elmheaders(tMesh *mesh)
+// {
+//   int size = nMPI_size();
+//   int rank = nMPI_rank();
+//   ulong *mynnb = checked_calloc(size, sizeof(mynnb[0]));
+//   ulong *nnb = checked_calloc(size, sizeof(nnb[0]));
+//   int ei, rk;
+//
+//   /* find number of nb-elms mynnb[r] on each rank */
+//   for(ei=0; ei<mesh->nnbelm; ei++)
+//   {
+//     tElm *nb = mesh->nbelm[ei];
+//     mynnb[nb->datrank]++;
+//   }
+//
+//   /* */
+//   for(rk=0; rk<size; rk++)
+//   {
+//     tElm0 **elm0s;
+//
+//     /* find out how many rank rk needs */
+//     if(rank == rk) nnb[rk] = mynnb[rk];
+//     nMPI_Bcast(nnb,size, nMPI_UNSIGNED_LONG, rk);
+//     /* rank rk needs nnb[r] nbs from rank r */
+//
+//     /* now send eids of the ones rank rk needs */
+//     for(r=0; r<size; r++)
+//     {
+//       ulong *eid = checked_calloc(nnb[r], sizeof(eid[0]));
+//
+//       for(ei=0; ei<mesh->nnbelm; ei++)
+//       {
+//         tElm *nb = mesh->nbelm[ei];
+//         if()
+//         mynnb[nb->datrank]++;
+//       }
+//
+//
+//
+//
+//       int k;
+//       for(k=0; k<nnb[r]; k++) eid[k] =
+//         nMPI_Send(eid,1, nMPI_UNSIGNED_LONG, rk, 1000);
+//       free(eid);
+//     }
+//
+//
+//
+//
+//
+//     elm0s = rows_calloc(size, nnb, sizeof(elm0s[0][0]));
+//
+//     /**/
+//     if(rank == rk) /* rank rk receives from rank r */
+//     {
+//       for(r=0; r<size; r++)
+//       {
+//         if(r != rk)
+//           nMPI_Recv(elm0s[r], nnb[r], nMPIvars->TEPLOC, r, 3000);
+//       }
+//     }
+//     else /* rank!=rk: i.e. I am rank rk and will revc from all others */
+//     {
+//       /* first send number of tEploc sized entries in ef0_nbs */
+//       nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
+//
+//       /* now send contents of ef0_nbs */
+//       nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
+//
+//     }
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//     rows_free(elm0s);
+//
+//
+//
+//
+//   }
+//
+//   free(nnb);
+//   free(mynnb);
+// }
 
 
 /****************************************************************************/
