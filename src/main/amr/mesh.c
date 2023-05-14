@@ -758,6 +758,9 @@ Yo(33.2);
 
 
   amr_update_elm_nbinfo_if_nfnb_negative(mesh);
+
+  amr_elm_nbinfo_to_elm_fnb(mesh);
+
   printmyelms(mesh);
 
 
@@ -765,7 +768,7 @@ Yo(33.2);
 //nMPI
 nMPI_barrier();
 RunFun(FINALIZE);
-finalize_all_and_exit(mesh, 3); //<--exit code 9
+finalize_all_and_exit(mesh, 0); //<--exit code 0
   return 0;
 }
 

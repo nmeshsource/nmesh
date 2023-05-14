@@ -170,22 +170,23 @@ void printelm(const tElm *e)
   {
     printf(" {");
     print_amr_elm_nbinfo(e, i);
-    printf(" }");
+    printf("}");
   }
   printf("\n");
-  /*
+
   printf(" fnb =");
   for(i=0; i<6; i++)
   {
     int j;
-    //printf(" %d:{", i);
     printf(" {");
-    //for(j=0; j<e->nfnb[i]; j++) printf(" %ld", get_node_nid(e->fnb[i][j]));
-    for(j=0; j<e->nfnb[i]; j++) printeploc(e->fnb[i][j]->eploc);
-    printf(" }");
+    for(j=0; j<e->nfnb[i]; j++)
+    {
+      printeploc(e->fnb[i][j]->eploc);
+      if(j<e->nfnb[i]-1) printf(" ");
+    }
+    printf("}");
   }
   printf("\n");
-  */
 }
 
 void printelmarray(long nelms, tElm **elm)
@@ -696,8 +697,8 @@ void printarray_eploc(tArray *A, int details)
 
   for(i=0; i<neplocs; i++)
   {
-    printf(" ");
     printeploc(&(A->eploc[i]));
+    if(i<neplocs-1) printf(" ");
   }
   if(details) printf("\n");
 }
