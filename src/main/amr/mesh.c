@@ -758,10 +758,14 @@ Yo(33.2);
 
 
   amr_update_elm_nbinfo_if_nfnb_negative(mesh);
-
   amr_elm_nbinfo_to_elm_fnb(mesh);
-
   printmyelms(mesh);
+
+
+  printf("mesh->myelm:\n");
+  printelmarray(mesh->nmyelm, mesh->myelm);
+  printf("mesh->nbelm:\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
 
 
 
