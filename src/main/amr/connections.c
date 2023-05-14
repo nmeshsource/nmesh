@@ -1373,8 +1373,13 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
           /* make new nb-elm */
           nb = alloc_elm_of_elmheader(mesh, nb0);
-          // where do we store this new nb-elm???
+          // FIXME: where do we store this new nb-elm???
           // how do we get its ->n and ->N ???
+          // do we need nb->n for sure, e.g. in surfac.c ???
+          PRF;printf(": FIXME!!!\n");
+
+          /* finally also point at this nb */
+          elm->fnb[f][i] = nb;
         }
       }
     } /* end loop over f */
