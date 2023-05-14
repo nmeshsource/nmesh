@@ -1344,19 +1344,6 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
     free_array(ef0_nbs);
   } /* end loop over rk */
 
-
-  //  // NONSENSE:
-  //  char *buf;
-  //  int sz1 = sizeof(buf[0]);
-  //  nMPI_Win win;
-  //
-  //  /* make a RMA window through which we communicate all */
-  //  nMPI_Win_allocate(1000*sz1, sz1, nMPI_INFO_NULL, WORLD, &buf, &win);
-  //
-  //  /* send elm0 to all MPI ranks */
-  //
-  //  nMPI_Win_free(&win);
-
   return 0;
 }
 
@@ -1446,7 +1433,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
           {
             amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
           }
-          /* NOTE: nb->n and nb->N need to be set later!!! */
+          /* NOTE: nb->n and nb->np need to be set later!!! */
 
           /* finally also point at this nb */
           elm->fnb[f][i] = nb;
