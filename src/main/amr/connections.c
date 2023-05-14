@@ -727,21 +727,17 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 }
 
 /****************************************************************************/
-/* functions that sort elm lists contained in C-arrays */
+/* functions that sort and search elm lists contained in C-arrays */
 /****************************************************************************/
 
 /* sort elmarray with qsort */
-void qsort_elmarray(ulong narr, tElm **arr)
+void amr_elmarray_qsort(ulong narr, tElm **arr)
 {
   qsort(arr, narr, sizeof(arr[0]), eecmp_q);
 }
 
-/****************************************************************************/
-/* functions that use tEloc or tEploc to find and send elms */
-/****************************************************************************/
-
-/* find elm in elm-array arr */
-tElm **bsearch_elmarray(ulong narr, tElm **arr, tElm *elm)
+/* find elm in elmarray arr */
+tElm **amr_elmarray_bsearch(ulong narr, tElm **arr, tElm *elm)
 {
   tElm **f_elm;
   tEloc eloc[1];
@@ -750,6 +746,24 @@ tElm **bsearch_elmarray(ulong narr, tElm **arr, tElm *elm)
   return f_elm;
 }
 
+/* insert elm into sorted elmarray, modifies narrp, arrp */
+void amr_elmarray_add_sort(ulong *narrp, tElm ***arrp, tElm *elm)
+{
+  ulong narr = *narrp;
+  ulong narrp1 = narr+1; //len of extended newarr
+  tElm **arr = *arrp;    //arr is elmarray
+  tElm **newarr = realloc(arr, (narrp1)*sizeof(arr[0])); //make arr 1 bigger
+  if(!newarr) errorexit("out of memory for newarr");
+  newarr[narr] = elm; //add elm in last position
+  amr_elmarray_qsort(narrp1, newarr);
+  *narrp = narrp1; //increase narrp
+  *arrp  = newarr; //point arrp to realloced mem.
+}
+
+
+/****************************************************************************/
+/* functions that use tEloc or tEploc to find and send elms */
+/****************************************************************************/
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
    with loc s_eloc and face s_f.
@@ -1399,6 +1413,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         {
           /* something like move_node_to_rank would not work here
              because it need to be called also by the sending rank */
+          tElm **f_elm;
           /* make a new empty elm that is missing some info, like elm->n */
           tElm *nb;
           tElm0 nb0[1];
@@ -1410,10 +1425,20 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
           /* make new nb-elm */
           nb = alloc_elm_of_elmheader(mesh, nb0);
-          // FIXME: where do we store this new nb-elm???
-          // how do we get its ->n and ->N ???
-          // do we need nb->n for sure, e.g. in surfac.c ???
-          PRF;printf(": FIXME!!!\n");
+
+          /* Is nb in mesh->nbelm already? */
+          f_elm = amr_elmarray_bsearch(mesh->nnbelm, mesh->nbelm, nb);
+          /* if yes we use the nb from mesh->nbelm */
+          if(f_elm)
+          {
+            free_elm(nb);
+            nb = f_elm[0];
+          }
+          else /* otherwise we add nb to mesh->nbelm */
+          {
+            amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
+          }
+          /* NOTE: nb->n and nb->N need to be set later!!! */
 
           /* finally also point at this nb */
           elm->fnb[f][i] = nb;
