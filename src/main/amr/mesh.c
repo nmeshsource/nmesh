@@ -767,8 +767,12 @@ Yo(33.2);
   printf("mesh->nbelm:\n");
   printelmarray(mesh->nnbelm, mesh->nbelm);
 
-printmyelms(mesh);
-printnbelms(mesh);
+  printf("mesh->myelm:\n");
+  printelmarray(mesh->nmyelm, mesh->myelm);
+  printmyelms(mesh);
+  printf("mesh->nbelm:\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
+  printnbelms(mesh);
 
 
 //nMPI
