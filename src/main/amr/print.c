@@ -194,11 +194,7 @@ void printelmarray(long nelms, tElm **elm)
   long i;
   printf("%ld elms: ", nelms);
   for(i=0; i<nelms; i++)
-  {
-    tEloc eloc[1];
-    eloc_from_eploc(eloc, elm[i]->eploc);
-    printeloc_s(eloc, " ");
-  }
+    printeploc_s(elm[i]->eploc, " ");
   printf("\n");
 }
 
@@ -210,6 +206,17 @@ void printmyelms(tMesh *mesh)
     printelm(elm);
   }
 }
+
+void printnbelms(tMesh *mesh)
+{
+  int ei;
+  for(ei=0; ei < mesh->nnbelm; ei++)
+  {
+    tElm *elm = mesh->nbelm[ei];
+    printelm(elm);
+  }
+}
+
 
 void printelocface(const tElocFace *ef)
 {

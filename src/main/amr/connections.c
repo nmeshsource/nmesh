@@ -1361,7 +1361,8 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 }
 
 
-/* Update elm->fnb[f] from the amr_elm_nbinfo0+f var if elm->nfnb[f] < 0 */
+/* Update elm->fnb[f] from the amr_elm_nbinfo0+f var if elm->nfnb[f] < 0,
+   and also add nb elms to mesh->nbelm if this rank does not have them */
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 {
   int rank = nMPI_rank();
@@ -1423,7 +1424,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
           tElm **f_elm;
           /* make a new empty elm that is missing some info, like elm->n */
           tElm *nb;
-          tElm0 nb0[1];
+          tElm0 nb0[] = {0}; /* initialze all to zero */
 
           /* copy eploc and datrank into nb0, and set bbox */
           nb0->eploc[0] = eploc[0];
