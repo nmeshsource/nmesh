@@ -1393,6 +1393,25 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 }
 
 
+/* Add elm to nb->fnb, where nb=elm->fnb[f][ni] */
+void amr_add_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
+{
+  tElm *nb = elm->fnb[f][ni];
+  /* figure out face on nb */
+  int nb_f = amr_get_nbface(elm, f, nb);
+  int nb_nfnb = nb->nfnb[nb_f];
+  tElm **nb_fnb = nb->fnb[nb_f];
+
+  /* make room for one more */
+  nb_fnb = realloc(nb_fnb, (nb_nfnb+1) * sizeof(nb_fnb[0]));
+  nb->fnb[nb_f]  = nb_fnb;
+  nb->nfnb[nb_f] = nb_nfnb+1;
+
+  /* add elm to nb->fnb */
+   nb_fnb[nb_nfnb] = elm;
+}
+
+
 /* Update elm->fnb[f] from the amr_elm_nbinfo0+f var if elm->nfnb[f] < 0,
    and also add nb elms to mesh->nbelm if this rank does not have them */
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
@@ -1482,27 +1501,15 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
           /* finally also point at this nb */
           elm->fnb[f][i] = nb;
-          /* FIXME: add elm also to nb->fnb[nb_f][nb_i]:
-             need to figure out nb_f */
+
+          /* add elm also to nb->fnb[nb_f][nb_i] */
+          amr_add_elm_to_nbelm_fnb(elm, f, i);
         }
       }
     } /* end loop over f */
   }
 
   return 0;
-}
-
-/* Set add elm to nb->fnb, where nb=elm->fnb[f][ni] */
-void amr_add_elm_nbelm_fnb(tElm *elm, int f, int ni)
-{
-  tElm *nb = elm->fnb[f][ni];
-
-  /* figure out face on nb */
-
-//  int nb_nfnb = nb->nfnb;
-//  tElm *nb_fnb = nb->nfnb;
-
-//  nb->fnb = realloc(nb->fnb, nb_nfnb * sizeof(nb->fnb));
 }
 
 /* Set elm->fnb for the elms in mesh->nbelm. This is done locally and may miss
