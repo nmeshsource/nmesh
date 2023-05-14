@@ -251,6 +251,148 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 }
 
 
+/****************************************************************************/
+/* functions that need to be moved into other files */
+/****************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+// replaces l_XYZ_of_xyz
+//FIXME: pick a good file for this func
+//       maybe around l_XYZ_of_xyz in main/coordinates/get_coords.c
+/* set X and return 1 if x is inside this elm, otherwise return 0 */
+int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
+{
+  tPat *pat = elm->pat;
+  int d, stat=0;
+
+  /* get X */
+  if(pat->XYZ_of_xyz)
+    //stat = pat->XYZ_of_xyz(pat, (tNode *)elm,ind, X, x);
+    stat = pat->XYZ_of_xyz(pat, elm,ind, X, x);
+  else
+    for(d=0; d<3; d++) X[d] = x[d];
+
+  if(stat) return 0;
+
+  for(d=0; d<3; d++)
+    if(dless(X[d],elm->bbox[2*d]) || dless(elm->bbox[2*d+1],X[d]))
+      return 0;
+
+  /* round X to inside box */
+  for(d=0; d<3; d++)
+  {
+    if(X[d] < elm->bbox[2*d])   X[d] = elm->bbox[2*d];
+    if(X[d] > elm->bbox[2*d+1]) X[d] = elm->bbox[2*d+1];
+  }
+
+  return 1;
+}
+////////////////////////////////////////////////////////////////////////////
+
+/*
+in add_nfaces_outside_patch study:
+                            =====
+      nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
+
+      touch = common_facepoints(node,face, nb,nb_f);
+
+in common_facepoints study:
+  f1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
+
+*/
+
+
+// equivalent to find_nodefacepoints_in_nbface:
+/* find out if any elm points on face f are on face nb_f of elm nb,
+   Returns: 1 if elm,f and nb,nb_f have points in common
+            0 otherwise */
+int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
+{
+  double *bbox  = elm->bbox;
+  int dir = f/2;
+  int n[] = { 3,3,3 };        /* we use 3 points */
+  double X0[3], LX[3], dX[3]; /* grid of points */
+  int dd;
+  int i,j,k, plane, ret0, ret;
+
+  /* make a grid of points, that excludes endpoints */
+  for(dd=0; dd<3; dd++)
+  {
+    X0[dd] = bbox[2*dd];
+    LX[dd] = bbox[2*dd+1] - X0[dd];
+    dX[dd] = LX[dd]/(n[dd]);
+    X0[dd] += dX[dd] * 0.5;
+  }
+
+  /* loop over points */
+  plane = (n[dir] - 1) * (f%2);
+  forplaneN(dir, i,j,k, n, plane)
+  {
+    double X[3], x[3], oX[3];
+    int nbface[6];
+
+    /* point grid, that never includes edges */
+    X[0] = X0[0] + dX[0] * i;
+    X[1] = X0[1] + dX[1] * j;
+    X[2] = X0[2] + dX[2] * k;
+
+    /* pick one of X,Y,Z on boundary */
+    X[dir] = bbox[f];
+
+    /* get x,y,z of X,Y,Z and then oX,oY,oZ in nb */
+    //set_xyz(NULL, (tNode *)elm,-1, X, x);
+    set_xyz(NULL, elm,-1, X, x);
+    ret0 = elmXYZ_of_xyz(nb,-1, oX, x);
+
+    /* try another point, if this one is not in nb */
+    if(!ret0) continue;
+
+    /* check if this point is on nb face */
+    ret = XYZ_on_face(nb->pat, nbface, oX);
+
+    /* if this point is only in face nb_f of nb we are done */
+    if(ret==1 && nbface[nb_f]) return 1;
+
+    /* if this point is in several faces try another point */
+    if(ret>1) continue;
+
+    if(ret==0)
+    {
+      errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
+    }
+  }
+
+  return 0;
+}
+
+/* check if elm and nb has common points on faces f and nb_f
+   since res in find_elmfacepoints_in_nbface is low, try it both ways,
+   Returns: 1 if elm,f and nb,nb_f have points in common
+            0 otherwise */
+int elm_common_facepoints(tElm *elm, int f, tElm *nb, int nb_f)
+{
+  int f1, f2;
+
+  f1 = find_elmfacepoints_in_nbface(elm,f, nb,nb_f);
+  if(f1) return 1;
+
+  f2 = find_elmfacepoints_in_nbface(nb,nb_f, elm,f);
+
+  return f2 || f1;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
 
 /****************************************************************************/
 /* functions that work on eloc */
@@ -447,6 +589,50 @@ int elm_get_ijk(tElm *elm)
   return connections_get_ijk(eloc->l, eloc->loc);
 }
 
+/* get face of nb that touches elm,elmface
+   Returns: nb-face nb_f if successful
+            -1 otherwise */
+int amr_get_nbface(tElm *elm, int elmface, tElm *nb)
+{
+  int patface[6]; //, nfaces;
+  tPat *pat = elm->pat;
+  tBface *bface;
+  int nb_f;
+  const tEploc *eploc = elm->eploc;
+  tEloc eloc[1];
+
+  /* unpack eploc */
+  eloc_from_eploc(eloc, eploc);
+
+  /* sanity check */
+  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  if(!patface[elmface])
+  {
+    /* simple case where elm and nb are in same patch */
+    nb_f  = elmface^1;
+    return nb_f;
+  }
+  else
+  {
+    /* loop over all bfaces on face and find nb-face nb_f */
+    forbfacesonface(pat, elmface, bface)
+    {
+      tBface *obface = bface->obface;
+      int touch;
+
+      /* do nothing if no other patch face */
+      if(!obface) continue;
+
+      /* check if we touch on the face of the other bface */
+      nb_f = obface->f;
+      touch = elm_common_facepoints(elm,elmface, nb,nb_f);
+      if(touch) return nb_f;
+    }
+  }
+
+  return -1;
+}
+
 
 /****************************************************************************/
 /* functions to initialize tElm */
@@ -587,147 +773,6 @@ void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
   elm0->datrank = amr_rank_of_elm_eploc(mesh, eploc);
 }
 
-
-/****************************************************************************/
-
-
-//////////////////////////////////////////////////////////////////////////
-// replaces l_XYZ_of_xyz
-//FIXME: pick a good file for this func
-//       maybe around l_XYZ_of_xyz in main/coordinates/get_coords.c
-/* set X and return 1 if x is inside this elm, otherwise return 0 */
-int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
-{
-  tPat *pat = elm->pat;
-  int d, stat=0;
-
-  /* get X */
-  if(pat->XYZ_of_xyz)
-    //stat = pat->XYZ_of_xyz(pat, (tNode *)elm,ind, X, x);
-    stat = pat->XYZ_of_xyz(pat, elm,ind, X, x);
-  else
-    for(d=0; d<3; d++) X[d] = x[d];
-
-  if(stat) return 0;
-
-  for(d=0; d<3; d++)
-    if(dless(X[d],elm->bbox[2*d]) || dless(elm->bbox[2*d+1],X[d]))
-      return 0;
-
-  /* round X to inside box */
-  for(d=0; d<3; d++)
-  {
-    if(X[d] < elm->bbox[2*d])   X[d] = elm->bbox[2*d];
-    if(X[d] > elm->bbox[2*d+1]) X[d] = elm->bbox[2*d+1];
-  }
-
-  return 1;
-}
-////////////////////////////////////////////////////////////////////////////
-
-
-
-/*
-in add_nfaces_outside_patch study:
-                            =====
-      nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
-
-      touch = common_facepoints(node,face, nb,nb_f);
-
-in common_facepoints study:
-  f1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
-
-*/
-
-
-// equivalent to find_nodefacepoints_in_nbface:
-/* find out if any elm points on face f are on face nb_f of elm nb */
-int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
-{
-  double *bbox  = elm->bbox;
-  int dir = f/2;
-  int n[] = { 3,3,3 };        /* we use 3 points */
-  double X0[3], LX[3], dX[3]; /* grid of points */
-  int dd;
-  int i,j,k, plane, ret0, ret;
-
-  /* make a grid of points, that excludes endpoints */
-  for(dd=0; dd<3; dd++)
-  {
-    X0[dd] = bbox[2*dd];
-    LX[dd] = bbox[2*dd+1] - X0[dd];
-    dX[dd] = LX[dd]/(n[dd]);
-    X0[dd] += dX[dd] * 0.5;
-  }
-
-  /* loop over points */
-  plane = (n[dir] - 1) * (f%2);
-  forplaneN(dir, i,j,k, n, plane)
-  {
-    double X[3], x[3], oX[3];
-    int nbface[6];
-
-    /* point grid, that never includes edges */
-    X[0] = X0[0] + dX[0] * i;
-    X[1] = X0[1] + dX[1] * j;
-    X[2] = X0[2] + dX[2] * k;
-
-    /* pick one of X,Y,Z on boundary */
-    X[dir] = bbox[f];
-
-    /* get x,y,z of X,Y,Z and then oX,oY,oZ in nb */
-    //set_xyz(NULL, (tNode *)elm,-1, X, x);
-    set_xyz(NULL, elm,-1, X, x);
-    ret0 = elmXYZ_of_xyz(nb,-1, oX, x);
-
-    /* try another point, if this one is not in nb */
-    if(!ret0) continue;
-
-    /* check if this point is on nb face */
-    ret = XYZ_on_face(nb->pat, nbface, oX);
-
-    /* if this point is only in face nb_f of nb we are done */
-    if(ret==1 && nbface[nb_f]) return 1;
-
-    /* if this point is in several faces try another point */
-    if(ret>1) continue;
-
-    if(ret==0)
-    {
-      errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
-    }
-  }
-
-  return 0;
-}
-
-/* check if elm and nb has common points on faces f and nb_f
-   since res in find_elmfacepoints_in_nbface is low, try it both ways */
-int elm_common_facepoints(tElm *elm, int f, tElm *nb, int nb_f)
-{
-  int f1, f2;
-
-  f1 = find_elmfacepoints_in_nbface(elm,f, nb,nb_f);
-  if(f1) return 1;
-
-  f2 = find_elmfacepoints_in_nbface(nb,nb_f, elm,f);
-
-  return f2 || f1;
-}
-
-
-//FIXME: Is this needed?
-
-/**/
-tElm *amr_get_parent(tElm *elm)
-{
-return NULL;
-}
-
-
-void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
-{
-}
 
 /****************************************************************************/
 /* functions that sort and search elm lists contained in C-arrays */
@@ -1445,6 +1490,19 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
   }
 
   return 0;
+}
+
+/* Set add elm to nb->fnb, where nb=elm->fnb[f][ni] */
+void amr_add_elm_nbelm_fnb(tElm *elm, int f, int ni)
+{
+  tElm *nb = elm->fnb[f][ni];
+
+  /* figure out face on nb */
+
+//  int nb_nfnb = nb->nfnb;
+//  tElm *nb_fnb = nb->nfnb;
+
+//  nb->fnb = realloc(nb->fnb, nb_nfnb * sizeof(nb->fnb));
 }
 
 /* Set elm->fnb for the elms in mesh->nbelm. This is done locally and may miss

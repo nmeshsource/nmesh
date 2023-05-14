@@ -356,7 +356,7 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 /***********************************************************************/
 /* Note: To include info about which patches touch, tPat also contains
          info about BCs for patches:
-  struct tBFACE *bface0;
+  struct tBFACE *bfaces[6];
 where tBface is a part of a patch face that touches at most one
 other patch. We use the same BC on all of tBface. */
 typedef struct tBFACE {
