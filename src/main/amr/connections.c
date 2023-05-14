@@ -101,6 +101,12 @@ int eecmp_q(const void *key_elem, const void *elem)
   return eecmp(key_elem, elem, NULL);
 }
 
+/* same as lecmp but without last arg */
+int lecmp_q(const void *loc, const void *elem)
+{
+  return lecmp(loc, elem, NULL);
+}
+
 /****************************************************************************/
 /* primitive functions that work on integers and strings */
 /****************************************************************************/
@@ -724,104 +730,26 @@ void amr_get_fnb(tElm *elm, int patface, int *nfnb, tElm **fnb)
 /* functions that sort elm lists contained in C-arrays */
 /****************************************************************************/
 
+/* sort elmarray with qsort */
 void qsort_elmarray(ulong narr, tElm **arr)
 {
   qsort(arr, narr, sizeof(arr[0]), eecmp_q);
 }
 
 /****************************************************************************/
-/* functions that use tEloc or tEploc to find to find and send elms */
+/* functions that use tEloc or tEploc to find and send elms */
 /****************************************************************************/
 
-/* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
-   with loc s_eloc and face s_f.
-   *s_eloc is the loc caller wants to search for
-   *But we start searching 1st for s_eloc's ancestor on level l0.
-   *If s_eloc has children we increase the level number l
-   Out: list f_elms_head of elms with loc s_eloc and face s_f
-   Returns: On success: level number of descendant(s) of s_eloc
-   Returns: On failure: an int below -999
-   Note: elems in f_elms_head have to be freed later! */
-int NEWNAME__amr_make_elms_on_eloc_face_list__(long narr, tElm **arr,
-                                    size_t off0, size_t num0,
-                                    tEloc s_eloc[1], int s_f, int l0,
-                                    struct list_head *f_elms_head)
+/* find elm in elm-array arr */
+tElm **bsearch_elmarray(ulong narr, tElm **arr, tElm *elm)
 {
-  tElm *const*f_elm;
-  size_t off, num;
-  //tEloc *eloc = elm->eloc;
-  tEloc f_eloc[1];
-  tEloc cheloc[1];
-  int l, lret;
-  int lmax = s_eloc->l;
-  int mor, ijk;
-
-  /* We start searching 1st for s_eloc's ancestor on level l0,
-     thus l0 cannot be bigger than lmax s_eloc->l. */
-  if(l0>lmax) errorexit("l0>lmax");
-
-  /* init */
-  off = off0;
-  num = num0;
-
-  //PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
-  //printeloc(s_eloc);
-  //printf(" s_f=%d\n  ", s_f);
-  //printelmarray(narr, arr);
-
-  for(l = l0; l <= lmax; l++)
-  {
-    /* search for ancestor of s_eloc of level l */
-    f_eloc[0] = s_eloc[0];
-    f_eloc->l = l;
-    f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
-
-    //printf("off=%zu num=%zu  f_elm pos=%zu\n",
-    //       off, num, (size_t) ((const tElm **)f_elm - arr));
-    //printf("got ");printelm(*f_elm);
-
-    if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
-
-    /* is there only one f_elm? */
-    mor=binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp, NULL);
-    //printf("mor=%d\n", mor);
-    if(!mor)  /* if there is only one */
-    {
-      //add f_elm to list and then return
-      glist_entry_add_tail(*f_elm, f_elms_head);
-      return l;
-    }
-  }
-  /* if we get here, nb at s_eloc has children */
-
-  /* search on children one level higher */
-  l = s_eloc->l + 1;
-  cheloc[0] = s_eloc[0];
-  cheloc->l = l;
-  /* we set cheloc->loc below */
-
-  /* default return value */
-  lret = -l - 1000; /* found nothing */
-
-  /* get the 4 children elocs on nb face s_f */
-  for(ijk = 0; ijk<8; ijk++) /* loop over all children */
-  {
-    if(connections_ijk_is_at_parentface(ijk, s_f)) /* only 4 are relevant */
-    {
-      int ret;
-      /* child ijk */
-      cheloc->loc[l-1] = ijk + '0';
-      if(l<NLOCS) cheloc->loc[l] = 0;
-      ret = amr_make_elms_on_eloc_face_list(narr, arr, off, num, cheloc, s_f,
-                                            l, f_elms_head);
-      if(ret >=0) lret = l; /* record success */
-    }
-  }
-
-  /* finally signal failure or success with at least one nb child */
-  //printf("final lret=%d\n", lret);
-  return lret;
+  tElm **f_elm;
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
+  f_elm = bsearch(eloc, arr, narr, sizeof(arr[0]), lecmp_q);
+  return f_elm;
 }
+
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the elm
    with loc s_eloc and face s_f.
