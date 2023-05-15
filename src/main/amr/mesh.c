@@ -767,15 +767,18 @@ Yo(33.2);
   printf("mesh->nbelm:\n");
   printelmarray(mesh->nnbelm, mesh->nbelm);
 
+
+
   printf("mesh->myelm:\n");
   printelmarray(mesh->nmyelm, mesh->myelm);
   printmyelms(mesh);
+
+  amr_get_nbelm_elmheaders(mesh);
+
   printf("mesh->nbelm:\n");
   printelmarray(mesh->nnbelm, mesh->nbelm);
   printnbelms(mesh);
 
-
-  amr_get_nbelm_elmheaders(mesh);
 
 
 
