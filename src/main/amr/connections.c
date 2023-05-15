@@ -60,19 +60,19 @@ int loccmp(const void *loc, const void *eloc)
 int lecmp(const void *loc, const void *elem, void *arg)
 {
   const tEloc *lc = loc;
-  //const tElm **elm_arr = elem;
-  const tElm *const*elm_arr = elem;
-  const tEploc *pelc = elm_arr[0]->eploc;
+  //const tElm0 **elm0_arr = elem;
+  const tElm0 *const*elm0_arr = elem;
+  const tEploc *pelc = elm0_arr[0]->eploc;
   tEloc elc[1];
   int cmp;
 
-  /* NOTE: we could optimize this by caching an unpacked loc in each elm: */
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
   eloc_from_eploc(elc, pelc);
 
   cmp = loccmp(lc, elc);
   //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
-  ////printelm(elm_arr[0]);
+  ////printelm0(elm0_arr[0]);
   return cmp;
 }
 
@@ -80,21 +80,21 @@ int lecmp(const void *loc, const void *elem, void *arg)
    this is used in binarysearch */
 int eecmp(const void *key_elem, const void *elem, void *arg)
 {
-  const tElm *const*kelm = key_elem;
-  const tEploc *keploc = kelm[0]->eploc;
-  const tElm *const*elm_arr = elem;
-  const tEploc *eploc = elm_arr[0]->eploc;
+  const tElm0 *const*kelm0 = key_elem;
+  const tEploc *keploc = kelm0[0]->eploc;
+  const tElm0 *const*elm0_arr = elem;
+  const tEploc *eploc = elm0_arr[0]->eploc;
   tEloc klc[1], elc[1];
   int cmp;
 
-  /* NOTE: we could optimize this by caching an unpacked loc in each elm: */
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
   eloc_from_eploc(klc, keploc);
   eloc_from_eploc(elc, eploc);
 
   cmp = loccmp(klc, elc);
   //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
-  ////printelm(elm_arr[0]);
+  ////printelm0(elm0_arr[0]);
   return cmp;
 }
 
@@ -1515,100 +1515,48 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 }
 
 
-// /* get the full elmheader for all elms in mesh->nbelm from the other rank */
-// int amr_get_nbelm_elmheaders(tMesh *mesh)
-// {
-//   int size = nMPI_size();
-//   int rank = nMPI_rank();
-//   ulong *mynnb = checked_calloc(size, sizeof(mynnb[0]));
-//   ulong *nnb = checked_calloc(size, sizeof(nnb[0]));
-//   int ei, rk;
-//
-//   /* find number of nb-elms mynnb[r] on each rank */
-//   for(ei=0; ei<mesh->nnbelm; ei++)
-//   {
-//     tElm *nb = mesh->nbelm[ei];
-//     mynnb[nb->datrank]++;
-//   }
-//
-//   /* */
-//   for(rk=0; rk<size; rk++)
-//   {
-//     tElm0 **elm0s;
-//
-//     /* find out how many rank rk needs */
-//     if(rank == rk) nnb[rk] = mynnb[rk];
-//     nMPI_Bcast(nnb,size, nMPI_UNSIGNED_LONG, rk);
-//     /* rank rk needs nnb[r] nbs from rank r */
-//
-//     /* now send eids of the ones rank rk needs */
-//     for(r=0; r<size; r++)
-//     {
-//       ulong *eid = checked_calloc(nnb[r], sizeof(eid[0]));
-//
-//       for(ei=0; ei<mesh->nnbelm; ei++)
-//       {
-//         tElm *nb = mesh->nbelm[ei];
-//         if()
-//         mynnb[nb->datrank]++;
-//       }
-//
-//
-//
-//
-//       int k;
-//       for(k=0; k<nnb[r]; k++) eid[k] =
-//         nMPI_Send(eid,1, nMPI_UNSIGNED_LONG, rk, 1000);
-//       free(eid);
-//     }
-//
-//
-//
-//
-//
-//     elm0s = rows_calloc(size, nnb, sizeof(elm0s[0][0]));
-//
-//     /**/
-//     if(rank == rk) /* rank rk receives from rank r */
-//     {
-//       for(r=0; r<size; r++)
-//       {
-//         if(r != rk)
-//           nMPI_Recv(elm0s[r], nnb[r], nMPIvars->TEPLOC, r, 3000);
-//       }
-//     }
-//     else /* rank!=rk: i.e. I am rank rk and will revc from all others */
-//     {
-//       /* first send number of tEploc sized entries in ef0_nbs */
-//       nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
-//
-//       /* now send contents of ef0_nbs */
-//       nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
-//
-//     }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//     rows_free(elm0s);
-//
-//
-//
-//
-//   }
-//
-//   free(nnb);
-//   free(mynnb);
-// }
+/* get the full elmheader for all elms in mesh->nbelm from the other rank */
+int amr_get_nbelm_elmheaders(tMesh *mesh)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  // s_elm[r][i] is elm_i that that is sent to rank r
+  // r_elm[r][i] is elm_i that that is revcd from rank r
+  tElm0 **s_elm = checked_calloc(size, sizeof(s_elm[0]));
+  tElm0 **r_elm = checked_calloc(size, sizeof(r_elm[0]));
+  /* numbers of elms we send to or recv from rank r: */
+  ulong *ns_elm = checked_calloc(size, sizeof(ns_elm[0]));
+  ulong *nr_elm = checked_calloc(size, sizeof(nr_elm[0]));
+  int ei;
+
+  /* mesh->nbelm has all nb-elms about which we have to exchange info */
+  for(ei=0; ei<mesh->nnbelm; ei++)
+  {
+    tElm *nb = mesh->nbelm[ei];
+    int nbrank = nb->datrank;
+    int f, ni;
+
+    /* add nb to list we want to recv from rank nbrank */
+//    amr_elmarray_add_sort(&(nr_elm[nbrank]),&(nr_elm[nbrank]), nb);
+
+    /* the neighbors of nb are my elms that I have to send to rank nbrank */
+    for(f=0; f<6; f++)
+      for(ni=0; ni<nb->nfnb[f]; ni++)
+      {
+        tElm *elm = nb->fnb[f][ni];
+
+        /* add elm to list we want to recv */
+//        amr_elmarray_add_sort(&(ns_elm[nbrank]),&(ns_elm[nbrank]), elm);
+      }
+  }
+
+
+
+  free(nr_elm);
+  free(ns_elm);
+  rows_free(r_elm, size);
+  rows_free(s_elm, size);
+}
 
 
 /****************************************************************************/
