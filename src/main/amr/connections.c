@@ -812,6 +812,99 @@ void amr_elmarray_add_sort(ulong *narrp, tElm ***arrp, tElm *elm)
   *arrp  = newarr; //point arrp to realloced mem.
 }
 
+/****************************************************************************/
+/* functions that sort and search elm0 C-arrays */
+/****************************************************************************/
+
+/* return -1,0,1 if loc is before,at,after elem location,
+   this is used in binarysearch */
+int le0cmp(const void *loc, const void *elem0, void *arg)
+{
+  const tEloc *lc = loc;
+  const tElm0 *elm0_arr = elem0;
+  const tEploc *pelc = elm0_arr->eploc;
+  tEloc elc[1];
+  int cmp;
+
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
+  eloc_from_eploc(elc, pelc);
+
+  cmp = loccmp(lc, elc);
+  //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
+  //printf("--> cmp=%d\n", cmp);
+  ////printelm0(elm0_arr[0]);
+  return cmp;
+}
+
+/* return -1,0,1 if key_elem location is before,at,after elem location,
+   this is used in binarysearch */
+int e0e0cmp(const void *key_elem0, const void *elem0, void *arg)
+{
+  const tElm0 *kelm0 = key_elem0;
+  const tEploc *keploc = kelm0->eploc;
+  const tElm0 *elm0_arr = elem0;
+  const tEploc *eploc = elm0_arr->eploc;
+  tEloc klc[1], elc[1];
+  int cmp;
+
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
+  eloc_from_eploc(klc, keploc);
+  eloc_from_eploc(elc, eploc);
+
+  cmp = loccmp(klc, elc);
+  //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
+  //printf("--> cmp=%d\n", cmp);
+  ////printelm0(elm0_arr[0]);
+  return cmp;
+}
+
+/* same as e0e0cmp but without last arg */
+int e0e0cmp_q(const void *key_elem, const void *elem)
+{
+  return e0e0cmp(key_elem, elem, NULL);
+}
+
+/* same as le0cmp but without last arg */
+int le0cmp_q(const void *loc, const void *elem)
+{
+  return le0cmp(loc, elem, NULL);
+}
+
+/* sort elm0 C-array with qsort */
+void amr_elm0array_qsort(ulong narr, tElm0 *arr)
+{
+  qsort(arr, narr, sizeof(arr[0]), e0e0cmp_q);
+}
+
+/* find elm0 in a C-array of tElm0 */
+tElm0 *amr_elm0array_bsearch(ulong narr, tElm0 *arr, tElm0 *elm0)
+{
+  tElm0 *f_elm0;
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, elm0->eploc); //could optimize if elm0 also has eloc
+  //PRF;printeloc_s(eloc," ");
+  f_elm0 = bsearch(eloc, arr, narr, sizeof(arr[0]), le0cmp_q);
+  //if(f_elm0) printf("found\n");
+  //else       printf("not found\n");
+  return f_elm0;
+}
+
+/* insert elm0 into sorted elm0array, modifies narrp, arrp */
+void amr_elm0array_add_sort(ulong *narrp, tElm0 **arrp, tElm0 *elm0)
+{
+  ulong narr = *narrp;
+  ulong narrp1 = narr+1; //len of extended newarr
+  tElm0 *arr = *arrp;    //arr is elm0array
+  tElm0 *newarr = realloc(arr, (narrp1)*sizeof(arr[0])); //make arr 1 bigger
+  if(!newarr) errorexit("out of memory for newarr");
+  newarr[narr] = elm0[0]; //add content of elm0 in last position
+  amr_elm0array_qsort(narrp1, newarr);
+  *narrp = narrp1; //increase narrp
+  *arrp  = newarr; //point arrp to realloced mem.
+}
+
+
+
 
 /****************************************************************************/
 /* functions that use tEloc or tEploc to find and send elms */
@@ -1520,25 +1613,28 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
-  // s_elm[r][i] is elm_i that that is sent to rank r
-  // r_elm[r][i] is elm_i that that is revcd from rank r
-  tElm0 **s_elm = checked_calloc(size, sizeof(s_elm[0]));
-  tElm0 **r_elm = checked_calloc(size, sizeof(r_elm[0]));
   /* numbers of elms we send to or recv from rank r: */
-  ulong *ns_elm = checked_calloc(size, sizeof(ns_elm[0]));
-  ulong *nr_elm = checked_calloc(size, sizeof(nr_elm[0]));
-  int ei;
+  ulong *ns_elm0 = checked_calloc(size, sizeof(ns_elm0[0]));
+  ulong *nr_elm0 = checked_calloc(size, sizeof(nr_elm0[0]));
+  // s_elm0[r][i] is elm_i that that is sent to rank r
+  // r_elm0[r][i] is elm_i that that is revcd from rank r
+  tElm0 **s_elm0 = checked_calloc(size, sizeof(s_elm0[0]));
+  tElm0 **r_elm0 = checked_calloc(size, sizeof(r_elm0[0]));
+  tCom *scom, *rcom;
+  int ei, rk;
 
   /* mesh->nbelm has all nb-elms about which we have to exchange info */
   for(ei=0; ei<mesh->nnbelm; ei++)
   {
     tElm *nb = mesh->nbelm[ei];
     int nbrank = nb->datrank;
+    union { tElm *elm; tElm0 *elm0; } e2e0;
     int f, ni;
 
     /* add nb to list we want to recv from rank nbrank */
-//    amr_elmarray_add_sort(&(nr_elm[nbrank]),&(nr_elm[nbrank]), nb);
-
+    e2e0.elm = nb;
+    amr_elm0array_add_sort(&(nr_elm0[nbrank]),&(r_elm0[nbrank]),
+                           e2e0.elm0);
     /* the neighbors of nb are my elms that I have to send to rank nbrank */
     for(f=0; f<6; f++)
       for(ni=0; ni<nb->nfnb[f]; ni++)
@@ -1546,16 +1642,45 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
         tElm *elm = nb->fnb[f][ni];
 
         /* add elm to list we want to recv */
-//        amr_elmarray_add_sort(&(ns_elm[nbrank]),&(ns_elm[nbrank]), elm);
+        e2e0.elm = elm;
+        amr_elm0array_add_sort(&(ns_elm0[nbrank]),&(s_elm0[nbrank]),
+                               e2e0.elm0);
       }
   }
 
+  /* send and recv from rank rk */
+  scom = alloc_com(sizeof(s_elm0[0][0]), 0);
+  rcom = alloc_com(sizeof(r_elm0[0][0]), 0);
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
 
+      /* send s_elm0[rk] buffer  */
+      rq = append_buffers_to_com(scom, s_elm0[rk],ns_elm0[rk], NULL,0);
+      nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD);
 
-  free(nr_elm);
-  free(ns_elm);
-  rows_free(r_elm, size);
-  rows_free(s_elm, size);
+      /* recv in r_elm0[rk] */
+      rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
+      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD);
+    }
+
+  /* wait for recvs in rcom */
+  nMPI_Waitall_com_recv(rcom);
+  free_com(rcom);
+
+  //
+  if(rank==0) printf("r_elm0[1][0].np=%d\n", r_elm0[1][0].np);
+
+  /* wait for sends in scom, then free all send related stuff */
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);
+
+  free(nr_elm0);
+  free(ns_elm0);
+  rows_free(r_elm0, size);
+  rows_free(s_elm0, size);
+  return 0;
 }
 
 

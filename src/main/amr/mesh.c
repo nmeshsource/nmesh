@@ -775,6 +775,10 @@ Yo(33.2);
   printnbelms(mesh);
 
 
+  amr_get_nbelm_elmheaders(mesh);
+
+
+
 //nMPI
 nMPI_barrier();
 RunFun(FINALIZE);
