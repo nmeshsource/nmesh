@@ -78,6 +78,36 @@
 #define Lnode_myid(mesh, myid) \
   mesh->myln->ln[(myid) / mesh->myln->nm][(myid) % mesh->myln->nm]->node
 
+
+/****************************************************************************/
+/* Macros that should be used in most modules to access certain structs */
+/****************************************************************************/
+
+/* get parts of tNode struct */
+#define Node_p(node)      (node)->pat->p
+#define Node_l(node)      (node)->l
+#define Node_eid(node)    (node)->nid
+#define Node_np(node)     (node)->np
+#define Node_pat(node)    (node)->pat
+#define Node_mesh(node)   (node)->pat->mesh
+#define Node_ijk(node)    (node)->ijk
+
+/* tests for patch-face, boundary, OUTERBOUND, INNERBOUND */
+#define Node_patface(node, face) (node)->patface[face]
+#define Node_on_BOUND(node, face) \
+  ( Node_patface(node, face) && \
+    (node)->pat->bfaces[face] && \
+    (node)->pat->bfaces[face]->boundary )
+#define Node_on_OUTERBOUND(node, face) \
+  ( Node_patface(node, face) && \
+    (node)->pat->bfaces[face] && \
+    ((node)->pat->bfaces[face]->boundary==OUTERBOUND) )
+#define Node_on_INNERBOUND(node, face) \
+  ( Node_patface(node, face) && \
+    (node)->pat->bfaces[face] && \
+    ((node)->pat->bfaces[face]->boundary==INNERBOUND) )
+
+
 /* marcos to start and stop node load timers */
 #define LOAD_START loadtimer_start(node)
 #define LOAD_STOP  loadtimer_stop(node)
