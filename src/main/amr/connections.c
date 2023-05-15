@@ -589,6 +589,26 @@ int elm_get_ijk(tElm *elm)
   return connections_get_ijk(eloc->l, eloc->loc);
 }
 
+/* set patface of elm, return number of patfaces elm is on */
+int elm_set_patface(tElm *elm, int patface[6])
+{
+  int npatfaces;
+  tEploc *eploc = elm->eploc;
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, eploc);
+  npatfaces = connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  return npatfaces;
+}
+
+/* returns: 1 if elm's face f in on patchface, 0 otherwise */
+int elm_is_on_patface(tElm *elm, int f)
+{
+  int patface[6];
+  elm_set_patface(elm, patface);
+  return patface[f];
+}
+
+
 /* get face of nb that touches elm,elmface
    Returns: nb-face nb_f if successful
             -1 otherwise */
