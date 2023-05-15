@@ -604,16 +604,19 @@ int amr_get_nbface(tElm *elm, int elmface, tElm *nb)
   /* unpack eploc */
   eloc_from_eploc(eloc, eploc);
 
-  /* sanity check */
+  /* check if elmface is on patch-face */
   connections_loc_on_patchface(eloc->l, eloc->loc, patface);
   if(!patface[elmface])
   {
     /* simple case where elm and nb are in same patch */
+    //PRF;printf(": nb is in same patch\n");
     nb_f  = elmface^1;
     return nb_f;
   }
   else
   {
+    /* nb is outside elm's patch */
+    //PRF;printf(": nb is outside patch\n");
     /* loop over all bfaces on face and find nb-face nb_f */
     forbfacesonface(pat, elmface, bface)
     {
