@@ -164,7 +164,7 @@ void printelm(const tElm *e)
   e2e0.elm = e;
   printelm0(e2e0.elm0, "");
   printf(" dat:%s\n", e->dat ? "yes" : "no");
-
+  /*
   printf(" nbi =");
   for(i=0; i<6; i++)
   {
@@ -173,7 +173,7 @@ void printelm(const tElm *e)
     printf("}");
   }
   printf("\n");
-
+  */
   printf(" fnb =");
   for(i=0; i<6; i++)
   {

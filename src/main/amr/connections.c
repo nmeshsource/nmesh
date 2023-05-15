@@ -882,7 +882,8 @@ tElm0 *amr_elm0array_bsearch(ulong narr, tElm0 *arr, tElm0 *elm0)
   tElm0 *f_elm0;
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm0->eploc); //could optimize if elm0 also has eloc
-  //PRF;printeloc_s(eloc," ");
+  //PRF;for(int i=0; i<narr; i++) printeploc_s(arr[i].eploc, " ");
+  //printf("\nbsearch: ");printeloc_s(eloc," ");
   f_elm0 = bsearch(eloc, arr, narr, sizeof(arr[0]), le0cmp_q);
   //if(f_elm0) printf("found\n");
   //else       printf("not found\n");
@@ -898,9 +899,24 @@ void amr_elm0array_add_sort(ulong *narrp, tElm0 **arrp, tElm0 *elm0)
   tElm0 *newarr = realloc(arr, (narrp1)*sizeof(arr[0])); //make arr 1 bigger
   if(!newarr) errorexit("out of memory for newarr");
   newarr[narr] = elm0[0]; //add content of elm0 in last position
+  //PRFs(":1: ");
+  //for(int i=0; i<narrp1; i++) printeploc_s(newarr[i].eploc, " ");
+  //printf("\n");
   amr_elm0array_qsort(narrp1, newarr);
+  //PRFs(":2: ");
+  //for(int i=0; i<narrp1; i++) printeploc_s(newarr[i].eploc, " ");
+  //printf("\n");
   *narrp = narrp1; //increase narrp
   *arrp  = newarr; //point arrp to realloced mem.
+}
+
+/* Add elm0 into sorted elm0array if it is not there yet.
+   This modifies narrp, arrp. */
+void amr_elm0array_unionadd_sort(ulong *narrp, tElm0 **arrp, tElm0 *elm0)
+{
+  tElm0 *f_elm0 = amr_elm0array_bsearch(*narrp, *arrp, elm0);
+  if(!f_elm0)
+    amr_elm0array_add_sort(narrp, arrp, elm0);
 }
 
 
@@ -1616,8 +1632,8 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   /* numbers of elms we send to or recv from rank r: */
   ulong *ns_elm0 = checked_calloc(size, sizeof(ns_elm0[0]));
   ulong *nr_elm0 = checked_calloc(size, sizeof(nr_elm0[0]));
-  // s_elm0[r][i] is elm_i that that is sent to rank r
-  // r_elm0[r][i] is elm_i that that is revcd from rank r
+  // s_elm0[r][i] is elm_i that is sent to rank r
+  // r_elm0[r][i] is elm_i that is revcd from rank r
   tElm0 **s_elm0 = checked_calloc(size, sizeof(s_elm0[0]));
   tElm0 **r_elm0 = checked_calloc(size, sizeof(r_elm0[0]));
   tCom *scom, *rcom;
@@ -1643,10 +1659,20 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 
         /* add elm to list we want to recv */
         e2e0.elm = elm;
-        amr_elm0array_add_sort(&(ns_elm0[nbrank]),&(s_elm0[nbrank]),
-                               e2e0.elm0);
+        amr_elm0array_unionadd_sort(&(ns_elm0[nbrank]),&(s_elm0[nbrank]),
+                                    e2e0.elm0);
       }
   }
+
+  /*
+  printf("r_elm0 = ");
+  for(ei=0; ei<nr_elm0[1]; ei++)
+    printeploc_s(r_elm0[1][ei].eploc, " ");
+
+  printf("s_elm0 = ");
+  for(ei=0; ei<ns_elm0[1]; ei++)
+    printeploc_s(s_elm0[1][ei].eploc, " ");
+  */
 
   /* send and recv from rank rk */
   scom = alloc_com(sizeof(s_elm0[0][0]), 0);
@@ -1669,17 +1695,36 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   nMPI_Waitall_com_recv(rcom);
   free_com(rcom);
 
-  //
-  if(rank==0) printf("r_elm0[1][0].np=%d\n", r_elm0[1][0].np);
+  /* write the now revcd r_elm0 contents into mesh->nbelm */
+  for(rk=0; rk<size; rk++)
+    for(ei=0; ei<nr_elm0[rk]; ei++)
+    {
+      tElm0 *nb0;
+      tElm *nb, *nb_header, **f_nb;
+      union { tElm *elm; tElm0 *elm0; } e2e0;
+      e2e0.elm0 = nb0 = &(r_elm0[rk][ei]);
+      nb_header = e2e0.elm; //is a pointer to tElm that points to a tElm0
+
+      /* find nb corresponding to nb_header in mesh->nbelm */
+      f_nb = amr_elmarray_bsearch(mesh->nnbelm, mesh->nbelm, nb_header);
+      nb = *f_nb;
+
+      /* write nb_header into nb */
+      memcpy(nb, nb0, sizeof(nb0[0]));
+    }
+
+  //printf("mesh->nbelm:\n");
+  //printnbelms(mesh);
 
   /* wait for sends in scom, then free all send related stuff */
   nMPI_Waitall_com_send(scom);
   free_com(scom);
 
-  free(nr_elm0);
-  free(ns_elm0);
+  /* free all arrays */
   rows_free(r_elm0, size);
   rows_free(s_elm0, size);
+  free(nr_elm0);
+  free(ns_elm0);
   return 0;
 }
 
