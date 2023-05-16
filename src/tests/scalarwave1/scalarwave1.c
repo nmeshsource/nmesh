@@ -187,11 +187,9 @@ void scalarwave1_fluxes_pt(tDGinfo *d)
     double *y = Vard_(node, ix+1);
     double *z = Vard_(node, ix+2);
     double t = node->time;
-    tPat *pat = node->pat;
-    tBface *bfaces = pat->bfaces[f];
 
     /* compute boundary flux terms, if on outer bound */
-    if(node->patface[f] && bfaces && bfaces->boundary)
+    if(Node_on_BOUND(node, f))
     {
       double xyz[] = { x[ijk],y[ijk],z[ijk] };
       double u5[5];

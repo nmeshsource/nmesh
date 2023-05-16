@@ -199,7 +199,7 @@ char *node_location_str(tNode *node, char *s, int slen)
     return s;
   }
 
-  l = node->l;
+  l = Node_l(node);
 
   if(slen<=l) errorexit("slen is not big enough");
   s[l--] = 0;

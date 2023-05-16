@@ -1585,7 +1585,8 @@ void set_nodemidpoints_to_face_distXb(tNode *node, double distXb[6])
 
   for(f=0; f<6; f++)
   {
-    double Xbm, Xb[3], X[3];
+    double Xbm, Xb[3];
+    double X[3] = {0}; /* init to avoid NANs in it */
     int dir = f/2;
     int right = f%2;
     int nm1 = n[dir]-1;

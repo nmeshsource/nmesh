@@ -1,0 +1,58 @@
+###################################################################
+# modules we use
+
+physics = scalarwave1
+
+###################################################################
+# FV tests
+coordinates_midpoint_data = yes
+amr_uniform_p = 0 2 4 # 0 1 2 3 4 5 6
+amr_fv_p      = 0 2 4 # 0 1 2 3 4 5 6 7
+#scalarwave1_numflux = LLF
+fv_rec = WENOmZ_2
+fv_surface_interp = parabolic
+#fv_WENOm3_opt_weightratio = 3 # 2
+fv_divf_extrap = dnfn_extrap1 # no # divf_extrap1
+#fv_divf_extrap_s1 = 0.5
+
+###################################################################
+# evolution
+
+evolve_method = sspRK3 # RK4 # Euler
+#evolve_filter = yes
+#evolve_filter_s = 4
+dt = auto # NOTE 6/30/22: auto2 makes dt so big that it's unstable!!!
+finaltime = 0.1
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 7 CubedSpheres
+amr_luni = 1
+
+amr_n0 = 6
+amr_n1 = 5
+amr_n2 = 4
+
+###################################################################
+# initial data
+
+scalarwave1_k = 0.8  -0.5  0.33166247903554
+
+###################################################################
+# output
+
+sysmon_hours = -1
+logfile_creation = no /dev/null
+
+0douttime = 0.05
+0doutput = scalarwave1_pi scalarwave1_pi_err
+0doutput_add_xyz = no
+0doutput_per_patch = no
+
+1douttime = 0.05
+1doutput = scalarwave1_pi
+
+#2douttime = 0.1
+#2doutput = scalarwave1_pi
+#2dformat = xdmf
