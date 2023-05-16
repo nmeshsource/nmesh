@@ -548,8 +548,6 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ);
 void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old);
 void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old);
 void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ);
-void update8_node_n_pt_typ(tNode *node, int *n, int *pt_typ);
-void update8_node_n(tNode *node, int n[3]);
 tDat *alloc_dat(tNode *node);
 void free_dat(tDat *dat);
 tNlist *alloc_nodelist(tNode *node);

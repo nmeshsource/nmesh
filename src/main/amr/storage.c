@@ -482,6 +482,15 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
     if(ijk==0) elm0 = elm; /* save first child */
   }
 
+  /* NOTE: The new children have all zero for nfnb, fnb, and nbinfo.
+           Also, all their neighbors have now the wrong nfnb and nbinfo.
+           Even worse, all its neighbors have fnb pointers pointing
+           to the parent which will be removed!!!  */
+
+  /* FIXME: We should go over parent's nbs and set whatever
+           nb-info we can!!! */
+
+
   /* #pragma omp critical (change_mesh_myelm_list) */
   /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
            if I use a named critical section!
@@ -504,42 +513,14 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   return elm0;
 }
 
-// Equivalent of
-// tNode *destroy_children(tNode *parent)
-// FIXME: it also needs to be then used in refine.c
-/* Remove 8 children and replace them by parent.
-   We assume that all 8 have been moved to this rank before
-   replace_8localchildren_by_parent is called! */
-tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
+/* use info in child0 to recreate the parent */
+tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
 {
   tMesh *mesh = Elm_mesh(child0);
-  unsigned char l_ch0 = child0->eploc->l;
-  tElm *parent;
+  tElm *parent = alloc_elm(mesh);
   int d;
   struct list_head *pos_ijk;
   int ijk;
-
-  /* sanity checks */
-  pos_ijk = &child0->list;
-  for(ijk=0; ijk<8; ijk++)
-  {
-    tElm *child = list_entry(pos_ijk, tElm, list);
-    tEloc eloc[1];
-
-    if(!child->dat)
-      errorexit("all 8 children need to be on this proc");
-    if(child->eploc->l != l_ch0)
-      errorexit("all 8 starting with child0 must be on same level");
-
-    eloc_from_eploc(eloc, child->eploc);
-    if(eloc->loc[l_ch0-1] != ijk)
-      errorexiti("this is not child%d", ijk);
-
-    pos_ijk = pos_ijk->next;  /* pos of next child */
-  }
-
-  /* alloc */
-  parent = alloc_elm(mesh);
 
   /* transfer child0 time info */
   parent->time = child0->time;
@@ -674,12 +655,50 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
     coordinates_init_node(parent);
   }
 
+  return parent;
+}
+
+// Equivalent of
+// tNode *destroy_children(tNode *parent)
+// FIXME: it also needs to be then used in refine.c
+/* Remove 8 children and replace them by parent.
+   We assume that all 8 have been moved to this rank before
+   replace_8localchildren_by_parent is called! */
+tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
+{
+  tElm *parent;
+  unsigned char l_ch0 = child0->eploc->l;
+  struct list_head *pos_ijk;
+  int ijk;
+
+  /* sanity checks */
+  pos_ijk = &child0->list;
+  for(ijk=0; ijk<8; ijk++)
+  {
+    tElm *child = list_entry(pos_ijk, tElm, list);
+    tEloc eloc[1];
+
+    if(!child->dat)
+      errorexit("all 8 children need to be on this proc");
+    if(child->eploc->l != l_ch0)
+      errorexit("all 8 starting with child0 must be on same level");
+
+    eloc_from_eploc(eloc, child->eploc);
+    if(eloc->loc[l_ch0-1] != ijk)
+      errorexiti("this is not child%d", ijk);
+
+    pos_ijk = pos_ijk->next;  /* pos of next child */
+  }
+
+  /* make new parent elm */
+  parent = make_parent_elm(child0, n, pt_typ);
+
   /* NOTE: This new parent has all zero for nfnb, fnb, and nbinfo.
            Also, all its neighbors have now the wrong nfnb and nbinfo.
            Even worse, all its neighbors have fnb pointers pointing
            to the children which will be removed!!!  */
 
-  /* NOTE: We should go over children's nbs and set whatever
+  /* FIXME: We should go over children's nbs and set whatever
            nb-info we can!!! */
 
 
@@ -707,11 +726,8 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
     free_elm(child0);
   }
 
-  /* NOTE: right now the children have only been removed from the
-           mesh->myelm_head list but otherwise are still there! */
   return parent;
 }
-
 
 
 /**************************************************************************/
@@ -1182,34 +1198,6 @@ void update_node_n(tNode *node, int n[3])
   update_node_n_pt_typ(node, n, NULL);
 }
 
-/* update node->n (and possibly node->pt_typ) on all 8 siblings,
-   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
-   must be called by all MPI procs */
-void update8_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
-{
-  tNode *parent = node->parent;
-
-  /* update all 8 siblings, unless this is root node */
-  if(parent)
-  {
-    int ijk;
-    for(ijk=0; ijk<8; ijk++)
-    {
-      tNode *sib = parent->child[ijk];
-      update_node_n_pt_typ(sib, n, pt_typ);
-    }
-  }
-  else
-  {
-    update_node_n_pt_typ(node, n, pt_typ);
-  }
-}
-
-/* update node->n on all 8 siblings, must be called by all MPI procs */
-void update8_node_n(tNode *node, int n[3])
-{
-  update8_node_n_pt_typ(node, n, NULL);
-}
 
 /* remove children */
 tNode *destroy_children(tNode *parent)
