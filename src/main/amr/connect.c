@@ -899,7 +899,7 @@ void remove_unpaired_node_fnbs_only(tNode *node)
         remove_node_fnb_only(node, f, ni);
         ni--;
 
-if(node->nid==72)
+if(Node_eid(nb)==72)
 {
 Yo(3.0);
 printnode(node);
