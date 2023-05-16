@@ -45,7 +45,7 @@ fornodelist(mesh->lns, elem)
 {
 tNode *node = elem->node;
 tDat *dat = node->dat;
-if(dat) dat->info->load_TimeIn_s = 1./(node->nid+1);
+if(dat) dat->info->load_TimeIn_s = 1./(Node_eid(node)+1);
 }
 Timing->mm_speed = 1./(nMPI_rank()+1);
 //Yo(10);
@@ -188,7 +188,7 @@ void move_node_to_rank(tNode *node, int desrank,
   if(setbufs) /* setup buffers and fill them */
   {
     if(PR) { PRF;printf(": nid%ld datrank%d rank%d desrank%d\n",
-                        node->nid, node->datrank, rank, desrank);
+                        Node_eid(node), node->datrank, rank, desrank);
              fflush(stdout); }
     if(rank == node->datrank)
     {
@@ -207,7 +207,7 @@ void move_node_to_rank(tNode *node, int desrank,
       //print_com(scom);
 
       /* send */
-      nMPI_Isend_double_com(scom, rq, other, node->nid, WORLD);
+      nMPI_Isend_double_com(scom, rq, other, Node_eid(node), WORLD);
     }
     if(rank == desrank)
     {
@@ -225,7 +225,7 @@ void move_node_to_rank(tNode *node, int desrank,
         rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
         //print_com(rcom);
         /* receive */
-        nMPI_Irecv_double_com(rcom, rq, other, node->nid, WORLD);
+        nMPI_Irecv_double_com(rcom, rq, other, Node_eid(node), WORLD);
       }
 
       /* allocate space already and init some stuff */
@@ -235,7 +235,7 @@ void move_node_to_rank(tNode *node, int desrank,
       if(0)
       {
         PRF;printf(": nid%ld rank%d node->dat=%p\n",
-                   node->nid, rank, (void *) node->dat);
+                   Node_eid(node), rank, (void *) node->dat);
       }
       if(PR) { PRF;printf(": calling coordinates_init_node\n"); }
       coordinates_init_node(node);
@@ -245,7 +245,7 @@ void move_node_to_rank(tNode *node, int desrank,
   else /* retrieve data from buffers */
   {
     if(PR) { PRF;printf(": nid%ld datrank%d rank%d desrank%d\n",
-                        node->nid, node->datrank, rank, desrank);
+                        Node_eid(node), node->datrank, rank, desrank);
              fflush(stdout); }
     if(rank == desrank)
     {
@@ -417,7 +417,7 @@ double load_set_nodeload_array(tMesh *mesh, const double *speed,
     tNode *node = elem->node;
     tDat *dat = node->dat;
     int datrank = node->datrank;
-    long nid = node->nid;
+    long nid = Node_eid(node);
     double load = loadmin;
 
     /* we need to broadcast nodeload from my nodes to all other ranks */
@@ -458,7 +458,7 @@ tNlist *inc_leaf_until_desired_loadsum(tNlist *ln0, const double *speed,
   fornodelist(ln0, elem)
   {
     tNode *node = elem->node;
-    long nid = node->nid;
+    long nid = Node_eid(node);
 
     sum += nodeload[nid] / rankspeed;
 
@@ -494,7 +494,7 @@ void load_set_desired_rank_start(tMesh *mesh, const double *speed,
   //PRFs(":\n");
   //for(rank=0; rank<size; rank++)
   //  if(rank_start[rank])
-  //    printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->node->nid);
+  //    printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->Node_eid(node));
 }
 
 /* compute desired rank */
@@ -511,7 +511,7 @@ int load_get_desiredrank(tLoadinfo *li)
     if(ln1)
     {
       node = ln1->node;
-      nid1 = node->nid;
+      nid1 = Node_eid(node);
     }
     else
     {
@@ -625,7 +625,7 @@ void load_balance(tMesh *mesh, int strategy)
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
-    li->nid = node->nid;
+    li->nid = Node_eid(node);
     desrank = desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 1);
@@ -639,7 +639,7 @@ void load_balance(tMesh *mesh, int strategy)
   fornodelist(mesh->lns, elem)
   {
     node = elem->node;
-    li->nid = node->nid;
+    li->nid = Node_eid(node);
     desrank = desiredrank(li);
     if(node->datrank != desrank)
       move_node_to_rank(node, desrank, scom, rcom, 0);
