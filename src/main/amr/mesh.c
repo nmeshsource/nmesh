@@ -568,13 +568,6 @@ int setup_elm_mesh1(tMesh *mesh)
   update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
 
   //printmesh(mesh);
-  i=1000;
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    elm = list_entry(pos, tElm, list);
-    Elm_eid(elm) = i++; /* nid is used as tag which must be >=0 */
-    printelm(elm);
-  }
 
   //simple_load_balance(mesh);
   load_balance_elms(mesh);
@@ -603,12 +596,6 @@ Yo(33);
 
   /* update nids */
   update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
-  i=1000;
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    elm = list_entry(pos, tElm, list);
-    Elm_eid(elm) = i++; /* nid is used as tag which must be >=0 */
-  }
   /* update rest */
   alloc_and_set_mesh_myelm(mesh);
   load_balance_elms(mesh);
@@ -633,12 +620,6 @@ Yo(33.1);
 
   /* update nids */
   update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
-  i=1000;
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    elm = list_entry(pos, tElm, list);
-    Elm_eid(elm) = i++; /* nid is used as tag which must be >=0 */
-  }
   /* update rest */
   alloc_and_set_mesh_myelm(mesh);
   load_balance_elms(mesh);
@@ -663,12 +644,6 @@ Yo(33.2);
 
   /* update nids */
   update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
-  i=1000;
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    elm = list_entry(pos, tElm, list);
-    Elm_eid(elm) = i++; /* nid is used as tag which must be >=0 */
-  }
   /* update rest */
   alloc_and_set_mesh_myelm(mesh);
   load_balance_elms(mesh);
