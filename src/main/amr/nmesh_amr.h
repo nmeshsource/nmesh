@@ -106,19 +106,21 @@ typedef struct tELM {
   double dt;              /* time step in node */ \
   double time;            /* current time in node */ \
   double bbox[6];         /* bounding box (in X,Y,Z) of this node */ \
-  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */ \
   int n[3];               /* number of points in X,Y,Z-directions */ \
   int np;                 /* np = n[0] * n[1] * n[2]; */ \
-  int l;                  /* refinement level of this node */ \
-  int leaf;               /* is 1 if this is a leaf node */ \
   int rflag;              /* flag for refining node */ \
-  int ijk;                /* node index (0-7), i.e. child number wrt. parent */ \
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */ \
   int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */ \
   int datrank;            /* rank of proc that rightfully has data */
 typedef struct tELM {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
+  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
+  int l;                  /* refinement level of this node */
+  int leaf;               /* is 1 if this is a leaf node */
+  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
+//FIXME: move nid HERE!!!
+
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
@@ -236,6 +238,12 @@ typedef struct tINDIC {
 typedef struct tNODE {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
+  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
+  int l;                  /* refinement level of this node */
+  int leaf;               /* is 1 if this is a leaf node */
+  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
+  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
+
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
