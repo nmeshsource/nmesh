@@ -487,7 +487,7 @@ int advection1_refine(tMesh *mesh)
     /* do not allow unrefine if we are already at the root node level */
     if(node->rflag<0 && !parent) node->rflag = 0;
 
-    if(node->rflag>0 && node->l>=4) node->rflag = 0;
+    if(node->rflag>0 && Node_l(node)>=4) node->rflag = 0;
     //node->rflag = 0;
 
     if(0 && node->rflag<0)
