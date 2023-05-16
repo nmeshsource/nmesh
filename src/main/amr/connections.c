@@ -734,7 +734,6 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc)
 /* set eploc of child */
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc)
 {
-  tEloc eloc[1];
   int l = eploc->l;
   if(l < 1)
     errorexit("eploc is root node, there is no parent");
