@@ -30,7 +30,7 @@ int SurfExchange_test(tMesh *mesh)
       int k = kOfInd_n(ijk, ua->n);
       int j = jOfInd_n_k(ijk, ua->n, k);
       int i = iOfInd_n_jk(ijk, ua->n, j,k);
-      ua->d[ijk] = node->nid + 0.0007;
+      ua->d[ijk] = Node_eid(node) + 0.0007;
       if(i==0)          ua->d[ijk] += 0.1; 
       if(i==ua->n[0]-1) ua->d[ijk] += 0.2;
       if(j==0)          ua->d[ijk] += 0.03; 

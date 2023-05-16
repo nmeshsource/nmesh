@@ -644,7 +644,7 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
 
   //pr3v("xyz", xyz);
   //pr3v("X", X);
-  //printf("node->nid=%ld node->datrank=%d\n", node->nid, node->datrank);
+  //printf("Node_eid(node)=%ld node->datrank=%d\n", Node_eid(node), node->datrank);
 
   if(!node) errorexit("could not find point xyz");
 

@@ -552,10 +552,10 @@ int test_ajsurf(tMesh *mesh)
       //double B = dom/2 ? X[2] : -X[2];
 
       //XYZ_of_XbYbZb(node, Xb, X);
-      va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * node->nid * node->nid;
-      //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * node->nid * node->nid;
+      va->d[ijk] = test_func(x[0],x[1],x[2]) + 0.000 * Node_eid(node) * Node_eid(node);
+      //va->d[ijk] = test_func(X[0],X[1],X[2]) + 0.000 * Node_eid(node) * Node_eid(node);
       if(test_func_lamAB) va->d[ijk] = test_func(lam,A,B);
-      //va->d[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
+      //va->d[ijk] = 1000*Node_eid(node) +100*X[0] +10*X[1] +X[2];
     }
   }
 
@@ -640,7 +640,7 @@ int test_ajsurf(tMesh *mesh)
       if(!sf) continue;
 
       norm_n_f = Lp_norm_array_reldiff(sf->ajsurf, sf->mysurf, 2);
-      printf("  nid%ld %s f%d: %g\n", node->nid,
+      printf("  nid%ld %s f%d: %g\n", Node_eid(node),
              nodename(node,s,99), f, norm_n_f);
       norm_n_f2 = pow(norm_n_f, 2);
       //#pragma omp atomic
@@ -700,8 +700,8 @@ int test_indc(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    node->dat->ic[vi]->myindc->d[0] = node->nid; 
-    node->dat->ic[vi]->myindc->d[1] = -node->nid; 
+    node->dat->ic[vi]->myindc->d[0] = Node_eid(node);
+    node->dat->ic[vi]->myindc->d[1] = -Node_eid(node);
   }
   request_all_myln_indc_exchange_for_vl(mesh, vl);
 
@@ -904,9 +904,9 @@ int test_filter(tMesh *mesh, int Jpow)
       //double B = dom/2 ? X[2] : -X[2];
 
       //XYZ_of_XbYbZb(node, Xb, X);
-      ud[ijk] = test_func2(x, lmax, node->n) + 0.000 * node->nid * node->nid;
+      ud[ijk] = test_func2(x, lmax, node->n) + 0.000 * Node_eid(node) * Node_eid(node);
       ud[ijk] = test_func2(X, lmax, node->n);
-      //ud[ijk] = 1000*node->nid +100*X[0] +10*X[1] +X[2];
+      //ud[ijk] = 1000*Node_eid(node) +100*X[0] +10*X[1] +X[2];
     }
   }
   PRF;printf(": coeffs before filter\n");

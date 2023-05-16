@@ -520,7 +520,7 @@ void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
       len = sizeof(double) * np;
       //PRF;printf(": name=%s np=%d vli=%d node->datrank=%d\n",
       //           name, np, vli, node->datrank);
-      //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), node->nid, vi);
+      //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), Node_eid(node), vi);
 
       /* check if this var needs to be read on this node */
       if(node->dat)
@@ -533,7 +533,7 @@ void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
 
         /* read var as raw binary */
         memcpy(v, buffer+off, len);
-        //if(node->nid==28) printf("v[]=%g\n", v[0]);
+        //if(Node_eid(node)==28) printf("v[]=%g\n", v[0]);
       }
       off += len; /* go len bytes further in buffer */
 

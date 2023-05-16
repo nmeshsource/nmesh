@@ -421,7 +421,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
           if(write_big) fwrite_big(v, sizeof(double), node->np, fp);
           else          fwrite_little(v, sizeof(double), node->np, fp);
           fprintf(fp, "\n");
-          //if(node->nid==28) printf("v[]=%g\n", v[0]);
+          //if(Node_eid(node)==28) printf("v[]=%g\n", v[0]);
         }
       }
     }

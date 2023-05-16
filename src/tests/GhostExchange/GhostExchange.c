@@ -32,7 +32,7 @@ int GhostExchange_test(tMesh *mesh)
       int k = kOfInd_n(ijk, va->n);
       int j = jOfInd_n_k(ijk, va->n, k);
       int i = iOfInd_n_jk(ijk, va->n, j,k);
-      va->d[ijk] = node->nid + 0.0001*(ijk%9+1);
+      va->d[ijk] = Node_eid(node) + 0.0001*(ijk%9+1);
       if(i==0)          va->d[ijk] += 0.1;
       if(i==va->n[0]-1) va->d[ijk] += 0.2;
       if(j==0)          va->d[ijk] += 0.03;

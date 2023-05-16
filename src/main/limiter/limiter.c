@@ -119,7 +119,7 @@ int limiter_MRS(tNode *node, tVarList *vl)
         if(Ma > Mi) Mi = Ma;
       }
 
-    //printf("nid%ld: alpha_h=%g  mi=%g Mi=%g\n", node->nid, alpha_h, mi,Mi);
+    //printf("nid%ld: alpha_h=%g  mi=%g Mi=%g\n", Node_eid(node), alpha_h, mi,Mi);
     mi = min2(wbar - alpha_h, mi);
     Mi = max2(wbar + alpha_h, Mi);
 

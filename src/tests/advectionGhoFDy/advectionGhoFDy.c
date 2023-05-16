@@ -114,7 +114,7 @@ int advectionGhoFDy_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
         n2 = 2;
         break;
       }
-      //printf("nid%ld: f=%d  ist=%d n0=%d  kst=%d n2=%d\n", node->nid, f, ist,n0, kst,n2);
+      //printf("nid%ld: f=%d  ist=%d n0=%d  kst=%d n2=%d\n", Node_eid(node), f, ist,n0, kst,n2);
 
       /* RHS at each ghost point at outer boundary */
       for(k0 = 0; k0 < n2; k0++)

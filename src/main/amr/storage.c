@@ -1859,13 +1859,13 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
         //if(parent) parent->lid = -lid;
       }
       /* set nid and invalidate parent's nid */
-      node->nid = nid++;
+      Node_eid(node) = nid++;
       if(parent) parent->nid = -nid;
       //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
 
       /* set node MPI communicator */
       //i = nMPIvars_get_ncomms();
-      //i = node->nid % i;
+      //i = Node_eid(node) % i;
       //node->comm = nMPIvars_get_comm(i);
       // //PRF;printf(": i=%d node->comm=%d\n", i, node->comm);
 
@@ -1907,7 +1907,7 @@ ulong update_mesh_myln_node_nid(tMesh *mesh)
 /* return nid or -1 */
 long get_node_nid(tNode *node)
 {
-  return node ? node->nid : -1;
+  return node ? Node_eid(node) : -1;
 }
 
 /* return a local node id */
@@ -1917,7 +1917,7 @@ int calc_node_lid(tNode *node)
   long nnodes = mesh->nln;
   long size = nMPI_size();
   long npr2 = 2*nnodes/size + 1;
-  long tmp = (node->nid) % npr2;
+  long tmp = (Node_eid(node)) % npr2;
   int lid = tmp;
 
   return lid;

@@ -160,7 +160,7 @@ int coordinates_init_node(tNode *node)
   if(dat->coords_set) return 0;
   if(!vars_on) return 0;
 
-  if(PR) { PRF;printf(": nid%ld\n", node->nid); }
+  if(PR) { PRF;printf(": nid%ld\n", Node_eid(node)); }
 
   /* which surface info do we set */
   surface_metric = Par("coordinates_surface_metric");
