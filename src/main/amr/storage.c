@@ -513,8 +513,33 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
 tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
 {
   tMesh *mesh = Elm_mesh(child0);
-  tElm *parent = alloc_elm(mesh);
+  unsigned char l_ch0 = child0->eploc->l;
+  tElm *parent;
   int d;
+  struct list_head *pos_ijk;
+  int ijk;
+
+  /* sanity checks */
+  pos_ijk = &child0->list;
+  for(ijk=0; ijk<8; ijk++)
+  {
+    tElm *child = list_entry(pos_ijk, tElm, list);
+    tEloc eloc[1];
+
+    if(!child->dat)
+      errorexit("all 8 children need to be on this proc");
+    if(child->eploc->l != l_ch0)
+      errorexit("all 8 starting with child0 must be on same level");
+
+    eloc_from_eploc(eloc, child->eploc);
+    if(eloc->loc[l_ch0-1] != ijk)
+      errorexiti("this is not child%d", ijk);
+
+    pos_ijk = pos_ijk->next;  /* pos of next child */
+  }
+
+  /* alloc */
+  parent = alloc_elm(mesh);
 
   /* transfer child0 time info */
   parent->time = child0->time;
@@ -540,9 +565,8 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
   if(child0->dat)
   {
     int nvdb = mesh->nvdb;
-    int vi, ijk;
+    int vi;
     tArray *Xp[3], *Ip[8], *Xc[8][3], *Res[8];
-    struct list_head *pos_ijk;
 
     if(!parent->dat) parent->dat = alloc_dat(parent);
 
@@ -655,8 +679,8 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
            Even worse, all its neighbors have fnb pointers pointing
            to the children which will be removed!!!  */
 
-  /* NOTE: Should we go over children's nbs and set whatever
-           nb-info we can??? */
+  /* NOTE: We should go over children's nbs and set whatever
+           nb-info we can!!! */
 
 
   /* replace children by parent mesh->myelm_head list */
@@ -668,18 +692,19 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
-    int ijk;
     /* now replace children by parent in mesh->myelm_head */
     /* first remove child 1-7 */
     for(ijk=1; ijk<8; ijk++)
     {
-      struct list_head *pos_ijk = (child0->list).next; //pos after child0
+      pos_ijk = (child0->list).next; //pos after child0
       tElm *ch_ijk = list_entry(pos_ijk, tElm, list);  //child after child0
-      list_del(&ch_ijk->list);
+      list_del(&ch_ijk->list); //del form mesh->myelm_head list
+      free_elm(ch_ijk);        //free mem of child ch_ijk
     }
     /* now replace child0 by parent in mesh->myelm_head */
     list_add(&parent->list, &child0->list);
     list_del(&child0->list);
+    free_elm(child0);
   }
 
   /* NOTE: right now the children have only been removed from the
