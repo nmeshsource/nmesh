@@ -564,6 +564,9 @@ int setup_elm_mesh1(tMesh *mesh)
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
+
+  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+
   //printmesh(mesh);
   i=1000;
   list_for_each(pos, &mesh->myelm_head)
@@ -599,6 +602,7 @@ Yo(33);
   }
 
   /* update nids */
+  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
   i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
@@ -628,6 +632,7 @@ Yo(33.1);
   }
 
   /* update nids */
+  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
   i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
@@ -657,6 +662,7 @@ Yo(33.2);
   }
 
   /* update nids */
+  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
   i=1000;
   list_for_each(pos, &mesh->myelm_head)
   {
