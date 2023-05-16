@@ -731,6 +731,23 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc)
   return l+1;
 }
 
+/* set eploc of child */
+int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc)
+{
+  tEloc eloc[1];
+  int l = eploc->l;
+  if(l < 1)
+    errorexit("eploc is root node, there is no parent");
+
+  /* copy everything */
+  parenteploc[0] = eploc[0];
+  /* now change l and eid */
+  parenteploc->l = l-1;
+  parenteploc->eid = EID_INVALID;
+
+  return l+1;
+}
+
 /****************************************************************************/
 /* functions to initialize tElm0 */
 /****************************************************************************/

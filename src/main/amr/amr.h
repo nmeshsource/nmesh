@@ -122,4 +122,5 @@ void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
+int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 int amr_update_elm_nbinfo_if_nfnb_negative(tMesh *mesh);

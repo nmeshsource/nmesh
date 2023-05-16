@@ -13,6 +13,9 @@ extern nMPI_Comm main_comm;
 /* use gridpoints from basis/gridpoints.c */
 extern tGridPoints gridpoints[1];
 
+/* amr stuff */
+extern tAMR amr[1];
+
 
 /**************************************************************************/
 /* basic memory management */
@@ -501,9 +504,190 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   return elm0;
 }
 
-// we STILL need the equivalent of
-//tNode *destroy_children(tNode *parent)
-// is also needs to be then used in refine.c
+// Equivalent of
+// tNode *destroy_children(tNode *parent)
+// FIXME: it also needs to be then used in refine.c
+/* Remove 8 children and replace them by parent.
+   We assume that all 8 have been moved to this rank before
+   replace_8localchildren_by_parent is called! */
+tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
+{
+  tMesh *mesh = Elm_mesh(child0);
+  tElm *parent = alloc_elm(mesh);
+  int d;
+
+  /* transfer child0 time info */
+  parent->time = child0->time;
+  parent->dt = child0->dt;  // FIXME: For now all elms have same dt
+
+  /* fill in info */
+  amr_set_parent_eploc(child0->eploc, parent->eploc);
+  amr_set_elm_pat(mesh, parent);
+  amr_set_elm_bbox(parent);
+
+  /* mark eid as not set */
+  parent->eploc->eid = EID_INVALID;
+
+  for(d=0; d<3; d++)
+  {
+    parent->n[d] = n[d];
+    parent->pt_typ[d] = pt_typ[d]; /* save point type */
+  }
+  parent->np = n[0] * n[1] * n[2];
+
+  /* set parent's datrank to the same as child0 */
+  parent->datrank = child0->datrank;
+  if(child0->dat)
+  {
+    int nvdb = mesh->nvdb;
+    int vi, ijk;
+    tArray *Xp[3], *Ip[8], *Xc[8][3], *Res[8];
+    struct list_head *pos_ijk;
+
+    if(!parent->dat) parent->dat = alloc_dat(parent);
+
+    /* enable same vars in parent->dat as in child0->dat */
+    for(vi=0; vi<nvdb; vi++)
+      if(child0->dat->v[vi]) enablevarcomp_innode(parent, vi);
+
+    /* but disable nb-info vars */
+    enablevar_innode(parent, amr->elm_nbinfo0);
+
+    /* array memory to store points of parent in X coords */
+    Xp[0] = alloc_array(parent->n);
+    Xp[1] = alloc_array(parent->n);
+    Xp[2] = alloc_array(parent->n);
+    fill_3arrays_with_nodepoints(parent, Xp);
+    /* convert from Xb of parent to X for parent,
+       these X are spread over the 8 child nodes */
+    array_XYZ_of_XbYbZb(parent, Xp, Xp);
+
+    /* fill parent->dat with interpolation data from children */
+    /* 1. set children coords within parent */
+    pos_ijk = &child0->list;
+    for(ijk=0; ijk<8; ijk++)
+    {
+      tElm *child = list_entry(pos_ijk, tElm, list);
+
+      /* array memory to store points of child in Xb coords */
+      Ip[ijk] = alloc_array(parent->n);
+      Xc[ijk][0] = alloc_array(parent->n);
+      Xc[ijk][1] = alloc_array(parent->n);
+      Xc[ijk][2] = alloc_array(parent->n);
+      Res[ijk] = alloc_array(parent->n);
+
+      /* find points inside child node -> mask is returned in Ip */
+      array_find_XYZ_in_node(child, Xp, Ip[ijk]);
+      // NOTE: Parent points on the boundary of child are found in several
+      // children (several ijk). Res[ijk] will contain the result
+      // interpolated from child ijk. This is a problem if data in
+      // children is not smooth. We need to average somehow.
+
+      /* convert Xp to child's internal basis coords */
+      array_XbYbZb_of_XYZ(child, Xc[ijk], Xp);
+
+      /* pos of next child */
+      pos_ijk = pos_ijk->next;
+    }
+
+    /* 2. use interpolation to get vars from child to parent */
+    for(vi=0; vi<nvdb; vi++)
+    {
+      int vt = MeshVarType(mesh, vi);
+      /* fill parent->dat with interpolation data from child */
+      if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
+      {
+        if(child0->dat->v[vi])
+        {
+          int k, cnt;
+
+          /* interpolate for each child and save results in Res */
+          pos_ijk = &child0->list;
+          for(ijk=0; ijk<8; ijk++)
+          {
+            tElm *child = list_entry(pos_ijk, tElm, list);
+            tArray *var = child->dat->v[vi];
+            if(var)
+              basis_interp_toIpoints(child, var, Xc[ijk],Ip[ijk], Res[ijk],
+                                     Lagrange_of_x);
+            /* pos of next child */
+            pos_ijk = pos_ijk->next;
+          }
+
+          /* take average of results from different child nodes */
+          forarray(parent->dat->v[vi], k)
+          {
+            cnt = 0;
+            parent->dat->v[vi]->d[k] = 0.;
+            for(ijk=0; ijk<8; ijk++)
+            {
+              if(Ip[ijk]->i[k] >= 0) /* if child has the point */
+              {
+                cnt++; /* count num of chidren who have this point */
+                parent->dat->v[vi]->d[k] += Res[ijk]->d[k];
+              }
+            }
+            /* average if there was more than one child with this point */
+            if(cnt>1) parent->dat->v[vi]->d[k] /= cnt;
+          }
+        } /* end: if(child0->dat) */
+      }
+    }
+    /* 3. free temp arrays for coords */
+    for(ijk=0; ijk<8; ijk++)
+    {
+      free_array(Res[ijk]);
+      free_array(Xc[ijk][2]);
+      free_array(Xc[ijk][1]);
+      free_array(Xc[ijk][0]);
+      free_array(Ip[ijk]);
+    }
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
+
+    /* init coords in parent */
+    coordinates_init_node(parent);
+  }
+
+  /* NOTE: This new parent has all zero for nfnb, fnb, and nbinfo.
+           Also, all its neighbors have now the wrong nfnb and nbinfo.
+           Even worse, all its neighbors have fnb pointers pointing
+           to the children which will be removed!!!  */
+
+  /* NOTE: Should we go over children's nbs and set whatever
+           nb-info we can??? */
+
+
+  /* replace children by parent mesh->myelm_head list */
+  /* #pragma omp critical (change_mesh_myelm_list) */
+  /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
+           if I use a named critical section!
+           So replace "GEN_Pragma(omp critical (change_mesh_myelm_list))"
+           by "GEN_Pragma(omp critical)" when debugging races!!! */
+  //GEN_Pragma(omp critical (change_mesh_myelm_list))
+  GEN_Pragma(omp critical)
+  {
+    int ijk;
+    /* now replace children by parent in mesh->myelm_head */
+    /* first remove child 1-7 */
+    for(ijk=1; ijk<8; ijk++)
+    {
+      struct list_head *pos_ijk = (child0->list).next; //pos after child0
+      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);  //child after child0
+      list_del(&ch_ijk->list);
+    }
+    /* now replace child0 by parent in mesh->myelm_head */
+    list_add(&parent->list, &child0->list);
+    list_del(&child0->list);
+  }
+
+  /* NOTE: right now the children have only been removed from the
+           mesh->myelm_head list but otherwise are still there! */
+  return parent;
+}
+
+
 
 /**************************************************************************/
 /* node storage */
