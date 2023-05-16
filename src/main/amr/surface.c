@@ -1083,7 +1083,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       }
 
       //printarray_int(Ip[ni]);
-      if(0 && f==1 && node->nid==7)
+      if(0 && f==1 && Node_eid(nb)==7)
       {
         printf("ni=%d:\n", ni);
         printnode(node);
@@ -1154,7 +1154,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
           basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                    Cb[ni],Ip[ni], Res[ni], Lagrange_of_x);
 
-if(0 && node->nid==17 && nb->nid==64 && vi==35)
+if(0 && Node_eid(nb)==17 && Node_eid(nb)==64 && vi==35)
 {
 tMesh *mesh = node->pat->mesh;
 int ll;
