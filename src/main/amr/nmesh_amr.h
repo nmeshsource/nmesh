@@ -109,7 +109,6 @@ typedef struct tELM {
   int n[3];               /* number of points in X,Y,Z-directions */ \
   int np;                 /* np = n[0] * n[1] * n[2]; */ \
   int rflag;              /* flag for refining node */ \
-  long nid;               /* node ID, updated by update_mesh_myln_node_nid */ \
   int pt_typ[3];          /* e.g. pt_typ[1]=P_LGL => LGL in dir1 of node */ \
   int datrank;            /* rank of proc that rightfully has data */
 typedef struct tELM {
@@ -119,6 +118,7 @@ typedef struct tELM {
   int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
+  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
 //FIXME: move nid HERE!!!
 
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */

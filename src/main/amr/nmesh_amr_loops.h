@@ -90,10 +90,33 @@
 /* Macros that should be used in most modules to access certain structs */
 /****************************************************************************/
 
+/* get parts of tElm struct */
+#define Elm_p(elm)      (elm)->eploc->p
+#define Elm_l(elm)      (elm)->eploc->l
+#define Elm_eid(elm)    (elm)->eploc->eid
+#define Elm_np(elm)     (elm)->np
+#define Elm_mesh(elm)   (elm)->pat->mesh
+
+/* tests for patch-face, boundary, OUTERBOUND, INNERBOUND */
+#define Elm_patface(elm, face) elm_is_on_patface(elm, face)
+#define Elm_on_BOUND(elm, face) \
+  ( Elm_patface(elm, face) && \
+    (elm)->pat->bfaces[face] && \
+    (elm)->pat->bfaces[face]->boundary )
+#define Elm_on_OUTERBOUND(elm, face) \
+  ( Elm_patface(elm, face) && \
+    (elm)->pat->bfaces[face] && \
+    ((elm)->pat->bfaces[face]->boundary==OUTERBOUND) )
+#define Elm_on_INNERBOUND(elm, face) \
+  ( Elm_patface(elm, face) && \
+    (elm)->pat->bfaces[face] && \
+    ((elm)->pat->bfaces[face]->boundary==INNERBOUND) )
+
+
 /* get parts of tNode struct */
 #define Node_p(node)      (node)->pat->p
 #define Node_l(node)      (node)->l
-#define Node_eid(node)    (node)->nid
+#define Node_eid(node)    Elm_eid(node)
 #define Node_np(node)     (node)->np
 #define Node_pat(node)    (node)->pat
 #define Node_mesh(node)   (node)->pat->mesh
