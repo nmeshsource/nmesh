@@ -250,12 +250,12 @@ cc_utilities:
 
 # target to run unit tests
 unittests: cc_utilities
-	@for X in $(testnames); do if [ -d "src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd src/tests/$$X/unittests; sh unittests.sh; fi done
+	@for X in $(testnames); do if [ -d "$(TOP)/src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd $(TOP)/src/tests/$$X/unittests; sh unittests.sh; fi done
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh unittests.sh; fi done
 
 # target to reset the unit test results, we consider to be "correct"
 resetunits:
-	@for X in $(testnames); do if [ -d "src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd src/tests/$$X/unittests; sh resetunits.sh; fi done
+	@for X in $(testnames); do if [ -d "$(TOP)/src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd $(TOP)/src/tests/$$X/unittests; sh resetunits.sh; fi done
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh resetunits.sh; fi done
 
 
