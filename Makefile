@@ -78,6 +78,10 @@ compiledphysics := $(patsubst src/main/%,,$(libpaths))
 compiledphysics := $(patsubst src/utility/%,,$(compiledphysics))
 compiledphysics := $(notdir $(compiledphysics))
 
+# extract all libnames that are in a path that starts with src/tests
+testpaths := $(filter src/tests/%,$(libpaths))
+testnames := $(notdir $(testpaths))
+
 # --------------------------------------------------------------------------
 # set CXX and CLINKER to CC if they are not set in MyConfig
 ifeq ($(CXX),)
@@ -204,6 +208,7 @@ printvars:
 	@echo PROJECTDIR=$(PROJECTDIR)
 	@echo projectpaths=$(projectpaths)
 	@echo projectnames=$(projectnames)
+	@echo testnames=$(testnames)
 #	@echo libpathCfiles=$(libpathCfiles)
 	@echo libpaths=$(libpaths)
 	@echo compiledphysics=$(compiledphysics)
@@ -245,10 +250,12 @@ cc_utilities:
 
 # target to run unit tests
 unittests: cc_utilities
+	@for X in $(testnames); do if [ -d "src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd src/tests/$$X/unittests; sh unittests.sh; fi done
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh unittests.sh; fi done
 
 # target to reset the unit test results, we consider to be "correct"
 resetunits:
+	@for X in $(testnames); do if [ -d "src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd src/tests/$$X/unittests; sh resetunits.sh; fi done
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh resetunits.sh; fi done
 
 
