@@ -91,7 +91,7 @@ typedef struct tELM {
   struct tDAT *dat;       // pointer to data (NULL if not on this proc)
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   struct tPAT *pat;       // remove one day, since we have mesh
-  int nfnb[6];            // number of face neighbor nodes
+  int nfnb[6];            // number of face neighbor nodes (fnb below)
   struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
   struct list_head list;  // all elms form a linked list
   //char loc[NLOCS];      // unpacked elm location
@@ -119,7 +119,6 @@ typedef struct tELM {
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
-//FIXME: move nid HERE!!!
 
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
   //struct tMESH *mesh;     // pointer to mesh that contains elm
@@ -132,7 +131,7 @@ typedef struct tELM {
   /* items to do with neighbor communication need to go last: */
   struct tELM *nb[6];     /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
                              nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
-  int nfnb[6];            /* number of face neighbor nodes */
+  int nfnb[6];            /* number of face neighbor nodes (fnb below) */
   struct tELM **fnb[6];   /* list of neighbor nodes on face, contains info
                              condensed out of nfaces */
   struct tNFACE *nfaces[6]; /* 1st nface of this node,
