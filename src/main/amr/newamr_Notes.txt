@@ -155,10 +155,10 @@ About fnb info and such:
   need to be updated.
  -now we have only our own elms, but lots of them have missing nb info
  -next we update all elm->eid everywhere (may save the old eids in elm->oid)
- -update all nbinfo[f] where nfnb[f] is not neg. by reading new eid via fnb[f]
-  and invalidate all nbinfo[f] where nfnb[f] is neg.
- -Then update nbinfo[f] for all faces of my elms that have an invalid nbinfo[f].
-  This will need MPI to find nb elms on other ranks!
+ -update all nbinfo[f] where nnbinfo[f] is not neg. by reading new eid via
+  fnb[f] and invalidate all nbinfo[f] where nnbinfo[f] is neg.
+ -Then update nbinfo[f] for all faces of my elms that have an invalid
+  nbinfo[f]. This will need MPI to find nb elms on other ranks!
  -PROBLEM: afterward we want to do load bal, that will probably erase nbelm
            as above. It will also invalidate a lot of elm->fnb.
            On the other hand nbinfo[f] remains valid, so it should be
@@ -168,7 +168,7 @@ About fnb info and such:
 Load bal and fnb info:
 ======================
 *the elms from other ranks in nbelm need to be erased, we should make all
- elm->nfnb<0 that point to them
+ elm->nfnb<0,nnbinfo<0 that point to them
 *how do we get the nbinfo[f] from other ranks???:
  make vars that contain the 6 vars nbinfo[0-5]:
   AddAuxVar("amr_elm_nbinfo", "@", "vars that contain arrays for *nbinfo[6]");
