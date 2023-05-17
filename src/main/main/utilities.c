@@ -864,8 +864,15 @@ void *rows_calloc(size_t nx, unsigned long ny[nx], size_t size)
 
   for(i=0; i<nx; i++)
   {
-    p[i] = calloc(ny[i], size);
-    if(!p[i]) errorexiti("no memory for %d bytes", ny[i]*size);
+    if(ny[i])
+    {
+      p[i] = calloc(ny[i], size);
+      if(!p[i]) errorexiti("no memory for %d bytes", ny[i]*size);
+    }
+    else
+    {
+      p[i] = NULL;
+    }
   }
   g = p;    /* convert p into generic pointer */
   return g; /* return generic pointer */
