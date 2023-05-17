@@ -762,12 +762,11 @@ int cmp_ulong(const void *key, const void *ar, void *arg)
   return 0;
 }
 
-/* return the rank that an elm with eploc is on */
-int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
+/* return the rank that an elm with eid is on */
+int amr_rank_of_eid(tMesh* mesh, ulong eid)
 {
   int size = nMPI_size();
   ulong *eidlim = mesh->eidlim;
-  ulong eid = eploc->eid;
   const ulong *li;
   size_t off, num;
 
@@ -787,19 +786,44 @@ int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
   return off+1;
 }
 
+/* return the rank that an elm with eploc is on */
+/*
+int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
+{
+  ulong eid = eploc->eid;
+
+  return amr_rank_of_eid(mesh, eid);
+}
+*/
+
 /* return the index into mesh->myelm (on the rank it is) that an elm
    with eploc is on */
+void amr_elmindex_and_datrank_of_eid(tMesh* mesh, ulong eid,
+                                     ulong *elmindex, int *datrank)
+{
+  ulong *eidlim = mesh->eidlim;
+
+  *datrank = amr_rank_of_eid(mesh, eid);
+
+  if(*datrank==0) *elmindex = eid;
+  else            *elmindex = eid - eidlim[*datrank-1];
+}
+
+/* return the index into mesh->myelm (on the rank it is) that an elm
+   with eploc is on */
+/*
 void amr_elmindex_and_datrank_of_elm_eploc(tMesh* mesh, tEploc *eploc,
                                            ulong *elmindex, int *datrank)
 {
   ulong *eidlim = mesh->eidlim;
   ulong eid = eploc->eid;
 
-  *datrank = amr_rank_of_elm_eploc(mesh, eploc);
+  *datrank = amr_rank_of_eid(mesh, eid);
 
   if(*datrank==0) *elmindex = eid;
   else            *elmindex = eid - eidlim[*datrank-1];
 }
+*/
 
 /* init elm0 data as far as possible from eploc */
 void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
@@ -809,7 +833,7 @@ void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
 
   /* set bbox and datrank, all else in elm0 remains unchanged */
   amr_set_elm0_bbox(mesh, elm0);
-  elm0->datrank = amr_rank_of_elm_eploc(mesh, eploc);
+  elm0->datrank = amr_rank_of_eid(mesh, eploc->eid);
 }
 
 
@@ -1690,7 +1714,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         int datrank;
         ulong nbidx;
 
-        amr_elmindex_and_datrank_of_elm_eploc(mesh,eploc, &nbidx, &datrank);
+        amr_elmindex_and_datrank_of_eid(mesh, eploc->eid, &nbidx, &datrank);
 
         if(datrank == rank) /* get elm of eploc from mesh->myelm */
         {
@@ -1757,7 +1781,8 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   tElm0 **s_elm0 = checked_calloc(size, sizeof(s_elm0[0]));
   tElm0 **r_elm0 = checked_calloc(size, sizeof(r_elm0[0]));
   tCom *scom, *rcom;
-  int ei, rk;
+  ulong ei;
+  int rk;
 
   /* mesh->nbelm has all nb-elms about which we have to exchange info */
   for(ei=0; ei<mesh->nnbelm; ei++)
@@ -1847,6 +1872,125 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   free(ns_elm0);
   return 0;
 }
+
+
+/****************************************************************************/
+/* functions to get elm-headers from another rank */
+/****************************************************************************/
+
+/* get the full elmheader for all elms in eid from the other rank */
+int amr_get_elm0_of_eids(tMesh *mesh, ulong neids, ulong *eid, tElm0 *elm0)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+
+  ulong **rank_eid = checked_calloc(size, sizeof(rank_eid[0]));
+
+  /* numbers of elms we send to or recv from rank r: */
+  ulong *ns_elm0 = checked_calloc(size, sizeof(ns_elm0[0]));
+  ulong *nr_elm0 = checked_calloc(size, sizeof(nr_elm0[0]));
+  // s_elm0[r][i] is elm_i that is sent to rank r
+  // r_elm0[r][i] is elm_i that is revcd from rank r
+  tElm0 **s_elm0 = checked_calloc(size, sizeof(s_elm0[0]));
+  tElm0 **r_elm0 = checked_calloc(size, sizeof(r_elm0[0]));
+  tCom *scom, *rcom;
+  int ei, rk;
+
+  /* eid has all eids for which we want elmheaders */
+  for(ei=0; ei<neids; ei++)
+  {
+    ulong eid_i = eid[ei];
+    union { tElm *elm; tElm0 *elm0; } e2e0;
+    ulong elmindex;
+    int datrank;
+
+    amr_elmindex_and_datrank_of_eid(mesh, eid_i, &elmindex, &datrank);
+
+    if(rank==datrank) /* I have the elm with this eid_i */
+    {
+      tElm0 *elm0;
+      e2e0.elm = mesh->myelm[elmindex];
+      r_elm0[rank][77777] = *(e2e0.elm0);
+    }
+    else
+    {
+    //.. need to get elm0 from datrank
+      /* add eid_i to list we want to recv from rank datrank */
+      rank_eid[datrank][55555] = eid_i;
+    }
+  }
+
+  /* tell each rank what we need */
+  //  nMPI_Bcast(rank_eid[datrank],555555, nMPI_UNSIGNED_LONG, rk);
+
+
+  /* send and recv from rank rk */
+  scom = alloc_com(sizeof(s_elm0[0][0]), 0);
+  rcom = alloc_com(sizeof(r_elm0[0][0]), 0);
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
+
+      /* send s_elm0[rk] buffer  */
+      rq = append_buffers_to_com(scom, s_elm0[rk],ns_elm0[rk], NULL,0);
+      nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD);
+
+      /* recv in r_elm0[rk] */
+      rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
+      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD);
+    }
+
+  /* wait for recvs in rcom */
+  nMPI_Waitall_com_recv(rcom);
+  free_com(rcom);
+
+  /* write the now revcd r_elm0 contents into eid */
+  for(rk=0; rk<size; rk++)
+    for(ei=0; ei<nr_elm0[rk]; ei++)
+    {
+      tElm0 *nb0;
+      tElm *nb, *nb_header, **f_nb;
+      union { tElm *elm; tElm0 *elm0; } e2e0;
+      e2e0.elm0 = nb0 = &(r_elm0[rk][ei]);
+      nb_header = e2e0.elm; //is a pointer to tElm that points to a tElm0
+
+      /* find nb corresponding to nb_header in eid */
+      f_nb = amr_elmarray_bsearch(neids, eid, nb_header);
+      nb = *f_nb;
+
+      /* write nb_header into nb */
+      memcpy(nb, nb0, sizeof(nb0[0]));
+    }
+
+  //printf("eid:\n");
+  //printnbelms(mesh);
+
+  /* wait for sends in scom, then free all send related stuff */
+  nMPI_Waitall_com_send(scom);
+  free_com(scom);
+
+  /* free all arrays */
+  rows_free(r_elm0, size);
+  rows_free(s_elm0, size);
+  free(nr_elm0);
+  free(ns_elm0);
+  rows_free(rank_eid, size);
+  return 0;
+}
+
+
+
+
+
+
+
+
+/****************************************************************************/
+
+/* We probably do NOT NEED all this stuff BELOW: */
+
+/****************************************************************************/
 
 
 /****************************************************************************/
