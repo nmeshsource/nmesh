@@ -293,6 +293,7 @@ void *pmalloc(int n);
 void *dtensor(size_t size);
 void *pcalloc(size_t n);
 void *checked_calloc(size_t nmemb, size_t size);
+void *checked_realloc(void *ptr, size_t size);
 void *rows_calloc(size_t nx, unsigned long ny[nx], size_t size);
 void rows_free(void *g, size_t nx);
 

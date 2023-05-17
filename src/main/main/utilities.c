@@ -852,6 +852,14 @@ void *checked_calloc(size_t nmemb, size_t size)
   return p;
 }
 
+/* realloc with check */
+void *checked_realloc(void *ptr, size_t size)
+{
+  void *p = realloc(ptr, size);
+  if(!p) errorexit("out of memory");
+  return p;
+}
+
 /* Alloc nx rows of pointers: pointer i is p[i] (with i=[0,...,nx-1])
    Each p[i] is pointing to ny[i]*size bytes of memory.
    To access the memory we use p[i][j].
