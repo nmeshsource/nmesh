@@ -1189,33 +1189,43 @@ void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
 
 /* write number of eplocs in var amr_elm_nbinfo into
    elm->dat->info->nnbinfo */
-void amr_elm_nbinfo_set_nnbinfo(tElm *elm)
+void amr_elm_nbinfo_set_nnbinfo(tElm *elm, int positive)
 {
+  tDat *dat = elm->dat;
   int f;
+
+  if(!dat) return; /* do nothing if no dat */
+
   for(f=0; f<6; f++)
   {
     int i_nbinfo = amr->elm_nbinfo0 + f;
     tArray *nbinfo = VarA(elm, i_nbinfo);
+    int nnbinfo_new;
+    int nnbinfo_old = elm->dat->info->nnbinfo[f];
 
     /* if there is no nbinfo there are no nbs */
+    /* is nbinfo enabled? */
     if(!nbinfo)
-    {
-      elm->dat->info->nnbinfo[f] = 0;
-      continue;
-    }
+      nnbinfo_new = 0; /* if there is no nbinfo there are no nbs */
+    else
+      nnbinfo_new = array_Neplocs(nbinfo); /* num. of nbs we have */
 
-    /* num. of nbs we have */
-    elm->dat->info->nnbinfo[f] = array_Neplocs(nbinfo);
+    /* write back into nnbinfo[f] */
+    /* if it was non-negative we keep it so */
+    if(nnbinfo_old >= 0 || positive)
+      elm->dat->info->nnbinfo[f] = nnbinfo_new;
+    else /* we keep it negative */
+        elm->dat->info->nnbinfo[f] = -nnbinfo_new - 1;
   }
 }
 
 /* call amr_elm_nbinfo_set_nnbinfo for all elms in mesh */
-int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh)
+int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive)
 {
   formyelms(mesh)
   {
     tElm *elm = MyElm;
-    amr_elm_nbinfo_set_nnbinfo(elm);
+    amr_elm_nbinfo_set_nnbinfo(elm, positive);
   }
   return 0;
 }
@@ -1602,8 +1612,9 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
   } /* end loop over rk */
 
 
-  /* finally set nnbinfo according to the new nb-info we have now */
-  amr_elm_nbinfo_set_nnbinfo_mesh(mesh);
+  /* finally set nnbinfo according to the new nb-info we have now,
+     but we keep them negative for now */
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 0);
 
   return 0;
 }
