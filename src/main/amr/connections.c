@@ -1894,12 +1894,12 @@ int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   ulong **s_deseid = checked_calloc(size, sizeof(s_deseid[0]));
   ulong **s_des_ei = checked_calloc(size, sizeof(s_des_ei[0]));
 
-  /* numbers of eids that we recv from rank r to get elm0 */
+  /* numbers of eids that we recv from rank r so we can send it elm0 */
   ulong *nr_deseid = checked_calloc(size, sizeof(nr_deseid[0]));
   // r_deseid[r][i] is eid_i that is sent to rank r
   ulong **r_deseid = checked_calloc(size, sizeof(r_deseid[0]));
 
-  /* numbers of elms we send to or recv from rank r: */
+  /* numbers of elms we recv/send from rank r: */
   ulong *nr_elm0 = checked_calloc(size, sizeof(nr_elm0[0]));
   ulong *ns_elm0 = checked_calloc(size, sizeof(ns_elm0[0]));
   // r_elm0[r][i] is elm_i that is revcd from rank r
@@ -2050,7 +2050,6 @@ int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   free_com(scom);
 
   /* free all arrays */
-
   rows_free(r_deseid, size);
   free(nr_deseid);
 
