@@ -1878,104 +1878,191 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 /* functions to get elm-headers from another rank */
 /****************************************************************************/
 
-/* get the full elmheader for all elms in eid from the other rank */
-int amr_get_elm0_of_eids(tMesh *mesh, ulong neids, ulong *eid, tElm0 *elm0)
+/* get the full elmheader for all elms with eids in eidarr that are on
+   other ranks
+   In: neids,eidarr  Out: elm0-array */
+int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
+                                    tElm0 *elm0)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
 
-  ulong **rank_eid = checked_calloc(size, sizeof(rank_eid[0]));
+  /* numbers of eids that we send to rank r to get elm0 */
+  ulong *ns_deseid = checked_calloc(size, sizeof(ns_deseid[0]));
+  // s_deseid[r][i] is eid_i that is sent to rank r
+  // s_des_ei[r][i] is index of eid in eidarr
+  ulong **s_deseid = checked_calloc(size, sizeof(s_deseid[0]));
+  ulong **s_des_ei = checked_calloc(size, sizeof(s_des_ei[0]));
+
+  /* numbers of eids that we recv from rank r to get elm0 */
+  ulong *nr_deseid = checked_calloc(size, sizeof(nr_deseid[0]));
+  // r_deseid[r][i] is eid_i that is sent to rank r
+  ulong **r_deseid = checked_calloc(size, sizeof(r_deseid[0]));
 
   /* numbers of elms we send to or recv from rank r: */
-  ulong *ns_elm0 = checked_calloc(size, sizeof(ns_elm0[0]));
   ulong *nr_elm0 = checked_calloc(size, sizeof(nr_elm0[0]));
-  // s_elm0[r][i] is elm_i that is sent to rank r
+  ulong *ns_elm0 = checked_calloc(size, sizeof(ns_elm0[0]));
   // r_elm0[r][i] is elm_i that is revcd from rank r
-  tElm0 **s_elm0 = checked_calloc(size, sizeof(s_elm0[0]));
-  tElm0 **r_elm0 = checked_calloc(size, sizeof(r_elm0[0]));
+  // s_elm0[r][i] is elm_i that is sent to rank r
+  tElm0 **r_elm0;
+  tElm0 **s_elm0;
   tCom *scom, *rcom;
-  int ei, rk;
+  ulong ei, k;
+  int rk;
 
-  /* eid has all eids for which we want elmheaders */
+  /* sort eidarr into s_deseid */
   for(ei=0; ei<neids; ei++)
   {
-    ulong eid_i = eid[ei];
-    union { tElm *elm; tElm0 *elm0; } e2e0;
-    ulong elmindex;
-    int datrank;
+    ulong eid = eidarr[ei];
+    int datrank = amr_rank_of_eid(mesh, eid);
+    int num = ns_deseid[datrank];
 
-    amr_elmindex_and_datrank_of_eid(mesh, eid_i, &elmindex, &datrank);
+    if(datrank==rank)
+      errorexit("this func deals only with eids on other ranks");
 
-    if(rank==datrank) /* I have the elm with this eid_i */
-    {
-      tElm0 *elm0;
-      e2e0.elm = mesh->myelm[elmindex];
-      r_elm0[rank][77777] = *(e2e0.elm0);
-    }
-    else
-    {
-    //.. need to get elm0 from datrank
-      /* add eid_i to list we want to recv from rank datrank */
-      rank_eid[datrank][55555] = eid_i;
-    }
+    s_deseid[datrank] = checked_realloc(s_deseid[datrank],
+                                        (num+1) * sizeof(s_deseid[0][0]));
+    s_des_ei[datrank] = checked_realloc(s_des_ei[datrank],
+                                        (num+1) * sizeof(s_des_ei[0][0]));
+    s_deseid[datrank][num] = eid;
+    s_des_ei[datrank][num] = ei;
+    ns_deseid[datrank] = num+1;
   }
 
-  /* tell each rank what we need */
-  //  nMPI_Bcast(rank_eid[datrank],555555, nMPI_UNSIGNED_LONG, rk);
+  /* we now know the size of r_elm0 */
+  r_elm0 = rows_calloc(size, ns_deseid, sizeof(r_elm0[0][0]));
 
 
-  /* send and recv from rank rk */
+  /* send and recv coms */
   scom = alloc_com(sizeof(s_elm0[0][0]), 0);
   rcom = alloc_com(sizeof(r_elm0[0][0]), 0);
+
+  /* find out how much needs to be exchanged */
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
+      /* tell how many I want from each rank rk */
+      {
+        rq = append_buffers_to_com(scom, &(ns_deseid[rk]),1, NULL,0);
+        nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 10, WORLD);
+      }
+      /* get how many the other ranks want */
+      {
+        rq = append_buffers_to_com(rcom, NULL,0, &(nr_deseid[rk]),1);
+        nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 10, WORLD);
+      }
+    }
+
+  /* wait for nr_deseid[rk] */
+  nMPI_Waitall_com_recv(rcom);
+  realloc_com_reqs(rcom, 0);
+
+  /* we now know the size of r_deseid[rk] and s_elm0 */
+  r_deseid = rows_calloc(size, nr_deseid, sizeof(r_deseid[0][0]));
+  s_elm0 =   rows_calloc(size, nr_deseid, sizeof(s_elm0[0][0]));
+
+
+  /* now send/recv s_deseid and r_deseid */
   for(rk=0; rk<size; rk++)
     if(rk != rank)
     {
       int rq;
 
-      /* send s_elm0[rk] buffer  */
-      rq = append_buffers_to_com(scom, s_elm0[rk],ns_elm0[rk], NULL,0);
-      nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD);
-
-      /* recv in r_elm0[rk] */
-      rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
-      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD);
+      /* send s_deseid buffer  */
+      if(ns_deseid[rk])
+      {
+        rq = append_buffers_to_com(scom, s_deseid[rk],ns_deseid[rk], NULL,0);
+        nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD);
+      }
+      /* recv in r_deseid */
+      if(nr_deseid[rk])
+      {
+        rq = append_buffers_to_com(rcom, NULL,0, r_deseid[rk],nr_deseid[rk]);
+        nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD);
+      }
     }
 
-  /* wait for recvs in rcom */
+  /* wait for r_deseid[rk] */
   nMPI_Waitall_com_recv(rcom);
-  free_com(rcom);
+  realloc_com_reqs(rcom, 0);
 
-  /* write the now revcd r_elm0 contents into eid */
+
+  /* use r_deseid[rk] to fill in s_elm0[rk] arrays */
   for(rk=0; rk<size; rk++)
-    for(ei=0; ei<nr_elm0[rk]; ei++)
-    {
-      tElm0 *nb0;
-      tElm *nb, *nb_header, **f_nb;
-      union { tElm *elm; tElm0 *elm0; } e2e0;
-      e2e0.elm0 = nb0 = &(r_elm0[rk][ei]);
-      nb_header = e2e0.elm; //is a pointer to tElm that points to a tElm0
+    if(rk != rank)
+      for(k=0; k<nr_deseid[rk]; k++)
+      {
+        union { tElm *elm; tElm0 *elm0; } e2e0;
+        ulong elmindex;
 
-      /* find nb corresponding to nb_header in eid */
-      f_nb = amr_elmarray_bsearch(neids, eid, nb_header);
-      nb = *f_nb;
+        int datrank;
 
-      /* write nb_header into nb */
-      memcpy(nb, nb0, sizeof(nb0[0]));
-    }
-
-  //printf("eid:\n");
-  //printnbelms(mesh);
+        amr_elmindex_and_datrank_of_eid(mesh, r_deseid[rk][k],
+                                        &elmindex, &datrank);
+        /* fill in ns_elm0 */
+        e2e0.elm = mesh->myelm[elmindex];
+        s_elm0[rk][k] = *(e2e0.elm0);
+      }
 
   /* wait for sends in scom, then free all send related stuff */
   nMPI_Waitall_com_send(scom);
+  realloc_com_reqs(scom, 0);
+
+
+  /* finally exchange elm0 */
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+    {
+      int rq;
+
+      /* send s_deseid buffer  */
+      if(ns_deseid[rk])
+      {
+        rq = append_buffers_to_com(scom, s_elm0[rk],nr_deseid[rk], NULL,0);
+        nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 30, WORLD);
+      }
+      /* recv in r_deseid */
+      if(nr_deseid[rk])
+      {
+        rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],ns_deseid[rk]);
+        nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 30, WORLD);
+      }
+    }
+
+  /* wait for r_elm0[rk] in rcom */
+  nMPI_Waitall_com_recv(rcom);
+  realloc_com_reqs(rcom, 0);
+
+
+  /* fill in elm0 array from r_elm0[rk] */
+  for(rk=0; rk<size; rk++)
+    if(rk != rank)
+      for(k=0; k<ns_deseid[rk]; k++)
+      {
+        ei = s_des_ei[rk][k];
+        elm0[ei] = r_elm0[rk][k];
+      }
+
+  /* wait for final sends */
+  nMPI_Waitall_com_send(scom);
+  free_com(rcom);
   free_com(scom);
 
   /* free all arrays */
-  rows_free(r_elm0, size);
+
+  rows_free(r_deseid, size);
+  free(nr_deseid);
+
   rows_free(s_elm0, size);
-  free(nr_elm0);
+  rows_free(r_elm0, size);
   free(ns_elm0);
-  rows_free(rank_eid, size);
+  free(nr_elm0);
+
+  rows_free(s_des_ei, size);
+  rows_free(s_deseid, size);
+  free(ns_deseid);
+
   return 0;
 }
 
