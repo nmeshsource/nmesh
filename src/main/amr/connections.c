@@ -1655,6 +1655,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
     {
       int i_nbinfo = amr->elm_nbinfo0 + f;
       tArray *nbinfo = VarA(elm, i_nbinfo);
+      int nnbinfo_f;
       int i, neplocs;
 
       /* if there is no nbinfo there are no nbs */
@@ -1666,8 +1667,10 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         continue;
       }
 
-      /* we only set the elm->fnb[f] where nnbinfo[f]<0 */
-      if(elm->dat->info->nnbinfo[f] >= 0)
+      /* we only set the elm->fnb[f] if an update is needed, i.e.
+         If nnbinfo[f]<0 or elm->nfnb[f]!=nnbinfo[f] */
+      nnbinfo_f = elm->dat->info->nnbinfo[f];
+      if( (nnbinfo_f >= 0) && (elm->nfnb[f] == nnbinfo_f) )
         continue; /* do nothing */
 
       /* If we get here, we add the nbs in nbinfo to fnb */

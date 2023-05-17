@@ -730,20 +730,22 @@ Yo(33.2);
   //disablevar_innode(elm, Ind("amr_elm_nbinfo0"));
 
 
-  /* set signal to update all fnb */
+  /* set flag to update all fnb */
   formyelms(mesh)
   {
     tElm *elm = MyElm;
     for(int f=0; f<6; f++)
     {
-      elm->dat->info->nnbinfo[f] = -1;
-      elm->nfnb[f] = -1;
+      elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
+      //elm->nfnb[f] = -1;
     }
   }
 
-
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
+
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
+
   printmyelms(mesh);
 
 
