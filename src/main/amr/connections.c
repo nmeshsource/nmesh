@@ -1660,15 +1660,14 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
       /* if there is no nbinfo there are no nbs */
       if(!nbinfo)
       {
-        if(elm->fnb[f] != NULL)
-        {
-          free(elm->fnb[f]);
-          elm->nfnb[f] = 0;
-          elm->fnb[f]  = NULL;
-        }
+        free(elm->fnb[f]);
+        elm->nfnb[f] = 0;
+        elm->fnb[f]  = NULL;
+        continue;
       }
 
-      if(elm->nfnb[f] >= 0) /* elm->fnb[f] is already set */
+      /* we only set the elm->fnb[f] where nnbinfo[f]<0 */
+      if(elm->dat->info->nnbinfo[f] >= 0)
         continue; /* do nothing */
 
       /* If we get here, we add the nbs in nbinfo to fnb */
