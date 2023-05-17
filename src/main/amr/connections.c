@@ -1187,6 +1187,62 @@ void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
   }
 }
 
+/* write number of eplocs in var amr_elm_nbinfo into
+   elm->dat->info->nnbinfo */
+void amr_elm_nbinfo_set_nnbinfo(tElm *elm)
+{
+  int f;
+  for(f=0; f<6; f++)
+  {
+    int i_nbinfo = amr->elm_nbinfo0 + f;
+    tArray *nbinfo = VarA(elm, i_nbinfo);
+
+    /* if there is no nbinfo there are no nbs */
+    if(!nbinfo)
+    {
+      elm->dat->info->nnbinfo[f] = 0;
+      continue;
+    }
+
+    /* num. of nbs we have */
+    elm->dat->info->nnbinfo[f] = array_Neplocs(nbinfo);
+  }
+}
+
+/* call amr_elm_nbinfo_set_nnbinfo for all elms in mesh */
+int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    amr_elm_nbinfo_set_nnbinfo(elm);
+  }
+  return 0;
+}
+
+/* redim var amr_elm_nbinfo according to elm->dat->info->nnbinfo */
+void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm)
+{
+  int f;
+  for(f=0; f<6; f++)
+  {
+    int i_nbinfo = amr->elm_nbinfo0 + f;
+    tArray *nbinfo = VarA(elm, i_nbinfo);
+    int nnb;
+
+    /* if there is no nbinfo there should be no nbs */
+    if(nbinfo==NULL)
+    {
+      if(elm->dat->info->nnbinfo[f] == 0)
+        continue;
+      else
+        errorexit("nbinfo=NULL contradicts nnbinfo!=0");
+    }
+
+    nnb = elm->dat->info->nnbinfo[f];
+    redim_array(nbinfo, nnb,1,1);
+  }
+}
 
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
@@ -1226,9 +1282,10 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   return list_count_nodes(fnb_head);
 }
 
-/* Update amr_elm_nbinfo vars on all faces where elm->nfnb[f] < 0.
+/* Update amr_elm_nbinfo vars on all faces where:
+   elm->dat->info->nnbinfo[f] < 0.
    This is done for all elms on all ranks */
-int amr_update_elm_nbinfo_if_nfnb_negative(tMesh *mesh)
+int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
 {
   struct list_head *pos;
   struct list_head ef0_head[6]; // one list for each face
@@ -1240,22 +1297,27 @@ int amr_update_elm_nbinfo_if_nfnb_negative(tMesh *mesh)
   /* init */
   for(f=0; f<6; f++) { INIT_LIST_HEAD(&ef0_head[f]); nmyef0[f]=0; }
 
-  /* find all my elmfaces that have nfnb<0 (all ranks do this) */
+  /* find all my elmfaces that have nnbinfo<0 (all ranks do this) */
   list_for_each(pos, &mesh->myelm_head)
   {
     tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
 
     /* go over elm-faces */
-    for(f=0; f<6; f++)
+    if(dat)
     {
-      /* if nfnb<0 nb info is not there yet */
-      if(elm->nfnb[f] < 0)
+      tNodeInfo *info = elm->dat->info;
+      for(f=0; f<6; f++)
       {
-        /* erase all nb info in var amr_elm_nbinfo[f] */
-        disablevarcomp_innode(elm, amr->elm_nbinfo0+f);
-        /* add elm to list of elms that need nb-info */
-        glist_entry_add_tail(elm, &ef0_head[f]);
-        nmyef0[f] += 1;
+        /* if nnbinfo<0 nb info is not there yet */
+        if(info->nnbinfo[f] < 0)
+        {
+          /* erase all nb info in var amr_elm_nbinfo[f] */
+          disablevarcomp_innode(elm, amr->elm_nbinfo0+f);
+          /* add elm to list of elms that need nb-info */
+          glist_entry_add_tail(elm, &ef0_head[f]);
+          nmyef0[f] += 1;
+        }
       }
     }
   }
@@ -1536,6 +1598,10 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
     /* we could reuse the large tArray, but for now we just free it */
     free_array(ef0_nbs);
   } /* end loop over rk */
+
+
+  /* finally set nnbinfo according to the new nb-info we have now */
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh);
 
   return 0;
 }

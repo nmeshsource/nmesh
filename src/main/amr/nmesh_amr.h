@@ -178,6 +178,8 @@ typedef struct tNODEINFO {
   struct timespec load_start[1]; //time when node load timer was started
   double load_TimeIn_s;          //time spent on this node in seconds
   int desrank;            /* rank that should have this node/elm */
+  int nnbinfo[6];         /* num. of eplocs in amr_elm_nbinfo, if nnbinfo<0
+                             amr_elm_nbinfo needs to be updated */
 } tNodeInfo;
 
 /* the data within a node, this should be only on one proc */

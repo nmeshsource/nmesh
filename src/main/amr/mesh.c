@@ -734,11 +734,15 @@ Yo(33.2);
   formyelms(mesh)
   {
     tElm *elm = MyElm;
-    for(int f=0; f<6; f++)  elm->nfnb[f] = -1;
+    for(int f=0; f<6; f++)
+    {
+      elm->dat->info->nnbinfo[f] = -1;
+      elm->nfnb[f] = -1;
+    }
   }
 
 
-  amr_update_elm_nbinfo_if_nfnb_negative(mesh);
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
   printmyelms(mesh);
 

@@ -7,9 +7,10 @@
 #define PR 0
 
 
-/* use timings and some MPI datatypes */
+/* use timings, some MPI datatypes, amr vars */
 extern tTiming Timing[1];
 extern tnMPIvars nMPIvars[1];
+extern tAMR amr[1];
 
 
 /* object we pass around to figure out the desired rank of a node */
@@ -167,6 +168,9 @@ int write_buffer_into_dat_vars(tDat *dat, double *buf)
   /* now put the end of the buffer in dat->info */
   sizeofinfo = buf[bi++];
   memcpy(dat->info, buf+bi, sizeofinfo);
+
+  /* make sure var amr_elm_nbinfo has the correct dimensions */
+  amr_elm_nbinfo_redim_according_to_nnbinfo(node);
 
   return bi;
 }
