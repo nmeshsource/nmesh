@@ -766,6 +766,33 @@ Yo(33.2);
   printelmarray(mesh->nnbelm, mesh->nbelm);
   printnbelms(mesh);
 
+  ulong eidarr[99];
+  tElm0 elm0[99] = {0};
+  int narr;
+
+  printf("amr_get_otherrank_elm0_for_eids:\n");
+  if(nMPI_rank()==0)
+  {
+    eidarr[0] = 1;
+    eidarr[1] = 2;
+    eidarr[0] = 18;
+    eidarr[1] = 17;
+    narr = 2;
+    amr_get_otherrank_elm0_for_eids(mesh, narr, eidarr, elm0);
+    for(i=0; i<narr; i++) printelm0(&elm0[i],"\n");
+  }
+  else
+  {
+    eidarr[0] = 17;
+    eidarr[1] = 18;
+    eidarr[2] = 16;
+    eidarr[0] = 2;
+    eidarr[1] = 3;
+    eidarr[2] = 1;
+    narr = 3;
+    amr_get_otherrank_elm0_for_eids(mesh, narr, eidarr, elm0);
+    for(i=0; i<narr; i++) printelm0(&elm0[i],"\n");
+  }
 
 
 

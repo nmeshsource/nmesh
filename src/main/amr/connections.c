@@ -1917,16 +1917,20 @@ int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     int datrank = amr_rank_of_eid(mesh, eid);
     int num = ns_deseid[datrank];
 
-    if(datrank==rank)
+    if(datrank!=rank)
+    {
+      s_deseid[datrank] = checked_realloc(s_deseid[datrank],
+                                          (num+1) * sizeof(s_deseid[0][0]));
+      s_des_ei[datrank] = checked_realloc(s_des_ei[datrank],
+                                          (num+1) * sizeof(s_des_ei[0][0]));
+      s_deseid[datrank][num] = eid;
+      s_des_ei[datrank][num] = ei;
+      ns_deseid[datrank] = num+1;
+    }
+    else
+    {
       errorexit("this func deals only with eids on other ranks");
-
-    s_deseid[datrank] = checked_realloc(s_deseid[datrank],
-                                        (num+1) * sizeof(s_deseid[0][0]));
-    s_des_ei[datrank] = checked_realloc(s_des_ei[datrank],
-                                        (num+1) * sizeof(s_des_ei[0][0]));
-    s_deseid[datrank][num] = eid;
-    s_des_ei[datrank][num] = ei;
-    ns_deseid[datrank] = num+1;
+    }
   }
 
   /* we now know the size of r_elm0 */
