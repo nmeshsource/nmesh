@@ -1875,14 +1875,14 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 
 
 /****************************************************************************/
-/* functions to get elm-headers from another rank */
+/* functions to get elm-headers from another ranks */
 /****************************************************************************/
 
-/* get the full elmheader for all elms with eids in eidarr that are on
-   other ranks
-   In: neids,eidarr  Out: elm0-array */
-int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
-                                    tElm0 *elm0)
+/* Get the full elmheader for all elms with eids in eidarr.
+   In: neids,eidarr  Out: elm0-array
+   This needs to be called on all MPI processes! */
+int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
+                          tElm0 *elm0)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
@@ -1929,7 +1929,14 @@ int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     }
     else
     {
-      errorexit("this func deals only with eids on other ranks");
+      union { tElm *elm; tElm0 *elm0; } e2e0;
+      ulong elmindex;
+      int datrank;
+      amr_elmindex_and_datrank_of_eid(mesh, eid,
+                                      &elmindex, &datrank);
+      /* just fill in elm0 */
+      e2e0.elm = mesh->myelm[elmindex];
+      elm0[ei] = *(e2e0.elm0);
     }
   }
 
@@ -1999,12 +2006,11 @@ int amr_get_otherrank_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
       {
         union { tElm *elm; tElm0 *elm0; } e2e0;
         ulong elmindex;
-
         int datrank;
 
         amr_elmindex_and_datrank_of_eid(mesh, r_deseid[rk][k],
                                         &elmindex, &datrank);
-        /* fill in ns_elm0 */
+        /* fill in s_elm0 */
         e2e0.elm = mesh->myelm[elmindex];
         s_elm0[rk][k] = *(e2e0.elm0);
       }
