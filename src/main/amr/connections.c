@@ -1233,10 +1233,10 @@ void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm)
     /* if there is no nbinfo there should be no nbs */
     if(nbinfo==NULL)
     {
-      if(elm->dat->info->nnbinfo[f] == 0)
-        continue;
-      else
-        errorexit("nbinfo=NULL contradicts nnbinfo!=0");
+      if(elm->dat->info->nnbinfo[f] > 0) //check if there should be nbs
+        errorexit("nbinfo=NULL contradicts nnbinfo>0");
+      else        //nnbinfo[f]=0 is consistent, nnbinfo[f]<0 means invalid
+        continue; //for nnbinfo[f]<=0 we do nothing
     }
 
     nnb = elm->dat->info->nnbinfo[f];

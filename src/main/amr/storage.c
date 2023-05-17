@@ -2254,6 +2254,7 @@ tDat *alloc_dat(tNode *node)
   if(!dat) errorexit("out of memory for dat");
 
   dat->node = node;
+  for(f=0; f<6; f++) dat->info->nnbinfo[f]=-1; //amr_elm_nbinfo is invalid
   dat->nv = nv;
   if(nv==0) return dat;
 
