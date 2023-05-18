@@ -17,74 +17,92 @@
 /****************************************************************************/
 /* loops that should be used in most modules                                */
 /****************************************************************************/
-/* preliminary elm macros, include OMP from nodes stuff later */
-#define formyelms(mesh) \
-  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
-#define MyElm mesh->myelm[ei_]
-
-
 
 /* loop over my leaf nodes on this proc without OpenMP */
-/* Note: for node in ln[c][i]: myid = myln->nm*c + i */
-#define formylnodes_noomp(mesh) \
-  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
+#define formyelms_noomp(mesh) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+
+/* for easy access */
+#define MyElm  mesh->myelm[ei_]
+#define MyElm0 mesh->myelm[0]
+#define Elm_myid(mesh, myid)  mesh->myelm[myid]
 
 /* do we use omp taskloop? */
 #ifdef USE_OMP_TASKLOOP
 
+/* we use OpenMP to parallelize the 2nd loop in formyelms_noomp */
+#define formyelms(mesh) \
+  NODELEVEL_Pragma(omp parallel) \
+  NODELEVEL_Pragma(omp master) \
+  NODELEVEL_Pragma(omp taskloop) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+
+/* this one will have no "parallel" on its own */
+/*
+#define formyelms_ompfor(mesh) \
+  NODELEVEL_Pragma(omp master) \
+  NODELEVEL_Pragma(omp taskloop) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+*/
+/* THIS DIDN'T WORK in dg_add_surface_fluxes!!! It caused a race for e.g.
+   dgi->node = node; ... It seems tasks get processed by arbitrary threads so
+   that allocating dgi on a per thread basis is not good enough... */
+/* to start tasks formyelms_ompfor has to be inside a:
+   #pragma omp parallel {  } */
+
+#else
+
+/* we use OpenMP to parallelize the 2nd loop in formyelms_noomp */
+#define formyelms(mesh) \
+  NODELEVEL_Pragma(omp parallel for) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+#endif
+
+
+/* this one will have no "parallel" on its own */
+#define formyelms_ompfor(mesh) \
+  NODELEVEL_Pragma(omp for) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+/* to start tasks formyelms_ompfor has to be inside a:
+   #pragma omp parallel {  } */
+
+
+/* for compatibility */
+#define formylnodes_noomp(mesh)  formyelms_noomp(mesh)
+#define formylnodes(mesh)        formyelms(mesh)
+#define formylnodes_ompfor(mesh) formyelms_ompfor(mesh)
+#define MyLnode                  MyElm
+#define MyLnode0                 MyElm0
+#define Lnode_myid(mesh, myid)   Elm_myid(mesh, myid)
+
+
+/****************************************************************************/
+/* Old node macros. Do not use!!! */
+/****************************************************************************/
+
 /* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
-#define formylnodes(mesh) \
+#define old_taskloop_formylnodes(mesh) \
   for(int cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   NODELEVEL_Pragma(omp parallel) \
   NODELEVEL_Pragma(omp master) \
   NODELEVEL_Pragma(omp taskloop) \
   for(int li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
-/* this one will have no "parallel" on its own */
-/*
-#define formylnodes_ompfor(mesh) \
-  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  NODELEVEL_Pragma(omp master) \
-  NODELEVEL_Pragma(omp taskloop) \
-  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
-*/
-/* THIS DIDN'T WORK in dg_add_surface_fluxes!!! It caused a race for e.g.
-   dgi->node = node; ... It seems tasks get processed by arbitrary threads so
-   that allocating dgi on a per thread basis is not good enough... */
-/* to start tasks formylnodes_ompfor has to be inside a:
-   #pragma omp parallel {  } */
-
-#else
-
 /* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
-#define formylnodes(mesh) \
+#define old_formylnodes(mesh) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
   NODELEVEL_Pragma(omp parallel for) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
-#endif
-
-
-/* this one will have no "parallel" on its own */
-#define formylnodes_ompfor(mesh) \
-  for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  NODELEVEL_Pragma(omp for) \
-  for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
-/* to start tasks formylnodes_ompfor has to be inside a:
-   #pragma omp parallel {  } */
-
-
 /* get leaf node from mesh, cat_ and li_ */
-#define MyLnode mesh->myln->ln[cat_][li_]->node
+#define old_MyLnode mesh->myln->ln[cat_][li_]->node
 
 /* get 1st leaf node on this proc from mesh, using cat_=0 and li_=0 */
-#define MyLnode0 (mesh->myln->ln ? mesh->myln->ln[0][0]->node : 0)
+#define old_MyLnode0 (mesh->myln->ln ? mesh->myln->ln[0][0]->node : 0)
 
 /* get node from myid */
-#define Lnode_myid(mesh, myid) \
+#define old_Lnode_myid(mesh, myid) \
   mesh->myln->ln[(myid) / mesh->myln->nm][(myid) % mesh->myln->nm]->node
-
 
 /****************************************************************************/
 /* Macros that should be used in most modules to access certain structs */
