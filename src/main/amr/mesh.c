@@ -760,6 +760,21 @@ Yo(33.2);
   printelmarray(mesh->nnbelm, mesh->nbelm);
   printnbelms(mesh);
 
+
+
+  amr_remove_mesh_nbelm(mesh);
+
+  printf("mesh->myelm:\n");
+  printelmarray(mesh->nmyelm, mesh->myelm);
+  printmyelms(mesh);
+  printf("mesh->nbelm:\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
+  printnbelms(mesh);
+
+
+
+
+
   ulong eidarr[99];
   tElm0 elm0[99] = {0};
   int narr;

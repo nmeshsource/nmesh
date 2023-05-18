@@ -1744,7 +1744,7 @@ void amr_add_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
   nb->nfnb[nb_f] = nb_nfnb+1;
 
   /* add elm to nb->fnb */
-   nb_fnb[nb_nfnb] = elm;
+  nb_fnb[nb_nfnb] = elm;
 }
 
 
@@ -2160,10 +2160,78 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 }
 
 
+/****************************************************************************/
+/* functions to partially set nb-info after refine or unrefine */
+/****************************************************************************/
+
+/* Invalidate nbinfo for all nbs of elm on elmface.
+   Return: 0 if all nbs have dat (are on my rank), 1 if one nb has not dat */
+int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
+{
+  int ni;
+  int nbs_on_other_rank = 0;
+
+  /* go over nbs of elm,elmface and invalidate their nbinfo */
+  for(ni=0; ni<elm->nfnb[elmface]; ni++)
+  {
+    tElm *nb = elm->fnb[elmface][ni];
+    int nb_f;
+
+    if(!nb) continue; /* do nothing if there is no nb */
+
+    /* face of nb */
+    nb_f = amr_get_nbface(elm,elmface, nb);
+
+    if(nb->dat)
+    {
+      int nnb = nb->dat->info->nnbinfo[nb_f];
+      /* invalidate nbinfo */
+      if(nnb>=0) nb->dat->info->nnbinfo[nb_f] = -nnb-1;
+    }
+    else
+    {
+      nbs_on_other_rank = 1;
+    }
+  }
+  return nbs_on_other_rank;
+}
+
+/* Go over mesh->nbelm list and invalidate nbinfo for all my elms that
+   are nbs of any elm in mesh->nbelm. */
+void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh)
+{
+  int ei;
+  for(ei=0; ei < mesh->nnbelm; ei++)
+  {
+    tElm *elm = mesh->nbelm[ei];
+    int f;
+    for(f=0; f<6; f++)
+      amr_invalidate_nbinfo_of_nbs(elm, f);
+  }
+}
+
+/* Remove mesh->nbelm and make sure all nbinfo about it is deleted */
+void amr_remove_mesh_nbelm(tMesh *mesh)
+{
+  int ei;
+
+  /* first make sure nobody has info about elms in nbelm */
+  amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh);
+
+  for(ei=0; ei < mesh->nnbelm; ei++)
+  {
+    tElm *elm = mesh->nbelm[ei];
+    free_elm(elm);
+  }
+}
 
 
 
+/* we just created the children in childlist, now set local nb-info */
+//int amr_invalidate_nbinfo_of_nbs(tElm *parent, struct list_head *childlist)
 
+
+    //connections_get_nbloc_InsidePat
 
 
 /****************************************************************************/
