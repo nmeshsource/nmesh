@@ -697,7 +697,6 @@ void prefine_pat(tMesh *mesh, int p, int n[3]);
 /* connections.c */
 char *elm_location_str(tElm *elm, char *s, int slen);
 char *elmname(tElm *elm, char *s, int slen);
-ulong elm_location(tElm *elm);
 tElm *elm_from_location_str(tPat *pat, char *loc);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);

@@ -252,47 +252,12 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 
 
 /****************************************************************************/
-/* functions that need to be moved into other files */
+/* functions that may need to be moved into other files */
 /****************************************************************************/
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////
-// replaces l_XYZ_of_xyz
-//FIXME: pick a good file for this func
-//       maybe around l_XYZ_of_xyz in main/coordinates/get_coords.c
-/* set X and return 1 if x is inside this elm, otherwise return 0 */
-int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
-{
-  tPat *pat = elm->pat;
-  int d, stat=0;
-
-  /* get X */
-  if(pat->XYZ_of_xyz)
-    //stat = pat->XYZ_of_xyz(pat, (tNode *)elm,ind, X, x);
-    stat = pat->XYZ_of_xyz(pat, elm,ind, X, x);
-  else
-    for(d=0; d<3; d++) X[d] = x[d];
-
-  if(stat) return 0;
-
-  for(d=0; d<3; d++)
-    if(dless(X[d],elm->bbox[2*d]) || dless(elm->bbox[2*d+1],X[d]))
-      return 0;
-
-  /* round X to inside box */
-  for(d=0; d<3; d++)
-  {
-    if(X[d] < elm->bbox[2*d])   X[d] = elm->bbox[2*d];
-    if(X[d] > elm->bbox[2*d+1]) X[d] = elm->bbox[2*d+1];
-  }
-
-  return 1;
-}
 ////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -600,13 +565,17 @@ char *elm_location_str(tElm *elm, char *s, int slen)
 }
 
 /* convert string from elm_location_str into a unsigned long int */
-ulong elm_location(tElm *elm)
+ulong elm_location__old(tElm *elm)
 {
   ulong uloc;
 
   if(!elm) return 0;
 
   memcpy(&uloc, &(elm->eploc->ploc[0]), sizeof(uloc));
+
+  /* remove MSB from uloc */
+  uloc = uloc<<1;
+  uloc = uloc>>1;
 
   return uloc;
 }

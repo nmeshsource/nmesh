@@ -821,11 +821,11 @@ tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
 }
 
 /* return node location if x is inside this patch, if not return -1 */
-long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3])
+long l_XYZ_of_xyz__old(tNode *node, int ind, double X[3], const double x[3])
 {
   tPat *pat = node->pat;
   int d, stat=0;
-  long loc = node_location(node); /* get node location */
+  long loc = elm_location__old(node); /* get node location */
 
   /* get X */
   if(pat->XYZ_of_xyz)
@@ -848,7 +848,35 @@ long l_XYZ_of_xyz(tNode *node, int ind, double X[3], const double x[3])
 
   return loc;
 }
+// replaces l_XYZ_of_xyz__old
+/* set X and return 1 if x is inside this elm, otherwise return 0 */
+int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
+{
+  tPat *pat = elm->pat;
+  int d, stat=0;
 
+  /* get X */
+  if(pat->XYZ_of_xyz)
+    //stat = pat->XYZ_of_xyz(pat, (tNode *)elm,ind, X, x);
+    stat = pat->XYZ_of_xyz(pat, elm,ind, X, x);
+  else
+    for(d=0; d<3; d++) X[d] = x[d];
+
+  if(stat) return 0;
+
+  for(d=0; d<3; d++)
+    if(dless(X[d],elm->bbox[2*d]) || dless(elm->bbox[2*d+1],X[d]))
+      return 0;
+
+  /* round X to inside box */
+  for(d=0; d<3; d++)
+  {
+    if(X[d] < elm->bbox[2*d])   X[d] = elm->bbox[2*d];
+    if(X[d] > elm->bbox[2*d+1]) X[d] = elm->bbox[2*d+1];
+  }
+
+  return 1;
+}
 
 /* find the faces a point X is on within tol, face[2]=1 if X is on face2  */
 int XYZ_on_face_tol(tPat *pat, int *face, const double X[3], double tol)
@@ -1456,8 +1484,11 @@ void array_find_nbXface_of_Xface(tNode *node, int f, tNode *nb, int nb_f,
     if(n_dir<2) set_xyz_in_face(node, f, i,j,k, x);
 
     /* find point x in nb */
-    loc = l_XYZ_of_xyz(nb,-1, oX, x);
-    if(loc>=0) /* point was found inside nb */
+    //loc = l_XYZ_of_xyz(nb,-1, oX, x);
+    //if(loc>=0) /* point was found inside nb */
+    /* find point x in nb */
+    loc = elmXYZ_of_xyz(nb,-1, oX, x);
+    if(loc) /* point was found inside nb */
     {
       oC[0][ind] = oX[od1];
       oC[1][ind] = oX[od2];

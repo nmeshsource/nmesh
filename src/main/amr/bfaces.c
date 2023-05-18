@@ -1262,10 +1262,12 @@ int find_nodefacepoints_in_nbface(tNode *node, int f, tNode *nb, int nb_f)
 
     /* get x,y,z of X,Y,Z and then oX,oY,oZ in nb */
     set_xyz(NULL, node,-1, X, x);
-    ret0 = l_XYZ_of_xyz(nb,-1, oX, x);
+    //ret0 = l_XYZ_of_xyz__old(nb,-1, oX, x);
+    //if(ret0<0) continue;
+    ret0 = elmXYZ_of_xyz(nb,-1, oX, x);
 
     /* try another point, if this one is not in nb */
-    if(ret0<0) continue;
+    if(!ret0) continue;
 
     /* check if this point is on nb face */
     ret = XYZ_on_face(nb->pat, nbface, oX);
