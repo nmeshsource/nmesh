@@ -127,96 +127,6 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
 }
 
 
-/* h-refine nodes with nids in array, we assume long *nid is sorted in ascending
-   order. We do not update nid's in here */
-void hrefine_nodes_without_nid_update__old(tMesh *mesh, long nnodes, long *nid)
-{
-  tNlist *elem = mesh->lns;
-  long i;
-
-  for(i=0; i<nnodes; i++)
-  {
-    tNode *parent;
-    tNlist *children;
-    tNlist *lastchild;
-    int *n, *pt_typ;
-
-    /* forward to node with nid[i] */
-    for(; elem->node->nid != nid[i]; elem = elem->next) ;
-
-    /* make children */
-    parent = elem->node;
-    pt_typ = elem->node->pt_typ; /* pick pt_typ */
-    n = elem->node->n; /* pick n */
-    children = make8_child_nodes(parent, pt_typ, n);
-
-    /* update mesh->lns if needed and add children to list */
-    if(elem == mesh->lns) mesh->lns = first_nodelist(children);
-    lastchild = replace1_in_nodelist(elem, children, 1);
-
-    /* set elem to last child we added */
-    elem = lastchild;
-  }
-}
-
-
-/* h-refine nodes with nids in array, we assume nid[] is sorted in ascending
-   order. We do not update nids in here */
-void create_children_no_nid_update(tMesh *mesh, long nnodes, long *nid,
-                                   tRef *ref)
-{
-  tNlist **replace, **children;
-  long i;
-
-  if(nnodes<=0) return;
-
-  /* get mem. */
-  replace  = calloc(nnodes, sizeof(replace[0]));
-  children = calloc(nnodes, sizeof(children[0]));
-  if(!replace || !children) errorexit("no memory for replace, children");
-
-  NODELEVEL_Pragma(omp parallel)
-  {
-    tNlist *elem = mesh->lns;
-
-    NODELEVEL_Pragma(omp for)
-    for(i=0; i<nnodes; i++)
-    {
-      tNode *parent;
-      int pt_typ[3], n[3];
-
-      /* forward to node with nid[i] */
-      //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
-      //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
-      for(; elem->node->nid != nid[i]; elem = elem->next) ;
-
-      /* find parent */
-      parent = elem->node;
-
-      /* set n and pt_typ */
-      hp_refine_set_n_pt_typ(parent, ref, n, pt_typ);
-
-      /* make children */
-      children[i] = make8_child_nodes(parent, pt_typ, n);
-
-      /* save elem that has to be replaced by children[i] later */
-      replace[i] = elem;
-    }
-  }
-
-  /* update mesh->lns using info in replace[i], children[i] */
-  for(i=0; i<nnodes; i++)
-  {
-    tNlist *elem = replace[i];
-
-    /* update mesh->lns if needed and add children to list */
-    if(elem == mesh->lns) mesh->lns = first_nodelist(children[i]);
-    replace1_in_nodelist(elem, children[i], 1); // can return last child
-  }
-  free(children);
-  free(replace);
-}
-
 
 /* p-refine nodes with nids in array, we assume nid[] is sorted in ascending
    order. We do not update nids in here */
@@ -254,176 +164,6 @@ void prefine_nid_list(tMesh *mesh, long nnodes, long *nid, tRef *ref)
 }
 
 
-/* h- or p-refine nids in the order in which we recv the MPI messages.
-   NOTE for ref->type = H_REFINE:
-   The order in which we recv is not certain => we do not have the same
-   order for all MPI procs. => order of node->nfaces and thus node->fnb
-   differs between different MPI procs!!! => nb index ni differs between
-   MPI procs => request_surfaces_exchange_for_all_vars deadlocks because
-   tags in there need a unique ni!!!
-   But it may work with P_REFINE */
-void hp_refine_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
-                                  int *nn, long **ref_nid,
-                                  int todo, tRef *ref)
-{
-  int rank = nMPI_rank(); /* my own rank */
-  int size = nMPI_size();
-  int r, done, flag;
-
-  /* refine my own ref_nid[rank] */
-  if(nn[rank]>0)
-    create_children_no_nid_update(mesh, nn[rank], ref_nid[rank], ref);
-
-  /* check for incoming broadcasts and then work on them */
-  r = 0;
-  done = 0;
-  while(done<todo)
-  {
-    if(nn[r]>0)
-    {
-      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
-      if(flag)
-      {
-        /* work on ref_nid[r] */
-        if(r != rank) /* r=rank has been done already above */
-        {
-          if(ref->type == H_REFINE)
-          {
-            /* do h-refinement */
-            create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
-          }
-          else
-          {
-            /* do p-refinement */
-            prefine_nid_list(mesh, nn[r], ref_nid[r], ref);
-          }
-        }
-        nn[r] = 0;
-        done++;
-      }
-    }
-    r++;
-    if(r>=size) r = 0;
-  }
-}
-
-/* h- or p-refine nids in the order of the MPI ranks. */
-void hp_refine_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
-                                  int *nn, long **ref_nid,
-                                  int todo, tRef *ref)
-{
-  int size = nMPI_size();
-  int r;
-
-  /* wait for incoming broadcasts and then work on them */
-  for(r=0; r<size; r++)
-  {
-    if(nn[r]>0)
-    {
-      nMPI_Wait(&(req[r]), nMPI_STATUS_IGNORE);
-
-      /* work on ref_nid[r] */
-      if(ref->type == H_REFINE)
-      {
-        /* do h-refinement */
-        create_children_no_nid_update(mesh, nn[r], ref_nid[r], ref);
-      }
-      else
-      {
-        /* do p-refinement */
-        prefine_nid_list(mesh, nn[r], ref_nid[r], ref);
-      }
-      nn[r] = 0;
-    }
-  } /* end for loop */
-}
-
-/* h- or p-refine all nodes on all MPI procs if indicated by node->rflag.
-   If hrefine=1 we actually create child nodes,
-   if hrefine=0 we just change the number (and possibly the spacing)
-   of points */
-void hp_refine_nodes_if_rflag(tMesh *mesh, tRef *ref)
-{
-  int rank = nMPI_rank();
-  int size = nMPI_size();
-  int r, todo;
-  int nnodes = (mesh->myln->nncats)*(mesh->myln->nm);
-  long *my_nid   = calloc(nnodes+1, sizeof(my_nid[0]));
-  nMPI_Req *req  = calloc(size, sizeof(req[0]));
-  int *nn        = calloc(size, sizeof(nn[0]));
-  long **ref_nid = calloc(size, sizeof(ref_nid[0]));
-
-  if(ref->method >= REF_METH_INVALID)
-    errorexit("ref->method >= REF_METH_INVALID");
-
-  if(!my_nid || !req || !nn || !ref_nid)
-    errorexit("no memory for my_nid, req, nn, ref_nid");
-
-  ///* record which nodes we want to refine */
-  //formylnodes(mesh)
-  //{
-  //  tNode *node = MyLnode;
-  //  node->rflag = needs_refine(node);
-  //}
-
-  /* save all nids where we need refinement in my_nid */
-  nnodes = 0;
-  formylnodes_noomp(mesh)
-  {
-    tNode *node = MyLnode;
-    if(node->rflag > 0)
-      my_nid[nnodes++] = node->nid;
-  }
-  nn[rank] = nnodes;
-
-  /* number of procs where we have to refine and how many we have done so far */
-  todo = size;
-
-  /* broadcast number of nodes nn to all MPI jobs */
-  for(r=0; r<size; r++)
-  {
-    nMPI_Bcast(&(nn[r]), 1, nMPI_INT, r);
-
-    if(nn[r]<=0) todo--; /* there is nothing to do if nn[r]=0 */
-
-    if(r==rank)
-    {
-      ref_nid[r] = my_nid;
-    }
-    else
-    {
-      if(nn[r]>0)
-        ref_nid[r] = calloc(nn[r], sizeof(ref_nid[r][0]));
-      else
-        ref_nid[r] = NULL;
-    }
-  }
-
-  /* broadcast ref_nid to all MPI jobs */
-  for(r=0; r<size; r++)
-  {
-    if(nn[r]>0)
-      nMPI_Ibcast(&(ref_nid[r][0]), nn[r], nMPI_LONG, r, &(req[r]));
-  }
-
-  /* check for incoming broadcasts and then work on them */
-  //hp_refine_nids_in_recv_order(mesh, req, nn, ref_nid, todo, ref);
-  //Note: hp_refine_nids_in_recv_order may work for P_REFINE
-  hp_refine_nids_in_rank_order(mesh, req, nn, ref_nid, todo, ref);
-
-  /* free ref_nid content */
-  for(r=0; r<size; r++)
-  {
-    free(ref_nid[r]);
-    ref_nid[r] = NULL;
-  }
-  /* my_nid was freed as one of ref_nid */
-
-  /* free rest */
-  free(ref_nid);
-  free(nn);
-  free(req);
-}
 
 // ====
 // NEW:
@@ -463,100 +203,43 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 }
 
 
+////////////////////////////////////////////////
+//Rename these 2, but keep old names as defines:
+
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   ref->type = H_REFINE;
-  //FIXME: this should call hp_refine_elms_if_rflag
-  hp_refine_nodes_if_rflag(mesh, ref);
+  hp_refine_elms_if_rflag(mesh, ref);
 }
 
 /* p-refine all nodes on all MPI procs if indicated by node->rflag */
 void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   ref->type = P_REFINE;
-  hp_refine_nodes_if_rflag(mesh, ref);
+  hp_refine_elms_if_rflag(mesh, ref);
 }
 
+////////////////////////////////////////////////////
 
-/* remove nodes with nids in array nid0 and their 7 other siblings,
-   We assume long *nid0 is sorted in ascending order.
-   nid0[2*i]   has the node id of sibling0,
-   nid0[2*i+1] has the number of siblings that need unrefinement
-   We do not update node->nid in here, but we change nid0 and return
-   what is left to process, i.e. all nid0 where we had less than 8 siblings
-   in this MPI proc. */
-long destroy_nodes_no_nid_update(tMesh *mesh, long nnodes, long *nid0)
+
+
+/* Unrefine all nodes on all MPI procs if indicated by node->rflag */
+void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
-  tNlist **elem_parent = calloc(nnodes, sizeof(elem_parent[0]));
-  long i;
-  long n_remain;
-
-  if(!elem_parent) errorexit("no memory for elem_parent");
-
-  //PRF;printnodelist(mesh->lns);
-  //prlarray("nid0", 2*nnodes, nid0);
-
-  /* update mesh->lns by removing all in nid0 and their siblings */
-  n_remain = 0;
-  for(i=0; i<nnodes; i++)
-  {
-    tNlist *elem = mesh->lns;
-    int update_lns;
-
-    /* forward to node with nid0[2*i] */
-    //for(; elem && elem->node->nid != nid0[2*i]; elem = elem->next) ;
-    //if(!elem) errorexiti("could not find nid0[2*i]=%d", nid0[2*i]);
-    for(; elem->node->nid != nid0[2*i]; elem = elem->next) ;
-
-    /* go to next node if not all 8 siblings need unrefinement,
-       but save it for later in nid0 */
-    if(nid0[2*i+1] < 8)
-    {
-      nid0[2*n_remain]   = nid0[2*i];
-      nid0[2*n_remain+1] = nid0[2*i+1];
-      n_remain++;
-      continue;
-    }
-
-    /* update mesh->lns if needed */
-    if(elem == mesh->lns)
-      update_lns = 1;
-    else
-      update_lns = 0;
-
-    //printf("B:rm %ld: ", i);
-    //printnodelistelement_and_neighbors_flag(elem,2);
-    ////printnodelist(elem);
-
-    /* remove 8 siblings */
-    elem_parent[i] = remove8siblings_in_mesh_lns(elem);
-    if(update_lns) mesh->lns = elem_parent[i];
-
-    /* set elem to parent */
-    elem = elem_parent[i];
-    //printf("E:rm %ld: ", i);
-    //printnodelistelement_and_neighbors_flag(elem,2);
-    ////printnodelist(elem);
-  }
-
-  /* Now mesh->lns is up to date, next destroy the children */
-  NODELEVEL_Pragma(omp parallel for)
-  for(i=0; i<nnodes; i++)
-  {
-    if(elem_parent[i])
-    {
-      tNode *parent = elem_parent[i]->node;
-      /* destroy 8 children */
-      destroy_children(parent);
-    }
-  }
-
-  free(elem_parent);
-
-  /* return number of nid0s not destroyed yet */
-  return n_remain;
+  errorexit("make: void remove_elms_if_rflag(tMesh *mesh, tRef *ref)");
 }
+
+
+
+
+
+
+
+
+
+
+
 
 /* merge nid0-list in nid0b into nid0-list in nid0, the allocated size
    of nid0 has to be 2*(n+nb) */
@@ -606,252 +289,6 @@ int nid0_compar(const void *x1, const void *x2)
   return 0;
 }
 
-/* destroy nids in the order in which we recv the MPI messages.
-   NOTE: The order in which we recv is not certain => we do not have the same
-   order for all MPI procs. => order of node->nfaces and thus node->fnb
-   differs between different MPI procs!!! => nb index ni differs between
-   MPI procs => request_surfaces_exchange_for_all_vars deadlocks because
-   tags in there need a unique ni!!! */
-void destroy_nids_in_recv_order(tMesh *mesh, nMPI_Req *req,
-                                int *nn, long **unref,
-                                int todo, tRef *ref)
-{
-  int rank = nMPI_rank(); /* my own rank */
-  int size = nMPI_size();
-  int r, done, flag, nn_rank;
-
-  /* unrefine my own unref[rank] */
-  nn_rank = nn[rank];
-  if(nn[rank]>0)
-    nn_rank = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
-  //PRFs(" 2: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
-
-  /* check for incoming broadcasts and then work on them */
-  r = 0;
-  done = 0;
-  while(done<todo)
-  {
-    if(nn[r]>0)
-    {
-      nMPI_Test(&(req[r]), &flag, nMPI_STATUS_IGNORE);
-      if(flag)
-      {
-        /* work on unref[r] */
-        if(r != rank) /* r=rank has been done already above */
-          nn[r] = destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
-        else
-          nn[r] = nn_rank;
-        nn[r] = -nn[r]; /* make nn[r] negative */
-        done++;
-      }
-    }
-    r++;
-    if(r>=size) r = 0;
-  }
-
-  /* flip sign on nn[r] since we made it negative above */
-  for(r=0; r<size; r++) nn[r] = -nn[r];
-  //PRFs(" 3: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
-}
-
-/* destroy nids in the order of the MPI ranks. */
-void destroy_nids_in_rank_order(tMesh *mesh, nMPI_Req *req,
-                                int *nn, long **unref,
-                                int todo, tRef *ref)
-{
-  int size = nMPI_size();
-  int r;
-
-  /* check for incoming broadcasts and then work on them */
-  for(r=0; r<size; r++)
-  {
-    if(nn[r]>0)
-    {
-      nMPI_Wait(&(req[r]), nMPI_STATUS_IGNORE);
-
-      /* work on unref[r] */
-      nn[r] = destroy_nodes_no_nid_update(mesh, nn[r], unref[r]);
-    }
-  }
-}
-
-/* Unrefine all nodes on all MPI procs if indicated by node->rflag */
-void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
-{
-  int rank = nMPI_rank();
-  int size = nMPI_size();
-  int r, todo;
-  int nnodes;
-  int myn = (mesh->myln->nncats)*(mesh->myln->nm);
-  long *my_unr  = calloc(2*myn+2, sizeof(my_unr[0]));
-  nMPI_Req *req = calloc(size, sizeof(req[0]));
-  int *nn       = calloc(size, sizeof(nn[0]));
-  long **unref  = calloc(size, sizeof(unref[0]));
-  tNode *sib0;
-
-  if(!my_unr || !req || !nn || !unref)
-    errorexit("no memory for my_unr, req, nn, unref");
-
-  //PRF;printnodelist(mesh->lns);
-  //PRF;printmesh(mesh);
-  //printNlistarray(mesh->myln->nm, mesh->myln->ln[0]);
-
-  ///* record which nodes we want to remove */
-  //formylnodes(mesh)
-  //{
-  //  tNode *node = MyLnode;
-  //  node->rflag = unrefine(node);
-  //}
-
-  /* save all sibling0 nids where we need refinement in my_unr */
-  sib0 = NULL;
-  nnodes = 0;
-  formylnodes_noomp(mesh)
-  {
-    tNode *node = MyLnode;
-    tNode *sib[8];
-    int ijk = node->ijk;
-    int n[] = {2,2,2};
-    int i,j,k, uref;
-    long nid0;
-
-    /* get sibling0 */
-    sib[0] = node;
-    k = kOfInd_n(ijk,n);
-    j = jOfInd_n_k(ijk,n,k);
-    i = iOfInd_n_jk(ijk,n,j,k);
-    if(i) sib[0] = sib[0]->nb[0];
-    if(j) sib[0] = sib[0]->nb[2];
-    if(k) sib[0] = sib[0]->nb[4];
-
-    /* check if we processed sib[0] already */
-    if(sib[0] == sib0) continue;
-    sib0 = sib[0]; /* save sib[0] as last one processed */
-
-    if(sib0->l==0)
-    {
-      if(sib0->rflag < 0) errorexit("root node cannot be removed!");
-      else continue;
-    }
-
-    /* other siblings */
-    sib[1] = sib[0]->nb[1];
-    sib[2] = sib[0]->nb[3];
-    sib[4] = sib[0]->nb[5];
-    sib[3] = sib[2]->nb[1];
-    sib[5] = sib[4]->nb[1];
-    sib[6] = sib[4]->nb[3];
-    sib[7] = sib[3]->nb[5];
-
-    /* check if all that we have on this proc needs to be unrefined */
-    uref = 0;
-    for(ijk=0; ijk<8; ijk++)
-    {
-      if(sib[ijk]->child[0]) /* cannot unrefine if there are any children */
-        goto continue_with_next_node;
-
-      if(sib[ijk]->dat)
-      {
-        if(sib[ijk]->rflag < 0) uref++;
-        else                    goto continue_with_next_node;
-      }
-    }
-
-    /* save nid0 and number of siblings that need a to be unrefined */
-    nid0 = sib[0]->nid;
-    my_unr[2*nnodes]   = nid0;
-    my_unr[2*nnodes+1] = uref;
-    nnodes++;
-
-  continue_with_next_node:
-    ;
-  }
-  nn[rank] = nnodes;
-
-  /* number of procs where we have to uref and how many we have done so far */
-  todo = size;
-
-  /* broadcast number of nodes nn to all MPI jobs */
-  for(r=0; r<size; r++)
-  {
-    nMPI_Bcast(&(nn[r]), 1, nMPI_INT, r);
-
-    if(nn[r]<=0) todo--; /* there is nothing to do if nn[r]=0 */
-
-    if(r==rank)
-    {
-      unref[r] = my_unr;
-    }
-    else
-    {
-      if(nn[r]>0)
-        unref[r] = calloc(2*nn[r], sizeof(unref[r][0]));
-      else
-        unref[r] = NULL;
-    }
-  }
-  my_unr = NULL; /* we do not need my_unr anymore */
-
-  /* broadcast unref to all MPI jobs */
-  for(r=0; r<size; r++)
-  {
-    if(nn[r]>0)
-      nMPI_Ibcast(&(unref[r][0]), 2*nn[r], nMPI_LONG, r, &(req[r]));
-  }
-
-  //PRFs(" 1: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
-
-  /* check for incoming broadcasts and then work on them */
-  //destroy_nids_in_recv_order(mesh, req, nn, unref, todo, ref);
-  destroy_nids_in_rank_order(mesh, req, nn, unref, todo, ref);
-
-  /* merge the arrays with left over nids into one */
-  for(r=0; r<size; r++)
-  {
-    if(r != rank)
-    {
-      int n;
-
-      /* check if we need more room */
-      n = nn[rank] + nn[r];
-      if(n > myn)
-      {
-        unref[rank] = realloc(unref[rank], 2*n*sizeof(unref[rank][0]));
-        myn = n;
-      }
-
-      /* now merge the arrays */
-      n = merge_nid0b_into_nid0(nn[rank], unref[rank], nn[r], unref[r]);
-      nn[rank] = n;
-    }
-  }
-
-  /* sort new longer unref[rank] with left over nid0s */
-  qsort(unref[rank], nn[rank], 2*sizeof(unref[rank][0]), nid0_compar);
-  //PRFs(" 4: ");prlarray("unref[rank]", 2*nn[rank], unref[rank]);
-
-  /* finally remove the stuff in unref[rank] */
-  nn[rank] = destroy_nodes_no_nid_update(mesh, nn[rank], unref[rank]);
-  if(nn[rank])
-  {
-    //printmesh(mesh);
-    prlarray("unref[rank]", 2*nn[rank]+4, unref[rank]);
-    errorexiti("nn[rank]=%d is supposed to be 0 now!", nn[rank]);
-  }
-
-  /* free unref content */
-  for(r=0; r<size; r++)
-  {
-    free(unref[r]);
-    unref[r] = NULL;
-  }
-  /* old my_unr is freed as one of unref */
-
-  /* free rest */
-  free(unref);
-  free(nn);
-  free(req);
-}
 
 
 /***************************************************************************/
@@ -939,36 +376,6 @@ void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
 void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
 {
   hrefine_nodes_if_nb_finer_by_dl(mesh, 1, ref);
-}
-
-
-/* refine all nodes up to level l */
-//void refine_mesh_to_level(tMesh *mesh, int l)
-void hrefine_mesh_to_level__old(tMesh *mesh, int l)
-{
-  tNlist *el;
-
-  for(el=mesh->lns; el; el = el->next)
-  {
-    while(el->node->l < l)
-      el = make8children_in_mesh_lns_myln(el, el->node->pt_typ, el->node->n);
-  }
-}
-
-/* refine patch number p in mesh */
-//void refine_pat(tMesh *mesh, int p)
-void hrefine_pat__old(tMesh *mesh, int p)
-{
-  tPat *pat = mesh->pat[p];
-  tNlist *el, *en;
-
-  el = mesh->lns;
-  for(en = el->next; el; en = el ? el->next : 0)
-  {
-    if(el->node->pat == pat)
-      make8children_in_mesh_lns_myln(el, el->node->pt_typ, el->node->n);
-    el = en;
-  }
 }
 
 

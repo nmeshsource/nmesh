@@ -306,8 +306,14 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
             errorexits("cannot find parent %s in mesh->lns", ns);
           }
 
+
+
           /* make 8 child nodes */
-          children = make8_child_nodes(parent, cp_typ[0], cn[0]);
+          //FIXME:
+          //children = make8_child_nodes(parent, cp_typ[0], cn[0]);
+          errorexit("call new elm ref function");
+
+
 
           /* set n and pt_typ for each child if needed */
           chld=0;

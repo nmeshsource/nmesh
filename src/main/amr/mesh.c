@@ -121,14 +121,6 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
     for(dir=0; dir<3; dir++) pt_typ[dir] = typ;
   }
 
-  /* setup root node */
-  pat->rnode = make_root_node(pat, pt_typ, nroot, datrank);
-  /* add root node to global mesh->lns list */
-  nlist = alloc_nodelist(pat->rnode);
-  append_nodelist_to_mesh_lns_myln(mesh, nlist);
-
-
-Yo(10000);
   /* setup root node element */
   make_and_add_root_elm(pat, nroot, pt_typ, datrank);
 
@@ -165,7 +157,7 @@ int amr_setup_mesh(tMesh *mesh)
   else if(Getv(mesh_type, "Shell"))
     ret = setup_Shell_mesh(mesh);
   else if(Getv(mesh_type, "l2_mesh"))
-    ret = setup_l2_mesh(mesh);
+    errorexit("add back:  ret = setup_l2_mesh(mesh);");
   else if(Getv(mesh_type, "3patchl2_mesh"))
     ret = setup_3patchl2_mesh(mesh);
   else
@@ -274,8 +266,10 @@ int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr)
   if(pr) printallbfaces(mesh);
 
   /* now setup root node connections, i.e. setup neighbors of root nodes */
-  update_all_rnode_nfaces_fnb(mesh);
-  if(pr) printmesh(mesh);
+  // FIXME: do we need something like
+  // update_all_rnode_nfaces_fnb(mesh);
+
+  if(pr) printmyelms(mesh);
   return 0;
 }
 
@@ -814,44 +808,6 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
 /***************************************************************************/
 
 /* set up a mesh with 2 levels  */
-int setup_l2_mesh(tMesh *mesh)
-{
-  int amr_n0 = Geti(Par("amr_n0"));
-  int amr_n1 = Geti(Par("amr_n1"));
-  int amr_n2 = Geti(Par("amr_n2"));
-  int n[] = { amr_n0, amr_n1, amr_n2 };
-  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
-  double bbox[6] = { -4,4, -2,2, -1,1 };
-  tNlist *el, *en;
-
-  PRFs(":\n");
-
-  mesh->dt = Getd(Par("dt"));
-  mesh->time = 0.;
-  mesh->iteration = 0;
-
-  remove_all_patches(mesh);
-  add_patch(mesh, bbox, pt_typ, n, 0);
-
-  make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
-
-  el = mesh->lns;
-  for(en = el->next; el; en = el ? el->next : 0)
-  {
-    if(el->node->l < 2)
-    {
-      make8children_in_mesh_lns_myln(el, pt_typ, n);
-      el = en;
-    }
-  }
-
-  simple_load_balance(mesh);
-  printmesh(mesh);
-
-  return 0;
-}
-
-/* set up a mesh with 2 levels  */
 int setup_3patchl2_mesh(tMesh *mesh)
 {
   int amr_n0 = Geti(Par("amr_n0"));
@@ -878,11 +834,15 @@ int setup_3patchl2_mesh(tMesh *mesh)
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
 
+  errorexit("add back the stuff below");
   /* 8 children in patch0 */
+  /*
   make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
   printmesh(mesh);
+  */
 
   /* 8 more in each patch */
+  /*
   el = mesh->lns;
   for(en = el->next; el; en = el ? el->next : 0)
   {
@@ -892,6 +852,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
       el = en;
     }
   }
+  */
 
   simple_load_balance(mesh);
   printmesh(mesh);
@@ -995,119 +956,4 @@ void test_array_thingies(tMesh *mesh)
   free_array(C0a);
   free_array(C1a);
   free_array(C2a);
-}
-
-
-/* a function just for testing */
-int setup_test_mesh(tMesh *mesh)
-{
-  double bbox[6] = { -4,4, -2,2, -1,1 };
-  int n[3] = { 5,4,3 };
-  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
-  tNlist *el, *el2;
-  int i;
-
-  PRFs(":\n");
-
-  mesh->dt = Getd(Par("dt"));
-  mesh->time = 0.;
-  mesh->iteration = 0;
-
-  remove_all_patches(mesh);
-
-//tNode *tnode = alloc_node();
-//mesh->pat[0]->rnode = 0;
-  //realloc_patlist_in_mesh(mesh, 1);
-  add_patch(mesh, bbox, pt_typ, n, 0);
-
-  enablevar(mesh, Ind("SurfExchange_u"));
-  enablevar(mesh, Ind("SurfExchange_v"));
-  enablevar(mesh, Ind("X"));
-//  tNlist *nlist;
-//  tNode *nd;
-//  nd = mesh->pat[0]->rnode;
-//  nlist = make8_child_nodes(nd, n);
-//  replace1_in_mesh_lns_myln(mesh->lns, nlist);
-  make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
-
-  //printnodelist(nlist);
-  printmesh(mesh);
-
-  el = mesh->lns;
-  for(i=1; i<=1; i++) el = el->next;
-//  nd = el->node;
-//  nlist = make8_child_nodes(nd, n);
-//  replace1_in_mesh_lns_myln(el, nlist);
-  make8children_in_mesh_lns_myln(el, pt_typ, n);
-
-  el = mesh->lns;
-  for(i=1; i<=8+2; i++) el = el->next;
-//  nd = el->node;
-//  nlist = make8_child_nodes(nd, n);
-//  replace1_in_mesh_lns_myln(el, nlist);
-  el = make8children_in_mesh_lns_myln(el, pt_typ, n);
-
-  //printnodelist(nlist);
-  printmesh(mesh);
-  printnodelist_and_neighbors(mesh->lns);
-
-  destroy8siblings_in_mesh_lns_myln(el);
-  printmesh(mesh);
-  printnodelist_and_neighbors(mesh->lns);
-
-  //test_array_thingies(mesh);
-  //abort();
-
-  //printarray(node_St(mesh->lns->next->node,1));
-  printarray_matrix0(node_St(mesh->lns->next->node,1));
-  printarray_matrix0(node_Dt(mesh->lns->next->node,1));
-
-  printarray(node_Xb(mesh->lns->next->node,1));
-  printarray(node_Wq(mesh->lns->next->node,1));
-
-//  el = mesh->lns;
-//  printnodelist(el);
-
-  el = alloc_nodelist(mesh->pat[0]->rnode->child[1]);
-  printnode_and_neighbors(el->node);
-
-Yo(1);
-  printnodelist(el);
-
-
-Yo(2);
-  el2 = ldescendants_along_face(el, 0, &i);
-Yo(3);
-  printf("i=%d\n",i);
-  printnodelist(el2);
-  free_nodelist(el);
-  free_nodelist(el2);
-
-Yo(4);
-//  printnodelist(el2);
-//  tNlist *make_mesh_neighbor_list(tNode *node, int face)
-  el2 = make_mesh_neighbor_list(mesh->pat[0]->rnode->child[1]->child[2], 0);
-  printnodelist(el2);
-
-  free_nodelist(el2);
-
-Yo(5);
-prdivider(2);
-el = mesh->lns;
-for(i=1; i<=8+2; i++) el = el->next;
-printnode(el->node);
-
-double *d = Vard(el->node, Ind("SurfExchange_u"));
-if(d) d[3] = 3;
-printvar_innode(el->node, Ind("SurfExchange_u"));
-
-simple_load_balance(mesh);
-printnode(el->node);
-printvar_innode(el->node, Ind("SurfExchange_u"));
-//printmesh(mesh);
-prdivider('^');
-//  fflush(stdout);
-//  nMPI_barrier();
-
-  return 0;
 }
