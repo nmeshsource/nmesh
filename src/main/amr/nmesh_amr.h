@@ -148,6 +148,7 @@ typedef struct tGLIST {
 #define glist_entry(ptr) list_entry(ptr, tGlist, list)->entry
 
 
+//FIXME: Remove this:
 /* for MPI exchange between neighboring ranks */
 typedef struct tELMFL {
   tElm elm_fl[2]; /* first and last elm on rank */
@@ -227,9 +228,10 @@ typedef struct tINDIC {
    myindc comes from this proc,
    nbindc[i] can just point if nb[i] is local, otherwise we need to alloc */
 
-/* the old node type tNode is now a lead node of type tElm */
+/* the old node type tNode is now a leaf node of type tElm */
 typedef tElm tNode;
 
+//FIXME: Remove:
 /* a linked list of nodes */
 typedef struct tNLIST {
   tNode *node;
@@ -355,6 +357,7 @@ enum
 };
 
 
+//FIXME: Remove tNface
 /***********************************************************************/
 /* Nfaces */
 /***********************************************************************/
