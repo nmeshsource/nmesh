@@ -820,35 +820,7 @@ tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
   return node_from_nodename(mesh, name);
 }
 
-/* return node location if x is inside this patch, if not return -1 */
-long l_XYZ_of_xyz__old(tNode *node, int ind, double X[3], const double x[3])
-{
-  tPat *pat = node->pat;
-  int d, stat=0;
-  long loc = elm_location__old(node); /* get node location */
-
-  /* get X */
-  if(pat->XYZ_of_xyz)
-    stat = pat->XYZ_of_xyz(pat, node,ind, X, x);
-  else
-    for(d=0; d<3; d++) X[d] = x[d];
-
-  if(stat) return -1;
-
-  for(d=0; d<3; d++)
-    if(dless(X[d],node->bbox[2*d]) || dless(node->bbox[2*d+1],X[d]))
-      return -1;
-
-  /* round X to inside box */
-  for(d=0; d<3; d++)
-  {
-    if(X[d] < node->bbox[2*d])   X[d] = node->bbox[2*d];
-    if(X[d] > node->bbox[2*d+1]) X[d] = node->bbox[2*d+1];
-  }
-
-  return loc;
-}
-// replaces l_XYZ_of_xyz__old
+// replaces l_XYZ_of_xyz__old:
 /* set X and return 1 if x is inside this elm, otherwise return 0 */
 int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3])
 {
