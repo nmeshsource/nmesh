@@ -942,7 +942,6 @@ void free_pat_CI(tPat *pat)
 void free_patch(tPat *pat)
 {
   tMesh *mesh = pat->mesh;
-  tNlist *elem;
   struct list_head *pos, *sav;
 
   if(!pat) return;

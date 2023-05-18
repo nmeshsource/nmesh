@@ -194,7 +194,7 @@ int coordinates_init_node(tNode *node)
       {
         printpatch(pat);
         printCI(pat);
-        printnode(node);
+        printelm(node);
         pr3v("X", X);
         pr3v("x", x);
         errorexit("x is NAN");

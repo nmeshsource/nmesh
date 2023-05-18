@@ -577,6 +577,122 @@ int eploc_key_in_eplocarray(const tEploc *eplockey,
 
 
 /****************************************************************************/
+/* functions for elm-name and elm-location strings */
+/****************************************************************************/
+
+/* construct a unique string that describes node location in patch:
+   e.g. 743 in octal is node on level 3 that has
+    ijk=7 on l1,  ijk=4 on l2,  ijk=3 on l3   */
+char *elm_location_str(tElm *elm, char *s, int slen)
+{
+  int i, l;
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, elm->eploc);
+  l = eloc->l;
+
+  if(slen <= l) errorexit("slen is too small");
+
+  for(i=0; i<l; i++)
+    s[i] = eloc->loc[i];
+  s[l] = 0;
+
+  return s;
+}
+
+/* convert string from elm_location_str into a unsigned long int */
+ulong elm_location(tElm *elm)
+{
+  ulong uloc;
+
+  if(!elm) return 0;
+
+  memcpy(&uloc, &(elm->eploc->ploc[0]), sizeof(uloc));
+
+  return uloc;
+}
+
+/* use elm_location_str to make a unique node name that also contains the
+   patch number */
+char *elmname(tElm *elm, char *s, int slen)
+{
+  char loc[NLOCS+2];
+  if(elm)
+  {
+    elm_location_str(elm, loc,NLOCS+2);
+    snprintf(s,slen, "%d_%s", elm->eploc->p, loc);
+  }
+
+  else
+    snprintf(s,slen, "-");
+  return s;
+}
+
+/* get elm in a patch from string produced by elm_location_str */
+void eploc_from_location_str(tEploc *eploc, int p, char *loc)
+{
+  tEloc eloc[1];
+  int i;
+
+  for(i=0; (i<NLOCS) && (loc[i]!=0); i++)
+    eloc->loc[i] = loc[i];
+
+  eloc->l = i;
+  eloc->p = p;
+
+  eloc_to_eploc(eloc, eploc);
+}
+
+/* get elm in a patch from string produced by elm_location_str */
+tElm *elm_from_location_str(tPat *pat, char *loc)
+{
+  tElm *elm;
+  tEploc eploc[1];
+
+  eploc_from_location_str(eploc, pat->p, loc);
+
+  /* find elm with eploc in mesh->mylems */
+  errorexit("unfinished, do we really need this???");
+
+  return elm;
+}
+
+/* get elm in the mesh from its full elmname */
+tNode *elm_from_elmname(tMesh *mesh,  char *name)
+{
+  tPat *pat;
+  int i, p;
+  char *loc;
+  int max = 99;
+
+  /* find pos i of '_' */
+  for(i=0; i<max; i++) if(name[i]=='_') break;
+
+  /* get patch */
+  p = atoi(name); /* atoi ignores '_' and all after it */
+  if(p>=mesh->npats || p<0) errorexiti("patch %d does not exist", p);
+  pat = mesh->pat[p];
+  //printf("name=%s => p=%d\n", name, p);
+
+  /* get location str. */
+  loc = name + i+1;
+
+  return elm_from_location_str(pat, loc);
+}
+
+/* check if a elm has the name in string nname */
+int elmname_is(tNode *elm, const char *nname)
+{
+  char myname[NLOCS+2];
+  elmname(elm, myname,NLOCS+2);  /* get name of elm into myname */
+  if(strcmp(myname, nname)==0)   /* if myname=nname */
+    return 1;
+  else
+    return 0;
+}
+
+
+
+/****************************************************************************/
 /* functions that work on elm */
 /****************************************************************************/
 

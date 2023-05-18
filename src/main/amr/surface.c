@@ -1086,9 +1086,9 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       if(0 && f==1 && Node_eid(nb)==7)
       {
         printf("ni=%d:\n", ni);
-        printnode(node);
+        printelm(node);
         printbfaces_on_f(node->pat, f);
-        printnode(nb);
+        printelm(nb);
         printbfaces_on_f(nb->pat, nb_f);
         printarray_int(Ip[ni]);
         printarray(Cp[0]);
@@ -1158,8 +1158,8 @@ if(0 && Node_eid(nb)==17 && Node_eid(nb)==64 && vi==35)
 {
 tMesh *mesh = node->pat->mesh;
 int ll;
-printnode(node);
-printnode(nb);
+printelm(node);
+printelm(nb);
 printf("nb_f=%d nb_ni=%d nb_dir=%d    f=%d ni=%d\n",
         nb_f, nb_ni, nb_dir, f,ni);
 printf("%s\n", VarName(vi));

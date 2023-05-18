@@ -629,14 +629,6 @@ void request_all_vl_surfaces(tNode *node, tVarList *vl);
 void get_all_vl_surfaces(tNode *node, tVarList *vl);
 void free_all_vl_surfaces(tNode *node, tVarList *vl);
 
-/* connect.c */
-char *node_location_str(tNode *node, char *s, int slen);
-char *nodename(tNode *node, char *s, int slen);
-long node_location(tNode *node);
-tNode *node_from_location_str(tPat *pat, char *loc);
-tNode *node_from_nodename(tMesh *mesh,  char *name);
-int nodename_is(tNode *node, const char *nname);
-
 /* load.c */
 void simple_load_balance(tMesh *mesh);
 void move_nodelist_to_rank(tNlist *list, int desrank);
@@ -701,3 +693,19 @@ void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref);
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref);
 void prefine_pat(tMesh *mesh, int p, int n[3]);
+
+/* connections.c */
+char *elm_location_str(tElm *elm, char *s, int slen);
+char *elmname(tElm *elm, char *s, int slen);
+ulong elm_location(tElm *elm);
+tElm *elm_from_location_str(tPat *pat, char *loc);
+tElm *elm_from_elmname(tMesh *mesh,  char *name);
+int elmname_is(tElm *elm, const char *nname);
+
+/* connect.c */
+#define node_location_str elm_location_str
+#define nodename elmname
+#define node_location elm_location
+#define node_from_location_str elm_from_location_str
+#define node_from_nodename elm_from_elmname
+#define nodename_is elmname_is
