@@ -224,7 +224,7 @@ int add_nfaces_within_patch(tNode *node, int face)
   int nbface;
 
   /* no neighb. if on patch face */
-  if(node->patface[face]) return 0;
+  if(Elm_patface(node, face)) return 0;
 
   /* find neighbor at same level or on lower level
      note: root node has no patch neighbors */
@@ -316,7 +316,7 @@ tNlist *make_patch_neighbor_list(tNode *node, int face)
   int nbface;
 
   /* no neighb. if on patch face */
-  if(node->patface[face]) return NULL;
+  if(Elm_patface(node, face)) return NULL;
 
   /* find neighbor at same level or on lower level
      note: root node has no patch neighbors */

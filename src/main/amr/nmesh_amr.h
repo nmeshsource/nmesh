@@ -114,7 +114,7 @@ typedef struct tELM {
 typedef struct tELM {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
-  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
+//  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
 //  int l;                  /* refinement level of this node */
 //  int leaf;               /* is 1 if this is a leaf node */
 //  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
@@ -700,6 +700,7 @@ tElm *elm_from_location_str(tPat *pat, char *loc);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);
 int elm_get_ijk(tElm *elm);
+int elm_is_on_patface(tElm *elm, int f);
 
 /* connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)

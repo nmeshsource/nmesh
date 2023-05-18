@@ -123,19 +123,10 @@
 #define Node_ijk(node)    (node)->ijk
 
 /* tests for patch-face, boundary, OUTERBOUND, INNERBOUND */
-#define Node_patface(node, face) (node)->patface[face]
-#define Node_on_BOUND(node, face) \
-  ( Node_patface(node, face) && \
-    (node)->pat->bfaces[face] && \
-    (node)->pat->bfaces[face]->boundary )
-#define Node_on_OUTERBOUND(node, face) \
-  ( Node_patface(node, face) && \
-    (node)->pat->bfaces[face] && \
-    ((node)->pat->bfaces[face]->boundary==OUTERBOUND) )
-#define Node_on_INNERBOUND(node, face) \
-  ( Node_patface(node, face) && \
-    (node)->pat->bfaces[face] && \
-    ((node)->pat->bfaces[face]->boundary==INNERBOUND) )
+#define Node_patface(node, face)       Elm_patface(node, face)
+#define Node_on_BOUND(node, face)      Elm_on_BOUND(node, face)
+#define Node_on_OUTERBOUND(node, face) Elm_on_OUTERBOUND(node, face)
+#define Node_on_INNERBOUND(node, face) Elm_on_INNERBOUND(node, face)
 
 
 /* marcos to start and stop node load timers */

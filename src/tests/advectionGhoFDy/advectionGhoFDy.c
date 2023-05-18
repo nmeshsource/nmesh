@@ -76,7 +76,8 @@ int advectionGhoFDy_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
     if(f==3) continue; /* do nothing on face 3 */
 
     /* compute boundary terms, if on outer bound */
-    if(node->patface[f] && bfaces && bfaces->boundary)
+    //if(node->patface[f] && bfaces && bfaces->boundary)
+    if(Elm_on_BOUND(node,f))
     {
       double *u = Vard(node, iu);
       double *r = Vard(node, ir);

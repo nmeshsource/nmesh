@@ -77,7 +77,7 @@ int coordinates_coordvars_enabled(tNode *node)
     if(bface0) ioC0 = bface0->ioC0_0;
     else       ioC0 = -1;
 
-    if(ioC0>0 && node->patface[f] && nnb)
+    if(ioC0>0 && Elm_patface(node, f) && nnb)
     {
       enablevarcomp_innode(node, ioC0+f);
       enablevarcomp_innode(node, ioC0+6+f);
@@ -240,7 +240,7 @@ int coordinates_init_node(tNode *node)
     if(bface0) ioC0 = bface0->ioC0_0;
     else       ioC0 = -1;
 
-    if(ioC0>0 && node->patface[f] && nnb>0)
+    if(ioC0>0 && Elm_patface(node, f) && nnb>0)
     {
       int dir = f/2;
       int pl = (n[dir]-1)*(f%2);

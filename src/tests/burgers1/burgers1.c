@@ -155,7 +155,10 @@ void burgers1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
     dir = face/2;
     p = (face%2)*(n[dir] - 1);
 
-    if(node->patface[face] && bfaces && bfaces->boundary)
+    //if(node->patface[face] && bfaces && bfaces->boundary)
+    if(Elm_on_BOUND(node,face))
+
+
       forplaneN(dir, i,j,k, n, p)
       {
         ijk = Ind_n(i,j,k, n);
