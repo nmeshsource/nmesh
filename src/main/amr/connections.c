@@ -1931,7 +1931,6 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     {
       union { tElm *elm; tElm0 *elm0; } e2e0;
       ulong elmindex;
-      int datrank;
       amr_elmindex_and_datrank_of_eid(mesh, eid,
                                       &elmindex, &datrank);
       /* just fill in elm0 */
