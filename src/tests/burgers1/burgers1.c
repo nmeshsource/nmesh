@@ -138,7 +138,7 @@ void burgers1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
   //int ix = Ind("x");
 
   /* compute boundary flux terms */
-  tPat *pat = node->pat;
+  //tPat *pat = node->pat;
   int *n = node->n;
   double *r = Vard(node, ir);
   //double *x = Vard(node, ix);
@@ -151,7 +151,7 @@ void burgers1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
   /* go over each face */
   for(face=0; face<6; face++)
   {
-    tBface *bfaces = pat->bfaces[face];
+    //tBface *bfaces = pat->bfaces[face];
     dir = face/2;
     p = (face%2)*(n[dir] - 1);
 

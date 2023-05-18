@@ -66,13 +66,13 @@ int advectionGhoFDy_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
   int ngho = Geti(Par("amr_nghosts"));
   int n2gho = 2*ngho;
 
-  tPat *pat = node->pat;
+  //tPat *pat = node->pat;
   int f;
 
   /* loop over faces */
   for(f=0; f<6; f++)
   {
-    tBface *bfaces = pat->bfaces[f];
+    //tBface *bfaces = pat->bfaces[f];
     if(f==3) continue; /* do nothing on face 3 */
 
     /* compute boundary terms, if on outer bound */

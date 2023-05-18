@@ -913,7 +913,7 @@ int ind_on_outerbound(tNode *node, int ind)
     for(f=0; f<6; f++)
       if(face[f])
       {
-        tBface *bfaces = node->pat->bfaces[f];
+        //tBface *bfaces = node->pat->bfaces[f];
         //if(node->patface[f] && bfaces && bfaces->boundary==OUTERBOUND)
         if(Elm_on_OUTERBOUND(node,f))
           return 1;
