@@ -223,15 +223,6 @@ void print_amr_elm_nbinfo(const tElm *elm, int face)
   printarray_eploc(nbinfo, 0);
 }
 
-void printnd(tNode *n)
-{
-  char s[100];
-  printf("nid%ld: %s [%g,%g]x[%g,%g]x[%g,%g] leaf=%d dat: %s\n",
-          n->nid, nodename(n, s,99),
-          n->bbox[0], n->bbox[1], n->bbox[2],
-          n->bbox[3], n->bbox[4],n->bbox[5], n->leaf, n->dat ? "yes" : "no");
-}
-
 void printnodes_in_list(tNlist *nl)
 {
   tNlist *el;

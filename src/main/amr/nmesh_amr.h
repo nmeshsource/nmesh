@@ -118,7 +118,7 @@ typedef struct tELM {
 //  int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
-  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
+//  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
 
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
   //struct tMESH *mesh;     // pointer to mesh that contains elm
@@ -577,7 +577,6 @@ void printeploc_s(const tEploc *eploc, const char *s);
 void printelm(const tElm *e);
 void printelmarray(long nelms, tElm **elm);
 void print_amr_elm_nbinfo(const tElm *elm, int face);
-void printnd(tNode *n) ;
 void printnodes_in_list(tNlist *nl);
 void pr_nodename(tNode *node);
 void printvar_innode(tNode *node, int vi);

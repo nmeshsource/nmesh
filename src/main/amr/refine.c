@@ -224,7 +224,7 @@ void prefine_nid_list(tMesh *mesh, long nnodes, long *nid, tRef *ref)
       /* forward to node with nid[i] */
       //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
       //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
-      for(; elem->node->nid != nid[i]; elem = elem->next) ;
+      for(; elem->node->eploc->eid != nid[i]; elem = elem->next) ;
 
       /* find node */
       node = elem->node;

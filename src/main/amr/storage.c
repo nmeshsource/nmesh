@@ -1557,7 +1557,7 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
       }
       /* set nid and invalidate parent's nid */
       Node_eid(node) = nid++;
-      if(parent) parent->nid = -nid;
+      if(parent) Node_eid(parent) = -nid;
       //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
 
       /* set node MPI communicator */
