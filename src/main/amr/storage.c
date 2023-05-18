@@ -731,6 +731,180 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
 
 
 /**************************************************************************/
+/* update n or pt_typ in a node or elm */
+/**************************************************************************/
+
+/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
+   should be called for all 8 siblings */
+void update_node_n_pt_typ__old(tNode *node, int *n, int *pt_typ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int nvdb = mesh->nvdb;
+  tNode node_old[1];
+  int d, vi;
+
+  /* backup old node info */
+  memcpy(node_old, node, sizeof(node_old[0]));
+
+  /* update node info */
+  if(n)
+  {
+    for(d=0; d<3; d++) node->n[d] = n[d];
+    node->np = n[0] * n[1] * n[2];
+  }
+  if(pt_typ)
+    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
+
+  /* if node has dat, we need to interpolate vars */
+  if(node_old->dat)
+  {
+    tArray *Xp[3];
+
+    /* alloc new dat for node */
+    node->dat = alloc_dat(node);
+
+    /* array memory to store points of node */
+    Xp[0] = alloc_array(n);
+    Xp[1] = alloc_array(n);
+    Xp[2] = alloc_array(n);
+    fill_3arrays_with_nodepoints(node, Xp);
+    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
+      could use: node_Xb3(node, Xp); to get new node points into Xp */
+
+    /* use interpolation to get vars from old dat to new node->dat */
+    for(vi=0; vi<nvdb; vi++)
+      if(node_old->dat->v[vi])
+      {
+        int vt = MeshVarType(mesh, vi);
+        /* enable same vars in new dat as in dat_old */
+        enablevarcomp_innode(node, vi);
+
+        /* fill node->dat with interpolation data from old dat */
+        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
+        {
+          basis_interp_topoints(node_old, node_old->dat->v[vi],
+                                Xp, node->dat->v[vi], Lagrange_of_x);
+        }
+      } /* end: if parent has dat->v[vi] */
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
+    free_dat(node_old->dat);
+
+    /* init coords in this new node */
+    coordinates_init_node(node);
+  }
+}
+
+/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
+   should be called for all 8 siblings
+   NOTE: After calling update_node_n_pt_typ_return_node_old we have to call:
+           update_node_n_pt_typ_free_node_old(node_old);
+         to free the copy node_old that is allocated and returned here. */
+tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
+{
+  tMesh *mesh = node->pat->mesh;
+  int nvdb = mesh->nvdb;
+  int d, vi;
+  tNode *node_old = calloc(1, sizeof(*node_old));
+  if(!node_old) errorexit("no memory for node_old");
+
+  /* backup old node info */
+  memcpy(node_old, node, sizeof(node_old[0]));
+
+  /* update node info */
+  if(n)
+  {
+    for(d=0; d<3; d++) node->n[d] = n[d];
+    node->np = n[0] * n[1] * n[2];
+  }
+  if(pt_typ)
+    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
+
+  /* if node has dat, we need to interpolate vars */
+  if(node_old->dat)
+  {
+    tArray *Xp[3];
+
+    /* alloc new dat for node */
+    node->dat = alloc_dat(node);
+
+    /* array memory to store points of node */
+    Xp[0] = alloc_array(n);
+    Xp[1] = alloc_array(n);
+    Xp[2] = alloc_array(n);
+    fill_3arrays_with_nodepoints(node, Xp);
+    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
+      could use: node_Xb3(node, Xp); to get new node points into Xp */
+
+    /* use interpolation to get vars from old dat to new node->dat */
+    for(vi=0; vi<nvdb; vi++)
+      if(node_old->dat->v[vi])
+      {
+        int vt = MeshVarType(mesh, vi);
+        /* enable same vars in new dat as in dat_old */
+        enablevarcomp_innode(node, vi);
+
+        /* fill node->dat with interpolation data from old dat */
+        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
+        {
+          basis_interp_topoints(node_old, node_old->dat->v[vi],
+                                Xp, node->dat->v[vi], Lagrange_of_x);
+        }
+      } /* end: if parent has dat->v[vi] */
+    free_array(Xp[2]);
+    free_array(Xp[1]);
+    free_array(Xp[0]);
+
+    /* shallow copy of node_old->dat->info, to get e.g. load timers */
+    node->dat->info[0] = node_old->dat->info[0];
+
+    /* init coords in this new node */
+    coordinates_init_node(node);
+  }
+  return node_old;
+}
+
+/* free the node_old returned by update_node_n_pt_typ_return_node_old */
+void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old)
+{
+  if(node_old->dat != node->dat) free_dat(node_old->dat);
+  free(node_old);
+}
+
+/* Undo a call to update_node_n_pt_typ_return_node_old. This still does not
+   free node_old! */
+void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
+{
+  /* free any newly allocated dat in node */
+  free_dat(node->dat);
+
+  /* use info in node_old to restore node */
+  memcpy(node, node_old, sizeof(node[0]));
+}
+
+/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
+   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
+   should be called for all 8 siblings */
+void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
+{
+  tNode *node_old;
+  node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
+  update_node_n_pt_typ_free_node_old(node, node_old);
+}
+
+/* update node->n on one node, should be called for all 8 siblings */
+void update_node_n(tNode *node, int n[3])
+{
+  update_node_n_pt_typ(node, n, NULL);
+}
+
+
+
+
+/**************************************************************************/
 /* node storage */
 /**************************************************************************/
 
@@ -1030,174 +1204,6 @@ tNlist *make8_child_nodes(tNode *parent, int pt_typ[3], int n[3])
 
   return nlist;
 }
-
-/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
-   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
-   should be called for all 8 siblings */
-void update_node_n_pt_typ__old(tNode *node, int *n, int *pt_typ)
-{
-  tMesh *mesh = node->pat->mesh;
-  int nvdb = mesh->nvdb;
-  tNode node_old[1];
-  int d, vi;
-
-  /* backup old node info */
-  memcpy(node_old, node, sizeof(node_old[0]));
-
-  /* update node info */
-  if(n)
-  {
-    for(d=0; d<3; d++) node->n[d] = n[d];
-    node->np = n[0] * n[1] * n[2];
-  }
-  if(pt_typ)
-    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
-
-  /* if node has dat, we need to interpolate vars */
-  if(node_old->dat)
-  {
-    tArray *Xp[3];
-
-    /* alloc new dat for node */
-    node->dat = alloc_dat(node);
-
-    /* array memory to store points of node */
-    Xp[0] = alloc_array(n);
-    Xp[1] = alloc_array(n);
-    Xp[2] = alloc_array(n);
-    fill_3arrays_with_nodepoints(node, Xp);
-    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
-      could use: node_Xb3(node, Xp); to get new node points into Xp */
-
-    /* use interpolation to get vars from old dat to new node->dat */
-    for(vi=0; vi<nvdb; vi++)
-      if(node_old->dat->v[vi])
-      {
-        int vt = MeshVarType(mesh, vi);
-        /* enable same vars in new dat as in dat_old */
-        enablevarcomp_innode(node, vi);
-
-        /* fill node->dat with interpolation data from old dat */
-        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
-        {
-          basis_interp_topoints(node_old, node_old->dat->v[vi],
-                                Xp, node->dat->v[vi], Lagrange_of_x);
-        }
-      } /* end: if parent has dat->v[vi] */
-    free_array(Xp[2]);
-    free_array(Xp[1]);
-    free_array(Xp[0]);
-    free_dat(node_old->dat);
-
-    /* init coords in this new node */
-    coordinates_init_node(node);
-  }
-}
-
-/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
-   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
-   should be called for all 8 siblings
-   NOTE: After calling update_node_n_pt_typ_return_node_old we have to call:
-           update_node_n_pt_typ_free_node_old(node_old);
-         to free the copy node_old that is allocated and returned here. */
-tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
-{
-  tMesh *mesh = node->pat->mesh;
-  int nvdb = mesh->nvdb;
-  int d, vi;
-  tNode *node_old = calloc(1, sizeof(*node_old));
-  if(!node_old) errorexit("no memory for node_old");
-
-  /* backup old node info */
-  memcpy(node_old, node, sizeof(node_old[0]));
-
-  /* update node info */
-  if(n)
-  {
-    for(d=0; d<3; d++) node->n[d] = n[d];
-    node->np = n[0] * n[1] * n[2];
-  }
-  if(pt_typ)
-    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
-
-  /* if node has dat, we need to interpolate vars */
-  if(node_old->dat)
-  {
-    tArray *Xp[3];
-
-    /* alloc new dat for node */
-    node->dat = alloc_dat(node);
-
-    /* array memory to store points of node */
-    Xp[0] = alloc_array(n);
-    Xp[1] = alloc_array(n);
-    Xp[2] = alloc_array(n);
-    fill_3arrays_with_nodepoints(node, Xp);
-    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
-      could use: node_Xb3(node, Xp); to get new node points into Xp */
-
-    /* use interpolation to get vars from old dat to new node->dat */
-    for(vi=0; vi<nvdb; vi++)
-      if(node_old->dat->v[vi])
-      {
-        int vt = MeshVarType(mesh, vi);
-        /* enable same vars in new dat as in dat_old */
-        enablevarcomp_innode(node, vi);
-
-        /* fill node->dat with interpolation data from old dat */
-        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
-        {
-          basis_interp_topoints(node_old, node_old->dat->v[vi],
-                                Xp, node->dat->v[vi], Lagrange_of_x);
-        }
-      } /* end: if parent has dat->v[vi] */
-    free_array(Xp[2]);
-    free_array(Xp[1]);
-    free_array(Xp[0]);
-
-    /* shallow copy of node_old->dat->info, to get e.g. load timers */
-    node->dat->info[0] = node_old->dat->info[0];
-
-    /* init coords in this new node */
-    coordinates_init_node(node);
-  }
-  return node_old;
-}
-
-/* free the node_old returned by update_node_n_pt_typ_return_node_old */
-void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old)
-{
-  if(node_old->dat != node->dat) free_dat(node_old->dat);
-  free(node_old);
-}
-
-/* Undo a call to update_node_n_pt_typ_return_node_old. This still does not
-   free node_old! */
-void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
-{
-  /* free any newly allocated dat in node */
-  free_dat(node->dat);
-
-  /* use info in node_old to restore node */
-  memcpy(node, node_old, sizeof(node[0]));
-}
-
-/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
-   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
-   should be called for all 8 siblings */
-void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
-{
-  tNode *node_old;
-  node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
-  update_node_n_pt_typ_free_node_old(node, node_old);
-}
-
-/* update node->n on one node, should be called for all 8 siblings */
-void update_node_n(tNode *node, int n[3])
-{
-  update_node_n_pt_typ(node, n, NULL);
-}
-
 
 /* remove children */
 tNode *destroy_children(tNode *parent)
