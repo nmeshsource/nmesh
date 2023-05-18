@@ -247,7 +247,7 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           p_prev = p;
           p = parent->pat->p;
           lp_prev = lp;
-          lp = parent->l;
+          lp = Elm_l(parent);
           //printf("buf=%s\n", buf);
           //printnode(parent);
 

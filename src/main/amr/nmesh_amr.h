@@ -115,7 +115,7 @@ typedef struct tELM {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
   int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
-  int l;                  /* refinement level of this node */
+//  int l;                  /* refinement level of this node */
   int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
   long nid;               /* node ID, updated by update_mesh_myln_node_nid */
@@ -302,8 +302,7 @@ typedef struct tPAT {
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bfaces[6]; /* 1st bface of this patch on each face */
-  tNode *rnode; //FIXME: REMOVE /* root node in this patch */
-  //tNlist *lns;   /* start of linked list of leaf nodes in this patch */
+  //tNode *rnode; //FIXME: REMOVE /* root node in this patch */
 } tPat;
 /* Note: each patch has Bfaces as in sgrid. But instead of pointlists we use
    bounding rectangles in both adjacent bfaces. These rectangles (brct) are
@@ -611,15 +610,7 @@ void printelm(const tElm *e);
 void printelmarray(long nelms, tElm **elm);
 void print_amr_elm_nbinfo(const tElm *elm, int face);
 void printnd(tNode *n) ;
-void printnode(tNode *n);
-void printnode_and_neighbors(tNode *n);
 void printnodes_in_list(tNlist *nl);
-void printnodelistelement_and_neighbors_flag(tNlist *el, int pr_nb);
-void printnodelistelement(tNlist *el);
-void printnodelist_and_neighbors(tNlist *nl);
-void printnodelist(tNlist *nl);
-void printnodearray(long nnodes, tNode **na);
-void printNlistarray(long nnodes, tNlist **nl);
 void pr_nodename(tNode *node);
 void printvar_innode(tNode *node, int vi);
 void printvar_ajsurfdiff(tNode *node, int vi);

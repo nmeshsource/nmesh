@@ -115,7 +115,7 @@
 
 /* get parts of tNode struct */
 #define Node_p(node)      (node)->pat->p
-#define Node_l(node)      (node)->l
+#define Node_l(node)      Elm_l(node)
 #define Node_eid(node)    Elm_eid(node)
 #define Node_np(node)     (node)->np
 #define Node_pat(node)    (node)->pat

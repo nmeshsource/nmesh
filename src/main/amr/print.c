@@ -10,22 +10,24 @@ extern tMesh *main_mesh;
 
 /* print information about various objects */
 
-void printmesh(tMesh *m)
+void printmesh(tMesh *mesh)
 {
+  int size = nMPI_rank();
   int p;
-  tNode *node;
 
-  if(m==main_mesh) printf("mesh=main_mesh: ");
-  else             printf("mesh=%p: ", (void *) m);
-  printf("npats=%d npdb=%d nvdb=%d nln=%ld myln->nm=%d dt=%g\n",
-	 m->npats, m->npdb, m->nvdb, m->nln, m->myln->nm, m->dt);
-  forpatches(m, p)
-    printpatch(m->pat[p]);
+  if(mesh==main_mesh) printf("mesh=main_mesh: ");
+  else             printf("mesh=%p: ", (void *) mesh);
+  printf("npats=%d npdb=%d nvdb=%d nln=%lu nmyelm=%lu dt=%g\n",
+	 mesh->npats, mesh->npdb, mesh->nvdb,
+	 mesh->eidlim[size-1], mesh->nmyelm, mesh->dt);
+  forpatches(mesh, p)
+    printpatch(mesh->pat[p]);
   printf("leaf nodes:\n");
-  forlnodes(m, node)
+  formyelms(mesh)
   {
-    printnode(node);
-  } endforlnodes;
+    tElm *elm = MyElm;
+    printelm(elm);
+  }
 }
 
 void printpatch(tPat *pat)
@@ -33,17 +35,6 @@ void printpatch(tPat *pat)
   printf("p%d: [%g,%g]x[%g,%g]x[%g,%g]\n",
          pat->p, pat->bbox[0], pat->bbox[1], pat->bbox[2], pat->bbox[3],
          pat->bbox[4],pat->bbox[5]);
-  printf("root node:\n");
-  printnode(pat->rnode);
-/*
-  printf("leaf nodes again:\n");
-  fornodelist(pat->lns, el)
-  {
-    printf("%p: prev=%p next=%p\n",
-           (void *) el, (void *) el->prev, (void *) el->next);
-    printnode(el->node);
-  }
-*/
 }
 
 void printCI(tPat *pat)
@@ -241,76 +232,6 @@ void printnd(tNode *n)
           n->bbox[3], n->bbox[4],n->bbox[5], n->leaf, n->dat ? "yes" : "no");
 }
 
-void printnode(tNode *n)
-{
-  int i, j;
-  char s[100];
-
-  printf("nid%ld:  %s  l%d  leaf=%d  rflag=%d  datrank=%d  dat: %s\n",
-          n->nid, nodename(n, s,99), n->l, n->leaf, n->rflag,
-          n->datrank, n->dat ? "yes" : "no");
-  printf(" ijk%d  [%g,%g]x[%g,%g]x[%g,%g]  np=%dx%dx%d=%d ",
-          n->ijk,
-          n->bbox[0], n->bbox[1], n->bbox[2],
-          n->bbox[3], n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
-  printf(" patface=");
-  for(i=0; i<6; i++) printf("%d", n->patface[i]);
-  printf("\n");
-  printf(" nb =");
-  //for(i=0; i<6; i++) printf(" %ld", get_node_nid(n->nb[i]));
-  for(i=0; i<6; i++) printf(" %s", nodename(n->nb[i],s,99));
-  //printf("   parent->nid=%ld\n", get_node_nid(n->parent));
-  printf("    parent=%s\n", nodename(n->parent,s,99));
-  if(n->leaf)
-  {
-    printf(" fnb =");
-    for(i=0; i<6; i++)
-    {
-      //printf(" %d:{", i);
-      printf(" {");
-      //for(j=0; j<n->nfnb[i]; j++) printf(" %ld", get_node_nid(n->fnb[i][j]));
-      for(j=0; j<n->nfnb[i]; j++) printf(" %s", nodename(n->fnb[i][j],s,99));
-      printf(" }");
-    }
-    printf("\n");
-    //printf(" ");printnfaces(n);
-  }
-  else
-  {
-    printf(" child =");
-    //for(i=0; i<8; i++) printf(" %ld", get_node_nid(n->child[i]));
-    for(i=0; i<8; i++) printf(" %s", nodename(n->child[i],s,99));
-    printf("\n");
-  }
-  //printf("\n");
-  //printf(" Dt =");
-  //for(i=0; i<3; i++) printf(" %p", (void *) node_Dt(n,i));
-  //printf("\n");
-}
-
-void printnode_and_neighbors(tNode *n)
-{
-  tNode *n0, *n0p, *n1;
-  int dir, ni;
-  char s[100];
-
-  printnode(n);
-  for(dir=0; dir<3; dir++)
-  {
-    printf("dir%d l%d neighbors cover:\n", dir, n->l);
-    ni=0;
-    for(n0=n;   n0; n0=n0->nb[dir*2], ni--) n0p = n0;
-    ni++;
-    for(n1=n0p; n1; n1=n1->nb[dir*2+1], ni++)
-    {
-      printf(" [%+5g,%+5g]x[%+5g,%+5g]x[%+5g,%+5g]  ni=%d, nid%ld %s\n",
-             n1->bbox[0], n1->bbox[1], n1->bbox[2], n1->bbox[3],
-             n1->bbox[4], n1->bbox[5], ni, n1->nid,
-             nodename(n1, s,99));
-    }
-  }
-}
-
 void printnodes_in_list(tNlist *nl)
 {
   tNlist *el;
@@ -319,94 +240,9 @@ void printnodes_in_list(tNlist *nl)
   {
     //if(el==nl) printf(">");
     //else       printf(" ");
-    printnode(el->node);
+    printelm(el->node);
   }
   if(!nl) printf("<empty nodelist>\n");
-}
-
-void printnodelistelement_and_neighbors_flag(tNlist *el, int pr_nb)
-{
-  char s[100];
-
-  printf("nid%ld %s: ", get_node_nid(el->node), nodename(el->node, s,100));
-  if(el->prev)
-    printf(" prev=nid%ld %s ",
-           get_node_nid(el->prev->node), nodename(el->prev->node, s,100));
-  if(el->next)
-    printf(" next=nid%ld %s\n",
-           get_node_nid(el->next->node), nodename(el->next->node, s,100));
-  else
-    printf("\n");
-  //printf("%p: prev=%p next=%p\n",
-  //       (void *) el, (void *) el->prev, (void *) el->next);
-  //printnode(el->node);
-  if(pr_nb == 1) printnode_and_neighbors(el->node);
-  if(pr_nb == 2) printnode(el->node);
-}
-
-void printnodelistelement(tNlist *el)
-{
-  printnodelistelement_and_neighbors_flag(el, 0);
-}
-
-void printnodelist_and_neighbors_flag(tNlist *nl, int pr_nb)
-{
-  tNlist *el;
-
-  fornodelist(first_nodelist(nl), el)
-  {
-    if(el==nl) printf(">");
-    else       printf(" ");
-    printnodelistelement_and_neighbors_flag(el, pr_nb);
-  }
-  if(!nl) printf("<empty nodelist>\n");
-}
-
-void printnodelist(tNlist *nl)
-{
-  printnodelist_and_neighbors_flag(nl, 0);
-}
-
-void printnodelist_and_neighbors(tNlist *nl)
-{
-  printnodelist_and_neighbors_flag(nl, 1);
-}
-
-void printnodearray_and_neighbors_flag(long nnodes, tNode **na, int pr_nb)
-{
-  char s[100];
-  long i;
-
-  for(i=0; i<nnodes; i++)
-  {
-    printf("nid%ld %s\n", get_node_nid(na[i]), nodename(na[i], s,100));
-    if(pr_nb) printnode_and_neighbors(na[i]);
-  }
-  if(!na || nnodes<1) printf("<empty nodearray>\n");
-}
-
-void printnodearray(long nnodes, tNode **na)
-{
-  printnodearray_and_neighbors_flag(nnodes, na, 0);
-}
-
-void printNlistarray_and_neighbors_flag(long nnodes, tNlist **nl, int pr_nb)
-{
-  char s[100];
-  long i;
-
-  for(i=0; i<nnodes; i++)
-  {
-    tNode *node = nl[i]->node;
-    printf("nid%ld %s\n", get_node_nid(node), nodename(node, s,100));
-    if(pr_nb) printnode_and_neighbors(node);
-  }
-  if(!nl || nnodes<1) printf("<empty nodearray>\n");
-}
-
-void printNlistarray(long nnodes, tNlist **nl)
-{
-  printNlistarray_and_neighbors_flag(nnodes, nl, 0);
 }
 
 /* print nodename */
@@ -555,8 +391,8 @@ void print_matrices_innode(tNode *n)
   int d;
   char s[100];
 
-  printf("nid%ld:  %s  l%d  leaf=%d  rflag=%d  datrank=%d  dat: %s\n",
-          n->nid, nodename(n, s,99), n->l, n->leaf, n->rflag,
+  printf("eid%lu:  %s  l%d  rflag=%d  datrank=%d  dat: %s\n",
+          Elm_eid(n), nodename(n, s,99), Elm_l(n), n->rflag,
           n->datrank, n->dat ? "yes" : "no");
   printf(" ijk%d  [%g,%g]x[%g,%g]x[%g,%g]  np=%dx%dx%d=%d ",
           n->ijk,

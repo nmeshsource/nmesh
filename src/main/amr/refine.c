@@ -364,7 +364,7 @@ void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
       for(ni=0; ni<node->nfnb[f]; ni++)
       {
         tNode *nb = node->fnb[f][ni];
-        if(nb->l - node->l >= dl) node->rflag = ref->method;
+        if(Elm_l(nb) - Elm_l(node) >= dl) node->rflag = ref->method;
       }
   }
   hrefine_nodes_if_rflag(mesh, ref);
@@ -391,7 +391,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
     fornodelist(mesh->lns, el)
     {
       tNode *node = el->node;
-      if(node->l < l)
+      if(Elm_l(node) < l)
       {
         node->rflag = rf->method; /* flag node for refinement */
         ref++;                    /* count number of nodes that need refinement */
@@ -444,7 +444,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
     fornodelist(mesh->lns, el)
     {
       tNode *node = el->node;
-      if(node->l > l)
+      if(Elm_l(node) > l)
       {
         node->rflag = -rf->method; /* flag node for unrefinement */
         ref++;                     /* count number of nodes that need refinement */

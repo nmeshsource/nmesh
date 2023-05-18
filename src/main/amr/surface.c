@@ -309,12 +309,12 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   if(!found)
   {
     printf("node:\n");
-    printnode(node);
-    printnfaces(node);
+    printelm(node);
+    //printnfaces(node);
     printbfaces(node->pat);
     printf("neighbor node:\n");
-    printnode(nb);
-    printnfaces(nb);
+    printelm(nb);
+    //printnfaces(nb);
     printbfaces(nb->pat);
     errorexit("couldn't find nb face!!!");
   }
@@ -755,7 +755,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
        we may not need interpolation */
     if(nb->pat == pat)
     {
-      if(nb->l == node->l)
+      if(Elm_l(nb) == Elm_l(node))
       {
         int same_n_t = same_n_and_pt_typ_normal_to_dir(nb, node, dir);
         /* if number of points is the same we can copy or just point
