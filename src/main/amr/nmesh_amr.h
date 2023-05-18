@@ -116,7 +116,7 @@ typedef struct tELM {
   /* stuff below this line is not copied when elm is sent to another rank */
   int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
 //  int l;                  /* refinement level of this node */
-  int leaf;               /* is 1 if this is a leaf node */
+//  int leaf;               /* is 1 if this is a leaf node */
   int ijk;                /* node index (0-7), i.e. child number wrt. parent */
 //  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
 

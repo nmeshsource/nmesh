@@ -765,34 +765,34 @@ tNlist *ancestors_alongBoundary(tNode *node, int dir)
   /* return the list of ancestors */
   return anclist;
 }
-/* go back down again to find neighbor */
-void descend_alongBoundary(tNlist *anclist, int dir, tNode *nb)
-{
-  int i;
-  int ns[] = {2,2,2};
-  tNode *anc0 = anclist->node;
-  tNode *anc1;
-  tNode *a0nb;
-  tNode *a1nb;
-
-  if(!anc0) return;
-
-  a0nb = anc0;
-  fornodes(anclist->next, anc1)
-  {
-    /* get descendant's i,j,k */
-    int ijk1 = anc1->ijk;
-    int k1 = kOfInd_n(ijk1, ns);
-    int j1 = jOfInd_n_k(ijk1, ns,k1);
-    //int i1 = iOfInd_n_jk(ijk1, ns,j1,k1);
-
-    // X dir only!!!
-    i=0; // need to set i to in anc1 ???
-    a1nb = a0nb->child[Ind_n(i,j1,k1,  ns)];
-    if(a1nb->leaf)
-      break; // nb = a1nb;
-
-    a0nb = a1nb;
-  } endfornodes;
-  nb = a1nb;
-}
+// /* go back down again to find neighbor */
+// void descend_alongBoundary(tNlist *anclist, int dir, tNode *nb)
+// {
+//   int i;
+//   int ns[] = {2,2,2};
+//   tNode *anc0 = anclist->node;
+//   tNode *anc1;
+//   tNode *a0nb;
+//   tNode *a1nb;
+//
+//   if(!anc0) return;
+//
+//   a0nb = anc0;
+//   fornodes(anclist->next, anc1)
+//   {
+//     /* get descendant's i,j,k */
+//     int ijk1 = anc1->ijk;
+//     int k1 = kOfInd_n(ijk1, ns);
+//     int j1 = jOfInd_n_k(ijk1, ns,k1);
+//     //int i1 = iOfInd_n_jk(ijk1, ns,j1,k1);
+//
+//     // X dir only!!!
+//     i=0; // need to set i to in anc1 ???
+//     a1nb = a0nb->child[Ind_n(i,j1,k1,  ns)];
+//     if(a1nb->leaf)
+//       break; // nb = a1nb;
+//
+//     a0nb = a1nb;
+//   } endfornodes;
+//   nb = a1nb;
+// }
