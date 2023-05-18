@@ -319,7 +319,9 @@ int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
     if(!ret0) continue;
 
     /* check if this point is on nb face */
-    ret = XYZ_on_face(nb->pat, nbface, oX);
+    ret = XYZ_on_elmface(nb, nbface, oX);
+    //This used to be:  ret = XYZ_on_face(nb->pat, nbface, oX);
+    //Which was very wrong, because we don't want to know it's on a patface
 
     /* if this point is only in face nb_f of nb we are done */
     if(ret==1 && nbface[nb_f]) return 1;

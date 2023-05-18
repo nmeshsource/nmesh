@@ -4,6 +4,10 @@ BUGS:
  It can be triggered by changing src/main/amr/mesh.c . This change is
  in the branch master_bug (at 1c705303). We can get it with:
    git checkout master_bug
+ =========
+*Actually: The bbox of patch3 is the reson for the crash.
+ ========= It is not touching patch0, but rather inside patch0. My bad...
+
 
 FIX these:
 ==========
