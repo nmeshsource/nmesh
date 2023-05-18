@@ -703,9 +703,9 @@ tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);
 
 /* connect.c */
-#define node_location_str elm_location_str
-#define nodename elmname
-#define node_location elm_location
-#define node_from_location_str elm_from_location_str
-#define node_from_nodename elm_from_elmname
-#define nodename_is elmname_is
+#define node_location_str(node, s, slen) elm_location_str(node, s, slen)
+#define nodename(node, s, slen)          elmname(node, s, slen)
+#define node_location(node)              elm_location(node)
+#define node_from_location_str(pat, loc) elm_from_location_str(pat, loc)
+#define node_from_nodename(mesh,  name)  elm_from_elmname(mesh,  name)
+#define nodename_is(node, nname)         elmname_is(node, nname)
