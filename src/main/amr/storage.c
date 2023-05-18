@@ -486,15 +486,6 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
     if(ijk==0) elm0 = elm; /* save first child */
   }
 
-  /* NOTE: The new children have all zero for nfnb, fnb, and nbinfo.
-           Also, all their neighbors have now the wrong nfnb and nbinfo.
-           Even worse, all its neighbors have fnb pointers pointing
-           to the parent which will be removed!!!  */
-
-  /* FIXME: We should go over parent's nbs and set whatever
-           nb-info we can!!! */
-
-
   /* #pragma omp critical (change_mesh_myelm_list) */
   /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
            if I use a named critical section!
@@ -503,6 +494,14 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
+    /* NOTE: The new children have all zero for nfnb, fnb, and nbinfo.
+             Also, all their neighbors have now the wrong nfnb and nbinfo.
+             Even worse, all its neighbors have fnb pointers pointing
+             to the parent which will be removed!!!  */
+
+    /* FIXME: We should go over parent's nbs and set whatever
+              nb-info we can!!! */
+
     /* now replace parent by elist in mesh->myelm_head */
     list_splice(&elist, &parent->list);
     list_del(&parent->list);
@@ -550,7 +549,7 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
   if(child0->dat)
   {
     int nvdb = mesh->nvdb;
-    int vi;
+    int vi, f;
     tArray *Xp[3], *Ip[8], *Xc[8][3], *Res[8];
 
     if(!parent->dat) parent->dat = alloc_dat(parent);
@@ -559,8 +558,9 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
     for(vi=0; vi<nvdb; vi++)
       if(child0->dat->v[vi]) enablevarcomp_innode(parent, vi);
 
-    /* but disable nb-info vars */
-    enablevar_innode(parent, amr->elm_nbinfo0);
+    /* but disable nb-info vars, mark them as not set */
+    disablevar_innode(parent, amr->elm_nbinfo0);
+    for(f=0; f<6; f++) parent->dat->info->nnbinfo[f]=-1;
 
     /* array memory to store points of parent in X coords */
     Xp[0] = alloc_array(parent->n);
@@ -697,15 +697,6 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
   /* make new parent elm */
   parent = make_parent_elm(child0, n, pt_typ);
 
-  /* NOTE: This new parent has all zero for nfnb, fnb, and nbinfo.
-           Also, all its neighbors have now the wrong nfnb and nbinfo.
-           Even worse, all its neighbors have fnb pointers pointing
-           to the children which will be removed!!!  */
-
-  /* FIXME: We should go over children's nbs and set whatever
-           nb-info we can!!! */
-
-
   /* replace children by parent mesh->myelm_head list */
   /* #pragma omp critical (change_mesh_myelm_list) */
   /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
@@ -715,6 +706,14 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
+    /* NOTE: This new parent has all zero for nfnb, fnb, and nbinfo.
+             Also, all its neighbors have now the wrong nfnb and nbinfo.
+             Even worse, all its neighbors have fnb pointers pointing
+             to the children which will be removed!!!  */
+
+    /* FIXME: We should go over children's nbs and set whatever
+              nb-info we can!!! */
+
     /* now replace children by parent in mesh->myelm_head */
     /* first remove child 1-7 */
     for(ijk=1; ijk<8; ijk++)
