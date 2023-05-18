@@ -396,7 +396,7 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
 {
   tMesh *mesh = parent->pat->mesh;
   tElm *elm = alloc_elm(mesh);
-  int d, vi,nvdb;
+  int d, vi,nvdb, f;
 
   /* transfer parent time info */
   elm->time = parent->time;
@@ -460,6 +460,10 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
 
     /* init coords in this new elm */
     coordinates_init_node(elm);
+
+    /* mark nbinfo as not set */
+    disablevar_innode(elm, amr->elm_nbinfo0);
+    for(f=0; f<6; f++) elm->dat->info->nnbinfo[f]=-1;
   }
   return elm;
 }
