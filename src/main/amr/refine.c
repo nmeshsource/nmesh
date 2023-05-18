@@ -128,42 +128,6 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
 
 
 
-/* p-refine nodes with nids in array, we assume nid[] is sorted in ascending
-   order. We do not update nids in here */
-void prefine_nid_list(tMesh *mesh, long nnodes, long *nid, tRef *ref)
-{
-  long i;
-
-  if(nnodes<=0) return;
-
-  NODELEVEL_Pragma(omp parallel)
-  {
-    tNlist *elem = mesh->lns;
-
-    NODELEVEL_Pragma(omp for)
-    for(i=0; i<nnodes; i++)
-    {
-      tNode *node;
-      int pt_typ[3], n[3];
-
-      /* forward to node with nid[i] */
-      //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
-      //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
-      for(; elem->node->nid != nid[i]; elem = elem->next) ;
-
-      /* find node */
-      node = elem->node;
-
-      /* set n and pt_typ */
-      hp_refine_set_n_pt_typ(node, ref, n, pt_typ);
-
-      /* p-refine by changing n and pt_typ of node */
-      update_node_n_pt_typ(node, n, pt_typ);
-    }
-  }
-}
-
-
 
 // ====
 // NEW:
@@ -235,10 +199,44 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 
 
 
+/***************************************************************************/
+/* old stuff. Remove later: */
+/***************************************************************************/
 
+/* p-refine nodes with nids in array, we assume nid[] is sorted in ascending
+   order. We do not update nids in here */
+void prefine_nid_list(tMesh *mesh, long nnodes, long *nid, tRef *ref)
+{
+  long i;
 
+  if(nnodes<=0) return;
 
+  NODELEVEL_Pragma(omp parallel)
+  {
+    tNlist *elem = mesh->lns;
 
+    NODELEVEL_Pragma(omp for)
+    for(i=0; i<nnodes; i++)
+    {
+      tNode *node;
+      int pt_typ[3], n[3];
+
+      /* forward to node with nid[i] */
+      //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
+      //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
+      for(; elem->node->nid != nid[i]; elem = elem->next) ;
+
+      /* find node */
+      node = elem->node;
+
+      /* set n and pt_typ */
+      hp_refine_set_n_pt_typ(node, ref, n, pt_typ);
+
+      /* p-refine by changing n and pt_typ of node */
+      update_node_n_pt_typ(node, n, pt_typ);
+    }
+  }
+}
 
 
 /* merge nid0-list in nid0b into nid0-list in nid0, the allocated size
