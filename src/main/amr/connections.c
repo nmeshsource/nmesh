@@ -2225,6 +2225,8 @@ void amr_remove_mesh_nbelm(tMesh *mesh)
     tElm *elm = mesh->nbelm[ei];
     free_elm(elm);
   }
+  free(mesh->nbelm);
+  mesh->nnbelm = 0;
 }
 
 

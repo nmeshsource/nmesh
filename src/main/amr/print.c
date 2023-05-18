@@ -150,11 +150,12 @@ void printelm0(const tElm0 *e, const char *s)
 
 void printelm(const tElm *e)
 {
+  tDat *dat = e->dat;
   int i;
   union { const tElm *elm; tElm0 *elm0; } e2e0;
   e2e0.elm = e;
   printelm0(e2e0.elm0, "");
-  printf(" dat:%s\n", e->dat ? "yes" : "no");
+  printf(" dat:%s\n", dat ? "yes" : "no");
   /*
   printf(" nbi =");
   for(i=0; i<6; i++)
@@ -170,11 +171,14 @@ void printelm(const tElm *e)
   {
     int j;
     printf(" {");
-    for(j=0; j<e->nfnb[i]; j++)
-    {
-      printeploc(e->fnb[i][j]->eploc);
-      if(j<e->nfnb[i]-1) printf(" ");
-    }
+    if(dat && dat->info->nnbinfo[i]<0)
+      printf("?");
+    else
+      for(j=0; j<e->nfnb[i]; j++)
+      {
+        printeploc(e->fnb[i][j]->eploc);
+        if(j<e->nfnb[i]-1) printf(" ");
+      }
     printf("}");
   }
   printf("\n");
