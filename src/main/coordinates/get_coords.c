@@ -874,6 +874,36 @@ int XYZ_on_face(tPat *pat, int *face, const double X[3])
   return XYZ_on_face_tol(pat, face, X, 1e-10);
 }
 
+/* find the elm-faces a point X is on within tol:
+   e.g. face[2]=1 if X is on face2
+   Returns: number of faces point is on  */
+int XYZ_on_elmface_tol(tElm *elm, int *face, const double X[3], double tol)
+{
+  tPat *pat   = elm->pat;
+  double *bb  = elm->bbox;
+  double diag = pat->bbdiag;
+  //int l       = Elm_l(elm);
+  //ulong fac   = 1<<l;
+  //double diag = pat->bbdiag / fac;
+  int f;
+  int nf;
+
+  /* find all faces we are on */
+  for(nf=0, f=0; f<6; f++)
+  {
+    int d=f/2;
+    if(dequal_tol(X[d], bb[f], tol*diag)) { face[f]=1; nf++; }
+    else                                  { face[f]=0; }
+  }
+  return nf; /* number of faces point is on */
+}
+
+/* find the elm-faces a point X is on:  e.g. face[2]=1 if X is on face2
+   Returns: number of faces point is on  */
+int XYZ_on_elmface(tElm *elm, int *face, const double X[3])
+{
+  return XYZ_on_elmface_tol(elm, face, X, 1e-10);
+}
 
 /* check if ind is on a node face */
 int ind_on_nodeface(tNode *node, int ind, int *face)

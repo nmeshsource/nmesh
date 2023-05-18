@@ -93,6 +93,7 @@ int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3]);
 tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3]);
 int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3]);
 int XYZ_on_face(tPat *pat, int *face, const double X[3]);
+int XYZ_on_elmface(tElm *elm, int *face, const double X[3]);
 int ind_on_nodeface(tNode *node, int ind, int *face);
 int ind_on_outerbound(tNode *node, int ind);
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
