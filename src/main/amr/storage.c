@@ -1658,49 +1658,6 @@ tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
   return nlist_beg;
 }
 
-/* replace siblings at element sib of mesh->lns by parent,
-   node with parent is returned so we can use it later */
-tNlist *remove8siblings_in_mesh_lns(tNlist *sib)
-{
-  tNode *parent, *node0;
-  tNlist *elem, *elem0;
-  tMesh *mesh = NULL;
-  int update_lns;
-  int ijk;
-
-  if(sib==NULL) errorexit("sib is NULL!!!");
-  mesh = sib->node->pat->mesh;
-  parent = sib->node->parent;
-  if(parent==NULL) errorexit("parent is NULL!!!");
-
-  /* find sibling 0 */
-  elem0=sib;
-  for(ijk=sib->node->ijk; ijk>0; ijk--)
-    elem0=elem0->prev;
-  node0 = elem0->node;
-  if(node0->parent != parent || node0->ijk != 0)
-    errorexit("elem0 has wrong parent!");
-
-  /* set elem to sibling 1 and remove the 7 after sibling 0 */
-  elem=elem0->next;
-  for(ijk=1; ijk<8; ijk++)
-  {
-    if(elem->node->parent != parent) errorexit("elem has wrong parent!");
-    elem = remove1_in_nodelist(elem, 1);
-  }
-
-  /* do we need to update mesh->lns? */
-  if(elem0 == mesh->lns) update_lns = 1;
-  else                   update_lns = 0;
-
-  /* replace sibling 0 by parent in list */
-  elem0 = replacenode_in_nodelist(elem0, parent);
-
-  /* reset mesh lists */
-  if(update_lns) mesh->lns = elem0;
-
-  return elem0;
-}
 
 
 /**********************************************************************/

@@ -117,7 +117,7 @@ typedef struct tELM {
   int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
 //  int l;                  /* refinement level of this node */
 //  int leaf;               /* is 1 if this is a leaf node */
-  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
+//  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
 //  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
 
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
@@ -699,6 +699,7 @@ char *elmname(tElm *elm, char *s, int slen);
 tElm *elm_from_location_str(tPat *pat, char *loc);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);
+int elm_get_ijk(tElm *elm);
 
 /* connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)

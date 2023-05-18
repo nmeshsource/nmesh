@@ -386,7 +386,7 @@ void print_matrices_innode(tNode *n)
           Elm_eid(n), nodename(n, s,99), Elm_l(n), n->rflag,
           n->datrank, n->dat ? "yes" : "no");
   printf(" ijk%d  [%g,%g]x[%g,%g]x[%g,%g]  np=%dx%dx%d=%d ",
-          n->ijk,
+          elm_get_ijk(n),
           n->bbox[0], n->bbox[1], n->bbox[2],
           n->bbox[3], n->bbox[4],n->bbox[5], n->n[0], n->n[1], n->n[2], n->np);
 

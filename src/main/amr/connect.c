@@ -29,7 +29,7 @@ void connect8_with_neighbors(tNode *narray[8], int connect)
     tNode *node = narray[ind];
     tNode *parentnb;     /* parent's neighbor */
     tNode *othernb;      /* other neighbor */
-    int ijk = node->ijk;
+    int ijk = elm_get_ijk(node);
     /* set node's i,j,k */
     int k = kOfInd_n(ijk, ns);
     int j = jOfInd_n_k(ijk, ns,k);
@@ -96,7 +96,7 @@ void connect8_with_neighbors(tNode *narray[8], int connect)
 int node_is_at_face(tNode *node, int face)
 {
   int ns[] = {2,2,2};
-  int ijk = node->ijk;
+  int ijk = elm_get_ijk(node);
   /* set node's i,j,k */
   int k = kOfInd_n(ijk, ns);
   int j = jOfInd_n_k(ijk, ns,k);
@@ -516,7 +516,7 @@ tNode *parent_and_fnbs_nc_locked(tNode *narray[8])
     int ni;
     int fo;   /* other face index */
     tNode *node = narray[ind];
-    int ijk = node->ijk;
+    int ijk = elm_get_ijk(node);
     /* set node's i,j,k */
     int k = kOfInd_n(ijk, ns);
     int j = jOfInd_n_k(ijk, ns,k);
@@ -569,7 +569,7 @@ void set_nc_lock_on_parent_and_fnbs_of_nodearray(tNode *narray[8],
     int ni;
     int fo;   /* other face index */
     tNode *node = narray[ind];
-    int ijk = node->ijk;
+    int ijk = elm_get_ijk(node);
     /* set node's i,j,k */
     int k = kOfInd_n(ijk, ns);
     int j = jOfInd_n_k(ijk, ns,k);
@@ -723,7 +723,7 @@ tNode *get_node_nc_lock(tNode *node)
 tNlist *ancestors_alongBoundary(tNode *node, int dir)
 {
   tNode *anc; /* ancestor */
-  int ijk = node->ijk;
+  int ijk = elm_get_ijk(node);
   int ns[] = {2,2,2};
   int k = kOfInd_n(ijk, ns);       /* set node's i,j,k */
   int j = jOfInd_n_k(ijk, ns,k);
@@ -734,7 +734,7 @@ tNlist *ancestors_alongBoundary(tNode *node, int dir)
   for(anc=node->parent; anc; anc=anc->parent)
   {
     /* get ancestor's i,j,k */
-    int aijk = anc->ijk;
+    int aijk = elm_get_ijk(anc);
     int ak = kOfInd_n(aijk, ns);
     int aj = jOfInd_n_k(aijk, ns,ak);
     int ai = iOfInd_n_jk(aijk, ns,aj,ak);

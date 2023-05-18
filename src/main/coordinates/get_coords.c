@@ -80,7 +80,7 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
 /* find i,j,k closest to X0, but discard ijk[d]=0 in upper nodes */
 void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
 {
-  int nd_ijk = node->ijk;
+  int nd_ijk = elm_get_ijk(node);
   tNode *nb;
   int ijk2[3];
 
