@@ -101,7 +101,6 @@ typedef struct tELM {
 //// we may want to streamline this later
 //Temporarily we use this for compatibility with tNode:
 #define ELMHEADER \
-  struct list_head list;  /* all elms form a linked list */ \
   tEploc eploc[1];        /* elm location in packed form */ \
   double dt;              /* time step in node */ \
   double time;            /* current time in node */ \
@@ -114,12 +113,6 @@ typedef struct tELM {
 typedef struct tELM {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
-//  int patface[6];         /* whether node is at patch face 0,1,2,3,4,5 */
-//  int l;                  /* refinement level of this node */
-//  int leaf;               /* is 1 if this is a leaf node */
-//  int ijk;                /* node index (0-7), i.e. child number wrt. parent */
-//  long nid;               /* node ID, updated by update_mesh_myln_node_nid */
-
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
   //struct tMESH *mesh;     // pointer to mesh that contains elm
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
@@ -138,6 +131,7 @@ typedef struct tELM {
                                kept up to date by update_node_fnb */
   struct tELM *volatile nc_lock; /* if not NULL, connections of node nc_lock
                                      and its nbs are currently being updated */
+  struct list_head list;  /* all elms form a linked list */ \
 } tElm;
 
 /* data type for only header part of tElm */
