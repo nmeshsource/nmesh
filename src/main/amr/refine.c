@@ -247,8 +247,6 @@ void set_parent_nbinfo_remove_children(tElm *parent,
     /* FIXME: Maybe go over children's nbs and set whatever
               nb-info we can!!! */
     /* for now we just invalidate a lot and remove the children */
-    //... FIXME inval!!!
-    errorexit("invalidate!!!");
     list_for_each(pos_ijk, ch_head)
     {
       tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
@@ -257,7 +255,6 @@ void set_parent_nbinfo_remove_children(tElm *parent,
       if(nbs_on_other_rank)
         amr_remove_mesh_nbelm(Elm_mesh(parent));
     }
-  }
 
     /* free children */
     list_for_each_safe(pos_ijk, sav, ch_head)
