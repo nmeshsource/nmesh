@@ -2167,7 +2167,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 /****************************************************************************/
 
 /* Invalidate nbinfo for all nbs of elm on elmface.
-   Return: 0 if all nbs have dat (are on my rank), 1 if one nb has not dat */
+   Return: 0 if all nbs have dat (are on my rank), 1 if one nb has no dat */
 int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
 {
   int ni;
@@ -2198,6 +2198,17 @@ int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
   return nbs_on_other_rank;
 }
 
+/* Invalidate nbinfo for all nbs of elm on elmface.
+   Return: 0 if all nbs have dat (are on my rank), # of nbs witout dat */
+int amr_invalidate_nbinfo_of_all_nbs(tElm *elm)
+{
+  int f;
+  int nbs_on_other_rank = 0;
+  for(f=0; f<6; f++)
+    nbs_on_other_rank += amr_invalidate_nbinfo_of_nbs(elm, f);
+  return nbs_on_other_rank;
+}
+
 /* Go over mesh->nbelm list and invalidate nbinfo for all my elms that
    are nbs of any elm in mesh->nbelm. */
 void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh)
@@ -2206,9 +2217,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh)
   for(ei=0; ei < mesh->nnbelm; ei++)
   {
     tElm *elm = mesh->nbelm[ei];
-    int f;
-    for(f=0; f<6; f++)
-      amr_invalidate_nbinfo_of_nbs(elm, f);
+    amr_invalidate_nbinfo_of_all_nbs(elm);
   }
 }
 
@@ -2229,13 +2238,9 @@ void amr_remove_mesh_nbelm(tMesh *mesh)
   mesh->nnbelm = 0;
 }
 
-
-
 /* we just created the children in childlist, now set local nb-info */
 //int amr_invalidate_nbinfo_of_nbs(tElm *parent, struct list_head *childlist)
-
-
-    //connections_get_nbloc_InsidePat
+// use: connections_get_nbloc_InsidePat
 
 
 /****************************************************************************/

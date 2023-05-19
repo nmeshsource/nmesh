@@ -494,10 +494,14 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
+    int nbs_on_other_rank;
     /* NOTE: The new children have all zero for nfnb, fnb, and nbinfo.
              Also, all their neighbors have now the wrong nfnb and nbinfo.
              Even worse, all its neighbors have fnb pointers pointing
              to the parent which will be removed!!!  */
+    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent);
+    if(nbs_on_other_rank)
+      amr_remove_mesh_nbelm(Elm_mesh(elm));
 
     /* FIXME: We should go over parent's nbs and set whatever
               nb-info we can!!! */
