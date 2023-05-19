@@ -181,8 +181,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
       }
     }
   }
-  /* NOTE: This does not update the list mesh->myelm!
-           Only the linked list mesh->myelm_head is changed here */
+  /* FIXME: This does not update the list mesh->myelm!
+            Only the linked list mesh->myelm_head is changed here */
 }
 
 /* set some nbinfo and then remove and free the old parent */
