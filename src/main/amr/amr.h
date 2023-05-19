@@ -23,8 +23,8 @@ tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
 void free_elm(tElm *elm);
 tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
-tNode *destroy_children(tNode *parent);
-tNlist *remove8siblings_in_mesh_lns(tNlist *sib);
+tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
+                                       struct list_head *ch_head);
 int realloc_myln_nncats(tMylnodes *myln, int nncats);
 int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 
@@ -93,6 +93,11 @@ int remove_nface(tNface *nface);
 void remove_all_nfaces(tNode *node);
 
 /* refine.c */
+void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref);
+void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);
+void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent);
+void set_parent_nbinfo_remove_children(tElm *parent,
+                                       struct list_head *ch_head);
 void hrefine_mesh_to_level(tMesh *mesh, int l);
 void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l);
 void hcoarsen_mesh_to_level(tMesh *mesh, int l);
@@ -125,3 +130,5 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
+int amr_invalidate_nbinfo_of_all_nbs(tElm *elm);
+void amr_remove_mesh_nbelm(tMesh *mesh);

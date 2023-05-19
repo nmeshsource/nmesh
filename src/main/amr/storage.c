@@ -472,18 +472,18 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
 {
   //tMesh *mesh = parent->pat->mesh;
-  struct list_head elist;
-  tElm *elm, *elm0;
+  struct list_head clist;
+  tElm *child, *child0;
   int ijk;
 
-  INIT_LIST_HEAD(&elist);
+  INIT_LIST_HEAD(&clist);
 
   /* make children */
   for(ijk=0; ijk<8; ijk++)
   {
-    elm = make_child_elm(parent, n, pt_typ, ijk);
-    if(elm) list_add_tail(&elm->list, &elist);
-    if(ijk==0) elm0 = elm; /* save first child */
+    child = make_child_elm(parent, n, pt_typ, ijk);
+    if(child) list_add_tail(&child->list, &clist);
+    if(ijk==0) child0 = child; /* save first child */
   }
 
   /* #pragma omp critical (change_mesh_myelm_list) */
@@ -494,30 +494,16 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
-    int nbs_on_other_rank;
-    /* NOTE: The new children have all zero for nfnb, fnb, and nbinfo.
+    /* NOTE: The new children have all zero for nfnb, fnb, and nnbinfo=-1.
              Also, all their neighbors have now the wrong nfnb and nbinfo.
              Even worse, all its neighbors have fnb pointers pointing
              to the parent which will be removed!!!  */
-    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent);
-    if(nbs_on_other_rank)
-      amr_remove_mesh_nbelm(Elm_mesh(elm));
-
-    /* FIXME: We should go over parent's nbs and set whatever
-              nb-info we can!!! */
-
-    /* now replace parent by elist in mesh->myelm_head */
-    list_splice(&elist, &parent->list);
+    /* now replace parent by clist in mesh->myelm_head */
+    list_splice(&clist, &parent->list);
     list_del(&parent->list);
   }
 
-  /* free parent and all data on parent */
-  free_elm(parent);
-
-  //printf("Created:\n");
-  //printnodes_in_list(nlist);
-
-  return elm0;
+  return child0;
 }
 
 /* use info in child0 to recreate the parent */
@@ -671,8 +657,12 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
 // FIXME: it also needs to be then used in refine.c
 /* Remove 8 children and replace them by parent.
    We assume that all 8 have been moved to this rank before
-   replace_8localchildren_by_parent is called! */
-tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
+   replace_8localchildren_by_parent is called!
+   In: child0,n,pt_typ
+   Out: ch_head <- list of removed children, (initialized by caller)
+   Returns: parent */
+tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
+                                       struct list_head *ch_head)
 {
   tElm *parent;
   unsigned char l_ch0 = child0->eploc->l;
@@ -710,7 +700,7 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
-    /* NOTE: This new parent has all zero for nfnb, fnb, and nbinfo.
+    /* NOTE: This new parent has all zero for nfnb, fnb, and nnbinfo=-1.
              Also, all its neighbors have now the wrong nfnb and nbinfo.
              Even worse, all its neighbors have fnb pointers pointing
              to the children which will be removed!!!  */
@@ -719,18 +709,15 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3])
               nb-info we can!!! */
 
     /* now replace children by parent in mesh->myelm_head */
-    /* first remove child 1-7 */
-    for(ijk=1; ijk<8; ijk++)
+    /* first insert parent before child0 */
+    list_add_tail(&parent->list, &child0->list);
+    /* remove children from mesh list, but add them to ch_head */
+    for(ijk=0; ijk<8; ijk++)
     {
-      pos_ijk = (child0->list).next; //pos after child0
-      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);  //child after child0
-      list_del(&ch_ijk->list); //del form mesh->myelm_head list
-      free_elm(ch_ijk);        //free mem of child ch_ijk
+      pos_ijk = (parent->list).next; //pos after parent
+      list_del(pos_ijk);
+      list_add_tail(pos_ijk, ch_head);
     }
-    /* now replace child0 by parent in mesh->myelm_head */
-    list_add(&parent->list, &child0->list);
-    list_del(&child0->list);
-    free_elm(child0);
   }
 
   return parent;

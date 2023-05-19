@@ -127,6 +127,24 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
 }
 
 
+////////////////////////////////////////////////
+//Rename these 2, but keep old names as defines:
+
+/* h-refine all nodes on all MPI procs if indicated by node->rflag */
+void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+{
+  ref->type = H_REFINE;
+  hp_refine_elms_if_rflag(mesh, ref);
+}
+
+/* p-refine all nodes on all MPI procs if indicated by node->rflag */
+void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+{
+  ref->type = P_REFINE;
+  hp_refine_elms_if_rflag(mesh, ref);
+}
+
+////////////////////////////////////////////////////
 
 
 // ====
@@ -154,7 +172,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
       if(ref->type == H_REFINE) /* replace elm with its children */
       {
-        replace_parent_by_8children(elm, n, pt_typ);
+        tElm *child0 = replace_parent_by_8children(elm, n, pt_typ);
+        set_children_nbinfo_remove_parent(child0, elm);
       }
       else /* p-refine by changing n and pt_typ of elm */
       {
@@ -166,37 +185,89 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
            Only the linked list mesh->myelm_head is changed here */
 }
 
-
-////////////////////////////////////////////////
-//Rename these 2, but keep old names as defines:
-
-/* h-refine all nodes on all MPI procs if indicated by node->rflag */
-void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+/* set some nbinfo and then remove and free the old parent */
+void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
 {
-  ref->type = H_REFINE;
-  hp_refine_elms_if_rflag(mesh, ref);
+  /* #pragma omp critical (change_mesh_myelm_list) */
+  /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
+           if I use a named critical section!
+           So replace "GEN_Pragma(omp critical (change_mesh_myelm_list))"
+           by "GEN_Pragma(omp critical)" when debugging races!!! */
+  //GEN_Pragma(omp critical (change_mesh_myelm_list))
+  GEN_Pragma(omp critical)
+  {
+    int nbs_on_other_rank;
+    /* NOTE: The new children have all zero for nfnb, fnb, and nnbinfo=-1.
+             Also, all their neighbors have now the wrong nfnb and nbinfo.
+             Even worse, all its neighbors have fnb pointers pointing
+             to the parent which will be removed!!!  */
+    /* FIXME: Maybe go over parent's nbs and set whatever
+              nb-info we can!!! */
+    /* for now we just invalidate a lot and remove the parent */
+    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent);
+    if(nbs_on_other_rank)
+      amr_remove_mesh_nbelm(Elm_mesh(parent));
+
+    /* free parent and all data on parent */
+    free_elm(parent);
+  }
 }
-
-/* p-refine all nodes on all MPI procs if indicated by node->rflag */
-void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
-{
-  ref->type = P_REFINE;
-  hp_refine_elms_if_rflag(mesh, ref);
-}
-
-////////////////////////////////////////////////////
-
 
 
 /* Unrefine all nodes on all MPI procs if indicated by node->rflag */
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   errorexit("make: void remove_elms_if_rflag(tMesh *mesh, tRef *ref)");
+//1st Call:
+//tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
+//                                       struct list_head *ch_head)
+//2nd Call:
+//void set_parent_nbinfo_remove_children(tElm *parent,
+//                                       struct list_head *ch_head)
 }
 
+/* set some nbinfo and then free the children in ch_head */
+void set_parent_nbinfo_remove_children(tElm *parent,
+                                       struct list_head *ch_head)
+{
+  /* #pragma omp critical (change_mesh_myelm_list) */
+  /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
+           if I use a named critical section!
+           So replace "GEN_Pragma(omp critical (change_mesh_myelm_list))"
+           by "GEN_Pragma(omp critical)" when debugging races!!! */
+  //GEN_Pragma(omp critical (change_mesh_myelm_list))
+  GEN_Pragma(omp critical)
+  {
+    int nbs_on_other_rank;
+    struct list_head *pos_ijk, *sav;
+    /* NOTE: This new parent has all zero for nfnb, fnb, and nnbinfo=-1.
+             Also, all its neighbors have now the wrong nfnb and nbinfo.
+             Even worse, all its neighbors have fnb pointers pointing
+             to the children which will be removed!!!  */
+    /* FIXME: Maybe go over children's nbs and set whatever
+              nb-info we can!!! */
+    /* for now we just invalidate a lot and remove the children */
+    //... FIXME inval!!!
+    errorexit("invalidate!!!");
+    list_for_each(pos_ijk, ch_head)
+    {
+      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
 
+      nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(ch_ijk);
+      if(nbs_on_other_rank)
+        amr_remove_mesh_nbelm(Elm_mesh(parent));
+    }
+  }
 
-
+    /* free children */
+    list_for_each_safe(pos_ijk, sav, ch_head)
+    {
+      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
+      list_del(&ch_ijk->list); //del from ch_head
+      free_elm(ch_ijk);        //free mem of child ch_ijk
+    }
+  }
+}
 
 
 /***************************************************************************/
