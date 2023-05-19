@@ -122,6 +122,8 @@ int connections_loc_on_patchface(int l, const char loc[NLOCS],
                                  int patface[6]);
 void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
+int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
+                                 const tEloc *eloc2, int l_max);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);

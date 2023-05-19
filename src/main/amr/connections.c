@@ -543,6 +543,39 @@ int eploc_key_in_eplocarray(const tEploc *eplockey,
 }
 
 
+/* check if 2 elocs agree up to level l_max, return 0/1 if no/yes */
+int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
+                                 const tEloc *eloc2, int l_max)
+{
+  int p1 = eloc1->p;
+  int l1 = eloc1->l;
+  int p2 = eloc2->p;
+  int l2 = eloc2->l;
+  int i;
+
+  if(p1!=p2)   return 0;
+  if(l1<l_max) return 0;
+  if(l2<l_max) return 0;
+
+  for(i=0; i<l_max; i++)
+  {
+    if(eloc1->loc[i] != eloc2->loc[i]) return 0;
+  }
+  return 1;
+}
+
+
+/* check if 2 eplocs agree up to level l_max, return 0/1 if no/yes */
+int eploc1_eploc2_agree_upto_l_max(const tEploc *eploc1,
+                                   const tEploc *eploc2, int l_max)
+{
+  tEloc eloc1[1], eloc2[1];
+  eloc_from_eploc(eloc1, eploc1);
+  eloc_from_eploc(eloc2, eploc2);
+  return eloc1_eloc2_agree_upto_l_max(eloc1, eloc2, l_max);
+}
+
+
 /****************************************************************************/
 /* functions for elm-name and elm-location strings */
 /****************************************************************************/

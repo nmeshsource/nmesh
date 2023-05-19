@@ -23,9 +23,13 @@
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 
 /* for easy access */
+#define MyID   ei_
 #define MyElm  mesh->myelm[ei_]
 #define MyElm0 mesh->myelm[0]
-#define Elm_myid(mesh, myid)  mesh->myelm[myid]
+#define Elm_MyID(mesh, myid)  mesh->myelm[myid]
+
+#define formyelms_s_n(mesh, s, n) \
+  for(int ei_=s; (ei_ < mesh->nmyelm) && (ei_ < s+n); ei_++)
 
 /* do we use omp taskloop? */
 #ifdef USE_OMP_TASKLOOP
@@ -73,7 +77,7 @@
 #define formylnodes_ompfor(mesh) formyelms_ompfor(mesh)
 #define MyLnode                  MyElm
 #define MyLnode0                 MyElm0
-#define Lnode_myid(mesh, myid)   Elm_myid(mesh, myid)
+#define Lnode_myid(mesh, myid)   Elm_MyID(mesh, myid)
 
 
 /****************************************************************************/

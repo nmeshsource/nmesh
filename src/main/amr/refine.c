@@ -217,23 +217,121 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
   }
 }
 
+/* try to get the next 8 elms in list, return how many we actually got */
+int amr_get_8elms_at_myid(tMesh *mesh,  ulong myid, tElm *elm[8])
+{
+  int cnt = 0;
+  formyelms_s_n(mesh, myid, 8)
+  {
+    elm[cnt] = MyElm;
+  }
+  return cnt;
+}
+
+/* check if all n in elm[8] are siblings */
+int amr_elms_are_siblings(int n, tElm *elm[8])
+{
+  int p0 = Elm_p(elm[0]);
+  int l0 = Elm_l(elm[0]);
+  int are_sibs;
+  int i;
+  tEloc eloc0[1], eloci[1];
+
+  eloc_from_eploc(eloc0, elm[0]->eploc);
+
+  for(i=1; i<n; i++)
+  {
+    int pi = Elm_p(elm[i]);
+    int li = Elm_l(elm[i]);
+    if(pi!=p0) return 0;
+    if(li!=l0) return 0;
+    eloc_from_eploc(eloci, elm[i]->eploc);
+    are_sibs = eloc1_eloc2_agree_upto_l_max(eloc0, eloci, l0-1);
+    if(!are_sibs) return 0;
+  }
+  return 1;
+}
 
 /* Unrefine all nodes on all MPI procs if indicated by node->rflag */
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
-  ulong *eidlim = mesh->eidlim;
-
+  //int rank = nMPI_rank();
+  //ulong myeidlim = mesh->eidlim[rank];
+  //struct list_head *pos;
 
   formyelms(mesh)
   {
-    tElm *elm = MyElm;
-    ulong eid = Elm_eid(elm);
+    tElm *elm  = MyElm;
+    ulong myid = MyID;
+    //ulong eid  = Elm_eid(elm);
     int ijk = elm_get_ijk(elm);
 
-    if(elm->rflag < 0)
-    {}
 
+    if(ijk==0)
+    {
+      tElm *elmar[8];
+      int num;
+      int uref, i;
+
+      /* check for other siblings, has how many we have on this rank */
+      num  = amr_get_8elms_at_myid(mesh, myid, elmar);
+      uref = 0;
+
+      /* check if the num elms in elmar are indeed siblings and count
+         how many want to be refined */
+      if(amr_elms_are_siblings(num, elmar))
+        for(uref=0, i=0; i<num; i++)
+          if(elmar[i]->rflag < 0) uref++;
+
+      //FIXME: do we want this:
+      ///* if not all want to be refined, erase their rflags */
+      //if(uref<num)
+      //  for(uref=0, i=0; i<num; i++)
+      //    elmar[i]->rflag = 0;
+
+      /* if not all want to be refined, continue with next elm */
+      if(uref<num)
+        continue;
+
+      if(num<8)
+      {
+        errorexit("ask other rank");
+        //use:
+        /*
+        int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
+                          tElm0 *elm0)
+        */
+        //add to eidarr: {myeidlim, myeidlim+1 ... (8-num) entries}
+      }
+    }
   }
+
+  // call:
+  //        int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
+  //                        tElm0 *elm0)
+
+  // check if all (8-num) elm0 ask for unref
+  // if yes: get them here
+  // if no unset their rflags
+
+
+// from old amr:
+/*
+    for(ijk=0; ijk<8; ijk++)
+    {
+      if(sib[ijk]->child[0]) // cannot unrefine if there are any children
+        goto continue_with_next_node;
+
+      if(sib[ijk]->dat)
+      {
+        if(sib[ijk]->rflag < 0) uref++;
+        else                    goto continue_with_next_node;
+      }
+    }
+*/
+
+
+
 
 
   /* FIXME: This does not update the list mesh->myelm!
