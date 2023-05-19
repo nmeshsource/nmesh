@@ -218,6 +218,8 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
   errorexit("make: void remove_elms_if_rflag(tMesh *mesh, tRef *ref)");
+//0th  get all 8 sibling children onto one MPI rank
+
 //1st Call:
 //tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
 //                                       struct list_head *ch_head)
