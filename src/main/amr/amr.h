@@ -94,7 +94,6 @@ void remove_all_nfaces(tNode *node);
 
 /* refine.c */
 void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref);
-void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent);
 void set_parent_nbinfo_remove_children(tElm *parent,
                                        struct list_head *ch_head);

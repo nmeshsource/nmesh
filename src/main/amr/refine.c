@@ -221,6 +221,26 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
 /* Unrefine all nodes on all MPI procs if indicated by node->rflag */
 void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
 {
+  ulong *eidlim = mesh->eidlim;
+
+
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    ulong eid = Elm_eid(elm);
+    int ijk = elm_get_ijk(elm);
+
+    if(elm->rflag < 0)
+    {}
+
+  }
+
+
+  /* FIXME: This does not update the list mesh->myelm!
+            Only the linked list mesh->myelm_head is changed here */
+
+
+
   errorexit("make: void remove_elms_if_rflag(tMesh *mesh, tRef *ref)");
 //0th  get all 8 sibling children onto one MPI rank
 
