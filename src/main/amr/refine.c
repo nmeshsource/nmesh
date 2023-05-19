@@ -203,6 +203,10 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
              to the parent which will be removed!!!  */
     /* FIXME: Maybe go over parent's nbs and set whatever
               nb-info we can!!! */
+    /* we just created the children (child0), now set local nb-info */
+    //int amr_set_nbinfo_of_new_children(tElm *child0, tElm *parent)
+    // use: connections_get_nbloc_InsidePat
+
     /* for now we just invalidate a lot and remove the parent */
     nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent);
     if(nbs_on_other_rank)
@@ -248,6 +252,10 @@ void set_parent_nbinfo_remove_children(tElm *parent,
              to the children which will be removed!!!  */
     /* FIXME: Maybe go over children's nbs and set whatever
               nb-info we can!!! */
+    /* we just created the parent, now set local nb-info */
+    //int amr_set_nbinfo_of_new_parent(tElm *parent, struct list_head *ch_head)
+    // use: connections_get_nbloc_InsidePat
+
     /* for now we just invalidate a lot and remove the children */
     list_for_each(pos_ijk, ch_head)
     {

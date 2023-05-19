@@ -2239,8 +2239,13 @@ void amr_remove_mesh_nbelm(tMesh *mesh)
   mesh->nnbelm = 0;
 }
 
-/* we just created the children in childlist, now set local nb-info */
-//int amr_invalidate_nbinfo_of_nbs(tElm *parent, struct list_head *childlist)
+//NOTE:
+/* we just created the children (child0), now set local nb-info */
+//int amr_set_nbinfo_of_new_children(tElm *child0, tElm *parent)
+// use: connections_get_nbloc_InsidePat
+
+/* we just created the parent, now set local nb-info */
+//int amr_set_nbinfo_of_new_parent(tElm *parent, struct list_head *ch_head)
 // use: connections_get_nbloc_InsidePat
 
 
