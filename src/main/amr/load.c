@@ -864,7 +864,7 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     ops_bal_sum[r] = \sum_{ri=0}^r ops_bal_ri
 
    *On rank r we want to have all elms that have an
-      ops(elm) := ops0 + v_r \sum_elm t_elm
+      ops(elm) := ops0 + v_r \sum_{elm'=1st_elm}^elm t_elm'
     between ops_bal_sum[r-1] and ops_bal_sum[r].
    *All elms that are not within this range will be sent to the rank
     where they fall into this range. All elms on other ranks that fall in
