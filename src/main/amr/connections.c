@@ -1441,7 +1441,9 @@ void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm)
     nnb = elm->dat->info->nnbinfo[f];
     /* since a need to update is signaled by nnbinfo -> -nnbinfo-1 */
     if(nnb<0) nnb = -nnb-1;
-    redim_array(nbinfo, nnb,1,1);
+    redim_array_Neplocs(nbinfo, nnb);
+    //PRF;printf(": eid%lu f%d nnb=%d ", Elm_eid(elm), f, nnb);
+    //printf("  ");print_amr_elm_nbinfo(elm, f);printf("\n");
   }
 }
 

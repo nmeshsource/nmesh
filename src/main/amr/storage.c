@@ -240,6 +240,18 @@ int array_Neplocs(tArray *ar)
   return (nbytes)/se;                //number of eplocs in nbytes
 }
 
+/* redim array in eploc size increments */
+int redim_array_Neplocs(tArray *ar, int Neplocs)
+{
+  size_t se = sizeof(ar->eploc[0]);  //sizeof eploc
+  size_t nbytes = se*Neplocs;        //number of bytes needed
+  size_t sd = sizeof(ar->d[0]);      //sizeof double
+  size_t nd = (nbytes+sd-1)/sd;      //num. of doubles in nbytes
+  return redim_array(ar, nd,1,1);
+}
+
+
+
 /****************************************************************************/
 /* elm storage */
 /****************************************************************************/
