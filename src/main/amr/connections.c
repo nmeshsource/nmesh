@@ -2257,7 +2257,7 @@ int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
   for(ni=0; ni<elm->nfnb[elmface]; ni++)
   {
     tElm *nb = elm->fnb[elmface][ni];
-    int nb_f;
+    int nb_f, nb_ni;
 
     if(!nb) continue; /* do nothing if there is no nb */
 
@@ -2273,6 +2273,12 @@ int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
     else
     {
       nbs_on_other_rank = 1;
+    }
+    /* set pointers in nb that point back at elm to NULL */
+    for(nb_ni=0; nb_ni<nb->nfnb[nb_f]; nb_ni++)
+    {
+      tElm *nbnb =  nb->fnb[nb_f][nb_ni];
+      if(nbnb==elm) nb->fnb[nb_f][nb_ni] = NULL;
     }
   }
   return nbs_on_other_rank;
