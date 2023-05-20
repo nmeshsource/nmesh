@@ -10,6 +10,7 @@
 
 /* use gridpoints from basis/gridpoints.c */
 extern tGridPoints gridpoints[1];
+extern tTiming Timing[1]; // FIXME: reomve this line
 
 
 /* make an empty mesh, into which we an then initialize or into which
@@ -541,6 +542,8 @@ int setup_elm_mesh1(tMesh *mesh)
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
   mesh->iteration = 0;
+
+  Timing->child1to7_weight = 1.;
 
   remove_all_patches(mesh);
   add_patch(mesh, bbox0, pt_typ, n, 0);
