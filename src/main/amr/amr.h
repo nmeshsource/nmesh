@@ -23,6 +23,7 @@ tElm *alloc_elm(tMesh *mesh);
 tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
 void free_elm(tElm *elm);
+ulong alloc_and_set_mesh_myelm(tMesh *mesh);
 tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
@@ -137,6 +138,7 @@ void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
+int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);

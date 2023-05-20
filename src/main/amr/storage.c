@@ -313,9 +313,9 @@ void free_elm(tElm *elm)
 
 
 /* allocate and set mesh->myelm array from mesh->myelm_head */
-long alloc_and_set_mesh_myelm(tMesh *mesh)
+ulong alloc_and_set_mesh_myelm(tMesh *mesh)
 {
-  long ei;
+  ulong ei;
   struct list_head *pos;
 
   /* free whatever we had so far in myelm */
