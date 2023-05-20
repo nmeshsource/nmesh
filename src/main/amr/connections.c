@@ -2274,7 +2274,12 @@ int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
     {
       nbs_on_other_rank = 1;
     }
-    /* set pointers in nb that point back at elm to NULL */
+
+    //CHECK:
+    /* Set pointers in nb that point back at elm to NULL.
+       This is needed if we remove elm and we then want to remove nb soon
+       after and then call:
+       amr_invalidate_nbinfo_of_nbs(nb,...); */
     for(nb_ni=0; nb_ni<nb->nfnb[nb_f]; nb_ni++)
     {
       tElm *nbnb =  nb->fnb[nb_f][nb_ni];
