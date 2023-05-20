@@ -782,10 +782,7 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     if(rank != desrank)
       move_node_to_rank(elm, desrank, scom, rcom, 1);
   }
-Yo(200);
-//printf("mesh=%p\n", mesh);
-//printf("&mesh->myelm_head=%p\n", &(mesh->myelm_head));
-fflush(stdout);
+
   /* loop over mesh->myelm_head list and recv dat from elms that have a
      datrank different from my rank */
   list_for_each(pos, &mesh->myelm_head)
@@ -800,21 +797,15 @@ fflush(stdout);
     else
     { if(datrank != rank) errorexit("dat!=NULL but datrank!=rank"); }
 
-
-//printf("elm=%p\n", (void *) elm);
-//fflush(stdout);
-
     /* setup MPI recv buffers */
     if(datrank != rank)
       move_node_to_rank(elm, rank, scom, rcom, 1);
   }
-Yo(800);
+
   /* wait for MPI sends and recvs */
   nMPI_Waitall_com_send(scom);
-Yo(801);
   free_com(scom);  /* free scom with all its buffers */
   nMPI_Waitall_com_recv(rcom);
-Yo(802);
 
   /* get var data out of recv buffers */
   set_com_counters(rcom, 0,0);
