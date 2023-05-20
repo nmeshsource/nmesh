@@ -181,8 +181,20 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
       }
     }
   }
-  /* FIXME: This does not update the list mesh->myelm!
-            Only the linked list mesh->myelm_head is changed here */
+
+  /* something my have happened to the elms in mesh->nbelm on another rank,
+     so we just get rid of mesh->nbelm */
+  amr_remove_mesh_nbelm(mesh);
+
+  /* update the list mesh->myelm */
+  alloc_and_set_mesh_myelm(mesh);
+
+  /* FIXME: Do we need fnb if further refine/unref happen right after?
+            I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
+            I think so. But if not, the 3 calls below are needed:
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  //amr_elm_nbinfo_to_elm_fnb(mesh);
+  //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
 }
 
 /* set some nbinfo and then remove and free the old parent */
