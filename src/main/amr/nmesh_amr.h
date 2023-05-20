@@ -424,13 +424,7 @@ typedef struct tVARLIST {
 /**************************************************************************/
 /* for load balancing */
 /**************************************************************************/
-enum
-{
-  LOADBAL_SIMPLE,     //each proc gets the same number of nodes
-  LOADBAL_NODETIMES,  //nodes are timed, each proc gets equal total times
-  LOADBAL_NODETIMES_SPEEDS //like LOADBAL_NODETIMES but also use proc speed
-};
-
+//...
 
 /**************************************************************************/
 /* for results from timing.c */
@@ -441,7 +435,7 @@ typedef struct tTIMING {
   double myops;  /* myops = speed * myT */
   double ops0;   /* ops0 = \sum_{r=0}^{myrank-1} myops(rank=r) */
   double allops; /* allops = \sum_{r=0}^{size-1} myops(rank=r) */
-  double child1to7_weight; /* load_TimeIn_s weight fac for child1-7 */
+  double sibl1to7_weight; /* load_TimeIn_s weight fac for sibling1-7 */
 } tTiming;
 
 
@@ -628,7 +622,6 @@ void free_all_vl_surfaces(tNode *node, tVarList *vl);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);
-void move_nodelist_to_rank(tNlist *list, int desrank);
 void load_balance(tMesh *mesh, int strategy);
 int load_balance_if_needed(tMesh *mesh);
 

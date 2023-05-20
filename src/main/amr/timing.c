@@ -140,8 +140,8 @@ double timing_get_elm_load_TimeIn_s(tElm *elm)
 
     /* set timing weight for this elm */
     if(ijk==0) tw = 1.;
-    else       tw = Timing->child1to7_weight;
-    /* NOTE: if child1to7_weight=0 and if all 8 siblings are there,
+    else       tw = Timing->sibl1to7_weight;
+    /* NOTE: if sibl1to7_weight=0 and if all 8 siblings are there,
              we may want to increase the ijk=0 weight to 8 */
 
     et = et * tw;

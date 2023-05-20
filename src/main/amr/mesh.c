@@ -543,7 +543,7 @@ int setup_elm_mesh1(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  Timing->child1to7_weight = 1.;
+  Timing->sibl1to7_weight = 1.;
 
   remove_all_patches(mesh);
   add_patch(mesh, bbox0, pt_typ, n, 0);
@@ -814,7 +814,7 @@ Yo(33.2);
 
 
   amr_remove_mesh_nbelm(mesh);
-  Timing->child1to7_weight = 0.;
+  Timing->sibl1to7_weight = 0.;
   load_balance_elms(mesh);
   alloc_and_set_mesh_myelm(mesh);
 

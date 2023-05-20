@@ -69,7 +69,7 @@ int nmesh_amr(tMesh *mesh)
          "radius of innermost sphere in nested sphere h-refinement");
 
   /* pars that determine how load is balanced */
-  AddPar("amr_load_balance", "no", "[no,simple,timingbased]");
+  AddPar("amr_load_balance", "no", "how load is balanced [no,yes]");
 
   /* MPI related pars */
   AddPar("amr_MPIexchange", "1", "type of MPI exchange we use: "

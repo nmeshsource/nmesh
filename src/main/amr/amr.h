@@ -74,6 +74,7 @@ void simple_load_balance(tMesh *mesh);
 void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs);
 void load_exchange_dat_after_moving_elms(tMesh *mesh);
+void load_balance_elms(tMesh *mesh);
 
 /* bfaces.c */
 void remove_all_bfaces(tPat *pat);

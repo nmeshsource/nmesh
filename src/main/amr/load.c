@@ -10,38 +10,44 @@
 /* use timings, some MPI datatypes, amr vars */
 extern tTiming Timing[1];
 extern tnMPIvars nMPIvars[1];
-extern tAMR amr[1];
-
-
-/* object we pass around to figure out the desired rank of a node */
-typedef struct tLOADINFO {
-  long nid;
-  long nnodes;
-  int size;
-  tNlist **rank_start; /* rank_start[i] is one of mesh->lns for rank i,
-                          set in load_set_desired_rank_start */
-} tLoadinfo;
 
 
 /**********************************************************************/
 /* functions to move nodes between procs */
 /**********************************************************************/
 
-/* compute desired rank */
-int desiredrank_simple(tLoadinfo *li)
-{
-  double N = li->nnodes;
-  double s = li->size;
-  double nperproc = N/s;
-  double desrank = li->nid/nperproc;
-  return desrank;
-}
-
-/* simplistic load balancing using desiredrank_simple */
+/* simplistic load balancing */
 void simple_load_balance(tMesh *mesh)
 {
-  load_balance(mesh, LOADBAL_SIMPLE);
+  load_balance(mesh, 1);
 }
+
+
+/* load balancing, where we can choose the balancing strategy:
+   strategy = LOADBAL_SIMPLE ... */
+void load_balance(tMesh *mesh, int strategy)
+{
+  /* for now we keep sibling 1-7 together with sibling 0 */
+  Timing->sibl1to7_weight = 0.;
+
+  /* when we move elms much of in mesh->nbmesh will become wrong */
+  amr_remove_mesh_nbelm(mesh);
+
+  /* move elms bewteen ranks */
+  load_balance_elms(mesh);
+
+  /* update mesh->myelm */
+  alloc_and_set_mesh_myelm(mesh);
+
+  /* set fnb */
+  amr_elm_nbinfo_to_elm_fnb(mesh);
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
+
+  /* set elm->n and elm->pt_typ for the elms of mesh->nbmesh */
+  amr_get_nbelm_elmheaders(mesh);
+}
+
+
 
 /* return: number of variables and number of doubles inside dat */
 /* NOTE: this does not take the extra space in some vars into account */
@@ -259,42 +265,6 @@ void move_node_to_rank(tNode *node, int desrank,
   TIMER_STOP;
 }
 
-/* move all nodes in list to rank */
-void move_nodelist_to_rank(tNlist *list, int desrank)
-{
-  tNlist *elem, *list0;
-  tNode *node = list->node;
-  //tMesh *mesh = node->pat->mesh;
-  tCom *scom = alloc_com(sizeof(double), 1);
-  tCom *rcom = alloc_com(sizeof(double), 1);
-
-  if(PR) { PRF;printf(": desrank=%d\n", desrank); }
-
-  /* find element 0 in list */
-  list0 = first_nodelist(list);
-
-  /* fill MPI send and recv buffers */
-  fornodelist(list0, elem)
-  {
-    node = elem->node;
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 1);
-  }
-  nMPI_Waitall_com_send(scom);
-  free_com(scom);  /* free scom with all its buffers */
-  nMPI_Waitall_com_recv(rcom);
-
-  /* get var data out of recv buffer */
-  set_com_counters(rcom, 0,0);
-  fornodelist(list0, elem)
-  {
-    node = elem->node;
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 0);
-  }
-
-  free_com(rcom);
-}
 
 
 /************************************************************************/
@@ -384,285 +354,17 @@ double load_set_speed_array(tMesh *mesh, double *speed)
 }
 
 
-/* Set array nodeload[] that contains the measured time each node used,
-   Also return the sum over nodeload[] */
-double load_set_nodeload_array(tMesh *mesh, const double *speed,
-                               double *nodeload)
-{
-  int rank = nMPI_rank();
-  double myspeed;
-  tNlist *elem;
-  double loadmin = 1e-50;
-  double loadsum = 0.;
-
-  if(speed) myspeed = speed[rank];
-  else      myspeed = 1.;
-
-  /* we assume that mesh->lns has the same order for all ranks */
-  fornodelist(mesh->lns, elem)
-  {
-    tNode *node = elem->node;
-    tDat *dat = node->dat;
-    int datrank = node->datrank;
-    long nid = Node_eid(node);
-    double load = loadmin;
-
-    /* we need to broadcast nodeload from my nodes to all other ranks */
-    if(dat) load = timing_get_elm_load_TimeIn_s(node) * myspeed;
-
-    /* in case we forgot to measure the times, just set load to a very small
-       uniform number: */
-    if(load < loadmin) load = loadmin;
-
-    nMPI_Bcast(&load,1, nMPI_DOUBLE, datrank);
-    nodeload[nid] = load;
-    loadsum += load;
-  }
-
-  //PRFs(":\n");
-  //for(long l=0; l<mesh->nln; l++)
-  //  printf("nodeload[%ld]=%g ", l, nodeload[l]);
-
-  return loadsum;
-}
-
-/* sum over leaf nodes (starting at ln0) until loadsum reaches the value
-   desired_load:
-   Return: leaf after the one where we reached desired_load.
-   In: ln0, desired_load[], nodeload.  Out: actual_load */
-tNlist *inc_leaf_until_desired_loadsum(tNlist *ln0, const double *speed,
-                                       int rank, double desired_loadsum,
-                                       const double nodeload[],
-                                       double *actual_loadsum)
-{
-  tNlist *elem;
-  double rankspeed, sum;
-
-  if(speed) rankspeed = speed[rank];
-  else      rankspeed = 1.;
-
-  sum = 0.;
-  fornodelist(ln0, elem)
-  {
-    tNode *node = elem->node;
-    long nid = Node_eid(node);
-
-    sum += nodeload[nid] / rankspeed;
-
-    if(sum >= desired_loadsum) break;
-  }
-
-  *actual_loadsum = sum;
-  if(elem) return elem->next;
-  else     return NULL;
-}
-
-/* Set rank_start[i] array.
-   It contains the first leaf that rank i should have */
-void load_set_desired_rank_start(tMesh *mesh, const double *speed,
-                                 double desired_loadsum,
-                                 const double nodeload[],
-                                 tNlist **rank_start)
-{
-  int size = nMPI_size();
-  tNlist *ln0, *ln1;
-  double actual_loadsum;
-  int rank;
-
-  rank = 0;
-  for(ln0 = mesh->lns; ln0; ln0 = ln1)
-  {
-    if(rank >= size) break;
-    rank_start[rank] = ln0;
-    ln1 = inc_leaf_until_desired_loadsum(ln0, speed, rank, desired_loadsum,
-                                         nodeload, &actual_loadsum);
-    rank++;
-  }
-  //PRFs(":\n");
-  //for(rank=0; rank<size; rank++)
-  //  if(rank_start[rank])
-  //    printf("rank_start[%d]=nid%ld ", rank, rank_start[rank]->Node_eid(node));
-}
-
-/* compute desired rank */
-int load_get_desiredrank(tLoadinfo *li)
-{
-  int rank;
-
-  for(rank = 0; rank < li->size-1; rank++)
-  {
-    tNlist *ln1 = li->rank_start[rank+1];
-    tNode *node;
-    long nid1;
-
-    if(ln1)
-    {
-      node = ln1->node;
-      nid1 = Node_eid(node);
-    }
-    else
-    {
-      break;
-    }
-    //PRF;printf(": rank=%d nid=%ld nid1=%ld\n", rank, li->nid, nid1);
-    /* we assume that leaf node nids are assigned in ascending order */
-    if(li->nid < nid1) break;
-  }
-  if(rank >= li->size)
-    errorexit("could not find the rank that should have li->nid");
-
-  return rank;
-}
-
-
-/* load balancing, where we can choose the balancing strategy:
-   strategy = LOADBAL_SIMPLE, LOADBAL_NODETIMES, ... */
-void load_balance(tMesh *mesh, int strategy)
-{
-  long nnodes = mesh->nln;
-  int size = nMPI_size();
-  tLoadinfo li[1];
-  int (*desiredrank)(tLoadinfo *li); /* func. pointer for distrib. strategy*/
-  int desrank;
-  tNlist *elem;
-  tNode *node;
-  tCom *scom;
-  tCom *rcom;
-  double totalload;            //only for LOADBAL_NODETIMES
-  double *nodeload = NULL;     //only for LOADBAL_NODETIMES
-  tNlist **rank_start = NULL;  //only for LOADBAL_NODETIMES
-  double *speed = NULL;        //only for LOADBAL_NODETIMES_SPEEDS
-  double avspeed = 1.;         //only for LOADBAL_NODETIMES_SPEEDS
-
-  PRF;printf(": strategy=%d nnodes=%ld ", strategy, nnodes);
-
-  /* set const part of li needed for all strategies */
-  li->nnodes = nnodes;
-  li->size   = size;
-
-  /* set up stuff for each strategy */
-  switch(strategy)
-  {
-  case LOADBAL_NODETIMES_SPEEDS:
-
-    speed = calloc(size, sizeof(speed[0]));
-    if(!speed)
-    {
-      free(speed);
-      printf("  WARNING: quitting ");PRF;
-      printf(" due to lack of memory!!!\n");
-      /* do fallback? */
-      //load_balance(mesh, LOADBAL_SIMPLE);
-      return;
-    }
-    avspeed = load_set_speed_array(mesh, speed);
-
-    /* FALLTHROUGH */
-
-  case LOADBAL_NODETIMES:
-
-    /* load balancing based on measured node loads */
-    nodeload   = dmalloc(nnodes);
-    rank_start = calloc(size, sizeof(rank_start[0]));
-    if(!nodeload || !rank_start)
-    {
-      free(rank_start);
-      free(nodeload);
-      printf("  WARNING: quitting ");PRF;
-      printf(" due to lack of memory!!!\n");
-      /* do fallback? */
-      //load_balance(mesh, LOADBAL_SIMPLE);
-      return;
-    }
-
-    /* get measured load for each node (in nodeload) and also totalload */
-    totalload = load_set_nodeload_array(mesh, speed, nodeload);
-    printf("totalload=%g\n", totalload);
-
-    /* set array rank_start with 1st desired leaf node for each rank */
-    load_set_desired_rank_start(mesh, speed, (totalload/avspeed)/size,
-                                nodeload, rank_start);
-
-    /* set const part of li, and pick function to calc. desired rank */
-    li->rank_start = rank_start;
-    desiredrank = load_get_desiredrank;
-
-    break;
-
-  case LOADBAL_SIMPLE:
-
-    /* pick function to calc. desired rank */
-    desiredrank = desiredrank_simple;
-    printf("\n");
-
-    break;
-
-  default:
-    errorexit("unknown strategy");
-  }
-
-  /* for MPI data transfers */
-  scom = alloc_com(sizeof(double), 1);
-  rcom = alloc_com(sizeof(double), 1);
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
-  /* fill MPI send and recv buffers */
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = Node_eid(node);
-    desrank = desiredrank(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 1);
-  }
-  nMPI_Waitall_com_send(scom);
-  free_com(scom);  /* free scom with all its buffers */
-  nMPI_Waitall_com_recv(rcom);
-
-  /* get var data out of recv buffer */
-  set_com_counters(rcom, 0,0);
-  fornodelist(mesh->lns, elem)
-  {
-    node = elem->node;
-    li->nid = Node_eid(node);
-    desrank = desiredrank(li);
-    if(node->datrank != desrank)
-      move_node_to_rank(node, desrank, scom, rcom, 0);
-  }
-
-  free_com(rcom);
-
-  update_mesh_myln_node_nid(mesh);
-  PRF;printf(": --> %d on this proc\n", total_nnodes_in_myln(mesh->myln));
-
-  /* now that nodes are elsewhere re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
-
-  /* free temp arrays */
-  free(rank_start);
-  free(nodeload);
-  free(speed);
-}
-
 /* function that can be scheduled in LOADBALANCING */
 int load_balance_if_needed(tMesh *mesh)
 {
   int amr_load_balance = Par("amr_load_balance");
 
-  if(Getv(amr_load_balance, "timingbased"))
+  if(Getv(amr_load_balance, "yes"))
   {
-    load_balance(mesh, LOADBAL_NODETIMES);
-  }
-  else if(Getv(amr_load_balance, "simple"))
-  {
-    load_balance(mesh, LOADBAL_SIMPLE);
+    load_balance(mesh, 1);
   }
   return 0;
 }
-
-
 
 
 
