@@ -945,12 +945,9 @@ void load_balance_elms(tMesh *mesh)
   tElm0 **s_elms, **r_elms; // s_elms[3][7] elm7 to be sent to rank3 */
   //ulong nkeep; // number of elms we keep on this rank
 
-Yo(1);
-printf("  mesh->nmyelm=%lu\n", mesh->nmyelm);
-
   /* get how ops are currently distributed */
   timing_set_myops_ops0_allops(mesh);
-printTiming();
+  //printTiming();
   ops0   = Timing->ops0;
   //myops  = Timing->myops;
   allops = Timing->allops;
@@ -962,9 +959,6 @@ printTiming();
     errorexit("no memory for speed or ops_bal_sum");
   avspeed = load_set_speed_array(mesh, speed);
   myspeed = speed[rank];
-
-////speed[1]=1.6; avspeed=1.3;
-//printf("avspeed=%g speed[0]=%g speed[1]=%g\n", avspeed, speed[0], speed[1]);
 
   /* ops needed for load balance */
   w = speed[0]/(avspeed*size); /* weight for rank0 */
@@ -1005,8 +999,8 @@ printTiming();
     if(et <= loadTmin) et = loadTmin;
     myT += et;
     desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
-printelm(elm);
-printf("desrank=%d\n", desrank);
+    //printelm(elm);
+    //printf("desrank=%d\n", desrank);
     if(desrank != torank)
       torank = desrank;
     ns_elms[torank] += 1;
@@ -1037,8 +1031,6 @@ printf("desrank=%d\n", desrank);
       nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD);
     }
 
-//fflush(stdout);
-//nMPI_Waitall_com_recv(rcom);
   /* alloc s_elms[rk] */
   s_elms = rows_calloc(size, ns_elms, sizeof(tElm0));
 
@@ -1086,14 +1078,10 @@ printf("desrank=%d\n", desrank);
   free_com(rcom);
   rcom = alloc_com(sizeof(long), 0);
 
-
-Yo(100);
-for(rk=0; rk<size; rk++)
-{
-printf("rk=%d ns_elms[rk]=%zu nr_elms[rk]=%zu\n", rk, ns_elms[rk], nr_elms[rk]);
-}
-fflush(stdout);
-
+  //Yo(100);
+  //for(rk=0; rk<size; rk++)
+  //  printf("rk=%d ns_elms[rk]=%zu nr_elms[rk]=%zu\n", rk, ns_elms[rk], nr_elms[rk]);
+  //fflush(stdout);
 
   /* alloc r_elms[rk] */
   r_elms = rows_calloc(size, nr_elms, sizeof(tElm0));
@@ -1158,28 +1146,25 @@ fflush(stdout);
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
-Yo(200);
-PRF;printf(": %zu in mesh->myelm_head\n", list_count_nodes(&mesh->myelm_head));
-printf("  mesh->nmyelm=%lu\n", mesh->nmyelm);
+  //Yo(200);
+  //PRF;printf(": %zu in mesh->myelm_head\n", list_count_nodes(&mesh->myelm_head));
+  //printf("  mesh->nmyelm=%lu\n", mesh->nmyelm);
 
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
-Yo(300);
 
-//alloc_and_set_mesh_myelm(mesh);
-//NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
+  //alloc_and_set_mesh_myelm(mesh);
+  //NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
 
-//FIXME: adapt  update_mesh_myln_node_nid
+  //FIXME: adapt  update_mesh_myln_node_nid
   update_mesh_myln_node_nid(mesh);
   PRF;printf(": --> %lu on this proc\n", mesh->nmyelm);
-printf(": --> %zu on this proc\n", list_count_nodes(&mesh->myelm_head));
+  //printf(": --> %zu on this proc\n", list_count_nodes(&mesh->myelm_head));
 
 
-//FIXME: call function that set's up elm->fnb and such...
-//       maybe also update_mesh_myln_node_nid ???
+  //FIXME: call function that set's up elm->fnb and such...
+  //       maybe also update_mesh_myln_node_nid ???
 
-Yo(900);
   /* now that nodes are elsewhere re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
-Yo(1000);
 }
