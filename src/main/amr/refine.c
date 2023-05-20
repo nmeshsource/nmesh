@@ -314,39 +314,39 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
 
-//alloc_and_set_mesh_myelm(mesh);
-//NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
+  //alloc_and_set_mesh_myelm(mesh);
+  //NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
 
-//FIXME: adapt  update_mesh_myln_node_nid
+  //FIXME: adapt  update_mesh_myln_node_nid
   update_mesh_myln_node_nid(mesh);
 
-//FIXME: call function that set's up elm->fnb and such...
-//       maybe also update_mesh_myln_node_nid ???
+  //FIXME: call function that set's up elm->fnb and such...
+  //       maybe also update_mesh_myln_node_nid ???
 
   /* now that nodes are elsewhere re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
 
 
-////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////
 
 
   /* FIXME: This does not update the list mesh->myelm!
             Only the linked list mesh->myelm_head is changed here */
 
   errorexit("finish: void remove_elms_if_rflag(tMesh *mesh, tRef *ref)");
-//0th  get all 8 sibling children onto one MPI rank
-//     (we have most of this above)
+  //0th  get all 8 sibling children onto one MPI rank
+  //     (we have most of this above)
 
   /* if not all 8 want to be refined we do nothing */
   if(uref<8) return;
 
-//1st Call:
-//tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
-//                                       struct list_head *ch_head)
+  //1st Call:
+  //tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
+  //                                       struct list_head *ch_head)
 
-//2nd Call:
-//void set_parent_nbinfo_remove_children(tElm *parent,
-//                                       struct list_head *ch_head)
+  //2nd Call:
+  //void set_parent_nbinfo_remove_children(tElm *parent,
+  //                                       struct list_head *ch_head)
 }
 
 /* set some nbinfo and then free the children in ch_head */
