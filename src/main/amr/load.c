@@ -745,11 +745,15 @@ void get_nbr_rank_info(tMesh *mesh)
 
 /* Move data (dat) for elms that have been moved.
    Here we assume:
-   -no dat has been moved yet
-   -the list in mesh->myelm_head has been updated to contain all elms
-    we want on this rank (but some have no dat yet)
-   -the list in mesh->myelm contains the elms that we had before the update,
-    and thus has all the elms for which we still have dat */
+   * no dat has been moved yet
+   * the list in mesh->myelm_head has been updated to contain only the elms
+     we want on this rank (but some have no dat yet)
+   * the list in mesh->myelm contains the elms that we had before the update,
+     and thus has all the elms for which we still have dat
+   * the elms whose dat that each proc sends away have the receiver rank in
+     elm->dat->info->desrank
+   * the elms whose dat each proc recvs have the sender rank in elm->datrank
+*/
 void load_exchange_dat_after_moving_elms(tMesh *mesh)
 {
   int rank = nMPI_rank();
