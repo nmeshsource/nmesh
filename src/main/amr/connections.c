@@ -575,6 +575,51 @@ int eploc1_eploc2_agree_upto_l_max(const tEploc *eploc1,
   return eloc1_eloc2_agree_upto_l_max(eloc1, eloc2, l_max);
 }
 
+/* try to get the 8 elms in list, return how many we actually got
+     this should really be:
+     int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, tElm *elm[8]);
+     void *ptr_elm is really tElm *elm[8],
+     but this way we can also pass in tElm0 *elm[8] */
+int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm)
+{
+  tElm **elm = ptr_elm; // like: tElm *elm[8];
+  int cnt = 0;
+  formyelms_s_n(mesh, myid, 8)
+  {
+    elm[cnt] = MyElm;
+  }
+  return cnt;
+}
+
+/* check if all n in elm[8] are siblings
+     this should really be:
+     int amr_elms_are_siblings(int n, tElm0 *elm[8]);
+     i.e. void *ptr_elm is really tElm0 *elm[8],
+     but this way we can also pass in tElm *elm[8] */
+int amr_elms_are_siblings(int n, void *ptr_elm)
+{
+  tElm0 **elm = ptr_elm; // like: tElm0 *elm[8];
+  int p0 = Elm_p(elm[0]);
+  int l0 = Elm_l(elm[0]);
+  int are_sibs;
+  int i;
+  tEloc eloc0[1], eloci[1];
+
+  eloc_from_eploc(eloc0, elm[0]->eploc);
+
+  for(i=1; i<n; i++)
+  {
+    int pi = Elm_p(elm[i]);
+    int li = Elm_l(elm[i]);
+    if(pi!=p0) return 0;
+    if(li!=l0) return 0;
+    eloc_from_eploc(eloci, elm[i]->eploc);
+    are_sibs = eloc1_eloc2_agree_upto_l_max(eloc0, eloci, l0-1);
+    if(!are_sibs) return 0;
+  }
+  return 1;
+}
+
 
 /****************************************************************************/
 /* functions for elm-name and elm-location strings */
