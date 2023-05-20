@@ -40,23 +40,6 @@ int desiredrank_simple(tLoadinfo *li)
 /* simplistic load balancing using desiredrank_simple */
 void simple_load_balance(tMesh *mesh)
 {
-/*
-tNlist *elem;
-fornodelist(mesh->lns, elem)
-{
-tNode *node = elem->node;
-tDat *dat = node->dat;
-if(dat) dat->info->load_TimeIn_s = 1./(Node_eid(node)+1);
-}
-Timing->mm_speed = 1./(nMPI_rank()+1);
-//Yo(10);
-//printmesh(mesh);
-//load_balance(mesh, LOADBAL_NODETIMES);
-load_balance(mesh, LOADBAL_NODETIMES_SPEEDS);
-//Yo(20);
-//printmesh(mesh);
-return;
-*/
   load_balance(mesh, LOADBAL_SIMPLE);
 }
 
@@ -425,7 +408,7 @@ double load_set_nodeload_array(tMesh *mesh, const double *speed,
     double load = loadmin;
 
     /* we need to broadcast nodeload from my nodes to all other ranks */
-    if(dat) load = node->dat->info->load_TimeIn_s * myspeed;
+    if(dat) load = timing_get_elm_load_TimeIn_s(node) * myspeed;
 
     /* in case we forgot to measure the times, just set load to a very small
        uniform number: */
@@ -988,15 +971,13 @@ void load_balance_elms(tMesh *mesh)
   torank = -1;
   list_for_each(pos, &mesh->myelm_head)
   {
-    double et, loadTmin = 1e-50;
+    double et;
     int desrank;
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     if(!dat) errorexit("this elm must have dat");
 
-    et = dat->info->load_TimeIn_s;
-    /* if we forgot to measure load_TimeIn_s of elm, just set et=loadTmin */
-    if(et <= loadTmin) et = loadTmin;
+    et = timing_get_elm_load_TimeIn_s(elm);
     myT += et;
     desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
     //printelm(elm);
