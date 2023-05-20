@@ -727,7 +727,8 @@ Yo(33.2);
   //disablevar_innode(elm, Ind("amr_elm_nbinfo0"));
 
 
-  /* set flag to update all fnb */
+  /* set flag to update all fnb, not needed because alloc_dat does this */
+  /*
   formyelms(mesh)
   {
     tElm *elm = MyElm;
@@ -737,7 +738,7 @@ Yo(33.2);
       //elm->nfnb[f] = -1;
     }
   }
-
+  */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
 
