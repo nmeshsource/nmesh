@@ -358,13 +358,9 @@ void loadtimer_stop(tNode *node)
 double load_set_speed_array(tMesh *mesh, double *speed)
 {
   int size = nMPI_size();
-  double myspeed = Timing->mm_speed;
+  double myspeed = timing_get_mm_speed(mesh);
   double avspeed;
-  double speedmin = 1e-50;
   int rank;
-
-  /* in case we forgot to measure Timing->mm_speed, just set myspeed=1 */
-  if(myspeed <= speedmin) myspeed = 1.;
 
   for(rank=0; rank<size; rank++)
   {
