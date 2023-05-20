@@ -66,6 +66,10 @@ int nvars_ndoubles_in_dat(tDat *dat, int *ndoubles)
       if(PR) { PRF;printf(": vi=%d ndoubles=%d\n", vi, *ndoubles); }
       nvars++;
     }
+    //else
+    //{
+    //  if(PR) { PRF;printf(": vi=%d no dat\n", vi); }
+    //}
 
   /* add amount in dat->info */
   sizeofinfo = sizeof(dat->info);
