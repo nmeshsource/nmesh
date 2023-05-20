@@ -56,6 +56,12 @@ About load bal:
     *check how destroy_nodes_no_nid_update currently works,
      do it compare ref flags on all 8???
 
+*search for:  double et = dat->info->load_TimeIn_s;  in *.c
+ and replace it with a call to:
+   double timing_get_elm_load_TimeIn_s(tElm *elm)
+
+
+
 
 About refinement:
 =================

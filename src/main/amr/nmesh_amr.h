@@ -441,6 +441,7 @@ typedef struct tTIMING {
   double myops;  /* myops = speed * myT */
   double ops0;   /* ops0 = \sum_{r=0}^{myrank-1} myops(rank=r) */
   double allops; /* allops = \sum_{r=0}^{size-1} myops(rank=r) */
+  double child1to7_weight; /* load_TimeIn_s weight fac for child1-7 */
 } tTiming;
 
 

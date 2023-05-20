@@ -110,6 +110,37 @@ int timing_mm_speed(tMesh *mesh)
   return 0;
 }
 
+/* get time from dat->info->load_TimeIn_s */
+double timing_get_elm_load_TimeIn_s(tElm *elm)
+{
+  double loadTmin = 1e-50;
+  double et;
+  tDat *dat = elm->dat;
+
+  if(dat)
+  {
+    int ijk = elm_get_ijk(elm);
+    double tw;
+
+    /* set timing weight for this elm */
+    if(ijk==0)
+      tw = 1.;
+    else
+      tw = Timing->child1to7_weight;
+
+    /* read dat->info->load_TimeIn_s */
+    et = dat->info->load_TimeIn_s;
+    /* if we forgot to measure load_TimeIn_s of elm, just set et=loadTmin */
+    if(et <= loadTmin) et = loadTmin;
+    et =  et*tw;
+    return et;
+  }
+  else
+  {
+    return 0.;
+  }
+}
+
 /* set number of operations myops that were done on this rank */
 int timing_set_myops(tMesh *mesh)
 {
