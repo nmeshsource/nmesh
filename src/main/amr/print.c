@@ -151,37 +151,46 @@ void printelm0(const tElm0 *e, const char *s)
 void printelm(const tElm *e)
 {
   tDat *dat = e->dat;
+  int nnbinfo_neg = 0;
+  int nfnb_tot    = 0;
   int i;
   union { const tElm *elm; tElm0 *elm0; } e2e0;
   e2e0.elm = e;
   printelm0(e2e0.elm0, "");
   printf(" dat:%s\n", dat ? "yes" : "no");
-  /*
-  printf(" nbi =");
-  for(i=0; i<6; i++)
-  {
-    printf(" {");
-    print_amr_elm_nbinfo(e, i);
-    printf("}");
-  }
-  printf("\n");
-  */
   printf(" fnb =");
   for(i=0; i<6; i++)
   {
     int j;
     printf(" {");
     if(dat && dat->info->nnbinfo[i]<0)
+    {
       printf("?");
+      nnbinfo_neg=1;
+    }
     else
+    {
       for(j=0; j<e->nfnb[i]; j++)
       {
         printeploc(e->fnb[i][j]->eploc);
         if(j<e->nfnb[i]-1) printf(" ");
+        nfnb_tot++;
       }
+    }
     printf("}");
   }
   printf("\n");
+  if(nnbinfo_neg || nfnb_tot==0)
+  {
+    printf(" nbi =");
+    for(i=0; i<6; i++)
+    {
+      printf(" {");
+      print_amr_elm_nbinfo(e, i);
+      printf("}");
+    }
+    printf("\n");
+  }
 }
 
 void printelmarray(long nelms, tElm **elm)

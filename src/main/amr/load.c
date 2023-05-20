@@ -868,8 +868,8 @@ int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
   double max = *((double *) arg);
   double diff = (ops_elm_sum - ops_bal_sum)/max;
   int ret = diff * (INT_MAX/4);
-printf("ops_bal_sum=%g ops_elm_sum=%g max=%g  diff=%g ret=%d\n",
-ops_bal_sum, ops_elm_sum, max, diff, ret);
+  //printf("ops_bal_sum=%g ops_elm_sum=%g max=%g  diff=%g ret=%d\n",
+  //       ops_bal_sum, ops_elm_sum, max, diff, ret);
   return ret;
 }
 
@@ -883,13 +883,13 @@ int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
   off = 0;
   num = size;
 
-printf("off=%zu num=%zu\n", off, num);
-printf("base: ops_bal_sum[0]=%g\n", ops_bal_sum[0]);
-//printf("base: ops_bal_sum[1]=%g\n", ops_bal_sum[1]);
-printf("key: ops_elm_sum=%g\n", ops_elm_sum);
+  //printf("off=%zu num=%zu\n", off, num);
+  //printf("base: ops_bal_sum[0]=%g\n", ops_bal_sum[0]);
+  ////printf("base: ops_bal_sum[1]=%g\n", ops_bal_sum[1]);
+  //printf("key: ops_elm_sum=%g\n", ops_elm_sum);
   val = bisectionsearch(&ops_elm_sum, ops_bal_sum, &off, &num,
                         sizeof(ops_bal_sum[0]), load_cmp_ops_bal_sum, &max);
-//printf("val=%p off=%zu num=%zu\n", val, off, num);
+  ////printf("val=%p off=%zu num=%zu\n", val, off, num);
   if(val)
   {
     if(num == 2) return off+1;
