@@ -813,15 +813,8 @@ Yo(33.2);
   }
 
 
-  amr_remove_mesh_nbelm(mesh);
-  Timing->sibl1to7_weight = 0.;
-  load_balance_elms(mesh);
-  alloc_and_set_mesh_myelm(mesh);
-
-  amr_elm_nbinfo_to_elm_fnb(mesh);
-  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
-
-  amr_get_nbelm_elmheaders(mesh);
+  load_balance(mesh, 1);
+  Timing->sibl1to7_weight = 1.;
 
   printf("mesh->myelm:\n");
   printelmarray(mesh->nmyelm, mesh->myelm);
