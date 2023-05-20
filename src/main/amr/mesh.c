@@ -771,9 +771,13 @@ Yo(33.2);
   printelmarray(mesh->nnbelm, mesh->nbelm);
   printnbelms(mesh);
 
-
-
-
+  tElm *e1 = mesh->myelm[6];
+  tElm *e2 = mesh->myelm[5];
+  tElm *ar[] = {e1, e2};
+  printelm(e1);
+  printelm(e2);
+  printf(":::%d\n", eploc1_eploc2_agree_upto_l_max(e1->eploc, e2->eploc, 1));
+  printf(":::%d\n", amr_elms_are_siblings(2, ar));
 
   ulong eidarr[99];
   tElm0 elm0[99] = {0};

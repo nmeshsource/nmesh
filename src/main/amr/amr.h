@@ -71,6 +71,7 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
 void simple_load_balance(tMesh *mesh);
 void move_node_to_rank(tNode *node, int desrank,
                        tCom *scom, tCom *rcom, int setbufs);
+void load_exchange_dat_after_moving_elms(tMesh *mesh);
 
 /* bfaces.c */
 void remove_all_bfaces(tPat *pat);
@@ -124,6 +125,8 @@ void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
                                  const tEloc *eloc2, int l_max);
+int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
+int amr_elms_are_siblings(int n, void *ptr_elm);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
@@ -131,5 +134,9 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
+int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
+int amr_get_nbelm_elmheaders(tMesh *mesh);
+int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
+                          tElm0 *elm0);
 int amr_invalidate_nbinfo_of_all_nbs(tElm *elm);
 void amr_remove_mesh_nbelm(tMesh *mesh);
