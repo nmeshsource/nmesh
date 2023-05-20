@@ -47,6 +47,18 @@ void load_balance(tMesh *mesh, int strategy)
   amr_get_nbelm_elmheaders(mesh);
 }
 
+/* function that can be scheduled in LOADBALANCING */
+int load_balance_if_needed(tMesh *mesh)
+{
+  int amr_load_balance = Par("amr_load_balance");
+
+  if(Getv(amr_load_balance, "yes"))
+  {
+    load_balance(mesh, 1);
+  }
+  return 0;
+}
+
 
 
 /* return: number of variables and number of doubles inside dat */
@@ -352,20 +364,6 @@ double load_set_speed_array(tMesh *mesh, double *speed)
 
   return avspeed;
 }
-
-
-/* function that can be scheduled in LOADBALANCING */
-int load_balance_if_needed(tMesh *mesh)
-{
-  int amr_load_balance = Par("amr_load_balance");
-
-  if(Getv(amr_load_balance, "yes"))
-  {
-    load_balance(mesh, 1);
-  }
-  return 0;
-}
-
 
 
 /*************************************************************************/
