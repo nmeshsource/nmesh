@@ -181,7 +181,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   /* update the list mesh->myelm */
   alloc_and_set_mesh_myelm(mesh);
 
-  /* FIXME: Do we need fnb if further refine/unref happen right after?
+  /* FIXME: Do we need fnb, if further refine/unref happen right after?
             I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
             I think so. But if not, the 3 calls below are needed:
   //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
@@ -271,6 +271,12 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
       pos = &parent->list;
     }
   }
+  /* FIXME: Do we need fnb, if further refine/unref happen right after?
+            I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
+            I think so. But if not, the 3 calls below are needed:
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  //amr_elm_nbinfo_to_elm_fnb(mesh);
+  //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
 }
 
 /* set some nbinfo and then free the children in ch_head */
