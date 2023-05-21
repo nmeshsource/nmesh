@@ -144,7 +144,7 @@ exit(8);
   free(buffer);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 0);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 0);
   printallbfaces(mesh);
 
   return 0;

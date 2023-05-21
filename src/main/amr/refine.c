@@ -183,7 +183,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* FIXME: Do we need fnb, if further refine/unref happen right after?
             I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
-            I think so. But if not, the 3 calls below are needed:
+            I think so. But if not, the calls below are needed:
+  //update_mesh_myelms_elm_eid_dt(mesh);
   //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   //amr_elm_nbinfo_to_elm_fnb(mesh);
   //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
@@ -274,7 +275,8 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
   }
   /* FIXME: Do we need fnb, if further refine/unref happen right after?
             I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
-            I think so. But if not, the 3 calls below are needed:
+            I think so. But if not, the calls below are needed:
+  //update_mesh_myelms_elm_eid_dt(mesh);
   //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   //amr_elm_nbinfo_to_elm_fnb(mesh);
   //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */

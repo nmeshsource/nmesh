@@ -260,17 +260,30 @@ hcoarsen_pat(mesh, 0);
 
 
 /* init neighbor info of root nodes */
-int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr)
+int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
 {
   /* setup all bfaces */
   amr_set_all_bfaces(mesh);
   if(pr) printallbfaces(mesh);
 
-  /* now setup root node connections, i.e. setup neighbors of root nodes */
-  // FIXME: do we need something like
-  // update_all_rnode_nfaces_fnb(mesh);
+  /* set mesh->myelms and eids */
+  update_mesh_myelms_elm_eid_dt(mesh);
 
-  if(pr) printmyelms(mesh);
+  /* now setup root node connections, i.e. setup neighbors of root nodes */
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  amr_elm_nbinfo_to_elm_fnb(mesh);
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+  amr_get_nbelm_elmheaders(mesh);
+
+  if(pr)
+  {
+    printf("mesh->myelm: ");
+    printelmarray(mesh->nmyelm, mesh->myelm);
+    printmyelms(mesh);
+    printf("mesh->nbelm: ");
+    printelmarray(mesh->nnbelm, mesh->nbelm);
+    printnbelms(mesh);
+  }
   return 0;
 }
 
@@ -350,7 +363,7 @@ int setup_box_mesh(tMesh *mesh)
   }
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
   return 0;
 }
@@ -472,7 +485,7 @@ outputPatchPlanes_meshvar(mesh, "z", 0,0);
 //exit(9);
 */
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
   return 0;
 }
@@ -510,7 +523,7 @@ int setup_Shell_mesh(tMesh *mesh)
   }
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
   return 0;
 }
@@ -559,7 +572,7 @@ int setup_elm_mesh1(tMesh *mesh)
     enablevarcomp_innode(mesh->myelm[2], Ind("advection1_u"));
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
 
   update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
@@ -868,7 +881,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   add_patch(mesh, bbox2, pt_typ, n, 0);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
   errorexit("add back the stuff below");
   /* 8 children in patch0 */

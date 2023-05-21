@@ -387,10 +387,6 @@ tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
     elm->datrank = datrank;
     elm->dat = alloc_dat(elm);
 
-    /* first set fnb */
-    //update_node_fnb_only(node);
-    //FIXME ???
-
     /* add new root element to list mesh->myelm_head */
     list_add_tail(&elm->list, &mesh->myelm_head);
 
@@ -664,9 +660,6 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
   return parent;
 }
 
-// Equivalent of
-// tNode *destroy_children(tNode *parent)
-// FIXME: it also needs to be then used in refine.c
 /* Remove 8 children and replace them by parent.
    We assume that all 8 have been moved to this rank before
    replace_8localchildren_by_parent is called!
@@ -1455,7 +1448,7 @@ int total_nnodes_in_myln(tMylnodes *myln)
 /**********************************************************************/
 /* functions to update elm->eploc->eid */
 /**********************************************************************/
-/* Update array of elms on this proc, set eids.
+/* Update elm eids and set mesh->eidlim.
    Also update elm->dt and mesh->dt if auto_dt!=0 */
 ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
                         double dtfac, double uniform_dtfac)
@@ -1501,12 +1494,7 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
     /* update eid to start value for next rk iteration */
     eid = mesh->eidlim[rk];
   }
-
-  //FIXME: should this be here???
-  /* set elm array */
-  alloc_and_set_mesh_myelm(mesh);
-
-  /* if there are no nodes do not update dt mesh->dt */
+  /* if there are no elms do not update dt mesh->dt */
   if(eid==0)
     mesh->dt = dt_old;
 
@@ -1518,6 +1506,26 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
   { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
 
   return eid;
+}
+
+/* update array of leaf nodes or elms on this proc, set eid and dt */
+ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh)
+{
+  int Par_dt   = Par("dt");
+  double dt    = Getd(Par_dt);
+  /* auto_dt can be 0,1,2: */
+  int auto_dt  = 1*Getv(Par_dt, "auto") + 2*Getv(Par_dt, "auto2");
+  double dtfac = Getd(Par("dtfac"));
+  double uniform_dtfac = Getd(Par("uniform_dtfac"));
+  ulong ret;
+
+  /* set elm array */
+  alloc_and_set_mesh_myelm(mesh);
+
+  /* update elm eids and mesh->eidlim */
+  ret = update_elm_eid_dt(mesh, dt, auto_dt, dtfac, uniform_dtfac);
+
+  return ret;
 }
 
 
@@ -1589,7 +1597,7 @@ long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
 }
 
 /* update array of leaf nodes on this proc, set nid */
-ulong update_mesh_myln_node_nid(tMesh *mesh)
+ulong update_mesh_myln_node_nid__old(tMesh *mesh)
 {
   int Par_dt   = Par("dt");
   double dt    = Getd(Par_dt);
@@ -1599,25 +1607,20 @@ ulong update_mesh_myln_node_nid(tMesh *mesh)
   double uniform_dtfac = Getd(Par("uniform_dtfac"));
   ulong ret;
 
-  ret = update_elm_eid_dt(mesh, dt, auto_dt, dtfac, uniform_dtfac);
-
-  //FIXME: remove this call
   ret = update_mesh_myln_node_nid_dt(mesh, dt, auto_dt,
                                      dtfac, uniform_dtfac);
   return ret;
 }
 
-/* return nid or -1 */
-long get_node_nid(tNode *node)
-{
-  return node ? Node_eid(node) : -1;
-}
+/**********************************************************************/
+/* functions to calculate node IDs */
+/**********************************************************************/
 
 /* return a local node id */
 int calc_node_lid(tNode *node)
 {
   tMesh *mesh = node->pat->mesh;
-  long nnodes = mesh->nln;
+  long nnodes = mesh->nmyelm;
   long size = nMPI_size();
   long npr2 = 2*nnodes/size + 1;
   long tmp = (Node_eid(node)) % npr2;
@@ -1625,6 +1628,10 @@ int calc_node_lid(tNode *node)
 
   return lid;
 }
+
+/**********************************************************************/
+/* functions about nodelists that need to be removed */
+/**********************************************************************/
 
 /* append a node list to mesh->lns and also update mesh->myln */
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)

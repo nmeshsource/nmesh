@@ -57,10 +57,10 @@ typedef unsigned long ulong;
 #define NPBYTES 21
 #define NLOCS   ((8*NPBYTES)/3)
 typedef struct tELOC {
-  int p;                  /* patch number */
-  int l;                  /* refinement level of this node */
-  char loc[NLOCS];        /* elm location string, giving loc. in patch */
-  unsigned long eid;      /* elm ID, updated by update_mesh_myln_node_nid */
+  int p;              /* patch number */
+  int l;              /* refinement level of this node */
+  char loc[NLOCS];    /* elm location string, giving loc. in patch */
+  unsigned long eid;  /* elm ID, updated by update_mesh_myelms_elm_eid_dt */
 } tEloc;
 
 /* location of an element (or elm) in packed form
@@ -69,7 +69,7 @@ typedef struct tEPLOC {
   unsigned short int p; // patch number (in 2 bytes)
   unsigned char l;      // refinement level of this node (in 1 byte)
   unsigned char ploc[NPBYTES];  // packed loc (3 bits per level)
-  unsigned long eid;    // elm ID, updated by update_mesh_myln_node_nid
+  unsigned long eid;    // elm ID, updated by update_mesh_myelms_elm_eid_dt
 } tEploc;
 
 /* a leaf node or element called elm */
@@ -471,7 +471,7 @@ tMesh *make_empty_mesh(int pr);
 tPat *add_patch(tMesh *mesh, double bbox[6],
                 int *pt_typ_root, int nroot[3], int datrank);
 int amr_setup_mesh(tMesh *mesh);
-int amr_set_bfaces_and_rnode_nfaces_fnb(tMesh *mesh, int pr);
+int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr);
 
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);
@@ -521,8 +521,7 @@ tNlist *first_nodelist(tNlist *list);
 tNlist *last_nodelist(tNlist *list);
 void free_nodelist(tNlist *elem);
 int total_nnodes_in_myln(tMylnodes *myln);
-ulong update_mesh_myln_node_nid(tMesh *mesh);
-long get_node_nid(tNode *node);
+ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh);
 int calc_node_lid(tNode *node);
 tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
 tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist);
@@ -538,6 +537,7 @@ void enablevar(tMesh *mesh, int i);
 void disablevar(tMesh *mesh, int i);
 void enablevarlist(tVarList *vl);
 void disablevarlist(tVarList *vl);
+#define update_mesh_myln_node_nid(mesh) update_mesh_myelms_elm_eid_dt(mesh)
 
 /* array.c */
 void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa);
