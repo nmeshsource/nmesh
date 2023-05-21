@@ -131,6 +131,7 @@ void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
                                  const tEloc *eloc2, int l_max);
+int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);
 int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
 int amr_elms_are_siblings(int n, void *ptr_elm);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);

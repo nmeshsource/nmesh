@@ -575,7 +575,28 @@ int eploc1_eploc2_agree_upto_l_max(const tEploc *eploc1,
   return eloc1_eloc2_agree_upto_l_max(eloc1, eloc2, l_max);
 }
 
-/* try to get the 8 elms in list, return how many we actually got
+
+/* try to get the 8 elms in mesh->myelm_head, return how many we actually got
+     this should really be:
+     int amr_get_8elms_at_pos(tElm *elm_start, tElm *elm[8]);
+     void *ptr_elm is really tElm *elm[8],
+     but this way we can also pass in tElm0 *elm[8] */
+int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm)
+{
+  tElm **elm = ptr_elm; // like: tElm *elm[8];
+  tMesh *mesh = Elm_mesh(elm_start);
+  struct list_head *pos = (elm_start->list).prev;
+  int cnt = 0;
+  list_for_each_continue(pos, &mesh->myelm_head)
+  {
+    tElm *elm_i = list_entry(pos, tElm, list);
+    elm[cnt++] = elm_i;
+    if(cnt>=8) break;
+  }
+  return cnt;
+}
+
+/* try to get the 8 elms in mesh->myelm list, return how many we actually got
      this should really be:
      int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, tElm *elm[8]);
      void *ptr_elm is really tElm *elm[8],
@@ -586,7 +607,7 @@ int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm)
   int cnt = 0;
   formyelms_s_n(mesh, myid, 8)
   {
-    elm[cnt] = MyElm;
+    elm[cnt++] = MyElm;
   }
   return cnt;
 }

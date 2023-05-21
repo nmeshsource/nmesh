@@ -224,30 +224,26 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
 /* Unrefine all elms on all MPI procs if indicated by elm->rflag */
 void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
-  int rank = nMPI_rank();
-  ulong myeidlim = mesh->eidlim[rank];
-  //struct list_head *pos;
-
-  /* arrays with missing eids and elmheaders */
-  ulong neids;
-  ulong eidarr[8];
-  tElm0 elm0[8];
+  struct list_head *pos;
   int num, uref;
   tElm0 *elmar[8];
-  int i;
 
+  /* loop over list with elms */
   num = uref = 0;
-  formyelms(mesh)
+  list_for_each(pos, &mesh->myelm_head)
   {
-    tElm *elm  = MyElm;
-    ulong myid = MyID;
-    //ulong eid  = Elm_eid(elm);
-    int ijk = elm_get_ijk(elm);
+    tElm *sib = list_entry(pos, tElm, list);
+    int ijk = elm_get_ijk(sib);
 
-    if(ijk==0)
+    if(ijk==0) //this is child0
     {
+      int pt_typ[3], n[3];
+      tElm *parent;
+      struct list_head ch_head;
+      int i;
+
       /* try to get 8 elms, return how many we have on this rank */
-      num  = amr_get_8elms_at_myid(mesh, myid, elmar);
+      num  = amr_get_8elms_at_elm_start(sib, elmar);
 
       /* check if the num elms in elmar are indeed siblings and count
          how many want to be refined */
@@ -266,17 +262,15 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
       /* we need all 8 siblings on this rank */
       if(num<8) errorexit("there have to be 8 siblings on this rank");
 
-      /* if we get here replace the 8 siblings y thier parent */
-      //1st Call:
-      //tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
-      //                                       struct list_head *ch_head)
-
-      //2nd Call:
-      //void set_parent_nbinfo_remove_children(tElm *parent,
-      //                                       struct list_head *ch_head)
+      /* if we get here, replace the 8 siblings by their parent: */
+      hp_refine_set_n_pt_typ(sib, ref, n, pt_typ); //set n and pt_typ
+      INIT_LIST_HEAD(&ch_head);
+      parent = replace_8localchildren_by_parent(sib, n, pt_typ, &ch_head);
+      set_parent_nbinfo_remove_children(parent, &ch_head);
+      /* update pos: set to parent that is now there instead of sib */
+      pos = &parent->list;
     }
   }
-
 }
 
 /* set some nbinfo and then free the children in ch_head */
@@ -326,7 +320,7 @@ void set_parent_nbinfo_remove_children(tElm *parent,
 
 /* Unrefine all elms on all MPI procs if indicated by elm->rflag .
    This version should also work when the 8 siblings to be removed are
-   on different MPI ranks */
+   on different MPI ranks, BUT it is unfinshed! */
 void remove_elms_if_rflag__general(tMesh *mesh, tRef *ref)
 {
   int rank = nMPI_rank();
