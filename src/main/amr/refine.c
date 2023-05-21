@@ -131,14 +131,14 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
 //Rename these 2, but keep old names as defines:
 
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
-void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+void hrefine_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
   ref->type = H_REFINE;
   hp_refine_elms_if_rflag(mesh, ref);
 }
 
 /* p-refine all nodes on all MPI procs if indicated by node->rflag */
-void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref)
+void prefine_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
   ref->type = P_REFINE;
   hp_refine_elms_if_rflag(mesh, ref);
@@ -229,8 +229,8 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
   }
 }
 
-/* Unrefine all nodes on all MPI procs if indicated by node->rflag */
-void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
+/* Unrefine all elms on all MPI procs if indicated by elm->rflag */
+void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
   int rank = nMPI_rank();
   ulong myeidlim = mesh->eidlim[rank];
@@ -264,101 +264,27 @@ void remove_nodes_if_rflag(tMesh *mesh, tRef *ref)
         for(uref=0, i=0; i<num; i++)
           if(elmar[i]->rflag < 0) uref++;
 
-      //FIXME: do we want this:
-      ///* if not all want to be refined, erase their rflags */
-      //if(uref<num)
-      //  for(uref=0, i=0; i<num; i++)
-      //    elmar[i]->rflag = 0;
-
       /* if not all want to be refined, continue with next elm */
       if(uref<num)
       {
         num = 0;  /* do not look beyond these */
         continue;
       }
+
+      /* we need all 8 siblings on this rank */
+      if(num<8) errorexit("there have to be 8 siblings on this rank");
+
+      /* if we get here replace the 8 siblings y thier parent */
+      //1st Call:
+      //tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
+      //                                       struct list_head *ch_head)
+
+      //2nd Call:
+      //void set_parent_nbinfo_remove_children(tElm *parent,
+      //                                       struct list_head *ch_head)
     }
   }
 
-  /* ask for all the eids that we need beyond my rank */
-  neids = 8 - num;
-
-  /* set the eids I need beyond what I have */
-  for(i=0; i<neids; i++) eidarr[i] = myeidlim+i;
-
-  /* get elmheader for all in eidarr */
-  amr_get_elm0_for_eids(mesh, neids, eidarr, elm0);
-
-  /* add elm0 from other ranks to elmar */
-  for(i=0; i<neids; i++)
-    elmar[num+i] = &(elm0[i]);
-
-  uref = 0;
-  if(amr_elms_are_siblings(8, elmar))
-    for(i=0; i<8; i++)
-      if(elmar[i]->rflag < 0) uref++;
-
-  /* get the neids missing elms onto my rank */
-
-  /* change myelm_head only if all 8 want to be refined */
-  if(uref==8)
-  {
-    /* insert elm0 after current end of list */
-    for(i=0; i<neids; i++)
-    {
-      tElm *elm = alloc_elm_init_pat(mesh, elm0[i].eploc->p); /* fresh elm */
-      memcpy(elm, &(elm0[i]), sizeof(tElm0)); /* init elm from r_elms[i] */
-      /* now add elm to the end of list in mesh */
-      list_add_tail(&elm->list, &mesh->myelm_head);
-    }
-  }
-
-  /////////////////////////////////////////////////////////////////////////
-  printf("PROBLEM !!!\n"
-         "How do I tell the other ranks to mark the elms that I want?\n"
-         "NOTE: load_exchange_dat_after_moving_elms only works if they set"
-         "their dat->info->desrank equal to my rank!!!");
-  errorexit("I give up because this PROBLEM has no easy solution!");
-  /////////////////////////////////////////////////////////////////////////
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
-  /* move dat to correct ranks now */
-  load_exchange_dat_after_moving_elms(mesh);
-
-  //alloc_and_set_mesh_myelm(mesh);
-  //NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
-
-  //FIXME: adapt  update_mesh_myln_node_nid
-  update_mesh_myln_node_nid(mesh);
-
-  //FIXME: call function that set's up elm->fnb and such...
-  //       maybe also update_mesh_myln_node_nid ???
-
-  /* now that nodes are elsewhere re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
-
-
-  ////////////////////////////////////////////////////////////////////
-
-
-  /* FIXME: This does not update the list mesh->myelm!
-            Only the linked list mesh->myelm_head is changed here */
-
-  errorexit("finish: void remove_elms_if_rflag(tMesh *mesh, tRef *ref)");
-  //0th  get all 8 sibling children onto one MPI rank
-  //     (we have most of this above)
-
-  /* if not all 8 want to be refined we do nothing */
-  if(uref<8) return;
-
-  //1st Call:
-  //tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
-  //                                       struct list_head *ch_head)
-
-  //2nd Call:
-  //void set_parent_nbinfo_remove_children(tElm *parent,
-  //                                       struct list_head *ch_head)
 }
 
 /* set some nbinfo and then free the children in ch_head */
@@ -406,7 +332,7 @@ void set_parent_nbinfo_remove_children(tElm *parent,
 }
 
 
-/* Unrefine all elms on all MPI procs if indicated by node->rflag .
+/* Unrefine all elms on all MPI procs if indicated by elm->rflag .
    This version should also work when the 8 siblings to be removed are
    on different MPI ranks */
 void remove_elms_if_rflag__general(tMesh *mesh, tRef *ref)
@@ -710,7 +636,7 @@ void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref)
         if(Elm_l(nb) - Elm_l(node) >= dl) node->rflag = ref->method;
       }
   }
-  hrefine_nodes_if_rflag(mesh, ref);
+  hrefine_elms_if_rflag(mesh, ref);
 }
 
 /* h-refine all nodes that have finer neighbors */
@@ -747,7 +673,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
 
     if(ref)
     {
-      hrefine_nodes_if_rflag(mesh, rf);
+      hrefine_elms_if_rflag(mesh, rf);
       update_mesh_myln_node_nid(mesh);
       if(PR)
       {
@@ -800,7 +726,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 
     if(ref)
     {
-      remove_nodes_if_rflag(mesh, rf);
+      remove_elms_if_rflag(mesh, rf);
       update_mesh_myln_node_nid(mesh);
       if(PR)
       {
@@ -825,7 +751,7 @@ void hrefine_pat(tMesh *mesh, int p)
     if(node->pat == pat) node->rflag = rf->method;
     else                 node->rflag = 0;
   }
-  hrefine_nodes_if_rflag(mesh, rf);
+  hrefine_elms_if_rflag(mesh, rf);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {
@@ -848,7 +774,7 @@ void hcoarsen_pat(tMesh *mesh, int p)
     if(node->pat == pat) node->rflag = -rf->method;
     else                 node->rflag = 0;
   }
-  remove_nodes_if_rflag(mesh, rf);
+  remove_elms_if_rflag(mesh, rf);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {
@@ -881,7 +807,7 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
     //         node->dat->info->nlim, node->rflag);
     //}
   }
-  hrefine_nodes_if_rflag(mesh, ref);
+  hrefine_elms_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   if(PR)
@@ -929,7 +855,7 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     //         node->dat->info->nlim, node->rflag);
     //}
   }
-  remove_nodes_if_rflag(mesh, ref);
+  remove_elms_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   if(PR)
@@ -980,7 +906,7 @@ int hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
       cnt++;
     }
   }
-  hrefine_nodes_if_rflag(mesh, ref);
+  hrefine_elms_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
   return cnt;
 }
@@ -1059,7 +985,7 @@ void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref)
                   for in ref */
       }
   }
-  prefine_nodes_if_rflag(mesh, ref);
+  prefine_elms_if_rflag(mesh, ref);
 }
 
 /* p-refine patch number p in mesh to have n[] points */
@@ -1079,7 +1005,7 @@ void prefine_pat(tMesh *mesh, int p, int n[3])
     if(node->pat == pat) node->rflag = rf->method;
     else                 node->rflag = 0;
   }
-  prefine_nodes_if_rflag(mesh, rf);
+  prefine_elms_if_rflag(mesh, rf);
   update_mesh_myln_node_nid(mesh);
   if(PR)
   {

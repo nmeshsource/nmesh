@@ -672,17 +672,21 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 /* refine.c */
 void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ);
 int resolve_shocks_using_nlim(tMesh *mesh);
-void hrefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
-void prefine_nodes_if_rflag(tMesh *mesh, tRef *ref);
+void hrefine_elms_if_rflag(tMesh *mesh, tRef *ref);
+void prefine_elms_if_rflag(tMesh *mesh, tRef *ref);
+void remove_elms_if_rflag(tMesh *mesh, tRef *ref);
 void refine_set_rflag_forall_nodes(tMesh *mesh, int rflag);
 void refine_set_use_fv_if_rflag(tMesh *mesh, int use_fv);
 void refine_set_use_fv_if_pt_typ(tMesh *mesh, int pt_typ[3], int use_fv);
 int refine_synchronize_ref_method(tRef *ref);
 void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref);
 void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref);
-void remove_nodes_if_rflag(tMesh *mesh, tRef *ref);
 void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref);
 void prefine_pat(tMesh *mesh, int p, int n[3]);
+#define hrefine_nodes_if_rflag(mesh, ref) hrefine_elms_if_rflag(mesh, ref)
+#define prefine_nodes_if_rflag(mesh, ref) prefine_elms_if_rflag(mesh, ref)
+//#define remove_nodes_if_rflag(mesh, ref) remove_elms_if_rflag(mesh, ref)
+
 
 /* connections.c */
 char *elm_location_str(tElm *elm, char *s, int slen);
