@@ -564,20 +564,14 @@ int setup_elm_mesh1(tMesh *mesh)
   add_patch(mesh, bbox2, pt_typ, n, 0);
   add_patch(mesh, bbox3, pt_typ, n, 0);
 
-  /* set elm array */
+  /* set elm array, so that we can already use mesh->myelm[2] */
   alloc_and_set_mesh_myelm(mesh);
-
   //enablevar(mesh, Ind("advection1_u"));
   if(nMPI_rank()==0)
     enablevarcomp_innode(mesh->myelm[2], Ind("advection1_u"));
 
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
-
-
-  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
-
-  //printmesh(mesh);
 
   //simple_load_balance(mesh);
   load_balance_elms(mesh);
@@ -605,7 +599,8 @@ Yo(33);
   }
 
   /* update nids */
-  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  //update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  update_mesh_myelms_elm_eid_dt(mesh);
   /* update rest */
   alloc_and_set_mesh_myelm(mesh);
   load_balance_elms(mesh);
@@ -629,7 +624,8 @@ Yo(33.1);
   }
 
   /* update nids */
-  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  //update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  update_mesh_myelms_elm_eid_dt(mesh);
   /* update rest */
   alloc_and_set_mesh_myelm(mesh);
   load_balance_elms(mesh);
@@ -653,7 +649,8 @@ Yo(33.2);
   }
 
   /* update nids */
-  update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  //update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  update_mesh_myelms_elm_eid_dt(mesh);
   /* update rest */
   alloc_and_set_mesh_myelm(mesh);
   load_balance_elms(mesh);
@@ -741,7 +738,6 @@ Yo(33.2);
 
 
   /* set flag to update all fnb, not needed because alloc_dat does this */
-  /*
   formyelms(mesh)
   {
     tElm *elm = MyElm;
@@ -751,7 +747,7 @@ Yo(33.2);
       //elm->nfnb[f] = -1;
     }
   }
-  */
+
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
 
