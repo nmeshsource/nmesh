@@ -127,9 +127,6 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
 }
 
 
-////////////////////////////////////////////////
-//Rename these 2, but keep old names as defines:
-
 /* h-refine all nodes on all MPI procs if indicated by node->rflag */
 void hrefine_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
@@ -144,12 +141,7 @@ void prefine_elms_if_rflag(tMesh *mesh, tRef *ref)
   hp_refine_elms_if_rflag(mesh, ref);
 }
 
-////////////////////////////////////////////////////
 
-
-// ====
-// NEW:
-// ====
 /* h- or p-refine all elms if indicated by elm->rflag.
    If we h-refine we actually create child elms,
    otherwise we just change the number (and possibly the spacing)

@@ -499,7 +499,7 @@ int advection1_refine(tMesh *mesh)
   update_mesh_myln_node_nid(mesh);
 
   /* refine where needed */
-  hrefine_nodes_if_rflag(mesh, ref);
+  hrefine_elms_if_rflag(mesh, ref);
   update_mesh_myln_node_nid(mesh);
 
   return 0;
