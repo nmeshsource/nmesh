@@ -44,13 +44,13 @@ int SurfExchange_test(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_innode(node, ui);
   }
 
   /* print var in one node again */
   nd = Lnode_myid(mesh, 0); /* my first node */
-  printnode(nd);
+  printelm(nd);
   printvar_innode(nd, ui);
 
   /* exchange surfaces */
@@ -89,7 +89,7 @@ int SurfExchange_test(tMesh *mesh)
 
   /* print var in one node yet again with surfaces */
   nd = Lnode_myid(mesh, 0); /* my first node */
-  printnode(nd);
+  printelm(nd);
   printvar_innode(nd, ui);
 
   /* after we have printed them, we no longer need the surfaces */

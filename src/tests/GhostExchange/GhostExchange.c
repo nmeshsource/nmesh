@@ -46,13 +46,13 @@ int GhostExchange_test(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_innode(node, vi);
   }
 
 //  /* print var in one node again */
 //  nd = Lnode_myid(mesh, 0); /* my first node */
-//  printnode(nd);
+//  printelm(nd);
 //  printvar_innode(nd, vi);
 
   /* exchange ghosts */
@@ -75,13 +75,13 @@ int GhostExchange_test(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_innode(node, vi);
   }
 
 //  /* print var in one node yet again */
 //  nd = Lnode_myid(mesh, 0); /* my first node */
-//  printnode(nd);
+//  printelm(nd);
 //  printvar_innode(nd, vi);
 
   /* after we have printed them, we no longer need the ghosts */

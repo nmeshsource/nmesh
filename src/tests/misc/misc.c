@@ -108,7 +108,7 @@ int test_point_interpolation(tMesh *mesh)
   n2 = nd->n[2];
   f = Lagrange_of_x(n2/2, 0., n2, node_Xb(nd,2)->d, node_WL(nd,2)->d);
   printf("Lagrange_of_x at Zb=0: f=%g\n", f);
-  printnode(nd);
+  printelm(nd);
   printvar_innode(nd, ui);
 
   /* print basis funcs */
@@ -389,7 +389,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   el = mesh->lns;
   nd = el->node;
   d0 = nd->dat;
-  printnode(el->node);
+  printelm(el->node);
   printvar_innode(nd, ui);
   if(d0) printf("1 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
 
@@ -410,14 +410,14 @@ int test_parent_child_interpolation(tMesh *mesh)
   printf("2c: test_func=%g\n", test_func(-4,-2,-1));
   printf("2c: test_func=%g\n", test_func(-1,-1,-1));
   el = mesh->lns;
-  printnode(el->node);
+  printelm(el->node);
   printvar_innode(nd->child[0], ui);
 
   destroy8siblings_in_mesh_lns_myln(el);
   printf("3 nd %p %p\n", (void *) nd, (void *) nd->dat);
   //if(d0) printf("4 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
   el = mesh->lns;
-  printnode(el->node);
+  printelm(el->node);
   printvar_innode(nd, ui);
 
   print_u_minus_f(el->node);
@@ -469,7 +469,7 @@ int test_point_finders(tMesh *mesh)
   printarray(Xd[1]);
   printarray(Xd[2]);
 
-  printnode(nd);
+  printelm(nd);
   //array_get_XYZ_in_node(nd, Xc, Xd);
   array_find_XYZ_in_node(nd, Xc, Xd[0]);
 
@@ -563,13 +563,13 @@ int test_ajsurf(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_innode(node, vi);
   }
 
   /* print var in one node again */
   nd = Lnode_myid(mesh, 0); /* my first node */
-  printnode(nd);
+  printelm(nd);
   printvar_innode(nd, vi);
 
   /* exchange surfaces */
@@ -589,14 +589,14 @@ int test_ajsurf(tMesh *mesh)
 
   /* print var in one node yet again with surfaces */
 //  nd = Lnode_myid(mesh, 7);
-//  printnode(nd);
+//  printelm(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));
   //printvar_innode(nd, Ind("oC1_1"));
 //  printvar_innode(nd, vi);
 
 //  nd = Lnode_myid(mesh, 78);
-//  printnode(nd);
+//  printelm(nd);
   //printvar_innode(nd, ix);
   //printvar_innode(nd, Ind("oC0_1"));
   //printvar_innode(nd, Ind("oC1_1"));
@@ -608,7 +608,7 @@ int test_ajsurf(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_ajsurfdiff(node, vi);
   }
 
@@ -621,7 +621,7 @@ int test_ajsurf(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_ajsurfdiff(node, vi);
   }
 
@@ -683,13 +683,13 @@ int test_indc(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_innode(node, vi);
   }
 
   /* print var in one node again */
   nd = Lnode_myid(mesh, 0); /* my first node */
-  printnode(nd);
+  printelm(nd);
   printvar_innode(nd, vi);
 
   /* exchange indc */
@@ -719,7 +719,7 @@ int test_indc(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_indc(node, vi);
   }
 
@@ -750,7 +750,7 @@ int test_node_av(tMesh *mesh)
     tNode *node = MyLnode;
 
     prdivider(0);
-    printnode(node);
+    printelm(node);
     //printvar_innode(node, vi);
     basis_var_analysis3(node, vi, ui);
     printf("c_{000}*sqrt(2)^3 of vi / 8  = %g\n",
@@ -809,7 +809,7 @@ int test_Jacobian(tMesh *mesh)
     tNode *node = MyLnode;
     //double ooJ = Vard_(node, idet_dXbdx); /* contains 1/J */
 
-    printnode(node);
+    printelm(node);
     printvar_innode(node, idet_dXbdx);
   }
 
@@ -847,7 +847,7 @@ int test_Jacobian(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     printvar_innode(node, ui);
   }
 
@@ -915,7 +915,7 @@ int test_filter(tMesh *mesh, int Jpow)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     basis_var_analysis3(node, ui, vi);
     printvar_innode(node, vi);
   }
@@ -939,7 +939,7 @@ int test_filter(tMesh *mesh, int Jpow)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    printnode(node);
+    printelm(node);
     basis_var_analysis3(node, ui, vi);
     printvar_innode(node, vi);
   }
