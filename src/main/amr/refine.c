@@ -187,6 +187,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   //amr_elm_nbinfo_to_elm_fnb(mesh);
   //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+  //amr_get_nbelm_elmheaders(mesh);
 }
 
 /* set some nbinfo and then remove and free the old parent */
@@ -277,6 +278,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
   //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   //amr_elm_nbinfo_to_elm_fnb(mesh);
   //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+  //amr_get_nbelm_elmheaders(mesh);
 }
 
 /* set some nbinfo and then free the children in ch_head */
