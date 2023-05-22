@@ -1850,6 +1850,21 @@ void amr_add_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
   nb_fnb[nb_nfnb] = elm;
 }
 
+/* erase all that is in elm->fnb */
+void amr_erase_all_elm_fnb(tMesh *mesh)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int f;
+    for(f=0; f<6; f++)
+    {
+      free(elm->fnb[f]);
+      elm->fnb[f]  = NULL;
+      elm->nfnb[f] = 0;
+    }
+  }
+}
 
 /* Update elm->fnb[f] from the amr_elm_nbinfo0+f var if elm->nfnb[f] < 0,
    and also add nb elms to mesh->nbelm if this rank does not have them */
