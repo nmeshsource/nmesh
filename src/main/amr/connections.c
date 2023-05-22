@@ -838,7 +838,8 @@ int amr_get_nbface(tElm *elm, int elmface, tElm *nb)
       if(touch) return nb_f;
     }
   }
-
+  //FIXME: remove errorexit
+  errorexit("nb_f not found");
   return -1;
 }
 
