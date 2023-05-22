@@ -142,6 +142,7 @@ int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
+void amr_erase_all_elm_fnb(tMesh *mesh);
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
 int amr_get_nbelm_elmheaders(tMesh *mesh);
 int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,

@@ -545,10 +545,12 @@ int setup_elm_mesh1(tMesh *mesh)
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
   double bbox3[6] = {  4,8,  2,4, -1,1 };
+  tRef ref[1];
   struct list_head *pos;
   struct list_head fnb_head;
   tElm *elm;
   int i;
+  ref->method = GIVEN_n_P_UNIFORM; /* use uniform grid spacing */
 
   PRFs(":\n");
 
@@ -564,97 +566,81 @@ int setup_elm_mesh1(tMesh *mesh)
   add_patch(mesh, bbox2, pt_typ, n, 0);
   add_patch(mesh, bbox3, pt_typ, n, 0);
 
-  /* set elm array, so that we can already use mesh->myelm[2] */
-  alloc_and_set_mesh_myelm(mesh);
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
+
+  /* we can already use mesh->myelm[2] */
   //enablevar(mesh, Ind("advection1_u"));
   if(nMPI_rank()==0)
     enablevarcomp_innode(mesh->myelm[2], Ind("advection1_u"));
 
-  /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
-  //simple_load_balance(mesh);
-  load_balance_elms(mesh);
+  simple_load_balance(mesh);
 
-  //printmesh(mesh);
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    printelm(list_entry(pos, tElm, list));
-  }
+  Yo(200);
+  printmyelms(mesh);
 
 Yo(33);
   /* refine!!! */
-  for(i=0; i<mesh->nmyelm; i++)
+  formyelms(mesh)
   {
-    elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
-    int n[] = {3,4,5};
-    int pt_typ[] = {0,0,0};
-    printelm(elm);
-    if(elm->eploc->eid==2)
-    {
-      Yo(34);
-      replace_parent_by_8children(elm, n, pt_typ);
-    }
-    //printf("elm->eploc->eid=%ld\n", elm->eploc->eid);
+    elm = MyElm;
+    if(elm->eploc->eid==2) elm->rflag = 1;
   }
-
-  /* update nids */
-  //update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  ref->method = PARENT_n;
+  hrefine_elms_if_rflag(mesh, ref);
   update_mesh_myelms_elm_eid_dt(mesh);
-  /* update rest */
-  alloc_and_set_mesh_myelm(mesh);
-  load_balance_elms(mesh);
-  alloc_and_set_mesh_myelm(mesh);
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  printmyelms(mesh);
+
+  simple_load_balance(mesh);
+  printmyelms(mesh);
 
 
 Yo(33.1);
   /* refine again !!! */
-  for(i=0; i<mesh->nmyelm; i++)
+  formyelms(mesh)
   {
-    elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
-    int n[] = {3,4,5};
-    int pt_typ[] = {0,0,0};
-    printelm(elm);
-    if(elm->eploc->eid==7)
-    {
-      Yo(34);
-      replace_parent_by_8children(elm, n, pt_typ);
-    }
-    //printf("elm->eploc->eid=%ld\n", elm->eploc->eid);
+    elm = MyElm;
+    if(elm->eploc->eid==7) elm->rflag = 1;
   }
-
-  /* update nids */
-  //update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  ref->method = PARENT_n;
+  hrefine_elms_if_rflag(mesh, ref);
   update_mesh_myelms_elm_eid_dt(mesh);
-  /* update rest */
-  alloc_and_set_mesh_myelm(mesh);
-  load_balance_elms(mesh);
-  alloc_and_set_mesh_myelm(mesh);
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  printmyelms(mesh);
+
+  simple_load_balance(mesh);
+  printmyelms(mesh);
 
 
 Yo(33.2);
   /* refine again !!! */
-  for(i=0; i<mesh->nmyelm; i++)
+  formyelms(mesh)
   {
-    elm = mesh->myelm[i]; //list_entry(pos, tElm, list);
-    int n[] = {3,4,5};
-    int pt_typ[] = {0,0,0};
-    printelm(elm);
-    if(elm->eploc->eid==7)
-    {
-      Yo(34);
-      replace_parent_by_8children(elm, n, pt_typ);
-    }
-    //printf("elm->eploc->eid=%ld\n", elm->eploc->eid);
+    elm = MyElm;
+    if(elm->eploc->eid==7) elm->rflag = 1;
   }
-
-  /* update nids */
-  //update_elm_eid_dt(mesh, 0.1, 0, 0,25, 0.125);
+  ref->method = PARENT_n;
+  hrefine_elms_if_rflag(mesh, ref);
   update_mesh_myelms_elm_eid_dt(mesh);
-  /* update rest */
-  alloc_and_set_mesh_myelm(mesh);
-  load_balance_elms(mesh);
-  alloc_and_set_mesh_myelm(mesh);
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  printmyelms(mesh);
+
+
+  simple_load_balance(mesh);
+  printmyelms(mesh);
+  printnbelms(mesh);
+
+// this crashes it! Why????
+amr_get_nbelm_elmheaders(mesh);
+
+
+//nMPI
+nMPI_barrier();
+RunFun(FINALIZE);
+finalize_all_and_exit(mesh, 0); //<--exit code 0
+
 
 
   /* print a var */

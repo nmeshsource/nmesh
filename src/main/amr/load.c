@@ -28,7 +28,8 @@ void simple_load_balance(tMesh *mesh)
 void load_balance(tMesh *mesh, int strategy)
 {
   /* for now we keep sibling 1-7 together with sibling 0 */
-  Timing->sibl1to7_weight = 0.;
+//FIXME: put the next line back in:
+//  Timing->sibl1to7_weight = 0.;
 
   /* when we move elms much of in mesh->nbmesh will become wrong */
   amr_remove_mesh_nbelm(mesh);
@@ -40,11 +41,13 @@ void load_balance(tMesh *mesh, int strategy)
   alloc_and_set_mesh_myelm(mesh);
 
   /* set fnb */
+  amr_erase_all_elm_fnb(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
   /* set elm->n and elm->pt_typ for the elms of mesh->nbmesh */
-  amr_get_nbelm_elmheaders(mesh);
+//FIXME: put the next line back in:
+//  amr_get_nbelm_elmheaders(mesh);
 }
 
 /* function that can be scheduled in LOADBALANCING */

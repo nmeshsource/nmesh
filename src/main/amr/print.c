@@ -233,6 +233,8 @@ void print_amr_elm_nbinfo(const tElm *elm, int face)
   tMesh *mesh = elm->pat->mesh;
   int i_nbinfo = Ind("amr_elm_nbinfo0") + face;
   tArray *nbinfo = VarA(elm, i_nbinfo);
+  tDat *dat = elm->dat;
+  if(dat && dat->info->nnbinfo[face]<0) printf("- ");
   printarray_eploc(nbinfo, 0);
 }
 
