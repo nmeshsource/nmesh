@@ -178,16 +178,21 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
      so we just get rid of mesh->nbelm */
   amr_remove_mesh_nbelm(mesh);
 
-  /* update the list mesh->myelm */
-  alloc_and_set_mesh_myelm(mesh);
+  /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
+     BUT update_mesh_myelms_elm_eid_dt below will call:
+     alloc_and_set_mesh_myelm(mesh); */
 
-  /* FIXME: Do we need fnb, if further refine/unref happen right after?
-            I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
-            I think so. But if not, the calls below are needed:
-  //update_mesh_myelms_elm_eid_dt(mesh);
-  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
-  //amr_elm_nbinfo_to_elm_fnb(mesh);
-  //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+  /* Note: Do we need fnb, if further refine/unref happen right after?
+           I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
+           I think so. So if we care about nothing else the stuff below
+           is not needed: */
+  /* update essential nb info */
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
+  amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
+
+  /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
 }
 
@@ -273,13 +278,26 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
       pos = &parent->list;
     }
   }
-  /* FIXME: Do we need fnb, if further refine/unref happen right after?
-            I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
-            I think so. But if not, the calls below are needed:
-  //update_mesh_myelms_elm_eid_dt(mesh);
-  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
-  //amr_elm_nbinfo_to_elm_fnb(mesh);
-  //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+
+  /* something my have happened to the elms in mesh->nbelm on another rank,
+     so we just get rid of mesh->nbelm */
+  amr_remove_mesh_nbelm(mesh);
+
+  /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
+     BUT update_mesh_myelms_elm_eid_dt below will call:
+     alloc_and_set_mesh_myelm(mesh); */
+
+  /* Note: Do we need fnb, if further refine/unref happen right after?
+           I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
+           I think so. So if we care about nothing else the stuff below
+           is not needed: */
+  /* update essential nb info */
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
+  amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
+
+  /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
 }
 

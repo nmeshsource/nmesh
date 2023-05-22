@@ -580,6 +580,7 @@ int setup_elm_mesh1(tMesh *mesh)
   Yo(200);
   printmyelms(mesh);
 
+
 Yo(33);
   /* refine!!! */
   formyelms(mesh)
@@ -589,12 +590,30 @@ Yo(33);
   }
   ref->method = PARENT_n;
   hrefine_elms_if_rflag(mesh, ref);
-  update_mesh_myelms_elm_eid_dt(mesh);
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  //update_mesh_myelms_elm_eid_dt(mesh);
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   printmyelms(mesh);
+
+//something messes up e.g. nbinfo of 3_
+  printf("mesh->myelm:\n");
+  printelmarray(mesh->nmyelm, mesh->myelm);
+  printmyelms(mesh);
+
+  printf("mesh->nbelm:\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
+  printnbelms(mesh);
+
+
+
+
+//nMPI
+nMPI_barrier();
+RunFun(FINALIZE);
+finalize_all_and_exit(mesh, 0); //<--exit code 0
 
   simple_load_balance(mesh);
   printmyelms(mesh);
+
 
 
 Yo(33.1);
@@ -645,6 +664,7 @@ Yo(33.2);
 //mesh->nbelm: on rank1 is wrong
 
   /* set flag to update all fnb, not needed because alloc_dat does this */
+  /*
   formyelms(mesh)
   {
     tElm *elm = MyElm;
@@ -654,6 +674,7 @@ Yo(33.2);
       //elm->nfnb[f] = -1;
     }
   }
+  */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   amr_erase_all_elm_fnb(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);

@@ -44,11 +44,11 @@ void load_balance(tMesh *mesh, int strategy)
   amr_erase_all_elm_fnb(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
   //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
-  //NOTE:  ^--this call meses up nbinfo!!! Why???
+  //NOTE:  ^--this call meses up nbinfo!!! ===> FIXME: remove these lines
 
   /* set elm->n and elm->pt_typ for the elms of mesh->nbmesh */
 //FIXME: put the next line back in:
-//  amr_get_nbelm_elmheaders(mesh);
+  amr_get_nbelm_elmheaders(mesh);
 }
 
 /* function that can be scheduled in LOADBALANCING */
