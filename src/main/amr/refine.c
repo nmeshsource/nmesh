@@ -174,7 +174,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
-  /* something my have happened to the elms in mesh->nbelm on another rank,
+  /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   amr_remove_mesh_nbelm(mesh);
 
@@ -186,9 +186,12 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
            I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
            I think so. So if we care about nothing else the stuff below
            is not needed: */
+  /* update_mesh_myelms_elm_eid_dt is needed for both:
+       amr_update_elm_nbinfo_if_nnbinfo_negative
+       amr_elm_nbinfo_to_elm_fnb                  */
+  update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
   /* update essential nb info */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
-  update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
@@ -279,7 +282,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
-  /* something my have happened to the elms in mesh->nbelm on another rank,
+  /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   amr_remove_mesh_nbelm(mesh);
 
@@ -291,9 +294,12 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
            I.e. does amr_invalidate_nbinfo_of_all_nbs work in this case?
            I think so. So if we care about nothing else the stuff below
            is not needed: */
+  /* update_mesh_myelms_elm_eid_dt is needed for both:
+       amr_update_elm_nbinfo_if_nnbinfo_negative
+       amr_elm_nbinfo_to_elm_fnb                  */
+  update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
   /* update essential nb info */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
-  update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
