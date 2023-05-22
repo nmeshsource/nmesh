@@ -632,6 +632,39 @@ Yo(33.2);
   printmyelms(mesh);
   printnbelms(mesh);
 
+
+
+  printf("mesh->myelm:\n");
+  printelmarray(mesh->nmyelm, mesh->myelm);
+  printmyelms(mesh);
+
+  printf("mesh->nbelm:\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
+  printnbelms(mesh);
+
+//mesh->nbelm: on rank1 is wrong
+
+  /* set flag to update all fnb, not needed because alloc_dat does this */
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    for(int f=0; f<6; f++)
+    {
+      elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
+      //elm->nfnb[f] = -1;
+    }
+  }
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  amr_erase_all_elm_fnb(mesh);
+  amr_elm_nbinfo_to_elm_fnb(mesh);
+
+
+  printf("mesh->nbelm (again):\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
+  printnbelms(mesh);
+
+
+
 // this crashes it! Why????
 amr_get_nbelm_elmheaders(mesh);
 

@@ -2012,15 +2012,21 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
       }
   }
 
-  /*
-  printf("r_elm0 = ");
-  for(ei=0; ei<nr_elm0[1]; ei++)
-    printeploc_s(r_elm0[1][ei].eploc, " ");
 
-  printf("s_elm0 = ");
-  for(ei=0; ei<ns_elm0[1]; ei++)
-    printeploc_s(s_elm0[1][ei].eploc, " ");
-  */
+  for(rk=0; rk<size; rk++)
+  {
+    printf("rk%d: nr=%d ns=%d\n", rk, nr_elm0[rk], ns_elm0[rk]);
+    printf("r_elm0 = ");
+    for(ei=0; ei<nr_elm0[rk]; ei++)
+      printeploc_s(r_elm0[rk][ei].eploc, " ");
+    printf("\n");
+
+    printf("s_elm0 = ");
+    for(ei=0; ei<ns_elm0[rk]; ei++)
+      printeploc_s(s_elm0[rk][ei].eploc, " ");
+    printf("\n");
+  }
+
 
   /* send and recv from rank rk */
   scom = alloc_com(sizeof(s_elm0[0][0]), 0);
