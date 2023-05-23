@@ -195,6 +195,16 @@ void printelmarray(long nelms, tElm **elm)
   printf("\n");
 }
 
+void printelmlist(struct list_head *elm_head)
+{
+  struct list_head *pos;
+  list_for_each(pos, elm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    printelm(elm);
+  }
+}
+
 void printmyelms(tMesh *mesh)
 {
   formyelms(mesh)

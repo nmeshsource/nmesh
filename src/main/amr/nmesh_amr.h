@@ -557,6 +557,7 @@ void printeploc_s(const tEploc *eploc, const char *s);
 void printelm0(const tElm0 *e, const char *s);
 void printelm(const tElm *e);
 void printelmarray(long nelms, tElm **elm);
+void printelmlist(struct list_head *elm_head);
 void printmyelms(tMesh *mesh);
 void printnbelms(tMesh *mesh);
 void print_amr_elm_nbinfo(const tElm *elm, int face);
