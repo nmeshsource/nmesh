@@ -79,7 +79,6 @@ int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh);
 int facepoint_in_bfacepair(tBface *bface, tNode *node, int ijk, double C[2],
                            int ofaces[6], double oX[3]);
 int add_nface(tNode *node, int f, tNode *nb, int nb_f);
-int remove_nface(tNface *nface);
 void remove_all_nfaces(tNode *node);
 
 /* refine.c */

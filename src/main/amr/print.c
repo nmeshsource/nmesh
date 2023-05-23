@@ -671,16 +671,6 @@ void printfacecorners(tPat *pat, int  f)
   }
 }
 
-
-/* print one nface */
-void printthisnface(tNface *nface, const char *s)
-{
-  char str[100];
-
-  if(!nface) return;
-  printf(" %s %s f%d\n", s, nodename(nface->node,str,99), nface->f);
-}
-
 /* print tRef contents */
 void printref(tRef *ref)
 {
