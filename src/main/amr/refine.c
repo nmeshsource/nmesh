@@ -273,8 +273,8 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
         continue;
       }
 
-      /* we need all 8 siblings on this rank */
-      if(num<8) errorexit("there have to be 8 siblings on this rank");
+      /* we need all 8 siblings to be on the rank of sibling0 */
+      if(num<8) errorexit("All 8 siblings must be on the same rank!");
 
       /* if we get here, replace the 8 siblings by their parent: */
       hp_refine_set_n_pt_typ(sib, ref, n, pt_typ); //set n and pt_typ
