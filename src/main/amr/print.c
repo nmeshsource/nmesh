@@ -130,18 +130,12 @@ void printeploc_s(const tEploc *eploc, const char *s)
 
 void printelm0(const tElm0 *e, const char *s)
 {
-  //int i;
-  //int patface[6];
-  //tEloc eloc[1];
-  //eloc_from_eploc(eloc, e->eploc);
-  //connections_loc_on_patchface(eloc->l, eloc->loc, patface);
   printeploc(e->eploc);
   printf(": eid%lu [%g,%g]x[%g,%g]x[%g,%g]",
          e->eploc->eid,
          e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5]);
   printf(" n=%dx%dx%d=%d", e->n[0],e->n[1],e->n[2], e->np);
-  //printf(" patface=");
-  //for(i=0; i<6; i++) printf("%d", patface[i]);
+  //printf(" rflag=%d", e->rflag);
   printf(" datrank=%d", e->datrank);
   printf("%s", s);
 }

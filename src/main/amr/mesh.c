@@ -811,6 +811,23 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
 
 
 
+  formyelms(mesh)
+  {
+    elm = MyElm;
+    //if(Elm_l(elm)>2) elm->rflag = -1;
+    //if(Elm_eid(elm)==11) elm->rflag = 0;
+    if(Elm_eid(elm)>=2 && Elm_eid(elm)<=16) elm->rflag = -1;
+  }
+  ref->method = PARENT_n;
+  remove_elms_if_rflag(mesh, ref);
+  printmyelms(mesh);
+
+  simple_load_balance(mesh);
+  printmyelms(mesh);
+
+
+
+
 
 //nMPI
 nMPI_barrier();
