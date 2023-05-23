@@ -238,19 +238,6 @@ void print_amr_elm_nbinfo(const tElm *elm, int face)
   printarray_eploc(nbinfo, 0);
 }
 
-void printnodes_in_list(tNlist *nl)
-{
-  tNlist *el;
-
-  fornodelist(first_nodelist(nl), el)
-  {
-    //if(el==nl) printf(">");
-    //else       printf(" ");
-    printelm(el->node);
-  }
-  if(!nl) printf("<empty nodelist>\n");
-}
-
 /* print nodename */
 void pr_nodename(tNode *node)
 {
@@ -698,66 +685,6 @@ void printthisnface(tNface *nface, const char *s)
 
   if(!nface) return;
   printf(" %s %s f%d\n", s, nodename(nface->node,str,99), nface->f);
-}
-
-/* print one nface and its pair */
-void printnface(tNface *nface)
-{
-  tNface *onface;
-
-  if(!nface) return;
-
-  onface = nface->onface;
-
-  if(!onface)
-  {
-    printthisnface(nface, " ");
-    return;
-  }
-
-  if(onface->onface == nface)
-  {
-    printthisnface(nface, "/");
-    printthisnface(onface, "\\");
-  }
-  else
-  {
-    printf("  WARNING: nfaces are not properly linked!!\n");
-    printf("  nface=%p nface->onface=%p:\n",
-           (void *) nface, (void *) nface->onface);
-    printthisnface(nface, " ");
-    printf("  onface=%p onface->onface%p:\n",
-           (void *) onface, (void *) onface->onface);
-    printthisnface(onface, " ");
-  }
-}
-
-/* print bfaces on face f with or without nodename */
-void printnfaces_on_f_prname(tNode *node, int f, int prname)
-{
-  tNface *nf;
-  char s[100];
-
-  if(prname) printf("nfaces[%d] on %s:\n", f, nodename(node,s,99));
-  for(nf=node->nfaces[f]; nf; nf=nf->next)
-    printnface(nf);
-}
-
-/* print bfaces on face f */
-void printnfaces_on_f(tNode *node, int f)
-{
-  printnfaces_on_f_prname(node, f, 1);
-}
-
-/* print all node nfaces */
-void printnfaces(tNode *node)
-{
-  int f;
-  char s[100];
-
-  printf("nfaces on %s:\n", nodename(node,s,99));
-  for(f=0; f<6; f++)
-    printnfaces_on_f_prname(node, f, 0);
 }
 
 /* print tRef contents */

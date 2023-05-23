@@ -574,7 +574,6 @@ void printelmarray(long nelms, tElm **elm);
 void printmyelms(tMesh *mesh);
 void printnbelms(tMesh *mesh);
 void print_amr_elm_nbinfo(const tElm *elm, int face);
-void printnodes_in_list(tNlist *nl);
 void pr_nodename(tNode *node);
 void printvar_innode(tNode *node, int vi);
 void printvar_ajsurfdiff(tNode *node, int vi);
@@ -596,9 +595,6 @@ void prlarray(const char *s, long n, const long *ar);
 void prbbox(double *bb, int dim);
 void printcorners(tPat *pat);
 void printfacecorners(tPat *pat, int  f);
-void printnface(tNface *nface);
-void printnfaces_on_f(tNode *node, int f);
-void printnfaces(tNode *node);
 void printref(tRef *ref);
 void print_n_pt_typ(tNode *node);
 void printpoint(tPoint *pt);
@@ -702,7 +698,7 @@ int elmname_is(tElm *elm, const char *nname);
 int elm_get_ijk(tElm *elm);
 int elm_is_on_patface(tElm *elm, int f);
 
-/* connect.c */
+/* compatibility with old connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)
 #define nodename(node, s, slen)          elmname(node, s, slen)
 #define node_location(node)              elm_location(node)
