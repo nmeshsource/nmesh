@@ -1040,11 +1040,11 @@ tElm **amr_elmarray_bsearch(ulong narr, tElm **arr, tElm *elm)
   tElm **f_elm;
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
-  //PRF;printelmarray(narr, arr);
+  //PRFs(": ");printelmarray(narr, arr);
   //printeloc_s(eloc," ");
   f_elm = bsearch(eloc, arr, narr, sizeof(arr[0]), lecmp_q);
-  //if(f_elm) printf("found\n");
-  //else      printf("not found\n");
+  //if(f_elm) { printf("found ");printeloc_s(eloc,"\n"); }
+  //else      { printf("could not find ");printeloc_s(eloc,"\n"); }
   return f_elm;
 }
 
@@ -1060,6 +1060,28 @@ void amr_elmarray_add_sort(ulong *narrp, tElm ***arrp, tElm *elm)
   amr_elmarray_qsort(narrp1, newarr);
   *narrp = narrp1; //increase narrp
   *arrp  = newarr; //point arrp to realloced mem.
+}
+
+tElm **amr_elmarray_linsearch(ulong narr, tElm **arr, tElm *elm)
+{
+  tElm **f_elm;
+  ulong i;
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
+  PRFs(": ");printelmarray(narr, arr);
+  printeloc_s(eloc," ");
+  f_elm = NULL;
+  for(i=0; i<narr; i++)
+  {
+    if(lecmp_q(eloc, &(arr[i]))==0)
+    {
+      f_elm = &(arr[i]);
+      break;
+    }
+  }
+  if(f_elm) { printf("found ");printeloc_s(eloc,"\n"); }
+  else      { printf("could not find ");printeloc_s(eloc,"\n"); }
+  return f_elm;
 }
 
 /****************************************************************************/
@@ -1876,6 +1898,31 @@ void amr_add_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
   /* add elm to nb->fnb */
   nb_fnb[nb_nfnb] = elm;
 }
+
+/* Add elm to nb->fnb, but only if elm is not there yet.
+   Here nb=elm->fnb[f][ni] */
+void amr_unionadd_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
+{
+  tElm *nb = elm->fnb[f][ni];
+  /* figure out face on nb */
+  int nb_f = amr_get_nbface(elm, f, nb);
+  int nb_nfnb = nb->nfnb[nb_f];
+  tElm **nb_fnb = nb->fnb[nb_f];
+  /* see if elm is already in nb_fnb */
+  tElm **f_elm = amr_elmarray_linsearch(nb_nfnb, nb_fnb, elm);
+  /* if elm is not there yet add it to nb_fnb = nb->fnb[nb_f] */
+  if(!f_elm)
+  {
+    /* make room for one more */
+    nb_fnb = realloc(nb_fnb, (nb_nfnb+1) * sizeof(nb_fnb[0]));
+    nb->fnb[nb_f]  = nb_fnb;
+    nb->nfnb[nb_f] = nb_nfnb+1;
+
+    /* add elm to nb->fnb */
+    nb_fnb[nb_nfnb] = elm;
+  }
+}
+
 
 /* erase all that is in elm->fnb */
 void amr_erase_all_elm_fnb(tMesh *mesh)
