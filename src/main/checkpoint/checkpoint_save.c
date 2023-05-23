@@ -89,8 +89,6 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
 /* write non-pointer part of tPat */
 void checkpoint_write_pat(FILE *fp, tPat *pat)
 {
-  int pat_rnode_n[] = {2,2,2};
-  int pat_rnode_pt_typ[] = {P_LGL,P_LGL,P_LGL};
   int d, f;
 
   fprintf(fp, "patch%d:\n", pat->p);
@@ -104,16 +102,13 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   //for(d=0; d<3; d++)
   //  fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
 
-  errorexit("set pat_rnode_n and pat_rnode_pt_typ");
-  // FIXME: we used to have:
-  // pat_rnode_n[d]      = pat->rnode->n[d]
-  // pat_rnode_pt_typ[d] = pat->rnode->pt_typ[d]
+  errorexit("set pat->rnode->n and pat->rnode->pt_typ");
 
   for(d=0; d<3; d++)
-    fprintf(fp, " rnode->n[%d] = %d\n", d, pat_rnode_n[d]);
+    fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
 
   for(d=0; d<3; d++)
-    fprintf(fp, " rnode->pt_typ[%d] = %d\n", d, pat_rnode_pt_typ[d]);
+    fprintf(fp, " rnode->pt_typ[%d] = %d\n", d, pat->rnode->pt_typ[d]);
 
   //printCI(pat);
   checkpoint_write_CI(fp, pat->CI);
@@ -174,9 +169,8 @@ int checkpoint_save_nodes(tMesh *mesh, char *fname)
   forpatches(mesh, p)
   {
     tPat *pat = mesh->pat[p];
-    errorexit("Replace:  tNode *rnode = pat->rnode;");
-    // FIXME: this is wrong:
-    tNode *rnode = NULL;
+    tNode *rnode =     (tNode *)          pat->rnode;
+    errorexit("Set:  tElm0 *rnode = pat->rnode;");
 
     if(p==0) rnlist = el = alloc_nodelist(rnode);
     else     el = addnode_to_nodelist_after(el, rnode);
