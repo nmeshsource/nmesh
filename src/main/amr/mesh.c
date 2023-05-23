@@ -606,17 +606,6 @@ Yo(33.01);
 
 
 
-
-//nMPI
-nMPI_barrier();
-RunFun(FINALIZE);
-finalize_all_and_exit(mesh, 0); //<--exit code 0
-
-  simple_load_balance(mesh);
-  printmyelms(mesh);
-
-
-
 Yo(33.1);
   /* refine again !!! */
   formyelms(mesh)
@@ -626,9 +615,10 @@ Yo(33.1);
   }
   ref->method = PARENT_n;
   hrefine_elms_if_rflag(mesh, ref);
-  update_mesh_myelms_elm_eid_dt(mesh);
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  //update_mesh_myelms_elm_eid_dt(mesh);
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   printmyelms(mesh);
+
 
   simple_load_balance(mesh);
   printmyelms(mesh);
@@ -643,14 +633,38 @@ Yo(33.2);
   }
   ref->method = PARENT_n;
   hrefine_elms_if_rflag(mesh, ref);
-  update_mesh_myelms_elm_eid_dt(mesh);
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  //update_mesh_myelms_elm_eid_dt(mesh);
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   printmyelms(mesh);
 
 
+
+  // print before crash:
+  printf("mesh->myelm:\n");
+  printelmarray(mesh->nmyelm, mesh->myelm);
+  printmyelms(mesh);
+
+  printf("mesh->nbelm:\n");
+  printelmarray(mesh->nnbelm, mesh->nbelm);
+  printnbelms(mesh);
+
+
+  //this crashes:
+  Yo(911);
   simple_load_balance(mesh);
   printmyelms(mesh);
   printnbelms(mesh);
+
+
+
+
+//nMPI
+nMPI_barrier();
+RunFun(FINALIZE);
+finalize_all_and_exit(mesh, 0); //<--exit code 0
+
+  simple_load_balance(mesh);
+  printmyelms(mesh);
 
 
 

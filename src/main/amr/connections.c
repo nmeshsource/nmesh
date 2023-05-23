@@ -1469,6 +1469,51 @@ void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm)
   }
 }
 
+/* update eid part of eplocs in nbinfo vars */
+void amr_elm_nbinfo_update_eid_locally_using_fnb(tElm *elm)
+{
+  int f;
+  for(f=0; f<6; f++)
+  {
+    int i_nbinfo = amr->elm_nbinfo0 + f;
+    tArray *nbinfo = VarA(elm, i_nbinfo);
+    int nfnb = elm->nfnb[f];
+    tElm **fnb = elm->fnb[f];
+    int Neplocs, ni;
+    //PRFs(":\n");
+    //printf("nbinfo=%p fnb=%p", nbinfo, fnb);
+
+    /* if there is no nbinfo or if it is outdated do nothing */
+    if(!nbinfo) continue;
+    if(elm->dat->info->nnbinfo[f] <= 0) continue;
+
+    Neplocs = array_Neplocs(nbinfo);
+    //PRFs(": ");printelm(elm);
+    //printf(" f%d Neplocs=%d nfnb=%d\n", f, Neplocs, nfnb);
+
+    if( (Neplocs!=nfnb) || (!fnb) )
+      errorexiti("nbinfo and fnb disagree on face%d", f);
+
+    /* set eid in each amr_elm_nbinfo entry to the actual eid of the nb */
+    for(ni=0; ni<Neplocs; ni++)
+    {
+      tElm *nb = fnb[ni];
+      tEploc *eploc = &(nbinfo->eploc[ni]);
+      eploc->eid = Elm_eid(nb);
+    }
+  }
+}
+/* call amr_elm_nbinfo_update_eid_locally_using_fnb on entire new
+   mesh->myelm */
+void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    amr_elm_nbinfo_update_eid_locally_using_fnb(elm);
+  }
+}
+
 
 /* Look in elm-array arr (in [arr+off,arr+num-1]) to find the nb of
    elm on face elmface.
@@ -1920,6 +1965,9 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
 
         amr_elmindex_and_datrank_of_eid(mesh, eploc->eid, &nbidx, &datrank);
 
+        //printf("QQQQQQ ");printeploc(elm->eploc);printf(" f%d\t",f);printeploc(eploc);
+        //printf(" nbidx=%lu datrank=%d\n", nbidx, datrank);
+
         if(datrank == rank) /* get elm of eploc from mesh->myelm */
         {
           tElm *nb = mesh->myelm[nbidx];
@@ -1928,7 +1976,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         else /* get elm of eploc from mesh->myelm of rank datrank */
         {
           /* something like move_node_to_rank would not work here
-             because it need to be called also by the sending rank */
+             because it needs to be called also by the sending rank */
           tElm **f_elm;
           /* make a new empty elm that is missing some info, like elm->n */
           tElm *nb;
@@ -2016,7 +2064,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 
   for(rk=0; rk<size; rk++)
   {
-    printf("rk%d: nr=%d ns=%d\n", rk, nr_elm0[rk], ns_elm0[rk]);
+    printf("rk%d: nr=%lu ns=%lu\n", rk, nr_elm0[rk], ns_elm0[rk]);
     printf("r_elm0 = ");
     for(ei=0; ei<nr_elm0[rk]; ei++)
       printeploc_s(r_elm0[rk][ei].eploc, " ");
@@ -2028,6 +2076,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
     printf("\n");
   }
 
+Yo(111);
 
   /* send and recv from rank rk */
   scom = alloc_com(sizeof(s_elm0[0][0]), 0);

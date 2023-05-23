@@ -31,23 +31,27 @@ void load_balance(tMesh *mesh, int strategy)
 //FIXME: put the next line back in:
 //  Timing->sibl1to7_weight = 0.;
 
-  /* when we move elms much of in mesh->nbmesh will become wrong */
-  amr_remove_mesh_nbelm(mesh);
+  /* when we move elms much of mesh->nbelm will become wrong */
+  amr_remove_mesh_nbelm(mesh); // this makes some of nnbinfo negative
 
   /* move elms bewteen ranks */
   load_balance_elms(mesh);
 
-  /* update mesh->myelm */
-  alloc_and_set_mesh_myelm(mesh);
+  /* we need to update eidlim after load balance moves elms */
+  update_mesh_myelms_elm_eid_dt(mesh);
+
+  //CHECK: we need this unless update_mesh_myelms_elm_eid_dt does it
+  //  /* update mesh->myelm */
+  //  alloc_and_set_mesh_myelm(mesh);
 
   /* set fnb */
   amr_erase_all_elm_fnb(mesh);
-  amr_elm_nbinfo_to_elm_fnb(mesh);
-  //amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
-  //NOTE:  ^--this call meses up nbinfo!!! ===> FIXME: remove these lines
+  amr_elm_nbinfo_to_elm_fnb(mesh); // this uses the negative nnbinfo
+
+  /* nbinfo remains correct during load balance, so make nnbinfo>=0 again */
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1);
 
   /* set elm->n and elm->pt_typ for the elms of mesh->nbmesh */
-//FIXME: put the next line back in:
   amr_get_nbelm_elmheaders(mesh);
 }
 
@@ -449,6 +453,7 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
   long i;
 
   PRFs(":\n");
+  //fflush(stdout);
 
   /* for MPI data transfers */
   scom = alloc_com(sizeof(double), 1);

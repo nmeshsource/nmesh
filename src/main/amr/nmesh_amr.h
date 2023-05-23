@@ -93,6 +93,7 @@ typedef struct tELM {
   struct tPAT *pat;       // remove one day, since we have mesh
   int nfnb[6];            // number of face neighbor nodes (fnb below)
   struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
+  //ulong oid;              // old elm ID
   struct list_head list;  // all elms form a linked list
   //char loc[NLOCS];      // unpacked elm location
 } tElm;
@@ -131,6 +132,7 @@ typedef struct tELM {
                                kept up to date by update_node_fnb */
   struct tELM *volatile nc_lock; /* if not NULL, connections of node nc_lock
                                      and its nbs are currently being updated */
+  //ulong oid;              /* old elm ID */
   struct list_head list;  /* all elms form a linked list */ \
 } tElm;
 

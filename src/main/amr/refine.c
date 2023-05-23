@@ -190,6 +190,10 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
        amr_update_elm_nbinfo_if_nnbinfo_negative
        amr_elm_nbinfo_to_elm_fnb                  */
   update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
+
+  /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
+  amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
+
   /* update essential nb info */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
@@ -298,6 +302,10 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
        amr_update_elm_nbinfo_if_nnbinfo_negative
        amr_elm_nbinfo_to_elm_fnb                  */
   update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
+
+  /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
+  amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
+
   /* update essential nb info */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders

@@ -165,10 +165,10 @@ void printelm(const tElm *e)
     printf(" {");
     if(dat && dat->info->nnbinfo[i]<0)
     {
-      printf("?");
+      printf("? ");
       nnbinfo_neg=1;
     }
-    else
+    //else
     {
       for(j=0; j<e->nfnb[i]; j++)
       {
@@ -235,6 +235,7 @@ void print_amr_elm_nbinfo(const tElm *elm, int face)
   tArray *nbinfo = VarA(elm, i_nbinfo);
   tDat *dat = elm->dat;
   if(dat && dat->info->nnbinfo[face]<0) printf("- ");
+  if(!nbinfo) printf("nil");
   printarray_eploc(nbinfo, 0);
 }
 

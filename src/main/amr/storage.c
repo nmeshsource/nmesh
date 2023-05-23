@@ -1481,7 +1481,10 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
         if(auto_dt)
           adapt_node_dt_and_mesh_dt(elm, auto_dt, dtfac, uniform_dtfac);
 
-        /* set my eid */
+        ///* save old eid */
+        //elm->oid = elm->eploc->eid;
+
+        /* set my new eid */
         elm->eploc->eid = eid++;
       }
       /* last elm->eploc->eid+1 is eidlim for me */
