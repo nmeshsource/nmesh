@@ -370,57 +370,52 @@ int print_u_minus_f(tNode *node)
 int test_parent_child_interpolation(tMesh *mesh)
 {
   tNode *nd;
+  int ii;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int nn[] = { 3,5,5 };
-  int pt_typ[] = { P_LGL, P_LGL, P_LGL };
-  tNlist *el = mesh->lns;
-  tNlist *l2 = NULL;
+  //int pt_typ[] = { P_LGL, P_LGL, P_LGL };
   tDat *d0;
+  tRef ref[1];
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
   enablevar(mesh, ui);
   enablevar(mesh, vi);
 
-  print_u_minus_f(mesh->lns->node);
+  if(Rank0) print_u_minus_f(MyElm0);
 
   /* get 1st node */
-  el = mesh->lns;
-  nd = el->node;
+  nd = MyElm0;
   d0 = nd->dat;
-  printelm(el->node);
+  printelm(nd);
   printvar_innode(nd, ui);
   if(d0) printf("1 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
 
-  make8children_in_mesh_lns_myln(el, pt_typ, nn);
-  //printmesh(mesh);
-  el = mesh->lns;
-  l2 = NULL;
-  l2 = addnode_to_nodelist_after(l2, el->next->next->node);
-  addnode_to_nodelist_after(l2, el->next->next->next->node);
-  move_nodelist_to_rank(l2, (nMPI_size()>1));
-  update_mesh_myln_node_nid(mesh);
-  free_nodelist(l2);
-  l2 = NULL;
+  nd->rflag = 1;
+  ref->method = GIVEN_n_P_LGL;
+  for(ii=0; ii<3; ii++) ref->n[ii] = nn[ii];
+  hrefine_elms_if_rflag(mesh, ref);
   //printmesh(mesh);
 
-  printf("2 nd %p %p\n", (void *) nd, (void *) nd->dat);
+  //printf("2 nd %p %p\n", (void *) nd, (void *) nd->dat);
   //if(d0) printf("2b nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
   printf("2c: test_func=%g\n", test_func(-4,-2,-1));
   printf("2c: test_func=%g\n", test_func(-1,-1,-1));
-  el = mesh->lns;
-  printelm(el->node);
-  printvar_innode(nd->child[0], ui);
-
-  destroy8siblings_in_mesh_lns_myln(el);
-  printf("3 nd %p %p\n", (void *) nd, (void *) nd->dat);
-  //if(d0) printf("4 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
-  el = mesh->lns;
-  printelm(el->node);
+  nd = MyElm0;
+  printelm(nd);
   printvar_innode(nd, ui);
 
-  print_u_minus_f(el->node);
+  for(ii=0; ii<8; ii++) Elm_MyID(mesh, ii)->rflag = -1;
+  remove_elms_if_rflag(mesh, ref);
+
+  nd = MyElm0;
+  printf("3 nd %p %p\n", (void *) nd, (void *) nd->dat);
+  //if(d0) printf("4 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
+  printelm(nd);
+  printvar_innode(nd, ui);
+
+  print_u_minus_f(nd);
 
   return 0;
 }
