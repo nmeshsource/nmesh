@@ -273,8 +273,13 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
         continue;
       }
 
-      /* we need all 8 siblings to be on the rank of sibling0 */
-      if(num<8) errorexit("All 8 siblings must be on the same rank!");
+      /* We need all 8 siblings to be on the rank of sibling0, to refine.
+         If num<8 it could be that the other siblings are on the next rank.
+         Or it could be that there are no siblings on the next rank, because
+         they have been refined. Since our new load balance should collect
+         all 8 on one rank we assume that not all 8 siblings exist, and thus
+         we do nothing if num<8. */
+      if(num<8) continue;
 
       /* if we get here, replace the 8 siblings by their parent: */
       hp_refine_set_n_pt_typ(sib, ref, n, pt_typ); //set n and pt_typ
