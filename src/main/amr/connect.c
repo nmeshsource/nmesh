@@ -420,32 +420,6 @@ void update_node_and_neighbors_fnb_only(tNode *node)
 }
 
 
-/* find node facenb in the node->fnb lists, returns 1  if it is there
-   returns face and nb index in vars: face and ni */
-int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni)
-{
-  int found = 0;
-  int f;
-  for(f=0; f<6; f++)
-  {
-    int nfnb = node->nfnb[f];
-    int i;
-    for(i=0; i<nfnb; i++)
-    {
-      if(node->fnb[f][i] == facenb)
-      {
-        found = 1;
-        *face = f;
-        *ni   = i;
-        break;
-      }
-    }
-    if(found) break;
-  }
-  return found;
-}
-
-
 /*******************************************************************/
 /* nc_lock helper functions */
 /*******************************************************************/

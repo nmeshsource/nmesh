@@ -44,21 +44,6 @@ int setup_test_mesh(tMesh *mesh);
 /* setup_Boxes.c */
 int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
 
-/* connect.c */
-void connect8_with_neighbors(tNode *narray[8], int connect);
-void connect8_siblings(tNode *narray[8]);
-tNlist *ldescendants_along_face(tNlist *nl, int face, int *ndescends);
-void update_node_and_neighbors_nfaces_fnb(tNode *node);
-void update_all_rnode_nfaces_fnb(tMesh *mesh);
-tNlist *make_patch_neighbor_list(tNode *node, int face);
-tNlist *make_mesh_neighbor_list(tNode *node, int face);
-void update_node_fnb_only(tNode *node);
-int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
-void node_and_fnbs_lock(tNode *node);
-void node_and_fnbs_unlock(tNode *node);
-void parent_and_fnbs_lock(tNode *narray[8], tNode *locker);
-void parent_and_fnbs_unlock(tNode *narray[8], tNode *locker);
-tNode *get_node_nc_lock(tNode *node);
 
 /* surface.c */
 void free_surface(tSurface *s);
@@ -134,6 +119,7 @@ int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
 int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);
 int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
 int amr_elms_are_siblings(int n, void *ptr_elm);
+int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
 void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0);
 void amr_set_elm_bbox(tElm *elm);
