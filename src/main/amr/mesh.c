@@ -728,20 +728,23 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
       //Elm->nfnb[f] = -1;
     }
   }
-
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   amr_elm_nbinfo_to_elm_fnb(mesh);
-
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
-  printmyelms(mesh);
 
-
-  printf("mesh->myelm:\n");
-  printelmarray(mesh->nmyelm, mesh->myelm);
-  printf("mesh->nbelm:\n");
-  printelmarray(mesh->nnbelm, mesh->nbelm);
-
+  formyelms(mesh)
+  {
+    tElm *Elm = MyElm;
+    for(int f=0; f<6; f++)
+    {
+      Elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
+      //Elm->nfnb[f] = -1;
+    }
+  }
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  amr_elm_nbinfo_to_elm_fnb(mesh);
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
 
   printf("mesh->myelm:\n");
@@ -754,16 +757,6 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
   printelmarray(mesh->nnbelm, mesh->nbelm);
   printnbelms(mesh);
 
-
-
-  amr_remove_mesh_nbelm(mesh);
-
-  printf("mesh->myelm:\n");
-  printelmarray(mesh->nmyelm, mesh->myelm);
-  printmyelms(mesh);
-  printf("mesh->nbelm:\n");
-  printelmarray(mesh->nnbelm, mesh->nbelm);
-  printnbelms(mesh);
 
   tElm *e1 = mesh->myelm[6];
   tElm *e2 = mesh->myelm[5];
