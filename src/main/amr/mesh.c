@@ -643,12 +643,13 @@ Yo(33.2);
   */
 
 
+/*
   printmesh(mesh);
 //nMPI
 nMPI_barrier();
 RunFun(FINALIZE);
 finalize_all_and_exit(mesh, 0); //<--exit code 0
-
+*/
 
 
 
@@ -803,6 +804,7 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
   }
 
 
+  Timing->sibl1to7_weight = 0.;
   load_balance(mesh, 1);
   Timing->sibl1to7_weight = 1.;
 
