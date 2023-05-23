@@ -838,7 +838,6 @@ int setup_3patchl2_mesh(tMesh *mesh)
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
-  //tNlist *el, *en;
 
   PRFs(":\n");
 
@@ -856,23 +855,12 @@ int setup_3patchl2_mesh(tMesh *mesh)
 
   errorexit("add back the stuff below");
   /* 8 children in patch0 */
-  /*
-  make8children_in_mesh_lns_myln(mesh->lns, pt_typ, n);
-  printmesh(mesh);
-  */
+  hrefine_pat(mesh, 0);
 
   /* 8 more in each patch */
-  /*
-  el = mesh->lns;
-  for(en = el->next; el; en = el ? el->next : 0)
-  {
-    if(el->node->l < 2)
-    {
-      make8children_in_mesh_lns_myln(el, pt_typ, n);
-      el = en;
-    }
-  }
-  */
+  hrefine_pat(mesh, 0);
+  hrefine_pat(mesh, 1);
+  hrefine_pat(mesh, 2);
 
   simple_load_balance(mesh);
   printmesh(mesh);
