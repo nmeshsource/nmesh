@@ -686,7 +686,7 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
       errorexit("all 8 starting with child0 must be on same level");
 
     eloc_from_eploc(eloc, child->eploc);
-    if(eloc->loc[l_ch0-1] != ijk)
+    if(eloc->loc[l_ch0-1] != '0' + ijk)
       errorexiti("this is not child%d", ijk);
 
     pos_ijk = pos_ijk->next;  /* pos of next child */
