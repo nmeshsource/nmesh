@@ -1919,6 +1919,11 @@ void amr_unionadd_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
     /* add elm to nb->fnb */
     nb_fnb[nb_nfnb] = elm;
   }
+  else
+  {
+    if(f_elm[0] != elm)
+      errorexit("found elm with same loc that is not elm");
+  }
 }
 
 
