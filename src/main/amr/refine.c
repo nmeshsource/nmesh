@@ -496,95 +496,6 @@ void remove_elms_if_rflag__general(tMesh *mesh, tRef *ref)
 
 
 
-/***************************************************************************/
-/* old stuff. Remove later: */
-/***************************************************************************/
-
-/* p-refine nodes with nids in array, we assume nid[] is sorted in ascending
-   order. We do not update nids in here */
-void prefine_nid_list(tMesh *mesh, long nnodes, long *nid, tRef *ref)
-{
-  long i;
-
-  if(nnodes<=0) return;
-
-  NODELEVEL_Pragma(omp parallel)
-  {
-    tNlist *elem = mesh->lns;
-
-    NODELEVEL_Pragma(omp for)
-    for(i=0; i<nnodes; i++)
-    {
-      tNode *node;
-      int pt_typ[3], n[3];
-
-      /* forward to node with nid[i] */
-      //for(; elem && elem->node->nid != nid[i]; elem = elem->next) ;
-      //if(!elem) errorexiti("could not find nid[i]=%d", nid[i]);
-      for(; elem->node->eploc->eid != nid[i]; elem = elem->next) ;
-
-      /* find node */
-      node = elem->node;
-
-      /* set n and pt_typ */
-      hp_refine_set_n_pt_typ(node, ref, n, pt_typ);
-
-      /* p-refine by changing n and pt_typ of node */
-      update_node_n_pt_typ(node, n, pt_typ);
-    }
-  }
-}
-
-
-/* merge nid0-list in nid0b into nid0-list in nid0, the allocated size
-   of nid0 has to be 2*(n+nb) */
-long merge_nid0b_into_nid0(long n, long *nid0, long nb, long *nid0b)
-{
-  long i, j, nn=n;
-
-  /* do nothing if nid0b is empty */
-  if(nb<=0) return n;
-
-  /* if nid0 is not empty, merge nid0b into nid0 */
-  if(n>0)
-  {
-    for(j=0; j<nb; j++)
-    {
-      long nid0b_2j = nid0b[2*j];
-
-      /* find nid0b_2j in nid0 */
-      for(i=0; i<n; i++)
-        if(nid0[2*i] == nid0b_2j) break;
-
-      if(i<n)  /* found nid0b_2j in nid0 */
-        nid0[2*i+1] += nid0b[2*j+1];
-      else     /* append nid0b to nid0 */
-        { nid0[2*nn] = nid0b[2*j];  nid0[2*nn+1] = nid0b[2*j+1];  nn++; }
-    }
-  }
-  else /* copy nid0b into nid0 */
-  {
-    for(j=0; j<2*nb; j++) nid0[j] = nid0b[j];
-    nn = nb;
-  }
-
-  /* return new length of nid0 */
-  return nn;
-}
-
-/* compare nid0 numbers for qsort */
-int nid0_compar(const void *x1, const void *x2)
-{
-  const long *n1, *n2;
-  n1 = x1;
-  n2 = x2;
-
-  if(*n1 < *n2) return -1;
-  if(*n1 > *n2) return 1;
-  return 0;
-}
-
-
 
 /***************************************************************************/
 /* helper functions */
@@ -683,26 +594,24 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
 
   for(i=0; i<l; i++)
   {
-    tNlist *el;
     ref = 0;
-    fornodelist(mesh->lns, el)
+    formyelms(mesh)
     {
-      tNode *node = el->node;
-      if(Elm_l(node) < l)
+      tElm *elm = MyElm;
+      if(Elm_l(elm) < l)
       {
-        node->rflag = rf->method; /* flag node for refinement */
-        ref++;                    /* count number of nodes that need refinement */
+        elm->rflag = rf->method; /* flag elm for refinement */
+        ref++;                   /* count number of elms that need refinement */
       }
       else
       {
-        node->rflag = 0;
+        elm->rflag = 0;
       }
     }
 
     if(ref)
     {
       hrefine_elms_if_rflag(mesh, rf);
-      update_mesh_myln_node_nid(mesh);
       if(PR)
       {
         PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
@@ -736,11 +645,10 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 
   do
   {
-    tNlist *el;
     ref = 0;
-    fornodelist(mesh->lns, el)
+    formyelms(mesh)
     {
-      tNode *node = el->node;
+      tElm *node = MyElm;
       if(Elm_l(node) > l)
       {
         node->rflag = -rf->method; /* flag node for unrefinement */
@@ -755,7 +663,6 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
     if(ref)
     {
       remove_elms_if_rflag(mesh, rf);
-      update_mesh_myln_node_nid(mesh);
       if(PR)
       {
         PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
@@ -769,18 +676,16 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 void hrefine_pat(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
-  tNlist *el;
   tRef rf[1];
   rf->method = PARENT_n;
 
-  fornodelist(mesh->lns, el)
+  formyelms(mesh)
   {
-    tNode *node = el->node;
-    if(node->pat == pat) node->rflag = rf->method;
-    else                 node->rflag = 0;
+    tElm *elm = MyElm;
+    if(elm->pat == pat) elm->rflag = rf->method;
+    else                elm->rflag = 0;
   }
   hrefine_elms_if_rflag(mesh, rf);
-  update_mesh_myln_node_nid(mesh);
   if(PR)
   {
     PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
@@ -792,18 +697,16 @@ void hrefine_pat(tMesh *mesh, int p)
 void hcoarsen_pat(tMesh *mesh, int p)
 {
   tPat *pat = mesh->pat[p];
-  tNlist *el;
   tRef rf[1];
   rf->method = PARENT_n;
 
-  fornodelist(mesh->lns, el)
+  formyelms(mesh)
   {
-    tNode *node = el->node;
-    if(node->pat == pat) node->rflag = -rf->method;
-    else                 node->rflag = 0;
+    tElm *elm = MyElm;
+    if(elm->pat == pat) elm->rflag = -rf->method;
+    else                elm->rflag = 0;
   }
   remove_elms_if_rflag(mesh, rf);
-  update_mesh_myln_node_nid(mesh);
   if(PR)
   {
     PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
@@ -836,7 +739,6 @@ void hrefine_pcoarsen_nodes_if_nlim(tMesh *mesh)
     //}
   }
   hrefine_elms_if_rflag(mesh, ref);
-  update_mesh_myln_node_nid(mesh);
 
   if(PR)
   {
@@ -857,7 +759,9 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    tNode *parent = node->parent;
+    //tNode *parent = node->parent;
+    errorexit("tNode *parent = node->parent;  no longer works");
+    tNode *parent = NULL; //FIXME: this is wrong!!!
     int p_np, p_rflag;
 
     if(parent)
@@ -884,7 +788,6 @@ void undo_hrefine_pcoarsen_nodes_if_zero_nlim(tMesh *mesh)
     //}
   }
   remove_elms_if_rflag(mesh, ref);
-  update_mesh_myln_node_nid(mesh);
 
   if(PR)
   {
@@ -935,7 +838,6 @@ int hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
     }
   }
   hrefine_elms_if_rflag(mesh, ref);
-  update_mesh_myln_node_nid(mesh);
   return cnt;
 }
 
@@ -1020,21 +922,19 @@ void prefine_nodes_if_nb_uniform_in_any_dir(tMesh *mesh, tRef *ref)
 void prefine_pat(tMesh *mesh, int p, int n[3])
 {
   tPat *pat = mesh->pat[p];
-  tNlist *el;
   tRef rf[1];
   rf->method = GIVEN_n;
   rf->n[0] = n[0];
   rf->n[1] = n[1];
   rf->n[2] = n[2];
 
-  fornodelist(mesh->lns, el)
+  formyelms(mesh)
   {
-    tNode *node = el->node;
-    if(node->pat == pat) node->rflag = rf->method;
-    else                 node->rflag = 0;
+    tElm *elm = MyElm;
+    if(elm->pat == pat) elm->rflag = rf->method;
+    else                elm->rflag = 0;
   }
   prefine_elms_if_rflag(mesh, rf);
-  update_mesh_myln_node_nid(mesh);
   if(PR)
   {
     PRF;printf(": On rank%d mesh is now:\n", nMPI_rank());
