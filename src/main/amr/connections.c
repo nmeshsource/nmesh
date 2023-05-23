@@ -2499,6 +2499,62 @@ void amr_remove_mesh_nbelm(tMesh *mesh)
 /* functions to exchange info between rank_i and rank_{i \pm 1} */
 /****************************************************************************/
 
+
+/* fill in tElmfl myfl[1] with my first and last elm */
+void get_my_Elmfl(tMesh *mesh, tElmfl myfl[1])
+{
+  long nelms = mesh->nmyelm;
+
+  myfl->nelms = nelms;
+  if(nelms <= 0) return;
+  myfl->elm_fl[0] = *(mesh->myelm[0]);        /* shallow copies */
+  myfl->elm_fl[1] = *(mesh->myelm[nelms-1]);
+}
+
+/* exchange first and last elms with rank+1 and rank-1 */
+void get_nbr_rank_info(tMesh *mesh)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  tCom *com;
+  int rq;
+  tElmfl myfl[1];
+  tElmfl *fl_m1 = mesh->nbr->fl_m1;
+  tElmfl *fl_p1 = mesh->nbr->fl_p1;
+
+  /* get my first and last elm from mesh->myelm */
+  get_my_Elmfl(mesh, myfl);
+
+  /* for MPI data transfers */
+  //FIXME: why sizeof(double)???, should 2nd arg be 0 or 1????
+  //com = alloc_com(sizeof(double), 0);
+  com = alloc_com(sizeof(char), 0);
+
+  //alloc_com is stupid!!! Its 1st arg should always be sizeof(void *)
+
+  /* send myfl to rank-1 and also receive fl_m1 from rank-1 */
+  if(rank>0)
+  {
+    rq = append_buffers_to_com(com, myfl,sizeof(myfl[0]),
+                                    fl_m1,sizeof(fl_m1[0]));
+    nMPI_Isend_Irecv_com(com, rq, nMPI_CHAR, rank-1, -1,+1, WORLD, WORLD);
+  }
+
+  /* send myfl to rank+1 and also receiv fl_p1 from rank+1 */
+  if(rank < size-1)
+  {
+    rq = append_buffers_to_com(com, myfl,sizeof(myfl[0]),
+                                    fl_p1,sizeof(fl_p1[0]));
+    nMPI_Isend_Irecv_com(com, rq, nMPI_CHAR, rank+1, +1,-1, WORLD, WORLD);
+  }
+
+  /* wait until all sent and received */
+  nMPI_Waitall_com(com);
+  free_com(com);
+}
+
+
+
 /* exchange first and last elm between neigboring ranks
   Out: myfl  <-- first and last elm on this rank
        rm1fl <-- first and last on rank-1
