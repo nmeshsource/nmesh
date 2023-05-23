@@ -264,7 +264,11 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
 {
   /* setup all bfaces */
   amr_set_all_bfaces(mesh);
-  if(pr) printallbfaces(mesh);
+  if(pr)
+  {
+    PRFs(":\n");
+    printallbfaces(mesh);
+  }
 
   /* set mesh->myelms and eids */
   update_mesh_myelms_elm_eid_dt(mesh);
@@ -277,6 +281,7 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
 
   if(pr)
   {
+    PRFs(":\n");
     printf("mesh->myelm: ");
     printelmarray(mesh->nmyelm, mesh->myelm);
     printmyelms(mesh);

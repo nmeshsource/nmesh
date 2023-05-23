@@ -324,7 +324,7 @@ ulong alloc_and_set_mesh_myelm(tMesh *mesh)
 
   /* get number of elms on this rank */
   mesh->nmyelm = list_count_nodes(&mesh->myelm_head);
-  PRF;printf(": mesh->nmyelm=%ld\n", mesh->nmyelm);
+  //PRF;printf(": mesh->nmyelm=%ld\n", mesh->nmyelm);
   /* return if there are no elms */
   if(mesh->nmyelm == 0) return 0;
 
@@ -339,7 +339,6 @@ ulong alloc_and_set_mesh_myelm(tMesh *mesh)
     mesh->myelm[ei] = list_entry(pos, tElm, list);
     ei++;
   }
-  if(ei != mesh->nmyelm) errorexit("Whaaaat??????");
   return mesh->nmyelm;
 }
 

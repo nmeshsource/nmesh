@@ -452,7 +452,7 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
   tCom *scom, *rcom;
   long i;
 
-  PRFs(":\n");
+  //PRFs(":\n");
   //fflush(stdout);
 
   /* for MPI data transfers */
