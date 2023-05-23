@@ -1116,7 +1116,7 @@ int toggle_face2_flag_of_CubSph_doms_0_4_and_1_5(tMesh *mesh)
 
 
 /* find out if any node points on face f are on face nb_f of node nb */
-int find_nodefacepoints_in_nbface(tNode *node, int f, tNode *nb, int nb_f)
+int find_nodefacepoints_in_nbface__OLD(tNode *node, int f, tNode *nb, int nb_f)
 {
   int dir = f/2;
   int n[] = { 3,3,3 };        /* we use 3 points */
@@ -1177,14 +1177,14 @@ int find_nodefacepoints_in_nbface(tNode *node, int f, tNode *nb, int nb_f)
 
 /* check if node and nb has common points on faces f and nb_f
    since res in find_nodefacepoints_in_nbface is low, try it both ways */
-int common_facepoints(tNode *node, int f, tNode *nb, int nb_f)
+int common_facepoints__OLD(tNode *node, int f, tNode *nb, int nb_f)
 {
   int f1, f2;
 
-  f1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
+  f1 = find_nodefacepoints_in_nbface__OLD(node,f, nb,nb_f);
   if(f1) return 1;
 
-  f2 = find_nodefacepoints_in_nbface(nb,nb_f, node,f);
+  f2 = find_nodefacepoints_in_nbface__OLD(nb,nb_f, node,f);
 
   return f2 || f1;
 }
