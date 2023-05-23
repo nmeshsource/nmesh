@@ -170,7 +170,8 @@ void printelm(const tElm *e)
     {
       for(j=0; j<e->nfnb[i]; j++)
       {
-        printeploc(e->fnb[i][j]->eploc);
+        if(e->fnb[i][j]) printeploc(e->fnb[i][j]->eploc);
+        else             printf("nil");
         if(j<e->nfnb[i]-1) printf(" ");
         nfnb_tot++;
       }
