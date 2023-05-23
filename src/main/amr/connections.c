@@ -1595,6 +1595,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
      needs to be updated. */
 
   /* print what we have so far */
+  /*
   for(f=0; f<6; f++)
   {
     PRF;printf(": nmyef0[f]=%lu  &ef0_head[%d]:\n", nmyef0[f], f);
@@ -1605,9 +1606,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
     }
     printf("\n");
   }
+  */
 
-printf("XXXXXX count=%lu\n", list_count_nodes(&ef0_head[0]));
-printf("XXXXXX rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
+  //printf("XXXXXX count=%lu\n", list_count_nodes(&ef0_head[0]));
+  //printf("XXXXXX rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
 
   /* send my lists to the other ranks */
   for(rk=0; rk<size; rk++)
@@ -1626,7 +1628,7 @@ printf("XXXXXX rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
     ulong ef0_nbs_idx = 0; /* index of next entry to add */
     ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
-printf("YYYYYYY rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
+    //printf("YYYYYYY rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
 
     /* rank rk copies his nmyef0 into nef0 */
     if(rank == rk)
@@ -1634,9 +1636,9 @@ printf("YYYYYYY rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
 
     /* rank rk sends his nef0[f] to all others, to tell how many elms he
        wants to find face nbs of */
-printf("111111 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
+    //printf("111111 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
     nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
-printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
+    //printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 
     /* init ef0_nbs index counter */
     ef0_nbs_idx = 0;
@@ -1698,12 +1700,6 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
                                 &(nnb), sizeof(nnb));
           ef0_nbs_idx++;
 
-
-          //printf("ADD nnb int, next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
-          //printarray_eploc(ef0_nbs, 1);
-          //exit(66);
-
-
           /* get nb eploc into ef0_nbs array */
           j=0;
           list_for_each_safe(pos1, sav, &fnb_head)
@@ -1715,11 +1711,6 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
                                   nb->eploc, sizeof(tEploc));
             ef0_nbs_idx++;
             j++;
-
-            //printf("next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
-            //printarray_eploc(ef0_nbs, 1);
-            //exit(67);
-
 
             /* once nb->eploc is in ef0_nbs, del elem with nb */
             glist_elem_del(elem);
@@ -1735,16 +1726,8 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 
     /* number of tEploc sized entries in ef0_nbs */
     nmyEplocs = ef0_nbs_idx;
-
-    printf("nmyEplocs=%lu\n", nmyEplocs);
-    printarray_eploc(ef0_nbs, 1);
-    //exit(65);
-
-    //we now need to send the ef0_nbs arrays of each rank to rank rk
-    //do NOT use: nMPI_Bcast(ef0_nbs->d, len???, nMPI_DOUBLE, rk);
-    // see https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
-    //--> use MPI_Gather
-    // all need to send, and only rk receives
+    //printf("nmyEplocs=%lu\n", nmyEplocs);
+    //printarray_eploc(ef0_nbs, 1);
 
     if(rank != rk) /* send to rank rk */
     {
@@ -1821,11 +1804,9 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
             e2ul.e = eplocs[r][epi++];
             nelms  = e2ul.ul;
 
-            printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
-
-
-            printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
-            printeploc_s(&(eplocs[r][epi-1]),"\n");
+            //printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
+            //printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
+            //printeploc_s(&(eplocs[r][epi-1]),"\n");
 
             for(ei=0; ei<nelms; ei++)
             {
@@ -1842,10 +1823,10 @@ printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
               e2ul.e = eplocs[r][epi++];
               nnb    = e2ul.ul;
 
-              printeploc_s(elm->eploc, " ");
-              printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
-              if(nnb) printeploc(&(eplocs[r][epi]));
-              printf("\n");
+              //printeploc_s(elm->eploc, " ");
+              //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
+              //if(nnb) printeploc(&(eplocs[r][epi]));
+              //printf("\n");
 
               /* all nbs in eplocs[r] to var amr_elm_nbinfo */
               amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(eplocs[r][epi]));
@@ -2061,7 +2042,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
       }
   }
 
-
+  /*
   for(rk=0; rk<size; rk++)
   {
     printf("rk%d: nr=%lu ns=%lu\n", rk, nr_elm0[rk], ns_elm0[rk]);
@@ -2075,8 +2056,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
       printeploc_s(s_elm0[rk][ei].eploc, " ");
     printf("\n");
   }
-
-Yo(111);
+  */
 
   /* send and recv from rank rk */
   scom = alloc_com(sizeof(s_elm0[0][0]), 0);
