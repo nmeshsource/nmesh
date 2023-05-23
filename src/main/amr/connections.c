@@ -1041,7 +1041,6 @@ tElm **amr_elmarray_bsearch(ulong narr, tElm **arr, tElm *elm)
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
   //PRFs(": ");printelmarray(narr, arr);
-  //printeloc_s(eloc," ");
   f_elm = bsearch(eloc, arr, narr, sizeof(arr[0]), lecmp_q);
   //if(f_elm) { printf("found ");printeloc_s(eloc,"\n"); }
   //else      { printf("could not find ");printeloc_s(eloc,"\n"); }
@@ -1069,7 +1068,6 @@ tElm **amr_elmarray_linsearch(ulong narr, tElm **arr, tElm *elm)
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
   PRFs(": ");printelmarray(narr, arr);
-  printeloc_s(eloc," ");
   f_elm = NULL;
   for(i=0; i<narr; i++)
   {
@@ -2036,7 +2034,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
           elm->fnb[f][i] = nb;
 
           /* add elm also to nb->fnb[nb_f][nb_i] */
-          amr_add_elm_to_nbelm_fnb(elm, f, i);
+          amr_unionadd_elm_to_nbelm_fnb(elm, f, i);
           /* This is done locally and may miss nbs of the elms in nbelm,
              that are on yet other ranks! */
         }
