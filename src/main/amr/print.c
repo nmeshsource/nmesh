@@ -22,12 +22,10 @@ void printmesh(tMesh *mesh)
 	 mesh->eidlim[size-1], mesh->nmyelm, mesh->dt);
   forpatches(mesh, p)
     printpatch(mesh->pat[p]);
-  printf("leaf nodes:\n");
-  formyelms(mesh)
-  {
-    tElm *elm = MyElm;
-    printelm(elm);
-  }
+  printf("leaf nodes on this rank:\n");
+  printmyelms(mesh);
+  printf("leaf nodes on nearby ranks:\n");
+  printnbelms(mesh);
 }
 
 void printpatch(tPat *pat)

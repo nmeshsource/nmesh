@@ -82,7 +82,6 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
                 int *pt_typ_root, int nroot[3], int datrank)
 {
   int nmax = gridpoints->nmax;
-  tNlist *nlist;
   tPat *pat;
   int p = mesh->npats;
   double dg;
@@ -579,12 +578,10 @@ int setup_elm_mesh1(tMesh *mesh)
   if(nMPI_rank()==0)
     enablevarcomp_innode(mesh->myelm[2], Ind("advection1_u"));
 
-
   simple_load_balance(mesh);
 
   Yo(200);
   printmyelms(mesh);
-
 
 Yo(33);
   /* refine!!! */
@@ -595,21 +592,7 @@ Yo(33);
   }
   ref->method = PARENT_n;
   hrefine_elms_if_rflag(mesh, ref);
-  //update_mesh_myelms_elm_eid_dt(mesh);
-  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
-Yo(33.01);
   printmyelms(mesh);
-
-//something messes up e.g. nbinfo of 3_
-  printf("mesh->myelm:\n");
-  printelmarray(mesh->nmyelm, mesh->myelm);
-  printmyelms(mesh);
-
-  printf("mesh->nbelm:\n");
-  printelmarray(mesh->nnbelm, mesh->nbelm);
-  printnbelms(mesh);
-
-
 
 Yo(33.1);
   /* refine again !!! */
@@ -620,14 +603,10 @@ Yo(33.1);
   }
   ref->method = PARENT_n;
   hrefine_elms_if_rflag(mesh, ref);
-  //update_mesh_myelms_elm_eid_dt(mesh);
-  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   printmyelms(mesh);
-
 
   simple_load_balance(mesh);
   printmyelms(mesh);
-
 
 Yo(33.2);
   /* refine again !!! */
@@ -638,35 +617,7 @@ Yo(33.2);
   }
   ref->method = PARENT_n;
   hrefine_elms_if_rflag(mesh, ref);
-  //update_mesh_myelms_elm_eid_dt(mesh);
-  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
   printmyelms(mesh);
-
-
-
-  // print before crash:
-  printf("mesh->myelm:\n");
-  printelmarray(mesh->nmyelm, mesh->myelm);
-  printmyelms(mesh);
-
-  printf("mesh->nbelm:\n");
-  printelmarray(mesh->nnbelm, mesh->nbelm);
-  printnbelms(mesh);
-
-
-  //this crashes:
-  Yo(911);
-  simple_load_balance(mesh);
-  printmyelms(mesh);
-  printnbelms(mesh);
-
-
-
-
-//nMPI
-nMPI_barrier();
-RunFun(FINALIZE);
-finalize_all_and_exit(mesh, 0); //<--exit code 0
 
   simple_load_balance(mesh);
   printmyelms(mesh);
@@ -680,63 +631,34 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
   printf("mesh->nbelm:\n");
   printelmarray(mesh->nnbelm, mesh->nbelm);
   printnbelms(mesh);
-
-//mesh->nbelm: on rank1 is wrong
-
-  /* set flag to update all fnb, not needed because alloc_dat does this */
-  /*
-  formyelms(mesh)
-  {
-    tElm *elm = MyElm;
-    for(int f=0; f<6; f++)
-    {
-      elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
-      //elm->nfnb[f] = -1;
-    }
-  }
-  */
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
-  amr_erase_all_elm_fnb(mesh);
-  amr_elm_nbinfo_to_elm_fnb(mesh);
-
-
-  printf("mesh->nbelm (again):\n");
-  printelmarray(mesh->nnbelm, mesh->nbelm);
-  printnbelms(mesh);
-
-
-
-// this crashes it! Why????
-amr_get_nbelm_elmheaders(mesh);
-
-
-//nMPI
-nMPI_barrier();
-RunFun(FINALIZE);
-finalize_all_and_exit(mesh, 0); //<--exit code 0
-
 
 
   /* print a var */
+  /*
   list_for_each(pos, &mesh->myelm_head)
   {
     elm = list_entry(pos, tElm, list);
     printvar_innode(elm, Ind("advection1_u"));
   }
+  */
 
 
-  //printmesh(mesh);
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    printelm(list_entry(pos, tElm, list));
-  }
+  printmesh(mesh);
+//nMPI
+nMPI_barrier();
+RunFun(FINALIZE);
+finalize_all_and_exit(mesh, 0); //<--exit code 0
+
+
+
+
 
   // try to find nb
   INIT_LIST_HEAD(&fnb_head);
   elm = mesh->myelm[6];
   if(nMPI_rank()==0)
     amr_make_fnb_list(elm, 1, mesh->nmyelm, mesh->myelm, &fnb_head);
-  printf("%d in fnb_head\n", list_count_nodes(&fnb_head));
+  printf("%zu in fnb_head\n", list_count_nodes(&fnb_head));
   list_for_each(pos, &fnb_head)
   {
     elm = glist_entry(pos);
@@ -754,8 +676,6 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
   tEploc eploc[7];
   tEloc eloc0;
   tEloc eloc;
-  double *pd;
-  ulong *pu;
 
   eloc0.p=16;
   eloc0.l=7;
@@ -800,11 +720,11 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
   /* set flag to update all fnb, not needed because alloc_dat does this */
   formyelms(mesh)
   {
-    tElm *elm = MyElm;
+    tElm *Elm = MyElm;
     for(int f=0; f<6; f++)
     {
-      elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
-      //elm->nfnb[f] = -1;
+      Elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
+      //Elm->nfnb[f] = -1;
     }
   }
 
@@ -923,7 +843,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   double bbox0[6] = { -4,4, -2,2, -1,1 };
   double bbox1[6] = { -4,0,  2,4, -1,1 };
   double bbox2[6] = {  0,4,  2,4, -1,1 };
-  tNlist *el, *en;
+  //tNlist *el, *en;
 
   PRFs(":\n");
 
