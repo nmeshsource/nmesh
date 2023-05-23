@@ -352,49 +352,49 @@ void free_mesh_myelm(tMesh *mesh)
 
 
 /* make root node element and add it to mesh */
-tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
+void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
 {
+  tMesh *mesh = pat->mesh;
+  tElm0 elm0[1] = {0}; /* elm header with root node info */
+  tEploc *eploc = elm0->eploc;
+  int i;
+
+  /* check for overflow in eploc->p */
+  i = (1 << (sizeof(eploc->p)*8)) - 1;
+  if(pat->p > i) errorexiti("cannot have more than %d patches", i);
+
+  /* fill in info */
+  eploc->p = pat->p;
+  eploc->l = 0; /* root node */
+  eploc->ploc[0] = 0;
+  amr_set_elm0_bbox(mesh, elm0);
+
+  /* save n and pt_typ for root node */
+  for(i=0; i<3; i++)
+  {
+    elm0->n[i] = n[i];
+    elm0->pt_typ[i] = pt_typ[i];
+  }
+  elm0->np = n[0] * n[1] * n[2];
+  elm0->eploc->eid = EID_INVALID;    /* mark eid as not set */
+
+  /* set where dat needs to be allocated */
+  elm0->datrank = datrank;
+
   /* make root element only on the MPI rank that owns it */
   if(nMPI_rank()==datrank)
   {
-    tMesh *mesh = pat->mesh;
-    tElm *elm = alloc_elm(mesh);
-    tEploc *eploc = elm->eploc;
-    int i;
-
-    /* check for overflow in eploc->p */
-    i = (1 << (sizeof(eploc->p)*8)) - 1;
-    if(pat->p > i) errorexiti("cannot have more than %d patches", i);
-
-    /* fill in info */
-    eploc->p = pat->p;
-    eploc->l = 0; /* root node */
-    eploc->ploc[0] = 0;
-    amr_set_elm_pat(mesh, elm);
-    amr_set_elm_bbox(elm);
-
-    /* save n and pt_typ for root node */
-    for(i=0; i<3; i++)
-    {
-      elm->n[i] = n[i];
-      elm->pt_typ[i] = pt_typ[i];
-    }
-    elm->np = n[0] * n[1] * n[2];
-    elm->eploc->eid = EID_INVALID;    /* mark eid as not set */
+    tElm *elm = alloc_elm_of_elmheader(mesh, elm0);
 
     /* see where dat needs to be allocated */
-    elm->datrank = datrank;
     elm->dat = alloc_dat(elm);
 
     /* add new root element to list mesh->myelm_head */
     list_add_tail(&elm->list, &mesh->myelm_head);
+  }
 
-    return elm;
-  }
-  else
-  {
-    return NULL;
-  }
+  /* set rnode info */
+  pat->rnode[0] = elm0[0];
 }
 
 

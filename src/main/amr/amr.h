@@ -24,7 +24,7 @@ tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
 void free_elm(tElm *elm);
 ulong alloc_and_set_mesh_myelm(tMesh *mesh);
-tElm *make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
+void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
                                        struct list_head *ch_head);
@@ -135,6 +135,7 @@ int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);
 int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
 int amr_elms_are_siblings(int n, void *ptr_elm);
 void amr_set_elm_pat(tMesh *mesh, tElm *elm);
+void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0);
 void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
