@@ -161,7 +161,7 @@ int amr_setup_mesh(tMesh *mesh)
   else if(Getv(mesh_type, "3patchl2_mesh"))
     ret = setup_3patchl2_mesh(mesh);
   else
-    ret = setup_elm_mesh1(mesh); //ret = setup_test_mesh(mesh);
+    ret = setup_elm_mesh1(mesh); // test case
 
   /* load balance root nodes */
   simple_load_balance(mesh);
