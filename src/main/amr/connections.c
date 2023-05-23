@@ -1067,7 +1067,7 @@ tElm **amr_elmarray_linsearch(ulong narr, tElm **arr, tElm *elm)
   ulong i;
   tEloc eloc[1];
   eloc_from_eploc(eloc, elm->eploc); //could optimize if elm also has eloc
-  PRFs(": ");printelmarray(narr, arr);
+  //PRFs(": ");printelmarray(narr, arr);
   f_elm = NULL;
   for(i=0; i<narr; i++)
   {
@@ -1077,8 +1077,8 @@ tElm **amr_elmarray_linsearch(ulong narr, tElm **arr, tElm *elm)
       break;
     }
   }
-  if(f_elm) { printf("found ");printeloc_s(eloc,"\n"); }
-  else      { printf("could not find ");printeloc_s(eloc,"\n"); }
+  //if(f_elm) { printf("found ");printeloc_s(eloc,"\n"); }
+  //else      { printf("could not find ");printeloc_s(eloc,"\n"); }
   return f_elm;
 }
 
