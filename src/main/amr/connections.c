@@ -941,8 +941,6 @@ int amr_get_nbface(tElm *elm, int elmface, tElm *nb)
       if(touch) return nb_f;
     }
   }
-  //FIXME: remove errorexit
-  errorexit("nb_f not found");
   return -1;
 }
 
@@ -2014,10 +2012,14 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
 void amr_add_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
 {
   tElm *nb = elm->fnb[f][ni];
+  int nb_nfnb;
+  tElm **nb_fnb;
   /* figure out face on nb */
   int nb_f = amr_get_nbface(elm, f, nb);
-  int nb_nfnb = nb->nfnb[nb_f];
-  tElm **nb_fnb = nb->fnb[nb_f];
+  if(nb_f<0) errorexit("nb_f not found");
+
+  nb_nfnb = nb->nfnb[nb_f];
+  nb_fnb = nb->fnb[nb_f];
 
   /* make room for one more */
   nb_fnb = realloc(nb_fnb, (nb_nfnb+1) * sizeof(nb_fnb[0]));
@@ -2033,10 +2035,15 @@ void amr_add_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
 void amr_unionadd_elm_to_nbelm_fnb(tElm *elm, int f, int ni)
 {
   tElm *nb = elm->fnb[f][ni];
+  int nb_nfnb;
+  tElm **nb_fnb;
   /* figure out face on nb */
   int nb_f = amr_get_nbface(elm, f, nb);
-  int nb_nfnb = nb->nfnb[nb_f];
-  tElm **nb_fnb = nb->fnb[nb_f];
+  if(nb_f<0) errorexit("nb_f not found");
+
+  nb_nfnb = nb->nfnb[nb_f];
+  nb_fnb = nb->fnb[nb_f];
+
   /* see if elm is already in nb_fnb */
   tElm **f_elm = amr_elmarray_linsearch(nb_nfnb, nb_fnb, elm);
   /* if elm is not there yet add it to nb_fnb = nb->fnb[nb_f] */
@@ -2517,6 +2524,7 @@ int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface,
 
     /* face of nb */
     nb_f = amr_get_nbface(elm,elmface, nb);
+    if(nb_f<0) errorexit("nb_f not found");
 
     if(nb->dat)
     {
