@@ -176,7 +176,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
-  amr_remove_mesh_nbelm(mesh);
+  amr_remove_mesh_nbelm(mesh, 0);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
@@ -226,9 +226,9 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
     // use: connections_get_nbloc_InsidePat
 
     /* for now we just invalidate a lot and remove the parent */
-    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent);
+    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent, 1);
     if(nbs_on_other_rank)
-      amr_remove_mesh_nbelm(Elm_mesh(parent));
+      amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
 
     /* free parent and all data on parent */
     free_elm(parent);
@@ -293,7 +293,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
-  amr_remove_mesh_nbelm(mesh);
+  amr_remove_mesh_nbelm(mesh, 0);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
@@ -349,16 +349,16 @@ void set_parent_nbinfo_remove_children(tElm *parent,
     list_for_each(pos_ijk, ch_head)
     {
       tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
-      int ret = amr_invalidate_nbinfo_of_all_nbs(ch_ijk);
+      int ret = amr_invalidate_nbinfo_of_all_nbs(ch_ijk, 1);
       if(ret) nbs_on_other_rank++;
       /* Note: amr_invalidate_nbinfo_of_all_nbs(ch_ijk) sets the fnb in
-         nbelm that point to child0-7 to NULL */
+         nbelm that point to child0-7 to NULL, if its 2nd arg is 0 */
     }
     if(nbs_on_other_rank)
-      amr_remove_mesh_nbelm(Elm_mesh(parent));
+      amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
       /* Note: amr_remove_mesh_nbelm cannot invalidate the fnb pointers
-         of child0-7, because all pointers to child0-7 in nbelm are NULL
-         (See comment above). This means child0-7 now contain invalid
+         of child0-7, if all pointers to child0-7 in nbelm are NULL
+         (See comment above). This means child0-7 then contain invalid
          pointers! But we will free child0-7 very soon. */
 
     /* free children */

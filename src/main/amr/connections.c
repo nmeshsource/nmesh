@@ -2468,7 +2468,8 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 
 /* Invalidate nbinfo for all nbs of elm on elmface.
    Return: 0 if all nbs have dat (are on my rank), 1 if one nb has no dat */
-int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
+int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface,
+                                 int Keep_nbs_fnb_to_elm)
 {
   int ni;
   int nbs_on_other_rank = 0;
@@ -2500,45 +2501,46 @@ int amr_invalidate_nbinfo_of_nbs(tElm *elm, int elmface)
        This is needed if we remove elm and we then want to remove nb soon
        after and then call:
        amr_invalidate_nbinfo_of_nbs(nb,...); */
-    for(nb_ni=0; nb_ni<nb->nfnb[nb_f]; nb_ni++)
-    {
-      tElm *nbnb =  nb->fnb[nb_f][nb_ni];
-      if(nbnb==elm) nb->fnb[nb_f][nb_ni] = NULL;
-    }
+    if(!Keep_nbs_fnb_to_elm)
+      for(nb_ni=0; nb_ni<nb->nfnb[nb_f]; nb_ni++)
+      {
+        tElm *nbnb =  nb->fnb[nb_f][nb_ni];
+        if(nbnb==elm) nb->fnb[nb_f][nb_ni] = NULL;
+      }
   }
   return nbs_on_other_rank;
 }
 
 /* Invalidate nbinfo for all nbs of elm on elmface.
    Return: 0 if all nbs have dat (are on my rank), # of nbs witout dat */
-int amr_invalidate_nbinfo_of_all_nbs(tElm *elm)
+int amr_invalidate_nbinfo_of_all_nbs(tElm *elm, int Keep_nbs_fnb)
 {
   int f;
   int nbs_on_other_rank = 0;
   for(f=0; f<6; f++)
-    nbs_on_other_rank += amr_invalidate_nbinfo_of_nbs(elm, f);
+    nbs_on_other_rank += amr_invalidate_nbinfo_of_nbs(elm, f, Keep_nbs_fnb);
   return nbs_on_other_rank;
 }
 
 /* Go over mesh->nbelm list and invalidate nbinfo for all my elms that
    are nbs of any elm in mesh->nbelm. */
-void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh)
+void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh, int Keep_nbs_fnb)
 {
   int ei;
   for(ei=0; ei < mesh->nnbelm; ei++)
   {
     tElm *elm = mesh->nbelm[ei];
-    amr_invalidate_nbinfo_of_all_nbs(elm);
+    amr_invalidate_nbinfo_of_all_nbs(elm, Keep_nbs_fnb);
   }
 }
 
 /* Remove mesh->nbelm and make sure all nbinfo about it is deleted */
-void amr_remove_mesh_nbelm(tMesh *mesh)
+void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
 {
   int ei;
 
   /* first make sure nobody has info about elms in nbelm */
-  amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh);
+  amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh, Keep_nbs_fnb);
 
   for(ei=0; ei < mesh->nnbelm; ei++)
   {

@@ -10,7 +10,6 @@ BUGS:
 
 *redef eecmp_q, lecmp_q  such that that return 0 only if really equal
  not like loccmp
-*fix CHECK in connections.c
 
 
 

@@ -134,5 +134,5 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
 int amr_get_nbelm_elmheaders(tMesh *mesh);
 int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
                           tElm0 *elm0);
-int amr_invalidate_nbinfo_of_all_nbs(tElm *elm);
-void amr_remove_mesh_nbelm(tMesh *mesh);
+int amr_invalidate_nbinfo_of_all_nbs(tElm *elm, int Keep_nbs_fnb);
+void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb);

@@ -32,7 +32,7 @@ void load_balance(tMesh *mesh, int strategy)
 //  Timing->sibl1to7_weight = 0.;
 
   /* when we move elms much of mesh->nbelm will become wrong */
-  amr_remove_mesh_nbelm(mesh); // this makes some of nnbinfo negative
+  amr_remove_mesh_nbelm(mesh, 0); // this makes some of nnbinfo negative
 
   /* move elms bewteen ranks */
   load_balance_elms(mesh);
