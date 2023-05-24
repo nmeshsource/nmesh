@@ -345,14 +345,21 @@ void set_parent_nbinfo_remove_children(tElm *parent,
     // use: connections_get_nbloc_InsidePat
 
     /* for now we just invalidate a lot and remove the children */
+    nbs_on_other_rank = 0;
     list_for_each(pos_ijk, ch_head)
     {
       tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
-
-      nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(ch_ijk);
-      if(nbs_on_other_rank)
-        amr_remove_mesh_nbelm(Elm_mesh(parent));
+      int ret = amr_invalidate_nbinfo_of_all_nbs(ch_ijk);
+      if(ret) nbs_on_other_rank++;
+      /* Note: amr_invalidate_nbinfo_of_all_nbs(ch_ijk) sets the fnb in
+         nbelm that point to child0-7 to NULL */
     }
+    if(nbs_on_other_rank)
+      amr_remove_mesh_nbelm(Elm_mesh(parent));
+      /* Note: amr_remove_mesh_nbelm cannot invalidate the fnb pointers
+         of child0-7, because all pointers to child0-7 in nbelm are NULL
+         (See comment above). This means child0-7 now contain invalid
+         pointers! But we will free child0-7 very soon. */
 
     /* free children */
     list_for_each_safe(pos_ijk, sav, ch_head)
