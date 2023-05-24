@@ -33,10 +33,11 @@ const void *binarysearch(const void *key, const void *base0,
                          size_t *base0offset, size_t *num, size_t size,
                          int (*compar)(const void *, const void *, void *),
                          void *arg);
-int binarysearchmore(const void *key, const void *base0,
-                     size_t nmemb, size_t size, const void *result,
-                     int (*compar)(const void *, const void *, void *),
-                     void *arg);
+void binarysearchmore(const void *key, const void *base0,
+                      size_t nmemb, size_t size, const void *result,
+                      int (*compar)(const void *, const void *, void *),
+                      void *arg,
+                      unsigned *more, unsigned *atBoundary);
 const void *bisectionsearch(const void *key, const void *base0,
                             size_t *base0offset, size_t *num, size_t size,
                             int (*compar)(const void *, const void *, void *),

@@ -58,41 +58,56 @@ const void *binarysearch(const void *key, const void *base0,
 }
 
 /* check if key also matches left and right of result of binarysearch
-   Return vals:
-   1 left of result also matches
-   2 right of result also matches
-   3 left and right of result also match
-   0 neither left nor right match */
-int binarysearchmore(const void *key, const void *base0,
-                     size_t nmemb, size_t size, const void *result,
-                     int (*compar)(const void *, const void *, void *),
-                     void *arg)
+   Out: more, atBound:
+   more =  1 left of result also matches
+           2 right of result also matches
+           3 left and right of result also match
+           0 neither left nor right match
+   atBound = 1 if pos of result is at lower array bound
+   atBound = 2 if pos of result is at upper array bound
+   atBound = 0 if pos of result is between lower & upper array bounds */
+void binarysearchmore(const void *key, const void *base0,
+                      size_t nmemb, size_t size, const void *result,
+                      int (*compar)(const void *, const void *, void *),
+                      void *arg,
+                      unsigned *more, unsigned *atBoundary)
 {
-    int cmp, more;
+    int cmp;
     const char *res = (const char *) result;
     size_t pos;
 
-    if(!result) return 0;
+    /* defaults for output vars */
+    *more = 0;
+    *atBoundary = 0;
+
+    if(!result) return;
 
     pos = (res - (const char *) base0)/size;
     //printf("result=%p base0=%p pos=%ld\n", result, base0, pos);
-    more = 0;
+    *more = 0;
+    *atBoundary = 0;
 
     /* check on left */
     if(pos>0)
     {
         cmp = (*compar)(key, res-size, arg);
-        if(cmp == 0) more |= 1;
+        if(cmp == 0) *more |= 1;
+    }
+    else
+    {
+      *atBoundary |= 1;
     }
 
     /* check on right */
     if(pos<nmemb-1)
     {
         cmp = (*compar)(key, res+size, arg);
-        if(cmp == 0) more |= 2;
+        if(cmp == 0) *more |= 2;
     }
-
-    return more;
+    else
+    {
+      *atBoundary |= 2;
+    }
 }
 
 
