@@ -1286,10 +1286,10 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
   off = off0;
   num = num0;
 
-  PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
-  printeloc(s_eloc);
-  printf(" s_f=%d\n  ", s_f);
-  printelmarray(narr, arr);
+  //PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
+  //printeloc(s_eloc);
+  //printf(" s_f=%d\n  ", s_f);
+  //printelmarray(narr, arr);
 
   for(l = l0; l <= lmax; l++)
   {
@@ -1298,16 +1298,16 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
     f_eloc->l = l;
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
 
-    printf("off=%zu num=%zu  f_elm pos=%zu\n",
-           off, num, (size_t) ((tElm **)f_elm - arr));
-    if(f_elm) { printf("got ");printelm(*f_elm); }
+    //printf("off=%zu num=%zu  f_elm pos=%zu\n",
+    //       off, num, (size_t) ((tElm **)f_elm - arr));
+    //if(f_elm) { printf("got ");printelm(*f_elm); }
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
     /* is there only one f_elm? */
     binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp, NULL,
                      &mor, &atB);
-    printf("mor=%d\n", mor);
+    //printf("mor=%d\n", mor);
     if(!mor)  /* if there is only one */
     {
       tEploc *f_eploc = (*f_elm)->eploc;
@@ -1351,7 +1351,7 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
   }
 
   /* finally signal failure or success with at least one nb child */
-  printf("final lret=%d\n", lret);
+  //printf("final lret=%d\n", lret);
   return lret;
 }
 
@@ -1455,23 +1455,16 @@ void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
      -if it is not enabled we assume it has been cleared before and we
       just set it to nbeploc */
   nbinfo = VarA(elm, i_nbinfo);
-
-if(elmname_is(elm, "2_7") && face==2)
-{
-//char *elmname(tElm *elm, char *s, int slen)
-
-PRF;printeploc(elm->eploc);
-printf(": 2_7 face%d\n", face);
-printf("nbinfo1: ");print_amr_elm_nbinfo(elm,face);printf("\n");
-//printf("nbinfo2: ");printarray_eploc(nbinfo, 1);//printf("\n");
-printf("nnb=%d nbeploc: ", nnb);
-for(int ni=0; ni<nnb; ni++) printeploc_s(&(nbeploc[ni]), " ");
-printf("\n");
-fflush(stdout);
-Yo(-11);
-//exit(88);
-}
-
+  //if(elmname_is(elm, "2_7") && face==2)
+  //{
+  //  PRF;printeploc(elm->eploc);
+  //  printf(": 2_7 face%d\n", face);
+  //  printf("nbinfo1: ");print_amr_elm_nbinfo(elm,face);printf("\n");
+  //  //printf("nbinfo2: ");printarray_eploc(nbinfo, 1);//printf("\n");
+  //  printf("nnb=%d nbeploc: ", nnb);
+  //  for(int ni=0; ni<nnb; ni++) printeploc_s(&(nbeploc[ni]), " ");
+  //  printf("\n");
+  //}
   if(!nbinfo) /* no nb info yet at all */
   {
     /* switch on var */
@@ -1645,26 +1638,24 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
     nbeloc->l = l0;
-    printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
-    printf("nbeloc->l=%d\n", nbeloc->l);
-    printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
+    //printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    //printf("nbeloc->l=%d\n", nbeloc->l);
+    //printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
     amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nbface,
                                     l0, fnb_head);
-    PRF;Yo(-777);
   }
   else /* complicated case where elmface is on patch surface */
   {
     amr_make_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
-    PRF;Yo(-333);
   }
 
-  if(elmname_is(elm, "2_7") && elmface==2)
-  {
-    PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
-               nMPI_rank(), elmface, patface[elmface]);
-    printeploc_s(elm->eploc, " \n");
-    printelmglist(fnb_head);
-  }
+  //if(elmname_is(elm, "2_7") && elmface==2)
+  //{
+  //  PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
+  //             nMPI_rank(), elmface, patface[elmface]);
+  //  printeploc_s(elm->eploc, " \n");
+  //  printelmglist(fnb_head);
+  //}
   return list_count_nodes(fnb_head);
 }
 
@@ -1833,17 +1824,15 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
           }
           if(nnb!=j) errorexit("nnb!=j");
 
-          if(elmname_is(elmi, "2_7") && f==2)
-          {
-            PRF;printf(": rank%d rk=%d: ", rank, rk);
-            printeploc(elmi->eploc);
-            printf(": 2_7 f%d\n", f);
-            for(int ni=0; ni<nnb; ni++)
-              printeploc_s(ef0_nbs->eploc+ef0_nbs_idx-j+ni, " ");
-            printf("\n");
-            Yo(-12);
-          }
-
+          //if(elmname_is(elmi, "2_7") && f==2)
+          //{
+          //  PRF;printf(": rank%d rk=%d: ", rank, rk);
+          //  printeploc(elmi->eploc);
+          //  printf(": 2_7 f%d\n", f);
+          //  for(int ni=0; ni<nnb; ni++)
+          //    printeploc_s(ef0_nbs->eploc+ef0_nbs_idx-j+ni, " ");
+          //  printf("\n");
+          //}
 
           /* now &fnb_head is freed, so just free the elmi */
           free_elm(elmi);
@@ -1932,9 +1921,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
             e2ul.e = eplocs[r][epi++];
             nelms  = e2ul.ul;
 
-            printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
-            printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
-            printeploc_s(&(eplocs[r][epi-1]),"\n");
+            //printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
+            //printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
+            //printeploc_s(&(eplocs[r][epi-1]),"\n");
 
             for(ei=0; ei<nelms; ei++)
             {
@@ -1951,11 +1940,11 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
               e2ul.e = eplocs[r][epi++];
               nnb    = e2ul.ul;
 
-              printeploc_s(elm->eploc, " ");
-              printf("f%d r=%d ", f, r);
-              printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
-              if(nnb) printeploc_s(&(eplocs[r][epi]), " ...");
-              printf("\n");
+              //printeploc_s(elm->eploc, " ");
+              //printf("f%d r=%d ", f, r);
+              //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
+              //if(nnb) printeploc_s(&(eplocs[r][epi]), " ...");
+              //printf("\n");
 
               /* all nbs in eplocs[r] to var amr_elm_nbinfo */
               amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(eplocs[r][epi]));
