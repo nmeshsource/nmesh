@@ -697,10 +697,9 @@ char *elmname(tElm *elm, char *s, int slen)
   return s;
 }
 
-/* get elm in a patch from string produced by elm_location_str */
-void eploc_from_location_str(tEploc *eploc, int p, char *loc)
+/* get eploc of elm in a patch from string produced by elm_location_str */
+void eloc_from_location_str(tEloc *eloc, int p, char *loc)
 {
-  tEloc eloc[1];
   int i;
 
   for(i=0; (i<NLOCS) && (loc[i]!=0); i++)
@@ -708,7 +707,40 @@ void eploc_from_location_str(tEploc *eploc, int p, char *loc)
 
   eloc->l = i;
   eloc->p = p;
+}
 
+/* get eploc of elm in a patch from string produced by elm_location_str */
+void eploc_from_location_str(tEploc *eploc, int p, char *loc)
+{
+  tEloc eloc[1];
+  eloc_from_location_str(eloc, p, loc);
+  eloc_to_eploc(eloc, eploc);
+}
+
+/* get eloc of elm from full elmname */
+void eloc_from_elmname(tEloc *eloc, char *name)
+{
+  int i, p;
+  char *loc;
+  int max = 99+NLOCS;
+
+  /* find pos i of '_' */
+  for(i=0; i<max; i++) if(name[i]=='_') break;
+
+  /* get patch */
+  p = atoi(name); /* atoi ignores '_' and all after it */
+  //printf("name=%s => p=%d\n", name, p);
+
+  /* get location str. */
+  loc = name + i+1;
+  eloc_from_location_str(eloc, p, loc);
+}
+
+/* get eploc of elm from full elmname */
+void eploc_from_elmname(tEploc *eploc, char *name)
+{
+  tEloc eloc[1];
+  eloc_from_elmname(eloc, name);
   eloc_to_eploc(eloc, eploc);
 }
 
