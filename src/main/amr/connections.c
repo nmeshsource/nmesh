@@ -1190,8 +1190,8 @@ tElm **amr_elmarray_linsearch(ulong narr, tElm **arr, tElm *elm)
 /****************************************************************************/
 
 /* return -1,0,1 if loc is before,at,after elem location,
-   this is used in binarysearch */
-int le0cmp(const void *loc, const void *elem0, void *arg)
+   this is used in bsearch */
+int le0cmp_q(const void *loc, const void *elem0)
 {
   const tEloc *lc = loc;
   const tElm0 *elm0_arr = elem0;
@@ -1202,7 +1202,7 @@ int le0cmp(const void *loc, const void *elem0, void *arg)
   /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
   eloc_from_eploc(elc, pelc);
 
-  cmp = loccmp(lc, elc);
+  cmp = loccmp_0OnlyIfEq(lc, elc, 1);
   //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -1210,8 +1210,8 @@ int le0cmp(const void *loc, const void *elem0, void *arg)
 }
 
 /* return -1,0,1 if key_elem location is before,at,after elem location,
-   this is used in binarysearch */
-int e0e0cmp(const void *key_elem0, const void *elem0, void *arg)
+   this is used in qsort */
+int e0e0cmp_q(const void *key_elem0, const void *elem0)
 {
   const tElm0 *kelm0 = key_elem0;
   const tEploc *keploc = kelm0->eploc;
@@ -1224,23 +1224,11 @@ int e0e0cmp(const void *key_elem0, const void *elem0, void *arg)
   eloc_from_eploc(klc, keploc);
   eloc_from_eploc(elc, eploc);
 
-  cmp = loccmp(klc, elc);
+  cmp = loccmp_0OnlyIfEq(klc, elc, 1);
   //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
   return cmp;
-}
-
-/* same as e0e0cmp but without last arg */
-int e0e0cmp_q(const void *key_elem, const void *elem)
-{
-  return e0e0cmp(key_elem, elem, NULL);
-}
-
-/* same as le0cmp but without last arg */
-int le0cmp_q(const void *loc, const void *elem)
-{
-  return le0cmp(loc, elem, NULL);
 }
 
 /* sort elm0 C-array with qsort */
