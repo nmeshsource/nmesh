@@ -173,7 +173,7 @@ void printelm(const tElm *e)
     printf("}");
   }
   printf("\n");
-  if(1 || nnbinfo_neg || nfnb_tot==0)
+  if(nnbinfo_neg || nfnb_tot==0)
   {
     printf(" nbi =");
     for(i=0; i<6; i++)
