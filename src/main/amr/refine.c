@@ -226,7 +226,7 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
     // use: connections_get_nbloc_InsidePat
 
     /* for now we just invalidate a lot and remove the parent */
-    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent, 1);
+    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent, 0);
     if(nbs_on_other_rank)
       amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
 
@@ -349,7 +349,7 @@ void set_parent_nbinfo_remove_children(tElm *parent,
     list_for_each(pos_ijk, ch_head)
     {
       tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
-      int ret = amr_invalidate_nbinfo_of_all_nbs(ch_ijk, 1);
+      int ret = amr_invalidate_nbinfo_of_all_nbs(ch_ijk, 0);
       if(ret) nbs_on_other_rank++;
       /* Note: amr_invalidate_nbinfo_of_all_nbs(ch_ijk) sets the fnb in
          nbelm that point to child0-7 to NULL, if its 2nd arg is 0 */
