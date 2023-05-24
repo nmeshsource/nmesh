@@ -173,7 +173,7 @@ void printelm(const tElm *e)
     printf("}");
   }
   printf("\n");
-  if(nnbinfo_neg || nfnb_tot==0)
+  if(1 || nnbinfo_neg || nfnb_tot==0)
   {
     printf(" nbi =");
     for(i=0; i<6; i++)
@@ -198,11 +198,25 @@ void printelmarray(long nelms, tElm **elm)
 void printelmlist(struct list_head *elm_head)
 {
   struct list_head *pos;
+  printf("%ld elms: ", list_count_nodes(elm_head));
   list_for_each(pos, elm_head)
   {
     tElm *elm = list_entry(pos, tElm, list);
-    printelm(elm);
+    printeploc_s(elm->eploc, " ");
   }
+  printf("\n");
+}
+
+void printelmglist(struct list_head *elm_head)
+{
+  struct list_head *pos;
+  printf("%ld elms: ", list_count_nodes(elm_head));
+  list_for_each(pos, elm_head)
+  {
+    tElm *elm = glist_entry(pos);
+    printeploc_s(elm->eploc, " ");
+  }
+  printf("\n");
 }
 
 void printmyelms(tMesh *mesh)
