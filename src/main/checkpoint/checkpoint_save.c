@@ -60,7 +60,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
   char *IObuf; /* larger buffer for write */
 
   errorexit("figure out which rank has root elms at level0 "
-            "and use them to reset pat->rnode")
+            "and use them to reset pat->rnode");
 
   /* only Rank0 writes the file */
   if(!Rank0) return 0;

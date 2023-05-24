@@ -259,7 +259,7 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
   double Val, val=0.;
   int Haveval, haveval=0;
 
-  if(node->dat)
+  if(node) if(node->dat)
   {
     val = basis_var_interpolate_local(node, vi, Xb);
     haveval = 1;
