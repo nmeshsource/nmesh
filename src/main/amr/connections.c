@@ -736,7 +736,6 @@ char *elmname(tElm *elm, char *s, int slen)
     elm_location_str(elm, loc,NLOCS+2);
     snprintf(s,slen, "%d_%s", elm->eploc->p, loc);
   }
-
   else
     snprintf(s,slen, "-");
   return s;
