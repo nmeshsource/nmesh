@@ -21,8 +21,8 @@ extern tAMR amr[1];
 
 /* Function that orders locations described in in tEloc:
    return -1,0,1 if loc is before,at,after eloc
-   This can be use in qsort. */
-int loccmp(const void *loc, const void *eloc)
+   This can be used in qsort, or bsearch if Ret0OnlyIfEq=1 */
+int loccmp_0OnlyIfEq(const void *loc, const void *eloc, int Ret0OnlyIfEq)
 {
   const tEloc *lc = loc;
   const tEloc *el = eloc;
@@ -41,7 +41,10 @@ int loccmp(const void *loc, const void *eloc)
       if(lc->loc[i] >  el->loc[i]) return  1;
       else                         return -1;
     }
-    return 0; /* lc and el are equal up the first lc->l */
+    if( Ret0OnlyIfEq && (el->l > lc->l) )
+      return -1; /* make el greater than lc, and thus move to left */
+    else
+      return 0;  /* lc and el are equal up the first lc->l */
   }
   else
   {
@@ -53,6 +56,14 @@ int loccmp(const void *loc, const void *eloc)
     }
     return 1; /* make binarysearch move to right */
   }
+}
+
+/* Function that orders locations described in in tEloc:
+   return -1,0,1 if loc is before,at,after eloc
+   This is used in our special binarysearch way. */
+int loccmp(const void *loc, const void *eloc)
+{
+  return loccmp_0OnlyIfEq(loc, eloc, 0);
 }
 
 /* return -1,0,1 if loc is before,at,after elem location,
@@ -98,16 +109,50 @@ int eecmp(const void *key_elem, const void *elem, void *arg)
   return cmp;
 }
 
-/* same as eecmp but without last arg */
-int eecmp_q(const void *key_elem, const void *elem)
-{
-  return eecmp(key_elem, elem, NULL);
-}
 
-/* same as lecmp but without last arg */
+/* return -1,0,1 if loc is before,at,after elem location,
+   this is used in qsort and bsearch, and returns 0 only if they are
+   strictly equal */
 int lecmp_q(const void *loc, const void *elem)
 {
-  return lecmp(loc, elem, NULL);
+  const tEloc *lc = loc;
+  //const tElm0 **elm0_arr = elem;
+  const tElm0 *const*elm0_arr = elem;
+  const tEploc *pelc = elm0_arr[0]->eploc;
+  tEloc elc[1];
+  int cmp;
+
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
+  eloc_from_eploc(elc, pelc);
+
+  cmp = loccmp_0OnlyIfEq(lc, elc, 1);
+  //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
+  //printf("--> cmp=%d\n", cmp);
+  ////printelm0(elm0_arr[0]);
+  return cmp;
+}
+
+/* return -1,0,1 if key_elem location is before,at,after elem location,
+   this is used qsort and bsearch, and returns 0 only if they are
+   strictly equal */
+int eecmp_q(const void *key_elem, const void *elem)
+{
+  const tElm0 *const*kelm0 = key_elem;
+  const tEploc *keploc = kelm0[0]->eploc;
+  const tElm0 *const*elm0_arr = elem;
+  const tEploc *eploc = elm0_arr[0]->eploc;
+  tEloc klc[1], elc[1];
+  int cmp;
+
+  /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
+  eloc_from_eploc(klc, keploc);
+  eloc_from_eploc(elc, eploc);
+
+  cmp = loccmp_0OnlyIfEq(klc, elc, 1);
+  //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
+  //printf("--> cmp=%d\n", cmp);
+  ////printelm0(elm0_arr[0]);
+  return cmp;
 }
 
 /****************************************************************************/

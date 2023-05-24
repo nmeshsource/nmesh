@@ -8,9 +8,6 @@ BUGS:
 *Actually: The bbox of patch3 is the reson for the crash.
  ========= It is not touching patch0, but rather inside patch0. My bad...
 
-*redef eecmp_q, lecmp_q  such that that return 0 only if really equal
- not like loccmp
-
 
 
 FIX these:
