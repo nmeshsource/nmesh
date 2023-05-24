@@ -36,13 +36,10 @@ void load_balance(tMesh *mesh, int strategy)
 
   /* move elms bewteen ranks */
   load_balance_elms(mesh);
-
-  /* we need to update eidlim after load balance moves elms */
-  update_mesh_myelms_elm_eid_dt(mesh);
-
-  //CHECK: we need this unless update_mesh_myelms_elm_eid_dt does it
-  //  /* update mesh->myelm */
-  //  alloc_and_set_mesh_myelm(mesh);
+  /* We need to update eidlim after load balance moves elms.
+     Fortunately load_balance_elms calls update_mesh_myelms_elm_eid_dt.
+     update_mesh_myelms_elm_eid_dt also calls alloc_and_set_mesh_myelm,
+     so that mesh->myelm is up to date now. */
 
   /* set fnb */
   amr_erase_all_elm_fnb(mesh);
@@ -787,17 +784,10 @@ void load_balance_elms(tMesh *mesh)
   /* move dat to correct ranks now */
   load_exchange_dat_after_moving_elms(mesh);
 
-  //alloc_and_set_mesh_myelm(mesh);
-  //NOTE: update_mesh_myln_node_nid call causes an update of mesh->myelm
-
-  //FIXME: adapt  update_mesh_myln_node_nid
-  update_mesh_myln_node_nid(mesh);
+  /* evolve_init_communication_structs needs mesh->myelm */
+  update_mesh_myelms_elm_eid_dt(mesh);
   PRF;printf(": --> %lu on this proc\n", mesh->nmyelm);
   //printf(": --> %zu on this proc\n", list_count_nodes(&mesh->myelm_head));
-
-
-  //FIXME: call function that set's up elm->fnb and such...
-  //       maybe also update_mesh_myln_node_nid ???
 
   /* now that nodes are elsewhere re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
