@@ -747,7 +747,7 @@ int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
    in:  mesh, namsiz, x
    out: name, X
    returns:  p */
-int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
+int p_nodename_XYZ_of_xyz_mesh__OLD(tMesh *mesh, char *name, const int namsiz,
                                double X[3], const double x[3])
 {
   int size = nMPI_size();
@@ -807,11 +807,11 @@ int p_nodename_XYZ_of_xyz_mesh(tMesh *mesh, char *name, const int namsiz,
 }
 
 /* return node and set X to where x is located */
-tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
+tNode *node_XYZ_of_xyz_mesh__OLD(tMesh *mesh, double X[3], const double x[3])
 {
   char name[99];
 
-  if(p_nodename_XYZ_of_xyz_mesh(mesh, name,99, X, x) < 0)
+  if(p_nodename_XYZ_of_xyz_mesh__OLD(mesh, name,99, X, x) < 0)
     return NULL;
 
   if(name[0]==0)
@@ -819,6 +819,96 @@ tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
 
   return node_from_nodename(mesh, name);
 }
+
+// replaces p_nodename_XYZ_of_xyz_mesh:
+/* go over all elms on all ranks and find the elm eid name that contains x
+   In:  mesh, x   Out: eid, X
+   Returns:  p */
+int p_eid_XYZ_of_xyz_mesh(tMesh *mesh, ulong *eid,
+                          double X[3], const double x[3])
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int r, p;
+  char *found; /* array with ranks that have x */
+  char *found_local;
+  char flag;
+
+  /* if eid stays at this val we didn't find it */
+  *eid = EID_INVALID;
+
+  /* find patch p and set X */
+  p = p_XYZ_of_xyz_mesh(mesh, X, x);
+  //PRFs(": ");pr3v("X", X);printf(": p=%d\n", p);
+
+  /* if x is not on mesh return -1 and leave name="" */
+  if(p<0) return p;
+
+  /* search among my leaf nodes (in patch p) for X */
+  flag = 0;
+  formyelms_noomp(mesh)
+  {
+    tElm *elm = MyElm;
+    if(elm->pat->p == p)
+      if(XYZ_is_in_node(elm, X))
+      {
+        *eid = Elm_eid(elm);
+        flag = 1;
+        break;
+      }
+  }
+
+  /* mark found_local[rank] if we found X in one of my leaf nodes */
+  found_local = checked_calloc(size, sizeof(found_local[0]));
+  found       = checked_calloc(size, sizeof(found[0]));
+  found_local[rank] = found[rank] = flag;
+
+  /* get global found */
+  nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR);
+
+  /* find lowest rank r that has node with X */
+  for(r=0; r<size; r++)
+  {
+    if(found[r]) break;
+  }
+  if(r>=size)
+  {
+    PRF;printf(": error: one rank must have the node with this x!\n");
+    r = 0; /* to avoid failure in nMPI_Bcast */
+  }
+
+  /* broadcast eid from rank r to all MPI jobs */
+  //PRF;printf(": %lu r=%d\n", *eid, r);fflush(stdout);
+  nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r);
+
+  free(found);
+  free(found_local);
+  return p;
+}
+
+// replaces node_XYZ_of_xyz_mesh
+/* return elm and set eid,elmindex,elmrank,X to where x is located */
+tElm *elm_XYZ_of_xyz_mesh(tMesh *mesh,
+                          ulong *eid, ulong *elmindex, int *elmrank,
+                          double X[3], const double x[3])
+{
+  if(p_eid_XYZ_of_xyz_mesh(mesh, eid, X, x) < 0)
+    return NULL;
+
+  if(*eid == EID_INVALID)
+    return NULL;
+
+  return elm_from_eid(mesh, *eid, elmindex, elmrank);
+}
+
+/* return node and set X to where x is located */
+tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
+{
+  ulong eid, elmindex;
+  int elmrank;
+  return elm_XYZ_of_xyz_mesh(mesh, &eid,&elmindex,&elmrank, X, x);
+}
+
 
 // replaces l_XYZ_of_xyz__old:
 /* set X and return 1 if x is inside this elm, otherwise return 0 */

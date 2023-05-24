@@ -123,6 +123,8 @@ void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
+void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
+                                     ulong *elmindex, int *elmrank);
 int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh);

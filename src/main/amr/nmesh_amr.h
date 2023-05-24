@@ -687,6 +687,7 @@ tElm *elm_from_location_str(tPat *pat, char *loc);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);
 int elm_get_ijk(tElm *elm);
+tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank);
 int elm_is_on_patface(tElm *elm, int f);
 
 /* compatibility with old connect.c */

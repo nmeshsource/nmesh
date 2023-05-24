@@ -136,13 +136,11 @@
 
 
 /* get parts of tNode struct */
-#define Node_p(node)      (node)->pat->p
 #define Node_l(node)      Elm_l(node)
 #define Node_eid(node)    Elm_eid(node)
-#define Node_np(node)     (node)->np
+#define Node_np(node)     Elm_np(elm)
 #define Node_pat(node)    (node)->pat
-#define Node_mesh(node)   (node)->pat->mesh
-#define Node_ijk(node)    (node)->ijk
+#define Node_mesh(node)   Elm_mesh(elm)
 
 /* tests for patch-face, boundary, OUTERBOUND, INNERBOUND */
 #define Node_patface(node, face)       Elm_patface(node, face)

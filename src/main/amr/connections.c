@@ -799,8 +799,9 @@ tElm *elm_from_location_str(tPat *pat, char *loc)
   eploc_from_location_str(eploc, pat->p, loc);
 
   /* find elm with eploc in mesh->mylems */
-  errorexit("unfinished, do we really need this???");
-
+  //unfinished, do we really need this???
+  errorexit("instead of elm_from_elmname and elm_from_location_str use "
+            "elm_from_eid");
   return elm;
 }
 
@@ -838,6 +839,18 @@ int elmname_is(tNode *elm, const char *nname)
     return 0;
 }
 
+//instead of elm_from_elmname and elm_from_location_str use:
+/* get elmindex and elmrank for eid
+   In: mesh, eid   Out: elmindex, elmrank
+   Returns: elm if it is on my rank, otherwise NULL */
+tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank)
+{
+  amr_elmindex_and_elmrank_of_eid(mesh, eid, elmindex, elmrank);
+  if( nMPI_rank() == *elmrank )
+    return mesh->myelm[*elmindex];
+  else
+    return NULL;
+}
 
 
 /****************************************************************************/
@@ -1085,32 +1098,32 @@ int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
 }
 */
 
-/* return the index into mesh->myelm (on the rank it is) that an elm
-   with eploc is on */
-void amr_elmindex_and_datrank_of_eid(tMesh* mesh, ulong eid,
-                                     ulong *elmindex, int *datrank)
+/* find the index into mesh->myelm (on the rank it is on) that an elm
+   with eid is on */
+void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
+                                     ulong *elmindex, int *elmrank)
 {
   ulong *eidlim = mesh->eidlim;
 
-  *datrank = amr_rank_of_eid(mesh, eid);
+  *elmrank = amr_rank_of_eid(mesh, eid);
 
-  if(*datrank==0) *elmindex = eid;
-  else            *elmindex = eid - eidlim[*datrank-1];
+  if(*elmrank==0) *elmindex = eid;
+  else            *elmindex = eid - eidlim[*elmrank-1];
 }
 
 /* return the index into mesh->myelm (on the rank it is) that an elm
    with eploc is on */
 /*
-void amr_elmindex_and_datrank_of_elm_eploc(tMesh* mesh, tEploc *eploc,
-                                           ulong *elmindex, int *datrank)
+void amr_elmindex_and_elmrank_of_elm_eploc(tMesh* mesh, tEploc *eploc,
+                                           ulong *elmindex, int *elmrank)
 {
   ulong *eidlim = mesh->eidlim;
   ulong eid = eploc->eid;
 
-  *datrank = amr_rank_of_eid(mesh, eid);
+  *elmrank = amr_rank_of_eid(mesh, eid);
 
-  if(*datrank==0) *elmindex = eid;
-  else            *elmindex = eid - eidlim[*datrank-1];
+  if(*elmrank==0) *elmindex = eid;
+  else            *elmindex = eid - eidlim[*elmrank-1];
 }
 */
 
@@ -2133,7 +2146,7 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
         int datrank;
         ulong nbidx;
 
-        amr_elmindex_and_datrank_of_eid(mesh, eploc->eid, &nbidx, &datrank);
+        amr_elmindex_and_elmrank_of_eid(mesh, eploc->eid, &nbidx, &datrank);
 
         //printf("QQQQQQ ");printeploc(elm->eploc);printf(" f%d\t",f);printeploc(eploc);
         //printf(" nbidx=%lu datrank=%d\n", nbidx, datrank);
@@ -2359,7 +2372,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     {
       union { tElm *elm; tElm0 *elm0; } e2e0;
       ulong elmindex;
-      amr_elmindex_and_datrank_of_eid(mesh, eid,
+      amr_elmindex_and_elmrank_of_eid(mesh, eid,
                                       &elmindex, &datrank);
       /* just fill in elm0 */
       e2e0.elm = mesh->myelm[elmindex];
@@ -2435,7 +2448,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
         ulong elmindex;
         int datrank;
 
-        amr_elmindex_and_datrank_of_eid(mesh, r_deseid[rk][k],
+        amr_elmindex_and_elmrank_of_eid(mesh, r_deseid[rk][k],
                                         &elmindex, &datrank);
         /* fill in s_elm0 */
         e2e0.elm = mesh->myelm[elmindex];
