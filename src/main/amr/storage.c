@@ -354,6 +354,7 @@ void free_mesh_myelm(tMesh *mesh)
 /* make root node element and add it to mesh */
 void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
 {
+  int rank = nMPI_rank();
   tMesh *mesh = pat->mesh;
   tElm0 elm0[1] = {0}; /* elm header with root node info */
   tEploc *eploc = elm0->eploc;
@@ -382,7 +383,7 @@ void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
   elm0->datrank = datrank;
 
   /* make root element only on the MPI rank that owns it */
-  if(nMPI_rank()==datrank)
+  if(datrank==rank)
   {
     tElm *elm = alloc_elm_of_elmheader(mesh, elm0);
 
@@ -390,6 +391,12 @@ void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
     elm->dat = alloc_dat(elm);
 
     /* add new root element to list mesh->myelm_head */
+    list_add_tail(&elm->list, &mesh->myelm_head);
+  }
+  else if((datrank<0) && (rank==0))
+  {
+    /* if datrank<0 create an elm without dat on rank0 */
+    tElm *elm = alloc_elm_of_elmheader(mesh, elm0);
     list_add_tail(&elm->list, &mesh->myelm_head);
   }
 

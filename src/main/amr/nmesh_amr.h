@@ -481,6 +481,7 @@ void *memcpy_to_array(tArray *ar, size_t bytestride, size_t pos,
                       const void *src, size_t n);
 void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
                             const void *src, size_t n);
+void free_elm(tElm *elm);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
 void free_mesh_patches_and_nodes(tMesh *mesh);
@@ -494,6 +495,7 @@ void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old);
 void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ);
 tDat *alloc_dat(tNode *node);
 void free_dat(tDat *dat);
+tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 tNlist *alloc_nodelist(tNode *node);
 tNlist *addnode_to_nodelist_after(tNlist *elem, tNode *node);
 tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node);
@@ -680,6 +682,7 @@ void prefine_pat(tMesh *mesh, int p, int n[3]);
 /* connections.c */
 char *elm_location_str(tElm *elm, char *s, int slen);
 char *elmname(tElm *elm, char *s, int slen);
+void eloc_from_elmname(tEloc *eloc, char *name);
 tElm *elm_from_location_str(tPat *pat, char *loc);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);

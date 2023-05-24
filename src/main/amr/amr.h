@@ -22,10 +22,8 @@ int redim_array_Neplocs(tArray *array, int Neplocs);
 tElm *alloc_elm(tMesh *mesh);
 tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
-void free_elm(tElm *elm);
 ulong alloc_and_set_mesh_myelm(tMesh *mesh);
 void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
-tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
                                        struct list_head *ch_head);
 int realloc_myln_nncats(tMylnodes *myln, int nncats);

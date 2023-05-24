@@ -185,7 +185,6 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
   {
     char buf[1000];
     char str[1000];
-    tNode *parent;
     int cn[8][3];      /* number of points in each child */
     int cp_typ[8][3];  /* point type we set for each child */
     int p = -1; /* patch number read from file */
@@ -240,25 +239,47 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
           int chld;
           int d;
           struct list_head *pos_chld;
-          tElm *elm;
-          tElm *child0;
+          tElm *elm, *parent, *child0;
+          char *parent_name;
           tEloc parent_eloc[1];
 
           /* strip trailing '\n' from buf */
           buf[strlen(buf)-1] = 0;
 
-          /* find parent node from its name in buf */
-          errorexit("don't use node_from_nodename");
-          parent = node_from_nodename(mesh, buf);
-          errorexit("get parent eloc instead and search for that below");
-          //use: void eloc_from_elmname(tEloc *eloc, char *name);
-          eloc_from_elmname(parent_eloc, buf);
+          /* set parent name from its name in buf */
+          parent_name = buf;
+          eloc_from_elmname(parent_eloc, parent_name);
           p_prev = p;
           p = parent_eloc->p;
           lp_prev = lp;
           lp = parent_eloc->l;
           //printf("buf=%s\n", buf);
-          //printeloc_s(parent_eloc,"\n");
+
+          /* update starting point in leaf node list of the 'for'-loop below */
+          if(p<p_prev || !pos_elm->next || lp!=lp_prev)
+          {
+            pos_elm = &mesh->myelm_head;
+            /* We could load balance here, BUT ONLY if all MPI-proc go
+               through the buffer in parallel! In any case, it's better to
+               do load balance only once after all nodes are read. */
+          }
+          /* find element in nodelist with parent: */
+          /* we could start search loop at pos_elm = &mesh->myelm_head,
+             but this would be slower */
+          list_for_each_continue(pos_elm, &mesh->myelm_head)
+          {
+            elm = list_entry(pos_elm, tElm, list);
+            if(elmname_is(elm, parent_name)) break;
+          }
+          if(list_is_head(pos_elm, &mesh->myelm_head))
+            parent = NULL;
+          else
+            parent = elm;
+          if(!parent)
+            errorexits("cannot find parent %s in myelm_head", parent_name);
+            //if this happens, this is not rank1, and we should just do nothing:
+          //if(!parent)
+          //  continue;
 
           /* init children n and pt_type to same as parent */
           for(chld=0; chld<8; chld++)
@@ -288,41 +309,9 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
             }
           }
 
-          //printf("n = %d %d %d\n", n[0],n[1],n[2]);
-          //fflush(stdout);
-
-          /* update starting point in leaf node list of the 'for'-loop below */
-          if(p<p_prev || !pos_elm->next || lp!=lp_prev)
-          {
-            pos_elm = &mesh->myelm_head;
-            /* We could load balance here, BUT ONLY if all MPI-proc go
-               through the buffer in parallel! In any case, it's better to
-               do load balance only once after all nodes are read. */
-          }
-          /* find element in nodelist with parent: */
-          /* we could start search loop at pos_elm = &mesh->myelm_head,
-             but this would be slower */
-          list_for_each_continue(pos_elm, &mesh->myelm_head)
-          {
-            elm = list_entry(pos_elm, tElm, list);
-            errorexit("search for parent eloc instead of this:");
-            if(elm == parent) break;
-          }
-          if(list_is_head(pos_elm, &mesh->myelm_head))
-          {
-            char ns[100];
-            nodename(parent, ns,99);
-            errorexits("cannot find parent %s in mesh->lns", ns);
-          }
-
-
           /* make 8 child nodes */
-          //FIXME:
-          //children = make8_child_nodes(parent, cp_typ[0], cn[0]);
-          errorexit("call new elm ref function");
-          child0 = replace_parent_by_8children(elm, cn[0], cp_typ[0]);
+          child0 = replace_parent_by_8children(parent, cn[0], cp_typ[0]);
           free_elm(parent);
-
 
           /* set n and pt_typ for each child if needed */
           pos_chld = &child0->list;
@@ -337,8 +326,9 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
             pos_chld = pos_chld->next;  /* pos of next child */
           }
 
-          /* set elem to last child we added */
-          pos_elm = pos_chld->prev;
+          /* set pos_elm, so that 1st child we added is next */
+          pos_elm = &child0->list;
+          pos_elm = pos_elm->prev;
         }
       }
     }
@@ -352,13 +342,13 @@ int checkpoint_load_nodes(tMesh *mesh, char *fname)
              mesh->iteration, mesh->time);
   fflush(stdout);
 
-  /* make sure all nodes have new current nids */
-  update_mesh_myln_node_nid(mesh);
+  /* make sure all nodes have new current eids */
+  update_mesh_myelms_elm_eid_dt(mesh);
 
   /* load balance all leaf nodes */
   simple_load_balance(mesh);
   //printmesh(mesh);
-  PRF;printf(": total number of leaf nodes mesh->nln=%ld\n", mesh->nln);
+  PRF;printf(": number of leaf nodes mesh->nmyelm=%lu\n", mesh->nmyelm);
   fflush(stdout);
 
   free(buffer);
