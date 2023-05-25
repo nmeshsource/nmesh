@@ -296,6 +296,7 @@ void *checked_calloc(size_t nmemb, size_t size);
 void *checked_realloc(void *ptr, size_t size);
 void *rows_calloc(size_t nx, unsigned long ny[nx], size_t size);
 void rows_free(void *g, size_t nx);
+void rows_print_sizes(size_t nx, unsigned long ny[nx], size_t size);
 
 /* endianIO.c */
 size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);

@@ -893,7 +893,12 @@ void rows_free(void *g, size_t nx)
   for(i=0; i<nx; i++) free(p[i]);
   free(p);
 }
-
+void rows_print_sizes(size_t nx, unsigned long ny[nx], size_t size)
+{
+  size_t i;
+  for(i=0; i<nx; i++)
+    printf("row%zu: len=%zu (%zu bytes)\n", i, ny[i], ny[i]*size);
+}
 
 /********************************************/
 /* Functions that have to do with errorexit */

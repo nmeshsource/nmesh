@@ -2393,7 +2393,12 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 
   /* we now know the size of r_elm0 */
   r_elm0 = rows_calloc(size, ns_deseid, sizeof(r_elm0[0][0]));
+  //printf("r_elm0 from ns_deseid:\n");
+  //rows_print_sizes(size, ns_deseid, sizeof(r_elm0[0][0]));
 
+  ////nr_deseid[0] = nr_deseid[2] = 66;
+  ////printf("fake nr_deseid:\n");
+  ////rows_print_sizes(size, nr_deseid, sizeof(r_deseid[0][0]));
 
   /* send and recv coms */
   scom = alloc_com(sizeof(s_elm0[0][0]), 0);
@@ -2424,6 +2429,10 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   r_deseid = rows_calloc(size, nr_deseid, sizeof(r_deseid[0][0]));
   s_elm0 =   rows_calloc(size, nr_deseid, sizeof(s_elm0[0][0]));
 
+  //printf("r_deseid from nr_deseid:\n");
+  //rows_print_sizes(size, nr_deseid, sizeof(r_deseid[0][0]));
+  //printf("s_elm0 from nr_deseid:\n");
+  //rows_print_sizes(size, nr_deseid, sizeof(s_elm0[0][0]));
 
   /* now send/recv s_deseid and r_deseid */
   for(rk=0; rk<size; rk++)
@@ -2431,13 +2440,13 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     {
       int rq;
 
-      /* send s_deseid buffer  */
+      /* send s_deseid buffer, i.e. the eids for which I want elm0 from rk */
       if(ns_deseid[rk])
       {
         rq = append_buffers_to_com(scom, s_deseid[rk],ns_deseid[rk], NULL,0);
         nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD);
       }
-      /* recv in r_deseid */
+      /* recv in r_deseid, i.e. the eids for which rk wants to know elm0 */
       if(nr_deseid[rk])
       {
         rq = append_buffers_to_com(rcom, NULL,0, r_deseid[rk],nr_deseid[rk]);
@@ -2448,7 +2457,6 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   /* wait for r_deseid[rk] */
   nMPI_Waitall_com_recv(rcom);
   realloc_com_reqs(rcom, 0);
-
 
   /* use r_deseid[rk] to fill in s_elm0[rk] arrays */
   for(rk=0; rk<size; rk++)
@@ -2477,14 +2485,14 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     {
       int rq;
 
-      /* send s_deseid buffer  */
-      if(ns_deseid[rk])
+      /* send elm0 that the others want */
+      if(nr_deseid[rk])
       {
         rq = append_buffers_to_com(scom, s_elm0[rk],nr_deseid[rk], NULL,0);
         nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 30, WORLD);
       }
-      /* recv in r_deseid */
-      if(nr_deseid[rk])
+      /* recv elm0 we want from the others */
+      if(ns_deseid[rk])
       {
         rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],ns_deseid[rk]);
         nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 30, WORLD);
@@ -2512,15 +2520,16 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 
   /* free all arrays */
   rows_free(s_elm0, size);
-  rows_free(r_elm0, size);
-  free(ns_elm0);
-  free(nr_elm0);
-
   rows_free(r_deseid, size);
-  free(nr_deseid);
+  rows_free(r_elm0, size);
 
   rows_free(s_des_ei, size);
   rows_free(s_deseid, size);
+
+  free(ns_elm0);
+  free(nr_elm0);
+
+  free(nr_deseid);
   free(ns_deseid);
 
   return 0;
