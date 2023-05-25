@@ -2511,13 +2511,13 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   free_com(scom);
 
   /* free all arrays */
-  rows_free(r_deseid, size);
-  free(nr_deseid);
-
   rows_free(s_elm0, size);
   rows_free(r_elm0, size);
   free(ns_elm0);
   free(nr_elm0);
+
+  rows_free(r_deseid, size);
+  free(nr_deseid);
 
   rows_free(s_des_ei, size);
   rows_free(s_deseid, size);
@@ -2618,14 +2618,8 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
   mesh->nnbelm = 0;
 }
 
-//NOTE:
-/* we just created the children (child0), now set local nb-info */
-//int amr_set_nbinfo_of_new_children(tElm *child0, tElm *parent)
-// use: connections_get_nbloc_InsidePat
 
-/* we just created the parent, now set local nb-info */
-//int amr_set_nbinfo_of_new_parent(tElm *parent, struct list_head *ch_head)
-// use: connections_get_nbloc_InsidePat
+
 
 
 /****************************************************************************/
