@@ -59,9 +59,6 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
   int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
 
-  errorexit("figure out which rank has root elms at level0 "
-            "and use them to reset pat->rnode");
-
   /* only Rank0 writes the file */
   if(!Rank0) return 0;
 
@@ -105,13 +102,11 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   //for(d=0; d<3; d++)
   //  fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
 
-  errorexit("set pat->rnode->n and pat->rnode->pt_typ");
+  //for(d=0; d<3; d++)
+  //  fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
 
-  for(d=0; d<3; d++)
-    fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
-
-  for(d=0; d<3; d++)
-    fprintf(fp, " rnode->pt_typ[%d] = %d\n", d, pat->rnode->pt_typ[d]);
+  //for(d=0; d<3; d++)
+  //  fprintf(fp, " rnode->pt_typ[%d] = %d\n", d, pat->rnode->pt_typ[d]);
 
   //printCI(pat);
   checkpoint_write_CI(fp, pat->CI);
@@ -153,182 +148,95 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 
 
 /******************************************************************/
-/* functions to save nodes */
+/* functions to save elms */
 /******************************************************************/
-/* save node info */
-int checkpoint_save_nodes(tMesh *mesh, char *fname)
+/* save elm info */
+int checkpoint_save_elms(tMesh *mesh, char *fname)
 {
-  FILE *fp;
-  tNlist *rnlist = NULL;
-  tNlist *el;
-  int p;
+  FILE *fp = NULL;
   int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
 
   /* only Rank0 writes the file */
-  if(!Rank0) return 0;
-
-  /* make list of all root nodes, and save first elem. in rnlist */
-  forpatches(mesh, p)
+  if(Rank0)
   {
-    tPat *pat = mesh->pat[p];
-    tNode *rnode =     (tNode *)          pat->rnode;
-    errorexit("Set:  tElm0 *rnode = pat->rnode;");
-
-    if(p==0) rnlist = el = alloc_nodelist(rnode);
-    else     el = addnode_to_nodelist_after(el, rnode);
+    /* open destination file */
+    fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
+    if(!fp) errorexits("failed opening %s", fname);
   }
 
-  /* open destination file */
-  fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
-  if(!fp) errorexits("failed opening %s", fname);
-
   /* write all nodes */
-  checkpoint_write_nodetrees(fp, rnlist);
+  checkpoint_write_elms(mesh, fp);
 
-  fclose_buf(fp, &IObuf);
-  free_nodelist(rnlist);
+  /* Rank0 needs to close file */
+  if(Rank0)
+    fclose_buf(fp, &IObuf);
+
   return 0;
 }
 
-/* write nodelist and all their children */
-void checkpoint_write_nodetrees(FILE *fp, tNlist *rnlist)
+/* write out info about all elms */
+int checkpoint_write_elms(tMesh *mesh, FILE *fp)
 {
-  tNlist *nlist  = rnlist;
-  tNlist *cnlist = NULL;
-
-  fprintf(fp, "parent nodes, their children's n, and optionally their "
-          "children's point type:\n\n");
-
-  /* write all nodes in rnlist anf their children */
-  while(nlist)
+  int size = nMPI_size();
+  int rk;
+  for(rk=0; rk<size; rk++)
   {
-    checkpoint_write_nodes_with_child0(fp, nlist);
+    int n_def[3] = {0};      /* defaults for n */
+    int pt_typ_def[3] = {0}; /* and pt_typ     */
+    ulong nelm0s;
+    tElm0 *elm0 = amr_alloc_get_elm0array_of_rank(mesh, rk, &nelm0s);
+    ulong i;
 
-    /* make list of all children of nlist, and then update nlist */
-    cnlist = childnodelist_of_nodelist(nlist);
-    if(nlist!=rnlist) free_nodelist(nlist);
-    nlist = cnlist;
-  }
-}
-
-/* write non-pointer part of tPat */
-void checkpoint_write_1_nodetree(FILE *fp, tNode *rnode)
-{
-  tNlist *nlist, *cnlist;
-
-  fprintf(fp,   "nodetree in patch%d: rnode->\n", rnode->pat->p);
-  fprintf(fp,   " pat->p = %d\n", rnode->pat->p);
-
-  /* put root node into a nodelist */
-  nlist = alloc_nodelist(rnode);
-
-  /* write all nodes in nlist */
-  while(nlist)
-  {
-    checkpoint_write_nodes_with_child0(fp, nlist);
-
-    /* make list of all children of nlist, and then update nlist */
-    cnlist = childnodelist_of_nodelist(nlist);
-    free_nodelist(nlist);
-    nlist = cnlist;
-  }
-}
-
-/* write info about all nodes in a list */
-void checkpoint_write_nodes_with_child0(FILE *fp, tNlist *nlist)
-{
-  tNlist *elem;
-
-  fornodelist(nlist, elem)
-  {
-    tNode *node = elem->node;
-    tNode *child0 = node->child[0];
-
-    if(child0)
+    for(i=0; i<nelm0s; i++)
     {
-      checkpoint_write_node(fp, node);
-      fprintf(fp, "\n");
-    }
-  }
-}
+      int n[3], pt_typ[3];
+      int d, l, write_n, write_pt_typ;
+      tEloc eloc[1];
 
-/* Write info about one node. We write n and pt_typ of its children */
-void checkpoint_write_node(FILE *fp, tNode *node)
-{
-  tNode *child0 = node->child[0];
-  char name[256];
-  int chld, d;
-  int write_all_n, write_pt_typ;
-
-  nodename(node, name,255);
-
-  /* info in node struct */
-  fprintf(fp, "%s\n", name);
-
-  // Not needed:
-  /*
-  fprintf(fp, "nodename = %s\n", name);
-  fprintf(fp,   " dt = %.19g\n", node->dt);
-  fprintf(fp,   " time = %.19g\n", node->time);
-
-  for(d=0; d<3; d++)
-    fprintf(fp, " n[%d] = %d\n", d, node->n[d]);
-
-  fprintf(fp,   " ijk = %d\n", node->ijk);
-  fprintf(fp,   " l = %d\n", node->l);
-  fprintf(fp,   " leaf = %d\n", node->leaf);
-  */
-
-  /* check if parent node and any child differ in pt_typ */
-  write_pt_typ = 0;
-  for(chld=0; chld<8; chld++)
-  {
-    tNode *child = node->child[chld];
-    if(child)
-    {
+      /* get n, pt_typ from elm and decide if we write them as well */
+      write_n = write_pt_typ = 0;
       for(d=0; d<3; d++)
-        if(node->pt_typ[d] != child->pt_typ[d]) { write_pt_typ=1; break; }
-    }
-    if(write_pt_typ) break;
-  }
-
-  /* check if any of the children differ in n or pt_typ from child0 */
-  write_all_n = 0;
-  for(chld=1; chld<8; chld++)
-  {
-    tNode *child = node->child[chld];
-    if(child0 && child)
-    {
-      for(d=0; d<3; d++)
-        if( (child->n[d]      != child0->n[d]) ||
-            (child->pt_typ[d] != child0->pt_typ[d]) )
-        {
-          write_all_n=1; break;
-        }
-    }
-    if(write_all_n) break;
-  }
-
-  /* write n and pt_typ for child0 or for all children */
-  for(chld=0; chld<8; chld++)
-  {
-    tNode *child = node->child[chld];
-    if(child)
-    {
-      if(write_all_n || chld==0)
       {
-        /* add info about child, so that we can easily re-create children */
+        n[d]      = elm0[i].n[d];
+        pt_typ[d] = elm0[i].pt_typ[d];
+
+        if(n[d]      != n_def[d])      { write_n = 1; }
+        if(pt_typ[d] != pt_typ_def[d]) { write_n = 1; write_pt_typ = 1; }
+      }
+
+      /* update defaults */
+      for(d=0; d<3; d++)
+      {
+        n_def[d]      = n[d];
+        pt_typ_def[d] = pt_typ[d];
+      }
+
+      /* get loc strings in eloc */
+      eloc_from_eploc(eloc, elm0[i].eploc);
+
+      /* only rank0 writes */
+      if(Rank0)
+      {
+        /* write elm name */
+        fprintf(fp, "%d_", eloc->p);
+        for(l = 0; l < eloc->l; l++) fputc(eloc->loc[l], fp);
+        fprintf(fp, "\n");
+
+        /* add info about n, pt_typ */
         for(d=0; d<3; d++)
         {
-          fprintf(fp, "%d", child->n[d]);
+          if(write_n)
+            fprintf(fp, "%d", n[d]);
           if(write_pt_typ)
-            fprintf(fp, " %d", child->pt_typ[d]);
+            fprintf(fp, " %d", pt_typ[d]);
           fprintf(fp, "\n");
         }
       }
-    } /* end if(child) */
+    } /* end rk-loop */
+    free(elm0);
   }
+  return 0;
 }
 
 

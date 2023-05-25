@@ -680,6 +680,8 @@ void prefine_pat(tMesh *mesh, int p, int n[3]);
 
 
 /* connections.c */
+void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
+void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 char *elm_location_str(tElm *elm, char *s, int slen);
 char *elmname(tElm *elm, char *s, int slen);
 void eloc_from_elmname(tEloc *eloc, char *name);
@@ -689,6 +691,7 @@ int elmname_is(tElm *elm, const char *nname);
 int elm_get_ijk(tElm *elm);
 tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank);
 int elm_is_on_patface(tElm *elm, int f);
+tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s);
 
 /* compatibility with old connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)

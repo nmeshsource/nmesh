@@ -2552,7 +2552,8 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 }
 
 /* allocate and fill an array with all elm0 on rank rk,
-   Returns pointer to array, Out: nelm0s <- size of array */
+   Returns: pointer to array, Out: nelm0s <- size of array,
+   returned array needs to be freed by caller */
 tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s)
 {
   ulong nelm0 = amr_nelms_on_rank(mesh, rk);

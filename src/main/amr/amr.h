@@ -109,8 +109,6 @@ int timing_set_myops_ops0_allops(tMesh *mesh);
 /* connections.c */
 int connections_loc_on_patchface(int l, const char loc[NLOCS],
                                  int patface[6]);
-void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
-void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
                                  const tEloc *eloc2, int l_max);
 int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);

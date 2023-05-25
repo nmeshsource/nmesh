@@ -10,14 +10,14 @@
 char chckpt_dir[] = "checkpoint";
 char save_pars_file[] = "save_pars.par";
 char patches_file[]   = "patches.txt";
-char nodes_file[]     = "nodes.txt";
+char elms_file[]      = "elms.txt";
 char variables_file[] = "variables.bin";
 
 /* make and allocate complete checkpoint pathnames, return allocated chars */
 int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
                                 char **Dir, const char *Dir_suffix,
                                 char **Pars, char **Pats,
-                                char **Nodes, char **Vars)
+                                char **Elms, char **Vars)
 {
   char *outdir = Gets(Par("outdir"));
 
@@ -27,21 +27,21 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
   int pl = nl + 40;
   char *pars  = cmalloc(pl);
   char *pats  = cmalloc(pl);
-  char *nodes = cmalloc(pl);
+  char *elms = cmalloc(pl);
   char *vars  = cmalloc(pl);
 
   /* filenames */
   snprintf(dir,nl, "%s%s/%s%s", outdir,outdir_suffix, chckpt_dir,Dir_suffix);
   snprintf(pars,pl,  "%s/%s", dir, save_pars_file);
   snprintf(pats,pl,  "%s/%s", dir, patches_file);
-  snprintf(nodes,pl, "%s/%s", dir, nodes_file);
+  snprintf(elms,pl,  "%s/%s", dir, elms_file);
   snprintf(vars,pl,  "%s/%s", dir, variables_file);
 
   /* save filenames */
   *Dir   = dir;
   *Pars  = pars;
   *Pats  = pats;
-  *Nodes = nodes;
+  *Elms  = elms;
   *Vars  = vars;
   return pl;
 }
@@ -56,12 +56,12 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
   char *dir;
   char *pars;
   char *pats;
-  char *nodes;
+  char *elms;
   char *vars;
   int ret=0;
 
   checkpoint_create_pathnames(mesh, outdir_suffix, &dir, Dir_suffix,
-                              &pars, &pats, &nodes, &vars);
+                              &pars, &pats, &elms, &vars);
   /* check if files exist */
   if(Rank0)
   {
@@ -86,7 +86,7 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
 
   /* free strings */
   free(vars);
-  free(nodes);
+  free(elms);
   free(pats);
   free(pars);
   free(dir);
@@ -107,7 +107,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   char *dir;
   char *pars;
   char *pats;
-  char *nodes;
+  char *elms;
   char *vars;
   int ret=0;
   double time, ntime;
@@ -119,7 +119,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   time = getTimeIn_s()/60.;
 
   checkpoint_create_pathnames(mesh, outdir_suffix, &dir,"",
-                              &pars, &pats, &nodes, &vars);
+                              &pars, &pats, &elms, &vars);
   prdivider(1);
   PRF;printf(": loading stage%d\n", stage);
   fflush(stdout);
@@ -133,8 +133,8 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     checkpoint_load_patches(mesh, pats);
     PRF;printf(": finished loading patches.\n");
     fflush(stdout);
-    checkpoint_load_nodes(mesh, nodes);
-    PRF;printf(": finished loading nodes.\n");
+    checkpoint_load_nodes(mesh, elms);
+    PRF;printf(": finished loading elms.\n");
     fflush(stdout);
   }
   else
@@ -150,7 +150,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
 
   /* free strings */
   free(vars);
-  free(nodes);
+  free(elms);
   free(pats);
   free(pars);
   free(dir);
@@ -168,10 +168,10 @@ int checkpoint_save(tMesh *mesh)
   char *dirn;
   char *pars;
   char *pats;
-  char *nodes;
+  char *elms;
   char *vars;
   int pl = checkpoint_create_pathnames(mesh, "", &dirn,"_new",
-                                       &pars, &pats, &nodes, &vars);
+                                       &pars, &pats, &elms, &vars);
   char *dir = cmalloc(pl);
   char *dirp = cmalloc(pl);
 
@@ -185,7 +185,7 @@ int checkpoint_save(tMesh *mesh)
   /* save checkpoint in various files */
   checkpoint_save_pars(mesh, pars);
   checkpoint_save_patches(mesh, pats);
-  checkpoint_save_nodes(mesh, nodes);
+  checkpoint_save_elms(mesh, elms);
   checkpoint_save_EvoVars(mesh, vars);
 
   /* wait until all get here */
@@ -204,7 +204,7 @@ int checkpoint_save(tMesh *mesh)
   free(dirp);
   free(dir);
   free(vars);
-  free(nodes);
+  free(elms);
   free(pats);
   free(pars);
   free(dirn);
