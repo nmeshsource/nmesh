@@ -2573,7 +2573,6 @@ tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s)
 }
 
 
-
 /****************************************************************************/
 /* functions to partially set nb-info after refine or unrefine */
 /****************************************************************************/
