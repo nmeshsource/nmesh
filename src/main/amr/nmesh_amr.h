@@ -27,7 +27,7 @@ tElm:      elm elm ...      elm elm elm ...      elm elm  ...
   proc. The tDat struct contains lists of arrays, one for each variable.
 
   The elms are the leaf nodes of an oct-tree. Here we show the structure
-  in one patch starting from a root-node. Each part of the tree is a node
+  in one patch starting from a root-node. Each part of the tree is a node.
   The leaf nodes are marked as elm. We only show 2 children instead of 8:
 level
 l=0                  _________root-node______________________
@@ -695,5 +695,5 @@ int elm_is_on_patface(tElm *elm, int f);
 #define nodename(node, s, slen)          elmname(node, s, slen)
 #define node_location(node)              elm_location(node)
 #define node_from_location_str(pat, loc) elm_from_location_str(pat, loc)
-#define node_from_nodename(mesh,  name)  elm_from_elmname(mesh,  name)
+#define node_from_nodename(mesh, name)   elm_from_elmname(mesh, name)
 #define nodename_is(node, nname)         elmname_is(node, nname)

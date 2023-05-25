@@ -846,15 +846,11 @@ int elmname_is(tNode *elm, const char *nname)
 tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank)
 {
   amr_elmindex_and_elmrank_of_eid(mesh, eid, elmindex, elmrank);
+  //PRF;printf(": eid=%lu\n", eid);
+  //printf("*elmindex=%lu *elmrank=%d\n", *elmindex, *elmrank);
 
-PRF;printf("1: eid=%lu EID_INVALID=%lu\n", eid, EID_INVALID);
-printf("*elmindex=%lu *elmrank=%d\n", *elmindex, *elmrank);
-
-
-  if( nMPI_rank() == *elmrank )
-    return mesh->myelm[*elmindex];
-  else
-    return NULL;
+  if( nMPI_rank() == *elmrank ) return mesh->myelm[*elmindex];
+  else                          return NULL;
 }
 
 
