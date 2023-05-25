@@ -22,8 +22,6 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   tPat *pat = NULL;
   char par[1000], val[1000];
   int useF=0;
-  int n[] = { 0,0,0 };
-  int pt_typ[] = { 0,0,0 };
   double bbox[] = { 0.,0.,0.,0.,0.,0. };
 
 /*
@@ -73,11 +71,7 @@ exit(8);
     {
       //prbbox(bbox, 3);
       //printf("n = %d %d %d\n", n[0],n[1],n[2]);
-      /* We set datrank=-1 to save memory. No dat is allocated
-         anywhere! */
-      pat = add_patch(mesh, bbox, pt_typ, n, -1);
-      errorexit("verify that datrank=-1 works with newamr, "
-                "probably we need datrank=0");
+      pat = add_patch_without_rnode(mesh, bbox);
       useF = 0;
     }
 
@@ -96,12 +90,6 @@ exit(8);
       if(strcmp(par, "bbox[4]")==0) bbox[4] = atof(val);
       if(strcmp(par, "bbox[5]")==0) bbox[5] = atof(val);
       //if(strcmp(par, "nmax")==0) nmax = atoi(val);
-      if(strcmp(par, "rnode->n[0]")==0) n[0] = atoi(val);
-      if(strcmp(par, "rnode->n[1]")==0) n[1] = atoi(val);
-      if(strcmp(par, "rnode->n[2]")==0) n[2] = atoi(val);
-      if(strcmp(par, "rnode->pt_typ[0]")==0) pt_typ[0] = atoi(val);
-      if(strcmp(par, "rnode->pt_typ[1]")==0) pt_typ[1] = atoi(val);
-      if(strcmp(par, "rnode->pt_typ[2]")==0) pt_typ[2] = atoi(val);
       if(strcmp(par, "s[0]")==0)  pat->CI->s[0] = atof(val);
       if(strcmp(par, "s[1]")==0)  pat->CI->s[1] = atof(val);
       if(strcmp(par, "s[2]")==0)  pat->CI->s[2] = atof(val);

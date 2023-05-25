@@ -76,8 +76,37 @@ int amr_set_use_fv_flag(tMesh *mesh)
 
 
 
-
 /* add a patch to the mesh */
+tPat *add_patch_without_rnode(tMesh *mesh, double bbox[6])
+{
+  int nmax = gridpoints->nmax;
+  tPat *pat;
+  int p = mesh->npats;
+  double dg;
+  int i, dir;
+  int pt_typ[3];
+
+  PRFs(":\n");
+
+  /* make room for new patch in mesh and then add an empty patch */
+  realloc_patlist_in_mesh(mesh, p + 1);
+  pat = alloc_patch(mesh, p);
+  mesh->pat[p] = pat;
+
+  /* set bbox and bbdiag */
+  for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
+  pat->bbdiag = 0.;
+  for(i=0; i<3; i++)
+  {
+    dg = bbox[2*i+1] - bbox[2*i];
+    pat->bbdiag += dg*dg;
+  }
+  pat->bbdiag = sqrt(pat->bbdiag);
+
+  return pat;
+}
+
+/* add a patch to the mesh, and put a root node/elm in it */
 tPat *add_patch(tMesh *mesh, double bbox[6],
                 int *pt_typ_root, int nroot[3], int datrank)
 {
@@ -95,20 +124,8 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
     if(nroot[dir] > nmax)
       errorexiti("nmax=%d is too small. Maybe increase par amr_nmax.", nmax);
 
-  /* make room for new patch in mesh and then add an empty patch */
-  realloc_patlist_in_mesh(mesh, p + 1);
-  pat = alloc_patch(mesh, p);
-  mesh->pat[p] = pat;
-
-  /* set bbox and bbdiag */
-  for(i=0; i<6; i++) pat->bbox[i] = bbox[i];
-  pat->bbdiag = 0.;
-  for(i=0; i<3; i++)
-  {
-    dg = bbox[2*i+1] - bbox[2*i];
-    pat->bbdiag += dg*dg;
-  }
-  pat->bbdiag = sqrt(pat->bbdiag);
+  /* make patch first, add root elm later */
+  pat = add_patch_without_rnode(mesh, bbox);
 
   /* get points (e.g. Legendre Gauss-Lobatto) and integration weights */
   if(pt_typ_root)

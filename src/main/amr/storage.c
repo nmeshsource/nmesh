@@ -400,8 +400,8 @@ void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
     list_add_tail(&elm->list, &mesh->myelm_head);
   }
 
-  /* set rnode info */
-  pat->rnode[0] = elm0[0];
+  ///* set rnode info */
+  //pat->rnode[0] = elm0[0];
 }
 
 
