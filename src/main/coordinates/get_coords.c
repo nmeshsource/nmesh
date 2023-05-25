@@ -839,7 +839,7 @@ int p_eid_XYZ_of_xyz_mesh(tMesh *mesh, ulong *eid,
 
   /* find patch p and set X */
   p = p_XYZ_of_xyz_mesh(mesh, X, x);
-  PRFs(": ");pr3v("X", X);printf(": p=%d\n", p);
+  //PRFs(": ");pr3v("X", X);printf(": p=%d\n", p);
 
   /* if x is not on mesh return -1 and leave name="" */
   if(p<0) return p;
@@ -878,9 +878,8 @@ int p_eid_XYZ_of_xyz_mesh(tMesh *mesh, ulong *eid,
   }
 
   /* broadcast eid from rank r to all MPI jobs */
-  PRF;printf("1: *eid=%lu r=%d\n", *eid, r);fflush(stdout);
   nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r);
-  PRF;printf("2: *eid=%lu r=%d\n", *eid, r);fflush(stdout);
+  //PRF;printf(": *eid=%lu r=%d\n", *eid, r);fflush(stdout);
 
   free(found);
   free(found_local);
@@ -898,17 +897,12 @@ tElm *elm_XYZ_of_xyz_mesh(tMesh *mesh,
   if(p_eid_XYZ_of_xyz_mesh(mesh, eid, X, x) < 0)
     return NULL;
 
-PRF;printf("1: *eid=%lu EID_INVALID=%lu\n", *eid, EID_INVALID);
-printf("*elmindex=%lu *elmrank=%d\n", *elmindex, *elmrank);
-
   if(*eid == EID_INVALID)
     return NULL;
 
   elm = elm_from_eid(mesh, *eid, elmindex, elmrank);
-
-PRF;printf("2: *eid=%lu EID_INVALID=%lu\n", *eid, EID_INVALID);
-printf("*elmindex=%lu *elmrank=%d\n", *elmindex, *elmrank);
-Yo(1111);
+  //PRF;printf(": *eid=%lu\n", *eid);
+  //printf("*elmindex=%lu *elmrank=%d\n", *elmindex, *elmrank);
   return elm;
 }
 
