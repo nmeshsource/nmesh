@@ -846,6 +846,11 @@ int elmname_is(tNode *elm, const char *nname)
 tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank)
 {
   amr_elmindex_and_elmrank_of_eid(mesh, eid, elmindex, elmrank);
+
+PRF;printf("1: eid=%lu EID_INVALID=%lu\n", eid, EID_INVALID);
+printf("*elmindex=%lu *elmrank=%d\n", *elmindex, *elmrank);
+
+
   if( nMPI_rank() == *elmrank )
     return mesh->myelm[*elmindex];
   else
@@ -1070,7 +1075,7 @@ int amr_rank_of_eid(tMesh* mesh, ulong eid)
   int size = nMPI_size();
   ulong *eidlim = mesh->eidlim;
   const ulong *li;
-  size_t off, num;
+  size_t off, num, nn;
 
   /* if eid is on rank rk: eidlim[rk-1] <= eid < eidlim[rk] */
   if(eid >= eidlim[size-1])
@@ -1085,7 +1090,17 @@ int amr_rank_of_eid(tMesh* mesh, ulong eid)
                      cmp_ulong, NULL);
   if(!li) errorexit("mesh->eidlim seems wrong");
 
-  return off+1;
+  /* in case there are duplicates in eidlim do a linear search
+     starting at off */
+  //printf("off=%zu\n", off);
+  for(nn=0; nn<8; nn++)
+  {
+    if(eidlim[off+nn] > eid) break;
+  }
+  //printf("nn=%zu\n", nn);
+  //printf("off+1=%zu\n", off+1);
+
+  return off+nn;
 }
 
 /* return the rank that an elm with eploc is on */
