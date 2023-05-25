@@ -133,7 +133,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     checkpoint_load_patches(mesh, pats);
     PRF;printf(": finished loading patches.\n");
     fflush(stdout);
-    checkpoint_load_nodes(mesh, elms);
+    checkpoint_load_elms(mesh, elms);
     PRF;printf(": finished loading elms.\n");
     fflush(stdout);
   }
