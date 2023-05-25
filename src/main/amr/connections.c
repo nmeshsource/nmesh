@@ -1738,7 +1738,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
 {
   struct list_head *pos;
   struct list_head ef0_head[6]; // one list for each face
-  ulong nmyef0[6];              // total number of elms
+  ulong nmyef0[6] = {0};        // total number of elms
   int f, rk;
   int rank=nMPI_rank();
   int size=nMPI_size();

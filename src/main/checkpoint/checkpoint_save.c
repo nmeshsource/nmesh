@@ -163,6 +163,10 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
     /* open destination file */
     fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
     if(!fp) errorexits("failed opening %s", fname);
+
+    fprintf(fp, "number of elms, followed by all elms, their number of "
+                "points, and optionally their point type\n\n");
+    fprintf(fp, "nelms = %lu\n\n", mesh->eidlim[nMPI_size()-1]);
   }
 
   /* write all nodes */

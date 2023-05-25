@@ -142,6 +142,217 @@ exit(8);
 
 
 /******************************************************************/
+/* functions to load elms */
+/******************************************************************/
+/* load node info */
+int checkpoint_load_elms(tMesh *mesh, char *fname)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  FILE *fp=NULL;
+  char *buffer=NULL;
+  long nbuffer;
+  long first = 524288;
+  long extra = 1024;
+  long nbuffer_allocd = first + extra;
+  int file_end;
+  int IObufsz = Geti(Par("fread_bufsize"));
+  char *IObuf;
+  ulong nelms, eid0, nmyelm;
+  int n[3];      /* number of points in elm */
+  int pt_typ[3]; /* point type we set for elm */
+  int n_def[]      = {2,2,2};             /* defaults for n */
+  int pt_typ_def[] = {P_LGL,P_LGL,P_LGL}; /* and pt_typ     */
+  char buf[1000];
+  char str[1000];
+
+  /* alloc buffer */
+  buffer = cmalloc(nbuffer_allocd);
+
+  /* open file on rank0 */
+  if(Rank0)
+  {
+    fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
+    if(!fp) errorexits("failed opening %s", fname);
+
+    /* read nelms from file */
+    {
+      int r;
+      fgets(str,999, fp); // read comment line
+      fgets(str,999, fp); // read empty line
+      if(fscanf(fp, "%s %s", buf, str)!=2) // read strings "nelms" and "="
+        errorexit("where is nelms in this file?");
+      fscanf(fp, "%s", str); // read nelms
+      nelms = strtoul(str, NULL, 10);
+
+      /* we give an equal number of elms to each rank,
+         we can load balance later */
+      for(r=0; r<size-1; r++) mesh->eidlim[r] = r*(nelms/size);
+      mesh->eidlim[size-1] = nelms;
+    }
+  }
+  /* broadcast mesh->eidlim[] to all MPI ranks */
+  nMPI_Bcast(mesh->eidlim,size, nMPI_UNSIGNED_LONG, 0);
+  nelms = mesh->eidlim[size-1]; // set nelms on each rank
+
+  /* now we know which eids each rank gets */
+  nmyelm = amr_nelms_on_rank(mesh, rank);
+  eid0 = amr_1st_eid_on_rank(mesh, rank);
+
+  /* get part of file into mem buffer on proc0 */
+  file_end = 0;
+  do
+  {
+    int p = -1;    /* patch number read from file */
+    int p_prev;    /* previous patch number read from file */
+    int lp = -1;   /* ref. level of parent */
+    int lp_prev;   /* ref. level of previous parent */
+    struct list_head *pos_elm = &mesh->myelm_head;
+
+
+    /* read a chunk from file into buffer */
+    if(Rank0)
+    {
+      char *tailbuf;
+      long pos;
+      int lastone, c;
+
+      /* read a certain number of elms and their n: */
+      /* start with reading a certain number of bytes */
+      nbuffer = fread(buffer, sizeof(char), first, fp);
+      if(nbuffer<first) file_end = 1;
+
+      /* read more bytes until info for last parent in buffer is complete */
+      tailbuf = buffer + nbuffer;
+      pos = 0;
+      lastone = 0;
+      while((c=fgetc(fp)) != EOF)
+      {
+        tailbuf[pos++] = c;
+        if(c=='_') lastone = 1; /* from now on we read until we get \n\n */
+        if(lastone && c=='\n' && tailbuf[pos-2]=='\n') break;
+      }
+      nbuffer += pos;
+      if(c == EOF) file_end = 1;
+    }
+
+    /* broadcast buffer to all MPI ranks */
+    nMPI_Bcast(&file_end,1, nMPI_INT, 0);
+    nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
+    if(!Rank0) buffer = cmalloc(nbuffer);
+    nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
+    //PRF;printf(": nbuffer=%ld\n", nbuffer);
+    /* now use the info in buffer to create nodes */
+    {
+      ulong eid; /* eid is just the number of the elm in the file */
+      long off, len;
+
+      /* read buffer line by line */
+      eid = 0;
+      off = 0;
+      while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
+      {
+        /* all elm names contain an '_' */
+        if(strstr(buf, "_"))
+        {
+          int chld;
+          int d, f;
+          struct list_head *pos_chld;
+          tElm *elm;
+          tEloc eloc[1];
+          long ret;
+
+          /* read n and point type for elm */
+          ret = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
+          off = ret; /* advance buffer offset off */
+          if(str[0]!='\n') /* if we don't only get "\n", there is n-info */
+          {
+            for(d=0; d<3; d++)
+            {
+              ret = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
+              off = ret; /* advance buffer offset off */
+              if(str[0]=='\n') /* if we only get \n, there is nothing */
+                errorexit("there should have been n, pt_typ");
+              ret = sscanf(str, "%d%d", &(n[d]), &(pt_typ[d]));
+              if(ret<2) pt_typ[d]     = pt_typ_def[d]; /* use default */
+              else      pt_typ_def[d] = pt_typ[d];     /* update default */
+              n_def[d] = n[d];                         /* update default */
+            }
+          }
+          else /* use default values for n, pt_typ */
+          {
+            for(d=0; d<3; d++)
+            {
+              n[d]      = n_def[d];
+              pt_typ[d] = pt_typ_def[d];
+            }
+          }
+
+          /* we got an elm, do nothing if it is not whithin my eid range */
+          if( (eid < eid0) || (eid >= eid0+nmyelm) )
+            goto Incr_Eid;
+
+          /* if we get here this is our eid */
+
+          /* strip trailing '\n' from buf */
+          buf[strlen(buf)-1] = 0;
+
+          /* set elm's eloc from its name in buf */
+          eloc_from_elmname(eloc, buf);
+          p_prev = p;
+          p = eloc->p;
+          lp_prev = lp;
+          lp = eloc->l;
+          //printf("buf=%s\n", buf);
+
+          /* make and init new elm */
+          elm = alloc_elm_init_pat(mesh, p);
+          eloc->eid = eid;
+          eloc_to_eploc(eloc, elm->eploc);
+          for(d=0; d<3; d++)
+          {
+            elm->n[d]      = n[d];
+            elm->pt_typ[d] = pt_typ[d];
+          }
+          amr_set_elm_bbox(elm);
+          /* dat needs to be allocated */
+          elm->dat = alloc_dat(elm);
+          /* nnbinfo<0 means nb info is not there yet */
+          for(f=0; f<6; f++)  elm->dat->info->nnbinfo[f] = -1;
+
+          /* add new element to list mesh->myelm_head on this rank */
+          list_add_tail(&elm->list, &mesh->myelm_head);
+
+        Incr_Eid:
+          eid++;
+        }
+      } /* end while that goes over buffer */
+    }
+
+  } while(!file_end);
+
+  /* close file */
+  if(Rank0) fclose_buf(fp, &IObuf);
+
+  PRF;printf(": mesh->iteration=%d mesh->time=%g\n",
+             mesh->iteration, mesh->time);
+  fflush(stdout);
+
+  /* make sure all nodes have new current eids */
+  update_mesh_myelms_elm_eid_dt(mesh);
+
+  /* load balance all leaf nodes */
+  simple_load_balance(mesh);
+  //printmesh(mesh);
+  PRF;printf(": number of leaf nodes mesh->nmyelm=%lu\n", mesh->nmyelm);
+  fflush(stdout);
+
+  free(buffer);
+  return 0;
+}
+
+
+/******************************************************************/
 /* functions to load nodes */
 /******************************************************************/
 /* load node info */

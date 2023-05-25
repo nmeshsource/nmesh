@@ -387,7 +387,7 @@ void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank)
   {
     tElm *elm = alloc_elm_of_elmheader(mesh, elm0);
 
-    /* see where dat needs to be allocated */
+    /* dat needs to be allocated */
     elm->dat = alloc_dat(elm);
 
     /* add new root element to list mesh->myelm_head */
