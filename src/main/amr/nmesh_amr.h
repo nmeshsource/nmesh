@@ -482,6 +482,9 @@ void *memcpy_to_array(tArray *ar, size_t bytestride, size_t pos,
                       const void *src, size_t n);
 void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
                             const void *src, size_t n);
+tElm *alloc_elm(tMesh *mesh);
+tElm *alloc_elm_init_pat(tMesh *mesh, int p);
+tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
 void free_elm(tElm *elm);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
@@ -681,6 +684,9 @@ void prefine_pat(tMesh *mesh, int p, int n[3]);
 
 
 /* connections.c */
+void amr_set_elm_pat(tMesh *mesh, tElm *elm);
+void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0);
+void amr_set_elm_bbox(tElm *elm);
 void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 char *elm_location_str(tElm *elm, char *s, int slen);
@@ -693,6 +699,11 @@ int elm_get_ijk(tElm *elm);
 tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank);
 int elm_is_on_patface(tElm *elm, int f);
 tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s);
+ulong amr_nelms_on_rank(tMesh *mesh, int rank);
+ulong amr_1st_eid_on_rank(tMesh *mesh, int rank);
+int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
+int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
+
 
 /* compatibility with old connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)

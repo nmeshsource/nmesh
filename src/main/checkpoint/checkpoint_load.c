@@ -203,13 +203,6 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
   file_end = 0;
   do
   {
-    int p = -1;    /* patch number read from file */
-    int p_prev;    /* previous patch number read from file */
-    int lp = -1;   /* ref. level of parent */
-    int lp_prev;   /* ref. level of previous parent */
-    struct list_head *pos_elm = &mesh->myelm_head;
-
-
     /* read a chunk from file into buffer */
     if(Rank0)
     {
@@ -255,9 +248,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
         /* all elm names contain an '_' */
         if(strstr(buf, "_"))
         {
-          int chld;
           int d, f;
-          struct list_head *pos_chld;
           tElm *elm;
           tEloc eloc[1];
           long ret;
@@ -296,17 +287,13 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
 
           /* strip trailing '\n' from buf */
           buf[strlen(buf)-1] = 0;
+          //printf("buf=%s\n", buf);
 
           /* set elm's eloc from its name in buf */
           eloc_from_elmname(eloc, buf);
-          p_prev = p;
-          p = eloc->p;
-          lp_prev = lp;
-          lp = eloc->l;
-          //printf("buf=%s\n", buf);
 
           /* make and init new elm */
-          elm = alloc_elm_init_pat(mesh, p);
+          elm = alloc_elm_init_pat(mesh, eloc->p);
           eloc->eid = eid;
           eloc_to_eploc(eloc, elm->eploc);
           for(d=0; d<3; d++)
@@ -341,8 +328,13 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
   /* make sure all nodes have new current eids */
   update_mesh_myelms_elm_eid_dt(mesh);
 
+  /* set nb-info */
+  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+
   /* load balance all leaf nodes */
   simple_load_balance(mesh);
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+
   //printmesh(mesh);
   PRF;printf(": number of leaf nodes mesh->nmyelm=%lu\n", mesh->nmyelm);
   fflush(stdout);

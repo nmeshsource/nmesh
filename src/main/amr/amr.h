@@ -19,9 +19,6 @@ typedef struct tELOCFACE {
 /* storage.c */
 int array_Neplocs(tArray *ar);
 int redim_array_Neplocs(tArray *array, int Neplocs);
-tElm *alloc_elm(tMesh *mesh);
-tElm *alloc_elm_init_pat(tMesh *mesh, int p);
-tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
 ulong alloc_and_set_mesh_myelm(tMesh *mesh);
 void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
@@ -115,18 +112,13 @@ int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);
 int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
 int amr_elms_are_siblings(int n, void *ptr_elm);
 int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni);
-void amr_set_elm_pat(tMesh *mesh, tElm *elm);
-void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0);
-void amr_set_elm_bbox(tElm *elm);
 int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
                                      ulong *elmindex, int *elmrank);
-int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh);
-int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
 void amr_erase_all_elm_fnb(tMesh *mesh);
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
 int amr_get_nbelm_elmheaders(tMesh *mesh);

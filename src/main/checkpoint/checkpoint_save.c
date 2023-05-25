@@ -89,7 +89,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
 /* write non-pointer part of tPat */
 void checkpoint_write_pat(FILE *fp, tPat *pat)
 {
-  int d, f;
+  int f;
 
   fprintf(fp, "patch%d:\n", pat->p);
   fprintf(fp, "pat->\n");
