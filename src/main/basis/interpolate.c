@@ -638,7 +638,8 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
                                          const double *x_p,
                                          const double *w_interp))
 {
-  double vinterp;
+  double Val, val=0.;
+  int Haveval, haveval=0;
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, xyz);
 
@@ -646,17 +647,21 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
   //pr3v("X", X);
   //printf("Node_eid(node)=%ld node->datrank=%d\n", Node_eid(node), node->datrank);
 
-  if(!node) errorexit("could not find point xyz");
-
-  if(node->dat)
+  if(node) if(node->dat)
   {
     XbYbZb_of_XYZ(node, Xb, X);
-    vinterp = basis_array_interp(node, VarA(node, ivar), Xb, basis);
+    val = basis_array_interp(node, VarA(node, ivar), Xb, basis);
+    haveval = 1;
   }
+  Val = val;
+  Haveval = haveval;
 
-  //printf("vinterp=%g\n", vinterp);
-  nMPI_Bcast(&vinterp, 1, nMPI_DOUBLE, node->datrank);
-  //printf("vinterp=%g\n", vinterp);
+  /* find out how many have a value, and add all of them */
+  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
+  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  if(!Haveval) errorexit("one MPI proc should have this node");
+  Val = Val/Haveval;
 
-  return vinterp;
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+  return Val;
 }
