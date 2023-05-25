@@ -1507,6 +1507,9 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
   if(eid==0)
     mesh->dt = dt_old;
 
+  //for(rk=0; rk<size; rk++)
+  //{ PRF;printf(": rank%d mesh->eidlim[%d]=%lu\n", rank, rk, mesh->eidlim[rk]); }
+
   /* now make sure we use the min dt of all ranks */
   dt_new = mesh->dt;
   nMPI_Allreduce(&dt_new, &(mesh->dt), 1, nMPI_DOUBLE, nMPI_MIN);
