@@ -1109,6 +1109,22 @@ int amr_rank_of_elm_eploc(tMesh* mesh, tEploc *eploc)
 }
 */
 
+/* return the number of elms on a rank */
+ulong amr_nelms_on_rank(tMesh *mesh, int rank)
+{
+  ulong *eidlim = mesh->eidlim;
+  if(rank>0) return eidlim[rank] - eidlim[rank-1];
+  else       return eidlim[0];
+}
+
+/* return the eid of the first elm on a rank rank */
+ulong amr_1st_eid_on_rank(tMesh *mesh, int rank)
+{
+  ulong *eidlim = mesh->eidlim;
+  if(rank>0) return eidlim[rank-1];
+  else       return 0;
+}
+
 /* find the index into mesh->myelm (on the rank it is on) that an elm
    with eid is on */
 void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
@@ -2534,6 +2550,28 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 
   return 0;
 }
+
+/* allocate and fill an array with all elm0 on rank rk,
+   Returns pointer to array, Out: nelm0s <- size of array */
+tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s)
+{
+  ulong nelm0 = amr_nelms_on_rank(mesh, rk);
+  tElm0 *elm0ar = checked_calloc(nelm0, sizeof(elm0ar[0]));
+  ulong *eidar  = checked_calloc(nelm0, sizeof(eidar[0]));
+  ulong eid0 = amr_1st_eid_on_rank(mesh, rk);
+  ulong i;
+
+  /* fill eid array */
+  for(i=0; i<nelm0; i++) eidar[i] = eid0 + i;
+
+  /* now put all elm0 for the eid array eidar into elm0ar */
+  amr_get_elm0_for_eids(mesh, nelm0, eidar, elm0ar);
+
+  free(eidar);
+  *nelm0s = nelm0;
+  return elm0ar;
+}
+
 
 
 /****************************************************************************/
