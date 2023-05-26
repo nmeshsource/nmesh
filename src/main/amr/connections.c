@@ -833,11 +833,11 @@ tElm *elm_eid_from_elmname(tMesh *mesh, char *name, ulong *eid)
   return amr_elm_eid_from_eloc(mesh, eloc, eid);
 }
 
-/* get elm in the mesh from its full elmname */
+/* get elm in the mesh from its full elmname
+   WARNING: better use elm_eid_from_elmname */
 tNode *elm_from_elmname(tMesh *mesh,  char *name)
 {
   ulong eid;
-  errorexit("use elm_eid_from_elmname instead of elm_from_eid");
   return elm_eid_from_elmname(mesh, name, &eid);
 }
 

@@ -701,6 +701,8 @@ int elm_is_on_patface(tElm *elm, int f);
 tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s);
 ulong amr_nelms_on_rank(tMesh *mesh, int rank);
 ulong amr_1st_eid_on_rank(tMesh *mesh, int rank);
+void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
+                                     ulong *elmindex, int *elmrank);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
 int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 
