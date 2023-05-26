@@ -258,9 +258,12 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
 
   /* loop over all vars and put all impportant EvoVars into vl */
   for(vi=0; vi<mesh->nvdb; vi++)
-    if(MeshVarType(mesh, vi) != AUXVAR)
+  {
+    int vt = MeshVarType(mesh, vi);
+    if( (vt==EVOVAR) || (vt==DATAVAR) )
       if(!var_added_by_evolve_init_evosys(mesh, vi))
         vlpushone(vl, vi);
+  }
 
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
