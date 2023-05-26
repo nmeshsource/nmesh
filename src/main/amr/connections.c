@@ -1409,10 +1409,10 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
     if(!mor)  /* if there is only one */
     {
       tEploc *f_eploc = (*f_elm)->eploc;
-      /* Note: if we are at boundary (atB) there could be more than one
-               if f_eploc->l > s_eloc->l and we are boundary there are likely
-               more on other ranks and we need to further verify the one we
-               found */
+      /* Note: If we are at arr-bound (atB) there could be more than one.
+               If f_eploc->l > s_eloc->l and we are at arr-bound there are
+               likely more on other ranks and we need to further verify the
+               one we found */
       if( (f_eploc->l <= s_eloc->l) || (!atB) )
       {
         /* looks like we found a unique elm, so add f_elm to list and then
