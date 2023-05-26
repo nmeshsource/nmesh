@@ -164,8 +164,8 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
     fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
     if(!fp) errorexits("failed opening %s", fname);
 
-    fprintf(fp, "number of elms, followed by all elms, their number of "
-                "points, and optionally their point type\n\n");
+    fprintf(fp, "number of elms, followed by all elms, their n[3] and "
+                "optionally their py_typ[3]\n\n");
     fprintf(fp, "nelms = %lu\n\n", mesh->eidlim[nMPI_size()-1]);
   }
 
@@ -230,12 +230,11 @@ int checkpoint_write_elms(tMesh *mesh, FILE *fp)
         /* add info about n, pt_typ */
         for(d=0; d<3; d++)
         {
-          if(write_n)
-            fprintf(fp, "%d", n[d]);
-          if(write_pt_typ)
-            fprintf(fp, " %d", pt_typ[d]);
-          fprintf(fp, "\n");
+          if(write_n)                 fprintf(fp, "%d", n[d]);
+          if(write_pt_typ)            fprintf(fp, " %d", pt_typ[d]);
+          if(write_n || write_pt_typ) fprintf(fp, "\n");
         }
+        fprintf(fp, "\n");
       }
     } /* end rk-loop */
     free(elm0);
