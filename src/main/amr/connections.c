@@ -790,42 +790,55 @@ void eploc_from_elmname(tEploc *eploc, char *name)
   eloc_to_eploc(eloc, eploc);
 }
 
-/* get elm in a patch from string produced by elm_location_str */
-tElm *elm_from_location_str(tPat *pat, char *loc)
+/* find an eloc in the elm list of all ranks,
+   In: mesh, eloc   Out: eid
+   Returns: the elm if it is on my rank, otherwise NULL */
+tElm *amr_elm_eid_from_eloc(tMesh *mesh, tEloc *eloc, ulong *eid)
 {
-  tElm *elm;
-  tEploc eploc[1];
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int r, sum;
+  char *found = checked_calloc(size, sizeof(found[0]));
+  char *Found = checked_calloc(size, sizeof(found[0]));
+  tElm **f_elm;
 
-  eploc_from_location_str(eploc, pat->p, loc);
+  f_elm = amr_elmarray_bsearch_eloc(mesh->nmyelm, mesh->myelm, eloc);
+  if(f_elm) found[rank] = 1;
+  Found[rank] = found[rank];
+  nMPI_Allreduce(found, Found, size, nMPI_CHAR, nMPI_BOR);
 
-  /* find elm with eploc in mesh->mylems */
-  //unfinished, do we really need this???
-  errorexit("instead of elm_from_elmname and elm_from_location_str use "
-            "elm_from_eid");
-  return elm;
+  /* check result */
+  for(sum=0, r=0; r<size; r++) sum += Found[r];
+  if(sum>1) errorexit("at most one rank should have this eloc");
+
+  /* get eid */
+  *eid = EID_INVALID;
+  if(f_elm) *eid = Elm_eid(f_elm[0]);
+
+  /* get rank r that has eid and Bcast it */
+  for(r=0; r<size; r++) if(Found[r]) break;
+  nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r);
+
+  free(Found);
+  free(found);
+  return f_elm[0];
+}
+
+/* get elm,eid in the mesh from its full elmname,
+   returns NULL if elm is on other rank */
+tElm *elm_eid_from_elmname(tMesh *mesh, char *name, ulong *eid)
+{
+  tEloc eloc[1];
+  eloc_from_elmname(eloc, name);
+  return amr_elm_eid_from_eloc(mesh, eloc, eid);
 }
 
 /* get elm in the mesh from its full elmname */
 tNode *elm_from_elmname(tMesh *mesh,  char *name)
 {
-  tPat *pat;
-  int i, p;
-  char *loc;
-  int max = 99;
-
-  /* find pos i of '_' */
-  for(i=0; i<max; i++) if(name[i]=='_') break;
-
-  /* get patch */
-  p = atoi(name); /* atoi ignores '_' and all after it */
-  if(p>=mesh->npats || p<0) errorexiti("patch %d does not exist", p);
-  pat = mesh->pat[p];
-  //printf("name=%s => p=%d\n", name, p);
-
-  /* get location str. */
-  loc = name + i+1;
-
-  return elm_from_location_str(pat, loc);
+  ulong eid;
+  errorexit("use elm_eid_from_elmname instead of elm_from_eid");
+  return elm_eid_from_elmname(mesh, name, &eid);
 }
 
 /* check if a elm has the name in string nname */
@@ -1174,6 +1187,18 @@ void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0)
 void amr_elmarray_qsort(ulong narr, tElm **arr)
 {
   qsort(arr, narr, sizeof(arr[0]), eecmp_q);
+}
+
+/* find elm with (eloc->p, eloc->l, eloc->loc) in elmarray arr
+   (eloc->eid is not looked at) */
+tElm **amr_elmarray_bsearch_eloc(ulong narr, tElm **arr, tEloc *eloc)
+{
+  tElm **f_elm;
+  //PRFs(": ");printelmarray(narr, arr);
+  f_elm = bsearch(eloc, arr, narr, sizeof(arr[0]), lecmp_q);
+  //if(f_elm) { printf("found ");printeloc_s(eloc,"\n"); }
+  //else      { printf("could not find ");printeloc_s(eloc,"\n"); }
+  return f_elm;
 }
 
 /* find elm in elmarray arr */

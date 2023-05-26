@@ -692,7 +692,7 @@ void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 char *elm_location_str(tElm *elm, char *s, int slen);
 char *elmname(tElm *elm, char *s, int slen);
 void eloc_from_elmname(tEloc *eloc, char *name);
-tElm *elm_from_location_str(tPat *pat, char *loc);
+tElm *elm_eid_from_elmname(tMesh *mesh, char *name, ulong *eid);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);
 int elm_get_ijk(tElm *elm);
@@ -709,6 +709,5 @@ int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)
 #define nodename(node, s, slen)          elmname(node, s, slen)
 #define node_location(node)              elm_location(node)
-#define node_from_location_str(pat, loc) elm_from_location_str(pat, loc)
 #define node_from_nodename(mesh, name)   elm_from_elmname(mesh, name)
 #define nodename_is(node, nname)         elmname_is(node, nname)
