@@ -953,10 +953,8 @@ void free_patch(tPat *pat)
 
   //PRFs(":\n");
 
-  /* free all in CI coordinfo, and also all bfaces  */
-  free_pat_CI(pat);
-  remove_all_bfaces(pat);
-
+  /* all nb info will be bad if a patch is removed, so delete it */
+  amr_remove_mesh_nbelm(mesh, 0);
 
   /* remove all elms in this patch from mesh->myelm_head */
   list_for_each_safe(pos, sav, &mesh->myelm_head)
@@ -969,9 +967,12 @@ void free_patch(tPat *pat)
     }
   }
 
-
   /* update myln lists */
-  update_mesh_myln_node_nid(mesh);
+  update_mesh_myelms_elm_eid_dt(mesh);
+
+  /* free all in CI coordinfo, and also all bfaces  */
+  free_pat_CI(pat);
+  remove_all_bfaces(pat);
 
   free(pat);
 }
