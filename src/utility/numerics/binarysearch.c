@@ -70,7 +70,7 @@ void binarysearchmore(const void *key, const void *base0,
                       size_t nmemb, size_t size, const void *result,
                       int (*compar)(const void *, const void *, void *),
                       void *arg,
-                      unsigned *more, unsigned *atBoundary)
+                      unsigned *more, unsigned *atBound)
 {
     int cmp;
     const char *res = (const char *) result;
@@ -78,14 +78,14 @@ void binarysearchmore(const void *key, const void *base0,
 
     /* defaults for output vars */
     *more = 0;
-    *atBoundary = 0;
+    *atBound = 0;
 
     if(!result) return;
 
     pos = (res - (const char *) base0)/size;
     //printf("result=%p base0=%p pos=%ld\n", result, base0, pos);
     *more = 0;
-    *atBoundary = 0;
+    *atBound = 0;
 
     /* check on left */
     if(pos>0)
@@ -95,7 +95,7 @@ void binarysearchmore(const void *key, const void *base0,
     }
     else
     {
-      *atBoundary |= 1;
+      *atBound |= 1;
     }
 
     /* check on right */
@@ -106,7 +106,7 @@ void binarysearchmore(const void *key, const void *base0,
     }
     else
     {
-      *atBoundary |= 2;
+      *atBound |= 2;
     }
 }
 
