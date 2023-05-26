@@ -253,14 +253,22 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
           tEloc eloc[1];
           long ret;
 
+          /* strip trailing '\n' from buf */
+          buf[strlen(buf)-1] = 0;
+          //printf("buf=%s\n", buf);
+
+          /* set elm's eloc from its name in buf */
+          eloc_from_elmname(eloc, buf);
+
           /* read n and point type for elm */
           ret = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
-          off = ret; /* advance buffer offset off */
+          //printf("1: %s", str);
           if(str[0]!='\n') /* if we don't only get "\n", there is n-info */
           {
             for(d=0; d<3; d++)
             {
               ret = str_from_buf(buffer,nbuffer, off, '\n', str,999, &len);
+              //printf("2: %s", str);
               off = ret; /* advance buffer offset off */
               if(str[0]=='\n') /* if we only get \n, there is nothing */
                 errorexit("there should have been n, pt_typ");
@@ -285,28 +293,25 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
 
           /* if we get here this is our eid */
 
-          /* strip trailing '\n' from buf */
-          buf[strlen(buf)-1] = 0;
-          //printf("buf=%s\n", buf);
-
-          /* set elm's eloc from its name in buf */
-          eloc_from_elmname(eloc, buf);
-
           /* make and init new elm */
           elm = alloc_elm_init_pat(mesh, eloc->p);
           eloc->eid = eid;
           eloc_to_eploc(eloc, elm->eploc);
+          elm->np = 1;
           for(d=0; d<3; d++)
           {
             elm->n[d]      = n[d];
             elm->pt_typ[d] = pt_typ[d];
           }
+          elm->np = n[0]*n[1]*n[2];
           amr_set_elm_bbox(elm);
           /* dat needs to be allocated */
           elm->dat = alloc_dat(elm);
+          elm->datrank = rank;
           /* nnbinfo<0 means nb info is not there yet */
           for(f=0; f<6; f++)  elm->dat->info->nnbinfo[f] = -1;
 
+          printelm(elm);
           /* add new element to list mesh->myelm_head on this rank */
           list_add_tail(&elm->list, &mesh->myelm_head);
 
