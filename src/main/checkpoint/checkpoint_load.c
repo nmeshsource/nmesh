@@ -394,7 +394,9 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
   buffer = NULL;
   do
   {
-    int datrank;
+    char nname[256];
+    ulong eid, elmindex;
+    int elmrank, datrank;
 
     /* make sure to free everything in buffer */
     free(buffer);
@@ -402,7 +404,7 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
 
     /* get data (in little endian format) for 1 node into buffer on rank0 */
     if(Rank0)
-      buffer = checkpoint_make_nodebuffer(fp, vl, 0, &nbuffer, &datrank);
+      buffer = checkpoint_make_nodebuffer(fp, vl, 0, &nbuffer, nname);
 /*
 if(Rank0)
 {
@@ -413,9 +415,16 @@ fclose(out);
 nMPI_barrier();
 exit(9);
 */
+    /* broadcast name of node */
+    nMPI_Bcast(nname,256, nMPI_CHAR, 0);
+
+    /* figure out datrank of nname */
+    elm_eid_from_elmname(mesh, nname, &eid);
+    amr_elmindex_and_elmrank_of_eid(mesh, eid, &elmindex, &elmrank);
+    datrank = elmrank;
+
     /* broadcast nbuffer and stop if it's empty */
     nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
-    nMPI_Bcast(&datrank,1, nMPI_INT, 0);
     //PRF;printf(": nbuffer=%ld datrank=%d\n", nbuffer, datrank);
     if(!nbuffer) break; /* break do-loop if no more node-data */
 
@@ -552,9 +561,9 @@ char *append_buf(char *buffer, long *nbuffer, const char *buf, long nbuf)
 
 /* read var info for one node into buffer */
 char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
-                                 long *nbuffer, int *datrank)
+                                 long *nbuffer, char *nname)
 {
-  tMesh *mesh = vl->mesh;
+  //tMesh *mesh = vl->mesh;
   char *buffer;
   char buf[1000];
   char *s;
@@ -565,10 +574,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
   *nbuffer = 0;
   while((s = fgets(buf,999, fp)))
   {
-    char name[256];
     int np, found_node;
-    ulong eid, elmindex;
-    int elmrank;
 
     if(strcmp(buf, "{\n")==0)
     {
@@ -576,10 +582,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
 
       fgets(buf,999, fp);
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app "nodename\n" */
-      sscanf(buf, "%s", name);   /* find node name */
-      elm_eid_from_elmname(mesh, name, &eid);
-      amr_elmindex_and_elmrank_of_eid(mesh, eid, &elmindex, &elmrank);
-      *datrank = elmrank;
+      sscanf(buf, "%s", nname);   /* find node name */
 
       s = fgets(buf,999, fp); /* s=NULL at EOF */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app "np\n" */
@@ -595,7 +598,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
     }
     while(found_node && s)
     {
-      //PRF;printf(": %s %d found_node=%d\n", name, np, found_node);
+      //PRF;printf(": %s %d found_node=%d\n", nname, np, found_node);
       /* check for end / read var info */
       fgets(buf,999, fp); /* use fgets to read "}\n" or vli plus '\n' */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
