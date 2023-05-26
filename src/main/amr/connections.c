@@ -1675,19 +1675,24 @@ void amr_elm_nbinfo_update_eid_locally_using_fnb(tElm *elm)
     tArray *nbinfo = VarA(elm, i_nbinfo);
     int nfnb = elm->nfnb[f];
     tElm **fnb = elm->fnb[f];
-    int Neplocs, ni;
+    int nnb, Neplocs, ni;
     //PRFs(":\n");
     //printf("nbinfo=%p fnb=%p", nbinfo, fnb);
 
     /* if there is no nbinfo or if it is outdated do nothing */
     if(!nbinfo) continue;
-    if(elm->dat->info->nnbinfo[f] <= 0) continue;
-
+    nnb = elm->dat->info->nnbinfo[f];
+    //NOTE and CHECK: We had this:
+    //if(nnb <= 0) continue;
+    if(nnb<0) nnb = -nnb-1;
     Neplocs = array_Neplocs(nbinfo);
+    if(nnb!=Neplocs)
+      errorexiti("amr_elm_nbinfo and nnbinfo disagree on face%d", f);
+
     //PRFs(": ");printelm(elm);
     //printf(" f%d Neplocs=%d nfnb=%d\n", f, Neplocs, nfnb);
 
-    if( (Neplocs!=nfnb) || (!fnb) )
+    if( (Neplocs!=nfnb) || (!fnb && Neplocs>0) )
       errorexiti("nbinfo and fnb disagree on face%d", f);
 
     /* set eid in each amr_elm_nbinfo entry to the actual eid of the nb */
@@ -1695,7 +1700,7 @@ void amr_elm_nbinfo_update_eid_locally_using_fnb(tElm *elm)
     {
       tElm *nb = fnb[ni];
       tEploc *eploc = &(nbinfo->eploc[ni]);
-      eploc->eid = Elm_eid(nb);
+      if(nb) eploc->eid = Elm_eid(nb);
     }
   }
 }
