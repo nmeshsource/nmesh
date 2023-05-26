@@ -27,9 +27,8 @@ void simple_load_balance(tMesh *mesh)
    strategy = LOADBAL_SIMPLE ... */
 void load_balance(tMesh *mesh, int strategy)
 {
-  /* for now we keep sibling 1-7 together with sibling 0 */
-//FIXME: put the next line back in:
-//  Timing->sibl1to7_weight = 0.;
+  /* to keep sibling 1-7 together with sibling 0 we need to have
+     Timing->sibl1to7_weight = 0.;  */
 
   /* when we move elms much of mesh->nbelm will become wrong */
   amr_remove_mesh_nbelm(mesh, 0); // this makes some of nnbinfo negative
