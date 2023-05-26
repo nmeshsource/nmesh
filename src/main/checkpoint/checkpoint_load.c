@@ -396,6 +396,7 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
   {
     char nname[256];
     ulong eid, elmindex;
+    tNode *node;
     int elmrank, datrank;
 
     /* make sure to free everything in buffer */
@@ -419,7 +420,7 @@ exit(9);
     nMPI_Bcast(nname,256, nMPI_CHAR, 0);
 
     /* figure out datrank of nname */
-    elm_eid_from_elmname(mesh, nname, &eid);
+    node = elm_eid_from_elmname(mesh, nname, &eid);
     amr_elmindex_and_elmrank_of_eid(mesh, eid, &elmindex, &elmrank);
     datrank = elmrank;
 
@@ -443,7 +444,7 @@ exit(9);
     }
 
     /* read var data from buffer for this one node */
-    if(nMPI_rank()==datrank) checkpoint_read_vl(buffer, nbuffer, vl);
+    if(nMPI_rank()==datrank) checkpoint_read_vl(node, buffer, nbuffer, vl);
 
     /* wait for all to get here */
     nMPI_barrier();
@@ -483,9 +484,10 @@ tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh)
 }
 
 /* read varlist on each node */
-void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
+void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
+                        tVarList *vl)
 {
-  tMesh *mesh = vl->mesh;
+  //tMesh *mesh = vl->mesh;
   char buf[1000];
   long off, len;
 
@@ -493,22 +495,18 @@ void checkpoint_read_vl(char *buffer, long nbuffer, tVarList *vl)
   off = 0;
   while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
   {
-    tNode *node;
-    ulong eid;
-    char name[256];
+    //char name[256];
     int np, vli, vi, found_node;
 
     if(strcmp(buf, "{\n")==0)
     {
-      /* read node info */
+      /* read nodename string into buf */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
-      sscanf(buf, "%s", name);
+      //sscanf(buf, "%s", name);
+      /* read np string into buf */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       sscanf(buf, "%d", &np);
 
-      /* find node from its name */
-      node = elm_eid_from_elmname(mesh, name, &eid);
-      if(eid==EID_INVALID) errorexits("could not find %s", name);
       found_node = 1;
     }
     else
