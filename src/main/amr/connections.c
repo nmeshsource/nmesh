@@ -821,7 +821,8 @@ tElm *amr_elm_eid_from_eloc(tMesh *mesh, tEloc *eloc, ulong *eid)
 
   free(Found);
   free(found);
-  return f_elm[0];
+  if(f_elm)  return f_elm[0];
+  else       return NULL;
 }
 
 /* get elm,eid in the mesh from its full elmname,
