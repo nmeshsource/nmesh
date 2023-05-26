@@ -128,15 +128,7 @@ exit(8);
     } /* end of if get_par_from_str */
   }
 
-  /* do not load balance root nodes here! datrank=-1 saves memory only
-     until simple_load_balance(mesh) is called for the 1st time! */
-
   free(buffer);
-
-  /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 0);
-  printallbfaces(mesh);
-
   return 0;
 }
 
@@ -330,8 +322,9 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
              mesh->iteration, mesh->time);
   fflush(stdout);
 
-  /* make sure all nodes have new current eids */
-  update_mesh_myelms_elm_eid_dt(mesh);
+  /* setup all bfaces and root node connections */
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 0);
+  printallbfaces(mesh);
 
   /* set nb-info */
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
