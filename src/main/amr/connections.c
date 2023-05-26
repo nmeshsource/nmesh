@@ -21,8 +21,25 @@ extern tAMR amr[1];
 
 /* Function that orders locations described in in tEloc:
    return -1,0,1 if loc is before,at,after eloc
-   This can be used in qsort, or bsearch if Ret0OnlyIfEq=1 */
-int loccmp_0OnlyIfEq(const void *loc, const void *eloc, int Ret0OnlyIfEq)
+   This can be used in qsort, or bsearch if mode=1.
+   About mode:
+   0: return  0 (equal) if el and lc agree
+      return  0 (equal) even if el->l > lc->l, as long as first lc->l agree
+      return  1 (lc>el) if el->l < lc->l, even if first el->l agree
+   1: return  0 (equal) if el and lc agree
+      return -1 (lc<el) if el->l > lc->l, even if first lc->l agree
+      return  1 (lc>el) if el->l < lc->l, even if first el->l agree
+   2: return  0 (equal) if el and lc agree
+      return  0 (equal) even if el->l > lc->l, as long as first lc->l agree
+      return  0 (equal) even if el->l < lc->l, as long first el->l agree
+   3: return  0 (equal) if el and lc agree
+      return -1 (lc<el) if el->l > lc->l, even if first lc->l agree
+      return  0 (equal) even if el->l < lc->l, as long first el->l agree
+   mode 1 is good for normal qsort or bsearch
+   mode 0 is good for finding nbs even if they are more refined
+   mode 3 is good for finding nbs even if they are less refined
+   mode 2 is probably good for nothing...  */
+int loccmp_mode(const void *loc, const void *eloc, int mode)
 {
   const tEloc *lc = loc;
   const tEloc *el = eloc;
@@ -41,7 +58,7 @@ int loccmp_0OnlyIfEq(const void *loc, const void *eloc, int Ret0OnlyIfEq)
       if(lc->loc[i] >  el->loc[i]) return  1;
       else                         return -1;
     }
-    if( Ret0OnlyIfEq && (el->l > lc->l) )
+    if( (mode & 1) && (el->l > lc->l) )
       return -1; /* make el greater than lc, and thus move to left */
     else
       return 0;  /* lc and el are equal up the first lc->l */
@@ -54,21 +71,26 @@ int loccmp_0OnlyIfEq(const void *loc, const void *eloc, int Ret0OnlyIfEq)
       if(lc->loc[i] >  el->loc[i]) return  1;
       else                         return -1;
     }
-    return 1; /* make binarysearch move to right */
+    if( (mode & 2) )
+      return 0; /* lc and el are equal up the first el->l */
+    else
+      return 1; /* make binarysearch move to right */
   }
 }
 
 /* Function that orders locations described in in tEloc:
    return -1,0,1 if loc is before,at,after eloc
    This is used in our special binarysearch way. */
+/*
 int loccmp(const void *loc, const void *eloc)
 {
-  return loccmp_0OnlyIfEq(loc, eloc, 0);
+  return loccmp_mode(loc, eloc, 0);
 }
+*/
 
 /* return -1,0,1 if loc is before,at,after elem location,
    this is used in binarysearch */
-int lecmp(const void *loc, const void *elem, void *arg)
+int lecmp_0(const void *loc, const void *elem, void *arg)
 {
   const tEloc *lc = loc;
   //const tElm0 **elm0_arr = elem;
@@ -80,7 +102,7 @@ int lecmp(const void *loc, const void *elem, void *arg)
   /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
   eloc_from_eploc(elc, pelc);
 
-  cmp = loccmp(lc, elc);
+  cmp = loccmp_mode(lc, elc, 0);
   //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -89,7 +111,7 @@ int lecmp(const void *loc, const void *elem, void *arg)
 
 /* return -1,0,1 if key_elem location is before,at,after elem location,
    this is used in binarysearch */
-int eecmp(const void *key_elem, const void *elem, void *arg)
+int eecmp_0(const void *key_elem, const void *elem, void *arg)
 {
   const tElm0 *const*kelm0 = key_elem;
   const tEploc *keploc = kelm0[0]->eploc;
@@ -102,7 +124,7 @@ int eecmp(const void *key_elem, const void *elem, void *arg)
   eloc_from_eploc(klc, keploc);
   eloc_from_eploc(elc, eploc);
 
-  cmp = loccmp(klc, elc);
+  cmp = loccmp_mode(klc, elc, 0);
   //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -125,7 +147,7 @@ int lecmp_q(const void *loc, const void *elem)
   /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
   eloc_from_eploc(elc, pelc);
 
-  cmp = loccmp_0OnlyIfEq(lc, elc, 1);
+  cmp = loccmp_mode(lc, elc, 1);
   //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -148,7 +170,7 @@ int eecmp_q(const void *key_elem, const void *elem)
   eloc_from_eploc(klc, keploc);
   eloc_from_eploc(elc, eploc);
 
-  cmp = loccmp_0OnlyIfEq(klc, elc, 1);
+  cmp = loccmp_mode(klc, elc, 1);
   //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -1266,7 +1288,7 @@ int le0cmp_q(const void *loc, const void *elem0)
   /* NOTE: we could optimize this by caching an unpacked loc in each elm0: */
   eloc_from_eploc(elc, pelc);
 
-  cmp = loccmp_0OnlyIfEq(lc, elc, 1);
+  cmp = loccmp_mode(lc, elc, 1);
   //PRFs(": ");printeloc_s(lc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -1288,7 +1310,7 @@ int e0e0cmp_q(const void *key_elem0, const void *elem0)
   eloc_from_eploc(klc, keploc);
   eloc_from_eploc(elc, eploc);
 
-  cmp = loccmp_0OnlyIfEq(klc, elc, 1);
+  cmp = loccmp_mode(klc, elc, 1);
   //PRFs(": ");printeloc_s(klc, " ");printeloc_s(elc, " ");
   //printf("--> cmp=%d\n", cmp);
   ////printelm0(elm0_arr[0]);
@@ -1393,16 +1415,16 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
     /* search for ancestor of s_eloc of level l */
     f_eloc[0] = s_eloc[0];
     f_eloc->l = l;
-    f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp, NULL);
+    f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp_0, NULL);
 
-    printf("off=%zu num=%zu  f_elm pos=%zu\n",
-           off, num, (size_t) ((tElm **)f_elm - arr));
+    printf("off=%zu num=%zu  f_elm=%p <-pos=%zu\n",
+           off, num, f_elm, (size_t) ((tElm **)f_elm - arr));
     if(f_elm) { printf("got ");printelm(*f_elm); }
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
     /* is there only one f_elm? */
-    binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp, NULL,
+    binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp_0, NULL,
                      &mor, &atB);
     printf("mor=%d\n", mor);
     if(!mor)  /* if there is only one */
@@ -1751,7 +1773,7 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     amr_make_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
   }
 
-  if(elmname_is(elm, "0_01") && elmface==1)
+  if(elmname_is(elm, "2_50") && elmface==4)
   {
     PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
                nMPI_rank(), elmface, patface[elmface]);
