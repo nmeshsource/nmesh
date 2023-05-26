@@ -2390,7 +2390,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   /* numbers of eids that we recv from rank r so we can send it elm0 */
   ulong *nr_deseid = checked_calloc(size, sizeof(nr_deseid[0]));
   // r_deseid[r][i] is eid_i that is sent to rank r
-  ulong **r_deseid = checked_calloc(size, sizeof(r_deseid[0]));
+  ulong **r_deseid;
 
   /* numbers of elms we recv/send from rank r: */
   ulong *nr_elm0 = checked_calloc(size, sizeof(nr_elm0[0]));
