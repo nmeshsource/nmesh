@@ -15,8 +15,6 @@ ulong alloc_and_set_mesh_myelm(tMesh *mesh);
 void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
 tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
                                        struct list_head *ch_head);
-int realloc_myln_nncats(tMylnodes *myln, int nncats);
-int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem);
 
 /* mesh.c */
 int amr_set_use_fv_flag(tMesh *mesh);

@@ -208,6 +208,13 @@
 /* grid points in Xb-coords in direc. dir on node */
 #define Xbpts(node, dir) node_Xb(node,dir)->d
 
+/* do not use: */
+#define VarMem(mesh, cat,li, vi) Vard_((mesh)->myln->ln[cat][li], vi)
+#define prVarMem(mesh, cat,li, vi,ijk) \
+  printf("cat%d node%d var%d at %p+%d = %g\n", cat,(int) (li), vi, \
+         (void *) VarMem(mesh, cat,li, vi), ijk, \
+         VarMem(mesh, cat,li, vi)[ijk])
+
 /***************************************************************************/
 /* macros that should be used only in very particular advanced cases       */
 /***************************************************************************/

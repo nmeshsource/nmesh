@@ -1052,10 +1052,8 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
   /* now free patch list array */
   free(mesh->pat);
 
-  /* node list in mesh */
-  free_nodelist(mesh->lns);
-  mesh->lns = NULL;
-  realloc_myln_nncats(mesh->myln, 0);
+  ///* node list in mesh */
+  //realloc_myln_nncats(mesh->myln, 0);
 
   /* free mesh->myelm */
   free_mesh_myelm(mesh);
@@ -1063,9 +1061,7 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
   /* set patch and node stuff to 0 */
   mesh->npats = 0;
   mesh->pat = NULL;
-  mesh->lns = NULL;
-  mesh->nln = 0;
-  memset(&(mesh->myln[0]), 0, sizeof(mesh->myln[0]));
+  //memset(&(mesh->myln[0]), 0, sizeof(mesh->myln[0]));
 }
 
 /* free mesh contents, except for MeshFuns that make up func skeleton */
@@ -1363,7 +1359,7 @@ int realloc_myln_nncats(tMylnodes *myln, int nncats)
 {
   int nncats_old = myln->nncats;
   int *ncat = myln->ncat;
-  tNlist ***ln = myln->ln;
+  tElm ***ln = myln->ln;
   int dc = nncats - nncats_old;
   int c;
 
@@ -1411,7 +1407,7 @@ int realloc_myln_ln_c(tMylnodes *myln, int c, int nelem)
 {
   int ainc = 256;
   int chunks = 1 + nelem/ainc;
-  tNlist ***ln = myln->ln;
+  tElm ***ln = myln->ln;
   int nncats = myln->nncats;
 
   if(c>=nncats) realloc_myln_nncats(myln, c+1);
@@ -1423,23 +1419,23 @@ int realloc_myln_ln_c(tMylnodes *myln, int c, int nelem)
 }
 
 /* add one element to myln in cat. c */
-int addto_myln_ln_c(tMylnodes *myln, int c, tNlist *elem)
+int addto_myln_ln_c(tMylnodes *myln, int c, tElm *elm)
 {
-  int old_nelem, nelem;
+  int old_nelm, nelm;
 
   /* if myln is empty add one category */
   if(!myln->nncats) realloc_myln_nncats(myln, 1);
 
   /* make room for new el */
-  old_nelem = myln->ncat[c];
-  nelem = realloc_myln_ln_c(myln, c, old_nelem+1);
+  old_nelm = myln->ncat[c];
+  nelm = realloc_myln_ln_c(myln, c, old_nelm+1);
   /* reset nm in case now we have more */
-  if(nelem > myln->nm) myln->nm = nelem;
+  if(nelm > myln->nm) myln->nm = nelm;
 
   /* add elem at the end of ln[c] */
-  myln->ln[c][old_nelem] = elem;
-  myln->ncat[c] = nelem;
-  //PRF;printf(": nelem=%d, myln->ncat[%d]=%d\n", nelem, c, myln->ncat[c]);
+  myln->ln[c][old_nelm] = elm;
+  myln->ncat[c] = nelm;
+  //PRF;printf(": nelm=%d, myln->ncat[%d]=%d\n", nelm, c, myln->ncat[c]);
   return myln->ncat[c];
 }
 
@@ -1453,7 +1449,7 @@ int total_nnodes_in_myln(tMylnodes *myln)
 }
 
 /**********************************************************************/
-/* functions to update elm->eploc->eid */
+/* functions to update elm->eploc->eid and mesh->eidlim */
 /**********************************************************************/
 /* Update elm eids and set mesh->eidlim.
    Also update elm->dt and mesh->dt if auto_dt!=0 */
@@ -1541,90 +1537,6 @@ ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh)
   return ret;
 }
 
-
-/**********************************************************************/
-/* functions to update the nodelist and node array in mesh */
-/**********************************************************************/
-/* Update array of leaf nodes on this proc, set nid.
-   Also update node->dt and mesh->dt if auto_dt!=0 */
-long update_mesh_myln_node_nid_dt(tMesh *mesh, double dt, int auto_dt,
-                                  double dtfac, double uniform_dtfac)
-{
-  tNlist *elem;
-  long nid = 0;
-  //int lid = 0;
-
-  /* delete mylns contents */
-  realloc_myln_nncats(mesh->myln, 0);
-
-  /* go over leaves if mesh->lns is not NULL */
-  if(mesh->lns)
-  {
-    double dt_old = mesh->dt;
-    if(auto_dt)
-    {
-      if(dt>0.) mesh->dt = dt;
-      else      mesh->dt = DBL_MAX*0.1; /* reset mesh->dt to max value */
-    }
-
-    fornodelist(mesh->lns, elem)
-    {
-      tNode *node = elem->node;
-      tNode *parent = node->parent;
-
-      if(node->dat)
-      {
-        /* for now we put all leaves in cat. 0 */
-        addto_myln_ln_c(mesh->myln, 0, elem);
-        //PRF;printf(": myln->ncat[0]=%d %p\n", mesh->myln->ncat[0], elem);
-
-        /* set lid and invalidate parent's lid */
-        //node->lid = lid++;
-        //if(parent) parent->lid = -lid;
-      }
-      /* set nid and invalidate parent's nid */
-      Node_eid(node) = nid++;
-      if(parent) Node_eid(parent) = -nid;
-      //PRF;printf(": nmyln%ld nid%ld\n", nmyln,nid);
-
-      /* set node MPI communicator */
-      //i = nMPIvars_get_ncomms();
-      //i = Node_eid(node) % i;
-      //node->comm = nMPIvars_get_comm(i);
-      // //PRF;printf(": i=%d node->comm=%d\n", i, node->comm);
-
-      /* check if we need to change node->dt and mesh->dt */
-      if(auto_dt)
-        adapt_node_dt_and_mesh_dt(node, auto_dt, dtfac, uniform_dtfac);
-    } /* end fornodelist */
-
-    if(mesh->dt != dt_old) { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
-  }
-  else /* mesh->lns is NULL, so free myln */
-  {
-    realloc_myln_nncats(mesh->myln, 0);
-  }
-
-  mesh->nln = nid;
-  return nid;
-}
-
-/* update array of leaf nodes on this proc, set nid */
-ulong update_mesh_myln_node_nid__old(tMesh *mesh)
-{
-  int Par_dt   = Par("dt");
-  double dt    = Getd(Par_dt);
-  /* auto_dt can be 0,1,2: */
-  int auto_dt  = 1*Getv(Par_dt, "auto") + 2*Getv(Par_dt, "auto2");
-  double dtfac = Getd(Par("dtfac"));
-  double uniform_dtfac = Getd(Par("uniform_dtfac"));
-  ulong ret;
-
-  ret = update_mesh_myln_node_nid_dt(mesh, dt, auto_dt,
-                                     dtfac, uniform_dtfac);
-  return ret;
-}
-
 /**********************************************************************/
 /* functions to calculate node IDs */
 /**********************************************************************/
@@ -1641,49 +1553,6 @@ int calc_node_lid(tNode *node)
 
   return lid;
 }
-
-/**********************************************************************/
-/* functions about nodelists that need to be removed */
-/**********************************************************************/
-
-/* append a node list to mesh->lns and also update mesh->myln */
-tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list)
-{
-  tNlist *lnl = NULL;
-  if(mesh->lns)
-  {
-    lnl = last_nodelist(mesh->lns); /* last elem. in mesh->lns */
-    lnl = insertnodelist_into_nodelist_after(lnl, list);
-  }
-  else
-    mesh->lns = first_nodelist(list);
-
-  /* update nids but leave node->dt alone */
-  update_mesh_myln_node_nid_dt(mesh, -1., 0, 0.25, 0.125);
-
-  return lnl;
-}
-
-/* replace elem in mesh->lns by nlist, return first of nlist */
-tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist)
-{
-  tNlist *nlist_beg;
-  tMesh *mesh = NULL;
-  int update_lns;
-
-  if(elem) mesh = elem->node->pat->mesh;
-  else     errorexit("elem is NULL!!!");
-
-  if(elem == mesh->lns) update_lns = 1;
-  else                  update_lns = 0;
-
-  nlist_beg = replace1_in_nodelist(elem, nlist, 0);
-  if(update_lns) mesh->lns = nlist_beg;
-
-  update_mesh_myln_node_nid(mesh);
-  return nlist_beg;
-}
-
 
 
 /**********************************************************************/

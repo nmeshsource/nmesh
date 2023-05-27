@@ -230,6 +230,7 @@ typedef struct tNLIST {
   struct tNLIST *prev;
 } tNlist;
 
+
 /* Leaf nodes owned by this proc. Each entry is one element of the global
    list of type tNlist. The leaves are sorted into categories that
    should be based on the time it takes to process each in it. This can
@@ -238,7 +239,7 @@ typedef struct tMYLNODES {
   int nncats;      /* number of leaf node categories */
   int *ncat;       /* ncat[c] is number of leaves in category c */
   int nm;          /* max of all ncat[c] */
-  tNlist ***ln;    /* ln[c][i] is leaf i of category c on this proc */
+  tElm ***ln;    /* ln[c][i] is leaf i of category c on this proc */
 } tMylnodes;
 
 /* the nodes fill a patch */
@@ -286,27 +287,16 @@ typedef struct tMESH {
   tEvoSys evosys[1]; /* contains lists of VarLists and RHS for evolve */
   int npats;         /* number of patches */
   tPat **pat;        /* list of pointers to patches */
-  //OLD stuff we can remove soon
-  tNlist *lns;       /* start of linked list of all leaf nodes */
-  long nln;          /* total number of leaf nodes */
-  tMylnodes myln[1]; /* elements of lns owned by this proc */
-  tMUTEX mutex[1];   /* mutex for mesh */
 
   /* newamr stuff */
   struct list_head myelm_head; /* list head for elms on this proc */
   ulong nmyelm;      /* number of elms on this proc */
   tElm **myelm;      /* list of pointers to elms on this proc */
                      /* myelm and myelm_head list are copies of each other */
-  //struct list_head nbelm_head; /* list head for elms on other procs */
-  //// do we want nbelm_head or this (not both)???:
   ulong nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
 
   ulong *eidlim;     /* (last eid on rank rk) = eidlim[rk]-1 */
-
-  // do we need this???:
-  //tNbr nbr[1];       /* info about elms on neighbor ranks */
-
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:
 use space filling curve as in
