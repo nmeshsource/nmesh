@@ -81,7 +81,7 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
 void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
 {
   int nd_ijk = elm_get_ijk(node);
-  tNode *nb;
+  tNode nb[1];
   int ijk2[3];
 
   nearest_ijk_of_XYZ(node, ijk, X0);
@@ -91,21 +91,24 @@ void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
      the surface between both upper and lower nodes */
   if(ijk[0]==0 && nd_ijk%2)
   {
-    nb = node->parent->child[nd_ijk-1];
+    //nb = node->parent->child[nd_ijk-1];
+    amr_set_sibling_elm0(node, nd_ijk-1, nb);
     nearest_ijk_of_XYZ(nb, ijk2, X0);
     if(ijk2[0]==nb->n[0]-1)
       ijk[0] = -1;
   }
   if(ijk[1]==0 && (nd_ijk/2)%2)
   {
-    nb = node->parent->child[nd_ijk-2];
+    //nb = node->parent->child[nd_ijk-2];
+    amr_set_sibling_elm0(node, nd_ijk-2, nb);
     nearest_ijk_of_XYZ(nb, ijk2, X0);
     if(ijk2[1]==nb->n[1]-1)
       ijk[1] = -1;
   }
   if(ijk[2]==0 && nd_ijk>=4)
   {
-    nb = node->parent->child[nd_ijk-4];
+    //nb = node->parent->child[nd_ijk-4];
+    amr_set_sibling_elm0(node, nd_ijk-4, nb);
     nearest_ijk_of_XYZ(nb, ijk2, X0);
     if(ijk2[2]==nb->n[2]-1)
       ijk[2] = -1;

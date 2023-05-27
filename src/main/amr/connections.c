@@ -330,18 +330,6 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-/*
-in add_nfaces_outside_patch study:
-                            =====
-      nblist1 = leafdescendants_along_face(nb, nb_f, NULL);
-
-      touch = common_facepoints(node,face, nb,nb_f);
-
-in common_facepoints study:
-  f1 = find_nodefacepoints_in_nbface(node,f, nb,nb_f);
-
-*/
-
 
 // equivalent to find_nodefacepoints_in_nbface:
 /* find out if any elm points on face f are on face nb_f of elm nb,
@@ -711,6 +699,28 @@ int amr_elms_are_siblings(int n, void *ptr_elm)
   return 1;
 }
 
+/* write the info of elm's sibling sib_ijk into sib */
+void amr_set_sibling_elm0(const tElm *elm, int sib_ijk, tElm *sib)
+{
+  int l = elm->eploc->l;
+  tEloc s_eloc[1];
+
+  /* copy header from elm into sib to get dt, time and such */
+  memset(sib, 0, sizeof(tElm)); // 1st zero sib
+  memcpy(sib, elm, sizeof(tElm0));
+
+  /* set sib eploc */
+  eloc_from_eploc(s_eloc, elm->eploc);
+  if(l<1) errorexit("root node has no siblings");
+  s_eloc->loc[l-1] = sib_ijk + '0';
+  eloc_to_eploc(s_eloc, sib->eploc);
+
+  /* set sib bbox */
+  amr_set_elm_bbox(sib);
+
+  /* set datrank to -1 since this is just a copy */
+  sib->datrank = -1;
+}
 
 /****************************************************************************/
 /* functions for elm-name and elm-location strings */

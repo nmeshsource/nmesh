@@ -120,7 +120,7 @@ typedef struct tELM {
                             // where dat is and where all neighb. have dat
   struct tPAT *pat;       // remove one day, since we have mesh
   struct tELM *parent;    /* pointer to parent node */
-  struct tELM *child[8];  /* list of pointers to childeren nodes */
+//  struct tELM *child[8];  /* list of pointers to childeren nodes */
 
   /* items to do with neighbors: */
   int nfnb[6];            /* number of face neighbor nodes (fnb below) */
@@ -637,6 +637,7 @@ void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0);
 void amr_set_elm_bbox(tElm *elm);
 void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
+void amr_set_sibling_elm0(const tElm *elm, int sib_ijk, tElm *sib);
 char *elm_location_str(tElm *elm, char *s, int slen);
 char *elmname(tElm *elm, char *s, int slen);
 void eloc_from_elmname(tEloc *eloc, char *name);
