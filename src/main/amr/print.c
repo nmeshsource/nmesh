@@ -16,10 +16,12 @@ void printmesh(tMesh *mesh)
   int p;
 
   if(mesh==main_mesh) printf("mesh=main_mesh: ");
-  else             printf("mesh=%p: ", (void *) mesh);
-  printf("npats=%d npdb=%d nvdb=%d nln=%lu nmyelm=%lu dt=%g\n",
-	 mesh->npats, mesh->npdb, mesh->nvdb,
-	 mesh->eidlim[size-1], mesh->nmyelm, mesh->dt);
+  else                printf("mesh=%p: ", (void *) mesh);
+
+  printf("npats=%d npdb=%d nvdb=%d ", mesh->npats, mesh->npdb, mesh->nvdb);
+  printf("nln=%lu ", mesh->eidlim[size-1]);
+  printf("dt=%g\n", mesh->dt);
+
   forpatches(mesh, p)
     printpatch(mesh->pat[p]);
   printf("leaf nodes on this rank:\n");
