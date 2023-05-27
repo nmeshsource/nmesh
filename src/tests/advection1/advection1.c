@@ -463,7 +463,6 @@ int advection1_refine(tMesh *mesh)
   /* set rflag based on refinement criterion */
   formylnodes(mesh)
   {
-    tNode *parent;
     tNode *node = MyLnode;
     //double *u  = Vard(node, iu);
     tArray *uA = VarA(node, iu);
@@ -476,12 +475,12 @@ int advection1_refine(tMesh *mesh)
     else if(max-min<urft) node->rflag = -ref->method;
     else                  node->rflag = 0;
 
-    /* find parent and unset rflag if it exists */
-    parent = node->parent;
-    if(parent) parent->rflag = 0;
+    ///* find parent and unset rflag if it exists */
+    //parent = node->parent;
+    //if(parent) parent->rflag = 0;
 
     /* do not allow unrefine if we are already at the root node level */
-    if(node->rflag<0 && !parent) node->rflag = 0;
+    if(node->rflag<0 && Node_l(node)<1) node->rflag = 0;
 
     if(node->rflag>0 && Node_l(node)>=4) node->rflag = 0;
     //node->rflag = 0;

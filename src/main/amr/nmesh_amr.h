@@ -119,7 +119,7 @@ typedef struct tELM {
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
                             // where dat is and where all neighb. have dat
   struct tPAT *pat;       // remove one day, since we have mesh
-  struct tELM *parent;    /* pointer to parent node */
+//  struct tELM *parent;    /* pointer to parent node */
 //  struct tELM *child[8];  /* list of pointers to childeren nodes */
 
   /* items to do with neighbors: */
