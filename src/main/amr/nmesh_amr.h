@@ -222,19 +222,11 @@ typedef struct tINDIC {
 /* the old node type tNode is now a leaf node of type tElm */
 typedef tElm tNode;
 
-//FIXME: Remove:
-/* a linked list of nodes */
-typedef struct tNLIST {
-  tNode *node;
-  struct tNLIST *next;
-  struct tNLIST *prev;
-} tNlist;
 
-
-/* Leaf nodes owned by this proc. Each entry is one element of the global
-   list of type tNlist. The leaves are sorted into categories that
-   should be based on the time it takes to process each in it. This can
-   help with load balancing. */
+/* Currently nused struct. Each entry is one element of the leaf node
+   list. The leaves are sorted into categories that should be based on the
+   time it takes to process each in it. This can help with load
+   balancing. */
 typedef struct tMYLNODES {
   int nncats;      /* number of leaf node categories */
   int *ncat;       /* ncat[c] is number of leaves in category c */
@@ -479,25 +471,8 @@ void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ);
 tDat *alloc_dat(tNode *node);
 void free_dat(tDat *dat);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
-tNlist *alloc_nodelist(tNode *node);
-tNlist *addnode_to_nodelist_after(tNlist *elem, tNode *node);
-tNlist *addnode_to_nodelist_before(tNlist *elem, tNode *node);
-tNlist *copy_of_nodelist(tNlist *elem);
-int count_elements_nodelist(tNlist *list);
-tNlist *insertnodelist_into_nodelist_after(tNlist *elem, tNlist *list);
-tNlist *insertnodelist_into_nodelist_before(tNlist *elem, tNlist *list);
-tNlist *replace1_in_nodelist(tNlist *elem, tNlist *list, int return_lend);
-tNlist *first_replace1_in_nodelist(tNlist *elem, tNlist *list);
-tNlist *remove1_in_nodelist(tNlist *elem, int return_next);
-tNlist *childnodelist_of_nodelist(tNlist *nlist);
-tNlist *first_nodelist(tNlist *list);
-tNlist *last_nodelist(tNlist *list);
-void free_nodelist(tNlist *elem);
-int total_nnodes_in_myln(tMylnodes *myln);
 ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh);
 int calc_node_lid(tNode *node);
-tNlist *append_nodelist_to_mesh_lns_myln(tMesh *mesh, tNlist *list);
-tNlist *replace1_in_mesh_lns_myln(tNlist *elem, tNlist *nlist);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
 void enablevarcomp_innode(tNode *node, int i);
