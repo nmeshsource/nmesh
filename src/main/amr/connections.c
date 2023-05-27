@@ -277,6 +277,7 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 {
   int patface[6];
   int ijk, nb_ijk;
+  int lret;
 
   //PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
@@ -306,15 +307,17 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
     //printf("   pnbloc=%s\n", pnbloc);
     strncpy(nbloc, pnbloc, NLOCS);
     //printf("    nbloc=%s?  pl=%d\n", nbloc, pl);
+    lret = pl;
   }
   else
   {
     strncpy(nbloc, loc, NLOCS);
+    lret = l;
   }
   nbloc[l-1] = nb_ijk + '0';
   if(l<NLOCS) nbloc[l] = 0; /* add string-end marker */
   //printf("  nbloc=%s\n", nbloc);
-  return l;
+  return lret;
 }
 
 
@@ -1758,18 +1761,19 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   if(!patface[elmface])
   {
     tEloc nbeloc[1];
-    int nbface, nb_l, l0;
+    int nbface, l0;
     nbeloc->p = eloc->p;
-    nb_l = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
+    l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
-    nbeloc->l = nb_l;
+    nbeloc->l = eloc->l;
     //printf(" -> nb_l=%d nbeloc=", nb_l);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
     //printf("nbeloc->l=%d\n", nbeloc->l);
     //printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
-    /* Look for nbs at level l0. For now we set l0 = 0.
-       But l0 = max(nb_l-4, 0) would be better if we allow for only a
+    /* Look for nbs at level l0.
+       l0 = max(nb_l-4, 0) would be ok if we allow for only a
        difference of 4 in refinement of nbs... */
-    l0 = 0; /* */
+    //l0 = 0; //For now we set l0 = 0.
+    /* but the best may be to use the output we got above ??? */
     amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nbface,
                                     l0, fnb_head);
   }
