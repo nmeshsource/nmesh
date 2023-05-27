@@ -251,23 +251,6 @@
 #define forbfacesonface(pat, f, bface) \
   for(bface=pat->bfaces[f]; bface; bface=bface->next)
 
-/* loop over a node list nlist (type tNlist) */
-#define fornodelist(nlist, elem) \
-  for(elem=(nlist); elem; elem=elem->next)
-
-/* loop over nodes in a node list */
-#define fornodes(nlist, listnode) { \
-  tNlist *elem_; \
-  for(elem_ = nlist,            listnode = elem_ ?  elem_->node : 0; \
-      elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
-#define endfornodes }
-/* loop over nodes in the node list in mesh */
-#define forlnodes(meshORpat, listnode) { \
-  tNlist *elem_; \
-  for(elem_ = meshORpat->lns,   listnode = elem_ ?  elem_->node : 0; \
-      elem_; elem_=elem_->next, listnode = elem_ ?  elem_->node : 0)
-#define endforlnodes }
-
 
 /****************************************************************************/
 /* useful loops over point indices */
