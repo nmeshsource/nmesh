@@ -122,16 +122,10 @@ typedef struct tELM {
   struct tELM *parent;    /* pointer to parent node */
   struct tELM *child[8];  /* list of pointers to childeren nodes */
 
-  /* items to do with neighbor communication need to go last: */
-  struct tELM *nb[6];     /* neighbs in +/-X,Y,Z dir: nb[+-dir], e.g.:
-                             nb[4]= neigh in -Z dir, nb[1]= neigh in +X dir */
+  /* items to do with neighbors: */
   int nfnb[6];            /* number of face neighbor nodes (fnb below) */
   struct tELM **fnb[6];   /* list of neighbor nodes on face, contains info
                              condensed out of nfaces */
-  struct tNFACE *nfaces[6]; /* 1st nface of this node,
-                               kept up to date by update_node_fnb */
-  struct tELM *volatile nc_lock; /* if not NULL, connections of node nc_lock
-                                     and its nbs are currently being updated */
   //ulong oid;              /* old elm ID */
   struct list_head list;  /* all elms form a linked list */ \
 } tElm;
