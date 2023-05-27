@@ -165,6 +165,7 @@ MyConfig:
 
 # automatic configuration files
 $(autoinclude): MyConfig $(mainheaders)
+	-rm -rf lib
 	@echo ==================== Auto generating files =====================
 	@echo $(autotext) > $(autoinclude)
 	for X in $(libincludes); do \
