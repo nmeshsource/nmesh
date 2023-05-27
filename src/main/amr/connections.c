@@ -21,7 +21,8 @@ extern tAMR amr[1];
 
 /* Function that orders locations described in in tEloc:
    return -1,0,1 if loc is before,at,after eloc
-   This can be used in qsort, or bsearch if mode=1.
+   This is used in our special binarysearch way with mode=0.
+   It can also be used in qsort, or bsearch if mode=1.
    About mode:
    0: return  0 (equal) if el and lc agree
       return  0 (equal) even if el->l > lc->l, as long as first lc->l agree
@@ -277,7 +278,7 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
   int patface[6];
   int ijk, nb_ijk;
 
-  PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
+  //PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
   //nfaces = connections_loc_on_patchface(l,loc, patface);
   connections_loc_on_patchface(l,loc, patface);
@@ -289,22 +290,22 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
   ijk = connections_get_ijk(l, loc);
   nb_ijk = connections_get_inner_nb_ijk(ijk, face/2);
   *nb_f  = face^1;
-  printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
+  //printf("  ijk=%d nb_ijk=%d *nb_f=%d\n", ijk, nb_ijk, *nb_f);
 
   if(connections_ijk_is_at_parentface(ijk, face))
   {
     int pl;
     char pnbloc[NLOCS]; /* location of parent nb */
     int pnb_f;
-    PRF;printf(" at parentface\n");
-    //printf(" pnbloc=%s\n", pnbloc);
+    //PRF;printf(" at parentface\n");
+    ////printf(" pnbloc=%s\n", pnbloc);
 
     /* l-1,loc is parent, write parent nb loc into pnbloc */
     pl = connections_get_nbloc_InsidePat(l-1,loc, face, pnbloc, &pnb_f);
     pnbloc[l-1] = 0; /* add string-end marker */
-    printf("   pnbloc=%s\n", pnbloc);
+    //printf("   pnbloc=%s\n", pnbloc);
     strncpy(nbloc, pnbloc, NLOCS);
-    printf("    nbloc=%s?  pl=%d\n", nbloc, pl);
+    //printf("    nbloc=%s?  pl=%d\n", nbloc, pl);
   }
   else
   {
@@ -312,7 +313,7 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
   }
   nbloc[l-1] = nb_ijk + '0';
   if(l<NLOCS) nbloc[l] = 0; /* add string-end marker */
-  printf("  nbloc=%s\n", nbloc);
+  //printf("  nbloc=%s\n", nbloc);
   return l;
 }
 
@@ -1405,10 +1406,10 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
   off = off0;
   num = num0;
 
-  PRF;printf(": off=%zu num=%zu s_eloc=", off, num);
-  printeloc(s_eloc);
-  printf(" s_f=%d\n  ", s_f);
-  //printelmarray(narr, arr);
+  //PRF;printf(": off=%zu num=%zu l0=%d s_eloc=", off, num, l0);
+  //printeloc(s_eloc);
+  //printf(" s_f=%d\n  ", s_f);
+  ////printelmarray(narr, arr);
 
   for(l = l0; l <= lmax; l++)
   {
@@ -1417,16 +1418,16 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
     f_eloc->l = l;
     f_elm = binarysearch(f_eloc, arr, &off, &num, sizeof(*arr), lecmp_0, NULL);
 
-    printf("off=%zu num=%zu  f_elm=%p <-pos=%zu\n",
-           off, num, f_elm, (size_t) ((tElm **)f_elm - arr));
-    if(f_elm) { printf("got ");printelm(*f_elm); }
+    //printf("off=%zu num=%zu  f_elm=%p <-pos=%zu\n",
+    //       off, num, f_elm, (size_t) ((tElm **)f_elm - arr));
+    //if(f_elm) { printf("got ");printelm(*f_elm); }
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
     /* is there only one f_elm? */
     binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp_0, NULL,
                      &mor, &atB);
-    printf("mor=%d\n", mor);
+    //printf("mor=%d\n", mor);
     if(!mor)  /* if there is only one */
     {
       tEploc *f_eploc = (*f_elm)->eploc;
@@ -1470,7 +1471,7 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
   }
 
   /* finally signal failure or success with at least one nb child */
-  printf("final lret=%d\n", lret);
+  //printf("final lret=%d\n", lret);
   return lret;
 }
 
@@ -1750,21 +1751,25 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   tEloc eloc[1];
 
   eloc_from_eploc(eloc, eploc);
-  PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
+  //PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
   connections_loc_on_patchface(eloc->l, eloc->loc, patface);
   /* simple case where elmface is inside the patch */
   if(!patface[elmface])
   {
     tEloc nbeloc[1];
-    int nbface, l0;
+    int nbface, nb_l, l0;
     nbeloc->p = eloc->p;
-    l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
+    nb_l = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
-    nbeloc->l = l0;
-    printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
-    printf("nbeloc->l=%d\n", nbeloc->l);
-    printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
+    nbeloc->l = nb_l;
+    //printf(" -> nb_l=%d nbeloc=", nb_l);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    //printf("nbeloc->l=%d\n", nbeloc->l);
+    //printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
+    /* Look for nbs at level l0. For now we set l0 = 0.
+       But l0 = max(nb_l-4, 0) would be better if we allow for only a
+       difference of 4 in refinement of nbs... */
+    l0 = 0; /* */
     amr_make_elms_on_eloc_face_list(narr, arr, 0, narr, nbeloc, nbface,
                                     l0, fnb_head);
   }
@@ -1773,13 +1778,13 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     amr_make_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
   }
 
-  if(elmname_is(elm, "2_50") && elmface==4)
-  {
-    PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
-               nMPI_rank(), elmface, patface[elmface]);
-    printeploc_s(elm->eploc, " \n");
-    printelmglist(fnb_head);
-  }
+  //if(elmname_is(elm, "2_50") && elmface==4)
+  //{
+  //  PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
+  //             nMPI_rank(), elmface, patface[elmface]);
+  //  printeploc_s(elm->eploc, " \n");
+  //  printelmglist(fnb_head);
+  //}
   return list_count_nodes(fnb_head);
 }
 
