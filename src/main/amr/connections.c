@@ -2736,10 +2736,33 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
 
 /****************************************************************************/
 
+//FIXME: maybe remove
+/* struct that has has both eloc and a face */
+typedef struct tELOCFACE {
+  tEloc eloc[1];
+  int face;
+} tElocFace;
+
+void printelocface(const tElocFace *ef)
+{
+  printeloc(ef->eloc);
+  printf(" f=%d\n", ef->face);
+}
 
 /****************************************************************************/
 /* functions to exchange info between rank_i and rank_{i \pm 1} */
 /****************************************************************************/
+
+/* for MPI exchange between neighboring ranks */
+typedef struct tELMFL {
+  tElm elm_fl[2]; /* first and last elm on rank */
+  int nelms;      /* number of elms on rank */
+} tElmfl;
+typedef struct tNBR {
+  tElmfl fl_m1[1]; /* first and last elm on rank-1 */
+  tElmfl fl_p1[1]; /* first and last elm on rank+1 */
+} tNbr;
+
 
 
 /* fill in tElmfl myfl[1] with my first and last elm */
@@ -2761,8 +2784,12 @@ void get_nbr_rank_info(tMesh *mesh)
   tCom *com;
   int rq;
   tElmfl myfl[1];
-  tElmfl *fl_m1 = mesh->nbr->fl_m1;
-  tElmfl *fl_p1 = mesh->nbr->fl_p1;
+  //this is correct:
+  //tElmfl *fl_m1 = mesh->nbr->fl_m1;
+  //tElmfl *fl_p1 = mesh->nbr->fl_p1;
+  //but for now:
+  tElmfl *fl_m1 = NULL;
+  tElmfl *fl_p1 = NULL;
 
   /* get my first and last elm from mesh->myelm */
   get_my_Elmfl(mesh, myfl);

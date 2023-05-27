@@ -150,17 +150,6 @@ typedef struct tGLIST {
 #define glist_entry(ptr) list_entry(ptr, tGlist, list)->entry
 
 
-//FIXME: Remove this:
-/* for MPI exchange between neighboring ranks */
-typedef struct tELMFL {
-  tElm elm_fl[2]; /* first and last elm on rank */
-  int nelms;      /* number of elms on rank */
-} tElmfl;
-typedef struct tNBR {
-  tElmfl fl_m1[1]; /* first and last elm on rank-1 */
-  tElmfl fl_p1[1]; /* first and last elm on rank+1 */
-} tNbr;
-
 
 /* extra info about node state that has nothing to do with neighbor info
    or connectivity */
@@ -316,7 +305,7 @@ typedef struct tMESH {
   ulong *eidlim;     /* (last eid on rank rk) = eidlim[rk]-1 */
 
   // do we need this???:
-  tNbr nbr[1];       /* info about elms on neighbor ranks */
+  //tNbr nbr[1];       /* info about elms on neighbor ranks */
 
 } tMesh;
 /* NOTE: the list lns needs to be distributed among MPI jobs:

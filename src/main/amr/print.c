@@ -240,13 +240,6 @@ void printnbelms(tMesh *mesh)
   }
 }
 
-
-void printelocface(const tElocFace *ef)
-{
-  printeloc(ef->eloc);
-  printf(" f=%d\n", ef->face);
-}
-
 void print_amr_elm_nbinfo(const tElm *elm, int face)
 {
   tMesh *mesh = elm->pat->mesh;

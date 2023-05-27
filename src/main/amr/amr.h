@@ -7,14 +7,6 @@
 extern nMPI_Comm main_comm;
 
 
-//FIXME: maybe remove
-/* struct that has has both eloc and a face */
-typedef struct tELOCFACE {
-  tEloc eloc[1];
-  int face;
-} tElocFace;
-
-
 
 /* storage.c */
 int array_Neplocs(tArray *ar);
