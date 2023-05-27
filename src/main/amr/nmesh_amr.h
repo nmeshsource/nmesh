@@ -52,7 +52,6 @@ typedef unsigned long ulong;
 /* new element IDs (eid)s are set to this value */
 #define  EID_INVALID  (ULONG_MAX)
 
-
 /* location of an element (or elm) */
 #define NPBYTES 21
 #define NLOCS   ((8*NPBYTES)/3)
@@ -74,33 +73,6 @@ typedef struct tEPLOC {
 
 /* a leaf node or element called elm */
 /* Beginning of tElm */
-//THIS is we want for later:
-/*
-#define ELMHEADER \
-  tEploc eploc[1];        // elm location \
-  double dt;              // time step in node \
-  double time;            // current time in node \
-  double bbox[6];         // bounding box (in X,Y,Z) of this node \
-  int n[3];               // number of points in X,Y,Z-directions \
-  int rflag;              // flag for refining node \
-  int pt_typ[3];          // e.g. pt_typ[1]=P_LGL => LGL in dir1 of node \
-  int datrank;            // rank of proc that rightfully has data
-typedef struct tELM {
-  ELMHEADER
-  // stuff below ELMHEADER is not copied when elm is sent to another rank
-  struct tDAT *dat;       // pointer to data (NULL if not on this proc)
-  //struct tMESH *mesh;     // pointer to mesh that contains elm
-  struct tPAT *pat;       // remove one day, since we have mesh
-  int nfnb[6];            // number of face neighbor nodes (fnb below)
-  struct tElm **fnb[6];   // list of neighb. nodes on face, made from fnbid
-  //ulong oid;              // old elm ID
-  struct list_head list;  // all elms form a linked list
-  //char loc[NLOCS];      // unpacked elm location
-} tElm;
-*/
-//// at the moment tElm has quite a few parts the nmesh tNode had as well.
-//// we may want to streamline this later
-//Temporarily we use this for compatibility with tNode:
 #define ELMHEADER \
   tEploc eploc[1];        /* elm location in packed form */ \
   double dt;              /* time step in node */ \
@@ -115,25 +87,27 @@ typedef struct tELM {
   ELMHEADER
   /* stuff below this line is not copied when elm is sent to another rank */
   struct tDAT *dat;       /* pointer to data (NULL if not on this proc) */
-  //struct tMESH *mesh;     // pointer to mesh that contains elm
   //nMPI_Comm comm;         // MPI_comm for node, could contain only ranks
                             // where dat is and where all neighb. have dat
-  struct tPAT *pat;       // remove one day, since we have mesh
-//  struct tELM *parent;    /* pointer to parent node */
-//  struct tELM *child[8];  /* list of pointers to childeren nodes */
-
+  //struct tMESH *mesh;     // pointer to mesh that contains elm
+  struct tPAT *pat;       // remove one day, and replace by mesh
   /* items to do with neighbors: */
   int nfnb[6];            /* number of face neighbor nodes (fnb below) */
   struct tELM **fnb[6];   /* list of neighbor nodes on face, contains info
                              condensed out of nfaces */
+  struct list_head list;  /* all elms form a linked list */
   //ulong oid;              /* old elm ID */
-  struct list_head list;  /* all elms form a linked list */ \
+  //char loc[NLOCS];        /* unpacked elm location */
 } tElm;
 
 /* data type for only header part of tElm */
 typedef struct tELM0 {
   ELMHEADER
 } tElm0;
+
+/* the old node type tNode is now a leaf node of type tElm */
+typedef tElm tNode;
+
 
 /* in case we need it, we can also make more linked element lists */
 /* a linked list of generic pointers */
@@ -142,7 +116,6 @@ typedef struct tGLIST {
   struct list_head list;
 } tGlist;
 #define glist_entry(ptr) list_entry(ptr, tGlist, list)->entry
-
 
 
 /* extra info about node state that has nothing to do with neighbor info
@@ -213,20 +186,6 @@ typedef struct tINDIC {
    myindc comes from this proc,
    nbindc[i] can just point if nb[i] is local, otherwise we need to alloc */
 
-/* the old node type tNode is now a leaf node of type tElm */
-typedef tElm tNode;
-
-
-/* Currently nused struct. Each entry is one element of the leaf node
-   list. The leaves are sorted into categories that should be based on the
-   time it takes to process each in it. This can help with load
-   balancing. */
-typedef struct tMYLNODES {
-  int nncats;      /* number of leaf node categories */
-  int *ncat;       /* ncat[c] is number of leaves in category c */
-  int nm;          /* max of all ncat[c] */
-  tElm ***ln;    /* ln[c][i] is leaf i of category c on this proc */
-} tMylnodes;
 
 /* the nodes fill a patch */
 typedef struct tPAT {
@@ -288,6 +247,18 @@ typedef struct tMESH {
 use space filling curve as in
 http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
+
+
+/* Currently unsed struct. Each entry is one element of the leaf node
+   list. The leaves are sorted into categories that should be based on the
+   time it takes to process each in it. This can help with load
+   balancing. */
+typedef struct tMYLNODES {
+  int nncats;      /* number of leaf node categories */
+  int *ncat;       /* ncat[c] is number of leaves in category c */
+  int nm;          /* max of all ncat[c] */
+  tElm ***ln;    /* ln[c][i] is leaf i of category c on this proc */
+} tMylnodes;
 
 
 /***********************************************************************/
