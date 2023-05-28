@@ -308,6 +308,16 @@ int enable_FPEEXCEPTIONS(void)
 #endif
 }
 
+/* quick and dirty, low quality random number generator */
+void rand_32primitive(uint32_t *num)
+{
+  *num = 1664525 * (*num) + 1013904223;
+}
+double rand_32primitive_u01(uint32_t *num)
+{
+  *num = 1664525 * (*num) + 1013904223;
+  return ((double) *num)/4294967296.0;
+}
 
 /* remove all chars that occur in del from string str,
    return number of removed chars */
