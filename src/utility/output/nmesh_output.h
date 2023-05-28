@@ -30,3 +30,6 @@ void write_vl_nodenamelist(char *nodenamelist, tVarList *vl,
 
 /* gnuplot.c */
 void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T);
+
+/* output_mesh.c */
+void write_mylnodes(tMesh *mesh, char *info, int mode);
