@@ -7,7 +7,7 @@
 
 
 /* write essential info */
-void write_nodeelm0(FILE *fp, tNode *e, const char *s)
+void write_lnode0(FILE *fp, tNode *e, const char *s)
 {
   char nns[100];
   fprintf(fp, "%s", nodename(e, nns,99));
@@ -20,7 +20,7 @@ void write_nodeelm0(FILE *fp, tNode *e, const char *s)
 }
 
 /* write essential info + some more */
-void write_nodeelm(FILE *fp, tNode *e, int mode)
+void write_lnode(FILE *fp, tNode *e, int mode)
 {
   char nns[100];
   tDat *dat = e->dat;
@@ -28,7 +28,7 @@ void write_nodeelm(FILE *fp, tNode *e, int mode)
   //union { const tNode *elm; tNode0 *elm0; } e2e0;
   //e2e0.elm = e;
   //printelm0(e2e0.elm0, "");
-  write_nodeelm0(fp, e, "");
+  write_lnode0(fp, e, "");
 
   switch(mode)
   {
@@ -59,7 +59,7 @@ void write_nodeelm(FILE *fp, tNode *e, int mode)
 }
 
 /* open file and write all my node elms into it */
-void write_mynodeelms(tMesh *mesh, char *info, int mode)
+void write_mylnodes(tMesh *mesh, char *info, int mode)
 {
   int rk;
   int outd = Par("outdir");
@@ -81,7 +81,7 @@ void write_mynodeelms(tMesh *mesh, char *info, int mode)
       formylnodes(mesh)
       {
         tNode *elm = MyLnode;
-        write_nodeelm(fp, elm, mode);
+        write_lnode(fp, elm, mode);
       }
       fprintf(fp, "\n");
       fclose(fp);
@@ -93,13 +93,13 @@ void write_mynodeelms(tMesh *mesh, char *info, int mode)
 
 /* open file and write neighbor node elms into it */
 /*
-void write_nbnodeelms(tMesh *mesh)
+void write_nblnodes(tMesh *mesh)
 {
   int ei;
   for(ei=0; ei < mesh->nnbelm; ei++)
   {
     tNode *elm = mesh->nbelm[ei];
-    write_nodeelm(fp, elm);
+    write_lnode(fp, elm);
   }
 }
 */
