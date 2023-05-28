@@ -61,23 +61,34 @@ void write_nodeelm(FILE *fp, tNode *e, int mode)
 /* open file and write all my node elms into it */
 void write_mynodeelms(tMesh *mesh, char *info, int mode)
 {
+  int rk;
   int outd = Par("outdir");
   char *outdir = Gets(outd);
   char fname[1000];
   FILE *fp;
 
-  sprintf(fname, "%s/%s.%d", outdir, "myelms", nMPI_rank());
-  fp = fopen(fname, "a");
-
-  fprintf(fp, "%s\n", info);
-
-  formylnodes(mesh)
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
   {
-    tNode *elm = MyLnode;
-    write_nodeelm(fp, elm, mode);
-  }
-  fprintf(fp, "\n");
-  fclose(fp);
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      sprintf(fname, "%s/%s.%d", outdir, "myelms", rk);
+      fp = fopen(fname, "a");
+
+      fprintf(fp, "%s\n", info);
+
+      formylnodes(mesh)
+      {
+        tNode *elm = MyLnode;
+        write_nodeelm(fp, elm, mode);
+      }
+      fprintf(fp, "\n");
+      fclose(fp);
+    }
+    /* wait until everyone is here */
+    nMPI_barrier();
+  } /* end rk-loop */
 }
 
 /* open file and write neighbor node elms into it */
