@@ -285,6 +285,7 @@ int system3(const char *s1, const char *s2, const char *s3);
 void print_system_info(void);
 int system_emu(const char *command);
 int construct_argv(char *str, char ***argv);
+int qsort_compar_str(const void *x1, const void *x2);
 void sort_int_array(int n, int *ar);
 int search_sorted_int_array(int n, int *ar, int key);
 double *dmalloc(int n);

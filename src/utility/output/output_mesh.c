@@ -19,6 +19,35 @@ void write_lnode0(FILE *fp, tNode *e, const char *s)
   fprintf(fp, "%s", s);
 }
 
+
+/* write fnb on one face */
+void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
+{
+  int j;
+  int nlocs = 100;
+  int nnb = e->nfnb[face];
+  char (*fnbstr)[nlocs] = gtensor(nnb*nlocs, sizeof(fnbstr[0][0]));
+
+  for(j=0; j<nnb; j++)
+  {
+    if(e->fnb[face][j]) nodename(e->fnb[face][j], fnbstr[j],nlocs);
+    else             sprintf(fnbstr[j], "nil");
+  }
+
+  if(sorted)
+    qsort(fnbstr, nnb, sizeof(fnbstr[0]), qsort_compar_str);
+
+  fprintf(fp, " {");
+  for(j=0; j<nnb; j++)
+  {
+    fprintf(fp, "%s", fnbstr[j]);
+    if(j<nnb-1) fprintf(fp, " ");
+  }
+  fprintf(fp, "}");
+  free(fnbstr);
+}
+
+
 /* write essential info + some more */
 void write_lnode(FILE *fp, tNode *e, int mode)
 {
