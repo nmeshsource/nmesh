@@ -78,7 +78,7 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
 
       fprintf(fp, "%s\n", info);
 
-      formylnodes(mesh)
+      formylnodes_noomp(mesh)
       {
         tNode *elm = MyLnode;
         write_lnode(fp, elm, mode);

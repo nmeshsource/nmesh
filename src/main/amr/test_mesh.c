@@ -21,11 +21,14 @@ void random_refine_frac_nodes_N_times(tMesh *mesh, double frac, int N)
   for(i=0; i<N; i++)
   {
     /* set rflag on a fraction */
-    formylnodes(mesh)
+    formylnodes_noomp(mesh)
     {
       tNode *node = MyLnode;
+      /* ran2 depends on the number of nodes on this proc */
       node->rflag = rand_32primitive_u01(&ran2) + frac;
     }
+    /* All MPI procs must do the lines below in the same way, so ran1 must
+       be the same no matter how many procs we have! */
     ref->type = rand_32primitive_u01(&ran1) * 1.99999;
     ref->method = GIVEN_n;
     ref->n[0] = rand_32primitive_u01(&ran1) * 6 + 1;
@@ -53,13 +56,16 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
   {
     /* set rflag on a fraction */
     j=0;
-    formylnodes(mesh)
+    formylnodes_noomp(mesh)
     {
       tNode *node = MyLnode;
+      /* ran2 depends on the number of nodes on this proc */
       if(j%8==0) rflag = -(rand_32primitive_u01(&ran2) + frac);
       node->rflag = rflag * (Node_l(node)>0);
       j++;
     }
+    /* All MPI procs must do the lines below in the same way, so ran1 must
+       be the same no matter how many procs we have! */
     //ref->type = rand_32primitive_u01(&ran1) * 1.99999;
     ref->method = GIVEN_n;
     ref->n[0] = rand_32primitive_u01(&ran1) * 6 + 1;
