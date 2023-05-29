@@ -26,7 +26,12 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
   int j;
   int nlocs = 100;
   int nnb = e->nfnb[face];
-  char **fnbstr = rows_calloc_matrix(nnb,nlocs, sizeof(fnbstr[0][0]));
+  char **fnbstr;
+
+  if(nnb)
+    fnbstr = rows_calloc_matrix(nnb,nlocs, sizeof(fnbstr[0][0]));
+  else
+    fnbstr = NULL;
 
   for(j=0; j<nnb; j++)
   {
@@ -35,7 +40,7 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
   }
   //for(j=0; j<nnb; j++) printf("%s\n",fnbstr[j]);
 
-  if(sorted)
+  if( sorted && (nnb>1) )
     qsort(fnbstr, nnb, sizeof(fnbstr[0]), qsort_compar_strlist);
 
   fprintf(fp, " {");
@@ -45,7 +50,7 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
     if(j<nnb-1) fprintf(fp, " ");
   }
   fprintf(fp, "}");
-  //rows_free(fnbstr);
+  //rows_free(fnbstr, nnb);
   for(j=0; j<nnb; j++) free(fnbstr[j]);
   free(fnbstr);
 }
@@ -54,7 +59,6 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
 /* write essential info + some more */
 void write_lnode(FILE *fp, tNode *e, int mode)
 {
-  char nns[100];
   tDat *dat = e->dat;
   int i;
   //union { const tNode *elm; tNode0 *elm0; } e2e0;
