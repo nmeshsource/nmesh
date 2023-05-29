@@ -236,9 +236,42 @@ int connections_get_inner_nb_ijk(int ijk, int dir)
 }
 
 
+/* check if l,loc is on patchface f
+   Out: return value: 1 if on patch face, 0 if not */
+int connections_loc_on_patchface_f(int l, const char loc[NLOCS], int f)
+{
+  int ll;
+
+  //PRF;printf(": l=%d loc=%s f=%d\n", l, loc, f);
+  for(ll=1; ll<=l; ll++)
+  {
+    int ijk = connections_get_ijk(ll, loc);
+    //printf("  %d in %s is ijk=%d\n", ll, loc, ijk);
+    if(!connections_ijk_is_at_parentface(ijk, f))
+      return 0;
+  }
+  return 1;
+}
+
 /* Out: return value: number of faces l,loc is on
         patface[f] = 1 if l,loc is on patch face f */
 int connections_loc_on_patchface(int l, const char loc[NLOCS],
+                                 int patface[6])
+{
+  int npatfaces, f;
+  for(npatfaces=0, f=0; f<6; f++)
+  {
+    patface[f] = connections_loc_on_patchface_f(l, loc, f);
+    npatfaces += patface[f];
+  }
+  //for(f=0; f<6; f++) printf("patface[%d]=%d ", f, patface[f]);
+  //printf("npatfaces=%d\n", npatfaces);
+  return npatfaces;
+}
+
+/* Out: return value: number of faces l,loc is on
+        patface[f] = 1 if l,loc is on patch face f */
+int connections_loc_on_patchface_WRONG(int l, const char loc[NLOCS],
                                  int patface[6])
 {
   int ll, f, npatfaces;
@@ -249,9 +282,12 @@ int connections_loc_on_patchface(int l, const char loc[NLOCS],
 
   if(l<1) return npatfaces; // <--- not needed
 
+  printf("WWWWWWWWWWWWWWWWWWWWWWWW\n");
+  PRF;printf(": l=%d loc=%s\n", l, loc);
   for(ll=1; ll<=l; ll++)
   {
     int ijk = connections_get_ijk(ll, loc);
+    PRF;printf(": %d in %s is ijk=%d\n", ll, loc, ijk);
 
     for(f=0; f<6; f++)
     {
@@ -259,11 +295,13 @@ int connections_loc_on_patchface(int l, const char loc[NLOCS],
       {
         npatfaces--;
         patface[f] = 0;
+        PRF;printf("f%d: %d=>\n", f, connections_ijk_is_at_parentface(ijk, f));
       }
       if(npatfaces<=0) break;
     }
     if(npatfaces<=0) break;
   }
+  printf("npatfaces=%d\n", npatfaces);
   return npatfaces;
 }
 
@@ -275,16 +313,15 @@ int connections_loc_on_patchface(int l, const char loc[NLOCS],
 int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
                                     char nbloc[NLOCS], int *nb_f)
 {
-  int patface[6];
+  //int patface[6];
   int ijk, nb_ijk;
   int lret;
 
   //PRF;printf(": l=%d loc=%s face=%d\n", l, loc, face);
 
   //nfaces = connections_loc_on_patchface(l,loc, patface);
-  connections_loc_on_patchface(l,loc, patface);
 
-  if(patface[face])
+  if(connections_loc_on_patchface_f(l,loc, face))
     errorexiti("face%d of loc is on patch surface", face);
 
   /* find ijk of node and ijk of nb */
@@ -930,9 +967,10 @@ int elm_set_patface(tElm *elm, int patface[6])
 /* returns: 1 if elm's face f in on patchface, 0 otherwise */
 int elm_is_on_patface(tElm *elm, int f)
 {
-  int patface[6];
-  elm_set_patface(elm, patface);
-  return patface[f];
+  tEploc *eploc = elm->eploc;
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, eploc);
+  return connections_loc_on_patchface_f(eloc->l, eloc->loc, f);
 }
 
 
@@ -967,7 +1005,7 @@ int locate_facenb_in_fnbs(tNode *node, tNode *facenb, int *face, int *ni)
             -1 otherwise */
 int amr_get_nbface(tElm *elm, int elmface, tElm *nb)
 {
-  int patface[6]; //, nfaces;
+  //int patface[6]; //, nfaces;
   tPat *pat = elm->pat;
   tBface *bface;
   int nb_f;
@@ -978,8 +1016,8 @@ int amr_get_nbface(tElm *elm, int elmface, tElm *nb)
   eloc_from_eploc(eloc, eploc);
 
   /* check if elmface is on patch-face */
-  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
-  if(!patface[elmface])
+  //connections_loc_on_patchface(eloc->l, eloc->loc, patface);
+  if(!connections_loc_on_patchface_f(eloc->l, eloc->loc, elmface))
   {
     /* simple case where elm and nb are in same patch */
     //PRF;printf(": nb is in same patch\n");
@@ -1497,7 +1535,7 @@ int amr_make_patchface_fnb_list(tElm *elm, int elmface,
                                 long narr, tElm **arr,
                                 struct list_head *fnb_head)
 {
-  int patface[6]; //, nfaces;
+  //int patface[6]; //, nfaces;
   int l  = - 9999; /* found nothing */
   int l2 = l;
   tPat *pat = elm->pat;
@@ -1513,8 +1551,7 @@ int amr_make_patchface_fnb_list(tElm *elm, int elmface,
   //PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
   /* sanity check */
-  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
-  if(!patface[elmface])
+  if(!connections_loc_on_patchface_f(eloc->l, eloc->loc, elmface))
     errorexit("call this for patch faces only!!!");
 
   //printbfaces_on_f(pat, elmface);
@@ -1759,16 +1796,15 @@ void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh)
 int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
                       struct list_head *fnb_head)
 {
-  int patface[6];
+  //int patface[6];
   const tEploc *eploc = elm->eploc;
   tEloc eloc[1];
 
   eloc_from_eploc(eloc, eploc);
   //PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
 
-  connections_loc_on_patchface(eloc->l, eloc->loc, patface);
   /* simple case where elmface is inside the patch */
-  if(!patface[elmface])
+  if(!connections_loc_on_patchface_f(eloc->l, eloc->loc, elmface))
   {
     tEloc nbeloc[1];
     int nbface, l0;
@@ -1776,9 +1812,12 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
     nbeloc->l = eloc->l;
-    //printf(" -> nb_l=%d nbeloc=", nb_l);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
-    //printf("nbeloc->l=%d\n", nbeloc->l);
-    //printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
+    //if(elmname_is(elm, "1_530") && elmface==1)
+    //{
+    //  printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    //  printf("nbeloc->l=%d\n", nbeloc->l);
+    //  printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
+    //}
     /* Look for nbs at level l0.
        l0 = max(nb_l-4, 0) would be ok if we allow for only a
        difference of 4 in refinement of nbs... */
@@ -1792,12 +1831,27 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     amr_make_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
   }
 
-  //if(elmname_is(elm, "2_50") && elmface==4)
+  //if(elmname_is(elm, "1_530") && elmface==1)
   //{
   //  PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
   //             nMPI_rank(), elmface, patface[elmface]);
   //  printeploc_s(elm->eploc, " \n");
   //  printelmglist(fnb_head);
+
+  //  //printf("on=%d\n", connections_loc_on_patchface_f(0,"530", 2));
+  //  //printf("on=%d\n", connections_loc_on_patchface_f(1,"530", 1));
+  //  //printf("on=%d\n", connections_loc_on_patchface_f(2,"530", 1));
+  //  //printf("on=%d\n", connections_loc_on_patchface_f(3,"530", 1));
+  //  //printf("on=%d\n", connections_loc_on_patchface_f(4,"5305", 1));
+  //  //printf("on=%d\n", connections_loc_on_patchface_f(8,"53351537", 1));
+  //  //int pf[6];
+  //  //printf("on=%d\n", connections_loc_on_patchface(0,"530", pf));
+  //  //printf("on=%d\n", connections_loc_on_patchface(1,"530", pf));
+  //  //printf("on=%d\n", connections_loc_on_patchface(2,"530", pf));
+  //  //printf("on=%d\n", connections_loc_on_patchface(3,"530", pf));
+  //  //printf("on=%d\n", connections_loc_on_patchface(4,"5305", pf));
+  //  //printf("on=%d\n", connections_loc_on_patchface(8,"53351537", pf));
+  //  errorexit("stop");
   //}
   return list_count_nodes(fnb_head);
 }
