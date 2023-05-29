@@ -33,9 +33,10 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
     if(e->fnb[face][j]) nodename(e->fnb[face][j], fnbstr[j],nlocs);
     else                sprintf(fnbstr[j], "nil");
   }
+  //for(j=0; j<nnb; j++) printf("%s\n",fnbstr[j]);
 
   if(sorted)
-    qsort(fnbstr, nnb, sizeof(fnbstr[0]), qsort_compar_str);
+    qsort(fnbstr, nnb, sizeof(fnbstr[0]), qsort_compar_strlist);
 
   fprintf(fp, " {");
   for(j=0; j<nnb; j++)
