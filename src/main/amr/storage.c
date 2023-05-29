@@ -741,69 +741,6 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
 
 /* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
    { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
-   should be called for all 8 siblings */
-void update_node_n_pt_typ__old(tNode *node, int *n, int *pt_typ)
-{
-  tMesh *mesh = node->pat->mesh;
-  int nvdb = mesh->nvdb;
-  tNode node_old[1];
-  int d, vi;
-
-  /* backup old node info */
-  memcpy(node_old, node, sizeof(node_old[0]));
-
-  /* update node info */
-  if(n)
-  {
-    for(d=0; d<3; d++) node->n[d] = n[d];
-    node->np = n[0] * n[1] * n[2];
-  }
-  if(pt_typ)
-    for(d=0; d<3; d++) node->pt_typ[d] = pt_typ[d];
-
-  /* if node has dat, we need to interpolate vars */
-  if(node_old->dat)
-  {
-    tArray *Xp[3];
-
-    /* alloc new dat for node */
-    node->dat = alloc_dat(node);
-
-    /* array memory to store points of node */
-    Xp[0] = alloc_array(n);
-    Xp[1] = alloc_array(n);
-    Xp[2] = alloc_array(n);
-    fill_3arrays_with_nodepoints(node, Xp);
-    /*FIXME: I think instead of alloc and fill_3arrays_with_nodepoints, we
-      could use: node_Xb3(node, Xp); to get new node points into Xp */
-
-    /* use interpolation to get vars from old dat to new node->dat */
-    for(vi=0; vi<nvdb; vi++)
-      if(node_old->dat->v[vi])
-      {
-        int vt = MeshVarType(mesh, vi);
-        /* enable same vars in new dat as in dat_old */
-        enablevarcomp_innode(node, vi);
-
-        /* fill node->dat with interpolation data from old dat */
-        if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
-        {
-          basis_interp_topoints(node_old, node_old->dat->v[vi],
-                                Xp, node->dat->v[vi], Lagrange_of_x);
-        }
-      } /* end: if parent has dat->v[vi] */
-    free_array(Xp[2]);
-    free_array(Xp[1]);
-    free_array(Xp[0]);
-    free_dat(node_old->dat);
-
-    /* init coords in this new node */
-    coordinates_init_node(node);
-  }
-}
-
-/* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
-   { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
    should be called for all 8 siblings
    NOTE: After calling update_node_n_pt_typ_return_node_old we have to call:
            update_node_n_pt_typ_free_node_old(node_old);
