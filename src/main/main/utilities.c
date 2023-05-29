@@ -838,11 +838,20 @@ void *pmalloc(int n)
    double (*T)[ny][nz] = dtensor(nx*ny*nz); // gives T[nx][ny][nz]
    //...
    free(T); free(M); */
-void *dtensor(size_t size)
+void *dtensor(size_t nentries)
 {
-  void *p = malloc(sizeof(double) * size);
+  void *p = malloc(nentries * sizeof(double));
 
-  if(!p) errorexiti("out of memory (%d double)", size);
+  if(!p) errorexiti("out of memory (%d double)", nentries);
+  return p;
+}
+
+/* like dtensor, but with element size arg (elemsize) in bytes */
+void *gtensor(size_t nentries, size_t elemsize)
+{
+  void *p = malloc(nentries * elemsize);
+
+  if(!p) errorexiti("out of memory (%d entries)", nentries);
   return p;
 }
 

@@ -291,7 +291,8 @@ double *dmalloc(int n);
 int *imalloc(int n);
 char *cmalloc(int n);
 void *pmalloc(int n);
-void *dtensor(size_t size);
+void *dtensor(size_t nentries);
+void *gtensor(size_t nentries, size_t elemsize);
 
 
 /* endianIO.c */
