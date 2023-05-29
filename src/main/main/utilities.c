@@ -770,6 +770,13 @@ int unlock_curr_til_EOF(FILE *out)
   return lockf(fd, F_ULOCK, 0);
 }
 
+/* function to compare two strings for qsort */
+int qsort_compar_str(const void *x1, const void *x2)
+{
+  const char *s1 = x1;
+  const char *s2 = x2;
+  return  strcmp(s1, s2);
+}
 
 /* function to compare two ints for qsort */
 int qsort_compar_int(const void *x1, const void *x2)
@@ -838,11 +845,20 @@ void *pmalloc(int n)
    double (*T)[ny][nz] = dtensor(nx*ny*nz); // gives T[nx][ny][nz]
    //...
    free(T); free(M); */
-void *dtensor(size_t size)
+void *dtensor(size_t nentries)
 {
-  void *p = malloc(sizeof(double) * size);
+  void *p = malloc(nentries * sizeof(double));
 
-  if(!p) errorexiti("out of memory (%d double)", size);
+  if(!p) errorexiti("out of memory (%d double)", nentries);
+  return p;
+}
+
+/* like dtensor, but with element size arg (elemsize) in bytes */
+void *gtensor(size_t nentries, size_t elemsize)
+{
+  void *p = malloc(nentries * elemsize);
+
+  if(!p) errorexiti("out of memory (%d entries)", nentries);
   return p;
 }
 
