@@ -26,12 +26,12 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
   int j;
   int nlocs = 100;
   int nnb = e->nfnb[face];
-  char (*fnbstr)[nlocs] = gtensor(nnb*nlocs, sizeof(fnbstr[0][0]));
+  char **fnbstr = rows_calloc_matrix(nnb,nlocs, sizeof(fnbstr[0][0]));
 
   for(j=0; j<nnb; j++)
   {
     if(e->fnb[face][j]) nodename(e->fnb[face][j], fnbstr[j],nlocs);
-    else             sprintf(fnbstr[j], "nil");
+    else                sprintf(fnbstr[j], "nil");
   }
 
   if(sorted)
@@ -44,6 +44,8 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
     if(j<nnb-1) fprintf(fp, " ");
   }
   fprintf(fp, "}");
+  //rows_free(fnbstr);
+  for(j=0; j<nnb; j++) free(fnbstr[j]);
   free(fnbstr);
 }
 
@@ -70,20 +72,7 @@ void write_lnode(FILE *fp, tNode *e, int mode)
 
   fprintf(fp, " fnb =");
   for(i=0; i<6; i++)
-  {
-    int j;
-    fprintf(fp, " {");
-    {
-      for(j=0; j<e->nfnb[i]; j++)
-      {
-        //if(e->fnb[i][j]) printeploc(e->fnb[i][j]->eploc);
-        if(e->fnb[i][j]) fprintf(fp, "%s", nodename(e->fnb[i][j], nns,99));
-        else             fprintf(fp, "nil");
-        if(j<e->nfnb[i]-1) fprintf(fp, " ");
-      }
-    }
-    fprintf(fp, "}");
-  }
+    write_lnode_fnb(fp, e, i, 1);
   fprintf(fp, "\n");
 }
 

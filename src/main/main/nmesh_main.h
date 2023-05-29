@@ -294,7 +294,8 @@ char *cmalloc(int n);
 void *pmalloc(int n);
 void *dtensor(size_t nentries);
 void *gtensor(size_t nentries, size_t elemsize);
-
+void *pcalloc(size_t n);
+void *rows_calloc_matrix(size_t nx, size_t ny, size_t size);
 
 /* endianIO.c */
 size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);

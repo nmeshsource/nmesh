@@ -862,6 +862,38 @@ void *gtensor(size_t nentries, size_t elemsize)
   return p;
 }
 
+/* alloc n pointers */
+void *pcalloc(size_t n)
+{
+  void *p = calloc(n, sizeof(void *));
+  if(!p) errorexiti("out of memory (%d void *)", n);
+  return p;
+}
+
+/* like rows_calloc but with fixed size ny */
+void *rows_calloc_matrix(size_t nx, size_t ny, size_t size)
+{
+  void **p = pcalloc(nx);  /* pointer we actully want */
+  void *g;                 /* generic pointer */
+  size_t i;
+
+  for(i=0; i<nx; i++)
+  {
+    if(ny)
+    {
+      p[i] = calloc(ny, size);
+      if(!p[i]) errorexiti("no memory for %d bytes", ny*size);
+    }
+    else
+    {
+      p[i] = NULL;
+    }
+  }
+  g = p;    /* convert p into generic pointer */
+  return g; /* return generic pointer */
+}
+
+
 /********************************************/
 /* Functions that have to do with errorexit */
 /********************************************/
