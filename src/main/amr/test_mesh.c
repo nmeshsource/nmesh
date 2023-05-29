@@ -126,9 +126,9 @@ int test_mesh(tMesh *mesh)
   random_refine_frac_nodes_N_times(mesh, 0.2, 8);
   write_mylnodes(mesh, "ref1:", mode);
 
-  //does not work:
+  //does not work with old AMR:
   /* 2. random unrefine */
-  //random_remove_frac_nodes_N_times(mesh, 0.2, 9);
+  //random_remove_frac_nodes_N_times(mesh, 0.4, 9);
   //write_mylnodes(mesh, "ref2:", mode);
   /* write_mylnodes crashes while printing a fnb that is messed
      up (e.g. pat=NULL). Probably remove_nodes_if_rflag has a bug!!! */
