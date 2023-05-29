@@ -770,12 +770,13 @@ int unlock_curr_til_EOF(FILE *out)
   return lockf(fd, F_ULOCK, 0);
 }
 
-/* function to compare two strings for qsort */
-int qsort_compar_str(const void *x1, const void *x2)
+/* function to compare two string-list elements for qsort */
+int qsort_compar_strlist(const void *x1, const void *x2)
 {
-  const char *s1 = x1;
-  const char *s2 = x2;
-  return  strcmp(s1, s2);
+  const char *const*s1 = x1;
+  const char *const*s2 = x2;
+  //printf("s1=%s s2=%s => %d\n", *s1,*s2, strcmp(*s1, *s2));
+  return  strcmp(*s1, *s2);
 }
 
 /* function to compare two ints for qsort */
