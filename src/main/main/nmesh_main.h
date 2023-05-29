@@ -287,7 +287,7 @@ double *dmalloc(int n);
 int *imalloc(int n);
 char *cmalloc(int n);
 void *pmalloc(int n);
-void *dtensor(size_t size);
+void *dtensor(size_t nentries);
 void *gtensor(size_t nentries, size_t elemsize);
 void *pcalloc(size_t n);
 void *checked_calloc(size_t nmemb, size_t size);
@@ -295,6 +295,7 @@ void *checked_realloc(void *ptr, size_t size);
 void *rows_calloc(size_t nx, unsigned long ny[nx], size_t size);
 void rows_free(void *g, size_t nx);
 void rows_print_sizes(size_t nx, unsigned long ny[nx], size_t size);
+void *rows_calloc_matrix(size_t nx, size_t ny, size_t size);
 
 /* endianIO.c */
 size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);
