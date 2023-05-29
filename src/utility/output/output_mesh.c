@@ -59,7 +59,7 @@ void write_lnode(FILE *fp, tNode *e, int mode)
 }
 
 /* open file and write all my node elms into it */
-void write_mylnodes(tMesh *mesh, char *info, int mode)
+void write_mylnodes(tMesh *mesh, const char *info, int mode)
 {
   int rk;
   int outd = Par("outdir");
