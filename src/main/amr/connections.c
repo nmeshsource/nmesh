@@ -917,13 +917,45 @@ tNode *elm_from_elmname(tMesh *mesh,  char *name)
 /* check if a elm has the name in string nname */
 int elmname_is(tNode *elm, const char *nname)
 {
-  char myname[NLOCS+2];
-  elmname(elm, myname,NLOCS+2);  /* get name of elm into myname */
+  char myname[NLOCS+12];
+  elmname(elm, myname,NLOCS+12); /* get name of elm into myname */
   if(strcmp(myname, nname)==0)   /* if myname=nname */
     return 1;
   else
     return 0;
 }
+
+/* write elocname into string s */
+char *elocname(tEloc *eloc, char *s, int slen)
+{
+  int l = eloc->l;
+  int l1, i;
+
+  /* patch part */
+  snprintf(s,slen, "%d_", eloc->p);
+  l1 = strlen(s);
+
+  /* copy loc */
+  for(i=0; (i<l) && (l1+i<slen-1); i++)
+    s[l1+i] = eloc->loc[i];
+
+  /* add str-end marker */
+  if(l1+i<slen) s[l1+i] = 0;
+
+  return s;
+}
+
+/* check if a eloc has the name in string ename */
+int elocname_is(tEloc *eloc, const char *ename)
+{
+  char myname[NLOCS+12];
+  elocname(eloc, myname,NLOCS+12); /* get name of eloc into myname */
+  if(strcmp(myname, ename)==0)     /* if myname=ename */
+    return 1;
+  else
+    return 0;
+}
+
 
 //instead of elm_from_elmname and elm_from_location_str use:
 /* get elmindex and elmrank for eid
@@ -1812,6 +1844,12 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     l0 = connections_get_nbloc_InsidePat(eloc->l, eloc->loc, elmface,
                                          nbeloc->loc, &nbface);
     nbeloc->l = eloc->l;
+    //if(elocname_is(nbeloc, "1_7124"))// && elmface==1)
+    //{
+    //  printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    //  printf("nbeloc->l=%d\n", nbeloc->l);
+    //  printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
+    //}
     //if(elmname_is(elm, "1_530") && elmface==1)
     //{
     //  printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
@@ -2397,6 +2435,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   }
 
   /*
+  PRF;printf(": mesh->nnbelm=%lu\n", mesh->nnbelm);
   for(rk=0; rk<size; rk++)
   {
     printf("rk%d: nr=%lu ns=%lu\n", rk, nr_elm0[rk], ns_elm0[rk]);
