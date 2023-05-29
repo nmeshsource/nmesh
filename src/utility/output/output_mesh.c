@@ -115,14 +115,36 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
 }
 
 /* open file and write neighbor node elms into it */
-/*
-void write_nblnodes(tMesh *mesh)
+void write_nblnodes(tMesh *mesh, const char *info, int mode)
 {
-  int ei;
-  for(ei=0; ei < mesh->nnbelm; ei++)
+  int rk;
+  int outd = Par("outdir");
+  char *outdir = Gets(outd);
+  char fname[1000];
+  FILE *fp;
+
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<nMPI_size(); rk++)
   {
-    tNode *elm = mesh->nbelm[ei];
-    write_lnode(fp, elm);
-  }
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      ulong ei;
+
+      sprintf(fname, "%s/%s.%d", outdir, "nbelms", rk);
+      fp = fopen(fname, "a");
+
+      fprintf(fp, "%s\n", info);
+
+      for(ei=0; ei < mesh->nnbelm; ei++)
+      {
+        tNode *elm = mesh->nbelm[ei];
+        write_lnode(fp, elm, mode);
+      }
+      fprintf(fp, "\n");
+      fclose(fp);
+    }
+    /* wait until everyone is here */
+    nMPI_barrier();
+  } /* end rk-loop */
 }
-*/
