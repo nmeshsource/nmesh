@@ -12,20 +12,30 @@
 /* refine a randomly chosen fraction frac of nodes, do this N times */
 void random_refine_frac_nodes_N_times(tMesh *mesh, double frac, int N)
 {
+  int size = nMPI_size();
+  int rank = nMPI_rank();
   uint32_t ran1=1; // seed1 for rand_32primitive
   uint32_t ran2=1; // seed2 for rand_32primitive
   tRef ref[1];
-  int i;
+  int i, rk;
 
   /* do N refines */
   for(i=0; i<N; i++)
   {
-    /* set rflag on a fraction */
-    formylnodes_noomp(mesh)
+    for(rk=0; rk<size; rk++)
     {
-      tNode *node = MyLnode;
-      /* ran2 depends on the number of nodes on this proc */
-      node->rflag = rand_32primitive_u01(&ran2) + frac;
+      if(rk==rank)
+      {
+        /* set rflag on a fraction */
+        formylnodes_noomp(mesh)
+        {
+          tNode *node = MyLnode;
+          /* ran2 depends on the number of nodes on this proc */
+          node->rflag = rand_32primitive_u01(&ran2) + frac;
+        }
+      }
+      /* broadcast ran2 to other ranks */
+      nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk);
     }
     /* All MPI procs must do the lines below in the same way, so ran1 must
        be the same no matter how many procs we have! */
@@ -46,23 +56,33 @@ void random_refine_frac_nodes_N_times(tMesh *mesh, double frac, int N)
 /* unrefine a randomly chosen fraction frac of nodes, do this N times */
 void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
 {
+  int size = nMPI_size();
+  int rank = nMPI_rank();
   uint32_t ran1=1; // seed1 for rand_32primitive
   uint32_t ran2=1; // seed2 for rand_32primitive
   tRef ref[1];
-  int i, j, rflag;
+  int i, rk, j, rflag;
 
   /* do N unrefines */
   for(i=0; i<N; i++)
   {
-    /* set rflag on a fraction */
-    j=0;
-    formylnodes_noomp(mesh)
+    for(rk=0; rk<size; rk++)
     {
-      tNode *node = MyLnode;
-      /* ran2 depends on the number of nodes on this proc */
-      if(j%8==0) rflag = -(rand_32primitive_u01(&ran2) + frac);
-      node->rflag = rflag * (Node_l(node)>0);
-      j++;
+      if(rk==rank)
+      {
+        /* set rflag on a fraction */
+        j=0;
+        formylnodes_noomp(mesh)
+        {
+          tNode *node = MyLnode;
+          /* ran2 depends on the number of nodes on this proc */
+          if(j%8==0) rflag = -(rand_32primitive_u01(&ran2) + frac);
+          node->rflag = rflag * (Node_l(node)>0);
+          j++;
+        }
+      }
+      /* broadcast ran2 to other ranks */
+      nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk);
     }
     /* All MPI procs must do the lines below in the same way, so ran1 must
        be the same no matter how many procs we have! */
@@ -121,9 +141,9 @@ int test_mesh(tMesh *mesh)
   random_refine_frac_nodes_N_times(mesh, 0.2, 8);
   write_mylnodes(mesh, "ref1:", mode);
 
-  //does not work:
+  //does not work with old AMR:
   /* 2. random unrefine */
-  //random_remove_frac_nodes_N_times(mesh, 0.2, 9);
+  //random_remove_frac_nodes_N_times(mesh, 0.4, 9);
   //write_mylnodes(mesh, "ref2:", mode);
   /* write_mylnodes crashes while printing a fnb that is messed
      up (e.g. pat=NULL). Probably remove_nodes_if_rflag has a bug!!! */
