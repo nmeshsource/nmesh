@@ -10,7 +10,7 @@
 
 /* use gridpoints from basis/gridpoints.c */
 extern tGridPoints gridpoints[1];
-extern tTiming Timing[1]; // FIXME: reomve this line
+extern tTiming Timing[1]; // FIXME: remove this line
 
 
 /* make an empty mesh, into which we an then initialize or into which
