@@ -32,4 +32,4 @@ void write_vl_nodenamelist(char *nodenamelist, tVarList *vl,
 void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* output_mesh.c */
-void write_mylnodes(tMesh *mesh, char *info, int mode);
+void write_mylnodes(tMesh *mesh, const char *info, int mode);

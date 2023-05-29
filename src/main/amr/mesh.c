@@ -173,6 +173,8 @@ int amr_setup_mesh(tMesh *mesh)
     ret = setup_CubedSphere_mesh(mesh);
   else if(Getv(mesh_type, "Shell"))
     ret = setup_Shell_mesh(mesh);
+  else if(Getv(mesh_type, "test_mesh"))
+    ret = test_mesh(mesh);
   else if(Getv(mesh_type, "l2_mesh"))
     errorexit("add back:  ret = setup_l2_mesh(mesh);");
   else if(Getv(mesh_type, "3patchl2_mesh"))
