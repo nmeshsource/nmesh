@@ -858,7 +858,16 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
           basis_interp_topoints(node_old, node_old->dat->v[vi],
                                 Xp, node->dat->v[vi], Lagrange_of_x);
         }
-      } /* end: if parent has dat->v[vi] */
+        /* copy nbinfo vars */
+        if( (vi >= amr->elm_nbinfo0) && (vi < amr->elm_nbinfo0+6) )
+        {
+          tArray *nbinfo_old = node_old->dat->v[vi];
+          tArray *nbinfo     = node->dat->v[vi];
+          int Neplocs = array_Neplocs(nbinfo_old);
+          redim_array_Neplocs(nbinfo, Neplocs);
+          copy_array_data(nbinfo_old, nbinfo);
+        }
+      } /* end: if node_old has dat->v[vi] */
     free_array(Xp[2]);
     free_array(Xp[1]);
     free_array(Xp[0]);
