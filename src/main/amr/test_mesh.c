@@ -71,7 +71,7 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
     ref->n[0] = rand_32primitive_u01(&ran1) * 6 + 1;
     ref->n[1] = rand_32primitive_u01(&ran1) * 6 + 1;
     ref->n[2] = rand_32primitive_u01(&ran1) * 6 + 1;
-    remove_nodes_if_rflag(mesh, ref);
+    remove_elms_if_rflag(mesh, ref);
     update_mesh_myln_node_nid(mesh);
     simple_load_balance(mesh);
     update_mesh_myln_node_nid(mesh);
@@ -99,7 +99,7 @@ int test_mesh(tMesh *mesh)
   two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nfaces_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
   update_mesh_myln_node_nid(mesh);
 
   /* refine all once to have more nodes */
