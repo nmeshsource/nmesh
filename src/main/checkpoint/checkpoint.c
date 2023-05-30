@@ -79,10 +79,17 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
       fclose(fp);
     }
 
-    fp = fopen(vars, "r");
+    fp = fopen(nbinfo, "r");
     if(fp)
     {
       ret |= 8;
+      fclose(fp);
+    }
+
+    fp = fopen(vars, "r");
+    if(fp)
+    {
+      ret |= 16;
       fclose(fp);
     }
   }

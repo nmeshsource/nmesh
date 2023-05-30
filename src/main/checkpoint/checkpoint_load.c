@@ -322,7 +322,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
              mesh->iteration, mesh->time);
   fflush(stdout);
 
-  //we should only this here:
+  //we should do only this here:
   ///* setup bfaces and eids */
   //amr_set_all_bfaces(mesh);
   //update_mesh_myelms_elm_eid_dt(mesh);
