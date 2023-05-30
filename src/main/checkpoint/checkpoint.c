@@ -188,8 +188,8 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
 /* setup nb related stuff and do load bal */
 void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo)
 {
-  PRFs(": 1.");
-  printmesh(mesh);
+  //PRFs(": 1.\n");
+  //printmesh(mesh);
 
   /* either keep the nbinfo we loaded or recreate it*/
   if(reset_nbinfo)
@@ -204,8 +204,8 @@ void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo)
   simple_load_balance(mesh);
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
 
-  PRFs(": 2.");
-  printmesh(mesh);
+  //PRFs(": 2.\n");
+  //printmesh(mesh);
 }
 
 
