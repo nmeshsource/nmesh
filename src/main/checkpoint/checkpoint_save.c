@@ -334,8 +334,10 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
         {
           double *v = Arrd_(va);
 
-          /* print only index in varlist */
-          fprintf(fp, "%d\n", vli);
+          if(va->N == node->np) /* print only index in varlist */
+            fprintf(fp, "%d\n", vli);
+          else /* print index in varlist and array dims */
+            fprintf(fp, "%d %d %d %d\n", vli, va->n[0],va->n[1],va->n[2]);
 
           /* write var array in raw binary */
           if(write_big) fwrite_big(v, sizeof(double), node->np, fp);
