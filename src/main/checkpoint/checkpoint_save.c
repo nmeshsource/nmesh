@@ -251,19 +251,41 @@ int checkpoint_write_elms(tMesh *mesh, FILE *fp)
 int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
 {
   tVarList *vl = vlalloc(mesh);
-  FILE *fp;
-  int vi, rk;
-  int IObufsz = Geti(Par("fwrite_bufsize"));
-  char *IObuf; /* larger buffer for write */
+  int vi;
 
-  /* loop over all vars and put all impportant EvoVars into vl */
+  /* loop over all vars and put all important EvoVars into vl */
   for(vi=0; vi<mesh->nvdb; vi++)
   {
     int vt = MeshVarType(mesh, vi);
-    if(vt!=AUXVAR) // ( (vt==EVOVAR) || (vt==DATAVAR) )
+    if( (vt==EVOVAR) || (vt==DATAVAR) )
       if(!var_added_by_evolve_init_evosys(mesh, vi))
         vlpushone(vl, vi);
   }
+
+  checkpoint_save_VL(mesh, fname, vl);
+  vlfree(vl);
+  return 0;
+}
+
+/* save all amr_elm_nbinfo vars */
+int checkpoint_save_nbinfoVars(tMesh *mesh, char *fname)
+{
+  tVarList *vl = vlalloc(mesh);
+
+  vlpush(vl, Ind("amr_elm_nbinfo0"));
+
+  checkpoint_save_VL(mesh, fname, vl);
+  vlfree(vl);
+  return 0;
+}
+
+/* write a varlist vl */
+int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl)
+{
+  FILE *fp;
+  int rk;
+  int IObufsz = Geti(Par("fwrite_bufsize"));
+  char *IObuf; /* larger buffer for write */
 
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
@@ -286,7 +308,6 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
     nMPI_barrier();
   } /* end rk-loop */
 
-  vlfree(vl);
   return 0;
 }
 

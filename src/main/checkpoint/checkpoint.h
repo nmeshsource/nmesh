@@ -10,6 +10,8 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI);
 int checkpoint_save_elms(tMesh *mesh, char *fname);
 int checkpoint_write_elms(tMesh *mesh, FILE *fp);
 int checkpoint_save_EvoVars(tMesh *mesh, char *fname);
+int checkpoint_save_nbinfoVars(tMesh *mesh, char *fname);
+int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl);
 void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big);
 
 /* checkpoint_load.c */
