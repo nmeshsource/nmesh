@@ -79,12 +79,10 @@ int amr_set_use_fv_flag(tMesh *mesh)
 /* add a patch to the mesh */
 tPat *add_patch_without_rnode(tMesh *mesh, double bbox[6])
 {
-  int nmax = gridpoints->nmax;
   tPat *pat;
   int p = mesh->npats;
   double dg;
-  int i, dir;
-  int pt_typ[3];
+  int i;
 
   PRFs(":\n");
 
@@ -113,8 +111,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
   int nmax = gridpoints->nmax;
   tPat *pat;
   int p = mesh->npats;
-  double dg;
-  int i, dir;
+  int dir;
   int pt_typ[3];
 
   PRFs(":\n");
