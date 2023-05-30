@@ -91,6 +91,7 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
 
   /* free strings */
   free(vars);
+  free(nbinfo);
   free(elms);
   free(pats);
   free(pars);
@@ -156,6 +157,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
 
   /* free strings */
   free(vars);
+  free(nbinfo);
   free(elms);
   free(pats);
   free(pars);
@@ -193,6 +195,7 @@ int checkpoint_save(tMesh *mesh)
   checkpoint_save_pars(mesh, pars);
   checkpoint_save_patches(mesh, pats);
   checkpoint_save_elms(mesh, elms);
+  checkpoint_save_nbinfoVars(mesh, nbinfo);
   checkpoint_save_EvoVars(mesh, vars);
 
   /* wait until all get here */
@@ -210,6 +213,7 @@ int checkpoint_save(tMesh *mesh)
   /* free strings */
   free(dirp);
   free(dir);
+  free(nbinfo);
   free(vars);
   free(elms);
   free(pats);

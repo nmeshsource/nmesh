@@ -273,6 +273,17 @@ int checkpoint_save_nbinfoVars(tMesh *mesh, char *fname)
   tVarList *vl = vlalloc(mesh);
 
   vlpush(vl, Ind("amr_elm_nbinfo0"));
+/*
+  int vi;
+  for(vi=0; vi<mesh->nvdb; vi++)
+  {
+    int vt = MeshVarType(mesh, vi);
+    if( (vt==EVOVAR) || (vt==DATAVAR) )
+      if(!var_added_by_evolve_init_evosys(mesh, vi))
+        vlpushone(vl, vi);
+  }
+*/
+
 
   checkpoint_save_VL(mesh, fname, vl);
   vlfree(vl);
