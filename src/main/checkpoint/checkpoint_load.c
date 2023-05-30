@@ -303,7 +303,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
           /* nnbinfo<0 means nb info is not there yet */
           for(f=0; f<6; f++)  elm->dat->info->nnbinfo[f] = -1;
 
-          printelm(elm);
+          //printelm(elm);
           /* add new element to list mesh->myelm_head on this rank */
           list_add_tail(&elm->list, &mesh->myelm_head);
 
