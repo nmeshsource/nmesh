@@ -143,6 +143,9 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     checkpoint_load_elms(mesh, elms);
     PRF;printf(": finished loading elms.\n");
     fflush(stdout);
+    checkpoint_load_Vars(mesh, nbinfo);
+    PRF;printf(": finished loading nbinfo.\n");
+    fflush(stdout);
   }
   else
   {
