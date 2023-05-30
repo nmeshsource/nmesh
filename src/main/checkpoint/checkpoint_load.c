@@ -179,7 +179,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
 
       /* we give an equal number of elms to each rank,
          we can load balance later */
-      for(r=0; r<size-1; r++) mesh->eidlim[r] = r*(nelms/size);
+      for(r=0; r<size-1; r++) mesh->eidlim[r] = (r+1)*(nelms/size);
       mesh->eidlim[size-1] = nelms;
     }
   }
@@ -322,12 +322,19 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
              mesh->iteration, mesh->time);
   fflush(stdout);
 
+  //we should only this here:
+  ///* setup bfaces and eids */
+  //amr_set_all_bfaces(mesh);
+  //update_mesh_myelms_elm_eid_dt(mesh);
+
+  //But for now we do all this:
   /* setup all bfaces and root node connections */
   amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 0);
   printallbfaces(mesh);
 
-  /* set nb-info */
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+  //amr_set_bfaces_and_rnode_nbinfo_fnb does this:
+  ///* set nb-info */
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
 
   /* load balance all leaf nodes */
   simple_load_balance(mesh);
