@@ -1915,9 +1915,21 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   return list_count_nodes(fnb_head);
 }
 
+
 /* Update amr_elm_nbinfo vars on all faces where:
    elm->dat->info->nnbinfo[f] < 0.
    This is done for all elms on all ranks */
+/* NOTE: amr_update_elm_nbinfo_if_nnbinfo_negative is very general as it
+   assumes no prior knowledge of which MPI rank I am actually in contact with.
+   BUT amr_update_elm_nbinfo_if_nnbinfo_negative is very slow!!!
+   This happens because every rank sends its ef0 to ALL other ranks:
+     nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+   So we should keep this func, but also make an improved version, where:
+   +I should only send to the ranks that I am in contact with, i.e. the ones
+    I had nbs with on this face before. We could destill a contacts list for
+    each face-dir out of mesh->nbelms and store it in mesh.
+   +Or MAYBE we should save a contacts list for each face in each elm. Then
+    we can do local updates (similar to the surface exchanges). */
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
 {
   struct list_head *pos;

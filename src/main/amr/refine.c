@@ -177,8 +177,10 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
+
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
+  prTimeIn_s("before amr_remove_mesh_nbelm ");
   amr_remove_mesh_nbelm(mesh, 0);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
@@ -207,9 +209,13 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   */
 
   /* update essential nb info */
+  prTimeIn_s("before amr_update_elm_nbinfo_if_nnbinfo_negative ");
   amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  prTimeIn_s("before amr_elm_nbinfo_to_elm_fnb ");
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
+  prTimeIn_s("before amr_elm_nbinfo_set_nnbinfo_mesh ");
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
+  prTimeIn_s("end of hp_refine_elms_if_rflag ");
 
   /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
