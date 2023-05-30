@@ -322,25 +322,10 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
              mesh->iteration, mesh->time);
   fflush(stdout);
 
-  //we should do only this here:
-  ///* setup bfaces and eids */
-  //amr_set_all_bfaces(mesh);
-  //update_mesh_myelms_elm_eid_dt(mesh);
+  /* setup bfaces and eids */
+  amr_set_all_bfaces(mesh);
+  update_mesh_myelms_elm_eid_dt(mesh);
 
-  //But for now we do all this:
-  /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 0);
-  printallbfaces(mesh);
-
-  //amr_set_bfaces_and_rnode_nbinfo_fnb does this:
-  ///* set nb-info */
-  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
-
-  /* load balance all leaf nodes */
-  simple_load_balance(mesh);
-  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
-
-  //printmesh(mesh);
   PRF;printf(": number of leaf nodes mesh->nmyelm=%lu\n", mesh->nmyelm);
   fflush(stdout);
 

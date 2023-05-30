@@ -396,6 +396,7 @@ tPat *add_patch_without_rnode(tMesh *mesh, double bbox[6]);
 tPat *add_patch(tMesh *mesh, double bbox[6],
                 int *pt_typ_root, int nroot[3], int datrank);
 int amr_setup_mesh(tMesh *mesh);
+int amr_set_all_bfaces(tMesh *mesh);
 int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr);
 
 /* storage.c */
@@ -625,6 +626,8 @@ void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
                                      ulong *elmindex, int *elmrank);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
 int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
+int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
+int amr_get_nbelm_elmheaders(tMesh *mesh);
 
 
 /* compatibility with old connect.c */

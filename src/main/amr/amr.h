@@ -53,7 +53,6 @@ void load_balance_elms(tMesh *mesh);
 
 /* bfaces.c */
 void remove_all_bfaces(tPat *pat);
-int amr_set_all_bfaces(tMesh *mesh);
 void find_external_faces_of_pat(tPat *pat, double Lmin,
                                 int *extface, int inclOuterBound);
 int set_bfaces_on_patface(tPat *pat, double Lmin, int f);
@@ -113,8 +112,6 @@ tElm **amr_elmarray_bsearch_eloc(ulong narr, tElm **arr, tEloc *eloc);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh);
 void amr_erase_all_elm_fnb(tMesh *mesh);
-int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
-int amr_get_nbelm_elmheaders(tMesh *mesh);
 int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
                           tElm0 *elm0);
 int amr_invalidate_nbinfo_of_all_nbs(tElm *elm, int Keep_nbs_fnb);

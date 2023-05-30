@@ -141,6 +141,8 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   /* load checkpoint from the various files */
   if(stage==0)
   {
+    int chkpt_exists = checkpoint_exists(mesh, "", "");
+
     nmesh_load_parameters(mesh, pars, 0, 1);
     PRF;printf(": finished loading pars.\n");
     fflush(stdout);
@@ -150,8 +152,16 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     checkpoint_load_elms(mesh, elms);
     PRF;printf(": finished loading elms.\n");
     fflush(stdout);
-    checkpoint_load_Vars(mesh, nbinfo);
-    PRF;printf(": finished loading nbinfo.\n");
+    if(chkpt_exists & 8)
+    {
+      checkpoint_load_Vars(mesh, nbinfo);
+      PRF;printf(": finished loading nbinfo.\n");
+      checkpoint_set_nbinfo_fnb_nbelm_loadbal(mesh, 0);
+    }
+    else
+    {
+      checkpoint_set_nbinfo_fnb_nbelm_loadbal(mesh, 1);
+    }
     fflush(stdout);
   }
   else
@@ -174,6 +184,30 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   free(dir);
   return ret;
 }
+
+/* setup nb related stuff and do load bal */
+void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo)
+{
+  PRFs(": 1.");
+  printmesh(mesh);
+
+  /* either keep the nbinfo we loaded or recreate it*/
+  if(reset_nbinfo)
+    amr_update_elm_nbinfo_if_nnbinfo_negative(mesh);
+
+  /* set fnb stuff */
+  amr_elm_nbinfo_to_elm_fnb(mesh);
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+  amr_get_nbelm_elmheaders(mesh);
+
+  /* load balance all leaf nodes */
+  simple_load_balance(mesh);
+  amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
+
+  PRFs(": 2.");
+  printmesh(mesh);
+}
+
 
 /******************************************************************/
 /* some functions to save nmesh data for checkpoints  */

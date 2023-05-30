@@ -2,6 +2,9 @@
 /* Wolfgang Tichy, 8/2019 */
 
 
+/* checkpoint.c */
+void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo);
+
 /* checkpoint_save.c */
 int checkpoint_save_pars(tMesh *mesh, char *fname);
 int checkpoint_save_patches(tMesh *mesh, char *fname);
