@@ -105,7 +105,7 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
    the resulting meshes */
 int test_mesh(tMesh *mesh)
 {
-  int mode=1;
+  int mode=0;
   tRef ref[1];
 
   PRFs(":\n");
