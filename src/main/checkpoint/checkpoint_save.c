@@ -260,7 +260,7 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
   for(vi=0; vi<mesh->nvdb; vi++)
   {
     int vt = MeshVarType(mesh, vi);
-    if( (vt==EVOVAR) || (vt==DATAVAR) )
+    if(vt!=AUXVAR) // ( (vt==EVOVAR) || (vt==DATAVAR) )
       if(!var_added_by_evolve_init_evosys(mesh, vi))
         vlpushone(vl, vi);
   }
@@ -340,8 +340,8 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
             fprintf(fp, "%d %d %d %d\n", vli, va->n[0],va->n[1],va->n[2]);
 
           /* write var array in raw binary */
-          if(write_big) fwrite_big(v, sizeof(double), node->np, fp);
-          else          fwrite_little(v, sizeof(double), node->np, fp);
+          if(write_big) fwrite_big(v, sizeof(double), va->N, fp);
+          else          fwrite_little(v, sizeof(double), va->N, fp);
           fprintf(fp, "\n");
           //if(Node_eid(node)==28) printf("v[]=%g\n", v[0]);
         }
