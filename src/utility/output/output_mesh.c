@@ -84,6 +84,8 @@ void write_lnode(FILE *fp, tNode *e, int mode)
 /* open file and write all my node elms into it */
 void write_mylnodes(tMesh *mesh, const char *info, int mode)
 {
+  int size = nMPI_size();
+  int rank = nMPI_rank();
   int rk;
   int outd = Par("outdir");
   char *outdir = Gets(outd);
@@ -91,22 +93,22 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
   FILE *fp;
 
   /* MPI motivated loop to assign work */
-  for(rk=0; rk<nMPI_size(); rk++)
+  for(rk=0; rk<size; rk++)
   {
     /* do work when it is my turn */
-    if(rk == nMPI_rank())
+    if(rk == rank)
     {
-      sprintf(fname, "%s/%s.%d", outdir, "myelms", rk);
+      sprintf(fname, "%s/%s", outdir, "myelms.txt");
       fp = fopen(fname, "a");
 
-      fprintf(fp, "%s\n", info);
+      if(rk==0) fprintf(fp, "%s\n", info);
 
       formylnodes_noomp(mesh)
       {
         tNode *elm = MyLnode;
         write_lnode(fp, elm, mode);
       }
-      fprintf(fp, "\n");
+      if(rk==size-1) fprintf(fp, "\n");
       fclose(fp);
     }
     /* wait until everyone is here */
