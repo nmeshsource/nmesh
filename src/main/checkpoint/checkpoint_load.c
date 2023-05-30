@@ -496,7 +496,7 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
       /* read nodename string into buf */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       //sscanf(buf, "%s", name);
-      PRF;printf(": %s", buf);
+      //PRF;printf(": %s", buf);
       /* read np string into buf */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       sscanf(buf, "%d", &np);
@@ -523,10 +523,10 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
       arN = arn[0]*arn[1]*arn[2];
       vi  = Vind(vl, vli);
       len = sizeof(double) * arN;
-      PRF;printf(": np=%d vli=%d node->datrank=%d ret=%d\n",
-                 np, vli, node->datrank, ret);
-      printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), Node_eid(node), vi);
-      printf("arn=%d %d %d, arN=%d len=%ld\n", arn[0],arn[1],arn[2], arN, len);
+      //PRF;printf(": np=%d vli=%d node->datrank=%d ret=%d\n",
+      //           np, vli, node->datrank, ret);
+      //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), Node_eid(node), vi);
+      //printf("arn=%d %d %d, arN=%d len=%ld\n", arn[0],arn[1],arn[2], arN, len);
 
       /* check if this var needs to be read on this node */
       if(node) if(node->dat)
