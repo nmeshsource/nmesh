@@ -7,7 +7,7 @@
 
 
 /* write essential info */
-void write_lnode0(FILE *fp, tNode *e, const char *s)
+void write_lnode0(FILE *fp, tNode *e, int mode, const char *s)
 {
   char nns[100];
   fprintf(fp, "%s", nodename(e, nns,99));
@@ -15,7 +15,13 @@ void write_lnode0(FILE *fp, tNode *e, const char *s)
          Node_eid(e),
          e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5]);
   fprintf(fp, " n=%dx%dx%d=%d", e->n[0],e->n[1],e->n[2], e->np);
-  fprintf(fp, " datrank=%d", e->datrank);
+  switch(mode)
+  {
+  case 1:
+    fprintf(fp, " datrank=%d", e->datrank);
+    break;
+  //default:
+  }
   fprintf(fp, "%s", s);
 }
 
@@ -64,7 +70,7 @@ void write_lnode(FILE *fp, tNode *e, int mode)
   //union { const tNode *elm; tNode0 *elm0; } e2e0;
   //e2e0.elm = e;
   //printelm0(e2e0.elm0, "");
-  write_lnode0(fp, e, "");
+  write_lnode0(fp, e, mode, "");
 
   switch(mode)
   {
