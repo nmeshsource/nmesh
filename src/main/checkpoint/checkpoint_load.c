@@ -496,6 +496,7 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
       /* read nodename string into buf */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       //sscanf(buf, "%s", name);
+      PRF;printf(": %s", buf);
       /* read np string into buf */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       sscanf(buf, "%d", &np);
@@ -522,9 +523,10 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
       arN = arn[0]*arn[1]*arn[2];
       vi  = Vind(vl, vli);
       len = sizeof(double) * arN;
-      //PRF;printf(": name=%s np=%d vli=%d node->datrank=%d\n",
-      //           name, np, vli, node->datrank);
-      //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), Node_eid(node), vi);
+      PRF;printf(": np=%d vli=%d node->datrank=%d ret=%d\n",
+                 np, vli, node->datrank, ret);
+      printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), Node_eid(node), vi);
+      printf("arn=%d %d %d, arN=%d len=%ld\n", arn[0],arn[1],arn[2], arN, len);
 
       /* check if this var needs to be read on this node */
       if(node) if(node->dat)
@@ -598,16 +600,27 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
     }
     while(found_node && s)
     {
+      int vli, arn[3], arN, ret;
       //PRF;printf(": %s %d found_node=%d\n", nname, np, found_node);
       /* check for end / read var info */
-      fgets(buf,999, fp); /* use fgets to read "}\n" or vli plus '\n' */
+      fgets(buf,999, fp); /* use fgets to read "}\n" or vli, n plus '\n' */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
       if(strcmp(buf, "}\n")==0) break;
 
+      /* read vli and arn */
+      ret = sscanf(buf, "%d %d %d %d", &vli, &(arn[0]), &(arn[1]), &(arn[2]));
+      if(ret < 4)
+      {
+        /* use default for array->n */
+        arn[0] = np;
+        arn[1] = arn[2] = 1;
+      }
+      arN = arn[0]*arn[1]*arn[2];
+
       /* read var as raw binary */
-      if(read_big) fread_big(v, sizeof(double), np, fp);
-      else         fread_little(v, sizeof(double), np, fp);
-      buffer = append_buf(buffer,nbuffer, (char *) v,np*sizeof(*v)); /* app v */
+      if(read_big) fread_big(v, sizeof(double), arN, fp);
+      else         fread_little(v, sizeof(double), arN, fp);
+      buffer = append_buf(buffer,nbuffer, (char *) v,arN*sizeof(*v)); /* app v */
 
       /* use fgets to also read the '\n' after var. */
       s = fgets(buf,999, fp); /* s=NULL at EOF */
