@@ -489,7 +489,7 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
   while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
   {
     //char name[256];
-    int np, vli, vi, found_node;
+    int np, vli, arn[3], arN, vi, found_node, ret;
 
     if(strcmp(buf, "{\n")==0)
     {
@@ -511,9 +511,17 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
       /* check for end ("}\n") or read var info */
       off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len);
       if(strcmp(buf, "}\n")==0) break;
-      vli = atoi(buf);
+      //vli = atoi(buf);
+      ret = sscanf(buf, "%d %d %d %d", &vli, &(arn[0]), &(arn[1]), &(arn[2]));
+      if(ret < 4)
+      {
+        /* use default for array->n */
+        arn[0] = np;
+        arn[1] = arn[2] = 1;
+      }
+      arN = arn[0]*arn[1]*arn[2];
       vi  = Vind(vl, vli);
-      len = sizeof(double) * np;
+      len = sizeof(double) * arN;
       //PRF;printf(": name=%s np=%d vli=%d node->datrank=%d\n",
       //           name, np, vli, node->datrank);
       //printf("%s nid=%ld vi=%d\n", nodename(node,buf,99), Node_eid(node), vi);
@@ -525,6 +533,7 @@ void checkpoint_read_vl(tNode *node, char *buffer, long nbuffer,
 
         /* switch on var on this node and get pointer to its data */
         enablevarcomp_innode(node, vi);
+        if(arN != np) redimension_array(VarA_(node, vi), arn);
         v = Vard(node, vi);
 
         /* read var as raw binary */
