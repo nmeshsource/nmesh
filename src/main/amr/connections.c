@@ -934,13 +934,16 @@ char *elocname(tEloc *eloc, char *s, int slen)
   /* patch part */
   snprintf(s,slen, "%d_", eloc->p);
   l1 = strlen(s);
+  //printf("|l=%d|1s=%s|", l,s);
 
   /* copy loc */
   for(i=0; (i<l) && (l1+i<slen-1); i++)
     s[l1+i] = eloc->loc[i];
+  //printf("|2s=%s|", s);
 
   /* add str-end marker */
   if(l1+i<slen) s[l1+i] = 0;
+  //printf("|l1+i=%d|3s=%s|", l1+i, s);
 
   return s;
 }
@@ -1472,13 +1475,14 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
                                     struct list_head *f_elms_head)
 {
   tElm *const*f_elm;
+  int f_elm_l;
   size_t off, num;
   //tEloc *eloc = elm->eloc;
   tEloc f_eloc[1];
   tEloc cheloc[1];
   int l, lret;
   int lmax = s_eloc->l;
-  unsigned mor, atB;
+  //unsigned mor, atB;
   int ijk;
 
   /* We start searching 1st for s_eloc's ancestor on level l0,
@@ -1507,25 +1511,40 @@ int amr_make_elms_on_eloc_face_list(long narr, tElm **arr,
 
     if(!f_elm) return -s_eloc->l - 1000; /* found nothing */
 
-    /* is there only one f_elm? */
-    binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp_0, NULL,
-                     &mor, &atB);
-    //printf("mor=%d\n", mor);
-    if(!mor)  /* if there is only one */
+    /* if we find an exact match we are done */
+    f_elm_l = Elm_l(*f_elm);
+    if(f_elm_l == l)
     {
-      tEploc *f_eploc = (*f_elm)->eploc;
-      /* Note: If we are at arr-bound (atB) there could be more than one.
-               If f_eploc->l > s_eloc->l and we are at arr-bound there are
-               likely more on other ranks and we need to further verify the
-               one we found */
-      if( (f_eploc->l <= s_eloc->l) || (!atB) )
-      {
-        /* looks like we found a unique elm, so add f_elm to list and then
-           return with success */
-        glist_entry_add_tail(*f_elm, f_elms_head);
-        return l;
-      }
+      /* looks like we found a unique elm, so add f_elm to list and then
+         return with success */
+      glist_entry_add_tail(*f_elm, f_elms_head);
+      return l;
     }
+
+    ///* if f_elm is longer than what we were looking for,
+    //   we need to try again with a larger f_eloc->l = l */
+    //if(f_elm_l > l) continue;
+
+
+    ///* is there only one f_elm? */
+    //binarysearchmore(f_eloc, arr, narr, sizeof(*arr), f_elm, lecmp_0, NULL,
+    //                 &mor, &atB);
+    //printf("mor=%d\n", mor);
+    //if(!mor)  /* if there is only one */
+    //{
+    //  f_elm_l = Elm_l(*f_elm);
+    //  /* Note: If we are at arr-bound (atB) there could be more than one.
+    //           If f_elm_l > s_eloc->l and we are at arr-bound there are
+    //           likely more on other ranks and we need to further verify the
+    //           one we found */
+    //  if( (f_elm_l <= s_eloc->l) || (!atB) )
+    //  {
+    //    /* looks like we found a unique elm, so add f_elm to list and then
+    //       return with success */
+    //    glist_entry_add_tail(*f_elm, f_elms_head);
+    //    return l;
+    //  }
+    //}
   }
   /* if we get here, nb at s_eloc has children */
 
@@ -1833,7 +1852,8 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
   tEloc eloc[1];
 
   eloc_from_eploc(eloc, eploc);
-  //PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface);
+  //if(elmname_is(elm, "1_7124"))// && elmface==1)
+  //{ PRFs(": ");printeloc(eloc);printf(" elmface=%d\n", elmface); }
 
   /* simple case where elmface is inside the patch */
   if(!connections_loc_on_patchface_f(eloc->l, eloc->loc, elmface))
@@ -1850,9 +1870,10 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     //  printf("nbeloc->l=%d\n", nbeloc->l);
     //  printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
     //}
-    //if(elmname_is(elm, "1_530") && elmface==1)
+    //if(elmname_is(elm, "1_7124"))// && elmface==1)
     //{
-    //  printf(" -> l0=%d nbeloc=", l0);printeloc(nbeloc);printf(" nbface=%d\n", nbface);
+    //  char s[100];
+    //  printf(" -> l0=%d nbeloc=%s", l0, elocname(nbeloc,s,100));printf(" nbface=%d\n", nbface);
     //  printf("nbeloc->l=%d\n", nbeloc->l);
     //  printf("find nbeloc,nbface in: ");printelmarray(narr, arr);
     //}
@@ -1869,13 +1890,13 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
     amr_make_patchface_fnb_list(elm,elmface, narr,arr, fnb_head);
   }
 
-  //if(elmname_is(elm, "1_530") && elmface==1)
+  //if(elmname_is(elm, "1_7124"))// && elmface==1)
   //{
   //  PRF;printf(": myrank=%d elmface=%d patface[elmface]=%d ",
-  //             nMPI_rank(), elmface, patface[elmface]);
+  //             nMPI_rank(), elmface, connections_loc_on_patchface_f(eloc->l, eloc->loc, elmface));
   //  printeploc_s(elm->eploc, " \n");
   //  printelmglist(fnb_head);
-
+  //}
   //  //printf("on=%d\n", connections_loc_on_patchface_f(0,"530", 2));
   //  //printf("on=%d\n", connections_loc_on_patchface_f(1,"530", 1));
   //  //printf("on=%d\n", connections_loc_on_patchface_f(2,"530", 1));
