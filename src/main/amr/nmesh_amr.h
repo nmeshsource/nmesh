@@ -421,6 +421,7 @@ void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
 tElm *alloc_elm(tMesh *mesh);
 tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
+tElm *alloc_elm_of_eploc(tMesh *mesh, tEploc *eploc);
 void free_elm(tElm *elm);
 tMesh *alloc_mesh(int npats);
 void realloc_patlist_in_mesh(tMesh *mesh, int npats);
