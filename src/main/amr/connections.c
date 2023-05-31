@@ -2033,9 +2033,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
       /* there is something to do only if nef0[f]>0 */
       if(nef0[f])
       {
-        // get &ef0_head[f] from rk into elmhead array ef0
-        tElm0 *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
+        // get &ef0_head[f] from rk into elmhead or eploc array ef0
+        //tElm0 *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
         //hey maybe we should just send tEploc not tElm0!!!???
+        tEploc *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
         struct list_head *pos0;
         ulong i;
 
@@ -2046,20 +2047,24 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
           list_for_each(pos0, &ef0_head[f])
           {
             tElm *elm = glist_entry(pos0);
-            memcpy(&ef0[i], elm, sizeof(ef0[0]));
+            //memcpy(&ef0[i], elm, sizeof(ef0[0]));
+            memcpy(&ef0[i], elm->eploc, sizeof(ef0[0]));
             i++;
           }
           if(nef0[f]!=i) errorexit("nef0[f]!=i");
         }
 
         /* broadcast all elmheaders in ef0 from rank rk to all */
-        nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+        //nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+        /* broadcast all eplocs in ef0 from rank rk to all */
+        nMPI_Bcast(ef0, nef0[f], nMPIvars->TEPLOC, rk);
                                //^^^^^^^^^^^^^^^-is this right???
 
         /* all ranks do work on ef0 array and find all nbs of all in ef0 */
         for(i=0; i<nef0[f]; i++)
         {
-          tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
+          //tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
+          tElm *elmi = alloc_elm_of_eploc(mesh, &ef0[i]);
           struct list_head *pos1, *sav;
           struct list_head fnb_head;
           ulong j, nnb;
