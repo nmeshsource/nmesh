@@ -240,10 +240,9 @@ typedef struct tMESH {
                      /* myelm and myelm_head list are copies of each other */
   ulong nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
-
   ulong *eidlim;     /* (last eid on rank rk) = eidlim[rk]-1 */
 } tMesh;
-/* NOTE: the list lns needs to be distributed among MPI jobs:
+/* NOTE: the list myelm is distributed among MPI jobs:
 use space filling curve as in
 http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
