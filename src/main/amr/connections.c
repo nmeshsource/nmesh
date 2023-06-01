@@ -2882,7 +2882,7 @@ int amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks)
   ulong ei;
   for(ei=0; ei<mesh->nnbelm; ei++)
   {
-    tElm *elm = Elm_MyID(mesh, ei);
+    tElm *elm = mesh->nbelm[ei];
     int is_missing;
     kh_put(u32, nbranks, elm->datrank, &is_missing);
     if(is_missing) nadded++;

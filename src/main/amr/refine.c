@@ -153,6 +153,10 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
   struct list_head *pos, *sav;
 
+  /* record nb ranks before we make changes */
+  khash_t(u32) *nbranks = kh_init(u32);
+  amr_khset_add_nb_ranks(mesh, nbranks);
+
   /* loop over list with elms */
   list_for_each_safe(pos, sav, &mesh->myelm_head)
   {
@@ -219,6 +223,9 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
+
+  /* free has set table */
+  kh_destroy(u32, nbranks);
 }
 
 /* set some nbinfo and then remove and free the old parent */
