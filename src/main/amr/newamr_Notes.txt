@@ -192,25 +192,25 @@ Improving upon
 amr_update_elm_nbinfo_if_nnbinfo_negative
 =========================================
 *in refinement funcs construct a khash table
-KHASH_MAP_INIT_INT(u32felm, tListHeads)
-khash_t(u32felm) *h = kh_init(u32felm); //see wolfGIT/c/khash_example.c
+KHASH_MAP_INIT_INT(u32_tFlist, tFlist)
+khash_t(u32_tFlist) *ef = kh_init(u32_tFlist);
 where
 typedef struct XXXX {
   struct list_head felm_head[6];
-} tListHeads;
+} tFlist;
 *Then do
-  ki = kh_put(u32felm, h, rank, &is_missing);
+  ki = kh_put(u32_tFlist, ef, rank, &is_missing);
   kh_val(h, ki) = (some tListHeads var);
  for every rank that we want to ask about nbs. We use elm->fnb of the parent
  to get to the datrank of all nbs that could be in contact iwht the new
  children.
 *Then add all children felm_head[face] for each rank we find to
-  ki = kh_get(u32felm, h, rank);
+  ki = kh_get(u32_tFlist, h, rank);
   glist_entry_add(elm, &(kh_val(h, ki).felm_head[f]));
 *pass the hashtable h to a new func that asks the MPI rank in it about
- the nbs of the elms in it. This new func will acces it like so:
- for all ranks(i.e. keys) in h
-   serialize felm_head[f] list into large array
+ the nbs of the elms in it. This new func will access it like so:
+ for all ranks(i.e. keys) in ef
+   serialize tFlist[f] list into large array
    send array to these ranks
    recv other array to these ranks
  work on all arrays that I got (i.e. find nbs)
