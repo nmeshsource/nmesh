@@ -2869,15 +2869,139 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
 
 
 /****************************************************************************/
-/* functions exchange info with neighboring ranks */
+/* functions to record info about neighboring ranks */
 /****************************************************************************/
 
-void amr___()
+/* Record all the nbranks I am in contact with, i.e. add datranks of all nbs
+   to the hash set called nbranks. */
+/* needs both:   khash_t(u32) *nbranks = kh_init(u32);
+                 kh_destroy(u32, nbranks);              */
+void amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks)
 {
-
+  ulong ei;
+  for(ei=0; ei<mesh->nnbelm; ei++)
+  {
+    tElm *elm = Elm_MyID(mesh, ei);
+    int is_missing;
+    kh_put(u32, nbranks, elm->datrank, &is_missing);
+  }
 }
 
+/* Record elm,face for the key rank in the hash table ef. The value of key
+   rank is 6 lists (one for each face) to which we append the elm. */
+void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
+                                     tElm *elm, int face)
+{
+  int is_missing;
+  khiter_t ki;
+  int f;
 
+  ki = kh_put(u32_tFlist, ef, rank, &is_missing);
+  if(is_missing)
+    for(f=0; f<6; f++) INIT_LIST_HEAD(&(kh_val(ef, ki).flist[f]));
+
+  glist_entry_add_tail(elm, &(kh_val(ef, ki).flist[face]));
+}
+
+/* Find all ranks that elm touches, and save elm,face once for each
+   touching rank. (Note: fnbranks is only there to track if elm was already
+   added once before.) */
+void amr_khmap_add_elm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm)
+{
+  khash_t(u32) *fnbranks = kh_init(u32);
+
+  int f, ni;
+  for(f=0; f<6; f++)
+  {
+    kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+    for(ni=0; ni<elm->nfnb[f]; ni++)
+    {
+      tElm *nb = elm->fnb[f][ni];
+      int rank = nb->datrank;
+      int is_missing;
+
+      kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
+      /* if this is the 1st time we find this rank on this face, add elm */
+      if(is_missing)
+        amr_khmap_add_elm_face_for_rank(ef, rank, elm, f);
+    }
+  }
+  kh_destroy(u32, fnbranks);
+}
+
+/* Find all ranks that parent elm touches, and save child0-7,face once for
+   each touching rank. (Note: fnbranks is only there to track if children
+   were already added once before.) */
+void amr_khmap_add_children_forallparentfaces(khash_t(u32_tFlist) *ef,
+                                              tElm *child0, tElm *parent)
+{
+  khash_t(u32) *fnbranks = kh_init(u32);
+
+  int f, ni;
+  for(f=0; f<6; f++)
+  {
+    kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+
+    for(ni=0; ni<parent->nfnb[f]; ni++)
+    {
+      tElm *nb = parent->fnb[f][ni];
+      int rank = nb->datrank;
+      int is_missing;
+
+      kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
+      /* if this is the 1st time we find this rank on this face,
+         add children */
+      if(is_missing)
+      {
+        struct list_head *pos_ijk = &child0->list; /* pos of 1st child */
+        int ijk;
+        for(ijk=0; ijk<8; ijk++)
+        {
+          tElm *child = list_entry(pos_ijk, tElm, list);
+          amr_khmap_add_elm_face_for_rank(ef, rank, child, f);
+          pos_ijk = pos_ijk->next;  /* pos of next child */
+        }
+      }
+    }
+  }
+  kh_destroy(u32, fnbranks);
+}
+
+/* Find all ranks that children touch, and save parent,face once for
+   each touching rank. (Note: fnbranks is only there to track if parent
+   wad already added once before.) */
+void amr_khmap_add_parent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
+                                              tElm *parent,
+                                              struct list_head *ch_head)
+{
+  khash_t(u32) *fnbranks = kh_init(u32);
+
+  int f, ni;
+  for(f=0; f<6; f++)
+  {
+    struct list_head *pos_ijk;
+
+    kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+    list_for_each(pos_ijk, ch_head)
+    {
+      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
+
+      for(ni=0; ni<ch_ijk->nfnb[f]; ni++)
+      {
+        tElm *nb = ch_ijk->fnb[f][ni];
+        int rank = nb->datrank;
+        int is_missing;
+
+        kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
+        /* if this is the 1st time we find this rank on this face,
+           add parent */
+        if(is_missing)
+          amr_khmap_add_elm_face_for_rank(ef, rank, parent, f);
+      }
+    }
+  }
+  kh_destroy(u32, fnbranks);
+}
 
 
 /****************************************************************************/

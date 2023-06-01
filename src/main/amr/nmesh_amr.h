@@ -7,6 +7,7 @@
 #include "thread_defs.h"
 #include "refine.h"
 #include "../main/linux_list.h"
+#include "../main/khash.h"
 #include "../main/skeleton.h"
 #include "../main/variables.h"
 #include "../nMPI/nMPI_defs.h"
@@ -115,7 +116,9 @@ typedef struct tGLIST {
   void *entry; /* could be entry=elm */
   struct list_head list;
 } tGlist;
-#define glist_entry(ptr) list_entry(ptr, tGlist, list)->entry
+#define glist_entry(ptr)       list_entry(ptr, tGlist, list)->entry
+#define glist_first_entry(ptr) list_first_entry(ptr, tGlist, list)->entry
+#define glist_last_entry(ptr)  list_last_entry(ptr, tGlist, list)->entry
 
 
 /* extra info about node state that has nothing to do with neighbor info
@@ -342,6 +345,19 @@ typedef struct tVARLIST {
                    as vlduplicate, vlcopy, vlfree, ...). So the user has
                    to manage it: e.g. free it, before calling vlfree. */
 } tVarList;
+
+
+/**************************************************************************/
+/* define some khash table types */
+/**************************************************************************/
+typedef struct tFLIST {
+  struct list_head flist[6];
+} tFlist;
+
+/* hash set with only 32 bit ints as keys and no values */
+KHASH_SET_INIT_INT(u32)
+/* hash table with 32 bit ints as keys and tFlist values */
+KHASH_MAP_INIT_INT(u32_tFlist, tFlist)
 
 
 /**************************************************************************/
