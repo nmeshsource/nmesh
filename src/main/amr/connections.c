@@ -2868,6 +2868,15 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
 }
 
 
+/****************************************************************************/
+/* functions exchange info with neighboring ranks */
+/****************************************************************************/
+
+void amr___()
+{
+
+}
+
 
 
 
