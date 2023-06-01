@@ -1718,6 +1718,50 @@ void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
   }
 }
 
+/* set trivial nb info between siblings */
+void amr_set_intersibling_nbinfo_nnbinfo(tElm *sib0)
+{
+  tElm *sib[8];
+  int ijk;
+  struct list_head *pos_ijk = &sib0->list; /* pos of 1st sib */
+
+  /* record 8 sibs in sib[8] array */
+  for(ijk=0; ijk<8; ijk++)
+  {
+    sib[ijk] = list_entry(pos_ijk, tElm, list);
+    pos_ijk = pos_ijk->next;  /* pos of next sib */
+  }
+
+  /* set inter-sib nbinfo for each sib */
+  for(ijk=0; ijk<8; ijk++)
+  {
+    tElm *sib_ijk = sib[ijk];
+    int f;
+    for(f=0; f<6; f++)
+    {
+      tElm *nb;
+      if(!connections_ijk_is_at_parentface(ijk, f))
+      {
+        int nb_ijk = connections_get_inner_nb_ijk(ijk, f/2);
+        nb =  sib[nb_ijk];
+
+        /* set nbinfo and nnbinfo */
+        disablevarcomp_innode(sib_ijk, amr->elm_nbinfo0+f);
+        amr_elm_nbinfo_add_nbeploc(sib_ijk, f, 1, nb->eploc);
+        sib_ijk->dat->info->nnbinfo[f] = 1;
+
+        /* now also set fnb pointers */
+        free(sib_ijk->fnb[f]);
+        sib_ijk->fnb[f] = checked_calloc(1, sizeof(sib_ijk->fnb[f][0]));
+        sib_ijk->fnb[f][0] = nb;
+        sib_ijk->nfnb[f] = 1;
+        //printelm(sib_ijk);
+      }
+    } /* end f-loop */
+  }
+}
+
+
 /* write number of eplocs in var amr_elm_nbinfo into
    elm->dat->info->nnbinfo */
 void amr_elm_nbinfo_set_nnbinfo(tElm *elm, int positive)
@@ -2939,6 +2983,9 @@ void amr_khmap_add_children_forallparentfaces(khash_t(u32_tFlist) *ef,
                                               tElm *child0, tElm *parent)
 {
   khash_t(u32) *fnbranks = kh_init(u32);
+
+  //printelm(parent);
+  //printelm(child0);
 
   int f, ni;
   for(f=0; f<6; f++)

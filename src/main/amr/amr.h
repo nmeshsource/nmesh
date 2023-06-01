@@ -71,7 +71,8 @@ void remove_all_nfaces(tNode *node);
 
 /* refine.c */
 void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref);
-void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent);
+void set_children_nbinfo_ef(tElm *child0, tElm *parent,
+                            khash_t(u32_tFlist) *ef);
 void set_parent_nbinfo_remove_children(tElm *parent,
                                        struct list_head *ch_head);
 void hrefine_mesh_to_level(tMesh *mesh, int l);
@@ -109,6 +110,7 @@ int amr_set_child_eloc(tEloc *parentloc, int ijk, tEloc *eloc);
 int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 tElm **amr_elmarray_bsearch_eloc(ulong narr, tElm **arr, tEloc *eloc);
+void amr_set_intersibling_nbinfo_nnbinfo(tElm *sib0);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh);
 void amr_erase_all_elm_fnb(tMesh *mesh);

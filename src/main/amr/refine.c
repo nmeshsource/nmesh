@@ -151,11 +151,17 @@ void prefine_elms_if_rflag(tMesh *mesh, tRef *ref)
    of points */
 void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
+  struct list_head plist; //list in which we temporarily keep all refined parents
   struct list_head *pos, *sav;
+
+  /* table with missing nb info */
+  khash_t(u32_tFlist) *ef = kh_init(u32_tFlist);
 
   /* record nb ranks before we make changes */
   khash_t(u32) *nbranks = kh_init(u32);
   amr_khset_add_nb_ranks(mesh, nbranks);
+
+  INIT_LIST_HEAD(&plist);
 
   /* loop over list with elms */
   list_for_each_safe(pos, sav, &mesh->myelm_head)
@@ -172,7 +178,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
       if(ref->type == H_REFINE) /* replace elm with its children */
       {
         tElm *child0 = replace_parent_by_8children(elm, n, pt_typ);
-        set_children_nbinfo_remove_parent(child0, elm);
+        list_add_tail(&elm->list, &plist); //add parent to plist
+        set_children_nbinfo_ef(child0, elm, ef);
       }
       else /* p-refine by changing n and pt_typ of elm */
       {
@@ -181,11 +188,25 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
+  /* now remove/free all old parents */
+  list_for_each_safe(pos, sav, &plist)
+  {
+    tElm *parent = list_entry(pos, tElm, list);
+    amr_invalidate_nbinfo_of_all_nbs(parent, 0);
+    //int nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent, 0);
+    //if(nbs_on_other_rank)
+    //  amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
+    list_del(&parent->list);
+    free_elm(parent);
+  }
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   prTimeIn_s("before amr_remove_mesh_nbelm ");
   amr_remove_mesh_nbelm(mesh, 0);
+  //FIXME: replace amr_remove_mesh_nbelm by a func that also records
+  // all rank boundary elms in ef
+
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
@@ -202,6 +223,12 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
   amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
+
+
+  /* update nbinfo of new children and other rank boundary elms using
+     the info in ef */
+  //.... FIXME!
+
 
   /*
   formyelms(mesh)
@@ -226,10 +253,13 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* free has set table */
   kh_destroy(u32, nbranks);
+  kh_destroy(u32_tFlist, ef);
 }
 
-/* set some nbinfo and then remove and free the old parent */
-void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
+/* set some nbinfo, record what is missing in ef, and then remove and
+   free the old parent */
+void set_children_nbinfo_ef(tElm *child0, tElm *parent,
+                            khash_t(u32_tFlist) *ef)
 {
   /* #pragma omp critical (change_mesh_myelm_list) */
   /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
@@ -239,24 +269,22 @@ void set_children_nbinfo_remove_parent(tElm *child0, tElm *parent)
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
-    int nbs_on_other_rank;
     /* NOTE: The new children have all zero for nfnb, fnb, and nnbinfo=-1.
              Also, all their neighbors have now the wrong nfnb and nbinfo.
              Even worse, all its neighbors have fnb pointers pointing
              to the parent which will be removed!!!  */
     /* FIXME: Maybe go over parent's nbs and set whatever
               nb-info we can!!! */
+
     /* we just created the children (child0), now set local nb-info */
     //int amr_set_nbinfo_of_new_children(tElm *child0, tElm *parent)
     // use: connections_get_nbloc_InsidePat
 
-    /* for now we just invalidate a lot and remove the parent */
-    nbs_on_other_rank = amr_invalidate_nbinfo_of_all_nbs(parent, 0);
-    if(nbs_on_other_rank)
-      amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
+    /* set trivial nb-info among sibs */
+    amr_set_intersibling_nbinfo_nnbinfo(child0);
 
-    /* free parent and all data on parent */
-    free_elm(parent);
+    /* record about which child face we need info from which rank */
+    amr_khmap_add_children_forallparentfaces(ef, child0, parent);
   }
 }
 
