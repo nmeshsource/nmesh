@@ -3093,7 +3093,8 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
 void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
                                                 khash_t(u32_tFlist) *ef)
 {
-  khash_t(u32) *nrank_nface = kh_init(u32);
+  khash_t(u64) *rk_elm_f = kh_init(u64);
+  ulong key_n[] = {nMPI_size(), mesh->nnbelm, 6};
   ulong ei;
 
   /* make nnbinf0<0 but keep all fnb pointers */
@@ -3106,14 +3107,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
     int elm_rk = elm->datrank;
     int f, ni;
 
-
-    kh_clear(u32, nrank_nface); /* empty nb ranks set for face f */
-
-
-
-
     for(f=0; f<6; f++)
-    {
       for(ni=0; ni<elm->nfnb[f]; ni++)
       {
         tElm *nb = elm->fnb[f][ni];
@@ -3128,24 +3122,21 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
         /* go over nbs of nb on its face nb_f, and look for elm */
         for(nb_ni=0; nb_ni<nb->nfnb[nb_f]; nb_ni++)
         {
-          tElm *nbnb =  nb->fnb[nb_f][nb_ni];
+          tElm *nbnb = nb->fnb[nb_f][nb_ni];
           if(nbnb==elm) /* if it points back at elm we need to record it */
           {
             int is_missing;
-
-            kh_put(u32, nrank_nface, elm_rk, &is_missing); /* record elm rank */
+            ulong nb_lid = calc_elm_lid(nb);
+            ulong key = Ind_n(elm_rk, nb_lid, nb_f,  key_n);
+            kh_put(u64, rk_elm_f, key, &is_missing); /* record */
             /* if this is the 1st time we find this rank on this face, add elm */
             if(is_missing)
               amr_khmap_add_elm_face_for_rank(ef, elm_rk, nb, nb_f);
           }
         }
       } /* end ni-loop */
-    }
-
-
-
   }
-  kh_destroy(u32, nrank_nface);
+  kh_destroy(u64, rk_elm_f);
 }
 
 /* Remove mesh->nbelm, make sure all nbinfo about it is deleted, and
