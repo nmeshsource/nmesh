@@ -102,6 +102,7 @@ int connections_loc_on_patchface(int l, const char loc[NLOCS],
                                  int patface[6]);
 int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
                                  const tEloc *eloc2, int l_max);
+void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0);
 int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);
 int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
 int amr_elms_are_siblings(int n, void *ptr_elm);
@@ -128,3 +129,5 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
 void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
                                                  tElm *parent,
                                                  struct list_head *ch_head);
+void amr_remove_mesh_nbelm_ef(tMesh *mesh, int Keep_nbs_fnb,
+                              khash_t(u32_tFlist) *ef);

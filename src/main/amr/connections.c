@@ -2957,6 +2957,7 @@ void amr_khmap_add_elm_forface(khash_t(u32_tFlist) *ef, tElm *elm, int face)
 {
   khash_t(u32) *fnbranks = kh_init(u32); /* empty nb ranks set for face */
   int ni;
+printelm(elm);
   for(ni=0; ni<elm->nfnb[face]; ni++)
   {
     tElm *nb = elm->fnb[face][ni];
@@ -3023,14 +3024,17 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
 
         kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
         /* if this is the 1st time we find this rank on this face,
-           add children */
+           add the 4 children on this face */
         if(is_missing)
         {
           pos_ijk = &child0->list; /* pos of 1st child */
           for(ijk=0; ijk<8; ijk++)
           {
-            tElm *child = list_entry(pos_ijk, tElm, list);
-            amr_khmap_add_elm_face_for_rank(ef, nb_rk, child, f);
+            if(connections_ijk_is_at_parentface(ijk, f))
+            {
+              tElm *child = list_entry(pos_ijk, tElm, list);
+              amr_khmap_add_elm_face_for_rank(ef, nb_rk, child, f);
+            }
             pos_ijk = pos_ijk->next;  /* pos of next child */
           }
         }
@@ -3079,11 +3083,17 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
   kh_destroy(u32, fnbranks);
 }
 
+
+
+
+
+
 /* Go over mesh->nbelm list, invalidate nbinfo for all my elms that
    are nbs of any elm in mesh->nbelm, and record them in ef */
 void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
                                                 khash_t(u32_tFlist) *ef)
 {
+  khash_t(u32) *nrank_nface = kh_init(u32);
   ulong ei;
 
   /* make nnbinf0<0 but keep all fnb pointers */
@@ -3093,13 +3103,21 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
   for(ei=0; ei < mesh->nnbelm; ei++)
   {
     tElm *elm = mesh->nbelm[ei];
+    int elm_rk = elm->datrank;
     int f, ni;
 
+
+    kh_clear(u32, nrank_nface); /* empty nb ranks set for face f */
+
+
+
+
     for(f=0; f<6; f++)
+    {
       for(ni=0; ni<elm->nfnb[f]; ni++)
       {
         tElm *nb = elm->fnb[f][ni];
-        int nb_f;
+        int nb_f, nb_ni;
 
         if(!nb) continue; /* do nothing if there is no nb */
 
@@ -3107,9 +3125,27 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
         nb_f = amr_get_nbface(elm,f, nb);
         if(nb_f<0) errorexit("nb_f not found");
 
-        amr_khmap_add_elm_forface(ef, nb, nb_f);
-      }
+        /* go over nbs of nb on its face nb_f, and look for elm */
+        for(nb_ni=0; nb_ni<nb->nfnb[nb_f]; nb_ni++)
+        {
+          tElm *nbnb =  nb->fnb[nb_f][nb_ni];
+          if(nbnb==elm) /* if it points back at elm we need to record it */
+          {
+            int is_missing;
+
+            kh_put(u32, nrank_nface, elm_rk, &is_missing); /* record elm rank */
+            /* if this is the 1st time we find this rank on this face, add elm */
+            if(is_missing)
+              amr_khmap_add_elm_face_for_rank(ef, elm_rk, nb, nb_f);
+          }
+        }
+      } /* end ni-loop */
+    }
+
+
+
   }
+  kh_destroy(u32, nrank_nface);
 }
 
 /* Remove mesh->nbelm, make sure all nbinfo about it is deleted, and

@@ -203,9 +203,12 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   prTimeIn_s("before amr_remove_mesh_nbelm ");
-  amr_remove_mesh_nbelm(mesh, 0);
+  //amr_remove_mesh_nbelm(mesh, 0);
   //FIXME: replace amr_remove_mesh_nbelm by a func that also records
   // all rank boundary elms in ef
+  amr_remove_mesh_nbelm_ef(mesh, 0, ef);
+
+
 
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
