@@ -2960,17 +2960,20 @@ void amr_khmap_add_elm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm)
   int f, ni;
   for(f=0; f<6; f++)
   {
-    kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
-    for(ni=0; ni<elm->nfnb[f]; ni++)
+    if(elm->dat->info->nnbinfo[f] < 0)
     {
-      tElm *nb = elm->fnb[f][ni];
-      int rank = nb->datrank;
-      int is_missing;
+      kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+      for(ni=0; ni<elm->nfnb[f]; ni++)
+      {
+        tElm *nb = elm->fnb[f][ni];
+        int rank = nb->datrank;
+        int is_missing;
 
-      kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
-      /* if this is the 1st time we find this rank on this face, add elm */
-      if(is_missing)
-        amr_khmap_add_elm_face_for_rank(ef, rank, elm, f);
+        kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
+        /* if this is the 1st time we find this rank on this face, add elm */
+        if(is_missing)
+          amr_khmap_add_elm_face_for_rank(ef, rank, elm, f);
+      }
     }
   }
   kh_destroy(u32, fnbranks);
@@ -3073,6 +3076,55 @@ void amr_khmap_add_parent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
   kh_destroy(u32, fnbranks);
 }
 
+/////////////
+
+/* Invalidate nbinfo for all nbs of elm on elmface.
+   Return: 0 if all nbs have dat (are on my rank), # of nbs witout dat */
+int amr_invalidate_nbinfo_of_all_nbs_ef(tElm *elm, int Keep_nbs_fnb)
+{
+  int f;
+  int nbs_on_other_rank = 0;
+  for(f=0; f<6; f++)
+    nbs_on_other_rank += amr_invalidate_nbinfo_of_nbs(elm, f, Keep_nbs_fnb);
+  return nbs_on_other_rank;
+}
+
+/* Go over mesh->nbelm list and invalidate nbinfo for all my elms that
+   are nbs of any elm in mesh->nbelm. */
+void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh, int Keep_nbs_fnb)
+{
+  int ei;
+  for(ei=0; ei < mesh->nnbelm; ei++)
+  {
+    tElm *elm = mesh->nbelm[ei];
+    amr_invalidate_nbinfo_of_all_nbs(elm, Keep_nbs_fnb);
+  }
+}
+
+
+
+
+/* Remove mesh->nbelm, make sure all nbinfo about it is deleted, and
+   record what is missing in ef */
+void amr_remove_mesh_nbelm_ef(tMesh *mesh, int Keep_nbs_fnb,
+                              khash_t(u32_tFlist) *ef)
+{
+  int ei;
+
+  /* first make sure nobody has info about elms in nbelm */
+  amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh, Keep_nbs_fnb);
+
+  for(ei=0; ei < mesh->nnbelm; ei++)
+  {
+    tElm *elm = mesh->nbelm[ei];
+    free_elm(elm);
+  }
+  free(mesh->nbelm);
+  mesh->nbelm  = NULL;
+  mesh->nnbelm = 0;
+}
+
+//////////////////////
 
 /****************************************************************************/
 
