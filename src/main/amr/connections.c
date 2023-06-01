@@ -2876,15 +2876,18 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
    to the hash set called nbranks. */
 /* needs both:   khash_t(u32) *nbranks = kh_init(u32);
                  kh_destroy(u32, nbranks);              */
-void amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks)
+int amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks)
 {
+  int nadded = 0;
   ulong ei;
   for(ei=0; ei<mesh->nnbelm; ei++)
   {
     tElm *elm = Elm_MyID(mesh, ei);
     int is_missing;
     kh_put(u32, nbranks, elm->datrank, &is_missing);
+    if(is_missing) nadded++;
   }
+  return nadded;
 }
 
 /* Record elm,face for the key rank in the hash table ef. The value of key

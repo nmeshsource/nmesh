@@ -645,7 +645,6 @@ int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
 int amr_get_nbelm_elmheaders(tMesh *mesh);
 
-
 /* compatibility with old connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)
 #define nodename(node, s, slen)          elmname(node, s, slen)
