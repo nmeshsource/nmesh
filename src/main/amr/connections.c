@@ -2990,29 +2990,46 @@ void amr_khmap_add_children_forallparentfaces(khash_t(u32_tFlist) *ef,
   int f, ni;
   for(f=0; f<6; f++)
   {
-    kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+    struct list_head *pos_ijk;
+    int ijk;
+    int nnbinfo_neg;
 
-    for(ni=0; ni<parent->nfnb[f]; ni++)
+    /* check if any child has nnbinfo<0 */
+    nnbinfo_neg = 0;
+    pos_ijk = &child0->list; /* pos of 1st child */
+    for(ijk=0; ijk<8; ijk++)
     {
-      tElm *nb = parent->fnb[f][ni];
-      int rank = nb->datrank;
-      int is_missing;
+      tElm *child = list_entry(pos_ijk, tElm, list);
+      if(child->dat->info->nnbinfo[f] < 0) { nnbinfo_neg = 1; break; }
+      pos_ijk = pos_ijk->next;  /* pos of next child */
+    }
 
-      kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
-      /* if this is the 1st time we find this rank on this face,
-         add children */
-      if(is_missing)
+    /* if yes, try to add them */
+    if(nnbinfo_neg)
+    {
+      kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+
+      for(ni=0; ni<parent->nfnb[f]; ni++)
       {
-        struct list_head *pos_ijk = &child0->list; /* pos of 1st child */
-        int ijk;
-        for(ijk=0; ijk<8; ijk++)
+        tElm *nb = parent->fnb[f][ni];
+        int nb_rk = nb->datrank;
+        int is_missing;
+
+        kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
+        /* if this is the 1st time we find this rank on this face,
+           add children */
+        if(is_missing)
         {
-          tElm *child = list_entry(pos_ijk, tElm, list);
-          amr_khmap_add_elm_face_for_rank(ef, rank, child, f);
-          pos_ijk = pos_ijk->next;  /* pos of next child */
+          pos_ijk = &child0->list; /* pos of 1st child */
+          for(ijk=0; ijk<8; ijk++)
+          {
+            tElm *child = list_entry(pos_ijk, tElm, list);
+            amr_khmap_add_elm_face_for_rank(ef, nb_rk, child, f);
+            pos_ijk = pos_ijk->next;  /* pos of next child */
+          }
         }
       }
-    }
+    } /* end if(nnbinfo_neg) */
   }
   kh_destroy(u32, fnbranks);
 }
@@ -3029,24 +3046,27 @@ void amr_khmap_add_parent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
   int f, ni;
   for(f=0; f<6; f++)
   {
-    struct list_head *pos_ijk;
-
-    kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
-    list_for_each(pos_ijk, ch_head)
+    if(parent->dat->info->nnbinfo[f] < 0)
     {
-      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
+      struct list_head *pos_ijk;
 
-      for(ni=0; ni<ch_ijk->nfnb[f]; ni++)
+      kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
+      list_for_each(pos_ijk, ch_head)
       {
-        tElm *nb = ch_ijk->fnb[f][ni];
-        int rank = nb->datrank;
-        int is_missing;
+        tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
 
-        kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
-        /* if this is the 1st time we find this rank on this face,
-           add parent */
-        if(is_missing)
-          amr_khmap_add_elm_face_for_rank(ef, rank, parent, f);
+        for(ni=0; ni<ch_ijk->nfnb[f]; ni++)
+        {
+          tElm *nb = ch_ijk->fnb[f][ni];
+          int nb_rk = nb->datrank;
+          int is_missing;
+
+          kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
+          /* if this is the 1st time we find this rank on this face,
+             add parent */
+          if(is_missing)
+            amr_khmap_add_elm_face_for_rank(ef, nb_rk, parent, f);
+        }
       }
     }
   }
