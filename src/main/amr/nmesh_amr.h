@@ -354,8 +354,9 @@ typedef struct tFLIST {
   struct list_head flist[6];
 } tFlist;
 
-/* hash set with only 32 bit ints as keys and no values */
+/* hash sets with only 32 or 64 bit ints as keys and no values */
 KHASH_SET_INIT_INT(u32)
+KHASH_SET_INIT_INT64(u64)
 /* hash table with 32 bit ints as keys and tFlist values */
 KHASH_MAP_INIT_INT(u32_tFlist, tFlist)
 
@@ -455,6 +456,7 @@ void free_dat(tDat *dat);
 tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh);
 int calc_node_lid(tNode *node);
+ulong calc_elm_lid(tNode *node);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
 void enablevarcomp_innode(tNode *node, int i);
