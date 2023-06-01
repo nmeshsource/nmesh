@@ -2885,7 +2885,7 @@ int amr_invalidate_nbinfo_of_all_nbs(tElm *elm, int Keep_nbs_fnb)
    are nbs of any elm in mesh->nbelm. */
 void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh, int Keep_nbs_fnb)
 {
-  int ei;
+  ulong ei;
   for(ei=0; ei < mesh->nnbelm; ei++)
   {
     tElm *elm = mesh->nbelm[ei];
@@ -2896,7 +2896,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs(tMesh *mesh, int Keep_nbs_fnb)
 /* Remove mesh->nbelm and make sure all nbinfo about it is deleted */
 void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
 {
-  int ei;
+  ulong ei;
 
   /* first make sure nobody has info about elms in nbelm */
   amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh, Keep_nbs_fnb);
@@ -2950,40 +2950,43 @@ void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
   glist_entry_add_tail(elm, &(kh_val(ef, ki).flist[face]));
 }
 
+/* Find all ranks that elm touches on face, and save elm,face once for each
+   touching rank. (Note: fnbranks is only there to track if elm was already
+   added once before.) */
+void amr_khmap_add_elm_forface(khash_t(u32_tFlist) *ef, tElm *elm, int face)
+{
+  khash_t(u32) *fnbranks = kh_init(u32); /* empty nb ranks set for face */
+  int ni;
+  for(ni=0; ni<elm->nfnb[face]; ni++)
+  {
+    tElm *nb = elm->fnb[face][ni];
+    int nb_rk = nb->datrank;
+    int is_missing;
+
+    kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
+    /* if this is the 1st time we find this rank on this face, add elm */
+    if(is_missing)
+      amr_khmap_add_elm_face_for_rank(ef, nb_rk, elm, face);
+  }
+  kh_destroy(u32, fnbranks);
+}
+
 /* Find all ranks that elm touches, and save elm,face once for each
    touching rank. (Note: fnbranks is only there to track if elm was already
    added once before.) */
-void amr_khmap_add_elm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm)
+void amr_khmap_add_negelm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm)
 {
-  khash_t(u32) *fnbranks = kh_init(u32);
-
-  int f, ni;
+  int f;
   for(f=0; f<6; f++)
-  {
     if(elm->dat->info->nnbinfo[f] < 0)
-    {
-      kh_clear(u32, fnbranks); /* empty nb ranks set for face f */
-      for(ni=0; ni<elm->nfnb[f]; ni++)
-      {
-        tElm *nb = elm->fnb[f][ni];
-        int rank = nb->datrank;
-        int is_missing;
-
-        kh_put(u32, fnbranks, rank, &is_missing); /* record nb rank */
-        /* if this is the 1st time we find this rank on this face, add elm */
-        if(is_missing)
-          amr_khmap_add_elm_face_for_rank(ef, rank, elm, f);
-      }
-    }
-  }
-  kh_destroy(u32, fnbranks);
+      amr_khmap_add_elm_forface(ef, elm, f);
 }
 
 /* Find all ranks that parent elm touches, and save child0-7,face once for
    each touching rank. (Note: fnbranks is only there to track if children
    were already added once before.) */
-void amr_khmap_add_children_forallparentfaces(khash_t(u32_tFlist) *ef,
-                                              tElm *child0, tElm *parent)
+void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
+                                                 tElm *child0, tElm *parent)
 {
   khash_t(u32) *fnbranks = kh_init(u32);
 
@@ -3040,9 +3043,9 @@ void amr_khmap_add_children_forallparentfaces(khash_t(u32_tFlist) *ef,
 /* Find all ranks that children touch, and save parent,face once for
    each touching rank. (Note: fnbranks is only there to track if parent
    wad already added once before.) */
-void amr_khmap_add_parent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
-                                              tElm *parent,
-                                              struct list_head *ch_head)
+void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
+                                                 tElm *parent,
+                                                 struct list_head *ch_head)
 {
   khash_t(u32) *fnbranks = kh_init(u32);
 
@@ -3076,55 +3079,52 @@ void amr_khmap_add_parent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
   kh_destroy(u32, fnbranks);
 }
 
-/////////////
-
-/* Invalidate nbinfo for all nbs of elm on elmface.
-   Return: 0 if all nbs have dat (are on my rank), # of nbs witout dat */
-int amr_invalidate_nbinfo_of_all_nbs_ef(tElm *elm, int Keep_nbs_fnb)
+/* Go over mesh->nbelm list, invalidate nbinfo for all my elms that
+   are nbs of any elm in mesh->nbelm, and record them in ef */
+void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
+                                                khash_t(u32_tFlist) *ef)
 {
-  int f;
-  int nbs_on_other_rank = 0;
-  for(f=0; f<6; f++)
-    nbs_on_other_rank += amr_invalidate_nbinfo_of_nbs(elm, f, Keep_nbs_fnb);
-  return nbs_on_other_rank;
-}
+  ulong ei;
 
-/* Go over mesh->nbelm list and invalidate nbinfo for all my elms that
-   are nbs of any elm in mesh->nbelm. */
-void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh, int Keep_nbs_fnb)
-{
-  int ei;
+  /* make nnbinf0<0 but keep all fnb pointers */
+  amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh, 1);
+
+  /* go over nbelms */
   for(ei=0; ei < mesh->nnbelm; ei++)
   {
     tElm *elm = mesh->nbelm[ei];
-    amr_invalidate_nbinfo_of_all_nbs(elm, Keep_nbs_fnb);
+    int f, ni;
+
+    for(f=0; f<6; f++)
+      for(ni=0; ni<elm->nfnb[f]; ni++)
+      {
+        tElm *nb = elm->fnb[f][ni];
+        int nb_f;
+
+        if(!nb) continue; /* do nothing if there is no nb */
+
+        /* face of nb */
+        nb_f = amr_get_nbface(elm,f, nb);
+        if(nb_f<0) errorexit("nb_f not found");
+
+        amr_khmap_add_elm_forface(ef, nb, nb_f);
+      }
   }
 }
-
-
-
 
 /* Remove mesh->nbelm, make sure all nbinfo about it is deleted, and
    record what is missing in ef */
 void amr_remove_mesh_nbelm_ef(tMesh *mesh, int Keep_nbs_fnb,
                               khash_t(u32_tFlist) *ef)
 {
-  int ei;
+  /* record in ef, but keep all pointers */
+  amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(mesh, ef);
 
-  /* first make sure nobody has info about elms in nbelm */
-  amr_invalidate_nbinfo_of_mesh_nbelm_nbs(mesh, Keep_nbs_fnb);
-
-  for(ei=0; ei < mesh->nnbelm; ei++)
-  {
-    tElm *elm = mesh->nbelm[ei];
-    free_elm(elm);
-  }
-  free(mesh->nbelm);
-  mesh->nbelm  = NULL;
-  mesh->nnbelm = 0;
+  /* make sure nobody has info about elms in nbelm */
+  amr_remove_mesh_nbelm(mesh, Keep_nbs_fnb);
 }
 
-//////////////////////
+
 
 /****************************************************************************/
 

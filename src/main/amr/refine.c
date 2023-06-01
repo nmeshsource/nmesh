@@ -284,7 +284,7 @@ void set_children_nbinfo_ef(tElm *child0, tElm *parent,
     amr_set_intersibling_nbinfo_nnbinfo(child0);
 
     /* record about which child face we need info from which rank */
-    amr_khmap_add_children_forallparentfaces(ef, child0, parent);
+    amr_khmap_add_negchildren_forallparentfaces(ef, child0, parent);
   }
 }
 
