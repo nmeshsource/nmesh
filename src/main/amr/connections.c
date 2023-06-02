@@ -3083,11 +3083,6 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
   kh_destroy(u32, fnbranks);
 }
 
-
-
-
-
-
 /* Go over mesh->nbelm list, invalidate nbinfo for all my elms that
    are nbs of any elm in mesh->nbelm, and record them in ef */
 void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
