@@ -3126,7 +3126,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
           if(nbnb==elm) /* if it points back at elm we need to record it */
           {
             int is_missing;
-            ulong nb_lid = calc_elm_lid(nb); //FIXME: calc_elm_lid has a bug!!!
+            ulong nb_lid = calc_local_elm_id(nb);
             ulong key = Ind_n(elm_rk, nb_lid, nb_f,  key_n);
             kh_put(u64, rk_elm_f, key, &is_missing); /* record */
             /* if this is the 1st time we find this rank on this face, add elm */

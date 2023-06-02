@@ -1252,8 +1252,8 @@ ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh)
 int calc_node_lid(tNode *node)
 {
   tMesh *mesh = node->pat->mesh;
-  ulong nnodes = mesh->nmyelm;
   ulong size = nMPI_size();
+  ulong nnodes = mesh->eidlim[size-1];
   ulong npr2 = 2*nnodes/size + 1;
   ulong tmp = (Node_eid(node)) % npr2;
   int lid = tmp;
@@ -1262,18 +1262,25 @@ int calc_node_lid(tNode *node)
 }
 
 /* return a local elm id */
-ulong calc_elm_lid(tNode *node)
+ulong calc_elm_lid(tNode *elm)
 {
-  tMesh *mesh = node->pat->mesh;
-  ulong nnodes = mesh->nmyelm;
+  tMesh *mesh = elm->pat->mesh;
   ulong size = nMPI_size();
-  ulong npr2 = 2*nnodes/size + 1;
-  ulong tmp = (Node_eid(node)) % npr2;
+  ulong nelms = mesh->eidlim[size-1];
+  ulong npr2 = 2*nelms/size + 1;
+  ulong tmp = (Node_eid(elm)) % npr2;
   ulong lid = tmp;
 
   return lid;
 }
 
+/* return another local elm id */
+ulong calc_local_elm_id(tNode *elm)
+{
+  tMesh *mesh = elm->pat->mesh;
+  ulong nmyelms = mesh->nmyelm;
+  return (Node_eid(elm)) % nmyelms;
+}
 
 /**********************************************************************/
 /* storage for dat lists in the nodes */

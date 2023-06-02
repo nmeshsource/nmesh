@@ -457,6 +457,7 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3]);
 ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh);
 int calc_node_lid(tNode *node);
 ulong calc_elm_lid(tNode *node);
+ulong calc_local_elm_id(tNode *elm);
 void realloc_datvariables(tDat *dat, int nv_new);
 void realloc_meshvariables(tMesh *mesh, int nvdb_new);
 void enablevarcomp_innode(tNode *node, int i);
