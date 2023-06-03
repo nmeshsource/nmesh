@@ -120,7 +120,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
 int amr_invalidate_nbinfo_of_all_nbs(tElm *elm, int Keep_nbs_fnb);
 void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb);
 
-int amr_khmap_add_nb_ranks(tMesh *mesh, khash_t(u32_tNumOnFace) *nbranks);
+int amr_khmap_add_nb_ranks(tMesh *mesh, khash_t(u32_t2eploc) *nbranks);
 void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
                                      tElm *elm, int face);
 void amr_khmap_add_negelm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm);
