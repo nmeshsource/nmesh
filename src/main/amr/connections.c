@@ -2385,117 +2385,103 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     nMPI_Isend_Irecv_com(com, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
   }
 
+  /* MPI is still transferring stuff, but by now we have finished the
+     Sends and Recvs to exchange all elm eplocs about which we need info */
+
+
   /* wait for sends and recvs in com */
 //  nMPI_Waitall_com_send(com);
 //  nMPI_Waitall_com_recv(com);
 //  realloc_com_reqs(com, 0);
 
-  /* */
+  /* wait for each ref and then find nbs and put them into ef0_nbs array */
   rq=0;
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
-    khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
+    //khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
     ulong i;
     //ulong ns = kh_val(nbranks, ki).neplocs[0]; //num.of eplocs to send to rk
     ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
     //tEploc *sef = kh_val(nbranks, ki).eploc[0];
     tEploc *ref = kh_val(nbranks, ki).eploc[1];
 
-    ulong nef0[6];
     /* ef0_nbs is a large array, where we will store all nbs of all the
-       nef0[f] elms rank rk needs nb info about, for all faces f. Layout is:
-        ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
-                          |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
-                          ...                            sizeof(tEploc) bytes
-                  |nef0[5]|nnb0|nb_eploc[0...nnb0-1]|
-                          |nnb1|nb_eploc[0...nnb1-1]|
-                          ... */
+       nef_f elms rank rk needs nb info about, for all faces f. Layout is:
+        ef0_nbs = |nef_0|nnb0|nb_eploc[0...nnb0-1]|
+                        |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
+                        ...                            sizeof(tEploc) bytes
+                  |nef_5|nnb0|nb_eploc[0...nnb0-1]|
+                        |nnb1|nb_eploc[0...nnb1-1]|
+                        ... */
     tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
-    //tArray *ef0_nbs = alloc_array1d((1*sizeof(tEploc))/sizeof(double));
     ulong ef0_nbs_idx = 0; /* index of next entry to add */
     ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
-
-
-
-
-    //use:
-    //int nMPI_Wait_com_send(tCom *com, int rq)
-    //int nMPI_Wait_com_recv(tCom *com, int rq)
-
     /* process eplocs that others want to know about */
     nMPI_Wait_com_recv(com, rq); /* wait for request number rq */
-    // for ...
 
+    /* do work on ref array for request rq and find all nbs of all in ref */
+    for(i=0, f=0; f<6; f++)
+    {
+      union { tEploc eploc; ulong num; } eploc2ulong;
+      ulong nef, efi;
 
-        /* do work on ref array and find all nbs of all in ref */
-        for(i=0; i<nr; i++)
+      /* read nef */
+      eploc2ulong.eploc = ref[i];
+      nef = eploc2ulong.num;
+      i++;
+
+      /* put the number nef into ef0_nbs array */
+      memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                            &nef, sizeof(nef));
+      ef0_nbs_idx++;
+
+      for(efi=0; efi<nef; efi++)
+      {
+        struct list_head *pos1, *sav;
+        struct list_head fnb_head;
+        ulong nnb, j;
+        tElm *elmi = alloc_elm_of_eploc(mesh, &ref[i]);
+        i++;
+
+        /* put the nbs of elmi into fnb_head list */
+        INIT_LIST_HEAD(&fnb_head);
+        nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
+                                &fnb_head);
+
+        /* put the number nnb into ef0_nbs array */
+        memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                              &(nnb), sizeof(nnb));
+        ef0_nbs_idx++;
+
+        /* put the nb eplocs into ef0_nbs array */
+        j=0;
+        list_for_each_safe(pos1, sav, &fnb_head)
         {
-          tElm *elmi;
-          struct list_head *pos1, *sav;
-          struct list_head fnb_head;
-          union { tEploc eploc; ulong num; } eploc2ulong;
-
-          ulong j, nnb;
-
-          INIT_LIST_HEAD(&fnb_head);
-
-          /* read nef[f] */
-          eploc2ulong.eploc = ref[i];
-          nef[f] = eploc2ulong.num;
-
-          /* put in nef[f]*/
-
-          /* put the number nef0[f] into ef0_nbs array */
+          tGlist *elem = list_entry(pos1, tGlist, list);
+          tElm *nb = elem->entry;
+          /* put nb->eploc into ef0_nbs array */
           memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                            &(nef0[f]), sizeof(nef0[f]));
+                                nb->eploc, sizeof(tEploc));
           ef0_nbs_idx++;
+          j++;
 
-          elmi = alloc_elm_of_eploc(mesh, &ref[i]);
-
-          /* put the nbs of elmi into fnb_head list */
-          nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
-                                  &fnb_head);
-
-          /* put the number nnb into ef0_nbs array */
-          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                &(nnb), sizeof(nnb));
-          ef0_nbs_idx++;
-
-          /* get nb eploc into ef0_nbs array */
-          j=0;
-          list_for_each_safe(pos1, sav, &fnb_head)
-          {
-            tGlist *elem = list_entry(pos1, tGlist, list);
-            tElm *nb = elem->entry;
-            /* put nb->eploc into ef0_nbs array */
-            memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                  nb->eploc, sizeof(tEploc));
-            ef0_nbs_idx++;
-            j++;
-
-            /* once nb->eploc is in ef0_nbs, del elem with nb */
-            glist_elem_del(elem);
-          }
-          if(nnb!=j) errorexit("nnb!=j");
-
-          //if(elmname_is(elmi, "2_7") && f==2)
-          //{
-          //  PRF;printf(": rank%d rk=%d: ", rank, rk);
-          //  printeploc(elmi->eploc);
-          //  printf(": 2_7 f%d\n", f);
-          //  for(int ni=0; ni<nnb; ni++)
-          //    printeploc_s(ef0_nbs->eploc+ef0_nbs_idx-j+ni, " ");
-          //  printf("\n");
-          //}
-
-          /* now &fnb_head is freed, so just free the elmi */
-          free_elm(elmi);
+          /* once nb->eploc is in ef0_nbs, del elem with nb */
+          glist_elem_del(elem);
         }
-        free(ref);
+        if(nnb!=j) errorexit("nnb!=j");
 
+        /* now &fnb_head is freed, so just free the elmi */
+        free_elm(elmi);
+      }
+    } /* end loop over ref */
+    /* free ref rray we have recvd and processed */
+    free(ref);
 
+    /* send ef0_nbs to rank rk */
+    // we can send here
+    // but when do we free ef0_nbs???
 
 
 
@@ -2504,10 +2490,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   }
 
 
-
   /* work on my own elms, while MPI is busy */
   //...
 
+//  nMPI_Waitall_com_send(com);
 
 
   /* wait for sends and recvs in com */
