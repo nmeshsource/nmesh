@@ -2298,18 +2298,13 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
                                          khash_t(u32_t2eploc) *nbranks,
                                          khash_t(u32_tFlist) *ef)
 {
-  struct list_head *pos;
   struct list_head ef0_head[6]; // one list for each face
-  ulong nmyef0[6] = {0};        // total number of elms
-  int f, rk;
-  int rank=nMPI_rank();
-  int size=nMPI_size();
-  int rq;
+  int f, mywork;
+  //int rank=nMPI_rank();
+  //int size=nMPI_size();
+  int rq, rq2, srq;
   khiter_t ki;
-  tCom *com, *scom, *rcom;
-
-  /* init */
-  for(f=0; f<6; f++) { INIT_LIST_HEAD(&ef0_head[f]); nmyef0[f]=0; }
+  tCom *com, *com2, *scom;
 
 //////////////////////////////////////////////////////////////////
 
@@ -2335,8 +2330,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     /* tell how many eplocs (kh_val(nbranks, ki).ul[0]) I want to send to
        rank rk, and also find out how many it wants to send to
        me (kh_val(nbranks, ki).ul[1]) */
-    rq = append_buffers_to_com(scom, &(kh_val(nbranks, ki).neplocs[0]),1,
-                                     &(kh_val(nbranks, ki).neplocs[1]),1);
+    rq = append_buffers_to_com(com, &(kh_val(nbranks, ki).neplocs[0]),1,
+                                    &(kh_val(nbranks, ki).neplocs[1]),1);
     nMPI_Isend_Irecv_com(com, rq, nMPI_UNSIGNED_LONG, rk, 10,10, WORLD,WORLD);
     /* we save the numbers of eplocs in the val of nbranks */
   }
@@ -2344,7 +2339,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   /* wait for sends and recvs in com */
   nMPI_Waitall_com_send(com);
   nMPI_Waitall_com_recv(com);
-  realloc_com_reqs(com, 0);
+  free_com(com);
+
+  /* send/recv com to/from other ranks */
+  com = alloc_com(sizeof(ulong), 0);
 
   /* send elms that I want info about from the other ranks and
      recv elms that other ranks need info about */
@@ -2381,20 +2379,19 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     }
     if(i!=ns) errorexit("i!=ns");
 
-    rq = append_buffers_to_com(scom, sef,ns, ref,nr);
+    rq = append_buffers_to_com(com, sef,ns, ref,nr);
     nMPI_Isend_Irecv_com(com, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
   }
 
   /* MPI is still transferring stuff, but by now we have finished the
      Sends and Recvs to exchange all elm eplocs about which we need info */
 
+  /* more coms to exchange nb results with other ranks */
+  com2 = alloc_com(sizeof(ulong), 0);
+  scom = alloc_com(sizeof(tEploc), 1);
 
-  /* wait for sends and recvs in com */
-//  nMPI_Waitall_com_send(com);
-//  nMPI_Waitall_com_recv(com);
-//  realloc_com_reqs(com, 0);
-
-  /* wait for each ref and then find nbs and put them into ef0_nbs array */
+  /* wait for each ref and then find nbs and put them into ef0_nbs array,
+     and also send the number of entries (nmyEplocs) in ef0_nbs */
   rq=0;
   forkhiter(nbranks, ki)
   {
@@ -2402,8 +2399,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     //khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
     ulong i;
     //ulong ns = kh_val(nbranks, ki).neplocs[0]; //num.of eplocs to send to rk
-    ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
-    //tEploc *sef = kh_val(nbranks, ki).eploc[0];
+    //ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
+    tEploc *sef = kh_val(nbranks, ki).eploc[0];
     tEploc *ref = kh_val(nbranks, ki).eploc[1];
 
     /* ef0_nbs is a large array, where we will store all nbs of all the
@@ -2476,602 +2473,164 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
         free_elm(elmi);
       }
     } /* end loop over ref */
-    /* free ref rray we have recvd and processed */
+
+    /* save number of tEploc sized entries in ef0_nbs */
+    nmyEplocs = ef0_nbs_idx;
+
+    /* free ref array we have recvd and processed */
     free(ref);
+    /* wait for sef array and then free it as well */
+    nMPI_Wait_com_send(com, rq); /* wait for request number rq */
+    free(sef);
+    /* now we have space in kh_val(nbranks, ki).eploc[0] and
+       kh_val(nbranks, ki).eploc[1] */
 
-    /* send ef0_nbs to rank rk */
-    // we can send here
-    // but when do we free ef0_nbs???
+    /* send/recv nmyEplocs */
+    kh_val(nbranks, ki).neplocs[0] = nmyEplocs; /* reuse vals in nbranks */
+    rq2 = append_buffers_to_com(com2, &(kh_val(nbranks, ki).neplocs[0]),1,
+                                      &(kh_val(nbranks, ki).neplocs[1]),1);
+    nMPI_Isend_Irecv_com(com2, rq2, nMPI_UNSIGNED_LONG, rk, 30,30, WORLD,WORLD);
+    /* we save the numbers of eplocs in the val of nbranks */
 
-
-
+    /* send ef0_nbs */
+    srq = append_buffers_to_com(scom, ef0_nbs,nmyEplocs, NULL,0);
+    nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
     rq++;
   }
 
+  /* we are now done with all in com */
+  free_com(com);
 
-  /* work on my own elms, while MPI is busy */
-  //...
+  /* wait for sends and recvs in com2 */
+  nMPI_Waitall_com_send(com2);
+  nMPI_Waitall_com_recv(com2);
+  /* we are now done with all in com2 */
+  free_com(com2);
 
-//  nMPI_Waitall_com_send(com);
+  /* recv results about my nbs */
+  rq=0;
+  mywork=0;
+  forkhiter(nbranks, ki)
+  {
+    unsigned rk = kh_key(nbranks, ki);
+    //ulong i;
+
+    //if( (rk>rank) && (mywork==0) ) //this is in the correct order
+    if(mywork==0) // this does all mine first
+    {
+      /* work on my own elms, while MPI is busy */
+      //...
+      mywork = 1;
+    }
+    else
+    {
+      ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
+      tEploc *ef0_nbs = checked_calloc(nr, sizeof(ef0_nbs[0]));
+      /* ef0_nbs is a large array, where we have stored all nbs of all the
+         nef_f elms rank rk needs nb info about, for all faces f. Layout is:
+          ef0_nbs = |nef_0|nnb0|nb_eploc[0...nnb0-1]|
+                          |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
+                          ...                            sizeof(tEploc) bytes
+                    |nef_5|nnb0|nb_eploc[0...nnb0-1]|
+                          |nnb1|nb_eploc[0...nnb1-1]|
+                          ... */
+      //ulong ef0_nbs_idx = 0; /* index of next entry to add */
+      //ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
+
+      /* recv ef0_nbs from rk */
+      nMPI_Recv(ef0_nbs,nr, nMPIvars->TEPLOC, rk, 40);
+
+      /* add all in ef0_nbs to my elms as nbs */
+
+      /**********************************************/
+      /* read eplocs[r] to build nb info on rank rk */
+      /**********************************************/
+      {
+        {
+          ulong epi;
+          /* each ef0_nbs is a tEploc array, where we will store all nbs of
+             all the nef0[f] elms rank rk needs nb info about, for all faces f.
+             Layout is:
+             ef0_nbs = |nelms[0]|nnb0|nb_eploc[0...nnb0-1]|
+                                |nnb1|nb_eploc[0...nnb1-1]|
+                                ...
+                       |nelms[5]|nnb0|nb_eploc[0...nnb0-1]|
+                                |nnb1|nb_eploc[0...nnb1-1]|
+                                ... */
+          epi = 0;
+          for(f=0; f<6; f++)
+          {
+            union { tEploc e; ulong ul; } e2ul;
+            struct list_head *pos1;
+            ulong nelms, ei;
+
+            /* pos of 1st elm in ef0_head[f] list */
+            pos1 = ef0_head[f].next;
+
+            /* get number of elms nelms out of ef0_nbs */
+            e2ul.e = ef0_nbs[epi++];
+            nelms  = e2ul.ul;
+
+            //printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
+            //printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
+            //printeploc_s(&(ef0_nbs[epi-1]),"\n");
+
+            for(ei=0; ei<nelms; ei++)
+            {
+              tGlist *elem;
+              tElm *elm;
+              ulong nnb;
+
+              /* get elm from list ef0_head[f] */
+              elem = list_entry(pos1, tGlist, list);
+              elm  = elem->entry;
+              pos1 = pos1->next; /* go forward now, because we del below */
+
+              /* get number of nbs out of ef0_nbs */
+              e2ul.e = ef0_nbs[epi++];
+              nnb    = e2ul.ul;
+
+              //printeploc_s(elm->eploc, " ");
+              //printf("f%d r=%d ", f, r);
+              //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
+              //if(nnb) printeploc_s(&(ef0_nbs[epi]), " ...");
+              //printf("\n");
+
+              /* all nbs in ef0_nbs to var amr_elm_nbinfo */
+              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
+              epi += nnb;
+
+              /* cannot del elem from ef0_head[f] list here, because it is
+                 needed for every r */
+            }
+          } /* end for f */
+        }
+        /* now clear the 6 ef0_head[f] lists */
+        for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
+      } /* end func that builds nb-info from elocs[r] */
 
 
-  /* wait for sends and recvs in com */
-  nMPI_Waitall_com_send(com);
-  nMPI_Waitall_com_recv(com);
-  realloc_com_reqs(com, 0);
 
 
+      free(ef0_nbs);
+    }
+    rq++;
+  }
 
-
-
-
-
-
-
-  /* send/recv to/from other ranks */
-  scom = alloc_com(sizeof(ulong), 0);
-  rcom = alloc_com(sizeof(ulong), 0);
-
-
-
-
-
-
-
-
-  /* wait for recvs in rcom */
-  nMPI_Waitall_com_recv(rcom);
-  free_com(rcom);
+  /* wait for sends in scom */
+  nMPI_Waitall_com_send(scom);
+  /* we are now done with all in scom */
+  free_com(scom);
 
 
 
 ////////////////////////////////////////////////////////////////////////
 
-  /* send my lists to the other ranks */
-  for(rk=0; rk<size; rk++)
-  {
-    ulong nef0[6];
-    /* ef0_nbs is a large array, where we will store all nbs of all the
-       nef0[f] elms rank rk needs nb info about, for all faces f. Layout is:
-        ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
-                            |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
-                          ...                            sizeof(tEploc) bytes
-                  |nef0[5]|nnb0|nb_eploc[0...nnb0-1]|
-                          |nnb1|nb_eploc[0...nnb1-1]|
-                          ... */
-    tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
-    //tArray *ef0_nbs = alloc_array1d((1*sizeof(tEploc))/sizeof(double));
-    ulong ef0_nbs_idx = 0; /* index of next entry to add */
-    ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
-
-    /* rank rk copies his nmyef0 into nef0 */
-    if(rank == rk)
-      for(f=0; f<6; f++) nef0[f] = nmyef0[f];
-
-    /* rank rk sends his nef0[f] to all others, to tell how many elms he
-       wants to find face nbs of */
-    //printf("111111 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
-    nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
-    //printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
-
-    /* init ef0_nbs index counter */
-    ef0_nbs_idx = 0;
-
-    /* make list for each face and send them... */
-    for(f=0; f<6; f++)
-    {
-      /* put the number nef0[f] into ef0_nbs array */
-      memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                            &(nef0[f]), sizeof(nef0[f]));
-      ef0_nbs_idx++;
-
-      //printf("ADD nef0[f] int, next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
-      //printarray_eploc(ef0_nbs, 1);
-      //exit(16);
-
-      /* there is something to do only if nef0[f]>0 */
-      if(nef0[f])
-      {
-        // get &ef0_head[f] from rk into elmhead or eploc array ef0
-        //tElm0 *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
-        //hey maybe we should just send tEploc not tElm0!!!???
-        tEploc *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
-        struct list_head *pos0;
-        ulong i;
-
-        /* rank rk now fills the ef0 array */
-        if(rank == rk)
-        {
-          i=0;
-          list_for_each(pos0, &ef0_head[f])
-          {
-            tElm *elm = glist_entry(pos0);
-            //memcpy(&ef0[i], elm, sizeof(ef0[0]));
-            memcpy(&ef0[i], elm->eploc, sizeof(ef0[0]));
-            i++;
-          }
-          if(nef0[f]!=i) errorexit("nef0[f]!=i");
-        }
-
-        /* broadcast all elmheaders in ef0 from rank rk to all */
-        //nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
-        /* broadcast all eplocs in ef0 from rank rk to all */
-        nMPI_Bcast(ef0, nef0[f], nMPIvars->TEPLOC, rk);
-                               //^^^^^^^^^^^^^^^-is this right???
-
-        /* all ranks do work on ef0 array and find all nbs of all in ef0 */
-        for(i=0; i<nef0[f]; i++)
-        {
-          //tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
-          tElm *elmi = alloc_elm_of_eploc(mesh, &ef0[i]);
-          struct list_head *pos1, *sav;
-          struct list_head fnb_head;
-          ulong j, nnb;
-
-          INIT_LIST_HEAD(&fnb_head);
-
-          /* put the nbs of elmi into fnb_head list */
-          nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
-                                  &fnb_head);
-
-          /* put the number nnb into ef0_nbs array */
-          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                &(nnb), sizeof(nnb));
-          ef0_nbs_idx++;
-
-          /* get nb eploc into ef0_nbs array */
-          j=0;
-          list_for_each_safe(pos1, sav, &fnb_head)
-          {
-            tGlist *elem = list_entry(pos1, tGlist, list);
-            tElm *nb = elem->entry;
-            /* put nb->eploc into ef0_nbs array */
-            memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                  nb->eploc, sizeof(tEploc));
-            ef0_nbs_idx++;
-            j++;
-
-            /* once nb->eploc is in ef0_nbs, del elem with nb */
-            glist_elem_del(elem);
-          }
-          if(nnb!=j) errorexit("nnb!=j");
-
-          //if(elmname_is(elmi, "2_7") && f==2)
-          //{
-          //  PRF;printf(": rank%d rk=%d: ", rank, rk);
-          //  printeploc(elmi->eploc);
-          //  printf(": 2_7 f%d\n", f);
-          //  for(int ni=0; ni<nnb; ni++)
-          //    printeploc_s(ef0_nbs->eploc+ef0_nbs_idx-j+ni, " ");
-          //  printf("\n");
-          //}
-
-          /* now &fnb_head is freed, so just free the elmi */
-          free_elm(elmi);
-        }
-        free(ef0);
-      }
-    } /* end loop over face f */
-
-    /* number of tEploc sized entries in ef0_nbs */
-    nmyEplocs = ef0_nbs_idx;
-    //printf("nmyEplocs=%lu\n", nmyEplocs);
-    //printarray_eploc(ef0_nbs, 1);
-
-    if(rank != rk) /* send to rank rk */
-    {
-      /* first send number of tEploc sized entries in ef0_nbs */
-      nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
-
-      /* now send contents of ef0_nbs */
-      nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
-
-    }
-    else /* rank=rk: i.e. I am rank rk and will revc from all others */
-    {
-      ulong *N_eplocs = checked_calloc(size, sizeof(N_eplocs[0]));
-      tEploc **eplocs;
-      int r;
-
-      /* revc number of tEploc sized entries from each rank r */
-      for(r=0; r<size; r++)
-      {
-        if(r != rk)
-          nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000);
-        else
-          N_eplocs[r] = nmyEplocs;
-      }
-
-      /* make recv buffers for data that is recvd */
-      eplocs = rows_calloc(size, N_eplocs, sizeof(eplocs[0][0]));
-      /* but rank rk does not need a recv buffer, because it has all
-         in ef0_nbs->d already, so we use that here */
-      free(eplocs[rk]);
-      /* transfer ef0_nbs->d from ef0_nbs to eplocs[rk] */
-      eplocs[rk] = ef0_nbs->eploc; //eplocs[rk] is in my tArray ef0_nbs
-      ef0_nbs->d_nofree=1;
-      free_array(ef0_nbs);
-      ef0_nbs = alloc_array1d(1); /* dummy that will be freed below */
-      ef0_nbs_idx = 0;
-
-      /* revc contents of ef0_nbs from each rank r */
-      for(r=0; r<size; r++)
-      {
-        if(r != rk)
-          nMPI_Recv(eplocs[r], N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
-        /* Note: eplocs[rk] already has what was in ef0_nbs->d before */
-      }
-
-
-      /**********************************************/
-      /* read eplocs[r] to build nb info on rank rk */
-      /**********************************************/
-      {
-        for(r=0; r<size; r++)
-        {
-          ulong epi;
-          /* each eplocs[r] is a tEploc array, where we will store all nbs of
-             all the nef0[f] elms rank rk needs nb info about, for all faces f.
-             Layout is:
-             eplocs[r] = |nelms[0]|nnb0|nb_eploc[0...nnb0-1]|
-                                  |nnb1|nb_eploc[0...nnb1-1]|
-                                  ...
-                         |nelms[5]|nnb0|nb_eploc[0...nnb0-1]|
-                                  |nnb1|nb_eploc[0...nnb1-1]|
-                                  ... */
-          epi = 0;
-          for(f=0; f<6; f++)
-          {
-            union { tEploc e; ulong ul; } e2ul;
-            struct list_head *pos1;
-            ulong nelms, ei;
-
-            /* pos of 1st elm in ef0_head[f] list */
-            pos1 = ef0_head[f].next;
-
-            /* get number of elms nelms out of eplocs[r] */
-            e2ul.e = eplocs[r][epi++];
-            nelms  = e2ul.ul;
-
-            //printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
-            //printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
-            //printeploc_s(&(eplocs[r][epi-1]),"\n");
-
-            for(ei=0; ei<nelms; ei++)
-            {
-              tGlist *elem;
-              tElm *elm;
-              ulong nnb;
-
-              /* get elm from list ef0_head[f] */
-              elem = list_entry(pos1, tGlist, list);
-              elm  = elem->entry;
-              pos1 = pos1->next; /* go forward now, because we del below */
-
-              /* get number of nbs out of eplocs[r] */
-              e2ul.e = eplocs[r][epi++];
-              nnb    = e2ul.ul;
-
-              //printeploc_s(elm->eploc, " ");
-              //printf("f%d r=%d ", f, r);
-              //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
-              //if(nnb) printeploc_s(&(eplocs[r][epi]), " ...");
-              //printf("\n");
-
-              /* all nbs in eplocs[r] to var amr_elm_nbinfo */
-              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(eplocs[r][epi]));
-              epi += nnb;
-
-              /* cannot del elem from ef0_head[f] list here, because it is
-                 needed for every r */
-            }
-          } /* end for f */
-        }
-        /* now clear the 6 ef0_head[f] lists */
-        for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
-      } /* end func that builds nb-info from elocs[r] */
-
-      /* the eplocs has been all read now, so free it */
-      rows_free(eplocs, size);
-      free(N_eplocs);
-    }
-
-    /* we could reuse the large tArray, but for now we just free it */
-    free_array(ef0_nbs);
-  } /* end loop over rk */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /* send my lists to the other ranks */
-  for(rk=0; rk<size; rk++)
-  {
-    ulong nef0[6];
-    /* ef0_nbs is a large array, where we will store all nbs of all the
-       nef0[f] elms rank rk needs nb info about, for all faces f. Layout is:
-        ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
-                            |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
-                          ...                            sizeof(tEploc) bytes
-                  |nef0[5]|nnb0|nb_eploc[0...nnb0-1]|
-                          |nnb1|nb_eploc[0...nnb1-1]|
-                          ... */
-    tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
-    //tArray *ef0_nbs = alloc_array1d((1*sizeof(tEploc))/sizeof(double));
-    ulong ef0_nbs_idx = 0; /* index of next entry to add */
-    ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
-
-    //printf("YYYYYYY rank%d nmyef0[0]=%lu\n", rank, nmyef0[0]);
-
-    /* rank rk copies his nmyef0 into nef0 */
-    if(rank == rk)
-      for(f=0; f<6; f++) nef0[f] = nmyef0[f];
-
-    /* rank rk sends his nef0[f] to all others, to tell how many elms he
-       wants to find face nbs of */
-    //printf("111111 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
-    nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
-    //printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
-
-    /* init ef0_nbs index counter */
-    ef0_nbs_idx = 0;
-
-    /* make list for each face and send them... */
-    for(f=0; f<6; f++)
-    {
-      /* put the number nef0[f] into ef0_nbs array */
-      memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                            &(nef0[f]), sizeof(nef0[f]));
-      ef0_nbs_idx++;
-
-      //printf("ADD nef0[f] int, next ef0_nbs_idx=%lu\n", ef0_nbs_idx);
-      //printarray_eploc(ef0_nbs, 1);
-      //exit(16);
-
-      /* there is something to do only if nef0[f]>0 */
-      if(nef0[f])
-      {
-        // get &ef0_head[f] from rk into elmhead or eploc array ef0
-        //tElm0 *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
-        //hey maybe we should just send tEploc not tElm0!!!???
-        tEploc *ef0 = checked_calloc(nef0[f], sizeof(ef0[0]));
-        struct list_head *pos0;
-        ulong i;
-
-        /* rank rk now fills the ef0 array */
-        if(rank == rk)
-        {
-          i=0;
-          list_for_each(pos0, &ef0_head[f])
-          {
-            tElm *elm = glist_entry(pos0);
-            //memcpy(&ef0[i], elm, sizeof(ef0[0]));
-            memcpy(&ef0[i], elm->eploc, sizeof(ef0[0]));
-            i++;
-          }
-          if(nef0[f]!=i) errorexit("nef0[f]!=i");
-        }
-
-        /* broadcast all elmheaders in ef0 from rank rk to all */
-        //nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
-        /* broadcast all eplocs in ef0 from rank rk to all */
-        nMPI_Bcast(ef0, nef0[f], nMPIvars->TEPLOC, rk);
-                               //^^^^^^^^^^^^^^^-is this right???
-
-        /* all ranks do work on ef0 array and find all nbs of all in ef0 */
-        for(i=0; i<nef0[f]; i++)
-        {
-          //tElm *elmi = alloc_elm_of_elmheader(mesh, &ef0[i]);
-          tElm *elmi = alloc_elm_of_eploc(mesh, &ef0[i]);
-          struct list_head *pos1, *sav;
-          struct list_head fnb_head;
-          ulong j, nnb;
-
-          INIT_LIST_HEAD(&fnb_head);
-
-          /* put the nbs of elmi into fnb_head list */
-          nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
-                                  &fnb_head);
-
-          /* put the number nnb into ef0_nbs array */
-          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                &(nnb), sizeof(nnb));
-          ef0_nbs_idx++;
-
-          /* get nb eploc into ef0_nbs array */
-          j=0;
-          list_for_each_safe(pos1, sav, &fnb_head)
-          {
-            tGlist *elem = list_entry(pos1, tGlist, list);
-            tElm *nb = elem->entry;
-            /* put nb->eploc into ef0_nbs array */
-            memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
-                                  nb->eploc, sizeof(tEploc));
-            ef0_nbs_idx++;
-            j++;
-
-            /* once nb->eploc is in ef0_nbs, del elem with nb */
-            glist_elem_del(elem);
-          }
-          if(nnb!=j) errorexit("nnb!=j");
-
-          //if(elmname_is(elmi, "2_7") && f==2)
-          //{
-          //  PRF;printf(": rank%d rk=%d: ", rank, rk);
-          //  printeploc(elmi->eploc);
-          //  printf(": 2_7 f%d\n", f);
-          //  for(int ni=0; ni<nnb; ni++)
-          //    printeploc_s(ef0_nbs->eploc+ef0_nbs_idx-j+ni, " ");
-          //  printf("\n");
-          //}
-
-          /* now &fnb_head is freed, so just free the elmi */
-          free_elm(elmi);
-        }
-        free(ef0);
-      }
-    } /* end loop over face f */
-
-    /* number of tEploc sized entries in ef0_nbs */
-    nmyEplocs = ef0_nbs_idx;
-    //printf("nmyEplocs=%lu\n", nmyEplocs);
-    //printarray_eploc(ef0_nbs, 1);
-
-    if(rank != rk) /* send to rank rk */
-    {
-      /* first send number of tEploc sized entries in ef0_nbs */
-      nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
-
-      /* now send contents of ef0_nbs */
-      nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
-
-    }
-    else /* rank=rk: i.e. I am rank rk and will revc from all others */
-    {
-      ulong *N_eplocs = checked_calloc(size, sizeof(N_eplocs[0]));
-      tEploc **eplocs;
-      int r;
-
-      /* revc number of tEploc sized entries from each rank r */
-      for(r=0; r<size; r++)
-      {
-        if(r != rk)
-          nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000);
-        else
-          N_eplocs[r] = nmyEplocs;
-      }
-
-      /* make recv buffers for data that is recvd */
-      eplocs = rows_calloc(size, N_eplocs, sizeof(eplocs[0][0]));
-      /* but rank rk does not need a recv buffer, because it has all
-         in ef0_nbs->d already, so we use that here */
-      free(eplocs[rk]);
-      /* transfer ef0_nbs->d from ef0_nbs to eplocs[rk] */
-      eplocs[rk] = ef0_nbs->eploc; //eplocs[rk] is in my tArray ef0_nbs
-      ef0_nbs->d_nofree=1;
-      free_array(ef0_nbs);
-      ef0_nbs = alloc_array1d(1); /* dummy that will be freed below */
-      ef0_nbs_idx = 0;
-
-      /* revc contents of ef0_nbs from each rank r */
-      for(r=0; r<size; r++)
-      {
-        if(r != rk)
-          nMPI_Recv(eplocs[r], N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
-        /* Note: eplocs[rk] already has what was in ef0_nbs->d before */
-      }
-
-
-      /**********************************************/
-      /* read eplocs[r] to build nb info on rank rk */
-      /**********************************************/
-      {
-        for(r=0; r<size; r++)
-        {
-          ulong epi;
-          /* each eplocs[r] is a tEploc array, where we will store all nbs of
-             all the nef0[f] elms rank rk needs nb info about, for all faces f.
-             Layout is:
-             eplocs[r] = |nelms[0]|nnb0|nb_eploc[0...nnb0-1]|
-                                  |nnb1|nb_eploc[0...nnb1-1]|
-                                  ...
-                         |nelms[5]|nnb0|nb_eploc[0...nnb0-1]|
-                                  |nnb1|nb_eploc[0...nnb1-1]|
-                                  ... */
-          epi = 0;
-          for(f=0; f<6; f++)
-          {
-            union { tEploc e; ulong ul; } e2ul;
-            struct list_head *pos1;
-            ulong nelms, ei;
-
-            /* pos of 1st elm in ef0_head[f] list */
-            pos1 = ef0_head[f].next;
-
-            /* get number of elms nelms out of eplocs[r] */
-            e2ul.e = eplocs[r][epi++];
-            nelms  = e2ul.ul;
-
-            //printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
-            //printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
-            //printeploc_s(&(eplocs[r][epi-1]),"\n");
-
-            for(ei=0; ei<nelms; ei++)
-            {
-              tGlist *elem;
-              tElm *elm;
-              ulong nnb;
-
-              /* get elm from list ef0_head[f] */
-              elem = list_entry(pos1, tGlist, list);
-              elm  = elem->entry;
-              pos1 = pos1->next; /* go forward now, because we del below */
-
-              /* get number of nbs out of eplocs[r] */
-              e2ul.e = eplocs[r][epi++];
-              nnb    = e2ul.ul;
-
-              //printeploc_s(elm->eploc, " ");
-              //printf("f%d r=%d ", f, r);
-              //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
-              //if(nnb) printeploc_s(&(eplocs[r][epi]), " ...");
-              //printf("\n");
-
-              /* all nbs in eplocs[r] to var amr_elm_nbinfo */
-              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(eplocs[r][epi]));
-              epi += nnb;
-
-              /* cannot del elem from ef0_head[f] list here, because it is
-                 needed for every r */
-            }
-          } /* end for f */
-        }
-        /* now clear the 6 ef0_head[f] lists */
-        for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
-      } /* end func that builds nb-info from elocs[r] */
-
-      /* the eplocs has been all read now, so free it */
-      rows_free(eplocs, size);
-      free(N_eplocs);
-    }
-
-    /* we could reuse the large tArray, but for now we just free it */
-    free_array(ef0_nbs);
-  } /* end loop over rk */
-
 
   /* finally set nnbinfo according to the new nb-info we have now,
      but we keep them negative for now */
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 0);
-
-  free_com(rcom);
-  free_com(scom);
-
-  free_com(com);
 
   return 0;
 }
