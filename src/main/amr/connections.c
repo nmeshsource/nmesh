@@ -2298,7 +2298,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
                                          khash_t(u32_t2eploc) *nbranks,
                                          khash_t(u32_tFlist) *ef)
 {
-  struct list_head ef0_head[6]; // one list for each face
   int f, mywork;
   //int rank=nMPI_rank();
   //int size=nMPI_size();
@@ -2514,7 +2513,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
-    //ulong i;
+    khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
 
     //if( (rk>rank) && (mywork==0) ) //this is in the correct order
     if(mywork==0) // this does all mine first
@@ -2538,14 +2537,17 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
       //ulong ef0_nbs_idx = 0; /* index of next entry to add */
       //ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
+     if(ki2!=kh_end(ef)) /* if rk is in ef */
+       if(nr==0) errorexit("what???");
+
       /* recv ef0_nbs from rk */
       nMPI_Recv(ef0_nbs,nr, nMPIvars->TEPLOC, rk, 40);
 
       /* add all in ef0_nbs to my elms as nbs */
 
-      /**********************************************/
-      /* read eplocs[r] to build nb info on rank rk */
-      /**********************************************/
+      /***************************************************/
+      /* read ef0_nbs to build info about nbs on rank rk */
+      /***************************************************/
       {
         {
           ulong epi;
@@ -2565,16 +2567,12 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
             struct list_head *pos1;
             ulong nelms, ei;
 
-            /* pos of 1st elm in ef0_head[f] list */
-            pos1 = ef0_head[f].next;
+            /* pos of 1st elm in ef list */
+            pos1 = kh_val(ef, ki2).flist[f].next;
 
             /* get number of elms nelms out of ef0_nbs */
             e2ul.e = ef0_nbs[epi++];
             nelms  = e2ul.ul;
-
-            //printf("f=%d ef0_head[%d] count=%lu\n", f,f, list_count_nodes(&ef0_head[f]));
-            //printf("f=%d: epi-1=%lu nelms=%lu ", f, epi-1, nelms);
-            //printeploc_s(&(ef0_nbs[epi-1]),"\n");
 
             for(ei=0; ei<nelms; ei++)
             {
@@ -2582,7 +2580,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
               tElm *elm;
               ulong nnb;
 
-              /* get elm from list ef0_head[f] */
+              /* get elm at pos1 */
               elem = list_entry(pos1, tGlist, list);
               elm  = elem->entry;
               pos1 = pos1->next; /* go forward now, because we del below */
@@ -2601,17 +2599,12 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
               amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
               epi += nnb;
 
-              /* cannot del elem from ef0_head[f] list here, because it is
-                 needed for every r */
+              /* NOTE: someone has to clear the 6 kh_val(ef, ki2).flist[f] lists */
+              //for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
             }
           } /* end for f */
         }
-        /* now clear the 6 ef0_head[f] lists */
-        for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
-      } /* end func that builds nb-info from elocs[r] */
-
-
-
+      } /* end func that builds nb-info from ef0_nbs */
 
       free(ef0_nbs);
     }
