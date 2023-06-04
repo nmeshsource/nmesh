@@ -2348,13 +2348,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
     ulong i;
     ulong *ns = get_com_send_buf(com0, rq0); //num.of eplocs to send to rk
-    //kh_val(nbranks, ki).neplocs[0]; //num.of eplocs to send to rk
     ulong *nr = get_com_recv_buf(com0, rq0); //num.of eplocs to recv from rk
-    ///kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
     tEploc *sef = checked_calloc(ns[0], sizeof(sef[0]));
     tEploc *ref = checked_calloc(nr[0], sizeof(ref[0]));
-    //kh_val(nbranks, ki).eploc[0] = sef;
-    //kh_val(nbranks, ki).eploc[1] = ref;
 
     /* now fill the sef array, i is index into sef */
     for(i=0, f=0; f<6; f++)
@@ -2477,7 +2473,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     /* save number of tEploc sized entries in ef0_nbs */
     nsE[0] = ef0_nbs_idx;
 
-    /* wait for sef array and then free it as well */
+    /* wait for sef array */
     nMPI_Wait_com_send(com1, rq); /* wait for request number rq */
 
     /* send/recv my nsE/nrE */
