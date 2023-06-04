@@ -2301,14 +2301,14 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   int f, mywork;
   //int rank=nMPI_rank();
   //int size=nMPI_size();
-  int rq, rq2, srq;
+  int rq0, rq, rq2, srq;
   khiter_t ki;
-  tCom *com, *com2, *scom;
+  tCom *com0, *com, *com2, *scom;
 
 //////////////////////////////////////////////////////////////////
 
   /* send/recv com to/from other ranks */
-  com = alloc_com(sizeof(ulong), 0);
+  com0 = alloc_com(sizeof(ulong), 1);
 
   /* send number of elms that I want info about from the other ranks and
      recv number of elms that other ranks need info about */
@@ -2316,46 +2316,48 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   {
     unsigned rk = kh_key(nbranks, ki);
     khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
-    ulong ns;
+    ulong *ns = checked_calloc(1, sizeof(ns[0]));
+    ulong *nr = checked_calloc(1, sizeof(nr[0]));
 
     /* count how many are in ef for rank rk */
-    ns = 0;
+    ns[0] = 0;
     if(ki2!=kh_end(ef)) /* if rk is in ef count */
       for(f=0; f<6; f++)
-        ns += 1 + list_count_nodes(&(kh_val(ef, ki2).flist[f]));
+        ns[0] += 1 + list_count_nodes(&(kh_val(ef, ki2).flist[f]));
         /* we add 1 to also send the number of elplos on each face */
-    kh_val(nbranks, ki).neplocs[0] = ns;
+    //kh_val(nbranks, ki).neplocs[0] = ns;
 
     /* tell how many eplocs (kh_val(nbranks, ki).ul[0]) I want to send to
        rank rk, and also find out how many it wants to send to
        me (kh_val(nbranks, ki).ul[1]) */
-    rq = append_buffers_to_com(com, &(kh_val(nbranks, ki).neplocs[0]),1,
-                                    &(kh_val(nbranks, ki).neplocs[1]),1);
-    nMPI_Isend_Irecv_com(com, rq, nMPI_UNSIGNED_LONG, rk, 10,10, WORLD,WORLD);
+    rq = append_buffers_to_com(com0, ns,1, nr,1);
+    nMPI_Isend_Irecv_com(com0, rq, nMPI_UNSIGNED_LONG, rk, 10,10, WORLD,WORLD);
     /* we save the numbers of eplocs in the val of nbranks */
   }
 
-  /* wait for sends and recvs in com */
-  nMPI_Waitall_com_send(com);
-  nMPI_Waitall_com_recv(com);
-  free_com(com);
+  /* wait for sends and recvs in com0 */
+  nMPI_Waitall_com_send(com0);
+  nMPI_Waitall_com_recv(com0);
 
   /* send/recv com to/from other ranks */
-  com = alloc_com(sizeof(ulong), 0);
+  com = alloc_com(sizeof(ulong), 1);
 
   /* send elms that I want info about from the other ranks and
      recv elms that other ranks need info about */
+  rq0=0;
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
     khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
     ulong i;
-    ulong ns = kh_val(nbranks, ki).neplocs[0]; //num.of eplocs to send to rk
-    ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
-    tEploc *sef = checked_calloc(ns, sizeof(sef[0]));
-    tEploc *ref = checked_calloc(nr, sizeof(ref[0]));
-    kh_val(nbranks, ki).eploc[0] = sef;
-    kh_val(nbranks, ki).eploc[1] = ref;
+    ulong *ns = get_com_send_buf(com0, rq0); //num.of eplocs to send to rk
+    //kh_val(nbranks, ki).neplocs[0]; //num.of eplocs to send to rk
+    ulong *nr = get_com_recv_buf(com0, rq0); //num.of eplocs to recv from rk
+    ///kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
+    tEploc *sef = checked_calloc(ns[0], sizeof(sef[0]));
+    tEploc *ref = checked_calloc(nr[0], sizeof(ref[0]));
+    //kh_val(nbranks, ki).eploc[0] = sef;
+    //kh_val(nbranks, ki).eploc[1] = ref;
 
     /* now fill the sef array, i is index into sef */
     for(i=0, f=0; f<6; f++)
@@ -2380,6 +2382,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 
     rq = append_buffers_to_com(com, sef,ns, ref,nr);
     nMPI_Isend_Irecv_com(com, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
+
+    rq0++;
   }
 
   /* MPI is still transferring stuff, but by now we have finished the
@@ -2397,10 +2401,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     unsigned rk = kh_key(nbranks, ki);
     //khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
     ulong i;
-    //ulong ns = kh_val(nbranks, ki).neplocs[0]; //num.of eplocs to send to rk
-    //ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
-    tEploc *sef = kh_val(nbranks, ki).eploc[0];
-    tEploc *ref = kh_val(nbranks, ki).eploc[1];
+    tEploc *sef = get_com_send_buf(com, rq);
+    tEploc *ref = get_com_recv_buf(com, rq);
 
     /* ef0_nbs is a large array, where we will store all nbs of all the
        nef_f elms rank rk needs nb info about, for all faces f. Layout is:
@@ -2412,7 +2414,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
                         ... */
     tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
     ulong ef0_nbs_idx = 0; /* index of next entry to add */
-    ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
+    /* number of tEploc sized entries in ef0_nbs */
+    ulong *nsE = checked_calloc(1, sizeof(nsE[0]));
+    ulong *nrE = checked_calloc(1, sizeof(nrE[0]));
 
     /* process eplocs that others want to know about */
     nMPI_Wait_com_recv(com, rq); /* wait for request number rq */
@@ -2474,38 +2478,25 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     } /* end loop over ref */
 
     /* save number of tEploc sized entries in ef0_nbs */
-    nmyEplocs = ef0_nbs_idx;
+    nsE[0] = ef0_nbs_idx;
 
-    /* free ref array we have recvd and processed */
-    free(ref);
     /* wait for sef array and then free it as well */
     nMPI_Wait_com_send(com, rq); /* wait for request number rq */
-    free(sef);
-    /* now we have space in kh_val(nbranks, ki).eploc[0] and
-       kh_val(nbranks, ki).eploc[1] */
 
-    /* send/recv nmyEplocs */
-    kh_val(nbranks, ki).neplocs[0] = nmyEplocs; /* reuse vals in nbranks */
-    rq2 = append_buffers_to_com(com2, &(kh_val(nbranks, ki).neplocs[0]),1,
-                                      &(kh_val(nbranks, ki).neplocs[1]),1);
+    /* send/recv my nsE/nrE */
+    rq2 = append_buffers_to_com(com2, nsE,1, nrE,1);
     nMPI_Isend_Irecv_com(com2, rq2, nMPI_UNSIGNED_LONG, rk, 30,30, WORLD,WORLD);
-    /* we save the numbers of eplocs in the val of nbranks */
 
     /* send ef0_nbs */
-    srq = append_buffers_to_com(scom, ef0_nbs,nmyEplocs, NULL,0);
+    srq = append_buffers_to_com(scom, ef0_nbs,nsE[0], NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
     rq++;
   }
 
-  /* we are now done with all in com */
+  /* we are now done with all in com0 and com */
   free_com(com);
-
-  /* wait for sends and recvs in com2 */
-  nMPI_Waitall_com_send(com2);
-  nMPI_Waitall_com_recv(com2);
-  /* we are now done with all in com2 */
-  free_com(com2);
+  free_com(com0);
 
   /* recv results about my nbs */
   rq=0;
@@ -2522,9 +2513,11 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
       //...
       mywork = 1;
     }
-    else
+
+    nMPI_Wait_com_recv(com2, rq); /* wait for request number rq */
+
     {
-      ulong nr = kh_val(nbranks, ki).neplocs[1]; //num.of eplocs to recv from rk
+      ulong nr = get_com_recv_buf(com2, rq); //num.of eplocs to recv from rk
       tEploc *ef0_nbs = checked_calloc(nr, sizeof(ef0_nbs[0]));
       /* ef0_nbs is a large array, where we have stored all nbs of all the
          nef_f elms rank rk needs nb info about, for all faces f. Layout is:
@@ -2542,6 +2535,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 
       /* recv ef0_nbs from rk */
       nMPI_Recv(ef0_nbs,nr, nMPIvars->TEPLOC, rk, 40);
+      //FIXME: can we pair Isend with Recv???
 
       /* add all in ef0_nbs to my elms as nbs */
 
@@ -2610,6 +2604,12 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     }
     rq++;
   }
+
+  /* wait for sends in com2 */
+  nMPI_Waitall_com_send(com2);
+
+  /* we are now done with all in com2 */
+  free_com(com2);
 
   /* wait for sends in scom */
   nMPI_Waitall_com_send(scom);
