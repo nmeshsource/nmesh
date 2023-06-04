@@ -2328,7 +2328,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     ns = 0;
     if(ki2!=kh_end(ef)) /* if rk is in ef count */
       for(f=0; f<6; f++)
-        ns += list_count_nodes(&(kh_val(ef, ki2).flist[f]));
+        ns += 1 + list_count_nodes(&(kh_val(ef, ki2).flist[f]));
+        /* we add 1 to also send the number of elplos on each face */
     kh_val(nbranks, ki).neplocs[0] = ns;
 
     /* tell how many eplocs (kh_val(nbranks, ki).ul[0]) I want to send to
@@ -2362,9 +2363,15 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     /* now fill the sef array, i is index into sef */
     for(i=0, f=0; f<6; f++)
     {
+      ulong num;
       struct list_head *pos0;
 
-      /* fill on face f */
+      /* put in number on face f */
+      num = list_count_nodes(&(kh_val(ef, ki2).flist[f]));
+      memcpy(&sef[i], &num, sizeof(num));
+      i++;
+
+      /* fill sef on face f */
       list_for_each(pos0, &(kh_val(ef, ki2).flist[f]))
       {
         tElm *elm = glist_entry(pos0);
@@ -2372,6 +2379,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
         i++;
       }
     }
+    if(i!=ns) errorexit("i!=ns");
 
     rq = append_buffers_to_com(scom, sef,ns, ref,nr);
     nMPI_Isend_Irecv_com(com, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
@@ -2382,9 +2390,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 //  nMPI_Waitall_com_recv(com);
 //  realloc_com_reqs(com, 0);
 
-
-  /* send elms that I want info about from the other ranks and
-     recv elms that other ranks need info about */
+  /* */
   rq=0;
   forkhiter(nbranks, ki)
   {
@@ -2396,20 +2402,11 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     //tEploc *sef = kh_val(nbranks, ki).eploc[0];
     tEploc *ref = kh_val(nbranks, ki).eploc[1];
 
-    //use:
-    //int nMPI_Wait_com_send(tCom *com, int rq)
-    //int nMPI_Wait_com_recv(tCom *com, int rq)
-
-    /* process eplocs that others want to know about */
-    nMPI_Wait_com_recv(com, rq); /* wait for request number rq */
-    // for ...
-
-
     ulong nef0[6];
     /* ef0_nbs is a large array, where we will store all nbs of all the
        nef0[f] elms rank rk needs nb info about, for all faces f. Layout is:
         ef0_nbs = |nef0[0]|nnb0|nb_eploc[0...nnb0-1]|
-                            |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
+                          |nnb1|nb_eploc[0...nnb1-1]| <--all entries have
                           ...                            sizeof(tEploc) bytes
                   |nef0[5]|nnb0|nb_eploc[0...nnb0-1]|
                           |nnb1|nb_eploc[0...nnb1-1]|
@@ -2421,16 +2418,41 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 
 
 
-        /* all ranks do work on ref array and find all nbs of all in ref */
+
+
+    //use:
+    //int nMPI_Wait_com_send(tCom *com, int rq)
+    //int nMPI_Wait_com_recv(tCom *com, int rq)
+
+    /* process eplocs that others want to know about */
+    nMPI_Wait_com_recv(com, rq); /* wait for request number rq */
+    // for ...
+
+
+        /* do work on ref array and find all nbs of all in ref */
         for(i=0; i<nr; i++)
         {
-          //tElm *elmi = alloc_elm_of_elmheader(mesh, &ref[i]);
-          tElm *elmi = alloc_elm_of_eploc(mesh, &ref[i]);
+          tElm *elmi;
           struct list_head *pos1, *sav;
           struct list_head fnb_head;
+          union { tEploc eploc; ulong num; } eploc2ulong;
+
           ulong j, nnb;
 
           INIT_LIST_HEAD(&fnb_head);
+
+          /* read nef[f] */
+          eploc2ulong.eploc = ref[i];
+          nef[f] = eploc2ulong.num;
+
+          /* put in nef[f]*/
+
+          /* put the number nef0[f] into ef0_nbs array */
+          memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
+                            &(nef0[f]), sizeof(nef0[f]));
+          ef0_nbs_idx++;
+
+          elmi = alloc_elm_of_eploc(mesh, &ref[i]);
 
           /* put the nbs of elmi into fnb_head list */
           nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
