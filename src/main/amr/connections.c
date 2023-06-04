@@ -2378,9 +2378,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
         i++;
       }
     }
-    if(i!=ns) errorexit("i!=ns");
+    if(i!=ns[0]) errorexit("i!=ns");
 
-    rq = append_buffers_to_com(com, sef,ns, ref,nr);
+    rq = append_buffers_to_com(com, sef,ns[0], ref,nr[0]);
     nMPI_Isend_Irecv_com(com, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
 
     rq0++;
@@ -2517,8 +2517,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     nMPI_Wait_com_recv(com2, rq); /* wait for request number rq */
 
     {
-      ulong nr = get_com_recv_buf(com2, rq); //num.of eplocs to recv from rk
-      tEploc *ef0_nbs = checked_calloc(nr, sizeof(ef0_nbs[0]));
+      ulong *nr = get_com_recv_buf(com2, rq); //num.of eplocs to recv from rk
+      tEploc *ef0_nbs = checked_calloc(nr[0], sizeof(ef0_nbs[0]));
       /* ef0_nbs is a large array, where we have stored all nbs of all the
          nef_f elms rank rk needs nb info about, for all faces f. Layout is:
           ef0_nbs = |nef_0|nnb0|nb_eploc[0...nnb0-1]|
@@ -2534,7 +2534,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
        if(nr==0) errorexit("what???");
 
       /* recv ef0_nbs from rk */
-      nMPI_Recv(ef0_nbs,nr, nMPIvars->TEPLOC, rk, 40);
+      nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40);
       //FIXME: can we pair Isend with Recv???
 
       /* add all in ef0_nbs to my elms as nbs */
