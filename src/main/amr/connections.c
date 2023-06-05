@@ -2299,7 +2299,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
    and ef to communicate only with nb ranks. */
 int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
                                                  khash_t(u32) *nbranks,
-                                                 khash_t(u32_tFlist) *ef)
+                                                 khash_t(u32_gptr) *ef)
 {
   int f, mywork;
   //int rank=nMPI_rank();
@@ -2316,16 +2316,23 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
-    khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
+    khiter_t ki2 = kh_get(u32_gptr, ef, rk); /* get kh iter in ef */
     ulong *ns = checked_calloc(1, sizeof(ns[0]));
     ulong *nr = checked_calloc(1, sizeof(nr[0]));
 
     /* count how many are in ef for rank rk */
     ns[0] = 0;
-    if(ki2!=kh_end(ef)) /* if rk is in ef count */
+    if(ki2!=kh_end(ef)) /* if rk is in ef, we count */
+    {
+      struct list_head *fhead = kh_val(ef, ki2);
       for(f=0; f<6; f++)
-        ns[0] += 1 + list_count_nodes(&(kh_val(ef, ki2).flist[f]));
-        /* we add 1 to also send the number of elplos on each face */
+        ns[0] += 1 + list_count_nodes(&(fhead[f]));
+        /* we add 1 to also send the number of eplocs on each face */
+    }
+    else
+    {
+      for(f=0; f<6; f++) ns[0] += 1;
+    }
 
     /* tell how many eplocs (ns[0]) I want to send to rank rk, and also
        find out how many it wants to send to me (nr[0]) */
@@ -2346,33 +2353,38 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
-    khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
+    khiter_t ki2 = kh_get(u32_gptr, ef, rk); /* get kh iter in ef */
     ulong i;
     ulong *ns = get_com_send_buf(com0, rq0); //num.of eplocs to send to rk
     ulong *nr = get_com_recv_buf(com0, rq0); //num.of eplocs to recv from rk
     tEploc *sef = checked_calloc(ns[0], sizeof(sef[0]));
     tEploc *ref = checked_calloc(nr[0], sizeof(ref[0]));
 
-    /* now fill the sef array, i is index into sef */
-    for(i=0, f=0; f<6; f++)
+    if(ki2!=kh_end(ef)) /* if rk is in ef */
     {
-      ulong num;
-      struct list_head *pos0;
+      struct list_head *fhead = kh_val(ef, ki2);
 
-      /* put in number on face f */
-      num = list_count_nodes(&(kh_val(ef, ki2).flist[f]));
-      memcpy(&sef[i], &num, sizeof(num));
-      i++;
-
-      /* fill sef on face f */
-      list_for_each(pos0, &(kh_val(ef, ki2).flist[f]))
+      /* now fill the sef array, i is index into sef */
+      for(i=0, f=0; f<6; f++)
       {
-        tElm *elm = glist_entry(pos0);
-        memcpy(&sef[i], elm->eploc, sizeof(sef[0]));
+        ulong num;
+        struct list_head *pos0;
+
+        /* put in number on face f */
+        num = list_count_nodes(&(fhead[f]));
+        memcpy(&sef[i], &num, sizeof(num));
         i++;
+
+        /* fill sef on face f */
+        list_for_each(pos0, &(fhead[f]))
+        {
+          tElm *elm = glist_entry(pos0);
+          memcpy(&sef[i], elm->eploc, sizeof(sef[0]));
+          i++;
+        }
       }
+      if(i!=ns[0]) errorexit("i!=ns");
     }
-    if(i!=ns[0]) errorexit("i!=ns");
 
     rq = append_buffers_to_com(com1, sef,ns[0], ref,nr[0]);
     nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
@@ -2393,7 +2405,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
-    //khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
+    //khiter_t ki2 = kh_get(u32_gptr, ef, rk); /* get kh iter in ef */
     ulong i;
     //tEploc *sef = get_com_send_buf(com, rq);
     tEploc *ref = get_com_recv_buf(com1, rq);
@@ -2514,7 +2526,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);
-    khiter_t ki2 = kh_get(u32_tFlist, ef, rk); /* get kh iter in ef */
+    khiter_t ki2 = kh_get(u32_gptr, ef, rk); /* get kh iter in ef */
 
     //if( (rk>rank) && (mywork==0) ) //this is in the correct order
     if(mywork==0) // this does all mine first
@@ -2568,7 +2580,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
       //ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
      if(ki2!=kh_end(ef)) /* if rk is in ef */
-       if(nr==0) errorexit("what???");
+       if(nr==0) errorexit("what??? how can nr be zero?");
 
       /* recv ef0_nbs from rk */
       nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40);
@@ -2578,7 +2590,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
       /*******************************************/
       /* read ef0_nbs to build info about my nbs */
       /*******************************************/
+      if(ki2!=kh_end(ef)) /* if rk is in ef */
       {
+        struct list_head *fhead = kh_val(ef, ki2);
         ulong epi;
         /* each ef0_nbs is a tEploc array, where we will store all nbs of
            all the nef0[f] elms rank rk needs nb info about, for all faces f.
@@ -2597,7 +2611,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
           ulong nelms, ei;
 
           /* pos of 1st elm in ef list */
-          pos1 = kh_val(ef, ki2).flist[f].next;
+          pos1 = fhead[f].next;
 
           /* get number of elms nelms out of ef0_nbs */
           e2ul.e = ef0_nbs[epi++];
@@ -2627,9 +2641,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
             /* add all nbs in ef0_nbs to var amr_elm_nbinfo */
             amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
             epi += nnb;
-
-            /* NOTE: someone has to clear the 6 kh_val(ef, ki2).flist[f] lists */
-            //for(f=0; f<6; f++) glist_free_elems(&(kh_val(ef, ki2).flist[f]));
           }
         } /* end for f */
       } /* end func that builds nb-info from ef0_nbs */
