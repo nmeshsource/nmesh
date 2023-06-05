@@ -2293,10 +2293,13 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
   return 0;
 }
 
-//NEW:
+/* Update amr_elm_nbinfo vars on all faces where:
+   elm->dat->info->nnbinfo[f] < 0.
+   This is done for all elms on all ranks, but it uses the info in nbranks
+   and ef to communicate only with nb ranks. */
 int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
-                                         khash_t(u32) *nbranks,
-                                         khash_t(u32_tFlist) *ef)
+                                                 khash_t(u32) *nbranks,
+                                                 khash_t(u32_tFlist) *ef)
 {
   int f, mywork;
   //int rank=nMPI_rank();
@@ -2304,8 +2307,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   int rq0, rq, rq2, srq;
   khiter_t ki;
   tCom *com0, *com1, *com2, *scom;
-
-//////////////////////////////////////////////////////////////////
 
   /* send/recv com to/from other ranks */
   com0 = alloc_com(sizeof(ulong), 1);
@@ -2605,11 +2606,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   nMPI_Waitall_com_send(scom);
   /* we are now done with all in scom */
   free_com(scom);
-
-
-
-////////////////////////////////////////////////////////////////////////
-
 
   /* finally set nnbinfo according to the new nb-info we have now,
      but we keep them negative for now */
@@ -3273,6 +3269,20 @@ void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
     for(f=0; f<6; f++) INIT_LIST_HEAD(&(kh_val(ef, ki).flist[f]));
 
   glist_entry_add_tail(elm, &(kh_val(ef, ki).flist[face]));
+}
+
+/* free mem allocated by amr_khmap_add_elm_face_for_rank allocs
+   for the 6 lists */
+void amr_khmap_free_all_lists(khash_t(u32_tFlist) *ef)
+{
+  khiter_t ki;
+
+  forkhiter(ef, ki)
+  {
+    int f;
+    /* clear the 6 lists in val */
+    for(f=0; f<6; f++) glist_free_elems(&(kh_val(ef, ki).flist[f]));
+  }
 }
 
 /* Find all ranks that elm touches on face, and save elm,face once for each

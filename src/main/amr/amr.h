@@ -123,6 +123,7 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb);
 int amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks);
 void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
                                      tElm *elm, int face);
+void amr_khmap_free_all_lists(khash_t(u32_tFlist) *ef);
 void amr_khmap_add_negelm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm);
 void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
                                                  tElm *child0, tElm *parent);
