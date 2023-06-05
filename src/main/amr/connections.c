@@ -2570,7 +2570,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
               /* get elm at pos1 */
               elem = list_entry(pos1, tGlist, list);
               elm  = elem->entry;
-              pos1 = pos1->next; /* go forward now, because we del below */
+              pos1 = pos1->next; /* go forward now, so we could del below */
 
               /* get number of nbs out of ef0_nbs */
               e2ul.e = ef0_nbs[epi++];
@@ -2582,12 +2582,12 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
               //if(nnb) printeploc_s(&(ef0_nbs[epi]), " ...");
               //printf("\n");
 
-              /* all nbs in ef0_nbs to var amr_elm_nbinfo */
+              /* add all nbs in ef0_nbs to var amr_elm_nbinfo */
               amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
               epi += nnb;
 
               /* NOTE: someone has to clear the 6 kh_val(ef, ki2).flist[f] lists */
-              //for(f=0; f<6; f++) glist_free_elems(&(ef0_head[f]));
+              //for(f=0; f<6; f++) glist_free_elems(&(kh_val(ef, ki2).flist[f]));
             }
           } /* end for f */
         }
