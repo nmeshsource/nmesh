@@ -158,8 +158,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   khash_t(u32_tFlist) *ef = kh_init(u32_tFlist);
 
   /* record nb ranks before we make changes */
-  khash_t(u32_t2eploc) *nbranks = kh_init(u32_t2eploc);
-  amr_khmap_add_nb_ranks(mesh, nbranks);
+  khash_t(u32) *nbranks = kh_init(u32);
+  amr_khset_add_nb_ranks(mesh, nbranks);
 
   INIT_LIST_HEAD(&plist);
 
@@ -249,7 +249,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   //amr_get_nbelm_elmheaders(mesh);
 
   /* free has set table */
-  kh_destroy(u32_t2eploc, nbranks);
+  kh_destroy(u32, nbranks);
   kh_destroy(u32_tFlist, ef);
 }
 

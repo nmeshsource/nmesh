@@ -2295,7 +2295,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
 
 //NEW:
 int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
-                                         khash_t(u32_t2eploc) *nbranks,
+                                         khash_t(u32) *nbranks,
                                          khash_t(u32_tFlist) *ef)
 {
   int f, mywork;
@@ -3243,9 +3243,9 @@ void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb)
 
 /* Record all the nbranks I am in contact with, i.e. add datranks of all nbs
    to the hash set called nbranks. */
-/* needs both:   khash_t(u32_t2eploc) *nbranks = kh_init(u32);
-                 kh_destroy(u32_t2eploc, nbranks);              */
-int amr_khmap_add_nb_ranks(tMesh *mesh, khash_t(u32_t2eploc) *nbranks)
+/* needs both:   khash_t(u32) *nbranks = kh_init(u32);
+                 kh_destroy(u32, nbranks);              */
+int amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks)
 {
   int nadded = 0;
   ulong ei;
@@ -3253,7 +3253,7 @@ int amr_khmap_add_nb_ranks(tMesh *mesh, khash_t(u32_t2eploc) *nbranks)
   {
     tElm *elm = mesh->nbelm[ei];
     int is_missing;
-    kh_put(u32_t2eploc, nbranks, elm->datrank, &is_missing);
+    kh_put(u32, nbranks, elm->datrank, &is_missing);
     if(is_missing) nadded++;
   }
   return nadded;
