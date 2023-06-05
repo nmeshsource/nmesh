@@ -358,6 +358,7 @@ KHASH_SET_INIT_INT(u32)
 KHASH_SET_INIT_INT64(u64)
 /* hash table with 32 bit ints as keys and tFlist values */
 KHASH_MAP_INIT_INT(u32_tFlist, tFlist)
+KHASH_MAP_INIT_INT(u32_gptr, void *)
 
 
 /**************************************************************************/
@@ -533,7 +534,7 @@ void printpoint(tPoint *pt);
 void printvar_atpoint(tPoint *pt, int vi);
 void printvarlist_atpoint(tPoint *pt, tVarList *vl);
 void print_u32(khash_t(u32) *nbranks);
-void print_u32_tFlist(khash_t(u32_tFlist) *ef);
+void print_u32_gptr(khash_t(u32_gptr) *ef);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);

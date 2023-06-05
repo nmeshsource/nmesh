@@ -155,7 +155,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   struct list_head *pos, *sav;
 
   /* table with missing nb info */
-  khash_t(u32_tFlist) *ef = kh_init(u32_tFlist);
+  khash_t(u32_gptr) *ef = kh_init(u32_gptr);
 
   /* record nb ranks before we make changes */
   khash_t(u32) *nbranks = kh_init(u32);
@@ -248,20 +248,18 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
 
-print_u32(nbranks);
-print_u32_tFlist(ef);
   /* free all in lists of ef */
   amr_khmap_free_all_lists(ef);
 
   /* free hash tables */
   kh_destroy(u32, nbranks);
-  kh_destroy(u32_tFlist, ef);
+  kh_destroy(u32_gptr, ef);
 }
 
 /* set some nbinfo, record what is missing in ef, and then remove and
    free the old parent */
 void set_children_nbinfo_ef(tElm *child0, tElm *parent,
-                            khash_t(u32_tFlist) *ef)
+                            khash_t(u32_gptr) *ef)
 {
   /* #pragma omp critical (change_mesh_myelm_list) */
   /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive

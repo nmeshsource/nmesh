@@ -790,17 +790,18 @@ void print_u32(khash_t(u32) *nbranks)
 }
 
 /* print all in ef */
-void print_u32_tFlist(khash_t(u32_tFlist) *ef)
+void print_u32_gptr(khash_t(u32_gptr) *ef)
 {
   khiter_t ki;
   forkhiter(ef, ki)
   {
+    struct list_head *fhead = kh_val(ef, ki);
     int f;
     printf("rk%u\n", kh_key(ef, ki));
     for(f=0; f<6; f++)
     {
       printf("f%d ", f);
-      printelmglist(&(kh_val(ef, ki).flist[f]));
+      printelmglist(&(fhead[f]));
     }
   }
 }

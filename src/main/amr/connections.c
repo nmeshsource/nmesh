@@ -3300,41 +3300,56 @@ int amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks)
 
 /* Record elm,face for the key rank in the hash table ef. The value of key
    rank is 6 lists (one for each face) to which we append the elm. */
-void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
+void amr_khmap_add_elm_face_for_rank(khash_t(u32_gptr) *ef, int rank,
                                      tElm *elm, int face)
 {
   int is_missing;
   khiter_t ki;
-  int f;
+  struct list_head *fhead;
 
-  ki = kh_put(u32_tFlist, ef, rank, &is_missing);
+  ki = kh_put(u32_gptr, ef, rank, &is_missing);
   if(is_missing)
-    for(f=0; f<6; f++) INIT_LIST_HEAD(&(kh_val(ef, ki).flist[f]));
+  {
+    int f;
+    /* alloc space for 6 list heads, one for each face */
+    kh_val(ef, ki) = calloc(6, sizeof(struct list_head));
+    fhead = kh_val(ef, ki);
+    for(f=0; f<6; f++) INIT_LIST_HEAD(&(fhead[f]));
+  }
 
-  glist_entry_add_tail(elm, &(kh_val(ef, ki).flist[face]));
+  /* add elm to list for this face */
+  fhead = kh_val(ef, ki);
+  //PRF;printf("1: rank%d ki=%u f%d %p\n", rank, ki, face, &(fhead[face]));
+  //printelmglist(&(fhead[face]));
+  glist_entry_add_tail(elm, &(fhead[face]));
+  //PRF;printf("2: rank%d ki=%u f%d %p\n", rank, ki, face, &(fhead[face]));
+  //printelmglist(&(fhead[face]));
 }
 
 /* free mem allocated by amr_khmap_add_elm_face_for_rank allocs
    for the 6 lists */
-void amr_khmap_free_all_lists(khash_t(u32_tFlist) *ef)
+void amr_khmap_free_all_lists(khash_t(u32_gptr) *ef)
 {
   khiter_t ki;
   forkhiter(ef, ki)
   {
+    struct list_head *fhead = kh_val(ef, ki);
     int f;
     /* clear the 6 lists in val */
-    for(f=0; f<6; f++) glist_free_elems(&(kh_val(ef, ki).flist[f]));
+    for(f=0; f<6; f++) glist_free_elems(&(fhead[f]));
+    free(fhead);
+    kh_val(ef, ki) = NULL;
   }
 }
 
 /* Find all ranks that elm touches on face, and save elm,face once for each
    touching rank. (Note: fnbranks is only there to track if elm was already
    added once before.) */
-void amr_khmap_add_elm_forface(khash_t(u32_tFlist) *ef, tElm *elm, int face)
+void amr_khmap_add_elm_forface(khash_t(u32_gptr) *ef, tElm *elm, int face)
 {
   khash_t(u32) *fnbranks = kh_init(u32); /* empty nb ranks set for face */
   int ni;
-printelm(elm);
+  //printelm(elm);
   for(ni=0; ni<elm->nfnb[face]; ni++)
   {
     tElm *nb = elm->fnb[face][ni];
@@ -3352,7 +3367,7 @@ printelm(elm);
 /* Find all ranks that elm touches, and save elm,face once for each
    touching rank. (Note: fnbranks is only there to track if elm was already
    added once before.) */
-void amr_khmap_add_negelm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm)
+void amr_khmap_add_negelm_forallfaces(khash_t(u32_gptr) *ef, tElm *elm)
 {
   int f;
   for(f=0; f<6; f++)
@@ -3363,7 +3378,7 @@ void amr_khmap_add_negelm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm)
 /* Find all ranks that parent elm touches, and save child0-7,face once for
    each touching rank. (Note: fnbranks is only there to track if children
    were already added once before.) */
-void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
+void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
                                                  tElm *child0, tElm *parent)
 {
   khash_t(u32) *fnbranks = kh_init(u32);
@@ -3424,7 +3439,7 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
 /* Find all ranks that children touch, and save parent,face once for
    each touching rank. (Note: fnbranks is only there to track if parent
    wad already added once before.) */
-void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
+void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_gptr) *ef,
                                                  tElm *parent,
                                                  struct list_head *ch_head)
 {
@@ -3463,7 +3478,7 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
 /* Go over mesh->nbelm list, invalidate nbinfo for all my elms that
    are nbs of any elm in mesh->nbelm, and record them in ef */
 void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
-                                                khash_t(u32_tFlist) *ef)
+                                                khash_t(u32_gptr) *ef)
 {
   khash_t(u64) *rk_elm_f = kh_init(u64);
   ulong key_n[] = {nMPI_size(), mesh->nnbelm, 6};
@@ -3514,7 +3529,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
 /* Remove mesh->nbelm, make sure all nbinfo about it is deleted, and
    record what is missing in ef */
 void amr_remove_mesh_nbelm_ef(tMesh *mesh, int Keep_nbs_fnb,
-                              khash_t(u32_tFlist) *ef)
+                              khash_t(u32_gptr) *ef)
 {
   /* record in ef, but keep all pointers */
   amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(mesh, ef);

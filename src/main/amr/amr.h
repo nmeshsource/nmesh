@@ -72,7 +72,7 @@ void remove_all_nfaces(tNode *node);
 /* refine.c */
 void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref);
 void set_children_nbinfo_ef(tElm *child0, tElm *parent,
-                            khash_t(u32_tFlist) *ef);
+                            khash_t(u32_gptr) *ef);
 void set_parent_nbinfo_remove_children(tElm *parent,
                                        struct list_head *ch_head);
 void hrefine_mesh_to_level(tMesh *mesh, int l);
@@ -121,14 +121,14 @@ int amr_invalidate_nbinfo_of_all_nbs(tElm *elm, int Keep_nbs_fnb);
 void amr_remove_mesh_nbelm(tMesh *mesh, int Keep_nbs_fnb);
 
 int amr_khset_add_nb_ranks(tMesh *mesh, khash_t(u32) *nbranks);
-void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
+void amr_khmap_add_elm_face_for_rank(khash_t(u32_gptr) *ef, int rank,
                                      tElm *elm, int face);
-void amr_khmap_free_all_lists(khash_t(u32_tFlist) *ef);
-void amr_khmap_add_negelm_forallfaces(khash_t(u32_tFlist) *ef, tElm *elm);
-void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_tFlist) *ef,
+void amr_khmap_free_all_lists(khash_t(u32_gptr) *ef);
+void amr_khmap_add_negelm_forallfaces(khash_t(u32_gptr) *ef, tElm *elm);
+void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
                                                  tElm *child0, tElm *parent);
-void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_tFlist) *ef,
+void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_gptr) *ef,
                                                  tElm *parent,
                                                  struct list_head *ch_head);
 void amr_remove_mesh_nbelm_ef(tMesh *mesh, int Keep_nbs_fnb,
-                              khash_t(u32_tFlist) *ef);
+                              khash_t(u32_gptr) *ef);
