@@ -778,3 +778,29 @@ void printvarlist_atpoint(tPoint *pt, tVarList *vl)
     PRF;printf(": NULL\n");
   }
 }
+
+/* print all in nbranks */
+void print_u32(khash_t(u32) *nbranks)
+{
+  khiter_t ki;
+  printf("nbranks:");
+  forkhiter(nbranks, ki)
+    printf(" %u", kh_key(nbranks, ki));
+  printf("\n");
+}
+
+/* print all in ef */
+void print_u32_tFlist(khash_t(u32_tFlist) *ef)
+{
+  khiter_t ki;
+  forkhiter(ef, ki)
+  {
+    int f;
+    printf("rk%u\n", kh_key(ef, ki));
+    for(f=0; f<6; f++)
+    {
+      printf("f%d ", f);
+      printelmglist(&(kh_val(ef, ki).flist[f]));
+    }
+  }
+}

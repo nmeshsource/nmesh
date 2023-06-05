@@ -3319,7 +3319,6 @@ void amr_khmap_add_elm_face_for_rank(khash_t(u32_tFlist) *ef, int rank,
 void amr_khmap_free_all_lists(khash_t(u32_tFlist) *ef)
 {
   khiter_t ki;
-
   forkhiter(ef, ki)
   {
     int f;

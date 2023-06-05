@@ -532,6 +532,8 @@ void print_n_pt_typ(tNode *node);
 void printpoint(tPoint *pt);
 void printvar_atpoint(tPoint *pt, int vi);
 void printvarlist_atpoint(tPoint *pt, tVarList *vl);
+void print_u32(khash_t(u32) *nbranks);
+void print_u32_tFlist(khash_t(u32_tFlist) *ef);
 
 /* surface.c */
 int init_all_surfaces(tNode *node);

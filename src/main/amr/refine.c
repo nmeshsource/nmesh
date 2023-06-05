@@ -248,6 +248,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
 
+print_u32(nbranks);
+print_u32_tFlist(ef);
   /* free all in lists of ef */
   amr_khmap_free_all_lists(ef);
 
