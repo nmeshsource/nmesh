@@ -2531,66 +2531,63 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
       //FIXME: can we pair Isend with Recv???
 
       /* add all in ef0_nbs to my elms as nbs */
-
-      /***************************************************/
-      /* read ef0_nbs to build info about nbs on rank rk */
-      /***************************************************/
+      /*******************************************/
+      /* read ef0_nbs to build info about my nbs */
+      /*******************************************/
       {
+        ulong epi;
+        /* each ef0_nbs is a tEploc array, where we will store all nbs of
+           all the nef0[f] elms rank rk needs nb info about, for all faces f.
+           Layout is:
+           ef0_nbs = |nelms[0]|nnb0|nb_eploc[0...nnb0-1]|
+                              |nnb1|nb_eploc[0...nnb1-1]|
+                              ...
+                     |nelms[5]|nnb0|nb_eploc[0...nnb0-1]|
+                              |nnb1|nb_eploc[0...nnb1-1]|
+                              ... */
+        epi = 0;
+        for(f=0; f<6; f++)
         {
-          ulong epi;
-          /* each ef0_nbs is a tEploc array, where we will store all nbs of
-             all the nef0[f] elms rank rk needs nb info about, for all faces f.
-             Layout is:
-             ef0_nbs = |nelms[0]|nnb0|nb_eploc[0...nnb0-1]|
-                                |nnb1|nb_eploc[0...nnb1-1]|
-                                ...
-                       |nelms[5]|nnb0|nb_eploc[0...nnb0-1]|
-                                |nnb1|nb_eploc[0...nnb1-1]|
-                                ... */
-          epi = 0;
-          for(f=0; f<6; f++)
+          union { tEploc e; ulong ul; } e2ul;
+          struct list_head *pos1;
+          ulong nelms, ei;
+
+          /* pos of 1st elm in ef list */
+          pos1 = kh_val(ef, ki2).flist[f].next;
+
+          /* get number of elms nelms out of ef0_nbs */
+          e2ul.e = ef0_nbs[epi++];
+          nelms  = e2ul.ul;
+
+          for(ei=0; ei<nelms; ei++)
           {
-            union { tEploc e; ulong ul; } e2ul;
-            struct list_head *pos1;
-            ulong nelms, ei;
+            tGlist *elem;
+            tElm *elm;
+            ulong nnb;
 
-            /* pos of 1st elm in ef list */
-            pos1 = kh_val(ef, ki2).flist[f].next;
+            /* get elm at pos1 */
+            elem = list_entry(pos1, tGlist, list);
+            elm  = elem->entry;
+            pos1 = pos1->next; /* go forward now, so we could del below */
 
-            /* get number of elms nelms out of ef0_nbs */
+            /* get number of nbs out of ef0_nbs */
             e2ul.e = ef0_nbs[epi++];
-            nelms  = e2ul.ul;
+            nnb    = e2ul.ul;
 
-            for(ei=0; ei<nelms; ei++)
-            {
-              tGlist *elem;
-              tElm *elm;
-              ulong nnb;
+            //printeploc_s(elm->eploc, " ");
+            //printf("f%d r=%d ", f, r);
+            //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
+            //if(nnb) printeploc_s(&(ef0_nbs[epi]), " ...");
+            //printf("\n");
 
-              /* get elm at pos1 */
-              elem = list_entry(pos1, tGlist, list);
-              elm  = elem->entry;
-              pos1 = pos1->next; /* go forward now, so we could del below */
+            /* add all nbs in ef0_nbs to var amr_elm_nbinfo */
+            amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
+            epi += nnb;
 
-              /* get number of nbs out of ef0_nbs */
-              e2ul.e = ef0_nbs[epi++];
-              nnb    = e2ul.ul;
-
-              //printeploc_s(elm->eploc, " ");
-              //printf("f%d r=%d ", f, r);
-              //printf("ei=%lu  nnb=%lu epi=%lu ", ei, nnb, epi);
-              //if(nnb) printeploc_s(&(ef0_nbs[epi]), " ...");
-              //printf("\n");
-
-              /* add all nbs in ef0_nbs to var amr_elm_nbinfo */
-              amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
-              epi += nnb;
-
-              /* NOTE: someone has to clear the 6 kh_val(ef, ki2).flist[f] lists */
-              //for(f=0; f<6; f++) glist_free_elems(&(kh_val(ef, ki2).flist[f]));
-            }
-          } /* end for f */
-        }
+            /* NOTE: someone has to clear the 6 kh_val(ef, ki2).flist[f] lists */
+            //for(f=0; f<6; f++) glist_free_elems(&(kh_val(ef, ki2).flist[f]));
+          }
+        } /* end for f */
       } /* end func that builds nb-info from ef0_nbs */
 
       free(ef0_nbs);
