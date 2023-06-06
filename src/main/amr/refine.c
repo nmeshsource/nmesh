@@ -188,7 +188,11 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
-//print_u32_gptr(ef);
+Yo(-100);
+printmyelms(mesh);
+Yo(-90);
+printnbelms(mesh);
+print_u32_gptr(ef);
 
   /* now remove/free all old parents */
   list_for_each_safe(pos, sav, &plist)
@@ -201,11 +205,16 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     list_del(&parent->list);
     free_elm(parent);
   }
+Yo(-80);
+//printmyelms(mesh);
+Yo(-70);
+printnbelms(mesh);
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   prTimeIn_s("before amr_remove_mesh_nbelm_ef ");
   amr_remove_mesh_nbelm_ef(mesh, 0, ef);
+print_u32_gptr(ef);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:

@@ -3551,7 +3551,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
                                                 khash_t(u32_gptr) *ef)
 {
   khash_t(u64) *rk_elm_f = kh_init(u64);
-  ulong key_n[] = {nMPI_size(), mesh->nnbelm, 6};
+  ulong key_n[] = {nMPI_size(), mesh->nmyelm, 6};
   ulong ei;
 
   /* make nnbinf0<0 but keep all fnb pointers */
@@ -3586,7 +3586,15 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
             ulong nb_lid = calc_local_elm_id(nb);
             ulong key = Ind_n(elm_rk, nb_lid, nb_f,  key_n);
             kh_put(u64, rk_elm_f, key, &is_missing); /* record */
-            /* if this is the 1st time we find this rank on this face, add elm */
+            if(elmname_is(elm, "1_2")||elmname_is(elm, "1_3")||key==56)
+            {
+              PRFs(": elm=");printelm(elm);
+              PRFs(": nb=");printelm(nb);
+              PRF;printf(": elm_rk=%d nb_lid=%lu nb_f=%d key=%lu is_missing=%d\n",
+                         elm_rk, nb_lid, nb_f, key, is_missing);
+            }
+            /* if this is the 1st time we find this nb for this rank on this
+                face, add nb */
             if(is_missing)
               amr_khmap_add_elm_face_for_rank(ef, elm_rk, nb, nb_f);
           }
