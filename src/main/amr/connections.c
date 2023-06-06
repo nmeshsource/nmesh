@@ -2517,6 +2517,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
         if(info->nnbinfo[f] < 0) /* if nnbinfo<0 nb info is not there yet */
           /* erase all nb info in var amr_elm_nbinfo[f] */
           disablevarcomp_innode(elm, amr->elm_nbinfo0+f);
+          //FIXME: what about the nbinfo that hp refine has already set
+          // correctly but with nnbinfo<0 ???
     }
   }
 
@@ -3393,8 +3395,9 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
                                                  tElm *child0, tElm *parent)
 {
   khash_t(u32) *fnbranks = kh_init(u32);
+  int p_rk = parent->datrank;
 
-  //printelm(parent);
+  PRF;printelm(parent);
   //printelm(child0);
 
   int f, ni;
@@ -3423,22 +3426,25 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
       {
         tElm *nb = parent->fnb[f][ni];
         int nb_rk = nb->datrank;
-        int is_missing;
 
-        kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
-        /* if this is the 1st time we find this rank on this face,
-           add the 4 children on this face */
-        if(is_missing)
+        if(nb_rk != p_rk)
         {
-          pos_ijk = &child0->list; /* pos of 1st child */
-          for(ijk=0; ijk<8; ijk++)
+          int is_missing;
+          kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
+          /* if this is the 1st time we find this rank on this face,
+             add the 4 children on this face */
+          if(is_missing)
           {
-            if(connections_ijk_is_at_parentface(ijk, f))
+            pos_ijk = &child0->list; /* pos of 1st child */
+            for(ijk=0; ijk<8; ijk++)
             {
-              tElm *child = list_entry(pos_ijk, tElm, list);
-              amr_khmap_add_elm_face_for_rank(ef, nb_rk, child, f);
+              if(connections_ijk_is_at_parentface(ijk, f))
+              {
+                tElm *child = list_entry(pos_ijk, tElm, list);
+                amr_khmap_add_elm_face_for_rank(ef, nb_rk, child, f);
+              }
+              pos_ijk = pos_ijk->next;  /* pos of next child */
             }
-            pos_ijk = pos_ijk->next;  /* pos of next child */
           }
         }
       }
@@ -3449,13 +3455,13 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
 
 /* Find all ranks that children touch, and save parent,face once for
    each touching rank. (Note: fnbranks is only there to track if parent
-   wad already added once before.) */
+   was already added once before.) */
 void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_gptr) *ef,
                                                  tElm *parent,
                                                  struct list_head *ch_head)
 {
   khash_t(u32) *fnbranks = kh_init(u32);
-
+  int p_rk = parent->datrank;
   int f, ni;
   for(f=0; f<6; f++)
   {
@@ -3472,13 +3478,16 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_gptr) *ef,
         {
           tElm *nb = ch_ijk->fnb[f][ni];
           int nb_rk = nb->datrank;
-          int is_missing;
 
-          kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
-          /* if this is the 1st time we find this rank on this face,
-             add parent */
-          if(is_missing)
-            amr_khmap_add_elm_face_for_rank(ef, nb_rk, parent, f);
+          if(nb_rk != p_rk)
+          {
+            int is_missing;
+            kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
+            /* if this is the 1st time we find this rank on this face,
+               add parent */
+            if(is_missing)
+              amr_khmap_add_elm_face_for_rank(ef, nb_rk, parent, f);
+          }
         }
       }
     }
