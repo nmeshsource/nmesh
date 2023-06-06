@@ -2492,8 +2492,8 @@ fflush(stdout);
     /* process eplocs that others want to know about */
     nMPI_Wait_com_recv(com1, rq); /* wait for request number rq */
 
-PRFs(":3 ref=");
-for(int ii=0; ii<16; ii++) printeploc_s(&(ref[ii]), " ");
+//PRFs(":3 ref=");
+//for(int ii=0; ii<16; ii++) printeploc_s(&(ref[ii]), " ");
 fflush(stdout);
 
     /* do work on ref array for request rq and find all nbs of all in ref */
