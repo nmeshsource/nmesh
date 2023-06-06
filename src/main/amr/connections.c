@@ -2360,6 +2360,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     tEploc *sef = checked_calloc(ns[0], sizeof(sef[0]));
     tEploc *ref = checked_calloc(nr[0], sizeof(ref[0]));
 
+PRFs(":1r ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
+
     if(ki2!=kh_end(ef)) /* if rk is in ef */
     {
       struct list_head *fhead = kh_val(ef, ki2);
@@ -2389,6 +2391,13 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     rq = append_buffers_to_com(com1, sef,ns[0], ref,nr[0]);
     nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
 
+PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
+PRFs(":2a sef=");
+for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
+//PRFs(":2b ");
+//for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ref[ii]), " ");
+fflush(stdout);
+//abort();
     rq0++;
   }
 
@@ -2426,6 +2435,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 
     /* process eplocs that others want to know about */
     nMPI_Wait_com_recv(com1, rq); /* wait for request number rq */
+
+PRFs(":3 ref=");
+for(int ii=0; ii<16; ii++) printeploc_s(&(ref[ii]), " ");
+fflush(stdout);
 
     /* do work on ref array for request rq and find all nbs of all in ref */
     for(i=0, f=0; f<6; f++)
@@ -2494,8 +2507,13 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     nMPI_Isend_Irecv_com(com2, rq2, nMPI_UNSIGNED_LONG, rk, 30,30, WORLD,WORLD);
 
     /* send ef0_nbs */
-    srq = append_buffers_to_com(scom, ef0_nbs,nsE[0], NULL,0);
+    srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE[0], NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
+
+PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu\n ef0_nbs=", nsE[0], nrE[0]);
+printarray_eploc(ef0_nbs, 0);
+fflush(stdout);
+//abort();
 
     rq++;
   }
@@ -2584,9 +2602,18 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
      if(ki2!=kh_end(ef)) /* if rk is in ef */
        if(nr==0) errorexit("what??? how can nr be zero?");
 
+PRFs(":5 ");printf("nr[0]=%lu\n", nr[0]);
+fflush(stdout);
+//abort();
+
       /* recv ef0_nbs from rk */
       nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40);
       //FIXME: can we pair Isend with Recv???
+
+PRFs(":6 ");
+for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ef0_nbs[ii]), " ");
+fflush(stdout);
+//abort();
 
       /* add all in ef0_nbs to my elms as nbs */
       /*******************************************/
@@ -2643,10 +2670,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
             /* add all nbs in ef0_nbs to var amr_elm_nbinfo */
             amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
             epi += nnb;
+            PRFs(":7 elm=");printelm0(elm,"\n");print_amr_elm_nbinfo(elm, f);
           }
         } /* end for f */
       } /* end func that builds nb-info from ef0_nbs */
-
       free(ef0_nbs);
     }
     rq++;
@@ -2662,6 +2689,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   nMPI_Waitall_com_send(scom);
   /* we are now done with all in scom */
   free_com(scom);
+fflush(stdout);
+//abort();
 
   /* finally set nnbinfo according to the new nb-info we have now,
      but we keep them negative for now */

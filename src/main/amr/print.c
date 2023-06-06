@@ -797,7 +797,7 @@ void print_u32_gptr(khash_t(u32_gptr) *ef)
   {
     struct list_head *fhead = kh_val(ef, ki);
     int f;
-    printf("rk%u\n", kh_key(ef, ki));
+    printf("rank%u %p\n", kh_key(ef, ki), fhead);
     for(f=0; f<6; f++)
     {
       printf("f%d ", f);

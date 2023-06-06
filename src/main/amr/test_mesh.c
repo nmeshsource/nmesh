@@ -50,6 +50,8 @@ void random_refine_frac_nodes_N_times(tMesh *mesh, double frac, int N)
     if(ref->type==0) hrefine_nodes_if_rflag(mesh, ref);
     else             prefine_nodes_if_rflag(mesh, ref);
     update_mesh_myln_node_nid(mesh);
+printmyelms(mesh);
+abort();
     simple_load_balance(mesh);
     update_mesh_myln_node_nid(mesh);
   }

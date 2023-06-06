@@ -188,6 +188,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
+//print_u32_gptr(ef);
+
   /* now remove/free all old parents */
   list_for_each_safe(pos, sav, &plist)
   {
@@ -218,6 +220,12 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
        amr_elm_nbinfo_to_elm_fnb                  */
   update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
 
+Yo(123);
+printmyelms(mesh);
+//printnbelms(mesh);
+print_u32_gptr(ef);
+//abort();
+
   /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
   amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
 
@@ -238,7 +246,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* update essential nb info */
   prTimeIn_s("before amr_update_elm_nbinfo_if_nnbinfo_negative ");
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  amr_update_elm_nbinfo_if_nnbinfo_negative_ef(mesh, nbranks, ef);
   prTimeIn_s("before amr_elm_nbinfo_to_elm_fnb ");
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
   prTimeIn_s("before amr_elm_nbinfo_set_nnbinfo_mesh ");
@@ -254,6 +263,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   /* free hash tables */
   kh_destroy(u32, nbranks);
   kh_destroy(u32_gptr, ef);
+//abort();
 }
 
 /* set some nbinfo, record what is missing in ef, and then remove and
@@ -285,6 +295,11 @@ void set_children_nbinfo_ef(tElm *child0, tElm *parent,
 
     /* record about which child face we need info from which rank */
     amr_khmap_add_negchildren_forallparentfaces(ef, child0, parent);
+if(0)//if(elmname_is(parent,"1_5"))
+{
+print_u32_gptr(ef);
+abort();
+}
   }
 }
 
