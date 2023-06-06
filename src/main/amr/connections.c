@@ -2293,6 +2293,62 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
   return 0;
 }
 
+/* clear amr_elm_nbinfo[f] if nnbinfo[f] < 0 */
+void amr_disable_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    tDat *dat = elm->dat;
+    if(dat)
+    {
+      tNodeInfo *info = elm->dat->info;
+      int f;
+      for(f=0; f<6; f++)  /* go over elm-faces */
+        if(info->nnbinfo[f] < 0) /* if nnbinfo<0 nb info is not there yet */
+        {
+          /* erase all nb info in var amr_elm_nbinfo[f] */
+          disablevarcomp_innode(elm, amr->elm_nbinfo0+f);
+          info->nnbinfo[f] = -1;
+        }
+    }
+  }
+}
+
+/* find all my elmfaces that have nnbinfo<0 */
+void amr_update_elm_nbinfo_locally_if_nnbinfo_negative(tMesh *mesh)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    tDat *dat = elm->dat;
+    if(dat)
+    {
+      tNodeInfo *info = elm->dat->info;
+      int f;
+      for(f=0; f<6; f++)  /* go over elm-faces */
+        if(info->nnbinfo[f] < 0)
+        {
+          struct list_head *pos1, *sav;
+          struct list_head fnb_head;
+          /* put the nbs of elm into fnb_head list */
+          INIT_LIST_HEAD(&fnb_head);
+          amr_make_fnb_list(elm, f, mesh->nmyelm, mesh->myelm, &fnb_head);
+          /* add all nbs to amr_elm_nbinfo */
+          list_for_each_safe(pos1, sav, &fnb_head)
+          {
+            tGlist *elem = list_entry(pos1, tGlist, list);
+            tElm *nb = elem->entry;
+            amr_elm_nbinfo_add_nbeploc(elm, f, 1, nb->eploc);
+            /* once nb->eploc is in amr_elm_nbinfo, del elem with nb */
+            glist_elem_del(elem);
+          }
+        }
+    }
+  }
+}
+
+
 /* Update amr_elm_nbinfo vars on all faces where:
    elm->dat->info->nnbinfo[f] < 0.
    This is done for all elms on all ranks, but it uses the info in nbranks
@@ -2522,23 +2578,13 @@ fflush(stdout);
   free_com(com1);
   free_com(com0);
 
-
   /* clear nnbinfo for new entries */
-  formyelms(mesh)
-  {
-    tElm *elm = MyElm;
-    tDat *dat = elm->dat;
-    if(dat)
-    {
-      tNodeInfo *info = elm->dat->info;
-      for(f=0; f<6; f++)  /* go over elm-faces */
-        if(info->nnbinfo[f] < 0) /* if nnbinfo<0 nb info is not there yet */
-          /* erase all nb info in var amr_elm_nbinfo[f] */
-          disablevarcomp_innode(elm, amr->elm_nbinfo0+f);
-          //FIXME: what about the nbinfo that hp refine has already set
-          // correctly but with nnbinfo<0 ???
-    }
-  }
+  amr_disable_elm_nbinfo_if_nnbinfo_negative(mesh);
+
+  /* work on my own elms, while MPI is busy:
+     find all my elmfaces that have nnbinfo<0 */
+  //if(kh_size(nbranks)==0)
+  amr_update_elm_nbinfo_locally_if_nnbinfo_negative(mesh);
 
   /* recv results about my nbs */
   rq=0;
@@ -2547,41 +2593,16 @@ fflush(stdout);
   {
     unsigned rk = kh_key(nbranks, ki);
     khiter_t ki2 = kh_get(u32_gptr, ef, rk); /* get kh iter in ef */
-
+    /*
     //if( (rk>rank) && (mywork==0) ) //this is in the correct order
     if(mywork==0) // this does all mine first
     {
       mywork = 1;
-      /* work on my own elms, while MPI is busy:
-         find all my elmfaces that have nnbinfo<0 */
-      formyelms(mesh)
-      {
-        tElm *elm = MyElm;
-        tDat *dat = elm->dat;
-        if(dat)
-        {
-          tNodeInfo *info = elm->dat->info;
-          for(f=0; f<6; f++)  /* go over elm-faces */
-            if(info->nnbinfo[f] < 0)
-            {
-              struct list_head *pos1, *sav;
-              struct list_head fnb_head;
-              /* put the nbs of elm into fnb_head list */
-              INIT_LIST_HEAD(&fnb_head);
-              amr_make_fnb_list(elm, f, mesh->nmyelm, mesh->myelm, &fnb_head);
-              /* add all nbs to amr_elm_nbinfo */
-              list_for_each_safe(pos1, sav, &fnb_head)
-              {
-                tGlist *elem = list_entry(pos1, tGlist, list);
-                tElm *nb = elem->entry;
-                amr_elm_nbinfo_add_nbeploc(elm, f, 1, nb->eploc);
-                /* once nb->eploc is in amr_elm_nbinfo, del elem with nb */
-                glist_elem_del(elem);
-              }
-            }
-        }
-      } /* end formyelms */
+      // work on my own elms, while MPI is busy:
+      // find all my elmfaces that have nnbinfo<0
+      amr_update_elm_nbinfo_locally_if_nnbinfo_negative(mesh);
     }
+    */
 
     nMPI_Wait_com_recv(com2, rq); /* wait for request number rq */
 
