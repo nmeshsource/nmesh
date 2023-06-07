@@ -73,8 +73,8 @@ void remove_all_nfaces(tNode *node);
 void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref);
 void set_children_nbinfo_ef(tElm *child0, tElm *parent,
                             khash_t(u32_gptr) *ef);
-void set_parent_nbinfo_remove_children(tElm *parent,
-                                       struct list_head *ch_head);
+void set_parent_nbinfo_ef(tElm *parent, struct list_head *ch_head,
+                          khash_t(u32_gptr) *ef);
 void hrefine_mesh_to_level(tMesh *mesh, int l);
 void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l);
 void hcoarsen_mesh_to_level(tMesh *mesh, int l);

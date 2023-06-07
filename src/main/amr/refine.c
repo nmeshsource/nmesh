@@ -315,9 +315,19 @@ abort();
 /* Unrefine all elms on all MPI procs if indicated by elm->rflag */
 void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
-  struct list_head *pos;
+  struct list_head clist; //temporary list of all removed children
+  struct list_head *pos, *sav;
   int num, uref;
   tElm0 *elmar[8];
+
+  /* table with missing nb info */
+  khash_t(u32_gptr) *ef = kh_init(u32_gptr);
+
+  /* record nb ranks before we make changes */
+  khash_t(u32) *nbranks = kh_init(u32);
+  amr_khset_add_nb_ranks(mesh, nbranks);
+
+  INIT_LIST_HEAD(&clist);
 
   /* Check if all 8 children were kept together in load bal.,
      if not call load_balance to make it so! */
@@ -372,11 +382,39 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
       hp_refine_set_n_pt_typ(sib, ref, n, pt_typ); //set n and pt_typ
       INIT_LIST_HEAD(&ch_head);
       parent = replace_8localchildren_by_parent(sib, n, pt_typ, &ch_head);
-      set_parent_nbinfo_remove_children(parent, &ch_head);
+      set_parent_nbinfo_ef(parent, &ch_head, ef);
+      list_splice_tail(&ch_head, &clist); //add all in ch_head to clist
+
       /* update pos: set to parent that is now there instead of sib */
       pos = &parent->list;
     }
   }
+
+  /* now remove/free all children */
+  list_for_each(pos, &clist)
+  {
+    tElm *child = list_entry(pos, tElm, list);
+    amr_invalidate_nbinfo_of_all_nbs(child, 0);
+    //int ret = amr_invalidate_nbinfo_of_all_nbs(child, 0);
+    //if(ret) nbs_on_other_rank++;
+    /* Note: amr_invalidate_nbinfo_of_all_nbs(child) sets the fnb in
+       nbelm that point to child0-7 to NULL, if its 2nd arg is 0 */
+  }
+  //if(nbs_on_other_rank)
+  //  amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
+    /* Note: amr_remove_mesh_nbelm cannot invalidate the fnb pointers
+       of child0-7, if all pointers to child0-7 in nbelm are NULL
+       (See comment above). This means child0-7 then contain invalid
+       pointers! But we will free child0-7 very soon. */
+  /* free children */
+  list_for_each_safe(pos, sav, &clist)
+  {
+    tElm *child = list_entry(pos, tElm, list);
+    list_del(&child->list); //del from clist
+    free_elm(child);        //free mem of child child
+  }
+
+
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
@@ -405,11 +443,18 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   //amr_get_nbelm_elmheaders(mesh);
+
+  /* free all in lists of ef */
+  amr_khmap_free_all_lists(ef);
+
+  /* free hash tables */
+  kh_destroy(u32, nbranks);
+  kh_destroy(u32_gptr, ef);
 }
 
 /* set some nbinfo and then free the children in ch_head */
-void set_parent_nbinfo_remove_children(tElm *parent,
-                                       struct list_head *ch_head)
+void set_parent_nbinfo_ef(tElm *parent, struct list_head *ch_head,
+                          khash_t(u32_gptr) *ef)
 {
   /* #pragma omp critical (change_mesh_myelm_list) */
   /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false? positive
@@ -419,8 +464,6 @@ void set_parent_nbinfo_remove_children(tElm *parent,
   //GEN_Pragma(omp critical (change_mesh_myelm_list))
   GEN_Pragma(omp critical)
   {
-    int nbs_on_other_rank;
-    struct list_head *pos_ijk, *sav;
     /* NOTE: This new parent has all zero for nfnb, fnb, and nnbinfo=-1.
              Also, all its neighbors have now the wrong nfnb and nbinfo.
              Even worse, all its neighbors have fnb pointers pointing
@@ -431,30 +474,8 @@ void set_parent_nbinfo_remove_children(tElm *parent,
     //int amr_set_nbinfo_of_new_parent(tElm *parent, struct list_head *ch_head)
     // use: connections_get_nbloc_InsidePat
 
-    /* for now we just invalidate a lot and remove the children */
-    nbs_on_other_rank = 0;
-    list_for_each(pos_ijk, ch_head)
-    {
-      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
-      int ret = amr_invalidate_nbinfo_of_all_nbs(ch_ijk, 0);
-      if(ret) nbs_on_other_rank++;
-      /* Note: amr_invalidate_nbinfo_of_all_nbs(ch_ijk) sets the fnb in
-         nbelm that point to child0-7 to NULL, if its 2nd arg is 0 */
-    }
-    if(nbs_on_other_rank)
-      amr_remove_mesh_nbelm(Elm_mesh(parent), 0);
-      /* Note: amr_remove_mesh_nbelm cannot invalidate the fnb pointers
-         of child0-7, if all pointers to child0-7 in nbelm are NULL
-         (See comment above). This means child0-7 then contain invalid
-         pointers! But we will free child0-7 very soon. */
-
-    /* free children */
-    list_for_each_safe(pos_ijk, sav, ch_head)
-    {
-      tElm *ch_ijk = list_entry(pos_ijk, tElm, list);
-      list_del(&ch_ijk->list); //del from ch_head
-      free_elm(ch_ijk);        //free mem of child ch_ijk
-    }
+    /* record about which parent face we need info from which rank */
+    amr_khmap_add_negparent_forallchildrenfaces(ef, parent, ch_head);
   }
 }
 
@@ -589,8 +610,7 @@ void remove_elms_if_rflag__general(tMesh *mesh, tRef *ref)
   //                                       struct list_head *ch_head)
 
   //2nd Call:
-  //void set_parent_nbinfo_remove_children(tElm *parent,
-  //                                       struct list_head *ch_head)
+  //void set_parent_nbinfo_ef(tElm *parent, struct list_head *ch_head)
 }
 
 

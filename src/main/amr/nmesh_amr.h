@@ -643,6 +643,9 @@ ulong amr_1st_eid_on_rank(tMesh *mesh, int rank);
 void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,
                                      ulong *elmindex, int *elmrank);
 int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh);
+int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
+                                                 khash_t(u32) *nbranks,
+                                                 khash_t(u32_gptr) *ef);
 int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
 int amr_get_nbelm_elmheaders(tMesh *mesh);
