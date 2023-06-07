@@ -418,7 +418,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
-  amr_remove_mesh_nbelm(mesh, 0);
+  amr_remove_mesh_nbelm_ef(mesh, 0, ef);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
@@ -437,7 +437,8 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
   amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
 
   /* update essential nb info */
-  amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
+  amr_update_elm_nbinfo_if_nnbinfo_negative_ef(mesh, nbranks, ef);
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
