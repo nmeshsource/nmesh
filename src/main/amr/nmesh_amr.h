@@ -350,14 +350,11 @@ typedef struct tVARLIST {
 /**************************************************************************/
 /* define some khash table types */
 /**************************************************************************/
-typedef struct tFLIST {
-  struct list_head flist[6];
-} tFlist;
+
 /* hash sets with only 32 or 64 bit ints as keys and no values */
 KHASH_SET_INIT_INT(u32)
 KHASH_SET_INIT_INT64(u64)
-/* hash table with 32 bit ints as keys and tFlist values */
-KHASH_MAP_INIT_INT(u32_tFlist, tFlist)
+/* hash table with 32 bit ints as keys and generic pointer values */
 KHASH_MAP_INIT_INT(u32_gptr, void *)
 
 
