@@ -418,6 +418,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
+  //amr_remove_mesh_nbelm(mesh, 0);
   amr_remove_mesh_nbelm_ef(mesh, 0, ef);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
