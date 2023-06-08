@@ -2357,7 +2357,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
                                                  khash_t(u32) *nbranks,
                                                  khash_t(u32_gptr) *ef)
 {
-  int f, mywork;
+  int f; //, mywork;
   //int rank=nMPI_rank();
   //int size=nMPI_size();
   tCom *com0, *com1, *com2, *scom;
@@ -2585,7 +2585,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 
   /* recv results about my nbs */
   rq=0;
-  mywork=0;
+  //mywork=0;
   forkhiter(nbranks, ki)
   {
     unsigned rk = kh_key(nbranks, ki);

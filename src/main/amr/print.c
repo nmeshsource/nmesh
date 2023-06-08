@@ -790,14 +790,14 @@ void print_u32(khash_t(u32) *nbranks)
 }
 
 /* print all in ef */
-void print_u32_gptr(khash_t(u32_gptr) *ef)
+void print_ef(khash_t(u32_gptr) *ef)
 {
   khiter_t ki;
   forkhiter(ef, ki)
   {
     struct list_head *fhead = kh_val(ef, ki);
     int f;
-    printf("rank%u %p\n", kh_key(ef, ki), fhead);
+    printf("rank%u %p\n", kh_key(ef, ki), kh_val(ef, ki));
     for(f=0; f<6; f++)
     {
       printf("f%d ", f);
