@@ -70,6 +70,11 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
   /* do N unrefines */
   for(i=0; i<N; i++)
   {
+    //prdivider(3);
+    //prdivider(3);
+    //prdivider(3);
+    //prdivider(3);
+    //PRF;printf(": i=%d\n", i);
     j=0;
     for(rk=0; rk<size; rk++)
     {
