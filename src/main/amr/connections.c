@@ -2447,14 +2447,12 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     rq = append_buffers_to_com(com1, sef,ns[0], ref,nr[0]);
     nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
 
-    PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu rk=%d\n", ns[0], nr[0], rk);
-    PRFs(":2a sef=");
-    for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
-    printf("\n");
+    //PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu rk=%d\n", ns[0], nr[0], rk);
+    //PRFs(":2a sef=");
+    //for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
+    //printf("\n");
     //PRFs(":2b ");
     //for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ref[ii]), " ");
-    fflush(stdout);
-    ////abort();
     rq0++;
   }
 
@@ -2567,10 +2565,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE[0], NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
-    PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu rk=%d\n ef0_nbs=", nsE[0], nrE[0], rk);
-    printarray_eploc(ef0_nbs, 0);printf("\n");
-    fflush(stdout);
-    ////abort();
+    //PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu rk=%d\n ef0_nbs=", nsE[0], nrE[0], rk);
+    //printarray_eploc(ef0_nbs, 0);printf("\n");
 
     rq++;
   }
@@ -2625,8 +2621,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
         if(nr==0) errorexit("what??? how can nr be zero?");
 
       //PRFs(":5 ");printf("nr[0]=%lu\n", nr[0]);
-      //fflush(stdout);
-      ////abort();
 
       /* recv ef0_nbs from rk */
       nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40);
@@ -2634,8 +2628,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
 
       //PRFs(":6 ");
       //for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ef0_nbs[ii]), " ");
-      //fflush(stdout);
-      ////abort();
 
       /* add all in ef0_nbs to my elms as nbs */
       /*******************************************/
@@ -2711,8 +2703,6 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   nMPI_Waitall_com_send(scom);
   /* we are now done with all in scom */
   free_com(scom);
-  //fflush(stdout);
-  ////abort();
 
   /* finally set nnbinfo according to the new nb-info we have now,
      but we keep them negative for now */
@@ -3447,10 +3437,8 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
 {
   khash_t(u32) *fnbranks = kh_init(u32);
   int p_rk = parent->datrank;
-
   //PRF;printelm(parent);
   ////printelm(child0);
-
   int f, ni;
   for(f=0; f<6; f++)
   {
@@ -3534,15 +3522,13 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_gptr) *ef,
           {
             int is_missing;
             kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
-
-            if(elmname_is(parent, "1_3")||elmname_is(parent, "1_730"))
-            {
-              PRFs(": parent=");printelm(parent);
-              PRFs(": nb=");printelm(nb);
-              PRF;printf(": p_rk=%d nb_rk=%d f=%d is_missing=%d\n",
-                         p_rk, nb_rk, f, is_missing);
-            }
-
+            //if(elmname_is(parent, "1_3")||elmname_is(parent, "1_730"))
+            //{
+            //  PRFs(": parent=");printelm(parent);
+            //  PRFs(": nb=");printelm(nb);
+            //  PRF;printf(": p_rk=%d nb_rk=%d f=%d is_missing=%d\n",
+            //             p_rk, nb_rk, f, is_missing);
+            //}
             /* if this is the 1st time we find this rank on this face,
                add parent */
             if(is_missing)
@@ -3596,13 +3582,13 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
             ulong nb_lid = calc_local_elm_id(nb);
             ulong key = Ind_n(elm_rk, nb_lid, nb_f,  key_n);
             kh_put(u64, rk_elm_f, key, &is_missing); /* record */
-            if(elmname_is(elm, "1_3")||elmname_is(elm, "1_730"))
-            {
-              PRFs(": elm=");printelm(elm);
-              PRFs(": nb=");printelm(nb);
-              PRF;printf(": elm_rk=%d nb_lid=%lu nb_f=%d key=%lu is_missing=%d\n",
-                         elm_rk, nb_lid, nb_f, key, is_missing);
-            }
+            //if(elmname_is(elm, "1_3")||elmname_is(elm, "1_730"))
+            //{
+            //  PRFs(": elm=");printelm(elm);
+            //  PRFs(": nb=");printelm(nb);
+            //  PRF;printf(": elm_rk=%d nb_lid=%lu nb_f=%d key=%lu is_missing=%d\n",
+            //             elm_rk, nb_lid, nb_f, key, is_missing);
+            //}
             /* if this is the 1st time we find this nb for this rank on this
                 face, add nb */
             if(is_missing)
