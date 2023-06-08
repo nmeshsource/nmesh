@@ -317,13 +317,8 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
   struct list_head *pos, *sav;
   int num, uref;
   tElm0 *elmar[8];
-
-  /* table with missing nb info */
-  khash_t(u32_gptr) *ef = kh_init(u32_gptr);
-
-  /* record nb ranks before we make changes */
-  khash_t(u32) *nbranks = kh_init(u32);
-  amr_khset_add_nb_ranks(mesh, nbranks);
+  khash_t(u32_gptr) *ef = kh_init(u32_gptr); /* table with missing nb info */
+  khash_t(u32) *nbranks = kh_init(u32); /* table nb ranks */
 
   INIT_LIST_HEAD(&clist);
 
@@ -336,6 +331,19 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     load_balance(mesh, 1);
     Timing->sibl1to7_weight = sibl1to7_weight_sav;
   }
+
+  /* record nb ranks before we remove any elms */
+  amr_khset_add_nb_ranks(mesh, nbranks);
+
+  prdivider(3);
+  prdivider(3);
+  printf("myelms:\n");
+  printmyelms(mesh);
+  prdivider(0);
+  printf("nbelms:\n");
+  printnbelms(mesh);
+  prdivider(3);
+  prdivider(3);
 
   /* loop over list with elms */
   num = uref = 0;
@@ -412,12 +420,19 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     free_elm(child);        //free mem of child child
   }
 
+print_u32(nbranks);
+print_u32_gptr(ef);
+prdivider(0);
 
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   //amr_remove_mesh_nbelm(mesh, 0);
   amr_remove_mesh_nbelm_ef(mesh, 0, ef);
+
+print_u32(nbranks);
+print_u32_gptr(ef);
+prdivider(0);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:

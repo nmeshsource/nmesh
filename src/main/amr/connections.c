@@ -2447,12 +2447,13 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     rq = append_buffers_to_com(com1, sef,ns[0], ref,nr[0]);
     nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
 
-    //PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
-    //PRFs(":2a sef=");
-    //for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
-    ////PRFs(":2b ");
-    ////for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ref[ii]), " ");
-    //fflush(stdout);
+    PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu rk=%d\n", ns[0], nr[0], rk);
+    PRFs(":2a sef=");
+    for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
+    printf("\n");
+    //PRFs(":2b ");
+    //for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ref[ii]), " ");
+    fflush(stdout);
     ////abort();
     rq0++;
   }
@@ -2566,9 +2567,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE[0], NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
-    //PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu\n ef0_nbs=", nsE[0], nrE[0]);
-    //printarray_eploc(ef0_nbs, 0);
-    //fflush(stdout);
+    PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu rk=%d\n ef0_nbs=", nsE[0], nrE[0], rk);
+    printarray_eploc(ef0_nbs, 0);printf("\n");
+    fflush(stdout);
     ////abort();
 
     rq++;
