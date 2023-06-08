@@ -188,11 +188,11 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
-Yo(-100);
-printmyelms(mesh);
-Yo(-90);
-printnbelms(mesh);
-print_u32_gptr(ef);
+//Yo(-100);
+//printmyelms(mesh);
+//Yo(-90);
+//printnbelms(mesh);
+//print_u32_gptr(ef);
 
   /* now remove/free all old parents */
   list_for_each_safe(pos, sav, &plist)
@@ -205,16 +205,16 @@ print_u32_gptr(ef);
     list_del(&parent->list);
     free_elm(parent);
   }
-Yo(-80);
-//printmyelms(mesh);
-Yo(-70);
-printnbelms(mesh);
+//Yo(-80);
+////printmyelms(mesh);
+//Yo(-70);
+//printnbelms(mesh);
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   prTimeIn_s("before amr_remove_mesh_nbelm_ef ");
   amr_remove_mesh_nbelm_ef(mesh, 0, ef);
-print_u32_gptr(ef);
+//print_u32_gptr(ef);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
@@ -229,11 +229,10 @@ print_u32_gptr(ef);
        amr_elm_nbinfo_to_elm_fnb                  */
   update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
 
-Yo(123);
-printmyelms(mesh);
-//printnbelms(mesh);
-print_u32_gptr(ef);
-//abort();
+//Yo(123);
+//printmyelms(mesh);
+////printnbelms(mesh);
+//print_u32_gptr(ef);
 
   /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
   amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
@@ -272,7 +271,6 @@ print_u32_gptr(ef);
   /* free hash tables */
   kh_destroy(u32, nbranks);
   kh_destroy(u32_gptr, ef);
-//abort();
 }
 
 /* set some nbinfo, record what is missing in ef, and then remove and

@@ -2416,7 +2416,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     tEploc *sef = checked_calloc(ns[0], sizeof(sef[0]));
     tEploc *ref = checked_calloc(nr[0], sizeof(ref[0]));
 
-PRFs(":1r ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
+    //PRFs(":1r ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
 
     if(ki2!=kh_end(ef)) /* if rk is in ef */
     {
@@ -2447,13 +2447,13 @@ PRFs(":1r ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
     rq = append_buffers_to_com(com1, sef,ns[0], ref,nr[0]);
     nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
 
-PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
-PRFs(":2a sef=");
-for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
-//PRFs(":2b ");
-//for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ref[ii]), " ");
-fflush(stdout);
-//abort();
+    //PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu\n", ns[0], nr[0]);
+    //PRFs(":2a sef=");
+    //for(int ii=0; ii<ns[0]; ii++) printeploc_s(&(sef[ii]), " ");
+    ////PRFs(":2b ");
+    ////for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ref[ii]), " ");
+    //fflush(stdout);
+    ////abort();
     rq0++;
   }
 
@@ -2492,9 +2492,9 @@ fflush(stdout);
     /* process eplocs that others want to know about */
     nMPI_Wait_com_recv(com1, rq); /* wait for request number rq */
 
-//PRFs(":3 ref=");
-//for(int ii=0; ii<16; ii++) printeploc_s(&(ref[ii]), " ");
-fflush(stdout);
+    ////PRFs(":3 ref=");
+    ////for(int ii=0; ii<16; ii++) printeploc_s(&(ref[ii]), " ");
+    //fflush(stdout);
 
     /* do work on ref array for request rq and find all nbs of all in ref */
     for(i=0, f=0; f<6; f++)
@@ -2566,10 +2566,10 @@ fflush(stdout);
     srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE[0], NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
-PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu\n ef0_nbs=", nsE[0], nrE[0]);
-printarray_eploc(ef0_nbs, 0);
-fflush(stdout);
-//abort();
+    //PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu\n ef0_nbs=", nsE[0], nrE[0]);
+    //printarray_eploc(ef0_nbs, 0);
+    //fflush(stdout);
+    ////abort();
 
     rq++;
   }
@@ -2620,21 +2620,21 @@ fflush(stdout);
       //ulong ef0_nbs_idx = 0; /* index of next entry to add */
       //ulong nmyEplocs;       /* number of tEploc sized entries in ef0_nbs */
 
-     if(ki2!=kh_end(ef)) /* if rk is in ef */
-       if(nr==0) errorexit("what??? how can nr be zero?");
+      if(ki2!=kh_end(ef)) /* if rk is in ef */
+        if(nr==0) errorexit("what??? how can nr be zero?");
 
-PRFs(":5 ");printf("nr[0]=%lu\n", nr[0]);
-fflush(stdout);
-//abort();
+      //PRFs(":5 ");printf("nr[0]=%lu\n", nr[0]);
+      //fflush(stdout);
+      ////abort();
 
       /* recv ef0_nbs from rk */
       nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40);
       //FIXME: can we pair Isend with Recv???
 
-PRFs(":6 ");
-for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ef0_nbs[ii]), " ");
-fflush(stdout);
-//abort();
+      //PRFs(":6 ");
+      //for(int ii=0; ii<nr[0]; ii++) printeploc_s(&(ef0_nbs[ii]), " ");
+      //fflush(stdout);
+      ////abort();
 
       /* add all in ef0_nbs to my elms as nbs */
       /*******************************************/
@@ -2691,7 +2691,7 @@ fflush(stdout);
             /* add all nbs in ef0_nbs to var amr_elm_nbinfo */
             amr_elm_nbinfo_add_nbeploc(elm, f, nnb, &(ef0_nbs[epi]));
             epi += nnb;
-            PRFs(":7 elm=");printelm0(elm,"\n");print_amr_elm_nbinfo(elm, f);
+            //PRFs(":7 elm=");printelm0(elm,"\n");print_amr_elm_nbinfo(elm, f);
           }
         } /* end for f */
       } /* end func that builds nb-info from ef0_nbs */
@@ -2710,8 +2710,8 @@ fflush(stdout);
   nMPI_Waitall_com_send(scom);
   /* we are now done with all in scom */
   free_com(scom);
-fflush(stdout);
-//abort();
+  //fflush(stdout);
+  ////abort();
 
   /* finally set nnbinfo according to the new nb-info we have now,
      but we keep them negative for now */
@@ -3447,8 +3447,8 @@ void amr_khmap_add_negchildren_forallparentfaces(khash_t(u32_gptr) *ef,
   khash_t(u32) *fnbranks = kh_init(u32);
   int p_rk = parent->datrank;
 
-  PRF;printelm(parent);
-  //printelm(child0);
+  //PRF;printelm(parent);
+  ////printelm(child0);
 
   int f, ni;
   for(f=0; f<6; f++)
@@ -3533,6 +3533,15 @@ void amr_khmap_add_negparent_forallchildrenfaces(khash_t(u32_gptr) *ef,
           {
             int is_missing;
             kh_put(u32, fnbranks, nb_rk, &is_missing); /* record nb rank */
+
+            if(elmname_is(parent, "1_3")||elmname_is(parent, "1_730"))
+            {
+              PRFs(": parent=");printelm(parent);
+              PRFs(": nb=");printelm(nb);
+              PRF;printf(": p_rk=%d nb_rk=%d f=%d is_missing=%d\n",
+                         p_rk, nb_rk, f, is_missing);
+            }
+
             /* if this is the 1st time we find this rank on this face,
                add parent */
             if(is_missing)
@@ -3586,7 +3595,7 @@ void amr_invalidate_nbinfo_of_mesh_nbelm_nbs_ef(tMesh *mesh,
             ulong nb_lid = calc_local_elm_id(nb);
             ulong key = Ind_n(elm_rk, nb_lid, nb_f,  key_n);
             kh_put(u64, rk_elm_f, key, &is_missing); /* record */
-            if(elmname_is(elm, "1_2")||elmname_is(elm, "1_3")||key==56)
+            if(elmname_is(elm, "1_3")||elmname_is(elm, "1_730"))
             {
               PRFs(": elm=");printelm(elm);
               PRFs(": nb=");printelm(nb);
