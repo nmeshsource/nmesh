@@ -288,7 +288,7 @@ int test_point_interpolation(tMesh *mesh)
   //printvar_innode(nd, vi);
   dir = 0;
   p = (n2>1);
-  redim_array(Cp[0], 11*p+1,0,0);
+  redim_array(Cp[0], 11*p+1,-1,-1);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   basis_interp2d_topoints(nd, VarA(nd, ui), dir,p,
                           Cp, Xp[0], Lagrange_of_x);
@@ -297,7 +297,7 @@ int test_point_interpolation(tMesh *mesh)
 
   dir = 1;
   p = (n2>1);
-  redim_array(Cp[0], 14*p+1,0,0);
+  redim_array(Cp[0], 14*p+1,-1,-1);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   basis_interp2d_topoints(nd, VarA(nd, ui), dir,p,
                           Cp, Xp[0], Lagrange_of_x);
@@ -306,7 +306,7 @@ int test_point_interpolation(tMesh *mesh)
 
   dir = 2;
   p = (n2>1);
-  redim_array(Cp[0], 19*p+1,0,0);
+  redim_array(Cp[0], 19*p+1,-1,-1);
   fill_2arrays_with_nodepoints(nd, dir, Cp);
   basis_interp2d_topoints(nd, VarA(nd, ui), dir,p,
                           Cp, Xp[0], Lagrange_of_x);
