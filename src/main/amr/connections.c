@@ -974,6 +974,23 @@ tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank)
   else                          return NULL;
 }
 
+/* get eploc from eid
+   In: mesh, eid  Out: eploc
+   Returns: elm if it is on my rank, otherwise NULL */
+tElm *elm_eploc_from_eid(tMesh *mesh, ulong eid, tEploc *eploc)
+{
+  ulong elmindex;
+  int elmrank;
+  tElm *elm = elm_from_eid(mesh, eid, &elmindex, &elmrank);
+
+  if(elm) eploc = elm->eploc;
+
+  /* Bcast eploc */
+  nMPI_Bcast(eploc,1, nMPIvars->TEPLOC, elmrank);
+
+  return elm;
+}
+
 
 /****************************************************************************/
 /* functions that work on elm */
