@@ -1321,8 +1321,8 @@ double rec1d_m_WENOmT_1(int n, const double *u, int im, double u_scale)
 
 
 /*************************************************************************/
-/* WEONZ is almost the same as WENO5, it just use the different factor
-   o_p_db02 when scaling the optimal WENO5 weights */
+/* WENOZ is almost the same as WENO5, it just uses the different factor
+   (1. + tau5/b1_p_eps) when scaling the optimal WENO5 weights */
 /*************************************************************************/
 
 /* Interpolate a field u to midpoint at i+1/2 with index im.
@@ -1358,12 +1358,12 @@ double rec1d_p_WENOZ(int n, const double *u, int im, double u_scale,
   double b0_p_eps = b0 + WENO5_epsilon*us2;
   double b1_p_eps = b1 + WENO5_epsilon*us2;
   double b2_p_eps = b2 + WENO5_epsilon*us2;
-  double o_p_db02 = 1. + fabs(b0 - b2);
+  double tau5 = fabs(b0 - b2);
 
   /* non-normalized weights */
-  double omegab0 = W5->optw[0]*o_p_db02/(b0_p_eps);
-  double omegab1 = W5->optw[1]*o_p_db02/(b1_p_eps);
-  double omegab2 = W5->optw[2]*o_p_db02/(b2_p_eps);
+  double omegab0 = W5->optw[0]*(1. + tau5/b0_p_eps);
+  double omegab1 = W5->optw[1]*(1. + tau5/b1_p_eps);
+  double omegab2 = W5->optw[2]*(1. + tau5/b2_p_eps);
   double oo_omegab_sum = 1./(omegab0 + omegab1 + omegab2);
 
   /* normalized weights */
@@ -1412,12 +1412,12 @@ double rec1d_m_WENOZ(int n, const double *u, int im, double u_scale,
   double b2_p_eps = b2 + WENO5_epsilon*us2;
   double b1_p_eps = b1 + WENO5_epsilon*us2;
   double b0_p_eps = b0 + WENO5_epsilon*us2;
-  double o_p_db02 = 1. + fabs(b0 - b2);
+  double tau5 = fabs(b0 - b2);
 
   /* non-normalized weights */
-  double omegab2 = W5->optw[2]*o_p_db02/(b2_p_eps);
-  double omegab1 = W5->optw[1]*o_p_db02/(b1_p_eps);
-  double omegab0 = W5->optw[0]*o_p_db02/(b0_p_eps);
+  double omegab2 = W5->optw[2]*(1. + tau5/b2_p_eps);
+  double omegab1 = W5->optw[1]*(1. + tau5/b1_p_eps);
+  double omegab0 = W5->optw[0]*(1. + tau5/b0_p_eps);
   double oo_omegab_sum = 1./(omegab0 + omegab1 + omegab2);
 
   /* normalized weights */
