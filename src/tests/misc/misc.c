@@ -98,7 +98,7 @@ int test_point_interpolation(tMesh *mesh)
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
-  nd = Lnode_myid(mesh, mesh->myln->nm-1); /* my last node??? */
+  nd = Lnode_myid(mesh, mesh->nmyelm-1); /* my last node??? */
   for(dir=0; dir<3; dir++) Xb[dir] = node_Xb(nd,dir)->d;
 
   /* print var in one node */
@@ -431,12 +431,16 @@ int test_point_finders(tMesh *mesh)
   double XX1[] = { -4.-0.1,   -1.1, -0.01 };
   double XX2[] = { -2,        -1.1, -0.01 };
   tArray *Xc[3], *Xd[3];
+  tEploc eploc[1];
+  tElm *elm;
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
 
-  /* 1st node */
-  nd = mesh->lns->node;
+  /* 1st node (with eid=0) */
+  elm = elm_eploc_from_eid(mesh, 0, eploc);
+  if(elm) nd = elm;
+  else    nd = alloc_elm_of_eploc(mesh, eploc);
 
   Xc[0] = alloc_array(nn);
   Xc[1] = alloc_array(nn);
@@ -488,6 +492,8 @@ int test_point_finders(tMesh *mesh)
   free_array(Xd[0]);
   free_array(Xd[1]);
   free_array(Xd[2]);
+  if(!elm) free_elm(nd);
+
   return 0;
 }
 
