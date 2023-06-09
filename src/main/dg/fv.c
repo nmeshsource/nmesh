@@ -105,6 +105,11 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     rec1d_m = rec1d_m_WENOm5_2;
     nghosts = 0;
     break;
+  case FV_REC_WENOmT_2:
+    rec1d_p = rec1d_p_WENOmT_2;
+    rec1d_m = rec1d_m_WENOmT_2;
+    nghosts = 0;
+    break;
   case FV_REC_WENOmZ_2:
     rec1d_p = rec1d_p_WENOmZ_2;
     rec1d_m = rec1d_m_WENOmZ_2;
