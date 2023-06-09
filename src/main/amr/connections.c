@@ -815,7 +815,7 @@ char *elmname(tElm *elm, char *s, int slen)
   return s;
 }
 
-/* get eploc of elm in a patch from string produced by elm_location_str */
+/* get eloc of elm in a patch from string produced by elm_location_str */
 void eloc_from_location_str(tEloc *eloc, int p, char *loc)
 {
   int i;
