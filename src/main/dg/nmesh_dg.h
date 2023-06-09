@@ -11,6 +11,7 @@ enum
   FV_REC_1,               /* 1st order accurate reconstruction */
   FV_REC_WENOm3_2,        /* non-standard WENO3 with uniform opt. weights */
   FV_REC_WENOm5_2,        /* non-standard WENO5 with uniform opt. weights */
+  FV_REC_WENOmT_2,        /* similar to WENOmZ_2 */
   FV_REC_WENOmZ_2,        /* non-standard WENOZ with uniform opt. weights */
   FV_REC_WENOm3_1,        /* non-standard WENO3 with uniform opt. weights */
   FV_REC_WENOm5_1,        /* non-standard WENO5 with uniform opt. weights */
@@ -140,6 +141,8 @@ double rec1d_p_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm5_1(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm5_1(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENOmT_2(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOmT_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOmZ_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOmZ_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOmZ_1(int n, const double *u, int im, double u_scale);
