@@ -707,8 +707,9 @@ int test_indc(tMesh *mesh)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    node->dat->ic[vi]->myindc->d[0] = Node_eid(node);
-    node->dat->ic[vi]->myindc->d[1] = -Node_eid(node);
+    long eid = Node_eid(node);
+    node->dat->ic[vi]->myindc->d[0] = eid;
+    node->dat->ic[vi]->myindc->d[1] = -eid;
   }
   request_all_myln_indc_exchange_for_vl(mesh, vl);
 
