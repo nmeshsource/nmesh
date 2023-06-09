@@ -215,3 +215,10 @@ typedef struct XXXX {
    recv other array to these ranks
  work on all arrays that I got (i.e. find nbs)
  send/recv results (i.e. nbs) from all these ranks
+DONE!
+
+
+Tests in misc.c
+===============
+mpirun -np 3 ~/nmesh/exe/nmesh misc.par
+hangs... MPI???
