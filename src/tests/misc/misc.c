@@ -374,6 +374,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int nn[] = { 3,5,5 };
+  int no[3];
   //int pt_typ[] = { P_LGL, P_LGL, P_LGL };
   tDat *d0;
   tRef ref[1];
@@ -392,6 +393,9 @@ int test_parent_child_interpolation(tMesh *mesh)
   printvar_innode(nd, ui);
   if(d0) printf("1 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
 
+  /* save nd->n in no */
+  for(ii=0; ii<3; ii++) no[ii] = nd->n[ii];
+
   nd->rflag = 1;
   ref->method = GIVEN_n_P_LGL;
   for(ii=0; ii<3; ii++) ref->n[ii] = nn[ii];
@@ -407,6 +411,8 @@ int test_parent_child_interpolation(tMesh *mesh)
   printvar_innode(nd, ui);
 
   for(ii=0; ii<8; ii++) Elm_MyID(mesh, ii)->rflag = -1;
+  ref->method = GIVEN_n_P_LGL;
+  for(ii=0; ii<3; ii++) ref->n[ii] = no[ii];
   remove_elms_if_rflag(mesh, ref);
 
   nd = MyElm0;
