@@ -722,7 +722,7 @@ void hrefine_nodes_if_nb_finer(tMesh *mesh, tRef *ref)
 /* h-refine all nodes up to level l */
 void hrefine_mesh_to_level(tMesh *mesh, int l)
 {
-  int i, ref;
+  int i, ref, Ref;
   tRef rf[1];
   rf->method = PARENT_n;
 
@@ -742,8 +742,10 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
         elm->rflag = 0;
       }
     }
-
-    if(ref)
+    /* check if anyone has set the rflag, if yes call hrefine_elms_if_rflag */
+    Ref = ref;
+    nMPI_Allreduce(&ref, &Ref, 1, nMPI_INT, MPI_LOR);
+    if(Ref)
     {
       hrefine_elms_if_rflag(mesh, rf);
       if(PR)
@@ -773,7 +775,7 @@ void hrefine_mesh_to_level_loadbalance(tMesh *mesh, int l)
 /* coarsen all nodes up to level l */
 void hcoarsen_mesh_to_level(tMesh *mesh, int l)
 {
-  int ref;
+  int ref, Ref;
   tRef rf[1];
   rf->method = PARENT_n;
 
@@ -793,7 +795,9 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
         node->rflag = 0;
       }
     }
-
+    /* check if anyone has set the rflag, if yes call remove_elms_if_rflag */
+    Ref = ref;
+    nMPI_Allreduce(&ref, &Ref, 1, nMPI_INT, MPI_LOR);
     if(ref)
     {
       remove_elms_if_rflag(mesh, rf);
