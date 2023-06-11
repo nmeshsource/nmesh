@@ -163,9 +163,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   INIT_LIST_HEAD(&plist);
 
-  //FIXME: do we need this:
   /* free surfaces & indc since they will change now anyway */
-  //evolve_free_communication_structs(mesh);
+  evolve_free_communication_structs(mesh);
 
   /* loop over list with elms */
   list_for_each_safe(pos, sav, &mesh->myelm_head)
@@ -260,10 +259,10 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
   prTimeIn_s("end of hp_refine_elms_if_rflag ");
 
-  /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
-  //amr_get_nbelm_elmheaders(mesh);
+  /* nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
+  amr_get_nbelm_elmheaders(mesh);
   /* now that elms have changed re-init surfaces & indc */
-  //evolve_init_communication_structs(mesh);
+  evolve_init_communication_structs(mesh);
 
   /* free all in lists of ef */
   amr_khmap_free_all_lists(ef);
@@ -332,9 +331,8 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     Timing->sibl1to7_weight = sibl1to7_weight_sav;
   }
 
-  //FIXME: do we need this:
   /* free surfaces & indc since they will change now anyway */
-  //evolve_free_communication_structs(mesh);
+  evolve_free_communication_structs(mesh);
 
   /* record nb ranks before we remove any elms */
   amr_khset_add_nb_ranks(mesh, nbranks);
@@ -460,10 +458,10 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
 
-  /* FIXME: nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
-  //amr_get_nbelm_elmheaders(mesh);
+  /* nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
+  amr_get_nbelm_elmheaders(mesh);
   /* now that elms have changed re-init surfaces & indc */
-  //evolve_init_communication_structs(mesh);
+  evolve_init_communication_structs(mesh);
 
   /* free all in lists of ef */
   amr_khmap_free_all_lists(ef);
