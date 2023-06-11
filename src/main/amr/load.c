@@ -30,6 +30,9 @@ void load_balance(tMesh *mesh, int strategy)
   /* to keep sibling 1-7 together with sibling 0 we need to have
      Timing->sibl1to7_weight = 0.;  */
 
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
+
   /* when we move elms much of mesh->nbelm will become wrong */
   amr_remove_mesh_nbelm(mesh, 0); // this makes some of nnbinfo negative
 
@@ -49,6 +52,9 @@ void load_balance(tMesh *mesh, int strategy)
 
   /* set elm->n and elm->pt_typ for the elms of mesh->nbmesh */
   amr_get_nbelm_elmheaders(mesh);
+
+  /* now that nodes are elsewhere re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
 }
 
 /* function that can be scheduled in LOADBALANCING */
@@ -772,10 +778,6 @@ void load_balance_elms(tMesh *mesh)
   /* free all received elm0 */
   free(nr_elms);
   rows_free(r_elms, size);
-
-  /* free surfaces & indc since they will change now anyway */
-  evolve_free_communication_structs(mesh);
-
   //Yo(200);
   //PRF;printf(": %zu in mesh->myelm_head\n", list_count_nodes(&mesh->myelm_head));
   //printf("  mesh->nmyelm=%lu\n", mesh->nmyelm);
@@ -787,7 +789,4 @@ void load_balance_elms(tMesh *mesh)
   update_mesh_myelms_elm_eid_dt(mesh);
   PRF;printf(": --> %lu on this proc\n", mesh->nmyelm);
   //printf(": --> %zu on this proc\n", list_count_nodes(&mesh->myelm_head));
-
-  /* now that nodes are elsewhere re-init surfaces & indc */
-  evolve_init_communication_structs(mesh);
 }
