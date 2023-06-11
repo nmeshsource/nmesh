@@ -584,8 +584,8 @@ int test_ajsurf(tMesh *mesh)
   /* exchange surfaces */
   prdivider(0);
   PRF;printf(": request_all_myln_surfaces_exchange\n");
-  init_all_myln_surfaces(mesh);
-  set_all_myln_mysurf(mesh);
+  //init_all_myln_surfaces(mesh);
+  //set_all_myln_mysurf(mesh);
   request_all_myln_surfaces_exchange(mesh);
 
   /* Here we can do work. MPI is now busy sending buffers */
@@ -622,7 +622,7 @@ int test_ajsurf(tMesh *mesh)
   }
 
   /* free redundant nbsurf stuff */
-  free_all_myln_nbsurf_only(mesh);
+  //free_all_myln_nbsurf_only(mesh);
 
   /* print var in all nodes again */
   prdivider(0);
@@ -663,7 +663,7 @@ int test_ajsurf(tMesh *mesh)
   printf("on all procs: total %.15g\n", sqrt(Sum));
 
   /* after we have printed them, we no longer need the surfaces */
-  free_all_myln_surfaces(mesh);
+  //free_all_myln_surfaces(mesh);
   return 0;
 }
 
