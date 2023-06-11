@@ -400,7 +400,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   ref->method = GIVEN_n_P_LGL;
   for(ii=0; ii<3; ii++) ref->n[ii] = nn[ii];
   hrefine_elms_if_rflag(mesh, ref);
-  amr_get_nbelm_elmheaders(mesh);
+  //amr_get_nbelm_elmheaders(mesh);
   //printmesh(mesh);
 
   //printf("2 nd %p %p\n", (void *) nd, (void *) nd->dat);
@@ -415,7 +415,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   ref->method = GIVEN_n_P_LGL;
   for(ii=0; ii<3; ii++) ref->n[ii] = no[ii];
   remove_elms_if_rflag(mesh, ref);
-  amr_get_nbelm_elmheaders(mesh);
+  //amr_get_nbelm_elmheaders(mesh);
 
   nd = MyElm0;
   printf("3 nd %p %p\n", (void *) nd, (void *) nd->dat);
