@@ -237,12 +237,6 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
   amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
 
-
-  /* update nbinfo of new children and other rank boundary elms using
-     the info in ef */
-  //.... FIXME!
-
-
   /*
   formyelms(mesh)
   {
