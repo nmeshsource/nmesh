@@ -268,7 +268,9 @@ hcoarsen_pat(mesh, 0);
 
   /* load balance full mesh */
   simple_load_balance(mesh);
-  if(PR) { printmesh(mesh); }
+
+  PRFs(":\n");
+  printmesh(mesh);
 
   return ret;
 }
