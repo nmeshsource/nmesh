@@ -343,14 +343,6 @@ Questions about bamps:
 
 Things that should be done:
 ===========================
-*does hrefine_mesh_to_level need a fornodelist(mesh->lns, el) loop or can we
- use formylnodes(mesh):
- -The way hrefine_mesh_to_level is curently written, it needs fornodelist!
-  Reason: hrefine_nodes_if_rflag needs to be called on each MPI job, but
-  ref=0 on one MPI job is possible if it has no nodes to be refined.
- -But it is possible to use formylnodes together with hrefine_nodes_if_rflag!
- -Probably hrefine_pat would already work as is with formylnodes
-
 *consider moving some stuff from tNode into tDat, e.g.:
  int rflag; nMPI_Comm comm;
 
