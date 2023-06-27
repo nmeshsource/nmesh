@@ -24,9 +24,9 @@ void printmesh(tMesh *mesh)
 
   forpatches(mesh, p)
     printpatch(mesh->pat[p]);
-  printf("leaf nodes on this rank:\n");
+  printf("leaf nodes on this rank: %lu \n", mesh->nmyelm);
   printmyelms(mesh);
-  printf("leaf nodes on nearby ranks:\n");
+  printf("leaf nodes on nearby ranks: %lu\n", mesh->nnbelm);
   printnbelms(mesh);
 }
 

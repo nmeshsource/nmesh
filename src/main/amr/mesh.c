@@ -297,13 +297,9 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
   if(pr)
   {
     PRFs(":\n");
-    printf("mesh->myelm: ");
-    printelmarray(mesh->nmyelm, mesh->myelm);
-    printmyelms(mesh);
-    printf("mesh->nbelm: ");
-    printelmarray(mesh->nnbelm, mesh->nbelm);
-    printnbelms(mesh);
+    printmesh(mesh);
   }
+
   return 0;
 }
 
