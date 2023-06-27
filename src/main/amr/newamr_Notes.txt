@@ -222,3 +222,43 @@ Tests in misc.c
 ===============
 mpirun -np 3 ~/nmesh/exe/nmesh misc.par
 hangs... MPI???
+
+FOR:
+mpirun -np 3 xterm -e gdb -ex r --args ~/nmesh/exe/nmesh Misc.par
+
+on rank2 we have:
+append_buffers_to_com:
+realloc_com_reqs: n_rq_new=1
+put_buffers_in_com:
+set_free_buf_in_com: free_buf=0
+nMPI_Isend_Irecv_com: print_com:
+com0x55555629c090: n_rq=1 send_i=0 recv_i=0
+    rq=0 rank_other=0 s_tag=1 r_tag=768
+nMPI_Isend_Irecv: 2 to 0, ns=6 nr=6 s_tag=1 r_tag=768
+nMPI_Isend_Irecv: calling MPI function...
+nMPI_Isend_Irecv: done.
+nMPI_size: calling MPI function...
+nMPI_size: done.
+nMPI_size: calling MPI function...
+nMPI_size: done.
+
+on rank0 we have:
+append_buffers_to_com:
+realloc_com_reqs: n_rq_new=2
+put_buffers_in_com:
+set_free_buf_in_com: free_buf=0
+nMPI_Isend_Irecv_com: print_com:
+com0x555556293820: n_rq=2 send_i=0 recv_i=0
+    rq=1 rank_other=2 s_tag=768 r_tag=7
+nMPI_Isend_Irecv: 0 to 2, ns=6 nr=6 s_tag=768 r_tag=7
+nMPI_Isend_Irecv: calling MPI function...
+nMPI_Isend_Irecv: done.
+nMPI_Wait_com_recv: print_com:
+
+SO 0 tries to receive with r_tag=7, while 2 sends with s_tag=1
+that CANNOT work!!!!!!!!!!!!!!!!!!
+
+
+Probably the nb index ni is not consistent (like in oldamr) because each
+nbelm has only the nbs it needs for this rank, and not all nbs it has (look
+at output of printmesh before and after load bal.)
