@@ -262,3 +262,4 @@ that CANNOT work!!!!!!!!!!!!!!!!!!
 Probably the nb index ni is not consistent (like in oldamr) because each
 nbelm has only the nbs it needs for this rank, and not all nbs it has (look
 at output of printmesh before and after load bal.)
+Indeed: on rank0 0_ has 2_ at ni=1, while on rank2 0_ has 2_ at ni=0.
