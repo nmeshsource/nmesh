@@ -216,8 +216,13 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
         //s_comm = node->comm;
         lid = calc_node_lid(node);
         nb_lid = calc_node_lid(nb);
-        s_ltag = (nb_lid*64 + nb_ni)*6 + nb_f;
-        r_ltag = (lid*64 + ni)*6 + f;
+        //s_ltag = (nb_lid*64 + nb_ni)*6 + nb_f;
+        //r_ltag = (lid*64 + ni)*6 + f;
+        /* We do not use nb_ni and ni any more since the elms in mesh->nbelm
+           have only the fnb needed for communication and not all of them.
+           Thus ni and nb_ni do not necessarily agree on different ranks. */
+        s_ltag = nb_lid*6 + nb_f;
+        r_ltag = lid*6 + f;
         nMPI_long_tag_to_commi_tag(s_ltag, &ci, &s_tag);
         s_comm = nMPIvars_get_comm(ci);
         nMPI_long_tag_to_commi_tag(r_ltag, &ci, &r_tag);
