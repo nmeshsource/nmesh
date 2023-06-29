@@ -395,7 +395,7 @@ int test_parent_child_interpolation(tMesh *mesh)
   d0 = nd->dat;
   printelm(nd);
   printvar_innode(nd, ui);
-  if(d0) printf("1 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
+  if(d0) printf("1 nd eid=%lu d0:%d %d\n", Node_eid(nd), d0!=NULL, d0->nv);
 
   /* save nd->n in no */
   for(ii=0; ii<3; ii++) no[ii] = nd->n[ii];
@@ -407,8 +407,8 @@ int test_parent_child_interpolation(tMesh *mesh)
   //amr_get_nbelm_elmheaders(mesh);
   //printmesh(mesh);
 
-  //printf("2 nd %p %p\n", (void *) nd, (void *) nd->dat);
-  //if(d0) printf("2b nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
+  //printf("2 nd eid=%lu dat:%d\n", Node_eid(nd), nd->dat!=NULL);
+  //if(d0) printf("2b nd eid=%lu d0:%d %d\n", Node_eid(nd), d0!=NULL, d0->nv);
   printf("2c: test_func=%g\n", test_func(-4,-2,-1));
   printf("2c: test_func=%g\n", test_func(-1,-1,-1));
   nd = MyElm0;
@@ -422,7 +422,8 @@ int test_parent_child_interpolation(tMesh *mesh)
   //amr_get_nbelm_elmheaders(mesh);
 
   nd = MyElm0;
-  printf("3 nd %p %p\n", (void *) nd, (void *) nd->dat);
+  printf("3 nd eid=%lu dat:%d\n", Node_eid(nd), nd->dat!=NULL);
+
   //if(d0) printf("4 nd %p %p %d\n", (void *) nd, (void *) d0, d0->nv);
   printelm(nd);
   printvar_innode(nd, ui);
