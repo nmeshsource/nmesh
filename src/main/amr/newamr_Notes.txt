@@ -39,29 +39,10 @@ Make an info exchange function (elm_exchange_between_nbranks):
 
 About load bal:
 ===============
-*make load bal func for elms first, because this is needed for
- remove_elms_if_rflag, where we need all 8 on same rank to de-refine.
-*maybe keep all 8 siblings together on 1 MPI rank, then any AMR criterion
- can check locally (without MPI communication) if de-refinement (8sib->1parent)
- should happen.
- -but not, if one of the siblings gets refined further
- -how do we store this info about other siblings???
-  +could store a flag sib_ref that says if sibling is refined???
-  -sounds complicated, maybe don't keep them together after all???
-  +or have flag keep_together=1 on each sibling that gets zero'd if
-   one is later refined? But how does this flag get 1 again?
-=> maybe don't try to keep them together:
-    Rather make AMR-func that checks all 8 and sets ref flag to de-ref.
-    Then a loadbal func can gather all 8, if all 8 agree that they
-    should be de-refined.
-    *check how destroy_nodes_no_nid_update currently works,
-     do it compare ref flags on all 8???
-
-*search for:  double et = dat->info->load_TimeIn_s;  in *.c
- and replace it with a call to:
-   double timing_get_elm_load_TimeIn_s(tElm *elm)
-
-
+*We now have Timing->sibl1to7_weight
+ If this is 1 the 8 siblings are spread across MPI ranks. If it is 0 then
+ sibl. 1-7 do not count in the load calc, and thus are kept togther with
+ sibl. 0.
 
 
 About refinement:
@@ -74,16 +55,13 @@ About refinement:
    hp_refine_nodes_if_rflag -> hp_refine_elms_if_rflag
    remove_nodes_if_rflag    -> remove_elms_if_rflag
 
-*de-refine is trickier. We  can remove all 8 siblings only if none are
+*de-refine is trickier. We can remove all 8 siblings only if none are
  refined themsleves AND if ALL are flagged for de-ref.
- +check among all locally available siblings and set their ref flags to zero
-  if any one sibling has ref=0.
- +then call elm_exchange_between_nbranks from above, and again zero ref
-  flags if siblings on nb rank have zero flag, or are refined themselves...
- +OR: just set elm et contrib to myT to 0 if(elm_get_ijk(elm)!=0)
-  But NOTE: in load_balance_elms there is this if:
-            "if(et <= loadTmin) et = loadTmin;" which could screw this up!!!
-
+*when we de-refine we 1st set Timing->sibl1to7_weight=0 and then do load
+ bal, so that all 8 siblings end up on the same MPI rank.
+*then we can derefine locally:
+ +check among all locally available siblings and do not de-refine if any one
+  sibling has ref=0.
 
 
 More about load bal:
@@ -112,19 +90,18 @@ ops_bal_r = w_r * ops
 About nid/eid:
 ==============
 *we now call it eid instead of nid
-*use maybe: unsigned long eid; //not size_t because we don't have MPI_SIZE_T
+*use: unsigned long eid; //not size_t because we don't have MPI_SIZE_T
 *then also:
  #define  NID_INVALID  (ULONG_MAX)
  #define  NID_REMOVED  (ULONG_MAX-1)
  (these 2 are -1 and -2 when converted to long)
-*also add oid to save old value of eid (e.g. after refine)
+*could also add oid to save old value of eid (e.g. after refine)
 *make eids again, in a way that just numbers all elms over all ranks
  consecutively
 *then eids do not change because of load bal
 *also from the eid alone we can tell the rank, if we store the 1st eid of
  every rank in the tMesh on each rank;
-*think: DO we need eid/nid at all? Maybe eploc(without eid) + datrank is
-        enough???
+
 
 About refine:
 =============
@@ -143,8 +120,7 @@ About fnb info and such:
 *nbinfo needs to be set using the nb elm finding funcs I made
 *from nbinfo we can then set the elm->fnb pointers
 *we also copy all elms from other ranks that are nb of one of our elms
- we put them into either: a linked elm list: struct list_head nbelm_head;
-                          or an array-list:  tElm **nbelm;
+ we put them into an array-list:  tElm **nbelm;
 *when we refine an elm:
  -signal all nb elms that the elm is gone now by setting the
   corresponding nb_nnbinfo to -nb_nnbinfo-1
@@ -216,50 +192,3 @@ typedef struct XXXX {
  work on all arrays that I got (i.e. find nbs)
  send/recv results (i.e. nbs) from all these ranks
 DONE!
-
-
-Tests in misc.c
-===============
-mpirun -np 3 ~/nmesh/exe/nmesh misc.par
-hangs... MPI???
-
-FOR:
-mpirun -np 3 xterm -e gdb -ex r --args ~/nmesh/exe/nmesh Misc.par
-
-on rank2 we have:
-append_buffers_to_com:
-realloc_com_reqs: n_rq_new=1
-put_buffers_in_com:
-set_free_buf_in_com: free_buf=0
-nMPI_Isend_Irecv_com: print_com:
-com0x55555629c090: n_rq=1 send_i=0 recv_i=0
-    rq=0 rank_other=0 s_tag=1 r_tag=768
-nMPI_Isend_Irecv: 2 to 0, ns=6 nr=6 s_tag=1 r_tag=768
-nMPI_Isend_Irecv: calling MPI function...
-nMPI_Isend_Irecv: done.
-nMPI_size: calling MPI function...
-nMPI_size: done.
-nMPI_size: calling MPI function...
-nMPI_size: done.
-
-on rank0 we have:
-append_buffers_to_com:
-realloc_com_reqs: n_rq_new=2
-put_buffers_in_com:
-set_free_buf_in_com: free_buf=0
-nMPI_Isend_Irecv_com: print_com:
-com0x555556293820: n_rq=2 send_i=0 recv_i=0
-    rq=1 rank_other=2 s_tag=768 r_tag=7
-nMPI_Isend_Irecv: 0 to 2, ns=6 nr=6 s_tag=768 r_tag=7
-nMPI_Isend_Irecv: calling MPI function...
-nMPI_Isend_Irecv: done.
-nMPI_Wait_com_recv: print_com:
-
-SO 0 tries to receive with r_tag=7, while 2 sends with s_tag=1
-that CANNOT work!!!!!!!!!!!!!!!!!!
-
-
-Probably the nb index ni is not consistent (like in oldamr) because each
-nbelm has only the nbs it needs for this rank, and not all nbs it has (look
-at output of printmesh before and after load bal.)
-Indeed: on rank0 0_ has 2_ at ni=1, while on rank2 0_ has 2_ at ni=0.
