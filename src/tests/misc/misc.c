@@ -42,11 +42,6 @@ int misc_test(tMesh *mesh)
   enablevar(mesh, ui);
   enablevar(mesh, vi);
 
-  // /* First free surfaces & indc since they are not up to date for misc_u
-  //    and misc_v. Then init them. */
-  //evolve_free_communication_structs(mesh);
-  //evolve_init_communication_structs(mesh);
-
   formylnodes(mesh)
   {
     int ijk;
@@ -71,12 +66,12 @@ int misc_test(tMesh *mesh)
     }
   }
 
-////  test_point_interpolation(mesh);
-//  test_point_finders(mesh);
-//  test_parent_child_interpolation(mesh);
+  test_point_interpolation(mesh);
+  test_point_finders(mesh);
+  test_parent_child_interpolation(mesh);
   test_indc(mesh);
-//  test_node_av(mesh);
-//  test_ajsurf(mesh);
+  test_node_av(mesh);
+  test_ajsurf(mesh);
   test_0doutput(mesh);
   test_Jacobian(mesh);
   test_filter(mesh, 1);
@@ -163,8 +158,8 @@ int test_point_interpolation(tMesh *mesh)
   /* save n pt_typ of node nd, and then switch to P_UNIFORM */
   for(dir=0; dir<3; dir++) p_ori[dir] = nd->pt_typ[dir];
   printf("set pt_typ to P_UNIFORM\n");
-  errorexit("It is not allowed to diretly call update_node_n_pt_typ. "
-            "Rather call hp_refine_elms_if_rflag !!!");
+  //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
+  //          "Rather call hp_refine_elms_if_rflag !!!");
   update_node_n_pt_typ(nd, nd->n, p_uni);
 
   /* set and then interp var vi in X[0] */
@@ -187,8 +182,8 @@ int test_point_interpolation(tMesh *mesh)
   }
   /* reset nd->pt_typ */
   printf("reset pt_typ\n");
-  errorexit("It is not allowed to diretly call update_node_n_pt_typ. "
-            "Rather call hp_refine_elms_if_rflag !!!");
+  //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
+  //          "Rather call hp_refine_elms_if_rflag !!!");
   update_node_n_pt_typ(nd, nd->n, p_ori);
   printf("\n");
 
@@ -593,8 +588,8 @@ int test_ajsurf(tMesh *mesh)
   /* exchange surfaces */
   prdivider(0);
   PRF;printf(": request_all_myln_surfaces_exchange\n");
-  //init_all_myln_surfaces(mesh);
-  //set_all_myln_mysurf(mesh);
+  init_all_myln_surfaces(mesh);
+  set_all_myln_mysurf(mesh);
   request_all_myln_surfaces_exchange(mesh);
 
   /* Here we can do work. MPI is now busy sending buffers */
@@ -672,7 +667,7 @@ int test_ajsurf(tMesh *mesh)
   printf("on all procs: total %.15g\n", sqrt(Sum));
 
   /* after we have printed them, we no longer need the surfaces */
-  //free_all_myln_surfaces(mesh);
+  free_all_myln_surfaces(mesh);
   return 0;
 }
 
