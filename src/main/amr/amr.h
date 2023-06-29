@@ -100,8 +100,9 @@ int timing_set_myops_ops0_allops(tMesh *mesh);
 /* connections.c */
 int connections_loc_on_patchface(int l, const char loc[NLOCS],
                                  int patface[6]);
-int eloc1_eloc2_agree_upto_l_max(const tEloc *eloc1,
-                                 const tEloc *eloc2, int l_max);
+void test_eploc(void);
+int eploc1_eploc2_agree_upto_l_max(const tEploc *eploc1,
+                                   const tEploc *eploc2, int l_max);
 void amr_init_elm0_from_eploc(tMesh* mesh, tEploc *eploc, tElm0 *elm0);
 int amr_get_8elms_at_elm_start(tElm *elm_start, void *ptr_elm);
 int amr_get_8elms_at_myid(tMesh *mesh, ulong myid, void *ptr_elm);
@@ -112,8 +113,12 @@ int amr_set_child_eploc(tEploc *parenteploc, int ijk, tEploc *eploc);
 int amr_set_parent_eploc(tEploc *eploc, tEploc *parenteploc);
 tElm **amr_elmarray_bsearch_eloc(ulong narr, tElm **arr, tEloc *eloc);
 void amr_set_intersibling_nbinfo_nnbinfo(tElm *sib0);
+void amr_elm_nbinfo_add_nbeploc(tElm *elm, int face,
+                                int nnb, const tEploc nbeploc[nnb]);
 void amr_elm_nbinfo_redim_according_to_nnbinfo(tElm *elm);
 void amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(tMesh *mesh);
+int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
+                      struct list_head *fnb_head);
 void amr_erase_all_elm_fnb(tMesh *mesh);
 int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
                           tElm0 *elm0);
