@@ -101,8 +101,8 @@ Things that need to be done urgently:
  -save entire mesh
   +save all patch info, so that we can call funcs to create them, with their
    bfaces and all
-  +save all nodes on each level (can later go through them and create all
-   nodes)
+  +save all leaf nodes (elms) (can later go through them and create all
+   elms)
   +for leaf nodes save all enabled EvoVars, but not RK stage vars
  -call checkpoint_load after POST_PARAMETERS
  -call amr's setup_mesh diectly if we do not load checkpoint
@@ -210,11 +210,6 @@ Things that need to be done urgently:
    In Teukolsky there is no big diff.,
    but in Bugner's thesis mass cons improves... ???
  -Liwei told me that a diagonal mass matrix is stupid according to...
-
-*in main/amr/connect.c we set and read ->nc_lock. Do we need a omp flush
- before every read and a omp flush after every write, even though we are
- in omp_set_lock region???
-
 
 *IDEA about ghost zones for finite differences
  -make main/amr/ghostupdate.c analog to main/amr/surface.c
@@ -343,24 +338,9 @@ Questions about bamps:
 
 Things that should be done:
 ===========================
-*consider moving some stuff from tNode into tDat, e.g.:
- int rflag; nMPI_Comm comm;
+*consider moving some stuff from tNode into tDat, e.g.: int rflag;
 
-*consider removing entries from tNode, e.g.: leaf, np ???
-
-*consider adding a "deflated" flag to tNode. If set yes then all node data
- needs to be gotten from MPI proc with datrank. A deflated node would not
- have any node info set, and need less memory. Instead we would only set:
-  struct tPAT *pat;
-  long nodeloc; // some number that encodes node-location string
-  int datrank;
- OR we could only keep the nodes we need on each MPI proc (plus some
- boundary layer). All neighbors of the boundary layer could just point to
- a single dummy node with only:
-  struct tPAT *pat;
-  int datrank;
- then we only know in which patch and on which MPI proc the neighbor of the
- boundary layer is.
+*consider removing entries from tNode, e.g.: pat, np ???
 
 *fix n0=n1=n2=1 case where set_ajsurf_forall_vars seems to interpolate
  -seems to interpolate only if the 2 nodes are in diff. patches
@@ -373,13 +353,6 @@ Things that should be done:
   -we could work on set_ajsurf_forall_vars for which ever requests are
    done instead of waiting for all of them in order...
  +do same for corresponding indc exchanges...
-
-*in main/amr/storage.c we often set mesh->lns = first_nodelist(...
- -BUT in many cases we know that mesh->lns is unchanged, or even know
-  how it chanched! : DONE in most often used parts.
-
-*node->fnb is an array, now there is also a nodelist in node->nfaces[f]
- -should we get rid of node->fnb???
 
 *we have timer.c to see what needs to be optimized
  -make timer_get s.t. "name" gets appended by threadID: DONE in some way.
@@ -404,25 +377,12 @@ Things that should be done:
  when ADM matter vars are set from GRHD.
  GRHD should probably set ADM matter vars and P in POST_CHECKPOINT_LOAD
 
-*update set_all_myln_mysurf and request_all_myln_surfaces_exchange
- so that we also have min/max or averages in extra space of mysurf
- and nbsurf arrays <-- will NOT work!!! Because in a RK substep we need
- to limit w = u_p + r dt and not r or u_p.
-
-*add to tNode:  int nchildren; // number of children this node has, usually 8
-  -update of storage.c should be easy
-  -update of connect.c will be harder because it assumes nb in all 3 direc.
-
-*checkpoint_load_nodes and checkpoint_load_Vars do serial reads, one
- MPI proc after the other. Maybe we want parallel MPI_File_read_all .
-
 
 Cleanup:
 ========
--remove ldescendants_along_face
 -remove/fix/replace: mark_points_in_nb_f
 -remove some comment and if(0) blocks
--fix warning. The line
+-For old versions of glibc, the line
   if(fatal) errorexits("Could not find parameter \"%s\"", name);
  in findparameterindex causes an incorrect warning with -O3:
  warning: ‘__s’ may be used uninitialized in this function [-Wmaybe-uninitialized]
@@ -517,12 +477,12 @@ How does EinsteinToolkit do its great AMR?
 *OpenMP:
  -give many nodes to each MPI proc, use OpenMP loops over these loops
   on each proc
- -use OpenMP in formylnodes
+ -use OpenMP in formyelms
 
 
 About OpenMP Parallelization:
 =============================
-*currently we use NODELEVEL_Pragma(omp parallel for) in formylnodes by
+*currently we use NODELEVEL_Pragma(omp parallel for) in formyelms by
 default
 
 *on supermuc with icc and -O3 NODELEVEL_Pragma(omp parallel for) seems to
@@ -537,8 +497,8 @@ never worked properly:
 -on Koko with icc and -O3 NODELEVEL_Pragma(omp parallel for) and
  NODELEVEL_Pragma(omp taskloop) give different answers for ham and mom. when
  I evolve a single TOV star for a few time steps with GRHD and GHG. For some
- reason the evolved quantities and AMD vars are very close and only ham and
- mom differe a lot.
+ reason the evolved quantities and ADM vars are very close and only ham and
+ mom differ a lot.
 +on the other hand on tyrfing with gcc and -O3 -g -fsanitize=thread no
  problems are reported. Why???
 +Also recall that the icc I had on koko had a bug that I wrote some Intel
