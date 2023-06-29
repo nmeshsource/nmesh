@@ -12,7 +12,7 @@ extern tMesh *main_mesh;
 
 void printmesh(tMesh *mesh)
 {
-  int size = nMPI_rank();
+  int size = nMPI_size();
   int p;
 
   if(mesh==main_mesh) printf("mesh=main_mesh: ");
