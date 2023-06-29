@@ -627,7 +627,7 @@ int test_ajsurf(tMesh *mesh)
   }
 
   /* free redundant nbsurf stuff */
-  //free_all_myln_nbsurf_only(mesh);
+  free_all_myln_nbsurf_only(mesh);
 
   /* print var in all nodes again */
   prdivider(0);
