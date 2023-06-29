@@ -9,32 +9,9 @@ BUGS:
  ========= It is not touching patch0, but rather inside patch0. My bad...
 
 
-
-FIX these:
-==========
-*mesh->
- myelm, nbelm, eidlim  all need to be freed somewhere
-
 General:
 ========
-*maybe typdef only tElm and then
-#define tNode tElm
-
-
-MPI exchange:
-=============
-| rank0         | rank1         | rank2         |
-|elmA  ...  elmB|elmA  ...  elmB|elmA  ...  elmB|
-
-Make an info exchange function (elm_exchange_between_nbranks):
- -exchange first and last elm between rank_i and rank_i+1,
-  and also some aggregate numbers such as:
-  +number of elms on each rank
-  +total speed and nodeload sums as in load_set_nodeload_array for each rank
- -save this info for rank on left and right in tMesh.
-
-*This way we have ref flag of next rank and know if sibling on other side
- exists and e.g. needs to be de-refined.
+*we now have:  typedef tElm tNode;
 
 
 About load bal:

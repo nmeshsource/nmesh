@@ -251,7 +251,7 @@ http://www.speedup.ch/workshops/w42_2013/carsten.pdf
 */
 
 
-/* Currently unsed struct. Each entry is one element of the leaf node
+/* Currently unused struct. Each entry is one element of the leaf node
    list. The leaves are sorted into categories that should be based on the
    time it takes to process each in it. This can help with load
    balancing. */
@@ -651,7 +651,7 @@ int amr_elm_nbinfo_set_nnbinfo_mesh(tMesh *mesh, int positive);
 int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh);
 int amr_get_nbelm_elmheaders(tMesh *mesh);
 
-/* compatibility with old connect.c */
+/* for compatibility with old connect.c */
 #define node_location_str(node, s, slen) elm_location_str(node, s, slen)
 #define nodename(node, s, slen)          elmname(node, s, slen)
 #define node_location(node)              elm_location(node)
