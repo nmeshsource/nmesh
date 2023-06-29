@@ -1,0 +1,26 @@
+physics = misc
+
+finaltime = 0
+
+errorexit = abort # exit # abort
+logfile_creation = yes
+logfile_reproducible = yes
+sysmon_hours = -1
+
+amr_mesh_type = 3 dom1 CubedSpheres
+
+amr_n0 =  5
+amr_n1 =  4
+amr_n2 =  3
+
+iterate_parameters = no
+iterate_parameter1 = amr_n0  4 6 8 10 12
+
+
+#outputX0Y0Z0coord = Xb
+
+1doutiter = 1
+1doutput = misc_u misc_v
+
+2doutiter = 1
+2doutput = misc_u misc_v
