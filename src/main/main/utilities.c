@@ -104,6 +104,11 @@ double getTimeIn_s(void)
 void prTimeIn_s(const char *comment)
 {
   double t_in_s = getTimeIn_s();
+  tMesh *mesh = main_mesh;
+
+  /* do nothing for reproducible runs */
+  if(GetvLax(ParLax("logfile_reproducible"),"yes")) return;
+
   printf("%s%gs\n", comment, t_in_s);
   fflush(stdout);
 }
@@ -680,6 +685,10 @@ void print_system_info(void)
 {
   char str[1024];
   long pid = getpid();
+  tMesh *mesh = main_mesh;
+
+  /* do nothing for reproducible runs */
+  if(GetvLax(ParLax("logfile_reproducible"),"yes")) return;
 
   prdivider(0);
   printf("print_system_info: calling some shell commands\n");

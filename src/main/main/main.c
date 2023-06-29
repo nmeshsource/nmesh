@@ -69,8 +69,8 @@ int main(int argc, char **argv)
   }
 
   TIMER_STOP;
+  prTimeIn_s("WallTime just before main's call to finalize_mesh: ");
   finalize_mesh(mesh);
-  prTimeIn_s("WallTime after main's call to finalize_mesh: ");
   free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
@@ -238,10 +238,13 @@ int make_output_directory(tMesh *mesh)
   /* say what we have after redirection: */
   prdivider(1);
   time_str[strlen(time_str)-1] = '\0';
-  printf("The current time is %s.\n", time_str);
-  printf("nmesh (rev " MSTR_OFVAL(MAINREV)
-         ") compiled on %s at %s:", __DATE__, __TIME__);
-  printf("  MAX_NTHREADS = %d\n", MAX_NTHREADS);
+  if(!GetvLax(ParLax("logfile_reproducible"),"yes"))
+  {
+    printf("The current time is %s.\n", time_str);
+    printf("nmesh (rev " MSTR_OFVAL(MAINREV)
+           ") compiled on %s at %s:", __DATE__, __TIME__);
+    printf("  MAX_NTHREADS = %d\n", MAX_NTHREADS);
+  }
   printf("  outdir = %s\n", outdir);
 
   free(outdirp);

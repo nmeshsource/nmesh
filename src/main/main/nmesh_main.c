@@ -37,6 +37,8 @@ int nmesh_main(tMesh *mesh)
 
   AddPar("errorexit", "exit", "how we stop on errors [exit,abort;errno]");
   AddPar("logfile_creation", "yes","create logfile [yes,no,/dev/null,none]");
+  AddPar("logfile_reproducible", "no","printf only stuff that is the same "
+         "for each run (e.g. no timing) [yes,no]");
 
   AddPar("timer_on", "no", "whether we use timers [yes,no]");
   AddPar("timer_MPI_barrier", "no", "barrier in timer [yes,no]");
