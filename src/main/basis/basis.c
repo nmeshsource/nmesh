@@ -253,8 +253,11 @@ double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
 }
 
 /* 3d interpolation:
-   call basis_var_interpolate_local and then send interp. val around */
-double basis_var_interpolate(tNode *node, int vi, double Xb[3])
+   call basis_var_interpolate_local and then send interp. val around
+   Returns: 1 if success
+            0 if if all MPI procs have node=NULL */
+int basis_var_interpolate_ok(tNode *node, int vi, double Xb[3],
+                             double *vinterp)
 {
   double Val, val=0.;
   int Haveval, haveval=0;
@@ -270,8 +273,20 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
   /* find out how many have a value, and add all of them */
   nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
   nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
-  if(!Haveval) errorexit("one MPI proc should have this node");
+  if(!Haveval) return 0; /* could not get interp on any node */
   Val = Val/Haveval;
+
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+  *vinterp = Val;
+  return 1; /* got interp value */
+}
+
+/* 3d interpolation: call basis_var_interpolate_ok */
+double basis_var_interpolate(tNode *node, int vi, double Xb[3])
+{
+  double Val;
+  int Haveval = basis_var_interpolate_ok(node, vi, Xb, &Val);
+  if(!Haveval) errorexit("one MPI proc should have this node");
 
   //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
   return Val;
@@ -280,10 +295,11 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
 /* 3d interpolation:
    interpolate var vi to the point (x[0],x[1],x[2]).
    out: val
-   returns: node if success, or NULL if failure to find x */
-tNode *basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
-                                  double *val)
+   returns: 1 if success, or 0 if failure to find x */
+int basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
+                               double *val)
 {
+  int Haveval;
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
 
@@ -291,9 +307,8 @@ tNode *basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
   if(node) XbYbZb_of_XYZ(node, Xb, X);
 
   /* interp var vi to Xb in node */
-  *val = basis_var_interpolate(node, vi, Xb);
-
-  return node;
+  Haveval = basis_var_interpolate_ok(node, vi, Xb, val);
+  return Haveval;
 }
 
 
