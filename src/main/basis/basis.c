@@ -287,11 +287,8 @@ tNode *basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
 
-  /* return NULL if node and X are not found */
-  if(!node) return NULL;
-
   /* set Xb in node */
-  XbYbZb_of_XYZ(node, Xb, X);
+  if(node) XbYbZb_of_XYZ(node, Xb, X);
 
   /* interp var vi to Xb in node */
   *val = basis_var_interpolate(node, vi, Xb);
