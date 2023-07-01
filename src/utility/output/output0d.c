@@ -54,6 +54,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   int Npt; /* number of points at which we output */
   double val_pt[Noutptmax];
   double x_pt[Noutptmax][3], Xb_pt[Noutptmax][3];
+  int have_pt[Noutptmax];
   tNode *node_pt[Noutptmax];
   int vli;
 
@@ -118,7 +119,8 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
 
     /* get value of var at some points */
     for(ipt=0; ipt<Npt; ipt++)
-      val_pt[ipt] = basis_var_interpolate(node_pt[ipt], vi, Xb_pt[ipt]);
+      have_pt[ipt] = basis_var_interpolate_ok(node_pt[ipt], vi, Xb_pt[ipt],
+                                              &(val_pt[ipt]));
 
     /* output is done by rank0 */
     if(Rank0)
@@ -145,11 +147,14 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
       /* output value of var at some points */
       for(ipt=0; ipt<Npt; ipt++)
       {
-        char typestr[99];
-        //PRF;printf(": val_pt[ipt]=%g\n", val_pt[ipt]);
-        snprintf(typestr,99, "%s%d", outpt, ipt);
-        output0d_filename(mesh, filename,999, name, typestr, pat);
-        output0d_value(filename, T, val_pt[ipt], 1, x_pt[ipt]);
+        if(have_pt[ipt])
+        {
+          char typestr[99];
+          //PRF;printf(": val_pt[ipt]=%g\n", val_pt[ipt]);
+          snprintf(typestr,99, "%s%d", outpt, ipt);
+          output0d_filename(mesh, filename,999, name, typestr, pat);
+          output0d_value(filename, T, val_pt[ipt], 1, x_pt[ipt]);
+        }
       }
     }
   } /* end loop over vli */
