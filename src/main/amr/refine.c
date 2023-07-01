@@ -191,12 +191,6 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     }
   }
 
-//Yo(-100);
-//printmyelms(mesh);
-//Yo(-90);
-//printnbelms(mesh);
-//print_ef(ef);
-
   /* now remove/free all old parents */
   list_for_each_safe(pos, sav, &plist)
   {
@@ -208,16 +202,12 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     list_del(&parent->list);
     free_elm(parent);
   }
-//Yo(-80);
-////printmyelms(mesh);
-//Yo(-70);
-//printnbelms(mesh);
 
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   prTimeIn_s("before amr_remove_mesh_nbelm_ef ");
   amr_remove_mesh_nbelm_ef(mesh, 0, ef);
-//print_ef(ef);
+  //print_ef(ef);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
@@ -232,32 +222,14 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
        amr_elm_nbinfo_to_elm_fnb                  */
   update_mesh_myelms_elm_eid_dt(mesh); //needed for amr_elm_nbinfo_to_elm_fnb
 
-//Yo(123);
-//printmyelms(mesh);
-////printnbelms(mesh);
-//print_ef(ef);
-
   /* make sure eids in eplocs of amr_elm_nbinfo are updated as well */
   amr_elm_nbinfo_update_eid_locally_using_fnb_mesh(mesh);
 
-  /*
-  formyelms(mesh)
-  {
-    tElm *Elm = MyElm;
-    for(int f=0; f<6; f++)
-      Elm->dat->info->nnbinfo[f] = -1; //make nnbinfo negative
-  }
-  */
-
   /* update essential nb info */
-  prTimeIn_s("before amr_update_elm_nbinfo_if_nnbinfo_negative ");
   //amr_update_elm_nbinfo_if_nnbinfo_negative(mesh); //remove old nbinfo entries
   amr_update_elm_nbinfo_if_nnbinfo_negative_ef(mesh, nbranks, ef);
-  prTimeIn_s("before amr_elm_nbinfo_to_elm_fnb ");
   amr_elm_nbinfo_to_elm_fnb(mesh);     //needed for amr_get_nbelm_elmheaders
-  prTimeIn_s("before amr_elm_nbinfo_set_nnbinfo_mesh ");
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive
-  prTimeIn_s("end of hp_refine_elms_if_rflag ");
 
   /* nbelm has elm->n only if we also call amr_get_nbelm_elmheaders */
   amr_get_nbelm_elmheaders(mesh);
@@ -301,11 +273,11 @@ void set_children_nbinfo_ef(tElm *child0, tElm *parent,
 
     /* record about which child face we need info from which rank */
     amr_khmap_add_negchildren_forallparentfaces(ef, child0, parent);
-if(0)//if(elmname_is(parent,"1_5"))
-{
-print_ef(ef);
-abort();
-}
+    //if(0)//if(elmname_is(parent,"1_5"))
+    //{
+    //print_ef(ef);
+    //abort();
+    //}
   }
 }
 
@@ -336,16 +308,6 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* record nb ranks before we remove any elms */
   amr_khset_add_nb_ranks(mesh, nbranks);
-
-  //prdivider(3);
-  //prdivider(3);
-  //printf("myelms:\n");
-  //printmyelms(mesh);
-  //prdivider(0);
-  //printf("nbelms:\n");
-  //printnbelms(mesh);
-  //prdivider(3);
-  //prdivider(3);
 
   /* loop over list with elms */
   num = uref = 0;
@@ -422,19 +384,10 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     free_elm(child);        //free mem of child child
   }
 
-  //print_u32(nbranks);
-  //print_ef(ef);
-  //prdivider(0);
-
-
   /* something may have happened to the elms in mesh->nbelm on another rank,
      so we just get rid of mesh->nbelm */
   //amr_remove_mesh_nbelm(mesh, 0);
   amr_remove_mesh_nbelm_ef(mesh, 0, ef);
-
-  //print_u32(nbranks);
-  //print_ef(ef);
-  //prdivider(0);
 
   /* we need to update the list mesh->myelm with alloc_and_set_mesh_myelm.
      BUT update_mesh_myelms_elm_eid_dt below will call:
