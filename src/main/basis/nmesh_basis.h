@@ -169,3 +169,5 @@ int topcoeff_has_expfalloff_var(tNode *node, int ui,
 /* SpinWeightedSphericalHarmonics.c */
 double Re_sYlm(int l, int m, int s, double theta, double phi);
 double Im_sYlm(int l, int m, int s, double theta, double phi);
+void ReIm_sYlm(int l, int m, int s, double theta, double phi,
+               double *Re_sYlm, double *Im_sYlm);
