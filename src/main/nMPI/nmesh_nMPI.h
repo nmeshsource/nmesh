@@ -59,6 +59,7 @@ int nMPI_Comm_free(nMPI_Comm *comm);
 int nMPI_Type_contiguous(int count, nMPI_Datatype oldtype,
                          nMPI_Datatype *newtype);
 int nMPI_Type_commit(nMPI_Datatype *datatype);
+int nMPI_Type_free(nMPI_Datatype *datatype);
 int nMPI_Send(const void *buf, int count, nMPI_Datatype datatype,
               int dest, int tag);
 int nMPI_Recv(void *buf, int count, nMPI_Datatype datatype,

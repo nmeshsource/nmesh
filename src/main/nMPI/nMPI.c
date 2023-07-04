@@ -82,8 +82,8 @@ int nMPIvars_finalize(tMesh *mesh)
   free(nMPIvars->comm);
 
   /* free MPI_Datatypes we have created */
-  MPI_Type_free(&(nMPIvars->TELM0));
-  MPI_Type_free(&(nMPIvars->TEPLOC));
+  nMPI_Type_free(&(nMPIvars->TELM0));
+  nMPI_Type_free(&(nMPIvars->TEPLOC));
 
   return 0;
 }
@@ -295,6 +295,17 @@ int nMPI_Type_commit(nMPI_Datatype *datatype)
 #ifdef USEMPI
   PR0;
   ret = MPI_Type_commit(datatype);
+  PR1;
+#endif
+  return ret;
+}
+/* Free a datatype made with nMPI_Type_commit */
+int nMPI_Type_free(nMPI_Datatype *datatype)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Type_free(datatype);
   PR1;
 #endif
   return ret;
