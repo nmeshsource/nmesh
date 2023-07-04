@@ -81,6 +81,10 @@ int nMPIvars_finalize(tMesh *mesh)
   /* free mem for communicators */
   free(nMPIvars->comm);
 
+  /* free MPI_Datatypes we have created */
+  MPI_Type_free(&(nMPIvars->TELM0));
+  MPI_Type_free(&(nMPIvars->TEPLOC));
+
   return 0;
 }
 
