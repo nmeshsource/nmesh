@@ -2505,8 +2505,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     tArray *ef0_nbs = alloc_array1d((18*sizeof(tEploc))/sizeof(double));
     ulong ef0_nbs_idx = 0; /* index of next entry to add */
     /* number of tEploc sized entries in ef0_nbs */
-    ulong *nsE = checked_calloc(1, sizeof(nsE[0]));
-    ulong *nrE = checked_calloc(1, sizeof(nrE[0]));
+    ulong nsE, nrE;
 
     /* process eplocs that others want to know about */
     nMPI_Wait_com_recv(com1, rq); /* wait for request number rq */
@@ -2574,20 +2573,20 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     } /* end loop over ref */
 
     /* save number of tEploc sized entries in ef0_nbs */
-    nsE[0] = ef0_nbs_idx;
+    nsE = ef0_nbs_idx;
 
     /* wait for sef array */
     nMPI_Wait_com_send(com1, rq); /* wait for request number rq */
 
     /* send/recv my nsE/nrE */
-    rq2 = append_buffers_to_com(com2, nsE,1, nrE,1);
+    rq2 = append_buffers_to_com(com2, &nsE,1, &nrE,1);
     nMPI_Isend_Irecv_com(com2, rq2, nMPI_UNSIGNED_LONG, rk, 30,30, WORLD,WORLD);
 
     /* send ef0_nbs */
-    srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE[0], NULL,0);
+    srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE, NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
-    //PRFs(":4 ");printf("nsE[0]=%lu nrE[0]=%lu rk=%d\n ef0_nbs=", nsE[0], nrE[0], rk);
+    //PRFs(":4 ");printf("nsE=%lu nrE=%lu rk=%d\n ef0_nbs=", nsE, nrE, rk);
     //printarray_eploc(ef0_nbs, 0);printf("\n");
 
     rq++;
