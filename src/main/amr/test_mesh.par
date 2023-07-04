@@ -1,0 +1,20 @@
+physics =
+
+finaltime = 0
+
+errorexit = abort
+logfile_creation = none
+
+amr_mesh_type = test_mesh
+
+amr_n0 = 3 # 9 # 24
+amr_n1 = 4 # 9 # 24
+amr_n2 = 5 # 9 # 24
+
+#1doutiter = 1
+#1douttime = 0.1
+#1doutput = advection1_u advection1_u_err x y z
+
+#2doutiter = 1
+#2douttime = 0.1
+#2doutput = advection1_u advection1_u_err x y z
