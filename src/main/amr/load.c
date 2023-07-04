@@ -571,6 +571,7 @@ void load_balance_elms(tMesh *mesh)
   int size = nMPI_size();
   int rank = nMPI_rank();
   int rk, torank;
+  ulong ei;
   double avspeed, myspeed;
   double *speed = NULL;
   struct list_head *pos, *sav;
@@ -623,7 +624,6 @@ void load_balance_elms(tMesh *mesh)
   //else       op0 = 0.;
 
   /* find all elms that are not within my boundaries */
-  torank = -1;
   list_for_each(pos, &mesh->myelm_head)
   {
     double et;
@@ -637,10 +637,8 @@ void load_balance_elms(tMesh *mesh)
     desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
     //printelm(elm);
     //printf("desrank=%d\n", desrank);
-    if(desrank != torank)
-      torank = desrank;
-    ns_elms[torank] += 1;
-    dat->info->desrank = torank; /* store rank where this elm should go */
+    ns_elms[desrank] += 1;
+    dat->info->desrank = desrank; /* store rank where this elm should go */
   }
   /* I don't send to myself, so zero ns_elms[rank] */
   //nkeep = ns_elms[rank];
@@ -672,10 +670,10 @@ void load_balance_elms(tMesh *mesh)
 
   /* set s_elms that has all elms that are not within my boundaries */
   torank = -1;
+  ei = 0; //set ei=0 to avoid stupid gcc warning
   list_for_each_safe(pos, sav, &mesh->myelm_head)
   {
     int desrank;
-    ulong i;
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     if(!dat) errorexit("this elm must have dat");
@@ -684,12 +682,12 @@ void load_balance_elms(tMesh *mesh)
     if(desrank != torank)
     {
       torank = desrank;
-      i = 0;
+      ei = 0;
     }
     if(torank != rank)
     {
-      memcpy(&(s_elms[torank][i]), elm, sizeof(tElm0));
-      i++;
+      memcpy(&(s_elms[torank][ei]), elm, sizeof(tElm0));
+      ei++;
       /* Remove this elm from list. But elm is still in mesh->myelm. */
       list_del(&elm->list);
     }
