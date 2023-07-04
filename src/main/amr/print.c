@@ -221,6 +221,17 @@ void printelmglist(struct list_head *elm_head)
   printf("\n");
 }
 
+void printelmsinglist(struct list_head *elm_head)
+{
+  struct list_head *pos;
+  printf("%ld elms:\n", list_count_nodes(elm_head));
+  list_for_each(pos, elm_head)
+  {
+    tElm *elm = glist_entry(pos);
+    printelm(elm);
+  }
+}
+
 void printmyelms(tMesh *mesh)
 {
   formyelms(mesh)
@@ -237,6 +248,17 @@ void printnbelms(tMesh *mesh)
   {
     tElm *elm = mesh->nbelm[ei];
     printelm(elm);
+  }
+}
+
+void printeidlim(tMesh *mesh)
+{
+  int size = nMPI_size();
+  ulong *eidlim = mesh->eidlim;
+  int rk;
+  for(rk=0; rk < size; rk++)
+  {
+    printf("eidlim[%d]=%lu\n", rk, eidlim[rk]);
   }
 }
 

@@ -1212,6 +1212,9 @@ int amr_rank_of_eid(tMesh* mesh, ulong eid)
   const ulong *li;
   size_t off, num, nn;
 
+  //PRF;printf(": %lu\n", eid);
+  //printeidlim(mesh);
+
   /* if eid is on rank rk: eidlim[rk-1] <= eid < eidlim[rk] */
   if(eid >= eidlim[size-1])
     errorexit("eid is outside the bounds of mesh->eidlim");
@@ -1228,14 +1231,12 @@ int amr_rank_of_eid(tMesh* mesh, ulong eid)
   /* in case there are duplicates in eidlim do a linear search
      starting at off */
   //printf("off=%zu\n", off);
-  for(nn=0; nn<8; nn++)
+  for(nn=off; nn<size; nn++)
   {
-    if(eidlim[off+nn] > eid) break;
+    if(eidlim[nn] > eid) break;
   }
   //printf("nn=%zu\n", nn);
-  //printf("off+1=%zu\n", off+1);
-
-  return off+nn;
+  return nn;
 }
 
 /* return the rank that an elm with eploc is on */
@@ -2135,6 +2136,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
           /* put the nbs of elmi into fnb_head list */
           nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
                                   &fnb_head);
+          //PRF;printf(": nbs of ");printelm(elmi);printf("are: ");
+          //printelmsinglist(&fnb_head);
 
           /* put the number nnb into ef0_nbs array */
           memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
@@ -2540,6 +2543,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
         INIT_LIST_HEAD(&fnb_head);
         nnb = amr_make_fnb_list(elmi, f, mesh->nmyelm, mesh->myelm,
                                 &fnb_head);
+        //PRF;printf(": nbs of ");printelm(elmi);printf("are: ");
+        //printelmsinglist(&fnb_head);
 
         /* put the number nnb into ef0_nbs array */
         memcpy_to_array_redim(ef0_nbs, sizeof(tEploc), ef0_nbs_idx,
@@ -2953,6 +2958,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 
   /*
   PRF;printf(": mesh->nnbelm=%lu\n", mesh->nnbelm);
+  printmesh(mesh);
   for(rk=0; rk<size; rk++)
   {
     printf("rk%d: nr=%lu ns=%lu\n", rk, nr_elm0[rk], ns_elm0[rk]);
@@ -2966,6 +2972,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
       printeploc_s(s_elm0[rk][ei].eploc, " ");
     printf("\n");
   }
+  fflush(stdout);
   */
 
   /* send and recv from rank rk */
