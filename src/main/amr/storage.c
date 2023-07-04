@@ -298,7 +298,7 @@ tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader)
 /* alloc a new elm using tEploc info */
 tElm *alloc_elm_of_eploc(tMesh *mesh, tEploc *eploc)
 {
-  tElm0 elm0[1];
+  tElm0 elm0[1] = {0};
   amr_init_elm0_from_eploc(mesh, eploc, elm0);
   return alloc_elm_of_elmheader(mesh, elm0);
 }
