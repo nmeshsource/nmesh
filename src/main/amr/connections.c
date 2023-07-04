@@ -2586,6 +2586,11 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE, NULL,0);
     nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
 
+    /* free array container but not its ef0_nbs->eploc, which will later be
+       freed by free_com(scom); in which we save the buffer ef0_nbs->eploc */
+    ef0_nbs->d_nofree = 1;
+    free_array(ef0_nbs);
+
     //PRFs(":4 ");printf("nsE=%lu nrE=%lu rk=%d\n ef0_nbs=", nsE, nrE, rk);
     //printarray_eploc(ef0_nbs, 0);printf("\n");
 
