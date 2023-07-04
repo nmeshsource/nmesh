@@ -495,7 +495,7 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
 {
   //tMesh *mesh = parent->pat->mesh;
   struct list_head clist;
-  tElm *child, *child0;
+  tElm *child, *child0=NULL; //set child0=NULL to avoid stupid gcc warning
   int ijk;
 
   INIT_LIST_HEAD(&clist);
@@ -504,7 +504,7 @@ tElm *replace_parent_by_8children(tElm *parent, int n[3], int pt_typ[3])
   for(ijk=0; ijk<8; ijk++)
   {
     child = make_child_elm(parent, n, pt_typ, ijk);
-    if(child) list_add_tail(&child->list, &clist);
+    list_add_tail(&child->list, &clist);
     if(ijk==0) child0 = child; /* save first child */
   }
 
