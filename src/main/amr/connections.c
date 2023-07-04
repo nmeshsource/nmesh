@@ -739,6 +739,8 @@ int amr_elms_are_siblings(int n, void *ptr_elm)
 /* write the info of elm's sibling sib_ijk into sib */
 void amr_set_sibling_elm0(const tElm *elm, int sib_ijk, tElm *sib)
 {
+  tMesh *mesh = elm->pat->mesh;
+  union { tElm *elm; tElm0 *elm0; } e2e0;
   int l = elm->eploc->l;
   tEloc s_eloc[1];
 
@@ -753,7 +755,8 @@ void amr_set_sibling_elm0(const tElm *elm, int sib_ijk, tElm *sib)
   eloc_to_eploc(s_eloc, sib->eploc);
 
   /* set sib bbox */
-  amr_set_elm_bbox(sib);
+  e2e0.elm = sib;
+  amr_set_elm0_bbox(mesh, e2e0.elm0);
 
   /* set datrank to -1 since this is just a copy */
   sib->datrank = -1;
