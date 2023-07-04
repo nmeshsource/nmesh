@@ -701,7 +701,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
     }
     /* check if anyone has set the rflag, if yes call hrefine_elms_if_rflag */
     Ref = ref;
-    nMPI_Allreduce(&ref, &Ref, 1, nMPI_INT, MPI_LOR);
+    nMPI_Allreduce(&ref, &Ref, 1, nMPI_INT, nMPI_LOR);
     if(Ref)
     {
       hrefine_elms_if_rflag(mesh, rf);
@@ -754,7 +754,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
     }
     /* check if anyone has set the rflag, if yes call remove_elms_if_rflag */
     Ref = ref;
-    nMPI_Allreduce(&ref, &Ref, 1, nMPI_INT, MPI_LOR);
+    nMPI_Allreduce(&ref, &Ref, 1, nMPI_INT, nMPI_LOR);
     if(ref)
     {
       remove_elms_if_rflag(mesh, rf);
