@@ -34,7 +34,7 @@
 /* do we use omp taskloop? */
 #ifdef USE_OMP_TASKLOOP
 
-/* we use OpenMP to parallelize the 2nd loop in formyelms_noomp */
+/* we use OpenMP to parallelize the loop in formyelms_noomp */
 #define formyelms(mesh) \
   NODELEVEL_Pragma(omp parallel) \
   NODELEVEL_Pragma(omp master) \
@@ -56,7 +56,7 @@
 
 #else
 
-/* we use OpenMP to parallelize the 2nd loop in formyelms_noomp */
+/* we use OpenMP to parallelize the loop in formyelms_noomp */
 #define formyelms(mesh) \
   NODELEVEL_Pragma(omp parallel for) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
