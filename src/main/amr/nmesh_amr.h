@@ -64,7 +64,7 @@ typedef struct tELOC {
 } tEloc;
 
 /* location of an element (or elm) in packed form
-   NPBYTES can 13,21,29,37 for optimal sizeof(tEploc) */
+   NPBYTES can be 13,21,29,37 for optimal sizeof(tEploc) */
 typedef struct tEPLOC {
   unsigned short int p; // patch number (in 2 bytes)
   unsigned char l;      // refinement level of this node (in 1 byte)
