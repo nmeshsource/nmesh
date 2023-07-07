@@ -154,7 +154,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     fflush(stdout);
     if(chkpt_exists & 8)
     {
-      checkpoint_load_Vars(mesh, nbinfo);
+      checkpoint_load_Vars(mesh, nbinfo, 1); /* load with native endian */
       PRF;printf(": finished loading nbinfo.\n");
       checkpoint_set_nbinfo_fnb_nbelm_loadbal(mesh, 0);
     }
@@ -166,7 +166,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   }
   else
   {
-    checkpoint_load_Vars(mesh, vars);
+    checkpoint_load_Vars(mesh, vars, 0); /* load as little endian */
     PRF;printf(": finished loading variables.\n");
     fflush(stdout);
   }

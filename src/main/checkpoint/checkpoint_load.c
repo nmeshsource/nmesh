@@ -338,7 +338,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
 /* functions to load variables */
 /******************************************************************/
 /* load all EvoVars */
-int checkpoint_load_Vars(tMesh *mesh, char *fname)
+int checkpoint_load_Vars(tMesh *mesh, char *fname, int read_native)
 {
   tVarList *vl;
   int nvars=0;
@@ -388,9 +388,11 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname)
     free(buffer);
     buffer = NULL;
 
-    /* get data (in little endian format) for 1 node into buffer on rank0 */
+    /* get data (in native or little endian format) for 1 node into buffer
+       on rank0 */
     if(Rank0)
-      buffer = checkpoint_make_nodebuffer(fp, vl, 0, &nbuffer, nname);
+      buffer = checkpoint_make_nodebuffer(fp, vl, read_native,
+                                          &nbuffer, nname);
 /*
 if(Rank0)
 {
@@ -554,7 +556,7 @@ char *append_buf(char *buffer, long *nbuffer, const char *buf, long nbuf)
 }
 
 /* read var info for one node into buffer */
-char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
+char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_native,
                                  long *nbuffer, char *nname)
 {
   //tMesh *mesh = vl->mesh;
@@ -617,8 +619,8 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       }
 
       /* read var as raw binary */
-      if(read_big) fread_big(v, sizeof(double), arN, fp);
-      else         fread_little(v, sizeof(double), arN, fp);
+      if(read_native) fread(v, sizeof(double), arN, fp);
+      else            fread_little(v, sizeof(double), arN, fp);
       buffer = append_buf(buffer,nbuffer, (char *) v,arN*sizeof(*v)); /* app v */
 
       /* use fgets to also read the '\n' after var. */

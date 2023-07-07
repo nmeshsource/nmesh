@@ -262,7 +262,8 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
         vlpushone(vl, vi);
   }
 
-  checkpoint_save_VL(mesh, fname, vl);
+  /* write var list vl in little endian format */
+  checkpoint_save_VL(mesh, fname, vl, 0);
   vlfree(vl);
   return 0;
 }
@@ -284,13 +285,15 @@ int checkpoint_save_nbinfoVars(tMesh *mesh, char *fname)
   }
 */
 
-  checkpoint_save_VL(mesh, fname, vl);
+  /* write var list vl in native format */
+  checkpoint_save_VL(mesh, fname, vl, 1);
   vlfree(vl);
   return 0;
 }
 
 /* write a varlist vl */
-int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl)
+int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl,
+                       int write_native)
 {
   FILE *fp;
   int rk;
@@ -308,8 +311,8 @@ int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl)
       else      fp = fopen_buf(fname, "ab", &IObuf,IObufsz);
       if(!fp) errorexits("failed opening %s", fname);
 
-      /* write var list vl in little endian format */
-      checkpoint_write_vl(fp, vl, 0);
+      /* write var list vl in native or little endian format */
+      checkpoint_write_vl(fp, vl, write_native);
 
       fclose_buf(fp, &IObuf);
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
@@ -322,7 +325,7 @@ int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl)
 }
 
 /* output varlist on each node */
-void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
+void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_native)
 {
   tMesh *mesh = vl->mesh;
   char name[256];
@@ -371,8 +374,8 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_big)
             fprintf(fp, "%d %d %d %d\n", vli, va->n[0],va->n[1],va->n[2]);
 
           /* write var array in raw binary */
-          if(write_big) fwrite_big(v, sizeof(double), va->N, fp);
-          else          fwrite_little(v, sizeof(double), va->N, fp);
+          if(write_native) fwrite(v, sizeof(double), va->N, fp);
+          else             fwrite_little(v, sizeof(double), va->N, fp);
           fprintf(fp, "\n");
           //if(Node_eid(node)==28) printf("v[]=%g\n", v[0]);
         }
