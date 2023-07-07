@@ -158,7 +158,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
   char buf[1000];
   char str[1000];
 
-  /* alloc buffer */
+  /* alloc buffer on all ranks */
   buffer = cmalloc(nbuffer_allocd);
 
   /* open file on rank0 */
@@ -207,7 +207,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
       nbuffer = fread(buffer, sizeof(char), first, fp);
       if(nbuffer<first) file_end = 1;
 
-      /* read more bytes until info for last parent in buffer is complete */
+      /* read more bytes until info for last elm in buffer is complete */
       tailbuf = buffer + nbuffer;
       pos = 0;
       lastone = 0;
@@ -224,7 +224,6 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
     /* broadcast buffer to all MPI ranks */
     nMPI_Bcast(&file_end,1, nMPI_INT, 0);
     nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
-    if(!Rank0) buffer = cmalloc(nbuffer);
     nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
     //PRF;printf(": nbuffer=%ld\n", nbuffer);
     /* now use the info in buffer to create nodes */
