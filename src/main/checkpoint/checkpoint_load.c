@@ -562,6 +562,7 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
   char buf[1000];
   char *s;
   double *v = NULL;
+  int vlen = 0;
 
   /* read line by line into the buffer */
   buffer = NULL;
@@ -583,8 +584,6 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       np = atoi(buf);
 
       found_node = 1;
-      free(v);
-      v = dmalloc(np);
     }
     else
     {
@@ -609,6 +608,14 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       }
       arN = arn[0]*arn[1]*arn[2];
 
+      /* alloc v array */
+      if(arN > vlen)
+      {
+        vlen = arN;
+        free(v);
+        v = dmalloc(vlen);
+      }
+
       /* read var as raw binary */
       if(read_big) fread_big(v, sizeof(double), arN, fp);
       else         fread_little(v, sizeof(double), arN, fp);
@@ -618,9 +625,9 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_big,
       s = fgets(buf,999, fp); /* s=NULL at EOF */
       buffer = append_buf(buffer,nbuffer, buf,strlen(buf)); /* app buf */
     } /* end while(found_node && s) */
-    free(v);
-    v = NULL;
     if(found_node) break; /* stop after we found a node */
   }
+  free(v);
+  v = NULL;
   return buffer;
 }
