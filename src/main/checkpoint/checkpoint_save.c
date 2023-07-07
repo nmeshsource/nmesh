@@ -262,6 +262,8 @@ int checkpoint_save_EvoVars(tMesh *mesh, char *fname)
         vlpushone(vl, vi);
   }
 
+  /* We make variables.bin portable by always writing the double arrays
+     with the variable data in little endian format. */
   /* write var list vl in little endian format */
   checkpoint_save_VL(mesh, fname, vl, 0);
   vlfree(vl);
@@ -274,17 +276,10 @@ int checkpoint_save_nbinfoVars(tMesh *mesh, char *fname)
   tVarList *vl = vlalloc(mesh);
 
   vlpush(vl, Ind("amr_elm_nbinfo0"));
-/*
-  int vi;
-  for(vi=0; vi<mesh->nvdb; vi++)
-  {
-    int vt = MeshVarType(mesh, vi);
-    if( (vt==EVOVAR) || (vt==DATAVAR) )
-      if(!var_added_by_evolve_init_evosys(mesh, vi))
-        vlpushone(vl, vi);
-  }
-*/
 
+  /* nbinfo.bin is not portable, because we write an array of structs.
+     Therefore we simply save it in native byte order. NOTE: If a checkpoint
+     is moved between machines nbinfo.bin should be deleted! */
   /* write var list vl in native format */
   checkpoint_save_VL(mesh, fname, vl, 1);
   vlfree(vl);
