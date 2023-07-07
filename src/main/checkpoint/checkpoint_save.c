@@ -183,11 +183,11 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
 int checkpoint_write_elms(tMesh *mesh, FILE *fp)
 {
   int size = nMPI_size();
+  int n_def[3]      = {0}; /* defaults for n */
+  int pt_typ_def[3] = {0}; /* and pt_typ     */
   int rk;
   for(rk=0; rk<size; rk++)
   {
-    int n_def[3] = {0};      /* defaults for n */
-    int pt_typ_def[3] = {0}; /* and pt_typ     */
     ulong nelm0s;
     tElm0 *elm0 = amr_alloc_get_elm0array_of_rank(mesh, rk, &nelm0s);
     ulong i;
