@@ -284,7 +284,6 @@ int checkpoint_save_nbinfoVars(tMesh *mesh, char *fname)
   }
 */
 
-
   checkpoint_save_VL(mesh, fname, vl);
   vlfree(vl);
   return 0;
