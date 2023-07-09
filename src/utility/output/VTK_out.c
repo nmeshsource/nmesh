@@ -13,7 +13,7 @@
 /*************************************************************************/
 
 /* open file for vtk writing */
-FILE *fopen_vtk(char *varname, const char *outdir, const char *suffix,
+FILE *fopen_vtk(const char *varname, const char *outdir, const char *suffix,
                 char *nstr, int series,
                 char *IObuf, size_t IObufsiz)
 {
@@ -330,7 +330,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
 /*************************************************************************/
 
 /* quick array output in vtk format */
-void write_array(tNode *node, tArray *va, char *name, int as_1d,
+void write_array(tNode *node, tArray *va, const char *name, int as_1d,
                  int fake_it, double fake_t)
 {
   tMesh *mesh;
@@ -378,7 +378,7 @@ void write_array(tNode *node, tArray *va, char *name, int as_1d,
 }
 
 /* quick var output in vtk format */
-void write_var(tNode *node, char *name, int as_1d,
+void write_var(tNode *node, const char *name, int as_1d,
                int fake_it, double fake_t)
 {
   tMesh *mesh;
@@ -409,7 +409,8 @@ void write_vl(tNode *node, tVarList *vl, int as_1d,
 
 /* quick var output in vtk format on several nodes, given in e.g.
    char nodenamelist[] = "0_5230 0_5231 0_5234 0_5235"; */
-void write_var_nodenamelist(tMesh *mesh, char *nodenamelist, char *varname,
+void write_var_nodenamelist(tMesh *mesh, const char *nodenamelist,
+                            const char *varname,
                             int as_1d, int fake_it, double fake_t)
 {
   char *list, *saveptr, *nname;
@@ -430,7 +431,7 @@ void write_var_nodenamelist(tMesh *mesh, char *nodenamelist, char *varname,
 
 /* quick varlist output in vtk format on several nodes, given in e.g.
    char nodenamelist[] = "0_5230 0_5231 0_5234 0_5235"; */
-void write_vl_nodenamelist(char *nodenamelist, tVarList *vl,
+void write_vl_nodenamelist(const char *nodenamelist, tVarList *vl,
                            int as_1d, int fake_it, double fake_t)
 {
   tMesh *mesh = vl->mesh;

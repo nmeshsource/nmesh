@@ -5,8 +5,8 @@
 
 /* object to hold pars we need to pass around */
 typedef struct tOUTPARS {
-  char *name;
-  char *nodename;
+  const char *name;
+  const char *nodename;
   int text;
   int arrange_as_1d;
   int flt;
@@ -36,7 +36,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 void gnuplot_output1d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* VTK_out.c */
-FILE *fopen_vtk(char *varname, const char *outdir, const char *suffix,
+FILE *fopen_vtk(const char *varname, const char *outdir, const char *suffix,
                 char *nstr, int series,
                 char *IObuf, size_t IObufsiz);
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter, double Time,
