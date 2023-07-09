@@ -73,3 +73,16 @@ double Im_sYlm(int l, int m, int s, double theta, double phi)
   if(s%2 != 0) c=-c; /* multiply by (-1)^s */
   return c*Wigner_d_function_WT(l, m, -s, theta) * sin(m*phi);
 }
+
+/* get both real and imaginary part of spin-weighted spherical harmonic sYlm
+   in one call */
+void ReIm_sYlm(int l, int m, int s, double theta, double phi,
+               double *Re_sYlm, double *Im_sYlm)
+{
+  double Wigd = Wigner_d_function_WT(l, m, -s, theta);
+  double c = sqrt( (2.0*l+1)/(4*PI) );
+  if(s%2 != 0) c=-c; /* multiply by (-1)^s */
+
+  *Re_sYlm = c*Wigd * cos(m*phi);
+  *Im_sYlm = c*Wigd * sin(m*phi);
+}
