@@ -401,7 +401,8 @@ int check_compiledphysics(tMesh *mesh)
   char *physics = Gets(Par("physics"));
   char *phys, *str, *sav;
 
-  printf("compiledphysics = %s\n", compiledphysics);
+  if(!Getb(Par("logfile_reproducible")))
+    printf("compiledphysics = %s\n", compiledphysics);
   printf("physics = %s\n", physics);
 
   /* loop over all in par physics and check if each is in compiledphysics */
