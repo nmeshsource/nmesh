@@ -266,7 +266,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
 
             /* find indices of nearest, if all are negative, node does not have
                outputX0, outputY0, outputZ0 */
-            nearest_lowernode_ijk_of_XYZ(node, plane, X0);
+            nearest_ijk_of_XYZplus(node, plane, X0);
             normal = approxXYZnormal_of_xyznormal(node, norm);
 
             if(normal>=0)

@@ -77,6 +77,22 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
   nearest_ijk_of_XbYbZb(node, ijk, Xb);
 }
 
+/* find i,j,k closest to X0+epsilon */
+void nearest_ijk_of_XYZplus(tNode *node, int ijk[3], const double X0[3])
+{
+  double X0_plus[3];
+  int dir;
+
+  /* create a point X0_plus, that is moved in the positive dir (1,1,1) */
+  for(dir=0; dir<3; dir++)
+  {
+    double X = X0[dir];
+    X0_plus[dir] = X + (1. + fabs(X))*10.*dequaleps;
+  }
+  /* get ijk of X0_plus */
+  nearest_ijk_of_XYZ(node, ijk, X0_plus);
+}
+
 /* find i,j,k closest to X0, but discard ijk[d]=0 in upper nodes */
 void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
 {
@@ -291,7 +307,7 @@ double nearest_corner_of_xyz_inplaneN(tNode *node, int N, int pl,
   return sqrt(dist2);
 }
 
-/* return an XYZ nomrmal direction that is in a similar direction as the
+/* return an XYZ normal direction that is in a similar direction as the
    Cartesion normal direction cartN, returns -1 if not found */
 int approxXYZnormal_of_xyznormal(tNode *node, int cartN)
 {

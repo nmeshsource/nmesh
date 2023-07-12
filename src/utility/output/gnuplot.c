@@ -310,7 +310,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
 
           /* find indices of nearest, if all are negative, node does not have
              outputX0, outputY0, outputZ0 */
-          nearest_lowernode_ijk_of_XYZ(node, ijk, X0);
+          nearest_ijk_of_XYZplus(node, ijk, X0);
 
           /* write files */
           /* X-axis:  Y = Y0, Z = Z0 */
