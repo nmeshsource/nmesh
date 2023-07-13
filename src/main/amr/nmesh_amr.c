@@ -70,6 +70,8 @@ int nmesh_amr(tMesh *mesh)
 
   /* pars that determine how load is balanced */
   AddPar("amr_load_balance", "no", "how load is balanced [no,yes]");
+  AddPar("amr_sibl1to7_weight", "0", "if 0 all 8 siblings are kept on the "
+         "same MPI rank, else they can end up on different ranks [0,1]");
 
   /* MPI related pars */
   AddPar("amr_MPIexchange", "1", "type of MPI exchange we use: "

@@ -393,6 +393,7 @@ typedef struct tTIMING {
 /* structure that holds global amr vars and pars */
 typedef struct {
   int dir_active[3]; /* Par("amr_dir_active0"), ... */
+  int sibl1to7_weight; /* Par("amr_sibl1to7_weight") */
   int MPIexchange;   /* Par("amr_MPIexchange") */
   int nghosts;       /* Par("amr_nghosts") */
   int elm_nbinfo0;   /* Ind("amr_elm_nbinfo0") */

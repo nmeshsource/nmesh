@@ -34,6 +34,7 @@ int amr_init_global_pars(tMesh *mesh)
   amr->dir_active[0] = Par("amr_dir_active0");
   amr->dir_active[1] = Par("amr_dir_active1");
   amr->dir_active[2] = Par("amr_dir_active2");
+  amr->sibl1to7_weight = Par("amr_sibl1to7_weight");
   amr->MPIexchange = Par("amr_MPIexchange");
   amr->nghosts     = Par("amr_nghosts");
 
@@ -45,6 +46,9 @@ int amr_init_global_pars(tMesh *mesh)
   for(d=0; d<3; d++)
     printf("      par_%04d : Getb(amr->dir_active[%d]) = %d\n",
            amr->dir_active[d], d, Getb(amr->dir_active[d]));
+  printf(" amr->sibl1to7_weight = par_%04d"
+         " : Getd(amr->sibl1to7_weight) = %g\n",
+         amr->sibl1to7_weight, Getd(amr->sibl1to7_weight));
   printf(" amr->MPIexchange = par_%04d : Geti(amr->MPIexchange) = %d\n",
          amr->MPIexchange, Geti(amr->MPIexchange));
   printf(" amr->nghosts = par_%04d :     Geti(amr->nghosts) = %d\n",
