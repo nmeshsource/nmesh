@@ -8,7 +8,7 @@
 #define PR 0
 
 
-extern tTiming Timing[1];
+extern tAMR amr[1];
 
 
 /* refine a randomly chosen fraction frac of nodes, do this N times */
@@ -124,7 +124,7 @@ int test_mesh(tMesh *mesh)
   mesh->iteration = 0;
 
   /* give equal weight to all siblings */
-  Timing->sibl1to7_weight = 1.;
+  Setd(amr->sibl1to7_weight, 1.);
 
   /* remove all patches from mesh, so we can just add new pristine ones */
   remove_all_patches(mesh);

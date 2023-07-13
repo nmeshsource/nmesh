@@ -8,8 +8,8 @@
 #define PR 0
 
 
-/* we need Timing->sibl1to7_weight */
-extern tTiming Timing[1];
+/* we need amr->sibl1to7_weight */
+extern tAMR amr[1];
 
 
 /* Set n and pt_typ depending on ref->method. pnode is the parent node
@@ -295,12 +295,12 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* Check if all 8 children were kept together in load bal.,
      if not call load_balance to make it so! */
-  if(Timing->sibl1to7_weight != 0.)
+  if(Getd(amr->sibl1to7_weight) != 0.)
   {
-    double sibl1to7_weight_sav = Timing->sibl1to7_weight;
-    Timing->sibl1to7_weight = 0.;
+    double sibl1to7_weight_sav = Getd(amr->sibl1to7_weight);
+    Setd(amr->sibl1to7_weight, 0.);
     load_balance(mesh, 1);
-    Timing->sibl1to7_weight = sibl1to7_weight_sav;
+    Setd(amr->sibl1to7_weight, sibl1to7_weight_sav);
   }
 
   /* free surfaces & indc since they will change now anyway */

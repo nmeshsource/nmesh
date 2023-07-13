@@ -6,7 +6,7 @@
 
 
 tTiming Timing[1];
-
+extern tAMR amr[1];
 
 
 /* print global Timing struct */
@@ -124,6 +124,7 @@ double timing_get_mm_speed(tMesh *mesh)
 /* get time from dat->info->load_TimeIn_s with non-zero floor */
 double timing_get_elm_load_TimeIn_s(tElm *elm)
 {
+  tMesh *mesh = elm->pat->mesh;
   double loadTmin = 1e-50;
   double et;
   tDat *dat = elm->dat;
@@ -140,7 +141,7 @@ double timing_get_elm_load_TimeIn_s(tElm *elm)
 
     /* set timing weight for this elm */
     if(ijk==0) tw = 1.;
-    else       tw = Timing->sibl1to7_weight;
+    else       tw = Getd(amr->sibl1to7_weight);
     /* NOTE: if sibl1to7_weight=0 and if all 8 siblings are there,
              we may want to increase the ijk=0 weight to 8 */
 

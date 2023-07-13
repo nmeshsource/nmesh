@@ -10,7 +10,7 @@
 
 /* use gridpoints from basis/gridpoints.c */
 extern tGridPoints gridpoints[1];
-extern tTiming Timing[1]; // FIXME: remove this line
+extern tAMR amr[1];
 
 
 /* make an empty mesh, into which we an then initialize or into which
@@ -576,7 +576,7 @@ int setup_elm_mesh1(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  Timing->sibl1to7_weight = 1.;
+  Setd(amr->sibl1to7_weight, 1.);
 
   remove_all_patches(mesh);
   add_patch(mesh, bbox0, pt_typ, n, 0);
@@ -811,9 +811,9 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
   }
 
 
-  Timing->sibl1to7_weight = 0.;
+  Setd(amr->sibl1to7_weight, 0.);
   load_balance(mesh, 1);
-  Timing->sibl1to7_weight = 1.;
+  Setd(amr->sibl1to7_weight, 1.);
 
   printf("mesh->myelm:\n");
   printelmarray(mesh->nmyelm, mesh->myelm);

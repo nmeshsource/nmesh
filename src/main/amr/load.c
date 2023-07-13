@@ -28,7 +28,7 @@ void simple_load_balance(tMesh *mesh)
 void load_balance(tMesh *mesh, int strategy)
 {
   /* to keep sibling 1-7 together with sibling 0 we need to have
-     Timing->sibl1to7_weight = 0.;  */
+     amr_sibl1to7_weight = 0 */
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
