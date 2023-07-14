@@ -66,12 +66,12 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
   /* do N unrefines */
   for(i=0; i<N; i++)
   {
+    j=0;
     for(rk=0; rk<size; rk++)
     {
       if(rk==rank)
       {
         /* set rflag on a fraction */
-        j=0;
         formylnodes_noomp(mesh)
         {
           tNode *node = MyLnode;
@@ -81,8 +81,10 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
           j++;
         }
       }
-      /* broadcast ran2 to other ranks */
+      /* broadcast ran2 and j to other ranks */
       nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk);
+      nMPI_Bcast(&j,1, nMPI_INT, rk);
+      nMPI_Bcast(&rflag,1, nMPI_INT, rk);
     }
     /* All MPI procs must do the lines below in the same way, so ran1 must
        be the same no matter how many procs we have! */
