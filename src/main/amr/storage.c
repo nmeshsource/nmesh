@@ -941,7 +941,7 @@ tMesh *alloc_mesh(int npats)
   INIT_LIST_HEAD(&mesh->myelm_head);
 
   /* init mesh mutex */
-  MUTEX_INIT(mesh->mutex);
+  //MUTEX_INIT(mesh->mutex);
 
   return mesh;
 }
@@ -1027,7 +1027,7 @@ void free_mesh_contents_exceptMeshFuns(tMesh *mesh)
   free(mesh->pdb);
 
   /* free mesh mutex */
-  MUTEX_DESTROY(mesh->mutex);
+  //MUTEX_DESTROY(mesh->mutex);
 
   /* free mesh->eidlim at the end */
   free(mesh->eidlim);
