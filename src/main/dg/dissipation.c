@@ -394,3 +394,16 @@ void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
   double cf[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   dissipation_add_taperedKO_order_cf(node, vlr, vlu, dissfac, order, cf);
 }
+
+/* use dissipation_add_taperedKO_order_cf with some cf zeroed near boundary,
+   so that no diss below min_order is used */
+void dissipation_add_taperedKO_order_min(tNode *node,
+                                         tVarList *vlr, tVarList *vlu,
+                                         double dissfac, int order,
+                                         int min_order)
+{
+  double cf[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  int i;
+  for(i=0; i<min_order/2; i++) cf[i]=0.;
+  dissipation_add_taperedKO_order_cf(node, vlr, vlu, dissfac, order, cf);
+}
