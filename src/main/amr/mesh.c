@@ -84,7 +84,7 @@ tPat *add_patch_without_rnode(tMesh *mesh, double bbox[6])
   double dg;
   int i;
 
-  PRFs(":\n");
+  //PRFs(":\n");
 
   /* make room for new patch in mesh and then add an empty patch */
   realloc_patlist_in_mesh(mesh, p + 1);
@@ -114,7 +114,7 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
   int dir;
   int pt_typ[3];
 
-  PRFs(":\n");
+  //PRFs(":\n");
 
   /* check if we have enough space for diff. and other matrices */
   for(dir=0; dir<3; dir++)
@@ -162,7 +162,7 @@ int amr_setup_mesh(tMesh *mesh)
   int sph_l = Geti(Par("amr_hrefine_sphere_levels"));
   double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
-  int ret;
+  int ret; //, pind;
 
   if(Getv(mesh_type, "BoxMesh"))
     ret = setup_box_mesh(mesh);
@@ -178,6 +178,14 @@ int amr_setup_mesh(tMesh *mesh)
     ret = setup_3patchl2_mesh(mesh);
   else
     ret = setup_elm_mesh1(mesh); // test case
+
+  ///* print info about all patches we have now */
+  //forpatches(mesh,pind)
+  //{
+  //  tPat *pat = mesh->pat[pind];
+  //  printpatch(pat);
+  //  printCI(pat);
+  //}
 
   /* load balance root nodes */
   simple_load_balance(mesh);
@@ -414,6 +422,10 @@ int setup_CubedSphere_mesh(tMesh *mesh)
 
   /* remove all patches from mesh, so we can just add new pristine ones */
   remove_all_patches(mesh);
+
+  /* perform some par sanity checks */
+  if(ssfac <= sqrt(3.))
+    errorexit("ssfac=amr_CubedSphere_r0fac needs to be larger than sqrt(3)");
 
   /* setup cubed spheres */
   switch(npats)
