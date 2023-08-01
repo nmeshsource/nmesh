@@ -505,6 +505,8 @@ void printmyelms(tMesh *mesh);
 void printnbelms(tMesh *mesh);
 void print_amr_elm_nbinfo(const tElm *elm, int face);
 void pr_nodename(tNode *node);
+void printnodeinfo(const tElm *elm);
+void printelm_nodeinfo(const tElm *elm);
 void printvar_innode(tNode *node, int vi);
 void printvar_ajsurfdiff(tNode *node, int vi);
 void printvar_indc(tNode *node, int vi);

@@ -280,6 +280,23 @@ void pr_nodename(tNode *node)
   printf("%s", nodename(node, str,99));
 }
 
+/* print info inside dat of node */
+void printnodeinfo(const tElm *elm)
+{
+  tNodeInfo *info = elm->dat->info;
+  printf("info->  ");
+  printf("evo_troubled=%d  trbl_score=%d  use_fv=%d",
+         info->evo_troubled, info->trbl_score, info->use_fv);
+  printref(info->trbl_ref);
+}
+
+void printelm_nodeinfo(const tElm *elm)
+{
+  union { const tElm *elm; tElm0 *elm0; } e2e0;
+  e2e0.elm = elm;
+  printelm0(e2e0.elm0, "\n");
+  printnodeinfo(elm);
+}
 
 /* print a variable in a node */
 void printvar_innode(tNode *node, int vi)
