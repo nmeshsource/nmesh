@@ -285,8 +285,9 @@ void printnodeinfo(const tElm *elm)
 {
   tNodeInfo *info = elm->dat->info;
   printf("info->  ");
-  printf("evo_troubled=%d  trbl_score=%d  use_fv=%d",
+  printf("evo_troubled=%d  trbl_score=%d  use_fv=%d\n",
          info->evo_troubled, info->trbl_score, info->use_fv);
+  printf("info->trbl_ref:\n");
   printref(info->trbl_ref);
 }
 
