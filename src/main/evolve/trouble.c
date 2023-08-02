@@ -207,7 +207,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
 
       if(!firstit)
         if(info_ref->method != ref->method)
-          errorexit("node with trouble > 0 must all have same trouble_ref");
+          errorexit("node with trouble > 0 must all have same trbl_ref");
       firstit = 0;
 
       /* set ref and node->rflag, since ref is global don't use OpenMP! */
