@@ -204,6 +204,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     if(node->dat->info->trbl_score <= -NOTROUBLES)
     {
       tRef *info_ref = node->dat->info->trbl_ref;
+      PRFs(": trbl_ref: ");printref(info_ref);
 
       if(!firstit)
         if(info_ref->method != ref->method)
@@ -232,6 +233,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
 
+  //FIXME: remove update_mesh_myln_node_nid
   /* update, nids won't change but hmin and thus dt might */
   update_mesh_myln_node_nid(mesh);
 
