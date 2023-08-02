@@ -137,7 +137,7 @@ void printelm0(const tElm0 *e, const char *s)
          e->eploc->eid,
          e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5]);
   printf(" n=%dx%dx%d=%d", e->n[0],e->n[1],e->n[2], e->np);
-  //printf(" rflag=%d", e->rflag);
+  printf(" rflag=%d", e->rflag);
   printf(" datrank=%d", e->datrank);
   printf("%s", s);
 }
@@ -287,7 +287,7 @@ void printnodeinfo(const tElm *elm)
   printf("info->  ");
   printf("evo_troubled=%d  trbl_score=%d  use_fv=%d\n",
          info->evo_troubled, info->trbl_score, info->use_fv);
-  printf("info->trbl_ref:\n");
+  printf("info->  trbl_ref: ");
   printref(info->trbl_ref);
 }
 
