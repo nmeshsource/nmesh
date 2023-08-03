@@ -166,6 +166,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     if(node->dat->info->trbl_score > 0)
     {
       tRef *info_ref = node->dat->info->trbl_ref;
+      if(elmname_is(node, "0_700")) {PRFs(": trbl_ref: ");printref(info_ref);}
 
       if(!firstit)
         if(info_ref->method != ref->method)
