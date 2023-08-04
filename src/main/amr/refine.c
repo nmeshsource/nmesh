@@ -172,19 +172,15 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
     tElm *elm = list_entry(pos, tElm, list);
     int pt_typ[3], n[3];
 
-    if(elmname_is(elm, "0_700"))
-    { PRFs(":\n  ");printelm_nodeinfo(elm); }
+    //if(elmname_is(elm, "0_700")) { PRFs(":\n  ");printelm_nodeinfo(elm); }
 
     /* refine only if rflag is set */
     if(elm->rflag > 0)
     {
       /* set n and pt_typ */
       hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
-      if(elmname_is(elm, "0_700"))
-      {
-        printref(ref);
-        printf("n[0]=%d pt_typ[0]=%d\n", n[0], pt_typ[0]);
-      }
+      //if(elmname_is(elm, "0_700"))
+      //  { printref(ref); printf("n[0]=%d pt_typ[0]=%d\n", n[0], pt_typ[0]); }
 
       if(ref->type == H_REFINE) /* replace elm with its children */
       {
@@ -194,7 +190,7 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
       }
       else /* p-refine by changing n and pt_typ of elm */
       {
-        if(elmname_is(elm, "0_700")) PRFs(": update_node_n_pt_typ\n");
+        //if(elmname_is(elm, "0_700")) PRFs(": update_node_n_pt_typ\n");
         update_node_n_pt_typ(elm, n, pt_typ);
       }
     }

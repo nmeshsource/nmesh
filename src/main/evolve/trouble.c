@@ -166,7 +166,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     if(node->dat->info->trbl_score > 0)
     {
       tRef *info_ref = node->dat->info->trbl_ref;
-      if(elmname_is(node, "0_700")) {PRFs(": trbl_ref: ");printref(info_ref);}
+      //if(elmname_is(node, "0_700")) {PRFs(": trbl_ref: ");printref(info_ref);}
 
       if(!firstit)
         if(info_ref->method != ref->method)
@@ -205,7 +205,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
     if(node->dat->info->trbl_score <= -NOTROUBLES)
     {
       tRef *info_ref = node->dat->info->trbl_ref;
-      if(elmname_is(node, "0_700")) {PRFs(": trbl_ref: ");printref(info_ref);}
+      //if(elmname_is(node, "0_700")) {PRFs(": trbl_ref: ");printref(info_ref);}
 
       if(!firstit)
         if(info_ref->method != ref->method)
@@ -235,8 +235,8 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   refine_set_rflag_forall_nodes(mesh, 0);
 
   //FIXME: remove update_mesh_myln_node_nid
-  /* update, nids won't change but hmin and thus dt might */
-  update_mesh_myln_node_nid(mesh);
+  ///* update, nids won't change but hmin and thus dt might */
+  //update_mesh_myln_node_nid(mesh);
 
   /* switch on fv on all uniform nodes */
   refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
