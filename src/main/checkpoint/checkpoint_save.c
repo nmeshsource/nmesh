@@ -244,6 +244,67 @@ int checkpoint_write_elms(tMesh *mesh, FILE *fp)
 
 
 /******************************************************************/
+/* functions to save dat->info */
+/******************************************************************/
+/* save dat->info */
+int checkpoint_save_datinfo(tMesh *mesh, char *fname)
+{
+  FILE *fp = NULL;
+  int IObufsz = Geti(Par("fwrite_bufsize"));
+  char *IObuf; /* larger buffer for write */
+  int rk;
+
+  /* ranks write one after the other */
+  for(rk=0; rk<nMPI_size(); rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == nMPI_rank())
+    {
+      /* only Rank0 writes the file header */
+      if(rk==0)
+      {
+        /* open destination file */
+        fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
+        if(!fp) errorexits("failed opening %s", fname);
+        fprintf(fp, "number of elms, followed by all elms, and some of their"
+                    "dat->info\n\n");
+        fprintf(fp, "nelms = %lu\n\n", mesh->eidlim[nMPI_size()-1]);
+      }
+      else
+      {
+        fp = fopen_buf(fname, "ab", &IObuf,IObufsz);
+        if(!fp) errorexits("failed opening %s", fname);
+      }
+
+      /* write all elm and their dat->info */
+      errorexit("this is not finished...");
+      formyelms(mesh)
+      {
+        tElm *elm = MyElm;
+        tNodeInfo *info = elm->dat->info;
+        tEloc eloc[1];
+        int l;
+
+        /* get loc strings in eloc */
+        eloc_from_eploc(eloc, elm->eploc);
+
+        /* write elm name */
+        fprintf(fp, "%d_", eloc->p);
+        for(l = 0; l < eloc->l; l++) fputc(eloc->loc[l], fp);
+        fprintf(fp, "\n");
+
+        fprintf(fp, "%d ", info->use_fv);
+        // ...
+        fprintf(fp, "\n");
+      }
+      fclose_buf(fp, &IObuf);
+    }
+  }
+  return 0;
+}
+
+
+/******************************************************************/
 /* functions to save variables */
 /******************************************************************/
 
