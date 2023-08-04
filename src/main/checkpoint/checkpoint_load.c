@@ -157,6 +157,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
   int pt_typ_def[] = {P_LGL,P_LGL,P_LGL}; /* and pt_typ     */
   char buf[1000];
   char str[1000];
+  ulong eid; /* eid is just the number of the elm in the file */
 
   /* alloc buffer on all ranks */
   buffer = cmalloc(nbuffer_allocd);
@@ -191,11 +192,12 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
   nmyelm = amr_nelms_on_rank(mesh, rank);
   eid0 = amr_1st_eid_on_rank(mesh, rank);
 
-  /* get part of file into mem buffer on proc0 */
+  /* put file chunk by chunk into mem buffer and then work on each chunk */
   file_end = 0;
+  eid = 0; /* first elm in file has eid=0 */
   do
   {
-    /* read a chunk from file into buffer */
+    /* read a chunk from file into buffer on proc0 */
     if(Rank0)
     {
       char *tailbuf;
@@ -228,11 +230,9 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
     //PRF;printf(": nbuffer=%ld\n", nbuffer);
     /* now use the info in buffer to create nodes */
     {
-      ulong eid; /* eid is just the number of the elm in the file */
       long off, len;
 
       /* read buffer line by line */
-      eid = 0;
       off = 0;
       while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
       {
