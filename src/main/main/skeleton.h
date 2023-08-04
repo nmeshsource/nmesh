@@ -9,6 +9,7 @@ enum
   //timebins called once in inidata_mesh:
   POST_PARAMETERS,
   INITMESH,         /* happens only if there is no checkpoint restart */
+  POST_INITMESH,    /* happens only if there is no checkpoint restart */
   PRE_COORDINATES,
   COORDINATES,
   POST_COORDINATES,
