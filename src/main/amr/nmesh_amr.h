@@ -405,6 +405,7 @@ typedef struct {
 
 /* mesh.c */
 tMesh *make_empty_mesh(int pr);
+int amr_use_fv_if_P_UNIFORM(tMesh *mesh);
 tPat *add_patch_without_rnode(tMesh *mesh, double bbox[6]);
 tPat *add_patch(tMesh *mesh, double bbox[6],
                 int *pt_typ_root, int nroot[3], int datrank);

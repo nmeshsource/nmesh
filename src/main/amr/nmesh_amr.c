@@ -15,7 +15,7 @@ int nmesh_amr(tMesh *mesh)
   AddFun(FIRST, amr_print_thread_info);
   //AddFun(FIRST, timing_mm_speed); // this is too slow right now
   AddFun(POST_PARAMETERS, amr_init_global_pars);
-  AddFun(INITIALDATA, amr_set_use_fv_flag);
+  AddFun(POST_INITMESH, amr_set_use_fv_flag);
   AddFun(LOADBALANCING, load_balance_if_needed);
 
   /* variables */
@@ -50,6 +50,9 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
   AddPar("amr_uniform_p", "", "list of patches with uniform grid spacing");
   AddPar("amr_fv_p", "", "patches where we use finite volume");
+  AddPar("amr_fv_if_uniform", "no", "set use_fv in uniform elms [no,yes]");
+  if(Getb(Par("amr_fv_if_uniform")))
+    AddFun(PRE_COORDINATES, amr_use_fv_if_P_UNIFORM);
 
   /* pars that control how many dimensions we use */
   AddPar("amr_dir_active0", "yes", "whether dir. 0 is used [yes,no]");
