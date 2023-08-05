@@ -2893,27 +2893,41 @@ int amr_elm_nbinfo_to_elm_fnb(tMesh *mesh)
           /* make new nb-elm */
           nb = alloc_elm_of_elmheader(mesh, nb0);
 
-          /* Is nb in mesh->nbelm already? */
-          f_elm = amr_elmarray_bsearch(mesh->nnbelm, mesh->nbelm, nb);
-          /* if yes we use the nb from mesh->nbelm */
-          if(f_elm)
+          //GEN_Pragma(omp critical (update_mesh_nbelm))
+          /* NOTE: For some reason gcc's -fsanitize=thread throws a ?false?
+             positive if I use a named critical section!
+             So replace "GEN_Pragma(omp critical (update_mesh_nbelm))"
+             by "GEN_Pragma(omp critical)" when debugging races!!! */
+          GEN_Pragma(omp critical)
           {
-            free_elm(nb);
-            nb = f_elm[0];
-          }
-          else /* otherwise we add nb to mesh->nbelm */
-          {
-            amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
-          }
-          /* NOTE: nb->n and nb->np need to be set later!!! */
+            /* We need a critical section here because:
+               amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
+                ^--touches & reallocs the global mesh->nbelm
+               amr_unionadd_elm_to_nbelm_fnb(elm, f, i);
+                ^--touches nb of elm in mesh->nbelm */
 
-          /* finally also point at this nb */
-          elm->fnb[f][i] = nb;
+            /* Is nb in mesh->nbelm already? */
+            f_elm = amr_elmarray_bsearch(mesh->nnbelm, mesh->nbelm, nb);
+            /* if yes we use the nb from mesh->nbelm */
+            if(f_elm)
+            {
+              free_elm(nb);
+              nb = f_elm[0];
+            }
+            else /* otherwise we add nb to mesh->nbelm */
+            {
+              amr_elmarray_add_sort(&(mesh->nnbelm), &(mesh->nbelm), nb);
+            }
+            /* NOTE: nb->n and nb->np need to be set later!!! */
 
-          /* add elm also to nb->fnb[nb_f][nb_i] */
-          amr_unionadd_elm_to_nbelm_fnb(elm, f, i);
-          /* This is done locally and may miss nbs of the elms in nbelm,
-             that are on yet other ranks! */
+            /* finally also point at this nb */
+            elm->fnb[f][i] = nb;
+
+            /* add elm also to nb->fnb[nb_f][nb_i] */
+            amr_unionadd_elm_to_nbelm_fnb(elm, f, i);
+            /* This is done locally and may miss nbs of the elms in nbelm,
+               that are on yet other ranks! */
+          }
         }
       }
     } /* end loop over f */
