@@ -84,8 +84,11 @@ int amr_print_thread_info(tMesh *mesh)
   system2("echo", "$OMP_NUM_THREADS");
   printf("MAX_NTHREADS = %d\n", MAX_NTHREADS);
 #ifdef USEOMP
-  printf("OpenMP pragmas are active. OMP_VERSION = _OPENMP = %d\n",
-         OMP_VERSION);
+  printf("OpenMP pragmas are active.\n");
+  printf("  OMP_VERSION = _OPENMP = %d\n", OMP_VERSION);
+#ifdef USE_OMP_TASKLOOP
+  printf("  USE_OMP_TASKLOOP is defined.\n");
+#endif
 #else
   printf("OpenMP pragmas are off.\n");
 #endif
