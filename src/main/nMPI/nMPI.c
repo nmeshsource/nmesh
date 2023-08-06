@@ -184,8 +184,10 @@ int nMPI_Finalize(void)
   ret = MPI_Finalize();
   PR1;
 #endif
-  fclose(stderr);
-  fclose(stdout);
+  /* We should never close stderr & stdout. If we close anything at all it
+     would be the files they have been redirected to... */
+  //fclose(stderr);
+  //fclose(stdout);
   return ret;
 }
 
