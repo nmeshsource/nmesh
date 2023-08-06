@@ -74,6 +74,7 @@ int main(int argc, char **argv)
   free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
+  PRF;printf(": nmesh has finished.\n");
   return 0;
 }
 
@@ -622,6 +623,7 @@ void finalize_all_and_exit(tMesh *mesh, int ec)
   free(mesh);
   nMPI_Comm_free(&(main_comm));
   nMPI_Finalize();
+  PRF;printf(": nmesh is exiting now.\n");
   fflush(stderr);
   fflush(stdout);
   exit(ec);
