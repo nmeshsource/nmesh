@@ -234,7 +234,7 @@ void printelmsinglist(struct list_head *elm_head)
 
 void printmyelms(tMesh *mesh)
 {
-  formyelms(mesh)
+  formyelms_noomp(mesh)
   {
     tElm *elm = MyElm;
     printelm(elm);

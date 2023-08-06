@@ -475,7 +475,7 @@ void remove_elms_if_rflag__general(tMesh *mesh, tRef *ref)
   int i;
 
   num = uref = 0;
-  formyelms(mesh)
+  formyelms_noomp(mesh)
   {
     tElm *elm  = MyElm;
     ulong myid = MyID;
@@ -691,7 +691,7 @@ void hrefine_mesh_to_level(tMesh *mesh, int l)
   for(i=0; i<l; i++)
   {
     ref = 0;
-    formyelms(mesh)
+    formyelms_noomp(mesh)
     {
       tElm *elm = MyElm;
       if(Elm_l(elm) < l)
@@ -744,7 +744,7 @@ void hcoarsen_mesh_to_level(tMesh *mesh, int l)
   do
   {
     ref = 0;
-    formyelms(mesh)
+    formyelms_noomp(mesh)
     {
       tElm *node = MyElm;
       if(Elm_l(node) > l)
