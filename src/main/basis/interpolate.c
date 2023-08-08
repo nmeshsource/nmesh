@@ -655,6 +655,7 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
   }
   Val = val;
   Haveval = haveval;
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
 
   /* find out how many have a value, and add all of them */
   nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);

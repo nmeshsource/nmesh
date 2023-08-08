@@ -711,8 +711,8 @@ int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3])
   else
     for(d=0; d<3; d++) X[d] = x[d];
 
-  //pr3v("|x",x);
-  //pr3v("X",X);
+  //PRF;pr3v(": x",x);
+  //printf("p=%d stat=%d ", pat->p, stat);pr3v("X",X);
 
   if(stat) return -1;
 
@@ -720,7 +720,7 @@ int p_XYZ_of_xyz(tPat *pat, double X[3], const double x[3])
     if(dless(X[d],pat->bbox[2*d]) || dless(pat->bbox[2*d+1],X[d]))
       return -1;
 
-  //prbbox(pat->bbox,3);
+  //PRF;prbbox(pat->bbox,3);
 
   /* round X to inside box */
   for(d=0; d<3; d++)
