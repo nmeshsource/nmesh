@@ -631,6 +631,64 @@ errorexit("extract_vals_pts_around_Xb is unfinished!!!");
 /* interpolate to a given x,y,z */
 /***********************************************************************/
 
+/* use basis_array_interp to interpolate var ivar onto xyz[3],
+   IN: mesh, ivar, xyz, basis   OUT: XYZ, value   RETURN: p (patchnumber) */
+int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
+                              double basis(int k, double x, int np,
+                                           const double *x_p,
+                                           const double *w_interp),
+                              double XYZ[3], double *value)
+{
+  double Val, val;
+  int Haveval, haveval;
+  int p, npts;
+
+  /* find patch p and set XYZ */
+  p = p_XYZ_of_xyz_mesh(mesh, XYZ, xyz);
+  //PRFs(": ");pr3v("XYZ", XYZ);printf(": p=%d\n", p);
+
+  /* if xyz is not on mesh return -1 */
+  if(p<0) return p;
+
+  /* search among my leaf nodes (in patch p) for XYZ */
+  val = 0.;
+  npts = 0;
+  haveval = 0;
+  formyelms_noomp(mesh)
+  {
+    tElm *elm = MyElm;
+    if(elm->pat->p == p)
+      if(XYZ_is_in_node(elm, XYZ))
+      {
+        double XbYbZb[3];
+
+        npts++; /* count how often we found XYZ */
+        XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
+        val += basis_array_interp(elm, VarA(elm, ivar), XbYbZb, basis);
+        break; //FIXME: remove this!!!!
+      }
+  }
+  /* if we found points with XYZ, set val to average value */
+  if(npts)
+  {
+    val = val/npts; /* average val */
+    haveval = 1;
+  }
+
+  Val = val;
+  Haveval = haveval;
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+
+  /* find out how many procs have a value, and add all of them */
+  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
+  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  if(!Haveval) errorexit("one MPI proc should have this value");
+  Val = Val/Haveval;
+  *value = Val;
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+  return p;
+}
+
 /* find node and Xb of xyz[3] and then use use basis_array_interp
    to interpolate var ivar onto xyz[3] */
 double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
@@ -638,31 +696,14 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
                                          const double *x_p,
                                          const double *w_interp))
 {
-  double Val, val=0.;
-  int Haveval, haveval=0;
-  double X[3], Xb[3];
-  tNode *node = node_XYZ_of_xyz_mesh(mesh, X, xyz);
-
-  //pr3v("xyz", xyz);
-  //pr3v("X", X);
-  //printf("Node_eid(node)=%ld node->datrank=%d\n", Node_eid(node), node->datrank);
-
-  if(node) if(node->dat)
+  double XYZ[3];
+  double value;
+  int p = basis_var_interpolate_xyz(mesh, ivar, xyz, basis, XYZ, &value);
+  if(p<0)
   {
-    XbYbZb_of_XYZ(node, Xb, X);
-    val = basis_array_interp(node, VarA(node, ivar), Xb, basis);
-    haveval = 1;
+    pr3v("xyz",xyz);
+    printf("p=%d\n", p);
+    errorexit("cannot find xyz on mesh");
   }
-  Val = val;
-  Haveval = haveval;
-  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
-
-  /* find out how many have a value, and add all of them */
-  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
-  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
-  if(!Haveval) errorexit("one MPI proc should have this node");
-  Val = Val/Haveval;
-
-  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
-  return Val;
+  return value;
 }
