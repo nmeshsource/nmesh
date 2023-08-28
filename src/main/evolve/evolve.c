@@ -82,20 +82,23 @@ int evolve_myln(tMesh *mesh)
       prdivider(0);
       PRF;printf(": trouble_score=%d (bad) => take back step & "
                  "switch troubled nodes\n", trouble_score);
-      //tNode *node = node_from_nodename(mesh, "0_2745");
-      //if(node->dat)
-      //printf("node->dat->info->trbl_score=%d\n", node->dat->info->trbl_score);
+      //node = node_from_nodename(mesh, "0_465");
+      //if(node && node->dat) printelm_nodeinfo(node);
+      //if(node) { Yo(89); GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u_p,0)); }
       /* go back to u_p and switch to fv */
       evolve_prepare_do_over_mesh(mesh);
-      //if(node->dat)
-      //printf("node->dat->info->trbl_score=%d\n", node->dat->info->trbl_score);
+      //if(node && node->dat) printelm_nodeinfo(node);
+      //if(node) { Yo(94); GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u,0)); }
       //tPoint pt[] =  {{.node=node, .ijk=151}};
       //printvarlist_atpoint(pt, ListEntry(evosys->u,0));
-      /* now all new fv nodes have newly interpolated evo vars,
-         so we need to limit them again */
-      evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
-      //if(node->dat)
-      //printf("node->dat->info->trbl_score=%d\n", node->dat->info->trbl_score);
+      /* Now all new fv nodes have newly interpolated evo vars, so we need
+         to limit them again. ALSO, we need to run PRELIM again to update
+         fields (like the ADM metric) that are not in evosys->u to the new
+         evosys->u = evosys->u_p set in evolve_prepare_do_over_mesh. */
+      //evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
+      evolve_limiter_mesh(mesh, evosys->u, 0); //in all nodes
+      //if(node && node->dat) printelm_nodeinfo(node);
+      //if(node) GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u,0));
 
       /* redo evo step */
       PRF;printf(": redo evo step\n");
