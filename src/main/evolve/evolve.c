@@ -111,9 +111,9 @@ int evolve_myln(tMesh *mesh)
          again, trbl_score of some nodes may further decrease ... */
     }
 
-    /* If trouble_score!=0, some nodes may have trbl_score<0.
-       We now switch these nodes back to dg. */
-    if(trouble_score!=0)
+    /* If trouble_score>0 or trouble_score<=-NOTROUBLES, some nodes may have
+       trbl_score<=-NOTROUBLES. We now switch these nodes back to dg. */
+    if(trouble_score>0 || trouble_score<=-NOTROUBLES)
     {
       if(trouble_score<=-NOTROUBLES) //all nodes have trbl_score<=0
       {
@@ -130,7 +130,7 @@ int evolve_myln(tMesh *mesh)
 
     /* update some vars by calling funcs in PRESURF, SETSRC
        often PRESURF does cons2prim, SETSRC sets stress-energy */
-    if(trouble_score!=0)
+    if(trouble_score>0 || trouble_score<=-NOTROUBLES)
       evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs,
                                                  evosys->u);
   }
