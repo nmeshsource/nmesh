@@ -75,11 +75,13 @@ int evolve_myln(tMesh *mesh)
     /* make one full evo step */
     Evolve_mesh(mesh);
 
-    /* get trouble score, and redo step with fv or switch back to dg */
+    /* get global trouble score */
     trouble_score = evolve_set_trouble_score_mesh(mesh);
+
+    /* If trouble_score>0 at least some nodes are troubled.
+       In this case we switch them to fv and redo the evo step. */
     if(trouble_score>0)
     {
-      //prdivider(0);
       PRF;printf(": trouble_score=%d (bad) => switch troubled nodes & "
                  "redo evo step\n", trouble_score);
       //node = node_from_nodename(mesh, "0_465");
@@ -103,17 +105,24 @@ int evolve_myln(tMesh *mesh)
       /* redo evo step */
       //PRF;printf(": redo evo step\n");
       Evolve_mesh(mesh);
-      //prdivider(0);
+      /* It may be good update trouble_score here. But we assume that
+         the nodes with trbl_score<0 in the 1st step still have that
+         when redo the step. Also, if we call evolve_set_trouble_score_mesh
+         again, trbl_score of some nodes may further decrease ... */
     }
-    else if(trouble_score<=-NOTROUBLES)
+
+    /* If trouble_score!=0, some nodes may have trbl_score<0.
+       We now switch these nodes back to dg. */
+    if(trouble_score!=0)
     {
-      //prdivider(0);
-      PRF;printf(": trouble_score=%d (great) => switch nontroubled nodes\n",
-                 trouble_score);
-      /* switch to dg */
+      if(trouble_score<=-NOTROUBLES) //all nodes have trbl_score<0
+      {
+        PRF;printf(": trouble_score=%d (great) => switch nontroubled nodes\n",
+                   trouble_score);
+      }
+      /* switch all nodes with negative enough trbl_score to dg */
       evolve_switch_nontroubled_nodes_mesh(mesh);
       /* now some aux vars (and others) are not set */
-      //prdivider(0);
     }
 
     /* we limit the final u only here */

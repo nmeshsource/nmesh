@@ -138,8 +138,8 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
 }
 
 
-/* switch bewteen fv and dg based on node->dat->info->trbl_score flag */
-void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
+/* switch from dg to fv based on node->dat->info->trbl_score flag */
+void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
   int firstit;
@@ -150,7 +150,7 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
-  /* Set ref to uniform. All nodes with trouble>0 should have trbl_ref
+  /* Set ref to uniform. All nodes with trbl_score>0 should have trbl_ref
      set to uniform already. */
   /* loop over all nodes, and flag all troubled nodes for uniform grid */
   firstit = 1;
@@ -188,9 +188,36 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
-  ///* also p-refine neighbors to make sure the star surface stays within fv
-  //   region when the radius changes a bit */
-  //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
+  /* now some aux vars (and others) are not set */
+  /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
+
+  /* clear rflag on all leaf nodes */
+  refine_set_rflag_forall_nodes(mesh, 0);
+
+  /* switch on fv on all uniform nodes */
+  refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
+
+  /* switch off fv on all LGL nodes */
+  refine_set_use_fv_if_pt_typ(mesh, ptLGL, 0);
+
+  /* now that nodes are changed re-init surfaces & indc */
+  evolve_init_communication_structs(mesh);
+
+  /* balance load, now that some nodes use a different method */
+  //FIXME: do something better than simple_load_balance
+}
+
+/* switch from fv to dg based on node->dat->info->trbl_score flag */
+void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
+{
+  tRef ref[1]; /* for ref info */
+  int firstit;
+  int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
+  int ptLGL[] = { P_LGL, P_LGL, P_LGL };
+  if(PR) PRFs(":\n");
+
+  /* free surfaces & indc since they will change now anyway */
+  evolve_free_communication_structs(mesh);
 
   /* Set ref to LGL. All nodes with trouble<0 should have trbl_ref
      set to LGL already. */
@@ -227,16 +254,11 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
-  ///* also p-refine neighbors to make sure the star surface stays within fv
-  //   region when the radius changes a bit */
-  //prefine_nodes_if_nb_uniform_in_any_dir(mesh, ref);
+  /* now some aux vars (and others) are not set */
+  /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
 
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
-
-  //FIXME: remove update_mesh_myln_node_nid
-  ///* update, nids won't change but hmin and thus dt might */
-  //update_mesh_myln_node_nid(mesh);
 
   /* switch on fv on all uniform nodes */
   refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
@@ -250,7 +272,6 @@ void evolve_trouble_switch_dg_fv_mesh(tMesh *mesh)
   /* balance load, now that some nodes use a different method */
   //FIXME: do something better than simple_load_balance
 }
-
 
 /* set u = u_p, and then switch to fv */
 void evolve_prepare_do_over_mesh(tMesh *mesh)
@@ -275,18 +296,7 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
   }
 
   /* switch nodes based on trouble flag */
-  evolve_trouble_switch_dg_fv_mesh(mesh);
-}
-
-/* switch back to dg */
-void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
-{
-  if(PR) PRFs(":\n");
-
-  /* switch nodes based on trouble flag */
-  evolve_trouble_switch_dg_fv_mesh(mesh);
-  /* now some aux vars (and others) are not set */
-  /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
+  evolve_switch_troubled_nodes_mesh(mesh);
 }
 
 /* Set myindc for u_p to get min/max of u_p needed for a RDMP trouble indicator.
