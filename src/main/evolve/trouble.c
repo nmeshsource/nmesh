@@ -398,6 +398,100 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
   return troubled;
 }
 
+/* compute Persson trouble indicator for var iu. Ref:
+   Per-Olof Persson and Jaime Peraire. Sub-cell shock capturing for
+   discontinuous Galerkin methods.
+   In 44th AIAA Aerospace Sciences Meeting and Exhibit.
+   American Institute of Aeronautics and Astronautics, Inc., 2006. */
+int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
+                           double alpha, double alpha_fv)
+{
+  //tMesh *mesh = node->pat->mesh;
+  int fv = node->dat->info->use_fv;
+  tArray *ca;
+  int nm1[3];
+  int i,j,k, n_max;
+  double c2_sum, c2_nm1_sum, c2_hi, se, se_lim;
+  int troubled;
+
+  /* get coeffs of var iu */
+  ca = alloc_array(node->n);
+  basis_array_analysis3(node, VarA(node,iu), ca);
+
+  /* set the 0th coeff (that corresponds to the node average) to u_scale,
+     so that we get the same result, no matter how high the node average */
+  if(u_scale >= 0.) Arrd(ca)[0] = u_scale;
+
+  /* compute sum of squares of all coeffs */
+  c2_sum = 0.;
+  forarray(ca, k)
+  {
+    double co = Arrd(ca)[k];
+    c2_sum += co*co;
+  }
+
+  /* set nm1 to node->n - 1 */
+  for(k=0; k<3; k++)
+  {
+    int n = node->n[k];
+    if(n>1) nm1[k] = n-1;
+    else    nm1[k] = n;   /* if n is too low do not subtract 1 */
+  }
+
+  /* compute sum of squares of all coeffs, except the highest ones */
+  c2_nm1_sum = 0;
+  forijk(i,j,k, nm1)
+  {
+    int ijk = Ind_n(i,j,k, node->n);
+    double co = Arrd(ca)[ijk];
+    c2_nm1_sum += co*co;
+  }
+
+  /* compute sum of squares of highest coeffs */
+  c2_hi = c2_sum - c2_nm1_sum;
+
+  /* Persson's indicator */
+  se = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
+
+  /* find max of number of points in all 3 dirs */
+  n_max = max3(node->n[0], node->n[1], node->n[2]);
+
+  /* 2109.11645 says that in 1D there is trouble if
+     se >=     -alpha * log10(n)  inside a dg node
+     se >= -(alpha+1) * log10(n)  inside a fv node, in both cases alpha=4 */
+  if(fv) se_lim = -alpha_fv * log10(n_max);
+  else   se_lim = -alpha    * log10(n_max);
+
+  //PRFs(": ");pr_nodename(node);printf(" iu=%d: ", iu);
+  //printf("c2_nm1_sum=%g ", c2_nm1_sum);
+  //printf("c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
+  //printf(" %g %g\n", se, se_lim);
+
+  /* set troubled flag */
+  if(se >= se_lim)
+  {
+    //char ns[100];
+
+    //PRFs(": ");printf("%s iu=%d: ", nodename(node,ns,99), iu);
+    //printf(" %g %g\n", se, se_lim);
+    troubled = 1;
+  }
+  else
+  {
+    troubled = 0;
+  }
+
+  //if(Node_eid(node)==3)
+  //{
+  //  printf("%d c2_hi=%g c2_sum=%g  ", fv, c2_hi, c2_sum);
+  //  printf(" %g %g => %d", se, se_lim, troubled);
+  //}
+
+  free_array(ca);
+  return troubled;
+}
+
+
 /* set trouble score ts based on whether node is troubled, and dg or fv */
 int trouble_score(tNode *node, int troubled)
 {
