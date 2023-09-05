@@ -32,6 +32,8 @@ void free_all_myln_myindc_in_evosys(tMesh *mesh);
 /* trouble.c */
 int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
                         double deltafac, double delta0, double epsilon);
+int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
+                           double alpha, double alpha_fv);
 int trouble_score(tNode *node, int troubled);
 void trouble_print_if_name(tNode *node, const char *nname,
                            int trbl, const char *text);
