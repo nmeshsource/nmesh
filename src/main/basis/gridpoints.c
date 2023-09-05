@@ -105,6 +105,14 @@ int init_gridpoints(tMesh *mesh)
 
         /* get analysis & synthesis matrix for Legendre basis */
         Legendre_AT_ST_matrices(ni, Xb, Wq, AT, ST);
+        //printarray(gridpoints->At[typ][ni]);
+        //printarray(gridpoints->St[typ][ni]);
+        //tArray *u = alloc_array1d(ni);
+        //for(int i=0; i<ni; i++) u->d[i] = Xb[i]*Xb[i]*Xb[i]*Xb[i]*Xb[i];
+        //mm_array0(gridpoints->At[typ][ni], u, gridpoints->Wq[typ][ni]);
+        //free_array(u);
+        //printarray(gridpoints->Wq[typ][ni]);
+        //if(ni==9) errorexit("ana and syn matr. are above");
 
         /* Lagrange interp. weights WL */
         Lagrange_winterp(ni, Xb, WL);
