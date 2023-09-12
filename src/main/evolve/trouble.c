@@ -485,10 +485,11 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
   }
 
   //if(Node_eid(node)==3)
-  //{
-  //  printf("%d c2_hi=%g c2_sum=%g  ", fv, c2_hi, c2_sum);
-  //  printf(" %g %g => %d", se, se_lim, troubled);
-  //}
+  if(nodename_is(node, "0_701"))
+  {
+    printf("%d c2_hi=%g c2_sum=%g  ", fv, c2_hi, c2_sum);
+    printf(" %g %g => %d", se, se_lim, troubled);
+  }
 
   free_array(ca);
   return troubled;
