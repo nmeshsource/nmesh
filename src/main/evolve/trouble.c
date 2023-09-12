@@ -402,9 +402,11 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
    Per-Olof Persson and Jaime Peraire. Sub-cell shock capturing for
    discontinuous Galerkin methods.
    In 44th AIAA Aerospace Sciences Meeting and Exhibit.
-   American Institute of Aeronautics and Astronautics, Inc., 2006. */
-int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
-                           double alpha, double alpha_fv)
+   American Institute of Aeronautics and Astronautics, Inc., 2006.
+   Computes trouble for var iu in node based on first ncoeffs coeffs */
+int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
+                                   int ncoeffs[3],
+                                   double alpha, double alpha_fv)
 {
   //tMesh *mesh = node->pat->mesh;
   int fv = node->dat->info->use_fv;
@@ -422,18 +424,19 @@ int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
      so that we get the same result, no matter how high the node average */
   if(u_scale >= 0.) Arrd(ca)[0] = u_scale;
 
-  /* compute sum of squares of all coeffs */
+  /* compute sum of squares of the ncoeffs coeffs */
   c2_sum = 0.;
-  forarray(ca, k)
+  forijk(i,j,k, ncoeffs)
   {
-    double co = Arrd(ca)[k];
+    int ijk = Ind_n(i,j,k, node->n);
+    double co = Arrd(ca)[ijk];
     c2_sum += co*co;
   }
 
-  /* set nm1 to node->n - 1 */
+  /* set nm1 to ncoeffs - 1 */
   for(k=0; k<3; k++)
   {
-    int n = node->n[k];
+    int n = ncoeffs[k];
     if(n>1) nm1[k] = n-1;
     else    nm1[k] = n;   /* if n is too low do not subtract 1 */
   }
@@ -453,8 +456,8 @@ int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
   /* Persson's indicator */
   se = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
 
-  /* find max of number of points in all 3 dirs */
-  n_max = max3(node->n[0], node->n[1], node->n[2]);
+  /* find max of number of points in all 3 dirs for ncoeffs coeffs */
+  n_max = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]);
 
   /* 2109.11645 says that in 1D there is trouble if
      se >=     -alpha * log10(n)  inside a dg node
@@ -491,6 +494,14 @@ int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
   return troubled;
 }
 
+/* compute Persson trouble based on all coeffs in node */
+int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
+                           double alpha, double alpha_fv)
+{
+  int *ncoeffs = node->n;
+  return evolve_Persson_trouble_ncoeffs(node, iu, u_scale, ncoeffs,
+                                        alpha, alpha_fv);
+}
 
 /* set trouble score ts based on whether node is troubled, and dg or fv */
 int trouble_score(tNode *node, int troubled)
