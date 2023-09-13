@@ -411,9 +411,8 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
   //tMesh *mesh = node->pat->mesh;
   int fv = node->dat->info->use_fv;
   tArray *ca;
-  int nm1[3];
   int i,j,k, n_max;
-  double c2_sum, c2_nm1_sum, c2_hi, se, se_lim;
+  double c2_sum, c2_hi, se, se_lim;
   int troubled;
 
   /* get coeffs of var iu */
@@ -433,25 +432,17 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
     c2_sum += co*co;
   }
 
-  /* set nm1 to ncoeffs - 1 */
-  for(k=0; k<3; k++)
-  {
-    int n = ncoeffs[k];
-    if(n>1) nm1[k] = n-1;
-    else    nm1[k] = n;   /* if n is too low do not subtract 1 */
-  }
-
-  /* compute sum of squares of all coeffs, except the highest ones */
-  c2_nm1_sum = 0;
-  forijk(i,j,k, nm1)
-  {
-    int ijk = Ind_n(i,j,k, node->n);
-    double co = Arrd(ca)[ijk];
-    c2_nm1_sum += co*co;
-  }
-
   /* compute sum of squares of highest coeffs */
-  c2_hi = c2_sum - c2_nm1_sum;
+  c2_hi = 0.;
+  forijk(i,j,k, ncoeffs)
+    if( ((i==ncoeffs[0]-1) && (ncoeffs[0]>1)) ||
+        ((j==ncoeffs[1]-1) && (ncoeffs[1]>1)) ||
+        ((k==ncoeffs[2]-1) && (ncoeffs[2]>1)) )
+    {
+      int ijk = Ind_n(i,j,k, node->n);
+      double co = Arrd(ca)[ijk];
+      c2_hi += co*co;
+    }
 
   /* Persson's indicator */
   se = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
