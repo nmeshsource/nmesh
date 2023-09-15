@@ -64,6 +64,8 @@ void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
   int bn0 = Ba->n[0];
   int bn1 = Ba->n[1] * Ba->n[2];
   int i,l,j;
+  int *lr[2];     /* pointer for l-range */
+  int r[2][atn1]; /* stack array for l-range */
 
   if(atn0 != bn0)
   {
@@ -73,11 +75,30 @@ void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
     errorexit("Ata->n[0] != Ba->n[0]");
   }
 
+  /* set l-range */
+  if(Ata->range[0])
+  {
+    lr[0] = Ata->range[0]; /* get range from array Ata */
+    lr[1] = Ata->range[1];
+  }
+  else
+  {
+    lr[0] = r[0]; /* use r as memory for lr */
+    lr[1] = r[1];
+    for(i=0; i<atn1; i++)
+    {
+      lr[0][i] = 0;    /* set default l-range: 0 <= l < atn0 */
+      lr[1][i] = atn0;
+    }
+  }
+
+  /* set AB_ij = A_il B_lj = At_li B_lj */
   for(j=0; j<bn1; j++)
     for(i=0; i<atn1; i++)
     {
+      int l0=lr[0][i], l1=lr[1][i];
       double sum=0.0;
-      for(l=0; l<atn0; l++)
+      for(l=l0; l<l1; l++)
         sum += At[l + atn0*i] * B[l + atn0*j];
         // At is col major transpose of A, and B is col major
       AB[i + atn1*j] = sum; // AB is col major
@@ -103,6 +124,7 @@ void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa)
     errorexit("Ata->n[0] != Ba->n[0]");
   }
 
+  /* set AB_ij = A_il B_lj = At_li B_lj */
   for(j=0; j<bn1; j++)
     for(i=0; i<atn1; i++)
     {
