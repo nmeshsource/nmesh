@@ -195,9 +195,11 @@ void fd_deriv_DT_uniform__old(int n, const double *x, int sr, double *DT)
 
 /* Set matrix DT for finite differences using a stencil of size ssz on a
    uniform grid with n gridpoints in [-1,1]. Shift stencil by lop to
-   the right (forward differencing) or left if lop<0 */
+   the right (forward differencing) or left if lop<0.
+   Also set non-zero range of DT, in case range is non-trivial. If range
+   is the trival [0,n) range is not set here. */
 void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
-                            double *DT)
+                            double *DT, int *range[2])
 {
   int odd = (ssz%2);  /* odd=1 if stencil size ssz is odd */
   int sszo2 = ssz/2;  /* stencil radius without forward or backward shift */
@@ -229,6 +231,7 @@ void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
   {
     Lagrange_winterp(n, x, w_interp);
     Lagrange_DT(n, x, w_interp, DT);
+    /* range of DT is trivial [0,n). So we do not set range[0], range[1] */
   }
   else /* use Lagrange_DT for ssz points */
   {
@@ -272,11 +275,16 @@ void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
         jmin = i - sdl;
       }
 
+      /* set DT */
       for(j=jmin; j<jmin+ssz; j++)
       {
         js = j - jmin;
         DT[i*n + j] = Dt[is*ssz + js] * fac;
       }
+
+      /* save j-range of DT */
+      if(range[0]) range[0][i] = jmin;
+      if(range[1]) range[1][i] = jmin+ssz;
     }
 
     free(Dt);
