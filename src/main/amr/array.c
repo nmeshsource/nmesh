@@ -24,6 +24,77 @@
    Thus we simply store the transposes of diff matrices and such to speed up
    matrix multiplication!!! */
 
+/************************************************************************/
+/* macros and functions for matrices in raw C-arrays */
+/************************************************************************/
+
+/* Multiply two matricies A and B:
+   AB = A B ,   AB_ij = A_il B_lj = At_li B_lj
+   At contains a atn0 x atn1 matrix that is the transpose of A, stored in
+   column major form. Ba contains a bn0 x bn1 matrix stored in column major
+   form. ABa will contain AB stored in column major form. */
+#define MM_SET_AB \
+  for(int j=0; j<bn1; j++) \
+    for(int i=0; i<atn1; i++) \
+    { \
+      double sum=0.0; \
+      for(int l=0; l<atn0; l++) \
+        sum += At[l + atn0*i] * B[l + atn0*j]; \
+        /* At is col major transpose of A, and B is col major */ \
+      AB[i + atn1*j] = sum; /* AB is col major */ \
+    }
+/* same as MM_SET_AB, but restrict sum over l to lrange,
+   because At_li = 0 outside this range */
+#define MM_SET_AB_IN_lrange \
+  for(int j=0; j<bn1; j++) \
+    for(int i=0; i<atn1; i++) \
+    { \
+      double sum=0.0; \
+      int l0=lrange[0][i], l1=lrange[1][i]; \
+      for(int l=l0; l<l1; l++) \
+        sum += At[l + atn0*i] * B[l + atn0*j]; \
+        /* At is col major transpose of A, and B is col major */ \
+      AB[i + atn1*j] = sum; /* AB is col major */ \
+    }
+
+/* Set AB = A B ,   AB_ij = A_il B_lj = At_li B_lj
+   Assume that A, B and AB point to different memory ararys */
+void mm_Carray(int atn0, int atn1, int bn1,
+               double *restrict At, double *restrict B,
+               double *restrict AB)
+{
+  MM_SET_AB
+}
+/* Set AB = A B ,   AB_ij = A_il B_lj = At_li B_lj */
+void mm_Carray_norestrict(int atn0, int atn1, int bn1,
+                          double *At, double *B,
+                          double *AB)
+{
+  MM_SET_AB
+}
+
+/* Set AB = A B ,   AB_ij = A_il B_lj = At_li B_lj
+   but restrict sum over l to lrange, because At_li = 0 outside this range */
+void mm_Carray_lrange(int atn0, int atn1, int bn1, int *lrange[2],
+                      double *restrict At, double *restrict B,
+                      double *restrict AB)
+{
+  MM_SET_AB_IN_lrange
+}
+/* Set AB = A B ,   AB_ij = A_il B_lj = At_li B_lj
+   but restrict sum over l to lrange, because At_li = 0 outside this range */
+void mm_Carray_lrange_norestrict(int atn0, int atn1, int bn1, int *lrange[2],
+                                 double *At, double *B,
+                                 double *AB)
+{
+  MM_SET_AB_IN_lrange
+}
+
+
+/************************************************************************/
+/* functions for for arrays of type tArray* */
+/************************************************************************/
+
 /* multiply matrix in Ata with 3d array Ba in a direction,
    store result in ABa */
 void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa)
@@ -54,106 +125,42 @@ void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa)
    of A, stored in column major form. We should have Ata->n[2] = 1.
    Ba contains a (Ba->n[0]) x (Ba->n[1] * Ba->n[2]) matrix stored in
    column major form. ABa will contain AB stored in column major form. */
+#define GET_At_A_AB_atn0_atn1_bn0_bn1 \
+  double *At = Ata->d; \
+  double *B  =  Ba->d; \
+  double *AB = ABa->d; \
+  int atn0 = Ata->n[0]; \
+  int atn1 = Ata->n[1] * Ata->n[2]; \
+  int bn0 = Ba->n[0]; \
+  int bn1 = Ba->n[1] * Ba->n[2]; \
+  if(atn0 != bn0) \
+  { \
+    printf("cannot multiply a %dx%d with %dx%d matrix:\n", atn1,atn0, bn0,bn1); \
+    printf("Ata");printarray(Ata); \
+    printf("Ba");printarray(Ba); \
+    errorexit("Ata->n[0] != Ba->n[0]"); \
+  }
+/* Calculate AB = A B */
 void mm_array0(tArray *Ata, tArray *Ba, tArray *ABa)
 {
-  double *restrict At = Ata->d;
-  double *restrict B  =  Ba->d;
-  double *restrict AB = ABa->d;
-  int atn0 = Ata->n[0];
-  int atn1 = Ata->n[1] * Ata->n[2];
-  int bn0 = Ba->n[0];
-  int bn1 = Ba->n[1] * Ba->n[2];
-  int i,l,j;
-  int *lr[2];     /* pointer for l-range */
-  int r[2][atn1]; /* stack array for l-range */
+  GET_At_A_AB_atn0_atn1_bn0_bn1
 
-  if(atn0 != bn0)
-  {
-    printf("cannot multiply a %dx%d with %dx%d matrix:\n", atn1,atn0, bn0,bn1);
-    printf("Ata");printarray(Ata);
-    printf("Ba");printarray(Ba);
-    errorexit("Ata->n[0] != Ba->n[0]");
-  }
-
-  /* set l-range */
-  if(Ata->range[0])
-  {
-    lr[0] = Ata->range[0]; /* get range from array Ata */
-    lr[1] = Ata->range[1];
-  }
+  /* set AB */
+  if(Ata->range[0] && Ata->range[1])
+    mm_Carray_lrange(atn0,atn1, bn1, Ata->range, At, B, AB);
   else
-  {
-    lr[0] = r[0]; /* use r as memory for lr */
-    lr[1] = r[1];
-    for(i=0; i<atn1; i++)
-    {
-      lr[0][i] = 0;    /* set default l-range: 0 <= l < atn0 */
-      lr[1][i] = atn0;
-    }
-  }
-
-  /* set AB_ij = A_il B_lj = At_li B_lj */
-  for(j=0; j<bn1; j++)
-    for(i=0; i<atn1; i++)
-    {
-      int l0=lr[0][i], l1=lr[1][i];
-      double sum=0.0;
-      for(l=l0; l<l1; l++)
-        sum += At[l + atn0*i] * B[l + atn0*j];
-        // At is col major transpose of A, and B is col major
-      AB[i + atn1*j] = sum; // AB is col major
-    }
+    mm_Carray(atn0,atn1, bn1, At, B, AB);
 }
 /* same as mm_array0 but without restrict */
 void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa)
 {
-  double *At = Ata->d;
-  double *B  =  Ba->d;
-  double *AB = ABa->d;
-  int atn0 = Ata->n[0];
-  int atn1 = Ata->n[1] * Ata->n[2];
-  int bn0 = Ba->n[0];
-  int bn1 = Ba->n[1] * Ba->n[2];
-  int i,l,j;
-  int *lr[2];     /* pointer for l-range */
-  int r[2][atn1]; /* stack array for l-range */
+  GET_At_A_AB_atn0_atn1_bn0_bn1
 
-  if(atn0 != bn0)
-  {
-    printf("cannot multiply a %dx%d with %dx%d matrix:\n", atn1,atn0, bn0,bn1);
-    printf("Ata");printarray(Ata);
-    printf("Ba");printarray(Ba);
-    errorexit("Ata->n[0] != Ba->n[0]");
-  }
-
-  /* set l-range */
-  if(Ata->range[0])
-  {
-    lr[0] = Ata->range[0]; /* get range from array Ata */
-    lr[1] = Ata->range[1];
-  }
+  /* set AB */
+  if(Ata->range[0] && Ata->range[1])
+    mm_Carray_lrange_norestrict(atn0,atn1, bn1, Ata->range, At, B, AB);
   else
-  {
-    lr[0] = r[0]; /* use r as memory for lr */
-    lr[1] = r[1];
-    for(i=0; i<atn1; i++)
-    {
-      lr[0][i] = 0;    /* set default l-range: 0 <= l < atn0 */
-      lr[1][i] = atn0;
-    }
-  }
-
-  /* set AB_ij = A_il B_lj = At_li B_lj */
-  for(j=0; j<bn1; j++)
-    for(i=0; i<atn1; i++)
-    {
-      int l0=lr[0][i], l1=lr[1][i];
-      double sum=0.0;
-      for(l=l0; l<l1; l++)
-        sum += At[l + atn0*i] * B[l + atn0*j];
-        // At is col major transpose of A, and B is col major
-      AB[i + atn1*j] = sum; // AB is col major
-    }
+    mm_Carray_norestrict(atn0,atn1, bn1, At, B, AB);
 }
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
