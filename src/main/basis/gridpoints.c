@@ -138,7 +138,6 @@ int init_gridpoints(tMesh *mesh)
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,0, DT, gDt->range);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT, gDpt->range);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT, gDmt->range);
-
         //printarray(gridpoints->Dt[typ][ni]);
         //printarray(gridpoints->Dpt[typ][ni]);
         //printarray(gridpoints->Dmt[typ][ni]);
