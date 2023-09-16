@@ -125,14 +125,20 @@ int init_gridpoints(tMesh *mesh)
         /* Lagrange_DT is very inaccurate for large ni on uniform grids and
            can also lead to instabilities in the evolution */
 
-        /* finite difference diff matrix DT */
-        /* fd matrices are sparse so we want to set the non-zero ranges */
-        //FIXME: call alloc_2darray_i_range_of_j
-        // extend fd_lopderiv_DT_uniform  to also set range
+        /* if ni > stencilsize the fd matrices are sparse so we set
+           the non-zero ranges */
+        if(ni > stencilsize)
+        {
+          alloc_2darray_irange_of_j(gDt);
+          alloc_2darray_irange_of_j(gDpt);
+          alloc_2darray_irange_of_j(gDmt);
+        }
 
-        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,0, DT);
-        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT);
-        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT);
+        /* finite difference diff matrix DT */
+        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,0, DT, gDt->range);
+        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT, gDpt->range);
+        fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT, gDmt->range);
+
         //printarray(gridpoints->Dt[typ][ni]);
         //printarray(gridpoints->Dpt[typ][ni]);
         //printarray(gridpoints->Dmt[typ][ni]);

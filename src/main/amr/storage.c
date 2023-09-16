@@ -175,7 +175,7 @@ int redim_array(tArray *array, int n0, int n1, int n2)
 }
 
 /* alloc mem for range part of array */
-void alloc_2darray_i_range_of_j(tArray *array)
+void alloc_2darray_irange_of_j(tArray *array)
 {
   int k;
 
@@ -197,7 +197,7 @@ void free_array(tArray *array)
     free(array->d); /* free data only if this segm. 0 and it should be freed */
 
   for(k=0; k<2; k++)
-    if(array->range[k]) free(array->range[k]); /* free range if it is there */
+    free(array->range[k]); /* free range */
 
   free(array);
 }

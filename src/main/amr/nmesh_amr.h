@@ -426,6 +426,7 @@ tArray *get_array_seg(tArray *array, int si);
 void point_array_d_to_data(tArray *array, void *data, int nofree);
 int redimension_array(tArray *array, int n[3]);
 int redim_array(tArray *array, int n0, int n1, int n2);
+void alloc_2darray_irange_of_j(tArray *array);
 void free_array(tArray *array);
 void free_3_arrays(tArray *array[3]);
 void *memcpy_from_array(const tArray *ar, size_t bytestride, size_t pos,
