@@ -496,6 +496,13 @@ void printarray_sel(tArray *A, int dbl)
   printf("->n[] = {%d,%d,%d}", A->n[0],A->n[1],A->n[2]);
   if(A->si) printf("  si=%d", A->si);
   printf("\n");
+  if(A->range[0])
+  {
+    printf(" range =");
+    for(j=0; j<A->n[1]; j++)
+      printf(" %d,%d", A->range[0][j], A->range[1][j]);
+    printf("\n");
+  }
   for(k=0; k<A->n[2]; k++)
   {
     for(j=0; j<A->n[1]; j++)

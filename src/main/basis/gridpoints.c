@@ -90,9 +90,12 @@ int init_gridpoints(tMesh *mesh)
       double *Xb = gridpoints->Xb[typ][ni]->d;
       double *Wq = gridpoints->Wq[typ][ni]->d;
       double *WL = gridpoints->WL[typ][ni]->d;
-      double *DT = gridpoints->Dt[typ][ni]->d;
-      double *DpT = gridpoints->Dpt[typ][ni]->d;
-      double *DmT = gridpoints->Dmt[typ][ni]->d;
+      tArray *gDt  = gridpoints->Dt[typ][ni];
+      tArray *gDpt = gridpoints->Dpt[typ][ni];
+      tArray *gDmt = gridpoints->Dmt[typ][ni];
+      double *DT = gDt->d;
+      double *DpT = gDpt->d;
+      double *DmT = gDmt->d;
       double *AT = gridpoints->At[typ][ni]->d;
       double *ST = gridpoints->St[typ][ni]->d;
 
@@ -123,6 +126,10 @@ int init_gridpoints(tMesh *mesh)
            can also lead to instabilities in the evolution */
 
         /* finite difference diff matrix DT */
+        /* fd matrices are sparse so we want to set the non-zero ranges */
+        //FIXME: call alloc_2darray_i_range_of_j
+        // extend fd_lopderiv_DT_uniform  to also set range
+
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,0, DT);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,+lopsidesize, DpT);
         fd_lopderiv_DT_uniform(ni, Xb, stencilsize,-lopsidesize, DmT);

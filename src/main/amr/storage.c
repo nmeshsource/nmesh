@@ -174,12 +174,31 @@ int redim_array(tArray *array, int n0, int n1, int n2)
   return redimension_array(array, n);
 }
 
+/* alloc mem for range part of array */
+void alloc_2darray_i_range_of_j(tArray *array)
+{
+  int k;
+
+  for(k=0; k<2; k++)
+  {
+    array->range[k] = calloc(array->n[1], sizeof(array->range[k][0]));
+    if(!array->range[k]) errorexit("out of memory");
+  }
+}
+
 /* free an array */
 void free_array(tArray *array)
 {
+  int k;
+
   if(!array) return;
+
   if( (array->si == 0) && (array->d_nofree == 0) )
     free(array->d); /* free data only if this segm. 0 and it should be freed */
+
+  for(k=0; k<2; k++)
+    if(array->range[k]) free(array->range[k]); /* free range if it is there */
+
   free(array);
 }
 
