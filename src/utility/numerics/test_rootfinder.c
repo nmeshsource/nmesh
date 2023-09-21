@@ -1,5 +1,8 @@
 /* test root finders */
 
+#include <math.h>
+#define finit(x1) isfinite(x1)
+
 #include "rtbrent_brak.c"
 #include "newton1d_brak.c"
 #include "newton1d_fd.c"
@@ -61,6 +64,32 @@ int main()
          ret, x0[0], x0[1]);
 
   x1=1.5; x2=4; x0[0]=3.9;
+  ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
+  printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
+
+
+  x1=2.0; x2=2.0; x0[0]=3.9;
+  ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
+  printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
+
+  x1=2.0; x2=2.5; x0[0]=3.9;
+  ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
+  printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
+
+  x1=1.5; x2=2.0; x0[0]=3.9;
+  ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
+  printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
+
+
+  x1=0.0; x2=0.0; x0[0]=3.9;
+  ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
+  printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
+
+  x1=0.0; x2=0.5; x0[0]=3.9;
+  ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
+  printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
+
+  x1=-0.5; x2=0.0; x0[0]=3.9;
   ret = rtbrent_brak(x0, f, x1,x2, 0, maxits,tol,pr);
   printf("rtbrent_brak ret=%d: x0[0]=%.16g\n\n", ret, x0[0]);
 }
