@@ -786,11 +786,23 @@ void printvar_atpoint(tPoint *pt, int vi)
 {
   tNode *node = pt->node;
   int ijk = pt->ijk;
-  int np = node->np;
-  tMesh *mesh = node->pat->mesh;
-  char *name = VarName(vi);
-  tDat *dat = node->dat;
-  tArray *va = dat ? dat->v[vi] : NULL;
+  int np;
+  tMesh *mesh;
+  char *name;
+  tDat *dat;
+  tArray *va;
+
+  if(!node)
+  {
+    printf(" node=NULL ijk=%d\n", ijk);
+    return;
+  }
+
+  np = node->np;
+  mesh = node->pat->mesh;
+  name = VarName(vi);
+  dat = node->dat;
+  va = dat ? dat->v[vi] : NULL;
 
   pr_nodename(node);
   printf(" ijk=%d/%d: %s", ijk,np, name);
