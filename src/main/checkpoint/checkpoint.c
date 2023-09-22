@@ -251,7 +251,8 @@ int checkpoint_save(tMesh *mesh)
     system2("rm -rf", dirp);
     system3("mv", dir, dirp);
     system3("mv", dirn, dir);
-    checkpoint_keep_previous(outdir, pl, dirp, 2);
+    checkpoint_keep_previous(outdir, pl, dirp,
+                             Geti(Par("checkpoint_n_previous")));
   }
 
   /* free strings */

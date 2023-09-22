@@ -24,6 +24,7 @@ int nmesh_checkpoint(tMesh *mesh)
   AddPar("checkpoint", "no", "whether we save checkpoints [no,yes,load_mesh]");
   AddPar("checkpoint_hours", "-1", "hours after which we checkpoint");
   AddPar("checkpoint_hours_quit", "-1", "when to quit after checkpoint");
+  AddPar("checkpoint_n_previous", "0", "keep n previous checkpoints");
   AddPar("checkpoint_save_pars", "", "pars in this list will be saved, all "
          "others come from parfile or earlier call to initialize_libraries "
          "when we restart");
