@@ -279,7 +279,7 @@ void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev)
   for(i=nprev; i>0; i--)
   {
     snprintf(dir_i,  pl, "%s/%s-%d", outdir, chckpt_dir, i);
-    if(i==nprev) snprintf(dir_ip1,pl, "%s/%s-oldest", outdir, chckpt_dir);
+    if(i==nprev) snprintf(dir_ip1,pl, "%s/%s-0LDE5T.tmp", outdir, chckpt_dir);
     else         snprintf(dir_ip1,pl, "%s/%s-%d", outdir, chckpt_dir, i+1);
     system3("mv", dir_i, dir_ip1);
   }
@@ -290,7 +290,7 @@ void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev)
     snprintf(dir_i,  pl, "%s/%s-%d", outdir, chckpt_dir, 1);
     system3("mv", dirp, dir_i);
     /* if we keep 1 or more, remove oldest one */
-    snprintf(dir_ip1,pl, "%s/%s-oldest", outdir, chckpt_dir);
+    snprintf(dir_ip1,pl, "%s/%s-0LDE5T.tmp", outdir, chckpt_dir);
     system2("rm -rf", dir_ip1);
   }
   else
