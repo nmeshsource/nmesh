@@ -251,7 +251,7 @@ int checkpoint_save(tMesh *mesh)
     system2("rm -rf", dirp);
     system3("mv", dir, dirp);
     system3("mv", dirn, dir);
-    system2("rm -rf", dirp);
+    checkpoint_keep_previous(outdir, pl, dirp, 2);
   }
 
   /* free strings */
@@ -265,6 +265,42 @@ int checkpoint_save(tMesh *mesh)
   free(dirn);
   return 0;
 }
+
+/* keep nprev previous checkpoints */
+void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev)
+{
+  char *dir_i   = cmalloc(pl+12);
+  char *dir_ip1 = cmalloc(pl+12);
+  int i;
+
+  /* increase suffix part of all previous checkpoints, e.g.:
+     checkpoint-1 -> checkpoint-2 */
+  for(i=nprev; i>0; i--)
+  {
+    snprintf(dir_i,  pl, "%s/%s-%d", outdir, chckpt_dir, i);
+    snprintf(dir_ip1,pl, "%s/%s-%d", outdir, chckpt_dir, i+1);
+    system3("mv", dir_i, dir_ip1);
+  }
+
+  if(nprev>0)
+  {
+    /* rename checkpoint_previous to checkpoint-1 */
+    snprintf(dir_i,  pl, "%s/%s-%d", outdir, chckpt_dir, 1);
+    system3("mv", dirp, dir_i);
+    /* if we keep 1 or more, remove oldest one */
+    snprintf(dir_ip1,pl, "%s/%s-%d", outdir, chckpt_dir, nprev+1);
+    system2("rm -rf", dir_ip1);
+  }
+  else
+  {
+    /* if nprev=0 we keep nothing and thus delete checkpoint_previous */
+    system2("rm -rf", dirp);
+  }
+
+  free(dir_ip1);
+  free(dir_i);
+}
+
 
 /* save a checkpoint if the time is right for it */
 int checkpoint_save_if_needed(tMesh *mesh, int always)

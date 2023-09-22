@@ -4,6 +4,7 @@
 
 /* checkpoint.c */
 void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo);
+void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev);
 
 /* checkpoint_save.c */
 int checkpoint_save_pars(tMesh *mesh, char *fname);
