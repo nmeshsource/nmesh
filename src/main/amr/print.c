@@ -283,12 +283,20 @@ void pr_nodename(tNode *node)
 /* print info inside dat of node */
 void printnodeinfo(const tElm *elm)
 {
-  tNodeInfo *info = elm->dat->info;
-  printf("info->  ");
-  printf("evo_troubled=%d  trbl_score=%d  use_fv=%d\n",
-         info->evo_troubled, info->trbl_score, info->use_fv);
-  printf("info->  trbl_ref: ");
-  printref(info->trbl_ref);
+  tDat *dat = elm->dat;
+  if(dat)
+  {
+    tNodeInfo *info = dat->info;
+    printf("info->  ");
+    printf("evo_troubled=%d  trbl_score=%d  use_fv=%d\n",
+           info->evo_troubled, info->trbl_score, info->use_fv);
+    printf("info->  trbl_ref: ");
+    printref(info->trbl_ref);
+  }
+  else
+  {
+    printf("dat=NULL\n");
+  }
 }
 
 void printelm_nodeinfo(const tElm *elm)
@@ -808,7 +816,7 @@ void printvar_atpoint(tPoint *pt, int vi)
   printf(" ijk=%d/%d: %s", ijk,np, name);
   if(ijk<np && ijk>=0)
   {
-    if(va) printf("=%g\n", Arrd(va)[ijk]);
+    if(va) printf("=%.18g\n", Arrd(va)[ijk]);
     else   printf(": NULL\n");
   }
   else
