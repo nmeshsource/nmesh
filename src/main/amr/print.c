@@ -826,14 +826,14 @@ void printvar_atpoint(tPoint *pt, int vi)
 }
 
 /* print varlist at one point */
-void printvarlist_atpoint(tPoint *pt, tVarList *vl)
+void printvarlist_atpoint(tPoint *pt, tVarList *vl, const char *infostr)
 {
   if(pt->node==NULL) return;
   if(vl)
   {
     int i, vi;
 
-    PRF;printf(": nvars=%d\n", VLn(vl));
+    PRF;printf(": nvars=%d %s\n", VLn(vl), infostr);
     forvl(vl, i)
     {
       vi = Vind(vl, i);

@@ -534,7 +534,7 @@ void printref(tRef *ref);
 void print_n_pt_typ(tNode *node);
 void printpoint(tPoint *pt);
 void printvar_atpoint(tPoint *pt, int vi);
-void printvarlist_atpoint(tPoint *pt, tVarList *vl);
+void printvarlist_atpoint(tPoint *pt, tVarList *vl, const char *infostr);
 void print_u32(khash_t(u32) *nbranks);
 void print_ef(khash_t(u32_gptr) *ef);
 
