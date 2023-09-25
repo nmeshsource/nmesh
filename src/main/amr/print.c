@@ -820,6 +820,7 @@ void printvar_atpoint(tPoint *pt, int vi)
 /* print varlist at one point */
 void printvarlist_atpoint(tPoint *pt, tVarList *vl)
 {
+  if(pt->node==NULL) return;
   if(vl)
   {
     int i, vi;
