@@ -398,6 +398,122 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
   return troubled;
 }
 
+/* Compute Persson trouble indicator for array u, with point type pt_typ,
+   using only the on first ncoeffs coeffs.
+   Ref: Per-Olof Persson and Jaime Peraire. Sub-cell shock capturing for
+   discontinuous Galerkin methods.
+   In 44th AIAA Aerospace Sciences Meeting and Exhibit.
+   American Institute of Aeronautics and Astronautics, Inc., 2006. */
+int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
+                                 int ncoeffs[3], double alpha)
+{
+  tArray *At[3];
+  tArray *ca;
+  int i,j,k, n_max;
+  double c2_sum, c2_hi, se, se_lim;
+  int troubled;
+
+  /* get ana. matrices */
+  At3_pt_type_n(pt_typ, Arrn(u), At);
+
+  /* get coeffs of var iu */
+  ca = alloc_array(Arrn(u));
+  basis_array_analysis3_At(At, u, ca);
+
+  /* set the 0th coeff (that corresponds to the node average) to u_scale,
+     so that we get the same result, no matter how high the node average */
+  if(u_scale >= 0.) Arrd(ca)[0] = u_scale;
+
+  /* compute sum of squares of the ncoeffs coeffs */
+  c2_sum = 0.;
+  forijk(i,j,k, ncoeffs)
+  {
+    int ijk = Ind_n(i,j,k, Arrn(u));
+    double co = Arrd(ca)[ijk];
+    c2_sum += co*co;
+  }
+
+  /* compute sum of squares of highest coeffs */
+  c2_hi = 0.;
+  forijk(i,j,k, ncoeffs)
+    if( ((i==ncoeffs[0]-1) && (ncoeffs[0]>1)) ||
+        ((j==ncoeffs[1]-1) && (ncoeffs[1]>1)) ||
+        ((k==ncoeffs[2]-1) && (ncoeffs[2]>1)) )
+    {
+      int ijk = Ind_n(i,j,k, Arrn(u));
+      double co = Arrd(ca)[ijk];
+      c2_hi += co*co;
+    }
+
+  /* Persson's indicator */
+  se = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
+
+  /* find max of number of points in all 3 dirs for ncoeffs coeffs */
+  n_max = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]);
+
+  /* 2109.11645 says that in 1D there is trouble if
+     se >= -alpha * log10(n)  inside a node
+     for a dg node alpha=4, for a fv node alpha=5 */
+  se_lim = -alpha * log10(n_max);
+
+  //PRFs(": ");pr_nodename(node);printf(" iu=%d: ", iu);
+  //printf("c2_nm1_sum=%g ", c2_nm1_sum);
+  //printf("c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
+  //printf(" %g %g\n", se, se_lim);
+
+  /* set troubled flag */
+  if(se >= se_lim)
+  {
+    //char ns[100];
+
+    //PRFs(": ");printf("%s iu=%d: ", nodename(node,ns,99), iu);
+    //printf(" %g %g\n", se, se_lim);
+    troubled = 1;
+  }
+  else
+  {
+    troubled = 0;
+  }
+
+  //if(Node_eid(node)==3)
+  if(1) //(nodename_is(node, "0_701"))
+  {
+    printf(" c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
+    printf(" %g %g => %d", se, se_lim, troubled);
+    printf("\n");
+  }
+
+  free_array(ca);
+  return troubled;
+}
+
+/* Compute Persson trouble for var iu in node based on first ncoeffs
+   coeffs */
+int evolve_Persson_trouble_ncoeffs__new(tNode *node, int iu, double u_scale,
+                                   int ncoeffs[3],
+                                   double alpha, double alpha_fv)
+{
+  //tMesh *mesh = node->pat->mesh;
+  int fv = node->dat->info->use_fv;
+  double alpha_a;
+
+  /* 2109.11645 says that in 1D there is trouble if
+     se >=     -alpha * log10(n)  inside a dg node
+     se >= -(alpha+1) * log10(n)  inside a fv node, in both cases alpha=4 */
+  if(fv) alpha_a = alpha_fv;
+  else   alpha_a = alpha;
+
+  //if(Node_eid(node)==3)
+  if(1) //(nodename_is(node, "0_701"))
+  {
+    pr_nodename(node);
+    printf(" %d", fv);
+  }
+
+  return evolve_Persson_array_trouble(VarA(node,iu), u_scale, node->pt_typ,
+                                      ncoeffs, alpha_a);
+}
+
 /* compute Persson trouble indicator for var iu. Ref:
    Per-Olof Persson and Jaime Peraire. Sub-cell shock capturing for
    discontinuous Galerkin methods.
@@ -478,8 +594,10 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
   //if(Node_eid(node)==3)
   if(nodename_is(node, "0_701"))
   {
-    printf("%d c2_hi=%g c2_sum=%g  ", fv, c2_hi, c2_sum);
+    pr_nodename(node);
+    printf(" %d c2_hi=%g c2_sum=%g  ", fv, c2_hi, c2_sum);
     printf(" %g %g => %d", se, se_lim, troubled);
+    printf("\n");
   }
 
   free_array(ca);
