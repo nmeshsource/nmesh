@@ -104,6 +104,8 @@ int init_gridpoints(tMesh *mesh)
       {
       case P_UNIFORM: /* set equally spaced points and their weights */
         //uniform_x_wGaussquad(ni, Xb, Wq); //can give negative rms
+        //printarray(gridpoints->Wq[typ][ni]);
+        //if(ni==20) errorexit("quad weights above");
         uniform_x_wTrapez(ni, Xb, Wq);
 
         /* get analysis & synthesis matrix for Legendre basis */
