@@ -4,7 +4,7 @@
 #include "nmesh.h"
 #include "evolve.h"
 
-#define PR 0
+#define PR 1
 
 /* Determine and set trouble score in a node,
    i.e. set node->dat->info->trbl_score .
@@ -475,7 +475,7 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
     troubled = 0;
   }
 
-  if(1)
+  if(PR)
   {
     printf(" c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
     printf(" %g %g => %d", se, se_lim, troubled);
@@ -502,7 +502,7 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
   if(fv) alpha_a = alpha_fv;
   else   alpha_a = alpha;
 
-  if(1) //(nodename_is(node, "0_701"))
+  if(PR) //(nodename_is(node, "0_701"))
   {
     pr_nodename(node);
     printf(" %d", fv);
@@ -521,7 +521,7 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
   int fv = node->dat->info->use_fv;
   int troubled;
 
-  if(1) //(nodename_is(node, "0_701"))
+  if(PR) //(nodename_is(node, "0_701"))
   {
     pr_nodename(node);
     printf(" %d", fv);
