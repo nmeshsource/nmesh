@@ -35,6 +35,9 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
 int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
                                    int ncoeffs[3],
                                    double alpha, double alpha_fv);
+int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
+                                      int ncoeffs[3],
+                                      double alpha, double alpha_fv);
 int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
                            double alpha, double alpha_fv);
 int trouble_score(tNode *node, int troubled);

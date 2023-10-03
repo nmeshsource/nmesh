@@ -475,7 +475,7 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
     troubled = 0;
   }
 
-  if(0)
+  if(1)
   {
     printf(" c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
     printf(" %g %g => %d", se, se_lim, troubled);
@@ -502,7 +502,7 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
   if(fv) alpha_a = alpha_fv;
   else   alpha_a = alpha;
 
-  if(0) //(nodename_is(node, "0_701"))
+  if(1) //(nodename_is(node, "0_701"))
   {
     pr_nodename(node);
     printf(" %d", fv);
@@ -512,97 +512,48 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
                                       ncoeffs, alpha_a);
 }
 
-/* compute Persson trouble indicator for var iu. Ref:
-   Per-Olof Persson and Jaime Peraire. Sub-cell shock capturing for
-   discontinuous Galerkin methods.
-   In 44th AIAA Aerospace Sciences Meeting and Exhibit.
-   American Institute of Aeronautics and Astronautics, Inc., 2006.
-   Computes trouble for var iu in node based on first ncoeffs coeffs */
-int evolve_Persson_trouble_ncoeffs__old(tNode *node, int iu, double u_scale,
-                                   int ncoeffs[3],
-                                   double alpha, double alpha_fv)
+/* Compute Persson trouble for var iu in node on dg-grid based on first
+   ncoeffs coeffs */
+int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
+                                      int ncoeffs[3],
+                                      double alpha, double alpha_fv)
 {
-  //tMesh *mesh = node->pat->mesh;
   int fv = node->dat->info->use_fv;
-  tArray *ca;
-  int i,j,k, n_max;
-  double c2_sum, c2_hi, se, se_lim;
   int troubled;
 
-  /* get coeffs of var iu */
-  ca = alloc_array(node->n);
-  basis_array_analysis3(node, VarA(node,iu), ca);
-
-  /* set the 0th coeff (that corresponds to the node average) to u_scale,
-     so that we get the same result, no matter how high the node average */
-  if(u_scale >= 0.) Arrd(ca)[0] = u_scale;
-
-  /* compute sum of squares of the ncoeffs coeffs */
-  c2_sum = 0.;
-  forijk(i,j,k, ncoeffs)
-  {
-    int ijk = Ind_n(i,j,k, node->n);
-    double co = Arrd(ca)[ijk];
-    c2_sum += co*co;
-  }
-
-  /* compute sum of squares of highest coeffs */
-  c2_hi = 0.;
-  forijk(i,j,k, ncoeffs)
-    if( ((i==ncoeffs[0]-1) && (ncoeffs[0]>1)) ||
-        ((j==ncoeffs[1]-1) && (ncoeffs[1]>1)) ||
-        ((k==ncoeffs[2]-1) && (ncoeffs[2]>1)) )
-    {
-      int ijk = Ind_n(i,j,k, node->n);
-      double co = Arrd(ca)[ijk];
-      c2_hi += co*co;
-    }
-
-  /* Persson's indicator */
-  se = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
-
-  /* find max of number of points in all 3 dirs for ncoeffs coeffs */
-  n_max = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]);
-
-  /* 2109.11645 says that in 1D there is trouble if
-     se >=     -alpha * log10(n)  inside a dg node
-     se >= -(alpha+1) * log10(n)  inside a fv node, in both cases alpha=4 */
-  if(fv) se_lim = -alpha_fv * log10(n_max);
-  else   se_lim = -alpha    * log10(n_max);
-
-  //PRFs(": ");pr_nodename(node);printf(" iu=%d: ", iu);
-  //printf("c2_nm1_sum=%g ", c2_nm1_sum);
-  //printf("c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
-  //printf(" %g %g\n", se, se_lim);
-
-  /* set troubled flag */
-  if(se >= se_lim)
-  {
-    //char ns[100];
-
-    //PRFs(": ");printf("%s iu=%d: ", nodename(node,ns,99), iu);
-    //printf(" %g %g\n", se, se_lim);
-    troubled = 1;
-  }
-  else
-  {
-    troubled = 0;
-  }
-
-  //if(Node_eid(node)==3)
   if(1) //(nodename_is(node, "0_701"))
   {
     pr_nodename(node);
-    printf(" %d c2_hi=%g c2_sum=%g  ", fv, c2_hi, c2_sum);
-    printf(" %g %g => %d", se, se_lim, troubled);
-    printf("\n");
+    printf(" %d", fv);
   }
 
-  free_array(ca);
+  if(fv)
+  {
+    /* use trbl_ref to find n_dg and pt_typ_dg*/
+    tRef *ref = node->dat->info->trbl_ref;
+    int n_dg[3], pt_typ_dg[3];
+    tArray *u_interp;
+
+    /* get num. and type of points on dg grid that we would switch to */
+    hp_refine_set_n_pt_typ(node, ref, n_dg, pt_typ_dg);
+
+    /* interpolate u to dg grid */
+    u_interp = alloc_array(n_dg);
+    basis_interp_to_pt_typ(node, iu, pt_typ_dg, u_interp);
+    troubled = evolve_Persson_array_trouble(u_interp, u_scale, pt_typ_dg,
+                                            ncoeffs, alpha_fv);
+    free_array(u_interp);
+  }
+  else
+  {
+    troubled = evolve_Persson_array_trouble(VarA(node,iu), u_scale,
+                                            node->pt_typ, ncoeffs, alpha);
+  }
   return troubled;
 }
 
-/* compute Persson trouble based on all coeffs in node */
+/* DO NOT USE:
+   compute Persson trouble based on all coeffs in node */
 int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
                            double alpha, double alpha_fv)
 {
