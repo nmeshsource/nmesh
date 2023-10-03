@@ -138,6 +138,8 @@ void basis_interp2d_toIpoints(tNode *node, tArray *var, int dir,int p,
                                            const double *x_p,
                                            const double *w_interp));
 void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d);
+void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
+                            tArray *interp);
 double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
                             double basis(int k, double x, int np,
                                          const double *x_p,

@@ -527,6 +527,31 @@ void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d)
 }
 
 
+/* 3d interpolation from var iu in node to a number of points (set by
+   Arrn(interp) = interp->n) with point type pt_typ. The result will be
+   written into array interp. */
+void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
+                            tArray *interp)
+{
+  int *n_interp = Arrn(interp);
+  tArray *Xb[3]; /* 3 1d arrays */
+  tArray *Xp[3]; /* 3 3d arrays */
+
+  /* set Xb */
+  Xb3_pt_type_n(pt_typ, n_interp, Xb);
+
+  /* set Xp */
+  Xp[0] = alloc_array(n_interp);
+  Xp[1] = alloc_array(n_interp);
+  Xp[2] = alloc_array(n_interp);
+  array_1d1d1d_coords_to_3d_coords(Xb, Xp);
+
+  /* interpolate to points Xp */
+  basis_interp_topoints(node, VarA(node,iu), Xp, interp, Lagrange_of_x);
+
+  free_3_arrays(Xp);
+}
+
 /***********************************************************************/
 /* Lagrange interpolation */
 /***********************************************************************/
