@@ -307,6 +307,12 @@ tArray *node_At(tNode *node, int dir)
 {
   return gridpoints->At[node->pt_typ[dir]][node->n[dir]];
 }
+/* get At[3] for pt_typ and n out of gridpoints */
+void At3_pt_type_n(int pt_typ[3], int n[3], tArray *At[3])
+{
+  int d;
+  for(d=0; d<3; d++) At[d] = gridpoints->At[pt_typ[d]][n[d]];
+}
 /* get At[3] for n (assuming point type of node) out of gridpoints */
 void At3_n(tNode *node, int n[3], tArray *At[3])
 {
@@ -323,6 +329,12 @@ void node_At3(tNode *node, tArray *At[3])
 tArray *node_St(tNode *node, int dir)
 {
   return gridpoints->St[node->pt_typ[dir]][node->n[dir]];
+}
+/* get St[3] for pt_typ and n out of gridpoints */
+void St3_pt_type_n(int pt_typ[3], int n[3], tArray *St[3])
+{
+  int d;
+  for(d=0; d<3; d++) St[d] = gridpoints->St[pt_typ[d]][n[d]];
 }
 /* get St[3] for n (assuming point type of node) out of gridpoints */
 void St3_n(tNode *node, int n[3], tArray *St[3])
