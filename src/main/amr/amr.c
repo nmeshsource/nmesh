@@ -227,6 +227,12 @@ tArray *node_Xb(tNode *node, int dir)
 {
   return gridpoints->Xb[node->pt_typ[dir]][node->n[dir]];
 }
+/* get Xb[3] for pt_typ and n out of gridpoints */
+void Xb3_pt_type_n(int pt_typ[3], int n[3], tArray *Xb[3])
+{
+  int d;
+  for(d=0; d<3; d++) Xb[d] = gridpoints->Xb[pt_typ[d]][n[d]];
+}
 /* get Xb[3] for n (assuming point type of node) out of gridpoints */
 void Xb3_n(tNode *node, int n[3], tArray *Xb[3])
 {

@@ -572,6 +572,7 @@ void MPIexchange_get_all_myln_data(tMesh *mesh);
 void MPIexchange_free_all_myln(tMesh *mesh);
 int Ind_n_norm(int i, int j, int k, int n[3], int norm);
 tArray *node_Xb(tNode *node, int dir);
+void Xb3_pt_type_n(int pt_typ[3], int n[3], tArray *Xb[3]);
 void Xb3_n(tNode *node, int n[3], tArray *Xb[3]);
 void node_Xb3(tNode *node, tArray *Xb[3]);
 tArray *node_Wq(tNode *node, int dir);
