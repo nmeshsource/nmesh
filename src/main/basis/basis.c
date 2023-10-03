@@ -196,6 +196,22 @@ int basis_var_synthesis3(tNode *node, int ui, int ci)
     return 0;
 }
 
+/* get coeffs c=c_ijk of array u, using ana. matrices in At[3] */
+void basis_array_analysis3_At(tArray *At[3], tArray *u, tArray *c)
+{
+  mm_array_indir(At[0], u, 0, c);
+  mm_array_indir(At[1], c, 1, c); //should work because it uses mm_array1
+  mm_array_indir(At[2], c, 2, c);
+}
+
+/* get array u from coeffs c=c_ijk, using syn. matrices in St[3] */
+void basis_array_synthesis3_St(tArray *St[3], tArray *u, tArray *c)
+{
+  mm_array_indir(St[0], c, 0, u);
+  mm_array_indir(St[1], u, 1, u); //should work because it uses mm_array1
+  mm_array_indir(St[2], u, 2, u);
+}
+
 /***********************************************************************/
 /* interpolate */
 /***********************************************************************/

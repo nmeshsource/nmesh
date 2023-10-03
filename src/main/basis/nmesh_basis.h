@@ -54,6 +54,8 @@ int basis_var_analysis3(tNode *node, int ui, int ci);
 int basis_var_synthesis3(tNode *node, int ui, int ci);
 void basis_array_analysis3(tNode *node, tArray *u, tArray *c);
 void basis_array_synthesis3(tNode *node, tArray *u, tArray *c);
+void basis_array_analysis3_At(tArray *At[3], tArray *u, tArray *c);
+void basis_array_synthesis3_St(tArray *St[3], tArray *u, tArray *c);
 double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3]);
 int basis_var_interpolate_ok(tNode *node, int vi, double Xb[3],
                              double *vinterp);
