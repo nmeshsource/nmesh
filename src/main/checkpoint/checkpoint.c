@@ -274,6 +274,13 @@ void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev)
   char *dir_ip1 = cmalloc(pl+12);
   int i;
 
+  /* if we keep 1 or more, remove oldest in case it's there due to errors */
+  if(nprev>0)
+  {
+    snprintf(dir_ip1,pl, "%s/%s-0LDE5T.tmp", outdir, chckpt_dir);
+    system2("rm -rf", dir_ip1);
+  }
+
   /* increase suffix part of all previous checkpoints, e.g.:
      checkpoint-1 -> checkpoint-2 */
   for(i=nprev; i>0; i--)
