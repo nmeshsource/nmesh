@@ -414,7 +414,7 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
   int troubled;
 
   /* get ana. matrices */
-  At3_pt_type_n(pt_typ, Arrn(u), At);
+  At3_pt_typ_n(pt_typ, Arrn(u), At);
 
   /* get coeffs of var iu */
   ca = alloc_array(Arrn(u));

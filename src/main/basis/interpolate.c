@@ -538,7 +538,7 @@ void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
   tArray *Xp[3]; /* 3 3d arrays */
 
   /* set Xb */
-  Xb3_pt_type_n(pt_typ, n_interp, Xb);
+  Xb3_pt_typ_n(pt_typ, n_interp, Xb);
 
   /* set Xp */
   Xp[0] = alloc_array(n_interp);
