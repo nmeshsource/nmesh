@@ -110,9 +110,9 @@ int evolve_myln(tMesh *mesh)
       /* redo evo step */
       //PRF;printf(": redo evo step\n");
       Evolve_mesh(mesh);
-      /* It may be good update trouble_score here. But we assume that
-         the nodes with trbl_score<0 in the 1st step still have that
-         when redo the step. Also, if we call evolve_set_trouble_score_mesh
+      /* It may be good to update trouble_score here. But we assume that
+         the nodes with trbl_score<0 in the 1st step still have <0 when
+         we redo the step. Also, if we call evolve_set_trouble_score_mesh
          again, trbl_score of some nodes may further decrease ... */
     }
 
