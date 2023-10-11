@@ -64,9 +64,6 @@ int evolve_myln(tMesh *mesh)
     vlcopy(u_ch, allu); /* u_ch = allu */
   }
 
-  /* since this is the start of an evo step reset evo_troubled flag here: */
-  trouble_reset_evo_troubled_mesh(mesh);
-
   /* how we evolve the mesh */
   if(allnodes)
   {
@@ -115,6 +112,13 @@ int evolve_myln(tMesh *mesh)
          we redo the step. Also, if we call evolve_set_trouble_score_mesh
          again, trbl_score of some nodes may further decrease ... */
     }
+
+    /* Since this is the end of the evo step (that we now consider
+       successful), reset evo_troubled flag here. If any evo trouble
+       happens aftrwards (e.g. when we call the limiter later) this should
+       be taken into account when evolve_set_trouble_score_mesh is called
+       the next time. */
+    trouble_reset_evo_troubled_mesh(mesh);
 
     /* If trouble_score>0 or trouble_score<=-NOTROUBLES, some nodes may have
        trbl_score<=-NOTROUBLES. We now switch these nodes back to dg. */
