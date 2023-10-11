@@ -422,7 +422,7 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
 
   /* set the 0th coeff (that corresponds to the node average) to u_scale,
      so that we get the same result, no matter how high the node average */
-  if(u_scale >= 0.) Arrd(ca)[0] = u_scale;
+  if(u_scale >= 0.) Arrd(ca)[0] = u_scale * 2.*sqrt(2.);
 
   /* compute sum of squares of the ncoeffs coeffs */
   c2_sum = 0.;
