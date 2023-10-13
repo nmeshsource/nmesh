@@ -79,12 +79,15 @@ LIBSGRID = $(SGRIDDIR)/lib/libsgrid.a
 SPECIALLIBS += $(LIBSGRID)
 # add dependency on libsgrid.a
 SPECIALDEPS += $(LIBSGRID)
-# target to build libsgrid.a
-$(LIBSGRID):
+# targets to build libsgrid.a
+$(LIBSGRID): $(SGRIDDIR)/MyConfig
+	@echo -------------------- Compiling sgrid ---------------------------
+	$(MAKE) -C $(SGRIDDIR) CC=gcc OFLAGS=$(OFLAGS)
+$(SGRIDDIR)/MyConfig:
+	$(MAKE) Get_sgrid
+Get_sgrid:
 	@echo -------------------- Downloading sgrid -------------------------
 	-git clone giter@quark.physics.fau.edu:/sgrid $(SGRIDDIR)
 	@echo -------------------- Configure sgrid for DNSdata ---------------
 	cp $(SGRIDDIR)/doc/MyConfig.DNSlibsgrid $(SGRIDDIR)/MyConfig
 	$(MAKE) -C $(SGRIDDIR) git_clone
-	@echo -------------------- Compiling sgrid ---------------------------
-	$(MAKE) -C $(SGRIDDIR) CC=gcc OFLAGS=$(OFLAGS)
