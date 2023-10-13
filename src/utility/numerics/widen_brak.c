@@ -11,7 +11,7 @@ int widen_brak(double (*func)(double,void *par),
   int it;
   double f1,f2;
 
-  if (*x1 == *x2)
+  if(*x1 == *x2)
   {
     if(pr) printf("widen_brak: x1 and x2 must be unequal\n");
     return -ntries-2;
