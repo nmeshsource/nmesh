@@ -15,6 +15,10 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
                  double x1, double x2, void *par, int maxits, double xacc,
                  int pr);
 
+/* widen_brak.c */
+int widen_brak(double (*func)(double,void *par),
+               double *x1, double *x2, void *par, int ntries, int pr);
+
 /* newton1d_fd.c */
 int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
                        double x1, double x2, void *par,
