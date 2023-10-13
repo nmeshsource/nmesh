@@ -3,6 +3,10 @@
 # Builds the nmesh executable by including the file MyConfig
 # See http://www.gnu.org/software/make/manual for the manual of GNU make
 
+# the default target is nmesh below, to have it first we also put it here
+.PHONY: Compile_nmesh
+Compile_nmesh: nmesh
+
 # top level dir
 TOP := $(shell pwd)
 
@@ -145,6 +149,7 @@ export
 # Make Targets
 # --------------------------------------------------------------------------
 # default target
+.PHONY: nmesh
 nmesh: $(autoinclude) $(autoinitial) .git/hooks/pre-commit
 	@echo
 	@echo ======================= Compiling nmesh ========================
