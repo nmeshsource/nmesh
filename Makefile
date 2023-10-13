@@ -32,6 +32,7 @@ INCS = -I$(TOP)/src/main/main
 LIBS = -L$(TOP)/lib
 SPECIALINCS =
 SPECIALLIBS =
+SPECIALDEPS =
 libsys = -lm
 
 # dirs for MPI given with -I and -L to compiler, and MPI lib given with -l
@@ -150,7 +151,7 @@ export
 # --------------------------------------------------------------------------
 # default target
 .PHONY: nmesh
-nmesh: $(autoinclude) $(autoinitial) .git/hooks/pre-commit
+nmesh: $(autoinclude) $(autoinitial) .git/hooks/pre-commit $(SPECIALDEPS)
 	@echo
 	@echo ======================= Compiling nmesh ========================
 	@echo CC=$(CC)
