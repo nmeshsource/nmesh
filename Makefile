@@ -219,10 +219,11 @@ touch_all_nmesh_c:
 	for X in $(libpathCfiles); do touch $$X; done
 
 # targets to get git projects
-git_clone:
+git_cloneonly:
 	@echo ==================== Cloning nmesh projects ====================
 	-for X in $(projects); do N=$$(basename $$X .git); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
-	@$(MAKE) install_git_hooks
+
+git_clone: git_cloneonly install_git_hooks
 
 git_pull: install_git_hooks
 	@echo ====================== main part of nmesh ======================
