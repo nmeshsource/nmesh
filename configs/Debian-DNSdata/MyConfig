@@ -1,0 +1,90 @@
+# MyConfig.example
+#
+# The file MyConfig is included verbatim in the Makefile to determine which
+# special libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# projects we add:
+#libpaths += src/tests/advection1
+#libpaths += src/tests/burgers1
+#libpaths += src/tests/scalarwave1
+repo = giter@quark.physics.fau.edu:nmesh-projects
+#projects += $(repo)/scalarwave2
+projects += $(repo)/Ein
+projects += $(repo)/ADM
+projects += $(repo)/EoS
+projects += $(repo)/SingleBH
+projects += $(repo)/TOVstar
+projects += $(repo)/GRHD
+#projects += $(repo)/SRHDtestID
+projects += $(repo)/GHG
+##projects += $(repo)/ScalarWave
+#projects += $(repo)/C3GH
+#projects += $(repo)/xActToC
+#projects += $(repo)/FOCCZ4
+#projects += https://github.com/rashti-alireza/Cpi
+##projects += $(repo)/Invariants
+##projects += $(repo)/Teukolsky
+projects += $(repo)/DNSdataReader
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = nmesh
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler, only gcc and icc have been tested, gcc is the default
+CC = mpicc # gcc # clang # /home/wolf/ekopath-4.0.12.1/bin/pathcc # icc
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -g # -O3 # -g # -fopenmp # -O3 -fopenmp # -O3 # -Wall # -O3 -fopenmp # -g -Wall # -O2
+
+#SPECIALLIBS += -lefence
+
+WARN = -std=c11 -pedantic -Wall \
+  -Wshadow -Wpointer-arith\
+  -Wcast-qual -Wcast-align\
+  -Wnested-externs\
+  -fshort-enums -fno-common -Wcast-qual -Wwrite-strings # -Wextra
+
+#WARN = -std=c11 -pedantic -Wextra -Wall -W \
+#  -Wconversion -Wshadow -Wpointer-arith \
+#  -Wcast-qual -Wcast-align \
+#  -Wwrite-strings -Wnested-externs \
+#  -fshort-enums -fno-common
+##  -Wmissing-prototypes -Wstrict-prototypes \
+
+# use OpenMP pragmas, this also needs something like -fopenmp in OFLAGS
+#DFLAGS += -DUSEOMP
+
+DFLAGS += -DUSEMPI
+# This works on Debian 9 with openmpi:
+MPIDIR = /usr/lib/x86_64-linux-gnu/openmpi
+MPIDIRL = -L$(MPIDIR)/lib
+MPIDIRI = -I$(MPIDIR)/include
+MPILIBS = -lmpi
+
+# compile in GSL
+SPECIALLIBS += -lgsl -lgslcblas
+
+# generate SIGFPE on NANs, works only on GNU, BSD or similar systems
+#DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
+
+# compile with libsgrid
+SGRIDDIR = $(TOP)/src/projects/sgrid
+LIBSGRID = $(SGRIDDIR)/lib/libsgrid.a
+SPECIALLIBS += $(LIBSGRID)
+# add dependency on libsgrid.a
+SPECIALDEPS += $(LIBSGRID)
+# target to build libsgrid.a
+$(LIBSGRID):
+	@echo -------------------- Downloading sgrid -------------------------
+	-git clone giter@quark.physics.fau.edu:/sgrid $(SGRIDDIR)
+	@echo -------------------- Configure sgrid for DNSdata ---------------
+	cp $(SGRIDDIR)/doc/MyConfig.DNSlibsgrid $(SGRIDDIR)/MyConfig
+	$(MAKE) -C $(SGRIDDIR) git_clone
+	@echo -------------------- Compiling sgrid ---------------------------
+	$(MAKE) -C $(SGRIDDIR) CC=gcc OFLAGS=$(OFLAGS)
