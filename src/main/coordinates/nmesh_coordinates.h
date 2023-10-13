@@ -135,6 +135,8 @@ void shift_Xb0_XbN_toward_Xbm0_XbmN(const double *Xbm, int n, double *Xb);
 /* derivs.c */
 int coordinate_dXdx_times_1form_array(tNode *node, tArray *daU[3],
                                       tArray *dau[3]);
+int array_cart_partials(tNode *node, tArray *au, tArray *dau[3],
+                        tDerivOpt *opt);
 int cart_partials(tNode *node, int ui, int dui[3], tDerivOpt *opt);
 void cart_partials_diScalar(tNode *node, int U, int dUx, tDerivOpt *opt);
 #define cart_partials_dU_di(node, U, dU) cart_partials_diScalar((node), (U), (dU), NULL)
