@@ -3,8 +3,8 @@
 #define FAC 1.6
 
 /* similar to sgrid's zbrac_P
-   returns number of tries it   if ok
-   returns <0                   if failure */
+   returns number of widenings it   if ok
+   returns <0                       if failure */
 int widen_brak(double (*func)(double,void *par),
                double *x1, double *x2, void *par, int ntries, int pr)
 {
