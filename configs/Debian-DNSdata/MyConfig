@@ -90,4 +90,4 @@ Get_sgrid:
 	-git clone giter@quark.physics.fau.edu:/sgrid $(SGRIDDIR)
 	@echo -------------------- Configure sgrid for DNSdata ---------------
 	cp $(SGRIDDIR)/doc/MyConfig.DNSlibsgrid $(SGRIDDIR)/MyConfig
-	$(MAKE) -C $(SGRIDDIR) git_clone
+	$(MAKE) -C $(SGRIDDIR) repo=giter@quark.physics.fau.edu: git_clone
