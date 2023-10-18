@@ -132,7 +132,8 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname,
 
   /* open file such that we can append and seek backwards */
   fp = fopen(fname, "a");
-  if(!fp) errorexit("cannot add if file was never created with fopen_xdmf_xmf");
+  if(!fp) errorexits("cannot add to %s if file was never created with "
+                     "fopen_xdmf_xmf", fname);
 
   /* attach IO buffer */
   if(IObufsiz) setvbuf(fp, IObuf, _IOFBF, IObufsiz);
