@@ -377,6 +377,13 @@ Things that should be done:
  when ADM matter vars are set from GRHD.
  GRHD should probably set ADM matter vars and P in POST_CHECKPOINT_LOAD
 
+*FIXME: In nmesh we use "typedef int (*FuncPointer)();". Some funcs
+ take FuncPointer as args, i.e. one of their args is a func with an
+ unspecified number of args. E.g. evolve_SetFun = evolve_SetEvoFun does
+ this. This is also used in the POSIX.1-2001 function makecontext:
+   void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...);
+ I think C2X=C23 is stupid enough to abolish this!!!
+
 
 Cleanup:
 ========
