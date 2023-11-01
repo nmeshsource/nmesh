@@ -82,7 +82,7 @@ SPECIALDEPS += $(LIBSGRID)
 # targets to build libsgrid.a
 $(LIBSGRID): $(SGRIDDIR)/MyConfig
 	@echo -------------------- Compiling sgrid ---------------------------
-	$(MAKE) -C $(SGRIDDIR) CC=gcc OFLAGS=$(OFLAGS)
+	$(MAKE) -C $(SGRIDDIR) CC=gcc OFLAGS=-O3
 $(SGRIDDIR)/MyConfig:
 	$(MAKE) Get_sgrid
 Get_sgrid:
