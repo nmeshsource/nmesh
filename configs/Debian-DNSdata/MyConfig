@@ -87,7 +87,7 @@ $(SGRIDDIR)/MyConfig:
 	$(MAKE) Get_sgrid
 Get_sgrid:
 	@echo -------------------- Downloading sgrid -------------------------
-	-git clone giter@quark.physics.fau.edu:/sgrid $(SGRIDDIR)
+	-git clone https://github.com/sgridsource/sgrid $(SGRIDDIR)
 	@echo -------------------- Configure sgrid for DNSdata ---------------
 	cp $(SGRIDDIR)/doc/MyConfig.DNSlibsgrid $(SGRIDDIR)/MyConfig
-	$(MAKE) -C $(SGRIDDIR) repo=giter@quark.physics.fau.edu: git_clone
+	$(MAKE) -C $(SGRIDDIR) repo=https://github.com/sgridsource git_clone
