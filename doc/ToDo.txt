@@ -385,6 +385,14 @@ Things that should be done:
  I think C2X=C23 is stupid enough to abolish this!!!
 
 
+Try SPH for hydro:
+==================
+*arXiv:2306.06226
+ The Lagrangian Numerical Relativity code SPHINCS_BSSN_v1.0
+ Authors: Stephan Rosswog, Francesco Torsello, Peter Diener
+ Journal ref: Front. Appl. Math. Stat., Volume 9, 2023
+
+
 Cleanup:
 ========
 -remove/fix/replace: mark_points_in_nb_f
