@@ -165,7 +165,7 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
     if(!fp) errorexits("failed opening %s", fname);
 
     fprintf(fp, "number of elms, followed by all elms, their n[3] and "
-                "optionally their py_typ[3]\n\n");
+                "optionally their pt_typ[3]\n\n");
     fprintf(fp, "nelms = %lu\n\n", mesh->eidlim[nMPI_size()-1]);
   }
 
