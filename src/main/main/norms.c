@@ -38,13 +38,12 @@ double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
                                int vind, int findMax,
                                tNode **Mnode, int *Mijk)
 {
-  double min = +DBL_MAX;
-  double max = -DBL_MAX;
   double extr;
+  if(findMax) extr = -DBL_MAX;
+  else        extr = +DBL_MAX;
 
   *Mnode = NULL;
   *Mijk  = 0;
-  extr   = 0.;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -60,12 +59,12 @@ double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
     if(findMax)
     {
       nextr = max_array(VarA(node,vind), &ijk);
-      if(nextr > max) found = 1;
+      if(nextr > extr) found = 1;
     }
     else
     {
       nextr = min_array(VarA(node,vind), &ijk);
-      if(nextr < min) found = 1;
+      if(nextr < extr) found = 1;
     }
 
     if(found)
@@ -84,8 +83,7 @@ double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
         if(magnitude_xyz(xs) > r) continue;
       }
 
-      if(findMax) max = extr = nextr;
-      else        min = extr = nextr;
+      extr = nextr;
       *Mnode = node;
       *Mijk = ijk;
     }
@@ -186,6 +184,92 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
     /* write local patch coords into MX and uloc, if we found a node */
     XbYbZb_of_ind(Mnode, *Mijk, Xb);
     XYZ_of_XbYbZb(Mnode, Xb, MX);
+    set_xyz(NULL, Mnode, *Mijk, MX, Mx);
+    uloc->loc->p = Mnode->pat->p;
+    node_location_str(Mnode, uloc->loc->nodeloc, 103);
+
+    /* write local results into uloc */
+    uloc->loc->ijk  = *Mijk;
+    uloc->loc->X[0] = MX[0];
+    uloc->loc->X[1] = MX[1];
+    uloc->loc->X[2] = MX[2];
+    uloc->loc->x[0] = Mx[0];
+    uloc->loc->x[1] = Mx[1];
+    uloc->loc->x[2] = Mx[2];
+  }
+  else
+  {
+    /* If we can't find a node just set uloc to zero, since in that case
+       another MPI proc must have found something... */
+    memset(&(uloc[0]), 0, sizeof(uloc[0]));
+  }
+
+  /* get global extr and rank into Mr */
+  if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
+  else        nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
+
+  /* now we have rank and value in Mr,
+     so broadcast local results from Mr->rank to all */
+  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
+
+  /* set location */
+  *Mp = uloc->loc->p;
+  strncpy(Mnodeloc, uloc->loc->nodeloc, 104);
+  *Mijk = uloc->loc->ijk;
+  MX[0] = uloc->loc->X[0];
+  MX[1] = uloc->loc->X[1];
+  MX[2] = uloc->loc->X[2];
+  Mx[0] = uloc->loc->x[0];
+  Mx[1] = uloc->loc->x[1];
+  Mx[2] = uloc->loc->x[2];
+
+  return Mr->extr;
+}
+
+
+/* compute max/min of var with index vind over a patch or mesh
+   within sphere |x-xc|<=r
+   input: mesh, pat, xc, r, vind, findMax
+   output: Mp, Mnodeloc, Mijk, MX[3], Mx[3]
+           output has max/min location */
+double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
+                         int vind, int findMax, int *Mp, char Mnodeloc[104],
+                         int *Mijk, double *MX, double *Mx)
+{
+  tNode *Mnode=NULL;
+
+  struct { /* extremum and rank where extr. is */
+    double extr;
+    int rank;
+  } mr[1], Mr[1];
+
+  struct Loc { /* location info */
+    int p;
+    char nodeloc[104]; /* node location string */
+    int ijk;
+    double X[3];
+    double x[3];
+  };
+
+  union { /* union to convert Loc to char array */
+    struct Loc loc[1];
+    char bytes[sizeof(struct Loc)];
+  } uloc[1];
+
+  /* write local extr and rank into mr and Mr */
+  mr->extr = SphereExtremumLoc_local(mesh,pat, xc,r,
+                                     vind, findMax, &Mnode, Mijk);
+  if(Mnode)  mr->rank = nMPI_rank();
+  else       mr->rank = -1; /* set rank to -1 in case nothing was found */
+  Mr->extr = mr->extr;
+  Mr->rank = mr->rank;
+  //printf("mr->extr=%g\n", mr->extr);
+  //printf("Mnode=%p *Mijk=%d\n", Mnode, *Mijk);
+
+  if(Mnode)
+  {
+    /* write local patch coords into MX and uloc, if we found a node */
+    XYZ_of_ind(Mnode, *Mijk, MX);
     set_xyz(NULL, Mnode, *Mijk, MX, Mx);
     uloc->loc->p = Mnode->pat->p;
     node_location_str(Mnode, uloc->loc->nodeloc, 103);
