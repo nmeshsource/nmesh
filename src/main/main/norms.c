@@ -237,6 +237,7 @@ double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
                          int *Mijk, double *MX, double *Mx)
 {
   tNode *Mnode=NULL;
+  int bcast_rank;
 
   struct { /* extremum and rank where extr. is */
     double extr;
@@ -285,18 +286,21 @@ double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
   }
   else
   {
-    /* If we can't find a node just set uloc to zero, since in that case
-       another MPI proc must have found something... */
+    /* If we can't find a node just set most of uloc to zero. In that case
+       another MPI proc could have found something... */
     memset(&(uloc[0]), 0, sizeof(uloc[0]));
+    uloc->loc->p = -1; /* invalid patch signals that no node was found */
   }
 
   /* get global extr and rank into Mr */
   if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
   else        nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
 
-  /* now we have rank and value in Mr,
-     so broadcast local results from Mr->rank to all */
-  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
+  if(Mr->rank >= 0) bcast_rank = Mr->rank;
+  else              bcast_rank = 0;
+  /* if we have rank and value in Mr,
+     broadcast local results from Mr->rank to all */
+  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, bcast_rank);
 
   /* set location */
   *Mp = uloc->loc->p;
