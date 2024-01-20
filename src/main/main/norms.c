@@ -91,6 +91,61 @@ double MeshMinLoc_local(tMesh *mesh, tPat *pat, int vind,
 }
 
 
+/* Compute MPI-proc local extremum of var with index vind inside a sphere of
+   radius r. The sphere center is in xc, given in x,y,z coords.
+   If pat!=NULL we only look inside patch pat.
+   Set Mnode, Mijk to the node and point-index with the extremum. */
+double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
+                               const double xc[3], double r,
+                               int vind, int findMax,
+                               tNode **Mnode, int *Mijk)
+{
+  double min = +DBL_MAX;
+  double max = -DBL_MAX;
+  double extr;
+
+  *Mnode = NULL;
+  *Mijk  = 0;
+  formylnodes_noomp(mesh)
+  {
+    tNode *node = MyLnode;
+    double nextr;
+    int found, ijk;
+
+    if(pat && node->pat != pat) continue;
+
+    if(VarA(node,vind) == NULL) continue;
+
+    /* check if there is a new extremum */
+    found = 0;
+    if(findMax)
+    {
+      nextr = max_array(VarA(node,vind), &ijk);
+      if(nextr > max) found = 1;
+    }
+    else
+    {
+      nextr = min_array(VarA(node,vind), &ijk);
+      if(nextr < min) found = 1;
+    }
+
+    /* check if new extremum loc is within sphere */
+    //get x of ijk
+    //get d = |x-xc|
+    //if(d > r) found = 0;
+
+    if(found)
+    {
+      if(findMax) max = extr = nextr;
+      else        min = extr = nextr;
+      *Mnode = node;
+      *Mijk = ijk;
+    }
+  }
+  return extr;
+}
+
+
 /* compute max of var with index vind over a patch or mesh */
 double MeshMax(tMesh *mesh, tPat *pat, int vind)
 {
