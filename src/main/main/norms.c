@@ -237,7 +237,6 @@ double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
                          int *Mijk, double *MX, double *Mx)
 {
   tNode *Mnode=NULL;
-  int bcast_rank;
 
   struct { /* extremum and rank where extr. is */
     double extr;
@@ -296,11 +295,10 @@ double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
   if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
   else        nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
 
-  if(Mr->rank >= 0) bcast_rank = Mr->rank;
-  else              bcast_rank = 0;
   /* if we have rank and value in Mr,
      broadcast local results from Mr->rank to all */
-  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, bcast_rank);
+  if(Mr->rank >= 0)
+    nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
 
   /* set location */
   *Mp = uloc->loc->p;
