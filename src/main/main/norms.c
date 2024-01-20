@@ -94,9 +94,10 @@ double MeshMinLoc_local__old(tMesh *mesh, tPat *pat, int vind,
 /* Compute MPI-proc local extremum of var with index vind inside a sphere of
    radius r. The sphere center is in xc, given in x,y,z coords.
    If pat!=NULL we only look inside patch pat.
+   If xc==NULL we do not check if extremum location is within sphere.
    Set Mnode, Mijk to the node and point-index with the extremum. */
 double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
-                               const double xc[3], double r,
+                               const double *xc, double r,
                                int vind, int findMax,
                                tNode **Mnode, int *Mijk)
 {
