@@ -44,6 +44,7 @@ double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
 
   *Mnode = NULL;
   *Mijk  = 0;
+  extr   = 0.;
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
