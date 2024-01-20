@@ -28,69 +28,6 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
 }
 
 
-/* compute MPI-proc local max of var with index vind over a patch or mesh,
-   set Mnode, Mijk to the node and point-index with the Max */
-double MeshMaxLoc_local__old(tMesh *mesh, tPat *pat, int vind,
-                        tNode **Mnode, int *Mijk)
-{
-  double max = -DBL_MAX;
-
-  *Mnode = NULL;
-  *Mijk  = 0;
-  formylnodes_noomp(mesh)
-  {
-    tNode *node = MyLnode;
-    double nmax;
-    int ijk;
-
-    if(pat && node->pat != pat) continue;
-
-    if(VarA(node,vind) == NULL) continue;
-
-    nmax = max_array(VarA(node,vind), &ijk);
-    if(nmax > max)
-    {
-      max = nmax;
-      *Mnode = node;
-      *Mijk = ijk;
-    }
-  }
-  return max;
-}
-
-
-/* compute MPI-proc local min of var with index vind over a patch or mesh,
-   set Mnode, Mijk to the node and point-index with the Min */
-double MeshMinLoc_local__old(tMesh *mesh, tPat *pat, int vind,
-                        tNode **Mnode, int *Mijk)
-{
-  double min = DBL_MAX;
-
-  *Mnode = NULL;
-  *Mijk  = 0;
-  formylnodes_noomp(mesh)
-  {
-    tNode *node = MyLnode;
-    double nmin;
-    int ijk;
-
-    if(pat && node->pat != pat) continue;
-
-    if(VarA(node,vind) == NULL) continue;
-
-    nmin = min_array(VarA(node,vind), &ijk);
-    if(nmin < min)
-    {
-      min = nmin;
-      *Mnode = node;
-      *Mijk = ijk;
-      //printf("*Mnode=%p *Mijk=%d\n", *Mnode, *Mijk);
-    }
-  }
-  return min;
-}
-
-
 /* Compute MPI-proc local extremum of var with index vind inside a sphere of
    radius r. The sphere center is in xc, given in x,y,z coords.
    If pat!=NULL we only look inside patch pat.
