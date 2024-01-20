@@ -110,7 +110,7 @@ double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
   {
     tNode *node = MyLnode;
     double nextr;
-    int found, ijk;
+    int found, ijk, d;
 
     if(pat && node->pat != pat) continue;
 
@@ -129,13 +129,19 @@ double SphereExtremumLoc_local(tMesh *mesh, tPat *pat,
       if(nextr < min) found = 1;
     }
 
-    /* check if new extremum loc is within sphere */
-    //get x of ijk
-    //get d = |x-xc|
-    //if(d > r) found = 0;
-
     if(found)
     {
+      double X[3], x[3], xs[3];
+
+      /* check if new extremum loc is within sphere */
+      /* get X and x for ijk */
+      XYZ_of_ind(node, ijk, X);
+      set_xyz(NULL, node, ijk, X, x);
+
+      /* continue to next node if |xs| = |x - xc| > r */
+      for(d=0; d<3; d++) xs[d] = x[d] - xc[d];
+      if(magnitude_xyz(xs) > r) continue;
+
       if(findMax) max = extr = nextr;
       else        min = extr = nextr;
       *Mnode = node;
