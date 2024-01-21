@@ -145,7 +145,7 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
    input: mesh, pat, vind, findMax
    output: Mp, Mnodeloc, Mijk, MX[3], Mx[3]
            output has max/min location */
-double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
+double MeshExtremumLoc__old(tMesh *mesh, tPat *pat, int vind, int findMax,
                        int *Mp, char Mnodeloc[104], int *Mijk,
                        double *MX, double *Mx)
 {
@@ -312,4 +312,17 @@ double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
   Mx[2] = uloc->loc->x[2];
 
   return Mr->extr;
+}
+
+/* compute max/min of var with index vind over a patch or mesh
+   input: mesh, pat, vind, findMax
+   output: Mp, Mnodeloc, Mijk, MX[3], Mx[3]
+           output has max/min location */
+double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
+                       int *Mp, char Mnodeloc[104], int *Mijk,
+                       double *MX, double *Mx)
+{
+  /* we pass NULL for xc, so that any sphere is not checked */
+  return SphereExtremumLoc(mesh,pat, NULL,DBL_MAX, vind, findMax,
+                           Mp, Mnodeloc, Mijk, MX, Mx);
 }
