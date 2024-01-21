@@ -380,3 +380,26 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
 
   return 0;
 }
+
+
+/******************************************************************/
+/* some more utility functions */
+/******************************************************************/
+
+/* add pars in parnames to checkpoint_save_pars */
+int checkpoint_save_pars_append(tMesh *mesh, const char *parnames)
+{
+  char *list, *saveptr, *name;
+
+  list = strdup(parnames);
+
+  /* loop over contents of list, and append to par checkpoint_save_pars */
+  for(name=strtok_r(list, " ", &saveptr); name!=NULL;
+      name=strtok_r(NULL, " ", &saveptr))
+  {
+    Appends(Par("checkpoint_save_pars"), name);
+  }
+
+  free(list);
+  return 0;
+}
