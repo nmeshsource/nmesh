@@ -121,15 +121,13 @@ double center_extremum_step(double vm, double v0, double vp, int findMax,
 }
 
 /* track center by finding the approx location of the extremum position */
-int center_track_extremum(tMesh *mesh, int findMax,
-                          double xold[3], double xnew[3])
+int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
+                          const double xold[3], double minmove,
+                          double xnew[3])
 {
   double v0,vm,vp, v;
   double dx,dy,dz;
-  int var = Ind(Gets(Par("center1_track_var")));
-  double minmove = 0.; //= Getd(Par("center_track_minmove"))*level->dx;
-  double x0, y0, z0, x1, y1, z1;
-  double h = 1; //FIXME: use finest grid spacing here!!!
+  double x0,y0,z0, x1,y1,z1;
   int pr = 0;
 
   /* previous coordinates */
@@ -161,10 +159,10 @@ int center_track_extremum(tMesh *mesh, int findMax,
   if (pr) printf("center_track_extremum:  %e %e %e\n",dx,dy,dz);
 
   v = basis_var_interp_x_y_z(mesh, var, x0+dx,y0+dy,z0+dz, Lagrange_of_x);
-  if (!finit(v) || !finit(v0) ||
-       ((findMax) && (v<=v0)) ||
-       ((!findMax) && (v>=v0)) ||
-       (sqrt(dx*dx + dy*dy + dz*dz) < minmove))
+  if( !finit(v) || !finit(v0) ||
+      ((findMax) && (v<=v0))  ||
+      ((!findMax) && (v>=v0)) ||
+      (sqrt(dx*dx + dy*dy + dz*dz) < minmove) )
     dx = dy = dz = 0.;
 
   x1 = x0 + dx;
@@ -179,9 +177,10 @@ int center_track_extremum(tMesh *mesh, int findMax,
 
   if(0)
   {
-    printf("  %.9f ->  %.9f\n", xold[0],xnew[0]);
-    printf("  %.9f ->  %.9f\n", xold[1],xnew[1]);
-    printf("  %.9f ->  %.9f\n", xold[2],xnew[2]);
+    PRFs("\n");
+    printf("  %.9f ->  %.9f\n", xold[0], xnew[0]);
+    printf("  %.9f ->  %.9f\n", xold[1], xnew[1]);
+    printf("  %.9f ->  %.9f\n", xold[2], xnew[2]);
   }
 
   return 1;
