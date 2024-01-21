@@ -3,3 +3,4 @@
 
 /* center.c */
 int center_update(tMesh *mesh);
+int center_init_globals(tMesh *mesh);

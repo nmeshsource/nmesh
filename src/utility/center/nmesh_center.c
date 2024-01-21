@@ -11,6 +11,7 @@ int nmesh_center(tMesh *mesh)
   printf("Adding center\n");
 
   /* functions */
+  AddFun(POST_PARAMETERS, center_init_globals);
   AddFun(ANALYZE, center_update);
 
   /* variables */
