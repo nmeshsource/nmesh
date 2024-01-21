@@ -22,6 +22,11 @@ int center_init_globals(tMesh *mesh)
   center->center2_y = Par("center2_y");
   center->center2_z = Par("center2_z");
 
+
+  /* make sure some pars are saved in checkpoint */
+  checkpoint_save_pars_append(mesh, "center0_x center0_y center0_z "
+                                    "center1_x center1_y center1_z "
+                                    "center2_x center2_y center2_z");
   return 0;
 }
 
