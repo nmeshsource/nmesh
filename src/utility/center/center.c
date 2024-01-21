@@ -64,9 +64,14 @@ int center_update(tMesh *mesh)
     var = Ind( Gets(Par("center1_track_var")) );
     minmove = 0; //FIXME: read par
     findMax = (meth==1) ?  1 : 0;
+    xold[0] = Getd(center->center1_x);
+    xold[1] = Getd(center->center1_y);
+    xold[2] = Getd(center->center1_z);
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
-
-    errorexit("implement method 1/2");
+    Setd(center->center1_x, xnew[0]);
+    Setd(center->center1_y, xnew[1]);
+    Setd(center->center1_z, xnew[2]);
+    errorexit("check method 1/2");
     break;
   default:
     errorexiti("unknown center1_track_method", meth);
