@@ -342,14 +342,19 @@ int approxXYZnormal_of_xyznormal(tNode *node, int cartN)
   }
 }
 
-/* |\vec{x}| */
-double magnitude_xyz(const double x[3])
+/* |\vec{x}|^2 */
+double magnitude2_xyz(const double x[3])
 {
   double d2;
   int dir;
 
   for(d2=0., dir=0; dir<3; dir++) d2 += x[dir] * x[dir];
-  return sqrt(d2);
+  return d2;
+}
+/* |\vec{x}| */
+double magnitude_xyz(const double x[3])
+{
+  return sqrt( magnitude2_xyz(x) );
 }
 
 
