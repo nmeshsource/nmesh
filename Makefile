@@ -46,6 +46,7 @@ libpaths = src/main/amr src/main/nMPI
 libpaths += src/main/basis src/main/coordinates src/main/evolve
 libpaths += src/main/dg src/main/limiter src/main/checkpoint
 libpaths += src/utility/output src/utility/numerics src/utility/units
+libpaths += src/utility/center
 
 # --------------------------------------------------------------------------
 # we can choose more libraries and options in the file MyConfig
