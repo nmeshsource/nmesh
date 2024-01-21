@@ -36,7 +36,7 @@ int center_init_globals(tMesh *mesh)
 /* update positions of centers */
 int center_update(tMesh *mesh)
 {
-  PRFs(":\n");
+  //PRFs(":\n");
 
   switch(Geti(Par("center0_track_method")))
   {

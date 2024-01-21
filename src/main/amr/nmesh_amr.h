@@ -397,9 +397,6 @@ typedef struct {
   int MPIexchange;     /* Par("amr_MPIexchange") */
   int nghosts;         /* Par("amr_nghosts") */
   int elm_nbinfo0;     /* Ind("amr_elm_nbinfo0") */
-  int Ncenters;        /* number of centers */
-#define NcentersMAX 3  /* max number of centers */
-  double xc[NcentersMAX][3]; /* xc[m][i] coord x^i of center m */
 } tAMR;
 
 
