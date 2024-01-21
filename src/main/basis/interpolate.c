@@ -732,3 +732,14 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
   }
   return value;
 }
+
+/* same as basis_var_interp_xyz but with differnt interface */
+double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
+                              double x,double y,double z,
+                              double basis(int k, double x, int np,
+                                         const double *x_p,
+                                         const double *w_interp))
+{
+  double xyz[] = {x,y,z};
+  return basis_var_interp_xyz(mesh, ivar, xyz, basis);
+}
