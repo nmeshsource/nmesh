@@ -37,5 +37,44 @@ int center_init_globals(tMesh *mesh)
 int center_update(tMesh *mesh)
 {
   PRFs(":\n");
+
+  switch(Geti(Par("center0_track_method")))
+  {
+  case 0:
+    break;
+  case 3:
+    errorexit("implement method 3");
+    break;
+  default:
+    errorexiti("unknown center0_track_method",
+               Geti(Par("center0_track_method")));
+  }
+
+  switch(Geti(Par("center1_track_method")))
+  {
+  case 0:
+    break;
+  case 1:
+  case 2:
+    errorexit("implement method 1/2");
+    break;
+  default:
+    errorexiti("unknown center1_track_method",
+               Geti(Par("center1_track_method")));
+  }
+
+  switch(Geti(Par("center2_track_method")))
+  {
+  case 0:
+    break;
+  case 1:
+  case 2:
+    errorexit("implement method 1/2");
+    break;
+  default:
+    errorexiti("unknown center2_track_method",
+               Geti(Par("center2_track_method")));
+  }
+
   return 0;
 }
