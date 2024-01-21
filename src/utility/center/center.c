@@ -36,9 +36,13 @@ int center_init_globals(tMesh *mesh)
 /* update positions of centers */
 int center_update(tMesh *mesh)
 {
+  int meth, var, findMax;
+  double xold[3], xnew[3];
+  double h, minmove;
   //PRFs(":\n");
 
-  switch(Geti(Par("center0_track_method")))
+  meth = Geti(Par("center0_track_method"));
+  switch(meth)
   {
   case 0:
     break;
@@ -46,34 +50,40 @@ int center_update(tMesh *mesh)
     errorexit("implement method 3");
     break;
   default:
-    errorexiti("unknown center0_track_method",
-               Geti(Par("center0_track_method")));
+    errorexiti("unknown center0_track_method", meth);
   }
 
-  switch(Geti(Par("center1_track_method")))
+  meth = Geti(Par("center1_track_method"));
+  switch(meth)
   {
   case 0:
     break;
   case 1:
   case 2:
+    h = 1; //FIXME: get grid spacing
+    var = Ind( Gets(Par("center1_track_var")) );
+    minmove = 0; //FIXME: read par
+    findMax = (meth==1) ?  1 : 0;
+    center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
+
     errorexit("implement method 1/2");
     break;
   default:
-    errorexiti("unknown center1_track_method",
-               Geti(Par("center1_track_method")));
+    errorexiti("unknown center1_track_method", meth);
   }
 
-  switch(Geti(Par("center2_track_method")))
+  meth = Geti(Par("center2_track_method"));
+  switch(meth)
   {
   case 0:
     break;
   case 1:
   case 2:
+    findMax = (meth==1) ?  1 : 0;
     errorexit("implement method 1/2");
     break;
   default:
-    errorexiti("unknown center2_track_method",
-               Geti(Par("center2_track_method")));
+    errorexiti("unknown center2_track_method", meth);
   }
 
   return 0;
