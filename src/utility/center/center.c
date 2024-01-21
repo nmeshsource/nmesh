@@ -78,3 +78,111 @@ int center_update(tMesh *mesh)
 
   return 0;
 }
+
+
+/* find maximum by fitting 1D polynomial:
+  we use a 2nd order function to track extremum
+  f = ax^2+bx+c
+  we use f = [vm, v0, vp]  at  x = [-1, 0, 1]
+  a = 0.5*(vp+vm) - v0;
+  b = 0.5*(vp-vm);
+  c = v0;
+  f' == 0      =>  x = -b/(2.*a);
+  we set ds = -b/(2.*a)
+  the actual step towards the extremum is then delx = ds*h
+  where h is the grid point spacing.
+  Thus we return ds*h. */
+double center_extremum_step(double vm, double v0, double vp, int findMax,
+                            double h)
+{
+  double a = 0.5*(vp+vm) - v0;
+  double ds;
+
+  if(!finit(vm) || !finit(v0) || !finit(vp)) return 0.;
+
+  if(fabs(a) <= 1e-10)
+  {
+    if      ((vp>v0) && (v0>vm)) ds = 1.;
+    else if ((vm>v0) && (v0>vp)) ds =-1.;
+    else                         ds = 0.;
+    ds *= (findMax)?(1.):(-1.);
+  }
+  else
+  {
+    /* we step toward the place with f'=0, i.e. we ignore findMax */
+    ds = 0.25*(vm-vp)/a;
+
+    /* disallow large steps */
+    ds = (ds> 1.)? 1.:ds;
+    ds = (ds<-1.)?-1.:ds;
+  }
+
+  return ds*h;
+}
+
+/* track center by finding the approx location of the extremum position */
+int center_track_extremum(tMesh *mesh, int findMax,
+                          double xold[3], double xnew[3])
+{
+  double v0,vm,vp, v;
+  double dx,dy,dz;
+  int var = Ind(Gets(Par("center1_track_var")));
+  double minmove = 0.; //= Getd(Par("center_track_minmove"))*level->dx;
+  double x0, y0, z0, x1, y1, z1;
+  double h = 1; //FIXME: use finest grid spacing here!!!
+  int pr = 0;
+
+  /* previous coordinates */
+  x0 = xold[0];
+  y0 = xold[1];
+  z0 = xold[2];
+
+  // value at the old puncture
+  v0 = basis_var_interp_x_y_z(mesh, var, x0,y0,z0, Lagrange_of_x);
+
+  /* find var to left and right in x-dir */
+  vm = basis_var_interp_x_y_z(mesh, var, x0-h,y0,z0, Lagrange_of_x);
+  vp = basis_var_interp_x_y_z(mesh, var, x0+h,y0,z0, Lagrange_of_x);
+  if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
+  dx = center_extremum_step(vm,v0,vp, findMax, h);
+
+  // y-direction
+  vm = basis_var_interp_x_y_z(mesh, var, x0,y0-h,z0, Lagrange_of_x);
+  vp = basis_var_interp_x_y_z(mesh, var, x0,y0+h,z0, Lagrange_of_x);
+  if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
+  dy = center_extremum_step(vm,v0,vp, findMax, h);
+
+  // z- direction
+  vm = basis_var_interp_x_y_z(mesh, var, x0,y0,z0-h, Lagrange_of_x);
+  vp = basis_var_interp_x_y_z(mesh, var, x0,y0,z0+h, Lagrange_of_x);
+  if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
+  dz = center_extremum_step(vm,v0,vp, findMax, h);
+
+  if (pr) printf("center_track_extremum:  %e %e %e\n",dx,dy,dz);
+
+  v = basis_var_interp_x_y_z(mesh, var, x0+dx,y0+dy,z0+dz, Lagrange_of_x);
+  if (!finit(v) || !finit(v0) ||
+       ((findMax) && (v<=v0)) ||
+       ((!findMax) && (v>=v0)) ||
+       (sqrt(dx*dx + dy*dy + dz*dz) < minmove))
+    dx = dy = dz = 0.;
+
+  x1 = x0 + dx;
+  y1 = y0 + dy;
+  z1 = z0 + dz;
+  //if ((pintoxyplane == 1) || (pintoxyplane == 3)) z1 = z0 ;
+
+  /* save the result */
+  xnew[0] = x1;
+  xnew[1] = y1;
+  xnew[2] = z1;
+
+  if(0)
+  {
+    printf("  %.9f ->  %.9f\n", xold[0],xnew[0]);
+    printf("  %.9f ->  %.9f\n", xold[1],xnew[1]);
+    printf("  %.9f ->  %.9f\n", xold[2],xnew[2]);
+  }
+
+  return 1;
+}
