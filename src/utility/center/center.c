@@ -7,6 +7,9 @@
 /* global pars for center */
 tcenter center[1];
 
+/* globals from other modules */
+extern tOutput output[1];
+
 
 /* init global center vars */
 int center_init_globals(tMesh *mesh)
@@ -84,6 +87,7 @@ int centerN_update(tMesh *mesh, int N)
 /* update positions of centers */
 int center_update(tMesh *mesh)
 {
+  int N, dir;
   //PRFs(":\n");
 
   /* update center 1 and 2 */
@@ -92,6 +96,15 @@ int center_update(tMesh *mesh)
 
   /* update center 0, which can depend on center 1 and 2 */
   centerN_update(mesh, 0);
+
+  /* set pt output vars if center position vars are not empty */
+  for(N=0; N<output->Noutpt; N++)
+    for(dir=0; dir<3; dir++)
+    {
+      double centerN_xi = Getd(center->center0_x + 3*N + dir);
+      if(strlen(Gets(center->center0_x + 3*N + dir)))
+        output->xpt[N][dir] = centerN_xi;
+    }
 
   return 0;
 }
