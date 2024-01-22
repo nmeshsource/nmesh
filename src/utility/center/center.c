@@ -33,48 +33,56 @@ int center_init_globals(tMesh *mesh)
   return 0;
 }
 
+/* update position of center N */
+int centerN_update(tMesh *mesh, int N)
+{
+  double minmove = 0; //FIXME: read par
+  int meth, var, findMax;
+  double xold[3], xnew[3];
+  double h;
+  char pname[1000];
+
+  sprintf(pname, "center%d_track_method", N);
+  meth = Geti(Par(pname));
+  switch(meth)
+  {
+  case 0:
+    break;
+  case 1:
+  case 2:
+    sprintf(pname, "center%d_track_var", N);
+    var = Ind( Gets(Par(pname)) );
+    findMax = (meth==1) ?  1 : 0;
+    xold[0] = Getd(center->center0_x + 3*N);
+    xold[1] = Getd(center->center0_x + 3*N + 1);
+    xold[2] = Getd(center->center0_x + 3*N + 2);
+    h = average_grid_spacing(mesh, xold);
+    center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
+    Setd(center->center0_x + 3*N,     xnew[0]);
+    Setd(center->center0_x + 3*N + 1, xnew[1]);
+    Setd(center->center0_x + 3*N + 2, xnew[2]);
+    errorexit("check method 1/2");
+    break;
+  case 3:
+    errorexit("implement method 3");
+    break;
+  default:
+    errorexiti("unknown center track method", meth);
+  }
+
+  return 0;
+}
+
 /* update positions of centers */
 int center_update(tMesh *mesh)
 {
-  double minmove = 0; //FIXME: read par
   int cnt;
   //PRFs(":\n");
 
   /* loop over centers */
   for(cnt=0; cnt<3; cnt++)
   {
-    int meth, var, findMax;
-    double xold[3], xnew[3];
-    double h;
-    char pname[1000];
-
-    sprintf(pname, "center%d_track_method", cnt);
-    meth = Geti(Par(pname));
-    switch(meth)
-    {
-    case 0:
-      break;
-    case 1:
-    case 2:
-      sprintf(pname, "center%d_track_var", cnt);
-      var = Ind( Gets(Par(pname)) );
-      findMax = (meth==1) ?  1 : 0;
-      xold[0] = Getd(center->center0_x + 3*cnt);
-      xold[1] = Getd(center->center0_x + 3*cnt + 1);
-      xold[2] = Getd(center->center0_x + 3*cnt + 2);
-      h = average_grid_spacing(mesh, xold);
-      center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
-      Setd(center->center0_x + 3*cnt,     xnew[0]);
-      Setd(center->center0_x + 3*cnt + 1, xnew[1]);
-      Setd(center->center0_x + 3*cnt + 2, xnew[2]);
-      errorexit("check method 1/2");
-      break;
-    case 3:
-      errorexit("implement method 3");
-      break;
-    default:
-      errorexiti("unknown center track method", meth);
-    }
+    centerN_update(mesh, cnt);
   }
 
   return 0;
