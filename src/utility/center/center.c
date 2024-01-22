@@ -26,11 +26,11 @@ int center_init_globals(tMesh *mesh)
   center->center2_z = Par("center2_z");
 
   /* make sure some pars are saved in checkpoint */
-  if(Geti(Par("center0_track_method")))
+  if(!Getv(Par("center0_track"),"no"))
     checkpoint_save_pars_append(mesh, "center0_x center0_y center0_z");
-  if(Geti(Par("center1_track_method")))
+  if(!Getv(Par("center1_track"),"no"))
     checkpoint_save_pars_append(mesh, "center1_x center1_y center1_z");
-  if(Geti(Par("center2_track_method")))
+  if(!Getv(Par("center2_track"),"no"))
     checkpoint_save_pars_append(mesh, "center2_x center2_y center2_z");
 
   return 0;
@@ -42,7 +42,7 @@ int centerN_update(tMesh *mesh, int N)
   double minmove = Getd(Par("center_track_minmove"));
   double m1 = Getd(Par("center1_mass"));
   double m2 = Getd(Par("center2_mass"));
-  int meth, var, findMax, dir, setCenter;
+  int track, var, findMax, dir, setCenter;
   double xold[3], xnew[3], x1[3], x2[3];
   double h;
   char pname[1000];
@@ -52,23 +52,24 @@ int centerN_update(tMesh *mesh, int N)
     xold[dir] = xnew[dir] = Getd(center->center0_x + 3*N + dir);
 
   setCenter = 0;
-  sprintf(pname, "center%d_track_method", N);
-  meth = Geti(Par(pname));
-  switch(meth)
+  sprintf(pname, "center%d_track", N);
+  track = Par(pname);
+  if(Getv(track, "no"))
   {
-  case 0:
     setCenter = 0;
-    break;
-  case 1: /* track max */
-  case 2: /* track min */
+  }
+  else if(Getv(track, "max") || Getv(track, "min"))
+  {
+    findMax = Getv(track, "max") ?  1 : 0;
     sprintf(pname, "center%d_track_var", N);
     var = Ind( Gets(Par(pname)) );
-    findMax = (meth==1) ?  1 : 0;
     h = average_grid_spacing(mesh, xold);
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
     setCenter = 1;
-    break;
-  case 3: /* track CM computed from centers 1 and 2 */
+  }
+  else if(Getv(track, "CM"))
+  {
+    /* track CM computed from centers 1 and 2 */
     for(dir=0; dir<3; dir++)
     {
       x1[dir] = Getd(center->center0_x + 3*1 + dir);
@@ -76,9 +77,11 @@ int centerN_update(tMesh *mesh, int N)
       xnew[dir] = (m1*x1[dir] + m2*x2[dir])/(m1 + m2);
     }
     setCenter = 1;
-    break;
-  default:
-    errorexiti("unknown center track method", meth);
+  }
+  else
+  {
+    PRF;printf(": %s = %s\n", pname, Gets(track));
+    errorexit("parameter value unknown");
   }
 
   /* write xnew into current center N location pars */

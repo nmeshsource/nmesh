@@ -27,9 +27,9 @@ int nmesh_center(tMesh *mesh)
   AddPar("center2_x", "", "x-coord of center2"); //
   AddPar("center2_y", "", "y-coord of center2"); // order !!!
   AddPar("center2_z", "", "z-coord of center2"); //
-  AddPar("center0_track_method", "0", "0: do not track, 3: track CM");
-  AddPar("center1_track_method", "0", "0: do not track, 1/2: track max/min");
-  AddPar("center2_track_method", "0", "0: do not track, 1/2: track max/min");
+  AddPar("center0_track", "no", "[no,CM]");
+  AddPar("center1_track", "no", "[no,min,max]");
+  AddPar("center2_track", "no", "[no,min,max]");
   AddPar("center1_track_var", "", "variable we track [ADM_alpha,GRHD_rho0]");
   AddPar("center2_track_var", "", "variable we track [ADM_alpha,GRHD_rho0]");
   AddPar("center_track_minmove", "0.01" , "don't move more than value*h");
