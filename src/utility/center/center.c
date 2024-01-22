@@ -61,7 +61,6 @@ int centerN_update(tMesh *mesh, int N)
     findMax = (meth==1) ?  1 : 0;
     h = average_grid_spacing(mesh, xold);
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
-    errorexit("check method 1/2");
     break;
   case 3: /* track CM computed from centers 1 and 2 */
     for(dir=0; dir<3; dir++)
@@ -70,7 +69,6 @@ int centerN_update(tMesh *mesh, int N)
       x2[dir] = Getd(center->center0_x + 3*2 + dir);
       xnew[dir] = (m1*x1[dir] + m2*x2[dir])/(m1 + m2);
     }
-    errorexit("implement method 3");
     break;
   default:
     errorexiti("unknown center track method", meth);
