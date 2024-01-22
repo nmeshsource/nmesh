@@ -93,6 +93,9 @@ int p_XYZ_of_xyz_inpatlist(tMesh *mesh, intList *pl,
                            double X[3], const double x[3]);
 int p_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3]);
 tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3]);
+tElm *set_elm0_XYZ_of_xyz_mesh(tMesh *mesh, tElm0 elm0[1],
+                               ulong *eid, ulong *elmindex, int *elmrank,
+                               double X[3], const double x[3]);
 int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3]);
 int XYZ_on_face(tPat *pat, int *face, const double X[3]);
 int XYZ_on_elmface(tElm *elm, int *face, const double X[3]);

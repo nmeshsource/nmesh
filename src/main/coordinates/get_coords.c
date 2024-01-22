@@ -938,6 +938,27 @@ tNode *node_XYZ_of_xyz_mesh(tMesh *mesh, double X[3], const double x[3])
   return elm_XYZ_of_xyz_mesh(mesh, &eid,&elmindex,&elmrank, X, x);
 }
 
+/* set elm0,eid,elmindex,elmrank,X to where x is located
+   In: mesh,x   Out: elm0,eid,elmindex,elmrank,X
+   NOTE: elm0,eid,elmindex,elmrank,X are invalid if eid==EID_INVALID
+   returns: elm if elm is on this rank, NULL otherwise */
+tElm *set_elm0_XYZ_of_xyz_mesh(tMesh *mesh, tElm0 elm0[1],
+                               ulong *eid, ulong *elmindex, int *elmrank,
+                               double X[3], const double x[3])
+{
+  tElm *elm = elm_XYZ_of_xyz_mesh(mesh, eid,elmindex,elmrank, X, x);
+
+  /* if we have elm set elm0 from it */
+  if(elm) memcpy(elm0, elm, sizeof(elm0[1]));
+
+  /* if we have a valid eid, we should have valid data, and we thus
+     Bcast elm0 from elmrank to all ranks */
+  if(*eid != EID_INVALID)
+    nMPI_Bcast(elm0, sizeof(tElm0), nMPI_CHAR, *elmrank);
+
+  return elm;
+}
+
 
 // replaces l_XYZ_of_xyz__old:
 /* set X and return 1 if x is inside this elm, otherwise return 0 */
