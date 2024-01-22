@@ -38,7 +38,8 @@ int center_update(tMesh *mesh)
 {
   int meth, var, findMax;
   double xold[3], xnew[3];
-  double h, minmove;
+  double h;
+  double minmove = 0; //FIXME: read par
   //PRFs(":\n");
 
   meth = Geti(Par("center0_track_method"));
@@ -60,13 +61,12 @@ int center_update(tMesh *mesh)
     break;
   case 1:
   case 2:
-    h = 1; //FIXME: get grid spacing
     var = Ind( Gets(Par("center1_track_var")) );
-    minmove = 0; //FIXME: read par
     findMax = (meth==1) ?  1 : 0;
     xold[0] = Getd(center->center1_x);
     xold[1] = Getd(center->center1_y);
     xold[2] = Getd(center->center1_z);
+    h = average_grid_spacing(mesh, xold);
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
     Setd(center->center1_x, xnew[0]);
     Setd(center->center1_y, xnew[1]);
@@ -94,6 +94,21 @@ int center_update(tMesh *mesh)
   return 0;
 }
 
+
+/* get grid spacing near point x */
+double average_grid_spacing(tMesh *mesh, double x[3])
+{
+  tElm0 elm0[1];
+  ulong eid, elmindex;
+  int elmrank;
+  double X[3], h[3];
+  int d;
+
+  set_elm0_XYZ_of_xyz_mesh(mesh, elm0, &eid,&elmindex,&elmrank, X, x);
+  for(d=0; d<3; d++)
+    h[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/elm0->n[d];
+  return max3(h[0],h[1],h[2]);
+}
 
 /* find maximum by fitting 1D polynomial:
   we use a 2nd order function to track extremum
