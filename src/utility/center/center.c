@@ -42,7 +42,7 @@ int centerN_update(tMesh *mesh, int N)
   double minmove = Getd(Par("center_track_minmove"));
   double m1 = Getd(Par("center1_mass"));
   double m2 = Getd(Par("center2_mass"));
-  int meth, var, findMax, dir;
+  int meth, var, findMax, dir, setCenter;
   double xold[3], xnew[3], x1[3], x2[3];
   double h;
   char pname[1000];
@@ -51,11 +51,13 @@ int centerN_update(tMesh *mesh, int N)
   for(dir=0; dir<3; dir++)
     xold[dir] = xnew[dir] = Getd(center->center0_x + 3*N + dir);
 
+  setCenter = 0;
   sprintf(pname, "center%d_track_method", N);
   meth = Geti(Par(pname));
   switch(meth)
   {
   case 0:
+    setCenter = 0;
     break;
   case 1: /* track max */
   case 2: /* track min */
@@ -64,6 +66,7 @@ int centerN_update(tMesh *mesh, int N)
     findMax = (meth==1) ?  1 : 0;
     h = average_grid_spacing(mesh, xold);
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
+    setCenter = 1;
     break;
   case 3: /* track CM computed from centers 1 and 2 */
     for(dir=0; dir<3; dir++)
@@ -72,14 +75,16 @@ int centerN_update(tMesh *mesh, int N)
       x2[dir] = Getd(center->center0_x + 3*2 + dir);
       xnew[dir] = (m1*x1[dir] + m2*x2[dir])/(m1 + m2);
     }
+    setCenter = 1;
     break;
   default:
     errorexiti("unknown center track method", meth);
   }
 
   /* write xnew into current center N location pars */
-  for(dir=0; dir<3; dir++)
-    Setd(center->center0_x + 3*N + dir, xnew[dir]);
+  if(setCenter)
+    for(dir=0; dir<3; dir++)
+      Setd(center->center0_x + 3*N + dir, xnew[dir]);
 
   return 0;
 }
