@@ -36,9 +36,9 @@ int center_init_globals(tMesh *mesh)
 /* update position of center N */
 int centerN_update(tMesh *mesh, int N)
 {
-  double minmove = 0; //FIXME: read par
-  double m1 = 1; //FIXME: read par
-  double m2 = 1; //FIXME: read par
+  double minmove = Getd(Par("center_track_minmove"));
+  double m1 = Getd(Par("center1_mass"));
+  double m2 = Getd(Par("center2_mass"));
   int meth, var, findMax, dir;
   double xold[3], xnew[3], x1[3], x2[3];
   double h;
