@@ -12,7 +12,7 @@ int nmesh_center(tMesh *mesh)
 
   /* functions */
   AddFun(POST_PARAMETERS, center_init_globals);
-  AddFun(ANALYZE, center_update);
+  AddFun(POST_EVOLVE, center_update);
 
   /* variables */
   //AddAuxVar("center_temp1", "", "temporary variable(for vol. integrals)");
