@@ -37,10 +37,14 @@ int center_init_globals(tMesh *mesh)
 int centerN_update(tMesh *mesh, int N)
 {
   double minmove = 0; //FIXME: read par
-  int meth, var, findMax;
-  double xold[3], xnew[3];
+  int meth, var, findMax, dir;
+  double xold[3], xnew[3], x1[3], x2[3];
   double h;
   char pname[1000];
+
+  /* read current center N location pars into xold and xnew */
+  for(dir=0; dir<3; dir++)
+    xold[dir] = xnew[dir] = Getd(center->center0_x + 3*N + dir);
 
   sprintf(pname, "center%d_track_method", N);
   meth = Geti(Par(pname));
@@ -53,22 +57,26 @@ int centerN_update(tMesh *mesh, int N)
     sprintf(pname, "center%d_track_var", N);
     var = Ind( Gets(Par(pname)) );
     findMax = (meth==1) ?  1 : 0;
-    xold[0] = Getd(center->center0_x + 3*N);
-    xold[1] = Getd(center->center0_x + 3*N + 1);
-    xold[2] = Getd(center->center0_x + 3*N + 2);
     h = average_grid_spacing(mesh, xold);
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
-    Setd(center->center0_x + 3*N,     xnew[0]);
-    Setd(center->center0_x + 3*N + 1, xnew[1]);
-    Setd(center->center0_x + 3*N + 2, xnew[2]);
     errorexit("check method 1/2");
     break;
   case 3:
+    for(dir=0; dir<3; dir++)
+    {
+      x1[dir] = Getd(center->center0_x + 3*1 + dir);
+      x2[dir] = Getd(center->center0_x + 3*2 + dir);
+      xnew[dir] = x1[dir] + x2[dir];
+    }
     errorexit("implement method 3");
     break;
   default:
     errorexiti("unknown center track method", meth);
   }
+
+  /* write xnew into current center N location pars */
+  for(dir=0; dir<3; dir++)
+    Setd(center->center0_x + 3*N + dir, xnew[dir]);
 
   return 0;
 }
