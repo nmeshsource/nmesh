@@ -37,6 +37,8 @@ int center_init_globals(tMesh *mesh)
 int centerN_update(tMesh *mesh, int N)
 {
   double minmove = 0; //FIXME: read par
+  double m1 = 1; //FIXME: read par
+  double m2 = 1; //FIXME: read par
   int meth, var, findMax, dir;
   double xold[3], xnew[3], x1[3], x2[3];
   double h;
@@ -52,8 +54,8 @@ int centerN_update(tMesh *mesh, int N)
   {
   case 0:
     break;
-  case 1:
-  case 2:
+  case 1: /* track max */
+  case 2: /* track min */
     sprintf(pname, "center%d_track_var", N);
     var = Ind( Gets(Par(pname)) );
     findMax = (meth==1) ?  1 : 0;
@@ -61,12 +63,12 @@ int centerN_update(tMesh *mesh, int N)
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
     errorexit("check method 1/2");
     break;
-  case 3:
+  case 3: /* track CM computed from centers 1 and 2 */
     for(dir=0; dir<3; dir++)
     {
       x1[dir] = Getd(center->center0_x + 3*1 + dir);
       x2[dir] = Getd(center->center0_x + 3*2 + dir);
-      xnew[dir] = x1[dir] + x2[dir];
+      xnew[dir] = (m1*x1[dir] + m2*x2[dir])/(m1 + m2);
     }
     errorexit("implement method 3");
     break;
@@ -194,7 +196,7 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   if( !finit(v) || !finit(v0) ||
       ((findMax) && (v<=v0))  ||
       ((!findMax) && (v>=v0)) ||
-      (sqrt(dx*dx + dy*dy + dz*dz) < minmove) )
+      (sqrt(dx*dx + dy*dy + dz*dz) < minmove*h) )
     dx = dy = dz = 0.;
 
   x1 = x0 + dx;
