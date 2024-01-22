@@ -76,14 +76,14 @@ int centerN_update(tMesh *mesh, int N)
 /* update positions of centers */
 int center_update(tMesh *mesh)
 {
-  int cnt;
   //PRFs(":\n");
 
-  /* loop over centers */
-  for(cnt=0; cnt<3; cnt++)
-  {
-    centerN_update(mesh, cnt);
-  }
+  /* update center 1 and 2 */
+  centerN_update(mesh, 1);
+  centerN_update(mesh, 2);
+
+  /* update center 0, which can depend on center 1 and 2 */
+  centerN_update(mesh, 0);
 
   return 0;
 }
