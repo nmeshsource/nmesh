@@ -109,9 +109,9 @@ int center_update(tMesh *mesh)
   for(N=0; N<output->Noutpt; N++)
     for(dir=0; dir<3; dir++)
     {
-      double centerN_xi = Getd(center->center0_x + 3*N + dir);
-      if(strlen(Gets(center->center0_x + 3*N + dir)))
-        output->xpt[N][dir] = centerN_xi;
+      int centerN_xi = center->center0_x + 3*N + dir;
+      if(strlen( Gets(centerN_xi) ))
+        output->xpt[N][dir] = Getd(centerN_xi);
     }
 
   return 0;
