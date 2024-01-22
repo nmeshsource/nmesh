@@ -105,6 +105,15 @@ int center_update(tMesh *mesh)
   /* update center 0, which can depend on center 1 and 2 */
   centerN_update(mesh, 0);
 
+  /* print center locations */
+  if(Getb(Par("center_verbose")))
+  {
+    for(N=0; N<3; N++)
+      for(dir=0; dir<3; dir++)
+        printf("  center%d_%c = %g\n", N, 'x'+dir,
+               Getd(center->center0_x + 3*N + dir));
+  }
+
   /* set pt output vars if center position vars are not empty */
   for(N=0; N<output->Noutpt; N++)
     for(dir=0; dir<3; dir++)

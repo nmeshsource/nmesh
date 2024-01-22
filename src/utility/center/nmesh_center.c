@@ -18,6 +18,7 @@ int nmesh_center(tMesh *mesh)
   //AddAuxVar("center_temp1", "", "temporary variable(for vol. integrals)");
 
   /* parameters */
+  AddPar("center_verbose", "no", "print center pars [no,yes]"); //
   AddPar("center0_x", "", "x-coord of center0"); //
   AddPar("center0_y", "", "y-coord of center0"); // KEEP these
   AddPar("center0_z", "", "z-coord of center0"); //
