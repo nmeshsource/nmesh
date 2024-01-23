@@ -20,9 +20,9 @@ int sysmon(tMesh *mesh)
   static int firstcall = 1;
   static double last_sysmon_time = 0.;
   static double last_mesh_time = 0.;
-  double hours = Getd(Par("sysmon_hours"));
   double time  = getTimeIn_s()/3600.;
   double time_since_sysmon;
+  double hours = Getd(Par("sysmon_hours"));
   int do_sysmon = 0;
   int output_per_rank = Getb(Par("sysmon_output_per_rank"));
 
@@ -119,4 +119,24 @@ void write_sysmon(tMesh *mesh, double last_mesh_time, const char *name,
             mesh->time, time, dpt/dt, data[0]/1048576);
     fclose(fp);
   }
+}
+
+
+/* write into sysmon.log if the time is right for it */
+int sysmon_now(tMesh *mesh)
+{
+  char *sysmon_hours_bak = strdup(Gets(Par("sysmon_hours")));
+  double time;
+
+  /* signal that we want sysmon right now */
+  Sets(Par("sysmon_hours"), "0");
+  time = getTimeIn_s()/3600.;
+  sysmon(mesh);
+  PRF;printf(": at WallTime = %13gh\n", time);
+
+  /* restore par sysmon_hours */
+  Sets(Par("sysmon_hours"), sysmon_hours_bak);
+  free(sysmon_hours_bak);
+
+  return 0;
 }

@@ -312,6 +312,9 @@ void glist_elem_del(tGlist *elem);
 void glist_free_elems_and_entries(struct list_head *head, void (*Free)());
 void glist_free_elems(struct list_head *head);
 
+/* sysmon.c */
+int sysmon_now(tMesh *mesh);
+
 /* timer.c */
 int write_all_timers(tMesh *mesh);
 int free_all_timers(tMesh *mesh);
