@@ -102,7 +102,7 @@ int newton1d_fd_region(double *x0, double (*func)(double x, void *par),
 
     /* test if Newton step could be possible */
     if( !finit(df) ) badstep = 1;
-    else                badstep = 0;
+    else             badstep = 0;
 
     if(badstep==0) /* try Newton step */
     {
