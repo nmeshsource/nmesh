@@ -27,7 +27,8 @@ int center_init_globals(tMesh *mesh)
 
   /* make sure some pars are saved in checkpoint */
   if(!Getv(Par("center0_track"),"no"))
-    checkpoint_save_pars_append(mesh, "center0_x center0_y center0_z");
+    checkpoint_save_pars_append(mesh, "center0_x center0_y center0_z "
+                                      "center1_mass center2_mass");
   if(!Getv(Par("center1_track"),"no"))
     checkpoint_save_pars_append(mesh, "center1_x center1_y center1_z");
   if(!Getv(Par("center2_track"),"no"))
