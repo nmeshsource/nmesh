@@ -212,6 +212,8 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   par->arrange_as_1d = Getv(Par("3dformat"), "arrange_as_1d");
   par->flt           = Getv(Par("3dformat"), "float");
   par->dbl           = Getv(Par("3dformat"), "double");
+  par->outputregion  = Par("3doutputregion");
+  output_set_regions_in_outpars(mesh, par);
 
   /* a number that counts the output */
   nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("3doutiter")),
@@ -231,6 +233,10 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
         if(node->dat->v[vi])
         {
           char ns[100];
+
+          /* Check if we want to output this node. Skip node if it
+             is outside the output region */
+          if( !output_keep_elm(node, par) ) continue;
 
           /* find string that identifies node */
           nodename(node, ns,100);
