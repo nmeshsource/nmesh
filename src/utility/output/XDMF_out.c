@@ -376,7 +376,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
             int n[] = { node->n[0], node->n[1], node->n[2] };
 
             {
-              /* node name and n for plane */
+              /* node name and n */
               nodename(node, ndname,99);
 
               /* write binary data in var */
