@@ -953,7 +953,8 @@ double hmin_new_ccc_nbr(tNode *node, int ccc, int nbr, double hmin_old)
 }
 
 /* trivial Cartesian distance between two points in x-coords */
-double Cart_distance_x0_x1(tNode *node, double x0[3], double x1[3])
+double Cart_distance_x0_x1(tNode *node,
+                           const double x0[3], const double x1[3])
 {
   int d;
   double dist2;
@@ -1313,6 +1314,24 @@ void set_nodecenter_xyz(tNode *node, double x[3])
 
   /* now get xc from X */
   set_xyz(NULL, node, -1, X, x);
+}
+
+/* check if a points in node are within a sphere of radius r centered on xc */
+int elmpoints_in_sphere(tElm *elm, const double *xc, double r)
+{
+  tMesh *mesh = elm->pat->mesh;
+  int ix = Ind("x");
+  double *x = Vard(elm, ix);
+  double *y = Vard(elm, ix+1);
+  double *z = Vard(elm, ix+2);
+  int i;
+  forpoints(elm, i)
+  {
+    double xp[] = {x[i], y[i], z[i]};
+    if(Cart_distance_x0_x1(elm, xc, xp) > r)
+      return 0;
+  }
+  return 1;
 }
 
 
