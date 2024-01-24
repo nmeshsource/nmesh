@@ -203,15 +203,49 @@ int TimeForMeshOutput_vl(tMesh *mesh, tVarList *vl)
 }
 
 
+/********************************************************************/
+/* Functions to test if output should be limited to certain regions */
+/********************************************************************/
+
+/* write region info into outpars */
+void output_set_regions_in_outpars(tMesh *mesh, tOutpars *outpars)
+{
+  int outputregion = outpars->outputregion;
+  outpars->region_all     = Getv(outputregion, "all");
+  outpars->region_sphere0 = Getv(outputregion, "sphere0");
+  outpars->region_sphere1 = Getv(outputregion, "sphere1");
+  outpars->region_sphere2 = Getv(outputregion, "sphere2");
+  outpars->sphere0_radius = Getd(Par("output_sphere0_radius"));
+  outpars->sphere1_radius = Getd(Par("output_sphere1_radius"));
+  outpars->sphere2_radius = Getd(Par("output_sphere2_radius"));
+}
+
+/* return 1 if elm is in one of the regions described in outpars */
+int output_keep_elm(tElm *elm, tOutpars *outpars)
+{
+  int keep = 0;
+
+  if(outpars->region_all) return 1;
+
+  if(outpars->region_sphere0)
+    keep |= elmpoints_in_sphere(elm, output->xpt[0], outpars->sphere0_radius);
+  if(outpars->region_sphere1)
+    keep |= elmpoints_in_sphere(elm, output->xpt[1], outpars->sphere1_radius);
+  if(outpars->region_sphere2)
+    keep |= elmpoints_in_sphere(elm, output->xpt[2], outpars->sphere2_radius);
+
+  return keep;
+}
+
 
 /*******************************************************************/
 /* Everything below this line is untested and may not work
    It may not be needed!!! */
 /*******************************************************************/
 
-/* Is it time to output? Yes if Iter is a multiple of di, or 
+/* Is it time to output? Yes if Iter is a multiple of di, or
    if Time has exceeded a multiple of dt */
-int TimeForNodeOutput_di_dt(tNode *node, int di, double dt) 
+int TimeForNodeOutput_di_dt(tNode *node, int di, double dt)
 {
   tMesh *mesh = node->pat->mesh;  // NOTE: later each node might have its
   double Time = fabs(mesh->time); // own time

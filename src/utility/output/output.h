@@ -11,11 +11,21 @@ typedef struct tOUTPARS {
   int arrange_as_1d;
   int flt;
   int dbl;
+  int outputregion;   /* e.g. Par("3doutputregion") */
+  int region_all;     /* Getv(Par("3doutputregion"), "all"));     */
+  int region_sphere0; /* Getv(Par("3doutputregion"), "sphere0")); */
+  int region_sphere1; /* Getv(Par("3doutputregion"), "sphere1")); */
+  int region_sphere2; /* Getv(Par("3doutputregion"), "sphere2")); */
+  double sphere0_radius; /* Getd(Par("output_sphere0_radius")); */
+  double sphere1_radius; /* Getd(Par("output_sphere1_radius")); */
+  double sphere2_radius; /* Getd(Par("output_sphere2_radius")); */
 } tOutpars;
 
 
 /* output.c */
-int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt) ;
+int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt);
+void output_set_regions_in_outpars(tMesh *mesh, tOutpars *outpars);
+int output_keep_elm(tElm *elm, tOutpars *outpars);
 
 /* output2d.c */
 void output2d_vl(tVarList *vl, int It, double T);

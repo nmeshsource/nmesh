@@ -57,6 +57,17 @@ int nmesh_output(tMesh *mesh)
   AddPar("coformat", "vtk text arrange_as_1d", "format for coef output "
 	 "[vtk,text,binary,float,double]");
 
+  /* pars to limit 2d or 3d output to certain regions */
+  AddPar("2doutputregion", "all", "do 2d output only inside certain regions "
+         "[all,sphere0,sphere1,sphere2]");
+  AddPar("3doutputregion", "all", "do 3d output only inside certain regions "
+         "[all,sphere0,sphere1,sphere2]");
+  /* sphere0,sphere1,sphere2 are centered on pt0,pt1,pt2 */
+  AddPar("output_sphere0_radius", "40", "radius of sphere0  3doutputregion");
+  AddPar("output_sphere1_radius", "10", "radius of sphere1 in 3doutputregion");
+  AddPar("output_sphere2_radius", "10", "radius of sphere2 in 3doutputregion");
+
+  /* pars for 1d output */
   AddPar("outputX0", "0", "origin for output in X");
   AddPar("outputY0", "0", "origin for output in Y");
   AddPar("outputZ0", "0", "origin for output in Z");

@@ -338,6 +338,11 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
+  tOutpars outpars[1] = {0};
+
+  /* write region info into outpars */
+  outpars->outputregion = Par("3doutputregion");
+  output_set_regions_in_outpars(mesh, outpars);
 
   /* loop over varlist */
   for(vli=0; vli<vl->n; vli++)
@@ -376,6 +381,10 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
             int n[] = { node->n[0], node->n[1], node->n[2] };
 
             {
+              /* Check if we want to output this node. Skip node if it
+                 is outside the output region */
+              if( !output_keep_elm(node, outpars) ) continue;
+
               /* node name and n */
               nodename(node, ndname,99);
 
