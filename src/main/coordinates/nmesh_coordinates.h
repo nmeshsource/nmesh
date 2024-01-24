@@ -242,6 +242,7 @@ double find_hmin(tNode *node, int *ijk1, int *ijk2);
 double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
                                  double uniform_dtfac);
 void set_nodecenter_xyz(tNode *node, double x[3]);
+int elmpoints_in_sphere(tElm *elm, const double *xc, double r);
 
 /* ComplexFunctions.c */
 double BaseAngle(double p, double peri, double p0);
