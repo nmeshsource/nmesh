@@ -63,9 +63,9 @@ int nmesh_output(tMesh *mesh)
   AddPar("3doutputregion", "all", "do 3d output only inside certain regions "
          "[all,sphere0,sphere1,sphere2]");
   /* sphere0,sphere1,sphere2 are centered on pt0,pt1,pt2 */
-  AddPar("output_sphere0_radius", "40", "radius of sphere0  3doutputregion");
-  AddPar("output_sphere1_radius", "10", "radius of sphere1 in 3doutputregion");
-  AddPar("output_sphere2_radius", "10", "radius of sphere2 in 3doutputregion");
+  AddPar("output_sphere0_radius", "40", "radius of sphere0 of 3doutputregion");
+  AddPar("output_sphere1_radius", "10", "radius of sphere1 of 3doutputregion");
+  AddPar("output_sphere2_radius", "10", "radius of sphere2 of 3doutputregion");
 
   /* pars for 1d output */
   AddPar("outputX0", "0", "origin for output in X");
