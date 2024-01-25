@@ -227,7 +227,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   tOutpars outpars[1] = {0};
 
   /* write region info into outpars */
-  outpars->outputregion = Par("3doutputregion");
+  outpars->outputregion = Par("2doutputregion");
   output_set_regions_in_outpars(mesh, outpars);
 
   /* loop over varlist */

@@ -567,6 +567,8 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   par->arrange_as_1d = 0; // Getv(Par("2dformat"), "arrange_as_1d");
   par->flt           = Getv(Par("2dformat"), "float");
   par->dbl           = Getv(Par("2dformat"), "double");
+  par->outputregion  = Par("2doutputregion");
+  output_set_regions_in_outpars(mesh, par);
 
   /* a number that counts the output */
   nseries = TimeForMeshOutput_di_dt(mesh,Geti(Par("2doutiter")),
@@ -587,6 +589,10 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
         {
           char ns[100];
           int ijk[3];
+
+          /* Check if we want to output this node. Skip node if it
+             is outside the output region */
+          if( !output_keep_elm(node, par) ) continue;
 
           //TODO: use different Xb0 for diff patches
           double X0[] = { Getd(Par("outputX0")),
