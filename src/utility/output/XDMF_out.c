@@ -224,6 +224,11 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
+  tOutpars outpars[1] = {0};
+
+  /* write region info into outpars */
+  outpars->outputregion = Par("3doutputregion");
+  output_set_regions_in_outpars(mesh, outpars);
 
   /* loop over varlist */
   for(vli=0; vli<vl->n; vli++)
@@ -264,6 +269,10 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
             int plane[3];
             intList *plist;
             int normal;
+
+            /* Check if we want to output this node. Skip node if it
+               is outside the output region */
+            if( !output_keep_elm(node, outpars) ) continue;
 
             /* find indices of nearest, if all are negative, node does not have
                outputX0, outputY0, outputZ0 */
