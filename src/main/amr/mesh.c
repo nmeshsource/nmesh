@@ -439,10 +439,7 @@ int setup_CubedSphere_mesh(tMesh *mesh)
       break;
     case 6:
       rc[0] = rc[1] = rc[2] = dc;
-      if(Getv(mesh_type, "Shell")) //<-REMOVE! This is covered in setup_Shell_mesh
-        CubedSphere_shell_at_xc(mesh,6, xc, dc, ssfac*dc);
-      else
-        sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
+      sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
       break;
     case 7:
       rc[0] = rc[1] = rc[2] = dc;
