@@ -195,14 +195,14 @@ int amr_setup_mesh(tMesh *mesh)
       !(Getv(mesh_type, "CubedSpheres")) &&
       !(Getv(mesh_type, "Shell")) )
   {
-  if(Getv(mesh_type, "test_mesh"))
-    ret = test_mesh(mesh);
-  else if(Getv(mesh_type, "l2_mesh"))
-    errorexit("add back:  ret = setup_l2_mesh(mesh);");
-  else if(Getv(mesh_type, "3patchl2_mesh"))
-    ret = setup_3patchl2_mesh(mesh);
-  else
-    ret = setup_elm_mesh1(mesh); // test case
+    if(Getv(mesh_type, "test_mesh"))
+      ret = test_mesh(mesh);
+    else if(Getv(mesh_type, "l2_mesh"))
+      errorexit("add back:  ret = setup_l2_mesh(mesh);");
+    else if(Getv(mesh_type, "3patchl2_mesh"))
+      ret = setup_3patchl2_mesh(mesh);
+    else
+      ret = setup_elm_mesh1(mesh); // test case
   }
 
   ///* print info about all patches we have now */
