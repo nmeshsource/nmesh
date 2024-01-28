@@ -327,6 +327,30 @@ int three_spheres_around_box_at_xc(tMesh *mesh, int N,
   return pl;
 }
 
+/* same as three_spheres_around_box_at_xc, but put no box at center */
+int three_spheres_around_empty_box_at_xc(tMesh *mesh, int N,
+                                         double xc[3], double dc[3],
+                                         double r0, double r1, double r2,
+                                         int stretch)
+{
+  int pl;
+  double Din[6], Dout[6];
+  int stretch1, i;
+
+  /* make the full box and sphere0 around them */
+  stretch1 = 0;
+  pl = two_spheres_around_empty_box_at_xc(mesh,N, xc, dc, r0, r1, stretch1);
+
+  /* set distances to make 6 more stretched cubed shells around sphere1 */
+  for(i=0; i<6; i++)
+  {
+    Din[i]  = r1;
+    Dout[i] = r2;
+  }
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,stretch,0, xc, Din,Dout);
+  return pl;
+}
+
 /************************************************************************/
 /* make patches that surround an inner sphere */
 /************************************************************************/
