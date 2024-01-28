@@ -291,7 +291,7 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
 }
 
 
-/* setup mesh made out of boxes, and set distances from center in boxes_dc */
+/* setup mesh made out of boxes, and set distances from center in boxes_rc */
 int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
 {
   int mesh_type = Par("amr_mesh_type");
