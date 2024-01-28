@@ -176,7 +176,7 @@ int amr_setup_mesh(tMesh *mesh)
   int sph_l = Geti(Par("amr_hrefine_sphere_levels"));
   double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
-  double BoxMesh_rc[3];
+  double BoxMesh_rc[] = {0.,0.,0.};
   int ret; //, pind;
 
   /* remove all patches from mesh, so we can just add new pristine ones */
@@ -393,6 +393,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   int CubedSphere_npatches = Geti(Par("amr_CubedSphere_npatches"));
   double rf_surf1 = 0.25;
   double rf_surf2 = 0.25;
+  double BoxMesh_rc_max = max3(BoxMesh_rc[0],BoxMesh_rc[1],BoxMesh_rc[2]);
   double dc = Getd(Par("amr_CubedSphere_dc"));
   double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
   double ssfac = Getd(Par("amr_CubedSphere_r0fac")); //DNSdata_OuterShellStart
@@ -406,6 +407,9 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
 
+  /* reset dc from BoxMesh_rc if BoxMesh_rc>0 */
+  if(BoxMesh_rc_max>0.) dc = BoxMesh_rc_max;
+
   PRFs(":\n");
 
   mesh->dt = Getd(Par("dt"));
@@ -415,6 +419,9 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   /* perform some par sanity checks */
   if(ssfac <= sqrt(3.))
     errorexit("ssfac=amr_CubedSphere_r0fac needs to be larger than sqrt(3)");
+  if(npats>0 && CubedSphere_npatches>0)
+    errorexit("remove the number of patches from amr_mesh_type if "
+              "amr_CubedSphere_npatches>0");
 
   /* setup cubed spheres based on npats read from amr_mesh_type */
   switch(npats)
