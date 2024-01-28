@@ -282,6 +282,10 @@ int three_spheres_around_box_at_xc(tMesh *mesh, int N,
                                    double xc[3], double dc[3],
                                    double r0, double r1, double r2,
                                    int stretch);
+int three_spheres_around_empty_box_at_xc(tMesh *mesh, int N,
+                                         double xc[3], double dc[3],
+                                         double r0, double r1, double r2,
+                                         int stretch);
 int CubedSphere_shell_at_xc(tMesh *mesh, int N, double xc[3],
                             double rin, double rout);
 int two_CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3], double r0,

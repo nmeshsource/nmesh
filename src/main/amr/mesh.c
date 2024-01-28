@@ -379,9 +379,8 @@ int setup_box_mesh(tMesh *mesh)
 int setup_CubedSphere_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
-  int BoxMesh_npatches     = Geti(Par("amr_BoxMesh_npatches"));
-  int CubedSphere_npatches = Geti(Par("amr_CubedSphere_npatches"));
   int npats = Geti(mesh_type);
+  int CubedSphere_npatches = Geti(Par("amr_CubedSphere_npatches"));
   double rf_surf1 = 0.25;
   double rf_surf2 = 0.25;
   double dc = Getd(Par("amr_CubedSphere_dc"));
@@ -399,10 +398,6 @@ int setup_CubedSphere_mesh(tMesh *mesh)
 
   PRFs(":\n");
 
-  /* re-set npats */
-  if(npats<=0 || CubedSphere_npatches>0)
-    npats = CubedSphere_npatches + BoxMesh_npatches;
-
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
   mesh->iteration = 0;
@@ -411,9 +406,12 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   if(ssfac <= sqrt(3.))
     errorexit("ssfac=amr_CubedSphere_r0fac needs to be larger than sqrt(3)");
 
-  /* setup cubed spheres */
+  /* setup cubed spheres based on npats read from amr_mesh_type */
   switch(npats)
   {
+    case 0:
+      /* do nothing if amr_mesh_type contains no number */
+      break;
     case 1:
       xc[0] = xc[1] = xc[2] = 0.0;
       add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
@@ -488,6 +486,32 @@ int setup_CubedSphere_mesh(tMesh *mesh)
     default:
       errorexiti("amr_mesh_type = %d CubedSpheres  <--not implemented", npats);
   }
+
+  /* setup cubed spheres based on CubedSphere_npatches */
+  switch(CubedSphere_npatches)
+  {
+    case 0:
+      /* do nothing */
+      break;
+    case 6:
+      rc[1] = rc[2] = dc; //dc*0.5;
+      rc[0] = dc;
+      sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
+      break;
+    case 12:
+      rc[1] = rc[2] = dc; //dc*0.5;
+      rc[0] = dc;
+      two_spheres_around_empty_box_at_xc(mesh,6, xc,
+                                         rc, ssfac*dc, obfac*dc, stretch);
+      break;
+    case 18:
+      rc[1] = rc[2] = dc; //dc*0.5;
+      rc[0] = dc;
+      three_spheres_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc,
+                                           r2fac*dc, stretch);
+      break;
+  }
+
 /*
 coordinates_init(mesh);
 outputPatchPlanes_meshvar(mesh, "x", 0,0);
