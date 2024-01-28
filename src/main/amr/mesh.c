@@ -504,19 +504,13 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
       /* do nothing */
       break;
     case 6:
-      rc[1] = rc[2] = dc; //dc*0.5;
-      rc[0] = dc;
       sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
       break;
     case 12:
-      rc[1] = rc[2] = dc; //dc*0.5;
-      rc[0] = dc;
       two_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
                                          ssfac*dc, obfac*dc, stretch);
       break;
     case 18:
-      rc[1] = rc[2] = dc; //dc*0.5;
-      rc[0] = dc;
       three_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
                                            ssfac*dc, obfac*dc,
                                            r2fac*dc, stretch);
