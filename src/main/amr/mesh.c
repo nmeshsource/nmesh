@@ -227,48 +227,6 @@ int amr_setup_mesh(tMesh *mesh)
   /* h-refine further in nested sphere regions */
   hrefine_sphere_loadbalance(mesh, sph_r, x0, sph_l);
 
-/*
-hrefine_pat(mesh, 1);
-Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
- simple_load_balance(mesh);
-Yo(1);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-hrefine_pat(mesh, 1);
-Yo(2);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
- simple_load_balance(mesh);
-Yo(2);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-hrefine_pat(mesh, 0);
-Yo(3);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
- simple_load_balance(mesh);
-Yo(3);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-hrefine_mesh_to_level(mesh, 3);
-Yo(4);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
- simple_load_balance(mesh);
-Yo(4);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-hcoarsen_pat(mesh, 0);
-Yo(5);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
- simple_load_balance(mesh);
-Yo(5);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-hcoarsen_mesh_to_level(mesh, 2);
-Yo(6);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
- simple_load_balance(mesh);
-Yo(6);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-
-hcoarsen_pat(mesh, 0);
-Yo(7);printf("%ld %d\n", mesh->nln, mesh->myln->nm);
-*/
-
-/* // test:
-simple_load_balance(mesh);
-hcoarsen_mesh_to_level(mesh, 2);
-simple_load_balance(mesh);
-hcoarsen_pat(mesh, 0);
-*/
-
   /* now p-refine the patches listed in amr_prefine_p */
   if(GetLen(prefp) > 0)
   {
