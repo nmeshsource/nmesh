@@ -33,7 +33,10 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_n2", "5", "number of points in dir. 2 in one node");
   AddPar("amr_nmax", "55", "max number of points in all 3 dir. in one node");
   AddPar("amr_mesh_xc", "0 0 0", "center for boxes or spheres");
+  AddPar("amr_BoxMesh_npatches", "0", "number of BoxMesh patches "
+         "(0 means par is no set");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
+  AddPar("amr_CubedSphere_npatches", "0", "number of CubedSphere patches");
   AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
   AddPar("amr_CubedSphere_r0fac", "4", "size factor for outer radius r0 of "
          "cubed sphere patches: r0 = r0fac*dc");

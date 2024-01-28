@@ -332,6 +332,7 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
 int setup_box_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
+  int BoxMesh_npatches = Geti(Par("amr_BoxMesh_npatches"));
   int npats = Geti(mesh_type);
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   double d = Getd(Par("amr_BoxMesh_dout"));
@@ -339,6 +340,10 @@ int setup_box_mesh(tMesh *mesh)
   double dout[] = { d, d, d };
 
   PRFs(":\n");
+
+  /* re-set npats */
+  if(npats<=0 || BoxMesh_npatches>0)
+    npats = BoxMesh_npatches;
 
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
   //pr3v("xc", xc);printf("\n");
@@ -412,6 +417,8 @@ int setup_box_mesh(tMesh *mesh)
 int setup_CubedSphere_mesh(tMesh *mesh)
 {
   int mesh_type = Par("amr_mesh_type");
+  int BoxMesh_npatches     = Geti(Par("amr_BoxMesh_npatches"));
+  int CubedSphere_npatches = Geti(Par("amr_CubedSphere_npatches"));
   int npats = Geti(mesh_type);
   double rf_surf1 = 0.25;
   double rf_surf2 = 0.25;
@@ -429,6 +436,10 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
 
   PRFs(":\n");
+
+  /* re-set npats */
+  if(npats<=0 || CubedSphere_npatches>0)
+    npats = CubedSphere_npatches + BoxMesh_npatches;
 
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
