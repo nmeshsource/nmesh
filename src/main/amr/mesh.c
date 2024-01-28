@@ -176,6 +176,7 @@ int amr_setup_mesh(tMesh *mesh)
   int sph_l = Geti(Par("amr_hrefine_sphere_levels"));
   double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
+  double BoxMesh_rc[3];
   int ret; //, pind;
 
   /* remove all patches from mesh, so we can just add new pristine ones */
@@ -183,9 +184,9 @@ int amr_setup_mesh(tMesh *mesh)
 
   /* call different funcs based on par amr_mesh_type */
   if(Getv(mesh_type, "BoxMesh"))
-    ret = setup_box_mesh(mesh);
+    ret = setup_box_mesh(mesh, BoxMesh_rc);
   else if(Getv(mesh_type, "CubedSpheres"))
-    ret = setup_CubedSphere_mesh(mesh);
+    ret = setup_CubedSphere_mesh(mesh, BoxMesh_rc);
   else if(Getv(mesh_type, "Shell"))
     ret = setup_Shell_mesh(mesh);
   else if(Getv(mesh_type, "test_mesh"))
@@ -290,8 +291,8 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
 }
 
 
-/* setup mesh made out of boxes */
-int setup_box_mesh(tMesh *mesh)
+/* setup mesh made out of boxes, and set distances from center in boxes_dc */
+int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
 {
   int mesh_type = Par("amr_mesh_type");
   int BoxMesh_npatches = Geti(Par("amr_BoxMesh_npatches"));
@@ -300,6 +301,7 @@ int setup_box_mesh(tMesh *mesh)
   double d = Getd(Par("amr_BoxMesh_dout"));
   double xc[]   = { 0., 0., 0. };
   double dout[] = { d, d, d };
+  int dr;
 
   PRFs(":\n");
 
@@ -321,6 +323,8 @@ int setup_box_mesh(tMesh *mesh)
   {
     int dir;
 
+    for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr];
+
     /* set direction of line */
     if(Getv(mesh_type, "Dir2"))      dir = 2;
     else if(Getv(mesh_type, "Dir1")) dir = 1;
@@ -340,18 +344,22 @@ int setup_box_mesh(tMesh *mesh)
       /* left end patch */
       x[dir] = xc[dir] + 2.*d*(0 - s + c) + 0.5*d;
       add_1box_pat(mesh, x, douto2);
+      boxes_rc[dir] = douto2[dir];
 
       /* middle patches */
       add_Nbox_pats_indir(mesh, xc, dout, npats-2, dir);
+      boxes_rc[dir] += dout[dir]*(npats-2);
 
       /* right end patch */
       x[dir] = xc[dir] + 2.*d*(npats-1 - s + c) - 0.5*d;
       add_1box_pat(mesh, x, douto2);
+      boxes_rc[dir] += douto2[dir];
     }
     else /* all npats patches are the same */
     {
-      /* put npats boxes in x-dir */
+      /* put npats boxes in dir */
       add_Nbox_pats_indir(mesh, xc, dout, npats, dir);
+      boxes_rc[dr] *= npats;
     }
   }
   else if(Getv(mesh_type, "Plane"))
@@ -360,6 +368,7 @@ int setup_box_mesh(tMesh *mesh)
     int rnpats = pow(npats, 0.5);
     int N[] = { rnpats, rnpats, 1 };
     arrange_box_pats_inBox(mesh, xc, dout, N);
+    for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr]*N[dr];
   }
   else
   {
@@ -367,6 +376,7 @@ int setup_box_mesh(tMesh *mesh)
     int crnpats = pow(npats, 0.3333333333334);
     int N[] = { crnpats, crnpats, crnpats };
     arrange_box_pats_inBox(mesh, xc, dout, N);
+    for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr]*N[dr];
   }
 
   /* setup all bfaces and root node connections */
@@ -375,8 +385,8 @@ int setup_box_mesh(tMesh *mesh)
   return 0;
 }
 
-/* a mesh with a number of cubed spheres */
-int setup_CubedSphere_mesh(tMesh *mesh)
+/* a mesh with a number of cubed spheres, IN: mesh, BoxMesh_rc */
+int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
@@ -496,18 +506,19 @@ int setup_CubedSphere_mesh(tMesh *mesh)
     case 6:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
+      sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
       break;
     case 12:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      two_spheres_around_empty_box_at_xc(mesh,6, xc,
-                                         rc, ssfac*dc, obfac*dc, stretch);
+      two_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
+                                         ssfac*dc, obfac*dc, stretch);
       break;
     case 18:
       rc[1] = rc[2] = dc; //dc*0.5;
       rc[0] = dc;
-      three_spheres_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc,
+      three_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
+                                           ssfac*dc, obfac*dc,
                                            r2fac*dc, stretch);
       break;
   }
