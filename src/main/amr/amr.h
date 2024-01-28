@@ -19,6 +19,7 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
 /* mesh.c */
 int amr_set_use_fv_flag(tMesh *mesh);
 void remove_all_patches(tMesh *mesh);
+int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr);
 int setup_box_mesh(tMesh *mesh, double boxes_rc[3]);
 int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3]);
 int setup_Shell_mesh(tMesh *mesh);

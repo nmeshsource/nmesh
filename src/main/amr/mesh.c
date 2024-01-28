@@ -190,10 +190,13 @@ int amr_setup_mesh(tMesh *mesh)
   if(Getv(mesh_type, "Shell"))
     ret = setup_Shell_mesh(mesh);
 
-  /* test meshes */
-  if( !(Getv(mesh_type, "BoxMesh")) &&
-      !(Getv(mesh_type, "CubedSpheres")) &&
-      !(Getv(mesh_type, "Shell")) )
+  if( (Getv(mesh_type, "BoxMesh")) || (Getv(mesh_type, "CubedSpheres")) ||
+      (Getv(mesh_type, "Shell")) )
+  {
+    /* setup all bfaces and root node connections */
+    amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
+  }
+  else  /* test meshes */
   {
     if(Getv(mesh_type, "test_mesh"))
       ret = test_mesh(mesh);
@@ -203,6 +206,8 @@ int amr_setup_mesh(tMesh *mesh)
       ret = setup_3patchl2_mesh(mesh);
     else
       ret = setup_elm_mesh1(mesh); // test case
+    /* NOTE: all test meshes call amr_set_bfaces_and_rnode_nbinfo_fnb
+             by themselves */
   }
 
   ///* print info about all patches we have now */
@@ -386,9 +391,6 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
     for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr]*N[dr];
   }
 
-  /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
-
   return 0;
 }
 
@@ -531,16 +533,13 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
       break;
   }
 
-/*
-coordinates_init(mesh);
-outputPatchPlanes_meshvar(mesh, "x", 0,0);
-outputPatchPlanes_meshvar(mesh, "y", 0,0);
-outputPatchPlanes_meshvar(mesh, "z", 0,0);
-//exit(9);
-*/
-  /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
-
+  /*
+  coordinates_init(mesh);
+  outputPatchPlanes_meshvar(mesh, "x", 0,0);
+  outputPatchPlanes_meshvar(mesh, "y", 0,0);
+  outputPatchPlanes_meshvar(mesh, "z", 0,0);
+  //exit(9);
+  */
   return 0;
 }
 
@@ -572,9 +571,6 @@ int setup_Shell_mesh(tMesh *mesh)
   {
     two_CubedSphere_shells_at_xc(mesh,6, xc, rin, r1, rout, stretch);
   }
-
-  /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
 
   return 0;
 }
