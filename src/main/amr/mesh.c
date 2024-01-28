@@ -178,6 +178,10 @@ int amr_setup_mesh(tMesh *mesh)
   double x0[3] = {0.};
   int ret; //, pind;
 
+  /* remove all patches from mesh, so we can just add new pristine ones */
+  remove_all_patches(mesh);
+
+  /* call different funcs based on par amr_mesh_type */
   if(Getv(mesh_type, "BoxMesh"))
     ret = setup_box_mesh(mesh);
   else if(Getv(mesh_type, "CubedSpheres"))
@@ -310,9 +314,6 @@ int setup_box_mesh(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  /* remove all patches to mesh, so we can just ad new pristine ones */
-  remove_all_patches(mesh);
-
   if(Getv(mesh_type, "Line"))
   {
     int dir;
@@ -402,9 +403,6 @@ int setup_CubedSphere_mesh(tMesh *mesh)
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
   mesh->iteration = 0;
-
-  /* remove all patches from mesh, so we can just add new pristine ones */
-  remove_all_patches(mesh);
 
   /* perform some par sanity checks */
   if(ssfac <= sqrt(3.))
@@ -522,9 +520,6 @@ int setup_Shell_mesh(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  /* remove all patches to mesh, so we can just ad new pristine ones */
-  remove_all_patches(mesh);
-
   /* setup cubed spheres in form of a shell */
   if(r1 < rin)
   {
@@ -573,7 +568,6 @@ int setup_elm_mesh1(tMesh *mesh)
 
   Setd(amr->sibl1to7_weight, 1.);
 
-  remove_all_patches(mesh);
   add_patch(mesh, bbox0, pt_typ, n, 0);
   add_patch(mesh, bbox1, pt_typ, n, 0);
   add_patch(mesh, bbox2, pt_typ, n, 0);
@@ -871,7 +865,6 @@ int setup_3patchl2_mesh(tMesh *mesh)
   mesh->time = 0.;
   mesh->iteration = 0;
 
-  remove_all_patches(mesh);
   add_patch(mesh, bbox0, pt_typ, n, 0);
   add_patch(mesh, bbox1, pt_typ, n, 0);
   add_patch(mesh, bbox2, pt_typ, n, 0);

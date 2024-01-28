@@ -126,9 +126,6 @@ int test_mesh(tMesh *mesh)
   /* give equal weight to all siblings */
   Setd(amr->sibl1to7_weight, 1.);
 
-  /* remove all patches from mesh, so we can just add new pristine ones */
-  remove_all_patches(mesh);
-
   /* from cubed sph tests */
   two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
 
