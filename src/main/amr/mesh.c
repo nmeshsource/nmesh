@@ -313,7 +313,7 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
   double d = Getd(Par("amr_BoxMesh_dout"));
   double xc[]   = { 0., 0., 0. };
   double dout[] = { d, d, d };
-  int dr;
+  int dd;
 
   PRFs(":\n");
 
@@ -335,7 +335,7 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
   {
     int dir;
 
-    for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr];
+    for(dd=0; dd<3; dd++) boxes_rc[dd] = dout[dd];
 
     /* set direction of line */
     if(Getv(mesh_type, "Dir2"))      dir = 2;
@@ -371,7 +371,7 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
     {
       /* put npats boxes in dir */
       add_Nbox_pats_indir(mesh, xc, dout, npats, dir);
-      boxes_rc[dr] *= npats;
+      boxes_rc[dir] *= npats;
     }
   }
   else if(Getv(mesh_type, "Plane"))
@@ -380,7 +380,7 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
     int rnpats = pow(npats, 0.5);
     int N[] = { rnpats, rnpats, 1 };
     arrange_box_pats_inBox(mesh, xc, dout, N);
-    for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr]*N[dr];
+    for(dd=0; dd<3; dd++) boxes_rc[dd] = dout[dd]*N[dd];
   }
   else
   {
@@ -388,8 +388,10 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
     int crnpats = pow(npats, 0.3333333333334);
     int N[] = { crnpats, crnpats, crnpats };
     arrange_box_pats_inBox(mesh, xc, dout, N);
-    for(dr=0; dr<3; dr++) boxes_rc[dr] = dout[dr]*N[dr];
+    for(dd=0; dd<3; dd++) boxes_rc[dd] = dout[dd]*N[dd];
   }
+
+  for(dd=0; dd<3; dd++) printf("boxes_rc[%d]=%g\n", dd, boxes_rc[dd]);
 
   return 0;
 }
