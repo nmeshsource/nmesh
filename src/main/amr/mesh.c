@@ -525,8 +525,8 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
     /* do nothing */
     break;
   case 6:
-    //sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
-    sphere_nAB_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc, nAB);
+    sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
+    //sphere_nAB_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc, nAB);
     break;
   case 12:
     errorexit("we should use Shell in amr_mesh_type");
