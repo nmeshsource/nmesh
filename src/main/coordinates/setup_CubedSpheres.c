@@ -666,7 +666,7 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
                            int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
 {
   int AB_div_mode = 1;
-  int f, ret;
+  int f, ret=-1;
 
   if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
 
