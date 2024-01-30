@@ -672,8 +672,8 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
   for(f=0; f<N; f++)
   {
     double Amin,Amax, Bmin,Bmax;
-    double alphamin, alphamax, dalpha;
-    double betamin,  betamax,  dbeta;
+    double alphamin, alphamax;
+    double betamin,  betamax;
     int nA, nB, j, k;
     int dir = f/2;
     int pls = f%2;
@@ -703,8 +703,8 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
     /* find angles from A and B extrema */
     angle_of_Arange_or_Brange(pls, Amin,Amax, &alphamin,&alphamax);
     angle_of_Arange_or_Brange(pls, Bmin,Bmax, &betamin,&betamax);
-    dalpha = (alphamax - alphamin)/nA;
-    dbeta  = (betamax  - betamin)/nB;
+    //double dalpha = (alphamax - alphamin)/nA;
+    //double dbeta  = (betamax  - betamin)/nB;
 
     /* make nlam*nA*nB patches */
     for(k=0; k<nB; k++)
