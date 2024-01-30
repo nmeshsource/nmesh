@@ -662,8 +662,10 @@ double A_or_B_of_index(int nA, int j, int mode,
 int add_N_CubedSphere_doms(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double xc[3], double Din[6], double Dout[6],
+//                           int AB_div_mode,
                            int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
 {
+  int AB_div_mode = 1;
   int f, ret;
 
   if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
@@ -709,14 +711,14 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
     /* make nlam*nA*nB patches */
     for(k=0; k<nB; k++)
     {
-      double B0 = A_or_B_of_index(nB, k, 1, Bmin,Bmax, betamin,betamax);
-      double B1 = A_or_B_of_index(nB, k+1, 1, Bmin,Bmax, betamin,betamax);
+      double B0 = A_or_B_of_index(nB, k, AB_div_mode, Bmin,Bmax, betamin,betamax);
+      double B1 = A_or_B_of_index(nB, k+1, AB_div_mode, Bmin,Bmax, betamin,betamax);
       //double B0 = tan(betamin + dbeta*k);
       //double B1 = tan(betamin + dbeta*(k+1));
       for(j=0; j<nA; j++)
       {
-        double A0 = A_or_B_of_index(nA, j, 1, Amin,Amax, alphamin,alphamax);
-        double A1 = A_or_B_of_index(nA, j+1, 1, Amin,Amax, alphamin,alphamax);
+        double A0 = A_or_B_of_index(nA, j, AB_div_mode, Amin,Amax, alphamin,alphamax);
+        double A1 = A_or_B_of_index(nA, j+1, AB_div_mode, Amin,Amax, alphamin,alphamax);
         //double A0 = tan(alphamin + dalpha*j);
         //double A1 = tan(alphamin + dalpha*(j+1));
         int nlam = nlam_AB[j][k];
