@@ -416,7 +416,8 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   double ABrct[] = { -1.,1., -1.,1. };
   int nAB[] = { 1,1,1 };
   double xc[] = { 0., 0., 0. };
-  int AB_div_mode = Getv(Par("amr_CubedSphere_domain_divide"),"angles");
+  int CubedSphere_domain_divide = Par("amr_CubedSphere_domain_divide");
+  int AB_div_mode;
   char *domain_nAB = Gets(Par("amr_CubedSphere_domain_nAB"));
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
@@ -437,6 +438,10 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   if(npats>0 && CubedSphere_ndomains>0)
     errorexit("remove the number of patches from amr_mesh_type if "
               "amr_CubedSphere_ndomains>0");
+
+  /* set AB_div_mode from par amr_CubedSphere_domain_divide */
+  if(Getv(CubedSphere_domain_divide,"angles"))
+    AB_div_mode = 1;
 
   /* setup cubed spheres based on npats read from amr_mesh_type */
   switch(npats)
