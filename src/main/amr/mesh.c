@@ -440,82 +440,82 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   /* setup cubed spheres based on npats read from amr_mesh_type */
   switch(npats)
   {
-    case 0:
-      /* do nothing if amr_mesh_type contains no number */
-      break;
-    case 1:
-      xc[0] = xc[1] = xc[2] = 0.0;
-      add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
-                            xc, dc, ssfac*dc, ABrct);
-      break;
-    case 2:
-      xc[0] = xc[1] = xc[2] = 0.0;
-      add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
-                            xc, dc, ssfac*dc, ABrct);
-      add_1_CubedSphere_pat(mesh, 2, outerCubedSphere,0,0,
-                            xc, dc, ssfac*dc, ABrct);
-      break;
-    case 3:
-      if(Getv(mesh_type, "dom1"))
-        two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
-      else
-        two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
-      break;
-    case 5:
-      rc[0] = rc[1] = rc[2] = dc;
-      /* use only the 4 cubed spheres in the xy-plane: */
-      sphere_around_full_box_at_xc(mesh,4, xc, rc, ssfac*dc);
-      break;
-    case 6:
-      rc[0] = rc[1] = rc[2] = dc;
-      sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
-      break;
-    case 7:
-      rc[0] = rc[1] = rc[2] = dc;
-      sphere_around_full_box_at_xc(mesh,6, xc, rc, ssfac*dc);
-      break;
-    case 12:
-      rc[1] = rc[2] = dc; //dc*0.5;
-      rc[0] = dc;
-      two_spheres_around_empty_box_at_xc(mesh,6, xc,
-                                         rc, ssfac*dc, obfac*dc, stretch);
-      break;
-    case 13:
-      rc[1] = rc[2] = dc; //dc*0.5;
-      rc[0] = dc;
-      two_spheres_around_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc, stretch);
-      break;
-    /* 13 patches but with 2 centers as in sgrid:
-    case 13:
-      xc[1] = xc[2] = 0.0;
-      xc[0] = dc;
-      arrange_1pat12CubSph_into_full_cube(mesh,6, xc,
-                                          csize*rf_surf1, rf_surf1, dc);
-      break; */
-    case 19:
-      rc[1] = rc[2] = rc[0] = dc;
-      three_spheres_around_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc,
-                                     r2fac*dc, stretch);
-      break;
-    case 26:
-      two_full_cubes_touching_at_x0(mesh,6, dc,
-                                    csize*rf_surf1, rf_surf1,
-                                    csize*rf_surf2, rf_surf2);
-      break;
-    case 32:
-      sphere_around_two_full_cubes_touching_at_x0(mesh,6, dc,
-                                                  csize*rf_surf1, rf_surf1,
-                                                  csize*rf_surf2, rf_surf2,
-                                                  ssfac*dc);
-      break;
-    case 38:
-      two_spheres_around_two_full_cubes(mesh,6, dc,
-                                        csize*rf_surf1, rf_surf1,
-                                        csize*rf_surf2, rf_surf2,
-                                        ssfac*dc, obfac*dc);
-      break;
-    default:
-      errorexiti("amr_mesh_type = %d CubedSpheres  <--not implemented", npats);
+  case 0:
+    /* do nothing if amr_mesh_type contains no number */
+    break;
+  case 1:
+    xc[0] = xc[1] = xc[2] = 0.0;
+    add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
+                          xc, dc, ssfac*dc, ABrct);
+    break;
+  case 2:
+    xc[0] = xc[1] = xc[2] = 0.0;
+    add_1_CubedSphere_pat(mesh, 0, outerCubedSphere,0,0,
+                          xc, dc, ssfac*dc, ABrct);
+    add_1_CubedSphere_pat(mesh, 2, outerCubedSphere,0,0,
+                          xc, dc, ssfac*dc, ABrct);
+    break;
+  case 3:
+    if(Getv(mesh_type, "dom1"))
+      two_wegdes_touching_1_wedge(mesh, 1.0, 2.0, 3.0);
+    else
+      two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
+    break;
+  case 5:
+    rc[0] = rc[1] = rc[2] = dc;
+    /* use only the 4 cubed spheres in the xy-plane: */
+    sphere_around_full_box_at_xc(mesh,4, xc, rc, ssfac*dc);
+    break;
+  case 6:
+    rc[0] = rc[1] = rc[2] = dc;
+    sphere_around_empty_box_at_xc(mesh,6, xc, rc, ssfac*dc);
+    break;
+  case 7:
+    rc[0] = rc[1] = rc[2] = dc;
+    sphere_around_full_box_at_xc(mesh,6, xc, rc, ssfac*dc);
+    break;
+  case 12:
+    rc[1] = rc[2] = dc; //dc*0.5;
+    rc[0] = dc;
+    two_spheres_around_empty_box_at_xc(mesh,6, xc,
+                                       rc, ssfac*dc, obfac*dc, stretch);
+    break;
+  case 13:
+    rc[1] = rc[2] = dc; //dc*0.5;
+    rc[0] = dc;
+    two_spheres_around_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc, stretch);
+    break;
+  /* 13 patches but with 2 centers as in sgrid:
+  case 13:
+    xc[1] = xc[2] = 0.0;
+    xc[0] = dc;
+    arrange_1pat12CubSph_into_full_cube(mesh,6, xc,
+                                        csize*rf_surf1, rf_surf1, dc);
+    break; */
+  case 19:
+    rc[1] = rc[2] = rc[0] = dc;
+    three_spheres_around_box_at_xc(mesh,6, xc, rc, ssfac*dc, obfac*dc,
+                                   r2fac*dc, stretch);
+    break;
+  case 26:
+    two_full_cubes_touching_at_x0(mesh,6, dc,
+                                  csize*rf_surf1, rf_surf1,
+                                  csize*rf_surf2, rf_surf2);
+    break;
+  case 32:
+    sphere_around_two_full_cubes_touching_at_x0(mesh,6, dc,
+                                                csize*rf_surf1, rf_surf1,
+                                                csize*rf_surf2, rf_surf2,
+                                                ssfac*dc);
+    break;
+  case 38:
+    two_spheres_around_two_full_cubes(mesh,6, dc,
+                                      csize*rf_surf1, rf_surf1,
+                                      csize*rf_surf2, rf_surf2,
+                                      ssfac*dc, obfac*dc);
+    break;
+  default:
+    errorexiti("amr_mesh_type = %d CubedSpheres  <--not implemented", npats);
   }
 
   /* setup cubed spheres based on CubedSphere_ndomains */
