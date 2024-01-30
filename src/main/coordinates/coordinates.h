@@ -48,6 +48,7 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
 int add_N_CubedSphere_doms(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double xc[3], double Din[6], double Dout[6],
+                           int AB_div_mode,
                            int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax]);
 void set_AB_min_max_from_Din(int dom, double *Din,
                              double *Amin, double *Amax,

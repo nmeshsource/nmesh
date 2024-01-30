@@ -416,6 +416,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   double ABrct[] = { -1.,1., -1.,1. };
   int nAB[] = { 1,1,1 };
   double xc[] = { 0., 0., 0. };
+  int AB_div_mode = Getv(Par("amr_CubedSphere_domain_divide"),"angles");
   char *domain_nAB = Gets(Par("amr_CubedSphere_domain_nAB"));
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
@@ -526,7 +527,8 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
     break;
   case 6:
     //sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
-    sphere_nAB_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc, nAB);
+    sphere_nAB_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc,
+                                      AB_div_mode, nAB);
     break;
   case 12:
     errorexit("we should use Shell in amr_mesh_type");

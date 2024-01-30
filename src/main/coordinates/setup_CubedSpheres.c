@@ -235,8 +235,8 @@ int sphere_around_full_box_at_xc(tMesh *mesh, int N,
 */
 int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
                                           double dc[3], double r0,
-                                          int nAB_x[3], int nBmax,
-                                          int (*nlam_AB)[nBmax])
+                                          int AB_div_mode, int nAB_x[3],
+                                          int nBmax, int (*nlam_AB)[nBmax])
 {
   int pl;
   double Din[6], Dout[6];
@@ -249,13 +249,13 @@ int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
     Dout[f] = r0;
   }
   pl = add_N_CubedSphere_doms(mesh, N, outerCubedSphere,0,0, xc, Din,Dout,
-                              nAB_x, nBmax, nlam_AB);
+                              AB_div_mode, nAB_x, nBmax, nlam_AB);
   return pl;
 }
 /* like sphere_nABnlam_around_empty_box_at_xc, but set all nlam_AB[j][k]=1 */
 int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
                                       double xc[3], double dc[3], double r0,
-                                      int nAB_x[3])
+                                      int AB_div_mode, int nAB_x[3])
 {
   int nABmax = max3(nAB_x[0], nAB_x[1], nAB_x[2]);
   int (*nlam_AB)[nABmax] = malloc(nABmax*nABmax*sizeof(int));
@@ -266,7 +266,7 @@ int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
     for(j=0; j<nABmax; j++)
       nlam_AB[j][k] = 1;
 
-  pl = sphere_nABnlam_around_empty_box_at_xc(mesh, N, xc, dc, r0,
+  pl = sphere_nABnlam_around_empty_box_at_xc(mesh, N, xc, dc, r0, AB_div_mode,
                                              nAB_x, nABmax,nlam_AB);
   free(nlam_AB);
   return pl;
@@ -662,10 +662,9 @@ double A_or_B_of_index(int nA, int j, int mode,
 int add_N_CubedSphere_doms(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double xc[3], double Din[6], double Dout[6],
-//                           int AB_div_mode,
+                           int AB_div_mode,
                            int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
 {
-  int AB_div_mode = 1;
   int f, ret=-1;
 
   if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");

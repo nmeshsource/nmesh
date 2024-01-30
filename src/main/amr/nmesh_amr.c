@@ -39,6 +39,8 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_CubedSphere_ndomains", "0", "number of CubedSphere domains");
   AddPar("amr_CubedSphere_domain_nAB", "1 1 1", "number of domain divisions "
          "in x, y, and z-dirs");
+  AddPar("amr_CubedSphere_domain_divide", "angles", "how we divide domain "
+         "[angles,AB");
   AddPar("amr_CubedSphere_dc", "0.5", "length scale for cubed sphere setup");
   AddPar("amr_CubedSphere_r0fac", "4", "size factor for outer radius r0 of "
          "cubed sphere patches: r0 = r0fac*dc");
