@@ -177,7 +177,7 @@ int amr_setup_mesh(tMesh *mesh)
   double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
   double BoxMesh_rc[] = {0.,0.,0.};
-  int ret; //, pind;
+  int ret = 0;
 
   /* remove all patches from mesh, so we can just add new pristine ones */
   remove_all_patches(mesh);
