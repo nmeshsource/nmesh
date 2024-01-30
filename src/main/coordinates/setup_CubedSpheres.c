@@ -609,6 +609,48 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
   return ret; /* return pat index of last added pat */
 }
 
+/* given (Amin,Amax) compute angles on patch
+   In: plus, Amin,Amax.  Out: alphamin,alphamax
+   plus=0 means on left  (e.g. dom 0,2,4)
+   plus=1 means on right (e.g. dom 1,3,5) */
+void angle_of_Arange_or_Brange(int plus, double Amin, double Amax,
+                             double *alphamin, double *alphamax)
+{
+  switch(plus)
+  {
+  case 0:
+    *alphamin = Arg_plus(-1., -Amin);
+    *alphamax = Arg_plus(-1., -Amax);
+    break;
+  case 1:
+    *alphamin = Arg(1., Amin);
+    *alphamax = Arg(1., Amax);
+    break;
+  }
+}
+
+/* get A at index j*/
+double A_or_B_of_index(int nA, int j, int mode,
+                       double Amin,double Amax,
+                       double alphamin, double alphamax)
+{
+  double dA, dalpha;
+
+  /* FIXME: uncomment this */
+  //if(j==0)  return Amin;
+  //if(j==nA) return Amax;
+  switch(mode)
+  {
+  case 0: /* linear in A */
+      dA = (Amax - Amin)/nA;
+    return (Amin + dA*j);
+    break;
+  case 1: /* linear in angle */
+    dalpha = (alphamax - alphamin)/nA;
+    return tan(alphamin + dalpha*j);
+  }
+}
+
 /* Add cubed sphere doms 0 to N-1:
    +Divide A or B region of a dom into nAB_x pieces. Here nAB_x[i] tells us
     how many pieces we want in the x^i-direction.
@@ -657,33 +699,24 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
     }
 
     /* find angles from A and B extrema */
-    switch(pls)
-    {
-    case 0:
-      alphamin = Arg_plus(-1., -Amin);
-      alphamax = Arg_plus(-1., -Amax);
-      betamin = Arg_plus(-1., -Bmin);
-      betamax = Arg_plus(-1., -Bmax);
-      break;
-    case 1:
-      alphamin = Arg(1., Amin);
-      alphamax = Arg(1., Amax);
-      betamin = Arg(1., Bmin);
-      betamax = Arg(1., Bmax);
-      break;
-    }
+    angle_of_Arange_or_Brange(pls, Amin,Amax, &alphamin,&alphamax);
+    angle_of_Arange_or_Brange(pls, Bmin,Bmax, &betamin,&betamax);
     dalpha = (alphamax - alphamin)/nA;
     dbeta  = (betamax  - betamin)/nB;
 
     /* make nlam*nA*nB patches */
     for(k=0; k<nB; k++)
     {
-      double B0 = tan(betamin + dbeta*k);
-      double B1 = tan(betamin + dbeta*(k+1));
+      double B0 = A_or_B_of_index(nB, k, 1, Bmin,Bmax, betamin,betamax);
+      double B1 = A_or_B_of_index(nB, k+1, 1, Bmin,Bmax, betamin,betamax);
+      //double B0 = tan(betamin + dbeta*k);
+      //double B1 = tan(betamin + dbeta*(k+1));
       for(j=0; j<nA; j++)
       {
-        double A0 = tan(alphamin + dalpha*j);
-        double A1 = tan(alphamin + dalpha*(j+1));
+        double A0 = A_or_B_of_index(nA, j, 1, Amin,Amax, alphamin,alphamax);
+        double A1 = A_or_B_of_index(nA, j+1, 1, Amin,Amax, alphamin,alphamax);
+        //double A0 = tan(alphamin + dalpha*j);
+        //double A1 = tan(alphamin + dalpha*(j+1));
         int nlam = nlam_AB[j][k];
         double dlam = 1./nlam;
         int i;
@@ -698,16 +731,16 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
           double bbox[] = {lam0,lam1, A0,A1, B0,B1};
 
           if(A0 != Amin) printf("A0diff=%g\n", A0-Amin);
-          if(A1 != Amin) printf("A1diff=%g\n", A1-Amin);
+          if(A1 != Amax) printf("A1diff=%g\n", A1-Amax);
           if(B0 != Bmin) printf("B0diff=%g\n", B0-Bmin);
-          if(B1 != Bmin) printf("B1diff=%g\n", B1-Bmin);
+          if(B1 != Bmax) printf("B1diff=%g\n", B1-Bmax);
 
           /* use exact end values for A and B */
+          /* REMOVE: */
           if(j==0)    bbox[2] = Amin;
           if(j==nA-1) bbox[3] = Amax;
           if(k==0)    bbox[4] = Bmin;
           if(k==nB-1) bbox[5] = Bmax;
-
 
           /* REMOVE: */
           //double ABrct[4];
