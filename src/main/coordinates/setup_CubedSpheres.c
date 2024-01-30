@@ -648,6 +648,8 @@ double A_or_B_of_index(int nA, int j, int mode,
   case 1: /* linear in angle */
     dalpha = (alphamax - alphamin)/nA;
     return tan(alphamin + dalpha*j);
+  default:
+    errorexit("mode must be: 0,1");
   }
 }
 
@@ -737,11 +739,12 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
 
           /* use exact end values for A and B */
           /* REMOVE: */
+          /*
           if(j==0)    bbox[2] = Amin;
           if(j==nA-1) bbox[3] = Amax;
           if(k==0)    bbox[4] = Bmin;
           if(k==nB-1) bbox[5] = Bmax;
-
+          */
           /* REMOVE: */
           //double ABrct[4];
           //ABrct[0] = Amin;
@@ -755,109 +758,6 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
           /* add 1 Cubed Sphere */
           ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
                                            xc,Din[f],Dout[f], bbox);
-        }
-      }
-    } /* end k-loop */
-  }
-
-  return ret; /* return pat index of last added pat */
-}
-int add_N_CubedSphere_doms__new(tMesh *mesh, int N,
-                           int type, int stretch, int SigFunc,
-                           double xc[3], double Din[6], double Dout[6],
-                           int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
-{
-  int f, ret=-1;
-
-  if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
-
-  /* make the N domains */
-  for(f=0; f<N; f++)
-  {
-    double Amin,Amax, Bmin,Bmax;
-    double alphamin, alphamax, dalpha;
-    double betamin,  betamax,  dbeta;
-    int nA, nB, j, k;
-    int dir = f/2;
-    int pls = f%2;
-
-    /* set min/max in A-, B-directions */
-    set_AB_min_max_from_Din(f, Din, &Amin,&Amax, &Bmin,&Bmax);
-
-    /* find number of pieces in A, B */
-    switch(dir)
-    {
-    case 0:
-      nA = nAB_x[1];
-      nB = nAB_x[2];
-      break;
-    case 1:
-      nA = nAB_x[0];
-      nB = nAB_x[2];
-      break;
-    case 2:
-      nA = nAB_x[1];
-      nB = nAB_x[0];
-      break;
-    default:
-      errorexit("dir must 0,1,2");
-    }
-
-    /* find angles from A and B extrema */
-    switch(pls)
-    {
-    case 0:
-      alphamin = Arg_plus(-1., -Amin);
-      alphamax = Arg_plus(-1., -Amax);
-      betamin = Arg_plus(-1., -Bmin);
-      betamax = Arg_plus(-1., -Bmax);
-      break;
-    case 1:
-      alphamin = Arg(1., Amin);
-      alphamax = Arg(1., Amax);
-      betamin = Arg(1., Bmin);
-      betamax = Arg(1., Bmax);
-      break;
-    }
-    dalpha = (alphamax - alphamin)/nA;
-    dbeta  = (betamax  - betamin)/nB;
-
-    /* make nlam*nA*nB patches */
-    for(k=0; k<nB; k++)
-    {
-      double B0 = tan(betamin + dbeta*k);
-      double B1 = tan(betamin + dbeta*(k+1));
-      for(j=0; j<nA; j++)
-      {
-        double A0 = tan(alphamin + dalpha*j);
-        double A1 = tan(alphamin + dalpha*(j+1));
-        int nlam = nlam_AB[j][k];
-        double dlam = 1./nlam;
-        int i;
-        for(i=0; i<nlam; i++)
-        {
-          double lam0 = dlam*i;
-          double lam1 = dlam*(i+1);
-          double bbox[] = {lam0,lam1, A0,A1, B0,B1};
-
-          /* use exact end values for A and B */
-          if(j==0)    bbox[2] = Amin;
-          if(j==nA-1) bbox[3] = Amax;
-          if(k==0)    bbox[4] = Bmin;
-          if(k==nB-1) bbox[5] = Bmax;
-
-          //double bbox[] = {0.,1., Amin,Amax, Bmin,Bmax};
-
-
-          /* add 1 Cubed Sphere */
-          //ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
-          //                                 xc,Din[f],Dout[f], bbox);
-
-    //double ABrct[] = {bbox[2],bbox[3],bbox[4],bbox[5]};
-    double ABrct[] = {Amin,Amax,Bmin,Bmax};
-    ret = add_1_CubedSphere_pat(mesh, f,type, stretch,SigFunc,
-                                xc,Din[i],Dout[i], ABrct);
-
         }
       }
     } /* end k-loop */
