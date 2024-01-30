@@ -637,6 +637,7 @@ double A_or_B_of_index(int nA, int j, int mode,
   double dA, dalpha;
 
   /* FIXME: uncomment this */
+  /* use exact end values for A or B */
   //if(j==0)  return Amin;
   //if(j==nA) return Amax;
   switch(mode)
@@ -705,22 +706,16 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
     /* find angles from A and B extrema */
     angle_of_Arange_or_Brange(pls, Amin,Amax, &alphamin,&alphamax);
     angle_of_Arange_or_Brange(pls, Bmin,Bmax, &betamin,&betamax);
-    //double dalpha = (alphamax - alphamin)/nA;
-    //double dbeta  = (betamax  - betamin)/nB;
 
     /* make nlam*nA*nB patches */
     for(k=0; k<nB; k++)
     {
       double B0 = A_or_B_of_index(nB, k, AB_div_mode, Bmin,Bmax, betamin,betamax);
       double B1 = A_or_B_of_index(nB, k+1, AB_div_mode, Bmin,Bmax, betamin,betamax);
-      //double B0 = tan(betamin + dbeta*k);
-      //double B1 = tan(betamin + dbeta*(k+1));
       for(j=0; j<nA; j++)
       {
         double A0 = A_or_B_of_index(nA, j, AB_div_mode, Amin,Amax, alphamin,alphamax);
         double A1 = A_or_B_of_index(nA, j+1, AB_div_mode, Amin,Amax, alphamin,alphamax);
-        //double A0 = tan(alphamin + dalpha*j);
-        //double A1 = tan(alphamin + dalpha*(j+1));
         int nlam = nlam_AB[j][k];
         double dlam = 1./nlam;
         int i;
@@ -738,23 +733,6 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
           if(A1 != Amax) printf("A1diff=%g\n", A1-Amax);
           if(B0 != Bmin) printf("B0diff=%g\n", B0-Bmin);
           if(B1 != Bmax) printf("B1diff=%g\n", B1-Bmax);
-
-          /* use exact end values for A and B */
-          /* REMOVE: */
-          /*
-          if(j==0)    bbox[2] = Amin;
-          if(j==nA-1) bbox[3] = Amax;
-          if(k==0)    bbox[4] = Bmin;
-          if(k==nB-1) bbox[5] = Bmax;
-          */
-          /* REMOVE: */
-          //double ABrct[4];
-          //ABrct[0] = Amin;
-          //ABrct[1] = Amax;
-          //ABrct[2] = Bmin;
-          //ABrct[3] = Bmax;
-          //ret = add_1_CubedSphere_pat(mesh, f,type, stretch,SigFunc,
-          //                            xc,Din[f],Dout[f], ABrct);
 
 
           /* add 1 Cubed Sphere */
