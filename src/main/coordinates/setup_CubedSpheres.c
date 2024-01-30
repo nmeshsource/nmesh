@@ -655,32 +655,34 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
 
     /* make nlam*nA*nB patches */
     for(k=0; k<nB; k++)
-    for(j=0; j<nA; j++)
     {
-      int nlam = nlam_AB[j][k];
-      double dlam = 1./nlam;
-      int i;
-      for(i=0; i<nlam; i++)
+      double B0 = tan(betamin + dbeta*k);
+      double B1 = tan(betamin + dbeta*(k+1));
+      for(j=0; j<nA; j++)
       {
         double A0 = tan(alphamin + dalpha*j);
         double A1 = tan(alphamin + dalpha*(j+1));
-        double B0 = tan(betamin + dbeta*k);
-        double B1 = tan(betamin + dbeta*(k+1));
-        double lam0 = dlam*i;
-        double lam1 = dlam*(i+1);
-        double bbox[] = {lam0,lam1, A0,A1, B0,B1};
+        int nlam = nlam_AB[j][k];
+        double dlam = 1./nlam;
+        int i;
+        for(i=0; i<nlam; i++)
+        {
+          double lam0 = dlam*i;
+          double lam1 = dlam*(i+1);
+          double bbox[] = {lam0,lam1, A0,A1, B0,B1};
 
-        /* use exact end values for A and B */
-        if(j==0)         bbox[2] = Amin;
-        else if(j==nA-1) bbox[3] = Amax;
-        if(k==0)         bbox[4] = Bmin;
-        else if(k==nB-1) bbox[5] = Bmax;
+          /* use exact end values for A and B */
+          if(j==0)         bbox[2] = Amin;
+          else if(j==nA-1) bbox[3] = Amax;
+          if(k==0)         bbox[4] = Bmin;
+          else if(k==nB-1) bbox[5] = Bmax;
 
-        /* add 1 Cubed Sphere */
-        ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
-                                         xc,Din[f],Dout[f], bbox);
+          /* add 1 Cubed Sphere */
+          ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
+                                           xc,Din[f],Dout[f], bbox);
+        }
       }
-    }
+    } /* end k-loop */
   }
 
   return ret; /* return pat index of last added pat */
