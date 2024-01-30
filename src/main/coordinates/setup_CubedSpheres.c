@@ -636,10 +636,10 @@ double A_or_B_of_index(int nA, int j, int mode,
 {
   double dA, dalpha;
 
-  /* FIXME: uncomment this */
   /* use exact end values for A or B */
-  //if(j==0)  return Amin;
-  //if(j==nA) return Amax;
+  if(j==0)  return Amin;
+  if(j==nA) return Amax;
+
   switch(mode)
   {
   case 0: /* linear in A */
@@ -728,12 +728,6 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
           //double bbox[] = {lam0,lam1, Amin,Amax, Bmin,Bmax};
           //double bbox[] = {lam0,lam1, A0,A1, Bmin,Bmax};
           double bbox[] = {lam0,lam1, A0,A1, B0,B1};
-
-          if(A0 != Amin) printf("A0diff=%g\n", A0-Amin);
-          if(A1 != Amax) printf("A1diff=%g\n", A1-Amax);
-          if(B0 != Bmin) printf("B0diff=%g\n", B0-Bmin);
-          if(B1 != Bmax) printf("B1diff=%g\n", B1-Bmax);
-
 
           /* add 1 Cubed Sphere */
           ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
