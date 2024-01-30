@@ -233,10 +233,10 @@ int sphere_around_full_box_at_xc(tMesh *mesh, int N,
         \________/        r0 is radius of outer sphere
                           2*dc[i] is sidelength of box in dir i
 */
-int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
-                                      double xc[3], double dc[3], double r0,
-                                      int nAB_x[3], int nBmax,
-                                      int (*nlam_AB)[nBmax])
+int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
+                                          double dc[3], double r0,
+                                          int nAB_x[3], int nBmax,
+                                          int (*nlam_AB)[nBmax])
 {
   int pl;
   double Din[6], Dout[6];
@@ -252,6 +252,27 @@ int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
                               nAB_x, nBmax, nlam_AB);
   return pl;
 }
+/* like sphere_nABnlam_around_empty_box_at_xc, but set all nlam_AB[j][k]=1 */
+int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
+                                      double xc[3], double dc[3], double r0,
+                                      int nAB_x[3])
+{
+  int nABmax = max3(nAB_x[0], nAB_x[1], nAB_x[2]);
+  int (*nlam_AB)[nABmax] = malloc(nABmax*nABmax*sizeof(int));
+  int j,k, pl;
+
+  /* set all nlam_AB to 1 */
+  for(k=0; k<nABmax; k++)
+    for(j=0; j<nABmax; j++)
+      nlam_AB[j][k] = 1;
+
+  pl = sphere_nABnlam_around_empty_box_at_xc(mesh, N, xc, dc, r0,
+                                             nAB_x, nABmax,nlam_AB);
+  free(nlam_AB);
+  return pl;
+}
+
+
 
 /* put 6 stretchedCubedShell's around the sphere from
    sphere_around_full_box_at_xc

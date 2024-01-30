@@ -414,9 +414,12 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   int stretch = Geti(Par("amr_OuterShellStretch"));
   double rc[3];
   double ABrct[] = { -1.,1., -1.,1. };
+  int nAB[] = { 1,1,1 };
   double xc[] = { 0., 0., 0. };
+  char *domain_nAB = Gets(Par("amr_CubedSphere_domain_nAB"));
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
+  sscanf(domain_nAB, "%d %d %d", &(nAB[0]), &(nAB[1]), &(nAB[2]));
 
   /* reset dc from BoxMesh_rc if BoxMesh_rc>0 */
   if(BoxMesh_rc_max>0.) dc = BoxMesh_rc_max;
@@ -518,21 +521,24 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   /* setup cubed spheres based on CubedSphere_ndomains */
   switch(CubedSphere_ndomains)
   {
-    case 0:
-      /* do nothing */
-      break;
-    case 6:
-      sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
-      break;
-    case 12:
-      two_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
-                                         ssfac*dc, obfac*dc, stretch);
-      break;
-    case 18:
-      three_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
-                                           ssfac*dc, obfac*dc,
-                                           r2fac*dc, stretch);
-      break;
+  case 0:
+    /* do nothing */
+    break;
+  case 6:
+    //sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
+    sphere_nAB_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc, nAB);
+    break;
+  case 12:
+    errorexit("we should use Shell in amr_mesh_type");
+    two_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
+                                       ssfac*dc, obfac*dc, stretch);
+    break;
+  case 18:
+    errorexit("we should use Shell in amr_mesh_type");
+    three_spheres_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc,
+                                         ssfac*dc, obfac*dc,
+                                         r2fac*dc, stretch);
+    break;
   }
 
   /*
