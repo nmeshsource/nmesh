@@ -723,10 +723,6 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
         {
           double lam0 = dlam*i;
           double lam1 = dlam*(i+1);
-          //double bbox[] = {lam0,lam1, A0,A1, B0,B1};
-          //double bbox[] = {0.,1., Amin,Amax, Bmin,Bmax};
-          //double bbox[] = {lam0,lam1, Amin,Amax, Bmin,Bmax};
-          //double bbox[] = {lam0,lam1, A0,A1, Bmin,Bmax};
           double bbox[] = {lam0,lam1, A0,A1, B0,B1};
 
           /* add 1 Cubed Sphere */
