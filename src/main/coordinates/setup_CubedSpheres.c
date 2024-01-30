@@ -250,6 +250,7 @@ int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
   }
   pl = add_N_CubedSphere_doms(mesh, N, outerCubedSphere,0,0, xc, Din,Dout,
                               nAB_x, nBmax, nlam_AB);
+//pl = add_N_CubedSphere_pats(mesh, N, outerCubedSphere,0,0, xc, Din,Dout);
   return pl;
 }
 /* like sphere_nABnlam_around_empty_box_at_xc, but set all nlam_AB[j][k]=1 */
@@ -693,14 +694,20 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
           double bbox[] = {lam0,lam1, A0,A1, B0,B1};
 
           /* use exact end values for A and B */
-          if(j==0)         bbox[2] = Amin;
-          else if(j==nA-1) bbox[3] = Amax;
-          if(k==0)         bbox[4] = Bmin;
-          else if(k==nB-1) bbox[5] = Bmax;
+          if(j==0)    bbox[2] = Amin;
+          if(j==nA-1) bbox[3] = Amax;
+          if(k==0)    bbox[4] = Bmin;
+          if(k==nB-1) bbox[5] = Bmax;
 
           /* add 1 Cubed Sphere */
-          ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
-                                           xc,Din[f],Dout[f], bbox);
+          //ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
+          //                                 xc,Din[f],Dout[f], bbox);
+
+    //double ABrct[] = {bbox[2],bbox[3],bbox[4],bbox[5]};
+    double ABrct[] = {Amin,Amax,Bmin,Bmax};
+    ret = add_1_CubedSphere_pat(mesh, f,type, stretch,SigFunc,
+                                xc,Din[i],Dout[i], ABrct);
+
         }
       }
     } /* end k-loop */
@@ -778,6 +785,7 @@ int add_1_CubedSphere_pat_bbox(tMesh *mesh, int dom, int type,
 
   /* make new patch */
   pat = add_patch(mesh, bbox, NULL, n, 0);
+  PRFs(": ");printpatch(pat);
 
   /* set center */
   for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];
