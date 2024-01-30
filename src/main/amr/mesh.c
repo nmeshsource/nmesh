@@ -401,7 +401,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
-  int CubedSphere_npatches = Geti(Par("amr_CubedSphere_npatches"));
+  int CubedSphere_ndomains = Geti(Par("amr_CubedSphere_ndomains"));
   double rf_surf1 = 0.25;
   double rf_surf2 = 0.25;
   double BoxMesh_rc_max = max3(BoxMesh_rc[0],BoxMesh_rc[1],BoxMesh_rc[2]);
@@ -430,9 +430,9 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   /* perform some par sanity checks */
   if(ssfac <= sqrt(3.))
     errorexit("ssfac=amr_CubedSphere_r0fac needs to be larger than sqrt(3)");
-  if(npats>0 && CubedSphere_npatches>0)
+  if(npats>0 && CubedSphere_ndomains>0)
     errorexit("remove the number of patches from amr_mesh_type if "
-              "amr_CubedSphere_npatches>0");
+              "amr_CubedSphere_ndomains>0");
 
   /* setup cubed spheres based on npats read from amr_mesh_type */
   switch(npats)
@@ -515,8 +515,8 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
       errorexiti("amr_mesh_type = %d CubedSpheres  <--not implemented", npats);
   }
 
-  /* setup cubed spheres based on CubedSphere_npatches */
-  switch(CubedSphere_npatches)
+  /* setup cubed spheres based on CubedSphere_ndomains */
+  switch(CubedSphere_ndomains)
   {
     case 0:
       /* do nothing */
