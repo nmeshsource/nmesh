@@ -641,11 +641,11 @@ double A_or_B_of_index(int nA, int j, int mode,
 
   switch(mode)
   {
-  case 0: /* linear in A */
+  case -1: /* linear in A */
       dA = (Amax - Amin)/nA;
     return (Amin + dA*j);
     break;
-  case 1: /* linear in angle */
+  case 0: /* linear in angle */
     dalpha = (alphamax - alphamin)/nA;
     return tan(alphamin + dalpha*j);
   default:

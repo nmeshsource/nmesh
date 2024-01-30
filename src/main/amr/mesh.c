@@ -440,7 +440,11 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
               "amr_CubedSphere_ndomains>0");
 
   /* set AB_div_mode from par amr_CubedSphere_domain_divide */
-  if(Getv(CubedSphere_domain_divide,"angles"))
+  if(Getv(CubedSphere_domain_divide,"AB"))
+    AB_div_mode = -1;
+  else if(Getv(CubedSphere_domain_divide,"angles"))
+    AB_div_mode = 0;
+  else if(Getv(CubedSphere_domain_divide,"angles_AB1"))
     AB_div_mode = 1;
 
   /* setup cubed spheres based on npats read from amr_mesh_type */
