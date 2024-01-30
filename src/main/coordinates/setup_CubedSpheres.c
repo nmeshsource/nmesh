@@ -633,23 +633,46 @@ double A_or_B_of_index(int nA, int j, int mode,
                        double Amin,double Amax,
                        double alphamin, double alphamax)
 {
-  double dA, dalpha;
+  double dA, dalpha, A_lin, A_alplin;
 
   /* use exact end values for A or B */
   if(j==0)  return Amin;
   if(j==nA) return Amax;
 
+  /* linear in A */
+  dA    = (Amax - Amin)/nA;
+  A_lin = (Amin + dA*j);
+
+  /* linear in angle */
+  dalpha   = (alphamax - alphamin)/nA;
+  A_alplin = tan(alphamin + dalpha*j);
+
   switch(mode)
   {
-  case -1: /* linear in A */
-      dA = (Amax - Amin)/nA;
-    return (Amin + dA*j);
-    break;
-  case 0: /* linear in angle */
-    dalpha = (alphamax - alphamin)/nA;
-    return tan(alphamin + dalpha*j);
+  case -1:
+    return A_lin;
+  case 0:
+    return A_alplin;
+  case 1:
+    if(fabs(A_lin) > 1.) return A_alplin;
+    else                 return A_lin;
+  case 2:
+    if(fabs(A_lin) > 2.) return A_alplin;
+    else                 return A_lin;
+  case 3:
+    if(fabs(A_lin) > 3.) return A_alplin;
+    else                 return A_lin;
+  case 4:
+    if(fabs(A_lin) > 4.) return A_alplin;
+    else                 return A_lin;
+  case 5:
+    if(fabs(A_lin) > 5.) return A_alplin;
+    else                 return A_lin;
+  case 6:
+    if(fabs(A_lin) > 6.) return A_alplin;
+    else                 return A_lin;
   default:
-    errorexit("mode must be: 0,1");
+    errorexit("mode must be: -1, 0,1,2,3,4,5,6");
   }
 }
 
