@@ -217,6 +217,42 @@ int sphere_around_full_box_at_xc(tMesh *mesh, int N,
   return pl;
 }
 
+/* Surround a box with cubed sphere domains that have A,B that in extended
+   range. Subdivide each domain.
+
+         ________         e.g. dom0/1 have A = [-0.8, 0.8]
+      __/   |    \__           dom2/6 have A = [-1.25,-0.625]
+     /   \ 7| 8 /   \          dom3/7 have A = [-0.625,0]
+    /__ 6 \ |  / 9 __\
+   /   -- ______ --   \   nAB_x[i] is number of subdivisions of A or B
+  |  0   |      |   1  |  in the x^i-direction. nBmax = max(nAB_x)
+  |      |______|      |
+   \ __-- / | \  --__ /   nlam_AB[j][k] is number of subdivisions of lam for
+    \  2 /  |  \ 5   /    piece (j,k) in A,B.
+     \__/ 3 | 4 \ __/
+        \________/        r0 is radius of outer sphere
+                          2*dc[i] is sidelength of box in dir i
+*/
+int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
+                                      double xc[3], double dc[3], double r0,
+                                      int nAB_x[3], int nBmax,
+                                      int (*nlam_AB)[nBmax])
+{
+  int pl;
+  double Din[6], Dout[6];
+  int f;
+
+  /* set distances to make 6 cubed spheres around the box */
+  for(f=0; f<6; f++)
+  {
+    Din[f]  = dc[f/2];
+    Dout[f] = r0;
+  }
+  pl = add_N_CubedSphere_doms(mesh, N, outerCubedSphere,0,0, xc, Din,Dout,
+                              nAB_x, nBmax, nlam_AB);
+  return pl;
+}
+
 /* put 6 stretchedCubedShell's around the sphere from
    sphere_around_full_box_at_xc
                    ___________
@@ -551,6 +587,105 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
   return ret; /* return pat index of last added pat */
 }
 
+/* Add cubed sphere doms 0 to N-1:
+   +Divide A or B region of a dom into nAB_x pieces. Here nAB_x[i] tells us
+    how many pieces we want in the x^i-direction.
+   +nBmax = max3(nAB_x[0], nAB_x[1], nAB_x[2])
+   +Also divide lam into nlam_AB[A_piece][B_piece] pieces,
+    where A/B_piece=0,...,nA/B */
+int add_N_CubedSphere_doms(tMesh *mesh, int N,
+                           int type, int stretch, int SigFunc,
+                           double xc[3], double Din[6], double Dout[6],
+                           int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
+{
+  int f, ret=-1;
+
+  if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
+
+  /* make the N domains */
+  for(f=0; f<N; f++)
+  {
+    double Amin,Amax, Bmin,Bmax;
+    double alphamin, alphamax, dalpha;
+    double betamin,  betamax,  dbeta;
+    int nA, nB, j, k;
+    int dir = f/2;
+    int pls = f%2;
+
+    /* set min/max in A-, B-directions */
+    set_AB_min_max_from_Din(f, Din, &Amin,&Amax, &Bmin,&Bmax);
+
+    /* find number of pieces in A, B */
+    switch(dir)
+    {
+    case 0:
+      nA = nAB_x[1];
+      nB = nAB_x[2];
+      break;
+    case 1:
+      nA = nAB_x[0];
+      nB = nAB_x[2];
+      break;
+    case 2:
+      nA = nAB_x[1];
+      nB = nAB_x[0];
+      break;
+    default:
+      errorexit("dir must 0,1,2");
+    }
+
+    /* find angles from A and B extrema */
+    switch(pls)
+    {
+    case 0:
+      alphamin = Arg_plus(-1., -Amin);
+      alphamax = Arg_plus(-1., -Amax);
+      betamin = Arg_plus(-1., -Bmin);
+      betamax = Arg_plus(-1., -Bmax);
+      break;
+    case 1:
+      alphamin = Arg(1., Amin);
+      alphamax = Arg(1., Amax);
+      betamin = Arg(1., Bmin);
+      betamax = Arg(1., Bmax);
+      break;
+    }
+    dalpha = (alphamax - alphamin)/nA;
+    dbeta  = (betamax  - betamin)/nB;
+
+    /* make nlam*nA*nB patches */
+    for(k=0; k<nB; k++)
+    for(j=0; j<nA; j++)
+    {
+      int nlam = nlam_AB[j][k];
+      double dlam = 1./nlam;
+      int i;
+      for(i=0; i<nlam; i++)
+      {
+        double A0 = tan(alphamin + dalpha*j);
+        double A1 = tan(alphamin + dalpha*(j+1));
+        double B0 = tan(betamin + dbeta*k);
+        double B1 = tan(betamin + dbeta*(k+1));
+        double lam0 = dlam*i;
+        double lam1 = dlam*(i+1);
+        double bbox[] = {lam0,lam1, A0,A1, B0,B1};
+
+        /* use exact end values for A and B */
+        if(j==0)         bbox[2] = Amin;
+        else if(j==nA-1) bbox[3] = Amax;
+        if(k==0)         bbox[4] = Bmin;
+        else if(k==nB-1) bbox[5] = Bmax;
+
+        /* add 1 Cubed Sphere */
+        ret = add_1_CubedSphere_pat_bbox(mesh, f,type, stretch,SigFunc,
+                                         xc,Din[f],Dout[f], bbox);
+      }
+    }
+  }
+
+  return ret; /* return pat index of last added pat */
+}
+
 
 /* find Amax,Amin, Bmax,Bmin in a domain using distances from center */
 void set_AB_min_max_from_Din(int dom, double *Din,
@@ -606,26 +741,17 @@ void set_AB_min_max_from_Din(int dom, double *Din,
   }
 }
 
-/* add 1 cubed sphere with specific bounds */
-int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
-                          int stretch, int SigFunc, double *xc,
-                          double Din, double Dout, double ABrct[4])
+/* add 1 cubed sphere with specific bounds and bbox */
+int add_1_CubedSphere_pat_bbox(tMesh *mesh, int dom, int type,
+                               int stretch, int SigFunc, double *xc,
+                               double Din, double Dout, double bbox[6])
 {
   int amr_n0 = Geti(Par("amr_n0"));
   int amr_n1 = Geti(Par("amr_n1"));
   int amr_n2 = Geti(Par("amr_n2"));
   int n[] = { amr_n0, amr_n1, amr_n2 };
-  double bbox[6];
   tPat *pat;
   int d;
-
-  /* set min/max in each direction */
-  bbox[0] = 0.;
-  bbox[1] = 1.;
-  bbox[2] = ABrct[0];
-  bbox[3] = ABrct[1];;
-  bbox[4] = ABrct[2];
-  bbox[5] = ABrct[3];
 
   /* make new patch */
   pat = add_patch(mesh, bbox, NULL, n, 0);
@@ -646,7 +772,17 @@ int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
 
   return pat->p; /* return pat index of last added pat */
 }
+/* add 1 cubed sphere with specific bounds, and lam in [0,1] */
+int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
+                          int stretch, int SigFunc, double *xc,
+                          double Din, double Dout, double ABrct[4])
+{
+  /* set min/max in each direction */
+  double bbox[] = { 0.,1.,  ABrct[0],ABrct[1], ABrct[2],ABrct[3] };
 
+  return add_1_CubedSphere_pat_bbox(mesh, dom,type, stretch,SigFunc,
+                                    xc, Din,Dout, bbox);
+}
 
 /* set 1 cubed sphere pat from patch info, as well as stretch, SigFunc */
 int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)

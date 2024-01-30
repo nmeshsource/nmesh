@@ -45,12 +45,16 @@ int add_6CubedSphere_pats(tMesh *mesh, int type, int stretch, int r_is_const,
 int add_N_CubedSphere_pats(tMesh *mesh, int N,
                            int type, int stretch, int r_is_const,
                            double *xc, double *Din, double *Dout);
+int add_N_CubedSphere_doms(tMesh *mesh, int N,
+                           int type, int stretch, int SigFunc,
+                           double xc[3], double Din[6], double Dout[6],
+                           int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax]);
 void set_AB_min_max_from_Din(int dom, double *Din,
                              double *Amin, double *Amax,
                              double *Bmin, double *Bmax);
-int add_1_CubedSphere_pat(tMesh *mesh, int dom, int type,
-                          int stretch, int r_is_const, double *xc,
-                          double Din, double Dout, double ABrct[4]);
+int add_1_CubedSphere_pat_bbox(tMesh *mesh, int dom, int type,
+                               int stretch, int SigFunc, double *xc,
+                               double Din, double Dout, double bbox[6]);
 
 /* setup_Boxes.c */
 int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
