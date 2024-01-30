@@ -250,7 +250,6 @@ int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
   }
   pl = add_N_CubedSphere_doms(mesh, N, outerCubedSphere,0,0, xc, Din,Dout,
                               nAB_x, nBmax, nlam_AB);
-//pl = add_N_CubedSphere_pats(mesh, N, outerCubedSphere,0,0, xc, Din,Dout);
   return pl;
 }
 /* like sphere_nABnlam_around_empty_box_at_xc, but set all nlam_AB[j][k]=1 */
@@ -805,7 +804,7 @@ int add_1_CubedSphere_pat_bbox(tMesh *mesh, int dom, int type,
 
   /* make new patch */
   pat = add_patch(mesh, bbox, NULL, n, 0);
-  PRFs(": ");printpatch(pat);
+  //PRFs(": ");printpatch(pat);
 
   /* set center */
   for(d=0; d<3; d++)  pat->CI->xc[d] = xc[d];
