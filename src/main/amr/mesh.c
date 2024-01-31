@@ -417,7 +417,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
   int nAB[] = { 1,1,1 };
   double xc[] = { 0., 0., 0. };
   int CubedSphere_domain_divide = Par("amr_CubedSphere_domain_divide");
-  int AB_div_mode;
+  double AB_div_mode;
   char *domain_nAB = Gets(Par("amr_CubedSphere_domain_nAB"));
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
@@ -441,11 +441,14 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
 
   /* set AB_div_mode from par amr_CubedSphere_domain_divide */
   if(Getv(CubedSphere_domain_divide,"AB"))
-    AB_div_mode = 1;
+    AB_div_mode = 1.;
   else if(Getv(CubedSphere_domain_divide,"angles"))
-    AB_div_mode = 0;
-  else if(Getv(CubedSphere_domain_divide,"angles_AB1"))
-    AB_div_mode = 2;
+    AB_div_mode = 0.;
+  else if(Getv(CubedSphere_domain_divide,"angles_AB"))
+    AB_div_mode = Getd(CubedSphere_domain_divide);
+  else
+    errorexits("unknown amr_CubedSphere_domain_divide = %s",
+               Gets(CubedSphere_domain_divide));
 
   /* setup cubed spheres based on npats read from amr_mesh_type */
   switch(npats)

@@ -235,7 +235,7 @@ int sphere_around_full_box_at_xc(tMesh *mesh, int N,
 */
 int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
                                           double dc[3], double r0,
-                                          int AB_div_mode, int nAB_x[3],
+                                          double AB_div_mode, int nAB_x[3],
                                           int nBmax, int (*nlam_AB)[nBmax])
 {
   int pl;
@@ -255,7 +255,7 @@ int sphere_nABnlam_around_empty_box_at_xc(tMesh *mesh, int N, double xc[3],
 /* like sphere_nABnlam_around_empty_box_at_xc, but set all nlam_AB[j][k]=1 */
 int sphere_nAB_around_empty_box_at_xc(tMesh *mesh, int N,
                                       double xc[3], double dc[3], double r0,
-                                      int AB_div_mode, int nAB_x[3])
+                                      double AB_div_mode, int nAB_x[3])
 {
   int nABmax = max3(nAB_x[0], nAB_x[1], nAB_x[2]);
   int (*nlam_AB)[nABmax] = malloc(nABmax*nABmax*sizeof(int));
@@ -676,7 +676,7 @@ double A_or_B_of_index(int nA, int j, int mode,
 int add_N_CubedSphere_doms(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double xc[3], double Din[6], double Dout[6],
-                           int AB_div_mode,
+                           double AB_div_mode,
                            int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
 {
   int f, ret=-1;
