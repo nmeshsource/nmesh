@@ -40,6 +40,9 @@ MPIDIRI =	# -I/usr/lib/x86_64-linux-gnu/openmpi/include	#for openmpi
 MPIDIRL =	# -L/usr/lib/x86_64-linux-gnu/openmpi/lib	#for openmpi
 MPILIBS =	# -lmpi						#for openmpi
 
+# git options
+git_clone_options = 	# e.g. --branch master
+
 # --------------------------------------------------------------------------
 # some nmesh libraries are required
 libpaths = src/main/amr src/main/nMPI
@@ -228,7 +231,7 @@ touch_all_nmesh_c:
 # targets to get git projects
 git_cloneonly:
 	@echo ==================== Cloning nmesh projects ====================
-	-for X in $(projects); do N=$$(basename $$X .git); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
+	-for X in $(projects); do N=$$(basename $$X .git); printf "==== %s ====\n" $$N; git clone $(git_clone_options) $$X $(PROJECTDIR)/$$N; done
 
 git_clone: git_cloneonly install_git_hooks
 
