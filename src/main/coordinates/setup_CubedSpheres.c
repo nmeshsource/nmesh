@@ -652,11 +652,11 @@ double A_or_B_of_index(int nA, int j, int mode,
   //PRF;printf(": mode=%d \n", mode);
   switch(mode)
   {
-  case -1:
+  case 1:
     return A_lin;
   case 0:
     return A_alplin;
-  case 1:
+  case 2:
     /* Alin1 is linear in A, but has a lesser slope than Alin */
     dA1    = 0.8*dA;
     A_lin1 = dA1*j + (Amax+Amin - dA1*nA)*0.5;
