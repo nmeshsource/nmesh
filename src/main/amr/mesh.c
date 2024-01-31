@@ -444,7 +444,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
     AB_div_mode = 1.;
   else if(Getv(CubedSphere_domain_divide,"angles"))
     AB_div_mode = 0.;
-  else if(Getv(CubedSphere_domain_divide,"angles_AB"))
+  else if(Getv(CubedSphere_domain_divide,"AB_angles"))
     AB_div_mode = Getd(CubedSphere_domain_divide);
   else
     errorexits("unknown amr_CubedSphere_domain_divide = %s",
