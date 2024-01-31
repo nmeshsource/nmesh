@@ -629,7 +629,7 @@ void angle_of_Arange_or_Brange(int plus, double Amin, double Amax,
 }
 
 /* get A at index j*/
-double A_or_B_of_index(int nA, int j, int mode,
+double A_or_B_of_index(int nA, int j, double mode,
                        double Amin,double Amax,
                        double alphamin, double alphamax)
 {
@@ -649,22 +649,15 @@ double A_or_B_of_index(int nA, int j, int mode,
   A_alplin = tan(alphamin + dalpha*j);
   /* Note: |A_alplin| < |A_lin| */
 
-  //PRF;printf(": mode=%d \n", mode);
-  switch(mode)
-  {
-  case 1:
-    return A_lin;
-  case 0:
-    return A_alplin;
-  case 2:
-    /* Alin1 is linear in A, but has a lesser slope than Alin */
-    dA1    = 0.8*dA;
-    A_lin1 = dA1*j + (Amax+Amin - dA1*nA)*0.5;
-    if(fabs(A_lin1) > fabs(A_alplin)) return A_lin1;
-    else                              return A_alplin;
-  default:
-    errorexit("mode must be: -1, 0,1,2,3,4,5,6");
-  }
+  if(mode>=1.) return A_lin;
+  if(mode<=0.) return A_alplin;
+
+  /* Alin1 is linear in A, but has a lesser slope than Alin */
+  dA1    = mode*dA;
+  A_lin1 = dA1*j + (Amax+Amin - dA1*nA)*0.5;
+
+  if(fabs(A_lin1) > fabs(A_alplin)) return A_lin1;
+  else                              return A_alplin;
 }
 
 /* Add cubed sphere doms 0 to N-1:
