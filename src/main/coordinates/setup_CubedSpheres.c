@@ -634,6 +634,7 @@ double A_or_B_of_index(int nA, int j, int mode,
                        double alphamin, double alphamax)
 {
   double dA, dalpha, A_lin, A_alplin;
+  double A_lin1, dA1;
 
   /* use exact end values for A or B */
   if(j==0)  return Amin;
@@ -646,7 +647,9 @@ double A_or_B_of_index(int nA, int j, int mode,
   /* linear in angle */
   dalpha   = (alphamax - alphamin)/nA;
   A_alplin = tan(alphamin + dalpha*j);
+  /* Note: |A_alplin| < |A_lin| */
 
+  //PRF;printf(": mode=%d \n", mode);
   switch(mode)
   {
   case -1:
@@ -654,23 +657,11 @@ double A_or_B_of_index(int nA, int j, int mode,
   case 0:
     return A_alplin;
   case 1:
-    if(fabs(A_lin) > 1.) return A_alplin;
-    else                 return A_lin;
-  case 2:
-    if(fabs(A_lin) > 2.) return A_alplin;
-    else                 return A_lin;
-  case 3:
-    if(fabs(A_lin) > 3.) return A_alplin;
-    else                 return A_lin;
-  case 4:
-    if(fabs(A_lin) > 4.) return A_alplin;
-    else                 return A_lin;
-  case 5:
-    if(fabs(A_lin) > 5.) return A_alplin;
-    else                 return A_lin;
-  case 6:
-    if(fabs(A_lin) > 6.) return A_alplin;
-    else                 return A_lin;
+    /* Alin1 is linear in A, but has a lesser slope than Alin */
+    dA1    = 0.8*dA;
+    A_lin1 = dA1*j + (Amax+Amin - dA1*nA)*0.5;
+    if(fabs(A_lin1) > fabs(A_alplin)) return A_lin1;
+    else                              return A_alplin;
   default:
     errorexit("mode must be: -1, 0,1,2,3,4,5,6");
   }
