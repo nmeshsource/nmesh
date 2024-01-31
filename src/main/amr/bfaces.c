@@ -772,6 +772,7 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
         printf("face=");
         for(fi=0; fi<6; fi++) printf("%d ", face[fi]);
         printf("-> ret=%d\n", ret);
+        printf("Are pat%d and pat%d overlapping???\n", pat->p, opat->p);
         errorexiti("oX was supposed to be on 1 face, not %d faces!!!", ret);
       }
     }
