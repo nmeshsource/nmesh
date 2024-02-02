@@ -10,4 +10,4 @@ enum
   DATAVAR=2, //loadbal transfer via MPI and interp on refine, but no surfaces
   LBTVAR=4   //loadbal transfer via MPI, but no interp. and no surfaces
 };
-//Note: we may use 0,1 instead of EVOVAR,EVOVAR somwhere
+//Note: we may use 0,1 instead of EVOVAR,AUXVAR somwhere
