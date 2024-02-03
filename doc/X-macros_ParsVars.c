@@ -65,6 +65,11 @@ void varname_Comp0(const char *name, const char *indices, char *varname0)
   { char varname[100]; \
     varname_Comp0(#module"_"#name, indices, varname); \
     module->name = Ind(varname); }
+//NOTE: We should probably change all the AddPar and AddVar funcs to return
+//      the index of the par or the index of the 1st var-comp.
+//      Then we could have simply:
+//#define ADDVAR(module, type, name, indices, comment) \
+//  module->name = Add##type(#module"_"#name, indices, comment);
 
 #define INITPARINDEX(module, type, name, value, comment) \
   module->name = Par(#module"_"#name);
