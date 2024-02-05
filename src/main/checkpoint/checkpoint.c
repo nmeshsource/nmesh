@@ -371,9 +371,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
       */
 
       printf("Now exit nmesh before the queuing system kills it!\n");
-      RunFun(FINALIZE); /* hook for funcs to run for a clean return */
-      prTimeIn_s("WallTime just before finalize_all_and_exit: ");
-      finalize_all_and_exit(mesh, 0);
+      RunFunFINALIZE_finalize_all_and_exit(mesh, 0);
     }
     return 1; /* signal that checkpoint was saved */
   }
