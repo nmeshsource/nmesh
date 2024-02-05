@@ -11,9 +11,9 @@ int nmesh_main(tMesh *mesh)
   printf("Adding main (rev "MSTR_OFVAL(MAINREV)")\n");
 
   /* functions */
-  AddFun(FIRST, print_endian_info);
-  AddFun(FIRST, check_compiledphysics);
-  AddFun(FIRST, CheckForBannedPars);
+  AddFun(POST_INITLIBS, print_endian_info);
+  AddFun(POST_INITLIBS, check_compiledphysics);
+  AddFun(POST_INITLIBS, CheckForBannedPars);
   AddFun(OUTPUT, write_all_timers);
   AddFun(POST_OUTPUT, nan_checker);
   AddFun(POST_OUTPUT, sysmon);

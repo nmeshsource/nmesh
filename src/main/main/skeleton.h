@@ -4,7 +4,8 @@
 /* for skeleton.c */
 enum
 {
-  FIRST,            /* in main: just after libraries have been initialized */
+  PRE_INITLIBS,     /* in main: just before libraries are initialized */
+  POST_INITLIBS,    /* in main: just after libraries have been initialized */
 
   //timebins called once in inidata_mesh:
   POST_PARAMETERS,

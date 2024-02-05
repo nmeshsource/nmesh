@@ -43,6 +43,7 @@ int main(int argc, char **argv)
   parse_parameter_file(mesh, Gets(Par("parameterfile")));
   parse_command_line_options(mesh);
   make_output_directory(mesh);
+  RunFun(PRE_INITLIBS);  /* for funcs to run before initialize_libraries */
   enable_FPEEXCEPTIONS();
   print_system_info();
   initialize_libraries(mesh);
@@ -51,8 +52,8 @@ int main(int argc, char **argv)
   /* print skeleton of function bins */
   PrintMeshFuncs(mesh);
 
-  /* hook for funcs to run 1st */
-  RunFun(FIRST);
+  /* hook for funcs to run just after initialize_libraries */
+  RunFun(POST_INITLIBS);
 
   iterate_parameters(mesh, 0); /* start of new iteration */
   while(iterate_parameters(mesh, 1))

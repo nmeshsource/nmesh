@@ -10,7 +10,7 @@ int nmesh_basis(tMesh *mesh)
   printf("Adding basis\n");
 
   /* functions */
-  AddFun(FIRST, init_gridpoints);
+  AddFun(POST_INITLIBS, init_gridpoints);
   AddFun(POST_FINALIZEMESH, free_gridpoints);
   AddFun(POST_PARAMETERS, basis_init_globals);
 
