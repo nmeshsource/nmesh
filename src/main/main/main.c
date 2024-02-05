@@ -27,6 +27,7 @@ int main(int argc, char **argv)
 {
   tMesh *mesh;
 
+  /* init MPI */
   nMPI_Init(&argc, &argv);
   wait_for_debugger_if_NMESH_MPI_DEBUG();
   nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
@@ -44,6 +45,7 @@ int main(int argc, char **argv)
   parse_command_line_options(mesh);
   make_output_directory(mesh);
   RunFun(PRE_INITLIBS);  /* for funcs to run before initialize_libraries */
+  main_mesh = mesh;      /* in case a func in PRE_INITLIBS has called main */
   enable_FPEEXCEPTIONS();
   print_system_info();
   initialize_libraries(mesh);
