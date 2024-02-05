@@ -10,6 +10,8 @@
 nMPI_Comm main_comm;  /* MPI communicator made at start of main */
 tMesh *main_mesh;     /* contains the mesh made in main */
 const char *compiledphysics; /* set in nmesh_automatic_initialize.c */
+int main_ncalls;             /* number of calls to main */
+int NMESH_memory_persists;   /* if 1 do not free in finalize_all */
 
 
 /* initialize libraries: calls the initializers for each module,
@@ -28,7 +30,8 @@ int main(int argc, char **argv)
   tMesh *mesh;
 
   /* init some stuff only once */
-  if(!main_mesh)
+  main_ncalls++;
+  if(main_ncalls <= 1)
   {
     /* init MPI */
     nMPI_Init(&argc, &argv);
@@ -622,15 +625,33 @@ int finalize_mesh(tMesh *mesh)
 /* free mesh and finalize MPI */
 void finalize_all(tMesh *mesh)
 {
-  finalize_mesh(mesh);
-  free(mesh);
-  nMPI_Comm_free(&(main_comm));
-  nMPI_Finalize();
+  if(!NMESH_memory_persists)
+  {
+    finalize_mesh(mesh);
+    free(mesh);
+  }
+  if(main_ncalls <= 1)
+  {
+    nMPI_Comm_free(&(main_comm));
+    nMPI_Finalize();
+  }
 }
+
+///* first run all funcs in FINALIZE, then finalize all else */
+//void RunFunFINALIZE_finalize_all(tMesh *mesh)
+//{
+//  if(!NMESH_memory_persists)
+//    RunFun(FINALIZE); /* hook for funcs to run for a clean return */
+//  prTimeIn_s("WallTime just before finalize_all_and_exit: ");
+//  finalize_all(mesh);
+//}
+
 
 /* finalize all and then exit with code ec */
 void finalize_all_and_exit(tMesh *mesh, int ec)
 {
+  NMESH_memory_persists = 0; /* free mem for clean exit */
+  main_ncalls = 1;           /* call MPI_Finalize for clean exit */
   finalize_all(mesh);
   PRF;printf(": nmesh is exiting now.\n");
   fflush(stderr);
@@ -641,7 +662,8 @@ void finalize_all_and_exit(tMesh *mesh, int ec)
 /* first run all funcs in FINALIZE, then exit cleanly */
 void RunFunFINALIZE_finalize_all_and_exit(tMesh *mesh, int ec)
 {
-  RunFun(FINALIZE); /* hook for funcs to run for a clean return */
+  if(!NMESH_memory_persists)
+    RunFun(FINALIZE); /* hook for funcs to run for a clean return */
   prTimeIn_s("WallTime just before finalize_all_and_exit: ");
   finalize_all_and_exit(mesh, ec);
 }
