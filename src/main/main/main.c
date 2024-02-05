@@ -76,11 +76,8 @@ int main(int argc, char **argv)
   }
 
   TIMER_STOP;
-  prTimeIn_s("WallTime just before main's call to finalize_mesh: ");
-  finalize_mesh(mesh);
-  free(mesh);
-  nMPI_Comm_free(&(main_comm));
-  nMPI_Finalize();
+  prTimeIn_s("WallTime just before main's call to finalize_all: ");
+  finalize_all(mesh);
   PRF;printf(": nmesh has finished.\n");
   return 0;
 }
@@ -623,7 +620,7 @@ int finalize_mesh(tMesh *mesh)
 }
 
 /* free mesh and finalize MPI */
-void finalize_all(tMesh *mesh, int ec)
+void finalize_all(tMesh *mesh)
 {
   finalize_mesh(mesh);
   free(mesh);
@@ -634,10 +631,7 @@ void finalize_all(tMesh *mesh, int ec)
 /* finalize all and then exit with code ec */
 void finalize_all_and_exit(tMesh *mesh, int ec)
 {
-  finalize_mesh(mesh);
-  free(mesh);
-  nMPI_Comm_free(&(main_comm));
-  nMPI_Finalize();
+  finalize_all(mesh);
   PRF;printf(": nmesh is exiting now.\n");
   fflush(stderr);
   fflush(stdout);

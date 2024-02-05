@@ -10,6 +10,7 @@ int check_compiledphysics(tMesh *mesh);
 int inidata_mesh(tMesh *mesh);
 int evolve_mesh(tMesh *mesh);
 int finalize_mesh(tMesh *mesh);
+void finalize_all(tMesh *mesh);
 
 /* parameters.c */
 void parse_parameter_file(tMesh *mesh, char *parfile);
