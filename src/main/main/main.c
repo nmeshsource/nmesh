@@ -29,8 +29,9 @@ int main(int argc, char **argv)
 {
   tMesh *mesh;
 
-  /* init some stuff only once */
   main_ncalls++;
+
+  /* init some stuff only once */
   if(main_ncalls <= 1)
   {
     /* init MPI */
@@ -82,6 +83,7 @@ int main(int argc, char **argv)
   prTimeIn_s("WallTime just before main's call to finalize_all: ");
   finalize_all(mesh);
   PRF;printf(": nmesh has finished.\n");
+  main_ncalls--;
   return 0;
 }
 
@@ -637,15 +639,14 @@ void finalize_all(tMesh *mesh)
   }
 }
 
-///* first run all funcs in FINALIZE, then finalize all else */
-//void RunFunFINALIZE_finalize_all(tMesh *mesh)
-//{
-//  if(!NMESH_memory_persists)
-//    RunFun(FINALIZE); /* hook for funcs to run for a clean return */
-//  prTimeIn_s("WallTime just before finalize_all_and_exit: ");
-//  finalize_all(mesh);
-//}
-
+/* first run all funcs in FINALIZE, then finalize all else */
+void RunFunFINALIZE_finalize_all(tMesh *mesh)
+{
+  if(!NMESH_memory_persists)
+    RunFun(FINALIZE); /* hook for funcs to run for a clean return */
+  prTimeIn_s("WallTime just before finalize_all: ");
+  finalize_all(mesh);
+}
 
 /* finalize all and then exit with code ec */
 void finalize_all_and_exit(tMesh *mesh, int ec)
@@ -662,8 +663,7 @@ void finalize_all_and_exit(tMesh *mesh, int ec)
 /* first run all funcs in FINALIZE, then exit cleanly */
 void RunFunFINALIZE_finalize_all_and_exit(tMesh *mesh, int ec)
 {
-  if(!NMESH_memory_persists)
-    RunFun(FINALIZE); /* hook for funcs to run for a clean return */
+  RunFun(FINALIZE); /* hook for funcs to run for a clean return */
   prTimeIn_s("WallTime just before finalize_all_and_exit: ");
   finalize_all_and_exit(mesh, ec);
 }
