@@ -27,13 +27,17 @@ int main(int argc, char **argv)
 {
   tMesh *mesh;
 
-  /* init MPI */
-  nMPI_Init(&argc, &argv);
-  wait_for_debugger_if_NMESH_MPI_DEBUG();
-  nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
+  /* init some stuff only once */
+  if(!main_mesh)
+  {
+    /* init MPI */
+    nMPI_Init(&argc, &argv);
+    wait_for_debugger_if_NMESH_MPI_DEBUG();
+    nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
 
-  /* set time when nmesh was started */
-  initTimeIn_s();
+    /* set time when nmesh was started */
+    initTimeIn_s();
+  }
 
   /* make first mesh in which we store pars, vars and funs */
   mesh = make_empty_mesh(0);
@@ -618,6 +622,14 @@ int finalize_mesh(tMesh *mesh)
   return 0;
 }
 
+/* free mesh and finalize MPI */
+void finalize_all(tMesh *mesh, int ec)
+{
+  finalize_mesh(mesh);
+  free(mesh);
+  nMPI_Comm_free(&(main_comm));
+  nMPI_Finalize();
+}
 
 /* finalize all and then exit with code ec */
 void finalize_all_and_exit(tMesh *mesh, int ec)
