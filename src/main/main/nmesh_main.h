@@ -344,3 +344,4 @@ FILE *fopen_bufsize(tMesh *mesh, const char *pathname, const char *mode,
                     char **buf);
 int fs_sync(tMesh *mesh);
 void finalize_all_and_exit(tMesh *mesh, int ec);
+void RunFunFINALIZE_finalize_all_and_exit(tMesh *mesh, int ec);

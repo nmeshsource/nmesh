@@ -637,3 +637,11 @@ void finalize_all_and_exit(tMesh *mesh, int ec)
   fflush(stdout);
   exit(ec);
 }
+
+/* first run all funcs in FINALIZE, then exit cleanly */
+void RunFunFINALIZE_finalize_all_and_exit(tMesh *mesh, int ec)
+{
+  RunFun(FINALIZE); /* hook for funcs to run for a clean return */
+  prTimeIn_s("WallTime just before finalize_all_and_exit: ");
+  finalize_all_and_exit(mesh, ec);
+}
