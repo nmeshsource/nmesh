@@ -279,11 +279,13 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
+  par->mesh          = mesh;
   par->name          = name;
   par->text          = Getv(Par("3dformat"), "text");
   par->arrange_as_1d = Getv(Par("3dformat"), "arrange_as_1d");
   par->flt           = Getv(Par("3dformat"), "float");
   par->dbl           = Getv(Par("3dformat"), "double");
+  par->addpoints     = Getv(Par("3dformat"), "addpoints");
   par->outputregion  = Par("3doutputregion");
   output_set_regions_in_outpars(mesh, par);
 
