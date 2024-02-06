@@ -60,7 +60,7 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n,
 	fprintf(fp, "%.16g\n", buffer[stride*i+offset]);
     else
       for(i = 0; i < n; i++)
-	fprintf(fp, "%.7g\n", (float) buffer[stride*i+offset]);
+	fprintf(fp, "%.7g\n", buffer[stride*i+offset]);
   }
   else /* assume binary vtk data */
   {
@@ -85,6 +85,51 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n,
   } /* end else */
 }
 
+/* write x,y,z points part of a VTK file, with out header */
+void write_raw_vtk_xyz(FILE *fp, double *px, double *py, double *pz,
+                       int n, int stride, int offset, tOutpars *par)
+{
+  int i;
+
+  if(par->text) /* ascii vtk data */
+  {
+    if(par->dbl)
+      for(i = 0; i < n; i++)
+        fprintf(fp, "%.16g %.16g %.16g\n",
+                px[stride*i+offset], py[stride*i+offset], pz[stride*i+offset]);
+    else
+      for(i = 0; i < n; i++)
+        fprintf(fp, "%.7g %.7g %.7g\n",
+                px[stride*i+offset], py[stride*i+offset], pz[stride*i+offset]);
+  }
+  else /* assume big endian binary vtk data */
+  {
+    if(par->dbl)
+    {
+      for(i = 0; i < n; i++)
+      {
+        double xdouble = px[stride*i+offset];
+        double ydouble = py[stride*i+offset];
+        double zdouble = pz[stride*i+offset];
+        fwrite_big(&xdouble, sizeof(double), 1, fp);
+        fwrite_big(&ydouble, sizeof(double), 1, fp);
+        fwrite_big(&zdouble, sizeof(double), 1, fp);
+      }
+    }
+    else
+    {
+      for (i = 0; i < n; i++)
+      {
+        float xfloat = px[stride*i+offset];
+        float yfloat = py[stride*i+offset];
+        float zfloat = pz[stride*i+offset];
+        fwrite_big(&xfloat, sizeof(float), 1, fp);
+        fwrite_big(&yfloat, sizeof(float), 1, fp);
+        fwrite_big(&zfloat, sizeof(float), 1, fp);
+      }
+    }
+  }
+}
 
 /*************************************************************************/
 /* functions for 3d output */
@@ -94,6 +139,7 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n,
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
                  double Time, int series, tOutpars *par)
 {
+  tMesh *mesh = NULL;
   tArray *X[3];
   tArray *Xb[3];
   double *pX, *pY, *pZ;
@@ -106,6 +152,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
 
   if(node)
   {
+    mesh = node->pat->mesh;
     node_Xb3(node, Xb);
 
     /* make room for X,Y,Z */
@@ -165,22 +212,44 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
     n1 = fmin(n[1], X[1]->n[0]);
     n2 = fmin(n[2], X[2]->n[0]);
 
-    /* write header */
+    /* start header */
     fprintf(fp, "# vtk DataFile Version 2.0\n");
     fprintf(fp, "variable %s, node %s, time %.15g\n",
             par->name, par->nodename, Time);
     fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
-    fprintf(fp, "DATASET RECTILINEAR_GRID\n");
-    fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
-    fprintf(fp, "X_COORDINATES %d %s\n", n0, par->dbl ? "double" : "float");
-    write_raw_vtk_data(fp, pX,n0, 1,0, par);
-    fprintf(fp, "\n\n");
-    fprintf(fp, "Y_COORDINATES %d %s\n", n1, par->dbl ? "double" : "float");
-    write_raw_vtk_data(fp, pY,n1, 1,0, par);
-    fprintf(fp, "\n\n");
-    fprintf(fp, "Z_COORDINATES %d %s\n", n2, par->dbl ? "double" : "float");
-    write_raw_vtk_data(fp, pZ,n2, 1,0, par);
+    if(1) /* use X,Y,Z coords */
+    {
+      /* write header for RECTILINEAR_GRID */
+      fprintf(fp, "DATASET RECTILINEAR_GRID\n");
+      fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
+      fprintf(fp, "X_COORDINATES %d %s\n", n0, par->dbl ? "double" : "float");
+      write_raw_vtk_data(fp, pX,n0, 1,0, par);
+      fprintf(fp, "\n\n");
+      fprintf(fp, "Y_COORDINATES %d %s\n", n1, par->dbl ? "double" : "float");
+      write_raw_vtk_data(fp, pY,n1, 1,0, par);
+      fprintf(fp, "\n\n");
+      fprintf(fp, "Z_COORDINATES %d %s\n", n2, par->dbl ? "double" : "float");
+      write_raw_vtk_data(fp, pZ,n2, 1,0, par);
+    }
+    else /* use x,y,z coords */
+    {
+      int ix;
+      double *px, *py, *pz;
+      if(node==NULL || mesh==NULL)
+        errorexit("node or mesh is NULL");
+      ix = Ind( Gets(Par("output_xcoord")) );
+      px = Vard(node, ix);
+      py = Vard(node, ix+1);
+      pz = Vard(node, ix+2);
+
+      /* write header for STRUCTURED_GRID */
+      fprintf(fp, "DATASET STRUCTURED_GRID\n");
+      fprintf(fp, "DIMENSIONS %d %d %d\n", n0, n1, n2);
+      fprintf(fp, "POINTS %d %s\n", n0*n1*n2, par->dbl ? "double" : "float");
+      write_raw_vtk_xyz(fp, px,py,pz, n0*n1*n2,1,0, par);
+    }
+    /* after points we write the actual scalar data */
     fprintf(fp, "\n\n");
     fprintf(fp, "POINT_DATA %d\n", n0*n1*n2);
     fprintf(fp, "SCALARS scalars %s\n", par->dbl ? "double" : "float");
