@@ -349,6 +349,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
+  par->mesh          = mesh;
   par->name          = name;
   par->text          = Getv(Par("coformat"), "text");
   par->arrange_as_1d = Getv(Par("coformat"), "arrange_as_1d");
@@ -636,11 +637,13 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
 
   /* pars we may need for vtk or others */
+  par->mesh          = mesh;
   par->name          = name;
   par->text          = Getv(Par("2dformat"), "text");
   par->arrange_as_1d = 0; // Getv(Par("2dformat"), "arrange_as_1d");
   par->flt           = Getv(Par("2dformat"), "float");
   par->dbl           = Getv(Par("2dformat"), "double");
+  par->addpoints     = Getv(Par("2dformat"), "addpoints");
   par->outputregion  = Par("2doutputregion");
   output_set_regions_in_outpars(mesh, par);
 
