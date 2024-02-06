@@ -139,7 +139,9 @@ void write_raw_vtk_xyz(FILE *fp, double *px, double *py, double *pz,
 void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
                  double Time, int series, tOutpars *par)
 {
-  tMesh *mesh = NULL;
+  tMesh *mesh = par->mesh;
+  int use_XYZ = 1;
+  int ix=-1;
   tArray *X[3];
   tArray *Xb[3];
   double *pX, *pY, *pZ;
@@ -152,7 +154,6 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
 
   if(node)
   {
-    mesh = node->pat->mesh;
     node_Xb3(node, Xb);
 
     /* make room for X,Y,Z */
@@ -174,6 +175,13 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
       X[d] = alloc_array(N);
       for(m=0; m<n[d]; m++) X[d]->d[m] = m;
     }
+  }
+
+  /* see if we can get, and want to use x,y,z */
+  if(par->addpoints && mesh && node)
+  {
+    ix = Ind( Gets(Par("output_xcoord")) );
+    use_XYZ = 0;
   }
 
   /* pointers to X data */
@@ -218,7 +226,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
             par->name, par->nodename, Time);
     fprintf(fp, par->text ? "ASCII\n" : "BINARY");
     fprintf(fp, "\n");
-    if(1) /* use X,Y,Z coords */
+    if(use_XYZ) /* use X,Y,Z coords */
     {
       /* write header for RECTILINEAR_GRID */
       fprintf(fp, "DATASET RECTILINEAR_GRID\n");
@@ -234,14 +242,9 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
     }
     else /* use x,y,z coords */
     {
-      int ix;
-      double *px, *py, *pz;
-      if(node==NULL || mesh==NULL)
-        errorexit("node or mesh is NULL");
-      ix = Ind( Gets(Par("output_xcoord")) );
-      px = Vard(node, ix);
-      py = Vard(node, ix+1);
-      pz = Vard(node, ix+2);
+      double *px = Vard(node, ix);
+      double *py = Vard(node, ix+1);
+      double *pz = Vard(node, ix+2);
 
       /* write header for STRUCTURED_GRID */
       fprintf(fp, "DATASET STRUCTURED_GRID\n");

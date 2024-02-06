@@ -5,12 +5,14 @@
 
 /* object to hold pars we need to pass around */
 typedef struct tOUTPARS {
+  tMesh *mesh;
   const char *name;
   const char *nodename;
   int text;
   int arrange_as_1d;
   int flt;
   int dbl;
+  int addpoints;
   int outputregion;   /* e.g. Par("3doutputregion") */
   int region_all;     /* Getv(Par("3doutputregion"), "all"));     */
   int region_sphere0; /* Getv(Par("3doutputregion"), "sphere0")); */

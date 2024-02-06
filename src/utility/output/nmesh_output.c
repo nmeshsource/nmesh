@@ -53,7 +53,7 @@ int nmesh_output(tMesh *mesh)
   AddPar("2dformat", "gnuplot",
 	 "format for 2d output [xdmf,gnuplot,vtk,text,binary,float,double]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "
-	 "[xdmf,vtk,text,binary,float,double]");
+	 "[xdmf,vtk,text,binary,float,double,addpoints]");
   AddPar("coformat", "vtk text arrange_as_1d", "format for coef output "
 	 "[vtk,text,binary,float,double]");
 
