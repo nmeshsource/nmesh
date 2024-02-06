@@ -343,7 +343,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
   int nseries;
   int vtk      = Getv(Par("coformat"), "vtk");
   char *outdir = Gets(Par("outdir"));
-  tOutpars par[1];
+  tOutpars par[1] = {0};
   int rk;
   int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf = cmalloc(IObufsz); /* larger buffer for write */
