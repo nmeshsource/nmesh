@@ -270,6 +270,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
 {
   int vi = Ind(name);
   FILE *fp;
+  char file_ext[8];
   int nseries;
   int vtk      = Getv(Par("3dformat"), "vtk");
   char *outdir = Gets(Par("outdir"));
@@ -286,6 +287,8 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
   par->flt           = Getv(Par("3dformat"), "float");
   par->dbl           = Getv(Par("3dformat"), "double");
   par->addpoints     = Getv(Par("3dformat"), "addpoints");
+  if(par->addpoints) strcpy(file_ext, "xyz");
+  else               strcpy(file_ext, "XYZ");
   par->outputregion  = Par("3doutputregion");
   output_set_regions_in_outpars(mesh, par);
 
@@ -322,7 +325,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
           if(vtk || 1) /* can do only VTK right now */
           {
             /* VTK output: one file per time step in separate subdirectories */
-            fp = fopen_vtk(name, outdir, "XYZ", ns, nseries-1, IObuf,IObufsz);
+            fp = fopen_vtk(name, outdir,file_ext, ns, nseries-1, IObuf,IObufsz);
             write3d_vtk(node, fp, VarA(node, vi), It,T, nseries-1, par);
             fclose(fp);
           }
@@ -434,7 +437,6 @@ void write_array(tNode *node, tArray *va, const char *name, int as_1d,
 
     /* set more pars */
     par->mesh = mesh;
-    par->addpoints = Getv(Par("3dformat"), "addpoints");
   }
   else
   {
