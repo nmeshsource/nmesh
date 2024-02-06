@@ -418,7 +418,7 @@ void write_array(tNode *node, tArray *va, const char *name, int as_1d,
   FILE *fp;
   int nseries;
   const char *outdir;
-  tOutpars par[1];
+  tOutpars par[1] = {0};
   char ns[100];
   int IObufsz;
   char *IObuf;
@@ -431,6 +431,10 @@ void write_array(tNode *node, tArray *va, const char *name, int as_1d,
 
     /* find string that identifies node */
     nodename(node, ns,100);
+
+    /* set more pars */
+    par->mesh = mesh;
+    par->addpoints = Getv(Par("3dformat"), "addpoints");
   }
   else
   {
@@ -547,6 +551,9 @@ void write_plane_vtk(tNode *node, FILE *fp, int normal, int plane[],
 
   /* return if var has no memory */
   if(!va || va->d==NULL) return;
+
+  if(par->addpoints)
+    errorexit("addpoints is not implemented in write_plane_vtk");
 
   /* make room for X,Y,Z and buf for var-plane data */
   X[0] = alloc_array(Xb[0]->n);
