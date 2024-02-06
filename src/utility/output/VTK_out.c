@@ -178,7 +178,7 @@ void write3d_vtk(tNode *node, FILE *fp, tArray *va, int Iter,
   }
 
   /* see if we can get, and want to use x,y,z */
-  if(par->addpoints && mesh && node)
+  if(par->addpoints && mesh && node) if(node->pat->XYZ_of_xyz)
   {
     ix = Ind( Gets(Par("output_xcoord")) );
     use_XYZ = 0;
