@@ -464,6 +464,16 @@ size_t write_buffer(const double *buf, int buflen, int dbl, FILE *fp)
 size_t write_3buffers(const double *b1, const double *b2, const double *b3,
                       int buflen, int dbl, FILE *fp)
 {
+  return write_3buffers_Fwrite(b1,b2,b3,buflen, dbl, fp, fwrite);
+}
+
+/* write 3 buffers as double or float
+   using Fwrite = fwrite, fwrite_big or fwrite_little */
+size_t write_3buffers_Fwrite(const double *b1, const double *b2,
+                             const double *b3, int buflen, int dbl, FILE *fp,
+                             size_t (*Fwrite)(const void *ptr, size_t size,
+                                              size_t nmemb, FILE *fp))
+{
   int i;
   size_t cnt;
 
@@ -474,25 +484,27 @@ size_t write_3buffers(const double *b1, const double *b2, const double *b3,
     {
       double dval;
       dval = b1[i];
-      cnt += fwrite(&dval, sizeof(double), 1, fp);
+      cnt += Fwrite(&dval, sizeof(double), 1, fp);
       dval = b2[i];
-      cnt += fwrite(&dval, sizeof(double), 1, fp);
+      cnt += Fwrite(&dval, sizeof(double), 1, fp);
       dval = b3[i];
-      cnt += fwrite(&dval, sizeof(double), 1, fp);
+      cnt += Fwrite(&dval, sizeof(double), 1, fp);
     }
     else
     {
       float fval;
       fval = b1[i];
-      cnt += fwrite(&fval, sizeof(float), 1, fp);
+      cnt += Fwrite(&fval, sizeof(float), 1, fp);
       fval = b2[i];
-      cnt += fwrite(&fval, sizeof(float), 1, fp);
+      cnt += Fwrite(&fval, sizeof(float), 1, fp);
       fval = b3[i];
-      cnt += fwrite(&fval, sizeof(float), 1, fp);
+      cnt += Fwrite(&fval, sizeof(float), 1, fp);
     }
   }
   return cnt;
 }
+
+
 
 
 /******************************************************************/
