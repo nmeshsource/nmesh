@@ -63,12 +63,12 @@ const char *B_E_grid_xmf =
   "        </Grid>\n";
 
 /* same format strings, but in WT's simplified text format */
-const char *B_head_smf = "# node n[0] n[1] n[2] xyzseek varseek\n\n";
+const char *B_head_smf = "# node n[0] n[1] n[2] xyzseek varseek\n";
 const char *E_head_smf = "";
 const char *B_temporal_smf = "";
 const char *E_temporal_smf = "";
-const char *B_spatial_smf = "# \"time = %.16g\"\n";
-const char *E_spatial_smf = "\n";
+const char *B_spatial_smf = "\n# \"time = %.16g\"\n";
+const char *E_spatial_smf = "";
 const char *B_E_grid_smf = "%s\t%d %d %d\t%ld %ld\n";
 
 /* pointers that can point to the above _xmf or _smf strings */
