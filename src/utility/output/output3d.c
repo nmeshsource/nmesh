@@ -15,6 +15,7 @@ void output3d_vl(tVarList *vl, int It, double T)
     tMesh *mesh = vl->mesh;
     int fmt = Par("3dformat");
     int xdmf = Getv(fmt, "xdmf");
+    int sdmf = Getv(fmt, "sdmf");
     int vtk  = Getv(fmt, "vtk");
     /*
     int gnuplot = Getv(fmt, "gnuplot");
@@ -36,8 +37,9 @@ void output3d_vl(tVarList *vl, int It, double T)
         vtk_output3d_meshvar(mesh, vname, It, T);
       }
     }
-    if(xdmf)
+    if(xdmf || sdmf)
     {
+      xdmf_set_format_strings(sdmf);
       output3d_xdmf(vl, It, T);
     }
 

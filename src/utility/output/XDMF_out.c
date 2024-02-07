@@ -23,30 +23,30 @@
 
 /* XML format strings to make .xmf files using fprintf,
    based on bamps and https://www.paraview.org/Wiki/ParaView/Data_formats */
-const char *B_head =
+const char *B_head_xmf =
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   "<Xdmf xmlns:xi=\"http://www.w3.org/2001/XInclude\" Version=\"2.1\">\n"
   "  <Domain>\n";
-const char *E_head =
+const char *E_head_xmf =
   "  </Domain>\n"
   "</Xdmf>\n";
 
-const char *B_temporal =
+const char *B_temporal_xmf =
   "    <Grid CollectionType=\"Temporal\" GridType=\"Collection\" Name=\"TCollection\">\n"
   "      <Geometry Type=\"None\"/>\n"
   "      <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-const char *E_temporal =
+const char *E_temporal_xmf =
   "    </Grid>\n";
 
-const char *B_spatial =
+const char *B_spatial_xmf =
   "      <Grid CollectionType=\"Spatial\" GridType=\"Collection\" Name=\"SCollection\">\n"
   "        <Time Value=\"%.9f\"/>\n"
   "        <Geometry Type=\"None\"/>\n"
   "        <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-const char *E_spatial =
+const char *E_spatial_xmf =
   "      </Grid>\n";
 
-const char *B_E_grid =
+const char *B_E_grid_xmf =
   "        <Grid Name=\"%s\">\n"
   "          <Time Value=\"%.9f\"/>\n"
   "          <Geometry Type=\"XYZ\">\n"
@@ -62,6 +62,48 @@ const char *B_E_grid =
   "          </Attribute>\n"
   "        </Grid>\n";
 
+/* same format strings, but in WT's simplified text format */
+const char *B_head_smf = "# node n[0] n[1] n[2] xyzseek varseek\n\n";
+const char *E_head_smf = "";
+const char *B_temporal_smf = "";
+const char *E_temporal_smf = "";
+const char *B_spatial_smf = "# \"time = %.16g\"\n";
+const char *E_spatial_smf = "\n";
+const char *B_E_grid_smf = "%s\t%d %d %d\t%ld %ld\n";
+
+/* pointers that can point to the above _xmf or _smf strings */
+const char *B_head;
+const char *E_head;
+const char *B_temporal;
+const char *E_temporal;
+const char *B_spatial;
+const char *E_spatial;
+const char *B_E_grid;
+/* set the pointers to the format strings above */
+void xdmf_set_format_strings(int mode)
+{
+  switch(mode)
+  {
+  case 1: /* use WT's simplified text format */
+    B_head     = B_head_smf;
+    E_head     = E_head_smf;
+    B_temporal = B_temporal_smf;
+    E_temporal = E_temporal_smf;
+    B_spatial  = B_spatial_smf;
+    E_spatial  = E_spatial_smf;
+    B_E_grid   = B_E_grid_smf;
+    break;
+  case 0:
+  default: /* use regular xmf format */
+    B_head     = B_head_xmf;
+    E_head     = E_head_xmf;
+    B_temporal = B_temporal_xmf;
+    E_temporal = E_temporal_xmf;
+    B_spatial  = B_spatial_xmf;
+    E_spatial  = E_spatial_xmf;
+    B_E_grid   = B_E_grid_xmf;
+  }
+}
 
 
 /* open file xmf file with XML description and position file pointer */
@@ -175,20 +217,26 @@ void write_xdmf_xmf(FILE *fp, long voffset, long xyzoffset,
   snprintf(fname, 1000, "%s.%s.bin", vname, suffix);
   snprintf(fname_xyz, 1000, "xyz.%s.bin", suffix);
 
-  /* <Grid> info to .xmf file */
-  fprintf(fp, B_E_grid,
-	  nodename,
-	  time,
-	  np, 3,
-	  format,
-	  xyzoffset,
-	  fname_xyz,
-	  n[2], n[1], n[0],
-	  vname,
-	  n[2], n[1], n[0],
-	  format,
-	  voffset,
-          fname);
+  /* write <Grid> info to .xmf file in normal xdmf format */
+  if(B_E_grid==B_E_grid_xmf)
+    fprintf(fp, B_E_grid,
+            nodename,
+            time,
+            np, 3,
+            format,
+            xyzoffset,
+            fname_xyz,
+            n[2], n[1], n[0],
+            vname,
+            n[2], n[1], n[0],
+            format,
+            voffset,
+            fname);
+  /* write <Grid> info to .xmf file in simplified format */
+  else if(B_E_grid==B_E_grid_smf)
+    fprintf(fp, B_E_grid, nodename, n[0], n[1], n[2], xyzoffset, voffset);
+  else
+    errorexit("B_E_grid is not set correctly");
 }
 
 

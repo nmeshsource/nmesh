@@ -58,6 +58,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T);
 void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T);
 
 /* XDMF_out.c */
+void xdmf_set_format_strings(int mode);
 void output2d_xdmf(tVarList *vl, int It, double T);
 void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                       double Time);

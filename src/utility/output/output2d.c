@@ -15,6 +15,7 @@ void output2d_vl(tVarList *vl, int It, double T)
     int fmt = Par("2dformat");
     int gnuplot = Getv(fmt, "gnuplot");
     int xdmf    = Getv(fmt, "xdmf");
+    int sdmf    = Getv(fmt, "sdmf");
     int vtk     = Getv(fmt, "vtk");
     /*
     int text    = Getv(fmt, "text");
@@ -36,8 +37,9 @@ void output2d_vl(tVarList *vl, int It, double T)
         if(vtk)     vtk_output2d_meshvar(mesh, vname, It, T);
       }
     }
-    if(xdmf)
+    if(xdmf || sdmf)
     {
+      xdmf_set_format_strings(sdmf);
       output2d_xdmf(vl, It, T);
     }
 
