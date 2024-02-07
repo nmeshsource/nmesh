@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
   /* read args */
   if(argc!=2)
   {
-    printf("Usage: sdmf2xdmf file.txt\n");
+    printf("Usage: sdmf2xdmf file.xyz.txt\n");
     return -1;
   }
   textname = argv[1];
