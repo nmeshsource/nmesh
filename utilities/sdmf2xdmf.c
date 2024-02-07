@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
   char str[STRLEN];
   char str1[STRLEN];
   char str2[STRLEN];
-  char vname[STRLEN];
-  char suffix[STRLEN];
+  char vname[1000];
+  char suffix[1000];
   char fname[STRLEN];
   char fname_xyz[STRLEN];
   char TopologyType[STRLEN];
@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
   pstr[0] = 0;
 
   /* filenames for field and also xyz data */
-  snprintf(fname, 1000, "%s.%s.bin", vname, suffix);
-  snprintf(fname_xyz, 1000, "xyz.%s.bin", suffix);
+  snprintf(fname, STRLEN, "%s.%s.bin", vname, suffix);
+  snprintf(fname_xyz, STRLEN, "xyz.%s.bin", suffix);
 
   /* now go over textname */
   first_time = 1;
