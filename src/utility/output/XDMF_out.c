@@ -23,30 +23,30 @@
 
 /* XML format strings to make .xmf files using fprintf,
    based on bamps and https://www.paraview.org/Wiki/ParaView/Data_formats */
-const char *B_head_xmf =
+static const char *B_head_xmf =
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   "<Xdmf xmlns:xi=\"http://www.w3.org/2001/XInclude\" Version=\"2.1\">\n"
   "  <Domain>\n";
-const char *E_head_xmf =
+static const char *E_head_xmf =
   "  </Domain>\n"
   "</Xdmf>\n";
 
-const char *B_temporal_xmf =
+static const char *B_temporal_xmf =
   "    <Grid CollectionType=\"Temporal\" GridType=\"Collection\" Name=\"TCollection\">\n"
   "      <Geometry Type=\"None\"/>\n"
   "      <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-const char *E_temporal_xmf =
+static const char *E_temporal_xmf =
   "    </Grid>\n";
 
-const char *B_spatial_xmf =
+static const char *B_spatial_xmf =
   "      <Grid CollectionType=\"Spatial\" GridType=\"Collection\" Name=\"SCollection\">\n"
   "        <Time Value=\"%.9f\"/>\n"
   "        <Geometry Type=\"None\"/>\n"
   "        <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
-const char *E_spatial_xmf =
+static const char *E_spatial_xmf =
   "      </Grid>\n";
 
-const char *B_E_grid_xmf =
+static const char *B_E_grid_xmf =
   "        <Grid Name=\"%s\">\n"
   "          <Time Value=\"%.9f\"/>\n"
   "          <Geometry Type=\"XYZ\">\n"
@@ -63,22 +63,22 @@ const char *B_E_grid_xmf =
   "        </Grid>\n";
 
 /* same format strings, but in WT's simplified text format */
-const char *B_head_smf = "# node n[0] n[1] n[2] xyzseek varseek\n";
-const char *E_head_smf = "";
-const char *B_temporal_smf = "";
-const char *E_temporal_smf = "";
-const char *B_spatial_smf = "\n# \"time = %.16g\"\n";
-const char *E_spatial_smf = "";
-const char *B_E_grid_smf = "%s\t%d %d %d\t%ld %ld\n";
+static const char *B_head_smf = "# node n[0] n[1] n[2] xyzseek varseek\n";
+static const char *E_head_smf = "";
+static const char *B_temporal_smf = "";
+static const char *E_temporal_smf = "";
+static const char *B_spatial_smf = "\n# \"time = %.16g\"\n";
+static const char *E_spatial_smf = "";
+static const char *B_E_grid_smf = "%s\t%d %d %d\t%ld %ld\n";
 
 /* pointers that can point to the above _xmf or _smf strings */
-const char *B_head;
-const char *E_head;
-const char *B_temporal;
-const char *E_temporal;
-const char *B_spatial;
-const char *E_spatial;
-const char *B_E_grid;
+static const char *B_head;
+static const char *E_head;
+static const char *B_temporal;
+static const char *E_temporal;
+static const char *B_spatial;
+static const char *E_spatial;
+static const char *B_E_grid;
 /* set the pointers to the format strings above */
 void xdmf_set_format_strings(int mode)
 {
