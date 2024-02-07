@@ -40,6 +40,11 @@ int main(int argc, char *argv[])
   /* get vname, suffix */
   strcpy(vname, textname);
   pstr = strstr(vname, ".");
+  if(pstr)
+  {
+    printf("file %s has no suffix\n", textname);
+    return -1;
+  }
   pstr[0] = 0;
   pstr++;
   strcpy(suffix, pstr);
