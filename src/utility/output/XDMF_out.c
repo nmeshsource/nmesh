@@ -60,9 +60,15 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   FILE *fp;
   char fname[1000];
   long offset;
+  const char *ext;
+
+  /* set file extension */
+  if(B_E_grid==B_E_grid_xmf)      ext = "xmf";
+  else if(B_E_grid==B_E_grid_smf) ext = "txt";
+  else errorexit("B_E_grid is not set correctly");
 
   /* name of XML file */
-  snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
+  snprintf(fname, 1000, "%s/%s.%s.%s", outdir, varname, suffix, ext);
 
   /* open file such that we can append and seek backwards */
   fp = fopen(fname, "r+"); //with "a" fseek below would fail
@@ -115,9 +121,15 @@ FILE *fopen_add_spatial_xdmf_xmf(char *varname,
 {
   FILE *fp;
   char fname[1000];
+  const char *ext;
+
+  /* set file extension */
+  if(B_E_grid==B_E_grid_xmf)      ext = "xmf";
+  else if(B_E_grid==B_E_grid_smf) ext = "txt";
+  else errorexit("B_E_grid is not set correctly");
 
   /* name of XML file */
-  snprintf(fname, 1000, "%s/%s.%s.xmf", outdir, varname, suffix);
+  snprintf(fname, 1000, "%s/%s.%s.%s", outdir, varname, suffix, ext);
 
   /* open file such that we can append and seek backwards */
   fp = fopen(fname, "a");
