@@ -37,15 +37,35 @@ int main(int argc, char *argv[])
   }
   textname = argv[1];
 
+  /* get vname, suffix */
+  strcpy(vname, textname);
+  pstr = strstr(vname, ".");
+  pstr[0] = 0;
+  pstr++;
+  strcpy(suffix, pstr);
+  pstr = strstr(suffix, ".");
+  pstr[0] = 0;
+  pstr++;
+  if(strcmp(pstr, "txt"))
+  {
+    printf("file extension of %s is not txt\n", textname);
+    return -1;
+  }
+
   /* open textname */
   ftxt = fopen(textname, "r");
   if(!ftxt)
   {
-    printf("%s not found. \n", textname);
+    printf("could not open %s\n", textname);
     return -1;
   }
   /* read header in textname */
   fgets(line,STRLEN, ftxt);
+  if(strncmp(line, B_head_smf, 4))
+  {
+    printf("sdmf header missing in %s\n", textname);
+    return -1;
+  }
   pstr = strstr(line, "TopologyType:");
   sscanf(pstr,"%s %s", str1, TopologyType);
   pstr = strstr(line, "AttributeCenter:");
@@ -62,21 +82,13 @@ int main(int argc, char *argv[])
   fxmf = fopen(xmfname, "w");
   if(!ftxt)
   {
-    printf("%s not found. \n", xmfname);
+    printf("could not open %s\n", xmfname);
     return -1;
   }
   /* write header */
   fprintf(fxmf, "%s", B_head_xmf);
   fprintf(fxmf, "%s", B_temporal_xmf);
 
-  /* get vname, suffix */
-  strcpy(vname, textname);
-  pstr = strstr(vname, ".");
-  pstr[0] = 0;
-  pstr++;
-  strcpy(suffix, pstr);
-  pstr = strstr(suffix, ".");
-  pstr[0] = 0;
 
   /* filenames for field and also xyz data */
   snprintf(fname, STRLEN, "%s.%s.bin", vname, suffix);
