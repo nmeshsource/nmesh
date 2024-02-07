@@ -95,7 +95,7 @@ typedef struct tELM {
   /* items to do with neighbors: */
   int nfnb[6];            /* number of face neighbor nodes (fnb below) */
   struct tELM **fnb[6];   /* list of neighbor nodes on face, contains info
-                             condensed out of nfaces */
+                             constructed from amr_elm_nbinfo */
   struct list_head list;  /* all elms form a linked list */
   //ulong oid;              /* old elm ID */
   //char loc[NLOCS];        /* unpacked elm location */
