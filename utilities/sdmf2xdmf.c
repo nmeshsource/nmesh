@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   /* get vname, suffix */
   strcpy(vname, textname);
   pstr = strstr(vname, ".");
-  if(pstr)
+  if(!pstr)
   {
     printf("file %s has no suffix\n", textname);
     return -1;
@@ -49,6 +49,11 @@ int main(int argc, char *argv[])
   pstr++;
   strcpy(suffix, pstr);
   pstr = strstr(suffix, ".");
+  if(!pstr)
+  {
+    printf("file %s has no extension after suffix\n", textname);
+    return -1;
+  }
   pstr[0] = 0;
   pstr++;
   if(strcmp(pstr, "txt"))
