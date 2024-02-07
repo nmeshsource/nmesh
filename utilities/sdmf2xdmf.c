@@ -116,18 +116,27 @@ int main(int argc, char *argv[])
     const char *format = (bin) ? "Binary" : "XML";
     long xyzoffset, voffset;
 
-    if(line[0]=='\n')
+    /* skip empty lines */
+    if(line[0]=='\n') continue;
+
+    /* look for comments */
+    if(line[0]=='#')
     {
+      /* skip comments without "time */
+      sscanf(line,"%s %s %s %lf", str, str1, str2, &time);
+      if(strcmp(str1, "\"time")) continue;
+
+      /* get next data line, but break if there is nothing */
+      if(fgets(line,STRLEN, ftxt)==NULL) break;
+
+      /* is this the 1st time we found the string "time ? */
       if(first_time)
         first_time = 0;
-      else /* close previous time */
+      else /* end previous time */
         fprintf(fxmf, E_spatial_xmf);
 
-      /* new time series starts, so get its time */
-      fgets(line,STRLEN, ftxt);
-      sscanf(line,"%s %s %s %lf", str, str1, str2, &time);
+      /* start new time */
       fprintf(fxmf, B_spatial_xmf, time);
-      fgets(line,STRLEN, ftxt);
     }
 
     /* read line with node info */
