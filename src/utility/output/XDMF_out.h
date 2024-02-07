@@ -58,7 +58,9 @@ static const char *B_E_grid_xmf =
   "        </Grid>\n";
 
 /* same format strings, but in WT's simplified text format */
-static const char *B_head_smf = "# node n[0] n[1] n[2] xyzseek varseek\n";
+static const char *B_head_smf =
+  "# sdmf:   binarydata: float   TopologyType: 3DSMesh   AttributeCenter: Node\n"
+  "# node n[0] n[1] n[2] xyzseek varseek\n";
 static const char *E_head_smf = "";
 static const char *B_temporal_smf = "";
 static const char *E_temporal_smf = "";
