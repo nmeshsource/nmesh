@@ -35,7 +35,7 @@ static const char *E_temporal_xmf =
 
 static const char *B_spatial_xmf =
   "      <Grid CollectionType=\"Spatial\" GridType=\"Collection\" Name=\"SCollection\">\n"
-  "        <Time Value=\"%.9f\"/>\n"
+  "        <Time Value=\"%.9lf\"/>\n"
   "        <Geometry Type=\"None\"/>\n"
   "        <Topology Dimensions=\"0\" Type=\"NoTopology\"/>\n";
 static const char *E_spatial_xmf =
@@ -43,7 +43,7 @@ static const char *E_spatial_xmf =
 
 static const char *B_E_grid_xmf =
   "        <Grid Name=\"%s\">\n"
-  "          <Time Value=\"%.9f\"/>\n"
+  "          <Time Value=\"%.9lf\"/>\n"
   "          <Geometry Type=\"XYZ\">\n"
   "            <DataItem DataType=\"Float\" Dimensions=\"%d %d\" Format=\"%s\" Seek=\"%ld\" Precision=\"4\">\n"
   "              %s\n"
@@ -64,6 +64,6 @@ static const char *B_head_smf =
 static const char *E_head_smf = "";
 static const char *B_temporal_smf = "";
 static const char *E_temporal_smf = "";
-static const char *B_spatial_smf = "\n# \"time = %.16g\"\n";
+static const char *B_spatial_smf = "\n# \"time = %.16lg\"\n";
 static const char *E_spatial_smf = "";
 static const char *B_E_grid_smf = "%s\t%d %d %d\t%ld %ld\n";
