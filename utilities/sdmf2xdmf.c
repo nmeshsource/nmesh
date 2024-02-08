@@ -1,12 +1,13 @@
-/* Parse output of diff and check for differences in floating point numbers */
-/* (c) Wolfgang Tichy 2002 */
+/* convert nmesh's sdmf output into xdmf output */
+/* (c) Wolfgang Tichy 2/2024 */
 
-#define STRLEN 65536
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "../src/utility/output/XDMF_out.h"
+
+#define STRLEN 65536
 
 
 int main(int argc, char *argv[])
@@ -98,7 +99,6 @@ int main(int argc, char *argv[])
   /* write header */
   fprintf(fxmf, "%s", B_head_xmf);
   fprintf(fxmf, "%s", B_temporal_xmf);
-
 
   /* filenames for field and also xyz data */
   snprintf(fname, STRLEN, "%s.%s.bin", vname, suffix);
