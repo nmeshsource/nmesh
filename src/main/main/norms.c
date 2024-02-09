@@ -329,7 +329,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
 
 
 /* Compute CRC of all pars */
-uint64_t crc_MeshPars(tMesh *mesh, uint64_t crc)
+void crc_MeshPars(tMesh *mesh, uint64_t *crc, size_t *cnt)
 {
   int i;
   for(i=0; i<mesh->npdb; i++)
@@ -337,8 +337,72 @@ uint64_t crc_MeshPars(tMesh *mesh, uint64_t crc)
     char *name = MeshParGetName(mesh, i);
     char *val  = Gets(i);
 
-    crc = crc64_continue(crc, name, strlen(name));
-    crc = crc64_continue(crc, val, strlen(val));
+    crc64_continue_counters(name, strlen(name), crc, cnt);
+    crc64_continue_counters(val, strlen(val), crc, cnt);
   }
-  return crc;
+}
+
+/* Compute CRC of all pats */
+void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
+{
+  int i;
+  for(i=0; i<mesh->npats; i++)
+  {
+    tPat *pat = mesh->pat[i];
+    tCoordInfo *CI = pat->CI;
+
+    /* include everything before mesh in crc */
+    crc64_continue_counters(pat, offsetof(tPat, mesh), crc, cnt);
+    /* include everything before FSurf in crc */
+    crc64_continue_counters(CI, offsetof(tCoordInfo, FSurf), crc, cnt);
+  }
+}
+
+/* Compute CRC of elms on this rank */
+void crc_elms_local(tMesh *mesh, uint64_t *crc, size_t *cnt)
+{
+  formyelms_noomp(mesh)
+  {
+    tElm *elm = MyElm;
+    tElm0 *elm0;
+    union { const tElm *elm; tElm0 *elm0; } e2e0;
+
+    /* inlcude only elm header in crc */
+    e2e0.elm = elm;
+    elm0 = e2e0.elm0;
+    crc64_continue_counters(elm0, sizeof(elm0), crc, cnt);
+  }
+}
+
+/* Compute CRC of varlist on this rank */
+void crc_VarList_local(tVarList *vl, uint64_t *crc, size_t *cnt)
+{
+  tMesh *mesh = vl->mesh;
+  int vli;
+
+  formyelms_noomp(mesh)
+  {
+    tElm *elm = MyElm;
+    forvl(vl, vli)
+    {
+      tArray *arr = VarA(elm, Vind(vl, vli));
+      int N = ArrN(arr);
+      double *d = Arrd(arr);
+      crc64_continue_counters(d, N, crc, cnt);
+    }
+  }
+}
+
+/* Compute CRC of all elms on all ranks */
+void crc_elms(tMesh *mesh, uint64_t *crc_all, size_t *cnt_all)
+{
+  uint64_t crc;
+  size_t cnt;
+
+  /* get my local crc */
+  crc = cnt = 0;
+  crc_elms_local(mesh, &crc, &cnt);
+
+  /* rank0 now collects all CRCs */
+  //...
 }
