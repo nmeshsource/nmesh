@@ -684,15 +684,15 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
     // NOTE:  for some reason the par CRC changes after restart!!!
     //        maybe it sets some pars???
     if(parsCRC   != parscrc)
-      ;//  printf("CRC WARNING: pars %lu!=%lu\n", parsCRC, parscrc);
+      ;//  printf("  WARNING: pars CRC %lu != %lu\n", parscrc, parsCRC);
     if(patsCRC   != patscrc)
-      printf("CRC WARNING: pats %lu!=%lu\n", patsCRC, patscrc);
+      printf("  WARNING: pats CRC %lu != %lu\n", patscrc, patsCRC);
     if(elmsCRC   != elmscrc)
-      printf("CRC WARNING: elms %lu!=%lu\n", elmsCRC, elmscrc);
+      printf("  WARNING: elms CRC %lu != %lu\n", elmscrc, elmsCRC);
     if(nbinfoCRC != nbinfocrc)
-      printf("CRC WARNING: nbinfo %lu!=%lu\n", nbinfoCRC, nbinfocrc);
+      printf("  WARNING: nbinfo CRC %lu != %lu\n", nbinfocrc, nbinfoCRC);
     if(varsCRC   != varscrc)
-      printf("CRC WARNING: vars %lu!=%lu\n", varsCRC, varscrc);
+      printf("  WARNING: vars CRC %lu != %lu\n", varscrc, varsCRC);
   }
   return ret;
 }
