@@ -633,6 +633,13 @@ int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal)
   return startok && endok ? 1 : 0;
 }
 
+/* get name of par with index i */
+char *MeshParGetName(tMesh *mesh, int i)
+{
+  if(i<0 || i>=mesh->npdb)
+    errorexit("parameter with this index does not exist");
+  return mesh->pdb[i].name;
+}
 
 
 

@@ -79,6 +79,7 @@ double MeshParGetd(tMesh *mesh, int i);
 int MeshParGetb(tMesh *mesh, int i);
 int MeshParGetLen(tMesh *mesh, int i);
 int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal);
+char *MeshParGetName(tMesh *mesh, int i);
 /* conveniece macros to query and set  pars */
 #define AddPar(name, val, desc) AddMeshPar(mesh, (name), (val), (desc))
 #define AddOrModifyPar(name, val, desc) AddOrModifyMeshPar(mesh, (name), \

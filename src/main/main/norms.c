@@ -326,3 +326,19 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
   return SphereExtremumLoc(mesh,pat, NULL,DBL_MAX, vind, findMax,
                            Mp, Mnodeloc, Mijk, MX, Mx);
 }
+
+
+/* Compute CRC of all pars */
+uint64_t crc_MeshPars(tMesh *mesh, uint64_t crc)
+{
+  int i;
+  for(i=0; i<mesh->npdb; i++)
+  {
+    char *name = MeshParGetName(mesh, i);
+    char *val  = Gets(i);
+
+    crc = crc64_continue(crc, name, strlen(name));
+    crc = crc64_continue(crc, val, strlen(val));
+  }
+  return crc;
+}
