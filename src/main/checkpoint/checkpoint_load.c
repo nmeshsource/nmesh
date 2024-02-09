@@ -658,12 +658,12 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
       {
         if(get_par_from_str(buf, par, ":", val, 999) && val[0])
         {
-        //printf("%s = %s\n", par, val);
-          if(strcmp(par, "pars")==0)   parsCRC = strtoul(val, NULL, 0);
-          if(strcmp(par, "pats")==0)   patsCRC = strtoul(val, NULL, 0);
-          if(strcmp(par, "elms")==0)   elmsCRC = strtoul(val, NULL, 0);
-          if(strcmp(par, "nbinfo")==0) nbinfoCRC = strtoul(val, NULL, 0);
-          if(strcmp(par, "vars")==0)   varsCRC = strtoul(val, NULL, 0);
+          //printf("%s = %s\n", par, val);
+          if(strcmp(par, "pars")==0)   parsCRC = strtoul(val, NULL, 10);
+          if(strcmp(par, "pats")==0)   patsCRC = strtoul(val, NULL, 10);
+          if(strcmp(par, "elms")==0)   elmsCRC = strtoul(val, NULL, 10);
+          if(strcmp(par, "nbinfo")==0) nbinfoCRC = strtoul(val, NULL, 10);
+          if(strcmp(par, "vars")==0)   varsCRC = strtoul(val, NULL, 10);
         }
       }
       fclose(fp);
