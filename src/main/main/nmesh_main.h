@@ -344,6 +344,8 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
 uint64_t crc64_continue(uint64_t crc, const void *buf, size_t nbytes);
 uint64_t crc64_0start(const void *buf, size_t nbytes);
 uint64_t crc64_0start_combine(uint64_t crc01, uint64_t crc02, size_t nbytes2);
+void crc64_continue_counters(const void *buf, size_t nbytes,
+                             uint64_t *crc, size_t *ntotalbytes);
 
 
 /* main.c */

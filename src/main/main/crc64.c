@@ -167,6 +167,14 @@ uint64_t crc64_0start(const void *buf, size_t nbytes)
   return crc64_continue(0, buf, nbytes);
 }
 
+/* write CRC into crc and also record the total number of bytes */
+void crc64_continue_counters(const void *buf, size_t nbytes,
+                             uint64_t *crc, size_t *ntotalbytes)
+{
+  *crc = crc64_continue(*crc, buf, nbytes);
+  *ntotalbytes += nbytes;
+}
+
 
 /* table needed in crc64_x_pow_n_modP_ */
 static const uint64_t crc64_x_pow_2n[64] = {
