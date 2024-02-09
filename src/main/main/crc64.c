@@ -274,3 +274,41 @@ void crc64_0start_combine_counters(uint64_t *crc01, size_t *ntotalbytes,
   *crc01 = crc64_0start_combine(*crc01, crc02, nbytes2);
   *ntotalbytes += nbytes2;
 }
+
+
+/**************************************************************************/
+/* functions that collect global CRCs via MPI */
+/**************************************************************************/
+#include "nmesh.h"
+
+/* Compute CRC locally with func crc_local, and then combine the results
+   from all ranks.
+   Note this sets *crc=0 at the start. */
+void crc64_0start_global(tMesh *mesh,
+                         void (*crc_local)(void *obj,
+                                           uint64_t *crc, size_t *cnt),
+                         void *obj, uint64_t *crc, size_t *cnt)
+{
+  int rk, size = nMPI_size();
+  ulong sbuf[2];
+  ulong *rbuf = NULL;
+
+  if(Rank0) rbuf = malloc(sizeof(rbuf[0])*2 * size);
+
+  /* get my local crc and put it into sbuf */
+  *crc = *cnt = 0; // START WITH 0
+  crc_local(obj, crc, cnt);
+  sbuf[0] = *crc;
+  sbuf[1] = *cnt;
+
+  /* rank0 now gathers all CRCs */
+  nMPI_Gather(sbuf,2, nMPI_UNSIGNED_LONG, rbuf,2, nMPI_UNSIGNED_LONG, 0);
+
+  /* rank0 now combines the CRCs */
+  if(Rank0)
+  {
+    for(rk=1; rk<size; rk++)
+      crc64_0start_combine_counters(crc, cnt, rbuf[rk*2], rbuf[rk*2+1]);
+    free(rbuf);
+  }
+}

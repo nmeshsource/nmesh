@@ -359,8 +359,9 @@ void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
 }
 
 /* Compute CRC of elms on this rank */
-void crc_elms_local(tMesh *mesh, uint64_t *crc, size_t *cnt)
+void crc_elms_local(void *Mesh, uint64_t *crc, size_t *cnt)
 {
+  tMesh *mesh = Mesh;
   formyelms_noomp(mesh)
   {
     tElm *elm = MyElm;
@@ -375,8 +376,9 @@ void crc_elms_local(tMesh *mesh, uint64_t *crc, size_t *cnt)
 }
 
 /* Compute CRC of varlist on this rank */
-void crc_VarList_local(tVarList *vl, uint64_t *crc, size_t *cnt)
+void crc_VarList_local(void *Vlist, uint64_t *crc, size_t *cnt)
 {
+  tVarList *vl = Vlist;
   tMesh *mesh = vl->mesh;
   int vli;
 
@@ -393,16 +395,15 @@ void crc_VarList_local(tVarList *vl, uint64_t *crc, size_t *cnt)
   }
 }
 
-/* Compute CRC of all elms on all ranks */
-void crc_elms(tMesh *mesh, uint64_t *crc_all, size_t *cnt_all)
+/* get global CRC for elms */
+void crc_elms(tMesh *mesh, uint64_t *crc, size_t *cnt)
 {
-  uint64_t crc;
-  size_t cnt;
+  crc64_0start_global(mesh, crc_elms_local, mesh, crc, cnt);
+}
 
-  /* get my local crc */
-  crc = cnt = 0;
-  crc_elms_local(mesh, &crc, &cnt);
-
-  /* rank0 now collects all CRCs */
-  //...
+/* get global CRC for Varlist */
+void crc_VarList(tVarList *vl, uint64_t *crc, size_t *cnt)
+{
+  tMesh *mesh = vl->mesh;
+  crc64_0start_global(mesh, crc_VarList_local, vl, crc, cnt);
 }
