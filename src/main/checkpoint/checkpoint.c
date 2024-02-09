@@ -159,7 +159,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     checkpoint_load_elms(mesh, elms);
     PRF;printf(": finished loading elms.\n");
     fflush(stdout);
-    if(chkpt_exists & 8)
+    if(chkpt_exists & CHECKPOINT_NBINFO)
     {
       checkpoint_load_Vars(mesh, nbinfo, 1); /* load with native endianess */
       PRF;printf(": finished loading nbinfo.\n");
@@ -175,6 +175,9 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   {
     checkpoint_load_Vars(mesh, vars, 0); /* load as little endian */
     PRF;printf(": finished loading variables.\n");
+    fflush(stdout);
+    //checkpoint_load_CRCs(mesh, crcs);
+    //PRF;printf(": finished loading CRCs.\n");
     fflush(stdout);
   }
   ntime = getTimeIn_s()/60.;
@@ -251,6 +254,7 @@ int checkpoint_save(tMesh *mesh)
   checkpoint_save_elms(mesh, elms);
   checkpoint_save_nbinfoVars(mesh, nbinfo);
   checkpoint_save_EvoVars(mesh, vars);
+  //checkpoint_save_CRCs(mesh, crcs);
 
   /* wait until all get here */
   nMPI_barrier();
