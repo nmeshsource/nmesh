@@ -282,8 +282,9 @@ void crc64_0start_combine_counters(uint64_t *crc01, size_t *ntotalbytes,
 #include "nmesh.h"
 
 /* Compute CRC locally with func crc_local, and then combine the results
-   from all ranks.
-   Note this sets *crc=0 at the start. */
+   from all ranks on Rank0.
+   Notes: This sets *crc=0 at the start.
+          ONLY Rank0 has the combined CRC */
 void crc64_0start_global(tMesh *mesh,
                          void (*crc_local)(void *obj,
                                            uint64_t *crc, size_t *cnt),
@@ -311,4 +312,6 @@ void crc64_0start_global(tMesh *mesh,
       crc64_0start_combine_counters(crc, cnt, rbuf[rk*2], rbuf[rk*2+1]);
     free(rbuf);
   }
+  /* we could now broadcast the CRC to all ranks */
+  // Is this needed?
 }
