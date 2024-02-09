@@ -339,6 +339,12 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
                        int *Mp, char Mnodeloc[104], int *Mijk,
                        double *MX, double *Mx);
 
+/* crc64.c */
+uint64_t crc64_continue(uint64_t crc, const void *buf, size_t nbytes);
+uint64_t crc64_0start(const void *buf, size_t nbytes);
+uint64_t crc64_0start_combine(uint64_t crc01, uint64_t crc02, size_t nbytes2);
+
+
 /* main.c */
 FILE *fopen_bufsize(tMesh *mesh, const char *pathname, const char *mode,
                     char **buf);
