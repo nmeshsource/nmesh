@@ -74,6 +74,11 @@ int nMPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
                    nMPI_Datatype datatype, nMPI_Op op);
 int nMPI_Reduce(const void *sendbuf, void *recvbuf, int count,
                 nMPI_Datatype datatype, nMPI_Op op, int root);
+int nMPI_Gather(const void *sendbuf, int sendcount, nMPI_Datatype sendtype,
+                void *recvbuf, int recvcount, nMPI_Datatype recvtype, int root);
+int nMPI_Igather(const void *sendbuf, int sendcount, nMPI_Datatype sendtype,
+                 void *recvbuf, int recvcount, nMPI_Datatype recvtype,
+                 int root, nMPI_Req *request);
 int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root);
 int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
                 int root, nMPI_Req *request);

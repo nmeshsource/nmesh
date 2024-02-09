@@ -529,6 +529,37 @@ int nMPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 }
 
 
+/* All send stuff in sendbuf to root, root recvs from all into recvbuf.
+   recvbuf is ignored for all nonroot processes. */
+int nMPI_Gather(const void *sendbuf, int sendcount, nMPI_Datatype sendtype,
+                void *recvbuf, int recvcount, nMPI_Datatype recvtype, int root)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Gather(sendbuf, sendcount, sendtype,
+                      recvbuf, recvcount, recvtype, root, WORLD);
+  PR1;
+#endif
+  return status;
+}
+
+/* like nMPI_Gather, but returns immediately */
+int nMPI_Igather(const void *sendbuf, int sendcount, nMPI_Datatype sendtype,
+                 void *recvbuf, int recvcount, nMPI_Datatype recvtype,
+                 int root, nMPI_Req *request)
+{
+  int status = 0;
+#ifdef USEMPI
+  PR0;
+  status = MPI_Igather(sendbuf, sendcount, sendtype,
+                       recvbuf, recvcount, recvtype, root, WORLD, request);
+  PR1;
+#endif
+  return status;
+}
+
+
 /* blocking broadcast from rank root to all others in MPI_Comm WORLD */
 int nMPI_Bcast(void *buffer, int count, nMPI_Datatype datatype, int root)
 {
