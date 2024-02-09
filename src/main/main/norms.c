@@ -355,6 +355,7 @@ void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
     crc64_continue_counters(pat, offsetof(tPat, mesh), crc, cnt);
     /* include everything before FSurf in crc */
     crc64_continue_counters(CI, offsetof(tCoordInfo, FSurf), crc, cnt);
+    //PRF;printf(": *crc=%lu\n", *crc);
   }
 }
 
@@ -406,4 +407,56 @@ void crc_VarList(tVarList *vl, uint64_t *crc, size_t *cnt)
 {
   tMesh *mesh = vl->mesh;
   crc64_0start_global(mesh, crc_VarList_local, vl, crc, cnt);
+}
+
+/* calc a couple of CRCs */
+void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
+                ulong *elmsCRC, ulong *nbinfoCRC, ulong *varsCRC)
+{
+  tVarList *vl;
+  int vi;
+  uint64_t crc, cnt;
+
+  if(Rank0)
+  {
+    /* pars and pats */
+    crc = cnt = 0;
+    crc_MeshPars(mesh, &crc, &cnt);
+    *parsCRC = crc;
+
+    crc = cnt = 0;
+    crc_pats(mesh, &crc, &cnt);
+    *patsCRC = crc;
+  }
+
+  /* elms */
+  crc = cnt = 0;
+  crc_elms(mesh, &crc, &cnt);
+  *elmsCRC = crc;
+
+  /* nbinfo */
+  vl = vlalloc(mesh);
+  vlpush(vl, Ind("amr_elm_nbinfo0"));
+  crc = cnt = 0;
+  crc_VarList(vl, &crc, &cnt);
+  *nbinfoCRC = crc;
+  vlfree(vl);
+
+  /* loop over all vars and put all important EvoVars into vl */
+  vl = vlalloc(mesh);
+  for(vi=0; vi<mesh->nvdb; vi++)
+  {
+    int vt = MeshVarType(mesh, vi);
+    if( (vt==EVOVAR) || (vt==DATAVAR) )
+      if(!var_added_by_evolve_init_evosys(mesh, vi))
+        vlpushone(vl, vi);
+  }
+  crc = cnt = 0;
+  crc_VarList(vl, &crc, &cnt);
+  *varsCRC = crc;
+  vlfree(vl);
+
+  PRF;printf("\n"
+      "parsCRC=%lu patsCRC=%lu elmsCRC=%lu nbinfoCRC=%lu varsCRC=%lu\n",
+      *parsCRC, *patsCRC, *elmsCRC, *nbinfoCRC, *varsCRC);
 }
