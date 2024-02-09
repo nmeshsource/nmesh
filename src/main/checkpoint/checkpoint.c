@@ -13,12 +13,13 @@ char patches_file[]   = "patches.txt";
 char elms_file[]      = "elms.txt";
 char nbinfo_file[]    = "nbinfo.bin";
 char variables_file[] = "variables.bin";
+char CRCs_file[]       = "CRC.txt";
 
 /* make and allocate complete checkpoint pathnames, return allocated chars */
 int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
                                 char **Dir, const char *Dir_suffix,
-                                char **Pars, char **Pats,
-                                char **Elms, char **Nbinfo, char **Vars)
+                                char **Pars, char **Pats, char **Elms,
+                                char **Nbinfo, char **Vars, char **CRCs)
 {
   char *outdir = Gets(Par("outdir"));
 
@@ -31,6 +32,7 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
   char *elms  = cmalloc(pl);
   char *nbinfo= cmalloc(pl);
   char *vars  = cmalloc(pl);
+  char *crcs  = cmalloc(pl);
 
   /* filenames */
   snprintf(dir,nl, "%s%s/%s%s", outdir,outdir_suffix, chckpt_dir,Dir_suffix);
@@ -39,6 +41,7 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
   snprintf(elms,pl,  "%s/%s", dir, elms_file);
   snprintf(nbinfo,pl,"%s/%s", dir, nbinfo_file);
   snprintf(vars,pl,  "%s/%s", dir, variables_file);
+  snprintf(crcs,pl,  "%s/%s", dir, CRCs_file);
 
   /* save filenames */
   *Dir   = dir;
@@ -47,6 +50,7 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
   *Elms  = elms;
   *Nbinfo= nbinfo;
   *Vars  = vars;
+  *CRCs  = crcs;
   return pl;
 }
 
@@ -63,10 +67,11 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
   char *elms;
   char *nbinfo;
   char *vars;
+  char *crcs;
   int ret=0;
 
   checkpoint_create_pathnames(mesh, outdir_suffix, &dir, Dir_suffix,
-                              &pars, &pats, &elms, &nbinfo, &vars);
+                              &pars, &pats, &elms, &nbinfo, &vars, &crcs);
   /* check if files exist */
   if(Rank0)
   {
@@ -97,6 +102,7 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
   nMPI_Bcast(&ret, 1, nMPI_INT, 0);
 
   /* free strings */
+  free(crcs);
   free(vars);
   free(nbinfo);
   free(elms);
@@ -123,6 +129,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   char *elms;
   char *nbinfo;
   char *vars;
+  char *crcs;
   int ret=0;
   double time, ntime;
 
@@ -133,7 +140,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   time = getTimeIn_s()/60.;
 
   checkpoint_create_pathnames(mesh, outdir_suffix, &dir,"",
-                              &pars, &pats, &elms, &nbinfo, &vars);
+                              &pars, &pats, &elms, &nbinfo, &vars, &crcs);
   prdivider(1);
   PRF;printf(": loading stage%d\n", stage);
   fflush(stdout);
@@ -176,6 +183,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   fflush(stdout);
 
   /* free strings */
+  free(crcs);
   free(vars);
   free(nbinfo);
   free(elms);
@@ -223,8 +231,10 @@ int checkpoint_save(tMesh *mesh)
   char *elms;
   char *nbinfo;
   char *vars;
+  char *crcs;
   int pl = checkpoint_create_pathnames(mesh, "", &dirn,"_new",
-                                       &pars, &pats, &elms, &nbinfo, &vars);
+                                       &pars, &pats, &elms, &nbinfo, &vars,
+                                       &crcs);
   char *dir = cmalloc(pl);
   char *dirp = cmalloc(pl);
 
@@ -258,8 +268,9 @@ int checkpoint_save(tMesh *mesh)
   /* free strings */
   free(dirp);
   free(dir);
-  free(nbinfo);
+  free(crcs);
   free(vars);
+  free(nbinfo);
   free(elms);
   free(pats);
   free(pars);
