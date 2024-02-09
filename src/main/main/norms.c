@@ -456,7 +456,9 @@ void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
   *varsCRC = crc;
   vlfree(vl);
 
+  /*
   PRF;printf("\n"
       "parsCRC=%lu patsCRC=%lu elmsCRC=%lu nbinfoCRC=%lu varsCRC=%lu\n",
       *parsCRC, *patsCRC, *elmsCRC, *nbinfoCRC, *varsCRC);
+  */
 }

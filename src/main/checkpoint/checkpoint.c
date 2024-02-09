@@ -176,7 +176,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     checkpoint_load_Vars(mesh, vars, 0); /* load as little endian */
     PRF;printf(": finished loading variables.\n");
     fflush(stdout);
-    //checkpoint_load_CRCs(mesh, crcs);
+    checkpoint_load_CRCs(mesh, crcs);
     //PRF;printf(": finished loading CRCs.\n");
     fflush(stdout);
   }
@@ -254,7 +254,7 @@ int checkpoint_save(tMesh *mesh)
   checkpoint_save_elms(mesh, elms);
   checkpoint_save_nbinfoVars(mesh, nbinfo);
   checkpoint_save_EvoVars(mesh, vars);
-  //checkpoint_save_CRCs(mesh, crcs);
+  checkpoint_save_CRCs(mesh, crcs);
 
   /* wait until all get here */
   nMPI_barrier();
