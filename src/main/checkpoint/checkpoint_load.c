@@ -632,3 +632,65 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_native,
   v = NULL;
   return buffer;
 }
+
+
+/******************************************************************/
+/* functions to load CRCs */
+/******************************************************************/
+
+/* load all CRCs from file */
+int checkpoint_load_CRCs(tMesh *mesh, char *fname)
+{
+  uint64_t parsCRC, patsCRC, elmsCRC, nbinfoCRC, varsCRC;
+  uint64_t parscrc, patscrc, elmscrc, nbinfocrc, varscrc;
+  int ret = 0;
+
+  if(Rank0)
+  {
+    FILE *fp;
+    char buf[1000];
+    char par[1000], val[1000];
+
+    fp = fopen(fname, "r");
+    if(fp)
+    {
+      while(fgets(buf,999, fp))
+      {
+        if(get_par_from_str(buf, par, ":", val, 999) && val[0])
+        {
+        //printf("%s = %s\n", par, val);
+          if(strcmp(par, "pars")==0)   parsCRC = strtoul(val, NULL, 0);
+          if(strcmp(par, "pats")==0)   patsCRC = strtoul(val, NULL, 0);
+          if(strcmp(par, "elms")==0)   elmsCRC = strtoul(val, NULL, 0);
+          if(strcmp(par, "nbinfo")==0) nbinfoCRC = strtoul(val, NULL, 0);
+          if(strcmp(par, "vars")==0)   varsCRC = strtoul(val, NULL, 0);
+        }
+      }
+      fclose(fp);
+    }
+    else
+    {
+      printf("could not open %s\n", fname);
+      parsCRC=patsCRC=elmsCRC=nbinfoCRC=varsCRC = 0;
+      ret = -2;
+    }
+  }
+
+  /* get current CRCs */
+  nmesh_CRCs(mesh, &parscrc,&patscrc,&elmscrc,&nbinfocrc,&varscrc);
+
+  if(Rank0)
+  {
+    if(parsCRC   != parscrc)
+      printf("CRC WARNING: pars %lu!=%lu\n", parsCRC, parscrc);
+    if(patsCRC   != patscrc)
+      printf("CRC WARNING: pats %lu!=%lu\n", patsCRC, patscrc);
+    if(elmsCRC   != elmscrc)
+      printf("CRC WARNING: elms %lu!=%lu\n", elmsCRC, elmscrc);
+    if(nbinfoCRC != nbinfocrc)
+      printf("CRC WARNING: nbinfo %lu!=%lu\n", nbinfoCRC, nbinfocrc);
+    if(varsCRC   != varscrc)
+      printf("CRC WARNING: vars %lu!=%lu\n", varsCRC, varscrc);
+  }
+  return ret;
+}

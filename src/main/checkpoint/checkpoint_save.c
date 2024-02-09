@@ -441,3 +441,31 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_native)
     fprintf(fp, "\n");
   } /* end node-loop */
 }
+
+
+/******************************************************************/
+/* functions to save CRCs */
+/******************************************************************/
+
+/* Rank0 saves all CRCs from nmesh_CRCs */
+int checkpoint_save_CRCs(tMesh *mesh, char *fname)
+{
+  uint64_t parsCRC, patsCRC, elmsCRC, nbinfoCRC, varsCRC;
+  FILE *fp;
+
+  /* get current CRCs */
+  nmesh_CRCs(mesh, &parsCRC,&patsCRC,&elmsCRC,&nbinfoCRC,&varsCRC);
+
+  if(Rank0)
+  {
+    fp = fopen(fname, "w");
+    //fprintf("CRCs for several things in nmesh's memory\n");
+    fprintf(fp, "pars:\t%lu\n", parsCRC);
+    fprintf(fp, "pats:\t%lu\n", patsCRC);
+    fprintf(fp, "elms:\t%lu\n", elmsCRC);
+    fprintf(fp, "nbinfo:\t%lu\n", nbinfoCRC);
+    fprintf(fp, "vars:\t%lu\n", varsCRC);
+    fclose(fp);
+  }
+  return 0;
+}
