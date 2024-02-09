@@ -15,8 +15,9 @@ typedef struct tCOORDINFO {
   double co[4];       /* any coeffs we may need for coord trafo */
   int dom;    /* domain index, e.g. 0-5 to indicate cubed sphere wedge */
   int type;   /* coordinate type, e.g. outerCubedSphere */
+  int label;  /* label/name of coordinate trafo type */
+  /* -- all pointers must be below this line ----------------------------- */
   int (*FSurf[6])(struct tPAT *pat, int f, double C[2], double *F); /* 6 funcs that set surface val, e.g. FSurf[0] -> F=sigma */
   int (*dFSurfdC[6])(struct tPAT *pat, int f, double C[2], double dFdC[2]); /* set derivs of FSurf, dFSurfdC[4] -> dFdC[0]=dFSurf[4]/dC0 */
   struct tARRAY *Fcoef[6]; /* coeffs that FSurf might need */
-  int label;  /* label/name of coordinate trafo type */
 } tCoordInfo;
