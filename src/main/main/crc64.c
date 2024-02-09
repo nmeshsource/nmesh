@@ -266,3 +266,11 @@ uint64_t crc64_0start_combine(uint64_t crc01, uint64_t crc02, size_t nbytes2)
 {
   return crc02 ^ crc64_multiply_(crc01, crc64_x_pow_n_modP_(8*nbytes2));
 }
+
+/* add crc02 of len nbytes2 to crc01 and record total num of bytes */
+void crc64_0start_combine_counters(uint64_t *crc01, size_t *ntotalbytes,
+                                   uint64_t  crc02, size_t  nbytes2)
+{
+  *crc01 = crc64_0start_combine(*crc01, crc02, nbytes2);
+  *ntotalbytes += nbytes2;
+}
