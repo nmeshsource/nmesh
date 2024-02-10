@@ -459,13 +459,16 @@ int checkpoint_save_CRCs(tMesh *mesh, char *fname)
   if(Rank0)
   {
     fp = fopen(fname, "w");
-    //fprintf("CRCs for several things in nmesh's memory\n");
-    fprintf(fp, "pars:\t%lu\n", parsCRC);
-    fprintf(fp, "pats:\t%lu\n", patsCRC);
-    fprintf(fp, "elms:\t%lu\n", elmsCRC);
-    fprintf(fp, "nbinfo:\t%lu\n", nbinfoCRC);
-    fprintf(fp, "vars:\t%lu\n", varsCRC);
-    fclose(fp);
+    if(fp)
+    {
+      //fprintf("CRCs for several things in nmesh's memory\n");
+      fprintf(fp, "pars:\t%lu\n", parsCRC);
+      fprintf(fp, "pats:\t%lu\n", patsCRC);
+      fprintf(fp, "elms:\t%lu\n", elmsCRC);
+      fprintf(fp, "nbinfo:\t%lu\n", nbinfoCRC);
+      fprintf(fp, "vars:\t%lu\n", varsCRC);
+      fclose(fp);
+    }
   }
   return 0;
 }
