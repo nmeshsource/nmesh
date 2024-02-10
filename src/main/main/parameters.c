@@ -256,6 +256,25 @@ int nmesh_update_parameters(tMesh *mesh)
   return 0;
 }
 
+/* save all current pars in file fname */
+void nmesh_save_parameters(tMesh *mesh, const char *fname)
+{
+  FILE *fp;
+  int i;
+
+  fp = fopen(fname, "w");
+  if(!fp) errorexits("could not open %s", fname);
+
+  for(i=0; i<mesh->npdb; i++)
+  {
+    char *name = MeshParGetName(mesh, i);
+    char *val  = Gets(i);
+
+    fprintf(fp, "%s = %s\n", name, val);
+  }
+
+  fclose(fp);
+}
 
 
 /***************************************************************************/

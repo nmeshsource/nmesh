@@ -60,6 +60,7 @@ typedef struct tPAR {
   int valuelen; /* cache strlen(value) */
 } tPar;
 int nmesh_load_parameters(tMesh *mesh, char *fname, int fatal, int pr);
+void nmesh_save_parameters(tMesh *mesh, const char *fname);
 void AddMeshPar(tMesh *mesh, const char *name, const char *value,
                 const char *description);
 void AddOrModifyMeshPar(tMesh *mesh, const char *name, const char *value,
