@@ -649,15 +649,15 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
   if(Rank0)
   {
     FILE *fp;
-    char buf[1000];
+    char str[1000];
     char par[1000], val[1000];
 
     fp = fopen(fname, "r");
     if(fp)
     {
-      while(fgets(buf,999, fp))
+      while(fgets(str,999, fp))
       {
-        if(get_par_from_str(buf, par, ":", val, 999) && val[0])
+        if(get_par_from_str(str, par, ":", val, 999) && val[0])
         {
           //printf("%s = %s\n", par, val);
           if(strcmp(par, "pars")==0)   parsCRC = strtoul(val, NULL, 10);
