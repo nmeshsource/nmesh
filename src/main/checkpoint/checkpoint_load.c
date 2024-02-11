@@ -673,7 +673,7 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
     {
       printf("could not open %s\n", fname);
       parsCRC=patsCRC=elmsCRC=nbinfoCRC=varsCRC = 0;
-      ret = 1;
+      ret = 1024;
     }
   }
 
@@ -698,27 +698,27 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
   if(parsCRC != crc[0])
   {
     printf("  WARNING: pars CRC %lu != %lu\n", crc[0], parsCRC);
-    ret |= 2;
+    ret |= 1;
   }
   if(patsCRC != crc[1])
   {
     printf("  WARNING: pats CRC %lu != %lu\n", crc[1], patsCRC);
-    ret |= 32;
+    ret |= 16;
   }
   if(elmsCRC != crc[2])
   {
     printf("  WARNING: elms CRC %lu != %lu\n", crc[2], elmsCRC);
-    ret |= 16;
+    ret |= 8;
   }
   if(nbinfoCRC != crc[3])
   {
     printf("  WARNING: nbinfo CRC %lu != %lu\n", crc[3], nbinfoCRC);
-    ret |= 8;
+    ret |= 4;
   }
   if(varsCRC != crc[4])
   {
     printf("  WARNING: vars CRC %lu != %lu\n", crc[4], varsCRC);
-    ret |= 4;
+    ret |= 2;
   }
 
   return ret;
