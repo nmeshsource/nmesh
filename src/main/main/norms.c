@@ -342,6 +342,28 @@ void crc_MeshPars(tMesh *mesh, uint64_t *crc, size_t *cnt)
   }
 }
 
+/* Compute CRC of all pars */
+void crc_checkpoint_save_pars(tMesh *mesh, uint64_t *crc, size_t *cnt)
+{
+  char *list, *saveptr, *name;
+
+  /* put vals of checkpoint_save_pars in list,
+     duplicate Gets(Par("checkpoint_save_pars")) because strtok_r
+     will modify list */
+  list = strdup( Gets(Par("checkpoint_save_pars")) );
+
+  /* loop over contents of list, and print pars */
+  for(name=strtok_r(list, " ", &saveptr); name!=NULL;
+      name=strtok_r(NULL, " ", &saveptr))
+  {
+    char *val  = Gets(Par(name));
+    crc64_continue_counters(name, strlen(name), crc, cnt);
+    crc64_continue_counters(val, strlen(val), crc, cnt);
+  }
+
+  free(list);
+}
+
 /* Compute CRC of all pats */
 void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
 {
@@ -421,7 +443,8 @@ void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
   {
     /* pars and pats */
     crc = cnt = 0;
-    crc_MeshPars(mesh, &crc, &cnt);
+    //crc_MeshPars(mesh, &crc, &cnt); // do not use all pars
+    crc_checkpoint_save_pars(mesh, &crc, &cnt);
     *parsCRC = crc;
 
     crc = cnt = 0;
