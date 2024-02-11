@@ -646,6 +646,8 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
   ulong crc[5]; //nmesh crcs for pars,pats,elms,nbinfo,vars
   int ret = 0;
 
+  parsCRC = patsCRC = elmsCRC = nbinfoCRC = varsCRC = 0;
+
   if(Rank0)
   {
     FILE *fp;
@@ -672,7 +674,7 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
     else
     {
       printf("could not open %s\n", fname);
-      parsCRC=patsCRC=elmsCRC=nbinfoCRC=varsCRC = 0;
+      parsCRC = patsCRC = elmsCRC = nbinfoCRC = varsCRC = 0;
       ret = 1024;
     }
   }
