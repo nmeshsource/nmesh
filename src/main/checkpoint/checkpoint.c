@@ -130,7 +130,6 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   char *nbinfo;
   char *vars;
   char *crcs;
-  int ret=0;
   double time, ntime;
 
   /* is checkpointing on? */
@@ -173,10 +172,14 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   }
   else
   {
+    int ret;
     checkpoint_load_Vars(mesh, vars, 0); /* load as little endian */
     PRF;printf(": finished loading variables.\n");
     fflush(stdout);
-    checkpoint_load_CRCs(mesh, crcs);
+    ret = checkpoint_load_CRCs(mesh, crcs);
+    if(ret >= Geti(Par("checkpoint_CRC")))
+      errorexiti("CRC error of %d has reached level set in checkpoint_CRC",
+                 ret);
     //PRF;printf(": finished loading CRCs.\n");
     fflush(stdout);
   }
@@ -193,7 +196,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   free(pats);
   free(pars);
   free(dir);
-  return ret;
+  return 0;
 }
 
 /* setup nb related stuff and do load bal */
