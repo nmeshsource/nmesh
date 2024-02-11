@@ -567,7 +567,8 @@ void MeshParAppends(tMesh *mesh, int pi, const char *value)
   {
     char *oldvalue = MeshParGets(mesh, pi);
     char *newvalue = cmalloc(strlen(oldvalue) + strlen(value) + 2);
-    sprintf(newvalue, "%s %s", oldvalue, value);
+    if(oldvalue[0]) sprintf(newvalue, "%s %s", oldvalue, value);
+    else            sprintf(newvalue, "%s", value);
     setparameter(mesh, pi, newvalue);
     free(newvalue);
   }
