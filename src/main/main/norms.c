@@ -342,7 +342,7 @@ void crc_MeshPars(tMesh *mesh, uint64_t *crc, size_t *cnt)
   }
 }
 
-/* Compute CRC of all pars */
+/* Compute CRC of pars in checkpoint_save_pars */
 void crc_checkpoint_save_pars(tMesh *mesh, uint64_t *crc, size_t *cnt)
 {
   char *list, *saveptr, *name;
@@ -432,12 +432,12 @@ void crc_VarList(tVarList *vl, uint64_t *crc, size_t *cnt)
 }
 
 /* calc a couple of CRCs */
-void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
-                ulong *elmsCRC, ulong *nbinfoCRC, ulong *varsCRC)
+void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
 {
   tVarList *vl;
   int vi;
   uint64_t crc, cnt;
+  ulong parsCRC, patsCRC, elmsCRC, nbinfoCRC, varsCRC;
 
   if(Rank0)
   {
@@ -445,24 +445,24 @@ void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
     crc = cnt = 0;
     //crc_MeshPars(mesh, &crc, &cnt); // do not use all pars
     crc_checkpoint_save_pars(mesh, &crc, &cnt);
-    *parsCRC = crc;
+    parsCRC = crc;
 
     crc = cnt = 0;
     crc_pats(mesh, &crc, &cnt);
-    *patsCRC = crc;
+    patsCRC = crc;
   }
 
   /* elms */
   crc = cnt = 0;
   crc_elms(mesh, &crc, &cnt);
-  *elmsCRC = crc;
+  elmsCRC = crc;
 
   /* nbinfo */
   vl = vlalloc(mesh);
   vlpush(vl, Ind("amr_elm_nbinfo0"));
   crc = cnt = 0;
   crc_VarList(vl, &crc, &cnt);
-  *nbinfoCRC = crc;
+  nbinfoCRC = crc;
   vlfree(vl);
 
   /* loop over all vars and put all important EvoVars into vl */
@@ -476,7 +476,7 @@ void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
   }
   crc = cnt = 0;
   crc_VarList(vl, &crc, &cnt);
-  *varsCRC = crc;
+  varsCRC = crc;
   vlfree(vl);
 
   /*
@@ -484,4 +484,11 @@ void nmesh_CRCs(tMesh *mesh, ulong *parsCRC, ulong *patsCRC,
       "parsCRC=%lu patsCRC=%lu elmsCRC=%lu nbinfoCRC=%lu varsCRC=%lu\n",
       *parsCRC, *patsCRC, *elmsCRC, *nbinfoCRC, *varsCRC);
   */
+  CRCs[0] = parsCRC;
+  CRCs[1] = patsCRC,
+  CRCs[2] = elmsCRC;
+  CRCs[3] = nbinfoCRC;
+  CRCs[4] = varsCRC;
+  /* get CRCs to everybody */
+  nMPI_Bcast(CRCs,nCRCs, nMPI_UNSIGNED_LONG, 0);
 }

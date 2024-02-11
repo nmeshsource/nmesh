@@ -641,8 +641,9 @@ char *checkpoint_make_nodebuffer(FILE *fp, tVarList *vl, int read_native,
 /* load all CRCs from file */
 int checkpoint_load_CRCs(tMesh *mesh, char *fname)
 {
-  uint64_t parsCRC, patsCRC, elmsCRC, nbinfoCRC, varsCRC;
-  uint64_t parscrc, patscrc, elmscrc, nbinfocrc, varscrc;
+  ulong parsCRC, patsCRC, elmsCRC, nbinfoCRC, varsCRC;
+  ulong buf[6];
+  ulong crc[5]; //nmesh crcs for pars,pats,elms,nbinfo,vars
   int ret = 0;
 
   if(Rank0)
@@ -672,25 +673,53 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
     {
       printf("could not open %s\n", fname);
       parsCRC=patsCRC=elmsCRC=nbinfoCRC=varsCRC = 0;
-      ret = -2;
+      ret = 1;
     }
   }
 
-  /* get current CRCs */
-  nmesh_CRCs(mesh, &parscrc,&patscrc,&elmscrc,&nbinfocrc,&varscrc);
+  /* get results from CRC.txt and ret to everyone */
+  buf[0] = parsCRC;
+  buf[1] = patsCRC;
+  buf[2] = elmsCRC;
+  buf[3] = nbinfoCRC;
+  buf[4] = varsCRC;
+  buf[5] = ret;
+  nMPI_Bcast(buf,6, nMPI_UNSIGNED_LONG, 0);
+  parsCRC   = buf[0];
+  patsCRC   = buf[1];
+  elmsCRC   = buf[2];
+  nbinfoCRC = buf[3];
+  varsCRC   = buf[4];
+  ret       = buf[5];
 
-  if(Rank0)
+  /* get current CRCs */
+  nmesh_CRCs(mesh, 5, crc);
+
+  if(parsCRC != crc[0])
   {
-    if(parsCRC   != parscrc)
-      printf("  WARNING: pars CRC %lu != %lu\n", parscrc, parsCRC);
-    if(patsCRC   != patscrc)
-      printf("  WARNING: pats CRC %lu != %lu\n", patscrc, patsCRC);
-    if(elmsCRC   != elmscrc)
-      printf("  WARNING: elms CRC %lu != %lu\n", elmscrc, elmsCRC);
-    if(nbinfoCRC != nbinfocrc)
-      printf("  WARNING: nbinfo CRC %lu != %lu\n", nbinfocrc, nbinfoCRC);
-    if(varsCRC   != varscrc)
-      printf("  WARNING: vars CRC %lu != %lu\n", varscrc, varsCRC);
+    printf("  WARNING: pars CRC %lu != %lu\n", crc[0], parsCRC);
+    ret |= 2;
   }
+  if(patsCRC != crc[1])
+  {
+    printf("  WARNING: pats CRC %lu != %lu\n", crc[1], patsCRC);
+    ret |= 8;
+  }
+  if(elmsCRC != crc[2])
+  {
+    printf("  WARNING: elms CRC %lu != %lu\n", crc[2], elmsCRC);
+    ret |= 16;
+  }
+  if(nbinfoCRC != crc[3])
+  {
+    printf("  WARNING: nbinfo CRC %lu != %lu\n", crc[3], nbinfoCRC);
+    ret |= 32;
+  }
+  if(varsCRC != crc[4])
+  {
+    printf("  WARNING: vars CRC %lu != %lu\n", crc[4], varsCRC);
+    ret |= 4;
+  }
+
   return ret;
 }

@@ -450,11 +450,11 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_native)
 /* Rank0 saves all CRCs from nmesh_CRCs */
 int checkpoint_save_CRCs(tMesh *mesh, char *fname)
 {
-  uint64_t parsCRC, patsCRC, elmsCRC, nbinfoCRC, varsCRC;
+  ulong CRC[5]; //nmesh CRCs for pars,pats,elms,nbinfo,vars
   FILE *fp;
 
   /* get current CRCs */
-  nmesh_CRCs(mesh, &parsCRC,&patsCRC,&elmsCRC,&nbinfoCRC,&varsCRC);
+  nmesh_CRCs(mesh, 5, CRC);
 
   if(Rank0)
   {
@@ -462,11 +462,11 @@ int checkpoint_save_CRCs(tMesh *mesh, char *fname)
     if(fp)
     {
       //fprintf("CRCs for several things in nmesh's memory\n");
-      fprintf(fp, "pars:\t%lu\n", parsCRC);
-      fprintf(fp, "pats:\t%lu\n", patsCRC);
-      fprintf(fp, "elms:\t%lu\n", elmsCRC);
-      fprintf(fp, "nbinfo:\t%lu\n", nbinfoCRC);
-      fprintf(fp, "vars:\t%lu\n", varsCRC);
+      fprintf(fp, "pars:\t%lu\n", CRC[0]);
+      fprintf(fp, "pats:\t%lu\n", CRC[1]);
+      fprintf(fp, "elms:\t%lu\n", CRC[2]);
+      fprintf(fp, "nbinfo:\t%lu\n", CRC[3]);
+      fprintf(fp, "vars:\t%lu\n", CRC[4]);
       fclose(fp);
     }
   }
