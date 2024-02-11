@@ -312,6 +312,14 @@ void crc64_0start_global(tMesh *mesh,
       crc64_0start_combine_counters(crc, cnt, rbuf[rk*2], rbuf[rk*2+1]);
     free(rbuf);
   }
-  /* we could now broadcast the CRC to all ranks */
-  // Is this needed?
+
+  /* now broadcast the CRC to all ranks */
+  sbuf[0] = *crc;
+  sbuf[1] = *cnt;
+  nMPI_Bcast(sbuf,2, nMPI_UNSIGNED_LONG, 0);
+  if(!Rank0)
+  {
+    *crc = sbuf[0];
+    *cnt = sbuf[1];
+  }
 }
