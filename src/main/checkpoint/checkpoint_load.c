@@ -703,7 +703,7 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
   if(patsCRC != crc[1])
   {
     printf("  WARNING: pats CRC %lu != %lu\n", crc[1], patsCRC);
-    ret |= 8;
+    ret |= 32;
   }
   if(elmsCRC != crc[2])
   {
@@ -713,7 +713,7 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
   if(nbinfoCRC != crc[3])
   {
     printf("  WARNING: nbinfo CRC %lu != %lu\n", crc[3], nbinfoCRC);
-    ret |= 32;
+    ret |= 8;
   }
   if(varsCRC != crc[4])
   {
