@@ -172,14 +172,10 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   }
   else
   {
-    int ret;
     checkpoint_load_Vars(mesh, vars, 0); /* load as little endian */
     PRF;printf(": finished loading variables.\n");
     fflush(stdout);
-    ret = checkpoint_load_CRCs(mesh, crcs);
-    if(ret >= Geti(Par("checkpoint_CRC")))
-      errorexiti("CRC error of %d has reached level set in checkpoint_CRC",
-                 ret);
+    checkpoint_load_CRCs(mesh, crcs);
     //PRF;printf(": finished loading CRCs.\n");
     fflush(stdout);
   }

@@ -721,5 +721,10 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
     ret |= 2;
   }
 
+  /* exit if ret is too large */
+  if(ret >= Geti(Par("checkpoint_CRC")))
+    errorexiti("CRC error of %d has reached level set in checkpoint_CRC",
+               ret);
+
   return ret;
 }
