@@ -525,41 +525,6 @@ int fclose_buf(FILE *fp, char **buf)
   return EOF;
 }
 
-/* commit file caches to disk if desired */
-int file_sync_mode(FILE *fp, int mode)
-{
-  int fd;
-  int ret = 0;
-
-  if(mode==0) return 0;
-
-  /* we need file descriptor */
-  fd = fileno(fp);
-  /* in case fdatasync syncs only kernel buffer, we 1st call fflush */
-  ret = fflush(fp);
-
-  if(mode & 1)
-    ret = fdatasync(fd);
-  if(mode & 2)
-    ret = fsync(fd);
-  if(mode & 4)
-    sync();
-
-  return ret;
-}
-
-/* call file_sync_mode, then close file */
-int fclose_sync_mode(FILE *fp, int mode)
-{
-  file_sync_mode(fp, mode);
-  return fclose(fp);
-}
-/* call file_sync_mode, then close file and free its buffer */
-int fclose_buf_sync_mode(FILE *fp, char **buf, int mode)
-{
-  file_sync_mode(fp, mode);
-  return fclose_buf(fp, buf);
-}
 
 /* make copy of a file: cp fname newname */
 int copy_file(char *fname, char *newname)
