@@ -275,6 +275,9 @@ long nbytes_infile(FILE *fp);
 FILE *fopen_buf(const char *pathname, const char *mode,
                 char **buf, size_t bufsiz);
 int fclose_buf(FILE *fp, char **buf);
+int file_sync_mode(FILE *fp, int mode);
+int fclose_sync_mode(FILE *fp, int mode);
+int fclose_buf_sync_mode(FILE *fp, char **buf, int mode);
 int copy_file_into_dir(char *fname, char *dir);
 int system1(const char *s1);
 int system2(const char *s1, const char *s2);
@@ -360,6 +363,7 @@ void crc64_0start_global(tMesh *mesh,
 FILE *fopen_bufsize(tMesh *mesh, const char *pathname, const char *mode,
                     char **buf);
 int fs_sync(tMesh *mesh);
+int get_file_sync_mode(tMesh *mesh);
 int fclose_file_sync(tMesh *mesh, FILE *fp);
 int fclose_buf_file_sync(tMesh *mesh, FILE *fp, char **buf);
 void RunFunFINALIZE_finalize_all(tMesh *mesh);

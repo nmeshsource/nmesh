@@ -408,13 +408,19 @@ int fs_sync(tMesh *mesh)
 /* commit file caches to disk if desired */
 int file_sync(tMesh *mesh, FILE *fp)
 {
+  int mode = get_file_sync_mode(mesh);
+  return file_sync_mode(fp, mode);
+}
+/* read mode for file_sync_mode from par "file_sync" */
+int get_file_sync_mode(tMesh *mesh)
+{
   int file_sync = Par("file_sync");
   int mode = 0;
 
   if(Getv(file_sync, "fdatasync")) mode |= 1;
   if(Getv(file_sync, "fsync"))     mode |= 2;
   if(Getv(file_sync, "sync"))      mode |= 4;
-  return file_sync_mode(fp, mode);
+  return mode;
 }
 
 /* commit file caches to disk if desired, then close file */
