@@ -23,3 +23,6 @@ int sysmon(tMesh *mesh);
 
 /* utilities.c */
 int enable_FPEEXCEPTIONS(void);
+int file_sync_mode(FILE *fp, int mode);
+int fclose_sync_mode(FILE *fp, int mode);
+int fclose_buf_sync_mode(FILE *fp, char **buf, int mode);
