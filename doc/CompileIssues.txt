@@ -60,8 +60,8 @@ table of contents, so that linking can succeed. One way around this on Macs,
 is to add
 OFLAGS += -fno-common
 to MyConfig. Then the compiler marks the symbols as "B" instead, and Apple's
-ar adds them the table of contents, so that linking can work. Another way
-around this is to explicitly change all global variable declarations in
+ar adds them to the table of contents, so that linking can work. Another
+way around this is to explicitly change all global variable declarations in
 nmesh from something like "int ex1;" to "int ex1=0;". But who came up with
 all this nonsense at Apple? After all Sec. 6.9.2-2 of the C99-standard
 clearly states that "int ex1;" will have the same behavior as "int ex1=0;"
