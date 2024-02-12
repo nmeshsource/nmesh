@@ -271,6 +271,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
   char Yfil[1000];
   char Zfil[1000];
   int IObufsz = Geti(Par("fwrite_bufsize"));
+  int syncmode = Geti(Par("file_sync"));
   char *IObufX = cmalloc(IObufsz); /* larger buffer for write */
   char *IObufY = cmalloc(IObufsz); /* larger buffer for write */
   char *IObufZ = cmalloc(IObufsz); /* larger buffer for write */
@@ -365,9 +366,9 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
           }
         }
       } /* end formylnodes_noomp */
-      if(fZ) fclose(fZ);
-      if(fY) fclose(fY);
-      if(fX) fclose(fX);
+      if(fZ) fclose_sync_mode(fZ, syncmode);
+      if(fY) fclose_sync_mode(fY, syncmode);
+      if(fX) fclose_sync_mode(fX, syncmode);
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* broadcast new phead to everyone else */

@@ -102,7 +102,7 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
 }
 
 /* write ends and close .xmf file */
-void fclose_xdmf_xmf(FILE *fp, int E_markers)
+void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
 {
   /* close collections and header */
   if(E_markers)
@@ -111,7 +111,7 @@ void fclose_xdmf_xmf(FILE *fp, int E_markers)
     fprintf(fp, "%s", E_temporal);
     fprintf(fp, "%s", E_head);
   }
-  fclose(fp);
+  fclose_sync_mode(fp, syncmode);
 }
 
 /* open file to add more nodes still with the same Time Value */
@@ -228,6 +228,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                   Getd(Par("outputZ0")) };
   int vli;
   int bufsize  = Geti(Par("fwrite_bufsize"));
+  int syncmode = Geti(Par("file_sync"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
@@ -321,9 +322,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
           }
         }
         /* close files on this proc now */
-        if(vli==0) fclose(fpxyz); /* done only for first var in list */
-        fclose(fpbin);
-        fclose_xdmf_xmf(fpxmf, rk==size-1); /* last rank puts end markers */
+        if(vli==0) fclose_sync_mode(fpxyz, syncmode); /* done only for first var in list */
+        fclose_sync_mode(fpbin, syncmode);
+        fclose_xdmf_xmf(fpxmf, syncmode, rk==size-1); /* last rank puts end markers */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
@@ -351,6 +352,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   const char *suffix = "xyz";
   int vli;
   int bufsize  = Geti(Par("fwrite_bufsize"));
+  int syncmode = Geti(Par("file_sync"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
@@ -427,9 +429,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
           }
         }
         /* close files on this proc now */
-        if(vli==0) fclose(fpxyz); /* done only for first var in list */
-        fclose(fpbin);
-        fclose_xdmf_xmf(fpxmf, rk==size-1); /* last rank puts end markers */
+        if(vli==0) fclose_sync_mode(fpxyz, syncmode); /* done only for first var in list */
+        fclose_sync_mode(fpbin, syncmode);
+        fclose_xdmf_xmf(fpxmf, syncmode, rk==size-1); /* last rank puts end markers */
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */

@@ -370,7 +370,7 @@ int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl,
       /* write var list vl in native or little endian format */
       checkpoint_write_vl(fp, vl, write_native);
 
-      fclose_buf(fp, &IObuf);
+      fclose_buf_file_sync(mesh, fp, &IObuf);
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
