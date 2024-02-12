@@ -53,6 +53,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("fread_bufsize", "0",       "setvbuf size for read, 0 means we "
          "don't call setvbuf so that we use C's default buffering");
   AddPar("fs_sync", "no", "whether fs_sync is active [yes,no]");
+  AddPar("file_sync", "no", "how we sync a file [fdatasync,fsync,sync]");
 
   return 0;
 }

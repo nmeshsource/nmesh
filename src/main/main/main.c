@@ -405,6 +405,32 @@ int fs_sync(tMesh *mesh)
   return 0;
 }
 
+/* commit file caches to disk if desired */
+int file_sync(tMesh *mesh, FILE *fp)
+{
+  int file_sync = Par("file_sync");
+  int mode = 0;
+
+  if(Getv(file_sync, "fdatasync")) mode |= 1;
+  if(Getv(file_sync, "fsync"))     mode |= 2;
+  if(Getv(file_sync, "sync"))      mode |= 4;
+  return file_sync_mode(fp, mode);
+}
+
+/* commit file caches to disk if desired, then close file */
+int fclose_file_sync(tMesh *mesh, FILE *fp)
+{
+  file_sync(mesh, fp);
+  return fclose(fp);
+}
+/* commit file caches to disk if desired, then close file and free buf */
+int fclose_buf_file_sync(tMesh *mesh, FILE *fp, char **buf)
+{
+  file_sync(mesh, fp);
+  return fclose_buf(fp, buf);
+}
+
+
 /* check if all in par physics has actually been compiled in */
 int check_compiledphysics(tMesh *mesh)
 {
