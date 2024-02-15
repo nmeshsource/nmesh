@@ -345,7 +345,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
     /* test based on walltime */
     if((hours      >= 0. && hours      <= time_since_checkpoint) ||
        (hours_quit >= 0. && hours_quit <= time) ||
-       (hours      >= 0. && always))
+       (always))
     {
       do_checkpoint = 1; /* yes, we want to save a checkpoint */
       last_checkpoint_time = time;
