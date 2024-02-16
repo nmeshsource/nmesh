@@ -635,6 +635,8 @@ void amr_set_elm0_bbox(tMesh* mesh, tElm0 *elm0);
 void amr_set_elm_bbox(tElm *elm);
 void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1]);
 void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
+void eloc_from_eploc_l(tEloc eloc[1], const tEploc eploc[1]);
+void eloc_l_to_eploc(const tEloc eloc[1], tEploc eploc[1]);
 void amr_set_sibling_elm0(const tElm *elm, int sib_ijk, tElm *sib);
 char *elm_location_str(tElm *elm, char *s, int slen);
 char *elmname(tElm *elm, char *s, int slen);

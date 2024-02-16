@@ -585,6 +585,36 @@ void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
   connections_loc_to_ploc(NLOCS, loc, ploc);
 }
 
+/* unpack eploc into eloc up to eloc-byte eploc->l */
+void eloc_from_eploc_l(tEloc eloc[1], const tEploc eploc[1])
+{
+  const unsigned char *ploc = eploc->ploc;
+  char *loc  = eloc->loc;
+
+  /* trivial copies */
+  eloc->eid = eploc->eid;
+  eloc->p = eploc->p;
+  eloc->l = eploc->l;
+
+  /* translate ploc to loc */
+  connections_loc_from_ploc(eploc->l, loc, ploc);
+}
+
+/* pack eloc up to byte eloc->l into eploc */
+void eloc_l_to_eploc(const tEloc eloc[1], tEploc eploc[1])
+{
+  unsigned char *ploc = eploc->ploc;
+  const char *loc  = eloc->loc;
+
+  /* trivial copies */
+  eploc->eid = eloc->eid;
+  eploc->p = eloc->p;
+  eploc->l = eloc->l;
+
+  /* translate ploc to loc */
+  connections_loc_to_ploc(eloc->l, loc, ploc);
+}
+
 /* test eloc_to_eploc and eloc_from_eploc */
 void test_eploc(void)
 {
