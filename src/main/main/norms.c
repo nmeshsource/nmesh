@@ -388,13 +388,17 @@ void crc_elms_local(void *Mesh, uint64_t *crc, size_t *cnt)
   formyelms_noomp(mesh)
   {
     tElm *elm = MyElm;
-    tElm0 *elm0;
-    union { const tElm *elm; tElm0 *elm0; } e2e0;
+    tEloc eloc[1] = {0};
 
-    /* inlcude only elm header in crc */
-    e2e0.elm = elm;
-    elm0 = e2e0.elm0;
-    crc64_continue_counters(elm0, sizeof(elm0), crc, cnt);
+    /* include only parts of elmheader in crc */
+    eloc_from_eploc_l(eloc, elm->eploc);
+    //printeploc_s(elm->eploc,";");
+    //if(elm->eploc->eid==1) printf("2 loc: p=%d l=%d %s\n", eloc->p, eloc->l, eloc->loc);
+    crc64_continue_counters(&eloc[0], sizeof(eloc[0]), crc, cnt);
+    crc64_continue_counters(&elm->bbox[0], sizeof(elm->bbox[0]*6), crc, cnt);
+    crc64_continue_counters(&elm->n[0], sizeof(elm->n[0]*3), crc, cnt);
+    crc64_continue_counters(&elm->np, sizeof(elm->np), crc, cnt);
+    crc64_continue_counters(&elm->pt_typ[0], sizeof(elm->pt_typ[0]*3), crc, cnt);
   }
 }
 
