@@ -461,7 +461,7 @@ int elm_common_facepoints(tElm *elm, int f, tElm *nb, int nb_f)
 /****************************************************************************/
 
 /* unpack ploc into loc */
-void connections_loc_from_ploc(char loc[NLOCS],
+void connections_loc_from_ploc(int l, char loc[NLOCS],
                                const unsigned char ploc[NPBYTES])
 {
   int i, p1,p2, b1,b2, bi1,bi2;
@@ -469,7 +469,7 @@ void connections_loc_from_ploc(char loc[NLOCS],
   //p2=0;
 
   /* translate ploc to loc */
-  for(i=0; i<NLOCS; i++)
+  for(i=0; i<l; i++)
   {
     int i3 = i*3;
     b1 = i3;        /* bit number of 1st bit in ploc */
@@ -567,7 +567,7 @@ void eloc_from_eploc(tEloc eloc[1], const tEploc eploc[1])
   eloc->l = eploc->l;
 
   /* translate ploc to loc */
-  connections_loc_from_ploc(loc, ploc);
+  connections_loc_from_ploc(NLOCS, loc, ploc);
 }
 
 /* pack eloc into eploc */
