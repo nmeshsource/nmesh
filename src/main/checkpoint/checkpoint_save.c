@@ -183,62 +183,67 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
 int checkpoint_write_elms(tMesh *mesh, FILE *fp)
 {
   int size = nMPI_size();
+  int rank = nMPI_rank();
   int n_def[3]      = {0}; /* defaults for n */
   int pt_typ_def[3] = {0}; /* and pt_typ     */
   int rk;
   for(rk=0; rk<size; rk++)
-  {
-    ulong nelm0s;
-    tElm0 *elm0 = amr_alloc_get_elm0array_of_rank(mesh, rk, &nelm0s);
-    ulong i;
-
-    for(i=0; i<nelm0s; i++)
+    if(rank==rk || rank==0)
     {
-      int n[3], pt_typ[3];
-      int d, l, write_n, write_pt_typ;
-      tEloc eloc[1];
+      ulong nelm0s = amr_nelms_on_rank(mesh, rk);
+      tElm0 *elm0 = checked_calloc(nelm0s, sizeof(elm0[0]));
 
-      /* get n, pt_typ from elm and decide if we write them as well */
-      write_n = write_pt_typ = 0;
-      for(d=0; d<3; d++)
+      /* send elm0 from rank rk to 0 */
+      amr_send_elm0array_of_src_to_dest(mesh, rk, 0, nelm0s, elm0);
+
+      if(rank==0)
       {
-        n[d]      = elm0[i].n[d];
-        pt_typ[d] = elm0[i].pt_typ[d];
-
-        if(n[d]      != n_def[d])      { write_n = 1; }
-        if(pt_typ[d] != pt_typ_def[d]) { write_n = 1; write_pt_typ = 1; }
-      }
-
-      /* update defaults */
-      for(d=0; d<3; d++)
-      {
-        n_def[d]      = n[d];
-        pt_typ_def[d] = pt_typ[d];
-      }
-
-      /* get loc strings in eloc */
-      eloc_from_eploc(eloc, elm0[i].eploc);
-
-      /* only rank0 writes */
-      if(Rank0)
-      {
-        /* write elm name */
-        fprintf(fp, "%d_", eloc->p);
-        for(l = 0; l < eloc->l; l++) fputc(eloc->loc[l], fp);
-        fprintf(fp, "\n");
-
-        /* add info about n, pt_typ */
-        for(d=0; d<3; d++)
+        ulong i;
+        for(i=0; i<nelm0s; i++)
         {
-          if(write_n)                 fprintf(fp, "%d", n[d]);
-          if(write_pt_typ)            fprintf(fp, " %d", pt_typ[d]);
-          if(write_n || write_pt_typ) fprintf(fp, "\n");
+          int n[3], pt_typ[3];
+          int d, l, write_n, write_pt_typ;
+          tEloc eloc[1];
+
+          /* get n, pt_typ from elm and decide if we write them as well */
+          write_n = write_pt_typ = 0;
+          for(d=0; d<3; d++)
+          {
+            n[d]      = elm0[i].n[d];
+            pt_typ[d] = elm0[i].pt_typ[d];
+
+            if(n[d]      != n_def[d])      { write_n = 1; }
+            if(pt_typ[d] != pt_typ_def[d]) { write_n = 1; write_pt_typ = 1; }
+          }
+
+          /* update defaults */
+          for(d=0; d<3; d++)
+          {
+            n_def[d]      = n[d];
+            pt_typ_def[d] = pt_typ[d];
+          }
+
+          /* get loc strings in eloc */
+          eloc_from_eploc(eloc, elm0[i].eploc);
+
+          /* only rank0 writes */
+          /* write elm name */
+          fprintf(fp, "%d_", eloc->p);
+          for(l = 0; l < eloc->l; l++) fputc(eloc->loc[l], fp);
+          fprintf(fp, "\n");
+
+          /* add info about n, pt_typ */
+          for(d=0; d<3; d++)
+          {
+            if(write_n)                 fprintf(fp, "%d", n[d]);
+            if(write_pt_typ)            fprintf(fp, " %d", pt_typ[d]);
+            if(write_n || write_pt_typ) fprintf(fp, "\n");
+          }
+          fprintf(fp, "\n");
         }
-        fprintf(fp, "\n");
       }
-    } /* end rk-loop */
-    free(elm0);
-  }
+      free(elm0);
+    } /* end rk-loop-if */
   return 0;
 }
 

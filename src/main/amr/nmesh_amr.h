@@ -646,7 +646,8 @@ int elm_get_ijk(tElm *elm);
 tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank);
 tElm *elm_eploc_from_eid(tMesh *mesh, ulong eid, tEploc *eploc);
 int elm_is_on_patface(tElm *elm, int f);
-tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s);
+void amr_send_elm0array_of_src_to_dest(tMesh *mesh, int src, int dest,
+                                       ulong nelm0, tElm0 *elm0ar);
 ulong amr_nelms_on_rank(tMesh *mesh, int rank);
 ulong amr_1st_eid_on_rank(tMesh *mesh, int rank);
 void amr_elmindex_and_elmrank_of_eid(tMesh* mesh, ulong eid,

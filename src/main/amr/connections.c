@@ -3088,6 +3088,10 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
   ulong ei, k;
   int rk;
 
+  errorexit("This function works, but it is so slow, that I will stop you "
+            "here.\n"
+            "Consider using amr_send_elm0array_of_src_to_dest");
+
   /* sort eidarr into s_deseid */
   for(ei=0; ei<neids; ei++)
   {
@@ -3275,12 +3279,51 @@ tElm0 *amr_alloc_get_elm0array_of_rank(tMesh *mesh, int rk, ulong *nelm0s)
   /* fill eid array */
   for(i=0; i<nelm0; i++) eidar[i] = eid0 + i;
 
+  errorexit("Stop using this func! amr_get_elm0_for_eids "
+            "is too slow! Use amr_send_elm0array_of_src_to_dest");
+
   /* now put all elm0 for the eid array eidar into elm0ar */
   amr_get_elm0_for_eids(mesh, nelm0, eidar, elm0ar);
 
   free(eidar);
   *nelm0s = nelm0;
   return elm0ar;
+}
+
+/* Fill an array on rank dest with all elm0 that are on rank src.
+   Returns: number of elms in array, Out: elm0ar <- array with elm0
+   elm0ar needs to be large enough, with a size of
+   nelm0 = amr_nelms_on_rank(mesh, src); */
+void amr_send_elm0array_of_src_to_dest(tMesh *mesh, int src, int dest,
+                                       ulong nelm0, tElm0 *elm0ar)
+{
+  int rank = nMPI_rank();
+
+  if(rank==src)
+  {
+    union { tElm *elm; tElm0 *elm0; } e2e0;
+    ulong i;
+
+    /* fill elm0-array elm0ar with all elms on rank src */
+    i = 0;
+    formyelms_noomp(mesh)
+    {
+      e2e0.elm = MyElm;
+      elm0ar[i] = *(e2e0.elm0);
+      i++;
+    }
+    if(nelm0 != i) errorexit("nelm0 is wrong, because nelm0 != i");
+    /* send elm0ar */
+    if(dest!=src)
+      nMPI_Send(elm0ar,nelm0, nMPIvars->TELM0, dest, 101);
+  }
+
+  if(rank==dest)
+  {
+    /* recv elm0ar */
+    if(dest!=src)
+      nMPI_Recv(elm0ar,nelm0, nMPIvars->TELM0, src, 101);
+  }
 }
 
 
