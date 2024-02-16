@@ -509,7 +509,7 @@ void connections_loc_from_ploc(char loc[NLOCS],
 }
 
 /* pack loc into ploc */
-void connections_loc_to_ploc(const char loc[NLOCS],
+void connections_loc_to_ploc(int l, const char loc[NLOCS],
                              unsigned char ploc[NPBYTES])
 {
   int i, p1,p2, b1,b2, bi1,bi2;
@@ -521,7 +521,7 @@ void connections_loc_to_ploc(const char loc[NLOCS],
 
   /* translate ploc to loc */
   //ploc[0] = 0; // not needed
-  for(i=0; i<NLOCS; i++)
+  for(i=0; i<l; i++)
   {
     int i3 = i*3;
     b1 = i3;        /* bit number of 1st bit in ploc */
@@ -582,7 +582,7 @@ void eloc_to_eploc(const tEloc eloc[1], tEploc eploc[1])
   eploc->l = eloc->l;
 
   /* translate ploc to loc */
-  connections_loc_to_ploc(loc, ploc);
+  connections_loc_to_ploc(NLOCS, loc, ploc);
 }
 
 /* test eloc_to_eploc and eloc_from_eploc */
