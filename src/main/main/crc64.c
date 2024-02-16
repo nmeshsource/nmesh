@@ -1,4 +1,7 @@
 /* crc64.c - compute 64 bit CRCs */
+/* Wolfgang Tichy, 2/2024 */
+
+#include "nmesh.h" /* only needed for nmesh parts that use tMesh and such */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -282,7 +285,6 @@ void crc64_0start_combine_counters(uint64_t *crc01, size_t *ntotalbytes,
 /**************************************************************************/
 /* functions that collect global CRCs via MPI */
 /**************************************************************************/
-#include "nmesh.h"
 
 /* Compute CRC locally with func crc_local, and then combine the results
    from all ranks on Rank0.
