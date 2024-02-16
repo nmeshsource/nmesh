@@ -115,6 +115,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
       printf("         --modify-par:\"P=v\"       set par P to value v\n");
       printf(" all options must start with --\n");
     }
+    prdivider(1);
     finalize_all_and_exit(mesh, 0);
   }
 
