@@ -447,12 +447,68 @@ double var_GLquadratureXYZ3(tNode *node, int ui)
 /* get sub arrays out of arrays, e.g. for lower order interpolation */
 /***********************************************************************/
 
+/* Find an index range of size n around Xb0 in direction dir.
+   If CenterOnXb0=1, we center exactly on Xb0, and shrink the range if it
+   wouldn't fit into the node. Otherwise, we just push the range inside the
+   node.
+   Out: i0 = start of range , ni = size of range */
+void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
+                        int CenterOnXb0, int *i0, int *ni)
+{
+  double *Xb = node_Xb(node,dir)->d; /* get point coords in node */
+  int nn = node->n[dir];
+  int ind0, b0,b1, nb;
+
+  /* set nb to n or to n+1 if CenterOnXb0=1 and n is odd */
+  nb = n;
+  if(CenterOnXb0 && (nb)%2) nb += 1;
+
+  /* find node-point ind0 closest to Xb0 */
+  ind0 = nearest_i0_of_Xb_indir(node, dir, Xb0);
+
+  /* move ind0 to the left of Xb0 if needed */
+  if(CenterOnXb0 && Xb[ind0] > Xb0) ind0--;
+
+  /* find index range start b0 and end b1 */
+  b0 = ind0 - (nb-1)/2;
+  b1 = b0 + (nb-1);
+
+  /* check if range with ends b0 and b1 fits */
+  if(CenterOnXb0) /* shorten range if it does not fit */
+  {
+    if(b0 < 0)   { b1 -= -b0;      b0 = 0; }
+    if(b1 >= nn) { b0 += b1-nn+1;  b1 = nn-1; }
+    /* cut off pieces outside node */
+    if(b0 >= nn) b0 = nn-1;
+    if(b1 < 0)   b1 = 0;
+  }
+  else /* push range inside and shorten it, if it does not fit */
+  {
+    if(b0 < 0)   { b1 += -b0;      b0 = 0; }
+    if(b1 >= nn) { b0 -= b1-nn+1;  b1 = nn-1; }
+    /* cut off left piece if needed */
+    if(b0 < 0) b0 = 0;
+  }
+
+  /* set i0 and ni */
+  *i0 = b0;
+  *ni = b1 - b0 + 1;
+}
+
 /* Find an index box of size n[3] around Xb0.
    If CenterOnXb0=1 we center exactly on Xb0, and shrink the box if it
    wouldn't fit into the node. Otherwise, we just push the box inside the
    node.
    Out: b0 = lower corner of box, nb = size of box nb */
 void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
+                      int CenterOnXb0[3], int b0[3], int nb[3])
+{
+  int d;
+  for(d=0; d<3; d++)
+    IndexRange_Xb0_get(node, d, Xb0[d], n[d], CenterOnXb0[d],
+                       &(b0[d]), &(nb[d]));
+}
+void IndexBox_Xb0_get__old(tNode *node, const double Xb0[3], const int n[3],
                       int CenterOnXb0[3], int b0[3], int nb[3])
 {
   double *Xb[3];
