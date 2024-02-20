@@ -493,6 +493,7 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
         {
           basis_interp_topoints(parent, parent->dat->v[vi],
                                 Xp, elm->dat->v[vi], Lagrange_of_x);
+          //FIXME: use interpolate_topoints !!!
         }
       } /* end: if parent has dat->v[vi] */
     free_array(Xp[2]);
@@ -650,6 +651,7 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
             if(var)
               basis_interp_toIpoints(child, var, Xc[ijk],Ip[ijk], Res[ijk],
                                      Lagrange_of_x);
+              //FIXME: use interpolate_toIpoints !!!
             /* pos of next child */
             pos_ijk = pos_ijk->next;
           }
@@ -821,6 +823,7 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
         {
           basis_interp_topoints(node_old, node_old->dat->v[vi],
                                 Xp, node->dat->v[vi], Lagrange_of_x);
+          //FIXME: use interpolate_topoints !!!
         }
         /* copy nbinfo vars */
         if( (vi >= amr->elm_nbinfo0) && (vi < amr->elm_nbinfo0+6) )
