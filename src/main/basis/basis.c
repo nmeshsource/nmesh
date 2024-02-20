@@ -508,65 +508,6 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
     IndexRange_Xb0_get(node, d, Xb0[d], n[d], CenterOnXb0[d],
                        &(b0[d]), &(nb[d]));
 }
-void IndexBox_Xb0_get__old(tNode *node, const double Xb0[3], const int n[3],
-                      int CenterOnXb0[3], int b0[3], int nb[3])
-{
-  double *Xb[3];
-  int *nn = node->n;
-  int d;
-  int ijk[3], b1[3];
-
-  /* get point coords in node */
-  for(d=0; d<3; d++) Xb[d] = node_Xb(node,d)->d;
-
-  /* set nb to n or to n+1 if CenterOnXb0=1 and n is odd */
-  for(d=0; d<3; d++)
-  {
-    nb[d] = n[d];
-    if(CenterOnXb0[d] && nb[d]%2) nb[d] += 1;
-  }
-
-  /* find node-point ijk closest to Xb0 */
-  nearest_ijk_of_XbYbZb(node, ijk, Xb0);
-
-  /* move ijk to the left of Xb0 if needed */
-  for(d=0; d<3; d++)
-    if(CenterOnXb0[d] && Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
-
-  /* find lower left front corner b0, and upper right top corner b1 of box */
-  for(d=0; d<3; d++)
-  {
-    b0[d] = ijk[d] - (nb[d]-1)/2;
-    b1[d] = b0[d] + (nb[d]-1);
-  }
-  //PRF;
-  //for(d=0; d<3; d++) printf(" | b0[%d]=%d b1[%d]=%d | ", d, b0[d], d, b1[d]);
-
-  /* check if box with corners b0 and b1 fits */
-  for(d=0; d<3; d++)
-  {
-    if(CenterOnXb0[d]) /* shorten box if it does not fit */
-    {
-      if(b0[d] < 0)      { b1[d] -= -b0[d];         b0[d] = 0; }
-      if(b1[d] >= nn[d]) { b0[d] += b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
-      /* cut off pieces outside node */
-      if(b0[d] >= nn[d]) b0[d] = nn[d]-1;
-      if(b1[d] < 0)      b1[d] = 0;
-    }
-    else /* push box inside and shorten it, if it does not fit */
-    {
-      if(b0[d] < 0)      { b1[d] += -b0[d];         b0[d] = 0; }
-      if(b1[d] >= nn[d]) { b0[d] -= b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
-      /* cut off left piece if needed */
-      if(b0[d] < 0)      b0[d] = 0;
-    }
-  }
-  //PRF;
-  //for(d=0; d<3; d++) printf(" b1[%d]=%d ", d, b1[d]);
-
-  /* reset nb */
-  for(d=0; d<3; d++) nb[d] = b1[d] - b0[d] + 1;
-}
 
 /* Copy node point coordinates into Xb[3] */
 void IndexBox_set_Xb(tNode *node, int b0[3], int nb[3], tArray *Xb[3])
