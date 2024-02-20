@@ -453,7 +453,7 @@ double var_GLquadratureXYZ3(tNode *node, int ui)
    node.
    Out: b0 = lower corner of box, nb = size of box nb */
 void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
-                      int CenterOnXb, int b0[3], int nb[3])
+                      int CenterOnXb[3], int b0[3], int nb[3])
 {
   double *Xb[3];
   int *nn = node->n;
@@ -467,7 +467,7 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
   for(d=0; d<3; d++)
   {
     nb[d] = n[d];
-    if(CenterOnXb && nb[d]%2) nb[d] += 1;
+    if(CenterOnXb[d] && nb[d]%2) nb[d] += 1;
   }
 
   /* find node-point ijk closest to Xb0 */
@@ -475,7 +475,7 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
 
   /* move ijk to the left of Xb0 if needed */
   for(d=0; d<3; d++)
-    if(CenterOnXb && Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
+    if(CenterOnXb[d] && Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
 
   /* find lower left front corner b0, and upper right top corner b1 of box */
   for(d=0; d<3; d++)
@@ -487,9 +487,9 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
   //for(d=0; d<3; d++) printf(" | b0[%d]=%d b1[%d]=%d | ", d, b0[d], d, b1[d]);
 
   /* check if box with corners b0 and b1 fits */
-  if(CenterOnXb) /* shorten box if it does not fit */
+  for(d=0; d<3; d++)
   {
-    for(d=0; d<3; d++)
+    if(CenterOnXb[d]) /* shorten box if it does not fit */
     {
       if(b0[d] < 0)      { b1[d] -= -b0[d];         b0[d] = 0; }
       if(b1[d] >= nn[d]) { b0[d] += b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
@@ -497,10 +497,7 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
       if(b0[d] >= nn[d]) b0[d] = nn[d]-1;
       if(b1[d] < 0)      b1[d] = 0;
     }
-  }
-  else /* push box inside and shorten it, if it does not fit */
-  {
-    for(d=0; d<3; d++)
+    else /* push box inside and shorten it, if it does not fit */
     {
       if(b0[d] < 0)      { b1[d] += -b0[d];         b0[d] = 0; }
       if(b1[d] >= nn[d]) { b0[d] -= b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
