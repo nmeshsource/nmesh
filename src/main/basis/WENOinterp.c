@@ -6,6 +6,11 @@
 
 #define sqr(x) ((x)*(x))
 
+
+/***********************************************************************/
+/* funcs for 1d WENO interpolation */
+/***********************************************************************/
+
 /* WENO6 interpolation as in
    Colin B. Macdonald, Steven J. Ruth, J Sci Comput (2008) 35: 219-240 */
 double interpolate_WENO_6_ds(double x, int n, const double *x_p,
@@ -115,4 +120,28 @@ double interpolate_WENO_4_ds(double x, int n, const double *x_p,
     sum += w[i]*p[i];
 
   return sum;
+}
+
+
+/***********************************************************************/
+/* func to select correct WENO */
+/***********************************************************************/
+
+/* nth order WENO */
+double interpolate_WENO_n_ds(double x, int n, const double *x_p,
+                             const double *w_interp,
+                             const double *f, int ds, double fscal)
+{
+  switch(n)
+  {
+  case 1:
+  case 2:
+    return Lagrange_interp_barycentric2_ds(x, n,x_p, w_interp, f, ds, fscal);
+  case 4:
+    return interpolate_WENO_4_ds(x, n,x_p, w_interp, f, ds, fscal);
+  case 6:
+    return interpolate_WENO_6_ds(x, n,x_p, w_interp, f, ds, fscal);
+  default:
+    errorexiti("order n=%d is not implemented", n);
+  }
 }

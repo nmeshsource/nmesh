@@ -14,3 +14,13 @@ int free_gridpoints(tMesh *mesh);
 void Fourier_coeffs(int N, const double u[], double c[]);
 void set_TrafoArray(tArray *At,
                     void (*get_coeffs)(int N, const double *u, double *c));
+
+/* Lagrange.c */
+double Lagrange_interp_barycentric2_ds(double x, int n, const double *x_p,
+                                       const double *w_interp,
+                                       const double *f, int ds, double fscal);
+
+/* WENOinterp.c */
+double interpolate_WENO_n_ds(double x, int n, const double *x_p,
+                             const double *w_interp,
+                             const double *f, int ds, double fscal);
