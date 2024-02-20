@@ -3,6 +3,14 @@
 /* global header file */
 
 
+/* types of interpolation we can do in 1d */
+enum
+{
+  INTERP_LAGRANGE,  /* Lagrange interpolation */
+  INTERP_WENO,      /* WENO interpolation */
+};
+
+
 /* structure that holds global coordinates vars and pars */
 typedef struct {
   int expfilter_JacobianPower; /* Par("basis_expfilter_JacobianPower") */
