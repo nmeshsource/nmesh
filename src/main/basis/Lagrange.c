@@ -48,10 +48,10 @@ double Lagrange_interp_barycentric2(double x, int n, const double *x_p,
   return numer / denom;
 }
 /* Standard barycentric 1d Lagrange interpolation of data f to point x,
-   where data has a stride sf in memory */
-double Lagrange_interp_barycentric2_sf(double x, int n, const double *x_p,
+   where data has a stride ds in memory */
+double Lagrange_interp_barycentric2_ds(double x, int n, const double *x_p,
                                        const double *w_interp,
-                                       const double *f, int sf)
+                                       const double *f, int ds)
 {
   double denom, numer, W, diff;
   int k;
@@ -59,10 +59,10 @@ double Lagrange_interp_barycentric2_sf(double x, int n, const double *x_p,
   for(k=0; k<n; k++)
   {
     diff = x - x_p[k];
-    if(fabs(diff) <= BARY_DIFF_MIN) return f[sf*k];
+    if(fabs(diff) <= BARY_DIFF_MIN) return f[ds*k];
 
     W = w_interp[k] / diff;
-    numer += W * f[sf*k];
+    numer += W * f[ds*k];
     denom += W;
   }
   return numer / denom;
