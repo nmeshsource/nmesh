@@ -441,3 +441,82 @@ double var_GLquadratureXYZ3(tNode *node, int ui)
   dXYZ_dXbYbZb(node, dXdXb);
   return var_GLquadrature3(node, ui) * fabs(dXdXb[0]*dXdXb[1]*dXdXb[2]);
 }
+
+
+/***********************************************************************/
+/* get sub arrays out of arrays, e.g. for lower order interpolation */
+/***********************************************************************/
+
+/* Find an index box of size n[3] around Xb0.
+   If CenterOnXb=1 we center exactly on Xb0, and shrink the box if it
+   wouldn't fit into the node. Otherwise, we just push the box inside the
+   node.
+   Out: b0 = lower corner of box, nb = size of box nb */
+void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
+                      int CenterOnXb, int b0[3], int nb[3])
+{
+  double *Xb[]={ node_Xb(node,0)->d, node_Xb(node,1)->d, node_Xb(node,2)->d };
+  int *nn = node->n;
+  int d;
+  int ijk[3], b1[3];
+
+  /* set nb to n */
+  for(d=0; d<3; d++) nb[d] = n[d];
+
+  /* find node-point ijk closest to Xb0 */
+  nearest_ijk_of_XbYbZb(node, ijk, Xb0);
+
+  /* move ijk to the left of Xb0 if needed */
+  for(d=0; d<3; d++)
+    if(Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
+
+  /* find lower left front corner b0, and upper right top corner b1 of box */
+  for(d=0; d<3; d++)
+  {
+    b0[d] = ijk[d] - (nb[d]-1)/2;
+    b1[d] = b0[d] + (nb[d]-1);
+  }
+
+  /* check if box with corners b0 and b1 fits */
+  if(CenterOnXb) /* shorten box if it does not fit */
+  {
+    for(d=0; d<3; d++)
+    {
+      if(b0[d] < 0)      { b1[d] -= -b0[d];         b0[d] = 0; }
+      if(b1[d] >= nn[d]) { b0[d] += b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
+    }
+  }
+  else /* push box inside and shorten it, if it does not fit */
+  {
+    for(d=0; d<3; d++)
+    {
+      if(b0[d] < 0)      { b1[d] += -b0[d];         b0[d] = 0; }
+      if(b1[d] >= nn[d]) { b0[d] -= b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
+      if(b0[d] < 0)      b0[d] = 0;
+    }
+  }
+
+  /* reset nb */
+  for(d=0; d<3; d++)  nb[d] = b1[d] - b0[d] + 1;
+}
+
+/* Copy data from ar inside a box of size nb[0]*nb[1]*nb[2] with origin
+   corner at ijk=(b0[0],b0[1],b0[2]). */
+void IndexBox_subarray_fill(tArray *ar, int b0[3], int nb[3], tArray *subar)
+{
+  int *na = Arrn(ar);
+  int i,j,k;
+
+  redimension_array(subar, nb);
+
+  /* copy data into subar */
+  for(k = 0; k < nb[2]; k++)
+  for(j = 0; j < nb[1]; j++)
+  for(i = 0; i < nb[0]; i++)
+  {
+    int ia = i + b0[0];
+    int ja = j + b0[1];
+    int ka = k + b0[2];
+    Arrd_(subar)[Ind_n(i,j,k, nb)] = Arrd_(ar)[Ind_n(ia,ja,ka, na)];
+  }
+}
