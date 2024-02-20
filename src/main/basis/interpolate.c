@@ -603,7 +603,14 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
 
     /* get interpolation weights if needed */
     if(scheme==INTERP_LAGRANGE)
+    {
+      w[d] = dmalloc(nb[d]);    /* alloc w */
       Lagrange_winterp(nb[d], x_p[d], w[d]);
+    }
+    else
+    {
+      w[d] = NULL;
+    }
   }
 
   /* get pointer vd to start of var data */
@@ -624,8 +631,10 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
   /* interp r1 along Z */
   iterp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
                            r1, 1, vscal);
+
   free(r2);
   free(r1);
+  for(d=2; d>=0; d--) free(w[d]);
 
   return iterp;
 }
