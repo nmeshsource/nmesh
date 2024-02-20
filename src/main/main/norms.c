@@ -417,7 +417,7 @@ void crc_VarList_local(void *Vlist, uint64_t *crc, size_t *cnt)
       tArray *arr = VarA(elm, Vind(vl, vli));
       int N = ArrN(arr);
       double *d = Arrd(arr);
-      crc64_continue_counters(d, N, crc, cnt);
+      crc64_continue_counters(d, N*sizeof(*d), crc, cnt);
     }
   }
 }
