@@ -48,10 +48,10 @@ double Lagrange_interp_barycentric2(double x, int n, const double *x_p,
   return numer / denom;
 }
 /* Standard barycentric 1d Lagrange interpolation of data f to point x,
-   where data has a stride ds in memory */
+   where data has a stride ds in memory, fscal is a dummy arg */
 double Lagrange_interp_barycentric2_ds(double x, int n, const double *x_p,
                                        const double *w_interp,
-                                       const double *f, int ds)
+                                       const double *f, int ds, double fscal)
 {
   double denom, numer, W, diff;
   int k;
