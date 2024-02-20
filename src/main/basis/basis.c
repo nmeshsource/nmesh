@@ -455,20 +455,27 @@ double var_GLquadratureXYZ3(tNode *node, int ui)
 void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
                       int CenterOnXb, int b0[3], int nb[3])
 {
-  double *Xb[]={ node_Xb(node,0)->d, node_Xb(node,1)->d, node_Xb(node,2)->d };
+  double *Xb[3];
   int *nn = node->n;
   int d;
   int ijk[3], b1[3];
 
-  /* set nb to n */
-  for(d=0; d<3; d++) nb[d] = n[d];
+  /* get point coords in node */
+  for(d=0; d<3; d++) Xb[d] = node_Xb(node,d)->d;
+
+  /* set nb to n or to n+1 if CenterOnXb=1 and n is odd */
+  for(d=0; d<3; d++)
+  {
+    nb[d] = n[d];
+    if(CenterOnXb && nb[d]%2) nb[d] += 1;
+  }
 
   /* find node-point ijk closest to Xb0 */
   nearest_ijk_of_XbYbZb(node, ijk, Xb0);
 
   /* move ijk to the left of Xb0 if needed */
   for(d=0; d<3; d++)
-    if(Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
+    if(CenterOnXb && Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
 
   /* find lower left front corner b0, and upper right top corner b1 of box */
   for(d=0; d<3; d++)
@@ -484,6 +491,7 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
     {
       if(b0[d] < 0)      { b1[d] -= -b0[d];         b0[d] = 0; }
       if(b1[d] >= nn[d]) { b0[d] += b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
+      if(b0[d] >= nn[d]) b0[d] = nn[d]-1;
     }
   }
   else /* push box inside and shorten it, if it does not fit */
@@ -497,12 +505,25 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
   }
 
   /* reset nb */
-  for(d=0; d<3; d++)  nb[d] = b1[d] - b0[d] + 1;
+  for(d=0; d<3; d++) nb[d] = b1[d] - b0[d] + 1;
+}
+
+/* Copy node point coordinates into Xb[3] */
+void IndexBox_set_Xb(tNode *node, int b0[3], int nb[3], tArray *Xb[3])
+{
+  int d, k;
+
+  /* copy node points nXb into Xb */
+  for(d=0; d<3; d++)
+  {
+    redim_array(Xb[d], nb[d],1,1);
+    for(k=0; k<nb[d]; k++) Xb[d]->d[k] = node_Xb(node,d)->d[k + b0[d]];
+  }
 }
 
 /* Copy data from ar inside a box of size nb[0]*nb[1]*nb[2] with origin
    corner at ijk=(b0[0],b0[1],b0[2]). */
-void IndexBox_subarray_fill(tArray *ar, int b0[3], int nb[3], tArray *subar)
+void IndexBox_fill_subarray(tArray *ar, int b0[3], int nb[3], tArray *subar)
 {
   int *na = Arrn(ar);
   int i,j,k;
