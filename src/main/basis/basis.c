@@ -469,7 +469,8 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   if(Xb0 > +1.) ind0 = nn-1;
 
   /* move ind0 to the left of Xb0 if needed */
-  if(CenterOnXb0 && Xb[ind0] > Xb0) ind0--;
+  //if(CenterOnXb0 && Xb[ind0] > Xb0) ind0--;
+  if(Xb[ind0] > Xb0) ind0--;
 
   /* find index range start b0 and end b1 */
   b0 = ind0 - (nb-1)/2;
