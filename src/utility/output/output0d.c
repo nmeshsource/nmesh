@@ -121,7 +121,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     for(ipt=0; ipt<Npt; ipt++)
       have_pt[ipt] = basis_var_interpolate_ok(node_pt[ipt], vi, Xb_pt[ipt],
                                               &(val_pt[ipt]));
-
+      //FIXME: use a better interpolator !!!
     /* output is done by rank0 */
     if(Rank0)
     {
