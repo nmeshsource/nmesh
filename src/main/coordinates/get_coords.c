@@ -27,8 +27,50 @@ void XbYbZb_of_ind(tNode *node, int ind, double Xb[3])
   XbYbZb_of_ijk(node, i,j,k, Xb);
 }
 
+/* find i0 closest to Xb0 in direction dir */
+int nearest_i0_of_Xb_indir(tNode *node, int dir, const double Xb0)
+{
+  int *n = node->n;
+  double *Xb = node_Xb(node,dir)->d;
+  int i,j,k;
+  double a,b;
+  int i0;
+
+  i = 0;
+  k = n[dir]-1;
+  /* set a, b */
+  Xb_of_X_indir(node, dir, &a, node->bbox[2*dir]);
+  Xb_of_X_indir(node, dir, &b, node->bbox[2*dir + 1]);
+  if(dgreater(Xb0, b)) return -k-1;
+  if(dless(Xb0, a))    return -1;
+
+  while(k-i>1)
+  {
+    j=(i+k)/2;
+
+    a = Xb[i] - Xb0;
+    b = Xb[j] - Xb0;
+    if(a*b<=0.0) k=j;
+    else         i=j;
+  }
+  if( fabs(Xb[i] - Xb0) < fabs(Xb[k] - Xb0) )
+    i0 = i;
+  else
+    i0 = k;
+
+  return i0;
+}
+
 /* find i,j,k closest to Xb0 */
 void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3])
+{
+  int dir;
+  for(dir=0; dir<3; dir++)
+    ijk[dir] = nearest_i0_of_Xb_indir(node, dir, Xb0[dir]);
+}
+
+/* find i,j,k closest to Xb0 */
+void nearest_ijk_of_XbYbZb__old(tNode *node, int ijk[3], const double Xb0[3])
 {
   int *n = node->n;
   double *Xb[]={ node_Xb(node,0)->d, node_Xb(node,1)->d, node_Xb(node,2)->d };
