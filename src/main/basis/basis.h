@@ -3,8 +3,18 @@
 /* header file for basis local functions */
 
 
+/* types of interpolation we can do in 1d */
+enum
+{
+  INTERP_LAGRANGE,  /* Lagrange interpolation */
+  INTERP_WENO,      /* WENO interpolation */
+};
+
+
 /* basis.c */
 int basis_init_globals(tMesh *mesh);
+void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
+                        int CenterOnXb0, int *i0, int *ni);
 
 /* gridpoints.c */
 int init_gridpoints(tMesh *mesh);

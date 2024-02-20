@@ -553,6 +553,120 @@ void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
 }
 
 /***********************************************************************/
+/* Interpolate using a particular interpolation scheme */
+/***********************************************************************/
+
+/* call Lagrange, or WENO depending on scheme */
+double interpolate1d_ds(double x, int n, const double *x_p,
+                        int scheme, const double *w_interp,
+                        const double *f, int ds, double fscal)
+{
+  switch(scheme)
+  {
+  case INTERP_LAGRANGE:
+    return Lagrange_interp_barycentric2_ds(x, n,x_p, w_interp, f, ds, fscal);
+  case INTERP_WENO:
+    return interpolate_WENO_n_ds(x, n,x_p, w_interp, f, ds, fscal);
+  default:
+    errorexit("unknown scheme");
+  }
+}
+
+/* 3d interp of var onto point Xb using np points around Xb */
+double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
+                     int scheme, double vscal)
+{
+  int *nn = elm->n;
+  double *Xb[3];
+  double *x_p[3];
+  double *w[3];
+  int CenterOnXb0, b0[3], nb[3];
+  double *vd;
+  double *r2;
+  double *r1;
+  double iterp;
+  int d, j,k;
+
+  /* center interp box for WENO only */
+  CenterOnXb0 = (scheme==INTERP_WENO);
+
+  for(d=0; d<3; d++)
+  {
+    /* get point coords in elm */
+    Xb[d] = node_Xb(elm,d)->d;
+
+    /* get index range into b0[3], nb[3] */
+    IndexRange_Xb0_get(elm, d, Xb0[d], np[d], CenterOnXb0,
+                       &(b0[d]), &(nb[d]));
+    /* get coords in box */
+    x_p[d] = Xb[d] + b0[d];
+
+    /* get interpolation weights if needed */
+    if(scheme==INTERP_LAGRANGE)
+      Lagrange_winterp(nb[d], x_p[d], w[d]);
+  }
+
+  /* get pointer vd to start of var data */
+  vd = Arrd(var);
+
+  /* interp vd along X for all Y,Z */
+  r2 = dmalloc(nb[1]*nb[2]);
+  for(k=b0[2]; k<b0[2]+nb[2]; k++)
+  for(j=b0[1]; j<b0[1]+nb[1]; j++)
+    r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                                       vd + Ind_n(b0[0],j,k, nn), 1, vscal);
+  /* interp r2 along Y for all Z */
+  r1 = dmalloc(nb[2]);
+  for(k=b0[2]; k<b0[2]+nb[2]; k++)
+    r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+                             r2, 1, vscal);
+
+  /* interp r1 along Z */
+  iterp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+                           r1, 1, vscal);
+  free(r2);
+  free(r1);
+
+  return iterp;
+}
+
+/* 3d interpolation from array var in elm onto a set of points given in
+   arrays Xp[0..2]. The arrays Xp[0..2] are in Xb coords. The result will
+   be written into array interp.
+   The interpolation will use np[3] points around Xp. scheme describes
+   the interpolation scheme, and vscal is the scale use in WENO, usually 1 */
+void interpolate_topoints(tElm *elm, tArray *var, tArray *Xp[3],
+                          int np[3], int scheme, double vscal,
+                          tArray *interp)
+{
+  int k;
+  forarray(Xp[0], k)
+  {
+    double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k], Xp[2]->d[k] };
+    interp->d[k] = interp_to_Xb0(elm, var, Xb, np, scheme, vscal);
+  }
+}
+
+/* 3d interpolation from array var in node to a set of points indicated by
+   the arrays Xp[0..2] and Ip. Xp[0..2] has the point coords in Xb coords
+   and Ip has the index where the interpolation result is written to in
+   interp. For points where Ip<0 nothing will be written into interp. */
+void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
+                           int np[3], int scheme, double vscal,
+                           tArray *Ip, tArray *interp)
+{
+  int k;
+  forarray(Xp[0], k)
+  {
+    double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k], Xp[2]->d[k] };
+    int idx = Ip->i[k];
+    if(idx>=0)
+      interp->d[idx] = interp_to_Xb0(elm, var, Xb, np, scheme, vscal);
+  }
+}
+
+
+/***********************************************************************/
 /* Lagrange interpolation */
 /***********************************************************************/
 

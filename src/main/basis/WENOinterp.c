@@ -127,16 +127,19 @@ double interpolate_WENO_4_ds(double x, int n, const double *x_p,
 /* func to select correct WENO */
 /***********************************************************************/
 
-/* nth order WENO */
+/* nth order WENO, Note: w_interp is ignored */
 double interpolate_WENO_n_ds(double x, int n, const double *x_p,
                              const double *w_interp,
                              const double *f, int ds, double fscal)
 {
+  double w[2];
   switch(n)
   {
   case 1:
   case 2:
-    return Lagrange_interp_barycentric2_ds(x, n,x_p, w_interp, f, ds, fscal);
+    /* set Lagrange interp. weights in case they are not in w_interp */
+    Lagrange_winterp(n, x_p, w); // cheap for n=2
+    return Lagrange_interp_barycentric2_ds(x, n,x_p, w, f, ds, fscal);
   case 4:
     return interpolate_WENO_4_ds(x, n,x_p, w_interp, f, ds, fscal);
   case 6:

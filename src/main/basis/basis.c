@@ -528,6 +528,7 @@ void IndexBox_fill_subarray(tArray *ar, int b0[3], int nb[3], tArray *subar)
 {
   int *na = Arrn(ar);
   int i,j,k;
+  errorexit("this funs is not tested!");
 
   redimension_array(subar, nb);
 
