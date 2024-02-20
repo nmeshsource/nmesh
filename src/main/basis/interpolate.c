@@ -584,7 +584,7 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
   double *vd;
   double *r2;
   double *r1;
-  double iterp;
+  double interp;
   int d, j,k;
 
   /* center interp box for WENO only */
@@ -611,10 +611,43 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
     {
       w[d] = NULL;
     }
+    /*
+    PRF;printf(": d=%d  b0[d]=%d nb[d]=%d\n", d, b0[d], nb[d]);
+    printf("  x_p[d] =");
+    for(k=0; k<nb[d]; k++) printf(" %g", x_p[d][k]);
+    printf("\n");
+    if(w[d])
+    {
+      printf("  w[d]   =");
+      for(k=0; k<nb[d]; k++) printf(" %g", w[d][k]);
+      printf("\n");
+      printf("  WL[d]  =");
+      for(k=0; k<nb[d]; k++) printf(" %g", node_WL(elm,d)->d[k]);
+      printf("\n");
+    }
+    */
   }
 
   /* get pointer vd to start of var data */
   vd = Arrd(var);
+
+
+/*
+  for(k=0; k<nb[0]; k++) printf(" %g", (vd + Ind_n(b0[0],b0[1],b0[2], nn))[k]);
+  printf("\n");
+
+Yo(100);
+interp =
+Lagrange_interp_barycentric2_ds(Xb0[0], nb[0], x_p[0], w[0],
+                                vd + Ind_n(b0[0],b0[1],b0[2], nn),
+                                1, vscal);
+printf("interp=%g\n", interp);
+return interp;
+
+interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                 vd + Ind_n(b0[0],b0[1],b0[2], nn),
+                 1, vscal);
+*/
 
   /* interp vd along X for all Y,Z */
   r2 = dmalloc(nb[1]*nb[2]);
@@ -630,13 +663,13 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
                              r2, 1, vscal);
 
   /* interp r1 along Z */
-  iterp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+  interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
                            r1, 1, vscal);
   free(r2);
   free(r1);
   for(d=2; d>=0; d--) free(w[d]);
 
-  return iterp;
+  return interp;
 }
 
 /* 3d interpolation from array var in elm onto a set of points given in
