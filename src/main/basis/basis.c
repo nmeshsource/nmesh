@@ -483,6 +483,8 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
     b0[d] = ijk[d] - (nb[d]-1)/2;
     b1[d] = b0[d] + (nb[d]-1);
   }
+  //PRF;
+  //for(d=0; d<3; d++) printf(" | b0[%d]=%d b1[%d]=%d | ", d, b0[d], d, b1[d]);
 
   /* check if box with corners b0 and b1 fits */
   if(CenterOnXb) /* shorten box if it does not fit */
@@ -491,7 +493,9 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
     {
       if(b0[d] < 0)      { b1[d] -= -b0[d];         b0[d] = 0; }
       if(b1[d] >= nn[d]) { b0[d] += b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
+      /* cut off pieces outside node */
       if(b0[d] >= nn[d]) b0[d] = nn[d]-1;
+      if(b1[d] < 0)      b1[d] = 0;
     }
   }
   else /* push box inside and shorten it, if it does not fit */
@@ -500,9 +504,12 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
     {
       if(b0[d] < 0)      { b1[d] += -b0[d];         b0[d] = 0; }
       if(b1[d] >= nn[d]) { b0[d] -= b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
+      /* cut off left piece if needed */
       if(b0[d] < 0)      b0[d] = 0;
     }
   }
+  //PRF;
+  //for(d=0; d<3; d++) printf(" b1[%d]=%d ", d, b1[d]);
 
   /* reset nb */
   for(d=0; d<3; d++) nb[d] = b1[d] - b0[d] + 1;
