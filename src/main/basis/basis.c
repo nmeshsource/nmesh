@@ -448,12 +448,12 @@ double var_GLquadratureXYZ3(tNode *node, int ui)
 /***********************************************************************/
 
 /* Find an index box of size n[3] around Xb0.
-   If CenterOnXb=1 we center exactly on Xb0, and shrink the box if it
+   If CenterOnXb0=1 we center exactly on Xb0, and shrink the box if it
    wouldn't fit into the node. Otherwise, we just push the box inside the
    node.
    Out: b0 = lower corner of box, nb = size of box nb */
 void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
-                      int CenterOnXb[3], int b0[3], int nb[3])
+                      int CenterOnXb0[3], int b0[3], int nb[3])
 {
   double *Xb[3];
   int *nn = node->n;
@@ -463,11 +463,11 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
   /* get point coords in node */
   for(d=0; d<3; d++) Xb[d] = node_Xb(node,d)->d;
 
-  /* set nb to n or to n+1 if CenterOnXb=1 and n is odd */
+  /* set nb to n or to n+1 if CenterOnXb0=1 and n is odd */
   for(d=0; d<3; d++)
   {
     nb[d] = n[d];
-    if(CenterOnXb[d] && nb[d]%2) nb[d] += 1;
+    if(CenterOnXb0[d] && nb[d]%2) nb[d] += 1;
   }
 
   /* find node-point ijk closest to Xb0 */
@@ -475,7 +475,7 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
 
   /* move ijk to the left of Xb0 if needed */
   for(d=0; d<3; d++)
-    if(CenterOnXb[d] && Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
+    if(CenterOnXb0[d] && Xb[d][ijk[d]] > Xb0[d]) ijk[d]--;
 
   /* find lower left front corner b0, and upper right top corner b1 of box */
   for(d=0; d<3; d++)
@@ -489,7 +489,7 @@ void IndexBox_Xb0_get(tNode *node, const double Xb0[3], const int n[3],
   /* check if box with corners b0 and b1 fits */
   for(d=0; d<3; d++)
   {
-    if(CenterOnXb[d]) /* shorten box if it does not fit */
+    if(CenterOnXb0[d]) /* shorten box if it does not fit */
     {
       if(b0[d] < 0)      { b1[d] -= -b0[d];         b0[d] = 0; }
       if(b1[d] >= nn[d]) { b0[d] += b1[d]-nn[d]+1;  b1[d] = nn[d]-1; }
@@ -545,3 +545,13 @@ void IndexBox_fill_subarray(tArray *ar, int b0[3], int nb[3], tArray *subar)
     Arrd_(subar)[Ind_n(i,j,k, nb)] = Arrd_(ar)[Ind_n(ia,ja,ka, na)];
   }
 }
+
+/* make these pars
+amr_uni_interpolate_scheme = [WENOm2, WENOZm2, Lagrange]
+amr_uni_interpolate_maxorder = [6,4,2]
+amr_LGL_interpolate_scheme <-- always Lagrange
+amr_LGL_interpolate_maxorder = [n,6,8,10]  # let <=0 mean use n
+
+output_interpolate_scheme = [WENOm2, WENOZm2, Lagrange]
+output_interpolate_maxorder = [n,6,4,2]
+*/
