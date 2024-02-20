@@ -27,6 +27,47 @@ void Lagrange_winterp(int n, const double *x, double *w_interp)
   }
 }
 
+/* Standard barycentric 1d Lagrange interpolation of data f[k] to point x.
+   Also called "second (true) form of the barycentric formula." */
+#define BARY_DIFF_MIN 1e-200
+double Lagrange_interp_barycentric2(double x, int n, const double *x_p,
+                                    const double *w_interp, const double *f)
+{
+  double denom, numer, W, diff;
+  int k;
+  denom = numer = 0.;
+  for(k=0; k<n; k++)
+  {
+    diff = x - x_p[k];
+    if(fabs(diff) <= BARY_DIFF_MIN) return f[k];
+
+    W = w_interp[k] / diff;
+    numer += W * f[k];
+    denom += W;
+  }
+  return numer / denom;
+}
+/* Standard barycentric 1d Lagrange interpolation of data f to point x,
+   where data has a stride sf in memory */
+double Lagrange_interp_barycentric2_sf(double x, int n, const double *x_p,
+                                       const double *w_interp,
+                                       const double *f, int sf)
+{
+  double denom, numer, W, diff;
+  int k;
+  denom = numer = 0.;
+  for(k=0; k<n; k++)
+  {
+    diff = x - x_p[k];
+    if(fabs(diff) <= BARY_DIFF_MIN) return f[sf*k];
+
+    W = w_interp[k] / diff;
+    numer += W * f[sf*k];
+    denom += W;
+  }
+  return numer / denom;
+}
+
 
 /* WT's Notes:
    Def.  k_j := \Pi_{m\neq j}(x_j - x_m),  c_j := 1/k_j
