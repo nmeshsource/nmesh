@@ -621,33 +621,19 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
       printf("  w[d]   =");
       for(k=0; k<nb[d]; k++) printf(" %g", w[d][k]);
       printf("\n");
-      printf("  WL[d]  =");
-      for(k=0; k<nb[d]; k++) printf(" %g", node_WL(elm,d)->d[k]);
-      printf("\n");
+      //printf("  WL[d]  =");
+      //for(k=0; k<nb[d]; k++) printf(" %g", node_WL(elm,d)->d[k]);
+      //printf("\n");
     }
     */
   }
+  //d=0;
+  //printf("  x_p[d] =");
+  //for(k=0; k<nb[d]; k++) printf(" %g", x_p[d][k]);
+  //printf("\n");
 
   /* get pointer vd to start of var data */
   vd = Arrd(var);
-
-
-/*
-  for(k=0; k<nb[0]; k++) printf(" %g", (vd + Ind_n(b0[0],b0[1],b0[2], nn))[k]);
-  printf("\n");
-
-Yo(100);
-interp =
-Lagrange_interp_barycentric2_ds(Xb0[0], nb[0], x_p[0], w[0],
-                                vd + Ind_n(b0[0],b0[1],b0[2], nn),
-                                1, vscal);
-printf("interp=%g\n", interp);
-return interp;
-
-interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
-                 vd + Ind_n(b0[0],b0[1],b0[2], nn),
-                 1, vscal);
-*/
 
   /* interp vd along X for all Y,Z */
   r2 = dmalloc(nb[1]*nb[2]);
@@ -656,15 +642,22 @@ interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
     r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
                                        vd + Ind_n(b0[0],b0[1]+j,b0[2]+k, nn),
                                        1, vscal);
+  //printf("  r2 =");
+  //for(k=0; k<nb[1]*nb[2]; k++) printf(" %g", r2[k]);
+  //printf("\n");
+
   /* interp r2 along Y for all Z */
   r1 = dmalloc(nb[2]);
   for(k=0; k<nb[2]; k++)
     r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
-                             r2, 1, vscal);
+                             r2 + nb[1]*k, 1, vscal);
+  //printf("  r1 =");
+  //for(k=0; k<nb[2]; k++) printf(" %g", r1[k]);
+  //printf("\n");
 
   /* interp r1 along Z */
   interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
-                           r1, 1, vscal);
+                            r1, 1, vscal);
   free(r2);
   free(r1);
   for(d=2; d>=0; d--) free(w[d]);
