@@ -940,15 +940,11 @@ int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
         npts++; /* count how often we found XYZ */
         XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
         val += basis_array_interp(elm, VarA(elm, ivar), XbYbZb, Basis);
-        break; //FIXME: remove this!!!!
       }
   }
   /* if we found points with XYZ, set val to average value */
   if(npts)
-  {
-    val = val/npts; /* average val */
-    haveval = 1;
-  }
+    haveval = npts;
 
   Val = val;
   Haveval = haveval;
