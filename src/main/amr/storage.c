@@ -270,6 +270,57 @@ int redim_array_Neplocs(tArray *ar, int Neplocs)
 }
 
 
+/****************************************************************************/
+/* functions to select interp. scheme for mesh refinement */
+/****************************************************************************/
+
+/* Return scheme and set np and vscal from amr pars.
+   scheme_pref is a preference that can be overridden on some grids */
+int amr_interp_scheme_get(tElm *elm, int vi,
+                          int np[3], int scheme_pref, double *vscal)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  int *pt_typ = elm->pt_typ;
+  int is_UNI, scheme, npts;
+  int d;
+
+  errorexit("this func is not tested!");
+
+  /* set scheme to preferred value */
+  scheme = scheme_pref;
+
+  /* check grid */
+  is_UNI=1;
+  for(d=0; d<3; d++)
+    if(pt_typ[d]!=P_UNIFORM) { is_UNI=0; break; }
+
+  /* switch from INTERP_WENO tp INTERP_LAGRANGE on non-unif. grids */
+  if( (scheme==INTERP_WENO) && (!is_UNI) ) scheme = INTERP_LAGRANGE;;
+
+  /* set np */
+  switch(scheme)
+  {
+  case INTERP_LAGRANGE:
+    npts = Geti(Par("amr_Lagrange_interp_order")); //Geti(amr->Lagrange_interp_order);
+    for(d=0; d<3; d++)
+    {
+      if(npts<1) np[d] = elm->n[d];
+      else       np[d] = npts;
+    }
+    break;
+  case INTERP_WENO:
+    npts = Geti(Par("amr_WENO_interp_order")); //Geti(amr->WENO_interp_order);
+    for(d=0; d<3; d++) np[d] = npts;
+    break;
+  default:
+    errorexit("unknown scheme");
+  }
+
+  /* set vscal to 1 for now */
+  *vscal = 1.;
+  return scheme;
+}
+
 
 /****************************************************************************/
 /* elm storage */
