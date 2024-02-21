@@ -83,7 +83,6 @@ printf("\n");
 double interpolate_WENO_4_ds(double x, int n, const double *x_p,
                              const double *w_interp,
                              const double *f, int ds, double f_scale)
-//OLD: (int N, double x, double x0, double h, double *c, double *u)
 {
   double u[] = { f[0], f[ds], f[2*ds], f[3*ds] };
   double fs2 = f_scale*f_scale;
