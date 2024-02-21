@@ -754,6 +754,89 @@ int interpolate_scheme_get(tElm *elm, tArray *var,
 
 
 /***********************************************************************/
+/* interpolation across MPI procs if based on Xb*/
+/***********************************************************************/
+
+/* 3d interpolation:
+   interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) locally */
+double interpolate_var_local(tElm *elm, int vi, double Xb[3],
+                             int npts, int scheme)
+{
+  tArray *v;
+  int np[] = {npts,npts,npts};
+  double vscal = 1.; /* set vscal to 1 for now */
+  double val;
+
+  v = VarA(elm, vi);
+  if(!v) return 0.; /* return 0 as interp value if var vi has no storage */
+
+  /* interp var to Xb in elm */
+  val = interp_to_Xb0(elm, v, Xb, np, scheme, vscal);
+  return val;
+}
+
+/* 3d interpolation:
+   call basis_var_interpolate_local and then send interp. val around
+   Returns: 1 if success
+            0 if if all MPI procs have node=NULL */
+int interpolate_var_ok(tNode *node, int vi, double Xb[3],
+                       int npts, int scheme, double *vinterp)
+{
+  double Val, val=0.;
+  int Haveval, haveval=0;
+
+  if(node) if(node->dat)
+  {
+    val = interpolate_var_local(node, vi, Xb, npts, scheme);
+    haveval = 1;
+  }
+  Val = val;
+  Haveval = haveval;
+
+  /* find out how many have a value, and add all of them */
+  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
+  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  if(!Haveval) return 0; /* could not get interp on any node */
+  Val = Val/Haveval;
+
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+  *vinterp = Val;
+  return 1; /* got interp value */
+}
+
+/* 3d interpolation: call basis_var_interpolate_ok */
+double interpolate_var(tNode *node, int vi, double Xb[3],
+                       int npts, int scheme)
+{
+  double Val;
+  int Haveval = interpolate_var_ok(node, vi, Xb, npts, scheme, &Val);
+  if(!Haveval) errorexit("one MPI proc should have this node");
+
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+  return Val;
+}
+
+/* 3d interpolation:
+   interpolate var vi to the point (x[0],x[1],x[2]).
+   out: val
+   returns: 1 if success, or 0 if failure to find x */
+int interpolate_var_mesh(tMesh *mesh, int vi, const double x[3],
+                         int npts, int scheme, double *val)
+{
+  int Haveval;
+  double X[3], Xb[3];
+  tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
+
+  /* set Xb in node */
+  if(node) XbYbZb_of_XYZ(node, Xb, X);
+
+  /* interp var vi to Xb in node */
+  Haveval = interpolate_var_ok(node, vi, Xb, npts, scheme, val);
+  return Haveval;
+}
+
+
+/***********************************************************************/
 /* Lagrange interpolation */
 /***********************************************************************/
 
