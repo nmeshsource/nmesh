@@ -599,6 +599,9 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
     if( (scheme==INTERP_WENO) && (pt_typ[d]!=P_UNIFORM) )
       errorexit("INTERP_WENO works only on uniform grids!!!");
 
+    /* reset np from elm->n, if it is zero */
+    if(np[d]<1) np[d] = nn[d];
+
     /* get point coords in elm */
     Xb[d] = node_Xb(elm,d)->d;
 
