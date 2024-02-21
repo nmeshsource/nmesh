@@ -465,8 +465,8 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 
   /* find node-point ind0 closest to Xb0 */
   ind0 = nearest_i0_of_Xb_indir(node, dir, Xb0);
-  if(Xb0 < -1.) ind0 = -1;
-  if(Xb0 > +1.) ind0 = nn-1;
+  if(ind0==-1)      ind0 = 0;
+  else if(ind0<-1)  ind0 = nn-1;
 
   /* move ind0 to the left of Xb0 if needed */
   //if(CenterOnXb0 && Xb[ind0] > Xb0) ind0--;
