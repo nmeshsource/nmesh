@@ -6,6 +6,8 @@
 #include "basis.h"
 
 
+/* frequently used global vars */
+//extern tbasis basis[1];
 
 /* ************************************************************************ */
 /* various functions needed for piecewise const or linear interpolation     */
@@ -235,7 +237,7 @@ double basis_pw_parab(int k, double x, int np,
    Note2: the only info we really retrieve from the node (in Xb3_n and WL3_n)
           is node->pt_typ, but not node->n */
 double basis_array_interp(tNode *node, tArray *var, double Xb[3],
-                          double basis(int k, double x, int np,
+                          double Basis(int k, double x, int np,
                                        const double *x_p,
                                        const double *w_interp))
 {
@@ -261,9 +263,9 @@ double basis_array_interp(tNode *node, tArray *var, double Xb[3],
   }
 
   /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B0,... */
-  for(k=0; k<n[0]; k++) B0[k] = basis(k, Xb[0], n[0], xp[0], w[0]);
-  for(k=0; k<n[1]; k++) B1[k] = basis(k, Xb[1], n[1], xp[1], w[1]);
-  for(k=0; k<n[2]; k++) B2[k] = basis(k, Xb[2], n[2], xp[2], w[2]);
+  for(k=0; k<n[0]; k++) B0[k] = Basis(k, Xb[0], n[0], xp[0], w[0]);
+  for(k=0; k<n[1]; k++) B1[k] = Basis(k, Xb[1], n[1], xp[1], w[1]);
+  for(k=0; k<n[2]; k++) B2[k] = Basis(k, Xb[2], n[2], xp[2], w[2]);
 
   /* interpolate to (Xb[0],Xb[1],Xb[2]) */
   sum = 0.;
@@ -292,7 +294,7 @@ double basis_array_interp(tNode *node, tArray *var, double Xb[3],
           is node->pt_typ, but not node->n */
 double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
                             double Cb[2],
-                            double basis(int k, double x, int np,
+                            double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp))
 {
@@ -320,8 +322,8 @@ double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
   {
   case 0:
     /* save basis func values */
-    for(k=0; k<n[1]; k++) B1[k] = basis(k, Cb[0], n[1], xp[1], w[1]);
-    for(k=0; k<n[2]; k++) B2[k] = basis(k, Cb[1], n[2], xp[2], w[2]);
+    for(k=0; k<n[1]; k++) B1[k] = Basis(k, Cb[0], n[1], xp[1], w[1]);
+    for(k=0; k<n[2]; k++) B2[k] = Basis(k, Cb[1], n[2], xp[2], w[2]);
 
     /* interpolate */
     sum = 0.;
@@ -331,8 +333,8 @@ double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
     break;
   case 1:
     /* save basis func values */
-    for(k=0; k<n[0]; k++) B1[k] = basis(k, Cb[0], n[0], xp[0], w[0]);
-    for(k=0; k<n[2]; k++) B2[k] = basis(k, Cb[1], n[2], xp[2], w[2]);
+    for(k=0; k<n[0]; k++) B1[k] = Basis(k, Cb[0], n[0], xp[0], w[0]);
+    for(k=0; k<n[2]; k++) B2[k] = Basis(k, Cb[1], n[2], xp[2], w[2]);
 
     /* interpolate */
     sum = 0.;
@@ -342,8 +344,8 @@ double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
     break;
   case 2:
     /* save basis func values */
-    for(k=0; k<n[0]; k++) B1[k] = basis(k, Cb[0], n[0], xp[0], w[0]);
-    for(k=0; k<n[1]; k++) B2[k] = basis(k, Cb[1], n[1], xp[1], w[1]);
+    for(k=0; k<n[0]; k++) B1[k] = Basis(k, Cb[0], n[0], xp[0], w[0]);
+    for(k=0; k<n[1]; k++) B2[k] = Basis(k, Cb[1], n[1], xp[1], w[1]);
 
     /* interpolate */
     sum = 0.;
@@ -446,7 +448,7 @@ void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2])
    be written into array interp */
 void basis_interp_topoints(tNode *node, tArray *var,
                            tArray *Xp[3], tArray *interp,
-                           double basis(int k, double x, int np,
+                           double Basis(int k, double x, int np,
                                         const double *x_p,
                                         const double *w_interp))
 {
@@ -454,7 +456,7 @@ void basis_interp_topoints(tNode *node, tArray *var,
   forarray(Xp[0], k)
   {
     double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k], Xp[2]->d[k] };
-    interp->d[k] = basis_array_interp(node, var, Xb, basis);
+    interp->d[k] = basis_array_interp(node, var, Xb, Basis);
   }
 }
 
@@ -464,7 +466,7 @@ void basis_interp_topoints(tNode *node, tArray *var,
    interp. For points where Ip<0 nothing will be written into interp. */
 void basis_interp_toIpoints(tNode *node, tArray *var,
                             tArray *Xp[3], tArray *Ip, tArray *interp,
-                            double basis(int k, double x, int np,
+                            double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp))
 {
@@ -474,7 +476,7 @@ void basis_interp_toIpoints(tNode *node, tArray *var,
     double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k], Xp[2]->d[k] };
     int idx = Ip->i[k];
     if(idx>=0)
-      interp->d[idx] = basis_array_interp(node, var, Xb, basis);
+      interp->d[idx] = basis_array_interp(node, var, Xb, Basis);
   }
 }
 
@@ -483,7 +485,7 @@ void basis_interp_toIpoints(tNode *node, tArray *var,
    Cp[0..1] are in Xb coords. The result will be written into array interp */
 void basis_interp2d_topoints(tNode *node, tArray *var, int dir, int p,
                              tArray *Cp[2], tArray *interp,
-                             double basis(int k, double x, int np,
+                             double Basis(int k, double x, int np,
                                           const double *x_p,
                                           const double *w_interp))
 {
@@ -491,7 +493,7 @@ void basis_interp2d_topoints(tNode *node, tArray *var, int dir, int p,
   forarray(Cp[0], k)
   {
     double Cb[]  = { Cp[0]->d[k], Cp[1]->d[k] };
-    interp->d[k] = basis_array_interp2d(node, var, dir,p, Cb, basis);
+    interp->d[k] = basis_array_interp2d(node, var, dir,p, Cb, Basis);
   }
 }
 
@@ -502,7 +504,7 @@ void basis_interp2d_topoints(tNode *node, tArray *var, int dir, int p,
 void basis_interp2d_toIpoints(tNode *node, tArray *var, int dir,int p,
                               tArray *Cp[2], tArray *Ip,
                               tArray *interp,
-                              double basis(int k, double x, int np,
+                              double Basis(int k, double x, int np,
                                            const double *x_p,
                                            const double *w_interp))
 {
@@ -512,7 +514,7 @@ void basis_interp2d_toIpoints(tNode *node, tArray *var, int dir,int p,
     double Cb[]  = { Cp[0]->d[k], Cp[1]->d[k] };
     int idx = Ip->i[k];
     if(idx>=0)
-      interp->d[k] = basis_array_interp2d(node, var, dir,p, Cb, basis);
+      interp->d[k] = basis_array_interp2d(node, var, dir,p, Cb, Basis);
   }
 }
 
@@ -705,7 +707,8 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
   }
 }
 
-/* return scheme and set np from basis pars */
+/* Return scheme and set np and vscal from basis pars.
+   scheme_pref is a preference that can be overridden on some grids */
 int interpolate_scheme_get(tElm *elm, tArray *var,
                            int np[3], int scheme_pref, double *vscal)
 {
@@ -725,11 +728,13 @@ int interpolate_scheme_get(tElm *elm, tArray *var,
   /* switch from INTERP_WENO tp INTERP_LAGRANGE on non-unif. grids */
   if( (scheme==INTERP_WENO) && (!is_UNI) ) scheme = INTERP_LAGRANGE;
 
+tbasis basis[1];
+
   /* set np */
   switch(scheme)
   {
   case INTERP_LAGRANGE:
-    npts = Geti(Par("basis_LGL_interpolate_maxpts"));
+    npts = Geti(basis->Lagrange_interp_np);
     for(d=0; d<3; d++)
     {
       if(npts<1) np[d] = elm->n[d];
@@ -737,7 +742,7 @@ int interpolate_scheme_get(tElm *elm, tArray *var,
     }
     break;
   case INTERP_WENO:
-    npts = Geti(Par("basis_UNI_interpolate_maxpts"));
+    npts = Geti(basis->WENO_interp_np);
     for(d=0; d<3; d++) np[d] = npts;
     break;
   default:
@@ -857,7 +862,7 @@ errorexit("extract_vals_pts_around_Xb is unfinished!!!");
 /* use basis_array_interp to interpolate var ivar onto xyz[3],
    IN: mesh, ivar, xyz, basis   OUT: XYZ, value   RETURN: p (patchnumber) */
 int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
-                              double basis(int k, double x, int np,
+                              double Basis(int k, double x, int np,
                                            const double *x_p,
                                            const double *w_interp),
                               double XYZ[3], double *value)
@@ -887,7 +892,7 @@ int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
 
         npts++; /* count how often we found XYZ */
         XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
-        val += basis_array_interp(elm, VarA(elm, ivar), XbYbZb, basis);
+        val += basis_array_interp(elm, VarA(elm, ivar), XbYbZb, Basis);
         break; //FIXME: remove this!!!!
       }
   }
@@ -915,13 +920,13 @@ int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
 /* find node and Xb of xyz[3] and then use use basis_array_interp
    to interpolate var ivar onto xyz[3] */
 double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
-                            double basis(int k, double x, int np,
+                            double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp))
 {
   double XYZ[3];
   double value;
-  int p = basis_var_interpolate_xyz(mesh, ivar, xyz, basis, XYZ, &value);
+  int p = basis_var_interpolate_xyz(mesh, ivar, xyz, Basis, XYZ, &value);
   if(p<0)
   {
     pr3v("xyz",xyz);
@@ -934,10 +939,10 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
 /* same as basis_var_interp_xyz but with differnt interface */
 double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
                               double x,double y,double z,
-                              double basis(int k, double x, int np,
+                              double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp))
 {
   double xyz[] = {x,y,z};
-  return basis_var_interp_xyz(mesh, ivar, xyz, basis);
+  return basis_var_interp_xyz(mesh, ivar, xyz, Basis);
 }
