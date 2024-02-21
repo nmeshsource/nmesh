@@ -152,6 +152,8 @@ void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
                             tArray *interp);
 double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
                      int scheme, double vscal);
+int interpolate_var_ok(tNode *node, int vi, double Xb[3],
+                       int npts, int scheme, double *vinterp);
 double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
                             double Basis(int k, double x, int np,
                                          const double *x_p,
