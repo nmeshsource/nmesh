@@ -62,6 +62,14 @@ double interpolate_WENO_6_ds(double x, int n, const double *x_p,
   for(i=1; i<=3; i++)
     w[i] = alpha[i]/sumalpha;
 
+//for(i=0; i<n; i++) printf("x_p[%d]=%g ", i, x_p[i]);
+//printf("\n");
+/*
+for(i=1; i<=3; i++) printf("w[%d]=%g ", i, w[i]);
+printf("\n");
+for(i=1; i<=3; i++) printf("p[%d]=%g ", i, p[i]);
+printf("\n");
+*/
   sum = 0;
   for(i=1; i<=3; i++)
     sum += w[i]*p[i];
