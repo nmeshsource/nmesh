@@ -93,6 +93,10 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_N1", "-1", "total number of inner points in dir. 1");
   AddPar("amr_N2", "-1", "total number of inner points in dir. 2");
 
+  /* pars related to interpolation during mesh refinement */
+  //AddPar("amr_Lagrange_interp_order", "n", "interp point number [n,6,8,10]");
+  //AddPar("amr_WENO_interp_order", "6", "interp point number [4,6]");
+
   /* bface pars */
   AddPar("bface_options", "face2_order3", "how we set some bface flags "
          "[none,face2_order0,face2_order1,face2_order2,face2_order3]");

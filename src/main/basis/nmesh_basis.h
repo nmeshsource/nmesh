@@ -15,8 +15,6 @@ enum
 typedef struct {
   int expfilter_JacobianPower; /* Par("basis_expfilter_JacobianPower") */
   int filter_fv;               /* Par("basis_filter_fv") */
-  int Lagrange_interp_np;      /* Par("basis_Lagrange_interp_np")); */
-  int WENO_interp_np;          /* Par("basis_WENO_interp_np")); */
 } tbasis;
 
 

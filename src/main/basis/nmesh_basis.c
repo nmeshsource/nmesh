@@ -22,8 +22,6 @@ int nmesh_basis(tMesh *mesh)
   AddPar("basis_expfilter_JacobianPower", "1",
          "multiply var with Jacobian to this power before filtering it");
   AddPar("basis_filter_fv", "yes", "filter in fv nodes [yes,no]");
-  AddPar("basis_Lagrange_interp_np", "n", "interp point number [n,6,8,10]");
-  AddPar("basis_WENO_interp_np", "6", "interp point number [4,6]");
 
   return 0;
 }
