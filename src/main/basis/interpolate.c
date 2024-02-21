@@ -709,13 +709,15 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
 
 /* Return scheme and set np and vscal from basis pars.
    scheme_pref is a preference that can be overridden on some grids */
-int interpolate_scheme_get(tElm *elm, tArray *var,
+int interpolate_scheme_get(tElm *elm, int vi,
                            int np[3], int scheme_pref, double *vscal)
 {
   tMesh *mesh = Elm_mesh(elm);
   int *pt_typ = elm->pt_typ;
   int is_UNI, scheme, npts;
   int d;
+
+  errorexit("this func is not tested!");
 
   /* set scheme to preferred value */
   scheme = scheme_pref;

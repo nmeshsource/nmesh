@@ -47,6 +47,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   char filename[1000];
   double max, min, maxAbs, rms, mean, VolInt;
   int add_xyz = Getb(Par("0doutput_add_xyz"));
+  int interp_np = Geti(Par("output_interpolate_np"));
   int p, ijk, ipt;
   char nodeloc[105]; /* node location string inside patch */
   double X[3], xmin[3], xmax[3], *xmaxAbs;
@@ -119,10 +120,8 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
 
     /* get value of var at some points */
     for(ipt=0; ipt<Npt; ipt++)
-      have_pt[ipt] = basis_var_interpolate_ok(node_pt[ipt], vi, Xb_pt[ipt],
-                                              &(val_pt[ipt]));
-      //FIXME: use a better interpolator !!!
-      //       try to remove basis_var_interpolate_ok and co
+      have_pt[ipt] = interpolate_var_ok(node_pt[ipt], vi, Xb_pt[ipt],
+                                 interp_np, INTERP_LAGRANGE, &(val_pt[ipt]));
     /* output is done by rank0 */
     if(Rank0)
     {

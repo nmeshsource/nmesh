@@ -75,5 +75,9 @@ int nmesh_output(tMesh *mesh)
 
   AddPar("output_xcoord", "x", "var used as Cartesian x-coordinate");
 
+  /* pars for output interpolation */
+  AddPar("output_interpolate_np", "88", "num of points used for interp");
+  //FIXME: this should get a better default
+
   return 0;
 }
