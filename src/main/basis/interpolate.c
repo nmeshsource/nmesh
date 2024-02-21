@@ -705,6 +705,50 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
   }
 }
 
+/* return scheme and set np from basis pars */
+int interpolate_scheme_get(tElm *elm, tArray *var,
+                           int np[3], int scheme_pref, double *vscal)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  int *pt_typ = elm->pt_typ;
+  int is_UNI, scheme, npts;
+  int d;
+
+  /* set scheme to preferred value */
+  scheme = scheme_pref;
+
+  /* check grid */
+  is_UNI=1;
+  for(d=0; d<3; d++)
+    if(pt_typ[d]!=P_UNIFORM) { is_UNI=0; break; }
+
+  /* switch from INTERP_WENO tp INTERP_LAGRANGE on non-unif. grids */
+  if( (scheme==INTERP_WENO) && (!is_UNI) ) scheme = INTERP_LAGRANGE;
+
+  /* set np */
+  switch(scheme)
+  {
+  case INTERP_LAGRANGE:
+    npts = Geti(Par("basis_LGL_interpolate_maxpts"));
+    for(d=0; d<3; d++)
+    {
+      if(npts<1) np[d] = elm->n[d];
+      else       np[d] = npts;
+    }
+    break;
+  case INTERP_WENO:
+    npts = Geti(Par("basis_UNI_interpolate_maxpts"));
+    for(d=0; d<3; d++) np[d] = npts;
+    break;
+  default:
+    errorexit("unknown scheme");
+  }
+
+  /* set vscal to 1 for now */
+  *vscal = 1.;
+  return scheme;
+}
+
 
 /***********************************************************************/
 /* Lagrange interpolation */
