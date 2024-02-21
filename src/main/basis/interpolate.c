@@ -757,19 +757,13 @@ int interpolate_scheme_get(tElm *elm, int vi,
   return scheme;
 }
 
-
-/***********************************************************************/
-/* interpolation across MPI procs if based on Xb*/
-/***********************************************************************/
-
 /* 3d interpolation:
    interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) locally */
 double interpolate_var_local(tElm *elm, int vi, double Xb[3],
-                             int npts, int scheme)
+                             int npts, int scheme, double vscal)
 {
   tArray *v;
   int np[] = {npts,npts,npts};
-  double vscal = 1.; /* set vscal to 1 for now */
   double val;
 
   v = VarA(elm, vi);
@@ -780,6 +774,11 @@ double interpolate_var_local(tElm *elm, int vi, double Xb[3],
   return val;
 }
 
+
+/***********************************************************************/
+/* interpolation across MPI procs if based on Xb*/
+/***********************************************************************/
+
 /* 3d interpolation:
    call interpolate_var_local and then send interp. val around
    Returns: 1 if success
@@ -787,12 +786,13 @@ double interpolate_var_local(tElm *elm, int vi, double Xb[3],
 int interpolate_var_ok(tNode *node, int vi, double Xb[3],
                        int npts, int scheme, double *vinterp)
 {
+  double vscal = 1.; /* set vscal to 1 for now */
   double Val, val=0.;
   int Haveval, haveval=0;
 
   if(node) if(node->dat)
   {
-    val = interpolate_var_local(node, vi, Xb, npts, scheme);
+    val = interpolate_var_local(node, vi, Xb, npts, scheme, vscal);
     haveval = 1;
   }
   Val = val;
@@ -834,7 +834,7 @@ int interpolate_var_mesh(tMesh *mesh, int vi, const double x[3],
   /* NOTE: node_XYZ_of_xyz_mesh leads to call of p_eid_XYZ_of_xyz_mesh
            BUT node_XYZ_of_xyz_mesh finds only one elm, EVEN IF there are
            several that have x. This is not good! */
-  errorexit("this func can pnly be used for non-critical things "
+  errorexit("this func can only be used for non-critical things "
             "like output");
 
   /* set Xb in node */
@@ -1054,10 +1054,11 @@ double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
 /* Use interpolate_var_local to interpolate var ivar onto xyz[3].
    First find node and Xb of xyz[3] and then use use interpolate_var_local
    to interpolate var ivar onto xyz[3]
-   IN: mesh, ivar, xyz, npts, scheme
+   IN: mesh, ivar, xyz, npts, scheme, vscal
    OUT: XYZ, value   RETURN: p (patchnumber) */
 int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
-                        int np, int scheme, double XYZ[3], double *value)
+                        int np, int scheme, double vscal,
+                        double XYZ[3], double *value)
 {
   double Val, val;
   int Haveval, haveval;
@@ -1084,7 +1085,7 @@ int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
 
         npts++; /* count how often we found XYZ */
         XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
-        val += interpolate_var_local(elm, ivar, XbYbZb, np, scheme);
+        val += interpolate_var_local(elm, ivar, XbYbZb, np, scheme, vscal);
       }
   }
   /* if we found points with XYZ, record how many we found */
@@ -1107,11 +1108,11 @@ int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
 
 /* interpolate var ivar onto xyz[3] */
 double interp_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
-                      int np, int scheme)
+                      int np, int scheme, double vscal)
 {
   double XYZ[3];
   double value;
-  int p = interpolate_var_xyz(mesh, ivar, xyz, np, scheme, XYZ, &value);
+  int p = interpolate_var_xyz(mesh, ivar, xyz, np, scheme, vscal, XYZ, &value);
   if(p<0)
   {
     pr3v("xyz",xyz);
@@ -1123,8 +1124,8 @@ double interp_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
 
 /* same as basis_var_interp_xyz but with differnt interface */
 double interp_var_x_y_z(tMesh *mesh, int ivar, double x,double y,double z,
-                        int np, int scheme)
+                        int np, int scheme, double vscal)
 {
   double xyz[] = {x,y,z};
-  return interp_var_xyz(mesh, ivar, xyz, np, scheme);
+  return interp_var_xyz(mesh, ivar, xyz, np, scheme, vscal);
 }

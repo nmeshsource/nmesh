@@ -159,9 +159,9 @@ double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
                                          const double *x_p,
                                          const double *w_interp));
 double interp_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
-                      int np, int scheme);
+                      int np, int scheme, double vscal);
 double interp_var_x_y_z(tMesh *mesh, int ivar, double x,double y,double z,
-                        int np, int scheme);
+                        int np, int scheme, double vscal);
 
 /* SphericalHarmonics.c */
 double *alloc_Plm_Tab(int lmax);
