@@ -966,7 +966,7 @@ int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
   int p, npts;
 
   PRF;printf(": WARNING: All basis_var_interp* funcs are deprecated.\n");
-  printf("  Use interp_var_xyz or interpolate_var_xyz instead!\n");
+  printf("  Use interp_var_xyz or interp_var_x_y_z instead!\n");
 
   /* find patch p and set XYZ */
   p = p_XYZ_of_xyz_mesh(mesh, XYZ, xyz);
