@@ -47,7 +47,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   char filename[1000];
   double max, min, maxAbs, rms, mean, VolInt;
   int add_xyz = Getb(Par("0doutput_add_xyz"));
-  int interp_np = Geti(Par("output_interpolate_np"));
+  int interp_np = Geti(Par("output_interpolation_order"));
   int p, ijk, ipt;
   char nodeloc[105]; /* node location string inside patch */
   double X[3], xmin[3], xmax[3], *xmaxAbs;
