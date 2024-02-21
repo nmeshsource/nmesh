@@ -550,19 +550,3 @@ void IndexBox_fill_subarray(tArray *ar, int b0[3], int nb[3], tArray *subar)
     Arrd_(subar)[Ind_n(i,j,k, nb)] = Arrd_(ar)[Ind_n(ia,ja,ka, na)];
   }
 }
-
-/* */
-
-
-
-
-
-/* make these pars
-amr_uni_interpolate_scheme = [WENOm2, WENOZm2, Lagrange]
-amr_uni_interpolate_maxorder = [6,4,2]
-amr_LGL_interpolate_scheme <-- always Lagrange
-amr_LGL_interpolate_maxorder = [n,6,8,10]  # let <=0 mean use n
-
-output_interpolate_scheme = [WENOm2, WENOZm2, Lagrange]
-output_interpolate_maxorder = [n,6,4,2]
-*/
