@@ -231,6 +231,8 @@ double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3])
   int k;
   double sum;
 
+  PRF;printf(": WARNING: this func is deprecated!\n");
+
   /* save basis func values at (Xb[0],Xb[1],Xb[2]) in B0,... */
   for(k=0; k<n[0]; k++) B0[k] = node_basis(node,0, k, Xb[0], n[0]);
   for(k=0; k<n[1]; k++) B1[k] = node_basis(node,1, k, Xb[1], n[1]);
@@ -260,6 +262,8 @@ double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
   tArray *v, *c;
   double val;
 
+  errorexit("use interpolate_var_local instead");
+
   /* set coeffs of var vi in c */
   v = VarA(node, vi);
   if(!v) return 0.; /* return 0 as interp value if var vi has no storage */
@@ -281,6 +285,8 @@ int basis_var_interpolate_ok(tNode *node, int vi, double Xb[3],
 {
   double Val, val=0.;
   int Haveval, haveval=0;
+
+  errorexit("use interpolate_var_ok instead");
 
   if(node) if(node->dat)
   {
@@ -306,6 +312,9 @@ double basis_var_interpolate(tNode *node, int vi, double Xb[3])
 {
   double Val;
   int Haveval = basis_var_interpolate_ok(node, vi, Xb, &Val);
+
+  errorexit("use interpolate_var instead");
+
   if(!Haveval) errorexit("one MPI proc should have this node");
 
   //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
@@ -322,6 +331,8 @@ int basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
   int Haveval;
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
+
+  errorexit("use interpolate_var_mesh instead");
 
   /* set Xb in node */
   if(node) XbYbZb_of_XYZ(node, Xb, X);
