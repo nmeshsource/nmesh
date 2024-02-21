@@ -781,7 +781,7 @@ double interpolate_var_local(tElm *elm, int vi, double Xb[3],
 }
 
 /* 3d interpolation:
-   call basis_var_interpolate_local and then send interp. val around
+   call interpolate_var_local and then send interp. val around
    Returns: 1 if success
             0 if if all MPI procs have node=NULL */
 int interpolate_var_ok(tNode *node, int vi, double Xb[3],
@@ -809,7 +809,7 @@ int interpolate_var_ok(tNode *node, int vi, double Xb[3],
   return 1; /* got interp value */
 }
 
-/* 3d interpolation: call basis_var_interpolate_ok */
+/* 3d interpolation: call interpolate_var_ok */
 double interpolate_var(tNode *node, int vi, double Xb[3],
                        int npts, int scheme)
 {
