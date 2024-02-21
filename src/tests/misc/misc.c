@@ -85,7 +85,7 @@ int misc_test(tMesh *mesh)
 int test_point_interpolation(tMesh *mesh)
 {
   tNode *nd;
-  int n2;
+  int n2, npts;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int dir, p, i,j,k;
@@ -180,6 +180,21 @@ int test_point_interpolation(tMesh *mesh)
     interp = basis_array_interp(nd, VarA(nd, vi), X, basis_pw_const);
     printf(" con=%+.2f\n", interp);
   }
+
+  printf("3d interp. in X[0] with interp_to_Xb0:\n");
+  npts = 6;
+  for(X[0]=-1.125; X[0]<=1.125; X[0]+=0.125)
+  //X[0]=+1.125;
+  //X[0]=-0.75;
+  {
+    int np[] = {npts,npts,npts};
+    printf("X[0]=%+.3f ", X[0]);
+    interp = interp_to_Xb0(nd, VarA(nd, vi), X, np, INTERP_LAGRANGE, 1.);
+    printf(" Lagr=%+.4f ", interp);
+    interp = interp_to_Xb0(nd, VarA(nd, vi), X, np, INTERP_WENO, 1.);
+    printf(" WENO=%+.4f ", interp);
+    printf("\n");
+  }
   /* reset nd->pt_typ */
   printf("reset pt_typ\n");
   //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
@@ -195,24 +210,44 @@ int test_point_interpolation(tMesh *mesh)
   printvar_innode(nd, vi);
   printarray(coef);
 
-  PRF;printf(": 3d interp. at 2 points with Lagrange and Legendre:\n");
+  PRF;printf(": 3d interp. at 2 points:\n");
   X[0]=0.9;
   X[1]=0.8;
   X[2]=0.7;
   f = test_func(X[0],X[1],X[2]);
+  printf("  with Lagrange and Legendre:\n");
   interp = basis_array_interp(nd, VarA(nd, ui), X, Lagrange_of_x);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  printf("  with interp_to_Xb0 npts=6:\n");
+  npts = 6;
+  interp = interp_to_Xb0(nd, VarA(nd, ui), X, (int[]){npts,npts,npts},
+                         INTERP_LAGRANGE, 1.);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  //interp = interp_to_Xb0(nd, VarA(nd, ui), X, (int[]){npts,npts,npts},
+  //                       INTERP_WENO, 1.);
+  //printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  //errorexit("INTERP_WENO works only on uniform grids!!!");
 
   X[0]=-0.134;
   X[1]=-0.457;
   X[2]=+0.666;
   f = test_func(X[0],X[1],X[2]);
+  printf("  with Lagrange and Legendre:\n");
   interp = basis_array_interp(nd, VarA(nd, ui), X, Lagrange_of_x);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
   interp = basis_array_interpolate(nd, coef, X);
   printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  printf("  with interp_to_Xb0 npts=4:\n");
+  npts = 4;
+  interp = interp_to_Xb0(nd, VarA(nd, ui), X, (int[]){npts,npts,npts},
+                         INTERP_LAGRANGE, 1.);
+  printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  //interp = interp_to_Xb0(nd, VarA(nd, ui), X, (int[]){npts,npts,npts},
+  //                       INTERP_WENO, 1.);
+  //printf("(%g,%g,%g) -> f=%g interp-f=%g\n", X[0],X[1],X[2], f, interp-f);
+  //errorexit("INTERP_WENO works only on uniform grids!!!");
 
   printf("3d interp. at last point with basis_pw_linear and basis_pw_const:\n");
   interp = basis_array_interp(nd, VarA(nd, ui), X, basis_pw_linear);
