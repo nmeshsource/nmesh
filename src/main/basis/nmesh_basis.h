@@ -15,6 +15,8 @@ enum
 typedef struct {
   int expfilter_JacobianPower; /* Par("basis_expfilter_JacobianPower") */
   int filter_fv;               /* Par("basis_filter_fv") */
+  int Lagrange_interp_np;      /* Par("basis_Lagrange_interp_np")); */
+  int WENO_interp_np;          /* Par("basis_WENO_interp_np")); */
 } tbasis;
 
 
@@ -113,12 +115,12 @@ double basis_pw_linear(int k, double x, int np,
 double basis_pw_parab(int k, double x, int np,
                       const double *x_p, const double *w_interp);
 double basis_array_interp(tNode *node, tArray *var, double Xb[3],
-                          double basis(int k, double x, int np,
+                          double Basis(int k, double x, int np,
                                        const double *x_p,
                                        const double *w_interp));
 double basis_array_interp2d(tNode *node, tArray *var, int dir, int p,
                             double Cb[2],
-                            double basis(int k, double x, int np,
+                            double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp));
 void array_1d1d1d_coords_to_3d_coords(tArray *X1d[3], tArray *Xp[3]);
@@ -126,23 +128,23 @@ void fill_3arrays_with_nodepoints(tNode *node, tArray *Xp[3]);
 void fill_2arrays_with_nodepoints(tNode *node, int dir, tArray *Cp[2]);
 void basis_interp_topoints(tNode *node, tArray *var,
                            tArray *Xp[3], tArray *interp,
-                           double basis(int k, double x, int np,
+                           double Basis(int k, double x, int np,
                                         const double *x_p,
                                         const double *w_interp));
 void basis_interp_toIpoints(tNode *node, tArray *var,
                             tArray *Xp[3], tArray *Ip, tArray *interp,
-                            double basis(int k, double x, int np,
+                            double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp));
 void basis_interp2d_topoints(tNode *node, tArray *var, int dir, int p,
                              tArray *Cp[2], tArray *interp,
-                             double basis(int k, double x, int np,
+                             double Basis(int k, double x, int np,
                                           const double *x_p,
                                           const double *w_interp));
 void basis_interp2d_toIpoints(tNode *node, tArray *var, int dir,int p,
                               tArray *Cp[2], tArray *Ip,
                               tArray *interp,
-                              double basis(int k, double x, int np,
+                              double Basis(int k, double x, int np,
                                            const double *x_p,
                                            const double *w_interp));
 void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d);
@@ -151,12 +153,12 @@ void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
 double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
                      int scheme, double vscal);
 double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
-                            double basis(int k, double x, int np,
+                            double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp));
 double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
                               double x,double y,double z,
-                              double basis(int k, double x, int np,
+                              double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp));
 

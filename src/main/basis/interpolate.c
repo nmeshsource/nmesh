@@ -7,7 +7,7 @@
 
 
 /* frequently used global vars */
-//extern tbasis basis[1];
+extern tbasis basis[1];
 
 /* ************************************************************************ */
 /* various functions needed for piecewise const or linear interpolation     */
@@ -726,9 +726,7 @@ int interpolate_scheme_get(tElm *elm, tArray *var,
     if(pt_typ[d]!=P_UNIFORM) { is_UNI=0; break; }
 
   /* switch from INTERP_WENO tp INTERP_LAGRANGE on non-unif. grids */
-  if( (scheme==INTERP_WENO) && (!is_UNI) ) scheme = INTERP_LAGRANGE;
-
-tbasis basis[1];
+  if( (scheme==INTERP_WENO) && (!is_UNI) ) scheme = INTERP_LAGRANGE;;
 
   /* set np */
   switch(scheme)
