@@ -1095,7 +1095,7 @@ int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
   /* find out how many values we found, and add all of them */
   nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
   nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
-  if(!Haveval) errorexit("one MPI proc should have this value");
+  if(!Haveval) errorexit("at least one MPI proc should have this value");
   Val = Val/Haveval;
   *value = Val;
   //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
