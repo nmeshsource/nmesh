@@ -831,6 +831,11 @@ int interpolate_var_mesh(tMesh *mesh, int vi, const double x[3],
   int Haveval;
   double X[3], Xb[3];
   tNode *node = node_XYZ_of_xyz_mesh(mesh, X, x);
+  /* NOTE: node_XYZ_of_xyz_mesh leads to call of p_eid_XYZ_of_xyz_mesh
+           BUT node_XYZ_of_xyz_mesh finds only one elm, EVEN IF there are
+           several that have x. This is not good! */
+  errorexit("this func can pnly be used for non-critical things "
+            "like output");
 
   /* set Xb in node */
   if(node) XbYbZb_of_XYZ(node, Xb, X);
@@ -942,7 +947,10 @@ errorexit("extract_vals_pts_around_Xb is unfinished!!!");
 
 
 /***********************************************************************/
-/* interpolate to a given x,y,z */
+/* interpolate to a given x,y,z using basis_array_interp, i.e.
+   using a func: double Basis(...).
+   This is not the best choice!!!
+   Use interpolate_var_xyz instead. */
 /***********************************************************************/
 
 /* use basis_array_interp to interpolate var ivar onto xyz[3],
@@ -1031,4 +1039,89 @@ double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
 {
   double xyz[] = {x,y,z};
   return basis_var_interp_xyz(mesh, ivar, xyz, Basis);
+}
+
+
+/***********************************************************************/
+/* interpolate to a given x,y,z using
+   double interpolate_var_local(tElm *elm, int vi, double Xb[3],
+                                int npts, int scheme) */
+/***********************************************************************/
+
+/* Use interpolate_var_local to interpolate var ivar onto xyz[3].
+   First find node and Xb of xyz[3] and then use use interpolate_var_local
+   to interpolate var ivar onto xyz[3]
+   IN: mesh, ivar, xyz, npts, scheme
+   OUT: XYZ, value   RETURN: p (patchnumber) */
+int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
+                        int np, int scheme, double XYZ[3], double *value)
+{
+  double Val, val;
+  int Haveval, haveval;
+  int p, npts;
+
+  /* find patch p and set XYZ */
+  p = p_XYZ_of_xyz_mesh(mesh, XYZ, xyz);
+  //PRFs(": ");pr3v("XYZ", XYZ);printf(": p=%d\n", p);
+
+  /* if xyz is not on mesh return -1 */
+  if(p<0) return p;
+
+  /* search among my leaf nodes (in patch p) for XYZ */
+  val = 0.;
+  npts = 0;
+  haveval = 0;
+  formyelms_noomp(mesh)
+  {
+    tElm *elm = MyElm;
+    if(elm->pat->p == p)
+      if(XYZ_is_in_node(elm, XYZ))
+      {
+        double XbYbZb[3];
+
+        npts++; /* count how often we found XYZ */
+        XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
+        val += interpolate_var_local(elm, ivar, XbYbZb, np, scheme);
+      }
+  }
+  /* if we found points with XYZ, record how many we found */
+  if(npts)
+    haveval = npts;
+
+  Val = val;
+  Haveval = haveval;
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+
+  /* find out how many values we found, and add all of them */
+  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
+  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  if(!Haveval) errorexit("one MPI proc should have this value");
+  Val = Val/Haveval;
+  *value = Val;
+  //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
+  return p;
+}
+
+/* interpolate var ivar onto xyz[3] */
+double interp_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
+                      int np, int scheme)
+{
+  double XYZ[3];
+  double value;
+  int p = interpolate_var_xyz(mesh, ivar, xyz, np, scheme, XYZ, &value);
+  if(p<0)
+  {
+    pr3v("xyz",xyz);
+    printf("p=%d\n", p);
+    errorexit("cannot find xyz on mesh");
+  }
+  return value;
+}
+
+/* same as basis_var_interp_xyz but with differnt interface */
+double interp_var_x_y_z(tMesh *mesh, int ivar, double x,double y,double z,
+                        int np, int scheme)
+{
+  double xyz[] = {x,y,z};
+  return interp_var_xyz(mesh, ivar, xyz, np, scheme);
 }
