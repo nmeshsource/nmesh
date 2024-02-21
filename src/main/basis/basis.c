@@ -215,7 +215,9 @@ void basis_array_synthesis3_St(tArray *St[3], tArray *u, tArray *c)
 }
 
 /***********************************************************************/
-/* interpolate */
+/* Interpolate using the basis funcs node_basis for each node.
+   NOTE: These funcs may be inaccurate on uniform grids, since
+   init_gridpoints seems to set basis_normLegendreP for all cases...  */
 /***********************************************************************/
 
 /* 3d interpolation:
