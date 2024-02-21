@@ -191,6 +191,7 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   double v0,vm,vp, v;
   double dx,dy,dz;
   double x0,y0,z0, x1,y1,z1;
+  int iord = 12; /* we can make interp. order a par later */
   int pr = 0;
 
   /* previous coordinates */
@@ -199,29 +200,29 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   z0 = xold[2];
 
   // value at the old puncture
-  v0 = basis_var_interp_x_y_z(mesh, var, x0,y0,z0, Lagrange_of_x);
+  v0 = interp_var_x_y_z(mesh, var, x0,y0,z0, iord, INTERP_LAGRANGE, 1.);
 
   /* find var to left and right in x-dir */
-  vm = basis_var_interp_x_y_z(mesh, var, x0-h,y0,z0, Lagrange_of_x);
-  vp = basis_var_interp_x_y_z(mesh, var, x0+h,y0,z0, Lagrange_of_x);
+  vm = interp_var_x_y_z(mesh, var, x0-h,y0,z0, iord, INTERP_LAGRANGE, 1.);
+  vp = interp_var_x_y_z(mesh, var, x0+h,y0,z0, iord, INTERP_LAGRANGE, 1.);
   if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
   dx = center_extremum_step(vm,v0,vp, findMax, h);
 
   // y-direction
-  vm = basis_var_interp_x_y_z(mesh, var, x0,y0-h,z0, Lagrange_of_x);
-  vp = basis_var_interp_x_y_z(mesh, var, x0,y0+h,z0, Lagrange_of_x);
+  vm = interp_var_x_y_z(mesh, var, x0,y0-h,z0, iord, INTERP_LAGRANGE, 1.);
+  vp = interp_var_x_y_z(mesh, var, x0,y0+h,z0, iord, INTERP_LAGRANGE, 1.);
   if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
   dy = center_extremum_step(vm,v0,vp, findMax, h);
 
   // z- direction
-  vm = basis_var_interp_x_y_z(mesh, var, x0,y0,z0-h, Lagrange_of_x);
-  vp = basis_var_interp_x_y_z(mesh, var, x0,y0,z0+h, Lagrange_of_x);
+  vm = interp_var_x_y_z(mesh, var, x0,y0,z0-h, iord, INTERP_LAGRANGE, 1.);
+  vp = interp_var_x_y_z(mesh, var, x0,y0,z0+h, iord, INTERP_LAGRANGE, 1.);
   if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
   dz = center_extremum_step(vm,v0,vp, findMax, h);
 
   if (pr) printf("center_track_extremum:  %e %e %e\n",dx,dy,dz);
 
-  v = basis_var_interp_x_y_z(mesh, var, x0+dx,y0+dy,z0+dz, Lagrange_of_x);
+  v = interp_var_x_y_z(mesh, var, x0+dx,y0+dy,z0+dz, iord, INTERP_LAGRANGE, 1.);
   if( !finit(v) || !finit(v0) ||
       ((findMax) && (v<=v0))  ||
       ((!findMax) && (v>=v0)) ||
