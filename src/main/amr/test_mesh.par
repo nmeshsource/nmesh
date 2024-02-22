@@ -11,8 +11,12 @@ amr_n0 = 3 # 9 # 24
 amr_n1 = 4 # 9 # 24
 amr_n2 = 5 # 9 # 24
 
-amr_Lagrange_interp_order = n
+amr_Lagrange_interp_order = 3
 amr_WENO_interp_order     = 6
+
+outputX0 =  0.02
+outputY0 = -0.01
+outputZ0 =  0.03
 
 #1douttime = 0.1
 1doutiter = 1

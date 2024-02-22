@@ -532,11 +532,11 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
         /* fill elm->dat with interpolation data from parent */
         if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
-          basis_interp_topoints(parent, parent->dat->v[vi],
-                                Xp, elm->dat->v[vi], Lagrange_of_x);
+          //basis_interp_topoints(parent, parent->dat->v[vi],
+          //                      Xp, elm->dat->v[vi], Lagrange_of_x);
           //FIXME:
-          //interp_topoints(parent, parent->dat->v[vi], Xp,
-          //                order, scheme, 1., elm->dat->v[vi]);
+          interp_topoints(parent, parent->dat->v[vi], Xp,
+                          order, scheme, 1., elm->dat->v[vi]);
         }
       } /* end: if parent has dat->v[vi] */
     free_array(Xp[2]);
@@ -696,11 +696,11 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
               int order, scheme;
               amr_interp_get_order_scheme(child, &order, &scheme);
 
-              basis_interp_toIpoints(child, var, Xc[ijk],Ip[ijk], Res[ijk],
-                                     Lagrange_of_x);
+              //basis_interp_toIpoints(child, var, Xc[ijk],Ip[ijk], Res[ijk],
+              //                       Lagrange_of_x);
               //FIXME: use interp_toIpoints !!!
-              //interp_toIpoints(child, var, Xc[ijk],Ip[ijk],
-              //                 order, scheme, 1., Res[ijk]);
+              interp_toIpoints(child, var, Xc[ijk],Ip[ijk],
+                               order, scheme, 1., Res[ijk]);
             }
             /* pos of next child */
             pos_ijk = pos_ijk->next;
@@ -873,11 +873,11 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
         /* fill node->dat with interpolation data from old dat */
         if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
-          basis_interp_topoints(node_old, node_old->dat->v[vi],
-                                Xp, node->dat->v[vi], Lagrange_of_x);
+          //basis_interp_topoints(node_old, node_old->dat->v[vi],
+          //                      Xp, node->dat->v[vi], Lagrange_of_x);
           //FIXME:
-          //interp_topoints(node_old, node_old->dat->v[vi], Xp,
-          //                order, scheme, 1., node->dat->v[vi]);
+          interp_topoints(node_old, node_old->dat->v[vi], Xp,
+                          order, scheme, 1., node->dat->v[vi]);
         }
         /* copy nbinfo vars */
         if( (vi >= amr->elm_nbinfo0) && (vi < amr->elm_nbinfo0+6) )
