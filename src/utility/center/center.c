@@ -191,7 +191,7 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   double v0,vm,vp, v;
   double dx,dy,dz;
   double x0,y0,z0, x1,y1,z1;
-  int iord = 12; /* we can make interp. order a par later */
+  int iord = 4; /* we can make interp. order a par later */
   int pr = 0;
 
   /* previous coordinates */
