@@ -152,10 +152,10 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
                            int np[3], int scheme, double vscal,
                            tArray *Ip, tArray *interp);
 void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
-                     int np[3], int scheme, double vscal,
+                     int npts, int scheme, double vscal,
                      tArray *interp);
 void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
-                      int np[3], int scheme, double vscal,
+                      int npts, int scheme, double vscal,
                       tArray *Ip, tArray *interp);
 int interpolate_var_ok(tNode *node, int vi, double Xb[3],
                        int npts, int scheme, double *vinterp);

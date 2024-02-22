@@ -714,21 +714,21 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
      basis_interp_topoints  OR  interpolate_topoints
    For INTERP_WENO it always uses interpolate_topoints */
 void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
-                     int np[3], int scheme, double vscal,
+                     int npts, int scheme, double vscal,
                      tArray *interp)
 {
   int *n = elm->n;
 
-  /* if np is either very small or very large nd we want LAGRANGE we use
+  /* if npts is either very small or very large and we want LAGRANGE we use
      the more optimized basis_interp_toIpoints */
   if( (scheme == INTERP_LAGRANGE) &&
-      ( ((np[0]<1)     && (np[1]<1)     && (np[2]<1))  ||
-        ((np[0]>=n[0]) && (np[1]>=n[1]) && (np[2]>=n[2])) ) )
+      ( (npts<1) || ((npts>=n[0]) && (npts>=n[1]) && (npts>=n[2])) ) )
   {
     basis_interp_topoints(elm, var, Xp, interp, Lagrange_of_x);
   }
   else
   {
+    int np[] = {npts, npts, npts};
     interpolate_topoints(elm, var, Xp, np,scheme,vscal, interp);
   }
 }
@@ -741,21 +741,21 @@ void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
      basis_interp_toIpoints  OR  interpolate_toIpoints
    For INTERP_WENO it always uses interpolate_toIpoints */
 void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
-                      int np[3], int scheme, double vscal,
+                      int npts, int scheme, double vscal,
                       tArray *Ip, tArray *interp)
 {
   int *n = elm->n;
 
-  /* if np is either very small or very large nd we want LAGRANGE we use
+  /* if npts is either very small or very large and we want LAGRANGE we use
      the more optimized basis_interp_toIpoints */
   if( (scheme == INTERP_LAGRANGE) &&
-      ( ((np[0]<1)     && (np[1]<1)     && (np[2]<1))  ||
-        ((np[0]>=n[0]) && (np[1]>=n[1]) && (np[2]>=n[2])) ) )
+      ( (npts<1) || ((npts>=n[0]) && (npts>=n[1]) && (npts>=n[2])) ) )
   {
     basis_interp_toIpoints(elm, var, Xp, Ip, interp, Lagrange_of_x);
   }
   else
   {
+    int np[] = {npts, npts, npts};
     interpolate_toIpoints(elm, var, Xp, np,scheme,vscal, Ip, interp);
   }
 }
