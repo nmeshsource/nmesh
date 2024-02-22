@@ -787,6 +787,26 @@ double interpolate_var_local(tElm *elm, int vi, double Xb[3],
   return val;
 }
 
+/* same as interpolate_var_local, but more optimized for speed */
+double interp_var_local(tElm *elm, int vi, double Xb[3],
+                        int npts, int scheme, double vscal)
+{
+  int *n = elm->n;
+
+  /* if npts is either very small or very large and we want LAGRANGE we use
+     the more optimized basis_array_interp */
+  if( (scheme == INTERP_LAGRANGE) &&
+      ( (npts<1) || ((npts>=n[0]) && (npts>=n[1]) && (npts>=n[2])) ) )
+  {
+    tArray *v;
+    v = VarA(elm, vi);
+    if(!v) return 0.; /* return 0 as interp value if var vi has no storage */
+
+    return basis_array_interp(elm, v, Xb, Lagrange_of_x);
+  }
+  return interpolate_var_local(elm, vi, Xb, npts, scheme, vscal);
+}
+
 
 /***********************************************************************/
 /* interpolation across MPI procs if based on Xb*/
@@ -1058,7 +1078,7 @@ double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
 /***********************************************************************/
 /* interpolate to a given x,y,z using
    double interpolate_var_local(tElm *elm, int vi, double Xb[3],
-                                int npts, int scheme) */
+                                int npts, int scheme, double vscal) */
 /***********************************************************************/
 
 /* Use interpolate_var_local to interpolate var ivar onto xyz[3].
