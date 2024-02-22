@@ -76,6 +76,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
   {
     int d;
     for(d=0; d<3; d++) x_pt[ipt][d] = output->xpt[ipt][d];
+    /* FIXME: use interp_var_xyz instead: */
     node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
     //PRF;pr3v(": x_pt[ipt]", x_pt[ipt]);pr3v("X", X);
     //printf("node_pt[%d]=%p\n", ipt, node_pt[ipt]);
@@ -122,6 +123,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     for(ipt=0; ipt<Npt; ipt++)
       have_pt[ipt] = interpolate_var_ok(node_pt[ipt], vi, Xb_pt[ipt],
                                  interp_np, INTERP_LAGRANGE, &(val_pt[ipt]));
+                                  /* ^-- FIXME: use interp_var_xyz instead */
     /* output is done by rank0 */
     if(Rank0)
     {

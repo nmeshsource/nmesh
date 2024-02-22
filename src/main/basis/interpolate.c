@@ -823,6 +823,12 @@ int interpolate_var_ok(tNode *node, int vi, double Xb[3],
   double Val, val=0.;
   int Haveval, haveval=0;
 
+  /* FIXME: use interp_var_xyz instead */
+  /* In output0d.c this func is used for xyz interpolation.
+     output0d.c should be changed to use interp_var_xyz. */
+  //errorexit("this func can only be used for non-critical things "
+  //          "like output");
+
   if(node) if(node->dat)
   {
     val = interp_var_local(node, vi, Xb, npts, scheme, vscal);
