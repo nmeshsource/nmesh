@@ -525,9 +525,9 @@ int inidata_mesh(tMesh *mesh)
     /* load an unfiltered checkpoint */
     checkpoint_load_stage(mesh, "", 1);
     RunFun(POST_CHECKPOINT_LOAD); /* do things right after loading */
-    /* Run the things that are after checkpoint_save_if_needed
-       in evolve_mesh, that are not already called after this block. */
-    RunFun(FILTER);
+    /* Run the things here that are after checkpoint_save_if_needed
+       in evolve_mesh, that are not already called after this block.
+       Right now there is not such thing... */
   }
   else
   {
@@ -597,12 +597,11 @@ int evolve_mesh(tMesh *mesh)
     }
     mesh->time = Te + te; /* best estimate for actual time */
 
-    /* save an unfiltered checkpoint,
-       save for sure if time is beyond timemax */
-    checkpoint_save_if_needed(mesh, mesh->time >= timemax - ttol);
-
     /* apply filters after the full evolution step */
     RunFun(FILTER);
+
+    /* save checkpoint, save for sure if time is beyond timemax */
+    checkpoint_save_if_needed(mesh, mesh->time >= timemax - ttol);
 
     /* post evolve */
     RunFun(POST_EVOLVE);
