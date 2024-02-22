@@ -260,7 +260,7 @@ double basis_var_interpolate_local(tNode *node, int vi, double Xb[3])
   tArray *v, *c;
   double val;
 
-  errorexit("use interpolate_var_local instead");
+  errorexit("use interp_var_local instead");
 
   /* set coeffs of var vi in c */
   v = VarA(node, vi);

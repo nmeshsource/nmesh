@@ -813,7 +813,7 @@ double interp_var_local(tElm *elm, int vi, double Xb[3],
 /***********************************************************************/
 
 /* 3d interpolation:
-   call interpolate_var_local and then send interp. val around
+   call interp_var_local and then send interp. val around
    Returns: 1 if success
             0 if if all MPI procs have node=NULL */
 int interpolate_var_ok(tNode *node, int vi, double Xb[3],
@@ -825,7 +825,7 @@ int interpolate_var_ok(tNode *node, int vi, double Xb[3],
 
   if(node) if(node->dat)
   {
-    val = interpolate_var_local(node, vi, Xb, npts, scheme, vscal);
+    val = interp_var_local(node, vi, Xb, npts, scheme, vscal);
     haveval = 1;
   }
   Val = val;
@@ -1077,12 +1077,12 @@ double basis_var_interp_x_y_z(tMesh *mesh, int ivar,
 
 /***********************************************************************/
 /* interpolate to a given x,y,z using
-   double interpolate_var_local(tElm *elm, int vi, double Xb[3],
-                                int npts, int scheme, double vscal) */
+   double interp_var_local(tElm *elm, int vi, double Xb[3],
+                           int npts, int scheme, double vscal) */
 /***********************************************************************/
 
-/* Use interpolate_var_local to interpolate var ivar onto xyz[3].
-   First find node and Xb of xyz[3] and then use use interpolate_var_local
+/* Use interp_var_local to interpolate var ivar onto xyz[3].
+   First find node and Xb of xyz[3] and then use use interp_var_local
    to interpolate var ivar onto xyz[3]
    IN: mesh, ivar, xyz, npts, scheme, vscal
    OUT: XYZ, value   RETURN: p (patchnumber) */
@@ -1115,7 +1115,7 @@ int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
 
         npts++; /* count how often we found XYZ */
         XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
-        val += interpolate_var_local(elm, ivar, XbYbZb, np, scheme, vscal);
+        val += interp_var_local(elm, ivar, XbYbZb, np, scheme, vscal);
       }
   }
   /* if we found points with XYZ, record how many we found */
