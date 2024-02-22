@@ -37,6 +37,8 @@ int amr_init_global_pars(tMesh *mesh)
   amr->sibl1to7_weight = Par("amr_sibl1to7_weight");
   amr->MPIexchange = Par("amr_MPIexchange");
   amr->nghosts     = Par("amr_nghosts");
+  amr->Lagrange_interp_order = Par("amr_Lagrange_interp_order");
+  amr->WENO_interp_order     = Par("amr_WENO_interp_order");
 
   /* print global vars and pars */
   printf(" amr->elm_nbinfo0 = var_%04d : VarName(amr->elm_nbinfo0) = %s\n",
@@ -53,6 +55,10 @@ int amr_init_global_pars(tMesh *mesh)
          amr->MPIexchange, Geti(amr->MPIexchange));
   printf(" amr->nghosts = par_%04d :     Geti(amr->nghosts) = %d\n",
          amr->nghosts, Geti(amr->nghosts));
+  printf(" amr->Lagrange_interp_order=par_%04d : Geti(amr->Lagrange_interp_order) = %d\n",
+         amr->Lagrange_interp_order, Geti(amr->Lagrange_interp_order));
+  printf(" amr->WENO_interp_order = par_%04d :   Geti(amr->WENO_interp_order) = %d\n",
+         amr->WENO_interp_order, Geti(amr->WENO_interp_order));
 
   /* set amr_n0,... from amr_N0, ... */
   if(Geti(amr_N0)>0)

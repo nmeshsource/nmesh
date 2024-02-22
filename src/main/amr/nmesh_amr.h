@@ -396,6 +396,8 @@ typedef struct {
   int sibl1to7_weight; /* Par("amr_sibl1to7_weight") */
   int MPIexchange;     /* Par("amr_MPIexchange") */
   int nghosts;         /* Par("amr_nghosts") */
+  int Lagrange_interp_order; /* Par("amr_Lagrange_interp_order") */
+  int WENO_interp_order;     /* Par("amr_WENO_interp_order") */
   int elm_nbinfo0;     /* Ind("amr_elm_nbinfo0") */
 } tAMR;
 
