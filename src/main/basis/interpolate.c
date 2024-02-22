@@ -707,6 +707,61 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
   }
 }
 
+/* 3d interpolation from array var in elm onto a set of points given in
+   arrays Xp[0..2]. The arrays Xp[0..2] are in Xb coords. The result will
+   be written into array interp.
+   For INTERP_LAGRANGE this func calls either:
+     basis_interp_topoints  OR  interpolate_topoints
+   For INTERP_WENO it always uses interpolate_topoints */
+void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
+                     int np[3], int scheme, double vscal,
+                     tArray *interp)
+{
+  int *n = elm->n;
+
+  /* if np is either very small or very large nd we want LAGRANGE we use
+     the more optimized basis_interp_toIpoints */
+  if( (scheme == INTERP_LAGRANGE) &&
+      ( ((np[0]<1)     && (np[1]<1)     && (np[2]<1))  ||
+        ((np[0]>=n[0]) && (np[1]>=n[1]) && (np[2]>=n[2])) ) )
+  {
+    basis_interp_topoints(elm, var, Xp, interp, Lagrange_of_x);
+  }
+  else
+  {
+    interpolate_topoints(elm, var, Xp, np,scheme,vscal, interp);
+  }
+}
+
+/* 3d interpolation from array var in node to a set of points indicated by
+   the arrays Xp[0..2] and Ip. Xp[0..2] has the point coords in Xb coords
+   and Ip has the index where the interpolation result is written to in
+   interp. For points where Ip<0 nothing will be written into interp.
+   For INTERP_LAGRANGE this func calls either:
+     basis_interp_toIpoints  OR  interpolate_toIpoints
+   For INTERP_WENO it always uses interpolate_toIpoints */
+void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
+                      int np[3], int scheme, double vscal,
+                      tArray *Ip, tArray *interp)
+{
+  int *n = elm->n;
+
+  /* if np is either very small or very large nd we want LAGRANGE we use
+     the more optimized basis_interp_toIpoints */
+  if( (scheme == INTERP_LAGRANGE) &&
+      ( ((np[0]<1)     && (np[1]<1)     && (np[2]<1))  ||
+        ((np[0]>=n[0]) && (np[1]>=n[1]) && (np[2]>=n[2])) ) )
+  {
+    basis_interp_toIpoints(elm, var, Xp, Ip, interp, Lagrange_of_x);
+  }
+  else
+  {
+    interpolate_toIpoints(elm, var, Xp, np,scheme,vscal, Ip, interp);
+  }
+}
+
+
+
 /* 3d interpolation:
    interpolate var vi to the point (Xb[0],Xb[1],Xb[2]) locally */
 double interpolate_var_local(tElm *elm, int vi, double Xb[3],
