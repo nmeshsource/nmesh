@@ -693,9 +693,9 @@ void interpolate_topoints(tElm *elm, tArray *var, tArray *Xp[3],
    the arrays Xp[0..2] and Ip. Xp[0..2] has the point coords in Xb coords
    and Ip has the index where the interpolation result is written to in
    interp. For points where Ip<0 nothing will be written into interp. */
-void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
+void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
                            int np[3], int scheme, double vscal,
-                           tArray *Ip, tArray *interp)
+                           tArray *interp)
 {
   int k;
   forarray(Xp[0], k)
@@ -740,9 +740,8 @@ void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
    For INTERP_LAGRANGE this func calls either:
      basis_interp_toIpoints  OR  interpolate_toIpoints
    For INTERP_WENO it always uses interpolate_toIpoints */
-void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
-                      int npts, int scheme, double vscal,
-                      tArray *Ip, tArray *interp)
+void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
+                      int npts, int scheme, double vscal, tArray *interp)
 {
   int *n = elm->n;
 
@@ -756,7 +755,7 @@ void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
   else
   {
     int np[] = {npts, npts, npts};
-    interpolate_toIpoints(elm, var, Xp, np,scheme,vscal, Ip, interp);
+    interpolate_toIpoints(elm, var, Xp,Ip, np,scheme,vscal, interp);
   }
 }
 

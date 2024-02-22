@@ -148,15 +148,14 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
 void interpolate_topoints(tElm *elm, tArray *var, tArray *Xp[3],
                           int np[3], int scheme, double vscal,
                           tArray *interp);
-void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
+void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
                            int np[3], int scheme, double vscal,
-                           tArray *Ip, tArray *interp);
+                           tArray *interp);
 void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
                      int npts, int scheme, double vscal,
                      tArray *interp);
-void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3],
-                      int npts, int scheme, double vscal,
-                      tArray *Ip, tArray *interp);
+void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
+                      int npts, int scheme, double vscal, tArray *interp);
 int interpolate_var_ok(tNode *node, int vi, double Xb[3],
                        int npts, int scheme, double *vinterp);
 double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
