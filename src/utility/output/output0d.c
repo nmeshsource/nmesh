@@ -78,6 +78,8 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     for(d=0; d<3; d++) x_pt[ipt][d] = output->xpt[ipt][d];
     /* FIXME: use interp_var_xyz instead: */
     node_pt[ipt] = node_XYZ_of_xyz_mesh(mesh, X, x_pt[ipt]);
+    /* NOTE: node_XYZ_of_xyz_mesh finds the 1st node that has x_pt.
+             But what if several nodes have this point??? */
     //PRF;pr3v(": x_pt[ipt]", x_pt[ipt]);pr3v("X", X);
     //printf("node_pt[%d]=%p\n", ipt, node_pt[ipt]);
     if(node_pt[ipt])
