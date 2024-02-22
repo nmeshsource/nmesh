@@ -545,6 +545,15 @@ void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
   Xp[2] = alloc_array(n_interp);
   array_1d1d1d_coords_to_3d_coords(Xb, Xp);
 
+  /* FIXME: improve this crash!!! */
+  if(n_interp[0]>24 || n_interp[1]>24 || n_interp[2]>24)
+  {
+    int *ptyp = node->pt_typ;
+    if(ptyp[0]!=P_LGL || ptyp[1]!=P_LGL || ptyp[2]!=P_LGL)
+      errorexit("n_interp is too big for basis_interp_topoints. "
+                "Make interp_to_pt_typ like interp_topoints to use WENO.");
+  }
+
   /* interpolate to points Xp */
   basis_interp_topoints(node, VarA(node,iu), Xp, interp, Lagrange_of_x);
 
