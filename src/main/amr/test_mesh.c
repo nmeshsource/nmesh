@@ -116,8 +116,13 @@ int test_mesh(tMesh *mesh)
 {
   int mode=0;
   tRef ref[1];
+  int iX, vi;
 
   PRFs(":\n");
+
+  AddEvoVar("test_mesh_var", "", "some test var");
+  vi = Ind("test_mesh_var");
+  iX = Ind("X");
 
   mesh->dt = Getd(Par("dt"));
   mesh->time = 0.;
@@ -144,6 +149,28 @@ int test_mesh(tMesh *mesh)
   update_mesh_myln_node_nid(mesh);
   simple_load_balance(mesh);
   update_mesh_myln_node_nid(mesh);
+
+  /* write some data in test_mesh_var */
+  enablevar(mesh, vi);
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int *n = elm->n;
+    int i,j,k;
+    double *X = Vard(elm,iX);
+    double *Y = Vard(elm,iX+1);
+    double *Z = Vard(elm,iX+2);
+    double *v = Vard(elm,vi);
+
+    forijk(i,j,k, n)
+    {
+      int ijk = Ind_n(i,j,k, n);
+      double Xi = X[ijk];
+      double Yi = Y[ijk];
+      double Zi = Z[ijk];
+      v[ijk] = Xi*Xi*Xi*Xi + 2*Yi*Yi*Yi + 3*Zi*Zi;
+    }
+  }
 
   /* write initial mesh into files */
   write_mylnodes(mesh, "initial patches:", mode);
