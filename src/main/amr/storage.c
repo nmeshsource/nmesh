@@ -506,6 +506,7 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
   if(parent->dat)
   {
     tArray *Xp[3];
+    int order, scheme;
 
     /* alloc dat for child */
     elm->dat = alloc_dat(elm);
@@ -520,6 +521,7 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
     array_XbYbZb_of_XYZ(parent, Xp, Xp);
 
     /* use interpolation to get vars from parent to child elm */
+    amr_interp_get_order_scheme(parent, &order, &scheme);
     for(vi=0; vi<nvdb; vi++)
       if(parent->dat->v[vi])
       {
@@ -532,7 +534,9 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
         {
           basis_interp_topoints(parent, parent->dat->v[vi],
                                 Xp, elm->dat->v[vi], Lagrange_of_x);
-          //FIXME: use interpolate_topoints !!!
+          //FIXME:
+          //interp_topoints(parent, parent->dat->v[vi], Xp,
+          //                order, scheme, 1., elm->dat->v[vi]);
         }
       } /* end: if parent has dat->v[vi] */
     free_array(Xp[2]);
@@ -688,9 +692,16 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
             tElm *child = list_entry(pos_ijk, tElm, list);
             tArray *var = child->dat->v[vi];
             if(var)
+            {
+              int order, scheme;
+              amr_interp_get_order_scheme(child, &order, &scheme);
+
               basis_interp_toIpoints(child, var, Xc[ijk],Ip[ijk], Res[ijk],
                                      Lagrange_of_x);
-              //FIXME: use interpolate_toIpoints !!!
+              //FIXME: use interp_toIpoints !!!
+              //interp_toIpoints(child, var, Xc[ijk],Ip[ijk],
+              //                 order, scheme, 1., Res[ijk]);
+            }
             /* pos of next child */
             pos_ijk = pos_ijk->next;
           }
@@ -837,6 +848,7 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
   if(node_old->dat)
   {
     tArray *Xp[3];
+    int order, scheme;
 
     /* alloc new dat for node */
     node->dat = alloc_dat(node);
@@ -850,6 +862,7 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
       could use: node_Xb3(node, Xp); to get new node points into Xp */
 
     /* use interpolation to get vars from old dat to new node->dat */
+    amr_interp_get_order_scheme(node_old, &order, &scheme);
     for(vi=0; vi<nvdb; vi++)
       if(node_old->dat->v[vi])
       {
@@ -862,7 +875,9 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
         {
           basis_interp_topoints(node_old, node_old->dat->v[vi],
                                 Xp, node->dat->v[vi], Lagrange_of_x);
-          //FIXME: use interpolate_topoints !!!
+          //FIXME:
+          //interp_topoints(node_old, node_old->dat->v[vi], Xp,
+          //                order, scheme, 1., node->dat->v[vi]);
         }
         /* copy nbinfo vars */
         if( (vi >= amr->elm_nbinfo0) && (vi < amr->elm_nbinfo0+6) )
