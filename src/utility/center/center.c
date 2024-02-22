@@ -139,7 +139,12 @@ double average_grid_spacing(tMesh *mesh, double x[3])
 
   set_elm0_XYZ_of_xyz_mesh(mesh, elm0, &eid,&elmindex,&elmrank, X, x);
   for(d=0; d<3; d++)
-    h[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/elm0->n[d];
+  {
+    if(elm0->n[d] > 1)
+      h[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/(elm0->n[d] - 1);
+    else
+      h[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/elm0->n[d];
+  }
   return max3(h[0],h[1],h[2]);
 }
 
