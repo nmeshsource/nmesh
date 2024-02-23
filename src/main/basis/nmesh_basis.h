@@ -141,8 +141,6 @@ void basis_interp2d_toIpoints(tNode *node, tArray *var, int dir,int p,
                                            const double *x_p,
                                            const double *w_interp));
 void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d);
-void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
-                            tArray *interp);
 double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
                      int scheme, double vscal);
 void interpolate_topoints(tElm *elm, tArray *var, tArray *Xp[3],
@@ -155,6 +153,8 @@ void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
                      int npts, int scheme, double vscal,
                      tArray *interp);
 void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
+                      int npts, int scheme, double vscal, tArray *interp);
+void interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
                       int npts, int scheme, double vscal, tArray *interp);
 int interpolate_var_ok(tNode *node, int vi, double Xb[3],
                        int npts, int scheme, double *vinterp);

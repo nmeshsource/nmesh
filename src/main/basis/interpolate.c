@@ -526,40 +526,6 @@ void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d)
 }
 
 
-/* 3d interpolation from var iu in node to a number of points (set by
-   Arrn(interp) = interp->n) with point type pt_typ. The result will be
-   written into array interp. */
-void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
-                            tArray *interp)
-{
-  int *n_interp = Arrn(interp);
-  tArray *Xb[3]; /* 3 1d arrays */
-  tArray *Xp[3]; /* 3 3d arrays */
-
-  /* set Xb */
-  Xb3_pt_typ_n(pt_typ, n_interp, Xb);
-
-  /* set Xp */
-  Xp[0] = alloc_array(n_interp);
-  Xp[1] = alloc_array(n_interp);
-  Xp[2] = alloc_array(n_interp);
-  array_1d1d1d_coords_to_3d_coords(Xb, Xp);
-
-  /* FIXME: improve this crash!!! */
-  if(n_interp[0]>24 || n_interp[1]>24 || n_interp[2]>24)
-  {
-    int *ptyp = node->pt_typ;
-    if(ptyp[0]!=P_LGL || ptyp[1]!=P_LGL || ptyp[2]!=P_LGL)
-      errorexit("n_interp is too big for basis_interp_topoints. "
-                "Make interp_to_pt_typ like interp_topoints to use WENO.");
-  }
-
-  /* interpolate to points Xp */
-  basis_interp_topoints(node, VarA(node,iu), Xp, interp, Lagrange_of_x);
-
-  free_3_arrays(Xp);
-}
-
 /***********************************************************************/
 /* Interpolate using a particular interpolation scheme */
 /***********************************************************************/
@@ -767,6 +733,34 @@ void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
     int np[] = {npts, npts, npts};
     interpolate_toIpoints(elm, var, Xp,Ip, np,scheme,vscal, interp);
   }
+}
+
+/* 3d interpolation from var iu in node to a number of points (set by
+   Arrn(interp) = interp->n) with point type pt_typ. The result will be
+   written into array interp. */
+//once this was:
+//void basis_interp_to_pt_typ(tNode *node, int iu, int pt_typ[3], tArray *interp)
+void interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
+                      int npts, int scheme, double vscal, tArray *interp)
+{
+  int *n_interp = Arrn(interp);
+  tArray *Xb[3]; /* 3 1d arrays */
+  tArray *Xp[3]; /* 3 3d arrays */
+
+  /* set Xb */
+  Xb3_pt_typ_n(pt_typ, n_interp, Xb);
+
+  /* set Xp */
+  Xp[0] = alloc_array(n_interp);
+  Xp[1] = alloc_array(n_interp);
+  Xp[2] = alloc_array(n_interp);
+  array_1d1d1d_coords_to_3d_coords(Xb, Xp);
+
+  /* interpolate to points Xp */
+  interp_topoints(node, VarA(node,iu), Xp, npts,scheme,vscal, interp);
+  //was: basis_interp_topoints(node, VarA(node,iu), Xp, interp, Lagrange_of_x);
+
+  free_3_arrays(Xp);
 }
 
 

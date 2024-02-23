@@ -533,13 +533,23 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     tRef *ref = node->dat->info->trbl_ref;
     int n_dg[3], pt_typ_dg[3];
     tArray *u_interp;
+    int npts;
 
     /* get num. and type of points on dg grid that we would switch to */
     hp_refine_set_n_pt_typ(node, ref, n_dg, pt_typ_dg);
 
+    /* FIXME: improve this crash!!! */
+    npts = max3(node->n[0], node->n[1], node->n[2]);
+    if(npts>24)
+    {
+      int *ptyp = node->pt_typ;
+      if(ptyp[0]!=P_LGL || ptyp[1]!=P_LGL || ptyp[2]!=P_LGL)
+        errorexit("npts is too big for interp_to_pt_typ");
+    }
+
     /* interpolate u to dg grid */
     u_interp = alloc_array(n_dg);
-    basis_interp_to_pt_typ(node, iu, pt_typ_dg, u_interp);
+    interp_to_pt_typ(node, iu, pt_typ_dg, npts,INTERP_LAGRANGE,1., u_interp);
     troubled = evolve_Persson_array_trouble(u_interp, u_scale, pt_typ_dg,
                                             ncoeffs, alpha_fv);
     free_array(u_interp);
