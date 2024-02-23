@@ -291,6 +291,9 @@ void amr_interp_get_order_scheme(tElm *elm, int *order, int *scheme)
   if(is_UNI) schm = INTERP_WENO;
   else       schm = INTERP_LAGRANGE;
 
+  /* BUT amr->force_interp_scheme can override scheme */
+  if(amr->force_interp_scheme) schm = amr->force_interp_scheme;
+
   /* set npts */
   switch(schm)
   {

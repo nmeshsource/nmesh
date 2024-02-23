@@ -6,6 +6,7 @@
 /* types of interpolation we can do in 1d */
 enum
 {
+  INTERP_NOT_SET=0, /* interpolation mode is not set */
   INTERP_LAGRANGE,  /* Lagrange interpolation */
   INTERP_WENO,      /* WENO interpolation */
 };

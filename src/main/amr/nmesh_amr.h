@@ -398,6 +398,7 @@ typedef struct {
   int nghosts;         /* Par("amr_nghosts") */
   int Lagrange_interp_order; /* Par("amr_Lagrange_interp_order") */
   int WENO_interp_order;     /* Par("amr_WENO_interp_order") */
+  int force_interp_scheme;   /* can be 0, INTERP_LAGRANGE, INTERP_WENO, ... */
   int elm_nbinfo0;     /* Ind("amr_elm_nbinfo0") */
 } tAMR;
 
