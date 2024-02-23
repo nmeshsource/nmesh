@@ -474,7 +474,7 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 
   /* set nb to n or to n+1 if CenterOnXb0=1 and n is odd */
   nb = n;
-  if(CenterOnXb0 && (nb)%2) nb += 1;
+  //if(CenterOnXb0 && (nb)%2) nb += 1;
 
   /* find node-point ind0 closest to Xb0 */
   ind0 = nearest_i0_of_Xb_indir(node, dir, Xb0);
@@ -483,7 +483,7 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 
   /* move ind0 to the left of Xb0 if needed */
   //if(CenterOnXb0 && Xb[ind0] > Xb0) ind0--;
-  if(Xb[ind0] > Xb0) ind0--;
+  if( (n%2 == 0) && (Xb[ind0] > Xb0) ) ind0--;
 
   /* find index range start b0 and end b1 */
   b0 = ind0 - (nb-1)/2;
@@ -492,8 +492,21 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   /* check if range with ends b0 and b1 fits */
   if(CenterOnXb0) /* shorten range if it does not fit */
   {
-    if(b0 < 0)   { b1 -= -b0;      b0 = 0; }
-    if(b1 >= nn) { b0 += b1-nn+1;  b1 = nn-1; }
+    if( (n%2) && (ind0<=0) ) /* on left end */
+    {
+      if(b0 < 0)   { b1 -= -b0-1;    b0 = 0; }
+      if(b1 >= nn) { b0 += b1-nn+1;  b1 = nn-1; }
+    }
+    else if(ind0>=nn-1) /* on right end */
+    {
+      if(b0 < 0)   { b1 -= -b0;      b0 = 0; }
+      if(b1 >= nn) { b0 += b1-nn;    b1 = nn-1; }
+    }
+    else /* more in the middle */
+    {
+      if(b0 < 0)   { b1 -= -b0;      b0 = 0; }
+      if(b1 >= nn) { b0 += b1-nn+1;  b1 = nn-1; }
+    }
     /* cut off pieces outside node */
     if(b0 >= nn) b0 = nn-1;
     if(b1 < 0)   b1 = 0;
