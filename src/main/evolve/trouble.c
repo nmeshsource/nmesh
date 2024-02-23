@@ -6,6 +6,11 @@
 
 #define PR 0
 
+
+/* use amr vars */
+extern tAMR amr[1];
+
+
 /* Determine and set trouble score in a node,
    i.e. set node->dat->info->trbl_score .
    Note evosys->f[TROUBLE] returns a score of 1, 0, or -1:
@@ -211,7 +216,7 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
-  int firstit;
+  int firstit, order_sav, force_sav;
   int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
   int ptLGL[] = { P_LGL, P_LGL, P_LGL };
   if(PR) PRFs(":\n");
@@ -252,10 +257,23 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   /* get ref->method from my proc to all others */
   refine_synchronize_ref_method(ref);
 
-  /* do p-refinement to desired n and point type */
+  /* do p-refinement to desired n and point type: */
+  /* We have just determined that these fv nodes are so untroubled that we
+     want to switch to them to dg. I.e. there will be no shocks. Thus we
+     will use high order Lagrange interpolation (and not WENO6).
+  */
+  /* 1. select interpolation scheme and order */
+  force_sav = amr->force_interp_scheme;         //backup flag
+  order_sav = Geti(amr->Lagrange_interp_order); //backup order par
+  amr->force_interp_scheme = INTERP_LAGRANGE;   //set internal amr flag
+  Seti(amr->Lagrange_interp_order, 12);         //set 12th order Lag interp
+  /* 2. now call p-refinement from amr */
   prefine_nodes_if_rflag(mesh, ref);
   /* now some aux vars (and others) are not set */
   /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
+  /* 3. restore par amr_Lagrange_interp_order and amr->force_interp_scheme */
+  amr->force_interp_scheme = force_sav;
+  Seti(amr->Lagrange_interp_order, order_sav);
 
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
@@ -546,6 +564,8 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
       if(ptyp[0]!=P_LGL || ptyp[1]!=P_LGL || ptyp[2]!=P_LGL)
         errorexit("npts is too big for interp_to_pt_typ");
     }
+    /* pick a good value for npts */
+    //npts = 12;
 
     /* interpolate u to dg grid */
     u_interp = alloc_array(n_dg);
