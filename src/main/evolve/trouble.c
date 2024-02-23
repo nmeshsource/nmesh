@@ -556,16 +556,12 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     /* get num. and type of points on dg grid that we would switch to */
     hp_refine_set_n_pt_typ(node, ref, n_dg, pt_typ_dg);
 
-    /* FIXME: improve this crash!!! */
-    npts = max3(node->n[0], node->n[1], node->n[2]);
-    if(npts>24)
-    {
-      int *ptyp = node->pt_typ;
-      if(ptyp[0]!=P_LGL || ptyp[1]!=P_LGL || ptyp[2]!=P_LGL)
-        errorexit("npts is too big for interp_to_pt_typ");
-    }
-    /* pick a good value for npts */
-    //npts = 12;
+    /* Pick a good value for npts:
+       Since We want to test for smoothness in here, we use LAGRANGE as
+       it is very sensitive to shocks. Yet in order to not incur too large
+       of a numerical error (when interpolating on a uniform grid), we
+       need to limit the number of interpolation points npts. */
+    npts = 12; // should this be a GRHD par that's passed in???
 
     /* interpolate u to dg grid */
     u_interp = alloc_array(n_dg);
