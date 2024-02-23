@@ -644,6 +644,7 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
     */
   }
   //d=0;
+  //printf(" b0=%d nb=%d ", b0[d], nb[d]);
   //printf("  x_p[d] =");
   //for(k=0; k<nb[d]; k++) printf(" %g", x_p[d][k]);
   //printf("\n");
