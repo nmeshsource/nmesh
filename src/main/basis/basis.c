@@ -472,9 +472,8 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   int nn = node->n[dir];
   int ind0, b0,b1, nb;
 
-  /* set nb to n or to n+1 if CenterOnXb0=1 and n is odd */
+  /* the default for nb is n */
   nb = n;
-  //if(CenterOnXb0 && (nb)%2) nb += 1;
 
   /* find node-point ind0 closest to Xb0 */
   ind0 = nearest_i0_of_Xb_indir(node, dir, Xb0);
@@ -482,7 +481,6 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   else if(ind0<-1)  ind0 = nn-1;
 
   /* move ind0 to the left of Xb0 if needed */
-  //if(CenterOnXb0 && Xb[ind0] > Xb0) ind0--;
   if( (n%2 == 0) && (Xb[ind0] > Xb0) ) ind0--;
 
   /* find index range start b0 and end b1 */
