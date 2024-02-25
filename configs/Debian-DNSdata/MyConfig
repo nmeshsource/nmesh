@@ -91,3 +91,6 @@ Get_sgrid:
 	@echo -------------------- Configure sgrid for DNSdata ---------------
 	cp $(SGRIDDIR)/doc/MyConfig.DNSlibsgrid $(SGRIDDIR)/MyConfig
 	$(MAKE) -C $(SGRIDDIR) repo=https://github.com/sgridsource git_clone
+Clean_sgrid:
+	@echo -------------------- make clean in sgrid -----------------------
+	$(MAKE) -C $(SGRIDDIR) clean
