@@ -33,7 +33,7 @@ int nmesh_center(tMesh *mesh)
   AddPar("center2_track", "no", "[no,min,max]");
   AddPar("center1_track_var", "", "variable we track [ADM_alpha,GRHD_rho0]");
   AddPar("center2_track_var", "", "variable we track [ADM_alpha,GRHD_rho0]");
-  AddPar("center_track_minmove", "0.01" , "don't move more than value*h");
+  AddPar("center_track_minmove", "0.01" , "skip moves of less than value*h");
   AddPar("center1_mass", "1", "mass1 used for CM calculation");
   AddPar("center2_mass", "1", "mass2 used for CM calculation");
 
