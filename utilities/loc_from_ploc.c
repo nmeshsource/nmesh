@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
   for(i=0, tok = strtok(str, delim); tok!=NULL; i++)
   {
     //printf("tok=%s\n", tok);
-    ploc[i] = atoi(tok);
+    ploc[i] = strtol(tok, NULL, 0); // atoi(tok);
     tok = strtok(NULL, delim);
   }
   //for(i=0; i<l; i++) printf("ploc[%d] = %d\n", i, (int) ploc[i]);
