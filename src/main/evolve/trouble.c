@@ -431,6 +431,11 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
   double c2_sum, c2_hi, se, se_lim;
   int troubled;
 
+  /* The Persson's indicator se calculated below is always negative.
+     So if alpha<0 se_lim=-alpha*log10(n_max)>0. Thus se>=se_lim
+     will never be true, and we always return troubled=0 for alpha<0. */
+  if(alpha < 0.) return 0;
+
   /* get ana. matrices */
   At3_pt_typ_n(pt_typ, Arrn(u), At);
 
