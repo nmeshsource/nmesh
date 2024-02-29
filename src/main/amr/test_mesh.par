@@ -4,6 +4,7 @@ finaltime = 0
 
 errorexit = abort
 logfile_creation = none
+sysmon_hours = -1
 
 amr_mesh_type = test_mesh
 
@@ -15,8 +16,8 @@ amr_Lagrange_interp_order = 3
 amr_WENO_interp_order     = 6
 
 outputX0 =  0.02
-outputY0 = -0.01
-outputZ0 =  0.03
+outputY0 =  0.01
+outputZ0 = -0.03
 
 #1douttime = 0.1
 1doutiter = 1
@@ -24,5 +25,6 @@ outputZ0 =  0.03
 1dformat = gnuplot
 
 #2douttime = 0.1
-#2doutiter = 1
-#2doutput = test_mesh_var x y z
+2doutiter = 1
+2doutput = test_mesh_var # x y z
+2dformat = xdmf
