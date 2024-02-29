@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
   printf("l = ");
   fgets(str, 999, stdin);
-  l = atoi(str);
+  l = strtol(str, NULL, 0); // atoi(str);
 
   printf("ploc = ");
   fgets(str, 999, stdin);
