@@ -558,6 +558,10 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     tArray *u_interp;
     int npts;
 
+    /* since evolve_Persson_array_trouble returns 0 for alpha_fv<0 anyway,
+       we do this here already */
+    if(alpha_fv < 0.) return 0;
+
     /* get num. and type of points on dg grid that we would switch to */
     hp_refine_set_n_pt_typ(node, ref, n_dg, pt_typ_dg);
 
