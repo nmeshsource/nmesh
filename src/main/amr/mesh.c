@@ -177,6 +177,7 @@ int amr_setup_mesh(tMesh *mesh)
   double sph_r = Geti(Par("amr_hrefine_sphere_radius"));
   double x0[3] = {0.};
   double BoxMesh_rc[] = {0.,0.,0.};
+  double CubedSphere_r = 0.;
   int ret = 0;
 
   /* remove all patches from mesh, so we can just add new pristine ones */
@@ -186,9 +187,9 @@ int amr_setup_mesh(tMesh *mesh)
   if(Getv(mesh_type, "BoxMesh"))
     ret = setup_box_mesh(mesh, BoxMesh_rc);
   if(Getv(mesh_type, "CubedSpheres"))
-    ret = setup_CubedSphere_mesh(mesh, BoxMesh_rc);
+    ret = setup_CubedSphere_mesh(mesh, BoxMesh_rc, &CubedSphere_r);
   if(Getv(mesh_type, "Shell"))
-    ret = setup_Shell_mesh(mesh);
+    ret = setup_Shell_mesh(mesh, CubedSphere_r);
 
   if( (Getv(mesh_type, "BoxMesh")) || (Getv(mesh_type, "CubedSpheres")) ||
       (Getv(mesh_type, "Shell")) )
@@ -397,7 +398,8 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
 }
 
 /* a mesh with a number of cubed spheres, IN: mesh, BoxMesh_rc */
-int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
+int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3],
+                           double *CubedSphere_r)
 {
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
@@ -541,6 +543,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
     //sphere_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc);
     sphere_nAB_around_empty_box_at_xc(mesh,6, xc, BoxMesh_rc, ssfac*dc,
                                       AB_div_mode, nAB);
+    *CubedSphere_r = ssfac*dc;
     break;
   case 12:
     errorexit("we should use Shell in amr_mesh_type");
@@ -567,7 +570,7 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3])
 
 
 /* a shell made out of a number of cubed spheres */
-int setup_Shell_mesh(tMesh *mesh)
+int setup_Shell_mesh(tMesh *mesh, double CubedSphere_r)
 {
   double rin  = Getd(Par("amr_Shell_rin"));
   double r1   = Getd(Par("amr_Shell_r1"));
@@ -577,6 +580,9 @@ int setup_Shell_mesh(tMesh *mesh)
   double xc[] = { 0., 0., 0. };
   char *mesh_xc = Gets(Par("amr_mesh_xc"));
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
+
+  /* reset rin from CubedSphere_r if CubedSphere_r>0 */
+  if(CubedSphere_r>0.) rin = CubedSphere_r;
 
   PRFs(":\n");
 

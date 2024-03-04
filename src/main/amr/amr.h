@@ -21,8 +21,9 @@ int amr_set_use_fv_flag(tMesh *mesh);
 void remove_all_patches(tMesh *mesh);
 int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr);
 int setup_box_mesh(tMesh *mesh, double boxes_rc[3]);
-int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3]);
-int setup_Shell_mesh(tMesh *mesh);
+int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3],
+                           double *CubedSphere_r);
+int setup_Shell_mesh(tMesh *mesh, double CubedSphere_r);
 int setup_elm_mesh1(tMesh *mesh);
 int setup_l2_mesh(tMesh *mesh);
 int setup_3patchl2_mesh(tMesh *mesh);
