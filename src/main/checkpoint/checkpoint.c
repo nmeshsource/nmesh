@@ -112,6 +112,26 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
   return ret;
 }
 
+/* check if there are any checkpoints at all */
+int checkpoints_exist(tMesh *mesh, const char *outdir_suffix)
+{
+  int chkpt_cur = checkpoint_exists(mesh, outdir_suffix, "");
+  int chkpt_new = checkpoint_exists(mesh, outdir_suffix, "_new");
+  int chkpt_prev= checkpoint_exists(mesh, outdir_suffix, "_previous");
+  char chkpt_suff[64];
+  int nprev = Geti(Par("checkpoint_n_previous"));
+  int ret, i;
+
+  ret = chkpt_cur | chkpt_new | chkpt_prev;
+
+  for(i=1; i<=nprev; i++)
+  {
+    sprintf(chkpt_suff, "-%d", i);
+    ret |= checkpoint_exists(mesh, outdir_suffix, chkpt_suff);
+  }
+  return ret;
+}
+
 /******************************************************************/
 /* some functions to load nmesh data from checkpoints  */
 /******************************************************************/
