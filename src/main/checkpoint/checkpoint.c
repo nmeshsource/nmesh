@@ -119,7 +119,8 @@ int checkpoints_exist(tMesh *mesh, const char *outdir_suffix)
   int chkpt_new = checkpoint_exists(mesh, outdir_suffix, "_new");
   int chkpt_prev= checkpoint_exists(mesh, outdir_suffix, "_previous");
   char chkpt_suff[64];
-  int nprev = Geti(Par("checkpoint_n_previous"));
+  //int nprev = Geti(Par("checkpoint_n_previous"));//par may not exist yet!
+  int nprev = 2;
   int ret, i;
 
   ret = chkpt_cur | chkpt_new | chkpt_prev;
