@@ -216,14 +216,18 @@ int make_output_directory(tMesh *mesh)
   if(!chkpt)
   {
     int chkpt_new = checkpoint_exists(mesh, "", "_new");
-    if(chkpt_new)
+    if(chkpt_new && Rank0)
     {
       printf("WARNING: There is checkpoint_new but no checkpoint in %s\n",
              outdir);
       printf("WARNING: The last checkpoint save has likely failed!\n");
-      printf("WARNING: Renaming checkpoint_new to checkpoint:\n");
-      checkpoint_change_suffix(mesh, "", "_new", "");
-      chkpt = chkpt_new;
+      /* It is unclear if there is maybe also a checkpoint_previous or
+         checkpoint-1, and which of these is good. So the user has to decide
+         what to do. */
+      errorexits("There is checkpoint_new but no checkpoint in %s", outdir);
+      //printf("WARNING: Renaming checkpoint_new to checkpoint:\n");
+      //checkpoint_change_suffix(mesh, "", "_new", "");
+      //chkpt = chkpt_new;
     }
   }
 
