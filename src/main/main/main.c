@@ -211,6 +211,22 @@ int make_output_directory(tMesh *mesh)
     printf("         Consider using system_emu.\n");
   }
 
+  /* if there is no checkpoint but a checkpoint_new, a previous checkpoint
+     save has likely failed */
+  if(!chkpt)
+  {
+    int chkpt_new = checkpoint_exists(mesh, "", "_new");
+    if(chkpt_new)
+    {
+      printf("WARNING: There is checkpoint_new but no checkpoint in %s\n",
+             outdir);
+      printf("WARNING: The last checkpoint save has likely failed!\n");
+      printf("WARNING: Renaming checkpoint_new to checkpoint:\n");
+      checkpoint_change_suffix(mesh, "", "_new", "");
+      chkpt = chkpt_new;
+    }
+  }
+
   /* set outdirp to outdir_previous */
   strcpy(outdirp, outdir);
   strcat(outdirp, "_previous");
