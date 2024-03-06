@@ -132,6 +132,51 @@ int checkpoints_exist(tMesh *mesh, const char *outdir_suffix)
   return ret;
 }
 
+/* go to outdir_suffix and change checkpoint-suffix from
+   old_suffix to new_suffix */
+int checkpoint_change_suffix(tMesh *mesh, const char *outdir_suffix,
+                             const char *old_suffix, const char *new_suffix)
+{
+  if(Rank0)
+  {
+    char *old_dir;
+    char *new_dir;
+    char *pars;
+    char *pats;
+    char *elms;
+    char *nbinfo;
+    char *vars;
+    char *crcs;
+
+    /* get old_dir */
+    checkpoint_create_pathnames(mesh, outdir_suffix, &old_dir, old_suffix,
+                                &pars, &pats, &elms, &nbinfo, &vars, &crcs);
+    free(crcs);
+    free(vars);
+    free(nbinfo);
+    free(elms);
+    free(pats);
+    free(pars);
+
+    /* get new_dir */
+    checkpoint_create_pathnames(mesh, outdir_suffix, &new_dir, new_suffix,
+                                &pars, &pats, &elms, &nbinfo, &vars, &crcs);
+    free(crcs);
+    free(vars);
+    free(nbinfo);
+    free(elms);
+    free(pats);
+    free(pars);
+
+    /* rename */
+    system3("mv", old_dir, new_dir);
+
+    free(new_dir);
+    free(old_dir);
+  }
+  return 0;
+}
+
 /******************************************************************/
 /* some functions to load nmesh data from checkpoints  */
 /******************************************************************/
