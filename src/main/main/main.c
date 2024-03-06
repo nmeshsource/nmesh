@@ -220,10 +220,10 @@ int make_output_directory(tMesh *mesh)
   if(move_old)
   {
     /* check if we have a checkpoint in outdir+"_previous" */
-    if(checkpoint_exists(mesh, "_previous", ""))
+    if(checkpoints_exist(mesh, "_previous"))
     {
       printf("*** Refusing to delete %s ***\n", outdirp);
-      errorexits("There is a checkpoint in %s_previous", outdir);
+      errorexits("There are a checkpoints in %s_previous", outdir);
     }
 
     /* remove outdir_previous and move outdir to outdir_previous */
