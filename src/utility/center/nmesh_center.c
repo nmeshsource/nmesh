@@ -18,16 +18,16 @@ int nmesh_center(tMesh *mesh)
   //AddAuxVar("center_temp1", "", "temporary variable(for vol. integrals)");
 
   /* parameters */
-  AddPar("center_verbose", "no", "print center pars [no,yes]"); //
-  AddPar("center0_x", "", "x-coord of center0"); //
-  AddPar("center0_y", "", "y-coord of center0"); // KEEP these
-  AddPar("center0_z", "", "z-coord of center0"); //
-  AddPar("center1_x", "", "x-coord of center1"); // center pars in
-  AddPar("center1_y", "", "y-coord of center1"); //
-  AddPar("center1_z", "", "z-coord of center1"); // this particular
-  AddPar("center2_x", "", "x-coord of center2"); //
-  AddPar("center2_y", "", "y-coord of center2"); // order !!!
-  AddPar("center2_z", "", "z-coord of center2"); //
+  AddPar("center_verbose", "no", "print center pars [no,yes]");
+  AddPar("center0_x", "", "x-coord of center0");
+  AddPar("center0_y", "", "y-coord of center0");
+  AddPar("center0_z", "", "z-coord of center0");
+  AddPar("center1_x", "", "x-coord of center1");
+  AddPar("center1_y", "", "y-coord of center1");
+  AddPar("center1_z", "", "z-coord of center1");
+  AddPar("center2_x", "", "x-coord of center2");
+  AddPar("center2_y", "", "y-coord of center2");
+  AddPar("center2_z", "", "z-coord of center2");
   AddPar("center0_track", "no", "[no,CM]");
   AddPar("center1_track", "no", "[no,min,max]");
   AddPar("center2_track", "no", "[no,min,max]");
