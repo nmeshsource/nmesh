@@ -15,15 +15,15 @@ extern tOutput output[1];
 int center_init_globals(tMesh *mesh)
 {
   PRFs(":\n");
-  center->center0_x = Par("center0_x");
-  center->center0_y = Par("center0_y");
-  center->center0_z = Par("center0_z");
-  center->center1_x = Par("center1_x");
-  center->center1_y = Par("center1_y");
-  center->center1_z = Par("center1_z");
-  center->center2_x = Par("center2_x");
-  center->center2_y = Par("center2_y");
-  center->center2_z = Par("center2_z");
+  center->cx[0][0] = Par("center0_x");
+  center->cx[0][1] = Par("center0_y");
+  center->cx[0][2] = Par("center0_z");
+  center->cx[1][0] = Par("center1_x");
+  center->cx[1][1] = Par("center1_y");
+  center->cx[1][2] = Par("center1_z");
+  center->cx[2][0] = Par("center2_x");
+  center->cx[2][1] = Par("center2_y");
+  center->cx[2][2] = Par("center2_z");
 
   /* make sure some pars are saved in checkpoint */
   if(!Getv(Par("center0_track"),"no"))
@@ -50,7 +50,7 @@ int centerN_update(tMesh *mesh, int N)
 
   /* read current center N location pars into xold and xnew */
   for(dir=0; dir<3; dir++)
-    xold[dir] = xnew[dir] = Getd(center->center0_x + 3*N + dir);
+    xold[dir] = xnew[dir] = Getd(center->cx[N][dir]);
 
   setCenter = 0;
   sprintf(pname, "center%d_track", N);
@@ -73,8 +73,8 @@ int centerN_update(tMesh *mesh, int N)
     /* track CM computed from centers 1 and 2 */
     for(dir=0; dir<3; dir++)
     {
-      x1[dir] = Getd(center->center0_x + 3*1 + dir);
-      x2[dir] = Getd(center->center0_x + 3*2 + dir);
+      x1[dir] = Getd(center->cx[1][dir]);
+      x2[dir] = Getd(center->cx[2][dir]);
       xnew[dir] = (m1*x1[dir] + m2*x2[dir])/(m1 + m2);
     }
     setCenter = 1;
@@ -88,7 +88,7 @@ int centerN_update(tMesh *mesh, int N)
   /* write xnew into current center N location pars */
   if(setCenter)
     for(dir=0; dir<3; dir++)
-      Setd(center->center0_x + 3*N + dir, xnew[dir]);
+      Setd(center->cx[N][dir], xnew[dir]);
 
   return 0;
 }
@@ -112,14 +112,14 @@ int center_update(tMesh *mesh)
     for(N=0; N<3; N++)
       for(dir=0; dir<3; dir++)
         printf("  center%d_%c = %g\n", N, 'x'+dir,
-               Getd(center->center0_x + 3*N + dir));
+               Getd(center->cx[N][dir]));
   }
 
   /* set pt output vars if center position vars are not empty */
   for(N=0; N<output->Noutpt; N++)
     for(dir=0; dir<3; dir++)
     {
-      int centerN_xi = center->center0_x + 3*N + dir;
+      int centerN_xi = center->cx[N][dir];
       if(strlen( Gets(centerN_xi) ))
         output->xpt[N][dir] = Getd(centerN_xi);
     }
