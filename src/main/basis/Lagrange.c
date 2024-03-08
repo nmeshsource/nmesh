@@ -55,7 +55,8 @@ double Lagrange_interp_barycentric2_ds(double x, int n, const double *x_p,
 {
   double denom, numer, W, diff;
   int k;
-  denom = numer = 0.;
+
+  if(ds==1) return Lagrange_interp_barycentric2(x, n, x_p, w_interp, f);
   /*
   PRF;printf(": n=%d", n);
   printf("  x_p=");
@@ -68,6 +69,7 @@ double Lagrange_interp_barycentric2_ds(double x, int n, const double *x_p,
   for(k=0; k<n; k++) printf(" %g", f[ds*k]);
   printf("\n");
   */
+  denom = numer = 0.;
   for(k=0; k<n; k++)
   {
     diff = x - x_p[k];
