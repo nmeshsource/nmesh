@@ -641,8 +641,8 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
   /* interp r1 along Z */
   interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
                             r1, 1, vscal);
-  free(r2);
   free(r1);
+  free(r2);
   for(d=2; d>=0; d--) free(w[d]);
 
   return interp;
