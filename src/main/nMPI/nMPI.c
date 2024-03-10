@@ -141,6 +141,36 @@ int nMPI_print_compile_info(tMesh *mesh)
 }
 
 
+/* WT util: print MPI error */
+void nMPI_print_error(int errcode)
+{
+#ifdef USEMPI
+  char errbuffer[MPI_MAX_ERROR_STRING];
+  int errlen;
+  MPI_Error_string(errcode, errbuffer, &errlen);
+  printf("MPI-Error %d: %s\n", errcode, errbuffer);
+#endif
+}
+
+/* WT util: print all errors in an array of MPI_Status */
+void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
+{
+#ifdef USEMPI
+  int i;
+  for(i=0; i<nreq; i++)
+  {
+    nMPI_Stat st = stat[i];
+    if(st.MPI_ERROR != MPI_SUCCESS)
+    {
+      printf("Error in request %d with src %d and tag %d\n",
+                 i, st.MPI_SOURCE, st.MPI_TAG);
+      printf("  ");
+      nMPI_print_error(st.MPI_ERROR);
+    }
+  }
+#endif
+}
+
 /********************************************************************/
 /* Wrappers for MPI functions */
 /********************************************************************/
@@ -461,24 +491,6 @@ int nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
                           s_tag, r_tag, s_comm, r_comm, s_req, r_req);
 }
 
-/* WT util: print all errors in an array of MPI_Status */
-void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
-{
-  int i;
-  for(i=0; i<nreq; i++)
-  {
-    nMPI_Stat st = stat[i];
-    if(st.MPI_ERROR != MPI_SUCCESS)
-    {
-      char errbuffer[MPI_MAX_ERROR_STRING];
-      int errlen;
-      MPI_Error_string(st.MPI_ERROR, errbuffer, &errlen);
-      printf("Error in request %d with src %d and tag %d\n",
-                 i, st.MPI_SOURCE, st.MPI_TAG);
-      printf("  MPI_ERROR %d: %s\n", st.MPI_ERROR, errbuffer);
-    }
-  }
-}
 
 /* check on requests */
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
