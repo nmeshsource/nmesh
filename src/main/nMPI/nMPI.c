@@ -1208,3 +1208,25 @@ int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm)
 {
   return nMPI_Irecv_com(com,rq, nMPI_DOUBLE, src, tag, comm);
 }
+
+
+/************************************************************************/
+/* funcs for to check MPI errors */
+/************************************************************************/
+
+/* Exit if we have an MPI error. This works only if the MPI error handler
+   is set to MPI_ERRORS_RETURN */
+void nMPI_check_error(const char *file, int line, const char *func, int stat)
+{
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS)
+  {
+    char errbuffer[MPI_MAX_ERROR_STRING];
+    int errlen;
+    MPI_Error_string(stat, errbuffer, &errlen);
+    printf("%s:%d: nMPI-error in %s\n", file, line, func);
+    printf("nMPI-Error %d: %s\n", stat, errbuffer);
+    errorexit("Exiting nmesh due to nMPI-error");
+  }
+#endif
+}

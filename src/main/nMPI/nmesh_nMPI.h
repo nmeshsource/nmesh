@@ -6,6 +6,10 @@
 /* marco to do: if(Rank0) */
 #define Rank0 (!nMPI_rank())
 
+/* Macro for MPI error checking. This works only if the MPI error handler
+   is set to MPI_ERRORS_RETURN */
+#define nMPIcheck(n) nMPI_check_error(__FILE__, __LINE__, __func__, n)
+
 
 /* structure that holds global nMPI vars */
 typedef struct {
@@ -142,6 +146,7 @@ int nMPI_Isend_Irecv_double_com(tCom *com, int rq,
                                 nMPI_Comm s_comm, nMPI_Comm r_comm);
 int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm);
 int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm);
+void nMPI_check_error(const char *file, int line, const char *func, int stat);
 
 
 
