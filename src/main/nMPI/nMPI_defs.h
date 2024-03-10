@@ -15,6 +15,9 @@
 #define nMPI_Comm MPI_Comm
 #define nMPI_Req  MPI_Request
 #define nMPI_Stat MPI_Status
+#define nMPI_Errhandler    MPI_Errhandler
+#define nMPI_ERRORS_ARE_FATAL MPI_ERRORS_ARE_FATAL
+#define nMPI_ERRORS_RETURN MPI_ERRORS_RETURN
 #define nMPI_STATUS_IGNORE MPI_STATUS_IGNORE
 #define nMPI_Op   MPI_Op
 #define nMPI_MAX  MPI_MAX
@@ -46,6 +49,9 @@
 #define nMPI_Comm int
 #define nMPI_Req  int
 #define nMPI_Stat int
+#define nMPI_Errhandler    int
+#define nMPI_ERRORS_ARE_FATAL 0
+#define nMPI_ERRORS_RETURN 0
 #define nMPI_STATUS_IGNORE 0
 #define nMPI_Op   int
 #define nMPI_MAX  0

@@ -278,6 +278,18 @@ int nMPI_Comm_free(nMPI_Comm *comm)
   return ret;
 }
 
+/* set error handler */
+int nMPI_Comm_set_errhandler(nMPI_Comm comm, nMPI_Errhandler errhandler)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Comm_set_errhandler(comm, errhandler);
+  PR1;
+#endif
+  return ret;
+}
+
 /* Create a new contiguous datatype */
 int nMPI_Type_contiguous(int count, nMPI_Datatype oldtype,
                          nMPI_Datatype *newtype)
