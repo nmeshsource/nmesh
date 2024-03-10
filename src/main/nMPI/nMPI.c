@@ -461,6 +461,25 @@ int nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
                           s_tag, r_tag, s_comm, r_comm, s_req, r_req);
 }
 
+/* WT util: print all errors in an array of MPI_Status */
+void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
+{
+  int i;
+  for(i=0; i<nreq; i++)
+  {
+    nMPI_Stat st = stat[i];
+    if(st.MPI_ERROR != MPI_SUCCESS)
+    {
+      char errbuffer[MPI_MAX_ERROR_STRING];
+      int errlen;
+      MPI_Error_string(st.MPI_ERROR, errbuffer, &errlen);
+      printf("Error in request %d with src %d and tag %d\n",
+                 i, st.MPI_SOURCE, st.MPI_TAG);
+      printf("  MPI_ERROR %d: %s\n", st.MPI_ERROR, errbuffer);
+    }
+  }
+}
+
 /* check on requests */
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
@@ -480,7 +499,10 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
     fflush(stdout);
   }
   if(status == MPI_ERR_IN_STATUS)
-    {PRF;printf(": error after waiting for %d requests\n", nreq);}
+  {
+    PRF;printf(": error after waiting for %d requests\n", nreq);
+    nMPI_print_error_MPI_Stat_array(nreq, stat);
+  }
 #endif
   return status;
 }
@@ -633,7 +655,10 @@ int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
   status = MPI_Testall(nreq, req, flag, stat);
   PR1;
   if(status == MPI_ERR_IN_STATUS)
-    {PRF;printf(": error after testing for %d requests\n",nreq);}
+  {
+    PRF;printf(": error after testing %d requests\n",nreq);
+    nMPI_print_error_MPI_Stat_array(nreq, stat);
+  }
 #else
   *flag = 1;
 #endif
