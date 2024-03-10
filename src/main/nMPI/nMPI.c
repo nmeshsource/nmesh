@@ -1272,11 +1272,8 @@ void nMPI_check_error(const char *file, int line, const char *func, int stat)
 #ifdef USEMPI
   if(stat != MPI_SUCCESS)
   {
-    char errbuffer[MPI_MAX_ERROR_STRING];
-    int errlen;
-    MPI_Error_string(stat, errbuffer, &errlen);
     printf("%s:%d: nMPI-error in %s\n", file, line, func);
-    printf("nMPI-Error %d: %s\n", stat, errbuffer);
+    nMPI_print_error(stat);
     errorexit("Exiting nmesh due to nMPI-error");
   }
 #endif
