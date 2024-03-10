@@ -385,12 +385,13 @@ int nMPI_Irecv(void *buf, int count, nMPI_Datatype datatype,
 }
 
 /* exchange general buffers */
-void nMPI_Isend_Irecv(void *sbuf, int ns, void *rbuf, int nr,
-                      nMPI_Datatype datatype,
-                      int rank_other, int s_tag, int r_tag,
-                      nMPI_Comm s_comm, nMPI_Comm r_comm,
-                      nMPI_Req *s_req, nMPI_Req *r_req)
+int nMPI_Isend_Irecv(void *sbuf, int ns, void *rbuf, int nr,
+                     nMPI_Datatype datatype,
+                     int rank_other, int s_tag, int r_tag,
+                     nMPI_Comm s_comm, nMPI_Comm r_comm,
+                     nMPI_Req *s_req, nMPI_Req *r_req)
 {
+  int stat = 0;
 #ifdef USEMPI
   int errS, errR;
 #endif
@@ -406,12 +407,22 @@ void nMPI_Isend_Irecv(void *sbuf, int ns, void *rbuf, int nr,
 #ifdef USEMPI
   PR0;
   errS = MPI_Isend(sbuf, ns, datatype, rank_other, s_tag, s_comm, s_req);
-  if(errS != MPI_SUCCESS) errorexiti("MPI_Isend failed: %d!\n", errS);
+  if(errS != MPI_SUCCESS)
+  {
+    errorexiti("MPI_Isend failed: %d!\n", errS);
+    return errS;
+  }
   
   errR = MPI_Irecv(rbuf, nr, datatype, rank_other, r_tag, r_comm, r_req);
-  if(errR != MPI_SUCCESS) errorexiti("MPI_Irecv failed: %d!\n", errR);
+  if(errR != MPI_SUCCESS)
+  {
+    errorexiti("MPI_Irecv failed: %d!\n", errR);
+    return errR;
+  }
   PR1;
+  stat = MPI_SUCCESS;
 #endif
+  return stat;
 }
 
 /* non-blocking send for double */
