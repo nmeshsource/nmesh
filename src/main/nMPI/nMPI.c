@@ -141,6 +141,10 @@ int nMPI_print_compile_info(tMesh *mesh)
 }
 
 
+/************************************************************************/
+/* funcs to deal with MPI errors */
+/************************************************************************/
+
 /* WT util: print MPI error */
 void nMPI_print_error(int errcode)
 {
@@ -167,6 +171,20 @@ void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
       printf("  ");
       nMPI_print_error(st.MPI_ERROR);
     }
+  }
+#endif
+}
+
+/* Exit if we have an MPI error. This works only if the MPI error handler
+   is set to MPI_ERRORS_RETURN */
+void nMPI_check_error(const char *file, int line, const char *func, int stat)
+{
+#ifdef USEMPI
+  if(stat != MPI_SUCCESS)
+  {
+    printf("%s:%d: nMPI-error in %s\n", file, line, func);
+    nMPI_print_error(stat);
+    errorexit("Exiting nmesh due to nMPI-error");
   }
 #endif
 }
@@ -1258,23 +1276,4 @@ int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm)
 int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm)
 {
   return nMPI_Irecv_com(com,rq, nMPI_DOUBLE, src, tag, comm);
-}
-
-
-/************************************************************************/
-/* funcs for to check MPI errors */
-/************************************************************************/
-
-/* Exit if we have an MPI error. This works only if the MPI error handler
-   is set to MPI_ERRORS_RETURN */
-void nMPI_check_error(const char *file, int line, const char *func, int stat)
-{
-#ifdef USEMPI
-  if(stat != MPI_SUCCESS)
-  {
-    printf("%s:%d: nMPI-error in %s\n", file, line, func);
-    nMPI_print_error(stat);
-    errorexit("Exiting nmesh due to nMPI-error");
-  }
-#endif
 }
