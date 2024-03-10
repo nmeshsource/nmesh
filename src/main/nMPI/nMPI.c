@@ -1119,7 +1119,7 @@ int nMPI_Waitall_com(tCom *com)
     PRF;printf("\n");
   }
   stat1 = nMPI_Waitall_com_send(com);
-  if(stat1 != MPI_SUCCESS) return stat1;
+  if(stat1 != nMPI_SUCCESS) return stat1;
   stat2 = nMPI_Waitall_com_recv(com);
   return stat2;
 }
@@ -1218,7 +1218,7 @@ int nMPI_Testall_com(tCom *com, int *flag)
     PRF;printf("\n");
   }
   stat1 = nMPI_Testall_com_send(com, &sflag);
-  if(stat1 != MPI_SUCCESS) return stat1;
+  if(stat1 != nMPI_SUCCESS) return stat1;
   stat2 = nMPI_Testall_com_recv(com, &rflag);
   *flag = rflag && sflag;
   return stat2;
