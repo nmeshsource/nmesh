@@ -465,7 +465,7 @@ int nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
 int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
 {
   int status = 0;
-  if(!nreq) return 0;
+  if(!nreq) return nMPI_SUCCESS;
   if(PR)
   {
     int rank = nMPI_rank();
@@ -622,7 +622,7 @@ int nMPI_Ibcast(void *buffer, int count, nMPI_Datatype datatype,
 int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
 {
   int status = 0;
-  if(!nreq) return 0;
+  if(!nreq) return nMPI_SUCCESS;
   if(PR)
   {
     PRF;printf(": %d testing for %d requests to finish\n", nMPI_rank(), nreq);
