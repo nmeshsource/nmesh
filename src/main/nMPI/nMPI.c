@@ -531,7 +531,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   if(status == MPI_ERR_IN_STATUS)
   {
     PRF;printf(": error after waiting for %d requests\n", nreq);
-    nMPI_print_error_MPI_Stat_array(nreq, stat);
+    PRF;nMPI_print_error_MPI_Stat_array(nreq, stat);
   }
 #endif
   return status;
@@ -687,7 +687,7 @@ int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
   if(status == MPI_ERR_IN_STATUS)
   {
     PRF;printf(": error after testing %d requests\n",nreq);
-    nMPI_print_error_MPI_Stat_array(nreq, stat);
+    PRF;nMPI_print_error_MPI_Stat_array(nreq, stat);
   }
 #else
   *flag = 1;
