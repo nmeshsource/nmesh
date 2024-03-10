@@ -440,13 +440,13 @@ int nMPI_Irecv_double(double *buf, int blen, int src, int tag,
 }
 
 /* exchange double buffers */
-void nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
-                             int rank_other, int s_tag, int r_tag,
-                             nMPI_Comm s_comm, nMPI_Comm r_comm,
-                             nMPI_Req *s_req, nMPI_Req *r_req)
+int nMPI_Isend_Irecv_double(double *sbuf, int ns, double *rbuf, int nr,
+                            int rank_other, int s_tag, int r_tag,
+                            nMPI_Comm s_comm, nMPI_Comm r_comm,
+                            nMPI_Req *s_req, nMPI_Req *r_req)
 {
-  nMPI_Isend_Irecv(sbuf,ns, rbuf,nr, nMPI_DOUBLE,
-                   rank_other, s_tag, r_tag, s_comm, r_comm, s_req, r_req);
+  return nMPI_Isend_Irecv(sbuf,ns, rbuf,nr, nMPI_DOUBLE, rank_other,
+                          s_tag, r_tag, s_comm, r_comm, s_req, r_req);
 }
 
 /* check on requests */
