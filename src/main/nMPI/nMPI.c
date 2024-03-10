@@ -1064,9 +1064,9 @@ int nMPI_Waitall_com(tCom *com)
     PRF;printf("\n");
   }
   stat1 = nMPI_Waitall_com_send(com);
-  stat2 = nMPI_Waitall_com_recv(com);
   if(stat1 != MPI_SUCCESS) return stat1;
-  else                     return stat2;
+  stat2 = nMPI_Waitall_com_recv(com);
+  return stat2;
 }
 
 /* wait for send request rq to finish */
@@ -1163,10 +1163,10 @@ int nMPI_Testall_com(tCom *com, int *flag)
     PRF;printf("\n");
   }
   stat1 = nMPI_Testall_com_send(com, &sflag);
+  if(stat1 != MPI_SUCCESS) return stat1;
   stat2 = nMPI_Testall_com_recv(com, &rflag);
   *flag = rflag && sflag;
-  if(stat1 != MPI_SUCCESS) return stat1;
-  else                     return stat2;
+  return stat2;
 }
 
 /* do send and recv request rq of com */
