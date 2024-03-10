@@ -130,16 +130,16 @@ int nMPI_Test_com_recv(tCom *com, int rq, int *flag);
 int nMPI_Testall_com_send(tCom *com, int *flag);
 int nMPI_Testall_com_recv(tCom *com, int *flag);
 int nMPI_Testall_com(tCom *com, int *flag);
-void nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
-                          int rank_other, int s_tag, int r_tag,
-                          nMPI_Comm s_comm, nMPI_Comm r_comm);
+int nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
+                         int rank_other, int s_tag, int r_tag,
+                         nMPI_Comm s_comm, nMPI_Comm r_comm);
 int nMPI_Isend_com(tCom *com, int rq, nMPI_Datatype datatype,
                    int dest, int tag, nMPI_Comm comm);
 int nMPI_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
                    int src, int tag, nMPI_Comm comm);
-void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
-                                 int rank_other, int s_tag, int r_tag,
-                                 nMPI_Comm s_comm, nMPI_Comm r_comm);
+int nMPI_Isend_Irecv_double_com(tCom *com, int rq,
+                                int rank_other, int s_tag, int r_tag,
+                                nMPI_Comm s_comm, nMPI_Comm r_comm);
 int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm);
 int nMPI_Irecv_double_com(tCom *com, int rq, int src, int tag, nMPI_Comm comm);
 

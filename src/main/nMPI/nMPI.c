@@ -1156,9 +1156,9 @@ int nMPI_Testall_com(tCom *com, int *flag)
 }
 
 /* do send and recv request rq of com */
-void nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
-                          int rank_other, int s_tag, int r_tag,
-                          nMPI_Comm s_comm, nMPI_Comm r_comm)
+int nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
+                         int rank_other, int s_tag, int r_tag,
+                         nMPI_Comm s_comm, nMPI_Comm r_comm)
 {
   if(PR)
   {
@@ -1167,10 +1167,10 @@ void nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
     printf("    rq=%d rank_other=%d s_tag=%d r_tag=%d\n",
            rq, rank_other, s_tag, r_tag);
   }
-  nMPI_Isend_Irecv(com->send_buf[rq], com->send_buflen[rq],
-                   com->recv_buf[rq], com->recv_buflen[rq],
-                   datatype, rank_other, s_tag, r_tag, s_comm, r_comm,
-                   &(com->send_rq[rq]), &(com->recv_rq[rq]));
+  return nMPI_Isend_Irecv(com->send_buf[rq], com->send_buflen[rq],
+                          com->recv_buf[rq], com->recv_buflen[rq],
+                          datatype, rank_other, s_tag, r_tag, s_comm, r_comm,
+                          &(com->send_rq[rq]), &(com->recv_rq[rq]));
 }
 /* send only */
 int nMPI_Isend_com(tCom *com, int rq, nMPI_Datatype datatype,
@@ -1191,12 +1191,12 @@ int nMPI_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
 
 
 /* do send and recv request rq of com for double */
-void nMPI_Isend_Irecv_double_com(tCom *com, int rq,
-                                 int rank_other, int s_tag, int r_tag,
-                                 nMPI_Comm s_comm, nMPI_Comm r_comm)
+int nMPI_Isend_Irecv_double_com(tCom *com, int rq,
+                                int rank_other, int s_tag, int r_tag,
+                                nMPI_Comm s_comm, nMPI_Comm r_comm)
 {
-  nMPI_Isend_Irecv_com(com,rq, nMPI_DOUBLE,
-                       rank_other, s_tag, r_tag, s_comm, r_comm);
+  return nMPI_Isend_Irecv_com(com,rq, nMPI_DOUBLE,
+                              rank_other, s_tag, r_tag, s_comm, r_comm);
 }
 /* send only */
 int nMPI_Isend_double_com(tCom *com, int rq, int dest, int tag, nMPI_Comm comm)
