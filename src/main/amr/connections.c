@@ -3045,8 +3045,8 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
       nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD);
     }
 
-  //printf("rcom");print_com(rcom);
-  //printf("scom");print_com(scom);
+  //printf("r");print_com(rcom);
+  //printf("s");print_com(scom);
 
   /* wait for recvs in rcom */
   MCK( nMPI_Waitall_com_recv(rcom) );
