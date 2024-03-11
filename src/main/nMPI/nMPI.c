@@ -982,6 +982,7 @@ void print_com(tCom *com)
     printf("  recv: buf=%d,%p stat.",
            com->recv_buflen[i], (void *) com->recv_buf[i]);
     nMPI_print_Stat(com->recv_stat[i]);
+    printf("\n");
   }
 #else
   for(int i=0; i<n_rq; i++)
