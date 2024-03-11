@@ -3013,7 +3013,8 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   printmesh(mesh);
   for(rk=0; rk<size; rk++)
   {
-    printf("rk%d: nr=%lu ns=%lu\n", rk, nr_elm0[rk], ns_elm0[rk]);
+    printf("rk%d: nr=%lu ns=%lu  r=%p s=%p\n", rk, nr_elm0[rk], ns_elm0[rk],
+           (void *) r_elm0[rk], (void *) s_elm0[rk]);
     printf("r_elm0 = ");
     for(ei=0; ei<nr_elm0[rk]; ei++)
       printeploc_s(r_elm0[rk][ei].eploc, " ");
@@ -3043,6 +3044,9 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
       rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
       nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD);
     }
+
+  //printf("rcom");print_com(rcom);
+  //printf("scom");print_com(scom);
 
   /* wait for recvs in rcom */
   MCK( nMPI_Waitall_com_recv(rcom) );
