@@ -1095,7 +1095,7 @@ int nMPI_Waitall_com_send(tCom *com)
 {
   int stat = nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf("nMPI_Waitall failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Waitall failed: %d\n", stat);}
 #endif
   return stat;
 }
@@ -1105,7 +1105,7 @@ int nMPI_Waitall_com_recv(tCom *com)
 {
   int stat =  nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf("nMPI_Waitall failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Waitall failed: %d\n", stat);}
 #endif
   return stat;
 }
