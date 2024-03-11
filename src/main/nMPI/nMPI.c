@@ -156,6 +156,15 @@ void nMPI_print_error(int errcode)
 #endif
 }
 
+/* WT util: print MPI_Status struct */
+void nMPI_print_Stat(nMPI_Stat stat)
+{
+#ifdef USEMPI
+  printf("ERR,SRC,TAG=%d,%d,%d",
+         stat.MPI_ERROR, stat.MPI_SOURCE, stat.MPI_TAG);
+#endif
+}
+
 /* WT util: print errors in an array of MPI_Status except skip_code */
 void nMPI_print_error_MPI_Stat_array_skip(int nreq, nMPI_Stat *stat,
                                           int skip_code)
@@ -964,11 +973,26 @@ void print_com(tCom *com)
 
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
          (void *) com, n_rq, com->send_i, com->recv_i);
-#ifndef USEMPI
+#ifdef USEMPI
   for(int i=0; i<n_rq; i++)
-    printf("%d: send_rq=%d recv_rq=%d send_stat=%d recv_stat=%d\n",
-           i, com->send_rq[i], com->recv_rq[i],
-           com->send_stat[i], com->recv_stat[i]);
+  {
+    printf("%d: send: buf=%d,%p stat=",
+           i, com->send_buflen[i], com->send_buf[i]);
+    nMPI_print_Stat(com->send_stat[i]);
+    printf("  recv: buf=%d,%p stat=",
+           com->recv_buflen[i], com->recv_buf[i]);
+    nMPI_print_Stat(com->recv_stat[i]);
+  }
+#else
+  for(int i=0; i<n_rq; i++)
+  {
+    printf("%d: send: buf=%d,%p stat=%d rq=%d",
+           i, com->send_buflen[i], com->send_buf[i],
+           com->send_stat[i], com->send_rq[i]);
+    printf("  recv: buf=%d,%p stat=%d rq=%d\n",
+           com->recv_buflen[i], com->recv_buf[i],
+           com->recv_stat[i], com->recv_rq[i]);
+  }
 #endif
 }
 
