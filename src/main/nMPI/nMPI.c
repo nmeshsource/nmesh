@@ -166,9 +166,9 @@ void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
     nMPI_Stat st = stat[i];
     if(st.MPI_ERROR != MPI_SUCCESS)
     {
-      printf("error in request %d with src %d and tag %d\n",
+      printf("  error in request %d with src %d and tag %d\n",
                  i, st.MPI_SOURCE, st.MPI_TAG);
-      printf("  ");
+      printf("    ");
       nMPI_print_error(st.MPI_ERROR);
     }
   }
@@ -531,7 +531,8 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   if(status == MPI_ERR_IN_STATUS)
   {
     PRF;printf(": error after waiting for %d requests\n", nreq);
-    PRFs(": ");nMPI_print_error_MPI_Stat_array(nreq, stat);
+    nMPI_print_error(status);
+    nMPI_print_error_MPI_Stat_array(nreq, stat);
   }
 #endif
   return status;
@@ -687,7 +688,8 @@ int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
   if(status == MPI_ERR_IN_STATUS)
   {
     PRF;printf(": error after testing %d requests\n",nreq);
-    PRFs(": ");nMPI_print_error_MPI_Stat_array(nreq, stat);
+    nMPI_print_error(status);
+    nMPI_print_error_MPI_Stat_array(nreq, stat);
   }
 #else
   *flag = 1;
@@ -1095,7 +1097,11 @@ int nMPI_Waitall_com_send(tCom *com)
 {
   int stat = nMPI_Waitall(com->n_rq, com->send_rq, com->send_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Waitall failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS)
+  {
+    PRF;printf(": nMPI_Waitall failed: %d\n", stat);
+    nMPI_print_error(stat);
+  }
 #endif
   return stat;
 }
@@ -1105,7 +1111,11 @@ int nMPI_Waitall_com_recv(tCom *com)
 {
   int stat =  nMPI_Waitall(com->n_rq, com->recv_rq, com->recv_stat);
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Waitall failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS)
+  {
+    PRF;printf(": nMPI_Waitall failed: %d\n", stat);
+    nMPI_print_error(stat);
+  }
 #endif
   return stat;
 }
