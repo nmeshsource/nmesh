@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     nMPI_Init(&argc, &argv);
     wait_for_debugger_if_NMESH_MPI_DEBUG();
     nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
-    #ifdef MPI_ERRORS_RETURN
+    #ifdef MPI_ERR_RET
       nMPI_Comm_set_errhandler(nMPI_COMM_WORLD, nMPI_ERRORS_RETURN);
       nMPI_Comm_set_errhandler(main_comm, nMPI_ERRORS_RETURN);
     #endif
