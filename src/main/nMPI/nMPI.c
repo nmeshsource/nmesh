@@ -156,15 +156,16 @@ void nMPI_print_error(int errcode)
 #endif
 }
 
-/* WT util: print all errors in an array of MPI_Status */
-void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
+/* WT util: print errors in an array of MPI_Status except skip_code */
+void nMPI_print_error_MPI_Stat_array_skip(int nreq, nMPI_Stat *stat,
+                                          int skip_code)
 {
 #ifdef USEMPI
   int i;
   for(i=0; i<nreq; i++)
   {
     nMPI_Stat st = stat[i];
-    if(st.MPI_ERROR != MPI_SUCCESS)
+    if( (st.MPI_ERROR != skip_code) && (st.MPI_ERROR != MPI_SUCCESS) )
     {
       printf("  error in request %d with src %d and tag %d\n",
                  i, st.MPI_SOURCE, st.MPI_TAG);
@@ -172,6 +173,13 @@ void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
       nMPI_print_error(st.MPI_ERROR);
     }
   }
+#endif
+}
+/* WT util: print all errors in an array of MPI_Status */
+void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
+{
+#ifdef USEMPI
+  nMPI_print_error_MPI_Stat_array_skip(nreq, stat, MPI_SUCCESS);
 #endif
 }
 
@@ -532,7 +540,7 @@ int nMPI_Waitall(int nreq, nMPI_Req *req, nMPI_Stat *stat)
   {
     PRF;printf(": error after waiting for %d requests\n", nreq);
     nMPI_print_error(status);
-    nMPI_print_error_MPI_Stat_array(nreq, stat);
+    nMPI_print_error_MPI_Stat_array_skip(nreq, stat, MPI_ERR_PENDING);
   }
 #endif
   return status;
@@ -689,7 +697,7 @@ int nMPI_Testall(int nreq, nMPI_Req *req, int *flag, nMPI_Stat *stat)
   {
     PRF;printf(": error after testing %d requests\n",nreq);
     nMPI_print_error(status);
-    nMPI_print_error_MPI_Stat_array(nreq, stat);
+    nMPI_print_error_MPI_Stat_array_skip(nreq, stat, MPI_ERR_PENDING);
   }
 #else
   *flag = 1;
