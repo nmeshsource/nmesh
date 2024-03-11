@@ -167,8 +167,8 @@ void nMPI_print_error_MPI_Stat_array_skip(int nreq, nMPI_Stat *stat,
     nMPI_Stat st = stat[i];
     if( (st.MPI_ERROR != skip_code) && (st.MPI_ERROR != MPI_SUCCESS) )
     {
-      printf("  error in request %d with src %d and tag %d\n",
-                 i, st.MPI_SOURCE, st.MPI_TAG);
+      printf("  MPI-error %d in request %d with src %d and tag %d\n",
+             st.MPI_ERROR, i, st.MPI_SOURCE, st.MPI_TAG);
       printf("    ");
       nMPI_print_error(st.MPI_ERROR);
     }
@@ -190,7 +190,8 @@ void nMPI_check_error(const char *file, int line, const char *func, int stat)
 #ifdef USEMPI
   if(stat != MPI_SUCCESS)
   {
-    printf("%s:%d: nMPI-Error in %s\n", file, line, func);
+    printf("%s:%d: nMPI-Error %d in %s\n", file, line, stat, func);
+    printf("  ");
     nMPI_print_error(stat);
     errorexit("Exiting nmesh due to nMPI-Error");
   }
