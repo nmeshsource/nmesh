@@ -2450,8 +2450,8 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   }
 
   /* wait for sends and recvs in com0 */
-  nMPI_Waitall_com_send(com0);
-  nMPI_Waitall_com_recv(com0);
+  MCK( nMPI_Waitall_com_send(com0) );
+  MCK( nMPI_Waitall_com_recv(com0) );
 
   /* send/recv com to/from other ranks */
   com1 = alloc_com(sizeof(ulong), 1);
@@ -2754,13 +2754,13 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
   }
 
   /* wait for sends in com2 */
-  nMPI_Waitall_com_send(com2);
+  MCK( nMPI_Waitall_com_send(com2) );
 
   /* we are now done with all in com2 */
   free_com(com2);
 
   /* wait for sends in scom */
-  nMPI_Waitall_com_send(scom);
+  MCK( nMPI_Waitall_com_send(scom) );
   /* we are now done with all in scom */
   free_com(scom);
 
@@ -3045,7 +3045,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
     }
 
   /* wait for recvs in rcom */
-  nMPI_Waitall_com_recv(rcom);
+  MCK( nMPI_Waitall_com_recv(rcom) );
   free_com(rcom);
 
   /* write the now revcd r_elm0 contents into mesh->nbelm */
@@ -3070,7 +3070,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   //printnbelms(mesh);
 
   /* wait for sends in scom, then free all send related stuff */
-  nMPI_Waitall_com_send(scom);
+  MCK( nMPI_Waitall_com_send(scom) );
   free_com(scom);
 
   /* free all arrays */
@@ -3182,7 +3182,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     }
 
   /* wait for nr_deseid[rk] */
-  nMPI_Waitall_com_recv(rcom);
+  MCK( nMPI_Waitall_com_recv(rcom) );
   realloc_com_reqs(rcom, 0);
 
   /* we now know the size of r_deseid[rk] and s_elm0 */
@@ -3215,7 +3215,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     }
 
   /* wait for r_deseid[rk] */
-  nMPI_Waitall_com_recv(rcom);
+  MCK( nMPI_Waitall_com_recv(rcom) );
   realloc_com_reqs(rcom, 0);
 
   /* use r_deseid[rk] to fill in s_elm0[rk] arrays */
@@ -3235,7 +3235,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
       }
 
   /* wait for sends in scom, then free all send related stuff */
-  nMPI_Waitall_com_send(scom);
+  MCK( nMPI_Waitall_com_send(scom) );
   realloc_com_reqs(scom, 0);
 
 
@@ -3260,7 +3260,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
     }
 
   /* wait for r_elm0[rk] in rcom */
-  nMPI_Waitall_com_recv(rcom);
+  MCK( nMPI_Waitall_com_recv(rcom) );
   realloc_com_reqs(rcom, 0);
 
 
@@ -3274,7 +3274,7 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
       }
 
   /* wait for final sends */
-  nMPI_Waitall_com_send(scom);
+  MCK( nMPI_Waitall_com_send(scom) );
   free_com(rcom);
   free_com(scom);
 
@@ -3821,7 +3821,7 @@ void get_nbr_rank_info(tMesh *mesh)
   }
 
   /* wait until all sent and received */
-  nMPI_Waitall_com(com);
+  MCK( nMPI_Waitall_com(com) );
   free_com(com);
 }
 
@@ -3878,7 +3878,7 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
                WORLD, &req[nreqs++]);
 
   /* wait until all MPI requests are done */
-  nMPI_Waitall(nreqs, req, stat);
+  MCK( nMPI_Waitall(nreqs, req, stat) );
 
   /**/
   /*FIXME: update rflag by using nb rank info,
