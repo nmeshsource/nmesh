@@ -152,7 +152,7 @@ void nMPI_print_error(int errcode)
   char errbuffer[MPI_MAX_ERROR_STRING];
   int errlen;
   MPI_Error_string(errcode, errbuffer, &errlen);
-  printf("MPI-Error %d: %s\n", errcode, errbuffer);
+  printf("MPI-error %d: %s\n", errcode, errbuffer);
 #endif
 }
 
@@ -166,7 +166,7 @@ void nMPI_print_error_MPI_Stat_array(int nreq, nMPI_Stat *stat)
     nMPI_Stat st = stat[i];
     if(st.MPI_ERROR != MPI_SUCCESS)
     {
-      printf("Error in request %d with src %d and tag %d\n",
+      printf("error in request %d with src %d and tag %d\n",
                  i, st.MPI_SOURCE, st.MPI_TAG);
       printf("  ");
       nMPI_print_error(st.MPI_ERROR);
@@ -182,9 +182,9 @@ void nMPI_check_error(const char *file, int line, const char *func, int stat)
 #ifdef USEMPI
   if(stat != MPI_SUCCESS)
   {
-    printf("%s:%d: nMPI-error in %s\n", file, line, func);
+    printf("%s:%d: nMPI-Error in %s\n", file, line, func);
     nMPI_print_error(stat);
-    errorexit("Exiting nmesh due to nMPI-error");
+    errorexit("Exiting nmesh due to nMPI-Error");
   }
 #endif
 }
