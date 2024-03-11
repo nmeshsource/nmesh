@@ -441,9 +441,9 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
   }
 
   /* wait for MPI sends and recvs */
-  nMPIcheck( nMPI_Waitall_com_send(scom) );
+  MCK( nMPI_Waitall_com_send(scom) );
   free_com(scom);  /* free scom with all its buffers */
-  nMPIcheck( nMPI_Waitall_com_recv(rcom) );
+  MCK( nMPI_Waitall_com_recv(rcom) );
 
   /* get var data out of recv buffers */
   set_com_counters(rcom, 0,0);
@@ -706,7 +706,7 @@ void load_balance_elms(tMesh *mesh)
     }
 
   /* wait for recvs in rcom */
-  nMPIcheck( nMPI_Waitall_com_recv(rcom) );
+  MCK( nMPI_Waitall_com_recv(rcom) );
 
   /* make new rcom */
   free_com(rcom);
@@ -735,11 +735,11 @@ void load_balance_elms(tMesh *mesh)
     }
 
   /* wait for recvs in rcom */
-  nMPIcheck( nMPI_Waitall_com_recv(rcom) );
+  MCK( nMPI_Waitall_com_recv(rcom) );
   free_com(rcom);
 
   /* wait for sends in scom, then free all send related stuff */
-  nMPIcheck( nMPI_Waitall_com_send(scom) );
+  MCK( nMPI_Waitall_com_send(scom) );
   free_com(scom);
   free(ns_elms);
   rows_free(s_elms, size);
