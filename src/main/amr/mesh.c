@@ -181,9 +181,11 @@ int amr_setup_mesh(tMesh *mesh)
   int ret = 0;
 
   /* remove all patches from mesh, so we can just add new pristine ones */
+  PRFs(": calling remove_all_patches\n");
   remove_all_patches(mesh);
 
   /* call different funcs based on par amr_mesh_type */
+  PRFs(": setup patches according to pars\n");
   if(Getv(mesh_type, "BoxMesh"))
     ret = setup_box_mesh(mesh, BoxMesh_rc);
   if(Getv(mesh_type, "CubedSpheres"))
@@ -195,10 +197,12 @@ int amr_setup_mesh(tMesh *mesh)
       (Getv(mesh_type, "Shell")) )
   {
     /* setup all bfaces and root node connections */
+    PRFs(": calling amr_set_bfaces_and_rnode_nbinfo_fnb\n");
     amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
   }
   else  /* test meshes */
   {
+    PRFs(": make some test mesh\n");
     if(Getv(mesh_type, "test_mesh"))
       ret = test_mesh(mesh);
     else if(Getv(mesh_type, "l2_mesh"))
@@ -220,10 +224,12 @@ int amr_setup_mesh(tMesh *mesh)
   //}
 
   /* load balance root nodes */
+  PRFs(": calling simple_load_balance\n");
   simple_load_balance(mesh);
   //printmesh(mesh);
 
   /* h-refine mesh uniformly */
+  PRFs(": calling hrefine_mesh_to_level_loadbalance\n");
   hrefine_mesh_to_level_loadbalance(mesh, luni);
 
   /* now h-refine the patches listed in amr_hrefine_p */
@@ -232,6 +238,7 @@ int amr_setup_mesh(tMesh *mesh)
     char *plist = Gets(hrefp);
     char *pl, *str, *sav;
 
+    PRFs(": calling hrefine_pat for some patches\n");
     pl = strdup(plist);
     for(str=strtok_r(pl, " ", &sav); str!=NULL;
         str=strtok_r(NULL, " ", &sav))
@@ -243,6 +250,7 @@ int amr_setup_mesh(tMesh *mesh)
   }
 
   /* h-refine further in nested sphere regions */
+  PRFs(": calling hrefine_sphere_loadbalance\n");
   hrefine_sphere_loadbalance(mesh, sph_r, x0, sph_l);
 
   /* now p-refine the patches listed in amr_prefine_p */
@@ -254,6 +262,7 @@ int amr_setup_mesh(tMesh *mesh)
     char *plist = Gets(prefp);
     char *pl, *str, *sav;
 
+    PRFs(": calling prefine_pat for some patches\n");
     pl = strdup(plist);
     for(str=strtok_r(pl, " ", &sav); str!=NULL;
         str=strtok_r(NULL, " ", &sav))
@@ -265,9 +274,10 @@ int amr_setup_mesh(tMesh *mesh)
   }
 
   /* load balance full mesh */
+  PRFs(": calling simple_load_balance at the end\n");
   simple_load_balance(mesh);
 
-  PRFs(":\n");
+  PRFs(": The resulting mesh is:\n");
   printmesh(mesh);
 
   return ret;
