@@ -414,8 +414,10 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
       }
 
       /* use MPI to recv/send buffers */
+      MCK(
       nMPI_Isend_Irecv_double_com(com, rq, nb_rank, s_tag,r_tag,
-                                  s_comm,r_comm);
+                                  s_comm,r_comm)
+      );
     }
   } /* end loop over neighbors */
 }
@@ -467,10 +469,10 @@ void free_dat_gcom_reqs_after_Waitall_com_send(tNode *node)
   if(!dat) return;
 
   /* to be sure, wait again for all recvs */
-  nMPI_Waitall_com_recv(dat->gcom);
+  MCK( nMPI_Waitall_com_recv(dat->gcom) );
 
   /* wait until all has been sent, then free all buffers for this face */
-  nMPI_Waitall_com_send(dat->gcom);
+  MCK( nMPI_Waitall_com_send(dat->gcom) );
   realloc_com_reqs(dat->gcom, 0); /* free req and send arrays */
 }
 
@@ -537,7 +539,7 @@ void get_ghostdata_for_vl(tNode *node, tVarList  *vl)
       rbuf = get_com_recv_buf(com, rq);
 
       /* wait for MPI buffer */
-      nMPI_Wait_com_recv(com, rq);
+      MCK( nMPI_Wait_com_recv(com, rq) );
 
       /* copy data from recv buffer into ghost zones */
       for(si=0, vli=0; vli<vl->n; vli++)

@@ -269,8 +269,10 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
           }
         }
         /* now call MPI */
+        MCK(
         nMPI_Isend_Irecv_double_com(com, rq, nb_rank, s_tag,r_tag,
-                                    s_comm,r_comm);
+                                    s_comm,r_comm)
+        );
       }
     }
   } /* end loop over neighbors */
@@ -331,7 +333,7 @@ void get_indc_for_vl(tNode *node, tVarList  *vl, int face, int ni)
   rq = dat->ic[vi]->nbindc[face][ni]->info;
 
   /* wait for MPI buffer */
-  nMPI_Wait_com_recv(com, rq);
+  MCK( nMPI_Wait_com_recv(com, rq) );
 }
 
 
@@ -343,10 +345,10 @@ void free_dat_icom_reqs_after_Waitall_com_send(tNode *node)
   if(!dat) return;
 
   /* to be sure, wait again for all recvs */
-  nMPI_Waitall_com_recv(dat->icom);
+  MCK( nMPI_Waitall_com_recv(dat->icom) );
 
   /* wait until all has been sent, then free all buffers for this face */
-  nMPI_Waitall_com_send(dat->icom);
+  MCK( nMPI_Waitall_com_send(dat->icom) );
   realloc_com_reqs(dat->icom, 0); /* free req and send arrays */
 }
 
