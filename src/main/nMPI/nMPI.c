@@ -979,11 +979,11 @@ void print_com(tCom *com)
     printf("%d: send: buf=%d,%p stat.",
            i, com->send_buflen[i], (void *) com->send_buf[i]);
     nMPI_print_Stat(com->send_stat[i]);
-    printf(" rq=%p", (void *) com->send_rq[i]);
+    printf(" rq=%lx", (ulong) com->send_rq[i]);
     printf("  recv: buf=%d,%p stat.",
            com->recv_buflen[i], (void *) com->recv_buf[i]);
     nMPI_print_Stat(com->recv_stat[i]);
-    printf(" rq=%p\n", (void *) com->recv_rq[i]);
+    printf(" rq=%lx\n", (ulong) com->recv_rq[i]);
   }
 #else
   for(int i=0; i<n_rq; i++)
