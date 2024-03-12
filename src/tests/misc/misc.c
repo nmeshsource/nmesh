@@ -699,7 +699,7 @@ int test_ajsurf(tMesh *mesh)
   }
   printf("on this proc: total %.15g\n", sqrt(sum));
   Sum = sum;
-  nMPI_Allreduce(&sum, &Sum, 1, nMPI_DOUBLE, nMPI_SUM);
+  MCK( nMPI_Allreduce(&sum, &Sum, 1, nMPI_DOUBLE, nMPI_SUM) );
   printf("on all procs: total %.15g\n", sqrt(Sum));
 
   /* after we have printed them, we no longer need the surfaces */

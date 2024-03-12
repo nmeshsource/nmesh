@@ -256,7 +256,7 @@ void gnuplot_output1d_pernode_meshvar(tMesh *mesh, char *name,
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(IObuf);
 }
@@ -372,11 +372,11 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* broadcast new phead to everyone else */
-    nMPI_Bcast(pheadX,npats, nMPI_INT, rk);
-    nMPI_Bcast(pheadY,npats, nMPI_INT, rk);
-    nMPI_Bcast(pheadZ,npats, nMPI_INT, rk);
+    MCK( nMPI_Bcast(pheadX,npats, nMPI_INT, rk) );
+    MCK( nMPI_Bcast(pheadY,npats, nMPI_INT, rk) );
+    MCK( nMPI_Bcast(pheadZ,npats, nMPI_INT, rk) );
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(pheadZ);
   free(pheadY);
@@ -484,7 +484,7 @@ void gnuplot_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(IObuf);
 }
@@ -552,7 +552,7 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T)
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(IObuf);
 }

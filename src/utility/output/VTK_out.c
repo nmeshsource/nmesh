@@ -334,7 +334,7 @@ void vtk_output3d_meshvar(tMesh *mesh, char *name, int It, double T)
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(IObuf);
 }
@@ -403,7 +403,7 @@ void vtk_output3dcoef_meshvar(tMesh *mesh, char *name, int It, double T)
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(IObuf);
 }
@@ -728,7 +728,7 @@ void vtk_output2d_meshvar(tMesh *mesh, char *name, int It, double T)
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
   free(IObuf);
 }

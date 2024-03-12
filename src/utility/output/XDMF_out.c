@@ -328,7 +328,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
-      nMPI_barrier();
+      MCK( nMPI_barrier() );
     } /* end rk-loop */
   }
   free(bufxyz);
@@ -435,7 +435,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
         fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
       }
       /* wait until everyone is here */
-      nMPI_barrier();
+      MCK( nMPI_barrier() );
     } /* end rk-loop */
   }
   free(bufxyz);

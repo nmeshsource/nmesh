@@ -118,7 +118,7 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
       fclose(fp);
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
 }
 
@@ -153,6 +153,6 @@ void write_nblnodes(tMesh *mesh, const char *info, int mode)
       fclose(fp);
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
 }
