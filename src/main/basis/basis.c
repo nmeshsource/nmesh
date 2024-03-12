@@ -295,8 +295,8 @@ int basis_var_interpolate_ok(tNode *node, int vi, double Xb[3],
   Haveval = haveval;
 
   /* find out how many have a value, and add all of them */
-  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
-  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  MCK( nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM) );
+  MCK( nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM) );
   if(!Haveval) return 0; /* could not get interp on any node */
   Val = Val/Haveval;
 

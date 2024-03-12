@@ -833,8 +833,8 @@ int interpolate_var_ok(tNode *node, int vi, double Xb[3],
   Haveval = haveval;
 
   /* find out how many have a value, and add all of them */
-  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
-  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  MCK( nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM) );
+  MCK( nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM) );
   if(!Haveval) return 0; /* could not get interp on any node */
   Val = Val/Haveval;
 
@@ -1036,8 +1036,8 @@ int basis_var_interpolate_xyz(tMesh *mesh, int ivar, const double xyz[3],
   //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
 
   /* find out how many procs have a value, and add all of them */
-  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
-  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  MCK( nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM) );
+  MCK( nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM) );
   if(!Haveval) errorexit("one MPI proc should have this value");
   Val = Val/Haveval;
   *value = Val;
@@ -1129,8 +1129,8 @@ int interpolate_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
   //PRF;printf(": Val=%g Haveval=%d\n", Val, Haveval);
 
   /* find out how many values we found, and add all of them */
-  nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM);
-  nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM);
+  MCK( nMPI_Allreduce(&haveval, &Haveval, 1, nMPI_INT, nMPI_SUM) );
+  MCK( nMPI_Allreduce(&val, &Val, 1, nMPI_DOUBLE, nMPI_SUM) );
   if(!Haveval) errorexit("at least one MPI proc should have this value");
   Val = Val/Haveval;
   *value = Val;
