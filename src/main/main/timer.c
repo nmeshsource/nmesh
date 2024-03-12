@@ -89,7 +89,7 @@ tTimer *timer_start(const char *name)
 
     /* get timer and save current time in it */
     t = timer_get(name);
-    if(timer_MPI_barrier) nMPI_barrier();
+    if(timer_MPI_barrier) MCK( nMPI_barrier() );
     t->start = getTimeIn_s();
     t->n += 1; /* func now has been called */
   }
@@ -108,7 +108,7 @@ tTimer *timer_stop(const char *name)
     /* t->start = -1 marks that timer is stopped already */
     if(t->start < 0.) return t;
 
-    if(timer_MPI_barrier) nMPI_barrier();
+    if(timer_MPI_barrier) MCK( nMPI_barrier() );
 
     /* save timing info */
     t->time += getTimeIn_s() - t->start;

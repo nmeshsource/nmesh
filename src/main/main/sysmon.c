@@ -46,7 +46,7 @@ int sysmon(tMesh *mesh)
   }
 
   /* broadcast do_sysmon from rank0 to all others */
-  nMPI_Bcast(&do_sysmon, 1, nMPI_INT, 0);
+  MCK( nMPI_Bcast(&do_sysmon, 1, nMPI_INT, 0) );
 
   /* now do it if needed */
   if(do_sysmon)
@@ -66,7 +66,7 @@ int sysmon(tMesh *mesh)
     n = 0;
     dat[n++] = ru_maxrss;  /* maximum resident set size */
     for(i=0; i<n; i++) datall[i] = dat[i]; /* in case MPI is not there */
-    nMPI_Allreduce(dat, datall, n, nMPI_DOUBLE, nMPI_SUM);
+    MCK( nMPI_Allreduce(dat, datall, n, nMPI_DOUBLE, nMPI_SUM) );
 
     /* output datall on rank 0 */
     if(Rank0)

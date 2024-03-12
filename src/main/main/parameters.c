@@ -107,13 +107,13 @@ int nmesh_load_parameters(tMesh *mesh, char *parfile, int fatal, int pr)
   }
 
   /* broadcast whether parfile exists */
-  nMPI_Bcast(&file_exists,1, nMPI_INT, 0);
+  MCK( nMPI_Bcast(&file_exists,1, nMPI_INT, 0) );
   if(!file_exists) return 0;
 
   /* broadcast buffer to all MPI ranks */
-  nMPI_Bcast(&nbuffer,1, nMPI_INT, 0);
+  MCK( nMPI_Bcast(&nbuffer,1, nMPI_INT, 0) );
   if(!Rank0_or_NoMPI) buffer = calloc(nbuffer+2, sizeof(char));
-  nMPI_Bcast(buffer,nbuffer+1, nMPI_CHAR, 0);
+  MCK( nMPI_Bcast(buffer,nbuffer+1, nMPI_CHAR, 0) );
   if(0) { printf("%s", buffer); Yo(1); }
 
   /* replace comments by spaces */
@@ -222,7 +222,7 @@ int nmesh_update_parameters(tMesh *mesh)
   }
 
   /* broadcast do_update from rank0 to all others */
-  nMPI_Bcast(&do_update, 1, nMPI_INT, 0);
+  MCK( nMPI_Bcast(&do_update, 1, nMPI_INT, 0) );
 
   /* now do it if needed */
   if(do_update)
