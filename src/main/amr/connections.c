@@ -910,7 +910,7 @@ tElm *amr_elm_eid_from_eloc(tMesh *mesh, tEloc *eloc, ulong *eid)
   f_elm = amr_elmarray_bsearch_eloc(mesh->nmyelm, mesh->myelm, eloc);
   if(f_elm) found[rank] = 1;
   Found[rank] = found[rank];
-  nMPI_Allreduce(found, Found, size, nMPI_CHAR, nMPI_BOR);
+  MCK( nMPI_Allreduce(found, Found, size, nMPI_CHAR, nMPI_BOR) );
 
   /* check result */
   for(sum=0, r=0; r<size; r++) sum += Found[r];
@@ -922,7 +922,7 @@ tElm *amr_elm_eid_from_eloc(tMesh *mesh, tEloc *eloc, ulong *eid)
 
   /* get rank r that has eid and Bcast it */
   for(r=0; r<size; r++) if(Found[r]) break;
-  nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r);
+  MCK( nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r) );
 
   free(Found);
   free(found);
@@ -1019,7 +1019,7 @@ tElm *elm_eploc_from_eid(tMesh *mesh, ulong eid, tEploc *eploc)
   if(elm) eploc = elm->eploc;
 
   /* Bcast eploc */
-  nMPI_Bcast(eploc,1, nMPIvars->TEPLOC, elmrank);
+  MCK( nMPI_Bcast(eploc,1, nMPIvars->TEPLOC, elmrank) );
 
   return elm;
 }
@@ -2018,7 +2018,7 @@ int amr_make_fnb_list(tElm *elm, int elmface, long narr, tElm **arr,
    assumes no prior knowledge of which MPI rank I am actually in contact with.
    BUT amr_update_elm_nbinfo_if_nnbinfo_negative is very slow!!!
    This happens because every rank sends its ef0 to ALL other ranks:
-     nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+     MCK( nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk) );
    So we should keep this func, but also make an improved version, where:
    +I should only send to the ranks that I am in contact with, i.e. the ones
     I had nbs with on this face before. We could destill a contacts list for
@@ -2107,7 +2107,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
     /* rank rk sends his nef0[f] to all others, to tell how many elms he
        wants to find face nbs of */
     //printf("111111 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
-    nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk);
+    MCK( nMPI_Bcast(&nef0[0],6, nMPI_UNSIGNED_LONG, rk) );
     //printf("222222 rank%d rk%d nef0[0]=%lu\n", rank, rk, nef0[0]);
 
     /* init ef0_nbs index counter */
@@ -2150,10 +2150,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
         }
 
         /* broadcast all elmheaders in ef0 from rank rk to all */
-        //nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk);
+        //MCK( nMPI_Bcast(ef0, nef0[f], nMPIvars->TELM0, rk) );
          /* broadcast all eplocs in ef0 from rank rk to all */
-        nMPI_Bcast(ef0, nef0[f], nMPIvars->TEPLOC, rk);
-                               //^^^^^^^^^^^^^^^-is this right???
+        MCK( nMPI_Bcast(ef0, nef0[f], nMPIvars->TEPLOC, rk) );
+                                    //^^^^^^^^^^^^^^^-is this right???
 
         /* all ranks do work on ef0 array and find all nbs of all in ef0 */
         for(i=0; i<nef0[f]; i++)
@@ -2219,10 +2219,10 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
     if(rank != rk) /* send to rank rk */
     {
       /* first send number of tEploc sized entries in ef0_nbs */
-      nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000);
+      MCK( nMPI_Send(&nmyEplocs,1, nMPI_UNSIGNED_LONG, rk, 1000) );
 
       /* now send contents of ef0_nbs */
-      nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000);
+      MCK( nMPI_Send(ef0_nbs->d,nmyEplocs, nMPIvars->TEPLOC, rk, 2000) );
 
     }
     else /* rank=rk: i.e. I am rank rk and will revc from all others */
@@ -2235,7 +2235,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
       for(r=0; r<size; r++)
       {
         if(r != rk)
-          nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000);
+          MCK( nMPI_Recv(&N_eplocs[r],1, nMPI_UNSIGNED_LONG, r, 1000) );
         else
           N_eplocs[r] = nmyEplocs;
       }
@@ -2256,7 +2256,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative(tMesh *mesh)
       for(r=0; r<size; r++)
       {
         if(r != rk)
-          nMPI_Recv(eplocs[r], N_eplocs[r], nMPIvars->TEPLOC, r, 2000);
+          MCK( nMPI_Recv(eplocs[r], N_eplocs[r], nMPIvars->TEPLOC, r, 2000) );
         /* Note: eplocs[rk] already has what was in ef0_nbs->d before */
       }
 
@@ -2446,7 +2446,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     /* tell how many eplocs (ns[0]) I want to send to rank rk, and also
        find out how many it wants to send to me (nr[0]) */
     rq = append_buffers_to_com(com0, ns,1, nr,1);
-    nMPI_Isend_Irecv_com(com0, rq, nMPI_UNSIGNED_LONG, rk, 10,10, WORLD,WORLD);
+    MCK(
+    nMPI_Isend_Irecv_com(com0, rq, nMPI_UNSIGNED_LONG, rk, 10,10, WORLD,WORLD)
+    );
   }
 
   /* wait for sends and recvs in com0 */
@@ -2498,7 +2500,9 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     }
 
     rq = append_buffers_to_com(com1, sef,ns[0], ref,nr[0]);
-    nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD);
+    MCK(
+    nMPI_Isend_Irecv_com(com1, rq, nMPIvars->TEPLOC, rk, 20,20, WORLD,WORLD)
+    );
 
     //PRFs(":1b ");printf("ns[0]=%lu nr[0]=%lu rk=%d\n", ns[0], nr[0], rk);
     //PRFs(":2a sef=");
@@ -2542,7 +2546,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     ulong *nrE = checked_calloc(1, sizeof(nrE[0]));
 
     /* process eplocs that others want to know about */
-    nMPI_Wait_com_recv(com1, rq); /* wait for request number rq */
+    MCK( nMPI_Wait_com_recv(com1, rq) ); /* wait for request number rq */
 
     ////PRFs(":3 ref=");
     ////for(int ii=0; ii<16; ii++) printeploc_s(&(ref[ii]), " ");
@@ -2610,15 +2614,17 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     nsE[0] = ef0_nbs_idx;
 
     /* wait for sef array */
-    nMPI_Wait_com_send(com1, rq); /* wait for request number rq */
+    MCK( nMPI_Wait_com_send(com1, rq) ); /* wait for request number rq */
 
     /* send/recv my nsE/nrE */
     rq2 = append_buffers_to_com(com2, nsE,1, nrE,1);
-    nMPI_Isend_Irecv_com(com2, rq2, nMPI_UNSIGNED_LONG, rk, 30,30, WORLD,WORLD);
+    MCK(
+    nMPI_Isend_Irecv_com(com2, rq2, nMPI_UNSIGNED_LONG, rk, 30,30, WORLD,WORLD)
+    );
 
     /* send ef0_nbs */
     srq = append_buffers_to_com(scom, ef0_nbs->eploc,nsE[0], NULL,0);
-    nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD);
+    MCK( nMPI_Isend_com(scom, srq, nMPIvars->TEPLOC, rk, 40, WORLD) );
 
     /* free array container but not its ef0_nbs->eploc, which will later be
        freed by free_com(scom); in which we save the buffer ef0_nbs->eploc */
@@ -2661,7 +2667,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
     }
     */
 
-    nMPI_Wait_com_recv(com2, rq); /* wait for request number rq */
+    MCK( nMPI_Wait_com_recv(com2, rq) ); /* wait for request number rq */
 
     {
       ulong *nr = get_com_recv_buf(com2, rq); //num.of eplocs to recv from rk
@@ -2683,7 +2689,7 @@ int amr_update_elm_nbinfo_if_nnbinfo_negative_ef(tMesh *mesh,
       //PRFs(":5 ");printf("nr[0]=%lu\n", nr[0]);
 
       /* recv ef0_nbs from rk */
-      nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40);
+      MCK( nMPI_Recv(ef0_nbs,nr[0], nMPIvars->TEPLOC, rk, 40) );
       //FIXME: can we pair Isend with Recv???
 
       //PRFs(":6 ");
@@ -3185,12 +3191,12 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
       /* tell how many I want from each rank rk */
       {
         rq = append_buffers_to_com(scom, &(ns_deseid[rk]),1, NULL,0);
-        nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 10, WORLD);
+        MCK( nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 10, WORLD) );
       }
       /* get how many the other ranks want */
       {
         rq = append_buffers_to_com(rcom, NULL,0, &(nr_deseid[rk]),1);
-        nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 10, WORLD);
+        MCK( nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 10, WORLD) );
       }
     }
 
@@ -3217,13 +3223,13 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
       if(ns_deseid[rk])
       {
         rq = append_buffers_to_com(scom, s_deseid[rk],ns_deseid[rk], NULL,0);
-        nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD);
+        MCK( nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD) );
       }
       /* recv in r_deseid, i.e. the eids for which rk wants to know elm0 */
       if(nr_deseid[rk])
       {
         rq = append_buffers_to_com(rcom, NULL,0, r_deseid[rk],nr_deseid[rk]);
-        nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD);
+        MCK( nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 20, WORLD) );
       }
     }
 
@@ -3262,13 +3268,13 @@ int amr_get_elm0_for_eids(tMesh *mesh, ulong neids, ulong *eidarr,
       if(nr_deseid[rk])
       {
         rq = append_buffers_to_com(scom, s_elm0[rk],nr_deseid[rk], NULL,0);
-        nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 30, WORLD);
+        MCK( nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 30, WORLD) );
       }
       /* recv elm0 we want from the others */
       if(ns_deseid[rk])
       {
         rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],ns_deseid[rk]);
-        nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 30, WORLD);
+        MCK( nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 30, WORLD) );
       }
     }
 
@@ -3358,14 +3364,14 @@ void amr_send_elm0array_of_src_to_dest(tMesh *mesh, int src, int dest,
     if(nelm0 != i) errorexit("nelm0 is wrong, because nelm0 != i");
     /* send elm0ar */
     if(dest!=src)
-      nMPI_Send(elm0ar,nelm0, nMPIvars->TELM0, dest, 101);
+      MCK( nMPI_Send(elm0ar,nelm0, nMPIvars->TELM0, dest, 101) );
   }
 
   if(rank==dest)
   {
     /* recv elm0ar */
     if(dest!=src)
-      nMPI_Recv(elm0ar,nelm0, nMPIvars->TELM0, src, 101);
+      MCK( nMPI_Recv(elm0ar,nelm0, nMPIvars->TELM0, src, 101) );
   }
 }
 
@@ -3822,7 +3828,9 @@ void get_nbr_rank_info(tMesh *mesh)
   {
     rq = append_buffers_to_com(com, myfl,sizeof(myfl[0]),
                                     fl_m1,sizeof(fl_m1[0]));
-    nMPI_Isend_Irecv_com(com, rq, nMPI_CHAR, rank-1, -1,+1, WORLD, WORLD);
+    MCK(
+    nMPI_Isend_Irecv_com(com, rq, nMPI_CHAR, rank-1, -1,+1, WORLD, WORLD)
+    );
   }
 
   /* send myfl to rank+1 and also receiv fl_p1 from rank+1 */
@@ -3830,7 +3838,9 @@ void get_nbr_rank_info(tMesh *mesh)
   {
     rq = append_buffers_to_com(com, myfl,sizeof(myfl[0]),
                                     fl_p1,sizeof(fl_p1[0]));
-    nMPI_Isend_Irecv_com(com, rq, nMPI_CHAR, rank+1, +1,-1, WORLD, WORLD);
+    MCK(
+    nMPI_Isend_Irecv_com(com, rq, nMPI_CHAR, rank+1, +1,-1, WORLD, WORLD)
+    );
   }
 
   /* wait until all sent and received */
@@ -3876,19 +3886,19 @@ void elmfl_exchange_between_nbranks(tMesh *mesh, tElmfl myfl[1],
   nreqs = 0;
   tag = 1;
   if(rank > 0)       /* send info to rank-1 */
-    nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank-1, tag,
-               WORLD, &req[nreqs++]);
+    MCK( nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank-1, tag,
+                    WORLD, &req[nreqs++]) );
   if(rank < size-1)  /* Receive info from rank+1 */
-    nMPI_Irecv((char *)rp1fl,sizeof(rp1fl[0]), nMPI_CHAR, rank+1, tag,
-               WORLD, &req[nreqs++]);
+    MCK( nMPI_Irecv((char *)rp1fl,sizeof(rp1fl[0]), nMPI_CHAR, rank+1, tag,
+               WORLD, &req[nreqs++]) );
 
   tag = 2;
   if(rank < size-1)  /* send info to rank+1 */
-    nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank+1, tag,
-               WORLD, &req[nreqs++]);
+    MCK( nMPI_Isend((char *)myfl,sizeof(myfl[0]), nMPI_CHAR, rank+1, tag,
+                    WORLD, &req[nreqs++]) );
   if(rank > 0)       /* Receive info from rank-1 */
-    nMPI_Irecv((char *)rm1fl,sizeof(rm1fl[0]), nMPI_CHAR, rank-1, tag,
-               WORLD, &req[nreqs++]);
+    MCK( nMPI_Irecv((char *)rm1fl,sizeof(rm1fl[0]), nMPI_CHAR, rank-1, tag,
+                    WORLD, &req[nreqs++]) );
 
   /* wait until all MPI requests are done */
   MCK( nMPI_Waitall(nreqs, req, stat) );
