@@ -3011,7 +3011,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   /*
   PRF;printf(": mesh->nnbelm=%lu\n", mesh->nnbelm);
   printmesh(mesh);
-  for(rk=0; rk<size; rk++)
+  for(rk=0; rk<size; rk++) if(nr_elm0[rk] || ns_elm0[rk])
   {
     printf("rk%d: nr=%lu ns=%lu  r=%p s=%p\n", rk, nr_elm0[rk], ns_elm0[rk],
            (void *) r_elm0[rk], (void *) s_elm0[rk]);
@@ -3048,6 +3048,7 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
   PRFs(": Debug\n");
   printf("r");print_com(rcom);
   printf("s");print_com(scom);
+  fflush(stdout);
   */
 
   /* wait for recvs in rcom */
