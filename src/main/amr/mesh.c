@@ -726,7 +726,7 @@ Yo(33.2);
 /*
   printmesh(mesh);
 //nMPI
-nMPI_barrier();
+MCK( nMPI_barrier() );
 RunFun(FINALIZE);
 finalize_all_and_exit(mesh, 0); //<--exit code 0
 */
@@ -910,7 +910,7 @@ finalize_all_and_exit(mesh, 0); //<--exit code 0
 
 
 //nMPI
-nMPI_barrier();
+MCK( nMPI_barrier() );
 RunFun(FINALIZE);
 finalize_all_and_exit(mesh, 0); //<--exit code 0
   return 0;
