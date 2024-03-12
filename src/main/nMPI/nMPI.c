@@ -435,6 +435,7 @@ int nMPI_Isend(const void *buf, int count, nMPI_Datatype datatype,
   {
     PRF;printf(": %d to %d, count=%d tag=%d\n", nMPI_rank(), dest, count, tag);
   }
+  if(!count) errorexit("MPI_Isend allows count=0, but we do not!");
 #ifdef USEMPI
   PR0;
   stat = MPI_Isend(buf, count, datatype, dest, tag, comm, req);
@@ -453,6 +454,7 @@ int nMPI_Irecv(void *buf, int count, nMPI_Datatype datatype,
   {
     PRF;printf(": %d from %d, count=%d tag=%d\n", nMPI_rank(), src, count, tag);
   }
+  if(!count) errorexit("MPI_Irecv allows count=0, but we do not!");
 #ifdef USEMPI
   PR0;
   stat = MPI_Irecv(buf, count, datatype, src, tag, comm, req);
@@ -482,6 +484,8 @@ int nMPI_Isend_Irecv(void *sbuf, int ns, void *rbuf, int nr,
   //for(int i=0; i<ns; i++) printf(" %g", sbuf[i]);
   //printf("\n");
   //fflush(stdout);
+  if(!ns || !nr)
+    errorexit("MPI_Isend, MPI_Irecv allow ns=0, nr=0, but we do not!");
 #ifdef USEMPI
   PR0;
   errS = MPI_Isend(sbuf, ns, datatype, rank_other, s_tag, s_comm, s_req);

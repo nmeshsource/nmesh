@@ -3036,13 +3036,19 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
     {
       int rq;
 
-      /* send s_elm0[rk] buffer  */
-      rq = append_buffers_to_com(scom, s_elm0[rk],ns_elm0[rk], NULL,0);
-      MCK( nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD) );
+      /* send s_elm0[rk] buffer */
+      if(ns_elm0[rk])
+      {
+        rq = append_buffers_to_com(scom, s_elm0[rk],ns_elm0[rk], NULL,0);
+        MCK( nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD) );
+      }
 
       /* recv in r_elm0[rk] */
-      rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
-      MCK( nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD) );
+      if(nr_elm0[rk])
+      {
+        rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
+        MCK( nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD) );
+      }
     }
   /*
   PRFs(": Debug\n");
