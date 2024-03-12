@@ -185,7 +185,7 @@ int timing_set_myops_ops0_allops(tMesh *mesh)
   if(rank > 0)
   {
     /* we use blocking MPI here */
-    nMPI_Recv(&(Timing->ops0),1, nMPI_DOUBLE, rank-1, 123);
+    MCK( nMPI_Recv(&(Timing->ops0),1, nMPI_DOUBLE, rank-1, 123) );
     /* This blocks until we actually get ops0 from previous rank.
        We do not want to go any further until we have ops0. */
   }
@@ -195,13 +195,13 @@ int timing_set_myops_ops0_allops(tMesh *mesh)
   if(rank < size-1)
   {
     /* we use blocking MPI here */
-    nMPI_Send(&(ops1),1, nMPI_DOUBLE, rank+1, 123);
+    MCK( nMPI_Send(&(ops1),1, nMPI_DOUBLE, rank+1, 123) );
     /* this blocks until ops1 is in some network buffer */
   }
 
   /* last rank knows total number of operations allops, so broadcast it */
   Timing->allops = ops1;
-  nMPI_Bcast(&(Timing->allops),1, nMPI_DOUBLE, size-1);
+  MCK( nMPI_Bcast(&(Timing->allops),1, nMPI_DOUBLE, size-1) );
 
   return 0;
 }
