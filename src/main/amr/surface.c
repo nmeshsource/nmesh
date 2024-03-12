@@ -414,7 +414,9 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       }
     }
     /* now call MPI */
-    nMPI_Isend_Irecv_double_com(com, rq, nb_rank, s_tag,r_tag, s_comm,r_comm);
+    MCK(
+    nMPI_Isend_Irecv_double_com(com, rq, nb_rank, s_tag,r_tag, s_comm,r_comm)
+    );
   }
 }
 
@@ -512,7 +514,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   rq = dat->s[face][vi]->nbsurf[ni]->info;
 
   /* wait for MPI buffer */
-  nMPI_Wait_com_recv(com, rq);
+  MCK( nMPI_Wait_com_recv(com, rq) );
 
   /* find our recv buffer, and set it to NULL.
      We do this because s->nbsurf[ni]->d already points there, and because
@@ -548,10 +550,10 @@ void free_dat_reqs_after_Waitall_com_send(tNode *node)
   for(face=0; face<6; face++)
   {
     /* to be sure, wait again for all recvs */
-    nMPI_Waitall_com_recv(dat->com[face]);
+    MCK( nMPI_Waitall_com_recv(dat->com[face]) );
 
     /* wait until all has been sent, then free all buffers for this face */
-    nMPI_Waitall_com_send(dat->com[face]);
+    MCK( nMPI_Waitall_com_send(dat->com[face]) );
     realloc_com_reqs(dat->com[face], 0); /* free req and send arrays */
   }
 }
@@ -645,13 +647,13 @@ int causeMPIprogress_all_myln_surfaces(tMesh *mesh, int sendrecv)
           switch(sendrecv)
           {
           case 0:
-            nMPI_Testall_com_send(com, &fl);
+            MCK( nMPI_Testall_com_send(com, &fl) );
             break;
           case 1:
-            nMPI_Testall_com_recv(com, &fl);
+            MCK( nMPI_Testall_com_recv(com, &fl) );
             break;
           default:
-            nMPI_Testall_com(com, &fl);
+            MCK( nMPI_Testall_com(com, &fl) );
           }
           flag = flag && fl;
         }
