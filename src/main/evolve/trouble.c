@@ -129,11 +129,11 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
 
   /* Max over all ranks */
   Max_trb = max_trb;
-  nMPI_Allreduce(&max_trb, &Max_trb, 1, nMPI_INT, nMPI_MAX);
+  MCK( nMPI_Allreduce(&max_trb, &Max_trb, 1, nMPI_INT, nMPI_MAX) );
 
   /* Min over all ranks */
   Min_trb = min_trb;
-  nMPI_Allreduce(&min_trb, &Min_trb, 1, nMPI_INT, nMPI_MIN);
+  MCK( nMPI_Allreduce(&min_trb, &Min_trb, 1, nMPI_INT, nMPI_MIN) );
 
   /* if there is bad trouble somewhere */
   if(Max_trb>0)

@@ -308,7 +308,7 @@ void crc64_0start_global(tMesh *mesh,
   sbuf[1] = *cnt;
 
   /* rank0 now gathers all CRCs */
-  nMPI_Gather(sbuf,2, nMPI_UNSIGNED_LONG, rbuf,2, nMPI_UNSIGNED_LONG, 0);
+  MCK( nMPI_Gather(sbuf,2, nMPI_UNSIGNED_LONG, rbuf,2, nMPI_UNSIGNED_LONG, 0) );
 
   /* rank0 now combines the CRCs */
   if(Rank0)
@@ -321,7 +321,7 @@ void crc64_0start_global(tMesh *mesh,
   /* now broadcast the CRC to all ranks */
   sbuf[0] = *crc;
   sbuf[1] = *cnt;
-  nMPI_Bcast(sbuf,2, nMPI_UNSIGNED_LONG, 0);
+  MCK( nMPI_Bcast(sbuf,2, nMPI_UNSIGNED_LONG, 0) );
   if(!Rank0)
   {
     *crc = sbuf[0];
