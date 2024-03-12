@@ -37,7 +37,7 @@ void random_refine_frac_nodes_N_times(tMesh *mesh, double frac, int N)
         }
       }
       /* broadcast ran2 to other ranks */
-      nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk);
+      MCK( nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk) );
     }
     /* All MPI procs must do the lines below in the same way, so ran1 must
        be the same no matter how many procs we have! */
@@ -91,9 +91,9 @@ void random_remove_frac_nodes_N_times(tMesh *mesh, double frac, int N)
         }
       }
       /* broadcast ran2 and j to other ranks */
-      nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk);
-      nMPI_Bcast(&j,1, nMPI_INT, rk);
-      nMPI_Bcast(&rflag,1, nMPI_INT, rk);
+      MCK( nMPI_Bcast(&ran2,1, nMPI_DOUBLE, rk) );
+      MCK( nMPI_Bcast(&j,1, nMPI_INT, rk) );
+      MCK( nMPI_Bcast(&rflag,1, nMPI_INT, rk) );
     }
     /* All MPI procs must do the lines below in the same way, so ran1 must
        be the same no matter how many procs we have! */
