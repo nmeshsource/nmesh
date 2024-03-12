@@ -1270,7 +1270,7 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
       mesh->eidlim[rk] = eid;
     }
     /* we use blocking MPI here */
-    nMPI_Bcast(&(mesh->eidlim[rk]),1, nMPI_UNSIGNED_LONG, rk);
+    MCK( nMPI_Bcast(&(mesh->eidlim[rk]),1, nMPI_UNSIGNED_LONG, rk) );
     /* This blocks until we get mesh->eidlim[rk] from rank rk. */
 
     /* update eid to start value for next rk iteration */
@@ -1285,7 +1285,7 @@ ulong update_elm_eid_dt(tMesh *mesh, double dt, int auto_dt,
 
   /* now make sure we use the min dt of all ranks */
   dt_new = mesh->dt;
-  nMPI_Allreduce(&dt_new, &(mesh->dt), 1, nMPI_DOUBLE, nMPI_MIN);
+  MCK( nMPI_Allreduce(&dt_new, &(mesh->dt), 1, nMPI_DOUBLE, nMPI_MIN) );
 
   if(mesh->dt != dt_old)
   { PRF;printf(": mesh->dt = %g\n", mesh->dt); }
