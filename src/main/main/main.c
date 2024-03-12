@@ -35,12 +35,12 @@ int main(int argc, char **argv)
   if(main_ncalls <= 1)
   {
     /* init MPI */
-    nMPI_Init(&argc, &argv);
+    MCK( nMPI_Init(&argc, &argv) );
     wait_for_debugger_if_NMESH_MPI_DEBUG();
-    nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm));
+    MCK( nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm)) );
     #ifdef MPI_ERR_RET
-      nMPI_Comm_set_errhandler(nMPI_COMM_WORLD, nMPI_ERRORS_RETURN);
-      nMPI_Comm_set_errhandler(main_comm, nMPI_ERRORS_RETURN);
+      MCK( nMPI_Comm_set_errhandler(nMPI_COMM_WORLD, nMPI_ERRORS_RETURN) );
+      MCK( nMPI_Comm_set_errhandler(main_comm, nMPI_ERRORS_RETURN) );
     #endif
 
     /* set time when nmesh was started */
@@ -266,7 +266,7 @@ int make_output_directory(tMesh *mesh)
     copy_file_into_dir(Gets(Par("parameterfile")), outdir);
   }
   /* all wait here until mkdir and copy are done. */
-  nMPI_barrier();
+  MCK( nMPI_barrier() );
 
   /* redirect stdout */
   redirect_stdout_and_stderr(mesh, "a");
@@ -387,7 +387,7 @@ int move_previous_output_to_outdir(tMesh *mesh)
   /* all wait here, until all has been written before moving dirs */
   fflush(stdout);
   fflush(stderr);
-  nMPI_barrier();
+  MCK( nMPI_barrier() );
 
   if(Rank0)
   {
@@ -397,7 +397,7 @@ int move_previous_output_to_outdir(tMesh *mesh)
   }
 
   /* all wait here until move is done. */
-  nMPI_barrier();
+  MCK( nMPI_barrier() );
   /* NOTE: this may not work!!!
      on koko system3("mv", outdirp, outdir) was finished on node0, but node1
      still saw the old outdir! So redirection below went to the wrong dir! */
