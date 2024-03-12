@@ -228,8 +228,8 @@ int sphere_around_full_box_at_xc(tMesh *mesh, int N,
   |  0   |      |   1  |  in the x^i-direction. nBmax = max(nAB_x)
   |      |______|      |
    \ __-- / | \  --__ /   nlam_AB[j][k] is number of subdivisions of lam for
-    \  2 /  |  \ 5   /    piece (j,k) in A,B.
-     \__/ 3 | 4 \ __/
+    \  5 /  |  \ 2   /    piece (j,k) in A,B.
+     \__/ 4 | 3 \ __/
         \________/        r0 is radius of outer sphere
                           2*dc[i] is sidelength of box in dir i
 */
