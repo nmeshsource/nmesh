@@ -58,9 +58,9 @@ exit(8);
   }
 
   /* broadcast buffer to all MPI ranks */
-  nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
+  MCK( nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0) );
   if(!Rank0) buffer = cmalloc(nbuffer);
-  nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
+  MCK( nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0) );
 
   /* read buffer line by line */
   off = 0;
@@ -185,7 +185,7 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
     }
   }
   /* broadcast mesh->eidlim[] to all MPI ranks */
-  nMPI_Bcast(mesh->eidlim,size, nMPI_UNSIGNED_LONG, 0);
+  MCK( nMPI_Bcast(mesh->eidlim,size, nMPI_UNSIGNED_LONG, 0) );
   nelms = mesh->eidlim[size-1]; // set nelms on each rank
 
   /* now we know which eids each rank gets */
@@ -224,9 +224,9 @@ int checkpoint_load_elms(tMesh *mesh, char *fname)
     }
 
     /* broadcast buffer to all MPI ranks */
-    nMPI_Bcast(&file_end,1, nMPI_INT, 0);
-    nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
-    nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0);
+    MCK( nMPI_Bcast(&file_end,1, nMPI_INT, 0) );
+    MCK( nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0) );
+    MCK( nMPI_Bcast(buffer,nbuffer, nMPI_CHAR, 0) );
     //PRF;printf(": nbuffer=%ld\n", nbuffer);
     /* now use the info in buffer to create nodes */
     {
@@ -365,11 +365,11 @@ int checkpoint_load_Vars(tMesh *mesh, char *fname, int read_native)
   }
 
   /* broadcast vl to all MPI ranks */
-  nMPI_Bcast(&nvars,1, nMPI_INT, 0);
+  MCK( nMPI_Bcast(&nvars,1, nMPI_INT, 0) );
   ibuffer = imalloc(nvars);
   if(Rank0)
     for(i=0; i<nvars; i++) ibuffer[i] = vl->index[i];
-  nMPI_Bcast(ibuffer,nvars, nMPI_INT, 0);
+  MCK( nMPI_Bcast(ibuffer,nvars, nMPI_INT, 0) );
   if(!Rank0)
     for(i=0; i<nvars; i++) vlpushone(vl, ibuffer[i]);
   free(ibuffer);
@@ -399,11 +399,11 @@ FILE *out=fopen("out", "w");
 fwrite(buffer,1,nbuffer, out);
 fclose(out);
 }
-nMPI_barrier();
+MCK( nMPI_barrier() );
 exit(9);
 */
     /* broadcast name of node */
-    nMPI_Bcast(nname,256, nMPI_CHAR, 0);
+    MCK( nMPI_Bcast(nname,256, nMPI_CHAR, 0) );
 
     /* figure out datrank of nname */
     node = elm_eid_from_elmname(mesh, nname, &eid);
@@ -411,7 +411,7 @@ exit(9);
     datrank = elmrank;
 
     /* broadcast nbuffer and stop if it's empty */
-    nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0);
+    MCK( nMPI_Bcast(&nbuffer,1, nMPI_LONG, 0) );
     //PRF;printf(": nbuffer=%ld datrank=%d\n", nbuffer, datrank);
     if(!nbuffer) break; /* break do-loop if no more node-data */
 
@@ -420,12 +420,12 @@ exit(9);
     {
       /* send buffer from 0 to rank with dat */
       if(Rank0)
-        nMPI_Send(buffer, nbuffer, nMPI_CHAR, datrank, 11);
+        MCK( nMPI_Send(buffer, nbuffer, nMPI_CHAR, datrank, 11) );
 
       if(nMPI_rank()==datrank)
       {
         buffer = cmalloc(nbuffer);
-        nMPI_Recv(buffer, nbuffer, nMPI_CHAR, 0, 11);
+        MCK( nMPI_Recv(buffer, nbuffer, nMPI_CHAR, 0, 11) );
       }
     }
 
@@ -433,7 +433,7 @@ exit(9);
     if(nMPI_rank()==datrank) checkpoint_read_vl(node, buffer, nbuffer, vl);
 
     /* wait for all to get here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } while(nbuffer);
   free(buffer);
 
@@ -686,7 +686,7 @@ int checkpoint_load_CRCs(tMesh *mesh, char *fname)
   buf[3] = nbinfoCRC;
   buf[4] = varsCRC;
   buf[5] = ret;
-  nMPI_Bcast(buf,6, nMPI_UNSIGNED_LONG, 0);
+  MCK( nMPI_Bcast(buf,6, nMPI_UNSIGNED_LONG, 0) );
   parsCRC   = buf[0];
   patsCRC   = buf[1];
   elmsCRC   = buf[2];

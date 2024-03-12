@@ -99,7 +99,7 @@ int checkpoint_exists(tMesh *mesh, const char *outdir_suffix,
     }
   }
   /* broadcast ret from rank0 to all others */
-  nMPI_Bcast(&ret, 1, nMPI_INT, 0);
+  MCK( nMPI_Bcast(&ret, 1, nMPI_INT, 0) );
 
   /* free strings */
   free(crcs);
@@ -322,7 +322,7 @@ int checkpoint_save(tMesh *mesh)
   checkpoint_save_CRCs(mesh, crcs);
 
   /* wait until all get here */
-  nMPI_barrier();
+  MCK( nMPI_barrier() );
 
   /* rename checkpoint and remove old one */
   if(Rank0)
@@ -419,8 +419,8 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
   }
 
   /* broadcast do_checkpoint, last_checkpoint_time from rank0 to all others */
-  nMPI_Bcast(&do_checkpoint, 1, nMPI_INT, 0);
-  nMPI_Bcast(&last_checkpoint_time, 1, nMPI_DOUBLE, 0);
+  MCK( nMPI_Bcast(&do_checkpoint, 1, nMPI_INT, 0) );
+  MCK( nMPI_Bcast(&last_checkpoint_time, 1, nMPI_DOUBLE, 0) );
 
   /* now do it if needed */
   if(do_checkpoint)
