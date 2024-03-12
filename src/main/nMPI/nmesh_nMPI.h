@@ -7,8 +7,13 @@
 #define Rank0 (!nMPI_rank())
 
 /* Macro for MPI error checking. This works only if the MPI error handler
-   is set to MPI_ERRORS_RETURN, i.e. by compiling with -DMPI_ERR_RET */
+   is set to MPI_ERRORS_RETURN, i.e. by compiling with -DMPI_ERR_RET
+   [see: int main(int argc, char **argv)] */
+#ifdef MPI_ERR_RET
 #define MCK(n) nMPI_check_error(__FILE__, __LINE__, __func__, n)
+#else
+#define MCK(n) (n)
+#endif
 
 
 /* structure that holds global nMPI vars */
