@@ -379,7 +379,7 @@ int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl,
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
-    nMPI_barrier();
+    MCK( nMPI_barrier() );
   } /* end rk-loop */
 
   return 0;

@@ -808,7 +808,7 @@ int p_nodename_XYZ_of_xyz_mesh__OLD(tMesh *mesh, char *name, const int namsiz,
   found_local[rank] = found[rank] = name[0];
 
   /* get global found */
-  nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR);
+  MCK( nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR) );
 
   /* find lowest rank r that has node with X */
   for(r=0; r<size; r++)
@@ -823,7 +823,7 @@ int p_nodename_XYZ_of_xyz_mesh__OLD(tMesh *mesh, char *name, const int namsiz,
 
   /* broadcast node name from rank r to all MPI jobs */
   //PRF;printf(":|%s|r=%d\n", name, r);fflush(stdout);
-  nMPI_Bcast(name, namsiz, nMPI_CHAR, r);
+  MCK( nMPI_Bcast(name, namsiz, nMPI_CHAR, r) );
 
   free(found);
   free(found_local);
@@ -888,7 +888,7 @@ int p_eid_XYZ_of_xyz_mesh(tMesh *mesh, ulong *eid,
   found_local[rank] = found[rank] = flag;
 
   /* get global found */
-  nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR);
+  MCK( nMPI_Allreduce(found_local, found, size, nMPI_CHAR, nMPI_LOR) );
 
   /* find lowest rank r that has node with X */
   for(r=0; r<size; r++)
@@ -902,7 +902,7 @@ int p_eid_XYZ_of_xyz_mesh(tMesh *mesh, ulong *eid,
   }
 
   /* broadcast eid from rank r to all MPI jobs */
-  nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r);
+  MCK( nMPI_Bcast(eid,1, nMPI_UNSIGNED_LONG, r) );
   //PRF;printf(": *eid=%lu r=%d\n", *eid, r);fflush(stdout);
 
   free(found);
@@ -954,7 +954,7 @@ tElm *set_elm0_XYZ_of_xyz_mesh(tMesh *mesh, tElm0 elm0[1],
   /* if we have a valid eid, we should have valid data, and we thus
      Bcast elm0 from elmrank to all ranks */
   if(*eid != EID_INVALID)
-    nMPI_Bcast(elm0, sizeof(tElm0), nMPI_CHAR, *elmrank);
+    MCK( nMPI_Bcast(elm0, sizeof(tElm0), nMPI_CHAR, *elmrank) );
 
   return elm;
 }
