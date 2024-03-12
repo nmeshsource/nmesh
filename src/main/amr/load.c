@@ -226,7 +226,7 @@ void move_node_to_rank(tNode *node, int desrank,
       //print_com(scom);
 
       /* send */
-      nMPI_Isend_double_com(scom, rq, other, Node_eid(node), WORLD);
+      MCK( nMPI_Isend_double_com(scom, rq, other, Node_eid(node), WORLD) );
     }
     if(rank == desrank)
     {
@@ -244,7 +244,7 @@ void move_node_to_rank(tNode *node, int desrank,
         rq = append_buffers_to_com(rcom, NULL,0, rbuf,rlen);
         //print_com(rcom);
         /* receive */
-        nMPI_Irecv_double_com(rcom, rq, other, Node_eid(node), WORLD);
+        MCK( nMPI_Irecv_double_com(rcom, rq, other, Node_eid(node), WORLD) );
       }
 
       /* allocate space already and init some stuff */
@@ -361,7 +361,7 @@ double load_set_speed_array(tMesh *mesh, double *speed)
   for(rank=0; rank<size; rank++)
   {
     if(rank == nMPI_rank()) speed[rank] = myspeed;
-    nMPI_Bcast(&(speed[rank]),1, nMPI_DOUBLE, rank);
+    MCK( nMPI_Bcast(&(speed[rank]),1, nMPI_DOUBLE, rank) );
   }
 
   avspeed = 0.;
@@ -738,8 +738,8 @@ void load_balance_elms(tMesh *mesh)
       {
         int rq;
         rq=append_buffers_to_com(rcom, NULL,0, &(r_elms[rk][0]),nr_elms[rk]);
-        //nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 100, WORLD);
-        nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 200, WORLD);
+        //MCK( nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 100, WORLD) );
+        MCK( nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 200, WORLD) );
       }
     }
 
