@@ -3038,15 +3038,17 @@ int amr_get_nbelm_elmheaders(tMesh *mesh)
 
       /* send s_elm0[rk] buffer  */
       rq = append_buffers_to_com(scom, s_elm0[rk],ns_elm0[rk], NULL,0);
-      nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD);
+      MCK( nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 31, WORLD) );
 
       /* recv in r_elm0[rk] */
       rq = append_buffers_to_com(rcom, NULL,0, r_elm0[rk],nr_elm0[rk]);
-      nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD);
+      MCK( nMPI_Irecv_com(rcom, rq, nMPIvars->TELM0, rk, 31, WORLD) );
     }
-
-  //printf("r");print_com(rcom);
-  //printf("s");print_com(scom);
+  /*
+  PRFs(": Debug\n");
+  printf("r");print_com(rcom);
+  printf("s");print_com(scom);
+  */
 
   /* wait for recvs in rcom */
   MCK( nMPI_Waitall_com_recv(rcom) );

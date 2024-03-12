@@ -658,12 +658,17 @@ void load_balance_elms(tMesh *mesh)
 
       /* tell that I send ns_elms to others */
       rq = append_buffers_to_com(scom, &(ns_elms[rk]),1, NULL,0);
-      nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD);
+      MCK( nMPI_Isend_com(scom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD) );
 
       /* recv nr_elms from others */
       rq = append_buffers_to_com(rcom, NULL,0, &(nr_elms[rk]),1);
-      nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD);
+      MCK( nMPI_Irecv_com(rcom, rq, nMPI_UNSIGNED_LONG, rk, 100, WORLD) );
     }
+  /*
+  PRFs(": DEBUG1\n");
+  printf("r");print_com(rcom);
+  printf("s");print_com(scom);
+  */
 
   /* alloc s_elms[rk] */
   s_elms = rows_calloc(size, ns_elms, sizeof(tElm0));
@@ -701,9 +706,13 @@ void load_balance_elms(tMesh *mesh)
       {
         int rq;
         rq=append_buffers_to_com(scom, &(s_elms[rk][0]),ns_elms[rk], NULL,0);
-        nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 200, WORLD);
+        MCK( nMPI_Isend_com(scom, rq, nMPIvars->TELM0, rk, 200, WORLD) );
       }
     }
+  /*
+  PRFs(": DEBUG2\n");
+  printf("s");print_com(scom);
+  */
 
   /* wait for recvs in rcom */
   MCK( nMPI_Waitall_com_recv(rcom) );
