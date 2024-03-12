@@ -22,7 +22,7 @@ double MeshVolumeIntegral(tMesh *mesh, tPat *pat, int vind,
       VolInt += NodeVolumeIntegral(node, vind, power, mode);
   }
   sum = VolInt;
-  nMPI_Allreduce(&VolInt, &sum, 1, nMPI_DOUBLE, nMPI_SUM);
+  MCK( nMPI_Allreduce(&VolInt, &sum, 1, nMPI_DOUBLE, nMPI_SUM) );
 
   return sum;
 }
@@ -120,7 +120,7 @@ double MeshMax(tMesh *mesh, tPat *pat, int vind)
 
   max = MeshMaxLoc_local(mesh, pat, vind, &Mnode, &Mijk);
   Max = max;
-  nMPI_Allreduce(&max, &Max, 1, nMPI_DOUBLE, nMPI_MAX);
+  MCK( nMPI_Allreduce(&max, &Max, 1, nMPI_DOUBLE, nMPI_MAX) );
 
   return Max;
 }
@@ -135,7 +135,7 @@ double MeshMin(tMesh *mesh, tPat *pat, int vind)
 
   min = MeshMinLoc_local(mesh, pat, vind, &Mnode, &Mijk);
   Min = min;
-  nMPI_Allreduce(&min, &Min, 1, nMPI_DOUBLE, nMPI_MIN);
+  MCK( nMPI_Allreduce(&min, &Min, 1, nMPI_DOUBLE, nMPI_MIN) );
 
   return Min;
 }
@@ -205,12 +205,12 @@ double MeshExtremumLoc__old(tMesh *mesh, tPat *pat, int vind, int findMax,
   }
 
   /* get global extr and rank into Mr */
-  if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
-  else        nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
+  if(findMax) MCK( nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC) );
+  else        MCK( nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC) );
 
   /* now we have rank and value in Mr,
      so broadcast local results from Mr->rank to all */
-  nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
+  MCK( nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank) );
 
   /* set location */
   *Mp = uloc->loc->p;
@@ -292,13 +292,13 @@ double SphereExtremumLoc(tMesh *mesh, tPat *pat, const double *xc, double r,
   }
 
   /* get global extr and rank into Mr */
-  if(findMax) nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC);
-  else        nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC);
+  if(findMax) MCK( nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MAXLOC) );
+  else        MCK( nMPI_Allreduce(mr, Mr, 1, nMPI_DOUBLE_INT, nMPI_MINLOC) );
 
   /* if we have rank and value in Mr,
      broadcast local results from Mr->rank to all */
   if(Mr->rank >= 0)
-    nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank);
+    MCK( nMPI_Bcast(&(uloc->bytes[0]), sizeof(struct Loc), nMPI_CHAR, Mr->rank) );
 
   /* set location */
   *Mp = uloc->loc->p;
@@ -494,5 +494,5 @@ void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
   CRCs[3] = nbinfoCRC;
   CRCs[4] = varsCRC;
   /* get CRCs to everybody */
-  nMPI_Bcast(CRCs,nCRCs, nMPI_UNSIGNED_LONG, 0);
+  MCK( nMPI_Bcast(CRCs,nCRCs, nMPI_UNSIGNED_LONG, 0) );
 }
