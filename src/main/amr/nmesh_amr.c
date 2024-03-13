@@ -93,6 +93,10 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_N1", "-1", "total number of inner points in dir. 1");
   AddPar("amr_N2", "-1", "total number of inner points in dir. 2");
 
+  /* pars related to finding neighbors */
+  AddPar("amr_nbsearch_n", "6", "num. of points n used to search for nbs in "
+         "func find_elmfacepoints_in_nbface");
+
   /* pars related to interpolation during mesh refinement */
   AddPar("amr_Lagrange_interp_order", "n", "interp order [n,4,6,8,...]");
   AddPar("amr_WENO_interp_order", "6", "interpolation order [4,6]");

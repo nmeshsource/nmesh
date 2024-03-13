@@ -279,6 +279,7 @@ int amr_setup_mesh(tMesh *mesh)
 
   PRFs(": The resulting mesh is:\n");
   printmesh(mesh);
+  //write_mylnodes(mesh, "mesh:", 0);
 
   return ret;
 }
