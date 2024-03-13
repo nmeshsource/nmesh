@@ -376,18 +376,20 @@ int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
 {
   double *bbox  = elm->bbox;
   int dir = f/2;
-  int n[] = { 3,3,3 };        /* we use 3 points */
-  double X0[3], LX[3], dX[3]; /* grid of points */
+  int n[] = { 6,6,6 }; /* we use 6 points */
+  double X0[3], dX[3]; /* grid of points */
   int dd;
   int i,j,k, plane, ret0, ret;
 
   /* make a grid of points, that excludes endpoints */
   for(dd=0; dd<3; dd++)
   {
+    double LX, LL;
     X0[dd] = bbox[2*dd];
-    LX[dd] = bbox[2*dd+1] - X0[dd];
-    dX[dd] = LX[dd]/(n[dd]);
-    X0[dd] += dX[dd] * 0.5;
+    LX     = bbox[2*dd+1] - X0[dd];
+    LL     = 0.00001*LX;  /* we stay LL/2 away from either endpoint */
+    dX[dd] = (LX - LL)/(n[dd] - 1);
+    X0[dd] += LL * 0.5;
   }
 
   /* loop over points */
