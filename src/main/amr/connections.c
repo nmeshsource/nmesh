@@ -387,10 +387,12 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 */
 int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
 {
-  double *bbox  = elm->bbox;
+  tMesh *mesh = elm->pat->mesh;
+  double *bbox = elm->bbox;
   int dir = f/2;
-  int n[] = { 6,6,6 }; /* we use 6 points */
-  double X0[3], dX[3]; /* grid of points */
+  int Np = Geti(amr->nbsearch_n); /* default gives Np=6 */
+  int n[] = { Np,Np,Np };         /* we use Np points */
+  double X0[3], dX[3];            /* grid of points */
   int dd;
   int i,j,k, plane, ret0, ret;
 
