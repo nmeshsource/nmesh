@@ -371,7 +371,20 @@ int connections_get_nbloc_InsidePat(int l, const char loc[NLOCS], int face,
 // equivalent to find_nodefacepoints_in_nbface:
 /* find out if any elm points on face f are on face nb_f of elm nb,
    Returns: 1 if elm,f and nb,nb_f have points in common
-            0 otherwise */
+            0 otherwise
+
+   In the past we used 3*3 points on a face, that were not close to the
+   edges (as in set_bfaces_on_patface), which could easily fail.
+
+   Now we use 6*6 points and put the outermost ones just 5e-6 from the
+   edges. This way it can better find if a face touches a nb face.
+
+   NOTE: If find_elmfacepoints_in_nbface fails to detect that two faces
+   actually touch the nb-info becomes wrong. When we then refine some ranks
+   may be able to update their nb-info, while others may not be able to do
+   so. This results in inconsistent nb-info between MPI ranks. Then we get
+   MPI errors like "MPI_ERR_TRUNCATE: message truncated".
+*/
 int find_elmfacepoints_in_nbface(tElm *elm, int f, tElm *nb, int nb_f)
 {
   double *bbox  = elm->bbox;
