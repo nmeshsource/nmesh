@@ -834,6 +834,16 @@ int interp_vars_xyz_local(tElm *elm, int nvars, int *vi, double xyz[3],
   /* return patch where xyz is in */
   return p;
 }
+/* same as interp_vars_xyz_local with only 1 var
+   IN:  elm, vi, xyz, npts, scheme, vscal     OUT: XYZ, value
+   Returns: pat number of elm, OR <0 if xyz is not in elm */
+int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
+                         int npts, int scheme, double vscal,
+                         double XYZ[3], double *value)
+{
+  return interp_vars_xyz_local(elm, 1,&vi, xyz, npts,scheme,vscal,
+                               XYZ, value);
+}
 
 
 /***********************************************************************/
