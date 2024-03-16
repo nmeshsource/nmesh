@@ -849,94 +849,82 @@ int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
                                XYZ, value,1);
 }
 
-/* use interp_vars_xyz_local to interpolate a varlist onto a sphere
-   IN: mesh, vl, r, ntheta,nphi, npts,scheme,vscal
-   OUT: Value <--array with interp values */
-int interp_VL_LG_2Sphere(tMesh *mesh, tVarList *vl,
-                         double r, int ntheta, int nphi,
-                         int npts, int scheme, double vscal,
-                         tArray *Value)
+/* use interp_vars_xyz_local to interpolate a varlist onto a set of points
+   IN: mesh, vl, xp, npts,scheme,vscal
+   OUT: Value <--array with interp values
+   value of var at point is here: Arrd(Value)[pt_index + np*vl_index] */
+int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
+                 int npts, int scheme, double vscal, tArray *Value)
 {
   int nvars = VLn(vl);
   int *vi   = &(Vind(vl, 0));
-  int n[] = {ntheta,nphi, nvars};
-  tArray *value = alloc_array(n);
-  tArray *Zb = alloc_array1d(ntheta);
-  tArray *Wq = alloc_array1d(ntheta);
+  int np = ArrN(xp[0]); /* number of points in xp */
+  tArray *value = alloc_array1d(np*nvars);
   double *Val = Arrd(Value);
   double *val = Arrd(value);
   int myrank = nMPI_rank();
-  int np = n[0]*n[1];
-  int *rank_ij = imalloc(np);
-  int *Rank_ij = imalloc(np);
-  int ij;
+  int *rank_pt = imalloc(np);
+  int *Rank_pt = imalloc(np);
+  int pt;
 
   if(ArrN(Value) < np*nvars) errorexit("Array named Value is too small!");
 
-  /* init Rank_ij,rank_ij */
-  for(ij=0; ij<np; ij++) Rank_ij[ij] = rank_ij[ij] = -1;
-
-  LG_set_Xb_Wq(Zb, Wq);
+  /* init Rank_pt,rank_pt */
+  for(pt=0; pt<np; pt++) Rank_pt[pt] = rank_pt[pt] = -1;
 
   formyelms(mesh)
   {
     tElm *elm = MyElm;
-    int i, j;
+    int ind;
 
-    for(j=0; j<n[1]; j++)
-      for(i=0; i<n[0];i++)
+    for(ind=0; ind<np; ind++)
+    {
+      double xyz[3], XYZ[3], *valpt;
+      int p;
+
+      xyz[0] = Arrd(xp[0])[ind];
+      xyz[1] = Arrd(xp[1])[ind];
+      xyz[2] = Arrd(xp[2])[ind];
+
+      valpt = val + ind; /* pointer to var0 at point ind */
+      p = interp_vars_xyz_local(elm, nvars,vi, xyz, 0, INTERP_LAGRANGE, 1.,
+                                XYZ, valpt, np);
+      /* check if elm has this point */
+      if(p>=0)
       {
-        int ind = Ind_n(i,j,0, n); /* point index */
-        double zi, th, ph;
-        double xyz[3], XYZ[3], *valij;
-        int p;
-
-        LG_2Sphere_get_zi_theta_phi(Zb, n[1], i, j, &zi, &th, &ph);
-        xyz[0] = r*sin(th)*cos(ph);
-        xyz[1] = r*sin(th)*sin(ph);
-        xyz[2] = r*zi;
-
-        valij = val + ind; /* point offset for var0 */
-        p = interp_vars_xyz_local(elm, nvars,vi, xyz, 0, INTERP_LAGRANGE, 1.,
-                                  XYZ, valij, np);
-        /* check if elm has this point */
-        if(p>=0)
-        {
-          /* signal that we have this point */
-          GEN_Pragma(omp atomic write)
-          { rank_ij[ind] = myrank; }
-        }
-      } /* end for i */
+        /* signal that we have this point */
+        GEN_Pragma(omp atomic write)
+        { rank_pt[ind] = myrank; }
+      }
+    } /* end for i */
   }
 
-  /* copy rank_ij into Rank_ij */
-  for(ij=0; ij<np; ij++) Rank_ij[ij] = rank_ij[ij];
+  /* copy rank_pt into Rank_pt */
+  for(pt=0; pt<np; pt++) Rank_pt[pt] = rank_pt[pt];
 
-  /* get max rank that has point i,j into Rank_ij */
-  MCK( nMPI_Allreduce(rank_ij, Rank_ij, np, nMPI_INT, nMPI_MAX) );
+  /* get max rank that has point i,j into Rank_pt */
+  MCK( nMPI_Allreduce(rank_pt, Rank_pt, np, nMPI_INT, nMPI_MAX) );
 
   /* zero val if point i,j on another rank, and copy val into Val */
-  for(ij=0; ij<np; ij++)
+  for(pt=0; pt<np; pt++)
   {
     int l;
-    if(Rank_ij[ij] < 0) errorexiti("could not find point %d", ij);
+    if(Rank_pt[pt] < 0) errorexiti("could not find point %d", pt);
 
     /* zero my vals if I don't own them */
-    if(Rank_ij[ij] != myrank)
-      for(l=0; l<nvars; l++) val[ij + np*l] = 0.;
+    if(Rank_pt[pt] != myrank)
+      for(l=0; l<nvars; l++) val[pt + np*l] = 0.;
 
     /* copy val into Val */
-    for(l=0; l<nvars; l++) Val[ij + np*l] = val[ij + np*l];
+    for(l=0; l<nvars; l++) Val[pt + np*l] = val[pt + np*l];
   }
 
   /* sum val from all ranks and put result into Val,
      this should give the interp val from the highest rank on each point */
-  MCK( nMPI_Allreduce(val, Val, np*n[2], nMPI_DOUBLE, nMPI_SUM) );
+  MCK( nMPI_Allreduce(val, Val, np*nvars, nMPI_DOUBLE, nMPI_SUM) );
 
-  free(Rank_ij);
-  free(rank_ij);
-  free_array(Wq);
-  free_array(Zb);
+  free(Rank_pt);
+  free(rank_pt);
   free_array(value);
   return 0;
 }
