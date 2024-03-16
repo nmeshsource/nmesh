@@ -804,12 +804,12 @@ double interp_var_local(tElm *elm, int vi, double Xb[3],
 
 /* like interp_var_local, but specify point in x,y,z-coords AND interpolate
    for a list of nvars variables
-   IN:  elm, nvars,vi, xyz, npts, scheme, vscal
+   IN:  elm, nvars,vi, xyz, npts,scheme,vscal, ds<--stride in value-array
    OUT: XYZ, value <-- C-array with values (one for each varindex in vi)
    Returns: pat number of elm, OR <0 if xyz is not in elm */
 int interp_vars_xyz_local(tElm *elm, int nvars, int *vi, double xyz[3],
                           int npts, int scheme, double vscal,
-                          double XYZ[3], double *value)
+                          double XYZ[3], double *value, int ds)
 {
   tPat *pat = elm->pat;
   int p, l;
@@ -829,7 +829,11 @@ int interp_vars_xyz_local(tElm *elm, int nvars, int *vi, double xyz[3],
 
   /* set values for all vars at XYZ */
   for(l=0; l<nvars; l++)
-    value[l] = interp_var_local(elm, vi[l], XbYbZb, npts, scheme, vscal);
+  {
+    double val = interp_var_local(elm, vi[l], XbYbZb, npts, scheme, vscal);
+    GEN_Pragma(omp atomic write)
+    { value[l*ds] = val; }
+  }
 
   /* return patch where xyz is in */
   return p;
@@ -842,7 +846,99 @@ int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
                          double XYZ[3], double *value)
 {
   return interp_vars_xyz_local(elm, 1,&vi, xyz, npts,scheme,vscal,
-                               XYZ, value);
+                               XYZ, value,1);
+}
+
+/* use interp_vars_xyz_local to interpolate a varlist onto a sphere
+   IN: mesh, vl, r, ntheta,nphi, npts,scheme,vscal
+   OUT: Value <--array with interp values */
+int interp_VL_LG_2Sphere(tMesh *mesh, tVarList *vl,
+                         double r, int ntheta, int nphi,
+                         int npts, int scheme, double vscal,
+                         tArray *Value)
+{
+  int nvars = VLn(vl);
+  int *vi   = &(Vind(vl, 0));
+  int n[] = {ntheta,nphi, nvars};
+  tArray *value = alloc_array(n);
+  tArray *Zb = alloc_array1d(ntheta);
+  tArray *Wq = alloc_array1d(ntheta);
+  double *Val = Arrd(Value);
+  double *val = Arrd(value);
+  int myrank = nMPI_rank();
+  int np = n[0]*n[1];
+  int *rank_ij = imalloc(np);
+  int *Rank_ij = imalloc(np);
+  int ij;
+
+  if(ArrN(Value) < np*nvars) errorexit("Array named Value is too small!");
+
+  /* init Rank_ij,rank_ij */
+  for(ij=0; ij<np; ij++) Rank_ij[ij] = rank_ij[ij] = -1;
+
+  LG_set_Xb_Wq(Zb, Wq);
+
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int i, j;
+
+    for(j=0; j<n[1]; j++)
+      for(i=0; i<n[0];i++)
+      {
+        int ind = Ind_n(i,j,0, n); /* point index */
+        double zi, th, ph;
+        double xyz[3], XYZ[3], *valij;
+        int p;
+
+        LG_2Sphere_get_zi_theta_phi(Zb, n[1], i, j, &zi, &th, &ph);
+        xyz[0] = r*sin(th)*cos(ph);
+        xyz[1] = r*sin(th)*sin(ph);
+        xyz[2] = r*zi;
+
+        valij = val + ind; /* point offset for var0 */
+        p = interp_vars_xyz_local(elm, nvars,vi, xyz, 0, INTERP_LAGRANGE, 1.,
+                                  XYZ, valij, np);
+        /* check if elm has this point */
+        if(p>=0)
+        {
+          /* signal that we have this point */
+          GEN_Pragma(omp atomic write)
+          { rank_ij[ind] = myrank; }
+        }
+      } /* end for i */
+  }
+
+  /* copy rank_ij into Rank_ij */
+  for(ij=0; ij<np; ij++) Rank_ij[ij] = rank_ij[ij];
+
+  /* get max rank that has point i,j into Rank_ij */
+  MCK( nMPI_Allreduce(rank_ij, Rank_ij, np, nMPI_INT, nMPI_MAX) );
+
+  /* zero val if point i,j on another rank, and copy val into Val */
+  for(ij=0; ij<np; ij++)
+  {
+    int l;
+    if(Rank_ij[ij] < 0) errorexiti("could not find point %d", ij);
+
+    /* zero my vals if I don't own them */
+    if(Rank_ij[ij] != myrank)
+      for(l=0; l<nvars; l++) val[ij + np*l] = 0.;
+
+    /* copy val into Val */
+    for(l=0; l<nvars; l++) Val[ij + np*l] = val[ij + np*l];
+  }
+
+  /* sum val from all ranks and put result into Val,
+     this should give the interp val from the highest rank on each point */
+  MCK( nMPI_Allreduce(val, Val, np*n[2], nMPI_DOUBLE, nMPI_SUM) );
+
+  free(Rank_ij);
+  free(rank_ij);
+  free_array(Wq);
+  free_array(Zb);
+  free_array(value);
+  return 0;
 }
 
 
