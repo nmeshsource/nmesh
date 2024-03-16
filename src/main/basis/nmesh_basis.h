@@ -163,6 +163,8 @@ double basis_var_interp_xyz(tMesh *mesh, int ivar, double xyz[3],
                             double Basis(int k, double x, int np,
                                          const double *x_p,
                                          const double *w_interp));
+int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
+                 int npts, int scheme, double vscal, tArray *Value);
 double interp_var_xyz(tMesh *mesh, int ivar, const double xyz[3],
                       int np, int scheme, double vscal);
 double interp_var_x_y_z(tMesh *mesh, int ivar, double x,double y,double z,

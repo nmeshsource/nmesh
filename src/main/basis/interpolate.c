@@ -850,6 +850,7 @@ int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
 }
 
 /* use interp_vars_xyz_local to interpolate a varlist onto a set of points
+   contained in xp[3]
    IN: mesh, vl, xp, npts,scheme,vscal
    OUT: Value <--array with interp values
    value of var at point is here: Arrd(Value)[pt_index + np*vl_index] */
