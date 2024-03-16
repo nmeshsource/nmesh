@@ -802,16 +802,17 @@ double interp_var_local(tElm *elm, int vi, double Xb[3],
   return interpolate_var_local(elm, vi, Xb, npts, scheme, vscal);
 }
 
-/* same as interp_var_local, but specify point in x,y,z-coords
-   IN:  elm, vi, xyz, npts, scheme, vscal
-   OUT: XYZ, value
+/* like interp_var_local, but specify point in x,y,z-coords AND interpolate
+   for a list of nvars variables
+   IN:  elm, nvars,vi, xyz, npts, scheme, vscal
+   OUT: XYZ, value <-- C-array with values (one for each varindex in vi)
    Returns: pat number of elm, OR <0 if xyz is not in elm */
-int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
-                         int npts, int scheme, double vscal,
-                         double XYZ[3], double *value)
+int interp_vars_xyz_local(tElm *elm, int nvars, int *vi, double xyz[3],
+                          int npts, int scheme, double vscal,
+                          double XYZ[3], double *value)
 {
   tPat *pat = elm->pat;
-  int p;
+  int p, l;
   double XbYbZb[3];
 
   /* check if xyz is in pat, and set XYZ */
@@ -823,9 +824,12 @@ int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
   /* if XYZ is not in elm return a more neg. number */
   if(!XYZ_is_in_node(elm, XYZ)) return -p-2;
 
-  /* set value at XYZ */
+  /* set XbYbZb */
   XbYbZb_of_XYZ(elm, XbYbZb, XYZ);
-  *value = interp_var_local(elm, vi, XbYbZb, npts, scheme, vscal);
+
+  /* set values for all vars at XYZ */
+  for(l=0; l<nvars; l++)
+    value[l] = interp_var_local(elm, vi[l], XbYbZb, npts, scheme, vscal);
 
   /* return patch where xyz is in */
   return p;
