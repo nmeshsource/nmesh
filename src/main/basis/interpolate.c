@@ -873,7 +873,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   if(ArrN(Value) < np*nvars) errorexit("Array named Value is too small!");
 
   /* init Rank_pt,rank_pt */
-  for(pt=0; pt<np; pt++) Rank_pt[pt] = rank_pt[pt] = -1;
+  for(pt=0; pt<np; pt++) Rank_pt[pt] = rank_pt[pt] = INT_MAX;
 
   formyelms(mesh)
   {
@@ -892,6 +892,8 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
       valpt = val + ind; /* pointer to var0 at point ind */
       p = interp_vars_xyz_local(elm, nvars,vi, xyz, 0, INTERP_LAGRANGE, 1.,
                                 XYZ, valpt, np);
+      /* NOTE: if several threads have the point, we get the interp result from
+               whichever thread writes last! */
       /* check if elm has this point */
       if(p>=0)
       {
@@ -905,10 +907,12 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   /* copy rank_pt into Rank_pt */
   for(pt=0; pt<np; pt++) Rank_pt[pt] = rank_pt[pt];
 
-  /* get max rank that has point i,j into Rank_pt */
-  MCK( nMPI_Allreduce(rank_pt, Rank_pt, np, nMPI_INT, nMPI_MAX) );
+  /* get min rank that has point pt into Rank_pt */
+  MCK( nMPI_Allreduce(rank_pt, Rank_pt, np, nMPI_INT, nMPI_MIN) );
+  /* the val at point pt is later taken from Rank_pt, i.e. we take val from
+     lowest rank */
 
-  /* zero val if point i,j on another rank, and copy val into Val */
+  /* zero val if point pt is on another rank, and copy val into Val */
   for(pt=0; pt<np; pt++)
   {
     int l;
