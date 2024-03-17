@@ -993,8 +993,8 @@ void print_com(tCom *com)
   for(int i=0; i<n_rq; i++)
   {
     printf("%d: send: buf=%d,%p stat=%d rq=%d",
-           i, com->send_buflen[i], com->send_buf[i],
-           com->send_stat[i], (void *) com->send_rq[i]);
+           i, com->send_buflen[i], (void *) com->send_buf[i],
+           com->send_stat[i], com->send_rq[i]);
     printf("  recv: buf=%d,%p stat=%d rq=%d\n",
            com->recv_buflen[i], (void *) com->recv_buf[i],
            com->recv_stat[i], com->recv_rq[i]);
