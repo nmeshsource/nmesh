@@ -830,9 +830,11 @@ int interp_vars_xyz_local(tElm *elm, int nvars, int *vi, double xyz[3],
   /* set values for all vars at XYZ */
   for(l=0; l<nvars; l++)
   {
-    double val = interp_var_local(elm, vi[l], XbYbZb, npts, scheme, vscal);
+    //double val = interp_var_local(elm, vi[l], XbYbZb, npts, scheme, vscal);
+    //GEN_Pragma(omp atomic write)
+    //value[l*ds] = val;
     GEN_Pragma(omp atomic write)
-    { value[l*ds] = val; }
+    value[l*ds] = interp_var_local(elm, vi[l], XbYbZb, npts, scheme, vscal);
   }
 
   /* return patch where xyz is in */
@@ -895,7 +897,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
       {
         /* signal that we have this point */
         GEN_Pragma(omp atomic write)
-        { rank_pt[ind] = myrank; }
+        rank_pt[ind] = myrank;
       }
     } /* end for i */
   }
