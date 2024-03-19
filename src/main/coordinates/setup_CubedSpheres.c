@@ -801,12 +801,32 @@ int add_1_CubedSphere_pat_bbox(tMesh *mesh, int dom, int type,
                                int stretch, int SigFunc, double *xc,
                                double Din, double Dout, double bbox[6])
 {
-  int amr_n0 = Geti(Par("amr_n0"));
-  int amr_n1 = Geti(Par("amr_n1"));
-  int amr_n2 = Geti(Par("amr_n2"));
-  int n[] = { amr_n0, amr_n1, amr_n2 };
+  int n[] =    { Geti(Par("amr_n0")),
+                 Geti(Par("amr_n1")),
+                 Geti(Par("amr_n2")) };
+  int n_CS[] = { Geti(Par("amr_CubedSphere_n0")),
+                 Geti(Par("amr_CubedSphere_n1")),
+                 Geti(Par("amr_CubedSphere_n2")) };
+  int n_Sh[] = { Geti(Par("amr_Shell_n0")),
+                 Geti(Par("amr_Shell_n1")),
+                 Geti(Par("amr_Shell_n2")) };
   tPat *pat;
   int d;
+
+  /* see if we want to override n */
+  switch(type)
+  {
+  case innerCubedSphere:
+  case outerCubedSphere:
+    for(d=0; d<3; d++) if(n_CS[d]>0) n[d] = n_CS[d];
+    break;
+  case CubedShell:
+    for(d=0; d<3; d++) if(n_Sh[d]>0) n[d] = n_Sh[d];
+    break;
+  }
+  //PRF;printf(": n =");
+  //for(d=0; d<3; d++) printf(" %d", n[d]);
+  //printf(":\n");
 
   /* make new patch */
   pat = add_patch(mesh, bbox, NULL, n, 0);

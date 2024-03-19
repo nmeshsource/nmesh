@@ -36,6 +36,12 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_BoxMesh_npatches", "0", "number of BoxMesh patches "
          "(0 means par is no set");
   AddPar("amr_BoxMesh_dout", "1", "box radius");
+  AddPar("amr_CubedSphere_n0", "-1", "number of points in dir. 0");
+  AddPar("amr_CubedSphere_n1", "-1", "number of points in dir. 1");
+  AddPar("amr_CubedSphere_n2", "-1", "number of points in dir. 2");
+  AddPar("amr_Shell_n0", "-1", "number of points in dir. 0");
+  AddPar("amr_Shell_n1", "-1", "number of points in dir. 1");
+  AddPar("amr_Shell_n2", "-1", "number of points in dir. 2");
   AddPar("amr_CubedSphere_ndomains", "0", "number of CubedSphere domains");
   AddPar("amr_CubedSphere_domain_nAB", "1 1 1", "number of domain divisions "
          "in x, y, and z-dirs");
