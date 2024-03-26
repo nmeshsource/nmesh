@@ -169,7 +169,7 @@ void sphericalDF_copy_to_doubleCoveredPoints(tArray *AsDF)
   }
 }
 
-
+/* test for sphericalDF_2dIntegral */
 void sphericalDF_test(void)
 {
   int n[3];

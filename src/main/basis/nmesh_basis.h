@@ -206,3 +206,9 @@ double Re_sYlm(int l, int m, int s, double theta, double phi);
 double Im_sYlm(int l, int m, int s, double theta, double phi);
 void ReIm_sYlm(int l, int m, int s, double theta, double phi,
                double *Re_sYlm, double *Im_sYlm);
+
+/* sphericalDF.c */
+void sphericalDF_theta_phi(int i, int j, const int *n,
+                           double *theta_i, double *phi_j);
+void sphericalDF_2dIntegral(tArray *auijk, tArray *aUk);
+void sphericalDF_copy_to_doubleCoveredPoints(tArray *AsDF);
