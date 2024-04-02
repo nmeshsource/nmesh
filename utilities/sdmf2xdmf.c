@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
   }
 
   /* find last / in dir_vname */
+  p1 = NULL;
   pstr = dir_vname;
   while(pstr = strstr(pstr, "/"))
   {
