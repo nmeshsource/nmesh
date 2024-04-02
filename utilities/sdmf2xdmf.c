@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
   FILE *fxmf;
   int slen;
   char line[STRLEN];
-  char *pstr;
+  char *pstr, *p1, *p2;
   char str[STRLEN];
   char str1[STRLEN];
   char str2[STRLEN];
@@ -38,26 +38,35 @@ int main(int argc, char *argv[])
   }
   textname = argv[1];
 
-  /* get vname, suffix */
+  /* find location of two last dots in file name */
   strcpy(vname, textname);
-  pstr = strstr(vname, ".");
-  if(!pstr)
+  p1 = p2 = NULL;
+  pstr = vname;
+  while(pstr = strstr(pstr, "."))
   {
-    printf("file %s has no suffix\n", textname);
-    return -1;
+    p1 = p2;   /* pointer to 2nd to last . */
+    p2 = pstr; /* pointer to last . */
+    pstr++;    /* go to char after . */
   }
-  pstr[0] = 0;
-  pstr++;
-  strcpy(suffix, pstr);
-  pstr = strstr(suffix, ".");
-  if(!pstr)
+  if(!p2)
   {
     printf("file %s has no extension after suffix\n", textname);
     return -1;
   }
-  pstr[0] = 0;
-  pstr++;
-  if(strcmp(pstr, "txt"))
+  if(!p1)
+  {
+    printf("file %s has no suffix\n", textname);
+    return -1;
+  }
+  /* set vname, suffix */
+  //printf("p1=%s\n", p1);
+  //printf("p2=%s\n", p2);
+  p1[0] = 0;
+  p2[0] = 0;
+  strcpy(suffix, p1+1);
+  //printf("vname=%s\n", vname);
+  //printf("suffix=%s\n", suffix);
+  if(strcmp(p2+1, "txt"))
   {
     printf("file extension of %s is not txt\n", textname);
     return -1;
