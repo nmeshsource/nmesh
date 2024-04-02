@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
     dirname[0] = 0;
     strcpy(vname, dir_vname);
   }
-  printf("dirname=%s\n", dirname);
-  printf("vname=%s\n", vname);
+  //printf("dirname=%s\n", dirname);
+  //printf("vname=%s\n", vname);
 
   /* open textname */
   ftxt = fopen(textname, "r");
