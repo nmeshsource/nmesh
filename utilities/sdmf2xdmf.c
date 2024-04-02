@@ -22,6 +22,8 @@ int main(int argc, char *argv[])
   char str[STRLEN];
   char str1[STRLEN];
   char str2[STRLEN];
+  char dir_vname[2000];
+  char dirname[2000];
   char vname[1000];
   char suffix[1000];
   char fname[STRLEN];
@@ -39,9 +41,9 @@ int main(int argc, char *argv[])
   textname = argv[1];
 
   /* find location of two last dots in file name */
-  strcpy(vname, textname);
+  strcpy(dir_vname, textname);
   p1 = p2 = NULL;
-  pstr = vname;
+  pstr = dir_vname;
   while(pstr = strstr(pstr, "."))
   {
     p1 = p2;   /* pointer to 2nd to last . */
@@ -58,19 +60,41 @@ int main(int argc, char *argv[])
     printf("file %s has no suffix\n", textname);
     return -1;
   }
-  /* set vname, suffix */
+  /* set dir_vname, suffix */
   //printf("p1=%s\n", p1);
   //printf("p2=%s\n", p2);
   p1[0] = 0;
   p2[0] = 0;
   strcpy(suffix, p1+1);
-  //printf("vname=%s\n", vname);
+  //printf("dir_vname=%s\n", dir_vname);
   //printf("suffix=%s\n", suffix);
   if(strcmp(p2+1, "txt"))
   {
     printf("file extension of %s is not txt\n", textname);
     return -1;
   }
+
+  /* find last / in dir_vname */
+  pstr = dir_vname;
+  while(pstr = strstr(pstr, "/"))
+  {
+    p1 = pstr;
+    pstr++;
+  }
+  /* set dirname, vname */
+  if(p1)
+  {
+    p1[0] = 0;
+    strcpy(dirname, dir_vname);
+    strcpy(vname, p1+1);
+  }
+  else
+  {
+    dirname[0] = 0;
+    strcpy(vname, dir_vname);
+  }
+  printf("dirname=%s\n", dirname);
+  printf("vname=%s\n", vname);
 
   /* open textname */
   ftxt = fopen(textname, "r");
