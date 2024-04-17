@@ -12,6 +12,7 @@ typedef struct tOUTPUT {
 
     
 /* output.c */
+int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt);
 int mesh_output(tMesh *mesh);
 int write_mesh(tMesh *mesh, int Iteration, double Time);
 int TimeForMeshOutput_vl(tMesh *mesh, tVarList *vl);

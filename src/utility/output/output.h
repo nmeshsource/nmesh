@@ -25,7 +25,6 @@ typedef struct tOUTPARS {
 
 
 /* output.c */
-int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt);
 void output_set_regions_in_outpars(tMesh *mesh, tOutpars *outpars);
 int output_keep_elm(tElm *elm, tOutpars *outpars);
 
