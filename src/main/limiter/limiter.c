@@ -151,6 +151,7 @@ int limiter_MRS(tNode *node, tVarList *vl)
       pr_nodename(node);
       printf(": n=%d %d %d: vli=%d iq=%d %s\n",
              n[0],n[1],n[2], vli, iq, VarName(iq));
+      if(!finit(qbar)) var_finite(node, iq, 0);
       printf("qbar=%g theta_i=%g\n", qbar, theta_i);
       errorexit("qbar or theta_i is not finite!");
     }

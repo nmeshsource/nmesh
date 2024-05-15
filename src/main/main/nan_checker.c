@@ -122,7 +122,8 @@ int var_finite(tNode *node, int vi, int errexit)
   {
     printf("node: %s,  var%d %s\n",
            nname, vi, vname);
-    errorexiti("not finite at ind=%d", ind);
+    if(errexit) errorexiti("not finite at ind=%d", ind);
+    else        printf("not finite at ind=%d\n", ind);
   }
 
   /* check surfaces */
@@ -141,7 +142,8 @@ int var_finite(tNode *node, int vi, int errexit)
       {
         printf("node: %s,  var%d %s, f%d mysurf\n",
                nname, vi, vname, f);
-        errorexiti("not finite at ind=%d", ind);
+        if(errexit) errorexiti("not finite at ind=%d", ind);
+        else        printf("not finite at ind=%d\n", ind);
       }
     }
     if(nsa)
@@ -155,7 +157,8 @@ int var_finite(tNode *node, int vi, int errexit)
         {
           printf("node: %s,  var%d %s, f%d nbsurf[%d]\n",
                  nname, vi, vname, f, ni);
-          errorexiti("not finite at ind=%d", ind);
+          if(errexit) errorexiti("not finite at ind=%d", ind);
+          else        printf("not finite at ind=%d\n", ind);
         }
       }
     }
@@ -167,7 +170,8 @@ int var_finite(tNode *node, int vi, int errexit)
       {
         printf("node: %s,  var%d %s, f%d ajsurf\n",
                nname, vi, vname, f);
-        errorexiti("not finite at ind=%d", ind);
+        if(errexit) errorexiti("not finite at ind=%d", ind);
+        else        printf("not finite at ind=%d\n", ind);
       }
     }
   }
