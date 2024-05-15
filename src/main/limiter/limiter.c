@@ -144,15 +144,16 @@ int limiter_MRS(tNode *node, tVarList *vl)
 
     /* find node average qbar */
     qbar = var_nodeaverage(node, iq);
-//printf("qbar=%g theta_i=%g\n", qbar, theta_i);
-//exit(88);
-if(!finit(qbar) || !finit(theta_i))
-{
-printf("qbar=%g theta_i=%g\n", qbar, theta_i);
-errorexit("qbar or theta_i is not finite!");
-//abort();
-//exit(8);
-}
+
+    if(!finit(qbar) || !finit(theta_i))
+    {
+      int *n = node->n;
+      pr_nodename(node);
+      printf(": n=%d %d %d: vli=%d iq=%d %s\n",
+             n[0],n[1],n[2], vli, iq, VarName(iq));
+      printf("qbar=%g theta_i=%g\n", qbar, theta_i);
+      errorexit("qbar or theta_i is not finite!");
+    }
     /* now limit q */
     forpoints(node, ijk)
       q[ijk] = qbar + theta_i*(q[ijk] - qbar);
