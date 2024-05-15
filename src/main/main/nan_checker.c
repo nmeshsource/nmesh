@@ -100,9 +100,9 @@ int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
 }
 
 
-/* check if a var is finite
+/* check if a var is finite, errorexit if errexit=1
    return values: -1 if finite, array index if not finite */
-int var_finite(tNode *node, int vi)
+int var_finite(tNode *node, int vi, int errexit)
 {
   tMesh *mesh = node->pat->mesh;
   char *vname = VarName(vi);
@@ -185,7 +185,7 @@ int vl_finite(tNode *node, tVarList *vl)
 
   forvl(vl, vli)
   {
-    int idx = var_finite(node, Vind(vl, vli));
+    int idx = var_finite(node, Vind(vl, vli), 1);
     if(idx>=0) ind = idx;
   }
   return ind;

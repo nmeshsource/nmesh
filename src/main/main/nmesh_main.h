@@ -330,7 +330,7 @@ struct tTIMER *timer_stop(const char *name);
 
 /* nan_checker.c */
 int array_finite(tArray *a, char *name, int ijk[3]);
-int var_finite(tNode *node, int vi);
+int var_finite(tNode *node, int vi, int errexit);
 int vl_finite(tNode *node, tVarList *vl);
 int vl_finite_mesh(tVarList *vl);
 int nan_checker(tMesh *mesh);
