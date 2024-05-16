@@ -540,7 +540,8 @@ double rec1d_m_WENO3_2g(int n, const double *u, int im, double u_scale)
      else        { w0 = 1./c0;  w1 = -c1*w0; }
    where c0 = 3/4, c1 = 1-c0 */
 double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
-                           double u_scale, double s1, double s2)
+                           double u_scale, double s1, double s2,
+                           int opt)
 {
   int top = (i0>0);
   int sign = 2*top - 1;
@@ -581,10 +582,21 @@ double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
     /* w1 -> w1 * f(s), where f(s)=0 if s<s1 or s>=s2, otherwise f(s)=1 */
     if(s<s1 || s>=s2) w1 = 0.;
 
-/*
-if(w1==0.)
-printf("u[%d]=%g d1=%g d2=%g d3=%g s=%g\n", i0, u[i0], d1,d2,d3, s);
-*/
+    /* options to e.g. take signs of d1 and d2 into account */
+    switch(opt)
+    {
+    case 1:
+      if(d1*d2<=0.) w1 = 0.;
+      break;
+    case -1:
+      if(d1*d2>=0.) w1 = 0.;
+      break;
+    }
+    /*
+    if(w1==0.)
+      printf("u[%d]=%g d1=%g d2=%g d3=%g s=%g\n", i0, u[i0], d1,d2,d3, s);
+    */
+
     /* get new w0 */
     w0 = 1. - w1;
   }
@@ -596,7 +608,8 @@ printf("u[%d]=%g d1=%g d2=%g d3=%g s=%g\n", i0, u[i0], d1,d2,d3, s);
 /* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */
 void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
-                                 double u_scale, double s1, double s2)
+                                 double u_scale, double s1, double s2,
+                                 int opt)
 {
   int i0;
 
@@ -605,7 +618,7 @@ void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
 
   for(i0=0; i0<n; i0+=n-1)
   {
-    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, u_scale, s1, s2);
+    u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, u_scale, s1, s2, opt);
   }
 }
 
