@@ -585,11 +585,14 @@ double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
     /* options to e.g. take signs of d1 and d2 into account */
     switch(opt)
     {
-    case 1:
-      if(d1*d2<=0.) w1 = 0.;
+    case -1:   // Fixme: OPTIMIZE by checking opt=-1 at top of func
+      w1 = 0.; /* no extrap if opt=-1. */
       break;
-    case -1:
-      if(d1*d2>=0.) w1 = 0.;
+    case 1:
+      if(d1*d2<=0.) w1 = 0.; /* no extrap if signs differ */
+      break;
+    case 2:
+      if(d1*d2>=0.) w1 = 0.; /* no extrap if signs same */
       break;
     }
     /*

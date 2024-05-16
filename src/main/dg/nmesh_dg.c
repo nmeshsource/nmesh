@@ -39,7 +39,7 @@ int nmesh_dg(tMesh *mesh)
   AddPar("fv_divf_extrap_s2", "DBL_MAX", "use 0th order extrapolation if "
          "|u1-u0|/|u2-u1| > 0.75 s2, [1e50, 1e5, ...]");
   AddPar("fv_divf_extrap_opt", "0", "possible options to fall back to 0th "
-         "order extrapolation [0,1,-1] (see rec1d_compute_1s1_u)");
+         "order extrapolation [0,-1,1,2] (see rec1d_compute_1s1_u)");
   AddPar("fv_divf_use_only_right_flux", "yes", "if yes we only compute "
          "fnumR_{i} for gridpoint i and assume fnumL_{i} = -fnumR_{i-1}. "
          "Otherwise we also compute fnumL_{i} [yes,no]");
