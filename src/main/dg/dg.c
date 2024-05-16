@@ -357,6 +357,7 @@ int dg_set_DGglobals(tMesh *mesh)
   /* set some more par values */
   DGglobals->fv_divf_extrap_s1 = Getd(Par("fv_divf_extrap_s1"));
   DGglobals->fv_divf_extrap_s2 = Getd(Par("fv_divf_extrap_s2"));
+  DGglobals->fv_divf_extrap_opt = Geti(Par("fv_divf_extrap_opt"));
   DGglobals->fv_divf_use_only_right_flux
     = Getb(Par("fv_divf_use_only_right_flux"));
 
@@ -387,6 +388,8 @@ int dg_print_DGglobals(tMesh *mesh)
          DGglobals->fv_divf_extrap_s1);
   printf(" DGglobals->fv_divf_extrap_s2 = %g\n",
          DGglobals->fv_divf_extrap_s2);
+  printf(" DGglobals->fv_divf_extrap_opt = %d\n",
+         DGglobals->fv_divf_extrap_opt);
   printf(" DGglobals->fv_divf_use_only_right_flux = %d\n",
          DGglobals->fv_divf_use_only_right_flux);
 

@@ -38,7 +38,8 @@ typedef struct {
   int fv_surface_interp_mode; /* surf. interp. mode from fv_surface_interp */
   double fv_WENOm3_optw[2];   /* optimal weights for WENOm3 */
   double fv_divf_extrap_s1;   /* value of par fv_divf_extrap_s1 */
-  double fv_divf_extrap_s2;   /* 2nd number in par fv_divf_extrap_s1 */
+  double fv_divf_extrap_s2;   /* value of par fv_divf_extrap_s2 */
+  int fv_divf_extrap_opt;     /* value of par fv_divf_extrap_opt */
   int fv_divf_use_only_right_flux; //Boolean val of par fv_divf_use_only_right_flux
 } tDGglobals;
 

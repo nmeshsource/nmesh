@@ -83,7 +83,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
   double extrap_s1 = DGglobals->fv_divf_extrap_s1;
   double extrap_s2 = DGglobals->fv_divf_extrap_s2;
-
+  int extrap_opt = DGglobals->fv_divf_extrap_opt;
 
   /* set func ptrs for rec. */
   switch(DGglobals->fv_rec_mode)
@@ -475,7 +475,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
           {
             double *df = di0fi0[l];
             rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale,
-                                        extrap_s1, extrap_s2, 0);
+                                        extrap_s1, extrap_s2, extrap_opt);
           }
 
         /* final loop over points in dir */
@@ -552,6 +552,7 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
   int extrap_mode = DGglobals->fv_divf_extrap_mode;
   double extrap_s1 = DGglobals->fv_divf_extrap_s1;
   double extrap_s2 = DGglobals->fv_divf_extrap_s2;
+  int extrap_opt = DGglobals->fv_divf_extrap_opt;
 
   if(norms_and_sqrtgdiag_on_midpoints)
   {
@@ -936,7 +937,7 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
           {
             double *dfJ = di0fi0J[l];
             rec1d_uface_to_uin_1_Carray(n[dir], dfJ, 0, q_scale,
-                                        extrap_s1, extrap_s2, 0);
+                                        extrap_s1, extrap_s2, extrap_opt);
           }
 
         /* final loop over points in dir */
