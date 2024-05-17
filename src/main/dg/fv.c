@@ -982,18 +982,25 @@ void printFVinfo(tFVinfo *fv)
   PRFs(": ");
   printf("nq=%d npts=%d q_scale=%g\n", fv->nq, fv->npts, fv->q_scale);
 
-  for(l=0; l<=fv->nq; l++)
-  {
-    printf("qc[%d] =", l);
-    for(i=0; i<fv->npts; i++) printf(" %g", fv->qc[l][i]);
-    printf("\n");
-  }
+  if(fv->qc)
+    for(l=0; l<fv->nq; l++)
+    {
+      printf("qc[%d] =", l);
+      for(i=0; i<fv->npts; i++) printf(" %g", fv->qc[l][i]);
+      printf("\n");
+    }
 
   printf("im=%d\n", fv->im);
-  printf("qm_p =");
-  for(l=0; l<=fv->nq; l++) printf(" %g", fv->qm_p[l]);
-  printf("\n");
-  printf("qm_m =");
-  for(l=0; l<=fv->nq; l++) printf(" %g", fv->qm_m[l]);
-  printf("\n");
+  if(fv->qm_p)
+  {
+    printf("qm_p =");
+    for(l=0; l<fv->nq; l++) printf(" %g", fv->qm_p[l]);
+    printf("\n");
+  }
+  if(fv->qm_m)
+  {
+    printf("qm_m =");
+    for(l=0; l<fv->nq; l++) printf(" %g", fv->qm_m[l]);
+    printf("\n");
+  }
 }
