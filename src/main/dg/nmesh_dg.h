@@ -82,7 +82,7 @@ typedef struct tFVINFO {
   int nq;        /* num of q-vars, (q can be u) */
   double **qc;   /* qc[l][i0] = val. of var q_l at grid point i0 */
   int npts;      /* number of grid points, i.e. n[dir] */
-  int q_scale;   /* scale of q */
+  double q_scale; /* scale of q */
   double (*rec1d_p)(int n, const double *q, int im, double q_scale);
   double (*rec1d_m)(int n, const double *q, int im, double q_scale);
   int im;        /* midpoint where we reconstruct vars */
@@ -157,6 +157,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
              void (*numflux)(tDGinfo *d));
+void printFVinfo(tFVinfo *fv);
 
 /* dissipation.c */
 void dissipation_add_KO4(tNode *node, tVarList *vlr, tVarList *vlu,

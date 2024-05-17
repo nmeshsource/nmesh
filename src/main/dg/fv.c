@@ -26,7 +26,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
   int npts    = fv->npts;
   int im      = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
-  int q_scale = fv->q_scale;
+  double q_scale = fv->q_scale;
   int l;
 
   /* interpolate fields qc towards the midpoint at im */
@@ -972,4 +972,28 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
     free(Xbm);
     free_DGinfo(d);
   }
+}
+
+
+/* print */
+void printFVinfo(tFVinfo *fv)
+{
+  int l, i;
+  PRFs(": ");
+  printf("nq=%d npts=%d q_scale=%g\n", fv->nq, fv->npts, fv->q_scale);
+
+  for(l=0; l<=fv->nq; l++)
+  {
+    printf("qc[%d] =", l);
+    for(i=0; i<fv->npts; i++) printf(" %g", fv->qc[l][i]);
+    printf("\n");
+  }
+
+  printf("im=%d\n", fv->im);
+  printf("qm_p =");
+  for(l=0; l<=fv->nq; l++) printf(" %g", fv->qm_p[l]);
+  printf("\n");
+  printf("qm_m =");
+  for(l=0; l<=fv->nq; l++) printf(" %g", fv->qm_m[l]);
+  printf("\n");
 }
