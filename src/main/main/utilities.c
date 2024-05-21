@@ -889,10 +889,11 @@ void *pmalloc(int n)
 
 /* malloc memory (and check out of memory) for VLA matrix or tensor.
    use it like this:
+   double (*V) = dtensor(nx);               // gives V[nx]
    double (*M)[ny] = dtensor(nx*ny);        // gives M[nx][ny]
    double (*T)[ny][nz] = dtensor(nx*ny*nz); // gives T[nx][ny][nz]
    //...
-   free(T); free(M); */
+   free(T); free(M); free(V); */
 void *dtensor(size_t nentries)
 {
   void *p = malloc(nentries * sizeof(double));
