@@ -372,3 +372,129 @@ accurate, and then we do not need J and \sqrt{\gamma^{kb,kb} on the
 midpoints at all.
 Does anybody do flux reconstruction instead of primitive (or conservative)
 variable reconstruction? Search literature...
+
+
+
+=========================================================================
+
+Important fv parameters in main/dg/nmesh_dg.c
+=============================================
+
+fv_rec: how we reconstruct u at midpoint if we use fv
+======
+*In the interior we can reconstruct using WENO3, WENO5 or WENOZ.
+*In our 1d shock tube tests WENOZ was better than WENO5 and WENO3.
+
+Useful values for fv_rec
+========================
+-----------------
+fv_rec = WENOmZ_2
+-----------------
+ 0       1       2       3       4       5       6 <-- gridpoint number i
+ |   |       |       |       |       |       |   |
+ o x |   o   |   o   |   o   |   o   |   o   | x o
+ |u l|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
+  ^ ^ ^    ^  ^     ^ ^     ^
+  | |  \  /    \   /   \   /
+  | |  WENO3   WENOZ   WENOZ
+  | linear interpolation using the gridpoints 0 and 1: l=(u_0 + u_1)/2
+  value at gridpoint 0: u=u_0
+
+-----------------
+fv_rec = WENOmZ_1
+-----------------
+ 0       1       2       3       4       5       6 <-- gridpoint number i
+ |   |       |       |       |       |       |   |
+ o x |   o   |   o   |   o   |   o   |   o   | x o
+ |u u|mW   pW|mW   pW|mW   pW|mW   pW|mW   pW|l u|
+  ^ ^ ^    ^  ^     ^ ^     ^
+  | |  \  /    \   /   \   /
+  | |  WENO3   WENOZ   WENOZ
+  | value at gridpoint 0: u=u_0
+  value at gridpoint 0: u=u_0
+
+Once we have the u's on both sides of all midpoints, we compute the
+numerical fluxes f*(u) at all midpoints.
+Differences between adjacent numerical fluxes give divf at the points:
+ | x |   o   |   o   |   o   |   o   |   o   | x |
+But we need divf at the gridpoints:
+ o   |   o   |   o   |   o   |   o   |   o   |   o
+ 0       1       2       3       4       5       6
+Hence we have to decide how we get divf_{i=0} on the left o (at i=0) from x.
+This is done with fv_divf_extrap*:
+
+fv_divf_extrap*: how we extrapolate from x to o
+===============
+
+Useful values for fv_divf_extrap*
+=================================
+-------------------
+fv_divf_extrap = no
+-------------------
+set divf_{i=0} = divf at x
+
+----------------------------------
+fv_divf_extrap     = dnfn_extrap1
+fv_divf_extrap_s1  = 0
+fv_divf_extrap_s2  = DBL_MAX
+fv_divf_extrap_opt = 0
+----------------------------------
+set divf_{i=0} = w (divf at x) + (1-w) (divf at o)    where w=4/3
+
+----------------------------------
+fv_divf_extrap     = dnfn_extrap1
+fv_divf_extrap_s1  = 0.5
+fv_divf_extrap_s2  = 2.5
+fv_divf_extrap_opt = 1
+----------------------------------
+set divf_{i=0} = w (divf at x) + (1-w) (divf at o)
+where
+    { 1    if |divf_1-divf_0|/|divf_2-divf_1| < 0.75 s1
+w = { 1    if |divf_1-divf_0|/|divf_2-divf_1| > 0.75 s2
+    { 1    if (divf_1-divf_0) and (divf_2-divf_1) have different signs
+    { 3/4  otherwise
+
+
+When dg and fv nodes meet, they usually do not have any surface gridpoints
+in common. So we need to interpolate when we pass u values to the neighbor
+node. This is determined by the par fv_surface_interp.
+
+fv_surface_interp: how we interpolate within node surface
+=================
+
+Useful values for fv_surface_interp
+===================================
+--------------------------
+fv_surface_interp = linear
+--------------------------
+*use linear interpolation in fv nodes, which is very robust if the fv
+ node contains a shock
+*use high order Lagrange interpolation in dg nodes, because they are not
+ supposed to contain shocks
+
+-----------------------------
+fv_surface_interp = parabolic
+-----------------------------
+*use parabolic interpolation in fv nodes
+*use high order Lagrange interpolation in dg nodes, because they are not
+ supposed to contain shocks
+
+FIXME: We should implement
+fv_surface_interp = WENO4
+*WENO4 should be more accurate and better for shocks than parabolic
+
+
+Some observations with GRHD
+===========================
+*If fv_rec=WENOmZ_2 and fv_divf_extrap=dnfn_extrap1 we can expect 2nd order
+ convergence at inter-node boundaries. All other options probably give only
+ 1st order convergence at inter-node boundaries.
+*When all nodes are switched to fv and all have the same size and number of
+ gridpoints and if fv_divf_extrap=no, then fv_rec=WENOmZ_1 conserves mass better
+ than fv_rec=WENOmZ_2.
+*BUT when dg and fv nodes meet, mass conservation gets a lot worse. In this
+ case fv_rec=WENOmZ_2 seems to be a bit better.
+ BUT maybe mass conservation could be improved if we implement
+ fv_surface_interp=WENO4
+*If we use fv_rec=WENOmZ_2 both fv_divf_extrap=dnfn_extrap1 and
+ fv_divf_extrap=no perform about equally well in terms of mass conservation
