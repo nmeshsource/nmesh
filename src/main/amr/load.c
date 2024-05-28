@@ -322,7 +322,7 @@ void loadtimer_start(tNode *node)
   }
 }
 
-/* start load timer and add time spent to counter dat->info->load_TimeIn_s*/
+/* stop load timer and add time spent to counter dat->info->load_TimeIn_s */
 void loadtimer_stop(tNode *node)
 {
   tDat *dat = node->dat;
@@ -344,6 +344,17 @@ void loadtimer_stop(tNode *node)
   }
 }
 
+/* reset load timers on all nodes */
+void loadtimer_reset_mesh(tMesh *mesh)
+{
+  formylnodes(mesh) loadtimer_reset(MyLnode);
+}
+/* These 2 are not a good idea:
+void loadtimer_start_mesh(tMesh *mesh) { formylnodes(mesh) loadtimer_start(MyLnode); }
+void loadtimer_stop_mesh(tMesh *mesh)  { formylnodes(mesh) loadtimer_stop(MyLnode); }
+Because the formylnodes takes time, so the nodes would not start and stop at
+the same time!!!
+*/
 
 /************************************************************************/
 /* functions for load balancing based on node timings in

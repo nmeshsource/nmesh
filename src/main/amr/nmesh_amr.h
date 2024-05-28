@@ -566,6 +566,10 @@ void free_all_vl_surfaces(tNode *node, tVarList *vl);
 void simple_load_balance(tMesh *mesh);
 void load_balance(tMesh *mesh, int strategy);
 int load_balance_if_needed(tMesh *mesh);
+void loadtimer_reset(tNode *node);
+void loadtimer_start(tNode *node);
+void loadtimer_stop(tNode *node);
+void loadtimer_reset_mesh(tMesh *mesh);
 
 /* amr.c */
 int amr_init_global_pars(tMesh *mesh);
