@@ -41,7 +41,7 @@ int timing_mm_speed(tMesh *mesh)
   struct timespec tp0[1];
   struct timespec tp1[1];
   int i;
-  int nxmax = 80;
+  int nxmax = 40;
   int nruns = 100;
   int n[] = {nxmax,nxmax,nxmax};
   int nx = nxmax;
@@ -104,8 +104,8 @@ int timing_mm_speed(tMesh *mesh)
 
   /* speed with which entire loop was done */
   Timing->mm_speed = speednorm / (getTimeDiffIn_s(tp1, tp0)/nruns);
-  printf("  speed for %d mm_array0 using %4d thread(s):  mm_speed = %g\n",
-         nruns, MAX_NTHREADS, Timing->mm_speed);
+  printf("  speed for %d mm_array0 using %4d thread(s):    mm_speed = %g\n",
+         1, MAX_NTHREADS, Timing->mm_speed);
 
   return 0;
 }
