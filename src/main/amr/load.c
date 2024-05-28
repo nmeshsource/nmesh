@@ -313,7 +313,7 @@ void loadtimer_start(tNode *node)
   /* save current time if timer is not running yet */
   if( !(dat->info->load_timer_running) )
   {
-    dat->info->load_timer_running = 1;
+    dat->info->load_timer_running = 1; /* timer is running normally */
     getRealTime(dat->info->load_start);
   }
   else
@@ -329,20 +329,52 @@ void loadtimer_stop(tNode *node)
   if(!dat) errorexit("I can only time nodes that I have");
 
   /* get time difference if timer was running */
-  if( (dat->info->load_timer_running) )
+  if( dat->info->load_timer_running == 1 )
   {
     struct timespec tp[1];
 
     getRealTime(tp);
     dat->info->load_TimeIn_s += getTimeDiffIn_s(tp, dat->info->load_start);
 
-    dat->info->load_timer_running = 0;
+    dat->info->load_timer_running = 0; /* timer is stopped */
   }
   else
   {
     errorexit("load timer is not running");
   }
 }
+
+/* pause a load timer */
+void loadtimer_pause(tNode *node)
+{
+  tDat *dat = node->dat;
+  if(!dat) errorexit("I can only time nodes that I have");
+
+  /* update time difference if timer was running */
+  if( dat->info->load_timer_running == 1 )
+  {
+    struct timespec tp[1];
+
+    getRealTime(tp);
+    dat->info->load_TimeIn_s += getTimeDiffIn_s(tp, dat->info->load_start);
+    dat->info->load_timer_running = 2; /* timer is paused */
+  }
+}
+
+/* resume a paused load timer */
+void loadtimer_resume(tNode *node)
+{
+  tDat *dat = node->dat;
+  if(!dat) errorexit("I can only time nodes that I have");
+
+  /* save current time if timer was paused */
+  if( dat->info->load_timer_running == 2 )
+  {
+    dat->info->load_timer_running = 1; /* timer is running normally */
+    getRealTime(dat->info->load_start);
+  }
+}
+
 
 /* reset load timers on all nodes */
 void loadtimer_reset_mesh(tMesh *mesh)

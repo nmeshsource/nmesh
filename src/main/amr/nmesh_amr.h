@@ -569,6 +569,8 @@ int load_balance_if_needed(tMesh *mesh);
 void loadtimer_reset(tNode *node);
 void loadtimer_start(tNode *node);
 void loadtimer_stop(tNode *node);
+void loadtimer_pause(tNode *node);
+void loadtimer_resume(tNode *node);
 void loadtimer_reset_mesh(tMesh *mesh);
 
 /* amr.c */
