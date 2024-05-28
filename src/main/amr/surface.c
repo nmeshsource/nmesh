@@ -604,7 +604,10 @@ void get_all_myln_surfaces(tMesh *mesh)
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
+
+    loadtimer_start(node);  /* time interp in set_ajsurf_forall_vars */
     get_all_surfaces(node);
+    loadtimer_stop(node);
   }
 
   /* postpone Waitall until we have finished all nodefaces. This could have
