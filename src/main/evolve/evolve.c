@@ -186,6 +186,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     tNode *node = MyLnode;
     int i, troubled;
 
+    /* time PRESURF */
+    loadtimer_start(node);
+
     /* set time on all nodes */
     node->time = mesh->time;
     node->dt   = mesh->dt;
@@ -200,6 +203,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
         troubled |= ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
     }
     node->dat->info->evo_troubled |= troubled;
+
+    /* add time spend on PRESURF */
+    loadtimer_stop(node);
   }
 
   /* do surface exchange on entire mesh */
@@ -216,6 +222,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     tNode *node = MyLnode;
     int i, troubled;
 
+    /* time SETSRC & VOLRHS */
+    loadtimer_start(node);
+
     troubled = 0;
     forList(u, i)
     {
@@ -229,6 +238,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
                                                    ListEntry(u,i));
     }
     node->dat->info->evo_troubled |= troubled;
+
+    /* add time spend on SETSRC & VOLRHS */
+    loadtimer_stop(node);
   }
 
   /* After we have done all we can without the surface data, we now wait
@@ -243,6 +255,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     tNode *node = MyLnode;
     int i, troubled;
 
+    /* time SURFRHS */
+    loadtimer_start(node);
+
     /* add all surface RHSs */
     troubled = 0;
     forList(u, i)
@@ -250,6 +265,9 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
         troubled |= ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i),
                                                     ListEntry(u,i));
     node->dat->info->evo_troubled |= troubled;
+
+    /* add time spend on SURFRHS */
+    loadtimer_stop(node);
   }
 }
 
@@ -278,6 +296,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     int trbl_score = node->dat->info->trbl_score;
     int i, troubled;
 
+    /* time PRELIM & LIMDATA */
+    loadtimer_start(node);
+
     if(trbl_score >= badlim || trbl_score<=goodlim)
     {
       troubled = 0;
@@ -293,6 +314,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
       }
       node->dat->info->evo_troubled |= troubled;
     } /* end if */
+
+    /* add time spend on PRELIM & LIMDATA */
+    loadtimer_stop(node);
   }
 
   /* create varlist that needs MPI exchange */
@@ -321,6 +345,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     int trbl_score = node->dat->info->trbl_score;
     int i;
 
+    /* time LIMITER */
+    loadtimer_start(node);
+
     if(trbl_score >= badlim || trbl_score<=goodlim)
     {
       forList(u, i)
@@ -339,6 +366,9 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
         }
       }
     } /* end if */
+
+    /* add time spend on LIMITER */
+    loadtimer_stop(node);
   }
 }
 
