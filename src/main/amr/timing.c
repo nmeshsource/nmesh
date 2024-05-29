@@ -22,7 +22,7 @@ void printTiming(void)
 
 
 /* get time for one matrix mul. */
-double time_mm_array0(tArray *At, tArray *B, tArray *AB)
+double time_mm_array0__old(tArray *At, tArray *B, tArray *AB)
 {
   struct timespec tp0[1];
   struct timespec tp1[1];
@@ -34,6 +34,47 @@ double time_mm_array0(tArray *At, tArray *B, tArray *AB)
   return getTimeDiffIn_s(tp1, tp0);
 }
 
+/* get time for one matrix mul. and the corresponding mem allocs */
+double time_mm_array0(int nxmax)
+{
+  int n[] = {nxmax,nxmax,nxmax};
+  int nx = nxmax;
+  int ny = nx-1;
+  int nz = nx-2;
+  int k;
+  tArray *At, *B, *AB;
+  struct timespec t0[1];
+  struct timespec t1[1];
+
+  /* time before any work */
+  getRealTime(t0);
+
+  At = alloc_array2d(n[0], n[0]);
+  B  = alloc_array(n);
+  AB = alloc_array(n);
+
+  /* put some numbers in At, B, AB */
+  forarray(At, k) Arrd(At)[k] = k+1;
+  forarray(B,  k) Arrd(B)[k]  = k*0.3;
+  forarray(AB, k) Arrd(AB)[k] = k*9;
+
+  nx = nxmax;
+  redim_array(At, nx, nx, 1);
+  redim_array(B,  nx, ny, nz);
+  redim_array(AB, nx, ny, nz);
+
+  //mm1_time += time_mm_array0(At, B, AB);
+  mm_array0(At, B, AB);
+
+  free_array(AB);
+  free_array(B);
+  free_array(At);
+
+  /* time after work */
+  getRealTime(t1);
+  return getTimeDiffIn_s(t1, t0);
+}
+
 /* do many matrix multiplications and distriubute them among
    OpenMP threads to determine the proc speed */
 int timing_mm_speed(tMesh *mesh)
@@ -41,14 +82,23 @@ int timing_mm_speed(tMesh *mesh)
   struct timespec tp0[1];
   struct timespec tp1[1];
   int i;
-  int nruns = 100;
+  int nruns = 96;
+  int nrunso10 = nruns/10;
   int nxmax = 40;
-  int n[] = {nxmax,nxmax,nxmax};
   int nx = nxmax;
   int ny = nx-1;
   int nz = nx-2;
   double speednorm = 1.;
-  double mm1_time;
+  double mm1_time, mm_time;
+
+  /* time nrunso10 with 1 thread to have less jitter */
+  mm1_time = 0.;
+  //NODELEVEL_Pragma(omp parallel for reduction(+:mm1_time))
+  for(i=0; i<nrunso10; i++)
+  {
+    mm1_time += time_mm_array0(nxmax);
+  }
+  mm1_time /= nrunso10;
 
   /* time before loop */
   getRealTime(tp0);
@@ -58,52 +108,41 @@ int timing_mm_speed(tMesh *mesh)
   NODELEVEL_Pragma(omp parallel for reduction(+:mm1_time))
   for(i=0; i<nruns; i++)
   {
-    int k;
-    tArray *At, *B, *AB;
-    struct timespec t0[1];
-    struct timespec t1[1];
-
-    /* time before any work */
-    getRealTime(t0);
-
-    At = alloc_array2d(n[0], n[0]);
-    B  = alloc_array(n);
-    AB = alloc_array(n);
-
-    /* put some numbers in At, B, AB */
-    forarray(At, k) Arrd(At)[k] = k+1;
-    forarray(B,  k) Arrd(B)[k]  = k*0.3;
-    forarray(AB, k) Arrd(AB)[k] = k*9;
-
-    nx = nxmax;
-    redim_array(At, nx, nx, 1);
-    redim_array(B,  nx, ny, nz);
-    redim_array(AB, nx, ny, nz);
-
-    //mm1_time += time_mm_array0(At, B, AB);
-    mm_array0(At, B, AB);
-
-    free_array(AB);
-    free_array(B);
-    free_array(At);
-
-    /* time after work */
-    getRealTime(t1);
-    mm1_time += getTimeDiffIn_s(t1, t0);
+    mm1_time += time_mm_array0(nxmax);
   }
+  mm1_time /= nruns;
+  mm1_time /= MAX_NTHREADS; // get average time
 
   /* time after loop */
   getRealTime(tp1);
+  mm_time = getTimeDiffIn_s(tp1, tp0) / nruns;
+
+  /* time nruns with 1 thread to have less jitter */
+  /*
+  mm1_time = 0.;
+  //NODELEVEL_Pragma(omp parallel for reduction(+:mm1_time))
+  for(i=0; i<nrunso10; i++)
+  {
+    mm1_time += time_mm_array0(nxmax);
+  }
+  mm1_time /= nrunso10;
+  */
+
+  /* print times */
+  PRFs(":\n");
+  printf("  time for mm_array0 for %dx%d * %dx%d:    mm1_time = %g\n",
+         nx,nx, nx,ny*nz, mm1_time);
+  printf("  time for mm_array0 using %4d thread(s):    mm_time = %g\n",
+         MAX_NTHREADS, mm_time);
 
   /* time and speed for one iteration of the loop */
-  mm1_time /= nruns;
-  Timing->mm1_speed = speednorm / mm1_time;
+  Timing->mm1_speed = speednorm / (mm1_time);
   PRFs(":\n");
   printf("  speed for 1 mm_array0 for %dx%d * %dx%d:    mm1_speed = %g\n",
          nx,nx, nx,ny*nz, Timing->mm1_speed);
 
   /* speed with which entire loop was done */
-  Timing->mm_speed = speednorm / (getTimeDiffIn_s(tp1, tp0)/nruns);
+  Timing->mm_speed = speednorm / (mm_time);
   printf("  speed for %d mm_array0 using %4d thread(s):    mm_speed = %g\n",
          1, MAX_NTHREADS, Timing->mm_speed);
 
