@@ -41,8 +41,8 @@ int timing_mm_speed(tMesh *mesh)
   struct timespec tp0[1];
   struct timespec tp1[1];
   int i;
-  int nxmax = 40;
   int nruns = 100;
+  int nxmax = 40;
   int n[] = {nxmax,nxmax,nxmax};
   int nx = nxmax;
   int ny = nx-1;
