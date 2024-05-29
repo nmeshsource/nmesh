@@ -736,6 +736,9 @@ void print_system_info(void)
   system1("lscpu");
   snprintf(str,1023, "cat /proc/%ld/status", pid);
   system1(str);
+  snprintf(str,1023, "printf \"%%s\" \"Running on CPU \" ; "
+                     "cat /proc/%ld/stat | cut -d ' ' -f 39", pid);
+  system1(str);
   system1("free -h");
 }
 
