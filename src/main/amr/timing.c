@@ -82,9 +82,9 @@ int timing_mm_speed(tMesh *mesh)
   struct timespec tp0[1];
   struct timespec tp1[1];
   int i;
-  int nruns = 96;
+  int nruns = 100;
   int nrunso10 = nruns/10;
-  int nxmax = 40;
+  int nxmax = 80;
   int nx = nxmax;
   int ny = nx-1;
   int nz = nx-2;
