@@ -16,6 +16,7 @@
   array->ns = (ns_); \
   array->d_nofree = 1; \
   array->si = array->info = 0; \
+  array->range[0] = array->range[1] = NULL; \
   array->par = NULL; \
   double array##data_[(array->N + (Ne_)) * (ns_)]; \
   array->size = sizeof(array##data_); \
