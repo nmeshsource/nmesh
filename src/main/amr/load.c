@@ -597,6 +597,10 @@ double *load_alloc_set_ops_bal_sum(tMesh *mesh, double *myspeed)
   /* we do not need speed array any longer */
   free(speed);
 
+  printf("ops_bal_sum =");
+  for(rk=0; rk<size; rk++) printf(" %g", ops_bal_sum[rk]);
+  printf("\n");
+
   return ops_bal_sum;
 }
 
@@ -642,7 +646,8 @@ int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
   }
 }
 
-/* set desired rank dat->info->desrank for each elm and set number of elms
+/* determine on which rank each elm should be:
+   set desired rank dat->info->desrank for each elm and set number of elms
    ns_elms[r] that I need to send to rank r */
 void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
 {
@@ -654,6 +659,8 @@ void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
   double *ops_bal_sum;
   double myT = 0.;
 
+  /* get how ops are currently distributed */
+  timing_set_myops_ops0_allops(mesh);
   ops0   = Timing->ops0;
 
   /* set ops_bal_sum */
@@ -682,6 +689,18 @@ void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
 
   /* from here on ops_bal_sum is no longer needed */
   free(ops_bal_sum);
+
+  printf("ns_elms =");
+  for(int rk=0; rk<size; rk++) printf(" %lu", ns_elms[rk]);
+  printf("\n");
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    printeploc(elm->eploc);
+    printf("r%d  ", dat->info->desrank);
+  }
+  printf("\n");
 }
 
 /* main load balancing function for elms:
@@ -699,89 +718,19 @@ void load_balance_elms(tMesh *mesh)
   int rank = nMPI_rank();
   int rk, torank;
   ulong ei;
-  double avspeed, myspeed;
-  double *speed = NULL;
   struct list_head *pos, *sav;
-  double ops0, allops;
-  double *ops_bal_sum = NULL;
-  double myT = 0.;
-  double w;
   tCom *scom, *rcom;
   ulong *ns_elms, *nr_elms; // number of elms to send or recv for each rank
   tElm0 **s_elms, **r_elms; // s_elms[3][7] elm7 to be sent to rank3 */
   //ulong nkeep; // number of elms we keep on this rank
 
-  /* get how ops are currently distributed */
-  timing_set_myops_ops0_allops(mesh);
-  //printTiming();
-  ops0   = Timing->ops0;
-  //myops  = Timing->myops;
-  allops = Timing->allops;
-
-  //FIXME: rm this block
-  { //Begin Block
-  /* get speeds on all ranks */
-  ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
-  speed       = calloc(size, sizeof(speed[0]));
-  if(!speed || !ops_bal_sum)
-    errorexit("no memory for speed or ops_bal_sum");
-  avspeed = load_set_speed_array(mesh, speed);
-  myspeed = speed[rank];
-
-  /* ops needed for load balance */
-  w = speed[0]/(avspeed*size); /* weight for rank0 */
-  ops_bal_sum[0] = w * allops; /* ops rank0 should have for balance */
-  for(rk=1; rk<size; rk++)
-  {
-    w = speed[rk]/(avspeed*size); /* weight for rank rk */
-    /* sum over ops that rank 0 to rank rk should have */
-    ops_bal_sum[rk] = ops_bal_sum[rk-1] + w * allops;
-  }
-
-  /* we do not need speed array any longer */
-  free(speed);
-  } //End Block
-
-  //FIXME: mv mem alloc to beginning of func
   /* memory for number of elms we send to or recv from each rank */
   ns_elms = calloc(size, sizeof(ns_elms[0]));
   nr_elms = calloc(size, sizeof(nr_elms[0]));
   if(!ns_elms || !nr_elms) errorexit("no memory for ns_elms or nr_elms");
 
-  ///* get boundaries op0 and op1 into which ops_bal has to fall
-  //   within allops */
-  //op1 = ops_bal_sum[rank];
-  //if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
-  //else       op0 = 0.;
-
-  //FIXME: rm this block
-  { //Begin Block
-  /* find all elms that are not within my boundaries */
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    double et;
-    int desrank;
-    tElm *elm = list_entry(pos, tElm, list);
-    tDat *dat = elm->dat;
-    if(!dat) errorexit("this elm must have dat");
-
-    et = timing_get_elm_load_TimeIn_s(elm);
-    myT += et;
-    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
-    //printelm(elm);
-    //printf("desrank=%d\n", desrank);
-    ns_elms[desrank] += 1;
-    dat->info->desrank = desrank; /* store rank where this elm should go */
-  }
-  /* I don't send to myself, so zero ns_elms[rank] */
-  //nkeep = ns_elms[rank];
-  ns_elms[rank] = 0;
-
-  /* from here on ops_bal_sum is no longer needed */
-  free(ops_bal_sum);
-  } //End Block
-  //FIXME: Instead call
-  //load_set_desrank_ns_elms(mesh, ns_elms);
+  /* determine rank each elm should be on, i.e. set desrank and ns_elms */
+  load_set_desrank_ns_elms(mesh, ns_elms);
 
   /* tell rank rk that I will send it ns_elms[rk] elms, and
      recv from rank rk how many (nr_elms[rk]) I will get */
