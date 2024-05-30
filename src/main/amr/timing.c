@@ -20,6 +20,20 @@ void printTiming(void)
   printf("  allops = %g\n", Timing->allops);
 }
 
+/* calculate a number characterizing the load (ideal load is 1) */
+double timing_load(void)
+{
+  int size = nMPI_size();
+  return size * Timing->myops / Timing->allops;
+}
+
+/* print load */
+int timing_print_load(tMesh *mesh)
+{
+  printf("load = %g\n", timing_load());
+  return 0;
+}
+
 
 /* get time for one matrix mul. */
 double time_mm_array0__old(tArray *At, tArray *B, tArray *AB)
@@ -183,6 +197,10 @@ double timing_get_elm_load_TimeIn_s(tElm *elm)
     else       tw = Getd(amr->sibl1to7_weight);
     /* NOTE: if sibl1to7_weight=0 and if all 8 siblings are there,
              we may want to increase the ijk=0 weight to 8 */
+    /* Better: For ijk=0, use amr_get_8elms_at_elm_start and
+               amr_elms_are_siblings (see remove_elms_if_rflag) to check
+               if all 8 siblings are there. If yes, add their load_TimeIn_s
+               to the et of ijk=0 */
 
     et = et * tw;
     return et;
