@@ -60,9 +60,9 @@ void load_balance(tMesh *mesh, int strategy)
 /* function that can be scheduled in LOADBALANCING */
 int load_balance_if_needed(tMesh *mesh)
 {
-  int amr_load_balance = Par("amr_load_balance");
+  int amr_loadbalance_time = Par("amr_loadbalance_time");
 
-  if(Getv(amr_load_balance, "yes"))
+  if(Getd(amr_loadbalance_time) >= 0.)
   {
     load_balance(mesh, 1);
   }
