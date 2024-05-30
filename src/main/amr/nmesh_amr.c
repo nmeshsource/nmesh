@@ -87,6 +87,8 @@ AddFun(POST_EVOLVE, timing_print_load);
 
   /* pars that determine how load is balanced */
   AddPar("amr_loadbalance_time", "-1", "when to loadbalance");
+  AddPar("amr_loadbalance_maxload", "1", "loadbalance only if the load on "
+         "one rank exceeds this value");
   AddPar("amr_sibl1to7_weight", "0", "if 0 all 8 siblings are kept on the "
          "same MPI rank, else they can end up on different ranks [0,1]");
 

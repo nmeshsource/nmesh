@@ -94,7 +94,7 @@ int amr_print_thread_info(tMesh *mesh);
 
 /* timing.c  */
 void printTiming(void);
-double timing_load(void);
+double timing_ops2load(double myops);
 int timing_print_load(tMesh *mesh);
 int timing_mm_speed(tMesh *mesh);
 double timing_get_mm_speed(tMesh *mesh);

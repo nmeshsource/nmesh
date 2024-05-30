@@ -65,11 +65,11 @@ int load_balance_if_needed(tMesh *mesh)
 
   if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
   {
+    timing_set_myops_ops0_allops(mesh);
+    // ^FIXME: load_set_desrank_ns_elms in load_balance calls this again...
     timing_set_maxops(mesh);
-
-
-
-    load_balance(mesh, 1);
+    if(timing_ops2load(Timing->maxops) > Getd(Par("amr_loadbalance_maxload")))
+      load_balance(mesh, 1);
   }
   return 0;
 }
