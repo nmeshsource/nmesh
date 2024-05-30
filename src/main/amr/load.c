@@ -69,7 +69,7 @@ int load_balance_if_needed(tMesh *mesh)
     // ^FIXME: load_set_desrank_ns_elms in load_balance calls this again...
     timing_set_maxops(mesh);
 
-    printTiming();
+    PRFs(": ");printTiming();
     timing_print_load(mesh);
 
     if(timing_ops2load(Timing->maxops) > Getd(Par("amr_loadbalance_maxload")))
