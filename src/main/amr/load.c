@@ -559,6 +559,47 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     old move_node_to_rank) to exchange the dat between the ranks.
 */
 
+/* allocate and set ops_bal_sum, and also set myspeed,
+   ops_bal_sum needs to be freed by caller */
+double *load_alloc_set_ops_bal_sum(tMesh *mesh, double *myspeed)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int rk;
+  double allops;
+  double *ops_bal_sum;
+  double avspeed;
+  double *speed;
+  double w;
+
+  //ops0   = Timing->ops0;
+  //myops  = Timing->myops;
+  allops = Timing->allops;
+
+  /* get speeds on all ranks */
+  ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
+  speed       = calloc(size, sizeof(speed[0]));
+  if(!speed || !ops_bal_sum)
+    errorexit("no memory for speed or ops_bal_sum");
+  avspeed = load_set_speed_array(mesh, speed);
+  *myspeed = speed[rank];
+
+  /* ops needed for load balance */
+  w = speed[0]/(avspeed*size); /* weight for rank0 */
+  ops_bal_sum[0] = w * allops; /* ops rank0 should have for balance */
+  for(rk=1; rk<size; rk++)
+  {
+    w = speed[rk]/(avspeed*size); /* weight for rank rk */
+    /* sum over ops that rank 0 to rank rk should have */
+    ops_bal_sum[rk] = ops_bal_sum[rk-1] + w * allops;
+  }
+
+  /* we do not need speed array any longer */
+  free(speed);
+
+  return ops_bal_sum;
+}
+
 /* comparison function for load_desired_rank */
 int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
 {
@@ -601,6 +642,48 @@ int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
   }
 }
 
+/* set desired rank dat->info->desrank for each elm and set number of elms
+   ns_elms[r] that I need to send to rank r */
+void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  double myspeed;
+  struct list_head *pos;
+  double ops0;
+  double *ops_bal_sum;
+  double myT = 0.;
+
+  ops0   = Timing->ops0;
+
+  /* set ops_bal_sum */
+  ops_bal_sum = load_alloc_set_ops_bal_sum(mesh, &myspeed);
+
+  /* find all elms that are not within my boundaries */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    double et;
+    int desrank;
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    if(!dat) errorexit("this elm must have dat");
+
+    et = timing_get_elm_load_TimeIn_s(elm);
+    myT += et;
+    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
+    //printelm(elm);
+    //printf("desrank=%d\n", desrank);
+    ns_elms[desrank] += 1;
+    dat->info->desrank = desrank; /* store rank where this elm should go */
+  }
+  /* I don't send to myself, so zero ns_elms[rank] */
+  //nkeep = ns_elms[rank];
+  ns_elms[rank] = 0;
+
+  /* from here on ops_bal_sum is no longer needed */
+  free(ops_bal_sum);
+}
+
 /* main load balancing function for elms:
    -We first determine how many elms (ns_elms[rk]) we send to another rank rk.
    -Then we tell the other ranks about it, and find out how many we will
@@ -635,6 +718,8 @@ void load_balance_elms(tMesh *mesh)
   //myops  = Timing->myops;
   allops = Timing->allops;
 
+  //FIXME: rm this block
+  { //Begin Block
   /* get speeds on all ranks */
   ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
   speed       = calloc(size, sizeof(speed[0]));
@@ -655,7 +740,9 @@ void load_balance_elms(tMesh *mesh)
 
   /* we do not need speed array any longer */
   free(speed);
+  } //End Block
 
+  //FIXME: mv mem alloc to beginning of func
   /* memory for number of elms we send to or recv from each rank */
   ns_elms = calloc(size, sizeof(ns_elms[0]));
   nr_elms = calloc(size, sizeof(nr_elms[0]));
@@ -667,6 +754,8 @@ void load_balance_elms(tMesh *mesh)
   //if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
   //else       op0 = 0.;
 
+  //FIXME: rm this block
+  { //Begin Block
   /* find all elms that are not within my boundaries */
   list_for_each(pos, &mesh->myelm_head)
   {
@@ -690,6 +779,9 @@ void load_balance_elms(tMesh *mesh)
 
   /* from here on ops_bal_sum is no longer needed */
   free(ops_bal_sum);
+  } //End Block
+  //FIXME: Instead call
+  //load_set_desrank_ns_elms(mesh, ns_elms);
 
   /* tell rank rk that I will send it ns_elms[rk] elms, and
      recv from rank rk how many (nr_elms[rk]) I will get */
