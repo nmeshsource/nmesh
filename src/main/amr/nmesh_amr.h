@@ -373,6 +373,7 @@ typedef struct tTIMING {
   double myops;  /* myops = speed * myT */
   double ops0;   /* ops0 = \sum_{r=0}^{myrank-1} myops(rank=r) */
   double allops; /* allops = \sum_{r=0}^{size-1} myops(rank=r) */
+  double maxops; /* maxops = max(myops(rank=r)) */
 } tTiming;
 
 

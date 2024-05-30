@@ -65,6 +65,10 @@ int load_balance_if_needed(tMesh *mesh)
 
   if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
   {
+    timing_set_maxops(mesh);
+
+
+
     load_balance(mesh, 1);
   }
   return 0;

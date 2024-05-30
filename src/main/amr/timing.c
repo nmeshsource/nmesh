@@ -18,21 +18,24 @@ void printTiming(void)
   printf("  myops = %g\n", Timing->myops);
   printf("  ops0 = %g\n", Timing->ops0);
   printf("  allops = %g\n", Timing->allops);
+  printf("  maxops = %g\n", Timing->maxops);
 }
 
 /* calculate a number characterizing the load (ideal load is 1) */
-double timing_load(void)
+double timing_ops2load(double myops)
 {
   int size = nMPI_size();
-  return size * Timing->myops / Timing->allops;
+  return (myops / Timing->allops) * size;
 }
 
 /* print load */
 int timing_print_load(tMesh *mesh)
 {
 timing_set_myops_ops0_allops(mesh);
+timing_set_maxops(mesh);
 printTiming();
-  printf("load = %g\n", timing_load());
+  printf("myload = %g   maxload = %g\n",
+         timing_ops2load(Timing->myops), timing_ops2load(Timing->maxops));
   return 0;
 }
 
@@ -261,6 +264,25 @@ int timing_set_myops_ops0_allops(tMesh *mesh)
   /* last rank knows total number of operations allops, so broadcast it */
   Timing->allops = ops1;
   MCK( nMPI_Bcast(&(Timing->allops),1, nMPI_DOUBLE, size-1) );
+
+  return 0;
+}
+
+/* find max myops among all ranks */
+int timing_set_maxops(tMesh *mesh)
+{
+  double myops = Timing->myops;
+  double maxops;
+
+  /* we assume that myops is set already */
+  //timing_set_myops(mesh);
+
+  /* get max myops */
+  maxops = myops;
+  nMPI_Allreduce(&myops, &maxops, 1, nMPI_DOUBLE, nMPI_MAX);
+
+  /* save result */
+  Timing->maxops = maxops;
 
   return 0;
 }

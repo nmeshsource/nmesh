@@ -100,6 +100,7 @@ int timing_mm_speed(tMesh *mesh);
 double timing_get_mm_speed(tMesh *mesh);
 double timing_get_elm_load_TimeIn_s(tElm *elm);
 int timing_set_myops_ops0_allops(tMesh *mesh);
+int timing_set_maxops(tMesh *mesh);
 
 /* connections.c */
 int connections_loc_on_patchface(int l, const char loc[NLOCS],
