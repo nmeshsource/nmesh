@@ -378,9 +378,10 @@ void loadtimer_resume(tNode *node)
 
 
 /* reset load timers on all nodes */
-void loadtimer_reset_mesh(tMesh *mesh)
+int loadtimer_reset_mesh(tMesh *mesh)
 {
   formylnodes(mesh) loadtimer_reset(MyLnode);
+  return 0;
 }
 /* These 2 are not a good idea:
 void loadtimer_start_mesh(tMesh *mesh) { formylnodes(mesh) loadtimer_start(MyLnode); }

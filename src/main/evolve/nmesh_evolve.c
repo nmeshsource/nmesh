@@ -10,6 +10,7 @@ int nmesh_evolve(tMesh *mesh)
   printf("Adding evolve\n");
 
   /* functions */
+  AddFun(EVOLVE, loadtimer_reset_mesh);
   AddFun(EVOLVE, evolve_myln);
   AddFun(FILTER, evolve_filter_evosys_mesh);
   AddFun(FINALIZEMESH, evolve_free_evosys);

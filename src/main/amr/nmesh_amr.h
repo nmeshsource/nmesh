@@ -571,7 +571,7 @@ void loadtimer_start(tNode *node);
 void loadtimer_stop(tNode *node);
 void loadtimer_pause(tNode *node);
 void loadtimer_resume(tNode *node);
-void loadtimer_reset_mesh(tMesh *mesh);
+int loadtimer_reset_mesh(tMesh *mesh);
 
 /* amr.c */
 int amr_init_global_pars(tMesh *mesh);
