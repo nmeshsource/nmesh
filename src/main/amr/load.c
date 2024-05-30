@@ -61,8 +61,9 @@ void load_balance(tMesh *mesh, int strategy)
 int load_balance_if_needed(tMesh *mesh)
 {
   int amr_loadbalance_time = Par("amr_loadbalance_time");
+  double dt = Getd(amr_loadbalance_time);
 
-  if(Getd(amr_loadbalance_time) >= 0.)
+  if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
   {
     load_balance(mesh, 1);
   }
