@@ -16,7 +16,6 @@ int nmesh_amr(tMesh *mesh)
   //AddFun(POST_INITLIBS, timing_mm_speed); //this is too inaccurate (& slow)
   AddFun(POST_PARAMETERS, amr_init_global_pars);
   AddFun(POST_INITMESH, amr_set_use_fv_flag);
-AddFun(POST_EVOLVE, timing_print_load);
   AddFun(LOADBALANCING, load_balance_if_needed);
 
   /* variables */

@@ -31,11 +31,8 @@ double timing_ops2load(double myops)
 /* print load */
 int timing_print_load(tMesh *mesh)
 {
-timing_set_myops_ops0_allops(mesh);
-timing_set_maxops(mesh);
-printTiming();
-  printf("myload = %g   maxload = %g\n",
-         timing_ops2load(Timing->myops), timing_ops2load(Timing->maxops));
+  PRF;printf(": myload = %g   maxload = %g\n",
+             timing_ops2load(Timing->myops), timing_ops2load(Timing->maxops));
   return 0;
 }
 
