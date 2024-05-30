@@ -596,11 +596,11 @@ double *load_alloc_set_ops_bal_sum(tMesh *mesh, double *myspeed)
 
   /* we do not need speed array any longer */
   free(speed);
-
+  /*
   printf("ops_bal_sum =");
   for(rk=0; rk<size; rk++) printf(" %g", ops_bal_sum[rk]);
   printf("\n");
-
+  */
   return ops_bal_sum;
 }
 
@@ -689,7 +689,7 @@ void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
 
   /* from here on ops_bal_sum is no longer needed */
   free(ops_bal_sum);
-
+  /*
   printf("ns_elms =");
   for(int rk=0; rk<size; rk++) printf(" %lu", ns_elms[rk]);
   printf("\n");
@@ -701,6 +701,7 @@ void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
     printf("r%d  ", dat->info->desrank);
   }
   printf("\n");
+  */
 }
 
 /* main load balancing function for elms:
