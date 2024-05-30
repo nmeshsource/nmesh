@@ -30,6 +30,8 @@ double timing_load(void)
 /* print load */
 int timing_print_load(tMesh *mesh)
 {
+timing_set_myops_ops0_allops(mesh);
+printTiming();
   printf("load = %g\n", timing_load());
   return 0;
 }
