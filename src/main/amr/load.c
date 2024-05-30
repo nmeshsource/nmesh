@@ -677,6 +677,7 @@ void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
 
     et = timing_get_elm_load_TimeIn_s(elm);
     myT += et;
+    //printf("ops0=%g myT=%g\n", ops0, myT);
     desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
     //printelm(elm);
     //printf("desrank=%d\n", desrank);
@@ -698,7 +699,7 @@ void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
     tElm *elm = list_entry(pos, tElm, list);
     tDat *dat = elm->dat;
     printeploc(elm->eploc);
-    printf("r%d  ", dat->info->desrank);
+    printf("t%gr%d  ", dat->info->load_TimeIn_s, dat->info->desrank);
   }
   printf("\n");
   */
