@@ -969,6 +969,39 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
   com->n_rq = n_rq_new;
 }
 
+/* print one entry in com only */
+void print_com_entry_i(tCom *com, int i)
+{
+#ifdef USEMPI
+  printf("%d: send: buf=%d,%p stat.",
+         i, com->send_buflen[i], (void *) com->send_buf[i]);
+  nMPI_print_Stat(com->send_stat[i]);
+  printf(" rq=%lx", (ulong) com->send_rq[i]);
+  printf("  recv: buf=%d,%p stat.",
+         com->recv_buflen[i], (void *) com->recv_buf[i]);
+  nMPI_print_Stat(com->recv_stat[i]);
+  printf(" rq=%lx\n", (ulong) com->recv_rq[i]);
+#else
+  printf("%d: send: buf=%d,%p stat=%d rq=%d",
+         i, com->send_buflen[i], (void *) com->send_buf[i],
+         com->send_stat[i], com->send_rq[i]);
+  printf("  recv: buf=%d,%p stat=%d rq=%d\n",
+         com->recv_buflen[i], (void *) com->recv_buf[i],
+         com->recv_stat[i], com->recv_rq[i]);
+#endif
+}
+/* print com header and entry i */
+void print_com_at_i(tCom *com, int i)
+{
+  int n_rq = com->n_rq;
+
+  if(PR) PRFs(":\n");
+
+  printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
+         (void *) com, n_rq, com->send_i, com->recv_i);
+  print_com_entry_i(com, i);
+}
+/* print all in com */
 void print_com(tCom *com)
 {
   int n_rq = com->n_rq;
@@ -977,29 +1010,8 @@ void print_com(tCom *com)
 
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
          (void *) com, n_rq, com->send_i, com->recv_i);
-#ifdef USEMPI
-  for(int i=0; i<n_rq; i++)
-  {
-    printf("%d: send: buf=%d,%p stat.",
-           i, com->send_buflen[i], (void *) com->send_buf[i]);
-    nMPI_print_Stat(com->send_stat[i]);
-    printf(" rq=%lx", (ulong) com->send_rq[i]);
-    printf("  recv: buf=%d,%p stat.",
-           com->recv_buflen[i], (void *) com->recv_buf[i]);
-    nMPI_print_Stat(com->recv_stat[i]);
-    printf(" rq=%lx\n", (ulong) com->recv_rq[i]);
-  }
-#else
-  for(int i=0; i<n_rq; i++)
-  {
-    printf("%d: send: buf=%d,%p stat=%d rq=%d",
-           i, com->send_buflen[i], (void *) com->send_buf[i],
-           com->send_stat[i], com->send_rq[i]);
-    printf("  recv: buf=%d,%p stat=%d rq=%d\n",
-           com->recv_buflen[i], (void *) com->recv_buf[i],
-           com->recv_stat[i], com->recv_rq[i]);
-  }
-#endif
+
+  for(int i=0; i<n_rq; i++) print_com_entry_i(com, i);
 }
 
 /* set free_buf flag in com */
