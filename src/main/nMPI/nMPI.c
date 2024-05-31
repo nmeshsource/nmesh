@@ -970,7 +970,7 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
 }
 
 /* print one entry in com only */
-void print_com_entry_i(tCom *com, int i)
+void print_com_entry(tCom *com, int i)
 {
 #ifdef USEMPI
   printf("%d: send: buf=%d,%p stat.",
@@ -991,7 +991,7 @@ void print_com_entry_i(tCom *com, int i)
 #endif
 }
 /* print com header and entry i */
-void print_com_at_i(tCom *com, int i)
+void print_com_at(tCom *com, int i)
 {
   int n_rq = com->n_rq;
 
@@ -999,7 +999,7 @@ void print_com_at_i(tCom *com, int i)
 
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
          (void *) com, n_rq, com->send_i, com->recv_i);
-  print_com_entry_i(com, i);
+  print_com_entry(com, i);
 }
 /* print all in com */
 void print_com(tCom *com)
@@ -1011,7 +1011,7 @@ void print_com(tCom *com)
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
          (void *) com, n_rq, com->send_i, com->recv_i);
 
-  for(int i=0; i<n_rq; i++) print_com_entry_i(com, i);
+  for(int i=0; i<n_rq; i++) print_com_entry(com, i);
 }
 
 /* set free_buf flag in com */
@@ -1198,7 +1198,7 @@ int nMPI_Wait_com_send(tCom *com, int rq)
 #ifdef USEMPI
   if(stat != MPI_SUCCESS)
   {
-    PRFs(": ");print_com(com);
+    PRFs(": ");print_com_at(com, rq);
     PRF;printf(": request number rq=%d\n", rq);
     PRF;printf(": nMPI_Wait failed: %d\n", stat);
   }
@@ -1211,7 +1211,7 @@ int nMPI_Wait_com_recv(tCom *com, int rq)
   int stat;
   if(PR)
   {
-    PRFs(": ");print_com(com);
+    PRFs(": ");print_com_at(com, rq);
     PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
