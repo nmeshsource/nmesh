@@ -1232,9 +1232,8 @@ int nMPI_Test_com_send(tCom *com, int rq, int *flag)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Test(&(com->send_rq[rq]), flag, &(com->send_stat[rq]));
 #ifdef USEMPI
@@ -1248,9 +1247,8 @@ int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
 #ifdef USEMPI
