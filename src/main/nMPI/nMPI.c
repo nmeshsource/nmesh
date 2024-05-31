@@ -1179,13 +1179,17 @@ int nMPI_Wait_com_send(tCom *com, int rq)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com(com);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Wait failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS)
+  {
+    PRFs(": ");print_com(com);
+    PRF;printf(": request number rq=%d\n", rq);
+    PRF;printf(": nMPI_Wait failed: %d\n", stat);
+  }
 #endif
   return stat;
 }
@@ -1195,13 +1199,17 @@ int nMPI_Wait_com_recv(tCom *com, int rq)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com(com);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Wait failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS)
+  {
+    PRFs(": ");print_com(com);
+    PRF;printf(": request number rq=%d\n", rq);
+    PRF;printf(": nMPI_Wait failed: %d\n", stat);
+  }
 #endif
   return stat;
 }
