@@ -65,6 +65,8 @@ int nMPI_Comm_get_attr(nMPI_Comm comm, int comm_keyval,
                        void *attribute_val, int *flag);
 int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm);
 int nMPI_Comm_free(nMPI_Comm *comm);
+int nMPI_Comm_set_name(MPI_Comm comm, const char *comm_name);
+int nMPI_Comm_get_name(MPI_Comm comm, char *comm_name, int *resultlen);
 int nMPI_Comm_set_errhandler(nMPI_Comm comm, nMPI_Errhandler errhandler);
 int nMPI_Type_contiguous(int count, nMPI_Datatype oldtype,
                          nMPI_Datatype *newtype);

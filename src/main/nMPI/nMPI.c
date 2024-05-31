@@ -22,6 +22,7 @@ int nMPIvars_init(tMesh *mesh)
 {
   int comm_bits = Geti(Par("nMPI_communicator_bits"));
   int ncomms = 1<<comm_bits;
+  char cname[MPI_MAX_OBJECT_NAME];
   int tag_ub, tag_bits;
   int i;
 
@@ -35,6 +36,8 @@ int nMPIvars_init(tMesh *mesh)
   {
     nMPIvars->comm[i] = nMPI_COMM_NULL;
     nMPI_Comm_dup(main_comm, &(nMPIvars->comm[i]));
+    snprintf(cname,nMPI_MAX_OBJECT_NAME, "c%d", i); //name for dupd comm
+    nMPI_Comm_set_name(main_comm, cname);
   }
 
   /* get max number of MPI tags */
@@ -207,6 +210,18 @@ void nMPI_check_error(const char *file, int line, const char *func, int stat)
 #endif
 }
 
+/* WT util: print MPI_Comm */
+void nMPI_print_Comm_name(nMPI_Comm comm)
+{
+#ifdef USEMPI
+  char comm_name[MPI_MAX_OBJECT_NAME+1];
+  int resultlen;
+  MPI_Comm_get_name(comm, comm_name, &resultlen);
+  printf("%s", comm_name);
+#endif
+}
+
+
 /********************************************************************/
 /* Wrappers for MPI functions */
 /********************************************************************/
@@ -320,7 +335,7 @@ int nMPI_Comm_get_attr(nMPI_Comm comm, int comm_keyval,
   return ret;
 }
 
-/* duplicate a communcator */
+/* duplicate a communicator */
 int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm)
 {
   int ret=0;
@@ -332,13 +347,37 @@ int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm)
   return ret;
 }
 
-/* free a communcator */
+/* free a communicator */
 int nMPI_Comm_free(nMPI_Comm *comm)
 {
   int ret=0;
 #ifdef USEMPI
   PR0;
   ret = MPI_Comm_free(comm);
+  PR1;
+#endif
+  return ret;
+}
+
+/* set a communicator name */
+int nMPI_Comm_set_name(MPI_Comm comm, const char *comm_name)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Comm_set_name(comm, comm_name);
+  PR1;
+#endif
+  return ret;
+}
+
+/* get a communicator name */
+int nMPI_Comm_get_name(MPI_Comm comm, char *comm_name, int *resultlen)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Comm_get_name(comm, comm_name, resultlen);
   PR1;
 #endif
   return ret;
