@@ -50,6 +50,7 @@ typedef struct tCOM {
 /* nMPI.c */
 int nMPI_long_tag_to_commi_tag(long long_tag, int *commi, int *tag);
 int nMPI_print_compile_info(tMesh *mesh);
+void nMPI_print_Comm_name(nMPI_Comm comm);
 int nMPIvars_init(tMesh *mesh);
 int nMPIvars_finalize(tMesh *mesh);
 nMPI_Comm nMPIvars_get_comm(int i);
