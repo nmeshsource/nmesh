@@ -112,6 +112,7 @@ int nMPI_Get(void *origin_addr, int origin_count,
 tCom *alloc_com(int entrysize, int free_buf);
 void free_com(tCom *com);
 void realloc_com_reqs(tCom *com, int n_rq_new);
+void print_com_at(tCom *com, int i);
 void print_com(tCom *com);
 void set_free_buf_in_com(tCom *com, int free_buf);
 void put_buffers_in_com(tCom *com, int rq,
