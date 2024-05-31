@@ -1299,8 +1299,8 @@ int nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
   if(PR)
   {
     PRFs(": ");print_com_at(com, rq);
-    PRFs(":\n");
-    printf("  rq=%d rank_other=%d s_tag=%d r_tag=%d s_comm=%lx r_comm=%lx\n",
+    PRF;
+    printf(": rq=%d rank_other=%d s_tag=%d r_tag=%d s_comm=%lx r_comm=%lx\n",
            rq, rank_other, s_tag, r_tag, (ulong) s_comm, (ulong) r_comm);
   }
   return nMPI_Isend_Irecv(com->send_buf[rq], com->send_buflen[rq],
