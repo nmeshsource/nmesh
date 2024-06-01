@@ -1321,8 +1321,7 @@ ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh)
 ulong calc_elm_lid(tElm *elm)
 {
   tMesh *mesh = elm->pat->mesh;
-  int rank = nMPI_rank();
-  ulong eid0 = amr_1st_eid_on_rank(mesh, rank);
+  ulong eid0 = amr_1st_eid_on_rank(mesh, elm->datrank);
   ulong eid = Elm_eid(elm);
 
   return eid - eid0;
