@@ -37,7 +37,7 @@ int nMPIvars_init(tMesh *mesh)
     nMPIvars->comm[i] = nMPI_COMM_NULL;
     nMPI_Comm_dup(main_comm, &(nMPIvars->comm[i]));
     snprintf(cname,nMPI_MAX_OBJECT_NAME, "c%d", i); //name for dupd comm
-    nMPI_Comm_set_name(main_comm, cname);
+    nMPI_Comm_set_name(nMPIvars->comm[i], cname);
   }
 
   /* get max number of MPI tags */
