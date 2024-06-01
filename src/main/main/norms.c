@@ -422,6 +422,18 @@ void crc_VarList_local(void *Vlist, uint64_t *crc, size_t *cnt)
   }
 }
 
+/* Compute CRC of elm->dat->info for all elms on this rank */
+void crc_elm_dat_infos_local(void *Mesh, uint64_t *crc, size_t *cnt)
+{
+  tMesh *mesh = Mesh;
+  formyelms_noomp(mesh)
+  {
+    tElm *elm = MyElm;
+    tNodeInfo *info = elm->dat->info;
+    crc64_continue_counters(info, sizeof(info[0]), crc, cnt);
+  }
+}
+
 /* get global CRC for elms */
 void crc_elms(tMesh *mesh, uint64_t *crc, size_t *cnt)
 {
@@ -435,13 +447,19 @@ void crc_VarList(tVarList *vl, uint64_t *crc, size_t *cnt)
   crc64_0start_global(mesh, crc_VarList_local, vl, crc, cnt);
 }
 
+/* get global CRC of elm->dat->info for all elms */
+void crc_elm_dat_infos(tMesh *mesh, uint64_t *crc, size_t *cnt)
+{
+  crc64_0start_global(mesh, crc_elm_dat_infos_local, mesh, crc, cnt);
+}
+
 /* calc a couple of CRCs */
 void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
 {
   tVarList *vl;
   int vi;
   uint64_t crc, cnt;
-  ulong parsCRC=0, patsCRC=0, elmsCRC, nbinfoCRC, varsCRC;
+  ulong parsCRC=0, patsCRC=0, elmsCRC, nbinfoCRC, varsCRC, datinfosCRC;
 
   if(Rank0)
   {
@@ -483,6 +501,14 @@ void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
   varsCRC = crc;
   vlfree(vl);
 
+  /* elm->dat->info */
+  if(nCRCs>5)
+  {
+    crc = cnt = 0;
+    crc_elm_dat_infos(mesh, &crc, &cnt);
+    datinfosCRC = crc;
+  }
+
   /*
   PRF;printf("\n"
       "parsCRC=%lu patsCRC=%lu elmsCRC=%lu nbinfoCRC=%lu varsCRC=%lu\n",
@@ -493,6 +519,8 @@ void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
   CRCs[2] = elmsCRC;
   CRCs[3] = nbinfoCRC;
   CRCs[4] = varsCRC;
+  if(nCRCs>5) CRCs[5] = datinfosCRC;
+
   /* get CRCs to everybody */
   MCK( nMPI_Bcast(CRCs,nCRCs, nMPI_UNSIGNED_LONG, 0) );
 }
