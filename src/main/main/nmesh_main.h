@@ -344,6 +344,7 @@ double MeshExtremumLoc(tMesh *mesh, tPat *pat, int vind, int findMax,
                        int *Mp, char Mnodeloc[104], int *Mijk,
                        double *MX, double *Mx);
 void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs);
+void printCRCs(tMesh *mesh, int nCRCs, ulong *CRCs);
 
 /* crc64.c */
 uint64_t crc64_continue(uint64_t crc, const void *buf, size_t nbytes);

@@ -524,3 +524,12 @@ void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
   /* get CRCs to everybody */
   MCK( nMPI_Bcast(CRCs,nCRCs, nMPI_UNSIGNED_LONG, 0) );
 }
+
+/* print CRC array */
+void printCRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
+{
+  int i;
+  PRFs(":");
+  for(i=0; i<nCRCs; i++) printf(" %lu", CRCs[i]);
+  printf("\n");
+}
