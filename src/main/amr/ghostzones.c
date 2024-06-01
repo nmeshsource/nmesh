@@ -375,8 +375,8 @@ void request_ghostdata_for_vl(tNode *node, tVarList  *vl)
       nb_rank = nb->datrank;
       lid = calc_node_lid(node);
       nb_lid = calc_node_lid(nb);
-      s_ltag = nb_lid*27 + nb_ni;
-      r_ltag = lid*27 + ni;
+      s_ltag = lid*27 + ni;
+      r_ltag = nb_lid*27 + nb_ni;
       nMPI_long_tag_to_commi_tag(s_ltag, &ci, &s_tag);
       s_comm = nMPIvars_get_comm(ci);
       nMPI_long_tag_to_commi_tag(r_ltag, &ci, &r_tag);
