@@ -221,6 +221,10 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
         /* We do not use nb_ni and ni any more since the elms in mesh->nbelm
            have only the fnb needed for communication and not all of them.
            Thus ni and nb_ni do not necessarily agree on different ranks. */
+        /* ALSO: We are sending the same data to all nbs at face face. Thus we
+           can as well use the same s_tag! One day we should optimize this,
+           and send the same data only once even if several nbs want it. */
+        /* see also func request_surfaces_exchange_for_all_vars */
         s_ltag = lid*6 + f;
         r_ltag = nb_lid*6 + nb_f;
         nMPI_long_tag_to_commi_tag(s_ltag, &ci, &s_tag);
