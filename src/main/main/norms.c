@@ -430,7 +430,14 @@ void crc_elm_dat_infos_local(void *Mesh, uint64_t *crc, size_t *cnt)
   {
     tElm *elm = MyElm;
     tNodeInfo *info = elm->dat->info;
+    int desrank = info->desrank;
+
+    /* exclude some parts of info */
+    info->desrank = 0;
+    /* now get CRC */
     crc64_continue_counters(info, sizeof(info[0]), crc, cnt);
+    /* restore excluded parts */
+    info->desrank = desrank;
   }
 }
 
