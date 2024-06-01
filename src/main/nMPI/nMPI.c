@@ -22,6 +22,7 @@ int nMPIvars_init(tMesh *mesh)
 {
   int comm_bits = Geti(Par("nMPI_communicator_bits"));
   int ncomms = 1<<comm_bits;
+  char cname[MPI_MAX_OBJECT_NAME];
   int tag_ub, tag_bits;
   int i;
 
@@ -35,6 +36,8 @@ int nMPIvars_init(tMesh *mesh)
   {
     nMPIvars->comm[i] = nMPI_COMM_NULL;
     nMPI_Comm_dup(main_comm, &(nMPIvars->comm[i]));
+    snprintf(cname,nMPI_MAX_OBJECT_NAME, "c%d", i); //name for dupd comm
+    nMPI_Comm_set_name(nMPIvars->comm[i], cname);
   }
 
   /* get max number of MPI tags */
@@ -207,6 +210,18 @@ void nMPI_check_error(const char *file, int line, const char *func, int stat)
 #endif
 }
 
+/* WT util: print MPI_Comm */
+void nMPI_print_Comm_name(nMPI_Comm comm)
+{
+#ifdef USEMPI
+  char comm_name[MPI_MAX_OBJECT_NAME+1];
+  int resultlen;
+  MPI_Comm_get_name(comm, comm_name, &resultlen);
+  printf("%s", comm_name);
+#endif
+}
+
+
 /********************************************************************/
 /* Wrappers for MPI functions */
 /********************************************************************/
@@ -320,7 +335,7 @@ int nMPI_Comm_get_attr(nMPI_Comm comm, int comm_keyval,
   return ret;
 }
 
-/* duplicate a communcator */
+/* duplicate a communicator */
 int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm)
 {
   int ret=0;
@@ -332,13 +347,37 @@ int nMPI_Comm_dup(nMPI_Comm comm, nMPI_Comm *newcomm)
   return ret;
 }
 
-/* free a communcator */
+/* free a communicator */
 int nMPI_Comm_free(nMPI_Comm *comm)
 {
   int ret=0;
 #ifdef USEMPI
   PR0;
   ret = MPI_Comm_free(comm);
+  PR1;
+#endif
+  return ret;
+}
+
+/* set a communicator name */
+int nMPI_Comm_set_name(MPI_Comm comm, const char *comm_name)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Comm_set_name(comm, comm_name);
+  PR1;
+#endif
+  return ret;
+}
+
+/* get a communicator name */
+int nMPI_Comm_get_name(MPI_Comm comm, char *comm_name, int *resultlen)
+{
+  int ret=0;
+#ifdef USEMPI
+  PR0;
+  ret = MPI_Comm_get_name(comm, comm_name, resultlen);
   PR1;
 #endif
   return ret;
@@ -969,6 +1008,39 @@ void realloc_com_reqs(tCom *com, int n_rq_new)
   com->n_rq = n_rq_new;
 }
 
+/* print one entry in com only */
+void print_com_entry(tCom *com, int i)
+{
+#ifdef USEMPI
+  printf("%d: send: buf=%d,%p stat.",
+         i, com->send_buflen[i], (void *) com->send_buf[i]);
+  nMPI_print_Stat(com->send_stat[i]);
+  printf(" rq=%lx", (ulong) com->send_rq[i]);
+  printf("  recv: buf=%d,%p stat.",
+         com->recv_buflen[i], (void *) com->recv_buf[i]);
+  nMPI_print_Stat(com->recv_stat[i]);
+  printf(" rq=%lx\n", (ulong) com->recv_rq[i]);
+#else
+  printf("%d: send: buf=%d,%p stat=%d rq=%d",
+         i, com->send_buflen[i], (void *) com->send_buf[i],
+         com->send_stat[i], com->send_rq[i]);
+  printf("  recv: buf=%d,%p stat=%d rq=%d\n",
+         com->recv_buflen[i], (void *) com->recv_buf[i],
+         com->recv_stat[i], com->recv_rq[i]);
+#endif
+}
+/* print com header and entry i */
+void print_com_at(tCom *com, int i)
+{
+  int n_rq = com->n_rq;
+
+  if(PR) PRFs(":\n");
+
+  printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
+         (void *) com, n_rq, com->send_i, com->recv_i);
+  print_com_entry(com, i);
+}
+/* print all in com */
 void print_com(tCom *com)
 {
   int n_rq = com->n_rq;
@@ -977,29 +1049,8 @@ void print_com(tCom *com)
 
   printf("com%p: n_rq=%d send_i=%d recv_i=%d\n",
          (void *) com, n_rq, com->send_i, com->recv_i);
-#ifdef USEMPI
-  for(int i=0; i<n_rq; i++)
-  {
-    printf("%d: send: buf=%d,%p stat.",
-           i, com->send_buflen[i], (void *) com->send_buf[i]);
-    nMPI_print_Stat(com->send_stat[i]);
-    printf(" rq=%lx", (ulong) com->send_rq[i]);
-    printf("  recv: buf=%d,%p stat.",
-           com->recv_buflen[i], (void *) com->recv_buf[i]);
-    nMPI_print_Stat(com->recv_stat[i]);
-    printf(" rq=%lx\n", (ulong) com->recv_rq[i]);
-  }
-#else
-  for(int i=0; i<n_rq; i++)
-  {
-    printf("%d: send: buf=%d,%p stat=%d rq=%d",
-           i, com->send_buflen[i], (void *) com->send_buf[i],
-           com->send_stat[i], com->send_rq[i]);
-    printf("  recv: buf=%d,%p stat=%d rq=%d\n",
-           com->recv_buflen[i], (void *) com->recv_buf[i],
-           com->recv_stat[i], com->recv_rq[i]);
-  }
-#endif
+
+  for(int i=0; i<n_rq; i++) print_com_entry(com, i);
 }
 
 /* set free_buf flag in com */
@@ -1179,13 +1230,17 @@ int nMPI_Wait_com_send(tCom *com, int rq)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Wait(&(com->send_rq[rq]), &(com->send_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Wait failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS)
+  {
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
+    PRF;printf(": nMPI_Wait failed: %d\n", stat);
+  }
 #endif
   return stat;
 }
@@ -1195,13 +1250,17 @@ int nMPI_Wait_com_recv(tCom *com, int rq)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Wait(&(com->recv_rq[rq]), &(com->recv_stat[rq]));
 #ifdef USEMPI
-  if(stat != MPI_SUCCESS) {PRF;printf(": nMPI_Wait failed: %d\n", stat);}
+  if(stat != MPI_SUCCESS)
+  {
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
+    PRF;printf(": nMPI_Wait failed: %d\n", stat);
+  }
 #endif
   return stat;
 }
@@ -1212,9 +1271,8 @@ int nMPI_Test_com_send(tCom *com, int rq, int *flag)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Test(&(com->send_rq[rq]), flag, &(com->send_stat[rq]));
 #ifdef USEMPI
@@ -1228,9 +1286,8 @@ int nMPI_Test_com_recv(tCom *com, int rq, int *flag)
   int stat;
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d\n", rq);
+    PRFs(": ");print_com_at(com, rq);
+    PRF;printf(": request number rq=%d\n", rq);
   }
   stat = nMPI_Test(&(com->recv_rq[rq]), flag, &(com->recv_stat[rq]));
 #ifdef USEMPI
@@ -1280,10 +1337,13 @@ int nMPI_Isend_Irecv_com(tCom *com, int rq, nMPI_Datatype datatype,
 {
   if(PR)
   {
-    PRFs(": ");
-    print_com(com);
-    printf("    rq=%d rank_other=%d s_tag=%d r_tag=%d\n",
+    PRFs(": ");print_com_at(com, rq);
+    PRF;
+    printf(": rq=%d rank_other=%d s_tag=%d r_tag=%d",
            rq, rank_other, s_tag, r_tag);
+    printf(" s_comm=");nMPI_print_Comm_name(s_comm);
+    printf(" r_comm=");nMPI_print_Comm_name(r_comm);
+    printf("\n");
   }
   return nMPI_Isend_Irecv(com->send_buf[rq], com->send_buflen[rq],
                           com->recv_buf[rq], com->recv_buflen[rq],

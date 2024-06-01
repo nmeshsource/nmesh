@@ -60,11 +60,20 @@ void load_balance(tMesh *mesh, int strategy)
 /* function that can be scheduled in LOADBALANCING */
 int load_balance_if_needed(tMesh *mesh)
 {
-  int amr_load_balance = Par("amr_load_balance");
+  int amr_loadbalance_time = Par("amr_loadbalance_time");
+  double dt = Getd(amr_loadbalance_time);
 
-  if(Getv(amr_load_balance, "yes"))
+  if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
   {
-    load_balance(mesh, 1);
+    timing_set_myops_ops0_allops(mesh);
+    // ^FIXME: load_set_desrank_ns_elms in load_balance calls this again...
+    timing_set_maxops(mesh);
+
+    PRFs(": ");printTiming();
+    timing_print_load(mesh);
+
+    if(timing_ops2load(Timing->maxops) > Getd(Par("amr_loadbalance_maxload")))
+      load_balance(mesh, 1);
   }
   return 0;
 }
@@ -378,9 +387,10 @@ void loadtimer_resume(tNode *node)
 
 
 /* reset load timers on all nodes */
-void loadtimer_reset_mesh(tMesh *mesh)
+int loadtimer_reset_mesh(tMesh *mesh)
 {
   formylnodes(mesh) loadtimer_reset(MyLnode);
+  return 0;
 }
 /* These 2 are not a good idea:
 void loadtimer_start_mesh(tMesh *mesh) { formylnodes(mesh) loadtimer_start(MyLnode); }
@@ -559,6 +569,51 @@ void load_exchange_dat_after_moving_elms(tMesh *mesh)
     old move_node_to_rank) to exchange the dat between the ranks.
 */
 
+/* allocate and set ops_bal_sum, and also set myspeed,
+   ops_bal_sum needs to be freed by caller */
+double *load_alloc_set_ops_bal_sum(tMesh *mesh, double *myspeed)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int rk;
+  double allops;
+  double *ops_bal_sum;
+  double avspeed;
+  double *speed;
+  double w;
+
+  //ops0   = Timing->ops0;
+  //myops  = Timing->myops;
+  allops = Timing->allops;
+
+  /* get speeds on all ranks */
+  ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
+  speed       = calloc(size, sizeof(speed[0]));
+  if(!speed || !ops_bal_sum)
+    errorexit("no memory for speed or ops_bal_sum");
+  avspeed = load_set_speed_array(mesh, speed);
+  *myspeed = speed[rank];
+
+  /* ops needed for load balance */
+  w = speed[0]/(avspeed*size); /* weight for rank0 */
+  ops_bal_sum[0] = w * allops; /* ops rank0 should have for balance */
+  for(rk=1; rk<size; rk++)
+  {
+    w = speed[rk]/(avspeed*size); /* weight for rank rk */
+    /* sum over ops that rank 0 to rank rk should have */
+    ops_bal_sum[rk] = ops_bal_sum[rk-1] + w * allops;
+  }
+
+  /* we do not need speed array any longer */
+  free(speed);
+  /*
+  printf("ops_bal_sum =");
+  for(rk=0; rk<size; rk++) printf(" %g", ops_bal_sum[rk]);
+  printf("\n");
+  */
+  return ops_bal_sum;
+}
+
 /* comparison function for load_desired_rank */
 int load_cmp_ops_bal_sum(const void *key, const void *ar, void *arg)
 {
@@ -601,6 +656,65 @@ int load_desired_rank(int size, const double *ops_bal_sum, double ops_elm_sum)
   }
 }
 
+/* determine on which rank each elm should be:
+   set desired rank dat->info->desrank for each elm and set number of elms
+   ns_elms[r] that I need to send to rank r */
+void load_set_desrank_ns_elms(tMesh *mesh, ulong *ns_elms)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  double myspeed;
+  struct list_head *pos;
+  double ops0;
+  double *ops_bal_sum;
+  double myT = 0.;
+
+  /* get how ops are currently distributed */
+  timing_set_myops_ops0_allops(mesh);
+  ops0   = Timing->ops0;
+
+  /* set ops_bal_sum */
+  ops_bal_sum = load_alloc_set_ops_bal_sum(mesh, &myspeed);
+
+  /* find all elms that are not within my boundaries */
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    double et;
+    int desrank;
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    if(!dat) errorexit("this elm must have dat");
+
+    et = timing_get_elm_load_TimeIn_s(elm);
+    myT += et;
+    //printf("ops0=%g myT=%g\n", ops0, myT);
+    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
+    //printelm(elm);
+    //printf("desrank=%d\n", desrank);
+    ns_elms[desrank] += 1;
+    dat->info->desrank = desrank; /* store rank where this elm should go */
+  }
+  /* I don't send to myself, so zero ns_elms[rank] */
+  //nkeep = ns_elms[rank];
+  ns_elms[rank] = 0;
+
+  /* from here on ops_bal_sum is no longer needed */
+  free(ops_bal_sum);
+  /*
+  printf("ns_elms =");
+  for(int rk=0; rk<size; rk++) printf(" %lu", ns_elms[rk]);
+  printf("\n");
+  list_for_each(pos, &mesh->myelm_head)
+  {
+    tElm *elm = list_entry(pos, tElm, list);
+    tDat *dat = elm->dat;
+    printeploc(elm->eploc);
+    printf("t%gr%d  ", dat->info->load_TimeIn_s, dat->info->desrank);
+  }
+  printf("\n");
+  */
+}
+
 /* main load balancing function for elms:
    -We first determine how many elms (ns_elms[rk]) we send to another rank rk.
    -Then we tell the other ranks about it, and find out how many we will
@@ -616,80 +730,19 @@ void load_balance_elms(tMesh *mesh)
   int rank = nMPI_rank();
   int rk, torank;
   ulong ei;
-  double avspeed, myspeed;
-  double *speed = NULL;
   struct list_head *pos, *sav;
-  double ops0, allops;
-  double *ops_bal_sum = NULL;
-  double myT = 0.;
-  double w;
   tCom *scom, *rcom;
   ulong *ns_elms, *nr_elms; // number of elms to send or recv for each rank
   tElm0 **s_elms, **r_elms; // s_elms[3][7] elm7 to be sent to rank3 */
   //ulong nkeep; // number of elms we keep on this rank
-
-  /* get how ops are currently distributed */
-  timing_set_myops_ops0_allops(mesh);
-  //printTiming();
-  ops0   = Timing->ops0;
-  //myops  = Timing->myops;
-  allops = Timing->allops;
-
-  /* get speeds on all ranks */
-  ops_bal_sum = calloc(size, sizeof(ops_bal_sum[0]));
-  speed       = calloc(size, sizeof(speed[0]));
-  if(!speed || !ops_bal_sum)
-    errorexit("no memory for speed or ops_bal_sum");
-  avspeed = load_set_speed_array(mesh, speed);
-  myspeed = speed[rank];
-
-  /* ops needed for load balance */
-  w = speed[0]/(avspeed*size); /* weight for rank0 */
-  ops_bal_sum[0] = w * allops; /* ops rank0 should have for balance */
-  for(rk=1; rk<size; rk++)
-  {
-    w = speed[rk]/(avspeed*size); /* weight for rank rk */
-    /* sum over ops that rank 0 to rank rk should have */
-    ops_bal_sum[rk] = ops_bal_sum[rk-1] + w * allops;
-  }
-
-  /* we do not need speed array any longer */
-  free(speed);
 
   /* memory for number of elms we send to or recv from each rank */
   ns_elms = calloc(size, sizeof(ns_elms[0]));
   nr_elms = calloc(size, sizeof(nr_elms[0]));
   if(!ns_elms || !nr_elms) errorexit("no memory for ns_elms or nr_elms");
 
-  ///* get boundaries op0 and op1 into which ops_bal has to fall
-  //   within allops */
-  //op1 = ops_bal_sum[rank];
-  //if(rank>0) op0 = op1 - ops_bal_sum[rank-1];
-  //else       op0 = 0.;
-
-  /* find all elms that are not within my boundaries */
-  list_for_each(pos, &mesh->myelm_head)
-  {
-    double et;
-    int desrank;
-    tElm *elm = list_entry(pos, tElm, list);
-    tDat *dat = elm->dat;
-    if(!dat) errorexit("this elm must have dat");
-
-    et = timing_get_elm_load_TimeIn_s(elm);
-    myT += et;
-    desrank = load_desired_rank(size, ops_bal_sum, ops0 + myT*myspeed);
-    //printelm(elm);
-    //printf("desrank=%d\n", desrank);
-    ns_elms[desrank] += 1;
-    dat->info->desrank = desrank; /* store rank where this elm should go */
-  }
-  /* I don't send to myself, so zero ns_elms[rank] */
-  //nkeep = ns_elms[rank];
-  ns_elms[rank] = 0;
-
-  /* from here on ops_bal_sum is no longer needed */
-  free(ops_bal_sum);
+  /* determine rank each elm should be on, i.e. set desrank and ns_elms */
+  load_set_desrank_ns_elms(mesh, ns_elms);
 
   /* tell rank rk that I will send it ns_elms[rk] elms, and
      recv from rank rk how many (nr_elms[rk]) I will get */

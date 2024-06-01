@@ -373,6 +373,7 @@ typedef struct tTIMING {
   double myops;  /* myops = speed * myT */
   double ops0;   /* ops0 = \sum_{r=0}^{myrank-1} myops(rank=r) */
   double allops; /* allops = \sum_{r=0}^{size-1} myops(rank=r) */
+  double maxops; /* maxops = max(myops(rank=r)) */
 } tTiming;
 
 
@@ -571,7 +572,7 @@ void loadtimer_start(tNode *node);
 void loadtimer_stop(tNode *node);
 void loadtimer_pause(tNode *node);
 void loadtimer_resume(tNode *node);
-void loadtimer_reset_mesh(tMesh *mesh);
+int loadtimer_reset_mesh(tMesh *mesh);
 
 /* amr.c */
 int amr_init_global_pars(tMesh *mesh);

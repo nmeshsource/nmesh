@@ -38,6 +38,7 @@ int main(int argc, char **argv)
     MCK( nMPI_Init(&argc, &argv) );
     wait_for_debugger_if_NMESH_MPI_DEBUG();
     MCK( nMPI_Comm_dup(nMPI_COMM_WORLD, &(main_comm)) );
+    MCK( nMPI_Comm_set_name(main_comm, "WORLD") );
     #ifdef MPI_ERR_RET
       MCK( nMPI_Comm_set_errhandler(nMPI_COMM_WORLD, nMPI_ERRORS_RETURN) );
       MCK( nMPI_Comm_set_errhandler(main_comm, nMPI_ERRORS_RETURN) );

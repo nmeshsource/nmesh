@@ -36,15 +36,13 @@ int Noutco = LENco;
 tOutput output[1];
 
 
-/* is it time to output all nodes? */
-int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt) 
+/* Check if time has reached a multiple of a time-interval dt
+   or an interation-interval di */
+int TimeIsAt_di_dt(tMesh *mesh, int di, double dt)
 {
   double Time = fabs(mesh->time);
   double dT = fabs(mesh->dt);
   long Iter = mesh->iteration;
-
-  /* Note: this function could check if all nodes are aligned in time and then
-     call TimeForNodeOutput_di_dt to test if all nodes want to output */
 
   /* time for output based on number of iterations */
   if(di > 0 && Iter % di == 0)
@@ -58,9 +56,17 @@ int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt)
     if( Time-i*dt > -0.5*dT && Time-i*dt <= 0.5*dT )
       return i + 1;
   }
-    
+
   /* not time for output */
   return 0;
+}
+
+/* is it time to output all nodes? */
+int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt)
+{
+  /* Note: this function could check if all nodes are aligned in time and then
+     call TimeForNodeOutput_di_dt to test if all nodes want to output */
+  return TimeIsAt_di_dt(mesh, di, dt);
 }
 
 

@@ -94,10 +94,13 @@ int amr_print_thread_info(tMesh *mesh);
 
 /* timing.c  */
 void printTiming(void);
+double timing_ops2load(double myops);
+int timing_print_load(tMesh *mesh);
 int timing_mm_speed(tMesh *mesh);
 double timing_get_mm_speed(tMesh *mesh);
 double timing_get_elm_load_TimeIn_s(tElm *elm);
 int timing_set_myops_ops0_allops(tMesh *mesh);
+int timing_set_maxops(tMesh *mesh);
 
 /* connections.c */
 int connections_loc_on_patchface(int l, const char loc[NLOCS],
