@@ -1317,38 +1317,23 @@ ulong update_mesh_myelms_elm_eid_dt(tMesh *mesh)
 /* functions to calculate node IDs */
 /**********************************************************************/
 
-/* return a local node id */
-int calc_node_lid(tNode *node)
-{
-  tMesh *mesh = node->pat->mesh;
-  ulong size = nMPI_size();
-  ulong nnodes = mesh->eidlim[size-1];
-  ulong npr2 = 2*nnodes/size + 1;
-  ulong tmp = (Node_eid(node)) % npr2;
-  int lid = tmp;
-
-  return lid;
-}
-
 /* return a local elm id */
-ulong calc_elm_lid(tNode *elm)
+ulong calc_elm_lid(tElm *elm)
 {
   tMesh *mesh = elm->pat->mesh;
-  ulong size = nMPI_size();
-  ulong nelms = mesh->eidlim[size-1];
-  ulong npr2 = 2*nelms/size + 1;
-  ulong tmp = (Node_eid(elm)) % npr2;
-  ulong lid = tmp;
+  int rank = nMPI_rank();
+  ulong eid0 = amr_1st_eid_on_rank(mesh, rank);
+  ulong eid = Elm_eid(elm);
 
-  return lid;
+  return eid - eid0;
 }
 
 /* return another local elm id */
-ulong calc_local_elm_id(tNode *elm)
+ulong calc_local_elm_id(tElm *elm)
 {
   tMesh *mesh = elm->pat->mesh;
   ulong nmyelms = mesh->nmyelm;
-  return (Node_eid(elm)) % nmyelms;
+  return (Elm_eid(elm)) % nmyelms;
 }
 
 /**********************************************************************/
