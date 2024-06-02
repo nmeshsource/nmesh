@@ -138,7 +138,7 @@ int evolve_myln(tMesh *mesh)
     evolve_limiter_mesh(mesh, evosys->u, 0);
     //if(node) { Yo(100); GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u_p,0)); }
 
-    /* update some vars by calling funcs in PRESURF, SETSRC
+    /* update some vars by calling funcs in PRESURF*, SETSRC*
        often PRESURF does cons2prim, SETSRC sets stress-energy */
     if(trouble_score>0 || trouble_score<=-NOTROUBLES)
       evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs,
@@ -199,6 +199,8 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     {
       tVarList *vlr = ListEntry(rhs,i);
       tVarList *vlu = ListEntry(u,i);
+      if(ListEntry(evosys->f[PRESURF0],i))
+        troubled |= ListEntry(evosys->f[PRESURF0],i)(node, vlr, vlu);
       if(ListEntry(evosys->f[PRESURF],i))
         troubled |= ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
     }
@@ -228,6 +230,10 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     troubled = 0;
     forList(u, i)
     {
+      /* set all early sources */
+      if(ListEntry(evosys->f[SETSRC0],i))
+        troubled |= ListEntry(evosys->f[SETSRC0],i)(node, ListEntry(rhs,i),
+                                                    ListEntry(u,i));
       /* set all sources */
       if(ListEntry(evosys->f[SETSRC],i))
         troubled |= ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i),
@@ -372,7 +378,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   }
 }
 
-/* update some vars by calling funcs in PRESURF, SETSRC
+/* update some vars by calling funcs in PRESURF*, SETSRC*
    often PRESURF does cons2prim, SETSRC sets stress-energy,
    PRELIM sets ADM metric */
 void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
@@ -396,8 +402,14 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
         tVarList *vlr = ListEntry(rhs,i);
         tVarList *vlu = ListEntry(u,i);
 
+        if(ListEntry(evosys->f[PRESURF0],i))
+          ListEntry(evosys->f[PRESURF0],i)(node, vlr, vlu);
+
         if(ListEntry(evosys->f[PRESURF],i))
           ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+
+        if(ListEntry(evosys->f[SETSRC0],i))
+          ListEntry(evosys->f[SETSRC0],i)(node, vlr, vlu);
 
         if(ListEntry(evosys->f[SETSRC],i))
           ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
