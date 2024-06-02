@@ -418,6 +418,18 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
       }
     }
     /* now call MPI */
+    if(0)
+    {
+      PRF;printf(": face=%d ni=%d nb_f=%d nb_ni=%d\n", face, ni, nb_f, nb_ni);
+      printf("node=");printelm(node);
+      printf("nb  =");printelm(nb);
+      PRFs(": ");print_com_at(com, rq);
+      printf(": rq=%d nb_rank=%d s_tag=%d r_tag=%d",
+             rq, nb_rank, s_tag, r_tag);
+      printf(" s_comm=");nMPI_print_Comm_name(s_comm);
+      printf(" r_comm=");nMPI_print_Comm_name(r_comm);
+      printf("\n");
+    }
     MCK(
     nMPI_Isend_Irecv_double_com(com, rq, nb_rank, s_tag,r_tag, s_comm,r_comm)
     );

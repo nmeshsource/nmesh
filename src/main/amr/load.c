@@ -73,7 +73,21 @@ int load_balance_if_needed(tMesh *mesh)
     timing_print_load(mesh);
 
     if(timing_ops2load(Timing->maxops) > Getd(Par("amr_loadbalance_maxload")))
+    {
+      //ulong CRCs[6], sum0, sum1;
+      //nmesh_CRCs(mesh, 6, CRCs);
+      //sum0 = 0;
+      //for(int i=0; i<6; i++) sum0 += CRCs[i];
+      //printCRCs(mesh, 6, CRCs);
+
       load_balance(mesh, 1);
+
+      //nmesh_CRCs(mesh, 6, CRCs);
+      //sum1 = 0;
+      //for(int i=0; i<6; i++) sum1 += CRCs[i];
+      //printCRCs(mesh, 6, CRCs);
+      //if(sum0!=sum1) errorexit("sum0!=sum1");
+    }
   }
   return 0;
 }
