@@ -11,7 +11,7 @@ enum
                its time- and space-derivs */
   PRESURF,  /* set vars needed before surf exchange, e.g. prims */
 
-  SETSRC0,  /* set some source terms, needed before SETSRC */
+  SETSRC0,  /* set some source terms needed before SETSRC */
   SETSRC,   /* set some source terms, is called before VOLRHS */
   VOLRHS,   /* set vol. terms of RHS of evo eqns (after setsrc) */
   SURFRHS,  /* add RHS terms from surf. fluxes (after volrhs) */
