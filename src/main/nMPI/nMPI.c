@@ -22,7 +22,7 @@ int nMPIvars_init(tMesh *mesh)
 {
   int comm_bits = Geti(Par("nMPI_communicator_bits"));
   int ncomms = 1<<comm_bits;
-  char cname[MPI_MAX_OBJECT_NAME];
+  char cname[nMPI_MAX_OBJECT_NAME];
   int tag_ub, tag_bits;
   int i;
 
