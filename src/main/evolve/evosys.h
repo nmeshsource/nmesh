@@ -7,6 +7,8 @@
 /* Function bins for tasks during one evolution sub step */
 enum
 {
+  SETSRC0,  /* set some source terms that are needed early, e.g. gmunu and
+               its time- and space-derivs */
   PRESURF,  /* set vars needed before surf exchange, e.g. prims */
   SETSRC,   /* set some source terms, is called before volrhs */
   VOLRHS,   /* set vol. terms of RHS of evo eqns (after setsrc) */
