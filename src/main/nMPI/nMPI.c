@@ -360,7 +360,7 @@ int nMPI_Comm_free(nMPI_Comm *comm)
 }
 
 /* set a communicator name */
-int nMPI_Comm_set_name(MPI_Comm comm, const char *comm_name)
+int nMPI_Comm_set_name(nMPI_Comm comm, const char *comm_name)
 {
   int ret=0;
 #ifdef USEMPI
@@ -372,7 +372,7 @@ int nMPI_Comm_set_name(MPI_Comm comm, const char *comm_name)
 }
 
 /* get a communicator name */
-int nMPI_Comm_get_name(MPI_Comm comm, char *comm_name, int *resultlen)
+int nMPI_Comm_get_name(nMPI_Comm comm, char *comm_name, int *resultlen)
 {
   int ret=0;
 #ifdef USEMPI
