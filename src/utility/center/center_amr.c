@@ -46,7 +46,10 @@ int center_amr_l(tElm *elm, void *pars)
   {
     for(N=N_first; N<=N_last; N++)
       if(elmpoints_any_in_sphere(elm, cx[N], r[N]))
+      {
         l_ref = l+1;
+        break;
+      }
 
     if(l_ref<=l) break;
 
@@ -60,17 +63,18 @@ int center_amr_l(tElm *elm, void *pars)
 int center_amr(tMesh *mesh)
 {
   double dt = Getd(Par("center_amr_time"));
-  tcenter_amr_pars pars = {.lmax    = Geti(Par("center1_amr_lmax")),
-                           .radius  = {0., Getd(Par("center1_amr_radius")),
-                                           Getd(Par("center2_amr_radius")) },
-                           .N_first = 1,
-                           .N_last  = 2};
+  if(dt >= 0.)
+  {
+    tcenter_amr_pars pars = {.lmax    = Geti(Par("center1_amr_lmax")),
+                             .radius  = {0., Getd(Par("center1_amr_radius")),
+                                             Getd(Par("center2_amr_radius")) },
+                             .N_first = 1,
+                             .N_last  = 2};
+    if(!Getv(Par("center2_amr_lmax"), "center1_amr_lmax"))
+      errorexit("currently we need center2_amr_lmax = center1_amr_lmax");
 
-  if(!Getv(Par("center2_amr_lmax"), "center1_amr_lmax"))
-    errorexit("currently we need center2_amr_lmax = center1_amr_lmax");
-
-  if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
-    hadapt_to_desired_l(mesh, center_amr_l, &pars);
-
+    if(TimeIsAt_di_dt(mesh, -1, dt))
+      hadapt_to_desired_l(mesh, center_amr_l, &pars);
+  }
   return 0;
 }
