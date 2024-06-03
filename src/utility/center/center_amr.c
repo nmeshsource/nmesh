@@ -10,8 +10,10 @@ extern tcenter center[1];
 
 /* struct for more pars */
 typedef struct {
-  int lmax;
-  int radius;
+  int lmax;         /* max ref.-level */
+  double radius[3]; /* radius[1] is radius of max ref.-level around center1 */
+  int N_first;      /* id of first center */
+  int N_last;       /* id of last center */
 } tcenter_amr_pars;
 
 
@@ -22,29 +24,34 @@ int center_amr_l(tElm *elm, void *pars)
 {
   tMesh *mesh = Elm_mesh(elm);
   tcenter_amr_pars *center_amr_pars = pars;
-  int l_max     = Getd(center_amr_pars->lmax);
-  double radius = Getd(center_amr_pars->radius);
-  int Nmax = 2;
+  int l_max      = center_amr_pars->lmax;
+  double *radius = center_amr_pars->radius;
+  int N_first    = center_amr_pars->N_first;
+  int N_last     = center_amr_pars->N_last;
   double cx[3][3]; /* 2 star centers: e.g. cx[1][3] = z-coord of center1 */
-  double r;
+  double r[3];
   int N, dir, l, l_ref;
 
   /* get 2 star centers */
-  for(N=1; N<=Nmax; N++)
+  for(N=N_first; N<=N_last; N++)
     for(dir=0; dir<3; dir++)
       cx[N][dir] = Getd(center->cx[1][dir]);
 
+  /* radius separating level 0 and 1 */
+  for(N=N_first; N<=N_last; N++) r[N] = radius[N] * pow(2., l_max-1);
+
   /* set refinement level l_ref that we want for this elm */
   l_ref = 0;
-  r = radius * pow(2., l_max-1); /* radius separating level 0 and 1 */
   for(l=0; l<l_max; l++)
   {
-    for(N=1; N<=Nmax; N++)
-      if(elmpoints_any_in_sphere(elm, cx[N], r))
+    for(N=N_first; N<=N_last; N++)
+      if(elmpoints_any_in_sphere(elm, cx[N], r[N]))
         l_ref = l+1;
 
     if(l_ref<=l) break;
-    r = r*0.5; /* shrink r for next level l */
+
+    /* shrink r for next level l */
+    for(N=N_first; N<=N_last; N++) r[N] *= 0.5;
   }
   return l_ref;
 }
@@ -53,8 +60,14 @@ int center_amr_l(tElm *elm, void *pars)
 int center_amr(tMesh *mesh)
 {
   double dt = Getd(Par("center_amr_time"));
-  tcenter_amr_pars pars = { .lmax   = Par("center_amr_lmax"),
-                            .radius = Par("center_amr_radius")};
+  tcenter_amr_pars pars = {.lmax    = Geti(Par("center1_amr_lmax")),
+                           .radius  = {0., Getd(Par("center1_amr_radius")),
+                                           Getd(Par("center2_amr_radius")) },
+                           .N_first = 1,
+                           .N_last  = 2};
+
+  if(!Getv(Par("center2_amr_lmax"), "center1_amr_lmax"))
+    errorexit("currently we need center2_amr_lmax = center1_amr_lmax");
 
   if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
     hadapt_to_desired_l(mesh, center_amr_l, &pars);
