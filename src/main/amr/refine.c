@@ -957,6 +957,7 @@ int hrefine_once_within_sphere(tMesh *mesh, double radius, double xc[3],
 void hrefine_sphere(tMesh *mesh, double radius, double xc[3], int levels)
 {
   tRef ref[1];
+  ref->type   = H_REFINE;
   ref->method = PARENT_n;
   int i;
   double r;
@@ -984,6 +985,57 @@ void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
     simple_load_balance(mesh);
     r = r*0.5;
   }
+}
+
+
+/************************************************************************/
+/* h-refine or coarsen up to a specific level */
+/************************************************************************/
+
+/* h-refine or coarsen once to get closer to desired level of refinement
+   as returned by the function desired_l */
+int hadapt_towards_desired_l(tMesh *mesh, int (*desired_l)(tElm *elm),
+                             tRef *ref)
+{
+  int abs_dl_max = 0;
+  int Abs_dl_max = 0;
+
+  /* go over mesh */
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int l = Elm_l(elm);
+    int l_des = desired_l(elm);
+    int dl = l - l_des;
+    int abs_dl = abs(dl);
+
+    if(dl<0)       elm->rflag = +ref->method;  /* flag refine */
+    else if(dl==0) elm->rflag = 0;
+    else if(dl>0)  elm->rflag = -ref->method;  /* flag de-refine */
+
+    if(abs_dl>abs_dl_max) abs_dl_max = abs_dl; /* save largest |dl| */
+  }
+  /* de-refine first where needed */
+  remove_elms_if_rflag(mesh, ref);
+  /* now refine where needed */
+  hrefine_elms_if_rflag(mesh, ref);
+
+  /* use MPI to get Abs_dl_max */
+  Abs_dl_max = abs_dl_max;
+  MCK( nMPI_Allreduce(&abs_dl_max, &Abs_dl_max, 1, nMPI_INT, nMPI_MAX) );
+
+  return Abs_dl_max;
+}
+
+/* call hadapt_towards_desired_l until every elm has ref level l we want */
+int hadapt_to_desired_l(tMesh *mesh, int (*desired_l)(tElm *elm))
+{
+  tRef ref[1];
+  ref->type   = H_REFINE;
+  ref->method = PARENT_n;
+
+  do{} while(hadapt_towards_desired_l(mesh, desired_l, ref));
+  return 0;
 }
 
 
