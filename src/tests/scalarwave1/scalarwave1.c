@@ -675,17 +675,19 @@ int scalarwave1_init(tMesh *mesh)
   scalarwave1_set_profile(vlu, NULL);
 
   /* register u and its RHS with evolve */
+  evolve_register_vl(vlu);
+  evolve_SetFun(VOLRHS,  scalarwave1_vol_rhs_u,  vlu);
+  evolve_SetFun(SURFRHS, scalarwave1_surf_rhs_u, vlu);
   if(Getv(limiter, "MRS"))
-    evolve_register_subsys_u_rhs_lim(mesh, vlu, scalarwave1_vol_rhs_u,
-                                     scalarwave1_surf_rhs_u,
-                                     limdata_MRS, limiter_MRS);
+  {
+    evolve_SetFun(LIMDATA, limdata_MRS, vlu);
+    evolve_SetFun(LIMITER, limiter_MRS, vlu);
+  }
   else if(Getv(limiter, "minmodB"))
-    evolve_register_subsys_u_rhs_lim(mesh, vlu, scalarwave1_vol_rhs_u,
-                                   scalarwave1_surf_rhs_u,
-                                   limdata_c000_100_010_001, limiter_minmodB);
-  else
-    evolve_register_subsys_u_rhs_lim(mesh, vlu, scalarwave1_vol_rhs_u,
-                                     scalarwave1_surf_rhs_u, 0,0);
+  {
+    evolve_SetFun(LIMDATA, limdata_c000_100_010_001, vlu);
+    evolve_SetFun(LIMITER, limiter_minmodB, vlu);
+  }
   evolve_print_evosys(mesh);
 
   /* choose numerical flux */
