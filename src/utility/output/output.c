@@ -234,11 +234,11 @@ int output_keep_elm(tElm *elm, tOutpars *outpars)
   if(outpars->region_all) return 1;
 
   if(outpars->region_sphere0)
-    keep |= elmpoints_in_sphere(elm, output->xpt[0], outpars->sphere0_radius);
+    keep |= elmpoints_all_in_sphere(elm, output->xpt[0], outpars->sphere0_radius);
   if(outpars->region_sphere1)
-    keep |= elmpoints_in_sphere(elm, output->xpt[1], outpars->sphere1_radius);
+    keep |= elmpoints_all_in_sphere(elm, output->xpt[1], outpars->sphere1_radius);
   if(outpars->region_sphere2)
-    keep |= elmpoints_in_sphere(elm, output->xpt[2], outpars->sphere2_radius);
+    keep |= elmpoints_all_in_sphere(elm, output->xpt[2], outpars->sphere2_radius);
 
   return keep;
 }

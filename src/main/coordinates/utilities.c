@@ -1316,8 +1316,8 @@ void set_nodecenter_xyz(tNode *node, double x[3])
   set_xyz(NULL, node, -1, X, x);
 }
 
-/* check if a points in node are within a sphere of radius r centered on xc */
-int elmpoints_in_sphere(tElm *elm, const double *xc, double r)
+/* check if all points in elm are within a sphere of radius r centered on xc */
+int elmpoints_all_in_sphere(tElm *elm, const double *xc, double r)
 {
   tMesh *mesh = elm->pat->mesh;
   int ix = Ind("x");
@@ -1332,6 +1332,24 @@ int elmpoints_in_sphere(tElm *elm, const double *xc, double r)
       return 0;
   }
   return 1;
+}
+
+/* check if any points in elm are within a sphere of radius r centered on xc */
+int elmpoints_any_in_sphere(tElm *elm, const double *xc, double r)
+{
+  tMesh *mesh = elm->pat->mesh;
+  int ix = Ind("x");
+  double *x = Vard(elm, ix);
+  double *y = Vard(elm, ix+1);
+  double *z = Vard(elm, ix+2);
+  int i;
+  forpoints(elm, i)
+  {
+    double xp[] = {x[i], y[i], z[i]};
+    if(Cart_distance_x0_x1(elm, xc, xp) <= r)
+      return 1;
+  }
+  return 0;
 }
 
 
