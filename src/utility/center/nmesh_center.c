@@ -11,8 +11,10 @@ int nmesh_center(tMesh *mesh)
   printf("Adding center\n");
 
   /* functions */
+  AddFun(INITMESH, center_amr);
   AddFun(POST_PARAMETERS, center_init_globals);
   AddFun(POST_EVOLVE, center_update);
+  AddFun(AMR, center_amr);
 
   /* variables */
   //AddAuxVar("center_temp1", "", "temporary variable(for vol. integrals)");
@@ -36,6 +38,10 @@ int nmesh_center(tMesh *mesh)
   AddPar("center_track_minmove", "0.01" , "skip moves of less than value*h");
   AddPar("center1_mass", "1", "mass1 used for CM calculation");
   AddPar("center2_mass", "1", "mass2 used for CM calculation");
+  /* for AMR following centers 1 & 2 */
+  AddPar("center_amr_time", "-1", "when call center_amr (-1=never)");
+  AddPar("center_amr_lmax", "0", "finest level");
+  AddPar("center_amr_radius", "8", "radius of finest level");
 
   return 0;
 }

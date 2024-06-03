@@ -994,7 +994,8 @@ void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
 
 /* h-refine or coarsen once to get closer to desired level of refinement
    as returned by the function desired_l */
-int hadapt_towards_desired_l(tMesh *mesh, int (*desired_l)(tElm *elm),
+int hadapt_towards_desired_l(tMesh *mesh,
+                             int (*desired_l)(tElm *elm, void *p), void *par,
                              tRef *ref)
 {
   int abs_dl_max = 0;
@@ -1005,7 +1006,7 @@ int hadapt_towards_desired_l(tMesh *mesh, int (*desired_l)(tElm *elm),
   {
     tElm *elm = MyElm;
     int l = Elm_l(elm);
-    int l_des = desired_l(elm);
+    int l_des = desired_l(elm, par);
     int dl = l - l_des;
     int abs_dl = abs(dl);
 
@@ -1028,13 +1029,14 @@ int hadapt_towards_desired_l(tMesh *mesh, int (*desired_l)(tElm *elm),
 }
 
 /* call hadapt_towards_desired_l until every elm has ref level l we want */
-int hadapt_to_desired_l(tMesh *mesh, int (*desired_l)(tElm *elm))
+int hadapt_to_desired_l(tMesh *mesh,
+                        int (*desired_l)(tElm *elm, void *p), void *par)
 {
   tRef ref[1];
   ref->type   = H_REFINE;
   ref->method = PARENT_n;
 
-  do{} while(hadapt_towards_desired_l(mesh, desired_l, ref));
+  do{} while(hadapt_towards_desired_l(mesh, desired_l, par, ref));
   return 0;
 }
 
