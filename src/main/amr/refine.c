@@ -635,6 +635,14 @@ void refine_set_use_fv_if_pt_typ(tMesh *mesh, int pt_typ[3], int use_fv)
   }
 }
 
+/* helper func to set use_fv flag in all elms that have
+   pt_typ[d]=Ptyp for all d */
+void refine_set_use_fv_if_Ptyp(tMesh *mesh, int Ptyp, int use_fv)
+{
+  int pt_typ[] = { Ptyp,Ptyp,Ptyp };
+  refine_set_use_fv_if_pt_typ(mesh, pt_typ, use_fv);
+}
+
 /* Synchronize ref->method on all procs. This assumes that some procs have
    ref->method=REF_METH_DONOTHING, while others have one particular
    value that is higher. We use MPI_Allreduce to set them all to the max
@@ -1019,6 +1027,11 @@ int hadapt_towards_desired_l(tMesh *mesh,
     //printf(": dl=%d min_dl=%d\n", dl, min_dl);
   }
 
+  //FIXME: Consider if we should call: loadtimer_reset_mesh(mesh) !!!
+  // After all remove_elms_if_rflag might call load_balance(mesh, 1)
+  // and if the timers are  incorrect because of prev ref./deref. the
+  // balance is all wrong...
+
   /* de-refine first where needed */
   remove_elms_if_rflag(mesh, ref);
 
@@ -1043,6 +1056,10 @@ int hadapt_to_desired_l(tMesh *mesh,
   while(hadapt_towards_desired_l(mesh, desired_l, par, ref) < 0);
 
   refine_set_rflag_forall_nodes(mesh, 0);
+
+  /* make sure use_fv flags are set */
+  refine_set_use_fv_if_Ptyp(mesh, P_UNIFORM, 1); //set use_fv=1
+  refine_set_use_fv_if_pt_typ(mesh, P_LGL, 0);   //set use_fv=0
 
   return 0;
 }
