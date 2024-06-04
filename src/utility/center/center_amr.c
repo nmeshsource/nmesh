@@ -89,8 +89,6 @@ int center_amr(tMesh *mesh)
     {
       struct timespec tp0[1];
       struct timespec tp1[1];
-
-      PRFs(":\n");
       getRealTime(tp0);
       hadapt_to_desired_l(mesh, center_amr_l, &pars);
       getRealTime(tp1);
