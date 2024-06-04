@@ -998,34 +998,38 @@ int hadapt_towards_desired_l(tMesh *mesh,
                              int (*desired_l)(tElm *elm, void *p), void *par,
                              tRef *ref)
 {
-  int abs_dl_max = 0;
-  int Abs_dl_max = 0;
+  int min_dl = INT_MAX;
+  int Min_dl;
 
-  /* go over mesh */
+  /* go over mesh to set elm->rflag */
   formyelms(mesh)
   {
     tElm *elm = MyElm;
     int l = Elm_l(elm);
     int l_des = desired_l(elm, par);
     int dl = l - l_des;
-    int abs_dl = abs(dl);
 
     if(dl<0)       elm->rflag = +ref->method;  /* flag refine */
     else if(dl==0) elm->rflag = 0;
     else if(dl>0)  elm->rflag = -ref->method;  /* flag de-refine */
 
-    if(abs_dl>abs_dl_max) abs_dl_max = abs_dl; /* save largest |dl| */
+    if(dl<min_dl) min_dl = dl; /* save smallest dl */
+
+    //printeploc(elm->eploc);
+    //printf(": dl=%d min_dl=%d\n", dl, min_dl);
   }
+
   /* de-refine first where needed */
   remove_elms_if_rflag(mesh, ref);
+
   /* now refine where needed */
   hrefine_elms_if_rflag(mesh, ref);
 
-  /* use MPI to get Abs_dl_max */
-  Abs_dl_max = abs_dl_max;
-  MCK( nMPI_Allreduce(&abs_dl_max, &Abs_dl_max, 1, nMPI_INT, nMPI_MAX) );
+  /* use MPI to get Min_dl */
+  Min_dl = min_dl;
+  MCK( nMPI_Allreduce(&min_dl, &Min_dl, 1, nMPI_INT, nMPI_MIN) );
 
-  return Abs_dl_max;
+  return Min_dl;
 }
 
 /* call hadapt_towards_desired_l until every elm has ref level l we want */
@@ -1036,7 +1040,8 @@ int hadapt_to_desired_l(tMesh *mesh,
   ref->type   = H_REFINE;
   ref->method = PARENT_n;
 
-  do{} while(hadapt_towards_desired_l(mesh, desired_l, par, ref));
+  while(hadapt_towards_desired_l(mesh, desired_l, par, ref) < 0);
+
   return 0;
 }
 
