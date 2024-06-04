@@ -546,6 +546,9 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
     /* init coords in this new elm */
     coordinates_init_node(elm);
 
+    /* flag that no limiter has been run on the newly interpolated data */
+    elm->dat->info->unlimited = 1;
+
     /* mark nbinfo as not set */
     disablevar_innode(elm, amr->elm_nbinfo0);
     for(f=0; f<6; f++) elm->dat->info->nnbinfo[f]=-1;
@@ -736,6 +739,9 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
 
     /* init coords in parent */
     coordinates_init_node(parent);
+
+    /* flag that no limiter has been run on the newly interpolated data */
+    parent->dat->info->unlimited = 1;
   }
 
   return parent;
