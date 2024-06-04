@@ -1337,15 +1337,11 @@ int elmpoints_all_in_sphere(tElm *elm, const double *xc, double r)
 /* check if any points in elm are within a sphere of radius r centered on xc */
 int elmpoints_any_in_sphere(tElm *elm, const double *xc, double r)
 {
-  tMesh *mesh = elm->pat->mesh;
-  int ix = Ind("x");
-  double *x = Vard(elm, ix);
-  double *y = Vard(elm, ix+1);
-  double *z = Vard(elm, ix+2);
   int i;
   forpoints(elm, i)
   {
-    double xp[] = {x[i], y[i], z[i]};
+    double xp[3];
+    xyz_of_ind(elm, i, xp);
     if(Cart_distance_x0_x1(elm, xc, xp) <= r)
       return 1;
   }
