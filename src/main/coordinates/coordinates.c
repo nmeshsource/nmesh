@@ -496,6 +496,7 @@ int coordinates_set_globals(tMesh *mesh)
   coordinates->sqrtdet2g_o_det3gamma = Getv(surface_metric,
                                             "sqrtdet2g_o_det3gamma");
   /* set some global vars */
+  coordinates->ix = Ind("x");
   coordinates->idXdx = Ind("dXdx");
   coordinates->itmp1 = Ind("coordinates_tmp1");
   coordinates->idet_dXbdx = Ind("det_dXbdx");

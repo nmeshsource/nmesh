@@ -32,6 +32,7 @@ typedef struct {
   /* some par values */
   int sqrtdet2g_o_det3gamma; // 1 if Getv(Par("coordinates_surface_metric"), "sqrtdet2g_o_det3gamma");
   /* some global var indices */
+  int ix;           /* Ind("x"); */
   int idXdx;        /* Ind("dXdx"); */
   int itmp1;        /* Ind("coordinates_tmp1") */
   int idet_dXbdx;   /* Ind("det_dXbdx") */
@@ -82,6 +83,7 @@ void array_XYZ_of_XbYbZb(tNode *node, tArray *aXb[3], tArray *aX[3]);
 void array_Xplane_of_Xb(tNode *node, int dir, tArray *aCb[2], tArray *aC[2]);
 void XYZ_of_ijk(tNode *node, int i, int j, int k, double X[3]);
 void XYZ_of_ind(tNode *node, int ind, double X[3]);
+void xyz_of_ind(tNode *node, int ind, double x[3]);
 void XbYbZb_of_XYZ(tNode *node, double Xb[3], const double X[3]);
 void Xb_of_X_indir(tNode *node, int dir, double *Xb, const double X);
 void array_XbYbZb_of_XYZ(tNode *node, tArray *aXb[3], tArray *aX[3]);

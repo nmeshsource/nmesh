@@ -5,6 +5,9 @@
 #include "coordinates.h"
 
 
+/* globals for coordinates */
+extern tcoordinates coordinates[1];
+
 
 /* get Xb from i,j,k */
 void XbYbZb_of_ijk(tNode *node, int i, int j, int k, double Xb[3])
@@ -464,6 +467,23 @@ void XYZ_of_ind(tNode *node, int ind, double X[3])
 {
   XbYbZb_of_ind(node, ind, X);
   XYZ_of_XbYbZb(node, X, X);
+}
+
+/* get x from point index ind */
+void xyz_of_ind(tNode *node, int ind, double x[3])
+{
+  if(node->dat->coords_set)
+  {
+    int ix = coordinates->ix; // Ind("x");
+    int dir;
+    for(dir=0; dir<3; dir++) x[dir] = Vard_(node, ix+dir)[ind];
+  }
+  else
+  {
+    double X[3];
+    XYZ_of_ind(node, ind, X);
+    set_xyz(NULL, node, -1, X, x); //-1 index means don't read x,y,z vars
+  }
 }
 
 /* get Xb from X */
