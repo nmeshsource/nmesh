@@ -1042,6 +1042,8 @@ int hadapt_to_desired_l(tMesh *mesh,
 
   while(hadapt_towards_desired_l(mesh, desired_l, par, ref) < 0);
 
+  refine_set_rflag_forall_nodes(mesh, 0);
+
   return 0;
 }
 

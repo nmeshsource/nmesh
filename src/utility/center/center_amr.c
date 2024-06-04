@@ -86,7 +86,15 @@ int center_amr(tMesh *mesh)
       errorexit("currently we need center2_amr_lmax = center1_amr_lmax");
 
     if(TimeIsAt_di_dt(mesh, -1, dt))
+    {
+      struct timespec tp0[1];
+      struct timespec tp1[1];
+      PRF;
+      getRealTime(tp0);
       hadapt_to_desired_l(mesh, center_amr_l, &pars);
+      getRealTime(tp1);
+      printf(": hadapt_to_desired_l took %gs\n", getTimeDiffIn_s(tp1, tp0));
+    }
   }
   return 0;
 }
