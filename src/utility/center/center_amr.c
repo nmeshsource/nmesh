@@ -35,7 +35,14 @@ int center_amr_l(tElm *elm, void *pars)
   /* get 2 star centers */
   for(N=N_first; N<=N_last; N++)
     for(dir=0; dir<3; dir++)
-      cx[N][dir] = Getd(center->cx[1][dir]);
+      cx[N][dir] = Getd(center->cx[N][dir]);
+  /*
+  PRF;
+  for(N=N_first; N<=N_last; N++)
+    for(dir=0; dir<3; dir++)
+      printf(" %g", cx[N][dir]);
+  printf("\n");
+  */
 
   /* radius separating level 0 and 1 */
   for(N=N_first; N<=N_last; N++) r[N] = radius[N] * pow(2., l_max-1);
@@ -44,9 +51,12 @@ int center_amr_l(tElm *elm, void *pars)
   l_ref = 0;
   for(l=0; l<l_max; l++)
   {
+    //for(N=N_first; N<=N_last; N++) printf("l%d r[%d]=%g\n", l, N, r[N]);
     for(N=N_first; N<=N_last; N++)
       if(elmpoints_any_in_sphere(elm, cx[N], r[N]))
       {
+        //PRFs(": ");printeploc(elm->eploc);
+        //printf(" has point in r[%d]\n", N);
         l_ref = l+1;
         break;
       }
@@ -56,6 +66,8 @@ int center_amr_l(tElm *elm, void *pars)
     /* shrink r for next level l */
     for(N=N_first; N<=N_last; N++) r[N] *= 0.5;
   }
+  //PRFs(": ");printeploc(elm->eploc);
+  //printf(" l_ref=%d\n", l_ref);
   return l_ref;
 }
 
