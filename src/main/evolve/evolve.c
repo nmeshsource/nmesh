@@ -277,21 +277,39 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   }
 }
 
+/* parse options for evolve_limiter_mesh */
+int evolve_call_limiter(tElm *elm, int opt)
+{
+  int trbl_score;
+
+  switch(opt)
+  {
+  case 0: /* always call limiter */
+    return 1;
+  case 1: /* call limiter only for switched elms */
+    trbl_score = elm->dat->info->trbl_score;
+    if(trbl_score>=1 || trbl_score<=-NOTROUBLES) return 1;
+    else                                         return 0;
+  case 2: /* call limiter only for elms that are still unlimited */
+    if(elm->dat->info->unlimited) return 1;
+    else                          return 0;
+  default:
+    return 1;
+  }
+}
+
 /* Apply limiters to evo subsystems.
-   We do it only if trbl_score >= badlim or trbl_score<=goodlim.
-   If opt=0 badlim=INT_MIN so that we ALWAYS do it.
-   If opt=1 badlim=1       so that we do it only for switched nodes. */
+   If opt=1
+     we do it only if trbl_score >= 1 or trbl_score<=-NOTROUBLES
+     i.e. only for switched nodes.
+   If opt=0
+     we ALWAYS do it. */
 /* Version for entire mesh: */
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 {
   tEvoSys *evosys = mesh->evosys;
   int j;
   tVarList *vl;
-  int goodlim = -NOTROUBLES;
-  int badlim;
-
-  if(opt==1) badlim = 1;
-  else       badlim = INT_MIN;
 
   if(PR) PRFs(":\n");
 
@@ -299,13 +317,12 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int trbl_score = node->dat->info->trbl_score;
     int i, troubled;
 
     /* time PRELIM & LIMDATA */
     loadtimer_start(node);
 
-    if(trbl_score >= badlim || trbl_score<=goodlim)
+    if(evolve_call_limiter(node, opt))
     {
       troubled = 0;
       forList(u, i)
@@ -348,13 +365,12 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    int trbl_score = node->dat->info->trbl_score;
     int i;
 
     /* time LIMITER */
     loadtimer_start(node);
 
-    if(trbl_score >= badlim || trbl_score<=goodlim)
+    if(evolve_call_limiter(node, opt))
     {
       forList(u, i)
       {

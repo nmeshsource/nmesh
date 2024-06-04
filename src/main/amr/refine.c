@@ -1061,6 +1061,9 @@ int hadapt_to_desired_l(tMesh *mesh,
   refine_set_use_fv_if_Ptyp(mesh, P_UNIFORM, 1); //set use_fv=1
   refine_set_use_fv_if_pt_typ(mesh, P_LGL, 0);   //set use_fv=0
 
+  /* now call correct limiters */
+  ///...
+
   return 0;
 }
 

@@ -136,6 +136,7 @@ typedef struct tNODEINFO {
   int desrank;            /* rank that should have this node/elm */
   int nnbinfo[6];         /* num. of eplocs in amr_elm_nbinfo, if nnbinfo<0
                              amr_elm_nbinfo needs to be updated */
+  int unlimited;          /* if 1 we need to run evo limiter on this elm */
 } tNodeInfo;
 
 /* the data within a node, this should be only on one proc */
