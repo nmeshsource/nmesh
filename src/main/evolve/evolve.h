@@ -6,7 +6,6 @@
 
 /* evolve.c */
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u);
-void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt);
 void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u);
 void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs);

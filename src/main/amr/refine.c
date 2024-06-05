@@ -656,6 +656,17 @@ int refine_synchronize_ref_method(tRef *ref)
   return Max_method;
 }
 
+/* set dat->info->unlimited flag for all elms */
+void refine_set_datinfo_unlimited_mesh(tMesh *mesh, int unlimited)
+{
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    tDat *dat = elm->dat;
+    if(dat) dat->info->unlimited = unlimited;
+  }
+}
+
 
 /***************************************************************************/
 /* functions we can call to h-refine in some particular way */
@@ -1052,6 +1063,7 @@ int hadapt_to_desired_l(tMesh *mesh,
   tRef ref[1];
   ref->type   = H_REFINE;
   ref->method = PARENT_n;
+  tEvoSys *evosys = mesh->evosys;
 
   while(hadapt_towards_desired_l(mesh, desired_l, par, ref) < 0);
 
@@ -1062,7 +1074,7 @@ int hadapt_to_desired_l(tMesh *mesh,
   refine_set_use_fv_if_pt_typ(mesh, P_LGL, 0);   //set use_fv=0
 
   /* now call correct limiters */
-  ///...
+  evolve_limiter_mesh(mesh, evosys->u, 2);
 
   return 0;
 }

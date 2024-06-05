@@ -9,6 +9,7 @@
 
 /* evolve.c */
 int evolve_myln(tMesh *mesh);
+void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt);
 
 /* evosys.c */
 void evolve_register_vl(tVarList *vl);

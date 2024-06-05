@@ -99,6 +99,7 @@ int evolve_myln(tMesh *mesh)
          evosys->u = evosys->u_p set in evolve_prepare_do_over_mesh. */
       //evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
       evolve_limiter_mesh(mesh, evosys->u, 0); //in all nodes
+      refine_set_datinfo_unlimited_mesh(mesh, 0); //mark elms as now limited
       //if(node) { Yo(90); printelm_nodeinfo(node); }
       //if(node) { GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u,0)); }
       //printvarlist_atpoint(pt, ListEntry(evosys->u,0), "");
@@ -393,6 +394,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     loadtimer_stop(node);
   }
 }
+
 
 /* update some vars by calling funcs in PRESURF*, SETSRC*
    often PRESURF does cons2prim, SETSRC sets stress-energy,
