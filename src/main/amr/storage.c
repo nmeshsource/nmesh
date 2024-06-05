@@ -543,14 +543,14 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
     free_array(Xp[1]);
     free_array(Xp[0]);
 
-    /* shallow copy of parent->dat->info, to get e.g. load timers */
-    elm->dat->info[0] = parent->dat->info[0];
-
     /* init coords in this new elm */
     coordinates_init_node(elm);
 
     /* flag that no limiter has been run on the newly interpolated data */
     elm->dat->info->unlimited = 1;
+
+    /* use parent load timer as approx for elm load timer */
+    elm->dat->info->load_TimeIn_s = parent->dat->info->load_TimeIn_s;
 
     /* mark nbinfo as not set */
     disablevar_innode(elm, amr->elm_nbinfo0);
@@ -740,14 +740,14 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
     free_array(Xp[1]);
     free_array(Xp[0]);
 
-    /* shallow copy of child0->dat->info, to get e.g. approx load timers */
-    parent->dat->info[0] = child0->dat->info[0];
-
     /* init coords in parent */
     coordinates_init_node(parent);
 
     /* flag that no limiter has been run on the newly interpolated data */
     parent->dat->info->unlimited = 1;
+
+    /* use child0 load timer as approx for parent load timer */
+    parent->dat->info->load_TimeIn_s = child0->dat->info->load_TimeIn_s;
   }
 
   return parent;
