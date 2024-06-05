@@ -312,6 +312,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   int j;
   tVarList *vl;
 
+  if(!u) return;
+
   if(PR) PRFs(":\n");
 
   /* loop over all nodes before MPI requests */
