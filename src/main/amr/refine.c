@@ -286,6 +286,50 @@ void set_children_nbinfo_ef(tElm *child0, tElm *parent,
   }
 }
 
+/* find sib with max n and pt_typ among the 8 siblings */
+tElm *refine_sib_with_max_np_pt_typ(tElm *sib0)
+{
+  unsigned char l_sib0 = sib0->eploc->l;
+  struct list_head *pos_ijk;
+  int ijk;
+  int np_LGL  = 0; /* default */
+  int np_UNI  = 0; /* default */
+  int use_LGL = 1; /* default: use P_LGL */
+  tElm *sib_max;
+
+  /* loop over 8 siblings */
+  pos_ijk = &sib0->list;
+  for(ijk=0; ijk<8; ijk++)
+  {
+    tElm *sib = list_entry(pos_ijk, tElm, list);
+    tEloc eloc[1];
+
+    /* sanity checks */
+    if(!sib->dat)
+      errorexit("all 8 siblings need to be on this proc");
+    if(sib->eploc->l != l_sib0)
+      errorexit("all 8 starting with sib0 must be on same level");
+    eloc_from_eploc(eloc, sib->eploc);
+    if(eloc->loc[l_sib0-1] != '0' + ijk)
+      errorexiti("this is not sib%d", ijk);
+
+    /* look at dir0 to decide if P_LGL or not */
+    if((use_LGL==1) && (sib->pt_typ[0]==P_LGL))
+    {
+      if(sib->np > np_LGL) { np_LGL = sib->np;  sib_max = sib; }
+    }
+    else
+    {
+      use_LGL = 0;
+      if(sib->np > np_UNI) { np_UNI = sib->np;  sib_max = sib; }
+    }
+
+    /* inc pos to next sib */
+    pos_ijk = pos_ijk->next;
+  }
+  return sib_max;
+}
+
 /* Unrefine all elms on all MPI procs if indicated by elm->rflag */
 void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 {
@@ -325,6 +369,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     {
       int pt_typ[3], n[3];
       tElm *parent;
+      tElm *sib_max_np;
       struct list_head ch_head;
       int i;
 
@@ -354,7 +399,8 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
       if(num<8) continue;
 
       /* if we get here, replace the 8 siblings by their parent: */
-      hp_refine_set_n_pt_typ(sib, ref, n, pt_typ); //set n and pt_typ
+      sib_max_np = refine_sib_with_max_np_pt_typ(sib); //sib with max(np)
+      hp_refine_set_n_pt_typ(sib_max_np, ref, n, pt_typ); //set n and pt_typ
       INIT_LIST_HEAD(&ch_head);
       parent = replace_8localchildren_by_parent(sib, n, pt_typ, &ch_head);
       set_parent_nbinfo_ef(parent, &ch_head, ef);
