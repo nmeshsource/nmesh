@@ -344,7 +344,7 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
 
   /* Check if all 8 children were kept together in load bal.,
      if not call load_balance to make it so! */
-  if(Getd(amr->sibl1to7_weight) != 0.)
+  if(mesh->sibs_1rank == 0)
   {
     double sibl1to7_weight_sav = Getd(amr->sibl1to7_weight);
     Setd(amr->sibl1to7_weight, 0.);

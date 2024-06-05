@@ -245,6 +245,7 @@ typedef struct tMESH {
   ulong nnbelm;      /* number of nb elms on other procs */
   tElm **nbelm;      /* list of pointers to nb elms on other procs */
   ulong *eidlim;     /* (last eid on rank rk) = eidlim[rk]-1 */
+  int sibs_1rank;    /* if 1 all 8 siblings are on one rank */
 } tMesh;
 /* NOTE: the list myelm is distributed among MPI jobs:
 use space filling curve as in

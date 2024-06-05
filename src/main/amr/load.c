@@ -10,6 +10,7 @@
 /* use timings, some MPI datatypes, amr vars */
 extern tTiming Timing[1];
 extern tnMPIvars nMPIvars[1];
+extern tAMR amr[1];
 
 
 /**********************************************************************/
@@ -29,6 +30,8 @@ void load_balance(tMesh *mesh, int strategy)
 {
   /* to keep sibling 1-7 together with sibling 0 we need to have
      amr_sibl1to7_weight = 0 */
+  if(Getd(amr->sibl1to7_weight)==0.) mesh->sibs_1rank = 1;
+  else                               mesh->sibs_1rank = 0;
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
