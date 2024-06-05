@@ -543,6 +543,9 @@ tElm *make_child_elm(tElm *parent, int n[3], int pt_typ[3], int ijk)
     free_array(Xp[1]);
     free_array(Xp[0]);
 
+    /* shallow copy of parent->dat->info, to get e.g. load timers */
+    elm->dat->info[0] = parent->dat->info[0];
+
     /* init coords in this new elm */
     coordinates_init_node(elm);
 
