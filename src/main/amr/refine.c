@@ -295,7 +295,7 @@ tElm *refine_sib_with_max_np_pt_typ(tElm *sib0)
   int np_LGL  = 0; /* default */
   int np_UNI  = 0; /* default */
   int use_LGL = 1; /* default: use P_LGL */
-  tElm *sib_max;
+  tElm *sib_max = NULL;
 
   /* loop over 8 siblings */
   pos_ijk = &sib0->list;
@@ -327,6 +327,7 @@ tElm *refine_sib_with_max_np_pt_typ(tElm *sib0)
     /* inc pos to next sib */
     pos_ijk = pos_ijk->next;
   }
+  if(sib_max==NULL) errorexit("How can sib_max be NULL?");
   return sib_max;
 }
 
