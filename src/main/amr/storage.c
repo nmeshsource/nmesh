@@ -740,6 +740,9 @@ tElm *make_parent_elm(tElm *child0, int n[3], int pt_typ[3])
     free_array(Xp[1]);
     free_array(Xp[0]);
 
+    /* shallow copy of child0->dat->info, to get e.g. approx load timers */
+    parent->dat->info[0] = child0->dat->info[0];
+
     /* init coords in parent */
     coordinates_init_node(parent);
 
