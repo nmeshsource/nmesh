@@ -1117,6 +1117,11 @@ int hadapt_to_desired_l(tMesh *mesh,
 
   while(hadapt_towards_desired_l(mesh, desired_l, par, ref) < 0);
 
+  /* the refines/derefines likely caused an imbalance, so balance load */
+  PRFs(": final ");
+  load_balance(mesh, 1);
+
+  /* zero all rflags */
   refine_set_rflag_forall_nodes(mesh, 0);
 
   /* make sure use_fv flags are set */
