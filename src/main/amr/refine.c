@@ -353,6 +353,10 @@ void remove_elms_if_rflag(tMesh *mesh, tRef *ref)
     Setd(amr->sibl1to7_weight, sibl1to7_weight_sav);
   }
 
+  /* We are now going to remove elms. Their parents may be siblings as well,
+     but these parent-siblings may not be on the same rank: */
+  mesh->sibs_1rank = 0;
+
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
 
