@@ -626,7 +626,12 @@ void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
 }
 
 /* forward=1: convert from u at face to u at 0.25h in
-   forward=0: convert from u at 0.25h in to u at face */
+   forward=0: convert from u at 0.25h in to u at face
+   NOTE: Even in 3d forward=0 is the exact inverse of forward=1.
+         I tested this and found that:
+         rec1d_uface_to_uin_1(node, vl1, 0); //extrap to face
+         rec1d_uface_to_uin_1(node, vl1, 1); //undo
+         does not change vl1 up to 1e-15. */
 void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward)
 {
   if(node->dat->info->use_fv)
@@ -700,6 +705,28 @@ void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
   }
 }
 
+/* like rec1d_uface_to_uin_1_mesh, but call rec1d_uface_to_uin_1 only
+   if rflag and use_fv are also set on node */
+void rec1d_fv_uface_to_uin_1_if_rflag(tMesh *mesh, tVarList *vlu,
+                                      int forward)
+{
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    if(node->rflag)
+      if(node->dat->info->use_fv)
+        rec1d_uface_to_uin_1(node, vlu, forward);
+  }
+}
+
+/* call rec1d_uface_to_uin_1 but for only one var */
+void rec1d_uface_to_uin_1_var(tNode *node, int vi, int forward)
+{
+  tVarList *vl1 = vlalloc(Elm_mesh(node));
+  vlpushone(vl1, vi);
+  rec1d_uface_to_uin_1(node, vl1, forward);
+  vlfree(vl1);
+}
 
 /*************************************************************************/
 /* WENOm3 is much like WENO3 but with weights for uniform grid points */

@@ -135,6 +135,9 @@ void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
                                  int opt);
 void rec1d_uface_to_uin_1(tNode *node, tVarList *vlu, int forward);
 void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward);
+void rec1d_fv_uface_to_uin_1_if_rflag(tMesh *mesh, tVarList *vlu,
+                                      int forward);
+void rec1d_uface_to_uin_1_var(tNode *node, int vi, int forward);
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale);
