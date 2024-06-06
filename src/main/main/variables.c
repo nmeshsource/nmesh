@@ -109,6 +109,7 @@ void AddEvoMeshVar(tMesh *mesh, const char *name,
   int Nextra = 0; // space for extra numbers: maybe min,max,average???
 
   AddMeshVar(mesh, name, tensorindices, description);
+  MeshVarSetType(mesh, nvdb, EVOVAR);
   MeshVarSetSurfInfo(mesh, nvdb, 1);
   MeshVarSetNextra(mesh, nvdb, Nextra);
 }
