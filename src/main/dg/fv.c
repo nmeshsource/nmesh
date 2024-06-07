@@ -20,7 +20,7 @@ extern tcoordinates coordinates[1];
    directly from arrays qc that contain q-vars at gridpoints.
    Note: fv->qc[l][i], qm_p[l], qm_m[l] are allocated in fv_divf.
    In: nq, qc, npts, im, q_scale, rec1d_p,rec1d_m. Out: qm_p, qm_m */
-void fv_rec1d_q_midpt(tFVinfo *fv)
+int fv_rec1d_q_midpt(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
@@ -36,6 +36,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
     fv->qm_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
     fv->qm_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
   }
+  return 0;
 }
 
 
