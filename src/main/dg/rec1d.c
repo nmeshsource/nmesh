@@ -609,6 +609,23 @@ double rec1d_compute_1s1_u(int n, double *u, int i0, int forward,
 }
 
 /* forward=1: convert from u at face to u at 0.25h in
+   forward=0: convert from u at 0.25h in to u at face
+   If right=1 do it only on the right
+   If right=0 do it only on the left */
+void rec1d_LR_uface_to_uin_1_Carray(int n, double *u, int right, int forward,
+                                    double u_scale, double s1, double s2,
+                                    int opt)
+{
+  int i0;
+
+  /* no interpolation if only 1 or 2 points */
+  if(n<=2) return;
+
+  i0 = right * (n-1);
+  u[i0] = rec1d_compute_1s1_u(n, u, i0, forward, u_scale, s1, s2, opt);
+}
+
+/* forward=1: convert from u at face to u at 0.25h in
    forward=0: convert from u at 0.25h in to u at face */
 void rec1d_uface_to_uin_1_Carray(int n, double *u, int forward,
                                  double u_scale, double s1, double s2,

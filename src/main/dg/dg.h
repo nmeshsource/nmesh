@@ -47,3 +47,9 @@ int dg_print_DGglobals(tMesh *mesh);
 
 /* funcs in tests.c */
 int fv_tests(tMesh *mesh);
+
+
+/* funcs in rec1d.c */
+void rec1d_LR_uface_to_uin_1_Carray(int n, double *u, int right, int forward,
+                                    double u_scale, double s1, double s2,
+                                    int opt);
