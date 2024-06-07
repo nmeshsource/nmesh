@@ -473,12 +473,24 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
 
         /* extrapolate df = d_i0 f^i0 to face */
         if(extrap_mode == FV_DNFN_EXTRAP1)
-          forvl(vldivf, l)
-          {
-            double *df = di0fi0[l];
-            rec1d_uface_to_uin_1_Carray(n[dir], df, 0, q_scale,
-                                        extrap_s1, extrap_s2, extrap_opt);
-          }
+        {
+          int extrap_left  = !(rec1d_midpt & FV_REC_NO_LEFT_EXTRAP1);
+          int extrap_right = !(rec1d_midpt & FV_REC_NO_RIGHT_EXTRAP1);
+          if(extrap_left)
+            forvl(vldivf, l)
+            {
+              double *df = di0fi0[l];
+              rec1d_LR_uface_to_uin_1_Carray(n[dir], df, 0, 0, q_scale,
+                                             extrap_s1, extrap_s2, extrap_opt);
+            }
+          if(extrap_right)
+            forvl(vldivf, l)
+            {
+              double *df = di0fi0[l];
+              rec1d_LR_uface_to_uin_1_Carray(n[dir], df, 1, 0, q_scale,
+                                             extrap_s1, extrap_s2, extrap_opt);
+            }
+        }
 
         /* final loop over points in dir */
         for(i0=0; i0<n[dir]; i0++)
