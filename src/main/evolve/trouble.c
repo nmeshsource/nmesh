@@ -9,6 +9,7 @@
 
 /* use amr vars */
 extern tAMR amr[1];
+extern tDGglobals DGglobals[1];
 
 
 /* Determine and set trouble score in a node,
@@ -219,6 +220,8 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   int firstit, order_sav, force_sav;
   int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
   int ptLGL[] = { P_LGL, P_LGL, P_LGL };
+  tVarList *vl_extrap;
+
   if(PR) PRFs(":\n");
 
   /* free surfaces & indc since they will change now anyway */
@@ -257,6 +260,12 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   /* get ref->method from my proc to all others */
   refine_synchronize_ref_method(ref);
 
+  /* set varlist where we use extrap to face before interp to dg */
+  if(DGglobals->fv2d_interp_use_extrap1)
+    vl_extrap = DGglobals->fv2d_interp_use_extrap1_vl;
+  else
+    vl_extrap = NULL;
+
   /* do p-refinement to desired n and point type: */
   /* We have just determined that these fv nodes are so untroubled that we
      want to switch to them to dg. I.e. there will be no shocks. Thus we
@@ -268,6 +277,7 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   amr->force_interp_scheme = INTERP_LAGRANGE;   //set internal amr flag
   Seti(amr->Lagrange_interp_order, 12);         //set 12th order Lag interp
   /* 2. now call p-refinement from amr */
+  rec1d_fv_uface_to_uin_1_if_rflag(mesh, vl_extrap, 0); //extrap to face
   prefine_nodes_if_rflag(mesh, ref);
   /* now some aux vars (and others) are not set */
   /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
@@ -556,11 +566,17 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     tRef *ref = node->dat->info->trbl_ref;
     int n_dg[3], pt_typ_dg[3];
     tArray *u_interp;
-    int npts;
+    int npts, fv_extrap;
 
     /* since evolve_Persson_array_trouble returns 0 for alpha_fv<0 anyway,
        we do this here already */
     if(alpha_fv < 0.) return 0;
+
+    /* decide if we extrap to faces 1st before we call interp_to_pt_typ */
+    fv_extrap = 0;
+    if(DGglobals->fv2d_interp_use_extrap1)
+      if( vlindex(DGglobals->fv2d_interp_use_extrap1_vl, iu) >= 0 )
+        fv_extrap = 1; // but always 0 could also be an option...
 
     /* get num. and type of points on dg grid that we would switch to */
     hp_refine_set_n_pt_typ(node, ref, n_dg, pt_typ_dg);
@@ -574,7 +590,9 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
 
     /* interpolate u to dg grid */
     u_interp = alloc_array(n_dg);
+    if(fv_extrap) rec1d_uface_to_uin_1_var(node, iu, 0); //extrap back to face
     interp_to_pt_typ(node, iu, pt_typ_dg, npts,INTERP_LAGRANGE,1., u_interp);
+    if(fv_extrap) rec1d_uface_to_uin_1_var(node, iu, 1); //undo extrap
     troubled = evolve_Persson_array_trouble(u_interp, u_scale, pt_typ_dg,
                                             ncoeffs, alpha_fv);
     free_array(u_interp);
