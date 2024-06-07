@@ -710,6 +710,7 @@ void rec1d_uface_to_uin_1_mesh(tMesh *mesh, tVarList *vlu, int forward)
 void rec1d_fv_uface_to_uin_1_if_rflag(tMesh *mesh, tVarList *vlu,
                                       int forward)
 {
+  if(!vlu) return;
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
