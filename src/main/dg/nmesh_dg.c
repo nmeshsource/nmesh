@@ -16,6 +16,7 @@ int nmesh_dg(tMesh *mesh)
   AddFun(POST_PARAMETERS, dg_set_DGglobals);
   AddFun(POST_PARAMETERS, dg_print_DGglobals);
   AddFun(PRE_EVOLVE,      dg_set_DGglobals); // in case we update fv_rec
+  AddFun(FINALIZE,        dg_free_DGglobals);
 
   /* variables */
   //AddAuxVar("dg_u",      "",    "test function");
@@ -45,6 +46,11 @@ int nmesh_dg(tMesh *mesh)
          "Otherwise we also compute fnumL_{i} [yes,no]");
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
          "[linear,parabolic]");
+  /* Pars for interpolation between fv and dg */
+  AddPar("fv2d_interp_use_extrap1", "no", "whether we extrap fv vars to "
+         "faces before we interpolate from fv to dg [no,yes]");
+  AddPar("fv2d_interp_use_extrap1_vars", "", "list of vars to which the par "
+         "fv2d_interp_use_extrap1 applies");
   /* Finite Differences (fd) pars */
   /* fv_surface_interp is also used for fd */
   AddPar("fd_stencilsize", "3", "Fin.Diff. accuracy = fd_stencilsize-1");

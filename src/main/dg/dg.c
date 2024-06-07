@@ -279,6 +279,7 @@ int dg_set_DGglobals(tMesh *mesh)
   int fv_divf_extrap = Par("fv_divf_extrap");
   int fv_surface_interp = Par("fv_surface_interp");
   double WENOm3_opt_weightratio = Getd(Par("fv_WENOm3_opt_weightratio"));
+  char *list, *saveptr, *name;
 
   /* set reconstruction mode */
   if(Getv(fv_rec, "1"))
@@ -361,6 +362,26 @@ int dg_set_DGglobals(tMesh *mesh)
   DGglobals->fv_divf_use_only_right_flux
     = Getb(Par("fv_divf_use_only_right_flux"));
 
+  /* info from fv2d_interp_use_extrap1 pars */
+  DGglobals->fv2d_interp_use_extrap1 = Getb(Par("fv2d_interp_use_extrap1"));
+  vlfree(DGglobals->fv2d_interp_use_extrap1_vl);
+  DGglobals->fv2d_interp_use_extrap1_vl = vlalloc(mesh);
+  list = strdup(Gets(Par("fv2d_interp_use_extrap1_vars")));
+  for(name=strtok_r(list, " ", &saveptr); name!=NULL;
+      name=strtok_r(NULL, " ", &saveptr))
+  {
+    vlpush(DGglobals->fv2d_interp_use_extrap1_vl, Ind(name));
+  }
+  free(list);
+
+  return 0;
+}
+
+/* free any memory that was allocated in dg_set_DGglobals */
+int dg_free_DGglobals(tMesh *mesh)
+{
+  vlfree(DGglobals->fv2d_interp_use_extrap1_vl);
+  DGglobals->fv2d_interp_use_extrap1_vl = NULL;
   return 0;
 }
 
@@ -392,6 +413,11 @@ int dg_print_DGglobals(tMesh *mesh)
          DGglobals->fv_divf_extrap_opt);
   printf(" DGglobals->fv_divf_use_only_right_flux = %d\n",
          DGglobals->fv_divf_use_only_right_flux);
+
+  printf(" DGglobals->fv2d_interp_use_extrap1 = %d\n",
+         DGglobals->fv2d_interp_use_extrap1);
+  printf(" DGglobals->fv2d_interp_use_extrap1_vl: ");
+  prvarlist(DGglobals->fv2d_interp_use_extrap1_vl);
 
   return 0;
 }

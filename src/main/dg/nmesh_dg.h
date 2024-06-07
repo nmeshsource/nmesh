@@ -41,6 +41,8 @@ typedef struct {
   double fv_divf_extrap_s2;   /* value of par fv_divf_extrap_s2 */
   int fv_divf_extrap_opt;     /* value of par fv_divf_extrap_opt */
   int fv_divf_use_only_right_flux; //Boolean val of par fv_divf_use_only_right_flux
+  int fv2d_interp_use_extrap1;     //Boolean val of par fv2d_interp_use_extrap1
+  tVarList *fv2d_interp_use_extrap1_vl; //vl for fv2d_interp_use_extrap1
 } tDGglobals;
 
 

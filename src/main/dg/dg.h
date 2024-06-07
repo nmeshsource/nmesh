@@ -41,6 +41,7 @@ int pr_weight_ratios(tMesh *mesh);
 
 /* funcs in dg.c */
 int dg_set_DGglobals(tMesh *mesh);
+int dg_free_DGglobals(tMesh *mesh);
 int dg_print_DGglobals(tMesh *mesh);
 
 
