@@ -93,7 +93,8 @@ typedef struct tFVINFO {
 } tFVinfo;
 
 
-/* possible return vulue bits of funcs like fv_rec1d_q_midpt */
+/* possible return value bits of the func rec1d_u_f_lam_midpt passed to
+   fv_divf, or the func fv_rec1d_q_midpt */
 enum
 {
   FV_REC_OK               = 0,
@@ -168,7 +169,7 @@ double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale);
 int fv_rec1d_q_midpt(tFVinfo *fv);
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
-             void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
+             int (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
              void (*numflux)(tDGinfo *d));
 void printFVinfo(tFVinfo *fv);

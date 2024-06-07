@@ -52,7 +52,7 @@ int fv_rec1d_q_midpt(tFVinfo *fv)
               face points */
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
-             void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
+             int (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
              void (*numflux)(tDGinfo *d))
 {
@@ -228,6 +228,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
         int i2 = i2_norm(i,j,k, dir);
         int i0;                       /* index orthogonal to plane */
+        int rec1d_midpt = FV_REC_OK; //for return bits of rec1d_u_f_lam_midpt
 
         /* fill field arrays qc, i0 runs orth. to plane */
         for(i0=0; i0<n[dir]; i0++)
@@ -350,7 +351,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               d->info = d_info_midnorm;
 
               /* reconstruct q,u and then set fluxes and eigenvalues in d */
-              rec1d_u_f_lam_midpt(fv, d);
+              rec1d_midpt |= rec1d_u_f_lam_midpt(fv, d);
 
               /* compute numerical flux directly after rec1d_u_f_lam_midpt,
                  if not set already in rec1d_u_f_lam_midpt */
@@ -408,7 +409,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             d->info = d_info_midnorm;
 
             /* reconstruct q,u and then set fluxes and eigenvalues in d */
-            rec1d_u_f_lam_midpt(fv, d);
+            rec1d_midpt |= rec1d_u_f_lam_midpt(fv, d);
 
             /* compute numerical flux directly after rec1d_u_f_lam_midpt,
                if not set already in rec1d_u_f_lam_midpt */
