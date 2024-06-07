@@ -93,6 +93,15 @@ typedef struct tFVINFO {
 } tFVinfo;
 
 
+/* possible return vulue bits of funcs like fv_rec1d_q_midpt */
+enum
+{
+  FV_REC_OK               = 0,
+  FV_REC_NO_LEFT_EXTRAP1  = 2,  //do not extrap rhs on left
+  FV_REC_NO_RIGHT_EXTRAP1 = 4,  //do not extrap rhs on right
+  FV_REC_SHARP_ON_LEFT    = 8,  //qc sharp on left
+  FV_REC_SHARP_ON_RIGHT   = 16  //qc sharp on right
+};
 
 
 /* numflux1d.c */

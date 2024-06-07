@@ -36,7 +36,7 @@ int fv_rec1d_q_midpt(tFVinfo *fv)
     fv->qm_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
     fv->qm_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
   }
-  return 0;
+  return FV_REC_OK;
 }
 
 
