@@ -47,10 +47,10 @@ int nmesh_dg(tMesh *mesh)
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
          "[linear,parabolic]");
   /* Pars for interpolation between fv and dg */
-  AddPar("fv2d_interp_use_extrap1", "no", "whether we extrap fv vars to "
+  AddPar("fv2dg_interp_use_extrap1", "no", "whether we extrap fv vars to "
          "faces before we interpolate from fv to dg [no,yes]");
-  AddPar("fv2d_interp_use_extrap1_vars", "", "list of vars to which the par "
-         "fv2d_interp_use_extrap1 applies");
+  AddPar("fv2dg_interp_use_extrap1_vars", "", "list of vars to which the par "
+         "fv2dg_interp_use_extrap1 applies");
   /* Finite Differences (fd) pars */
   /* fv_surface_interp is also used for fd */
   AddPar("fd_stencilsize", "3", "Fin.Diff. accuracy = fd_stencilsize-1");

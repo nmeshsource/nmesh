@@ -261,8 +261,8 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   refine_synchronize_ref_method(ref);
 
   /* set varlist where we use extrap to face before interp to dg */
-  if(DGglobals->fv2d_interp_use_extrap1)
-    vl_extrap = DGglobals->fv2d_interp_use_extrap1_vl;
+  if(DGglobals->fv2dg_interp_use_extrap1)
+    vl_extrap = DGglobals->fv2dg_interp_use_extrap1_vl;
   else
     vl_extrap = NULL;
 
@@ -574,8 +574,8 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
 
     /* decide if we extrap to faces 1st before we call interp_to_pt_typ */
     fv_extrap = 0;
-    if(DGglobals->fv2d_interp_use_extrap1)
-      if( vlindex(DGglobals->fv2d_interp_use_extrap1_vl, iu) >= 0 )
+    if(DGglobals->fv2dg_interp_use_extrap1)
+      if( vlindex(DGglobals->fv2dg_interp_use_extrap1_vl, iu) >= 0 )
         fv_extrap = 1; // but always 0 could also be an option...
 
     /* get num. and type of points on dg grid that we would switch to */
