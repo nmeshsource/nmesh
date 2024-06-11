@@ -9,6 +9,7 @@ coordinates_surface_metric = sqrtgdiag
 coordinates_midpoint_data = yes
 amr_uniform_p = 0 2 4 # 0 1 2 3 4 5 6
 amr_fv_p      = 0 2 4 # 0 1 2 3 4 5 6 7
+amr_fv_if_uniform = yes
 #scalarwave1_numflux = LLF
 fv_rec = WENOmZ_2
 fv_flux = fnum # fnum_minus_fi
