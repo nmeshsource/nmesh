@@ -68,6 +68,9 @@ int load_balance_if_needed(tMesh *mesh)
 
   if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
   {
+    struct timespec tp0[1], tp1[1];
+    getRealTime(tp0);
+
     timing_set_myops_ops0_allops(mesh);
     // ^FIXME: load_set_desrank_ns_elms in load_balance calls this again...
     timing_set_maxops(mesh);
@@ -84,6 +87,8 @@ int load_balance_if_needed(tMesh *mesh)
       //printCRCs(mesh, 6, CRCs);
 
       load_balance(mesh, 1);
+      getRealTime(tp1);
+      PRF;printf(" took %gs\n", getTimeDiffIn_s(tp1, tp0));
 
       //nmesh_CRCs(mesh, 6, CRCs);
       //sum1 = 0;
