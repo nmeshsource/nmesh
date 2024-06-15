@@ -80,7 +80,8 @@ void fv_stat_WENOm3_1or2(tFVinfo *fv)
   }
 }
 
-/* like fv_rec1d_q_midpt but set fv->stat based on rec1d_u_in1_weightfac */
+/* like fv_rec1d_q_midpt but set fv->stat based on rec1d_u_in1_weightfac,
+   and then use WENOm3_1 or fv->rec1d depending on fv->stat */
 void fv_rec1d_q_midpt_endpts_WENOm3_1or2(tFVinfo *fv)
 {
   int nq      = fv->nq;
@@ -97,12 +98,12 @@ void fv_rec1d_q_midpt_endpts_WENOm3_1or2(tFVinfo *fv)
   for(l=0; l<nq; l++)
   {
     /* reconstruct from both sides of midpoint at im */
-    fv->qm_p[l] = rec1d_p_flag_WENOm3(npts, qc[l], im, q_scale,
-                                      fv->stat[l] & FV_REC_NO_LEFT_EXTRAP1,
-                                      fv->rec1d_p);
-    fv->qm_m[l] = rec1d_m_flag_WENOm3(npts, qc[l], im, q_scale,
-                                      fv->stat[l] & FV_REC_NO_RIGHT_EXTRAP1,
-                                      fv->rec1d_m);
+    fv->qm_p[l] = rec1d_p_flag_WENOm3_1(npts, qc[l], im, q_scale,
+                                        fv->stat[l] & FV_REC_NO_LEFT_EXTRAP1,
+                                        fv->rec1d_p);
+    fv->qm_m[l] = rec1d_m_flag_WENOm3_1(npts, qc[l], im, q_scale,
+                                        fv->stat[l] & FV_REC_NO_RIGHT_EXTRAP1,
+                                        fv->rec1d_m);
   }
 }
 
