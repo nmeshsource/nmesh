@@ -970,7 +970,7 @@ double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale)
 
 
 /* check if u[i0in2] - u[i0in1] is similar to u[i0in1] - u[i0],
-   if yes return 1, else rerurn 0 */
+   if yes return 1, else return 0 */
 double rec1d_u_in1_weightfac(int n, const double *u, int i0, double u_scale,
                              double s1, double s2, int opt)
 {
@@ -1014,6 +1014,30 @@ double rec1d_u_in1_weightfac(int n, const double *u, int i0, double u_scale,
   return w1fac;
 }
 
+/* Use either rec1d or WENOm3_1 depending on flag_WENOm3_1
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_flag_WENOm3(int n, const double *u, int im, double u_scale,
+                           unsigned flag_WENOm3_1,
+                           double (*rec1d)(int n, const double *q, int im,
+                                           double q_scale))
+{
+  if(flag_WENOm3_1 && (im==0))
+    return rec1d_p_WENOm3_1(n,u, im, u_scale);
+  else
+    return rec1d(n,u, im, u_scale);
+}
+double rec1d_m_flag_WENOm3(int n, const double *u, int im, double u_scale,
+                           unsigned flag_WENOm3_1,
+                           double (*rec1d)(int n, const double *q, int im,
+                                           double q_scale))
+{
+  if(flag_WENOm3_1 && (im==n-2))
+    return rec1d_m_WENOm3_1(n,u, im, u_scale);
+  else
+    return rec1d(n,u, im, u_scale);
+}
+
 /* Use either WENOm3_2 or WENOm3_1 depending on weight fac returned
    by rec1d_u_in1_weightfac.
    The n-1 midpoints are at im=0,...,n-2
@@ -1023,6 +1047,8 @@ double rec1d_p_WENOm3_1or2(int n, const double *u, int im, double u_scale,
 {
   double s1=0, s2=1e77;
   int opt = 1;
+
+  errorexit("this is untested!");
 
   *stat = 0; /* stat=0 means WENOm3_2 is used */
 
@@ -1046,6 +1072,8 @@ double rec1d_m_WENOm3_1or2(int n, const double *u, int im, double u_scale,
 {
   double s1=0, s2=1e77;
   int opt = 1;
+
+  errorexit("this is untested!");
 
   *stat = 0; /* stat=0 means WENOm3_2 is used */
 

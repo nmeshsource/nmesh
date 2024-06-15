@@ -40,6 +40,71 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
   }
 }
 
+/* set fv->stat based on rec1d_u_in1_weightfac to determine if we want
+   WENOm3_2 or WENOm3_1 */
+void fv_stat_WENOm3_1or2(tFVinfo *fv)
+{
+  int nq      = fv->nq;
+  double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
+  int npts    = fv->npts;
+  int im      = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
+  double q_scale = fv->q_scale;
+  int l, stat;
+
+  /* call rec1d_u_in1_weightfac to determine stat */
+  if(1)
+  {
+    double s1=0, s2=1e77;
+    int opt = 1;
+
+    if(im==0) /* rec at midpoint 0 is special */
+    {
+      for(l=0; l<nq; l++)
+      {
+        double w1fac = rec1d_u_in1_weightfac(npts,qc[l], 0,
+                                             q_scale, s1,s2,opt);
+        stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
+        fv->stat[l] |= FV_REC_NO_LEFT_EXTRAP1 * stat;
+      }
+    }
+    else if(im==npts-2) /* rec at midpoint npts-2 is special */
+    {
+      for(l=0; l<nq; l++)
+      {
+        double w1fac = rec1d_u_in1_weightfac(npts,qc[l], npts-1,
+                                             q_scale, s1,s2,opt);
+        stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
+        fv->stat[l] |= FV_REC_NO_RIGHT_EXTRAP1 * stat;
+      }
+    }
+  }
+}
+
+/* like fv_rec1d_q_midpt but set fv->stat based on rec1d_u_in1_weightfac */
+void fv_rec1d_q_midpt_endpts_WENOm3_1or2(tFVinfo *fv)
+{
+  int nq      = fv->nq;
+  double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
+  int npts    = fv->npts;
+  int im      = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
+  double q_scale = fv->q_scale;
+  int l;
+
+  /* call rec1d_u_in1_weightfac to determine fv->stat */
+  fv_stat_WENOm3_1or2(fv);
+
+  /* interpolate fields qc towards the midpoint at im */
+  for(l=0; l<nq; l++)
+  {
+    /* reconstruct from both sides of midpoint at im */
+    fv->qm_p[l] = rec1d_p_flag_WENOm3(npts, qc[l], im, q_scale,
+                                      fv->stat[l] & FV_REC_NO_LEFT_EXTRAP1,
+                                      fv->rec1d_p);
+    fv->qm_m[l] = rec1d_m_flag_WENOm3(npts, qc[l], im, q_scale,
+                                      fv->stat[l] & FV_REC_NO_RIGHT_EXTRAP1,
+                                      fv->rec1d_m);
+  }
+}
 
 /* compute d_i f^i with finite vol. methods on one node.
    In:
