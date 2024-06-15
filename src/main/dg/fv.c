@@ -20,7 +20,7 @@ extern tcoordinates coordinates[1];
    directly from arrays qc that contain q-vars at gridpoints.
    Note: fv->qc[l][i], qm_p[l], qm_m[l] are allocated in fv_divf.
    In: nq, qc, npts, im, q_scale, rec1d_p,rec1d_m. Out: qm_p, qm_m */
-int fv_rec1d_q_midpt(tFVinfo *fv)
+void fv_rec1d_q_midpt(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
@@ -35,8 +35,9 @@ int fv_rec1d_q_midpt(tFVinfo *fv)
     /* reconstruct from both sides of midpoint at im */
     fv->qm_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
     fv->qm_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
+    //Note: We do not set: fv->stat[l] = FV_REC_OK;
+    //Because fv_divf zeros stat with memset, i.e. it already sets FV_REC_OK
   }
-  return FV_REC_OK;
 }
 
 
@@ -183,6 +184,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     double (*di0fi0)[maxn] = dtensor(nfvars*maxn); //array for d_i J*sgd*flux^i
     double *qm_p = dmalloc(nqvars); // array for rec u at one point
     double *qm_m = dmalloc(nqvars);
+    unsigned *fv_stat = uimalloc(nqvars); //fv_stat[l] = rec. status for q[l]
     int l; /* field index */
     int d_info_midnorm;
     int dir;
@@ -228,7 +230,9 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
         int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
         int i2 = i2_norm(i,j,k, dir);
         int i0;                       /* index orthogonal to plane */
-        int rec1d_midpt = FV_REC_OK; //for return bits of rec1d_u_f_lam_midpt
+
+        /* zero status bits of rec1d_u_f_lam_midpt */
+        memset(fv_stat, 0, sizeof(fv_stat[0])*nqvars);
 
         /* fill field arrays qc, i0 runs orth. to plane */
         for(i0=0; i0<n[dir]; i0++)
@@ -346,12 +350,13 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
               fv->rec1d_m = rec1d_m;
               fv->qm_p = qm_p;
               fv->qm_m = qm_m;
+              fv->stat = fv_stat;
 
               d->face = dir*2;
               d->info = d_info_midnorm;
 
               /* reconstruct q,u and then set fluxes and eigenvalues in d */
-              rec1d_midpt |= rec1d_u_f_lam_midpt(fv, d);
+              rec1d_u_f_lam_midpt(fv, d);
 
               /* compute numerical flux directly after rec1d_u_f_lam_midpt,
                  if not set already in rec1d_u_f_lam_midpt */
@@ -404,12 +409,13 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             fv->rec1d_m = rec1d_m;
             fv->qm_p = qm_p;
             fv->qm_m = qm_m;
+            fv->stat = fv_stat;
 
             d->face = dir*2 + 1;
             d->info = d_info_midnorm;
 
             /* reconstruct q,u and then set fluxes and eigenvalues in d */
-            rec1d_midpt |= rec1d_u_f_lam_midpt(fv, d);
+            rec1d_u_f_lam_midpt(fv, d);
 
             /* compute numerical flux directly after rec1d_u_f_lam_midpt,
                if not set already in rec1d_u_f_lam_midpt */
@@ -474,22 +480,19 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
         /* extrapolate df = d_i0 f^i0 to face */
         if(extrap_mode == FV_DNFN_EXTRAP1)
         {
-          int extrap_left  = !(rec1d_midpt & FV_REC_NO_LEFT_EXTRAP1);
-          int extrap_right = !(rec1d_midpt & FV_REC_NO_RIGHT_EXTRAP1);
-          if(extrap_left)
-            forvl(vldivf, l)
-            {
-              double *df = di0fi0[l];
+          forvl(vldivf, l)
+          {
+            int rec1d_midpt = fv_stat[l]; //stat of rec. q[l]
+            int extrap_left  = !(rec1d_midpt & FV_REC_NO_LEFT_EXTRAP1);
+            int extrap_right = !(rec1d_midpt & FV_REC_NO_RIGHT_EXTRAP1);
+            double *df = di0fi0[l];
+            if(extrap_left)
               rec1d_LR_uface_to_uin_1_Carray(n[dir], df, 0, 0, q_scale,
                                              extrap_s1, extrap_s2, extrap_opt);
-            }
-          if(extrap_right)
-            forvl(vldivf, l)
-            {
-              double *df = di0fi0[l];
+            if(extrap_right)
               rec1d_LR_uface_to_uin_1_Carray(n[dir], df, 1, 0, q_scale,
                                              extrap_s1, extrap_s2, extrap_opt);
-            }
+          }
         }
 
         /* final loop over points in dir */
@@ -516,6 +519,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     } /* end dir-loop*/
 
     /* release mem */
+    free(fv_stat);
     free(qm_m);
     free(qm_p);
     free(di0fi0);

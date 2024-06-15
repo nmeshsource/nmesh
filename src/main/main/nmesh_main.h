@@ -290,6 +290,7 @@ void sort_int_array(int n, int *ar);
 int search_sorted_int_array(int n, int *ar, int key);
 double *dmalloc(int n);
 int *imalloc(int n);
+unsigned int *uimalloc(int n);
 char *cmalloc(int n);
 void *pmalloc(int n);
 void *dtensor(size_t nentries);

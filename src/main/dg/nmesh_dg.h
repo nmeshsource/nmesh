@@ -90,14 +90,15 @@ typedef struct tFVINFO {
   int im;        /* midpoint where we reconstruct vars */
   double *qm_p;  /* qm_p[l] is reconstructed q in positive direction (p) */
   double *qm_m;  /* qm_m[l] is reconstructed q in negative direction (m) */
+  unsigned *stat; //rec1d_u_f_lam_midpt can write a status for each qm-var
 } tFVinfo;
 
 
-/* possible return value bits of the func rec1d_u_f_lam_midpt passed to
-   fv_divf, or the func fv_rec1d_q_midpt */
+/* possible status bits written into stat of tFVinfo by the func
+   rec1d_u_f_lam_midpt passed to fv_divf, or by the func fv_rec1d_q_midpt */
 enum
 {
-  FV_REC_OK               = 0,
+  FV_REC_OK               = 0,  //must be zero (because fv_divf uses memset for init)
   FV_REC_NO_LEFT_EXTRAP1  = 2,  //do not extrap rhs on left
   FV_REC_NO_RIGHT_EXTRAP1 = 4,  //do not extrap rhs on right
   FV_REC_SHARP_ON_LEFT    = 8,  //qc sharp on left
@@ -166,7 +167,7 @@ double rec1d_p_WENOmZ_1(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale);
 
 /* fv.c */
-int fv_rec1d_q_midpt(tFVinfo *fv);
+void fv_rec1d_q_midpt(tFVinfo *fv);
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
              int (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),

@@ -861,7 +861,7 @@ int search_sorted_int_array(int n, int *ar, int key)
 double *dmalloc(int n)
 {
   double *p = malloc(sizeof(double) * n);
-  
+
   if(!p) errorexiti("out of memory (%d double)", n);
   return p;
 }
@@ -869,15 +869,23 @@ double *dmalloc(int n)
 int *imalloc(int n)
 {
   int *p = malloc(sizeof(int) * n);
-  
+
   if(!p) errorexiti("out of memory (%d int)", n);
+  return p;
+}
+
+unsigned int *uimalloc(int n)
+{
+  unsigned int *p = malloc(sizeof(unsigned int) * n);
+
+  if(!p) errorexiti("out of memory (%d unsigned int)", n);
   return p;
 }
 
 char *cmalloc(int n)
 {
   char *p = malloc(sizeof(char) * n);
-  
+
   if(!p) errorexiti("out of memory (%d char)", n);
   return p;
 }
@@ -885,7 +893,7 @@ char *cmalloc(int n)
 void *pmalloc(int n)
 {
   void *p = malloc(sizeof(void *) * n);
-  
+
   if(!p) errorexiti("out of memory (%d void *)", n);
   return p;
 }
