@@ -969,6 +969,103 @@ double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale)
 }
 
 
+/* check if u[i0in2] - u[i0in1] is similar to u[i0in1] - u[i0],
+   if yes return 1, else rerurn 0 */
+double rec1d_u_in1_weightfac(int n, const double *u, int i0, double u_scale,
+                             double s1, double s2, int opt)
+{
+  int top = (i0>0);
+  int sign = 2*top - 1;
+  int i0in1 = i0 - sign;  /* one away from from face */
+  double w1fac;           /* how much of u[i0in2] we take into account */
+
+  if(n<=2) { w1fac = 0.;  return w1fac; }
+  else     { w1fac = 1.; }
+
+  /* adjust weights towards 0th order extrapolation if s1>0 */
+  if( (s1>0. || s2<DBL_MAX) )
+  {
+    int i0in2 = i0in1 - sign; /* 2 away from from face */
+    //int i0in3 = i0in2 - sign; /* 3 away from from face */
+    double s, d1,d2; //,d3;
+    double eps = 1e-100;
+
+    d2 = u[i0in2] - u[i0in1];
+    d1 = u[i0in1] - u[i0];
+    s = fabs(d1) / (fabs(d2) + eps*u_scale);
+
+    /* w1fac -> w1fac * f(s), where f(s)=0 if s<s1 or s>=s2, otherwise f(s)=1 */
+    if(s<s1 || s>=s2) w1fac = 0.;
+
+    /* options to e.g. take signs of d1 and d2 into account */
+    switch(opt)
+    {
+    case -1:   // Fixme: OPTIMIZE by checking opt=-1 at top of func
+      w1fac = 0.; /* no extrap if opt=-1. */
+      break;
+    case 1:
+      if(d1*d2<=0.) w1fac = 0.; /* no extrap if signs differ */
+      break;
+    case 2:
+      if(d1*d2>=0.) w1fac = 0.; /* no extrap if signs same */
+      break;
+    }
+  }
+  return w1fac;
+}
+
+/* Use either WENOm3_2 or WENOm3_1 depending on weight fac returned
+   by rec1d_u_in1_weightfac.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOm3_1or2(int n, const double *u, int im, double u_scale,
+                           unsigned *stat)
+{
+  double s1=0, s2=1e77;
+  int opt = 1;
+
+  *stat = 0; /* stat=0 means WENOm3_2 is used */
+
+  if(im==0) /* only rec at midpoint 0 is special */
+  {
+    double w1fac, w0, w1;
+    if(n<3) { *stat=1;  return rec1d_p_1(n, u, im, u_scale); }
+
+    w1fac = rec1d_u_in1_weightfac(n,u, 0, u_scale, s1,s2,opt);
+    w1 = 0.5 * w1fac;
+    w0 = 1. - w1;
+    *stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
+    /* do same as WENOm3_2 or WENOm3_1 depending on weights */
+    return (w0*u[0] + w1*u[1]);
+  }
+  /* otherwise use WENOm3_2 */
+  return rec1d_p_WENOm3_2(n,u, im, u_scale);
+}
+double rec1d_m_WENOm3_1or2(int n, const double *u, int im, double u_scale,
+                           unsigned *stat)
+{
+  double s1=0, s2=1e77;
+  int opt = 1;
+
+  *stat = 0; /* stat=0 means WENOm3_2 is used */
+
+  if(im==n-2) /* only rec at midpoint n-2 is special */
+  {
+    double w1fac, w0, w1;
+    if(n<3) { *stat=1;  return rec1d_p_1(n, u, im, u_scale); }
+
+    w1fac = rec1d_u_in1_weightfac(n,u, n-1, u_scale, s1,s2,opt);
+    w1 = 0.5 * w1fac;
+    w0 = 1. - w1;
+    *stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
+    /* do same as WENOm3_2 or WENOm3_1 depending on weights */
+    return (w0*u[n-1] + w1*u[n-2]);
+  }
+  /* otherwise use WENOm3_2 */
+  return rec1d_m_WENOm3_2(n,u, im, u_scale);
+}
+
+
 /*************************************************************************/
 /* WENO5 or WEONZ have more weights and use 5 points */
 /*************************************************************************/
