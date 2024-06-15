@@ -170,7 +170,7 @@ double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale);
 void fv_rec1d_q_midpt(tFVinfo *fv);
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
-             int (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
+             void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
              void (*numflux)(tDGinfo *d));
 void printFVinfo(tFVinfo *fv);

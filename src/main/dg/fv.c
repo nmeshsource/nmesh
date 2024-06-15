@@ -53,7 +53,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
               face points */
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
-             int (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
+             void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),
              void (*u_f_lam)(tDGinfo *d),
              void (*numflux)(tDGinfo *d))
 {
