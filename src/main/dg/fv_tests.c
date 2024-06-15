@@ -26,10 +26,9 @@ void test_flux_normx(tDGinfo *d)
 {
   testflux_normi(d, 0);
 }
-int test_rec_flux_normx(tFVinfo *f, tDGinfo *d)
+void test_rec_flux_normx(tFVinfo *f, tDGinfo *d)
 {
   testflux_normi(d, 0);
-  return FV_REC_OK;
 }
 
 /* use testflux_normi in y-dir */
@@ -37,10 +36,9 @@ void test_flux_normy(tDGinfo *d)
 {
   testflux_normi(d, 1);
 }
-int test_rec_flux_normy(tFVinfo *f, tDGinfo *d)
+void test_rec_flux_normy(tFVinfo *f, tDGinfo *d)
 {
   testflux_normi(d, 1);
-  return FV_REC_OK;
 }
 
 /* use testflux_normi in z-dir */
@@ -48,10 +46,9 @@ void test_flux_normz(tDGinfo *d)
 {
   testflux_normi(d, 2);
 }
-int test_rec_flux_normz(tFVinfo *f, tDGinfo *d)
+void test_rec_flux_normz(tFVinfo *f, tDGinfo *d)
 {
   testflux_normi(d, 2);
-  return FV_REC_OK;
 }
 
 
@@ -66,7 +63,7 @@ int test_rec_flux_normz(tFVinfo *f, tDGinfo *d)
 int fv_test_fv_divf(tNode *node, tVarList *vldivf)
 {
   /* func pointers */
-  int (*test_rec_flux[3])(tFVinfo *f, tDGinfo *d) =
+  void (*test_rec_flux[3])(tFVinfo *f, tDGinfo *d) =
        {test_rec_flux_normx, test_rec_flux_normy, test_rec_flux_normz};
   void (*test_flux[3])(tDGinfo *d) =
        {test_flux_normx, test_flux_normy, test_flux_normz};
