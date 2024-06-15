@@ -41,7 +41,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
 }
 
 /* set fv->stat based on rec1d_u_in1_weightfac to determine if we want
-   WENOm3_2 or WENOm3_1 */
+   WENOm3_2 or WENOm3_1 near end points */
 void fv_stat_WENOm3_1or2(tFVinfo *fv)
 {
   int nq      = fv->nq;
@@ -52,10 +52,11 @@ void fv_stat_WENOm3_1or2(tFVinfo *fv)
   int l, stat;
 
   /* call rec1d_u_in1_weightfac to determine stat */
-  if(1)
+  if(DGglobals->fv_rec_mode_WENOm)
   {
-    double s1=0, s2=1e77;
-    int opt = 1;
+    double s1 = DGglobals->fv_rec_WENOm_s1;
+    double s2 = DGglobals->fv_rec_WENOm_s2;
+    int opt   = DGglobals->fv_rec_WENOm_opt;
 
     if(im==0) /* rec at midpoint 0 is special */
     {
@@ -82,7 +83,7 @@ void fv_stat_WENOm3_1or2(tFVinfo *fv)
 
 /* like fv_rec1d_q_midpt but set fv->stat based on rec1d_u_in1_weightfac,
    and then use WENOm3_1 or fv->rec1d depending on fv->stat */
-void fv_rec1d_q_midpt_endpts_WENOm3_1or2(tFVinfo *fv)
+void fv_rec1d_q_midpt_endpts_1or2(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]

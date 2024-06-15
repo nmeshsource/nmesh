@@ -315,6 +315,15 @@ int dg_set_DGglobals(tMesh *mesh)
   else
     errorexits("unknown value %s in par fv_rec.", Gets(fv_rec));
 
+  /* WENOm3,WENOm5,WENOmZ use 1st or 2nd order acc. in rec. near boundary */
+  if( (DGglobals->fv_rec_mode == FV_REC_WENOm3) ||
+      (DGglobals->fv_rec_mode == FV_REC_WENOm5) ||
+      (DGglobals->fv_rec_mode == FV_REC_WENOmZ) )
+    DGglobals->fv_rec_mode_WENOm = 1; //need to decide on 1st or 2nd order
+  DGglobals->fv_rec_WENOm_s1  = Getd(Par("fv_rec_WENOm_s1"));
+  DGglobals->fv_rec_WENOm_s2  = Getd(Par("fv_rec_WENOm_s2"));
+  DGglobals->fv_rec_WENOm_opt = Getd(Par("fv_rec_WENOm_opt"));
+
   /* save how we get fv flux */
   if(Getv(Par("fv_flux"), "fnum_minus_fi"))
     DGglobals->fv_flux_is_fnum_minus_fi = 1;
@@ -401,6 +410,14 @@ int dg_print_DGglobals(tMesh *mesh)
   for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
   printf(" }\n");
   printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
+  printf(" DGglobals->fv_rec_mode_WENOm = %d\n",
+         DGglobals->fv_rec_mode_WENOm);
+  printf(" DGglobals->fv_rec_WENOm_s1 = %g\n",
+         DGglobals->fv_rec_WENOm_s1);
+  printf(" DGglobals->fv_rec_WENOm_s2 = %g\n",
+         DGglobals->fv_rec_WENOm_s2);
+  printf(" DGglobals->fv_rec_WENOm_opt = %d\n",
+         DGglobals->fv_rec_WENOm_opt);
   printf(" DGglobals->fv_flux_is_fnum_minus_fi = %d\n",
          DGglobals->fv_flux_is_fnum_minus_fi);
   printf(" DGglobals->fv_divf_extrap_mode = %d\n",

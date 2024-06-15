@@ -35,6 +35,10 @@ typedef struct {
   /* frequently used par values */
   double outerBC_flux_fac[3]; /* values from par dg_outerBC_flux_fac */
   int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
+  int fv_rec_mode_WENOm;      /* 1 if WENOm3, WENOm5, or WENOmZ*/
+  double fv_rec_WENOm_s1;     /* value of par fv_rec_WENOm_s1 */
+  double fv_rec_WENOm_s2;     /* value of par fv_rec_WENOm_s2 */
+  int fv_rec_WENOm_opt;       /* value of par fv_rec_WENOm_opt */
   int fv_flux_is_fnum_minus_fi; //whether we subtract inner from num. flux
   int fv_divf_extrap_mode;    /* div(f) extrap. mode from fv_divf_extrap */
   int fv_divf_adds_surface_fluxes; //if 1 fv_divf adds surf. fluxes
