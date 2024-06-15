@@ -751,7 +751,7 @@ int scalarwave1_analyze(tMesh *mesh)
 /* function that sets cons vars u, fluxes and eigenvals.
    In:  fv->nq,qc,npts,im,q_scale,rec1d_p,rec1d_m, d->node,info,i,j,k,face
    Out: fv->qm_p,qm_m, d->ui,ua,fi,fa,lami,lama */
-int scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
+void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
 {
   tNode *node = d->node;
   //int *n = node->n;
@@ -791,6 +791,4 @@ int scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
   /* get inner and adjacent fluxes fi, fa */
   scalarwave1_flux1d(node,nvars, d->fi,norm, d->ui);
   scalarwave1_flux1d(node,nvars, d->fa,norm, d->ua);
-
-  return FV_REC_OK;
 }
