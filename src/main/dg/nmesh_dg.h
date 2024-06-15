@@ -164,14 +164,14 @@ double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale);
 double rec1d_u_in1_weightfac(int n, const double *u, int i0, double u_scale,
                              double s1, double s2, int opt);
-double rec1d_p_flag_WENOm3_1(int n, const double *u, int im, double u_scale,
-                             unsigned flag_WENOm3_1,
-                             double (*rec1d)(int n, const double *q, int im,
-                                             double q_scale));
-double rec1d_m_flag_WENOm3_1(int n, const double *u, int im, double u_scale,
-                             unsigned flag_WENOm3_1,
-                             double (*rec1d)(int n, const double *q, int im,
-                                             double q_scale));
+double rec1d_p_flag_WENOm_1(int n, const double *u, int im, double u_scale,
+                            unsigned flag_WENOm_1,
+                            double (*rec1d)(int n, const double *q, int im,
+                                            double q_scale));
+double rec1d_m_flag_WENOm_1(int n, const double *u, int im, double u_scale,
+                            unsigned flag_WENOm_1,
+                            double (*rec1d)(int n, const double *q, int im,
+                                            double q_scale));
 double rec1d_p_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm5_1(int n, const double *u, int im, double u_scale);
@@ -185,6 +185,8 @@ double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale);
 
 /* fv.c */
 void fv_rec1d_q_midpt(tFVinfo *fv);
+void fv_stat_WENOm_1or2(tFVinfo *fv);
+void fv_rec1d_q_midpt_WENOm_1or2(tFVinfo *fv);
 void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
              tVarList *vlu, tVarList *vls,
              void (*rec1d_u_f_lam_midpt)(tFVinfo *f, tDGinfo *d),

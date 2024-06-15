@@ -766,7 +766,8 @@ void scalarwave1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
   node_normal_from_DGinfo(d, norm);
 
   /* reconstruct at mid point */
-  fv_rec1d_q_midpt(fv);
+  //fv_rec1d_q_midpt(fv);
+  fv_rec1d_q_midpt_WENOm_1or2(fv);
 
   /* in scalarwave1 q is u, so transfer qm_p,qm_m into ui,ua now */
 

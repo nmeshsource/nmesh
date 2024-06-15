@@ -1014,25 +1014,25 @@ double rec1d_u_in1_weightfac(int n, const double *u, int i0, double u_scale,
   return w1fac;
 }
 
-/* Use either rec1d or WENOm3_1 depending on flag_WENOm3_1
+/* Use either rec1d or WENOm3_1 depending on flag_WENOm_1
    The n-1 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
-double rec1d_p_flag_WENOm3_1(int n, const double *u, int im, double u_scale,
-                             unsigned flag_WENOm3_1,
-                             double (*rec1d)(int n, const double *q, int im,
-                                             double q_scale))
+double rec1d_p_flag_WENOm_1(int n, const double *u, int im, double u_scale,
+                            unsigned flag_WENOm_1,
+                            double (*rec1d)(int n, const double *q, int im,
+                                            double q_scale))
 {
-  if(flag_WENOm3_1 && (im==0))
+  if(flag_WENOm_1 && (im==0))
     return rec1d_p_WENOm3_1(n,u, im, u_scale);
   else
     return rec1d(n,u, im, u_scale);
 }
-double rec1d_m_flag_WENOm3_1(int n, const double *u, int im, double u_scale,
-                             unsigned flag_WENOm3_1,
-                             double (*rec1d)(int n, const double *q, int im,
-                                             double q_scale))
+double rec1d_m_flag_WENOm_1(int n, const double *u, int im, double u_scale,
+                            unsigned flag_WENOm_1,
+                            double (*rec1d)(int n, const double *q, int im,
+                                            double q_scale))
 {
-  if(flag_WENOm3_1 && (im==n-2))
+  if(flag_WENOm_1 && (im==n-2))
     return rec1d_m_WENOm3_1(n,u, im, u_scale);
   else
     return rec1d(n,u, im, u_scale);

@@ -42,7 +42,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
 
 /* set fv->stat based on rec1d_u_in1_weightfac to determine if we want
    WENOm3_2 or WENOm3_1 near end points */
-void fv_stat_WENOm3_1or2(tFVinfo *fv)
+void fv_stat_WENOm_1or2(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
@@ -83,7 +83,7 @@ void fv_stat_WENOm3_1or2(tFVinfo *fv)
 
 /* like fv_rec1d_q_midpt but set fv->stat based on rec1d_u_in1_weightfac,
    and then use WENOm3_1 or fv->rec1d depending on fv->stat */
-void fv_rec1d_q_midpt_endpts_1or2(tFVinfo *fv)
+void fv_rec1d_q_midpt_WENOm_1or2(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
@@ -93,18 +93,18 @@ void fv_rec1d_q_midpt_endpts_1or2(tFVinfo *fv)
   int l;
 
   /* call rec1d_u_in1_weightfac to determine fv->stat */
-  fv_stat_WENOm3_1or2(fv);
+  fv_stat_WENOm_1or2(fv);
 
   /* interpolate fields qc towards the midpoint at im */
   for(l=0; l<nq; l++)
   {
     /* reconstruct from both sides of midpoint at im */
-    fv->qm_p[l] = rec1d_p_flag_WENOm3_1(npts, qc[l], im, q_scale,
-                                        fv->stat[l] & FV_REC_NO_LEFT_EXTRAP1,
-                                        fv->rec1d_p);
-    fv->qm_m[l] = rec1d_m_flag_WENOm3_1(npts, qc[l], im, q_scale,
-                                        fv->stat[l] & FV_REC_NO_RIGHT_EXTRAP1,
-                                        fv->rec1d_m);
+    fv->qm_p[l] = rec1d_p_flag_WENOm_1(npts, qc[l], im, q_scale,
+                                       fv->stat[l] & FV_REC_NO_LEFT_EXTRAP1,
+                                       fv->rec1d_p);
+    fv->qm_m[l] = rec1d_m_flag_WENOm_1(npts, qc[l], im, q_scale,
+                                       fv->stat[l] & FV_REC_NO_RIGHT_EXTRAP1,
+                                       fv->rec1d_m);
   }
 }
 
