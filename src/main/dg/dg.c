@@ -298,6 +298,12 @@ int dg_set_DGglobals(tMesh *mesh)
     DGglobals->fv_rec_mode = FV_REC_WENOm5_1;
   else if(Getv(fv_rec, "WENOmZ_1"))
     DGglobals->fv_rec_mode = FV_REC_WENOmZ_1;
+  else if(Getv(fv_rec, "WENOm3"))
+    DGglobals->fv_rec_mode = FV_REC_WENOm3;
+  else if(Getv(fv_rec, "WENOm5"))
+    DGglobals->fv_rec_mode = FV_REC_WENOm5;
+  else if(Getv(fv_rec, "WENOmZ"))
+    DGglobals->fv_rec_mode = FV_REC_WENOmZ;
   else if(Getv(fv_rec, "WENO3if1away_1"))
     DGglobals->fv_rec_mode = FV_REC_WENO3if1away_1;
   else if(Getv(fv_rec, "WENO3if2away_1"))

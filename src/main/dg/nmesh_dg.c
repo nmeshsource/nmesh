@@ -30,6 +30,7 @@ int nmesh_dg(tMesh *mesh)
   /* Finite Volume (fv) pars */
   AddPar("fv_rec", "WENOm3_2", "how we reconstruct with fv [1,WENOm3_2,"
          "WENOm5_2,WENOmT_2,WENOmZ_2,WENOm3_1,WENOm5_1,WENOmZ_1,"
+         "WENOm3,WENOm5,WENOmZ,"
          "WENO3if1away_1,WENO3if2away_1,WENO3_2,WENO3_2g]");
   AddPar("fv_WENOm3_opt_weightratio", "2", "2=standard, 3=mod value");
   AddPar("fv_flux", "fnum", "[fnum_minus_fi, fnum]");

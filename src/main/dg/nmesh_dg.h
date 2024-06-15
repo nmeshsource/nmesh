@@ -16,6 +16,9 @@ enum
   FV_REC_WENOm3_1,        /* non-standard WENO3 with uniform opt. weights */
   FV_REC_WENOm5_1,        /* non-standard WENO5 with uniform opt. weights */
   FV_REC_WENOmZ_1,        /* non-standard WENOZ with uniform opt. weights */
+  FV_REC_WENOm3,          /* WENOm3_2 or WENOm3_1 */
+  FV_REC_WENOm5,          /* WENOm5_2 or WENOm5_1 */
+  FV_REC_WENOmZ,          /* WENOmZ_2 or WENOmZ_1 */
   FV_REC_WENO3if2away_1,  /* WENO3 if 2 away from face, else 1st order */
   FV_REC_WENO3if1away_1,  /* WENO3 if 1 away from face, else 1st order */
   FV_REC_WENO3_2,         /* WENO3 if 1 away from face, else 2nd? order */

@@ -133,6 +133,22 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     rec1d_m = rec1d_m_WENOmZ_1;
     nghosts = 0;
     break;
+  /* use WENOm3_1 or WENOm3_2 near boundary */
+  case FV_REC_WENOm3:
+    rec1d_p = rec1d_p_WENOm3_2; //use only away from boundary
+    rec1d_m = rec1d_m_WENOm3_2; //use only away from boundary
+    nghosts = 0;
+    break;
+  case FV_REC_WENOm5:
+    rec1d_p = rec1d_p_WENOm5_2; //use only away from boundary
+    rec1d_m = rec1d_m_WENOm5_2; //use only away from boundary
+    nghosts = 0;
+    break;
+  case FV_REC_WENOmZ:
+    rec1d_p = rec1d_p_WENOmZ_2; //use only away from boundary
+    rec1d_m = rec1d_m_WENOmZ_2; //use only away from boundary
+    nghosts = 0;
+    break;
   /* WENO3 experiments that didn't show good convergence: */
   case FV_REC_WENO3if2away_1:
     rec1d_p = rec1d_p_WENO3_if2away;
