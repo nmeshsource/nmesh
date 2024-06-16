@@ -102,7 +102,7 @@ typedef struct tFVINFO {
 
 
 /* possible status bits written into stat of tFVinfo by the func
-   rec1d_u_f_lam_midpt passed to fv_divf, or by the func fv_rec1d_q_midpt */
+   rec1d_u_f_lam_midpt passed to fv_divf */
 enum
 {
   FV_REC_OK               = 0,  //must be zero (because fv_divf uses memset for init)

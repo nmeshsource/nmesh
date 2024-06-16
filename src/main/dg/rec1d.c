@@ -791,6 +791,7 @@ double rec1d_m_WENOm3_uniform(int n, const double *u, int im, double u_scale)
 double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale)
 {
   int lm;
+  //PRF;printf(": im=%d\n", im);
 
   /* inside */
   if(im>=1 && im<=n-2)
@@ -849,6 +850,7 @@ double rec1d_p_WENOm3_2(int n, const double *u, int im, double u_scale)
 double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
 {
   int lm;
+  //PRF;printf(": im=%d\n", im);
 
   /* inside */
   if(im>=0 && im<=n-3)
@@ -912,6 +914,7 @@ double rec1d_m_WENOm3_2(int n, const double *u, int im, double u_scale)
 double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale)
 {
   int lm;
+  //PRF;printf(": im=%d\n", im);
 
   /* inside */
   if(im>=1 && im<=n-2)
@@ -941,6 +944,7 @@ double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale)
 double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale)
 {
   int lm;
+  //PRF;printf(": im=%d\n", im);
 
   /* inside */
   if(im>=0 && im<=n-3)
