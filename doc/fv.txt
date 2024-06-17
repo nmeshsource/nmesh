@@ -272,8 +272,8 @@ where we note:
 Now f^{kb} = dx^{kb}/dx^i f^i = (1/a) n^{kb}_i f^i
            = \sqrt{\gamma^{kb,kb} n^{kb}_i f^i
            = \sqrt{\gamma^{kb,kb} f
-where we have define f := n^{kb}_i f^i
-                     -----------------
+where we have defined f := n^{kb}_i f^i
+                      -----------------
 So finally
   ------------------------------------------------------------------
   df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}        (1)
@@ -490,11 +490,55 @@ Some observations with GRHD
  convergence at inter-node boundaries. All other options probably give only
  1st order convergence at inter-node boundaries.
 *When all nodes are switched to fv and all have the same size and number of
- gridpoints and if fv_divf_extrap=no, then fv_rec=WENOmZ_1 conserves mass better
- than fv_rec=WENOmZ_2.
+ gridpoints and if fv_divf_extrap=no, then fv_rec=WENOmZ_1 conserves mass
+ better than fv_rec=WENOmZ_2.
 *BUT when dg and fv nodes meet, mass conservation gets a lot worse. In this
  case fv_rec=WENOmZ_2 seems to be a bit better.
  BUT maybe mass conservation could be improved if we implement
  fv_surface_interp=WENO4
 *If we use fv_rec=WENOmZ_2 both fv_divf_extrap=dnfn_extrap1 and
  fv_divf_extrap=no perform about equally well in terms of mass conservation
+
+
+-----------
+DRAFT:
+===========================================================================
+New ideas:
+==========
+*fv_divf computes
+ di0fi0 =       d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}  (no sum over kb)
+ and not  (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}  as in (1
+ (Note: we use (A) or (B) to approximate d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb})
+*later divf += di0fi0 / J   <--for each direction
+
+*above we have extrapolated di0fi0 from x to o, which violates conservation:
+ 0       1       2       3       4       5       6 <-- gridpoint number i
+ |   |       |       |       |       |       |   |
+ o x |   o   |   o   |   o   |   o   |   o   | x o
+ |   |       |       |       |       |       |   |
+-1   0       1       2       3       4       5   6 <-- midpoint number im
+ |   |       |
+ a           b
+
+*we could just calc di0fi0 in 2 ways:
+ 1. use "fv_rec = WENOmZ_1" from above.
+ 2. use "fv_rec = WENOmZ_2" from above.
+
+*1. gives di0fi0 at the point o since at 1st order the values at x and o
+ are the same.
+ 2. gives di0fi0 at the point x and not o.
+ Note: The fluxes at a and b are the same for both 1. and 2.
+       And the fluxes at a and b are 2nd order accurate!!!
+
+*use result from 1. to integrate from midpoint a to midpoint b:
+ I_ab = \int_a^b dx^k df/dx^k   <--no sums over k or kb
+      ~ \int_a^b d^{kb}(dx^k/dx^{kb}) (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}
+ use dx^k/dx^{kb} = J
+ I_ab ~ \int_a^b d^{kb} d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}
+      = \int_a^b d^{kb} di0fi0
+      = dXb(i=0) * di0fi0(i=0) + dXb(i=1) * di0fi0(i=1)
+ where dXb(i=0) and dXb(i=1) are the distances between the midpoints
+
+*Use result from 2. to get a better approx for di0fi0(i=1)
+ And then set di0fi0(i=0) to:
+ di0fi0(i=0) = [I_ab - dXb(i=1) * di0fi0(i=1)] / dXb(i=0)
