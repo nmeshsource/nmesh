@@ -500,11 +500,20 @@ Some observations with GRHD
  fv_divf_extrap=no perform about equally well in terms of mass conservation
 
 
------------
-DRAFT:
+
+
+
+
+
+
+
+
+
+
+
 ===========================================================================
-New ideas:
-==========
+Notes:
+======
 *fv_divf computes
  di0fi0 =       d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}  (no sum over kb)
  and not  (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}  as in (1
@@ -520,15 +529,15 @@ New ideas:
  |   |       |
  a           b
 
-*we could just calc di0fi0 in 2 ways:
+*we can calc di0fi0 in 2 ways:
  1. use "fv_rec = WENOmZ_1" from above.
  2. use "fv_rec = WENOmZ_2" from above.
 
-*1. gives di0fi0 at the point o since at 1st order the values at x and o
- are the same.
+*1. gives di0fi0 at the point x with 1st order accuracy. But at 1st order,
+ the values at at x and o can be assumed to be the same.
  2. gives di0fi0 at the point x and not o.
  Note: The fluxes at a and b are the same for both 1. and 2.
-       And the fluxes at a and b are 2nd order accurate!!!
+       The fluxes at a is exact and at it is are 3rd order accurate!!!
 
 *use result from 1. to integrate from midpoint a to midpoint b:
  I_ab = \int_a^b dx^k df/dx^k   <--no sums over k or kb
@@ -536,9 +545,16 @@ New ideas:
  use dx^k/dx^{kb} = J
  I_ab ~ \int_a^b d^{kb} d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}
       = \int_a^b d^{kb} di0fi0
-      = dXb(i=0) * di0fi0(i=0) + dXb(i=1) * di0fi0(i=1)
+      = dXb(i=0) * di0fi0_x + dXb(i=1) * di0fi0(i=1)
  where dXb(i=0) and dXb(i=1) are the distances between the midpoints
+*both di0fi0_x and di0fi0(i=1) with 1. are only 1st order acc., but their
+ sum I_ab is 3rd order accurate.
 
-*Use result from 2. to get a better approx for di0fi0(i=1)
- And then set di0fi0(i=0) to:
- di0fi0(i=0) = [I_ab - dXb(i=1) * di0fi0(i=1)] / dXb(i=0)
+*If we use 2. we get a better 2nd order acc. approx. for di0fi0(i=1).
+ Since their sum
+ I_ab ~ dXb(i=0) * di0fi0_x + dXb(i=1) * di0fi0(i=1)
+ is still the same (and 3rd order accurate), the new di0fi0_x must now also also
+ be 2nd order accurate.
+
+*But in either case di0fi0_x is still at point x not o. So I don't see how
+ we can avoid exptrapolation from x to o.
