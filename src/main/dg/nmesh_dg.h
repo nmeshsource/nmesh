@@ -164,14 +164,6 @@ double rec1d_p_WENOm3_1(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm3_1(int n, const double *u, int im, double u_scale);
 double rec1d_u_in1_weightfac(int n, const double *u, int i0, double u_scale,
                              double s1, double s2, int opt);
-double rec1d_p_flag_WENOm_1(int n, const double *u, int im, double u_scale,
-                            unsigned flag_WENOm_1,
-                            double (*rec1d)(int n, const double *q, int im,
-                                            double q_scale));
-double rec1d_m_flag_WENOm_1(int n, const double *u, int im, double u_scale,
-                            unsigned flag_WENOm_1,
-                            double (*rec1d)(int n, const double *q, int im,
-                                            double q_scale));
 double rec1d_p_WENOm3(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm3(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm5_2(int n, const double *u, int im, double u_scale);
