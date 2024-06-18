@@ -42,7 +42,7 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
 
 /* set fv->stat based on rec1d_u_in1_weightfac to determine if we want
    WENOm3_2 or WENOm3_1 near end points */
-void fv_stat_WENOm_1or2(tFVinfo *fv)
+void fv_stat_WENOm_1or2__old(tFVinfo *fv)
 {
   int nq      = fv->nq;
   double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
@@ -80,6 +80,39 @@ void fv_stat_WENOm_1or2(tFVinfo *fv)
     }
   }
 }
+void fv_stat_WENOm_1or2(tFVinfo *fv)
+{
+  int nq       = fv->nq;
+  double **qc  = fv->qc;   // qc[0..nvars-1][0..npts-1]
+  int npts     = fv->npts;
+  int im       = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
+  double *qm_p = fv->qm_p;
+  double *qm_m = fv->qm_m;
+  int l;
+
+  /* call rec1d_u_in1_weightfac to determine stat */
+  if(DGglobals->fv_rec_mode_WENOm)
+  {
+    if(im==0) /* rec_p at midpoint 0 is special */
+    {
+      for(l=0; l<nq; l++)
+      {
+        /* if WENOm3_1 was used */
+        if(qm_p[l] == qc[l][0])
+          fv->stat[l] |= FV_REC_NO_LEFT_EXTRAP1;
+      }
+    }
+    else if(im==npts-2) /* rec_m at midpoint npts-2 is special */
+    {
+      for(l=0; l<nq; l++)
+      {
+        /* if WENOm3_1 was used */
+        if(qm_m[l] == qc[l][npts-1])
+          fv->stat[l] |= FV_REC_NO_RIGHT_EXTRAP1;
+      }
+    }
+  }
+}
 
 /* like fv_rec1d_q_midpt but set fv->stat based on rec1d_u_in1_weightfac,
    and then use WENOm3_1 or fv->rec1d depending on fv->stat */
@@ -92,20 +125,16 @@ void fv_rec1d_q_midpt_WENOm_1or2(tFVinfo *fv)
   double q_scale = fv->q_scale;
   int l;
 
-  /* call rec1d_u_in1_weightfac to determine fv->stat */
-  fv_stat_WENOm_1or2(fv);
-
   /* interpolate fields qc towards the midpoint at im */
   for(l=0; l<nq; l++)
   {
     /* reconstruct from both sides of midpoint at im */
-    fv->qm_p[l] = rec1d_p_flag_WENOm_1(npts, qc[l], im, q_scale,
-                                       fv->stat[l] & FV_REC_NO_LEFT_EXTRAP1,
-                                       fv->rec1d_p);
-    fv->qm_m[l] = rec1d_m_flag_WENOm_1(npts, qc[l], im, q_scale,
-                                       fv->stat[l] & FV_REC_NO_RIGHT_EXTRAP1,
-                                       fv->rec1d_m);
+    fv->qm_p[l] = fv->rec1d_p(npts, qc[l], im, q_scale);
+    fv->qm_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
   }
+
+  /* check if WENOm copied points to determine fv->stat */
+  fv_stat_WENOm_1or2(fv);
 }
 
 /* compute d_i f^i with finite vol. methods on one node.
@@ -202,18 +231,18 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     break;
   /* use WENOm3_1 or WENOm3_2 near boundary */
   case FV_REC_WENOm3:
-    rec1d_p = rec1d_p_WENOm3_2; //use only away from boundary
-    rec1d_m = rec1d_m_WENOm3_2; //use only away from boundary
+    rec1d_p = rec1d_p_WENOm3;
+    rec1d_m = rec1d_m_WENOm3;
     nghosts = 0;
     break;
   case FV_REC_WENOm5:
-    rec1d_p = rec1d_p_WENOm5_2; //use only away from boundary
-    rec1d_m = rec1d_m_WENOm5_2; //use only away from boundary
+    rec1d_p = rec1d_p_WENOm5;
+    rec1d_m = rec1d_m_WENOm5;
     nghosts = 0;
     break;
   case FV_REC_WENOmZ:
-    rec1d_p = rec1d_p_WENOmZ_2; //use only away from boundary
-    rec1d_m = rec1d_m_WENOmZ_2; //use only away from boundary
+    rec1d_p = rec1d_p_WENOmZ;
+    rec1d_m = rec1d_m_WENOmZ;
     nghosts = 0;
     break;
   /* WENO3 experiments that didn't show good convergence: */

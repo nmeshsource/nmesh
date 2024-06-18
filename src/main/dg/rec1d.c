@@ -1048,8 +1048,9 @@ double rec1d_m_flag_WENOm_1(int n, const double *u, int im, double u_scale,
    The 2 face points are at im=-1 & im = n-1 */
 double rec1d_p_WENOm3(int n, const double *u, int im, double u_scale)
 {
-  double s1=0, s2=1e77;
-  int opt = 1;
+  double s1 = DGglobals->fv_rec_WENOm_s1;
+  double s2 = DGglobals->fv_rec_WENOm_s2;
+  int opt   = DGglobals->fv_rec_WENOm_opt;
 
   if(im==0) /* only rec at midpoint 0 is special */
   {
@@ -1067,8 +1068,9 @@ double rec1d_p_WENOm3(int n, const double *u, int im, double u_scale)
 }
 double rec1d_m_WENOm3(int n, const double *u, int im, double u_scale)
 {
-  double s1=0, s2=1e77;
-  int opt = 1;
+  double s1 = DGglobals->fv_rec_WENOm_s1;
+  double s2 = DGglobals->fv_rec_WENOm_s2;
+  int opt   = DGglobals->fv_rec_WENOm_opt;
 
   if(im==n-2) /* only rec at midpoint n-2 is special */
   {
