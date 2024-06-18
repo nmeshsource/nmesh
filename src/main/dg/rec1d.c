@@ -1046,50 +1046,38 @@ double rec1d_m_flag_WENOm_1(int n, const double *u, int im, double u_scale,
    by rec1d_u_in1_weightfac.
    The n-1 midpoints are at im=0,...,n-2
    The 2 face points are at im=-1 & im = n-1 */
-double rec1d_p_WENOm3_1or2(int n, const double *u, int im, double u_scale,
-                           unsigned *stat)
+double rec1d_p_WENOm3(int n, const double *u, int im, double u_scale)
 {
   double s1=0, s2=1e77;
   int opt = 1;
 
-  errorexit("this is untested!");
-
-  *stat = 0; /* stat=0 means WENOm3_2 is used */
-
   if(im==0) /* only rec at midpoint 0 is special */
   {
     double w1fac, w0, w1;
-    if(n<3) { *stat=1;  return rec1d_p_1(n, u, im, u_scale); }
+    if(n<3) return u[im]; // 1st order acc. rec.
 
     w1fac = rec1d_u_in1_weightfac(n,u, 0, u_scale, s1,s2,opt);
-    w1 = 0.5 * w1fac;
+    w1 = 0.5 * w1fac; /* w1fac=0 means WENOm3_1 is used */
     w0 = 1. - w1;
-    *stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
     /* do same as WENOm3_2 or WENOm3_1 depending on weights */
     return (w0*u[0] + w1*u[1]);
   }
   /* otherwise use WENOm3_2 */
   return rec1d_p_WENOm3_2(n,u, im, u_scale);
 }
-double rec1d_m_WENOm3_1or2(int n, const double *u, int im, double u_scale,
-                           unsigned *stat)
+double rec1d_m_WENOm3(int n, const double *u, int im, double u_scale)
 {
   double s1=0, s2=1e77;
   int opt = 1;
 
-  errorexit("this is untested!");
-
-  *stat = 0; /* stat=0 means WENOm3_2 is used */
-
   if(im==n-2) /* only rec at midpoint n-2 is special */
   {
     double w1fac, w0, w1;
-    if(n<3) { *stat=1;  return rec1d_p_1(n, u, im, u_scale); }
+    if(n<3) return u[im+1]; // 1st order acc. rec.
 
     w1fac = rec1d_u_in1_weightfac(n,u, n-1, u_scale, s1,s2,opt);
-    w1 = 0.5 * w1fac;
+    w1 = 0.5 * w1fac; /* w1fac=0 means WENOm3_1 is used */
     w0 = 1. - w1;
-    *stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
     /* do same as WENOm3_2 or WENOm3_1 depending on weights */
     return (w0*u[n-1] + w1*u[n-2]);
   }
@@ -1302,6 +1290,26 @@ double rec1d_m_WENOm5_1(int n, const double *u, int im, double u_scale)
     return rec1d_m_WENO5_uniform(n, u, im, u_scale);
   else
     return rec1d_m_WENOm3_1(n, u, im, u_scale);
+}
+
+/* Use WENO5 inside and WENOm3 near the boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOm5(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=2 && im<=n-3)
+    return rec1d_p_WENO5_uniform(n, u, im, u_scale);
+  else
+    return rec1d_p_WENOm3(n, u, im, u_scale);
+}
+double rec1d_m_WENOm5(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=1 && im<=n-4)
+    return rec1d_m_WENO5_uniform(n, u, im, u_scale);
+  else
+    return rec1d_m_WENOm3(n, u, im, u_scale);
 }
 
 
@@ -1710,4 +1718,24 @@ double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale)
     return rec1d_m_WENOZ_uniform(n, u, im, u_scale);
   else
     return rec1d_m_WENOm3_1(n, u, im, u_scale);
+}
+
+/* Use WENOZ inside and WENOm3 near the boundary.
+   The n-1 midpoints are at im=0,...,n-2
+   The 2 face points are at im=-1 & im = n-1 */
+double rec1d_p_WENOmZ(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=2 && im<=n-3)
+    return rec1d_p_WENOZ_uniform(n, u, im, u_scale);
+  else
+    return rec1d_p_WENOm3(n, u, im, u_scale);
+}
+double rec1d_m_WENOmZ(int n, const double *u, int im, double u_scale)
+{
+  /* inside */
+  if(im>=1 && im<=n-4)
+    return rec1d_m_WENOZ_uniform(n, u, im, u_scale);
+  else
+    return rec1d_m_WENOm3(n, u, im, u_scale);
 }

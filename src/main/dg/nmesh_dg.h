@@ -172,16 +172,22 @@ double rec1d_m_flag_WENOm_1(int n, const double *u, int im, double u_scale,
                             unsigned flag_WENOm_1,
                             double (*rec1d)(int n, const double *q, int im,
                                             double q_scale));
+double rec1d_p_WENOm3(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOm3(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm5_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOm5_1(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOm5_1(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENOm5(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOm5(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOmT_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOmT_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOmZ_2(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOmZ_2(int n, const double *u, int im, double u_scale);
 double rec1d_p_WENOmZ_1(int n, const double *u, int im, double u_scale);
 double rec1d_m_WENOmZ_1(int n, const double *u, int im, double u_scale);
+double rec1d_p_WENOmZ(int n, const double *u, int im, double u_scale);
+double rec1d_m_WENOmZ(int n, const double *u, int im, double u_scale);
 
 /* fv.c */
 void fv_rec1d_q_midpt(tFVinfo *fv);
