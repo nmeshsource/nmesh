@@ -82,17 +82,20 @@ void fv_stat_WENOm_1or2__old(tFVinfo *fv)
 }
 void fv_stat_WENOm_1or2(tFVinfo *fv)
 {
-  int nq       = fv->nq;
-  double **qc  = fv->qc;   // qc[0..nvars-1][0..npts-1]
-  int npts     = fv->npts;
-  int im       = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
-  double *qm_p = fv->qm_p;
-  double *qm_m = fv->qm_m;
-  int l;
+  double s1 = DGglobals->fv_rec_WENOm_s1;
+  double s2 = DGglobals->fv_rec_WENOm_s2;
 
   /* call rec1d_u_in1_weightfac to determine stat */
-  if(DGglobals->fv_rec_mode_WENOm)
+  if( (DGglobals->fv_rec_mode_WENOm) && (s1>0. || s2<DBL_MAX) )
   {
+    int nq       = fv->nq;
+    double **qc  = fv->qc;   // qc[0..nvars-1][0..npts-1]
+    int npts     = fv->npts;
+    int im       = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
+    double *qm_p = fv->qm_p;
+    double *qm_m = fv->qm_m;
+    int l;
+
     if(im==0) /* rec_p at midpoint 0 is special */
     {
       for(l=0; l<nq; l++)
