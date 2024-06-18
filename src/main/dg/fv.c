@@ -40,46 +40,8 @@ void fv_rec1d_q_midpt(tFVinfo *fv)
   }
 }
 
-/* set fv->stat based on rec1d_u_in1_weightfac to determine if we want
-   WENOm3_2 or WENOm3_1 near end points */
-void fv_stat_WENOm_1or2__old(tFVinfo *fv)
-{
-  int nq      = fv->nq;
-  double **qc = fv->qc;   // qc[0..nvars-1][0..npts-1]
-  int npts    = fv->npts;
-  int im      = fv->im;   // im = 0..npts-2, im is midpt to right of grdpt im
-  double q_scale = fv->q_scale;
-  int l, stat;
-
-  /* call rec1d_u_in1_weightfac to determine stat */
-  if(DGglobals->fv_rec_mode_WENOm)
-  {
-    double s1 = DGglobals->fv_rec_WENOm_s1;
-    double s2 = DGglobals->fv_rec_WENOm_s2;
-    int opt   = DGglobals->fv_rec_WENOm_opt;
-
-    if(im==0) /* rec at midpoint 0 is special */
-    {
-      for(l=0; l<nq; l++)
-      {
-        double w1fac = rec1d_u_in1_weightfac(npts,qc[l], 0,
-                                             q_scale, s1,s2,opt);
-        stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
-        fv->stat[l] |= FV_REC_NO_LEFT_EXTRAP1 * stat;
-      }
-    }
-    else if(im==npts-2) /* rec at midpoint npts-2 is special */
-    {
-      for(l=0; l<nq; l++)
-      {
-        double w1fac = rec1d_u_in1_weightfac(npts,qc[l], npts-1,
-                                             q_scale, s1,s2,opt);
-        stat = 1. - w1fac; /* stat=1 means WENOm3_1 is used */
-        fv->stat[l] |= FV_REC_NO_RIGHT_EXTRAP1 * stat;
-      }
-    }
-  }
-}
+/* set fv->stat based on whether we have used WENOm3_2 or WENOm3_1 near
+   end points */
 void fv_stat_WENOm_1or2(tFVinfo *fv)
 {
   double s1 = DGglobals->fv_rec_WENOm_s1;
@@ -136,7 +98,7 @@ void fv_rec1d_q_midpt_WENOm_1or2(tFVinfo *fv)
     fv->qm_m[l] = fv->rec1d_m(npts, qc[l], im, q_scale);
   }
 
-  /* check if WENOm copied points to determine fv->stat */
+  /* check if WENOm used WENOm3_1 to determine fv->stat */
   fv_stat_WENOm_1or2(fv);
 }
 
