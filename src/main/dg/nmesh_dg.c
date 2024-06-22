@@ -37,7 +37,7 @@ int nmesh_dg(tMesh *mesh)
          "|u1-u0|/|u2-u1| < s1, [0, 0.333, ...]");
   AddPar("fv_rec_WENOm_s2", "DBL_MAX", "use 0th order extrapolation if "
          "|u1-u0|/|u2-u1| > s2, [1e99, 3, ...]");
-  AddPar("fv_rec_WENOm_opt", "1", "possible options to fall back to 0th "
+  AddPar("fv_rec_WENOm_opt", "0", "possible options to fall back to 0th "
          "order extrapolation [0,-1,1,2] (see rec1d_u_in1_weightfac)");
   AddPar("fv_flux", "fnum", "[fnum_minus_fi, fnum]");
   AddPar("fv_divf_extrap", "dnfn_extrap1", "how we extrap div(f) [no,"
