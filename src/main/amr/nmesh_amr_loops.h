@@ -275,9 +275,9 @@
 #define kOfInd_n(ijk,n)        ((ijk)/((n[0])*(n[1])))
 #define jOfInd_n_k(ijk,n,k)    (((ijk) - (n[0])*(n[1])*(k))/(n[0]))
 #define iOfInd_n_jk(ijk,n,j,k) ((ijk) - (n[0])*(n[1])*(k) - (n[0])*(j))
-#define i_j_k_OfInd_n(ijk,n,i,j,k) k = kOfInd_n(ijk,n); \
-                                   j = jOfInd_n_k(ijk,n,k); \
-                                   i = iOfInd_n_jk(ijk,n,j,k)
+#define Ind_n_To_ijk(ijk,n,i,j,k) k = kOfInd_n(ijk,n); \
+                                  j = jOfInd_n_k(ijk,n,k); \
+                                  i = iOfInd_n_jk(ijk,n,j,k)
 /* first and second index of i,j,k when we are in plane normal to norm */
 #define i1_norm(i,j,k,norm) ( (i)*(norm==2 || norm==1) + (j)*(norm==0) )
 #define i2_norm(i,j,k,norm) ( (k)*(norm==0 || norm==1) + (j)*(norm==2) )
