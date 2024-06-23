@@ -388,53 +388,57 @@ typedef struct tIDX {
 
 /* 7 point stencil where some points are in the neighbors,
    here na[4] contains adjacent n from neighbor 4 */
-#define set_ptinds_check_7(i,j,k, n, na)				\
+#define set_ptinds_check_7(ic,jc,kc, n, na)				\
   ccc->f = -1;								\
-  ccc->i = Ind_n(i,j,k, n);						\
-  if(i>0) { mcc->f =-1;  mcc->i = ccc->i-1; }				\
-  else    { mcc->f = 0;  mcc->i = Ind_n(na[0][0]-1,j,k, na[0]); }	\
-  if(j>0) { cmc->f =-1;  cmc->i = ccc->i-n[0]; }			\
-  else    { cmc->f = 2;  cmc->i = Ind_n(i,na[2][1]-1,k, na[2]); }	\
-  if(k>0) { ccm->f =-1;  ccm->i = ccc->i-n[0]*n[1]; }			\
-  else    { ccm->f = 4;  ccm->i = Ind_n(i,j,na[4][2]-1, na[4]); }	\
-  if(i+1<n[0]) { pcc->f =-1;  pcc->i = ccc->i+1; }			\
-  else         { pcc->f = 1;  pcc->i = Ind_n(0,j,k, na[1]); }		\
-  if(j+1<n[1]) { cpc->f =-1;  cpc->i = ccc->i+n[0]; }			\
-  else         { cpc->f = 3;  cpc->i = Ind_n(i,0,k, na[3]); }		\
-  if(k+1<n[2]) { ccp->f =-1;  ccp->i = ccc->i+n[0]*n[1]; }		\
-  else         { ccp->f = 5;  ccp->i = Ind_n(i,j,0, na[5]); }
+  ccc->i = Ind_n(ic,jc,kc, n);						\
+  if(ic>0) { mcc->f =-1;  mcc->i = ccc->i-1; }				\
+  else     { mcc->f = 0;  mcc->i = Ind_n(na[0][0]-1,jc,kc, na[0]); }	\
+  if(jc>0) { cmc->f =-1;  cmc->i = ccc->i-n[0]; }			\
+  else     { cmc->f = 2;  cmc->i = Ind_n(ic,na[2][1]-1,kc, na[2]); }	\
+  if(kc>0) { ccm->f =-1;  ccm->i = ccc->i-n[0]*n[1]; }			\
+  else     { ccm->f = 4;  ccm->i = Ind_n(ic,jc,na[4][2]-1, na[4]); }	\
+  if(ic+1<n[0]) { pcc->f =-1;  pcc->i = ccc->i+1; }			\
+  else          { pcc->f = 1;  pcc->i = Ind_n(0,jc,kc, na[1]); }	\
+  if(jc+1<n[1]) { cpc->f =-1;  cpc->i = ccc->i+n[0]; }			\
+  else          { cpc->f = 3;  cpc->i = Ind_n(ic,0,kc, na[3]); }	\
+  if(kc+1<n[2]) { ccp->f =-1;  ccp->i = ccc->i+n[0]*n[1]; }		\
+  else          { ccp->f = 5;  ccp->i = Ind_n(ic,jc,0, na[5]); }
 
 /* 7+6 point stencil where some points are in the neighbors */
-#define set_ptinds2_check_6(i,j,k, n, na)				\
-  if(i>1) { Mcc->f =-1;  Mcc->i = mcc->i-1; }				\
-  else    { Mcc->f = 0;  Mcc->i = Ind_n(na[0][0]-2,j,k, na[0]); }	\
-  if(j>1) { cMc->f =-1;  cMc->i = cmc->i-n[0]; }			\
-  else    { cMc->f = 2;  cMc->i = Ind_n(i,na[2][1]-2,k, na[2]); }	\
-  if(k>1) { ccM->f =-1;  ccM->i = ccm->i-n[0]*n[1]; }			\
-  else    { ccM->f = 4;  ccM->i = Ind_n(i,j,na[4][2]-2, na[4]); }	\
-  if(i+2<n[0]) { Pcc->f =-1;  Pcc->i = pcc->i+1; }			\
-  else         { Pcc->f = 1;  Pcc->i = Ind_n(1,j,k, na[1]); }		\
-  if(j+2<n[1]) { cPc->f =-1;  cPc->i = cpc->i+n[0]; }			\
-  else         { cPc->f = 3;  cPc->i = Ind_n(i,1,k, na[3]); }		\
-  if(k+2<n[2]) { ccP->f =-1;  ccP->i = ccp->i+n[0]*n[1]; }		\
-  else         { ccP->f = 5;  ccP->i = Ind_n(i,j,1, na[5]); }
+#define set_ptinds2_check_6(ic,jc,kc, n, na)				\
+  if(ic>1) { Mcc->f =-1;  Mcc->i = mcc->i-1; }				\
+  else     { Mcc->f = 0;  Mcc->i = Ind_n(na[0][0]-2,jc,kc, na[0]); }	\
+  if(jc>1) { cMc->f =-1;  cMc->i = cmc->i-n[0]; }			\
+  else     { cMc->f = 2;  cMc->i = Ind_n(ic,na[2][1]-2,kc, na[2]); }	\
+  if(kc>1) { ccM->f =-1;  ccM->i = ccm->i-n[0]*n[1]; }			\
+  else     { ccM->f = 4;  ccM->i = Ind_n(ic,jc,na[4][2]-2, na[4]); }	\
+  if(ic+2<n[0]) { Pcc->f =-1;  Pcc->i = pcc->i+1; }			\
+  else          { Pcc->f = 1;  Pcc->i = Ind_n(1,jc,kc, na[1]); }	\
+  if(jc+2<n[1]) { cPc->f =-1;  cPc->i = cpc->i+n[0]; }			\
+  else          { cPc->f = 3;  cPc->i = Ind_n(ic,1,kc, na[3]); }	\
+  if(kc+2<n[2]) { ccP->f =-1;  ccP->i = ccp->i+n[0]*n[1]; }		\
+  else          { ccP->f = 5;  ccP->i = Ind_n(ic,jc,1, na[5]); }
 
 /* 7+6+6 point stencil where some points are in the neighbors */
-#define set_ptinds3_check_6(i,j,k, n, na)				\
-  if(i>2) { m3cc->f =-1;  m3cc->i = Mcc->i-1; }				\
-  else    { m3cc->f = 0;  m3cc->i = Ind_n(na[0][0]-3,j,k, na[0]); }	\
-  if(j>2) { cm3c->f =-1;  cm3c->i = cMc->i-n[0]; }			\
-  else    { cm3c->f = 2;  cm3c->i = Ind_n(i,na[2][1]-3,k, na[2]); }	\
-  if(k>2) { ccm3->f =-1;  ccm3->i = ccM->i-n[0]*n[1]; }			\
-  else    { ccm3->f = 4;  ccm3->i = Ind_n(i,j,na[4][2]-3, na[4]); }	\
-  if(i+3<n[0]) { p3cc->f =-1;  p3cc->i = Pcc->i+1; }			\
-  else         { p3cc->f = 1;  p3cc->i = Ind_n(2,j,k, na[1]); }		\
-  if(j+3<n[1]) { cp3c->f =-1;  cp3c->i = cPc->i+n[0]; }			\
-  else         { cp3c->f = 3;  cp3c->i = Ind_n(i,2,k, na[3]); }		\
-  if(k+3<n[2]) { ccp3->f =-1;  ccp3->i = ccP->i+n[0]*n[1]; }		\
-  else         { ccp3->f = 5;  ccp3->i = Ind_n(i,j,2, na[5]); }
+#define set_ptinds3_check_6(ic,jc,kc, n, na)				\
+  if(ic>2) { m3cc->f =-1;  m3cc->i = Mcc->i-1; }			\
+  else     { m3cc->f = 0;  m3cc->i = Ind_n(na[0][0]-3,jc,kc, na[0]); }	\
+  if(jc>2) { cm3c->f =-1;  cm3c->i = cMc->i-n[0]; }			\
+  else     { cm3c->f = 2;  cm3c->i = Ind_n(ic,na[2][1]-3,kc, na[2]); }	\
+  if(kc>2) { ccm3->f =-1;  ccm3->i = ccM->i-n[0]*n[1]; }		\
+  else     { ccm3->f = 4;  ccm3->i = Ind_n(ic,jc,na[4][2]-3, na[4]); }	\
+  if(ic+3<n[0]) { p3cc->f =-1;  p3cc->i = Pcc->i+1; }			\
+  else          { p3cc->f = 1;  p3cc->i = Ind_n(2,jc,kc, na[1]); }	\
+  if(jc+3<n[1]) { cp3c->f =-1;  cp3c->i = cPc->i+n[0]; }		\
+  else          { cp3c->f = 3;  cp3c->i = Ind_n(ic,2,kc, na[3]); }	\
+  if(kc+3<n[2]) { ccp3->f =-1;  ccp3->i = ccP->i+n[0]*n[1]; }		\
+  else          { ccp3->f = 5;  ccp3->i = Ind_n(ic,jc,2, na[5]); }
 
 
 /* 7 point stencil in my node only. All valid points have f=-1. The stencil
    points that would be in the neighbors are invalid and marked by f>=0. */
-#define set_my_ptinds_check_7(i,j,k, n) set_ptinds_check_7(i,j,k, n, n)
+#define set_my_ptinds_check_7(ic,jc,kc, n) { int *na[] = { n,n,n,n,n,n }; \
+  set_ptinds_check_7(ic,jc,kc, n, na); }
+#define set_my_ptinds_check_7_ind(ind, n) { int i_ind_,j_ind_,k_ind_; \
+  Ind_n_To_ijk(ind,n, i_ind_,j_ind_,k_ind_); \
+  set_my_ptinds_check_7(i_ind_,j_ind_,k_ind_, n); }
