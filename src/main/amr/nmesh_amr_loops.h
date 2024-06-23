@@ -379,6 +379,9 @@ typedef struct tIDX {
 #define tIdx_ptinds_19  tIdx_ptinds_7;    tIdx_ptinds_edges
 #define tIdx_ptinds2_25 tIdx_ptinds_19;   tIdx_ptinds_faces2
 #define tIdx_ptinds_27  tIdx_ptinds_19;   tIdx_ptinds_corners
+/* NOTE: we can put them into arrays like this:
+  tIdx *ptind[] = { ccc,  mcc,pcc, cmc,cpc, ccm,ccp };
+  Then: ptind[2]->i = pcc->i */
 
 /* 7 point stencil where some points are in the neighbors,
    here na[4] contains adjacent n from neighbor 4 */
@@ -427,3 +430,8 @@ typedef struct tIDX {
   else         { cp3c->f = 3;  cp3c->i = Ind_n(i,2,k, na[3]); }		\
   if(k+3<n[2]) { ccp3->f =-1;  ccp3->i = ccP->i+n[0]*n[1]; }		\
   else         { ccp3->f = 5;  ccp3->i = Ind_n(i,j,2, na[5]); }
+
+
+/* 7 point stencil in my node only. All valid points have f=-1. The stencil
+   points that would be in the neighbors are invalid and marked by f>=0. */
+#define set_my_ptinds_check_7(i,j,k, n) set_ptinds_check_7(i,j,k, n, n)
