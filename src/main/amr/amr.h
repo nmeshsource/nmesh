@@ -62,6 +62,8 @@ void expand_bfaces_to_patch_edges(tMesh *mesh);
 tBface *ith_bface_on_f_with_obface(tPat *pat, int f, int i);
 int nbfaces_on_f_with_obface(tPat *pat, int f);
 void mark_all_bfaces_without_op_as_OUTERBOUND(tMesh *mesh);
+void mark_bfacesonface_without_op_as_boundary(tMesh *mesh, int face,
+                                              int boundary);
 int set_consistent_flags_in_all_bfaces(tMesh *mesh);
 int zero_face2_flag_in_all_bfaces(tMesh *mesh);
 int toggle_face2_flag_in_faces4_5_of_cubes(tMesh *mesh);

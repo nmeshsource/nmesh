@@ -909,6 +909,27 @@ void mark_all_bfaces_without_op_as_OUTERBOUND(tMesh *mesh)
   }
 }
 
+/* set boundary flag on bfaces that have no other patch and are on face */
+void mark_bfacesonface_without_op_as_boundary(tMesh *mesh, int face,
+                                              int boundary)
+{
+  int p;
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    tBface *bface;
+
+    forbfacesonface(pat, face, bface)
+    {
+      /* if op=-1 there is no other box, mark as boundary if on face */
+      if(bface->op == -1)
+        bface->boundary = boundary;
+    }
+  }
+}
+
+
 /* make sure bit fields in all bfaces are consitent.
    Right now we just set bface->face2, which has the same meaning as sgrid's
    setnormalderiv */
