@@ -135,7 +135,7 @@ int test_mesh(tMesh *mesh)
   two_diff_wegdes_touching_1_wedge(mesh, 1.0, 3.0, 5.0);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1,1);
   update_mesh_myln_node_nid(mesh);
 
   /* refine all once to have more nodes */

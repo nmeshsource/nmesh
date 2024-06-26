@@ -419,7 +419,6 @@ tPat *add_patch(tMesh *mesh, double bbox[6],
                 int *pt_typ_root, int nroot[3], int datrank);
 int amr_setup_mesh(tMesh *mesh);
 int amr_set_all_bfaces(tMesh *mesh);
-int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr);
 
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);

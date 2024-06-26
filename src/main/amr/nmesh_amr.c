@@ -61,6 +61,8 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_r1",  "0" ,  "intermediate radius1 [for 0 it's off]");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
+  AddPar("amr_innerboundary_faces", "", "list of patch-faces we set to "
+         "INNERBOUND");
   AddPar("amr_uniform_p", "", "list of patches with uniform grid spacing");
   AddPar("amr_fv_p", "", "patches where we use finite volume");
   AddPar("amr_fv_if_uniform", "no", "set use_fv in uniform elms [no,yes]");

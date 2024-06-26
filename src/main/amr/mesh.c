@@ -198,7 +198,7 @@ int amr_setup_mesh(tMesh *mesh)
   {
     /* setup all bfaces and root node connections */
     PRFs(": calling amr_set_bfaces_and_rnode_nbinfo_fnb\n");
-    amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
+    amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 0,1);
   }
   else  /* test meshes */
   {
@@ -214,6 +214,29 @@ int amr_setup_mesh(tMesh *mesh)
     /* NOTE: all test meshes call amr_set_bfaces_and_rnode_nbinfo_fnb
              by themselves */
   }
+
+  /* apply par amr_innerboundary_faces */
+  if(GetLen(Par("amr_innerboundary_faces")) > 0)
+  {
+    char *flist = Gets(Par("amr_innerboundary_faces"));
+    char *fl, *str, *sav;
+
+    PRFs(": marking some faces as inner boundary\n");
+    fl = strdup(flist);
+    for(str=strtok_r(fl, " ", &sav); str!=NULL;
+        str=strtok_r(NULL, " ", &sav))
+    {
+      int f = atoi(str);
+      if(f>=0 && f<6)
+        mark_bfacesonface_without_op_as_boundary(mesh, f, INNERBOUND);
+    }
+    free(fl);
+  }
+
+  /* after amr_set_bfaces_and_rnode_nbinfo_fnb and
+     mark_bfacesonface_without_op_as_boundary it is good to see bfaces */
+  PRFs(":\n");
+  printallbfaces(mesh);
 
   ///* print info about all patches we have now */
   //forpatches(mesh,pind)
@@ -286,11 +309,12 @@ int amr_setup_mesh(tMesh *mesh)
 
 
 /* init neighbor info of root nodes */
-int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
+int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh,
+                                        int pr_bfaces, int pr_mesh)
 {
   /* setup all bfaces */
   amr_set_all_bfaces(mesh);
-  if(pr)
+  if(pr_bfaces)
   {
     PRFs(":\n");
     printallbfaces(mesh);
@@ -305,7 +329,7 @@ int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh, int pr)
   amr_elm_nbinfo_set_nnbinfo_mesh(mesh, 1); //make nnbinfo positive */
   amr_get_nbelm_elmheaders(mesh);
 
-  if(pr)
+  if(pr_mesh)
   {
     PRFs(":\n");
     printmesh(mesh);
@@ -652,7 +676,7 @@ int setup_elm_mesh1(tMesh *mesh)
   add_patch(mesh, bbox3, pt_typ, n, 0);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1,1);
 
   /* we can already use mesh->myelm[2] */
   //enablevar(mesh, Ind("advection1_u"));
@@ -948,7 +972,7 @@ int setup_3patchl2_mesh(tMesh *mesh)
   add_patch(mesh, bbox2, pt_typ, n, 0);
 
   /* setup all bfaces and root node connections */
-  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1);
+  amr_set_bfaces_and_rnode_nbinfo_fnb(mesh, 1,1);
 
   errorexit("add back the stuff below");
   /* 8 children in patch0 */
