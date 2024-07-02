@@ -538,7 +538,7 @@ int three_CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3],
 int CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3], int nr,
                              double rin, double rout)
 {
-  int si, pl;
+  int si, pl=-1;
   double L  = rout - rin;
   double dL = L/nr;
   double r0, r1;
