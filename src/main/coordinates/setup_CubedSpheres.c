@@ -486,6 +486,54 @@ int two_CubedSphere_shells_at_xc(tMesh *mesh, int N,
   return pl;
 }
 
+/* put 6 stretchedCubedShell's around the shells from
+   two_CubedSphere_shells_at_xc
+             ______________________
+         ___/          r3          \___
+      __/                              \__
+    _/                                    \_
+  _/               ___________              \_
+ /  \-       _____/    r2     \______      -/ \
+      \-  __/                        \_  -/
+        \/                             \/
+       _- \-                         -/
+      /     \-       _______       -/
+     |        \-  __/  r1   \__  -/   ...
+    |           \/_           _\/
+   /            /  \_       _/  \     first shell extends from r0 to r1
+  |            /     \_---_/     \    second shell extends from r1 to r2
+  |           |      /     \      |   third shell extends from r2 to r3
+  |           |      \_   _/      |
+  |            \    _/ --- \_    /    if stretch=0 use xyz_of_lamAB_CubSph
+   \            \__/         \_ /     if stretch=1 use xyz_of_rhoAB_CubSph
+    |          _/\__         __/      in outermost CubedShell
+     |       _/     \_______/
+      \    _/
+       -_ /
+         \      ...
+*/
+int three_CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3],
+                                   double r0,double r1,double r2,double r3,
+                                   int stretch)
+{
+  int pl;
+  double Din[6], Dout[6];
+  int f;
+
+  /* make two inner shells */
+  two_CubedSphere_shells_at_xc(mesh,N, xc, r0, r1, r2, 0);
+
+  /* set distances to make 6 cubed spheres around the inner shells */
+  for(f=0; f<6; f++)
+  {
+    Din[f]  = r2;
+    Dout[f] = r3;
+  }
+  pl = add_N_CubedSphere_pats(mesh, N, CubedShell,stretch,0, xc, Din,Dout);
+
+  return pl;
+}
+
 
 /************************************************************************/
 /* make test patches */

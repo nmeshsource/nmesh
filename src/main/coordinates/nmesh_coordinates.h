@@ -297,6 +297,9 @@ int CubedSphere_shell_at_xc(tMesh *mesh, int N, double xc[3],
                             double rin, double rout);
 int two_CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3], double r0,
                                  double r1, double r2, int stretch);
+int three_CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3],
+                                   double r0,double r1,double r2,double r3,
+                                   int stretch);
 int two_wegdes_touching_1_wedge(tMesh *mesh, double dc, double r0, double r1);
 int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
                                      double r0, double r1);
