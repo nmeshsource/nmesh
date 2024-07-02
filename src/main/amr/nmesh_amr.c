@@ -60,6 +60,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_Stretch_A", "1", "amplitude par for amr_OuterShellStretch");
   AddPar("amr_Shell_rin", "0.5", "inner radius of shell");
   AddPar("amr_Shell_r1",  "0" ,  "intermediate radius1 [for 0 it's off]");
+  AddPar("amr_Shell_r2",  "0" ,  "intermediate radius2 [for 0 it's off]");
   AddPar("amr_Shell_rout", "1", "outer radius of shell");
   AddPar("amr_innerboundary_faces", "", "list of patch-faces we set to "
          "INNERBOUND");
