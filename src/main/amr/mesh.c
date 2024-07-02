@@ -611,6 +611,8 @@ int setup_Shell_mesh(tMesh *mesh, double CubedSphere_r)
   double r1   = Getd(Par("amr_Shell_r1"));
   double r2   = Getd(Par("amr_Shell_r2"));
   double rout = Getd(Par("amr_Shell_rout"));
+  int nr = Geti(Par("amr_Shell_nr"));
+
   /* stretch type in cubed spheres for outermost shell */
   int stretch = Geti(Par("amr_OuterShellStretch"));
   double xc[] = { 0., 0., 0. };
@@ -627,16 +629,23 @@ int setup_Shell_mesh(tMesh *mesh, double CubedSphere_r)
   mesh->iteration = 0;
 
   /* setup cubed spheres in form of a shell */
-  if(r1 <= rin)
+  if(nr == 1)
   {
-    CubedSphere_shell_at_xc(mesh,6, xc, rin, rout);
-  }
-  else
-  {
-    if(r2 <= r1)
-      two_CubedSphere_shells_at_xc(mesh,6, xc, rin,r1,rout, stretch);
+    if(r1 <= rin)
+    {
+      CubedSphere_shell_at_xc(mesh,6, xc, rin, rout);
+    }
     else
-      three_CubedSphere_shells_at_xc(mesh,6, xc, rin,r1,r2,rout, stretch);
+    {
+      if(r2 <= r1)
+        two_CubedSphere_shells_at_xc(mesh,6, xc, rin,r1,rout, stretch);
+      else
+        three_CubedSphere_shells_at_xc(mesh,6, xc, rin,r1,r2,rout, stretch);
+    }
+  }
+  else /* divide radial dir between rin and rout into nr pieces */
+  {
+    CubedSphere_shells_at_xc(mesh,6, xc, nr, rin,rout);
   }
 
   return 0;
