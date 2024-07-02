@@ -534,6 +534,27 @@ int three_CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3],
   return pl;
 }
 
+/* surround an inner excised sphere with N cubed spheres to form nr shells */
+int CubedSphere_shells_at_xc(tMesh *mesh, int N, double xc[3], int nr,
+                             double rin, double rout)
+{
+  int si, pl;
+  double L  = rout - rin;
+  double dL = L/nr;
+  double r0, r1;
+
+  r1 = rin;
+  for(si=0; si<nr; si++)
+  {
+    /* set 2 radii dL apart */
+    r0 = r1;
+    r1 = r0  + dL;
+
+    pl = CubedSphere_shell_at_xc(mesh, N, xc, r0, r1);
+  }
+  return pl;
+}
+
 
 /************************************************************************/
 /* make test patches */
