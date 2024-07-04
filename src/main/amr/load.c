@@ -63,10 +63,31 @@ void load_balance(tMesh *mesh, int strategy)
 /* function that can be scheduled in LOADBALANCING */
 int load_balance_if_needed(tMesh *mesh)
 {
-  int amr_loadbalance_time = Par("amr_loadbalance_time");
-  double dt = Getd(amr_loadbalance_time);
+  static int loadbalance_delay = 3; //loadbalance only after 2 calls
+  static double last_loadbalance_time = -1e200; //signal we never did it
+  double time  = getTimeIn_s()/3600.;
+  double time_since_loadbalance = time - last_loadbalance_time;
+  double hours = Getd(Par("amr_loadbalance_hours"));
+  int do_loadbalance = 0;
 
-  if(dt >= 0. && TimeIsAt_di_dt(mesh, -1, dt))
+  /* decrement delay counter until it is 0 */
+  if(loadbalance_delay > 0) loadbalance_delay--;
+  /* we have a delay to ensure timing data has been collected */
+
+  /* test if it is time */
+  if(Rank0)
+  {
+    /* test based on walltime */
+    if( (hours >= 0.) &&
+        (hours <= time_since_loadbalance) &&
+        (loadbalance_delay <= 0) )
+      do_loadbalance = 1; /* yes, we want to balance load */
+  }
+  /* broadcast do_loadbalance from rank0 to all others */
+  MCK( nMPI_Bcast(&do_loadbalance, 1, nMPI_INT, 0) );
+
+  /* now do it if needed */
+  if(do_loadbalance)
   {
     struct timespec tp0[1], tp1[1];
     getRealTime(tp0);
@@ -96,6 +117,8 @@ int load_balance_if_needed(tMesh *mesh)
       //printCRCs(mesh, 6, CRCs);
       //if(sum0!=sum1) errorexit("sum0!=sum1");
     }
+    /* update times */
+    last_loadbalance_time = time;
   }
   return 0;
 }
