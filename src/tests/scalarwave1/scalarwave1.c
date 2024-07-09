@@ -127,6 +127,8 @@ void scalarwave1_f_divf(tNode *node, tVarList *vlu)
 
     /* flux derivs */
     cart_di_Ui(node, if_pix, idivf_pi);
+    Yo(1000);
+    printvar_innode(node, idivf_pi);
     cart_di_Ui(node, if_cxx, idivf_cx);
     cart_di_Ui(node, if_cyx, idivf_cx+1);
     cart_di_Ui(node, if_czx, idivf_cx+2);

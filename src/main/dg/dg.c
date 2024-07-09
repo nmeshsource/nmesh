@@ -19,8 +19,13 @@ tDGglobals DGglobals[1];
 
 /* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
    to vldf. We compute the fluxes from vlu.
-   For the RHS in DG we need sign=-1 but div(flux) needs sign=+1.
-   We also have the flag use_fv, to decide if whether fv mode is active at
+   If vldf contains the RHS of the DG eqns we need sign=-1, so that the
+   surface flux terms get directly added to the RHS.
+   If vldf contains div(flux) we need sign=+1, and div(flux) simply gets
+   modified by the addition of the surface flux terms. Then something
+   else (e.g. vladdto_onfaces_node) has to still subtract the now modified
+   vldf from the RHS after this call.
+   We also have the flag use_fv, to decide whether fv mode is active at
    all inside this function. */
 int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
                           tVarList *vldf, tVarList *vlu, tVarList *vls,
@@ -147,7 +152,12 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
 
 /* Add surface flux terms with a choice of sign (sign=+1 or sign=-1)
    to vldf. We compute the fluxes from vlu.
-   For the RHS in DG we need sign=-1 but div(flux) needs sign=+1. */
+   If vldf contains the RHS of the DG eqns we need sign=-1, so that the
+   surface flux terms get directly added to the RHS.
+   If vldf contains div(flux) we need sign=+1, and div(flux) simply gets
+   modified by the addition of the surface flux terms. Then something
+   else (e.g. vladdto_onfaces_node) has to still subtract the now modified
+   vldf from the RHS after this call. */
 int dg_add_surface_fluxes_sign(tNode *node, double sign, tVarList *vldf,
                                tVarList *vlu, tVarList *vls,
                                void (*u_f_lam)(tDGinfo *d),
