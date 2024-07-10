@@ -20,8 +20,8 @@ int nmesh_scalarwave1(tMesh *mesh)
   AddEvoVar("scalarwave1_phi",   "", "scalar field phi");
   AddEvoVar("scalarwave1_pi",    "", "pi  = d_t phi");
   AddEvoVar("scalarwave1_c",    "i", "c_i = d_i phi");
-  AddAuxVar("scalarwave1_f_pi", "I", "flux for pi:  f_{pi}^i ");
-  AddAuxVar("scalarwave1_f_c", "iJ", "flux for c_i: f_{c_i}^j");
+  AddAuxVar("scalarwave1_f_pi", "I", "flux for pi:  f_{pi}^i = -g^{ij} c_j");
+  AddAuxVar("scalarwave1_f_c", "iJ", "flux for c_i: f_{c_i}^j= -g_i^j pi");
   AddAuxVar("scalarwave1_divf_pi", "", "d_i f_{pi}^i");
   AddAuxVar("scalarwave1_divf_c", "i", "d_j f_{c_i}^j");
 
