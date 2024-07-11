@@ -20,7 +20,7 @@ n = sympy.Idx('n', (1, 3))
 ########################################################################
 tocompute = (
 r''':Text =
-/* stuff to make it compile without nmesh */
+/* Some defines to make it compile without nmesh: */
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -32,17 +32,21 @@ r''':Text =
 double Mem[100]; // instead of the data arrays of nmesh
 
 
+/* To compile with nmesh remove the above #includes and #defines
+   INSTEAD uncomment this: */
 //#include "nmesh.h"
 
-#define POW2(x)      (x)*(x)
-#define POWER(x, y)  pow(x,y)
+#define POWER(x,y) pow(x,y)
+#define POW2(x)    ((x)*(x))
+#define POW3(x)    ((x)*(x)*(x))
+#define SQRT(x)    sqrt(x)
+#define CBRT(x)    cbrt(x)
 
 
-
+/* some example calculation with tensors */
 void exmpl_func(tVarList *vlu)
 {
   double e = 0;// Getd(Par("FOCCZ4_e"));
-  int ijk; /* grid point index */
 ''',
 ''':Decl: W[i,j,k,l]; T[i,k,l]; S[i,j]; A[i,j]; SS[i,j,k]; AA[i,j,k];
           R[i,j]; :
@@ -86,7 +90,9 @@ r''':Text =
 }
 
 
-/* add main so that it compiles without nmesh  */
+/* To compile with nmesh remove the entire main below: */
+
+//test main so that it compiles and runs without nmesh
 int main()
 {
   int i = 2;
@@ -138,7 +144,7 @@ if __name__ == '__main__':
   ########################################################################
   # run more sympy simplification operations on RHSs (this is optional)
   ########################################################################
-  allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
+  #allEqs = simplify_all_EqnComponents(sympy.simplify, allEqs)
   #allEqs = simplify_all_EqnComponents(sympy.expand, allEqs)
   allEqs = simplify_all_EqnComponents(sympy.N, allEqs)
 
