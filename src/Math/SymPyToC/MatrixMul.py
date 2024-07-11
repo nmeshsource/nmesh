@@ -53,17 +53,13 @@ void MatrixMul(tElm *elm, tVarList *vlv, int iM, tVarList *vlu)
   double e = 0;// Getd(Par("FOCCZ4_e"));
   int ijk; /* grid point index */
 ''',
-''':Decl: u[i]; :
+''':Decl: u[i]; v[i]; :
           Access={VAR}{COMP}[ijk] : Format =
-  double *{VAR}{COMP} = Vard( elm, Vind(vlu,{LI}) );
-''',
-''':Decl: v[i]; :
-          Access={VAR}{COMP}[ijk] : Format =
-  double *{VAR}{COMP} = Vard( elm, Vind(vlv,{LI}) );
+  double *{VAR}{COMP} = Vard( elm, Vind(vl{VAR},{CI}) );
 ''',
 ''':Decl: M[i,j]; :
           Access={VAR}{COMP}[ijk] : Format =
-  double *{VAR}{COMP} = Vard( elm, iM+{LI} ); // name={VAR} ID={VARID} compind={CI} listind={LI}
+  double *{VAR}{COMP} = Vard( elm, iM+{CI} ); // name={VAR} ID={VARID} compind={CI} listind={LI}
 ''',
 ''':Decl: AUTOVARS :
           Access={VAR}{COMP} : DeclFunc=make_DeclList : Format =
