@@ -621,37 +621,6 @@ int MeshParGetLen(tMesh *mesh, int i)
 
 /* "get value?" returns 1 if value is in the list of values and 0 else
    (not equivalent to value being a substring of string parameter) */
-int MeshParGetv_fatal__old(tMesh *mesh, int i, const char *value, int fatal)
-{
-  tPar *p;
-  char *s=NULL;
-  char *parval;
-  int lv, ls, lp, startok, endok;
-
-  if(i<0 || i>=mesh->npdb)
-  {
-    if(fatal) errorexit("parameter with this index does not exist");
-    else      return 0;
-  }
-
-  p = &(mesh->pdb[i]);
-
-  if(!p) return 0;
-  parval = p->value;
-  while( (s = strstr(parval, value)) )
-  {
-    lv = strlen(value);
-    //printf("ls=%d  value=%s| s=%s| p->value=%s|\n", ls, value, s, p->value);
-    if( s[lv]==' ' || s[lv]==0 ) break;
-    parval = s+1;
-  }
-  if(!s) return 0;
-  ls = strlen(s);
-  lp = strlen(p->value);
-  startok = (s == p->value || *(s-1) == ' ');  /* how robust is this? */
-  endok   = (s+ls == p->value+lp || *(s+ls) == ' ');
-  return startok && endok ? 1 : 0;
-}
 int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal)
 {
   tPar *p;
