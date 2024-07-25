@@ -621,7 +621,7 @@ int MeshParGetLen(tMesh *mesh, int i)
 
 /* "get value?" returns 1 if value is in the list of values and 0 else
    (not equivalent to value being a substring of string parameter) */
-int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal)
+int MeshParGetv_fatal__old(tMesh *mesh, int i, const char *value, int fatal)
 {
   tPar *p;
   char *s=NULL;
@@ -651,6 +651,34 @@ int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal)
   startok = (s == p->value || *(s-1) == ' ');  /* how robust is this? */
   endok   = (s+ls == p->value+lp || *(s+ls) == ' ');
   return startok && endok ? 1 : 0;
+}
+int MeshParGetv_fatal(tMesh *mesh, int i, const char *value, int fatal)
+{
+  tPar *p;
+  char *s=NULL;
+  char *parval;
+  int lv, startok, endok;
+
+  if(i<0 || i>=mesh->npdb)
+  {
+    if(fatal) errorexit("parameter with this index does not exist");
+    else      return 0;
+  }
+
+  p = &(mesh->pdb[i]);
+
+  if(!p) return 0;
+  parval = p->value;
+  lv = strlen(value);
+  while( (s = strstr(parval, value)) )
+  {
+    //printf("lv=%d  value=%s| s=%s| p->value=%s|\n", lv, value, s, p->value);
+    startok = (s == p->value || *(s-1) == ' ');
+    endok = (s[lv]==' ' || s[lv]==0);
+    if ( startok && endok ) return 1;
+    parval = s+1;
+  }
+  return 0;
 }
 
 /* get name of par with index i */
