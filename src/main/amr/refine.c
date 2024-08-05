@@ -1108,14 +1108,19 @@ int hadapt_towards_desired_l(tMesh *mesh,
 }
 
 /* call hadapt_towards_desired_l until every elm has ref level l we want */
-int hadapt_to_desired_l(tMesh *mesh,
+int hadapt_to_desired_l(tMesh *mesh, int lmax,
                         int (*desired_l)(tElm *elm, void *p), void *par)
 {
+  int l;
   tRef ref[1];
   ref->type   = H_REFINE;
   ref->method = PARENT_n;
 
-  while(hadapt_towards_desired_l(mesh, desired_l, par, ref) < 0);
+  /* adapt only lmax times to avoid situations where desired_l malfunctions.
+     E.g. center_amr_l can alternate between refine & de-refine for certain
+     regions as it only checks grid points. */
+  for(l=0; l<lmax; l++)
+    if(hadapt_towards_desired_l(mesh, desired_l, par, ref) >= 0) break;
 
   /* the refines/derefines likely caused an imbalance, so balance load */
   PRFs(": final ");
