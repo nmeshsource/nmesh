@@ -212,6 +212,23 @@ void LGL_x_wquad(int npoints, double *x, double *w)
   }
 }
 
+/* Adapt points and weights for interval [-1,1] to the interval [a,b].
+   We scale the standard points and weights in x and w like this:
+     x^[a,b]_k = m*x^[-1,1]_k + (a+b)/2,    where m:=(b-a)/2
+     w^[a,b]_k = m w^[-1,1]_k                                 */
+void scale_x_wquad_to_a_b(int npoints, double *x, double *w,
+                          double a, double b)
+{
+  double m = 0.5*(b-a);
+  double c = 0.5*(b+a);
+  int k;
+  for(k=0; k<npoints; k++)
+  {
+    x[k] = m*x[k] + c;
+    w[k] = m*w[k];
+  }
+}
+
 /* Gauss or Gauss-Lobatto (GL) quadrature:
    compute I = \int_{-1}^1 dx f(x) where f(x) is known at the nodes.
    For LGL nodes, the w[i] are the integration weights from LGL_x_wquad
@@ -225,6 +242,16 @@ double Gauss_integral(int n, const double *w, const double *f)
   return I;
 }
 
+/* same as Gauss_integral, but use arrays. */
+double Gauss_Integral(tArray *Wq, tArray *func)
+{
+  double *w = Arrd(Wq);
+  double *f = Arrd(func);
+  int *n = Arrn(func);
+  int n0 = n[0];
+
+  return Gauss_integral(n0, w, f);
+}
 
 
 /* Set analysis and synthesis matrices for expansions in Legendre polynmials
