@@ -6,10 +6,13 @@
 
 
 
+/* global pars for center */
+extern tcenter center[1];
+
+
 /* compute coord distance between x1 to x2 */
 double coord_distance(const double x1[3], const double x2[3])
 {
-  double m[3];
   double length;
   int d;
 
@@ -17,10 +20,10 @@ double coord_distance(const double x1[3], const double x2[3])
   for(d=0; d<3; d++)
   {
     double dd = x2[d] - x1[d];
-    length += dd*dd
+    length += dd*dd;
   }
   length = sqrt(length);
-  return length
+  return length;
 }
 
 /* compute proper length of straight coord line from x1 to x2:
@@ -32,11 +35,12 @@ double coord_distance(const double x1[3], const double x2[3])
 double proper_length_of_coordline(const double x1[3], const double x2[3],
                                   tVarList *vl_3metric, int np, int iord)
 {
+  tMesh *mesh = vl_3metric->mesh;
   double m[3], c[3];
   double *lambda = dmalloc(np);
   double *w      = dmalloc(np);
   tArray *xp[] = {alloc_array1d(np), alloc_array1d(np), alloc_array1d(np)};
-  double *x[]  = {Arrd(xp[0]),       Arrd(xp[1]),       Arrd(xp[2])}
+  double *x[]  = {Arrd(xp[0]),       Arrd(xp[1]),       Arrd(xp[2])};
   tArray *val = alloc_array1d(np*VLn(vl_3metric));
   double *f = dmalloc(np);
   double length;
@@ -69,7 +73,7 @@ double proper_length_of_coordline(const double x1[3], const double x2[3],
       for(e=0; e<3; e++)
       {
         int vl_index = index_symmmat(3, d,e);
-        double g_de = Arrd(val)[i + np*vl_index]
+        double g_de = Arrd(val)[i + np*vl_index];
         f[i] += g_de * m[d]*m[e];
       }
     if(f[i]<0.) {PRF;printf("f[i]=%g\n", f[i]);}
@@ -86,4 +90,62 @@ double proper_length_of_coordline(const double x1[3], const double x2[3],
   free(lambda);
 
   return length;
+}
+
+
+/* output distance between center1 and center2 */
+int center_1_2_distance_output(tMesh *mesh)
+{
+  int di = -1;
+  double dt = Getd(Par("center_distance_output_time"));
+
+  /* do nothing if it's not time to write */
+  if(TimeIsAt_di_dt(mesh, di,dt))
+  {
+    char fname[] = "center_1_2_distance.txt";
+    FILE *fp;
+    double time = mesh->time;
+    double x1[3], x2[3];
+    tVarList *vl_3metric;
+    double r1, r2, coord_dist, prop_dist;
+    int np, iord, dir;
+
+    /* get positions of center 1 & 2 */
+    for(dir=0; dir<3; dir++)
+    {
+      x1[dir] = Getd(center->cx[1][dir]);
+      x2[dir] = Getd(center->cx[2][dir]);
+    }
+
+    /* Move x1 and x2 away from centers along line connecting them.
+       This is important for punctures where metric diverges. */
+    r1 = Getd(Par("center1_radius"));
+    r2 = Getd(Par("center2_radius"));
+    coord_dist = coord_distance(x1, x2);
+    for(dir=0; dir<3; dir++)
+    {
+      x1[dir] = x1[dir] + (x2[dir] - x1[dir]) * r1/coord_dist;
+      x2[dir] = x1[dir] - (x2[dir] - x1[dir]) * r2/coord_dist;
+    }
+
+    /* calc distance between x1 and x2 in several ways */
+    coord_dist = coord_distance(x1, x2);
+    vl_3metric = vlalloc(mesh);
+    vlpush(vl_3metric, Ind(Gets(Par("center_distance_metric"))));
+    np = 25;
+    iord = 5;
+    prop_dist = proper_length_of_coordline(x1, x2, vl_3metric, np, iord);
+    vlfree(vl_3metric);
+
+    /* write distances into file */
+    if(Rank0)
+    {
+      fp = fopen(fname, "a");
+      if(time==0.) fprintf(fp, "# time coord_dist prop_dist\n");
+      fprintf(fp, "%.15g %.15g %.15g\n", time, coord_dist, prop_dist);
+      fclose(fp);
+    }
+  }
+
+  return 0;
 }

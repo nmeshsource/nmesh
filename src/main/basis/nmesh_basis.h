@@ -78,6 +78,7 @@ double var_GLquadratureXYZ3(tNode *node, int ui);
 double basis_LegendreP(int l, double x, int np);
 double basis_normLegendreP(int i, double x, int np);
 void LGL_x_wquad(int npoints, double *x, double *w);
+double Gauss_integral(int n, const double *w, const double *f);
 void LGL_AT_ST_matrices(int n, const double *x, const double *w,
                         double *AT, double *ST);
 void LG_x_wquad(int npoints, double *x, double *w);
