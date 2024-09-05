@@ -102,7 +102,7 @@ int center_1_2_distance_output(tMesh *mesh)
   /* do nothing if it's not time to write */
   if(TimeIsAt_di_dt(mesh, di,dt))
   {
-    char fname[] = "center_1_2_distance.txt";
+    char fname[] = "center_1_2_distance.t";
     FILE *fp;
     double time = mesh->time;
     double x1[3], x2[3];

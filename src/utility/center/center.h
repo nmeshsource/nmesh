@@ -10,3 +10,6 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
                           double xnew[3]);
 /* center_amr.c */
 int center_amr(tMesh *mesh);
+
+/* center_distance.c */
+int center_1_2_distance_output(tMesh *mesh);

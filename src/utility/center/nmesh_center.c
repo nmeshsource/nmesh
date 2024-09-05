@@ -14,6 +14,7 @@ int nmesh_center(tMesh *mesh)
   AddFun(INITMESH, center_amr);
   AddFun(POST_PARAMETERS, center_init_globals);
   AddFun(POST_EVOLVE, center_update);
+  AddFun(POST_EVOLVE, center_1_2_distance_output);
   AddFun(AMR, center_amr);
 
   /* variables */
@@ -39,11 +40,16 @@ int nmesh_center(tMesh *mesh)
   AddPar("center1_mass", "1", "mass1 used for CM calculation");
   AddPar("center2_mass", "1", "mass2 used for CM calculation");
   /* for AMR following centers 1 & 2 */
-  AddPar("center_amr_time", "-1", "when call center_amr (-1=never)");
+  AddPar("center_amr_time", "-1", "when to call center_amr (-1=never)");
   AddPar("center1_amr_lmax", "0", "finest level at center1");
   AddPar("center1_amr_radius", "8", "radius of finest level around center1");
   AddPar("center2_amr_lmax", "center1_amr_lmax", "finest level at center2");
   AddPar("center2_amr_radius", "8", "radius of finest level around center2");
+  /* for computing distances */
+  AddPar("center_distance_output_time", "-1", "time for distance (-1=never)");
+  AddPar("center_distance_radius1", "0", "radius we exclude from distance");
+  AddPar("center_distance_radius2", "0", "radius we exclude from distance");
+  AddPar("center_distance_metric", "ADM_gxx", "metric for proper distance");
 
   return 0;
 }
