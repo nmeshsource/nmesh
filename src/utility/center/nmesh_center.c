@@ -46,7 +46,7 @@ int nmesh_center(tMesh *mesh)
   AddPar("center2_amr_lmax", "center1_amr_lmax", "finest level at center2");
   AddPar("center2_amr_radius", "8", "radius of finest level around center2");
   /* for computing distances */
-  AddPar("center_distance_output_time", "-1", "time for distance (-1=never)");
+  AddPar("center_distance_outtime", "-1", "distance output times (-1=never)");
   AddPar("center_distance_radius1", "0", "radius we exclude from distance");
   AddPar("center_distance_radius2", "0", "radius we exclude from distance");
   AddPar("center_distance_metric", "ADM_gxx", "metric for proper distance");

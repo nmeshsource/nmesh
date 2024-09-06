@@ -110,7 +110,7 @@ double proper_length_of_coordline(const double x1[3], const double x2[3],
 int center_1_2_distance_output(tMesh *mesh)
 {
   int di = -1;
-  double dt = Getd(Par("center_distance_output_time"));
+  double dt = Getd(Par("center_distance_outtime"));
 
   /* //test with particular const metric:
   tVarList *u = vlalloc(mesh);
