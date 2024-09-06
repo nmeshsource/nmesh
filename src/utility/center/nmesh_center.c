@@ -50,6 +50,8 @@ int nmesh_center(tMesh *mesh)
   AddPar("center_distance_radius1", "0", "radius we exclude from distance");
   AddPar("center_distance_radius2", "0", "radius we exclude from distance");
   AddPar("center_distance_metric", "ADM_gxx", "metric for proper distance");
+  AddPar("center_distance_iorder", "4", "interp. order for metric");
+  AddPar("center_distance_npoints", "16", "num of points in Gauss quad.");
 
   return 0;
 }

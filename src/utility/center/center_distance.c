@@ -33,7 +33,7 @@ double coord_distance(const double x1[3], const double x2[3])
    We use np points for \lambda \in [-1,1], and use interp. of order iord
    to find the metric at these points. */
 double proper_length_of_coordline(const double x1[3], const double x2[3],
-                                  tVarList *vl_3metric, int np, int iord)
+                                  tVarList *vl_3metric, int iord, int np)
 {
   tMesh *mesh = vl_3metric->mesh;
   double m[3], c[3];
@@ -102,13 +102,15 @@ int center_1_2_distance_output(tMesh *mesh)
   /* do nothing if it's not time to write */
   if(TimeIsAt_di_dt(mesh, di,dt))
   {
+    int np   = Geti(Par("center_distance_npoints"));
+    int iord = Geti(Par("center_distance_iorder"));
     char fname[] = "center_1_2_distance.t";
     FILE *fp;
     double time = mesh->time;
     double x1[3], x2[3];
     tVarList *vl_3metric;
     double r1, r2, coord_dist, prop_dist;
-    int np, iord, dir;
+    int dir;
 
     /* get positions of center 1 & 2 */
     for(dir=0; dir<3; dir++)
@@ -132,9 +134,7 @@ int center_1_2_distance_output(tMesh *mesh)
     coord_dist = coord_distance(x1, x2);
     vl_3metric = vlalloc(mesh);
     vlpush(vl_3metric, Ind(Gets(Par("center_distance_metric"))));
-    np = 25;
-    iord = 5;
-    prop_dist = proper_length_of_coordline(x1, x2, vl_3metric, np, iord);
+    prop_dist = proper_length_of_coordline(x1, x2, vl_3metric, iord, np);
     vlfree(vl_3metric);
 
     /* write distances into file */
