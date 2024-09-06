@@ -79,9 +79,9 @@ double proper_length_of_coordline(const double x1[3], const double x2[3],
     if(f[i]<0.) {PRF;printf("f[i]=%g\n", f[i]);}
     f[i] = sqrt(f[i]);
   }
-printarray(val);
 
-  PRFs(": ");
+  /* PRFs(": ");
+  printarray(val);
   pr3v("m", m);
   pr3v("c", c);
   pr3v("lambda", lambda);
@@ -91,8 +91,7 @@ printarray(val);
   pr3v("x[2]", x[2]);
   pr3v("val[0]", Arrd(val));
   pr3v("f", f);
-  printf("\n");
-
+  printf("\n"); */
 
   /* get path length */
   length = Gauss_integral(np, w, f);
@@ -112,6 +111,29 @@ int center_1_2_distance_output(tMesh *mesh)
 {
   int di = -1;
   double dt = Getd(Par("center_distance_output_time"));
+
+  /* //test with particular const metric:
+  tVarList *u = vlalloc(mesh);
+  vlpushone(u, Ind("ADM_gxx"));
+  vlsetconstant(u, 2.);
+  vldropn(u, 1);
+  vlpushone(u, Ind("ADM_gxy"));
+  vlsetconstant(u, -0.1);
+  vldropn(u, 1);
+  vlpushone(u, Ind("ADM_gxz"));
+  vlsetconstant(u, -0.2);
+  vldropn(u, 1);
+  vlpushone(u, Ind("ADM_gyy"));
+  vlsetconstant(u, 3.);
+  vldropn(u, 1);
+  vlpushone(u, Ind("ADM_gyz"));
+  vlsetconstant(u, 0.3);
+  vldropn(u, 1);
+  vlpushone(u, Ind("ADM_gzz"));
+  vlsetconstant(u, 4.);
+  vldropn(u, 1);
+  vlfree(u);
+  */
 
   /* write only if it's time */
   if(TimeIsAt_di_dt(mesh, di,dt))
@@ -139,7 +161,7 @@ int center_1_2_distance_output(tMesh *mesh)
       x1[dir] = x1[dir] + (x2[dir] - x1[dir]) * r1/coord_dist;
       x2[dir] = x2[dir] - (x2[dir] - x1[dir]) * r2/coord_dist;
     }
-    PRFs(": ");pr3v("x1", x1);pr3v("x2", x2);printf("\n");
+    //PRFs(": ");pr3v("x1", x1);pr3v("x2", x2);printf("\n");
 
     /* calc distance between x1 and x2 in several ways */
     coord_dist = coord_distance(x1, x2);
@@ -150,15 +172,13 @@ int center_1_2_distance_output(tMesh *mesh)
     prop_dist = proper_length_of_coordline(x1, x2, vl_3metric, iord, np);
     vlfree(vl_3metric);
 
-    //PRF;printf(": %.15g %.15g %.15g\n", time, coord_dist, prop_dist);
-
     /* write distances into file */
     if(Rank0)
     {
       FILE *fp;
       char fname[1000];
       sprintf(fname, "%s/%s", Gets(Par("outdir")), "center_1_2_distance.t");
-      PRF;printf(": %s %.15g %.15g %.15g\n", fname, time, coord_dist, prop_dist);
+      //PRF;printf(": %s %.15g %.15g %.15g\n", fname, time, coord_dist, prop_dist);
       fp = fopen(fname, "a");
       if(time==0.) fprintf(fp, "# time coord_dist prop_dist\n");
       fprintf(fp, "%.15g %.15g %.15g\n", time, coord_dist, prop_dist);
