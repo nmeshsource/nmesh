@@ -271,6 +271,11 @@ resetunits:
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh resetunits.sh; fi done
 
 
+# target to reset MyConfig timestamp to the old timestamp of Makefile
+timestamp_MyConfig_as_old:
+	touch -r Makefile MyConfig
+
+
 # remove code that is not needed once the corresponding libs have been built
 rm_MemoryMan_code:
 	find src/main/MemoryMan/ -name "*.c*" -print -exec rm -rf '{}' \;
