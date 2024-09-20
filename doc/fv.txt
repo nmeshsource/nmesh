@@ -516,7 +516,7 @@ Notes:
 ======
 *fv_divf computes
  di0fi0 =       d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}  (no sum over kb)
- and not  (1/J) d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}  as in (1
+ and not  (1/J) d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}  as in (1)
  (Note: we use (A) or (B) to approximate d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb})
 *later divf += di0fi0 / J   <--for each direction
 
