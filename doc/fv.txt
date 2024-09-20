@@ -254,7 +254,7 @@ n^{kb}_i = a dx^{kb}/dx^i
 Here a is const determined from the normalization:
 1 = \gamma^{ij} n^{kb}_i n^{kb}_j = a^2 dx^{kb}/dx^i \gamma^{ij} dx^{kb}/dx^j
 Thus 1/a = \sqrt{dx^{kb}/dx^i \gamma^{ij} dx^{kb}/dx^j}
-         =: \sqrt{\gamma^{kb,kb}
+         =: \sqrt{\gamma^{kb,kb}}
 
 Def: M^{kb}_i := dx^{kb}/dx^i
      J        := 1/det(M^{kb}_i)
@@ -270,20 +270,20 @@ where we note:
                         = 1/J
 
 Now f^{kb} = dx^{kb}/dx^i f^i = (1/a) n^{kb}_i f^i
-           = \sqrt{\gamma^{kb,kb} n^{kb}_i f^i
-           = \sqrt{\gamma^{kb,kb} f
+           = \sqrt{\gamma^{kb,kb}} n^{kb}_i f^i
+           = \sqrt{\gamma^{kb,kb}} f
 where we have defined f := n^{kb}_i f^i
                       -----------------
 So finally
   ------------------------------------------------------------------
-  df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}        (1)
+  df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}        (1)
   ------------------------------------------------------------------
 
 Numerically we compute this from
 -------------------------------------------------------------
 df^i/dx^i = (1/J_C) \sum_{kb}
-            [ (J\sqrt{\gamma^{kb,kb})_R f^*_R           (A)
-             +(J\sqrt{\gamma^{kb,kb})_L f^*_L ] / w
+            [ (J\sqrt{\gamma^{kb,kb}})_R f^*_R           (A)
+             +(J\sqrt{\gamma^{kb,kb}})_L f^*_L ] / w
 -------------------------------------------------------------
 
    o    |    o    |    o
@@ -298,14 +298,14 @@ use (f^* - f), where f is the actual inner flux at point C.
 Then
 ---------------------------------------------------------------------
 df^i/dx^i = (1/J_C) \sum_{kb}
-            [ (J\sqrt{\gamma^{kb,kb})_R (f^*_R - f_R)           (B)
-             +(J\sqrt{\gamma^{kb,kb})_L (f^*_L - f_L) ] / w
+            [ (J\sqrt{\gamma^{kb,kb}})_R (f^*_R - f_R)           (B)
+             +(J\sqrt{\gamma^{kb,kb}})_L (f^*_L - f_L) ] / w
 ---------------------------------------------------------------------
 where f_R = (n^{kb}_i)_R f^i_C,  f_L = (n^{kb}_i)_L f^i_C
 and both involve the flux f^i at the same point C.
 
 For Cartesian coords
-J = \sqrt{\gamma^{kb,kb}) = 1, (n^{kb}_i)_R = (n^{kb}_i)_L = const
+J = \sqrt{\gamma^{kb,kb}} = 1, (n^{kb}_i)_R = (n^{kb}_i)_L = const
 then f^i cancels out.
 
 Test cases:
@@ -315,7 +315,7 @@ If f^i = (1,0,0) = const  ==>  n^{kb}_i f^i = n^{kb}_x
     f^*_R = (n^{kb}_x)_R   f^*_L = (n^{kb}_x)_L
 
 In the continuum case (1) is now
-df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb} n^{kb}_x)/dx^{kb}
+df^i/dx^i = (1/J) d(J \sqrt{\gamma^{kb,kb}} n^{kb}_x)/dx^{kb}
           = df^i/dx^i = d(1)/dx^i + 0 = 0
 
 coordinates_set_divb_J_sqrtgdiag_n computes this deriv numerically.
@@ -326,8 +326,8 @@ as in the continuum limit.
 
 (A) says
 df^i/dx^i = (1/J_C) \sum_{kb}
-            [ (J\sqrt{\gamma^{kb,kb})_R (n^{kb}_x)_R
-             +(J\sqrt{\gamma^{kb,kb})_L (n^{kb}_x)_L ] / w
+            [ (J\sqrt{\gamma^{kb,kb}})_R (n^{kb}_x)_R
+             +(J\sqrt{\gamma^{kb,kb}})_L (n^{kb}_x)_L ] / w
 This converges to 0 with O(w)^2 = O(h)^2, since it approximates (1)
 which is 0.
 
@@ -367,8 +367,8 @@ Flux reconstruction
 
 For GRHD we reconstruct the primitive variables on the midpoint and then
 compute fluxes from them. Maybe it would be better to directly reconstruct
-[ J\sqrt{\gamma^{kb,kb} (f^* - f) ] on the midpoints. This may be more
-accurate, and then we do not need J and \sqrt{\gamma^{kb,kb} on the
+[ J\sqrt{\gamma^{kb,kb}} (f^* - f) ] on the midpoints. This may be more
+accurate, and then we do not need J and \sqrt{\gamma^{kb,kb}} on the
 midpoints at all.
 Does anybody do flux reconstruction instead of primitive (or conservative)
 variable reconstruction? Search literature...
@@ -515,9 +515,9 @@ Some observations with GRHD
 Notes:
 ======
 *fv_divf computes
- di0fi0 =       d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}  (no sum over kb)
- and not  (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}  as in (1
- (Note: we use (A) or (B) to approximate d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb})
+ di0fi0 =       d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}  (no sum over kb)
+ and not  (1/J) d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}  as in (1
+ (Note: we use (A) or (B) to approximate d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb})
 *later divf += di0fi0 / J   <--for each direction
 
 *above we have extrapolated di0fi0 from x to o, which violates conservation:
@@ -541,9 +541,9 @@ Notes:
 
 *use result from 1. to integrate from midpoint a to midpoint b:
  I_ab = \int_a^b dx^k df/dx^k   <--no sums over k or kb
-      ~ \int_a^b d^{kb}(dx^k/dx^{kb}) (1/J) d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}
+      ~ \int_a^b d^{kb}(dx^k/dx^{kb}) (1/J) d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}
  use dx^k/dx^{kb} = J
- I_ab ~ \int_a^b d^{kb} d(J \sqrt{\gamma^{kb,kb} f)/dx^{kb}
+ I_ab ~ \int_a^b d^{kb} d(J \sqrt{\gamma^{kb,kb}} f)/dx^{kb}
       = \int_a^b d^{kb} di0fi0
       = dXb(i=0) * di0fi0_x + dXb(i=1) * di0fi0(i=1)
  where dXb(i=0) and dXb(i=1) are the distances between the midpoints
