@@ -855,7 +855,9 @@ int interp_var_xyz_local(tElm *elm, int vi, double xyz[3],
    contained in xp[3]
    IN: mesh, vl, xp, npts,scheme,vscal
    OUT: Value <--array with interp values
-   value of var at point is here: Arrd(Value)[pt_index + np*vl_index] */
+   value of var at point is here: Arrd(Value)[pt_index + np*vl_index]
+   Returns: +1 if all is ok
+            -(point index) of 1st point that was not found on mesh */
 int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
                  int npts, int scheme, double vscal, tArray *Value)
 {
@@ -867,6 +869,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   double *val = Arrd(value);
   int myrank = nMPI_rank();
   int size = nMPI_size();
+  int ret = +1; /* default return value */
   int *rank_pt = imalloc(np);
   int *Rank_pt = imalloc(np);
   int pt;
@@ -918,7 +921,12 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   for(pt=0; pt<np; pt++)
   {
     int l;
-    if(Rank_pt[pt] >= size) errorexiti("could not find point %d", pt);
+    if((Rank_pt[pt] >= size) && (ret > 0))
+    {
+      //errorexiti("could not find point %d", pt);
+      PRF;printf(": could not find point %d\n", pt);
+      ret = -pt;
+    }
 
     /* zero my vals if I don't own them */
     if(Rank_pt[pt] != myrank)
@@ -935,7 +943,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   free(Rank_pt);
   free(rank_pt);
   free_array(value);
-  return 0;
+  return ret;
 }
 
 
