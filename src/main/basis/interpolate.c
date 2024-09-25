@@ -866,6 +866,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   double *Val = Arrd(Value);
   double *val = Arrd(value);
   int myrank = nMPI_rank();
+  int size = nMPI_size();
   int *rank_pt = imalloc(np);
   int *Rank_pt = imalloc(np);
   int pt;
@@ -888,6 +889,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
       xyz[0] = Arrd(xp[0])[ind];
       xyz[1] = Arrd(xp[1])[ind];
       xyz[2] = Arrd(xp[2])[ind];
+      //PRF;printf(": ind=%d  ", ind);pr3v("xyz", xyz);printf("\n");
 
       valpt = val + ind; /* pointer to var0 at point ind */
       p = interp_vars_xyz_local(elm, nvars,vi, xyz, 0, INTERP_LAGRANGE, 1.,
@@ -916,7 +918,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
   for(pt=0; pt<np; pt++)
   {
     int l;
-    if(Rank_pt[pt] < 0) errorexiti("could not find point %d", pt);
+    if(Rank_pt[pt] >= size) errorexiti("could not find point %d", pt);
 
     /* zero my vals if I don't own them */
     if(Rank_pt[pt] != myrank)
