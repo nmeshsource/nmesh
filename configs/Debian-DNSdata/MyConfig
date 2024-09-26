@@ -67,11 +67,11 @@ MPIDIRL = -L$(MPIDIR)/lib
 MPIDIRI = -I$(MPIDIR)/include
 MPILIBS = -lmpi
 
-# compile in GSL
+# link in GSL
 SPECIALLIBS += -lgsl -lgslcblas
 
 # generate SIGFPE on NANs, works only on GNU, BSD or similar systems
 #DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
 
-# compile with libsgrid from inside DNSdataReader
+# link with libsgrid from inside DNSdataReader
 SPECIALLIBS += -L$(TOP)/src/projects/DNSdataReader/sgrid/lib -lsgrid
