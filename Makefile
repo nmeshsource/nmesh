@@ -223,6 +223,7 @@ printvars:
 #	@echo libpathCfiles=$(libpathCfiles)
 	@echo libpaths=$(libpaths)
 	@echo compiledphysics=$(compiledphysics)
+	@echo LIBS=$(LIBS)
 
 # touch all nmesh_*.c files so that the git revision gets updated
 touch_all_nmesh_c:
