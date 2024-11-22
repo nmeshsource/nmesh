@@ -895,7 +895,7 @@ int interp_VL_xp(tMesh *mesh, tVarList *vl, tArray *xp[3],
       //PRF;printf(": ind=%d  ", ind);pr3v("xyz", xyz);printf("\n");
 
       valpt = val + ind; /* pointer to var0 at point ind */
-      p = interp_vars_xyz_local(elm, nvars,vi, xyz, 0, INTERP_LAGRANGE, 1.,
+      p = interp_vars_xyz_local(elm, nvars,vi, xyz, npts, scheme, vscal,
                                 XYZ, valpt, np);
       /* NOTE: if several threads have the point, we get the interp result from
                whichever thread writes last! */
