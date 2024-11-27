@@ -319,7 +319,10 @@ def expand_RHS_sums(eqs):
         #exec(cmd, globals())
         #print(rs)
         try:
-            rhs = eval(rs)
+            #rhs = eval(rs)
+            # remove all '\n' to avoid indent errors
+            rs0 = rs.replace('\n', ' ')
+            rhs = eval(rs0)
         except Exception as e:
             print('Error in RHS of:')
             print('----------------')
