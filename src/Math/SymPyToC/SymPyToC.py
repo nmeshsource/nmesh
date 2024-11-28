@@ -361,7 +361,14 @@ def expand_RHS_sums(eqs):
 def get_tuple_with_all_indexvals(T):
     if type(T) == str:
         return ()
-    Tshape = T.shape
+    try:
+        Tshape = T.shape
+    except Exception as e:
+        print('T contains more than one tensor:')
+        print('--------------------------------')
+        print(T)
+        print('--------------------------------')
+        raise(e)
     if Tshape == None:
         return ()
     shap = tuple(Tshape) # maybe use:  sympy.tensor.get_indices(T)
