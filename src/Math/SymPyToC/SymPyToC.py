@@ -455,7 +455,15 @@ def get_AUTOVARS(Declvars, LHSvars):
     # make list of Indexed objects from string list Declvars
     DeclTens = []
     for decv in Declvars:
-        DeclTens.append(eval(decv))
+        try:
+            dv = eval(decv)
+        except Exception as e:
+            print('Error in Decl of:')
+            print('-----------------')
+            print(decv)
+            print('-----------------')
+            raise(e)
+        DeclTens.append(dv)
     # loop over LHSs
     for lhs in LHSvars:
         try:
