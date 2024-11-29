@@ -1383,7 +1383,9 @@ def make_DeclList(List_of_IndexedObjLists, fstr, VARlambda=None):
                 indices = []
             # apply VARlambda to varbase
             if VARlambda != None:
-                varbase = VARlambda(str(varbase))
+                varlambda = VARlambda(str(varbase))
+            else:
+                varlambda = varbase
             # construct string that labels component
             comp = make_CompString(indices)
             if varcompindex == 0:
@@ -1393,7 +1395,7 @@ def make_DeclList(List_of_IndexedObjLists, fstr, VARlambda=None):
             # string s for one declaration
             s = fstr.format(VAR=varbase, COMP=comp, COMP0=comp0,
                             LI=listindex, CI=varcompindex, VARID=varid,
-                            VARPRE=vpre, VARSUF=vsuf)
+                            VARPRE=vpre, VARSUF=vsuf, VARLAMBDA=varlambda)
             # add anything that is not zero
             if obj != 0:
                 declist.append(s)
