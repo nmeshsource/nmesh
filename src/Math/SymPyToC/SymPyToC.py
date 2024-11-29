@@ -1364,7 +1364,7 @@ declist = make_DeclList([ [A[1,2], A[1,3], A[2,3]], [g[1,1], g[1,2]] ],
 'Vard( node, Vind(vlu,FOCCZ4->i_{VAR} + {CI} ); // ID={VARID} listpos={LI}')
 for s in declist: print(s)
 """
-def make_DeclList(List_of_IndexedObjLists, fstr):
+def make_DeclList(List_of_IndexedObjLists, fstr, VARlambda=None):
     declist = []
     # init counters
     listindex    = 0
@@ -1381,6 +1381,9 @@ def make_DeclList(List_of_IndexedObjLists, fstr):
             else:
                 varbase = obj
                 indices = []
+            # apply VARlambda to varbase
+            if VARlambda != None:
+                varbase = VARlambda(str(varbase))
             # construct string that labels component
             comp = make_CompString(indices)
             if varcompindex == 0:
@@ -1568,6 +1571,16 @@ def write_Eqs(filename, allEqs, AUTOVARS, FinalSimplify=True):
                         f.write(text)
                     elif LHS.startswith(':Decl'):
                         #print('Command',comstr)
+                        ind = comstr.find('VARlambda')
+                        if ind != -1:
+                            text = comstr[ind:]
+                            ind = comstr.find('=', ind)
+                            text = comstr[ind+1:]
+                            text = text.split(':')[0]
+                            text = text.strip()
+                            VARlambda = eval(text)
+                        else:
+                            VARlambda = None
                         ind = comstr.find('DeclFunc')
                         if ind != -1:
                             text = comstr[ind:]
@@ -1588,7 +1601,8 @@ def write_Eqs(filename, allEqs, AUTOVARS, FinalSimplify=True):
                             if text[0] == '\n':
                                 text = text[1:]
                         fstr = text
-                        decs = DeclFunc(allEqs[1][eq_i][comp], fstr)
+                        decs = DeclFunc(allEqs[1][eq_i][comp], fstr,
+                                        VARlambda=VARlambda)
                         for line in decs:
                             f.write(line)
                 # Eqs
