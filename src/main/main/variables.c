@@ -413,7 +413,7 @@ int vlpush(tVarList *v, int vi)
   int idx, i, n;
   tMesh *mesh;
 
-  if(!v) return -1;
+  if(!v) errorexit("v is NULL");
   idx = v->n; /* position-index in v where vi will go */
   mesh = v->mesh;
   n = MeshVarNComponents(mesh, vi);
@@ -433,7 +433,7 @@ int vlpushvl(tVarList *v, tVarList *u)
 {
   int idx, i;
 
-  if(!v) return -1;
+  if(!v) errorexit("v is NULL");
   idx = v->n; /* position-index in v where u will go */
   if(!u) return idx;
   v->n += u->n;
