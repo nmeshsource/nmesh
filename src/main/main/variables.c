@@ -410,10 +410,13 @@ int vlpushone(tVarList *v, int vi)
    return index idx of where we put vi in varlist v */
 int vlpush(tVarList *v, int vi)
 {
-  int idx = v->n; /* position-index in v where vi will go */
-  tMesh *mesh = v->mesh;
-  int i, n = MeshVarNComponents(mesh, vi);
+  int idx, i, n;
+  tMesh *mesh;
 
+  if(!v) return -1;
+  idx = v->n; /* position-index in v where vi will go */
+  mesh = v->mesh;
+  n = MeshVarNComponents(mesh, vi);
   if(MeshVarIndComponent0(mesh, vi)!=vi)
     errorexit("vi needs to be index of component 0. "
               "Consider using vlpushone.");
