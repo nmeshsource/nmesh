@@ -196,13 +196,13 @@ int MeshVar_Nextra(tMesh *mesh, int i);
 void prvarlist(tVarList *v);
 tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
-void vlpushone(tVarList *v, int vi);
-void vlpush(tVarList *v, int vi);
-void vlpushvl(tVarList *v, tVarList *u);
+int vlpushone(tVarList *v, int vi);
+int vlpush(tVarList *v, int vi);
+int vlpushvl(tVarList *v, tVarList *u);
 void vldropn(tVarList *v, int n);
-int vlpushone_index(tVarList *v, int vi);
-int vlpush_index(tVarList *v, int vi);
-int vlpushvl_index(tVarList *v, tVarList *u);
+#define vlpushone_index vlpushone
+#define vlpush_index    vlpush
+#define vlpushvl_index  vlpushvl
 int vlindex(tVarList *v, int vi);
 void vlsort(tVarList *v);
 int vlindex_if_sorted(tVarList *v, int vi);

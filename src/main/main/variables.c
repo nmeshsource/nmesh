@@ -395,17 +395,22 @@ void vlfree(tVarList *u)
   }
 }
 
-/* add a variable (one component) to a variable list */
-void vlpushone(tVarList *v, int vi)
+/* add a variable (one component) to a variable list
+   return index idx of where we put vi in varlist v */
+int vlpushone(tVarList *v, int vi)
 {
+  int idx = v->n; /* position-index in v where vi will go */
   v->n += 1;
   v->index = realloc(v->index, sizeof(int) * v->n);
   v->index[v->n-1] = vi;
+  return idx;
 }
 
-/* add a variable with all its components to a variable list */
-void vlpush(tVarList *v, int vi)
+/* add a variable with all its components to a variable list
+   return index idx of where we put vi in varlist v */
+int vlpush(tVarList *v, int vi)
 {
+  int idx = v->n; /* position-index in v where vi will go */
   tMesh *mesh = v->mesh;
   int i, n = MeshVarNComponents(mesh, vi);
 
@@ -416,18 +421,23 @@ void vlpush(tVarList *v, int vi)
   v->index = realloc(v->index, sizeof(int) * v->n);
   for(i = 0; i < n; i++)
     v->index[v->n-n+i] = vi + i;
+  return idx;
 }
 
-/* add a variable list to a variable list */
-void vlpushvl(tVarList *v, tVarList *u)
+/* add a variable list to a variable list
+   return index idx of where we add u in varlist v */
+int vlpushvl(tVarList *v, tVarList *u)
 {
-  int i;
+  int idx, i;
 
-  if(!v || !u) return;
+  if(!v) return -1;
+  idx = v->n; /* position-index in v where u will go */
+  if(!u) return idx;
   v->n += u->n;
   v->index = realloc(v->index, sizeof(int) * v->n);
   for(i = 0; i < u->n; i++)
     v->index[v->n - u->n + i] = u->index[i];
+  return idx;
 }
 
 /* drop a variable (one component) from a variable list */
@@ -460,32 +470,6 @@ void vldropn(tVarList *v, int n)
   if(n >= v->n) v->n  = 0;
   else          v->n -= n;
 }
-
-
-/* call vlpushone and return index idx of where we put vi in varlist v */
-int vlpushone_index(tVarList *v, int vi)
-{
-  int idx = v->n; /* position-index in v where vi will go */
-  vlpushone(v, vi);
-  return idx;
-}
-
-/* call vlpush and return index idx of where we put vi in varlist v */
-int vlpush_index(tVarList *v, int vi)
-{
-  int idx = v->n; /* position-index in v where vi will go */
-  vlpush(v, vi);
-  return idx;
-}
-
-/* call vlpushvl and return index idx of where we add u in varlist v */
-int vlpushvl_index(tVarList *v, tVarList *u)
-{
-  int idx = v->n; /* position-index in v where vi will go */
-  vlpushvl(v, u);
-  return idx;
-}
-
 
 /* duplicate variable list */
 tVarList *vlduplicate(tVarList *v)
