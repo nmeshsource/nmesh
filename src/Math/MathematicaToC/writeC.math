@@ -58,6 +58,15 @@ prdecvar[vars_, index_] := Module[{cvars, s, nf},
   ];
 ]
 
+prdecvarCompFun[vars_, index_, Fun_] := Module[{cvars, s, nf},
+  cvars = vars /. expfreeindices /. gluevar;
+  For[nf = 0, nf < Length[cvars], nf++,
+    s = StringForm["double *`` = Vard_(node, `` + ``(``));\n",
+                    cvars[[nf+1]], index, Fun, nf];
+    pr[s];
+  ];
+]
+
 prdecvarname[vars_, name_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   s = StringForm["int index_`` = Ind(\"``\");\n", name, name];
