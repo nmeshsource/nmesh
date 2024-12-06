@@ -70,6 +70,19 @@ prdecvarname[vars_, name_] := Module[{cvars, s, nf},
   ];
 ]
 
+prdecvarnameCompFun[vars_, name_, Fun_] := Module[{cvars, s, nf},
+  cvars = vars /. expfreeindices /. gluevar;
+  s = StringForm["int index_`` = Ind(\"``\");\n", name, name];
+  pr[s];
+  For[nf = 0, nf < Length[cvars], nf++,
+      (* should node be hardwired??? *)
+      s = StringForm["double *`` = Vard_(node, index_`` + ``(``));\n",
+                    cvars[[nf+1]], name, Fun, nf];
+    pr[s];
+  ];
+]
+
+
 prdecvl[vars_, name_] := Module[{cvars, s, nf},
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
