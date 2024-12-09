@@ -1552,7 +1552,7 @@ def write_Eqs(filename, allEqs, AUTOVARS, FinalSimplify=True):
         nsum = 0
         # write info
         f.write('/* ' + pathlib.Path(filename).name + ' */\n')
-        f.write('/* Copyright (C) 2020-2023 Wolfgang Tichy */\n')
+        f.write('/* Copyright (C) 2020-2025 Wolfgang Tichy */\n')
         f.write('/* Produced with SymPyToC.py */\n\n')
         LHS = 'Nothing yet'
         # loop over Eqns
