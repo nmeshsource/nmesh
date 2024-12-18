@@ -524,7 +524,7 @@ def get_AUTOVARS(Declvars, LHSvars):
                 continue
             if typ_Tl == sympy.tensor.indexed.Indexed:
                 if Tl.base == decT.base:
-                    if Tl.shape == decT.shape:
+                    if Tl.rank == decT.rank:
                         lhs_is_in_DeclTens = True
                         break
             else:
