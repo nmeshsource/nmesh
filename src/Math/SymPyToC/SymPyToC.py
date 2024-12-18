@@ -378,6 +378,20 @@ def get_array_with_indexranges(T):
             Tranges.append( (ind,ind) )
     return Tranges
 
+# get shape of tensor from index ranges
+def get_shape_from_indexranges(Tranges):
+    shap = tuple( [(rn[1]-rn[0]+1) for rn in Tranges] )
+    return shap
+
+# get shape of tensor
+def get_shape(T):
+    if type(T) == sympy.tensor.indexed.Indexed:
+        Tranges = get_array_with_indexranges(T)
+        shap = get_shape_from_indexranges(Tranges)
+        return shap
+    else:
+        return None
+
 # return all possible index values of a tensor
 def get_tuple_with_all_indexvals(T):
     if type(T) == str:
@@ -386,7 +400,7 @@ def get_tuple_with_all_indexvals(T):
         return ()
     Tranges = get_array_with_indexranges(T)
     #print(Tranges)
-    shap = tuple( [(rn[1]-rn[0]+1) for rn in Tranges] )
+    shap = get_shape_from_indexranges(Tranges)
     #print('shap =', shap)
     l1 = list(numpy.ndindex(shap))
     l2 = [rn[0] for rn in Tranges]
