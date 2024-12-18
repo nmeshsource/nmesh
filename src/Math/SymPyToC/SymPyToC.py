@@ -357,23 +357,41 @@ def expand_RHS_sums(eqs):
     return [LHS_list, RHS_list]
 
 
+# get index ranges of a tensor
+def get_array_with_indexranges(T):
+    try:
+        Tranges0 = T.ranges
+        Tindices = T.indices
+    except Exception as e:
+        print('T may contain more than one tensor:')
+        print('-----------------------------------')
+        print(T)
+        print('-----------------------------------')
+        raise(e)
+    Tranges = []
+    for i in range(len(Tranges0)):
+        rn = Tranges0[i]
+        if rn != None:
+            Tranges.append(rn)
+        else:
+            ind = Tindices[i]
+            Tranges.append( (ind,ind) )
+    return Tranges
+
 # return all possible index values of a tensor
 def get_tuple_with_all_indexvals(T):
     if type(T) == str:
         return ()
-    try:
-        Tshape = T.shape
-    except Exception as e:
-        print('T contains more than one tensor:')
-        print('--------------------------------')
-        print(T)
-        print('--------------------------------')
-        raise(e)
-    if Tshape == None:
+    if type(T) == sympy.tensor.indexed.IndexedBase:
         return ()
-    shap = tuple(Tshape) # maybe use:  sympy.tensor.get_indices(T)
+    Tranges = get_array_with_indexranges(T)
+    #print(Tranges)
+    shap = tuple( [(rn[1]-rn[0]+1) for rn in Tranges] )
+    #print('shap =', shap)
     l1 = list(numpy.ndindex(shap))
-    l2 = [ind.lower for ind in T.indices]
+    l2 = [rn[0] for rn in Tranges]
+    #print('l1 =', l1)
+    #print('l2 =', l2)
     a1 = numpy.array(l1, dtype=int)
     a2 = numpy.array(l2, dtype=int)
     a = list(a1 + a2)
