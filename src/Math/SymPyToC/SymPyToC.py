@@ -1258,9 +1258,16 @@ def replace_Kdelta__old(expr):
 
 # replace Kdelta by sympy.KroneckerDelta using strings
 def replace_Kdelta(expr):
-    strdict = { "Indexed(IndexedBase(Symbol('Kdelta'))," :
-                "KroneckerDelta(" }
+    #print('=================================')
+    #print('expr =', expr)
+    strdict = {
+        "Indexed(IndexedBase(Symbol('Kdelta'))," :
+        "KroneckerDelta(",
+        "Indexed(IndexedBase(Symbol('Kdelta', commutative=True))," :
+        "KroneckerDelta("
+         }
     expr2 = str_replace_termstr(expr, strdict)
+    #print('expr2 =', expr2)
     return expr2
 
 #replace LCeps3 by LeviCivita
@@ -1302,6 +1309,7 @@ def str_replace_term(expr, termsdict):
 def str_replace_termstr(expr, strdict):
     # make string from expr
     s_expr = sympy.srepr(expr)
+    #print('SRST: s_expr =', s_expr)
     # replace term strings in s_expr
     for s_term in strdict:
         s_term_new = strdict[s_term]
