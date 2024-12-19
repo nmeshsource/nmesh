@@ -1249,10 +1249,18 @@ Kdelta = sympy.IndexedBase('Kdelta')
 LCeps3 = sympy.IndexedBase('LCeps3')
 
 # replace Kdelta by sympy.KroneckerDelta
-def replace_Kdelta(expr):
+# BUT somehow the stupid sympy.Wild does not work with 2 Integers
+def replace_Kdelta__old(expr):
     w1 = sympy.Wild('w1')
     w2 = sympy.Wild('w2')
     expr2 = expr.replace(Kdelta[w1,w2], sympy.KroneckerDelta(w1,w2))
+    return expr2
+
+# replace Kdelta by sympy.KroneckerDelta using strings
+def replace_Kdelta(expr):
+    strdict = { "Indexed(IndexedBase(Symbol('Kdelta'))," :
+                "KroneckerDelta(" }
+    expr2 = str_replace_termstr(expr, strdict)
     return expr2
 
 #replace LCeps3 by LeviCivita
@@ -1286,6 +1294,21 @@ def str_replace_term(expr, termsdict):
     #print('SRT: RESULT: s_expr =', s_expr)
     expr_new = sympy.sympify(s_expr)
     #print('SRT: expr_new =', expr_new)
+    # return expression after replacement
+    return expr_new
+
+# replace all string-keys in strdict by their values in expr
+# this func uses srepr of expr to do the string replacement
+def str_replace_termstr(expr, strdict):
+    # make string from expr
+    s_expr = sympy.srepr(expr)
+    # replace term strings in s_expr
+    for s_term in strdict:
+        s_term_new = strdict[s_term]
+        s_expr = s_expr.replace(s_term, s_term_new)
+    #print('SRST: RESULT: s_expr =', s_expr)
+    expr_new = sympy.sympify(s_expr)
+    #print('SRST: expr_new =', expr_new)
     # return expression after replacement
     return expr_new
 
