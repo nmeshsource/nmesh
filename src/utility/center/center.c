@@ -116,7 +116,7 @@ int center_update(tMesh *mesh)
   }
 
   /* set pt output vars if center position vars are not empty */
-  for(N=0; N<output->Noutpt; N++)
+  for(N=0; N<min2(3, output->Noutpt); N++)
     for(dir=0; dir<3; dir++)
     {
       int centerN_xi = center->cx[N][dir];
