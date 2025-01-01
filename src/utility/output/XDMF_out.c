@@ -218,7 +218,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   tMesh *mesh = vl->mesh;
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
+  int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
+  long xyzoffset0, vtotal, vcnt;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -261,8 +263,12 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
 
         /* open binary files */
         fpbin = fopen_bin(vname, outdir, suffix[norm], bufbin,bufsize);
+        vtotal = 0; /* num of bytes written for var vname */
         if(vli==0) /* write xyz only for first var in list */
+        {
           fpxyz = fopen_bin("xyz", outdir, suffix[norm], bufxyz,bufsize);
+          xyzoffset0 = ftell(fpxyz);
+        }
 
         /* loop over all leaf nodes */
         formylnodes_noomp(mesh)
@@ -299,7 +305,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
 
               /* write binary data in var */
               voffset = ftell(fpbin);
-              write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+              vcnt = write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+              vcnt *= vbytes; //number of bytes written by write_buffer
+              vtotal += vcnt; //total num of bytes outputted for var so far
 
               /* write point's x,y,z coordinates */
               if(vli==0) /* write xyz only for first var in list */
@@ -307,11 +315,14 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
+                xyzoffset = ftell(fpxyz);
                 write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
               }
-
-              /* we wrote 3 things (x,y,z) for each var */
-              xyzoffset = 3 * voffset;
+              else
+              {
+                /* we wrote 3 things (x,y,z) for each var */
+                xyzoffset = xyzoffset0 + 3*(vtotal - vcnt);
+              }
 
               /* write grid information into xmf file */
               write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
@@ -345,7 +356,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   char *outdir = Gets(outd);
   int bin = 1; /* we can only do binary output right now */
   int dbl = 0; /* we output float not double */
+  int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
+  long xyzoffset0, vtotal, vcnt;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -383,8 +396,12 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
                                              bufxmf,bufsize);
         /* open binary files */
         fpbin = fopen_bin(vname, outdir, suffix, bufbin,bufsize);
+        vtotal = 0; /* num of bytes written for var vname */
         if(vli==0) /* write xyz only for first var in list */
+        {
           fpxyz = fopen_bin("xyz",outdir,suffix, bufxyz,bufsize);
+          xyzoffset0 = ftell(fpxyz);
+        }
 
         /* loop over all leaf nodes */
         formylnodes_noomp(mesh)
@@ -408,7 +425,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
 
               /* write binary data in var */
               voffset = ftell(fpbin);
-              write_buffer(Vard(node,vi), np, dbl, fpbin);
+              vcnt = write_buffer(Vard(node,vi), np, dbl, fpbin);
+              vcnt *= vbytes; //number of bytes written by write_buffer
+              vtotal += vcnt; //total num of bytes outputted for var so far
 
               /* write point's x,y,z coordinates */
               if(vli==0) /* write xyz only for first var in list */
@@ -416,11 +435,14 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
                 double *px = Vard(node, ix);
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
+                xyzoffset = ftell(fpxyz);
                 write_3buffers(px,py,pz, np, dbl, fpxyz);
               }
-
-              /* we wrote 3 things (x,y,z) for each var */
-              xyzoffset = 3 * voffset;
+              else
+              {
+                /* we wrote 3 things (x,y,z) for each var */
+                xyzoffset = xyzoffset0 + 3*(vtotal - vcnt);
+              }
 
               /* write grid information into xmf file */
               write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix,
