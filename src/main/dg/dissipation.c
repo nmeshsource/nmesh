@@ -284,7 +284,6 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
     int ord;      /* order we actually use */
     double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
     int i,j,k;
-//if(dir==1 || dir==2) continue;
 
     /* do nothing if we have too few grid points */
     if(ndir<3) continue;
@@ -347,9 +346,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
 
           /* add dissipation term to RHS */
           rl[ccc] += dis;
-          //printf("ndir=%d i0=%d  dis=%g\n", ndir, i0, dis);
         }
-        //if(ndir==5) exit(9);
 
         /* loop over points near boundary in dir */
         for(ib=1; ib<srad; ib++)
@@ -378,9 +375,7 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
 
             /* add dissipation term to RHS */
             rl[ccc] += dis;
-            //printf("ndir=%d i0=%d  dis=%g\n", ndir, i0, dis);
           }
-          //if(ndir==5) exit(9);
         }
 
       } /* end loop over fields */
@@ -416,10 +411,7 @@ void diss_taperedKO(int srad, double *sw[], int ndir, const double *uc,
 
     /* save dissipation term for RHS */
     rc[i0] = dis;
-    //rc[i0] += dis;
-    //printf("ndir=%d i0=%d  dis=%g\n", ndir, i0, dis);
   }
-  //if(ndir==5) exit(9);
 
   /* loop over points near boundary */
   for(ib=1; ib<srad; ib++)
@@ -445,10 +437,7 @@ void diss_taperedKO(int srad, double *sw[], int ndir, const double *uc,
 
       /* save dissipation term for RHS */
       rc[i0] = dis;
-      //rc[i0] += dis;
-      //printf("ndir=%d i0=%d  dis=%g\n", ndir, i0, dis);
     }
-    //if(ndir==5) exit(9);
   }
 }
 /* new tapered KO diss */
@@ -488,7 +477,6 @@ void dissipation_add_taperedKO_order_cf__new(tNode *node, tVarList *vlr,
     int ord;      /* order we actually use */
     double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
     int i,j,k;
-//if(dir==1 || dir==2) continue;
 
     /* do nothing if we have too few grid points */
     if(ndir<3) continue;
@@ -546,9 +534,6 @@ void dissipation_add_taperedKO_order_cf__new(tNode *node, tVarList *vlr,
       } /* end loop over fields */
     } /* end plane loop */
   } /* end dir-loop*/
-
-
-
 
   /* release mem */
   free(rc);
