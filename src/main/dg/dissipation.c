@@ -386,6 +386,153 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
   free(uc);
 }
 
+/* calc diss terms for taperedKO from uc and write them into rc */
+void diss_taperedKO(int srad, double *sw[], int ndir, const double *uc,
+                    double facoh, const double facoh_bou[srad], double *rc)
+{
+  int isw = srad - 1;
+  int i0, ib;
+
+  /* loop over inner points */
+  for(i0=srad; i0<ndir-srad; i0++)
+  {
+    double dis;
+    int s;
+
+    /* Set dissipation term. Here we assume the stencil is symmetric
+       (i.e. same weight for uc[i0-s] and uc[i0+s]) and thus use only
+       the top half of sw[isw]. */
+    dis = sw[isw][srad]*uc[i0];
+    for(s=1; s<=srad; s++) dis += sw[isw][s+srad]*(uc[i0-s] + uc[i0+s]);
+    dis *= facoh;
+
+    /* save dissipation term for RHS */
+    rc[i0] = dis;
+  }
+
+  /* loop over points near boundary */
+  for(ib=1; ib<srad; ib++)
+  {
+    int is = ib-1;   /* current stencil index */
+    double dis;
+    int sr, cnt, s;
+
+    /* set current stencil radius */
+    sr = ib;
+
+    /* left boundary is at i0 = ib */
+    /* right boundary is at i0 = ndir-1 - ib */
+    /* => loop over left and right: */
+    for(cnt=0, i0=ib; cnt<2; cnt++, i0+=ndir-1 - 2*ib)
+    {
+      /* Set dissipation term. Here we assume the stencil is symmetric
+         (i.e. same weight for uc[i0-s] and uc[i0+s]) and thus use only
+         the top half of sw[is]. */
+      dis = sw[is][sr]*uc[i0];
+      for(s=1; s<=sr; s++) dis += sw[is][s+sr]*(uc[i0-s] + uc[i0+s]);
+      dis *= facoh_bou[sr];
+
+      /* save dissipation term for RHS */
+      rc[i0] = dis;
+    }
+  }
+}
+/* new tapered KO diss */
+void dissipation_add_taperedKO_order_cf__new(tNode *node, tVarList *vlr,
+                                        tVarList *vlu, double dissfac,
+                                        int order, double *cf)
+{
+  int *n = node->n;
+  double *bb = node->bbox;
+  int maxn = max3(n[0],n[1],n[2]);
+  double *uc = dtensor(maxn);
+  double *rc = dtensor(maxn);
+  int dir;
+  double *sw[] = {sw2, sw4, sw6, sw8, sw10, sw12};  /* stencil weights */
+  int srad = order/2;     /* stencil radius */
+  int sr;
+  double sgn_bou[srad+1]; /* signs near boundary, and last in interior */
+  double fac_bou[srad+1]; /* factors near boundary, and last in interior */
+  double facoh_bou[srad]; /* factors/h near boundary */
+
+  if(order%2 || order<2 || order>12)
+    errorexit("order must be 2,4,6,8,10,12");
+
+  /* set signs/2^order near boundary, and in interior (last entry) */
+  /* overall sign = (-1)^(1+order/2), we also devide by 2^ord */
+  for(sr=0; sr<srad+1; sr++) sgn_bou[sr] = (-1. + 2*(sr%2))/(1 << (2*sr));
+
+  /* set fac_bou, i.e. fac. near boundary, and in interior (last entry) */
+  for(sr=0; sr<srad; sr++) fac_bou[sr] = sgn_bou[sr] * dissfac * cf[sr];
+  fac_bou[srad] = sgn_bou[srad] * dissfac;
+
+  /* add dissipation in each direction to RHS */
+  for(dir=0; dir<3; dir++)
+  {
+    int ndir = n[dir];
+    double ooh = (ndir-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
+    int ord;      /* order we actually use */
+    double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
+    int i,j,k;
+
+    /* do nothing if we have too few grid points */
+    if(ndir<3) continue;
+
+    /* reduce ord if we have less than order+1 grid points */
+    if(ndir<=order) ord = ((ndir-1)/2) * 2;
+    else            ord = order;
+
+    /* reset stencil radius, and stencil weight index */
+    srad = ord/2;
+
+    /* set interior fac. */
+    facoh = fac_bou[srad] * ooh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
+
+    /* set facoh_bou, i.e. fac. near boundary */
+    for(sr=0; sr<srad; sr++) facoh_bou[sr] = fac_bou[sr] * ooh;
+
+    /* loop over plane */
+    forplaneN(dir, i,j,k, n, 0)
+    {
+      int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+      int i2 = i2_norm(i,j,k, dir);
+      int i0;                       /* index orthogonal to plane */
+      int ic,jc,kc, ccc;
+      int l;                        /* field index */
+
+      /* loop over fields */
+      forvl(vlu, l)
+      {
+        double *ul = Vard(node, Vind(vlu, l)); /* field data pointer */
+        double *rl = Vard(node, Vind(vlr, l)); /* RHS data pointer */
+
+        /* fill field arrays uc, i0 runs orth. to plane */
+        for(i0=0; i0<ndir; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+          /* set uc */
+          uc[i0] = ul[ccc];
+        }
+
+        /* use uc to calc dissipation terms rc */
+        diss_taperedKO(srad, sw, ndir, uc, facoh, facoh_bou, rc);
+
+        /* add dissipation terms to RHS */
+        for(i0=0; i0<ndir; i0++)
+          rl[ccc] += rc[i0];
+      } /* end loop over fields */
+    } /* end plane loop */
+  } /* end dir-loop*/
+
+  /* release mem */
+  free(rc);
+  free(uc);
+}
+
+
+
 /* same as dissipation_add_taperedKO_order_cf, but use same diss. factor for
    all diss. orders near boundary and in interior */
 void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
