@@ -398,7 +398,8 @@ void diss_taperedKO(int srad, double *sw[], int ndir, const double *uc,
   int isw = srad - 1;
   int i0, ib;
 
-memset(rc, 0, ndir*8);
+  /* we do nothing at the boundary below */
+  rc[0] = rc[ndir-1] = 0;
 
   /* loop over inner points */
   for(i0=srad; i0<ndir-srad; i0++)
@@ -414,8 +415,8 @@ memset(rc, 0, ndir*8);
     dis *= facoh;
 
     /* save dissipation term for RHS */
-    //rc[i0] = dis;
-    rc[i0] += dis;
+    rc[i0] = dis;
+    //rc[i0] += dis;
     //printf("ndir=%d i0=%d  dis=%g\n", ndir, i0, dis);
   }
   //if(ndir==5) exit(9);
@@ -443,8 +444,8 @@ memset(rc, 0, ndir*8);
       dis *= facoh_bou[sr];
 
       /* save dissipation term for RHS */
-      //rc[i0] = dis;
-      rc[i0] += dis;
+      rc[i0] = dis;
+      //rc[i0] += dis;
       //printf("ndir=%d i0=%d  dis=%g\n", ndir, i0, dis);
     }
     //if(ndir==5) exit(9);
