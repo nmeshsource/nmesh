@@ -436,7 +436,7 @@ void dissipation_add_taperedKO_order_min(tNode *node,
 }
 
 
-/* Modify taperedKO result. Note: h1po must be h^(order+1)
+/* Modify taperedKO result.
    In the interior we use the same Kreiss-Oliger nth order derivative
    operator as in dissipation_add_KO_order. But the order is dropped
    successively to 2 when we approach the boundary.
@@ -450,7 +450,7 @@ o       o       o       o       o       o       o       o  . . .
 |       |       4th order diss. of size O(h^3) * (h^6 d^6 u)^(1/3)
 |       2nd order diss. of size O(h) * (h^6 d^6 u)^(2/3)
 no diss. */
-void diss_WTmod_taperedKO(int order, double h1po, int ndir, double *rc)
+void diss_WTmod_taperedKO(int order, double h1, int ndir, double *rc)
 {
   int maxorder = ndir-1; /* max. order possible */
   double ord   = fmin(order, maxorder);
@@ -468,8 +468,8 @@ void diss_WTmod_taperedKO(int order, double h1po, int ndir, double *rc)
     /* => loop over left and right: */
     for(cnt=0, i0=ib; cnt<2; cnt++, i0+=ndir-1 - 2*ib)
     {
-      /* h1po=(h^(order+1), rc_in[cnt]=hi order dissterm further in */
-      double fm = pow(fabs(h1po*rc_in[cnt]), (ord - 2*ib)/ord);
+      /* h1=h, rc_in[cnt]=hi order dissterm further in */
+      double fm = pow(fabs(h1*rc_in[cnt]), (ord - 2*ib)/ord);
 
       /* multiply tapered diss we have by fm */
       rc[i0] *= fm;
@@ -537,7 +537,7 @@ void dissipation_add_WTmodKO_order_cf(tNode *node, tVarList *vlr,
   {
     int ndir = n[dir];
     double ooh = (ndir-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double h1, h1po;
+    double h1;
     int ord;      /* order we actually use */
     double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
     int i,j,k;
@@ -546,7 +546,6 @@ void dissipation_add_WTmodKO_order_cf(tNode *node, tVarList *vlr,
     if(ndir<3) continue;
 
     h1 = 1./ooh;
-    h1po = pow(h1, order+1);
 
     /* reduce ord if we have less than order+1 grid points */
     if(ndir<=order) ord = ((ndir-1)/2) * 2;
@@ -590,7 +589,7 @@ void dissipation_add_WTmodKO_order_cf(tNode *node, tVarList *vlr,
         diss_taperedKO(srad, sw, ndir, uc, facoh, facoh_bou, rc);
 
         /* modify dissipation terms in rc */
-        diss_WTmod_taperedKO(order, h1po, ndir, rc);
+        diss_WTmod_taperedKO(order, h1, ndir, rc);
 
         /* add dissipation terms to RHS */
         for(i0=0; i0<ndir; i0++)
