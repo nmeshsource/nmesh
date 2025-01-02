@@ -413,7 +413,6 @@ void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
   free(uc);
 }
 
-
 /* same as dissipation_add_taperedKO_order_cf, but use same diss. factor for
    all diss. orders near boundary and in interior */
 void dissipation_add_taperedKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
@@ -434,4 +433,186 @@ void dissipation_add_taperedKO_order_min(tNode *node,
   int i;
   for(i=0; i<min_order/2; i++) cf[i]=0.;
   dissipation_add_taperedKO_order_cf(node, vlr, vlu, dissfac, order, cf);
+}
+
+
+/* Modify taperedKO result. Note: h1po must be h^(order+1)
+   In the interior we use the same Kreiss-Oliger nth order derivative
+   operator as in dissipation_add_KO_order. But the order is dropped
+   successively to 2 when we approach the boundary.
+   But we also multiply each term with a factor to ensure
+   convergence at the same rate at the boundary points.
+   So it can do dissipation everywhere, except on the boundary.
+   E.g. if order=6 and these are the grid points (marked by o):
+o       o       o       o       o       o       o       o  . . .
+^       ^       ^       ^_______^_______^_______^_______^__
+|       |       |       6th order diss. of size O(h^5) in all of interior
+|       |       4th order diss. of size O(h^3) * (h^6 d^6 u)^(1/3)
+|       2nd order diss. of size O(h) * (h^6 d^6 u)^(2/3)
+no diss. */
+void diss_WTmod_taperedKO(int order, double h1po, int ndir, double *rc)
+{
+  int maxorder = ndir-1; /* max. order possible */
+  double ord   = fmin(order, maxorder);
+  int srad     = ord/2; /* stencil radius in interior */
+  int i0, ib;
+  /* first and last value where taperedKO didn't taper yet */
+  double rc_in[] = { rc[srad], rc[ndir-1 - srad] };
+
+  /* loop over points near boundary */
+  for(ib=1; ib<srad; ib++)
+  {
+    int cnt;
+    /* left boundary is at i0 = ib */
+    /* right boundary is at i0 = ndir-1 - ib */
+    /* => loop over left and right: */
+    for(cnt=0, i0=ib; cnt<2; cnt++, i0+=ndir-1 - 2*ib)
+    {
+      /* h1po=(h^(order+1), rc_in[cnt]=hi order dissterm further in */
+      double fm = pow(h1po*rc_in[cnt], (ord - 2*ib)/ord);
+
+      /* multiply tapered diss we have by fm */
+      rc[i0] *= fm;
+    }
+  }
+}
+
+/* Add dissipation terms to vlr. vlr can be varlist for RHS.
+   In the interior we use the same Kreiss-Oliger nth order derivative
+   operator as in dissipation_add_KO_order. But the order is dropped
+   successively to 2 when we approach the boundary.
+   But we also multiply each term with a factor to ensure
+   convergence at the same rate at the boundary points.
+   So it can do dissipation everywhere, except on the boundary.
+   E.g. if order=6 and these are the grid points (marked by o):
+o       o       o       o       o       o       o       o  . . .
+^       ^       ^       ^_______^_______^_______^_______^__
+|       |       |       6th order diss. of size O(h^5) in all of interior
+|       |       4th order diss. of size O(h^3) * (h^6 d^6 u)^(1/3)
+|       2nd order diss. of size O(h) * (h^6 d^6 u)^(2/3)
+no diss.
+   In:
+     node
+     vlu contains evolved fields
+     dissfac is dissipation factor
+     order is the order of the derivative operator we want (r=order/2) in
+           the interior
+     cf    describes by which factor we change diss.fac. near boundary
+           E.g. if order=8: cf[] = { 0, .7, .8, .9 } changes it by 0.7 one
+           point away, by 0.8 two points away, and 0.9 three points away from
+           boundary. At the boundary it is always unchanged, so cf[0] is
+           always ignored, but cf needs to have order/2 entries!
+   Out:
+     vlr is the varlist to which we add dissipation terms */
+void dissipation_add_WTmodKO_order_cf(tNode *node, tVarList *vlr,
+                                      tVarList *vlu, double dissfac,
+                                      int order, double *cf)
+{
+  int *n = node->n;
+  double *bb = node->bbox;
+  int maxn = max3(n[0],n[1],n[2]);
+  double *uc = dtensor(maxn);
+  double *rc = dtensor(maxn);
+  int dir;
+  double *sw[] = {sw2, sw4, sw6, sw8, sw10, sw12};  /* stencil weights */
+  int srad = order/2;     /* stencil radius */
+  int sr;
+  double sgn_bou[srad+1]; /* signs near boundary, and last in interior */
+  double fac_bou[srad+1]; /* factors near boundary, and last in interior */
+  double facoh_bou[srad]; /* factors/h near boundary */
+
+  if(order%2 || order<2 || order>12)
+    errorexit("order must be 2,4,6,8,10,12");
+
+  /* set signs/2^order near boundary, and in interior (last entry) */
+  /* overall sign = (-1)^(1+order/2), we also devide by 2^ord */
+  for(sr=0; sr<srad+1; sr++) sgn_bou[sr] = (-1. + 2*(sr%2))/(1 << (2*sr));
+
+  /* set fac_bou, i.e. fac. near boundary, and in interior (last entry) */
+  for(sr=0; sr<srad; sr++) fac_bou[sr] = sgn_bou[sr] * dissfac * cf[sr];
+  fac_bou[srad] = sgn_bou[srad] * dissfac;
+
+  /* add dissipation in each direction to RHS */
+  for(dir=0; dir<3; dir++)
+  {
+    int ndir = n[dir];
+    double ooh = (ndir-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
+    double h1 = 1./ooh;
+    double h1po = pow(h1, order+1);
+    int ord;      /* order we actually use */
+    double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
+    int i,j,k;
+
+    /* do nothing if we have too few grid points */
+    if(ndir<3) continue;
+
+    /* reduce ord if we have less than order+1 grid points */
+    if(ndir<=order) ord = ((ndir-1)/2) * 2;
+    else            ord = order;
+
+    /* reset stencil radius, and stencil weight index */
+    srad = ord/2;
+
+    /* set interior fac. */
+    facoh = fac_bou[srad] * ooh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
+
+    /* set facoh_bou, i.e. fac. near boundary */
+    for(sr=0; sr<srad; sr++) facoh_bou[sr] = fac_bou[sr] * ooh;
+
+    /* loop over plane */
+    forplaneN(dir, i,j,k, n, 0)
+    {
+      int i1 = i1_norm(i,j,k, dir); /* 1st and 2nd index in plane */
+      int i2 = i2_norm(i,j,k, dir);
+      int i0;                       /* index orthogonal to plane */
+      int ic,jc,kc, ccc;
+      int l;                        /* field index */
+
+      /* loop over fields */
+      forvl(vlu, l)
+      {
+        double *ul = Vard(node, Vind(vlu, l)); /* field data pointer */
+        double *rl = Vard(node, Vind(vlr, l)); /* RHS data pointer */
+
+        /* fill field arrays uc, i0 runs orth. to plane */
+        for(i0=0; i0<ndir; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+          /* set uc */
+          uc[i0] = ul[ccc];
+        }
+
+        /* use uc to calc dissipation terms rc */
+        diss_taperedKO(srad, sw, ndir, uc, facoh, facoh_bou, rc);
+
+        /* modify dissipation terms in rc */
+        diss_WTmod_taperedKO(order, h1po, ndir, rc);
+
+        /* add dissipation terms to RHS */
+        for(i0=0; i0<ndir; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+          /* add rc to RHS */
+          rl[ccc] += rc[i0];
+        }
+      } /* end loop over fields */
+    } /* end plane loop */
+  } /* end dir-loop*/
+
+  /* release mem */
+  free(rc);
+  free(uc);
+}
+
+/* same as dissipation_add_WTmodKO_order_cf, but use same diss. factor for
+   all diss. orders near boundary and in interior */
+void dissipation_add_WTmodKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
+                                   double dissfac, int order)
+{
+  double cf[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  dissipation_add_WTmodKO_order_cf(node, vlr, vlu, dissfac, order, cf);
 }
