@@ -248,7 +248,7 @@ no diss.
            always ignored, but cf needs to have order/2 entries!
    Out:
      vlr is the varlist to which we add dissipation terms */
-void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
+void dissipation_add_taperedKO_order_cf__old(tNode *node, tVarList *vlr,
                                         tVarList *vlu, double dissfac,
                                         int order, double *cf)
 {
@@ -438,7 +438,7 @@ void diss_taperedKO(int srad, double *sw[], int ndir, const double *uc,
   }
 }
 /* new tapered KO diss */
-void dissipation_add_taperedKO_order_cf__new(tNode *node, tVarList *vlr,
+void dissipation_add_taperedKO_order_cf(tNode *node, tVarList *vlr,
                                         tVarList *vlu, double dissfac,
                                         int order, double *cf)
 {
@@ -521,7 +521,13 @@ void dissipation_add_taperedKO_order_cf__new(tNode *node, tVarList *vlr,
 
         /* add dissipation terms to RHS */
         for(i0=0; i0<ndir; i0++)
+        {
+          /* set points and their index */
+          ijk_inplaneN(dir, ic,jc,kc, i1,i2, i0);
+          ccc = Ind_n(ic,jc,kc, n);
+          /* add rc to RHS */
           rl[ccc] += rc[i0];
+        }
       } /* end loop over fields */
     } /* end plane loop */
   } /* end dir-loop*/
