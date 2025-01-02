@@ -208,3 +208,5 @@ void dissipation_add_taperedKO_order_min(tNode *node,
                                          tVarList *vlr, tVarList *vlu,
                                          double dissfac, int order,
                                          int min_order);
+void dissipation_add_WTmodKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
+                                   double dissfac, int order);
