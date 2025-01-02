@@ -469,7 +469,7 @@ void diss_WTmod_taperedKO(int order, double h1po, int ndir, double *rc)
     for(cnt=0, i0=ib; cnt<2; cnt++, i0+=ndir-1 - 2*ib)
     {
       /* h1po=(h^(order+1), rc_in[cnt]=hi order dissterm further in */
-      double fm = pow(h1po*rc_in[cnt], (ord - 2*ib)/ord);
+      double fm = pow(fabs(h1po*rc_in[cnt]), (ord - 2*ib)/ord);
 
       /* multiply tapered diss we have by fm */
       rc[i0] *= fm;
@@ -537,14 +537,16 @@ void dissipation_add_WTmodKO_order_cf(tNode *node, tVarList *vlr,
   {
     int ndir = n[dir];
     double ooh = (ndir-1)/(bb[2*dir+1] - bb[2*dir]);// 1/dist betw. points
-    double h1 = 1./ooh;
-    double h1po = pow(h1, order+1);
+    double h1, h1po;
     int ord;      /* order we actually use */
     double facoh; /* (-1)^(1+ord/2)/2^ord * dissfac/h */
     int i,j,k;
 
     /* do nothing if we have too few grid points */
     if(ndir<3) continue;
+
+    h1 = 1./ooh;
+    h1po = pow(h1, order+1);
 
     /* reduce ord if we have less than order+1 grid points */
     if(ndir<=order) ord = ((ndir-1)/2) * 2;
