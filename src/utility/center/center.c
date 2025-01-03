@@ -131,20 +131,41 @@ int center_update(tMesh *mesh)
 /* get grid spacing near point x */
 double average_grid_spacing(tMesh *mesh, double x[3])
 {
+  tPat *pat;
   tElm0 elm0[1];
   ulong eid, elmindex;
   int elmrank;
-  double X[3], h[3];
-  int d;
+  double X[3], H[3], h[3];
+  int d, m,n;
 
   set_elm0_XYZ_of_xyz_mesh(mesh, elm0, &eid,&elmindex,&elmrank, X, x);
   for(d=0; d<3; d++)
   {
     if(elm0->n[d] > 1)
-      h[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/(elm0->n[d] - 1);
+      H[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/(elm0->n[d] - 1);
     else
-      h[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/elm0->n[d];
+      H[d] = (elm0->bbox[2*d+1] - elm0->bbox[2*d])/elm0->n[d];
   }
+
+  /* transform spacing H to Cartesian coords h if needed */
+  pat = mesh->pat[Elm_p(elm0)];
+  if(pat->dXYZ_dxyz)
+  {
+    double xx[3], dXdx[3][3], dxdX[3][3];
+
+    pat->dXYZ_dxyz(pat,NULL,-1, X, xx, dXdx);
+    inv3Dmat_from_3Dmat(dXdx, dxdX);
+
+    for(m=0; m<3; m++)
+      for(n=0; n<3; n++)
+        h[m] = dxdX[m][n]*H[n];
+  }
+  else
+  {
+    for(m=0; m<3; m++) h[m] = H[m];
+  }
+  printf("h[0],h[1],h[2]=%g %g %g\n", h[0],h[1],h[2]);
+
   return max3(h[0],h[1],h[2]);
 }
 
