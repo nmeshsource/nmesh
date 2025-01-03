@@ -436,6 +436,11 @@ void dissipation_add_taperedKO_order_min(tNode *node,
 }
 
 
+/************************************************************************/
+/* NOTE: diss_WTmod_taperedKO makes evolution of
+         advection1/parfiles/Adv1dFD4-DG.par unstable!!! */
+/************************************************************************/
+
 /* Modify taperedKO result.
    In the interior we use the same Kreiss-Oliger nth order derivative
    operator as in dissipation_add_KO_order. But the order is dropped
