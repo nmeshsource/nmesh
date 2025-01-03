@@ -218,7 +218,7 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   double dx,dy,dz;
   double x0,y0,z0, x1,y1,z1;
   int iord = 3; /* just like the 3 points used in center_extremum_step */
-  int pr = 1;
+  int pr = 0;
 
   if(pr) { PRF;printf(": h=%g findMax=%d\n", h, findMax); }
 
