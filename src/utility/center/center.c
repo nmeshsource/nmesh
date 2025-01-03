@@ -164,7 +164,7 @@ double average_grid_spacing(tMesh *mesh, double x[3])
   {
     for(m=0; m<3; m++) h[m] = H[m];
   }
-  printf("h[0],h[1],h[2]=%g %g %g\n", h[0],h[1],h[2]);
+  //printf("h[0],h[1],h[2]=%g %g %g\n", h[0],h[1],h[2]);
 
   return max3(h[0],h[1],h[2]);
 }
