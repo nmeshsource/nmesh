@@ -218,42 +218,48 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   double dx,dy,dz;
   double x0,y0,z0, x1,y1,z1;
   int iord = 3; /* just like the 3 points used in center_extremum_step */
-  int pr = 0;
+  int pr = 1;
+
+  if(pr) { PRF;printf(": h=%g findMax=%d\n", h, findMax); }
 
   /* previous coordinates */
   x0 = xold[0];
   y0 = xold[1];
   z0 = xold[2];
 
-  // value at the old puncture
+  // value at the old center
   v0 = interp_var_x_y_z(mesh, var, x0,y0,z0, iord, INTERP_LAGRANGE, 1.);
 
   /* find var to left and right in x-dir */
   vm = interp_var_x_y_z(mesh, var, x0-h,y0,z0, iord, INTERP_LAGRANGE, 1.);
   vp = interp_var_x_y_z(mesh, var, x0+h,y0,z0, iord, INTERP_LAGRANGE, 1.);
-  if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
+  if(pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
   dx = center_extremum_step(vm,v0,vp, findMax, h);
 
   // y-direction
   vm = interp_var_x_y_z(mesh, var, x0,y0-h,z0, iord, INTERP_LAGRANGE, 1.);
   vp = interp_var_x_y_z(mesh, var, x0,y0+h,z0, iord, INTERP_LAGRANGE, 1.);
-  if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
+  if(pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
   dy = center_extremum_step(vm,v0,vp, findMax, h);
 
   // z- direction
   vm = interp_var_x_y_z(mesh, var, x0,y0,z0-h, iord, INTERP_LAGRANGE, 1.);
   vp = interp_var_x_y_z(mesh, var, x0,y0,z0+h, iord, INTERP_LAGRANGE, 1.);
-  if (pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
+  if(pr) printf("   %2.2e   %2.2e   %2.2e\n",vm,v0,vp);
   dz = center_extremum_step(vm,v0,vp, findMax, h);
 
-  if (pr) printf("center_track_extremum:  %e %e %e\n",dx,dy,dz);
+  if(pr) printf("  dx=%g  dy=%g  dz=%g\n", dx,dy,dz);
 
   v = interp_var_x_y_z(mesh, var, x0+dx,y0+dy,z0+dz, iord, INTERP_LAGRANGE, 1.);
+  if(pr) printf("  v(x0,y0,z0)=%g  v(x0+dx,y0+dy,z0+dz)=%g\n", v0, v);
+
   if( !finit(v) || !finit(v0) ||
       ((findMax) && (v<=v0))  ||
       ((!findMax) && (v>=v0)) ||
       (sqrt(dx*dx + dy*dy + dz*dz) < minmove*h) )
     dx = dy = dz = 0.;
+
+  if(pr) printf("  ==> using: dx=%g  dy=%g  dz=%g\n", dx,dy,dz);
 
   x1 = x0 + dx;
   y1 = y0 + dy;
@@ -265,9 +271,8 @@ int center_track_extremum(tMesh *mesh, double h, int var, int findMax,
   xnew[1] = y1;
   xnew[2] = z1;
 
-  if(0)
+  if(pr)
   {
-    PRFs("\n");
     printf("  %.9f ->  %.9f\n", xold[0], xnew[0]);
     printf("  %.9f ->  %.9f\n", xold[1], xnew[1]);
     printf("  %.9f ->  %.9f\n", xold[2], xnew[2]);
