@@ -12,6 +12,7 @@ extern tcenter center[1];
 typedef struct {
   int lmax;         /* max ref.-level */
   double radius[3]; /* radius[1] is radius of max ref.-level around center1 */
+  double mass[3];   /* mass[1] is center1_mass */
   int N_first;      /* id of first center */
   int N_last;       /* id of last center */
 } tcenter_amr_pars;
@@ -26,6 +27,7 @@ int center_amr_l(tElm *elm, void *pars)
   tcenter_amr_pars *center_amr_pars = pars;
   int l_max      = center_amr_pars->lmax;
   double *radius = center_amr_pars->radius;
+  double *mass   = center_amr_pars->mass;
   int N_first    = center_amr_pars->N_first;
   int N_last     = center_amr_pars->N_last;
   double cx[3][3]; /* 2 star centers: e.g. cx[1][3] = z-coord of center1 */
@@ -53,7 +55,7 @@ int center_amr_l(tElm *elm, void *pars)
   {
     //for(N=N_first; N<=N_last; N++) printf("l%d r[%d]=%g\n", l, N, r[N]);
     for(N=N_first; N<=N_last; N++)
-      if(elmpoints_any_in_sphere(elm, cx[N], r[N]))
+      if( (mass[N]>0.) && (elmpoints_any_in_sphere(elm, cx[N], r[N])) )
       {
         //PRFs(": ");printeploc(elm->eploc);
         //printf(" has point in r[%d]\n", N);
@@ -80,6 +82,8 @@ int center_amr(tMesh *mesh)
     tcenter_amr_pars pars = {.lmax    = Geti(Par("center1_amr_lmax")),
                              .radius  = {0., Getd(Par("center1_amr_radius")),
                                              Getd(Par("center2_amr_radius")) },
+                             .mass    = {0., Getd(Par("center1_mass")),
+                                             Getd(Par("center2_mass")) },
                              .N_first = 1,
                              .N_last  = 2};
     if(!Getv(Par("center2_amr_lmax"), "center1_amr_lmax"))
