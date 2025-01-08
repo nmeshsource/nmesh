@@ -220,7 +220,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   int dbl = 0; /* we output float not double */
   int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
-  long xyzoffset0, vtotal, vcnt;
+  long xyzoffset0=0, vtotal, vcnt;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -358,7 +358,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   int dbl = 0; /* we output float not double */
   int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
-  long xyzoffset0, vtotal, vcnt;
+  long xyzoffset0=0, vtotal, vcnt;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
