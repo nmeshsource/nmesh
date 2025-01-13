@@ -255,6 +255,17 @@ Here a is const determined from the normalization:
 1 = \gamma^{ij} n^{kb}_i n^{kb}_j = a^2 dx^{kb}/dx^i \gamma^{ij} dx^{kb}/dx^j
 Thus 1/a = \sqrt{dx^{kb}/dx^i \gamma^{ij} dx^{kb}/dx^j}
          =: \sqrt{\gamma^{kb,kb}}
+-----------------------------------------------------------------------------
+NOTE: \gamma^{kb,kb} can be the physical metric in x^{kb} coords, or the flat
+      metric \delta^{ij} transformed to x^{kb} coords. It depends on which
+      metric we use to normalize n^{kb}_i. In nmesh the default (and only
+      fully implemented option) is to use the flat metric!!!
+==> EVERY \gamma^{kb,kb} from here on and below without bar is really
+    \bar{\gamma}_{kb,kb} in nmesh's fv_divf from main/dg/fv.c!!!
+    I.e. \gamma^{kb,kb} is also the flat metric transformed to x^{kb} coords.
+    This also means that the vectors n^{kb}_i need to be normalized with
+    this flat metric!!!
+-----------------------------------------------------------------------------
 
 Def: M^{kb}_i := dx^{kb}/dx^i
      J        := 1/det(M^{kb}_i)
