@@ -4,7 +4,7 @@
 
 
 /* macro to set a func for a varlist in an evolution bin */
-#define evolve_SetFun(bin, f, vl) evolve_SetEvoFun(bin, f, vl, MSTR(f))
+#define evolve_SetFun(bin, f, vlu) evolve_SetEvoFun(bin, f, vlu, MSTR(f))
 
 
 /* evolve.c */
@@ -13,7 +13,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt);
 
 /* evosys.c */
 void evolve_register_vl(tVarList *vl);
-void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, const char *name);
+void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vlu, const char *name);
 void evolve_register_subsys(tMesh *mesh, tVarList *u,
                 FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
                 FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,
@@ -22,6 +22,7 @@ void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
                                       FuncPointer volrhs, FuncPointer surfrhs,
                                       FuncPointer limdata,
                                       FuncPointer limiter);
+void evolve_SetVLx(tVarList *vlx, tVarList *vlu);
 tVarList *evolve_get_rhs_vl(tVarList *vl);
 void evolve_print_evosys(tMesh *mesh);
 int var_added_by_evolve_init_evosys(tMesh *mesh, int vi);

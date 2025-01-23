@@ -178,6 +178,7 @@ int evolve_myln(tMesh *mesh)
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
+  pVLList *x = evosys->x; /* extra vars needed for LDG */
 
   if(PR) PRFs(":\n");
 
@@ -231,18 +232,30 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     troubled = 0;
     forList(u, i)
     {
+      tVarList *vlr = ListEntry(rhs,i);
+      tVarList *vlu = ListEntry(u,i);
+      tVarList *vlx = ListEntry(x,i);
+
       /* set all early sources */
       if(ListEntry(evosys->f[SETSRC0],i))
-        troubled |= ListEntry(evosys->f[SETSRC0],i)(node, ListEntry(rhs,i),
-                                                    ListEntry(u,i));
+        troubled |= ListEntry(evosys->f[SETSRC0],i)(node, vlr, vlu);
       /* set all sources */
       if(ListEntry(evosys->f[SETSRC],i))
-        troubled |= ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i),
-                                                   ListEntry(u,i));
+        troubled |= ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
+
+      /* check if we have to set extra vars for LDG */
+      if(ListEntry(evosys->f[XVOLRHS],i))
+        troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, vlx, vlu);
+      if(ListEntry(evosys->f[XSURFRHS],i))
+      {
+        get_all_surfaces(node); //get surfaces of u, don't need surf of x yet
+        //FIXME: make get_all_surfaces_vl that does it just for a varlist
+        troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, vlx, vlu);
+      }
+
       /* set all volume RHSs */
       if(ListEntry(evosys->f[VOLRHS],i))
-        troubled |= ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i),
-                                                   ListEntry(u,i));
+        troubled |= ListEntry(evosys->f[VOLRHS],i)(node, vlr, vlu);
     }
     node->dat->info->evo_troubled |= troubled;
 

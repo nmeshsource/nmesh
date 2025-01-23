@@ -13,6 +13,8 @@ enum
 
   SETSRC0,  /* set some source terms needed before SETSRC */
   SETSRC,   /* set some source terms, is called before VOLRHS */
+  XVOLRHS,  /* set some extra vars needed for LDG, sets vol. terms */
+  XSURFRHS, /* add some extra vars needed for LDG on surf. */
   VOLRHS,   /* set vol. terms of RHS of evo eqns (after setsrc) */
   SURFRHS,  /* add RHS terms from surf. fluxes (after volrhs) */
 
@@ -48,6 +50,7 @@ typedef struct tEVOSYS {
   pVLL *s[NEVOTEMP];  /* temp. storage for say RK stages */
   pFL *f[NEVOFUNCBINS];      /* one list of func. pointers in each evo bin */
   pSL *f_name[NEVOFUNCBINS]; /* one list of func. names in each evo bin */
+  pVLL *x; /* extra vars in RHS for LDG, x is AUXVAR with surfacezones */
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP

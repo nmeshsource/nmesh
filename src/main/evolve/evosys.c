@@ -26,8 +26,12 @@ void evolve_register_vl(tVarList *vl)
   if(!vl) errorexit("variable list vl can be empty but NULL is forbidden!");
   evosys = vl->mesh->evosys;
 
-  /* allocate lists u, f, f_name in evosys */
-  if(!evosys->u) evosys->u = alloc_pVLList();
+  /* allocate lists u, x, f, f_name in evosys */
+  if(!evosys->u)
+  {
+    evosys->u = alloc_pVLList();
+    evosys->x = alloc_pVLList();
+  }
   for(b=0; b<NEVOFUNCBINS; b++)
   {
     if(!evosys->f[b])      evosys->f[b]      = alloc_FuncPointerList();
@@ -36,6 +40,9 @@ void evolve_register_vl(tVarList *vl)
 
   /* Add vl to list u in evosys. */
   push_pVLList(evosys->u, vl);
+
+  /* Add NULL to list x, which we can overwrite later. */
+  push_pVLList(evosys->x, NULL);
 
   /* Add NULL, empty to lists f, f_name in evosys,
      which we can overwrite later. */
@@ -46,14 +53,14 @@ void evolve_register_vl(tVarList *vl)
   }
 }
 
-/* Set a function in an evolution bin for the variable list vl in evosys */
-void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vl, const char *name)
+/* Set a function in an evolution bin for the variable list vlu in evosys */
+void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vlu, const char *name)
 {
-  tMesh *mesh = vl->mesh;
+  tMesh *mesh = vlu->mesh;
   tEvoSys *evosys = mesh->evosys;
-  int i = index_pVLList(evosys->u, vl); /* get index i of vl in list */
+  int i = index_pVLList(evosys->u, vlu); /* get index i of vlu in list */
 
-  if(i<0) errorexit("variable list vl not registered in evosys");
+  if(i<0) errorexit("variable list vlu not registered in evosys");
 
   /* set func pointer and name at index i */
   setatindex_FuncPointerList(evosys->f[bin], i, f);
@@ -93,6 +100,20 @@ void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
                          NULL,NULL,volrhs,surfrhs);
 }
 
+/* Set the extra varlist vlx for the variable list vlu in evosys */
+void evolve_SetVLx(tVarList *vlx, tVarList *vlu)
+{
+  tMesh *mesh = vlu->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  int i = index_pVLList(evosys->u, vlu); /* get index i of vlu in list */
+
+  if(i<0) errorexit("variable list vlu not registered in evosys");
+
+  /* set vlx at index i */
+  setatindex_pVLList(evosys->x, i, vlx);
+}
+
+
 /* free extra VarLists and other Lists */
 int evolve_free_evosys(tMesh *mesh)
 {
@@ -112,6 +133,7 @@ int evolve_free_evosys(tMesh *mesh)
   freeall_pVLList(evosys->u_p, vlfree,0);
   for(i=0; i<NEVOTEMP; i++)
     freeall_pVLList(evosys->s[i], vlfree,0);
+  freeall_pVLList(evosys->x, vlfree,0);
 
   /* free Lists */
   printf("Freeing rhs lists for evolution:\n");
