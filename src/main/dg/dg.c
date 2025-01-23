@@ -126,8 +126,9 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
         /* set vars, fluxes and eigenvals on both sides */
         u_f_lam(dgi);
 
-        /* compute numerical flux */
-        numflux(dgi);
+        /* compute numerical flux directly after u_f_lam,
+           if not set already in u_f_lam */
+        if(numflux) numflux(dgi);
 
         /* get Ffac, this can be set in u_f_lam or numflux */
         Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */

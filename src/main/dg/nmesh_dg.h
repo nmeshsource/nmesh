@@ -117,6 +117,7 @@ enum
 void numflux1d_scalarGodunov(tDGinfo *d);
 void numflux1d_upwind(tDGinfo *d);
 void numflux1d_central(tDGinfo *d);
+void numflux1d_add_central(tDGinfo *d);
 void numflux1d_LLF(tDGinfo *d);
 void numflux1d_HLL(tDGinfo *d);
 
