@@ -167,10 +167,24 @@ tVarList *evolve_get_rhs_vl(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
   tEvoSys *evosys = mesh->evosys;
-  int b = evolve_get_index_of_vl(vl);
+  int i = evolve_get_index_of_vl(vl);
 
-  if(b>=0 && evosys->rhs)
-    return ListEntry(evosys->rhs, b);
+  if(i>=0 && evosys->rhs)
+    return ListEntry(evosys->rhs, i);
+  else
+    return NULL;
+}
+
+/* return extra varlist vlx that corresponds to vl,
+   or return NULL if vlu is not registered with evosys */
+tVarList *evolve_get_x_vl(tVarList *vl)
+{
+  tMesh *mesh = vl->mesh;
+  tEvoSys *evosys = mesh->evosys;
+  int i = evolve_get_index_of_vl(vl);
+
+  if(i>=0)
+    return ListEntry(evosys->x, i);
   else
     return NULL;
 }
