@@ -65,6 +65,15 @@ void numflux1d_upwind(tDGinfo *d)
 }
 
 
+/* simplest central flux for nf fields. Numerical flux is written in fnum[i] */
+void numflux1d_central(tDGinfo *d)
+{
+  int nf = d->vlu->n;
+  int i;
+  for(i=0; i<nf; i++) d->fnum[i] = 0.5*( d->fa[i] + d->fi[i] );
+}
+
+
 /* LLF flux for nf fields. Numerical flux is written in fnum[i] */
 void numflux1d_LLF(tDGinfo *d)
 {
