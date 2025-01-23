@@ -13,8 +13,10 @@ enum
 
   SETSRC0,  /* set some source terms needed before SETSRC */
   SETSRC,   /* set some source terms, is called before VOLRHS */
+
   XVOLRHS,  /* set some extra vars needed for LDG, sets vol. terms */
   XSURFRHS, /* add some extra vars needed for LDG on surf. */
+
   VOLRHS,   /* set vol. terms of RHS of evo eqns (after setsrc) */
   SURFRHS,  /* add RHS terms from surf. fluxes (after volrhs) */
 
