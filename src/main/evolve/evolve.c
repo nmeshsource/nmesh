@@ -179,7 +179,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
   pVLList *x = evosys->x; /* extra vars needed for LDG */
-  int have_XVOLRHS; /* is set to 1 if we have an XVOLRHS for x */
+  int have_XRHS; /* is set to 1 if we have a XVOLRHS or a XSURFRHS for x */
   int ie;
 
   if(PR) PRFs(":\n");
@@ -266,9 +266,10 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   }
 
   /* check if there is a single XVOLRHS */
-  have_XVOLRHS = 0;
+  have_XRHS = 0;
   forList(u, ie)
-    if(ListEntry(evosys->f[XVOLRHS],ie)) { have_XVOLRHS = 1;  break; }
+    if( (ListEntry(evosys->f[XVOLRHS],ie)) ||
+        (ListEntry(evosys->f[XSURFRHS],ie)) ) { have_XRHS = 1;  break; }
 
   /* After we have done all we can without the surface data, we now wait
      until we get all the surface data: */
@@ -277,7 +278,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 
   /* We may also need to get the surface data for the extra vars in x.
      Note, the surface data for u has already arrived. */
-  if(have_XVOLRHS)
+  if(have_XRHS)
   {
     /* For now we just do the entire surface exchange again. (FIXME) */
     MPIexchange_set_all_myln_localdata(mesh);
