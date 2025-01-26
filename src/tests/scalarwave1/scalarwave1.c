@@ -239,8 +239,10 @@ void scalarwave1_set_divf(tNode *node, tVarList *vlu)
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int scalarwave1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int scalarwave1_vol_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   int ipi = Vind(vlu, 0);
   int irpi = Vind(vlr, 0);
   int ircx = Vind(vlr, 1);
@@ -282,8 +284,10 @@ int scalarwave1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* surface terms in RHS of: d_t u */
-int scalarwave1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int scalarwave1_surf_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   tMesh *mesh = vlu->mesh;
   int idivf_pi = Ind("scalarwave1_divf_pi");
   int idivf_cx = Ind("scalarwave1_divf_cx");
@@ -680,13 +684,13 @@ int scalarwave1_init(tMesh *mesh)
   evolve_SetFun(SURFRHS, scalarwave1_surf_rhs_u, vlu);
   if(Getv(limiter, "MRS"))
   {
-    evolve_SetFun(LIMDATA, limdata_MRS, vlu);
-    evolve_SetFun(LIMITER, limiter_MRS, vlu);
+    evolve_SetFun(LIMDATA, limdata_MRS_evv, vlu);
+    evolve_SetFun(LIMITER, limiter_MRS_evv, vlu);
   }
   else if(Getv(limiter, "minmodB"))
   {
-    evolve_SetFun(LIMDATA, limdata_c000_100_010_001, vlu);
-    evolve_SetFun(LIMITER, limiter_minmodB, vlu);
+    evolve_SetFun(LIMDATA, limdata_c000_100_010_001_evv, vlu);
+    evolve_SetFun(LIMITER, limiter_minmodB_evv, vlu);
   }
   evolve_print_evosys(mesh);
 
