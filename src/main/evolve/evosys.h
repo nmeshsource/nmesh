@@ -61,8 +61,16 @@ typedef struct tEVOSYS {
 
 /* a struct that contains all we need to call RHS funcs */
 typedef struct tEVOVARS {
-  struct tVARLIST *vlu;  /* varlist of all evolved vars for one system */
-  struct tVARLIST *vlr;  /* varlistof RHS vars for one system */
-  struct tVARLIST *vlx;  /* varlist with extra vars (for LDG) for one sys. */
-  void *pars;            /* extra pars we may want to pass to a RHS */
+  struct tVARLIST *vlu;   /* varlist of all evolved vars for one system */
+  struct tVARLIST *vlr;   /* varlistof RHS vars for one system */
+  struct tVARLIST *vlx;   /* vl with extra vars (for LDG) for one sys. */
+  struct tVARLIST *vlu_p; /* vlu at previous time */
+  void *pars;             /* extra pars we may want to pass to a RHS */
 } tEvoVars;
+
+/* macros to access tEvoVars */
+#define EvoVars_vlu(evv)    evv->vlu
+#define EvoVars_vlr(evv)    evv->vlr
+#define EvoVars_vlx(evv)    evv->vlx
+#define EvoVars_vlu_p(evv)  evv->vlu_p
+#define EvoVars_pars(evv)   evv->pars;

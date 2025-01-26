@@ -12,6 +12,10 @@ typedef struct tLIMITER {
 
 
 /* limiter.c */
+int limdata_MRS_evv(tNode *node, tEvoVars *evv);
+int limiter_MRS_evv(tNode *node, tEvoVars *evv);
+int limdata_c000_100_010_001_evv(tNode *node, tEvoVars *evv);
+int limiter_minmodB_evv(tNode *node, tEvoVars *evv);
 int limdata_MRS(tNode *node, tVarList *vl);
 int limiter_MRS(tNode *node, tVarList *vl);
 int limdata_c000_100_010_001(tNode *node, tVarList *vl);

@@ -335,12 +335,13 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
     forList(evosys->u, i)
     {
       tVarList *vl = ListEntry(evosys->u,i);
+      tEvoVars evv[1] = {{ .vlu = vl }};
 
       if(ListEntry(evosys->f[LIMDATA],i))
       {
-        /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, vl)
+        /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, evv)
                  must return number of data vals we need */
-        int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, vl);
+        int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, evv);
         if(nvals>0)
           init_all_myln_myindc_for_vl(mesh, vl, nvals);
       }
@@ -353,12 +354,13 @@ void init_all_myln_myindc_in_evosys(tMesh *mesh)
     forList(evosys->w, i)
     {
       tVarList *vl = ListEntry(evosys->w,i);
+      tEvoVars evv[1] = {{ .vlu = vl }};
 
       if(ListEntry(evosys->f[LIMDATA],i))
       {
-        /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, vl)
+        /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, evv)
                  must return number of data vals we need */
-        int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, vl);
+        int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, evv);
         if(nvals>0)
           init_all_myln_myindc_for_vl(mesh, vl, nvals);
       }

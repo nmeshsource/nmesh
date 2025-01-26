@@ -201,13 +201,14 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     troubled = 0;
     forList(u, i)
     {
-      //tEvoVars evv[] =
-      tVarList *vlr = ListEntry(rhs,i);
-      tVarList *vlu = ListEntry(u,i);
+      tEvoVars evv[1] = {{
+        .vlu = ListEntry(u,i),
+        .vlr = ListEntry(rhs,i),
+        .vlx = ListEntry(x,i)    }};
       if(ListEntry(evosys->f[PRESURF0],i))
-        troubled |= ListEntry(evosys->f[PRESURF0],i)(node, vlr, vlu);
+        troubled |= ListEntry(evosys->f[PRESURF0],i)(node, evv);
       if(ListEntry(evosys->f[PRESURF],i))
-        troubled |= ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+        troubled |= ListEntry(evosys->f[PRESURF],i)(node, evv);
     }
     node->dat->info->evo_troubled |= troubled;
 
@@ -235,30 +236,31 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     troubled = 0;
     forList(u, i)
     {
-      tVarList *vlr = ListEntry(rhs,i);
-      tVarList *vlu = ListEntry(u,i);
-      tVarList *vlx = ListEntry(x,i);
+      tEvoVars evv[1] = {{
+        .vlu = ListEntry(u,i),
+        .vlr = ListEntry(rhs,i),
+        .vlx = ListEntry(x,i)    }};
 
       /* set all early sources */
       if(ListEntry(evosys->f[SETSRC0],i))
-        troubled |= ListEntry(evosys->f[SETSRC0],i)(node, vlr, vlu);
+        troubled |= ListEntry(evosys->f[SETSRC0],i)(node, evv);
       /* set all sources */
       if(ListEntry(evosys->f[SETSRC],i))
-        troubled |= ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
+        troubled |= ListEntry(evosys->f[SETSRC],i)(node, evv);
 
       /* check if we have to set extra vars for LDG */
       if(ListEntry(evosys->f[XVOLRHS],i))
-        troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, vlx, vlu);
+        troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
       if(ListEntry(evosys->f[XSURFRHS],i))
       {
         get_all_surfaces(node); //get surfaces of u, don't need surf of x yet
         //FIXME: make get_all_surfaces_vl that does it just for a varlist
-        troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, vlx, vlu);
+        troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
       }
 
       /* set all volume RHSs */
       if(ListEntry(evosys->f[VOLRHS],i))
-        troubled |= ListEntry(evosys->f[VOLRHS],i)(node, vlr, vlu);
+        troubled |= ListEntry(evosys->f[VOLRHS],i)(node, evv);
     }
     node->dat->info->evo_troubled |= troubled;
 
@@ -301,9 +303,14 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     /* add all surface RHSs */
     troubled = 0;
     forList(u, i)
+    {
+      tEvoVars evv[1] = {{
+        .vlu = ListEntry(u,i),
+        .vlr = ListEntry(rhs,i),
+        .vlx = ListEntry(x,i)    }};
       if(ListEntry(evosys->f[SURFRHS],i))
-        troubled |= ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i),
-                                                    ListEntry(u,i));
+        troubled |= ListEntry(evosys->f[SURFRHS],i)(node, evv);
+    }
     node->dat->info->evo_troubled |= troubled;
 
     /* add time spend on SURFRHS */
@@ -363,13 +370,14 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
       troubled = 0;
       forList(u, i)
       {
+        tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
         /* call funcs that we need before limiters */
         if(ListEntry(evosys->f[PRELIM],i))
-          troubled |= ListEntry(evosys->f[PRELIM],i)(node, ListEntry(u,i));
+          troubled |= ListEntry(evosys->f[PRELIM],i)(node, evv);
 
         /* set data limiter needs in myindc arrays of each node */
         if(ListEntry(evosys->f[LIMDATA],i))
-          troubled |= ListEntry(evosys->f[LIMDATA],i)(node, ListEntry(u,i));
+          troubled |= ListEntry(evosys->f[LIMDATA],i)(node, evv);
       }
       node->dat->info->evo_troubled |= troubled;
     } /* end if */
@@ -410,10 +418,11 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     {
       forList(u, i)
       {
+        tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
         /* apply limiter */
         if(ListEntry(evosys->f[LIMITER],i))
         {
-          int ret = ListEntry(evosys->f[LIMITER],i)(node, ListEntry(u,i));
+          int ret = ListEntry(evosys->f[LIMITER],i)(node, evv);
 
           /* increase nlim if limiter was active, otherwise reset nlim */
           if(ret) node->dat->info->nlim += 1;
@@ -438,6 +447,7 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
+  pVLList *x = evosys->x; /* extra vars needed for LDG */
 
   if(PR) PRFs(":\n");
 
@@ -452,20 +462,22 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
     if(node->dat->info->trbl_score <= -NOTROUBLES)
       forList(u, i)
       {
-        tVarList *vlr = ListEntry(rhs,i);
-        tVarList *vlu = ListEntry(u,i);
+        tEvoVars evv[1] = {{
+          .vlu = ListEntry(u,i),
+          .vlr = ListEntry(rhs,i),
+          .vlx = ListEntry(x,i)    }};
 
         if(ListEntry(evosys->f[PRESURF0],i))
-          ListEntry(evosys->f[PRESURF0],i)(node, vlr, vlu);
+          ListEntry(evosys->f[PRESURF0],i)(node, evv);
 
         if(ListEntry(evosys->f[PRESURF],i))
-          ListEntry(evosys->f[PRESURF],i)(node, vlr, vlu);
+          ListEntry(evosys->f[PRESURF],i)(node, evv);
 
         if(ListEntry(evosys->f[SETSRC0],i))
-          ListEntry(evosys->f[SETSRC0],i)(node, vlr, vlu);
+          ListEntry(evosys->f[SETSRC0],i)(node, evv);
 
         if(ListEntry(evosys->f[SETSRC],i))
-          ListEntry(evosys->f[SETSRC],i)(node, vlr, vlu);
+          ListEntry(evosys->f[SETSRC],i)(node, evv);
 
         /* we do not need to run PRELIM, since evolve_limiter_mesh will
            run right before evolve_setsrc_mesh is called */
@@ -560,20 +572,29 @@ void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
 
   /* set all sources */
   forList(u, i)
+  {
+    tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=ListEntry(rhs,i)}};
     if(ListEntry(evosys->f[SETSRC],i))
-      ListEntry(evosys->f[SETSRC],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+      ListEntry(evosys->f[SETSRC],i)(node, evv);
+  }
 
   /* set all vol. RHSs */
   forList(u, i)
+  {
+    tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=ListEntry(rhs,i)}};
     if(ListEntry(evosys->f[VOLRHS],i))
-      ListEntry(evosys->f[VOLRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+      ListEntry(evosys->f[VOLRHS],i)(node, evv);
+  }
 
   //Test:  get_all_surfaces(node);
 
   /* add all surf. RHSs */
   forList(u, i)
+  {
+    tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=ListEntry(rhs,i)}};
     if(ListEntry(evosys->f[SURFRHS],i))
-      ListEntry(evosys->f[SURFRHS],i)(node, ListEntry(rhs,i), ListEntry(u,i));
+      ListEntry(evosys->f[SURFRHS],i)(node, evv);
+  }
 
   /* do not free all surface info, because we call evolve_setrhs repeatedly */
   //if(0) evolve_free_surfaces(node, u);

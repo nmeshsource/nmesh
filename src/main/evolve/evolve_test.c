@@ -8,8 +8,10 @@
 
 
 /* RHS of: d_t u = -u */
-int evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int evolve_test_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlu = EvoVars_vlu(evv);
+  tVarList *vlr = EvoVars_vlr(evv);
   double *u = Vard(node, vlu->index[0]);
   double *r = Vard(node, vlr->index[0]);
   int i;
@@ -21,8 +23,10 @@ int evolve_test_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* RHS of: d_t v = s */
-int evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
+int evolve_test_rhs_v(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlv = EvoVars_vlu(evv);
+  tVarList *vlr = EvoVars_vlr(evv);
   tMesh *mesh = vlv->mesh;
   //double *v = Vard(node, vlv->index[0]);
   double *r = Vard(node, vlr->index[0]);
@@ -36,8 +40,9 @@ int evolve_test_rhs_v(tNode *node, tVarList *vlr, tVarList *vlv)
 }
 
 /* set source s for v: s = u */
-int evolve_test_src_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int evolve_test_src_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlu = EvoVars_vlu(evv);
   tMesh *mesh = vlu->mesh;
   double *u = Vard(node, vlu->index[0]);
   double *s = Vard(node, Ind("evolve_test_s"));

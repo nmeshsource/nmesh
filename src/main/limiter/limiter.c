@@ -25,6 +25,35 @@ int limiter_init_global_par_indices(tMesh *mesh)
    from main/amr/indicators.c to do the exchange. */
 
 /*********************************************************************/
+/* interface to limiter funcs used during evo steps */
+/*********************************************************************/
+
+/* set data for MRS limiter. This one uses the cons vars in vl */
+int limdata_MRS_evv(tNode *node, tEvoVars *evv)
+{
+  return limdata_MRS(node, EvoVars_vlu(evv));
+}
+
+/* MRS limiter: limit u using data in dat->ic */
+int limiter_MRS_evv(tNode *node, tEvoVars *evv)
+{
+  return limiter_MRS(node, EvoVars_vlu(evv));
+}
+
+/* set data for minmodB */
+int limdata_c000_100_010_001_evv(tNode *node, tEvoVars *evv)
+{
+  return limdata_c000_100_010_001(node, EvoVars_vlu(evv));
+}
+
+/* minmodB slope limiter as in : limit u using data in dat->ic */
+int limiter_minmodB_evv(tNode *node, tEvoVars *evv)
+{
+  return limiter_minmodB(node, EvoVars_vlu(evv));
+}
+
+
+/*********************************************************************/
 /* funcs for MRS limiter arXiv:1507.03024v1 [math.NA] */
 /*********************************************************************/
 

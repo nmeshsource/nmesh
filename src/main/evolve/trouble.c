@@ -42,9 +42,10 @@ int evolve_set_trouble_score(tNode *node)
   /* check all evo systems for trouble and put max into tr_max */
   forList(u, i)
   {
-    tVarList *vlu_p = ListEntry(u_p,i);
-    tVarList *vlu   = ListEntry(u,i);
-    tVarList *vlr   = ListEntry(r,i);
+    tEvoVars evv[1] = {{
+      .vlu   = ListEntry(u,i),
+      .vlu_p = ListEntry(u_p,i),
+      .vlr   = ListEntry(r,i)    }};
 
     /* run TROUBLE func */
     if(tr_max<=0) /* need to check only if there no trouble yet */
@@ -52,7 +53,7 @@ int evolve_set_trouble_score(tNode *node)
       if(ListEntry(evosys->f[TROUBLE],i))
       {
         int tr = 0;
-        tr = ListEntry(evosys->f[TROUBLE],i)(node, vlr, vlu, vlu_p);
+        tr = ListEntry(evosys->f[TROUBLE],i)(node, evv);
         if(tr>tr_max) tr_max = tr;
       }
     }
