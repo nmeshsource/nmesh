@@ -69,11 +69,10 @@ typedef struct tEVOVARS {
 } tEvoVars;
 
 /* macros to access tEvoVars */
-#define EvoVars_vlu(evv)    evv->vlu
-#define EvoVars_vlr(evv)    evv->vlr
-#define EvoVars_vlx(evv)    evv->vlx
-#define EvoVars_vlu_p(evv)  evv->vlu_p
-#define EvoVars_pars(evv)   evv->pars;
-#define EvoVars_Get_vlu_vlr(evv) \
-  struct tVARLIST *vlu = EvoVars_vlu(evv); \
-  struct tVARLIST *vlr = EvoVars_vlu(evv)
+#define EvoVars_vlu(evv)    (evv)->vlu
+#define EvoVars_vlr(evv)    (evv)->vlr
+#define EvoVars_vlx(evv)    (evv)->vlx
+#define EvoVars_vlu_p(evv)  (evv)->vlu_p
+#define EvoVars_pars(evv)   (evv)->pars
+#define EvoVarsSet_vlu(evv, vl)  (evv)->vlu = vl
+#define EvoVarsSet_vlr(evv, vl)  (evv)->vlr = vl
