@@ -224,8 +224,10 @@ void advection1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int advection1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int advection1_vol_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   tMesh *mesh = vlu->mesh;
   int idivf = advection1->idivf;
   int ir = vlr->index[0];
@@ -259,9 +261,10 @@ int advection1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* surface terms in RHS of: d_t u */
-int advection1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int advection1_surf_rhs_u(tNode *node, tEvoVars *evv)
 {
-  TIMER_START;
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
 
   /* get flux terms on surfaces */
   dg_add_surface_fluxes(node, vlr, vlu, NULL,
@@ -270,7 +273,6 @@ int advection1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
   /* impose outer BC, if it wasn't done above by advection1_fluxes_pt */
   if(!advection1->outerBC_influxes) advection1_u_BC(node, vlr, vlu);
 
-  TIMER_STOP;
   return 0;
 }
 
@@ -364,13 +366,13 @@ int advection1_init(tMesh *mesh)
   evolve_SetFun(SURFRHS, advection1_surf_rhs_u, vlu);
   if(Getv(limiter, "MRS"))
   {
-    evolve_SetFun(LIMDATA, limdata_MRS, vlu);
-    evolve_SetFun(LIMITER, limiter_MRS, vlu);
+    evolve_SetFun(LIMDATA, limdata_MRS_evv, vlu);
+    evolve_SetFun(LIMITER, limiter_MRS_evv, vlu);
   }
   else if(Getv(limiter, "minmodB"))
   {
-    evolve_SetFun(LIMDATA, limdata_c000_100_010_001, vlu);
-    evolve_SetFun(LIMITER, limiter_minmodB, vlu);
+    evolve_SetFun(LIMDATA, limdata_c000_100_010_001_evv, vlu);
+    evolve_SetFun(LIMITER, limiter_minmodB_evv, vlu);
   }
   evolve_print_evosys(mesh);
 
