@@ -34,7 +34,7 @@ void evolve_register_vl(tVarList *vl)
   }
   for(b=0; b<NEVOFUNCBINS; b++)
   {
-    if(!evosys->f[b])      evosys->f[b]      = alloc_FuncPointerList();
+    if(!evosys->f[b])      evosys->f[b]      = alloc_EvoFuncPtrList();
     if(!evosys->f_name[b]) evosys->f_name[b] = alloc_constStringList();
   }
 
@@ -48,13 +48,13 @@ void evolve_register_vl(tVarList *vl)
      which we can overwrite later. */
   for(b=0; b<NEVOFUNCBINS; b++)
   {
-    push_FuncPointerList(evosys->f[b], NULL);
+    push_EvoFuncPtrList(evosys->f[b], NULL);
     push_constStringList(evosys->f_name[b], empty);
   }
 }
 
 /* Set a function in an evolution bin for the variable list vlu in evosys */
-void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vlu, const char *name)
+void evolve_SetEvoFun(int bin, EvoFuncPtr f, tVarList *vlu, const char *name)
 {
   tMesh *mesh = vlu->mesh;
   tEvoSys *evosys = mesh->evosys;
@@ -63,7 +63,7 @@ void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vlu, const char *name)
   if(i<0) errorexit("variable list vlu not registered in evosys");
 
   /* set func pointer and name at index i */
-  setatindex_FuncPointerList(evosys->f[bin], i, f);
+  setatindex_EvoFuncPtrList(evosys->f[bin], i, f);
   setatindex_constStringList(evosys->f_name[bin], i, name);
 }
 
@@ -72,9 +72,9 @@ void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vlu, const char *name)
    and contains the RHS for the evo eqn of u. The others are there to apply
    limiters or to set source terms before rhs is called */
 void evolve_register_subsys(tMesh *mesh, tVarList *u,
-                FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
-                FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,
-                FuncPointer surfrhs)
+                EvoFuncPtr prelim, EvoFuncPtr limdata, EvoFuncPtr limiter,
+                EvoFuncPtr presurf, EvoFuncPtr setsrc, EvoFuncPtr volrhs,
+                EvoFuncPtr surfrhs)
 {
   /* first register varlist */
   evolve_register_vl(u);
@@ -92,9 +92,9 @@ void evolve_register_subsys(tMesh *mesh, tVarList *u,
 /* register a list of variable lists and its RHS, source functions and
    limiters in evosys */
 void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
-                                      FuncPointer volrhs, FuncPointer surfrhs,
-                                      FuncPointer limdata,
-                                      FuncPointer limiter)
+                                      EvoFuncPtr volrhs, EvoFuncPtr surfrhs,
+                                      EvoFuncPtr limdata,
+                                      EvoFuncPtr limiter)
 {
   evolve_register_subsys(mesh, u, NULL,limdata,limiter,
                          NULL,NULL,volrhs,surfrhs);
@@ -140,7 +140,7 @@ int evolve_free_evosys(tMesh *mesh)
   //free_pVLList(evosys->u); /* free list only, not content */
   for(b=0; b<NEVOFUNCBINS; b++)
   {
-    free_FuncPointerList(evosys->f[b]);
+    free_EvoFuncPtrList(evosys->f[b]);
     free_constStringList(evosys->f_name[b]);
   }
 

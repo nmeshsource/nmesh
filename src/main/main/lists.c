@@ -39,8 +39,8 @@ typedef tVarList *pVL;        /* list_templates.h only works with numbers */
 /***************************************************************************/
 /* compile lists with entries of type func. pointer */
 /***************************************************************************/
-typedef int (*FuncPointer)();  /* a func. pointer */
-#define TYP FuncPointer        /* the pointer FuncPointer is a number */
+typedef int (*EvoFuncPtr)();  /* a func. pointer */
+#define TYP EvoFuncPtr        /* the pointer EvoFuncPtr is a number */
 #include "list_templates.c"
 #undef TYP
 

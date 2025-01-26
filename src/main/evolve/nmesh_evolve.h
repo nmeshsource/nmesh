@@ -13,15 +13,15 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt);
 
 /* evosys.c */
 void evolve_register_vl(tVarList *vl);
-void evolve_SetEvoFun(int bin, FuncPointer f, tVarList *vlu, const char *name);
+void evolve_SetEvoFun(int bin, EvoFuncPtr f, tVarList *vlu, const char *name);
 void evolve_register_subsys(tMesh *mesh, tVarList *u,
-                FuncPointer prelim, FuncPointer limdata, FuncPointer limiter,
-                FuncPointer presurf, FuncPointer setsrc, FuncPointer volrhs,
-                FuncPointer surfrhs);
+                EvoFuncPtr prelim, EvoFuncPtr limdata, EvoFuncPtr limiter,
+                EvoFuncPtr presurf, EvoFuncPtr setsrc, EvoFuncPtr volrhs,
+                EvoFuncPtr surfrhs);
 void evolve_register_subsys_u_rhs_lim(tMesh *mesh, tVarList *u,
-                                      FuncPointer volrhs, FuncPointer surfrhs,
-                                      FuncPointer limdata,
-                                      FuncPointer limiter);
+                                      EvoFuncPtr volrhs, EvoFuncPtr surfrhs,
+                                      EvoFuncPtr limdata,
+                                      EvoFuncPtr limiter);
 void evolve_SetVLx(tVarList *vlx, tVarList *vlu);
 tVarList *evolve_get_rhs_vl(tVarList *vl);
 void evolve_print_evosys(tMesh *mesh);

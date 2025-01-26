@@ -42,7 +42,7 @@ struct tNODE;   /* nodes are defined in main/amr/nmesh_amr.h */
    that are coupled via source terms in their RHSs */
 #define NEVOTEMP 6
 #define pVLL struct pVLLIST
-#define pFL struct FuncPointerLIST
+#define pFL struct EvoFuncPtrLIST
 #define pSL struct constStringLIST
 typedef struct tEVOSYS {
   pVLL *u;            /* list of VarLists with evo vars of entire system */
@@ -56,3 +56,13 @@ typedef struct tEVOSYS {
 } tEvoSys;
 #undef pVLL
 //#undef NEVOTEMP
+
+
+
+/* a struct that contains all we need to call RHS funcs */
+typedef struct tEVOVARS {
+  struct tVARLIST *vlu;  /* varlist of all evolved vars for one system */
+  struct tVARLIST *vlr;  /* varlistof RHS vars for one system */
+  struct tVARLIST *vlx;  /* varlist with extra vars (for LDG) for one sys. */
+  void *pars;            /* extra pars we may want to pass to a RHS */
+} tEvoVars;

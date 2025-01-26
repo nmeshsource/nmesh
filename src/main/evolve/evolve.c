@@ -201,6 +201,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
     troubled = 0;
     forList(u, i)
     {
+      //tEvoVars evv[] =
       tVarList *vlr = ListEntry(rhs,i);
       tVarList *vlu = ListEntry(u,i);
       if(ListEntry(evosys->f[PRESURF0],i))
