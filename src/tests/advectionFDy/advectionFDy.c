@@ -23,8 +23,10 @@ int advectionFDy_init_global_pars(tMesh *mesh)
 
 
 /* RHS of: d_t u = - d_y u */
-int advectionFDy_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int advectionFDy_vol_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   int ir = Vind(vlr, 0);
   int iu = Vind(vlu, 0);
 
@@ -57,8 +59,10 @@ int advectionFDy_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* surface terms in RHS of: d_t u = -d_y u */
-int advectionFDy_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int advectionFDy_surf_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   tMesh *mesh = vlu->mesh;
   int ir = Vind(vlr, 0);
   int iu = Vind(vlu, 0);

@@ -171,8 +171,10 @@ void burgers1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* RHS of: d_t u = - d_i f^i */
-int burgers1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int burgers1_vol_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   tMesh *mesh = vlu->mesh;
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
@@ -191,8 +193,10 @@ int burgers1_vol_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
 }
 
 /* surface terms in RHS of: d_t u */
-int burgers1_surf_rhs_u(tNode *node, tVarList *vlr, tVarList *vlu)
+int burgers1_surf_rhs_u(tNode *node, tEvoVars *evv)
 {
+  tVarList *vlr = EvoVars_vlr(evv);
+  tVarList *vlu = EvoVars_vlu(evv);
   /* add boundary flux terms */
   dg_add_surface_fluxes(node, vlr, vlu, NULL,
                         burgers1_fluxes_pt, burgers1_numflux);
@@ -249,7 +253,7 @@ int burgers1_init(tMesh *mesh)
 
   /* register u and its RHS with evolve */
   evolve_register_subsys_u_rhs_lim(mesh, vlu, burgers1_vol_rhs_u,
-                              burgers1_surf_rhs_u, limdata_MRS, limiter_MRS);
+                  burgers1_surf_rhs_u, limdata_MRS_evv, limiter_MRS_evv);
   evolve_print_evosys(mesh);
 
   /* choose numerical flux */
