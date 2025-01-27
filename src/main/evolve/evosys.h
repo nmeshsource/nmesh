@@ -74,5 +74,5 @@ typedef struct tEVOVARS {
 #define EvoVars_vlx(evv)    (evv)->vlx
 #define EvoVars_vlu_p(evv)  (evv)->vlu_p
 #define EvoVars_pars(evv)   (evv)->pars
-#define EvoVarsSet_vlu(evv, vl)  (evv)->vlu = vl
-#define EvoVarsSet_vlr(evv, vl)  (evv)->vlr = vl
+#define EvoVarsSet_vlu(evv, vl)  (evv)->vlu = (vl)
+#define EvoVarsSet_vlr(evv, vl)  (evv)->vlr = (vl)
