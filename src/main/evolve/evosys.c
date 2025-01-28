@@ -29,8 +29,8 @@ void evolve_register_vl(tVarList *vl)
   /* allocate lists u, x, f, f_name in evosys */
   if(!evosys->u)
   {
-    evosys->u = alloc_pVLList();
-    evosys->x = alloc_pVLList();
+    evosys->u = pVLList_alloc();
+    evosys->x = pVLList_alloc();
   }
   for(b=0; b<NEVOFUNCBINS; b++)
   {
@@ -39,10 +39,10 @@ void evolve_register_vl(tVarList *vl)
   }
 
   /* Add vl to list u in evosys. */
-  push_pVLList(evosys->u, vl);
+  pVLList_push(evosys->u, vl);
 
   /* Add NULL to list x, which we can overwrite later. */
-  push_pVLList(evosys->x, NULL);
+  pVLList_push(evosys->x, NULL);
 
   /* Add NULL, empty to lists f, f_name in evosys,
      which we can overwrite later. */
@@ -58,7 +58,7 @@ void evolve_SetEvoFun(int bin, EvoFuncPtr f, tVarList *vlu, const char *name)
 {
   tMesh *mesh = vlu->mesh;
   tEvoSys *evosys = mesh->evosys;
-  int i = index_pVLList(evosys->u, vlu); /* get index i of vlu in list */
+  int i = pVLList_index(evosys->u, vlu); /* get index i of vlu in list */
 
   if(i<0) errorexit("variable list vlu not registered in evosys");
 
@@ -105,12 +105,12 @@ void evolve_SetVLx(tVarList *vlx, tVarList *vlu)
 {
   tMesh *mesh = vlu->mesh;
   tEvoSys *evosys = mesh->evosys;
-  int i = index_pVLList(evosys->u, vlu); /* get index i of vlu in list */
+  int i = pVLList_index(evosys->u, vlu); /* get index i of vlu in list */
 
   if(i<0) errorexit("variable list vlu not registered in evosys");
 
   /* set vlx at index i */
-  setatindex_pVLList(evosys->x, i, vlx);
+  pVLList_setatindex(evosys->x, i, vlx);
 }
 
 
@@ -127,17 +127,17 @@ int evolve_free_evosys(tMesh *mesh)
 
   /* free memory in varlists */
   printf("Freeing extra variable lists for evolution:\n");
-  freeall_pVLList(evosys->u, vlfree,0); /* free list and its content */
-  freeall_pVLList(evosys->w, vlfree,0); /* free list and its content */
-  freeall_pVLList(evosys->rhs, vlfree,0);
-  freeall_pVLList(evosys->u_p, vlfree,0);
+  pVLList_freeall(evosys->u, vlfree,0); /* free list and its content */
+  pVLList_freeall(evosys->w, vlfree,0); /* free list and its content */
+  pVLList_freeall(evosys->rhs, vlfree,0);
+  pVLList_freeall(evosys->u_p, vlfree,0);
   for(i=0; i<NEVOTEMP; i++)
-    freeall_pVLList(evosys->s[i], vlfree,0);
-  freeall_pVLList(evosys->x, vlfree,0);
+    pVLList_freeall(evosys->s[i], vlfree,0);
+  pVLList_freeall(evosys->x, vlfree,0);
 
   /* free Lists */
   printf("Freeing rhs lists for evolution:\n");
-  //free_pVLList(evosys->u); /* free list only, not content */
+  //pVLList_free(evosys->u); /* free list only, not content */
   for(b=0; b<NEVOFUNCBINS; b++)
   {
     free_EvoFuncPtrList(evosys->f[b]);
@@ -158,7 +158,7 @@ int evolve_get_index_of_vl(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
   tEvoSys *evosys = mesh->evosys;
-  return index_pVLList(evosys->u, vl);
+  return pVLList_index(evosys->u, vl);
 }
 
 /* return RHS var list that corresponds to vl,
@@ -243,19 +243,19 @@ int evolve_init_evosys(tMesh *mesh)
     evolve_free_communication_structs(mesh);
 
     /* add lists */
-    evosys->w   = alloc_pVLList();
-    evosys->rhs = alloc_pVLList();
-    evosys->u_p = alloc_pVLList();
+    evosys->w   = pVLList_alloc();
+    evosys->rhs = pVLList_alloc();
+    evosys->u_p = pVLList_alloc();
 
     printf("Adding variables for RK evolution:\n");
     forList(evosys->u, i)
     {
       tVarList *u   = ListEntry(evosys->u, i);
 
-      push_pVLList(evosys->w,   AddDuplicateEnable(u, "_w", AUXVAR,-1));
-      push_pVLList(evosys->rhs, AddDuplicateEnable(u, "_r", AUXVAR,0));
-      push_pVLList(evosys->u_p, AddDuplicateEnable(u, "_p", AUXVAR,0));
-      //push_pVLList(evosys->s[0], AddDuplicateEnable(u, "_s0", AUXVAR,0));
+      pVLList_push(evosys->w,   AddDuplicateEnable(u, "_w", AUXVAR,-1));
+      pVLList_push(evosys->rhs, AddDuplicateEnable(u, "_r", AUXVAR,0));
+      pVLList_push(evosys->u_p, AddDuplicateEnable(u, "_p", AUXVAR,0));
+      //pVLList_push(evosys->s[0], AddDuplicateEnable(u, "_s0", AUXVAR,0));
     }
     //printf("evosys->w = %p\n", evosys->w);
 

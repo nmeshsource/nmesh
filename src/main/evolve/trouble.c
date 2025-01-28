@@ -314,7 +314,7 @@ void evolve_prepare_do_over_mesh(tMesh *mesh)
   if(PR) PRFs(":\n");
 
   /* go back to t-dt and set u = u_p */
-  copy_pVLList(u, u_p, vlcopy,0);
+  pVLList_copy(u, u_p, vlcopy,0);
   mesh->time = t-dt;
 
   /* loop over all nodes, and set time */

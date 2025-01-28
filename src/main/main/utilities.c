@@ -422,7 +422,7 @@ int str_to_intList(const char *str, const char *delim, intList *il)
       val=strtok_r(NULL, delim, &sav))
   {
     int i = atoi(val);
-    push_intList(il, i);
+    intList_push(il, i);
     ret++;
   }
   free(str2);
