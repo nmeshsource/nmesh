@@ -154,25 +154,25 @@ void evolve_RK4(tNode *node)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
 
-  pVLList_copy(u_p, u, vlcopy_node, node);             // u_p = u
+  pVLList_copy(u_p, u, vlcopy, node);                  // u_p = u
   node->time = t;
   evolve_setrhs(node, r, u, 1);                        // r  = RHS(u, t)
-  pVLList_addto(u, dt/6.0, r, vladdto_node, node);     // u += r dt/6
+  pVLList_addto(u, dt/6.0, r, vladdto, node);          // u += r dt/6
 
-  pVLList_add(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
+  pVLList_add(w, 1., u_p, dt/2., r, vladd, node);      // w  = u_p + r dt/2
   node->time = t+0.5*dt;
   evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt/2)
-  pVLList_addto(u, dt/3., r, vladdto_node, node);      // u += r dt/3
+  pVLList_addto(u, dt/3., r, vladdto, node);           // u += r dt/3
 
-  pVLList_add(w, 1., u_p, dt/2., r, vladd_node, node); // w  = u_p + r dt/2
+  pVLList_add(w, 1., u_p, dt/2., r, vladd, node);      // w  = u_p + r dt/2
   node->time = t+0.5*dt;
   evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt/2)
-  pVLList_addto(u, dt/3., r, vladdto_node, node);      // u += r dt/3
+  pVLList_addto(u, dt/3., r, vladdto, node);           // u += r dt/3
 
-  pVLList_add(w, 1., u_p, dt, r, vladd_node, node);    // w  = u_p + r dt
+  pVLList_add(w, 1., u_p, dt, r, vladd, node);         // w  = u_p + r dt
   node->time = t+dt;
   evolve_setrhs(node, r, w, 1);                        // r  = RHS(w, t+dt)
-  pVLList_addto(u, dt/6., r, vladdto_node, node);      // u += r dt/6
+  pVLList_addto(u, dt/6., r, vladdto, node);           // u += r dt/6
 }
 
 /* Euler step */
@@ -187,8 +187,8 @@ void evolve_Euler(tNode *node)
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
 
-  pVLList_copy(u_p, u, vlcopy_node, node);         // u_p = u
+  pVLList_copy(u_p, u, vlcopy, node);              // u_p = u
   node->time = t;
   evolve_setrhs(node, r, u, 1);                    // r  = RHS(u, t)
-  pVLList_addto(u, dt, r, vladdto_node, node);     // u += r dt
+  pVLList_addto(u, dt, r, vladdto, node);          // u += r dt
 }

@@ -47,7 +47,7 @@ int coordinates_set_divb_J_sqrtgdiag_n(tNode *node)
   for(i=0; i<3; i++)
   {
     vlpushone(vldivb_J_sqrtgdiag_n, idivb_J_sqrtgdiag_nx+i);
-    vlsetconstant_node(node, vldivb_J_sqrtgdiag_n, 0.);
+    vlsetconst(node, vldivb_J_sqrtgdiag_n, 0.);
 
     /* loop over ib=\bar{i} of n^{\bar{i}_i */
     for(ib=0; ib<3; ib++)
@@ -134,7 +134,7 @@ int coordinates_set_ooJ_Db_J_sqrtgdiag_n(tNode *node)
   {
     /* zero var w. index iooJ_Db_J_sqrtgdiag_nx+ii */
     vlpushone(vlooJ_Db_J_sqrtgdiag_n, iooJ_Db_J_sqrtgdiag_nx+ii);
-    vlsetconstant_node(node, vlooJ_Db_J_sqrtgdiag_n, 0.);
+    vlsetconst(node, vlooJ_Db_J_sqrtgdiag_n, 0.);
 
     /* loop over dir=\bar{i} of n^{\bar{i}_i */
     for(dir=0; dir<3; dir++)

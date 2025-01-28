@@ -311,7 +311,7 @@ int scalarwave1_surf_rhs_u(tNode *node, tEvoVars *evv)
     rec1d_uface_to_uin_1(node, vldivf, 0);
 
   /* add divf on node surfaces */
-  vladdto_onfaces_node(node, vlr, -1., vldivf);
+  vladdto_onfaces(node, vlr, -1., vldivf);
 
   vlfree(vldivf);
   return 0;
@@ -737,8 +737,8 @@ int scalarwave1_analyze(tMesh *mesh)
   scalarwave1_set_profile(vle, NULL);
 
   /*  compute errors: u_err = u - u_correct */
-  vladd(vle,  1.,vlu, -1.,vle);  // vle  = vlu - vle
-  vladd(vler, 1.,vlr, -1.,vler); // vler = vlr - vler
+  vladd(0, vle,  1.,vlu, -1.,vle);  // vle  = vlu - vle
+  vladd(0, vler, 1.,vlr, -1.,vler); // vler = vlr - vler
 
   vlfree(vler);
   vlfree(vle);

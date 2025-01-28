@@ -242,7 +242,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
   use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
 
   /* set var list for div of fluxes to zero */
-  vlsetconstant_node(node, vldivf, 0.);
+  vlsetconst(node, vldivf, 0.);
 
   /* RHS */
   {
@@ -739,7 +739,7 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
   use_left_flux = !(DGglobals->fv_divf_use_only_right_flux);
 
   /* set var list for div of fluxes to zero */
-  vlsetconstant_node(node, vldivf, 0.);
+  vlsetconst(node, vldivf, 0.);
 
   /* RHS */
   {

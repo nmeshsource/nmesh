@@ -672,7 +672,7 @@ tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
 /********************************************************************/
 
 /* set: u = c on one node */
-void vlsetconstant(const void *el, tVarList *u, const double c)
+void vlsetconst(const void *el, tVarList *u, const double c)
 {
   int n;
 
@@ -694,7 +694,7 @@ void vlsetconstant(const void *el, tVarList *u, const double c)
   else
   {
     tMesh *mesh = u->mesh;
-    formyelms(mesh) vlsetconstant(MyElm, u, c);
+    formyelms(mesh) vlsetconst(MyElm, u, c);
   }
 }
 

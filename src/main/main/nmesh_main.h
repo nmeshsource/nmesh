@@ -211,7 +211,8 @@ tVarList *AddDuplicate(tVarList *vl, const char *postfix,
 tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones);
 
-void vlsetconstant(const void *el, tVarList *u, const double c);
+void vlsetconst(const void *el, tVarList *u, const double c);
+//#define vlsetconstant_node(node, u, c) vlsetconstant((node), (u), (c))
 void vlcopy(const void *el, tVarList *v, tVarList *u);
 void vladd(const void *el,
            tVarList *r, double ca, tVarList *a, double cb, tVarList *b);

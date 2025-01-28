@@ -61,7 +61,7 @@ int evolve_myln(tMesh *mesh)
   if(Getb(Par("evolve_compute_change")))
   {
     u_ch = AddDuplicateEnable(allu, "_change", AUXVAR, 0);
-    vlcopy(u_ch, allu); /* u_ch = allu */
+    vlcopy(NULL, u_ch, allu); /* u_ch = allu */
   }
 
   /* how we evolve the mesh */
@@ -162,7 +162,7 @@ int evolve_myln(tMesh *mesh)
 
   /* set u_ch = allu - u_ch after evo step */
   if(Getb(Par("evolve_compute_change")))
-    vladd(u_ch, 1.,allu, -1.,u_ch); /* u_ch = allu - u_ch */
+    vladd(NULL, u_ch, 1.,allu, -1.,u_ch); /* u_ch = allu - u_ch */
 
   /* we don't need allu, u_ch anymore */
   vlfree(u_ch);
