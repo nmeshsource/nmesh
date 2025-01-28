@@ -11,7 +11,7 @@
 /* compile lists with entries of type int */
 /***************************************************************************/
 /* compile list functions with lists of type int
-   e.g. intList *alloc_intList(void);  */
+   e.g. intList *intList_alloc(void);  */
 #define TYP int
 #include "list_templates.c"
 #undef TYP

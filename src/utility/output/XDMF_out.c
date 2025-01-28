@@ -328,7 +328,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
               write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
                              ndname, Time, n, bin, dbl);
 
-              free_intList(plist);
+              intList_free(plist);
             }
           }
         }

@@ -133,15 +133,15 @@ int write_mesh(tMesh *mesh, int Iter, double Time)
 
           vi0 = MeshVarIndComponent0(mesh, vi);
           vlpush(vltmp, vi0);
-          /* use unionpushlist_intList to add all in vltmp only once */
-          unionpushlist_intList(il, iltmp);
+          /* use intList_unionpushlist to add all in vltmp only once */
+          intList_unionpushlist(il, iltmp);
           vlfree(vltmp);
         }
         else
         {
-          /* use unionpush_intList to add var-comp only once */
+          /* use intList_unionpush to add var-comp only once */
           intList *il = vl2intList(vl[d]);
-          unionpush_intList(il, vi);
+          intList_unionpush(il, vi);
         }
       } //end: while loop
     }
