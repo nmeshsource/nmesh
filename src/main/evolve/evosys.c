@@ -34,8 +34,8 @@ void evolve_register_vl(tVarList *vl)
   }
   for(b=0; b<NEVOFUNCBINS; b++)
   {
-    if(!evosys->f[b])      evosys->f[b]      = alloc_EvoFuncPtrList();
-    if(!evosys->f_name[b]) evosys->f_name[b] = alloc_constStringList();
+    if(!evosys->f[b])      evosys->f[b]      = EvoFuncPtrList_alloc();
+    if(!evosys->f_name[b]) evosys->f_name[b] = constStringList_alloc();
   }
 
   /* Add vl to list u in evosys. */
@@ -48,8 +48,8 @@ void evolve_register_vl(tVarList *vl)
      which we can overwrite later. */
   for(b=0; b<NEVOFUNCBINS; b++)
   {
-    push_EvoFuncPtrList(evosys->f[b], NULL);
-    push_constStringList(evosys->f_name[b], empty);
+    EvoFuncPtrList_push(evosys->f[b], NULL);
+    constStringList_push(evosys->f_name[b], empty);
   }
 }
 
@@ -63,8 +63,8 @@ void evolve_SetEvoFun(int bin, EvoFuncPtr f, tVarList *vlu, const char *name)
   if(i<0) errorexit("variable list vlu not registered in evosys");
 
   /* set func pointer and name at index i */
-  setatindex_EvoFuncPtrList(evosys->f[bin], i, f);
-  setatindex_constStringList(evosys->f_name[bin], i, name);
+  EvoFuncPtrList_setatindex(evosys->f[bin], i, f);
+  constStringList_setatindex(evosys->f_name[bin], i, name);
 }
 
 /* register a variable list u and its RHS in evosys. The func. pointers will
@@ -140,8 +140,8 @@ int evolve_free_evosys(tMesh *mesh)
   //pVLList_free(evosys->u); /* free list only, not content */
   for(b=0; b<NEVOFUNCBINS; b++)
   {
-    free_EvoFuncPtrList(evosys->f[b]);
-    free_constStringList(evosys->f_name[b]);
+    EvoFuncPtrList_free(evosys->f[b]);
+    constStringList_free(evosys->f_name[b]);
   }
 
   /* now set all of evosys to zero */
