@@ -27,7 +27,7 @@ typedef tVarList *pVL;        // list_templates.h only works with numbers
 
 
 /* allocate an empty list */
-LIST(TYP) *FN(alloc,LIST(TYP))(void)
+LIST(TYP) *FN(LIST(TYP),alloc)(void)
 {
   LIST(TYP) *u;
 
@@ -36,7 +36,7 @@ LIST(TYP) *FN(alloc,LIST(TYP))(void)
 }
 
 /* free a list */
-void FN(free,LIST(TYP))(LIST(TYP) *u)
+void FN(LIST(TYP),free)(LIST(TYP) *u)
 {
   if(u)
   {
@@ -47,7 +47,7 @@ void FN(free,LIST(TYP))(LIST(TYP) *u)
 }
 
 /* clear a list */
-void FN(clear,LIST(TYP))(LIST(TYP) *u)
+void FN(LIST(TYP),clear)(LIST(TYP) *u)
 {
   if(u)
   {
@@ -58,7 +58,7 @@ void FN(clear,LIST(TYP))(LIST(TYP) *u)
 }
 
 /* print list u */
-void FN(pr,LIST(TYP))(LIST(TYP) *u)
+void FN(LIST(TYP),pr)(LIST(TYP) *u)
 {
   int i;
   long ui;
@@ -76,7 +76,7 @@ void FN(pr,LIST(TYP))(LIST(TYP) *u)
 }
 
 /* add an entry to a list */
-void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi)
+void FN(LIST(TYP),push)(LIST(TYP) *v, TYP vi)
 {
   v->n += 1;
   v->e = realloc(v->e, sizeof(TYP) * v->n);
@@ -84,7 +84,7 @@ void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi)
 }
 
 /* append a list to a list */
-void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
+void FN(LIST(TYP),pushlist)(LIST(TYP) *v, LIST(TYP) *u)
 {
   int i;
 
@@ -96,24 +96,24 @@ void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
 }
 
 /* add to list (if not already in it) */
-void FN(unionpush,LIST(TYP))(LIST(TYP) *v, TYP vi)
+void FN(LIST(TYP),unionpush)(LIST(TYP) *v, TYP vi)
 {
   int i;
   int addvi=1;
   /* add vi only if it is not already in blist */
   for(i=0; i<v->n; i++) if(v->e[i]==vi) { addvi=0; break; }
-  if(addvi) FN(push,LIST(TYP))(v, vi);
+  if(addvi) FN(LIST(TYP),push)(v, vi);
 }
 
 /* v = union(v, u): add all of u to list v (if not already in v) */
-void FN(unionpushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
+void FN(LIST(TYP),unionpushlist)(LIST(TYP) *v, LIST(TYP) *u)
 {
   int i;
-  for(i=0; i<u->n; i++) FN(unionpush,LIST(TYP))(v, u->e[i]);
+  for(i=0; i<u->n; i++) FN(LIST(TYP),unionpush)(v, u->e[i]);
 }
 
 /* drop an entry from a list */
-void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind)
+void FN(LIST(TYP),dropindex)(LIST(TYP) *v, int ind)
 {
   int i;
   if(ind<0 || ind >= v->n) return;
@@ -122,7 +122,7 @@ void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind)
 }
 
 /* drop an entry from a list */
-void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi)
+void FN(LIST(TYP),drop)(LIST(TYP) *v, TYP vi)
 {
   int i;
 
@@ -137,7 +137,7 @@ void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi)
 }
 
 /* drop last n entries from a list */
-void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n)
+void FN(LIST(TYP),droplastn)(LIST(TYP) *v, int n)
 {
   if(n <= 0)
     return;
@@ -148,33 +148,33 @@ void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n)
 }
 
 /* drop all in u from v */
-void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
+void FN(LIST(TYP),droplist)(LIST(TYP) *v, LIST(TYP) *u)
 {
   int i;
-  for(i=0; i<u->n; i++) FN(drop,LIST(TYP))(v, u->e[i]);
+  for(i=0; i<u->n; i++) FN(LIST(TYP),drop)(v, u->e[i]);
 }
 
 /* set an existing entry (at index ind) in a list to the value vi */
-void FN(setatindex,LIST(TYP))(LIST(TYP) *v, int ind, TYP vi)
+void FN(LIST(TYP),setatindex)(LIST(TYP) *v, int ind, TYP vi)
 {
   if(ind<0 || ind >= v->n) return;
   v->e[ind] = vi;
 }
 
 /* duplicate a list */
-LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v)
+LIST(TYP) *FN(LIST(TYP),duplicate)(LIST(TYP) *v)
 {
   int i;
-  LIST(TYP) *u = FN(alloc,LIST(TYP))();
+  LIST(TYP) *u = FN(LIST(TYP),alloc)();
 
   for(i = 0; i < v->n; i++)
-    FN(push,LIST(TYP))(u, v->e[i]);
+    FN(LIST(TYP),push)(u, v->e[i]);
 
   return u;
 }
 
 /* return 1 if vi is in list v */
-int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi)
+int FN(LIST(TYP),in)(LIST(TYP) *v, TYP vi)
 {
   int i;
   int in=0;
@@ -183,7 +183,7 @@ int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi)
 }
 
 /* return index of first element vi in list v, returns -1 if not in list */
-int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi)
+int FN(LIST(TYP),index)(LIST(TYP) *v, TYP vi)
 {
   int i;
   int in=-1; /* is not in list */
@@ -200,7 +200,7 @@ int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi)
      return (vi == *pi);
    }
 */
-int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
+int FN(LIST(TYP),index_prop)(LIST(TYP) *v, int i0,
                              int (*prop)(), //(const void *obj, TYP vi),
                              const void *obj)
 {
@@ -216,7 +216,7 @@ int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
    e.g. for ints it could be just:
    void copy(int d, int s){ d = s; }
 */
-void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
+void FN(LIST(TYP),copy)(LIST(TYP) *dest, LIST(TYP) *src,
                         void (*copy)(), //(const void *obj, TYP d, TYP s),
                         const void *obj)
 {
@@ -229,7 +229,7 @@ void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
 }
 
 /* add contents: r = ca*a + cb*b */
-void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+void FN(LIST(TYP),add)(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
                        void (*add)(), //(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
                        const void *obj)
@@ -243,7 +243,7 @@ void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 }
 
 /* add to contents: r += ca*a */
-void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+void FN(LIST(TYP),addto)(LIST(TYP) *r, double ca, LIST(TYP) *a,
                          void (*addto)(), //(const void *obj, TYP r, double ca, TYP a),
                          const void *obj)
 {
@@ -256,7 +256,7 @@ void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
 }
 
 /* free contents of r */
-void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj)
+void FN(LIST(TYP),freeclear)(LIST(TYP) *r, void (*Free)(), const void *obj)
 {
   if(Free && r)
   {
@@ -267,14 +267,14 @@ void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj)
       else    Free(r->e[i]);
     }
   }
-  FN(clear,LIST(TYP))(r);
+  FN(LIST(TYP),clear)(r);
 }
 
 /* free contents of r and then r itself */
-void FN(freeall,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj)
+void FN(LIST(TYP),freeall)(LIST(TYP) *r, void (*Free)(), const void *obj)
 {
-  FN(freeclear,LIST(TYP))(r, Free, obj);
-  FN(free,LIST(TYP))(r);
+  FN(LIST(TYP),freeclear)(r, Free, obj);
+  FN(LIST(TYP),free)(r);
 }
 
 /***************************************************************************/

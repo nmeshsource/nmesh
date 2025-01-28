@@ -9,7 +9,7 @@
 #define PASTE_(a, b)  a ## _ ## b
 
 /* make a function name */
-#define FN(name,LTYPE) PASTE_(name,LTYPE)
+#define FN(LTYPE,name) PASTE_(LTYPE,name)
 
 /*******************************************************************/
 
@@ -35,42 +35,42 @@ typedefLIST(TYP);
 /* utility functions for these lists */
 
 /* from list_templates.c */
-LIST(TYP) *FN(alloc,LIST(TYP))(void);
-void FN(free,LIST(TYP))(LIST(TYP) *u);
-void FN(clear,LIST(TYP))(LIST(TYP) *u);
-void FN(pr,LIST(TYP))(LIST(TYP) *u);
-void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi);
-void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
-void FN(unionpush,LIST(TYP))(LIST(TYP) *v, TYP vi);
-void FN(unionpushlist,LIST(TYP))(LIST(TYP) *u, LIST(TYP) *v);
-void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind);
-void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi);
-void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n);
-void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
-void FN(setatindex,LIST(TYP))(LIST(TYP) *v, int ind, TYP vi);
-LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v);
-int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi);
-int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi);
-int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
+LIST(TYP) *FN(LIST(TYP),alloc)(void);
+void FN(LIST(TYP),free)(LIST(TYP) *u);
+void FN(LIST(TYP),clear)(LIST(TYP) *u);
+void FN(LIST(TYP),pr)(LIST(TYP) *u);
+void FN(LIST(TYP),push)(LIST(TYP) *v, TYP vi);
+void FN(LIST(TYP),pushlist)(LIST(TYP) *v, LIST(TYP) *u);
+void FN(LIST(TYP),unionpush)(LIST(TYP) *v, TYP vi);
+void FN(LIST(TYP),unionpushlist)(LIST(TYP) *u, LIST(TYP) *v);
+void FN(LIST(TYP),dropindex)(LIST(TYP) *v, int ind);
+void FN(LIST(TYP),drop)(LIST(TYP) *v, TYP vi);
+void FN(LIST(TYP),droplastn)(LIST(TYP) *v, int n);
+void FN(LIST(TYP),droplist)(LIST(TYP) *v, LIST(TYP) *u);
+void FN(LIST(TYP),setatindex)(LIST(TYP) *v, int ind, TYP vi);
+LIST(TYP) *FN(LIST(TYP),duplicate)(LIST(TYP) *v);
+int FN(LIST(TYP),in)(LIST(TYP) *v, TYP vi);
+int FN(LIST(TYP),index)(LIST(TYP) *v, TYP vi);
+int FN(LIST(TYP),index_prop)(LIST(TYP) *v, int i0,
                              int (*prop)(), //(const void *obj, TYP vi),
                              const void *obj);
-void FN(copy,LIST(TYP))(LIST(TYP) *dest, LIST(TYP) *src,
+void FN(LIST(TYP),copy)(LIST(TYP) *dest, LIST(TYP) *src,
                         void (*copy)(), //(const void *obj, TYP d, TYP s),
                         const void *obj);
-void FN(add,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+void FN(LIST(TYP),add)(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
                        void (*add)(), //(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
                        const void *obj);
-void FN(addto,LIST(TYP))(LIST(TYP) *r, double ca, LIST(TYP) *a,
+void FN(LIST(TYP),addto)(LIST(TYP) *r, double ca, LIST(TYP) *a,
                          void (*addto)(), //(const void *obj, TYP r, double ca, TYP a),
                          const void *obj);
-void FN(freeclear,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj);
-void FN(freeall,LIST(TYP))(LIST(TYP) *r, void (*Free)(), const void *obj);
+void FN(LIST(TYP),freeclear)(LIST(TYP) *r, void (*Free)(), const void *obj);
+void FN(LIST(TYP),freeall)(LIST(TYP) *r, void (*Free)(), const void *obj);
 
 /* e.g.: if TYP = int 
-   LIST(TYP) FN(alloc,LIST(TYP))(void)
+   LIST(TYP) FN(LIST(TYP),alloc)(void)
    becomes
-   intList alloc_intList(void) */
+   intList intList_alloc(void) */
 
 /************************************************************************/
 /* macros to do things with lists like looping */

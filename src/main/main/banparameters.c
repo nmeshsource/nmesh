@@ -53,12 +53,12 @@ void BanPar(const char *name, const char *ban_reason)
   tBannedPar *bp;
   int i;
 
-  if(!bannedpars) bannedpars = alloc_pBannedList();
+  if(!bannedpars) bannedpars = pBannedList_alloc();
 
   if(0) {PRF;printf("%s %s\n", name, ban_reason);}
 
   /* look for name in bannedpars */
-  i = index_prop_pBannedList(bannedpars,0, prop_samenames, name);
+  i = pBannedList_index_prop(bannedpars,0, prop_samenames, name);
   if(i>=0)
     errorexit("cannot ban the same par twice");
 
@@ -66,7 +66,7 @@ void BanPar(const char *name, const char *ban_reason)
   bp = calloc(1, sizeof(bp[0]));
   bp->name = name;
   bp->ban_reason = ban_reason;
-  push_pBannedList(bannedpars, bp);
+  pBannedList_push(bannedpars, bp);
 }
 
 
@@ -77,7 +77,7 @@ int ExitIfParBanned(const char *name)
   if(bannedpars)
   {
     /* look for name in bannedpars */
-    int i = index_prop_pBannedList(bannedpars,0, prop_samenames, name);
+    int i = pBannedList_index_prop(bannedpars,0, prop_samenames, name);
     //PRF;printf(": %s -> i=%d\n", name, i);
     if(i>=0)
     {
@@ -94,7 +94,7 @@ int ExitIfParBanned(const char *name)
 /* free all in bannedpars */
 int FreeBannedParList(tMesh *mesh)
 {
-  freeall_pBannedList(bannedpars, free, NULL);
+  pBannedList_freeall(bannedpars, free, NULL);
   bannedpars = NULL;
   return 0;
 }
