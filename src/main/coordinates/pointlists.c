@@ -9,7 +9,7 @@
    needs to be freed by caller */
 intList *pointindexList_line(tNode *node, int dir, int axis[])
 {
-  intList *plist = alloc_intList(); /* list that contains other point indices */
+  intList *plist = intList_alloc(); /* list that contains other point indices */
   int *n = node->n;
   int i,j,k;
   int imin, jmin, kmin;
@@ -50,7 +50,7 @@ intList *pointindexList_line(tNode *node, int dir, int axis[])
       for(i=imin; i<=imax; i++)
       {
         int ind = Ind_n(i,j,k, n);
-        push_intList(plist, ind);
+        intList_push(plist, ind);
       }
 
   return plist;
@@ -60,7 +60,7 @@ intList *pointindexList_line(tNode *node, int dir, int axis[])
    needs to be freed by caller */
 intList *pointindexList_plane(tNode *node, int normal, int plane[])
 {
-  intList *plist = alloc_intList(); /* list that contains other point indices */
+  intList *plist = intList_alloc(); /* list that contains other point indices */
   int *n = node->n;
   int i,j,k;
   int imin, jmin, kmin;
@@ -95,7 +95,7 @@ intList *pointindexList_plane(tNode *node, int normal, int plane[])
       for(i=imin; i<=imax; i++)
       {
         int ind = Ind_n(i,j,k, n);
-        push_intList(plist, ind);
+        intList_push(plist, ind);
       }
 
   return plist;
@@ -105,10 +105,10 @@ intList *pointindexList_plane(tNode *node, int normal, int plane[])
    needs to be freed by caller */
 intList *pointindexList_node(tNode *node)
 {
-  intList *plist = alloc_intList(); /* list that contains other point indices */
+  intList *plist = intList_alloc(); /* list that contains other point indices */
   int ind;
 
-  forpoints(node,ind) push_intList(plist, ind);
+  forpoints(node,ind) intList_push(plist, ind);
 
   return plist;
 }
