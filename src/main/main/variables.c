@@ -672,72 +672,58 @@ tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
 /********************************************************************/
 
 /* set: u = c on one node */
-void vlsetconstant_node(tNode *node, tVarList *u, const double c)
+void vlsetconstant(const void *el, tVarList *u, const double c)
 {
   int n;
 
   if(!u) return;
 
-  for(n=0; n<u->n; n++)
+  if(el)
   {
-    int ui = u->index[n];
-    double *pu = Vard(node, ui);
-    int i;
+    const tElm *elm = el;
+    for(n=0; n<u->n; n++)
+    {
+      int ui = u->index[n];
+      double *pu = Vard(elm, ui);
+      int i;
 
-    forvari(node, ui, i)
-      pu[i] = c;
+      forvari(elm, ui, i)
+        pu[i] = c;
+    }
+  }
+  else
+  {
+    tMesh *mesh = u->mesh;
+    formyelms(mesh) vlsetconstant(MyElm, u, c);
   }
 }
 
-/* set: u = c */
-void vlsetconstant(tVarList *u, const double c)
-{
-  tMesh *mesh;
-  if(!u) return;
-
-  mesh = u->mesh;
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    vlsetconstant_node(node, u, c);
-  }
-}
-
-/* copy: v = u on one node */
-void vlcopy_node(tNode *node, tVarList *v, tVarList *u)
+/* copy: v = u on one elm */
+void vlcopy(const void *el, tVarList *v, tVarList *u)
 {
   double *pu, *pv;
   int i, n, vi,ui;
 
   if( (!v) || (!u) ) return;
 
-  for(n=0; n<v->n; n++)
+  if(el)
   {
-    ui = u->index[n];
-    vi = v->index[n];
-    pu = Vard(node, ui);
-    pv = Vard(node, vi);
-    forvari(node, vi, i)
-      pv[i] = pu[i];
+    const tElm *elm = el;
+    for(n=0; n<v->n; n++)
+    {
+      ui = u->index[n];
+      vi = v->index[n];
+      pu = Vard(elm, ui);
+      pv = Vard(elm, vi);
+      forvari(elm, vi, i)
+        pv[i] = pu[i];
+    }
   }
-}
-
-/* copy: v = u */
-void vlcopy(tVarList *v, tVarList *u)
-{
-  tMesh *mesh;
-
-  if( (!v) || (!u) ) return;
-
-  mesh = v->mesh;
-
-  /* copy time */
-  v->time = u->time;
-
-  formylnodes(mesh)
+  else
   {
-    tNode *node = MyLnode;
-    vlcopy_node(node, v, u);
+    tMesh *mesh = v->mesh;
+    v->time = u->time;    /* copy time */
+    formyelms(mesh) vlcopy(MyElm, v, u);
   }
 }
 
@@ -745,7 +731,7 @@ void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u)
 {
   if(!mesh || !v || !u) return;
   v->mesh = u->mesh = mesh;
-  vlcopy(v, u);
+  vlcopy(NULL, v, u);
 }
 
 /* wrapper for single variable: v = u (iv/u is index of v/u) */
@@ -755,7 +741,7 @@ void varcopy(tMesh *mesh, int iv, int iu)
   tVarList *u = vlalloc(mesh);
   vlpushone(v, iv);
   vlpushone(u, iu);
-  vlcopy(v, u);
+  vlcopy(NULL, v, u);
   vlfree(u);
   vlfree(v);
 }
@@ -810,134 +796,60 @@ void varswap(tMesh *mesh, int iv, int iu)
   vlfree(v);
 }
 
-/* average: r=(a+b)/2 */
-void vlaverage(tVarList *r, tVarList *a, tVarList *b)
-{
-  double c = 0.5;
-  tMesh *mesh;
-
-  if( (!r) || (!a) || (!b) ) return;
-
-  mesh = r->mesh;
-
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    double *pr, *pa, *pb;
-    int i, n;
-
-    for(n=0; n<r->n; n++)
-    {
-      int ri = r->index[n];
-      int ai = a->index[n];
-      int bi = b->index[n];
-      pr = Vard(node, ri);
-      pa = Vard(node, ai);
-      pb = Vard(node, bi);
-
-      forvari(node, ri, i)
-        pr[i] = c * (pa[i] + pb[i]);
-    }
-  }
-  /* average times as well */
-  r->time = c * (a->time + b->time);
-}
-
-/* subtract two var lists: r = a - b
-   can be called as vlsubtract(r,a,b); or vlsubtract(a,a,b); */
-void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
-{
-  tMesh *mesh;
-
-  if( (!r) || (!a) || (!b) ) return;
-
-  mesh = r->mesh;
-
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    double *pr, *pa, *pb;
-    int i, n;
-
-    for(n=0; n<r->n; n++)
-    {
-      int ri = r->index[n];
-      int ai = a->index[n];
-      int bi = b->index[n];
-      pr = Vard(node, ri);
-      pa = Vard(node, ai);
-      pb = Vard(node, bi);
-
-      forvari(node, ri, i)
-        pr[i] = pa[i] - pb[i];
-    }
-  }
-  /* subtract times as well */
-  r->time = a->time - b->time;
-}
-
 /* linear combination of two var lists: r = ca*a + cb*b
    catch special cases like ca=0 or cb=0
    if coefficient is zero memory is not accessed */
-void vladd_node(tNode *node,
-                tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
+void vladd(const void *el,
+           tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
 {
   double *pr, *pa, *pb;
   int i, n;
 
   if( (!r) || (!a) || (!b) ) return;
 
-  for(n=0; n<r->n; n++)
+  if(el)
   {
-    int ri = r->index[n];
-    int ai = a->index[n];
-    int bi = b->index[n];
-    pr = Vard(node, ri);
+    const tElm *elm = el;
+    for(n=0; n<r->n; n++)
+    {
+      int ri = r->index[n];
+      int ai = a->index[n];
+      int bi = b->index[n];
+      pr = Vard(elm, ri);
 
-    if(ca == 0 && cb == 0)
-    {
-      forvari(node, ri, i) pr[i] = 0;
-    }
-    else if(ca == 0)
-    {
-      pb = Vard(node, bi);
-      forvari(node, ri, i) pr[i] = cb * pb[i];
-    }
-    else if(cb == 0)
-    {
-      pa = Vard(node, ai);
-      forvari(node, ri, i) pr[i] = ca * pa[i];
-    }
-    else
-    {
-      pa = Vard(node, ai);
-      pb = Vard(node, bi);
-      forvari(node, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
+      if(ca == 0 && cb == 0)
+      {
+        forvari(elm, ri, i) pr[i] = 0;
+      }
+      else if(ca == 0)
+      {
+        pb = Vard(elm, bi);
+        forvari(elm, ri, i) pr[i] = cb * pb[i];
+      }
+      else if(cb == 0)
+      {
+        pa = Vard(elm, ai);
+        forvari(elm, ri, i) pr[i] = ca * pa[i];
+      }
+      else
+      {
+        pa = Vard(elm, ai);
+        pb = Vard(elm, bi);
+        forvari(elm, ri, i) pr[i] = ca * pa[i] + cb * pb[i];
+      }
     }
   }
-}
-
-/* add for all my leaf nodes */
-void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
-{
-  tMesh *mesh;
-
-  if( (!r) || (!a) || (!b) ) return;
-
-  mesh = r->mesh;
-
-  formylnodes(mesh)
+  else
   {
-    tNode *node = MyLnode;
-    vladd_node(node, r, ca,a, cb,b);
+    tMesh *mesh = r->mesh;
+    formyelms(mesh) vladd(MyElm, r, ca,a, cb,b);
+    /* add times as well */
+    if(ca == 0 && cb == 0) r->time = 0.0;
+    else if(ca == 0)       r->time = cb * b->time;
+    else if(cb == 0)       r->time = ca * a->time;
+    else                   r->time = ca * a->time + cb * b->time;
   }
-  /* add times as well */
-  if(ca == 0 && cb == 0) r->time = 0.0;
-  else if(ca == 0)       r->time = cb * b->time;
-  else if(cb == 0)       r->time = ca * a->time;
-  else                   r->time = ca * a->time + cb * b->time;
 }
-
 
 /* wrapper for single variable: r = ca*a + cb*b (ia/b/r is index of a/b/r) */
 void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
@@ -948,112 +860,92 @@ void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
   vlpushone(a, ia);
   vlpushone(b, ib);
   vlpushone(r, ir);
-  vladd(r, ca,a, cb,b);
+  vladd(NULL, r, ca,a, cb,b);
   vlfree(a);
   vlfree(b);
   vlfree(r);
 }
 
-/* add second var list to first on one node: r += ca*a
+/* add second var list to first on one elm: r += ca*a
    with special treatment for ca = 1 and ca = -1 */
-void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a)
+void vladdto(const void *el, tVarList *r, const double ca, tVarList *a)
 {
   int i, n;
 
   if(ca == 0) return;
   if( (!r) || (!a) ) return;
 
-  /* loop over vars in varlists */
-  for(n=0; n<r->n; n++)
+  if(el)
   {
-    int ri = r->index[n];
-    int ai = a->index[n];
-    double *pr = Vard(node, ri);
-    double *pa = Vard(node, ai);
+    const tElm *elm = el;
+    /* loop over vars in varlists */
+    for(n=0; n<r->n; n++)
+    {
+      int ri = r->index[n];
+      int ai = a->index[n];
+      double *pr = Vard(elm, ri);
+      double *pa = Vard(elm, ai);
 
-    if(ca == 1)
-    {
-      forvari(node, ri, i) pr[i] += pa[i];
-    }
-    else if(ca == -1)
-    {
-      forvari(node, ri, i) pr[i] -= pa[i];
-    }
-    else
-    {
-      forvari(node, ri, i) pr[i] += ca * pa[i];
+      if(ca == 1)
+      {
+        forvari(elm, ri, i) pr[i] += pa[i];
+      }
+      else if(ca == -1)
+      {
+        forvari(elm, ri, i) pr[i] -= pa[i];
+      }
+      else
+      {
+        forvari(elm, ri, i) pr[i] += ca * pa[i];
+      }
     }
   }
-}
-
-/* add second var list to first: r += ca*a
-   special treatment for ca = 1 and ca = -1 */
-void vladdto(tVarList *r, const double ca, tVarList *a)
-{
-  tMesh *mesh;
-
-  if( (!r) || (!a) ) return;
-
-  mesh = r->mesh;
-
-  if(ca == 0) return;
-
-  formylnodes(mesh)
+  else
   {
-    tNode *node = MyLnode;
-    vladdto_node(node, r, ca, a);
+    tMesh *mesh = r->mesh;
+    formyelms(mesh) vladdto(MyElm, r, ca,a);
+    /* add times as well */
+    r->time += ca * a->time;
   }
 
-  /* add times as well */
-  r->time += ca * a->time;
 }
 
-/* add second var list to first on node surface: r += ca*a */
-void vladdto_onfaces_node(tNode *node, tVarList *r,
-                          const double ca, tVarList *a)
+/* add second var list to first on elm surface: r += ca*a */
+void vladdto_onfaces(const void *el, tVarList *r,
+                     const double ca, tVarList *a)
 {
   int l;
-  int *n = node->n;
 
   if(ca == 0) return;
   if( (!r) || (!a) ) return;
 
-  /* loop over vars in varlists */
-  for(l=0; l<min2(r->n, a->n); l++)
+  if(el)
   {
-    int ri = r->index[l];
-    int ai = a->index[l];
-    double *pr = Vard(node, ri);
-    double *pa = Vard(node, ai);
-    int i,j,k, ijk;
-
-    forfacepoints(i,j,k, n)
+    const tElm *elm = el;
+    const int *n = elm->n;
+    /* loop over vars in varlists */
+    for(l=0; l<min2(r->n, a->n); l++)
     {
-      ijk = Ind_n(i,j,k,n);
-      pr[ijk] += ca * pa[ijk];
+      int ri = r->index[l];
+      int ai = a->index[l];
+      double *pr = Vard(elm, ri);
+      double *pa = Vard(elm, ai);
+      int i,j,k, ijk;
+
+      forfacepoints(i,j,k, n)
+      {
+        ijk = Ind_n(i,j,k,n);
+        pr[ijk] += ca * pa[ijk];
+      }
     }
   }
-}
-
-/* add second var list to first on all node surfaces: r += ca*a */
-void vladdto_onfaces(tVarList *r, const double ca, tVarList *a)
-{
-  tMesh *mesh;
-
-  if( (!r) || (!a) ) return;
-
-  mesh = r->mesh;
-
-  if(ca == 0) return;
-
-  formylnodes(mesh)
+  else
   {
-    tNode *node = MyLnode;
-    vladdto_onfaces_node(node, r, ca, a);
+    tMesh *mesh = r->mesh;
+    formyelms(mesh) vladdto_onfaces(MyElm, r, ca,a);
+    /* add times as well */
+    r->time += ca * a->time;
   }
-
-  /* add times as well */
-  r->time += ca * a->time;
 }
 
 

@@ -210,18 +210,14 @@ tVarList *AddDuplicate(tVarList *vl, const char *postfix,
                        int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones);
-void vlsetconstant_node(tNode *node, tVarList *u, const double c);
-void vlsetconstant(tVarList *u, const double c);
-void vlcopy_node(tNode *node, tVarList *v, tVarList *u);
-void vlcopy(tVarList *v, tVarList *u);
-void vladd_node(tNode *node,
-                tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
-void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
-void vladdto_node(tNode *node, tVarList *r, const double ca, tVarList *a);
-void vladdto(tVarList *r, const double ca, tVarList *a);
-void vladdto_onfaces_node(tNode *node, tVarList *r,
-                          const double ca, tVarList *a);
-void vladdto_onfaces(tVarList *r, const double ca, tVarList *a);
+
+void vlsetconstant(const void *el, tVarList *u, const double c);
+void vlcopy(const void *el, tVarList *v, tVarList *u);
+void vladd(const void *el,
+           tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
+void vladdto(const void *el, tVarList *r, const double ca, tVarList *a);
+void vladdto_onfaces(const void *el, tVarList *r,
+                     const double ca, tVarList *a);
 intList *vl2intList(tVarList *v);
 
 /* utilities.c */
