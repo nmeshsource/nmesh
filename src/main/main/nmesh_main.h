@@ -212,13 +212,15 @@ tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones);
 
 void vlsetconst(const void *el, tVarList *u, const double c);
-//#define vlsetconstant_node(node, u, c) vlsetconstant((node), (u), (c))
+#define vlsetconstant_node(node, u, c) vlsetconst((node), (u), (c))
+#define vlsetconstant(u, c) vlsetconst(NULL, (u), (c))
 void vlcopy(const void *el, tVarList *v, tVarList *u);
 void vladd(const void *el,
            tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
 void vladdto(const void *el, tVarList *r, const double ca, tVarList *a);
 void vladdto_onfaces(const void *el, tVarList *r,
                      const double ca, tVarList *a);
+#define vladdto_onfaces_node(node, r, ca, a) vladdto_onfaces((node), (r), (ca), (a))
 intList *vl2intList(tVarList *v);
 
 /* utilities.c */

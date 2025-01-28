@@ -69,7 +69,7 @@ int coordinates_set_divb_J_sqrtgdiag_n(tNode *node)
       /* tmp2 = \partial_{\bar{i}} tmp1 */
       basis_var_deriv1(node, ib, itmp1, itmp2, NULL);
       /* divb_J_sqrtgdiag_n += tmp2 */
-      vladdto_node(node, vldivb_J_sqrtgdiag_n, 1., vltmp2);
+      vladdto(node, vldivb_J_sqrtgdiag_n, 1., vltmp2);
     }
     vldropn(vldivb_J_sqrtgdiag_n, 1);
   }
