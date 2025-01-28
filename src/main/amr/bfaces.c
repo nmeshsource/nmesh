@@ -465,10 +465,10 @@ void find_external_faces_of_pat(tPat *pat, double L,
   }
 
   /* list that will contain other patches */
-  opl = alloc_intList();
+  opl = intList_alloc();
 
   /* make opl that contains all pats except this one */
-  forpatches(mesh, i) if(i!=pat->p) unionpush_intList(opl, i);
+  forpatches(mesh, i) if(i!=pat->p) intList_unionpush(opl, i);
 
   /* make a grid of points, that excludes endpoints */
   for(dir=0; dir<3; dir++)
@@ -565,7 +565,7 @@ void find_external_faces_of_pat(tPat *pat, double L,
     }
   } /* end loop over directions */
 
-  free_intList(opl);
+  intList_free(opl);
 }
 
 
@@ -588,7 +588,7 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
   int dd;
   int i,j,k, plane, li, ret0, ret, of;
   int face[6];
-  intList *opl = alloc_intList(); /* list that contains other patches*/
+  intList *opl = intList_alloc(); /* list that contains other patches*/
   int op, nbfaces;
   double oX[3];
 
@@ -616,7 +616,7 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
       bface = add_empty_bface(pat, f);
       bface->op = op;
     }
-    unionpush_intList(opl, op);
+    intList_unionpush(opl, op);
   }
   /* add one more empty bface for outer boundary points that
      are not in contact with any other pat */
@@ -788,7 +788,7 @@ int set_bfaces_on_patface(tPat *pat, double L, int f)
   nbfaces = 0;
   for(bface=pat->bfaces[f]; bface; bface=bface->next) nbfaces++;
 
-  free_intList(opl);
+  intList_free(opl);
 
   return nbfaces;
 }

@@ -35,25 +35,25 @@ tMesh *make_empty_mesh(int pr)
 int choose_patch_points(tMesh *mesh, int p)
 {
   int ret;
-  intList *pl = alloc_intList();
+  intList *pl = intList_alloc();
 
   /* push all ints from amr_uniform_p into pl */
   str_to_intList(Gets(Par("amr_uniform_p")), " ", pl);
 
   /* now check if patch p is mentioned in amr_uniform_p */
-  if(in_intList(pl, p))
+  if(intList_in(pl, p))
     ret = P_UNIFORM;
   else
     ret = P_LGL; /* default is Legendre Gauss-Lobatto */
 
-  free_intList(pl);
+  intList_free(pl);
   return ret;
 }
 
 /* set use_fv on some nodes */
 int amr_set_use_fv_flag(tMesh *mesh)
 {
-  intList *pl = alloc_intList();
+  intList *pl = intList_alloc();
 
   /* push all ints from scalarwave1_fv_p into pl */
   str_to_intList(Gets(Par("amr_fv_p")), " ", pl);
@@ -62,7 +62,7 @@ int amr_set_use_fv_flag(tMesh *mesh)
   {
     tNode *node = MyLnode;
     int p = node->pat->p;
-    int use_fv = in_intList(pl, p);
+    int use_fv = intList_in(pl, p);
 
     if(use_fv)
     {
@@ -70,7 +70,7 @@ int amr_set_use_fv_flag(tMesh *mesh)
       node->dat->info->use_fv = 1;
     }
   }
-  free_intList(pl);
+  intList_free(pl);
   return 0;
 }
 
