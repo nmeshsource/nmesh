@@ -52,20 +52,20 @@ LIST(TYP) *FN(LIST(TYP),duplicate)(LIST(TYP) *v);
 int FN(LIST(TYP),in)(LIST(TYP) *v, TYP vi);
 int FN(LIST(TYP),index)(LIST(TYP) *v, TYP vi);
 int FN(LIST(TYP),index_prop)(LIST(TYP) *v, int i0,
-                             int (*prop)(), //(const void *obj, TYP vi),
+                             int (*prop)(const void *obj, TYP vi),
                              const void *obj);
 void FN(LIST(TYP),copy)(LIST(TYP) *dest, LIST(TYP) *src,
-                        void (*copy)(), //(const void *obj, TYP d, TYP s),
+                        void (*copy)(const void *obj, TYP d, TYP s),
                         const void *obj);
 void FN(LIST(TYP),add)(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
-                       void (*add)(), //(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
+                       void (*add)(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
                        const void *obj);
 void FN(LIST(TYP),addto)(LIST(TYP) *r, double ca, LIST(TYP) *a,
-                         void (*addto)(), //(const void *obj, TYP r, double ca, TYP a),
+                         void (*addto)(const void *obj, TYP r, double ca, TYP a),
                          const void *obj);
-void FN(LIST(TYP),freeclear)(LIST(TYP) *r, void (*Free)(), const void *obj);
-void FN(LIST(TYP),freeall)(LIST(TYP) *r, void (*Free)(), const void *obj);
+void FN(LIST(TYP),freeclear)(LIST(TYP) *r, void (*Free)(TYP r));
+void FN(LIST(TYP),freeall)(LIST(TYP) *r, void (*Free)(TYP r));
 
 /* e.g.: if TYP = int 
    LIST(TYP) FN(LIST(TYP),alloc)(void)

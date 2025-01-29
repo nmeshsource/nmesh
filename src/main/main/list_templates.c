@@ -194,14 +194,14 @@ int FN(LIST(TYP),index)(LIST(TYP) *v, TYP vi)
 /* return index of first element in list v that has prop returning 1,
    we start checking with element i0, returns -1 if prop returns 0 for all in v */
 /* the function prop could be as simple as:
-   int prop(void *p, int vi)
+   int prop(const void *p, int vi)
    {
-     int *pi = (int *) p;
+     const int *pi = (const int *) p;
      return (vi == *pi);
    }
 */
 int FN(LIST(TYP),index_prop)(LIST(TYP) *v, int i0,
-                             int (*prop)(), //(const void *obj, TYP vi),
+                             int (*prop)(const void *obj, TYP vi),
                              const void *obj)
 {
   int i;
@@ -212,68 +212,56 @@ int FN(LIST(TYP),index_prop)(LIST(TYP) *v, int i0,
 }
 
 /* copy contents of src into dest, so that dest = src
-   We need to pass in a func copy that know how to copy list elements.
-   e.g. for ints it could be just:
-   void copy(int d, int s){ d = s; }
+   We need to pass in a func copy that knows how to copy list elements.
+   e.g. for TYP=int * it could be just:
+   void copy(const void *obj, int *d, int *s){ *d = *s; }
 */
 void FN(LIST(TYP),copy)(LIST(TYP) *dest, LIST(TYP) *src,
-                        void (*copy)(), //(const void *obj, TYP d, TYP s),
+                        void (*copy)(const void *obj, TYP d, TYP s),
                         const void *obj)
 {
   int i;
   for(i=0; i<dest->n; i++)
-  {
-    if(obj) copy(obj, dest->e[i], src->e[i]); /* func that knows how to copy */
-    else    copy(dest->e[i], src->e[i]);
-  }
+    copy(obj, dest->e[i], src->e[i]); /* func that knows how to copy */
 }
 
 /* add contents: r = ca*a + cb*b */
 void FN(LIST(TYP),add)(LIST(TYP) *r, double ca, LIST(TYP) *a,
                        double cb, LIST(TYP) *b,
-                       void (*add)(), //(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
+                       void (*add)(const void *obj, TYP r, double ca, TYP a, double cb, TYP b),
                        const void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
-  {
-    if(obj) add(obj, r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
-    else    add(r->e[i], ca,a->e[i], cb,b->e[i]);
-  }
+    add(obj, r->e[i], ca,a->e[i], cb,b->e[i]); /* func that adds */
 }
 
 /* add to contents: r += ca*a */
 void FN(LIST(TYP),addto)(LIST(TYP) *r, double ca, LIST(TYP) *a,
-                         void (*addto)(), //(const void *obj, TYP r, double ca, TYP a),
+                         void (*addto)(const void *obj, TYP r, double ca, TYP a),
                          const void *obj)
 {
   int i;
   for(i=0; i<r->n; i++)
-  {
-    if(obj) addto(obj, r->e[i], ca,a->e[i]); /* func that adds to r */
-    else    addto(r->e[i], ca,a->e[i]);
-  }
+    addto(obj, r->e[i], ca,a->e[i]); /* func that adds to r */
 }
 
 /* free contents of r */
-void FN(LIST(TYP),freeclear)(LIST(TYP) *r, void (*Free)(), const void *obj)
+void FN(LIST(TYP),freeclear)(LIST(TYP) *r, void (*Free)(TYP r))
 {
   if(Free && r)
   {
     int i;
     for(i=0; i<r->n; i++)
-    {
-      if(obj) Free(obj, r->e[i]); /* func that frees r->e[i] */
-      else    Free(r->e[i]);
-    }
+      Free(r->e[i]); /* func that frees r->e[i] */
   }
   FN(LIST(TYP),clear)(r);
 }
 
 /* free contents of r and then r itself */
-void FN(LIST(TYP),freeall)(LIST(TYP) *r, void (*Free)(), const void *obj)
+void FN(LIST(TYP),freeall)(LIST(TYP) *r, void (*Free)(TYP r))
 {
-  FN(LIST(TYP),freeclear)(r, Free, obj);
+  FN(LIST(TYP),freeclear)(r, Free);
   FN(LIST(TYP),free)(r);
 }
 

@@ -91,10 +91,16 @@ int ExitIfParBanned(const char *name)
   return 0;
 }
 
+/* undo the calloc in BanPar */
+void pBanned_free(tBannedPar *bp)
+{
+  free(bp);
+}
+
 /* free all in bannedpars */
 int FreeBannedParList(tMesh *mesh)
 {
-  pBannedList_freeall(bannedpars, free, NULL);
+  pBannedList_freeall(bannedpars, pBanned_free);
   bannedpars = NULL;
   return 0;
 }

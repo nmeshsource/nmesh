@@ -127,13 +127,13 @@ int evolve_free_evosys(tMesh *mesh)
 
   /* free memory in varlists */
   printf("Freeing extra variable lists for evolution:\n");
-  pVLList_freeall(evosys->u, vlfree,0); /* free list and its content */
-  pVLList_freeall(evosys->w, vlfree,0); /* free list and its content */
-  pVLList_freeall(evosys->rhs, vlfree,0);
-  pVLList_freeall(evosys->u_p, vlfree,0);
+  pVLList_freeall(evosys->u, vlfree); /* free list and its content */
+  pVLList_freeall(evosys->w, vlfree); /* free list and its content */
+  pVLList_freeall(evosys->rhs, vlfree);
+  pVLList_freeall(evosys->u_p, vlfree);
   for(i=0; i<NEVOTEMP; i++)
-    pVLList_freeall(evosys->s[i], vlfree,0);
-  pVLList_freeall(evosys->x, vlfree,0);
+    pVLList_freeall(evosys->s[i], vlfree);
+  pVLList_freeall(evosys->x, vlfree);
 
   /* free Lists */
   printf("Freeing rhs lists for evolution:\n");
