@@ -17,7 +17,13 @@ Maybe this could work:
   recompute VOLRHS r with FV
   recompute new u (e.g. u += r dt/6)
 *now add SURFRHS contribution
+*check u for trouble again
+*if DG and trouble:
+  undo addition of r to u (e.g. u -= r dt/6)
+  convert u from DG to FV
+  recompute SURFRHS r with FV
+  recompute new u, i.e. add surface r to u
 
 +All is local. We never need surface communication to decide if there is
  trouble!!!
-+We can take substep back locally and never for all elements.
++We can take substep back locally and never need to go back for all elements.
