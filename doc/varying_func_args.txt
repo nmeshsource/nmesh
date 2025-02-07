@@ -1,0 +1,57 @@
+QUESTION:
+===￼
+I have two functions with variable number and types of arguments
+
+double my_func_one(double x, double a, double b, double c)
+{ return x + a + b + c }
+
+double my_func_two(double x, double p[], double c)
+{ return x + p[0] + p[1] + c }
+
+I want to use a pointer to a function to the functions I defined above based
+on a some condition getting true e.g.
+
+if (condition_1)
+   pfunc = my_func_one;
+else if (condition_2)
+   pfunc = my_func_two;
+
+ // The function that will use the function I passed to it
+ swap_function(a, b, pfunc);
+
+My question is, for this scenario, Can I at all define a function pointer?
+If yes, how?
+
+My understanding is that the prototype of function pointer should be the
+same for all those functions it CAN be pointed to.
+
+typedef double (*pfunction)(int, int);
+In my case they are not the same. Is there any other way to do this?
+
+
+ANS:
+====￼
+The cleanest way to do it is to use a union:
+
+typedef union {
+  double (*func_one)(double x, double a, double b, double c);
+  double (*func_two)(double x, double p[], double c);
+} func_one_two;
+
+Then you can initialize an instance of the union, and include information to
+the swap_function function to say which field is valid:
+
+func_one_two func;
+
+if (condition_1)
+   func.func_one = my_func_one;
+else if (condition_2)
+   func.func_two = my_func_two;
+
+ // The function that will use the function I passed to it
+ swap_function(a, b, func, condition_1);
+
+This assumes that swap_function can know based on condition_1 being false
+that it should assume condition_2. Note that the union is passed by value;
+it's only a function pointer in size after all so that's not more expensive
+than passing a pointer to it.
