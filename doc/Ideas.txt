@@ -1,0 +1,23 @@
+
+Improve trouble score:
+======================
+1st trouble score implementation in nmesh works like this:
+----------------------------------------------------------
+*do a full RK step
+*check for trouble
+*if DG and trouble, redo entire RK step in all elements
+
+Maybe this could work:
+----------------------
+*get VOLRHS r for a RK substep
+*compute new substep u (e.g. u += r dt/6)
+*check u for trouble
+*if DG and trouble:
+  undo addition of r to u (e.g. u -= r dt/6)
+  recompute VOLRHS r with FV
+  recompute new u (e.g. u += r dt/6)
+*now add SURFRHS contribution
+
++All is local. We never need surface communication to decide if there is
+ trouble!!!
++We can take substep back locally and never for all elements.
