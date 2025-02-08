@@ -7,25 +7,41 @@
 #define PR 1
 
 
-/* func pointer for numerical flux */
-void (*burgers1_numflux)(tDGinfo *d);
+
+/* global vars/pars for burgers1.c */
+tburgers1 burgers1[1];
+
+
+/* func to init global vars/pars */
+int burgers1_init_global_pars(tMesh *mesh)
+{
+  int d;
+  char *advdir;
+  double nd[3];
+
+  PRFs(":\n");
+
+  advdir = Gets(Par("burgers1_direction"));
+  /* prop. dir.*/
+  sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
+  for(d=0; d<3; d++) burgers1->direction[d] = nd[d];
+
+  printf(" burgers1->direction = {");
+  for(d=0; d<3; d++) printf(" %.16g", burgers1->direction[d]);
+  printf(" }\n");
+
+  /* choose numerical flux */
+  burgers1->numflux = numflux1d_scalarGodunov;
+
+  return 0;
+}
 
 
 /* flux in direction norm */
 void burgers1_flux1d(tNode *node, int ncons, double *f, double norm[3],
                      double *u)
 {
-  static int firstcall = 1;
-  static double nd[3];
-
-  if(firstcall)
-  {
-    tMesh *mesh = node->pat->mesh;
-    char *advdir = Gets(Par("burgers1_direction"));
-    /* prop. dir.*/
-    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
-    firstcall = 0;
-  }
+  double *nd = burgers1->direction;
 
   /* flux times norm */
   f[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * 0.5*u[0]*u[0];
@@ -35,17 +51,7 @@ void burgers1_flux1d(tNode *node, int ncons, double *f, double norm[3],
 void burgers1_eigenval1d(tNode *node, int ncons, double *lam, double norm[3],
                          double *u)
 {
-  static int firstcall = 1;
-  static double nd[3];
-
-  if(firstcall)
-  {
-    tMesh *mesh = node->pat->mesh;
-    char *advdir = Gets(Par("burgers1_direction"));
-    /* prop. dir.*/
-    sscanf(advdir, "%lg %lg %lg", &(nd[0]), &(nd[1]), &(nd[2]));
-    firstcall = 0;
-  }
+  double *nd = burgers1->direction;
 
   /* eigenvalue */
   lam[0] = (norm[0]*nd[0] + norm[1]*nd[1] + norm[2]*nd[2]) * u[0];
@@ -199,7 +205,7 @@ int burgers1_surf_rhs_u(tNode *node, tEvoVars *evv)
   tVarList *vlu = EvoVars_vlu(evv);
   /* add boundary flux terms */
   dg_add_surface_fluxes(node, vlr, vlu, NULL,
-                        burgers1_fluxes_pt, burgers1_numflux);
+                        burgers1_fluxes_pt, burgers1->numflux);
 
   /* impose outer BC */
   burgers1_u_BC(node, vlr, vlu);
@@ -217,11 +223,10 @@ int burgers1_init(tMesh *mesh)
   int ix =  Ind("x");
   int iue = Ind("burgers1_u_err");
   tVarList *vlu = vlalloc(mesh);
-  char *advdir = Gets(Par("burgers1_direction"));
-  double nx,ny,nz;
-
-  /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
+  int limiter = Par("burgers1_limiter");
+  double nx = burgers1->direction[0]; /* prop. dir.*/
+  double ny = burgers1->direction[1];
+  double nz = burgers1->direction[2];
 
   PRF;printf(": dt = %g\n", mesh->dt);
 
@@ -252,12 +257,20 @@ int burgers1_init(tMesh *mesh)
   }
 
   /* register u and its RHS with evolve */
-  evolve_register_subsys_u_rhs_lim(mesh, vlu, burgers1_vol_rhs_u,
-                  burgers1_surf_rhs_u, limdata_MRS_evv, limiter_MRS_evv);
+  evolve_register_vl(vlu);
+  evolve_SetFun(VOLRHS,  burgers1_vol_rhs_u,  vlu);
+  evolve_SetFun(SURFRHS, burgers1_surf_rhs_u, vlu);
+  if(Getv(limiter, "MRS"))
+  {
+    evolve_SetFun(LIMDATA, limdata_MRS_evv, vlu);
+    evolve_SetFun(LIMITER, limiter_MRS_evv, vlu);
+  }
+  else if(Getv(limiter, "minmodB"))
+  {
+    evolve_SetFun(LIMDATA, limdata_c000_100_010_001_evv, vlu);
+    evolve_SetFun(LIMITER, limiter_minmodB_evv, vlu);
+  }
   evolve_print_evosys(mesh);
-
-  /* choose numerical flux */
-  burgers1_numflux = numflux1d_scalarGodunov;
 
   return 0;
 } 

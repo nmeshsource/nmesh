@@ -12,6 +12,7 @@ int nmesh_burgers1(tMesh *mesh)
   printf("Adding burgers1\n");
 
   /* functions */
+  AddFun(POST_PARAMETERS, burgers1_init_global_pars);
   AddFun(INITIALDATA, burgers1_init);
   AddFun(ANALYZE, burgers1_analyze);
 
@@ -23,6 +24,7 @@ int nmesh_burgers1(tMesh *mesh)
 
   /* parameters */
   AddPar("burgers1_direction", "1 0 0", "propagation direction n^i");
+  AddPar("burgers1_limiter", "MRS", "limiter [none,MRS,minmodB]");
 
   return 0;
 }
