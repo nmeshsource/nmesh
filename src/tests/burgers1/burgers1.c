@@ -30,6 +30,9 @@ int burgers1_init_global_pars(tMesh *mesh)
   for(d=0; d<3; d++) printf(" %.16g", burgers1->direction[d]);
   printf(" }\n");
 
+  /* set index of div var */
+  burgers1->idivf = Ind("burgers1_divf");
+
   /* choose numerical flux */
   burgers1->numflux = numflux1d_scalarGodunov;
 
@@ -58,7 +61,7 @@ void burgers1_eigenval1d(tNode *node, int ncons, double *lam, double norm[3],
 }
 
 /* flux and its derivs for adv. eqn: f^i = n^i u */
-void burgers1_f_df(tNode *node, tVarList *vlu)
+void burgers1_f_divf(tNode *node, tVarList *vlu)
 {
   tMesh *mesh = vlu->mesh;
   int ifx = Ind("burgers1_fx");
@@ -176,6 +179,28 @@ void burgers1_u_BC(tNode *node, tVarList *vlr, tVarList *vlu)
   }
 }
 
+/* compute div of flux */
+void burgers1_set_divf(tNode *node, tVarList *vlu)
+{
+  int use_fv = node->dat->info->use_fv;
+  tMesh *mesh = vlu->mesh;
+  tVarList *vldivf = vlalloc(mesh);
+  vlpush(vldivf, burgers1->idivf);
+
+  if(use_fv)
+  {
+    /* compute d_i f^i with finite vol. methods on one node */
+    fv_divf(node, vldivf, vlu, vlu,NULL, burgers1_rec_u_f_lam,
+            burgers1_fluxes_pt, burgers1->numflux);
+  }
+  else
+  {
+    burgers1_f_divf(node, vlu);
+  }
+
+  vlfree(vldivf);
+}
+
 /* RHS of: d_t u = - d_i f^i */
 int burgers1_vol_rhs_u(tNode *node, tEvoVars *evv)
 {
@@ -190,7 +215,7 @@ int burgers1_vol_rhs_u(tNode *node, tEvoVars *evv)
   int i;
 
   /* compute flux */
-  burgers1_f_df(node, vlu);
+  burgers1_f_divf(node, vlu);
 
   /* RHS at each point */
   forpoints(node, i) r[i] = -divf[i];
@@ -289,7 +314,7 @@ int burgers1_analyze(tMesh *mesh)
   sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
   //nmag2 = (nx*nx + ny*ny + nz*nz);
 
-  if(PR) PRFs("\n");
+  if(0) PRFs("\n");
 
   /*  compute errors */
   formylnodes(mesh)
@@ -315,4 +340,55 @@ int burgers1_analyze(tMesh *mesh)
     }
   }
   return 0;
+}
+
+
+/***********************************************************************/
+/* funcs needed for finite volume method in nmesh */
+/***********************************************************************/
+
+/* function that sets cons vars u, fluxes and eigenvals.
+   In:  fv->nq,qc,npts,im,q_scale,rec1d_p,rec1d_m, d->node,info,i,j,k,face
+   Out: fv->qm_p,qm_m, d->ui,ua,fi,fa,lami,lama */
+void burgers1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d)
+{
+  tNode *node = d->node;
+  //int *n = node->n;
+  int f = d->face;
+  int right_face = f%2;
+  //int ijk = Ind_n(d->i,d->j,d->k, n);
+  int nvars = 1;
+  double norm[3];
+  int l;
+
+  /* get normal at midpoint left or right of ijk */
+  node_normal_from_DGinfo(d, norm);
+
+  /* reconstruct at mid point */
+  //fv_rec1d_q_midpt(fv);
+  fv_rec1d_q_midpt_WENOm_1or2(fv);
+
+  /* in burgers1 q is u, so transfer qm_p,qm_m into ui,ua now */
+
+  /* right face means, use right midpoint */
+  if(right_face)
+    for(l=0; l<fv->nq; l++)
+    {
+      d->ui[l] = fv->qm_p[l];
+      d->ua[l] = fv->qm_m[l];
+    }
+  else
+    for(l=0; l<fv->nq; l++)
+    {
+      d->ui[l] = fv->qm_m[l];
+      d->ua[l] = fv->qm_p[l];
+    }
+
+  /* eigenval in dir norm */
+  burgers1_eigenval1d(node,nvars, d->lami,norm, d->ui);
+  burgers1_eigenval1d(node,nvars, d->lama,norm, d->ua);
+
+  /* get inner and adjacent fluxes fi, fa */
+  burgers1_flux1d(node,nvars, d->fi,norm, d->ui);
+  burgers1_flux1d(node,nvars, d->fa,norm, d->ua);
 }
