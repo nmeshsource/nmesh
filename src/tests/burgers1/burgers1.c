@@ -206,10 +206,10 @@ int burgers1_vol_rhs_u(tNode *node, tEvoVars *evv)
 {
   tVarList *vlr = EvoVars_vlr(evv);
   tVarList *vlu = EvoVars_vlu(evv);
-  tMesh *mesh = vlu->mesh;
+  //tMesh *mesh = vlu->mesh;
   int ir = vlr->index[0];
   //int iu = vlu->index[0];
-  int idivf = Ind("burgers1_divf");
+  int idivf = burgers1->idivf;
   double *r  = Vard(node, ir);
   double *divf = Vard(node, idivf);
   int i;
