@@ -214,8 +214,8 @@ int burgers1_vol_rhs_u(tNode *node, tEvoVars *evv)
   double *divf = Vard(node, idivf);
   int i;
 
-  /* compute flux */
-  burgers1_f_divf(node, vlu);
+  /* set div of flux */
+  burgers1_set_divf(node, vlu);
 
   /* RHS at each point */
   forpoints(node, i) r[i] = -divf[i];
