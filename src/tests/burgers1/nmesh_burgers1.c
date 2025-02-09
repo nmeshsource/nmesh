@@ -18,8 +18,8 @@ int nmesh_burgers1(tMesh *mesh)
 
   /* variables */
   AddEvoVar("burgers1_u", "",     "field we advect");
-  AddAuxVar("burgers1_f", "I",    "f^i = n^i u");
-  AddAuxVar("burgers1_divf", "",   "d_i f^i");
+  AddAuxVar("burgers1_f", "I",    "f^i = n^i u^2/2");
+  AddAuxVar("burgers1_divf", "",  "d_i f^i");
   AddAuxVar("burgers1_u_err", "", "error in u");
 
   /* parameters */
