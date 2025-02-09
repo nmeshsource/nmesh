@@ -17,10 +17,10 @@ int nmesh_burgers1(tMesh *mesh)
   AddFun(ANALYZE, burgers1_analyze);
 
   /* variables */
-  AddEvoVar("burgers1_u", "",     "field we advect");
-  AddAuxVar("burgers1_f", "I",    "f^i = n^i u^2/2");
-  AddAuxVar("burgers1_divf", "",  "d_i f^i");
-  AddAuxVar("burgers1_u_err", "", "error in u");
+  AddEvoVar("burgers1_u",     "",  "field we evolve with Burgers eqn");
+  AddAuxVar("burgers1_f",     "I", "f^i = n^i u^2/2");
+  AddAuxVar("burgers1_divf",  "",  "d_i f^i");
+  AddAuxVar("burgers1_u_err", "",  "error in u");
 
   /* parameters */
   AddPar("burgers1_direction", "1 0 0", "propagation direction n^i");
