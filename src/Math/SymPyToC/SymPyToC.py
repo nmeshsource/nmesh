@@ -1378,7 +1378,8 @@ def replace_varname(s, varstr, repl):
         if ind == -1:
             break
         if ind > 0:
-            letterbefore = s2[ind-1].isidentifier()
+            s2b = s2[ind-1]
+            letterbefore = s2b.isidentifier() or is_0_to_9(s2b)
         else:
             letterbefore = False
         ia = ind + varstr_len
