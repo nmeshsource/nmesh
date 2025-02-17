@@ -1689,7 +1689,7 @@ def write_Eqs(filename, allEqs, AUTOVARS, FinalSimplify=True):
                     ndiv += RHSstr.count('/')
                     nsum += RHSstr.count('+') + RHSstr.count('-')
                     # now write into file
-                    RHSstr = textwrap.fill(RHSstr)
+                    RHSstr = textwrap.fill(RHSstr, width=76, break_long_words=False)
                     if type(prevLHS) == str:
                         f.write('\n')
                     f.write(LHSstr)
