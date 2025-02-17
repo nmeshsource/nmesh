@@ -241,6 +241,7 @@ double det_2_2_array(tArray *aM);
 void var_to_var_times_JtoPower(tNode *node, int ui, int Jpower);
 double Cart_distance_x0_x1(tNode *node,
                            const double x0[3], const double x1[3]);
+double space_diagonal0_length(tNode *node);
 double find_hmin(tNode *node, int *ijk1, int *ijk2);
 double adapt_node_dt_and_mesh_dt(tNode *node, int auto_dt, double dtfac,
                                  double uniform_dtfac);

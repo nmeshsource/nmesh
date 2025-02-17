@@ -1009,6 +1009,18 @@ double Cart_distance_X0_X1(tNode *node, double X0[3], double X1[3])
   return sqrt(dist2);
 }
 
+
+/* Cart. length of space diagonal0 in element */
+double space_diagonal0_length(tNode *node)
+{
+  double X0[] = { node->bbox[0], node->bbox[2], node->bbox[4] };
+  double X1[] = { node->bbox[1], node->bbox[3], node->bbox[5] };
+
+  /* return length of diagonal */
+  return Cart_distance_X0_X1(node, X0,X1);
+}
+
+
 /* Find distance to closest point, but return hmin_old if no point closer
    than hmin_old found. If a point closer than hmin_old exists, write its
    index into *ijk1, and the index of i,j,k into *ijk0,
@@ -1077,12 +1089,10 @@ double distance_to_closest_point(tNode *node, int i, int j, int k,
 double find_hmin(tNode *node, int *ijk0, int *ijk1)
 {
   int *n = node->n;
-  double X0[] = { node->bbox[0], node->bbox[2], node->bbox[4] };
-  double X1[] = { node->bbox[1], node->bbox[3], node->bbox[5] };
   double hmin;
 
   /* set hmin from node diagonal */
-  hmin = Cart_distance_X0_X1(node, X0,X1)/sqrt(3.);
+  hmin = space_diagonal0_length(node)/sqrt(3.);
 
   /* first corner */
   hmin = distance_to_closest_point(node, 0,0,0, hmin, ijk0, ijk1);
