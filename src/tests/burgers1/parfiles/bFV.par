@@ -1,0 +1,63 @@
+###################################################################
+# use FV to simulate Burger's eqn along x-dir
+
+###################################################################
+# modules we use
+
+physics = burgers1
+
+errorexit = abort
+logfile_creation = no
+
+###################################################################
+# evolution
+
+evolve_method = Euler
+
+dt = auto # 0.05
+dtfac = 0.2
+finaltime = 17
+
+###################################################################
+# FV
+
+coordinates_midpoint_data = yes
+amr_uniform_p = 0 1 2 3 4 5 6 7
+amr_fv_p = 0 1 2 3 4 5 6 7
+fv_rec = WENOmZ_2
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 8 BoxMesh Line
+amr_mesh_xc = 7.95
+amr_BoxMesh_dout = 1
+
+amr_dir_active0 = 1
+amr_dir_active1 = 0
+amr_dir_active2 = 0
+amr_n0 = 12
+amr_n1 = 1
+amr_n2 = 1
+
+iterate_parameters = no
+iterate_parameter1 = amr_n0  4 6 8 10 12
+iterate_parameter2 = amr_n1  4 6 8 10 12
+iterate_parameter3 = amr_n2  4 6 8 10 12
+
+###################################################################
+# initial data
+
+###################################################################
+# output
+
+#outputX0Y0Z0coord = Xb
+
+#1doutiter = 1
+1douttime = 0.1
+1dformat = gnuplot
+1doutput = burgers1_u burgers1_u_err burgers1_fx burgers1_fxx
+
+#2doutiter = 1
+#2doutput = burgers1_u burgers1_u_err
+##2dformat = gnuplot xdmf
