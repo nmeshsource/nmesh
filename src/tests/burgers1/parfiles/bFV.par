@@ -1,5 +1,5 @@
 ###################################################################
-# use FV to simulate Burger's eqn along x-dir
+# use FV to simulate shock with Burgers eqn along x-dir
 
 ###################################################################
 # modules we use
