@@ -494,6 +494,17 @@ double evolve_Persson_array_indicator(tArray *u, double u_scale,
   return se;
 }
 
+/* Compute Persson indicator for var iu in node based on first ncoeffs
+   coeffs */
+int evolve_Persson_indicator_ncoeffs(tNode *node, int iu, double u_scale,
+                                     int ncoeffs[3])
+{
+  //tMesh *mesh = node->pat->mesh;  //int fv = node->dat->info->use_fv;
+  return evolve_Persson_array_indicator(VarA(node,iu), u_scale, node->pt_typ,
+                                        ncoeffs);
+}
+
+
 /* Compute Persson trouble for u based on first ncoeffs coeffs */
 int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
                                  int ncoeffs[3], double alpha)
