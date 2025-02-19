@@ -47,8 +47,6 @@ typedef struct tGRIDPOINTS {
 /* structure to hold options for deriv taking */
 typedef struct tDERIVOPT {
   int lop;  /* lopsided stencil?: 0=centered, 1=forward, -1=backward fd */
-  int add;  /* set or add deriv?: 0=set deriv, 1=add deriv to result */
-            //NOTE: add is only implemented cart_divergence so far!
 } tDerivOpt;
 
 

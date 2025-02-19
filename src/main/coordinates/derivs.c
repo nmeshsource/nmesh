@@ -750,11 +750,11 @@ int cart_1partial(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
 }
 
 /* compute Cart. divergence d_i U^i of vector U^i with indices Ux,Uy,Uz
-   put it into var divUi */
+   put result into var divUi if add=0, otherwise add to divUi */
 /* NOTE: maybe one could get d_i U^i from [d_A (sqrt(f) U^A)]/sqrt(f)
    where f is the flat metric in X^A coords. This might need less memory! */
 int cart_divergence(tNode *node, int Ux, int Uy, int Uz,
-                    int divUi, tDerivOpt *opt)
+                    int divUi, int add, tDerivOpt *opt)
 {
   tDat *dat = node->dat;
   tArray *aU;
@@ -776,7 +776,7 @@ int cart_divergence(tNode *node, int Ux, int Uy, int Uz,
   daU[1] = VarA(node, coordinates->itmp1+1);
   daU[2] = VarA(node, coordinates->itmp1+2);
 
-  if(opt && opt->add)
+  if(add)
   {
     /* add x-deriv */
     aU     = dat->v[Ux];
@@ -820,5 +820,5 @@ int cart_divergence(tNode *node, int Ux, int Uy, int Uz,
    where f is the flat metric in X^A coords. This might need less memory! */
 int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt)
 {
-  return cart_divergence(node, Ux,Ux+1,Ux+2, divUi, opt);
+  return cart_divergence(node, Ux,Ux+1,Ux+2, divUi, 0, opt);
 }
