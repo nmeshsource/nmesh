@@ -776,10 +776,22 @@ int cart_divergence(tNode *node, int Ux, int Uy, int Uz,
   daU[1] = VarA(node, coordinates->itmp1+1);
   daU[2] = VarA(node, coordinates->itmp1+2);
 
-  /* set x-deriv in divaU */
-  aU = dat->v[Ux];
-  daU[0] = divaU;
-  array_cart_partials(node, aU, daU, opt);
+  if(opt && opt->add)
+  {
+    /* add x-deriv */
+    aU     = dat->v[Ux];
+    daU[0] = daU0;
+    array_cart_partials(node, aU, daU, opt);
+    dU = Arrd(daU[0]);
+    forpoints(node,i) divU[i] += dU[i];
+  }
+  else
+  {
+    /* set x-deriv in divaU */
+    aU = dat->v[Ux];
+    daU[0] = divaU;
+    array_cart_partials(node, aU, daU, opt);
+  }
 
   /* add y-deriv */
   aU     = dat->v[Uy];

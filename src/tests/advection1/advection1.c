@@ -64,7 +64,7 @@ void advection1_f_df(tNode *node, tVarList *vlu)
   double *fx = Vard(node, ifx);
   double *fy = Vard(node, ifx+1);
   double *fz = Vard(node, ifx+2);
-  tDerivOpt opt[1]; /* options for taking derivs */
+  tDerivOpt opt[1] = {0}; /* options for taking derivs */
   int i;
 
   /* flux at each point */
