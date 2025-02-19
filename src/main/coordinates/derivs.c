@@ -749,11 +749,12 @@ int cart_1partial(tNode *node, int dir, int ui, int dui, tDerivOpt *opt)
   return array_cart_1partial(node, dir, au, dau, opt);
 }
 
-/* compute Cart. divergence d_i U^i of vector U^i with index Ux,
+/* compute Cart. divergence d_i U^i of vector U^i with indices Ux,Uy,Uz
    put it into var divUi */
 /* NOTE: maybe one could get d_i U^i from [d_A (sqrt(f) U^A)]/sqrt(f)
    where f is the flat metric in X^A coords. This might need less memory! */
-int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt)
+int cart_divergence(tNode *node, int Ux, int Uy, int Uz,
+                    int divUi, tDerivOpt *opt)
 {
   tDat *dat = node->dat;
   tArray *aU;
@@ -781,14 +782,14 @@ int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt)
   array_cart_partials(node, aU, daU, opt);
 
   /* add y-deriv */
-  aU     = dat->v[Ux+1];
+  aU     = dat->v[Uy];
   daU[0] = daU0;
   array_cart_partials(node, aU, daU, opt);
   dU = Arrd(daU[1]);
   forpoints(node,i) divU[i] += dU[i];
 
   /* add z-deriv */
-  aU     = dat->v[Ux+2];
+  aU     = dat->v[Uz];
   //daU[0] = daU0;
   array_cart_partials(node, aU, daU, opt);
   dU = Arrd(daU[2]);
@@ -799,4 +800,13 @@ int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt)
   //free_array(daU[2]);
 
   return 1;
+}
+
+/* compute Cart. divergence d_i U^i of vector U^i with index Ux,
+   put it into var divUi */
+/* NOTE: maybe one could get d_i U^i from [d_A (sqrt(f) U^A)]/sqrt(f)
+   where f is the flat metric in X^A coords. This might need less memory! */
+int cart_div3Vector(tNode *node, int Ux, int divUi, tDerivOpt *opt)
+{
+  return cart_divergence(node, Ux,Ux+1,Ux+2, divUi, opt);
 }
