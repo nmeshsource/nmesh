@@ -433,19 +433,13 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
    discontinuous Galerkin methods.
    In 44th AIAA Aerospace Sciences Meeting and Exhibit.
    American Institute of Aeronautics and Astronautics, Inc., 2006. */
-int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
-                                 int ncoeffs[3], double alpha)
+double evolve_Persson_array_indicator(tArray *u, double u_scale,
+                                      int pt_typ[3], int ncoeffs[3])
 {
   tArray *At[3];
   tArray *ca;
-  int i,j,k, n_max;
-  double c2_sum, c2_hi, se, se_lim;
-  int troubled;
-
-  /* The Persson's indicator se calculated below is always negative.
-     So if alpha<0 se_lim=-alpha*log10(n_max)>0. Thus se>=se_lim
-     will never be true, and we always return troubled=0 for alpha<0. */
-  if(alpha < 0.) return 0;
+  int i,j,k; //, n_max;
+  double c2_sum, c2_hi, se;
 
   /* get ana. matrices */
   At3_pt_typ_n(pt_typ, Arrn(u), At);
@@ -482,6 +476,38 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
   /* Persson's indicator */
   se = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
 
+  /* Note: se scales with log10(n) so when using it we should use:
+           se / log10(n_max)
+           where: n_max = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]); */
+
+  //PRFs(": ");pr_nodename(node);printf(" iu=%d: ", iu);
+  //printf("c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
+  //printf(" %g\n", se);
+
+  if(PR)
+  {
+    printf(" c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
+    printf(" %g\n", se);
+  }
+
+  free_array(ca);
+  return se;
+}
+
+/* Compute Persson trouble for u based on first ncoeffs coeffs */
+int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
+                                 int ncoeffs[3], double alpha)
+{
+  double se, se_lim;
+  int n_max, troubled;
+
+  /* The Persson's indicator se is always negative.
+     So if alpha<0 se_lim=-alpha*log10(n_max)>0. Thus se>=se_lim
+     will never be true, and we always return troubled=0 for alpha<0. */
+  if(alpha < 0.) return 0;
+
+  se = evolve_Persson_array_indicator(u, u_scale, pt_typ, ncoeffs);
+
   /* find max of number of points in all 3 dirs for ncoeffs coeffs */
   n_max = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]);
 
@@ -491,15 +517,12 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
   se_lim = -alpha * log10(n_max);
 
   //PRFs(": ");pr_nodename(node);printf(" iu=%d: ", iu);
-  //printf("c2_nm1_sum=%g ", c2_nm1_sum);
-  //printf("c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
   //printf(" %g %g\n", se, se_lim);
 
   /* set troubled flag */
   if(se >= se_lim)
   {
     //char ns[100];
-
     //PRFs(": ");printf("%s iu=%d: ", nodename(node,ns,99), iu);
     //printf(" %g %g\n", se, se_lim);
     troubled = 1;
@@ -511,12 +534,10 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
 
   if(PR)
   {
-    printf(" c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
     printf(" %g %g => %d", se, se_lim, troubled);
     printf("\n");
   }
 
-  free_array(ca);
   return troubled;
 }
 
