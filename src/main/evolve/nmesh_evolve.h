@@ -36,6 +36,8 @@ int evolve_RDMP_trouble(tNode *node, tVarList *vlu, tVarList *vlu_p,
                         double deltafac, double delta0, double epsilon);
 double evolve_Persson_indicator_ncoeffs(tNode *node, int iu, double u_scale,
                                         int ncoeffs[3]);
+double evolve_Pmod_indicator_ncoeffs(tNode *node, int iu, double u_scale,
+                                     int ncoeffs[3]);
 int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
                                    int ncoeffs[3],
                                    double alpha, double alpha_fv);

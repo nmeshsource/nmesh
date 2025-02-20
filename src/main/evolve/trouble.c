@@ -484,15 +484,121 @@ double evolve_Persson_array_indicator(tArray *u, double u_scale,
   //printf("c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
   //printf(" %g\n", se);
 
-  if(PR)
+  if(PR && u_scale<-1.)
   {
-    printf(" c2_hi=%g c2_sum=%g  ", c2_hi, c2_sum);
-    printf(" %g\n", se);
+    PRF;printf(": c2_hi=%g c2_sum=%g   %g\n", c2_hi, c2_sum, se);
   }
 
   free_array(ca);
   return se;
 }
+
+/* reduce n.  IN: n,  OUT: ndec */
+int decrement_nmaxs(const int n[3], int ndec[3])
+{
+  int nmax, ret, d;
+
+  /* find max of number of points in all 3 dirs for ncoeffs coeffs */
+  nmax = max3(n[0], n[1], n[2]);
+
+  /* put decr n into ndec, for each n that reaches nmax, record dir in ret */
+  ret = 0;
+  for(d=0; d<3; d++)
+  {
+    if(n[d]==nmax) { ndec[d] = n[d]-1;  ret |= (1 << d); }
+    else           { ndec[d] = n[d]; }
+  }
+  return ret;
+}
+
+/* similar to evolve_Persson_array_indicator above but look at more than
+   just highest coeffs */
+double evolve_Pmod_array_indicator(tArray *u, double u_scale,
+                                   int pt_typ[3], int ncoeffs[3])
+{
+  tArray *At[3];
+  tArray *ca;
+  int ndec[3];
+  int i,j,k, n_max, ndec_max;
+  double c2_sum, c2_hi, c2_hm1, se, sem1, Pmod;
+
+  /* get ana. matrices */
+  At3_pt_typ_n(pt_typ, Arrn(u), At);
+
+  /* get coeffs of var iu */
+  ca = alloc_array(Arrn(u));
+  basis_array_analysis3_At(At, u, ca);
+
+  /* set the 0th coeff (that corresponds to the node average) to u_scale,
+     so that we get the same result, no matter how high the node average */
+  if(u_scale >= 0.) Arrd(ca)[0] = u_scale * 2.*sqrt(2.);
+
+  /* compute sum of squares of the ncoeffs coeffs */
+  c2_sum = 0.;
+  forijk(i,j,k, ncoeffs)
+  {
+    int ijk = Ind_n(i,j,k, Arrn(u));
+    double co = Arrd(ca)[ijk];
+    c2_sum += co*co;
+  }
+
+  /* compute sum of squares of highest coeffs */
+  c2_hi = 0.;
+  forijk(i,j,k, ncoeffs)
+    if( ((i==ncoeffs[0]-1) && (ncoeffs[0]>1)) ||
+        ((j==ncoeffs[1]-1) && (ncoeffs[1]>1)) ||
+        ((k==ncoeffs[2]-1) && (ncoeffs[2]>1)) )
+    {
+      int ijk = Ind_n(i,j,k, Arrn(u));
+      double co = Arrd(ca)[ijk];
+      c2_hi += co*co;
+    }
+
+  /* "ndec[d] = ncoeffs[d]-1" */
+  decrement_nmaxs(ncoeffs, ndec);
+
+  /* compute sum of squares of 2nd highest coeffs */
+  c2_hm1 = 0.;
+  forijk(i,j,k, ndec)
+    if( ((i==ndec[0]-1) && (ndec[0]>1)) ||
+        ((j==ndec[1]-1) && (ndec[1]>1)) ||
+        ((k==ndec[2]-1) && (ndec[2]>1)) )
+    {
+      int ijk = Ind_n(i,j,k, Arrn(u));
+      double co = Arrd(ca)[ijk];
+      c2_hm1 += co*co;
+    }
+
+  /* Persson indicator's from c2_hi and c2_hm1 */
+  se   = log10( c2_hi / (c2_sum + DBL_MIN) + LOGARGFLOOR );
+  sem1 = log10( c2_hm1 / (c2_sum + DBL_MIN) + LOGARGFLOOR );
+
+  /* default for Pmod is Persson indicator */
+  Pmod = se;
+
+  /* find nmax in all 3 dirs */
+  n_max    = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]);
+  ndec_max = max3(ndec[0],    ndec[1],    ndec[2]);
+
+  /* modify Persson indicator, if se comes out too negative */
+  if(ndec_max>1)
+  {
+    double lg_n_max    = log10(n_max);
+    double lg_ndec_max = log10(ndec_max);
+
+    if( (sem1 * lg_n_max) > (se * lg_ndec_max) )
+      Pmod = sem1 * lg_n_max / lg_ndec_max;
+  }
+
+  if(PR && u_scale<-1.)
+  {
+    PRF;printf(": c2_hi=%g c2_sum=%g   %g\n", c2_hi, c2_sum, Pmod);
+  }
+
+  free_array(ca);
+  return Pmod;
+}
+
 
 /* Compute Persson indicator for var iu in node based on first ncoeffs
    coeffs */
@@ -502,6 +608,16 @@ double evolve_Persson_indicator_ncoeffs(tNode *node, int iu, double u_scale,
   //tMesh *mesh = node->pat->mesh;  //int fv = node->dat->info->use_fv;
   return evolve_Persson_array_indicator(VarA(node,iu), u_scale, node->pt_typ,
                                         ncoeffs);
+}
+
+/* Compute Pmod for var iu in node based on first ncoeffs
+   coeffs */
+double evolve_Pmod_indicator_ncoeffs(tNode *node, int iu, double u_scale,
+                                     int ncoeffs[3])
+{
+  //tMesh *mesh = node->pat->mesh;  //int fv = node->dat->info->use_fv;
+  return evolve_Pmod_array_indicator(VarA(node,iu), u_scale, node->pt_typ,
+                                     ncoeffs);
 }
 
 
