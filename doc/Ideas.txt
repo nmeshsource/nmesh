@@ -27,3 +27,16 @@ Maybe this could work:
 +All is local. We never need surface communication to decide if there is
  trouble!!!
 +We can take substep back locally and never need to go back for all elements.
+
+
+About artificial viscosity (av):
+================================
+*1st implementatation in nmesh adds  mu*d_x^2 u  to RHS
+*mu is O(h) and thus this converges to zero with 1st order
+
+*maybe we could simply use Kreiss-Oliger dissipation, i.e. we could call
+ e.g. dissipation_add_taperedKO_order_min and ignore the fact that our DG
+ grid is not uniform.
+*This would amount to adding  const*d_x^4 g(u)  where g(u) is a function
+ that compresses or stretches u in the x-dir. g arises because DG has a
+ non-uniform grid.
