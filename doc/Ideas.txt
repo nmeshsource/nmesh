@@ -37,6 +37,6 @@ About artificial viscosity (av):
 *maybe we could simply use Kreiss-Oliger dissipation, i.e. we could call
  e.g. dissipation_add_taperedKO_order_min and ignore the fact that our DG
  grid is not uniform.
-*This would amount to adding  const*d_x^4 g(u)  where g(u) is a function
+*This would amount to adding  const*h^3*d_x^4 g(u)  where g(u) is a function
  that compresses or stretches u in the x-dir. g arises because DG has a
  non-uniform grid.
