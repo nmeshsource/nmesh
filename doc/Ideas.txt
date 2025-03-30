@@ -40,3 +40,5 @@ About artificial viscosity (av):
 *This would amount to adding  const*h^3*d_x^4 g(u)  where g(u) is a function
  that compresses or stretches u in the x-dir. g arises because DG has a
  non-uniform grid.
+==> This is implemented in burgersAV, but didn't work so well. Even with
+    filters, there are way more Gibbs oscis than with av.
