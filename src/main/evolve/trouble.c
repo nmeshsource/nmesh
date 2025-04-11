@@ -637,10 +637,14 @@ int evolve_PerssonPmod_array_trouble(tArray *u, double u_scale, int pt_typ[3],
      will never be true, and we always return troubled=0 for alpha<0. */
   if(alpha < 0.) return 0;
 
-  if(mode)
+  switch(mode & 15)
+  {
+  case 1:
     se = evolve_Pmod_array_indicator(u, u_scale, pt_typ, ncoeffs);
-  else
+    break;
+  default:
     se = evolve_Persson_array_indicator(u, u_scale, pt_typ, ncoeffs);
+  }
 
   /* find max of number of points in all 3 dirs for ncoeffs coeffs */
   n_max = max3(ncoeffs[0], ncoeffs[1], ncoeffs[2]);
@@ -650,15 +654,11 @@ int evolve_PerssonPmod_array_trouble(tArray *u, double u_scale, int pt_typ[3],
      for a dg node alpha=4, for a fv node alpha=5 */
   se_lim = -alpha * log10(n_max);
 
-  //PRFs(": ");pr_nodename(node);printf(" iu=%d: ", iu);
-  //printf(" %g %g\n", se, se_lim);
+  if(mode>15) { PRF;printf(": se=%g se_lim=%g\n", se, se_lim); }
 
   /* set troubled flag */
   if(se >= se_lim)
   {
-    //char ns[100];
-    //PRFs(": ");printf("%s iu=%d: ", nodename(node,ns,99), iu);
-    //printf(" %g %g\n", se, se_lim);
     troubled = 1;
   }
   else
