@@ -622,8 +622,8 @@ double evolve_Pmod_indicator_ncoeffs(tNode *node, int iu, double u_scale,
 
 
 /* Compute Persson trouble for u based on first ncoeffs coeffs */
-int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
-                                 int ncoeffs[3], double alpha)
+int evolve_PerssonPmod_array_trouble(tArray *u, double u_scale, int pt_typ[3],
+                                     int ncoeffs[3], double alpha)
 {
   double se, se_lim;
   int n_max, troubled;
@@ -670,7 +670,7 @@ int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
 
 /* Compute Persson trouble for var iu in node based on first ncoeffs
    coeffs */
-int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
+int evolve_PerssonPmod_trouble_ncoeffs(tNode *node, int iu, double u_scale,
                                    int ncoeffs[3],
                                    double alpha, double alpha_fv)
 {
@@ -690,13 +690,13 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
     printf(" %d", fv);
   }
 
-  return evolve_Persson_array_trouble(VarA(node,iu), u_scale, node->pt_typ,
-                                      ncoeffs, alpha_a);
+  return evolve_PerssonPmod_array_trouble(VarA(node,iu), u_scale, node->pt_typ,
+                                          ncoeffs, alpha_a);
 }
 
 /* Compute Persson trouble for var iu in node on dg-grid based on first
    ncoeffs coeffs */
-int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
+int evolve_PerssonPmod_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
                                       int ncoeffs[3],
                                       double alpha, double alpha_fv)
 {
@@ -717,7 +717,7 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     tArray *u_interp;
     int npts, fv_extrap;
 
-    /* since evolve_Persson_array_trouble returns 0 for alpha_fv<0 anyway,
+    /* since evolve_PerssonPmod_array_trouble returns 0 for alpha_fv<0 anyway,
        we do this here already */
     if(alpha_fv < 0.) return 0;
 
@@ -742,17 +742,56 @@ int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     if(fv_extrap) rec1d_uface_to_uin_1_var(node, iu, 0); //extrap back to face
     interp_to_pt_typ(node, iu, pt_typ_dg, npts,INTERP_LAGRANGE,1., u_interp);
     if(fv_extrap) rec1d_uface_to_uin_1_var(node, iu, 1); //undo extrap
-    troubled = evolve_Persson_array_trouble(u_interp, u_scale, pt_typ_dg,
+    troubled = evolve_PerssonPmod_array_trouble(u_interp, u_scale, pt_typ_dg,
                                             ncoeffs, alpha_fv);
     free_array(u_interp);
   }
   else
   {
-    troubled = evolve_Persson_array_trouble(VarA(node,iu), u_scale,
-                                            node->pt_typ, ncoeffs, alpha);
+    troubled = evolve_PerssonPmod_array_trouble(VarA(node,iu), u_scale,
+                                                node->pt_typ, ncoeffs, alpha);
   }
   return troubled;
 }
+
+
+
+
+
+/* Compute Persson trouble for u based on first ncoeffs coeffs */
+int evolve_Persson_array_trouble(tArray *u, double u_scale, int pt_typ[3],
+                                 int ncoeffs[3], double alpha)
+{
+  return evolve_PerssonPmod_array_trouble(u, u_scale, pt_typ, ncoeffs, alpha);
+}
+/* Compute Persson trouble for var iu in node based on first ncoeffs
+   coeffs */
+int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
+                                   int ncoeffs[3],
+                                   double alpha, double alpha_fv)
+{
+  return evolve_PerssonPmod_trouble_ncoeffs(node, iu, u_scale, ncoeffs,
+                                            alpha, alpha_fv);
+}
+
+/* Compute Persson trouble for var iu in node on dg-grid based on first
+   ncoeffs coeffs */
+int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
+                                      int ncoeffs[3],
+                                      double alpha, double alpha_fv)
+
+{
+  return evolve_PerssonPmod_trouble_ncoeffs_dg(node, iu, u_scale, ncoeffs,
+                                               alpha, alpha_fv);
+}
+
+
+
+
+
+
+
+
 
 /* DO NOT USE:
    compute Persson trouble based on all coeffs in node */

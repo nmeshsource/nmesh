@@ -44,8 +44,6 @@ int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
 int evolve_Persson_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
                                       int ncoeffs[3],
                                       double alpha, double alpha_fv);
-int evolve_Persson_trouble(tNode *node, int iu, double u_scale,
-                           double alpha, double alpha_fv);
 int trouble_score(tNode *node, int troubled);
 void trouble_print_if_name(tNode *node, const char *nname,
                            int trbl, const char *text);
