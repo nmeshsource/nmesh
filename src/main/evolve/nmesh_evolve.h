@@ -38,6 +38,14 @@ double evolve_Persson_indicator_ncoeffs(tNode *node, int iu, double u_scale,
                                         int ncoeffs[3]);
 double evolve_Pmod_indicator_ncoeffs(tNode *node, int iu, double u_scale,
                                      int ncoeffs[3]);
+int evolve_PerssonPmod_trouble_ncoeffs(tNode *node, int iu, double u_scale,
+                                       int ncoeffs[3],
+                                       double alpha, double alpha_fv,
+                                       int mode);
+int evolve_PerssonPmod_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
+                                          int ncoeffs[3],
+                                          double alpha, double alpha_fv,
+                                          int mode);
 int evolve_Persson_trouble_ncoeffs(tNode *node, int iu, double u_scale,
                                    int ncoeffs[3],
                                    double alpha, double alpha_fv);
