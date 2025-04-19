@@ -968,8 +968,8 @@ tNode *elm_from_elmname(tMesh *mesh,  char *name)
 int elmname_is(tNode *elm, const char *nname)
 {
   char myname[NLOCS+12];
-  elmname(elm, myname,NLOCS+12); /* get name of elm into myname */
-  if(strcmp(myname, nname)==0)   /* if myname=nname */
+  elmname(elm, myname,NLOCS+12);            /* get name of elm into myname */
+  if( nname && (strcmp(myname, nname)==0) ) /* if myname=nname */
     return 1;
   else
     return 0;
