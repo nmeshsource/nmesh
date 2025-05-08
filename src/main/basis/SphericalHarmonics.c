@@ -118,7 +118,7 @@ void set_YlmTabs(int lmax, double th, double ph, double *ReYtab, double *ImYtab)
   for(l=0; l<=lmax; l++)
   {
     fac = (2*l+1) * oo4pi;
-    for(m=0; m<=l; m++)
+    for(m=0; ; m++)
     {
       i = ind_lm(l,m);
       /* Y_l^m = sqrt(fac) P_l^m exp(I m phi), i.e.:
@@ -127,7 +127,8 @@ void set_YlmTabs(int lmax, double th, double ph, double *ReYtab, double *ImYtab)
       sfac *= sqrt(fac);
       ReYtab[i] = sfac * cos(m*ph); /* now Plm is no longer in ReYtab at i */
       ImYtab[i] = sfac * sin(m*ph);
-      fac /= ((l+m+1)*(l-m)); 
+      if(m>=l) break;
+      fac /= ((l+m+1)*(l-m));
     }
   }
 }
