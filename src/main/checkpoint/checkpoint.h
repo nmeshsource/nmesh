@@ -3,6 +3,8 @@
 
 
 /* checkpoint.c */
+void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, char *pats,
+                                      char **Fcoef_filename);
 void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo);
 void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev);
 
@@ -23,6 +25,7 @@ int checkpoint_save_CRCs(tMesh *mesh, char *fname);
 
 /* checkpoint_load.c */
 int checkpoint_load_patches(tMesh *mesh, char *fname);
+void checkpoint_load_CI_Fcoef(tPat *pat, char *fname);
 int checkpoint_load_elms(tMesh *mesh, char *fname);
 int checkpoint_load_Vars(tMesh *mesh, char *fname, int read_native);
 tVarList *checkpoint_make_vl(FILE *fp, tMesh *mesh);

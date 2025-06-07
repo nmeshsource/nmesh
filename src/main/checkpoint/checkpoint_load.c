@@ -106,6 +106,8 @@ exit(8);
       if(strcmp(par, "dom")==0)   pat->CI->dom = atoi(val);
       if(strcmp(par, "type")==0)  pat->CI->type = atoi(val);
       if(strcmp(par, "use_FSurf")==0)  useF = atoi(val);
+      if(useF) checkpoint_load_CI_Fcoef(pat, fname);
+
       if(strcmp(par, "label")==0 ||
          strcmp(par, "coordinates_get_label(pat)")==0)
       {
@@ -130,6 +132,51 @@ exit(8);
 
   free(buffer);
   return 0;
+}
+
+/* load CI->Fcoef[f] for patch pat */
+void checkpoint_load_CI_Fcoef(tPat *pat, char *fname)
+{
+  tCoordInfo *CI = pat->CI;
+  char *Fcname = cmalloc(strlen(fname)+64);
+  int f;
+
+  for(f=0; f<6; f++)
+  {
+    tArray arrbuf[1] = {0};
+
+    /* free and zero Fcoef */
+    free_array(CI->Fcoef[f]);
+    CI->Fcoef[f] = NULL;
+
+    /* rank0 loads the data from file */
+    if(Rank0)
+    {
+      /* write output file name into Fcname */
+      checkpoint_set_CI_Fcoef_filename(pat, f, fname, &Fcname);
+
+      /* read Fcoef from file Fcname */
+      CI->Fcoef[f] = array_alloc_read(pat->mesh, Fcname, 0);
+    }
+
+    /* copy into arrbuf */
+    if(CI->Fcoef[f]) arrbuf[0] = CI->Fcoef[f][0];
+    //else arrbuf[0] contains all zeros
+
+    /* broadcast arrbuf to all MPI ranks */
+    MCK( nMPI_Bcast(arrbuf,sizeof(arrbuf[0]), nMPI_CHAR, 0) );
+
+    /* alloc and broadcast CI->Fcoef[f] for other ranks,
+       if arrbuf is not all zero */
+    if(arrbuf->size)
+    {
+      if(!Rank0)
+        CI->Fcoef[f] = alloc_array_with_segs(arrbuf->n, arrbuf->Ne, arrbuf->ns);
+      /* broadcast data in CI->Fcoef[f] */
+      MCK( nMPI_Bcast(CI->Fcoef[f]->d, arrbuf->size, nMPI_CHAR, 0) );
+    }
+  }
+  free(Fcname);
 }
 
 

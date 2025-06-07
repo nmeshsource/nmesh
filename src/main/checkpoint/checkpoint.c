@@ -55,6 +55,28 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
   return pl;
 }
 
+/* write output filename for CI->Fcoef into Fcoef_filename */
+void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, char *pats,
+                                      char **Fcoef_filename)
+{
+  char *Fcname = *Fcoef_filename;
+  int headlen;
+
+  /* copy pats without patches_file part*/
+  strcpy(Fcname, pats);
+  Fcname[strlen(pats) - strlen(patches_file)] = 0;
+
+  /* append Fcoef_filehead to Fcname */
+  strcat(Fcname, Fcoef_filehead);
+
+  /* get len of full header */
+  headlen = strlen(Fcname);
+
+  /* complete output file name */
+  sprintf(Fcname+headlen, "%d.%d", f, pat->p);
+}
+
+
 /* return 0 if there is no checkpoint,
    return ret otherwise:
    ret has bit1=2^1 set if checkpoint has patches_file

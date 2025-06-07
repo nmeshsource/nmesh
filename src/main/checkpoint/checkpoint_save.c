@@ -5,9 +5,6 @@
 #include "nmesh.h"
 #include "checkpoint.h"
 
-/* vars from checkpoint.c */
-extern char patches_file[];
-extern char Fcoef_filehead[];
 
 /******************************************************************/
 /* some functions to save nmesh data for checkpoints  */
@@ -156,24 +153,14 @@ void checkpoint_write_CI_Fcoef(tPat *pat, char *fname)
 {
   tCoordInfo *CI = pat->CI;
   char *Fcname = cmalloc(strlen(fname)+64);
-  int headlen;
   int f;
-
-  /* copy fname without patches_file part*/
-  strcpy(Fcname, fname);
-  Fcname[strlen(fname) - strlen(patches_file)] = 0;
-
-  /* append Fcoef_filehead to Fcname */
-  strcat(Fcname, Fcoef_filehead);
-
-  /* get len of full header */
-  headlen = strlen(Fcname);
 
   for(f=0; f<6; f++)
     if(CI->Fcoef[f])
     {
-      /* complete output file name */
-      sprintf(Fcname+headlen, "%d.%d", f, pat->p);
+      /* set output file name in Fcname */
+      checkpoint_set_CI_Fcoef_filename(pat, f, fname, &Fcname);
+
       /* write Fcoef into file Fcname */
       array_write(NULL, CI->Fcoef[f], Fcname);
     }
