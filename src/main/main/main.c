@@ -553,7 +553,7 @@ int inidata_mesh(tMesh *mesh)
     RunFun(POST_CHECKPOINT_LOAD); /* do things right after loading */
     /* Run the things here that are after checkpoint_save_if_needed
        in evolve_mesh, that are not already called after this block.
-       Right now there is not such thing... */
+       Right now there is no such thing... */
   }
   else
   {
