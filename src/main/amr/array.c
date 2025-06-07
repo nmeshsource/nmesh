@@ -423,3 +423,75 @@ double min_array(tArray *A, int *ind)
 {
   return min_in_1d_array(A->d, A->N, ind);
 }
+
+
+/******************************************************************/
+/* functions for array IO */
+/******************************************************************/
+/* write an array into a file */
+int array_write(tMesh *mesh, tArray *array, char *fname)
+{
+  int *n = Arrn(array);
+  int Nt = array->N + array->Ne;
+  int nmemb = Nt * (array->ns);
+  int size1 = sizeof(array->d[0]);
+  FILE *fp;
+  int IObufsz = Geti(Par("fwrite_bufsize"));
+  char *IObuf; /* larger buffer for write */
+
+  /* open destination file */
+  fp = fopen_buf(fname, "wb", &IObuf,IObufsz);
+  if(!fp) errorexits("failed opening %s", fname);
+
+  /* header with some array info */
+  fprintf(fp, "%d\n", n[0]);
+  fprintf(fp, "%d\n", n[1]);
+  fprintf(fp, "%d\n", n[2]);
+  fprintf(fp, "%d\n", array->Ne);
+  fprintf(fp, "%d\n", array->ns);
+  /* write double data */
+  fwrite_little(array->d, size1, nmemb, fp);
+
+  fclose_buf(fp, &IObuf);
+  return 0;
+}
+
+/* allocate and read an array form file*/
+tArray *array_alloc_read(tMesh *mesh, char *fname)
+{
+  tArray *array;
+  int n[3];
+  int Ne, ns, Nt, nmemb;
+  int size1 = sizeof(array->d[0]);
+  char str[1000];
+  FILE *fp;
+  int IObufsz = Geti(Par("fread_bufsize"));
+  char *IObuf; /* larger buffer for write */
+
+  /* open destination file */
+  fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
+  if(!fp) errorexits("failed opening %s", fname);
+
+  /* read header with n, Ne, ns */
+  fgets(str,999, fp);
+  n[0] = atoi(str);
+  fgets(str,999, fp);
+  n[1] = atoi(str);
+  fgets(str,999, fp);
+  n[2] = atoi(str);
+  fgets(str,999, fp);
+  Ne = atoi(str);
+  fgets(str,999, fp);
+  ns = atoi(str);
+
+  /* alloc array */
+  array = alloc_array_with_segs(n, Ne, ns);
+
+  /* read double data */
+  Nt = array->N + array->Ne;
+  nmemb = Nt * (array->ns);
+  fread_little(array->d, size1, nmemb, fp);
+
+  fclose_buf(fp, &IObuf);
+  return 0;
+}
