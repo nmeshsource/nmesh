@@ -436,7 +436,7 @@ int array_write(tMesh *mesh, tArray *array, char *fname)
   int nmemb = Nt * (array->ns);
   int size1 = sizeof(array->d[0]);
   FILE *fp;
-  int IObufsz = Geti(Par("fwrite_bufsize"));
+  int IObufsz = ((mesh) ? Geti(Par("fwrite_bufsize")) : 0);
   char *IObuf; /* larger buffer for write */
 
   /* open destination file */
@@ -465,7 +465,7 @@ tArray *array_alloc_read(tMesh *mesh, char *fname)
   int size1 = sizeof(array->d[0]);
   char str[1000];
   FILE *fp;
-  int IObufsz = Geti(Par("fread_bufsize"));
+  int IObufsz = ((mesh) ? Geti(Par("fread_bufsize")) : 0);
   char *IObuf; /* larger buffer for write */
 
   /* open destination file */
