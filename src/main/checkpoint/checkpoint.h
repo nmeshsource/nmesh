@@ -3,8 +3,8 @@
 
 
 /* checkpoint.c */
-void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, char *pats,
-                                      char **Fcoef_filename);
+void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, const char *pats,
+                                      char *Fcoef_filename);
 void checkpoint_set_nbinfo_fnb_nbelm_loadbal(tMesh *mesh, int reset_nbinfo);
 void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev);
 

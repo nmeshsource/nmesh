@@ -159,7 +159,7 @@ void checkpoint_write_CI_Fcoef(tPat *pat, char *fname)
     if(CI->Fcoef[f])
     {
       /* set output file name in Fcname */
-      checkpoint_set_CI_Fcoef_filename(pat, f, fname, &Fcname);
+      checkpoint_set_CI_Fcoef_filename(pat, f, fname, Fcname);
 
       /* write Fcoef into file Fcname */
       array_write(NULL, CI->Fcoef[f], Fcname);

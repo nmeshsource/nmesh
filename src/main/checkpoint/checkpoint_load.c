@@ -153,7 +153,7 @@ void checkpoint_load_CI_Fcoef(tPat *pat, char *fname)
     if(Rank0)
     {
       /* write output file name into Fcname */
-      checkpoint_set_CI_Fcoef_filename(pat, f, fname, &Fcname);
+      checkpoint_set_CI_Fcoef_filename(pat, f, fname, Fcname);
 
       /* read Fcoef from file Fcname */
       CI->Fcoef[f] = array_alloc_read(pat->mesh, Fcname, 0);
