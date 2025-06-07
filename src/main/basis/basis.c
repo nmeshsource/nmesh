@@ -373,7 +373,8 @@ tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar)
   return Ivar;
 }
 
-/* put 2d integral in directions perpendicular to norm into Ivar */
+/* put 2d integral (\int d^2Xb var) in directions perpendicular to norm
+   into Ivar */
 tArray *array_GLquadrature2(tNode *node, int norm, tArray *var, tArray *Ivar)
 {
   switch(norm)
@@ -393,6 +394,36 @@ tArray *array_GLquadrature2(tNode *node, int norm, tArray *var, tArray *Ivar)
   default:
     errorexit("dir must be 0,1,2");
   }
+  return Ivar;
+}
+
+/* put 2d integral (\int d^2X var) in directions perpendicular to norm
+   into Ivar  */
+tArray *array_GLquadrature2X(tNode *node, int norm, tArray *var, tArray *Ivar)
+{
+  int k;
+  double dXdXb[3];
+  double jac; /* Jacobian between Xb and X is const */
+  dXYZ_dXbYbZb(node, dXdXb);
+  switch(norm)
+  {
+  case 0:
+    jac = fabs(dXdXb[1]*dXdXb[2]);
+    break;
+  case 1:
+    jac = fabs(dXdXb[0]*dXdXb[2]);
+    break;
+  case 2:
+    jac = fabs(dXdXb[0]*dXdXb[1]);
+    break;
+  default:
+    errorexit("dir must be 0,1,2");
+  }
+  /* get \int d^2Xb var */
+  array_GLquadrature2(node, norm, var, Ivar);
+  /* and then multiply by Jacobian to get \int d^2X var */
+  forarray(Ivar,k) Arrd_(Ivar)[k] *= jac;
+
   return Ivar;
 }
 
@@ -419,7 +450,7 @@ double array_nodeaverage(tNode *node, tArray *var)
 }
 
 /* compute 3d integral (\int d^3X var) of array var */
-double array_GLquadratureXYZ3(tNode *node, tArray *var)
+double array_GLquadrature3X(tNode *node, tArray *var)
 {
   double dXdXb[3];
   dXYZ_dXbYbZb(node, dXdXb);
@@ -448,7 +479,7 @@ double var_nodeaverage(tNode *node, int ui)
 }
 
 /* compute 3d integral (\int d^3X u) of var ui */
-double var_GLquadratureXYZ3(tNode *node, int ui)
+double var_GLquadrature3X(tNode *node, int ui)
 {
   double dXdXb[3];
   dXYZ_dXbYbZb(node, dXdXb);

@@ -70,9 +70,9 @@ tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar);
 double array_GLquadrature3(tNode *node, tArray *var);
 double array_nodeaverage(tNode *node, tArray *var);
 double var_GLquadrature3(tNode *node, int ui);
-double array_GLquadratureXYZ3(tNode *node, tArray *var);
+double array_GLquadrature3X(tNode *node, tArray *var);
 double var_nodeaverage(tNode *node, int ui);
-double var_GLquadratureXYZ3(tNode *node, int ui);
+double var_GLquadrature3X(tNode *node, int ui);
 
 /* Legendre.c */
 double basis_LegendreP(int l, double x, int np);
