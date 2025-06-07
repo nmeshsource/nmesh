@@ -9,8 +9,9 @@ void checkpoint_keep_previous(char *outdir, int pl, char *dirp, int nprev);
 /* checkpoint_save.c */
 int checkpoint_save_pars(tMesh *mesh, char *fname);
 int checkpoint_save_patches(tMesh *mesh, char *fname);
-void checkpoint_write_pat(FILE *fp, tPat *pat);
-void checkpoint_write_CI(FILE *fp, tCoordInfo *CI);
+void checkpoint_write_pat(FILE *fp, tPat *pat, char *fname);
+void checkpoint_write_CI(FILE *fp, tPat *pat, char *fname);
+void checkpoint_write_CI_Fcoef(tPat *pat, char *fname);
 int checkpoint_save_elms(tMesh *mesh, char *fname);
 int checkpoint_write_elms(tMesh *mesh, FILE *fp);
 int checkpoint_save_EvoVars(tMesh *mesh, char *fname);

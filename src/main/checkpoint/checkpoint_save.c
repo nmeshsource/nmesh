@@ -5,6 +5,9 @@
 #include "nmesh.h"
 #include "checkpoint.h"
 
+/* vars from checkpoint.c */
+extern char patches_file[];
+extern char Fcoef_filehead[];
 
 /******************************************************************/
 /* some functions to save nmesh data for checkpoints  */
@@ -78,7 +81,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
   {
     tPat *pat = mesh->pat[p];
 
-    checkpoint_write_pat(fp, pat);
+    checkpoint_write_pat(fp, pat, fname);
     fprintf(fp, "\n");
   }
 
@@ -87,7 +90,7 @@ int checkpoint_save_patches(tMesh *mesh, char *fname)
 }
 
 /* write non-pointer part of tPat */
-void checkpoint_write_pat(FILE *fp, tPat *pat)
+void checkpoint_write_pat(FILE *fp, tPat *pat, char *fname)
 {
   int f;
 
@@ -109,13 +112,14 @@ void checkpoint_write_pat(FILE *fp, tPat *pat)
   //  fprintf(fp, " rnode->pt_typ[%d] = %d\n", d, pat->rnode->pt_typ[d]);
 
   //printCI(pat);
-  checkpoint_write_CI(fp, pat->CI);
+  checkpoint_write_CI(fp, pat, fname);
 }
 
 
 /* write non-pointer part of tCoordInfo */
-void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
+void checkpoint_write_CI(FILE *fp, tPat *pat, char *fname)
 {
+  tCoordInfo *CI = pat->CI;
   int d, f, i, useF=0;
 
   fprintf(fp, " CI->\n");
@@ -141,11 +145,40 @@ void checkpoint_write_CI(FILE *fp, tCoordInfo *CI)
 
   for(f=0; f<6; f++) if(CI->FSurf[f]) { useF = 1; break; }
   fprintf(fp,     "  use_FSurf = %d\n", useF);
+  if(useF) checkpoint_write_CI_Fcoef(pat, fname);
 
   /* this signifies end of patch info, so this needs to be last */
   fprintf(fp,     "  label = %d\n", CI->label);
 }
 
+/* write arrays with coeffs in CI->Fcoef */
+void checkpoint_write_CI_Fcoef(tPat *pat, char *fname)
+{
+  tCoordInfo *CI = pat->CI;
+  char *Fcname = cmalloc(strlen(fname)+64);
+  int headlen;
+  int f;
+
+  /* copy fname without patches_file part*/
+  strcpy(Fcname, fname);
+  Fcname[strlen(fname) - strlen(patches_file)] = 0;
+
+  /* append Fcoef_filehead to Fcname */
+  strcat(Fcname, Fcoef_filehead);
+
+  /* get len of full header */
+  headlen = strlen(Fcname);
+
+  for(f=0; f<6; f++)
+    if(CI->Fcoef[f])
+    {
+      /* complete output file name */
+      sprintf(Fcname+headlen, "%d.%d", f, pat->p);
+      /* write Fcoef into file Fcname */
+      array_write(NULL, CI->Fcoef[f], Fcname);
+    }
+  free(Fcname);
+}
 
 /******************************************************************/
 /* functions to save elms */

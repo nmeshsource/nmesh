@@ -10,6 +10,7 @@
 char chckpt_dir[] = "checkpoint";
 char save_pars_file[] = "save_pars.par";
 char patches_file[]   = "patches.txt";
+char Fcoef_filehead[] = "pat_CI_Fcoef";
 char elms_file[]      = "elms.txt";
 char nbinfo_file[]    = "nbinfo.bin";
 char variables_file[] = "variables.bin";

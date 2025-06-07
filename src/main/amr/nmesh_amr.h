@@ -497,7 +497,7 @@ double Lp_norm_array_reldiff(tArray *A, tArray *B, double p);
 double max_array(tArray *A, int *ind);
 double min_array(tArray *A, int *ind);
 int array_write(tMesh *mesh, tArray *array, char *fname);
-tArray *array_alloc_read(tMesh *mesh, char *fname);
+tArray *array_alloc_read(tMesh *mesh, char *fname, int fatal);
 
 /* print.c */
 void printmesh(tMesh *g);

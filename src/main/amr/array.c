@@ -457,7 +457,7 @@ int array_write(tMesh *mesh, tArray *array, char *fname)
 }
 
 /* allocate and read an array form file*/
-tArray *array_alloc_read(tMesh *mesh, char *fname)
+tArray *array_alloc_read(tMesh *mesh, char *fname, int fatal)
 {
   tArray *array;
   int n[3];
@@ -470,7 +470,11 @@ tArray *array_alloc_read(tMesh *mesh, char *fname)
 
   /* open destination file */
   fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
-  if(!fp) errorexits("failed opening %s", fname);
+  if(!fp)
+  {
+    if(fatal) errorexits("failed opening %s", fname);
+    else      return NULL;
+  }
 
   /* read header with n, Ne, ns */
   fgets(str,999, fp);
