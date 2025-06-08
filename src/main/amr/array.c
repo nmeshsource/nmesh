@@ -109,7 +109,7 @@ void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa)
   switch(dir)
   {
   case 0:
-    mm_array0(Ata, Ba, ABa);  break;
+    mm_array0_saferestrict(Ata, Ba, ABa);  break;
   case 1:
     mm_array1(Ata, Ba, ABa);  break;
   case 2:
@@ -163,7 +163,7 @@ void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa)
     mm_Carray_norestrict(atn0,atn1, bn1, At, B, AB);
 }
 /* same as mm_array0 but decide if we use restrict or not */
-void mm_array0_safe(tArray *Ata, tArray *Ba, tArray *ABa)
+void mm_array0_saferestrict(tArray *Ata, tArray *Ba, tArray *ABa)
 {
   GET_At_A_AB_atn0_atn1_bn0_bn1
 

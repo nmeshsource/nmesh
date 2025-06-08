@@ -481,6 +481,7 @@ void disablevarlist(tVarList *vl);
 /* array.c */
 void mm_array_indir(tArray *Ata, tArray *Ba, int dir, tArray *ABa);
 void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa);
+void mm_array0_saferestrict(tArray *Ata, tArray *Ba, tArray *ABa);
 void mm_array0(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array1(tArray *Aa, tArray *Ba, tArray *ABa);
 void mm_array2(tArray *Aa, tArray *Ba, tArray *ABa);
