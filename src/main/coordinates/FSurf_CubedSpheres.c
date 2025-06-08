@@ -407,6 +407,11 @@ int FSurf_CubSph_set_Ylm(tNode *node, int S0, double *Re_Ylmp, double *Im_Ylmp,
    If var has zero imag. part set Im_vind=-1. */
 int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
                                    int lmax, int Integ_ind)
+//
+//FIXME: we probably only need s=0, replace int Integ_ind by tArray *aInteg
+//
+//int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
+//                                   int lmax, tArray *aInteg)
 {
   tMesh *mesh = Elm_mesh(node);
   tPat *pat = node->pat;
@@ -427,6 +432,7 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   double *Re_Integp;
   double *Im_Integp;
   double *Integ =  Vard(node, Integ_ind);
+  //double *Integ = Arrd(aInteg);
   double *Yp = Vard(node, Ind("Y"));
   double *Zp = Vard(node, Ind("Z"));
   tArray *Re_Integ; // array needed for array_GLquadrature2X
@@ -478,10 +484,10 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
 
       /* We need to compute \int d\phi d\theta \sin(theta) (Y_l^m)^* var .
          Later we actually compute  \int dA dB (Integ).
-         Now \int d\phi d\theta \sin(theta) = \int dA dB Jac
+         Now \int d\phi d\theta \sin(theta) = \int dA dB Jac \sin(theta)
          So we need to multiply by the Jacobian  */
       /* get Theta, Phi and their derivs */
-      ThetaPhi_dThetaPhidAB_of_AB_CubSph(box, A,B, &Theta,&Phi,
+      ThetaPhi_dThetaPhidAB_of_AB_CubSph(pat, A,B, &Theta,&Phi,
                                          &dThetadA,&dThetadB, &dPhidA,&dPhidB);
       Jac = fabs(dThetadA*dPhidB - dThetadB*dPhidA); /* Jacobian */
       fac = Jac * sin(Theta);
@@ -540,6 +546,9 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   if(nYs>=Ng/4) errorexit("decrease lmax!");
   offset = ((box->nnodes/2)*s)/(n0-1);  /* offset for Integs in Integ */
   ijk = offset;
+  //if(nYs>=ArrN(aInteg)) errorexit("decrease lmax!");
+  //offset = ((Ng/2)*s)/(n0-1);  /* offset for Integs in Integ */
+  //ijk = 0;
   i = 0;
   for(l=0; l<=lmax; l++)
   for(m=0; m<=l; m++)
@@ -560,9 +569,9 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
 
 /* take integrals over all six boxes and add them such that they become
    the coeffs in the Ylm expansion */
-int FSurf_CubSph_set_Ylm_coeffs(tGrid *grid, int bi_dom0, int ico)
+int FSurf_CubSph_set_Ylm_coeffs__sgrid(tGrid *grid, int pi_dom0, int ico)
 {
-  tBox *box0 = grid->box[bi_dom0];
+  tBox *box0 = grid->box[pi_dom0];
   int ijk;
 
   /* ijk loop in box0, assumes all 6 boxes have same n0,n1,n2 */
@@ -575,14 +584,14 @@ int FSurf_CubSph_set_Ylm_coeffs(tGrid *grid, int bi_dom0, int ico)
     sum = 0.;
     for(ii=0; ii<6; ii++) /* loop over 6 boxes */
     {
-      tBox *box = grid->box[bi_dom0 + ii];
+      tBox *box = grid->box[pi_dom0 + ii];
       double *co = box->v[ico];
       sum += co[ijk];
     }
     /* now store sum back into co in all 6 boxes */
     for(ii=0; ii<6; ii++)
     {
-      tBox *box = grid->box[bi_dom0 + ii];
+      tBox *box = grid->box[pi_dom0 + ii];
       double *co = box->v[ico];
       co[ijk] = sum;
     }
@@ -590,49 +599,25 @@ int FSurf_CubSph_set_Ylm_coeffs(tGrid *grid, int bi_dom0, int ico)
   return 0;
 }
 
-/* set var box->CI->iSurf and its derivs from FSurf_CubSph_sigma01_func */
-int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tBox *box, int si)
+/* take integrals over all six boxes and add them such that they become
+   the coeffs in the Ylm expansion */
+int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int pi_dom0, tArray *aco)
 {
-  tCoordInfo *CI = box->CI;
-  int n0=nn[0];
-  int n1=nn[1];
-  int n2=nn[2];
-  double *Yp = Vard(node, Ind("Y"));
-  double *Zp = Vard(node, Ind("Z"));
-  int i,j,k, ijk;
-  double A,B;
-  int isigma    = CI->iSurf[si];
-  int isigma_dA = CI->idSurfdX[si][2];
-  int isigma_dB = CI->idSurfdX[si][3];
-  double *sigma    = Vard(node, isigma);
-  double *sigma_dA = Vard(node, isigma_dA);
-  double *sigma_dB = Vard(node, isigma_dB);
-
-  i = si*(n0-1);
-  for(k=0; k<n2; k++)
-  for(j=0; j<n1; j++)
+  formylnodes(mesh)
   {
-    /* get A,B at point ijk */
-    ijk=Ind_n(i,j,k, nn);
-    A = Yp[ijk];
-    B = Zp[ijk];
+    tNode *node = MyLnode;
+    tPat *pat = node->pat;
+    int pi = pat->p;
 
-    /* set sigma01 var */
-    sigma[ijk] = CI->FSurf[si](box,si, A,B);
+    if(pi<pi_dom0 || pi>=pi_dom0+6) continue;
 
-    /* set sigma01 derivs */
-    if(CI->dFSurfdX[si][2] != NULL)
-      sigma_dA[ijk] = CI->dFSurfdX[si][2](box,si, A,B);
-    if(CI->dFSurfdX[si][3] != NULL)
-      sigma_dB[ijk] = CI->dFSurfdX[si][3](box,si, A,B);
   }
-
-  /* set derivs, if we didn't have a dFSurfdX */
-  if(CI->dFSurfdX[si][2] == NULL)
-    compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
 
   return 0;
 }
+
+
+
 
 /* initialize function FSurf_CubSph_sigma01_func and its coeffs in
    isigma01_co of FSurf. Get coeffs from integrating over var in

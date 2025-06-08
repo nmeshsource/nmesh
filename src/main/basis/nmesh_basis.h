@@ -67,6 +67,7 @@ void basis_array_analysis3_At(tArray *At[3], tArray *u, tArray *c);
 void basis_array_synthesis3_St(tArray *St[3], tArray *u, tArray *c);
 double basis_array_interpolate(tNode *node, tArray *coef, double Xb[3]);
 tArray *array_GLquadrature1(tNode *node, int dir, tArray *var, tArray *Ivar);
+tArray *array_GLquadrature2X(tNode *node, int norm, tArray *var, tArray *Ivar);
 double array_GLquadrature3(tNode *node, tArray *var);
 double array_nodeaverage(tNode *node, tArray *var);
 double var_GLquadrature3(tNode *node, int ui);
