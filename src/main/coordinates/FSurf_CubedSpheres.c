@@ -532,8 +532,9 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
     array_GLquadrature2X(node, 0, Re_Integ, Re_Integ);
     array_GLquadrature2X(node, 0, Im_Integ, Im_Integ);
   }
-
   //quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
+  free_array(Re_Integ);
+  free_array(Im_Integ);
 
   /* Put Integs into var with index Integ_ind */
   if(nYs>=Ng/4) errorexit("decrease lmax!");
