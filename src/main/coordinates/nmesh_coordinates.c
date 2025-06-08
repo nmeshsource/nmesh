@@ -52,9 +52,11 @@ int nmesh_coordinates(tMesh *mesh)
      CI->Fcoef[1] of the enclosed patch p-6. Fcoef is then used in the
      funcs FSurf and dFSurfdC.
      Note that CubedSphere_sigma0_def needs to have storage only in the
-     elements that touch face0 of patch p. As in sgrid we use more than 1
-     point in the radial direction to have room to store sigma0 from previous
-     iterations. */
+     elements that touch face0 of patch p. */
+  /* As in sgrid we use more than 1 point in the radial direction to have
+     room to store sigma0 from previous iterations. To checkpoint
+     CubedSphere_sigma0_def we make it a DATAVAR: */
+  MeshVarSetType(mesh, Ind("CubedSphere_sigma0_def"), DATAVAR);
 
   /* parameters */
   AddPar("coordinates_verbose", "yes", "verbose [yes,no]");
