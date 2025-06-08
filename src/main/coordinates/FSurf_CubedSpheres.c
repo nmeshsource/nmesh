@@ -429,6 +429,8 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   double *Integ =  Vard(node, Integ_ind);
   double *Yp = Vard(node, Ind("Y"));
   double *Zp = Vard(node, Ind("Z"));
+  tArray *Re_Integ; // array needed for array_GLquadrature2X
+  tArray *Im_Integ; // array needed for array_GLquadrature2X
 
   //printf("lmax=%d\n", lmax);
 
@@ -504,19 +506,31 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
     }
   }
 
+  /* setup arrays for integration */
+  Re_Integ = alloc_empty_array_with_segs(nn, 0,1);
+  Im_Integ = alloc_empty_array_with_segs(nn, 0,1);
+
   /* integrate over surfaces */
-  /* If we have more than one segment (S0>1) we need spec_2dIntegral calls
-     for each segment! */
+  /* If we have more than one segment (S0>1) we need array_GLquadrature2X
+     calls for each segment! */
   for(seg=0; seg<S0; seg++)
   {
-
-
-  tArray *array_GLquadrature2X(tNode *node, int norm, tArray *var, tArray *Ivar)
-
-
     int os = Ng*seg;
-    spec_2dIntegral(box, 1, Re_Integp+os, Re_Integp+os);
-    spec_2dIntegral(box, 1, Im_Integp+os, Im_Integp+os);
+
+    //spec_2dIntegral(box, 1, Re_Integp+os, Re_Integp+os);
+    //spec_2dIntegral(box, 1, Im_Integp+os, Im_Integp+os);
+
+    /* point array to Re_Integp+os data and set correct dims */
+    point_array_d_to_data(Re_Integ, Re_Integp+os, 1);
+    point_array_d_to_data(Im_Integ, Im_Integp+os, 1);
+    /* set array-sizes so that redimension_array will not realloc */
+    Re_Integ->size = Im_Integ->size = n0*n1*n2 * sizeof(double);
+    redimension_array(Re_Integ, nn);
+    redimension_array(Im_Integ, nn);
+
+    /* do the integrals */
+    array_GLquadrature2X(node, 0, Re_Integ, Re_Integ);
+    array_GLquadrature2X(node, 0, Im_Integ, Im_Integ);
   }
 
   //quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
@@ -530,7 +544,7 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   for(m=0; m<=l; m++)
   {
     /* set Re and Im part of Integ */
-    Ijk = (i%n0) + Ng*(i/n0);
+    Ijk = (i%n0) + Ng*(i/n0);        //FIXME: is this correct ????
     Integ[ijk++] = Re_Integp[Ijk];
     Integ[ijk++] = Im_Integp[Ijk];
     i++;
