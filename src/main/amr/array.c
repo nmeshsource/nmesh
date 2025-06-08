@@ -162,6 +162,28 @@ void mm_array0_norestrict(tArray *Ata, tArray *Ba, tArray *ABa)
   else
     mm_Carray_norestrict(atn0,atn1, bn1, At, B, AB);
 }
+/* same as mm_array0 but decide if we use restrict or not */
+void mm_array0_safe(tArray *Ata, tArray *Ba, tArray *ABa)
+{
+  GET_At_A_AB_atn0_atn1_bn0_bn1
+
+  if(AB != B)
+  {
+    /* set AB */
+    if(Ata->range[0] && Ata->range[1])
+      mm_Carray_lrange(atn0,atn1, bn1, Ata->range, At, B, AB);
+    else
+      mm_Carray(atn0,atn1, bn1, At, B, AB);
+  }
+  else
+  {
+    /* set AB */
+    if(Ata->range[0] && Ata->range[1])
+      mm_Carray_lrange_norestrict(atn0,atn1, bn1, Ata->range, At, B, AB);
+    else
+      mm_Carray_norestrict(atn0,atn1, bn1, At, B, AB);
+  }
+}
 
 /* Multiply two matricies A and B:  AB = A B ,   AB_ij = A_il B_lj
    Ata contains an (Ata->n[0]) x (Ata->n[1]) matrix stored in row-major
