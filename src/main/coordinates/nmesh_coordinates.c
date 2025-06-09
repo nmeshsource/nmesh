@@ -44,28 +44,37 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVarDim("CubedSphere_sigma1",     "", "sigma_{1}", 1,-1,-1);
   AddAuxVarDim("CubedSphere_dsigma1_dA", "", "d/dA sigma_{1}", 1,-1,-1);
   AddAuxVarDim("CubedSphere_dsigma1_dB", "", "d/dB sigma_{1}", 1,-1,-1);
-  /* Var to we use to compute CI->FSurf[0]: */
-  AddAuxVar("CubedSphere_sigma0_def",    "", "var we use to define and set "
-            "the sigma_0 in CubedSphere_sigma0*");
-  /* The strategy is to put the Ylm coeffs of CubedSphere_sigma0_def into
-     CI->Fcoef[0] for the 1st patch p0. CI->Fcoef[1] of the enclosed patch
-     p0-6 should be the same as CI->Fcoef[0] from patch p0. We thus use
-     CI->Fcoef[0] from patch p0 instead of CI->Fcoef[1] for patch p0-6.
-     Fcoef[0] is then used in the funcs FSurf and dFSurfdC.
-     Note that CubedSphere_sigma0_def needs to have storage only in the
-     elements that touch face0 of patch p. */
-  /* As in sgrid we use more than 1 point in the radial direction to have
-     room to store sigma0 from previous iterations. To checkpoint
-     CubedSphere_sigma0_def we make it a DATAVAR: */
-  MeshVarSetType(mesh, Ind("CubedSphere_sigma0_def"), DATAVAR);
 
   /* parameters */
   AddPar("coordinates_verbose", "yes", "verbose [yes,no]");
   AddPar("coordinates_3metric", "", "[flat,any var name]");
   AddPar("coordinates_surface_metric", "sqrtgdiag", "metric for faces, set "
          "e.g. in coordinates_init_node [sqrtgdiag,sqrtdet2g_o_det3gamma]");
-  AddPar("CubedSphere_sigma01_lmax", "8", "lmax for Ylm's "
-         "used in FSurf_CubSph_sigma01_func");
+
+  /* special CubedSphere pars and vars */
+  AddPar("CubedSphere_sigma01_lmax", "8", "lmax for Ylm's used in the "
+         "func FSurf_CubSph_sigma01");
+  AddPar("CubedSphere_sigma01_def", "no", "switch on sigma01_def [no,yes]");
+  AddPar("CubedSphere_sigma01_test", "no", "run tests [no,yes]");
+  if(Getb(Par("CubedSphere_sigma01_test")))
+    Sets(Par("CubedSphere_sigma01_def"), "yes");
+  if(Getb(Par("CubedSphere_sigma01_def")))
+  {
+    /* Var to we use to compute CI->FSurf[0]: */
+    AddAuxVar("CubedSphere_sigma0_def",    "", "var we use to define and set "
+              "the sigma_0 in CubedSphere_sigma0*");
+    /* The strategy is to put the Ylm coeffs of CubedSphere_sigma0_def into
+       CI->Fcoef[0] for the 1st patch p0. CI->Fcoef[1] of the enclosed patch
+       p0-6 should be the same as CI->Fcoef[0] from patch p0. We thus use
+       CI->Fcoef[0] from patch p0 instead of CI->Fcoef[1] for patch p0-6.
+       Fcoef[0] is then used in the funcs FSurf and dFSurfdC.
+       Note that CubedSphere_sigma0_def needs to have storage only in the
+       elements that touch face0 of patch p. */
+    /* As in sgrid we use more than 1 point in the radial direction to have
+       room to store sigma0 from previous iterations. To checkpoint
+       CubedSphere_sigma0_def we make it a DATAVAR: */
+    MeshVarSetType(mesh, Ind("CubedSphere_sigma0_def"), DATAVAR);
+  }
 
   /* Variables to store some things in the middle between two regular grid
      points of a node */
