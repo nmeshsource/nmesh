@@ -281,7 +281,6 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 
   errorexit("this function needs to be tested!!!");
 
-  if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
   if(pi_dom0!=pg0) return -1; /* do nothing if this is not dom0 */
 
   /* set lmax we use */
@@ -318,12 +317,16 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
     int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
     int nc[] = { nYs*2, 1, 1 };           /* number of coeffs we need */
 
-    /* alloc memory for coeffs in one of the six patches */
-    //FIXME: alloc mem only for pat0 in group, and only for si=0
-    if(pat->CI->Fcoef[si])
-      redimension_array(pat->CI->Fcoef[si], nc);
-    else
-      pat->CI->Fcoef[si] = alloc_array(nc);
+    if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
+
+    /* alloc memory for coeffs in one of the six patches and only for si=0 */
+    if(si==0)
+    {
+      if(pat->CI->Fcoef[si])
+        redimension_array(pat->CI->Fcoef[si], nc);
+      else
+        pat->CI->Fcoef[si] = alloc_array(nc);
+    }
 
     /* loop over 6 patches */
     for(i=0; i<npg; i++)
@@ -579,7 +582,7 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   for(m=0; m<=l; m++)
   {
     /* set Re and Im part of Integ */
-    Ijk = (i%n0) + Ng*(i/n0);        //FIXME: is this correct ????
+    Ijk = (i%n0) + Ng*(i/n0);
 
     //Integ[ijk++] = Re_Integp[Ijk];
     //Integ[ijk++] = Im_Integp[Ijk];
@@ -652,7 +655,6 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
 
   errorexit("this function needs to be tested!!!");
 
-  if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
   if(pi_dom0!=pg0) return -1; /* do nothing if this is not dom0 */
 
   /* set lmax we use */
@@ -677,7 +679,121 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
   }
 
   if(innerSphere)
+  {
+    if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
     FSurf_CubSph_set_Ylm_coefArray(mesh, 0, pg0, isigma0,-1, lmax,
                                    pat->CI->Fcoef[0]);
+  }
+  return 0;
+}
+
+
+/**************************************************************************/
+/* funcs for testing  */
+/**************************************************************************/
+
+/* this deforms sigma for testing purposes
+   (does same as sgrid's deform_CubedSphere_sigma01) */
+void CubSphTest_deform_sigmavar(tMesh *mesh, int pi_dom0,
+                                int isigma, double cA, double cB)
+{
+  tPat *pat0 = mesh->pat[pi_dom0];
+  int npg = pat0->npg; /* pick patch group */
+  int pg0 = pat0->pg0;
+  int iA = Ind("Y");
+  int iB = Ind("Z");
+
+  if(!npg) return;
+
+  /* do nothing if pi_dom0 is not 1st patch */
+  if(pi_dom0 != pg0) return;
+
+  /* deform in all nodes in patch group */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tPat *pat = node->pat;
+    int p = pat->p;
+
+    if(p<pg0 || p>=pg0+npg) continue;
+
+    if(VarA(node,isigma))
+    {
+      double s = (pat->CI->dom - 2.5)/2.5;
+      int i;
+      forpoints(node, i)
+      {
+        double A = Vard(node,iA)[i];
+        double B = Vard(node,iB)[i];
+        double fac = (1.0 - cA*(A-1)*(A+1)*s) * (1.0 - cB*(B-1)*(B+1)*s);
+        Vard(node,isigma)[i] *= fac;
+      }
+    }
+  }
+}
+
+/* set CubedSphere_sigma0_def to the constant CI->s[0] */
+int CubedSphere_sigma0_def_from_CI_s0(tMesh *mesh)
+{
+  int isigma0 = Ind("CubedSphere_sigma0_def");
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tPat *pat = node->pat;
+    tCoordInfo *CI = pat->CI;
+
+    if(VarA(node,isigma0))
+    {
+      double *sigma0 = Vard(node,isigma0);
+      int i;
+      forpoints(node, i)
+      {
+        sigma0[i] = CI->s[0];
+      }
+    }
+  }
+  return 0;
+}
+
+/**/
+int CubSphTest_set_CubedSphere_sigma0_def(tMesh *mesh)
+{
+  if(Getb(Par("CubedSphere_sigma01_test")))
+  {
+    int isigma0 = Ind("CubedSphere_sigma0_def");
+    int p;
+
+    /* set const CubedSphere_sigma0_def */
+    CubedSphere_sigma0_def_from_CI_s0(mesh);
+
+    /* defoem CubedSphere_sigma0_def */
+    forpatches(mesh,p)
+      CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
+
+    /* compute CI->Fcoef[0] from CubedSphere_sigma0_def */
+    forpatches(mesh,p)
+      FSurf_CubSph_set_CI_Fcoef0(mesh, p);
+
+    /* Alloc the unused Fcoef[5] in the 3rd patch in the patgroup.
+       This only tests checkpoints and serves no other purpose. */
+    forpatches(mesh,p)
+    {
+      tPat *pat = mesh->pat[p];
+      int pg0 = pat->pg0;
+      int npg = pat->npg;
+
+      if(npg && p-pg0==2)
+      {
+        char *cp;
+        pat->CI->Fcoef[5] = alloc_array1d(6);
+
+        /* write some bytes into array data */
+        cp = (char *) pat->CI->Fcoef[5]->d;
+        cp[0] = '5';
+        cp[1] = 'A' + p;
+      }
+    }
+  }
   return 0;
 }
