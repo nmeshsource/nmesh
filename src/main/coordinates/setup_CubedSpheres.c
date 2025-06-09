@@ -631,7 +631,9 @@ int dFSurfdC_is_zero(tPat *pat, int si, double C[2], double dF[2])
 }
 
 
-
+/************************************************************************/
+/* functions to add N CubedSphere patches or domains */
+/************************************************************************/
 
 /* add 6 pats with some kind of cubed spheres */
 /* call this before any pats exist already */
@@ -810,6 +812,10 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
   return ret; /* return pat index of last added pat */
 }
 
+
+/************************************************************************/
+/* functions to set or add 1 CubedSphere patch */
+/************************************************************************/
 
 /* find Amax,Amin, Bmax,Bmin in a domain using distances from center */
 void set_AB_min_max_from_Din(int dom, double *Din,

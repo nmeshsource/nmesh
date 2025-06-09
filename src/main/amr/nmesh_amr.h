@@ -205,6 +205,8 @@ typedef struct tPAT {
   int (*dXYZ_dxyz)(struct tPAT *pat, tNode *node, int ind,
                    const double X[3], double x[3], double dXYZdxyz[3][3]);
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
+  int npg;              /* if pat is in a patgroup, npg is num of pats in this group */
+  int pg0;              /* pg0 if 1st pat in group if npg!=0 */
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bfaces[6]; /* 1st bface of this patch on each face */
   //tElm0 rnode[1];     //FIXME: remove!  /* root node in this patch */
@@ -580,6 +582,7 @@ int loadtimer_reset_mesh(tMesh *mesh);
 
 /* amr.c */
 int amr_init_global_pars(tMesh *mesh);
+void amr_set_patgroup_npg_pg0(tMesh *mesh, int npg, int pg0);
 void MPIexchange_init_all_myln(tMesh *mesh);
 void MPIexchange_set_all_myln_localdata(tMesh *mesh);
 void MPIexchange_request_all_myln_data(tMesh *mesh);

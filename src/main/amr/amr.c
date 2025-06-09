@@ -104,6 +104,20 @@ int amr_print_thread_info(tMesh *mesh)
   return 0;
 }
 
+/* set patch group flags in tPat */
+void amr_set_patgroup_npg_pg0(tMesh *mesh, int npg, int pg0)
+{
+  int off;
+  for(off=0; off<npg; off++)
+  {
+    int p = pg0 + off;
+    tPat *pat = mesh->pat[p];
+    pat->npg = npg;
+    pat->pg0 = pg0;
+  }
+}
+
+
 /*************************************************************************/
 /* funcs for MPI exchange */
 /*************************************************************************/
