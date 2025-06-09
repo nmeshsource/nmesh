@@ -241,18 +241,20 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
 /* set CI->FSurf func pointer and alloc room for coeffs in CI->Fcoef */
 int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 {
-  tPat *pat = mesh->pat[pi_dom0];
-  int npg = pat->npg; /* pick patch group */
-  int pg0 = pat->pg0;
+  tPat *pat0 = mesh->pat[pi_dom0];
+  int npg = pat0->npg; /* pick patch group */
+  int pg0 = pat0->pg0;
+  tPat *pat = mesh->pat[pg0];
   int type = pat->CI->type;
-  int dom  = pat->CI->dom;
+  //int dom  = pat->CI->dom;
   int i, si, si0, si1;
   int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
   int lmax;
 
   errorexit("this function needs to be tested!!!");
 
-  if(dom!=0) return -1; /* do nothing if this is not dom0 */
+  if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
+  if(pi_dom0!=pg0) return -1; /* do nothing if this is not dom0 */
 
   /* set lmax we use */
   lmax = Geti(CubedSphere_sigma01_lmax);
@@ -352,6 +354,7 @@ int FSurf_CubSph_set_Ylm(tNode *node, int S0, double *Re_Ylmp, double *Im_Ylmp,
   /* loop over l and m and set Ylm over surface. Put each Ylm at a
      different radial coord for each l,m */
   //printf("setting Ylm in box%d\n", box->b);
+  i=0;
   for(k=0; k<n2; k++)
   for(j=0; j<n1; j++)
   {
@@ -604,11 +607,8 @@ int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0,
 }
 
 
-
-
-/* initialize function FSurf_CubSph_sigma01_func and its coeffs in
-   isigma01_co of FSurf. Get coeffs from integrating over var in
-   box->CI->iFS[si]. */
+/* Set CI->Fcoef[0] in 1st patch of cub.sph. group. We get these coeffs
+   by integrating CubedSphere_sigma0_def against Ylm's. */
 int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
 {
   tPat *pat0 = mesh->pat[pi_dom0];
