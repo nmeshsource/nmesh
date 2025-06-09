@@ -1,0 +1,57 @@
+###################################################################
+# modules we use
+
+physics = advection1
+
+###################################################################
+# checkpoint
+checkpoint = yes
+checkpoint_hours = 0
+checkpoint_hours_quit = -1
+
+###################################################################
+# evolution
+
+# we use RK4 to ensure 4th order conv in time
+evolve_method = RK4 # sspRK3 # RK4 # Euler
+dt = auto
+iterations = 2
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 13 CubedSpheres
+amr_luni = 1
+
+amr_n0 = 3
+amr_n1 = 4
+amr_n2 = 5
+
+amr_uniform_p = 0 1 2 # 3 4 5 6 # 8 9 10 11 12 13
+
+###################################################################
+# parameters for advection1
+
+advection1_direction = 0.7 -0.6 0.4
+
+###################################################################
+# output
+
+sysmon_hours = -1
+logfile_creation = no /dev/null
+
+0doutiter = 1
+0doutput = advection1_u_err
+0doutput_add_xyz = no
+0doutput_per_patch = no
+
+1doutiter = 1
+1doutput = advection1_u advection1_u_err
+
+#2dformat = xdmf  gnuplot
+#2douttime = 0.1
+#2doutput = advection1_u advection1_u_err
+
+#3dformat = xdmf # gnuplot
+#3douttime = 0.1
+#3doutput = advection1_u
