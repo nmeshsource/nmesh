@@ -616,6 +616,10 @@ int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0, tArray *aco)
 {
   int f = s ? 1 : 0; //pick face
 
+  /* zero aco */
+  ...
+
+  /* add integral pieces from all nodes on face0 on this rank to aco */
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
@@ -625,8 +629,22 @@ int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0, tArray *aco)
     if(pi<pi_dom0 || pi>=pi_dom0+6) continue;
     if(!Node_patface(node, f)) continue;
 
-
+    FSurf_CubSph_add_Ylm_integrals(node, 0, Re_vind,Im_vind, lmax, aco);
   }
+
+  /* use AllReduce to add up aco from different ranks */
+  MCK( nMPI_Allreduce(aco->d, aco->d, aco->N, nMPI_DOUBLE, nMPI_SUM) );
+  ??? can 1st and 2nd arg be the same???
+  No. Use:
+  MCK( nMPI_Allreduce(nMPI_IN_PLACE, aco->d, aco->N, nMPI_DOUBLE, nMPI_SUM) );
+
+  other example:
+  There is MPI_IN_PLACE:
+  double val = 1.0;
+  MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  // Now val contains the sum over all processes
+  Each process starts with val = 1.0, and after the call, all have val = num_procs.
+
 
   return 0;
 }
