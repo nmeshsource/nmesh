@@ -287,6 +287,7 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
     int nc[] = { nYs*2, 1, 1 };           /* number of coeffs we need */
 
     /* alloc memory for coeffs in one of the six patches */
+    //FIXME: alloc mem only for pat0 in group, and only for si=0
     if(pat->CI->Fcoef[si])
       redimension_array(pat->CI->Fcoef[si], nc);
     else
@@ -578,74 +579,36 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   return 0;
 }
 
-/* take integrals over all six boxes and add them such that they become
-   the coeffs in the Ylm expansion */
-int FSurf_CubSph_set_Ylm_coeffs__sgrid(tGrid *grid, int pi_dom0, int ico)
+/* take integrals over all nodes at cub.sph. patch faces and accumulate
+   them in aco, such that they become the coeffs in the Ylm expansion */
+int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0,
+                                int Re_vind, int Im_vind, int lmax,
+                                tArray *aco)
 {
-  tBox *box0 = grid->box[pi_dom0];
-  int ijk;
-
-  /* ijk loop in box0, assumes all 6 boxes have same n0,n1,n2 */
-  forallpoints(box0, ijk)
-  {
-    int ii;
-    double sum;
-
-    /* find sum of co[ijk] over 6 boxes. This sum is the Ylm coeff. */
-    sum = 0.;
-    for(ii=0; ii<6; ii++) /* loop over 6 boxes */
-    {
-      tBox *box = grid->box[pi_dom0 + ii];
-      double *co = box->v[ico];
-      sum += co[ijk];
-    }
-    /* now store sum back into co in all 6 boxes */
-    for(ii=0; ii<6; ii++)
-    {
-      tBox *box = grid->box[pi_dom0 + ii];
-      double *co = box->v[ico];
-      co[ijk] = sum;
-    }
-  }
-  return 0;
-}
-
-/* take integrals over all six boxes and add them such that they become
-   the coeffs in the Ylm expansion */
-int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0, tArray *aco)
-{
+  tPat *pat0 = mesh->pat[pi_dom0];
+  int npg = pat0->npg; /* pick patch group */
+  int pg0 = pat0->pg0;
   int f = s ? 1 : 0; //pick face
 
   /* zero aco */
-  ...
+  memset(Arrd_(aco), 0, ArrN(aco));
 
   /* add integral pieces from all nodes on face0 on this rank to aco */
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
     tPat *pat = node->pat;
-    int pi = pat->p;
+    int p = pat->p;
 
-    if(pi<pi_dom0 || pi>=pi_dom0+6) continue;
+    if(p<pg0 || p>=pg0+npg) continue;
     if(!Node_patface(node, f)) continue;
 
-    FSurf_CubSph_add_Ylm_integrals(node, 0, Re_vind,Im_vind, lmax, aco);
+    FSurf_CubSph_add_Ylm_integrals(node, s, Re_vind,Im_vind, lmax, aco);
   }
 
   /* use AllReduce to add up aco from different ranks */
-  MCK( nMPI_Allreduce(aco->d, aco->d, aco->N, nMPI_DOUBLE, nMPI_SUM) );
-  ??? can 1st and 2nd arg be the same???
-  No. Use:
-  MCK( nMPI_Allreduce(nMPI_IN_PLACE, aco->d, aco->N, nMPI_DOUBLE, nMPI_SUM) );
-
-  other example:
-  There is MPI_IN_PLACE:
-  double val = 1.0;
-  MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-  // Now val contains the sum over all processes
-  Each process starts with val = 1.0, and after the call, all have val = num_procs.
-
-
+  MCK( nMPI_Allreduce(nMPI_IN_PLACE, Arrd(aco), ArrN(aco),
+                      nMPI_DOUBLE, nMPI_SUM) );
   return 0;
 }
 
