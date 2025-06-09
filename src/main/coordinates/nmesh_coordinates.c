@@ -48,9 +48,10 @@ int nmesh_coordinates(tMesh *mesh)
   AddAuxVar("CubedSphere_sigma0_def",    "", "var we use to define and set "
             "the sigma_0 in CubedSphere_sigma0*");
   /* The strategy is to put the Ylm coeffs of CubedSphere_sigma0_def into
-     CI->Fcoef[0] for each patch p. Then we copy CI->Fcoef[0] into
-     CI->Fcoef[1] of the enclosed patch p-6. Fcoef is then used in the
-     funcs FSurf and dFSurfdC.
+     CI->Fcoef[0] for the 1st patch p0. CI->Fcoef[1] of the enclosed patch
+     p0-6 should be the same as CI->Fcoef[0] from patch p0. We thus use
+     CI->Fcoef[0] from patch p0 instead of CI->Fcoef[1] for patch p0-6.
+     Fcoef[0] is then used in the funcs FSurf and dFSurfdC.
      Note that CubedSphere_sigma0_def needs to have storage only in the
      elements that touch face0 of patch p. */
   /* As in sgrid we use more than 1 point in the radial direction to have
