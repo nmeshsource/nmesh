@@ -7,7 +7,7 @@ physics = advection1
 # checkpoint
 checkpoint = yes
 checkpoint_hours = 0
-checkpoint_hours_quit = 1e-33
+checkpoint_hours_quit = 0 # 1e-33
 
 ###################################################################
 # evolution

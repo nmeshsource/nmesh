@@ -440,7 +440,7 @@ int checkpoint_save_if_needed(tMesh *mesh, int always)
     fflush(stdout);
 
     /* check if we want to kill nmesh */
-    if(0. < hours_quit && hours_quit <= ntime)
+    if(0. <= hours_quit && hours_quit <= ntime)
     {
       /*
       if(Rank0 && Getb(Par("checkpoint_resub")))
