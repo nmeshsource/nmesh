@@ -21,6 +21,7 @@
 #define nMPI_ERRORS_RETURN MPI_ERRORS_RETURN
 #define nMPI_STATUS_IGNORE MPI_STATUS_IGNORE
 #define nMPI_MAX_OBJECT_NAME MPI_MAX_OBJECT_NAME
+#define nMPI_IN_PLACE MPI_IN_PLACE
 #define nMPI_Op   MPI_Op
 #define nMPI_MAX  MPI_MAX
 #define nMPI_MIN  MPI_MIN
@@ -58,6 +59,7 @@
 #define nMPI_ERRORS_RETURN 0
 #define nMPI_STATUS_IGNORE 0
 #define nMPI_MAX_OBJECT_NAME 128
+#define nMPI_IN_PLACE 0
 #define nMPI_Op   int
 #define nMPI_MAX  0
 #define nMPI_MIN  0
