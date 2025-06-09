@@ -601,8 +601,10 @@ int FSurf_CubSph_set_Ylm_coeffs__sgrid(tGrid *grid, int pi_dom0, int ico)
 
 /* take integrals over all six boxes and add them such that they become
    the coeffs in the Ylm expansion */
-int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int pi_dom0, tArray *aco)
+int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0, tArray *aco)
 {
+  int f = s ? 1 : 0; //pick face
+
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
@@ -610,6 +612,8 @@ int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int pi_dom0, tArray *aco)
     int pi = pat->p;
 
     if(pi<pi_dom0 || pi>=pi_dom0+6) continue;
+    if(!Node_patface(node, f)) continue;
+
 
   }
 
