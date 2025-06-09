@@ -242,6 +242,8 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
 int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 {
   tPat *pat = mesh->pat[pi_dom0];
+  int npg = pat->npg; /* pick patch group */
+  int pg0 = pat->pg0;
   int type = pat->CI->type;
   int dom  = pat->CI->dom;
   int i, si, si0, si1;
@@ -294,9 +296,9 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
       pat->CI->Fcoef[si] = alloc_array(nc);
 
     /* loop over 6 patches */
-    for(i=0; i<6; i++)
+    for(i=0; i<npg; i++)
     {
-      tPat *pati = mesh->pat[pi_dom0 + i];
+      tPat *pati = mesh->pat[pg0 + i];
       tCoordInfo *CI = pati->CI;
 
       /* set surface functions */
@@ -309,17 +311,9 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 }
 
 
-
-
-
-
-/* FROM sgrid: */
-
-
-
-
-
-
+/***********************************************************************/
+/* funcs to compute Ylm coeffs */
+/***********************************************************************/
 
 /* put the Ylm into two C-arrays Re_Ylmp, Im_Ylmp */
 /* We can use array_GLquadrature2X to compute surface integrals.
@@ -408,10 +402,7 @@ int FSurf_CubSph_set_Ylm(tNode *node, int S0, double *Re_Ylmp, double *Im_Ylmp,
    FSurf_CubSph_add_Ylm_integrals will be called inside a loop over nodes.
    Make sure aInteg is zeroed before we loop over these nodes.
    If var has zero imag. part set Im_vind=-1. */
-//int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
-//                                   int lmax, int Integ_ind)
-//
-//FIXME: we probably only need s=0, replace int Integ_ind by tArray *aInteg
+   //NOTE: we probably only need s=0
 int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
                                    int lmax, tArray *aInteg)
 {
@@ -618,101 +609,47 @@ int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0,
 /* initialize function FSurf_CubSph_sigma01_func and its coeffs in
    isigma01_co of FSurf. Get coeffs from integrating over var in
    box->CI->iFS[si]. */
-int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
+int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
 {
-  tBox *box = grid->box[bi_dom0];
-  int type = box->CI->type;
-  int dom  = box->CI->dom;
-  int ret =  -1;
-  int i, si, si0, si1;
-  int use_dFSurfdX = Getv("Coordinates_CubedSphere_use_dFSurfdX", "yes");
-  int n0 = nn[0];
-  int n1 = nn[1];
-  int n2 = nn[2];
+  tPat *pat0 = mesh->pat[pi_dom0];
+  int npg = pat0->npg; /* pick patch group */
+  int pg0 = pat0->pg0;
+  tPat *pat = mesh->pat[pg0];
+  int type = pat->CI->type;
+  //int dom  = pat->CI->dom;
+  int innerSphere;
+  int isigma0 = Ind("CubedSphere_sigma0_def");
+  int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
+  int lmax;
 
-  if(dom!=0) return -1; /* do nothing if this is not dom0 */
+  errorexit("this function needs to be tested!!!");
+
+  if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
+  if(pi_dom0!=pg0) return -1; /* do nothing if this is not dom0 */
 
   /* set lmax we use */
-  if(Getv("Coordinates_CubedSphere_sigma01_lmax","from_n0"))
-  {
-    /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
-       to store the table.
-       So when is (lmax*(lmax+1))/2 + lmax+1 = n0?
-       set L = lmax ==> L^2/2 + 3L/2 + 1 = n0  <==> L^2 + 3 L + 2 - 2*n0 = 0
-       so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1)
-       L = (sqrt(8*n0 + 1) - 3)/2  */
-    lmax = 0.5*(sqrt(8.*n0 + 1.) - 3.);
-  }
-  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n1*n2)/4+1"))
-    lmax = sqrt(n1*n2)/4 + 1;
-  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n1*n2)/4"))
-    lmax = sqrt(n1*n2)/4;
-  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n1*n2)/2"))
-    lmax = sqrt(n1*n2)/2;
-  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n1*n2)"))
-    lmax = sqrt(n1*n2);
-  else
-    lmax = Geti("Coordinates_CubedSphere_sigma01_lmax");
-
+  lmax = Geti(CubedSphere_sigma01_lmax);
   if(lmax<1) errorexit("lmax<1 is suspicious!");
+  /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
+     to store the table.
+     So when is (lmax*(lmax+1))/2 + lmax+1 = n0?
+     set L = lmax ==> L^2/2 + 3L/2 + 1 = n0  <==> L^2 + 3 L + 2 - 2*n0 = 0
+     so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1)
+     L = (sqrt(8*n0 + 1) - 3)/2  */
 
-  /* save coeffs var index */
-  isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
-
-  /* figure out range of si */
+  /* figure out if face0 is spherical */
   switch(type)
   {
-  case outerCubedSphere:
-    si0 = si1 = 1;
-    break;
   case innerCubedSphere:
-    si0 = si1 = 0;
-    break;
   case CubedShell:
-    si0 = 0;
-    si1 = 1;
+    innerSphere = 1;
     break;
   default:
-    si0 = +2; /* do not loop over si */
-    si1 = -1;
+    innerSphere = 0;
   }
 
-  /* loop if si0<=si1 */
-  for(si=si0; si<=si1; si++)
-  {
-    for(i=0; i<6; i++) /* loop over 6 boxes */
-    {
-      box = grid->box[bi_dom0 + i];
-      tCoordInfo *CI = box->CI;
-      int n0 = nn[0];
-      int s  = si ? n0-1 : 0;  /* i-index of surface */
-      int iFS = CI->iFS[si];
-
-      /* set surface function */
-      CI->FSurf[si] = FSurf_CubSph_sigma01_func;
-      if(use_dFSurfdX)
-      {
-        CI->dFSurfdX[si][2] = FSurf_CubSph_dsigma01_dA_func;
-        CI->dFSurfdX[si][3] = FSurf_CubSph_dsigma01_dB_func;
-      }
-
-      /* integrate (Ylm^* FS) and store results in co */
-      ///* we need to set sigma from iFS so that integrals can work */
-      //init_1CubedSphere_by_copying_CI_iFS(box, si);
-      ret=FSurf_CubSph_get_Ylm_integrals(box, s, iFS,-1, lmax, isigma01_co);
-    }
-  }
-  /* set coeffs co from values of integrals already in co */
-  ret=FSurf_CubSph_set_Ylm_coeffs(grid, bi_dom0, isigma01_co);
-  //quick_Vars_output(box, "Coordinates_CubedSphere_sigma01_co", 9,9);
-
-  /* set var box->CI->iSurf and its derivs */
-  for(si=si0; si<=si1; si++)
-    for(i=0; i<6; i++) /* loop over 6 boxes */
-    {
-      box = grid->box[bi_dom0 + i];
-      ret=FSurf_CubSph_set_sigma01vars_from_sigma01_func(box, si);
-    }
-
-  return ret;
+  if(innerSphere)
+    FSurf_CubSph_set_Ylm_coeffs(mesh, 0, pg0, isigma0,-1, lmax,
+                                pat->CI->Fcoef[0]);
+  return 0;
 }
