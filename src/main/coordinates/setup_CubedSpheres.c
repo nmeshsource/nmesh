@@ -654,6 +654,7 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
                            int type, int stretch, int SigFunc,
                            double *xc, double *Din, double *Dout)
 {
+  int p0 = mesh->npats; /* index of 1st pat we are about to add */
   int i, ret;
 
   if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
@@ -675,6 +676,9 @@ int add_N_CubedSphere_pats(tMesh *mesh, int N,
     ret = add_1_CubedSphere_pat(mesh, i,type, stretch,SigFunc,
                                 xc,Din[i],Dout[i], ABrct);
   }
+
+  /* add patgroup info */
+  amr_set_patgroup_npg_pg0(mesh, mesh->npats - p0, p0);
 
   return ret; /* return pat index of last added pat */
 }
@@ -743,6 +747,7 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
                            double AB_div_mode,
                            int nAB_x[3], int nBmax, int (*nlam_AB)[nBmax])
 {
+  int p0 = mesh->npats; /* index of 1st pat we are about to add */
   int f, ret=-1;
 
   if(N<1 || N>6) errorexit("N must be 1,2,3,4,5,6");
@@ -808,6 +813,9 @@ int add_N_CubedSphere_doms(tMesh *mesh, int N,
       }
     } /* end k-loop */
   }
+
+  /* add patgroup info */
+  amr_set_patgroup_npg_pg0(mesh, mesh->npats - p0, p0);
 
   return ret; /* return pat index of last added pat */
 }
