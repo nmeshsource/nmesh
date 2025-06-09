@@ -403,15 +403,16 @@ int FSurf_CubSph_set_Ylm(tNode *node, int S0, double *Re_Ylmp, double *Im_Ylmp,
 
 /* Compute integrals of (Ylm^* var) that have real part at varindex Re_vind and
    imag. part at Im_vind. Do integrals over surface with index i=s in X-dir.
-   Put integrals into var with index Integ_ind.
+   Add integrals to array aInteg.
+   FSurf_CubSph_add_Ylm_integrals will be called inside a loop over nodes.
+   Make sure aInteg is zeroed before we loop over these nodes.
    If var has zero imag. part set Im_vind=-1. */
-int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
-                                   int lmax, int Integ_ind)
+//int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
+//                                   int lmax, int Integ_ind)
 //
 //FIXME: we probably only need s=0, replace int Integ_ind by tArray *aInteg
-//
-//int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
-//                                   int lmax, tArray *aInteg)
+int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
+                                   int lmax, tArray *aInteg)
 {
   tMesh *mesh = Elm_mesh(node);
   tPat *pat = node->pat;
@@ -424,15 +425,15 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
   int N0;                               /* i-range of Re_Ylmp,Im_Ylmp arrays */
   int S0;                               /* num. of segments: S0 = N0/n0 */
-  int offset; /* offset used to write into var Integ_ind */
+  //int offset; /* offset used to write into var Integ_ind */
   double *Re_varp = Vard(node, Re_vind);
   double *Im_varp;
   double *Re_Ylmp;
   double *Im_Ylmp;
   double *Re_Integp;
   double *Im_Integp;
-  double *Integ =  Vard(node, Integ_ind);
-  //double *Integ = Arrd(aInteg);
+  //double *Integ = Vard(node, Integ_ind);
+  double *Integ = Arrd(aInteg);
   double *Yp = Vard(node, Ind("Y"));
   double *Zp = Vard(node, Ind("Z"));
   tArray *Re_Integ; // array needed for array_GLquadrature2X
@@ -542,21 +543,31 @@ int FSurf_CubSph_get_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   free_array(Re_Integ);
   free_array(Im_Integ);
 
-  /* Put Integs into var with index Integ_ind */
-  if(nYs>=Ng/4) errorexit("decrease lmax!");
-  offset = ((box->nnodes/2)*s)/(n0-1);  /* offset for Integs in Integ */
-  ijk = offset;
-  //if(nYs>=ArrN(aInteg)) errorexit("decrease lmax!");
+  ///* Put Integs into var with index Integ_ind */
+  //if(nYs>=Ng/4) errorexit("decrease lmax!");
   //offset = ((Ng/2)*s)/(n0-1);  /* offset for Integs in Integ */
-  //ijk = 0;
+  //ijk = offset;
+  /* Add Integs to Integ */
+  if(nYs>=ArrN(aInteg)) errorexit("decrease lmax!");
+  //offset = ((Ng/2)*s)/(n0-1);  /* offset for Integs in Integ */
+  ijk = 0;
   i = 0;
   for(l=0; l<=lmax; l++)
   for(m=0; m<=l; m++)
   {
     /* set Re and Im part of Integ */
     Ijk = (i%n0) + Ng*(i/n0);        //FIXME: is this correct ????
-    Integ[ijk++] = Re_Integp[Ijk];
-    Integ[ijk++] = Im_Integp[Ijk];
+
+    //Integ[ijk++] = Re_Integp[Ijk];
+    //Integ[ijk++] = Im_Integp[Ijk];
+    GEN_Pragma(omp atomic update)
+    { Integ[ijk] += Re_Integp[Ijk]; }
+    ijk++;
+
+    GEN_Pragma(omp atomic update)
+    { Integ[ijk] += Im_Integp[Ijk]; }
+    ijk++;
+
     i++;
   }
 
