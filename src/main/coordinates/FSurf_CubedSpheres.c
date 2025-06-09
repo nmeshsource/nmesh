@@ -216,6 +216,7 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
   int i,j,k, ijk, pl, sjk;
 
   errorexit("this function may not be needed and it needs to be tested!!!");
+  errorexit("I think coordinates_init_node sets the sigma01 vars already...");
 
   pl = (n[0]-1)*(si==1);
   forplane0(i,j,k, n, pl)

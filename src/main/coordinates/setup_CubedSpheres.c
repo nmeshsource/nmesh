@@ -615,10 +615,10 @@ int two_diff_wegdes_touching_1_wedge(tMesh *mesh, double dc,
 
 
 /************************************************************************/
-/* basic functions to make one box or a cubed sphere shell */
+/* basic functions to make cubed sphere shells */
 /************************************************************************/
 
-/* primitive default forconstant FSurf funcs */
+/* primitive default for constant FSurf funcs */
 int FSurf_is_CI_s(tPat *pat, int si, double C[2], double *F)
 {
   *F = pat->CI->s[si];
