@@ -331,8 +331,8 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
    Then I can use array_GLquadrature2X over these vars to compute the all
    coeffs. */
 /* NOTE: Re_Ylmp,Im_Ylmp have size N0*n1*n2, where N0=n0*S0, with S0>=1 */
-int FSurf_CubSph_set_Ylm(tNode *node, int S0, double *Re_Ylmp, double *Im_Ylmp,
-                         int lmax)
+int FSurf_CubSph_set_ReIm_Ylm(tNode *node, int S0,
+                              double *Re_Ylmp, double *Im_Ylmp, int lmax)
 {
   tMesh *mesh = Elm_mesh(node);
   tPat *pat = node->pat;
@@ -457,7 +457,7 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
     errorexit("out of memory for Re_Ylmp, Im_Ylmp, ...");
 
   /* precompute the Ylm */
-  FSurf_CubSph_set_Ylm(node, S0, Re_Ylmp, Im_Ylmp, lmax);
+  FSurf_CubSph_set_ReIm_Ylm(node, S0, Re_Ylmp, Im_Ylmp, lmax);
 
   /* set integrands */
   for(k=0; k<n2; k++)
@@ -575,9 +575,9 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
 
 /* take integrals over all nodes at cub.sph. patch faces and accumulate
    them in aco, such that they become the coeffs in the Ylm expansion */
-int FSurf_CubSph_set_Ylm_coeffs(tMesh *mesh, int s, int pi_dom0,
-                                int Re_vind, int Im_vind, int lmax,
-                                tArray *aco)
+int FSurf_CubSph_set_Ylm_coefArray(tMesh *mesh, int s, int pi_dom0,
+                                   int Re_vind, int Im_vind, int lmax,
+                                   tArray *aco)
 {
   tPat *pat0 = mesh->pat[pi_dom0];
   int npg = pat0->npg; /* pick patch group */
@@ -649,7 +649,7 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
   }
 
   if(innerSphere)
-    FSurf_CubSph_set_Ylm_coeffs(mesh, 0, pg0, isigma0,-1, lmax,
-                                pat->CI->Fcoef[0]);
+    FSurf_CubSph_set_Ylm_coefArray(mesh, 0, pg0, isigma0,-1, lmax,
+                                   pat->CI->Fcoef[0]);
   return 0;
 }
