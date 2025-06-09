@@ -9,7 +9,7 @@
 
 
 /* return value of surface function sigma01 */
-int FSurf_CubSph_sigma01_func(tPat *pat, int si, double AB[2], double *sig)
+int FSurf_CubSph_sigma01(tPat *pat, int si, double AB[2], double *sig)
 {
   tArray *Co = pat->CI->Fcoef[si];
   int N = Co->N;
@@ -81,8 +81,7 @@ int FSurf_CubSph_sigma01_func(tPat *pat, int si, double AB[2], double *sig)
 }
 
 /* compute values of surface function derivs */
-int FSurf_CubSph_sigma01_derivs(tPat *pat, int si, double AB[2], 
-                                double dsig[2])
+int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2])
 {
   tArray *Co = pat->CI->Fcoef[si];
   int N = Co->N;
@@ -195,7 +194,7 @@ errorexit("NAN!");
 }
 
 
-/* set var pat->CI->iSurf and its derivs from FSurf_CubSph_sigma01_func */
+/* set var pat->CI->iSurf and its derivs from FSurf_CubSph_sigma01 */
 int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
 {
   tPat *pat = node->pat;
@@ -305,8 +304,8 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
       tCoordInfo *CI = pati->CI;
 
       /* set surface functions */
-      CI->FSurf[si]    = FSurf_CubSph_sigma01_func;
-      CI->dFSurfdC[si] = FSurf_CubSph_sigma01_derivs;
+      CI->FSurf[si]    = FSurf_CubSph_sigma01;
+      CI->dFSurfdC[si] = FSurf_CubSph_dsigma01;
     }
   }
 
