@@ -6,133 +6,156 @@
 #include "coordinates.h"
 
 
+/* return coeffs for face0 of 1st patch */
+tArray *FSurf_CubSph_sigma01_Fcoef(tPat *pat, int si)
+{
+  tMesh *mesh = pat->mesh;
+  int p0 = pat->pg0;
+  int np = pat->npg;
+  int pi = (si ? p0+np : p0); /* if si!=0 go to next pat group */
 
+  if(pi >= mesh->npats) return NULL; /* there are no coeffs */
+
+  return mesh->pat[pi]->CI->Fcoef[0];
+}
 
 /* return value of surface function sigma01 */
 int FSurf_CubSph_sigma01(tPat *pat, int si, double AB[2], double *sig)
 {
-  tArray *Co = pat->CI->Fcoef[si];
-  int N = Co->N;
-  int nYs = N/2; /* number of Ylm's we use */
-  int lmax = (sqrt(8*nYs + 1) - 3)/2;
-  /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
-     to store the table.
-     So when is (lmax*(lmax+1))/2 + lmax+1 = n0?
-     set L = lmax ==> L^2/2 + 3L/2 + 1 = n0  <==> L^2 + 3 L + 2 - 2*n0 = 0
-     so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1) 
-     L = (sqrt(8*n0 + 1) - 3)/2  */
-  int ijk, l,m;
-  double sm;
-  double *co = Co->d;
-  double fv, Theta,Phi;
-  double *ReYtab = alloc_Plm_Tab(lmax);
-  double *ImYtab = alloc_Plm_Tab(lmax);
+  tArray *Co = FSurf_CubSph_sigma01_Fcoef(pat, si);
 
-  errorexit("this function needs to be tested!!!");
+  if(Co) /* if we have coeffs we now compute sig from them */
+  {
 
-  /* get Theta,Phi from A,B */
-  ThetaPhi_of_AB_CubSph(pat, AB[0],AB[1], &Theta,&Phi);
+    int N = Co->N;
+    int nYs = N/2; /* number of Ylm's we use */
+    int lmax = (sqrt(8*nYs + 1) - 3)/2;
+    /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
+       to store the table.
+       So when is (lmax*(lmax+1))/2 + lmax+1 = n0?
+       set L = lmax ==> L^2/2 + 3L/2 + 1 = n0  <==> L^2 + 3 L + 2 - 2*n0 = 0
+       so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1)
+       L = (sqrt(8*n0 + 1) - 3)/2  */
+    int ijk, l,m;
+    double sm;
+    double *co = Co->d;
+    double fv, Theta,Phi;
+    double *ReYtab = alloc_Plm_Tab(lmax);
+    double *ImYtab = alloc_Plm_Tab(lmax);
 
-  /* make tables of Ylm at Theta,Phi */
-  set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
+    errorexit("this function needs to be tested!!!");
 
-  /* get func val fv at Theta,Phi */
-  fv = 0.;
-  /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
-  ijk=0;
-  for(l=0; l<=lmax; l++)
-    for(sm=1., m=0;  m<=l;  m++, sm=-sm)
-    {
-      double Rclm, Iclm, Re_Ylm, Im_Ylm;
-      double Rclmm, Iclmm, Re_Ylmm, Im_Ylmm;
-      /* get real and imag part of coeffs in co */
-      Rclm = co[ijk++];
-      Iclm = co[ijk++];
+    /* get Theta,Phi from A,B */
+    ThetaPhi_of_AB_CubSph(pat, AB[0],AB[1], &Theta,&Phi);
 
-      /* get Ylm at Theta,Phi */
-      Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
+    /* make tables of Ylm at Theta,Phi */
+    set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
 
-      /* There is a choice of sign here: define the inner product by
-         (f,g) = int f^* g
-         and define
-         psi_mode = (Ylm, psi)  */
-      /* fv = \sum_{l,m} c_l^m Y_l^m
-         fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                          i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
-      /* fv = \sum_{l,m} c_l^m Y_l^m
-            = \sum_l [ c_l^0 Y_l^0 +
-                      \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
-         Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
-               c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
-      Re_Ylmm =  sm*Re_Ylm;
-      Im_Ylmm = -sm*Im_Ylm;
-      Rclmm =  sm*Rclm; /* assuming fv is real */
-      Iclmm = -sm*Iclm;
+    /* get func val fv at Theta,Phi */
+    fv = 0.;
+    /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
+    ijk=0;
+    for(l=0; l<=lmax; l++)
+      for(sm=1., m=0;  m<=l;  m++, sm=-sm)
+      {
+        double Rclm, Iclm, Re_Ylm, Im_Ylm;
+        double Rclmm, Iclmm, Re_Ylmm, Im_Ylmm;
+        /* get real and imag part of coeffs in co */
+        Rclm = co[ijk++];
+        Iclm = co[ijk++];
 
-      if(m==0)
-        fv += Rclm*Re_Ylm;
-      else /* assuming fv is real */
-        fv += Rclm*Re_Ylm - Iclm*Im_Ylm + Rclmm*Re_Ylmm - Iclmm*Im_Ylmm;
-    }
-  free(ImYtab);
-  free(ReYtab);
-  *sig = fv;
+        /* get Ylm at Theta,Phi */
+        Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
+
+        /* There is a choice of sign here: define the inner product by
+           (f,g) = int f^* g
+           and define
+           psi_mode = (Ylm, psi)  */
+        /* fv = \sum_{l,m} c_l^m Y_l^m
+           fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                            i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
+        /* fv = \sum_{l,m} c_l^m Y_l^m
+              = \sum_l [ c_l^0 Y_l^0 +
+                        \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
+           Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
+                 c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
+        Re_Ylmm =  sm*Re_Ylm;
+        Im_Ylmm = -sm*Im_Ylm;
+        Rclmm =  sm*Rclm; /* assuming fv is real */
+        Iclmm = -sm*Iclm;
+
+        if(m==0)
+          fv += Rclm*Re_Ylm;
+        else /* assuming fv is real */
+          fv += Rclm*Re_Ylm - Iclm*Im_Ylm + Rclmm*Re_Ylmm - Iclmm*Im_Ylmm;
+      }
+    free(ImYtab);
+    free(ReYtab);
+    *sig = fv;
+  }
+  else /* if there are no coeffs we return a constant sig */
+  {
+    *sig = pat->CI->s[si];
+  }
   return 0;
 }
 
 /* compute values of surface function derivs */
 int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2])
 {
-  tArray *Co = pat->CI->Fcoef[si];
-  int N = Co->N;
-  int nYs = N/2; /* number of Ylm's we use */
-  int lmax = (sqrt(8*nYs + 1) - 3)/2;
-  int ijk, l,m;
-  double sm;
-  double *co = Co->d;
-  double ft, fp; /* ft = sin(Theta) dsigma/dTheta, fp = dsigma/dPhi */
-  double fth;    /* fth= dsigma/dTheta */
-  double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB;
-  double *ReYtab = alloc_Plm_Tab(lmax);
-  double *ImYtab = alloc_Plm_Tab(lmax);
-  double *csdth = calloc(nYs*2, sizeof(double));
-  double *cdphi = calloc(nYs*2, sizeof(double));
-  double A=AB[0], B=AB[1];
+  tArray *Co = FSurf_CubSph_sigma01_Fcoef(pat, si);
 
-  errorexit("this function needs to be tested!!!");
+  if(Co) /* if we have coeffs we now compute dsig from them */
+  {
+    int N = Co->N;
+    int nYs = N/2; /* number of Ylm's we use */
+    int lmax = (sqrt(8*nYs + 1) - 3)/2;
+    int ijk, l,m;
+    double sm;
+    double *co = Co->d;
+    double ft, fp; /* ft = sin(Theta) dsigma/dTheta, fp = dsigma/dPhi */
+    double fth;    /* fth= dsigma/dTheta */
+    double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB;
+    double *ReYtab = alloc_Plm_Tab(lmax);
+    double *ImYtab = alloc_Plm_Tab(lmax);
+    double *csdth = calloc(nYs*2, sizeof(double));
+    double *cdphi = calloc(nYs*2, sizeof(double));
+    double A=AB[0], B=AB[1];
 
-  /* regularize case where A=B=0 <==> Theta=0:
-     Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
-     to find d/dTheta Ylm. Also dPhidA blows up!!!
-     So for now just add epsilon to B. */
-  if(A==0. && B==0.) B = 1e-10;
+    errorexit("this function needs to be tested!!!");
 
-  /* get Theta,Phi and their derivs from A,B */
-  ThetaPhi_dThetaPhidAB_of_AB_CubSph(pat, A,B, &Theta,&Phi,
-                                     &dThetadA,&dThetadB, &dPhidA,&dPhidB);
-  /* make tables of Ylm at Theta,Phi */
-  set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
+    /* regularize case where A=B=0 <==> Theta=0:
+       Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
+       to find d/dTheta Ylm. Also dPhidA blows up!!!
+       So for now just add epsilon to B. */
+    if(A==0. && B==0.) B = 1e-10;
 
-  /* get coeffs of derivs */
-  SphHarm_sin_theta_dtheta_forRealFunc(co, csdth, lmax);
-  SphHarm_dphi_forRealFunc(co, cdphi, lmax);
+    /* get Theta,Phi and their derivs from A,B */
+    ThetaPhi_dThetaPhidAB_of_AB_CubSph(pat, A,B, &Theta,&Phi,
+                                       &dThetadA,&dThetadB, &dPhidA,&dPhidB);
+    /* make tables of Ylm at Theta,Phi */
+    set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
 
-  /* get func vals ft,fp at Theta,Phi */
-  fp = ft = 0.;
-  ijk=0;
-  /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
-  for(l=0; l<=lmax; l++)
-    for(sm=1., m=0;  m<=l;  m++, sm=-sm)
-    {
-      double Re_Ylm, Im_Ylm, Re_Ylmm, Im_Ylmm;
-      double Rcsdth, Icsdth, Rcsdthm, Icsdthm;
-      double Rcdphi, Icdphi, Rcdphim, Icdphim;
+    /* get coeffs of derivs */
+    SphHarm_sin_theta_dtheta_forRealFunc(co, csdth, lmax);
+    SphHarm_dphi_forRealFunc(co, cdphi, lmax);
 
-      /* get real and imag part of coeffs in arrays */
-      Rcsdth = csdth[ijk];
-      Rcdphi = cdphi[ijk++];
-      Icsdth = csdth[ijk];
-      Icdphi = cdphi[ijk++];
+    /* get func vals ft,fp at Theta,Phi */
+    fp = ft = 0.;
+    ijk=0;
+    /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
+    for(l=0; l<=lmax; l++)
+      for(sm=1., m=0;  m<=l;  m++, sm=-sm)
+      {
+        double Re_Ylm, Im_Ylm, Re_Ylmm, Im_Ylmm;
+        double Rcsdth, Icsdth, Rcsdthm, Icsdthm;
+        double Rcdphi, Icdphi, Rcdphim, Icdphim;
+
+        /* get real and imag part of coeffs in arrays */
+        Rcsdth = csdth[ijk];
+        Rcdphi = cdphi[ijk++];
+        Icsdth = csdth[ijk];
+        Icdphi = cdphi[ijk++];
 /*
 if(!finit(Rcsdth+Rcdphi+Icsdth+Icdphi))
 {
@@ -141,47 +164,47 @@ l,m,ijk, Rcsdth,Rcdphi,Icsdth,Icdphi);
 errorexit("NAN!");
 }
 */
-      /* get Ylm at Theta,Phi */
-      Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
+        /* get Ylm at Theta,Phi */
+        Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
 
-      /* There is a choice of sign here: define the inner product by
-         (f,g) = int f^* g
-         and define
-         psi_mode = (Ylm, psi)  */
-      /* fv = \sum_{l,m} c_l^m Y_l^m
-         fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                          i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
-      /* fv = \sum_{l,m} c_l^m Y_l^m
-            = \sum_l [ c_l^0 Y_l^0 +
-                      \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
-         Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
-               c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
-      Re_Ylmm =  sm*Re_Ylm;
-      Im_Ylmm = -sm*Im_Ylm;
-      Rcsdthm =  sm*Rcsdth; /* assuming func is real */
-      Icsdthm = -sm*Icsdth;
-      Rcdphim =  sm*Rcdphi; /* assuming func is real */
-      Icdphim = -sm*Icdphi;
+        /* There is a choice of sign here: define the inner product by
+           (f,g) = int f^* g
+           and define
+           psi_mode = (Ylm, psi)  */
+        /* fv = \sum_{l,m} c_l^m Y_l^m
+           fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                            i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
+        /* fv = \sum_{l,m} c_l^m Y_l^m
+              = \sum_l [ c_l^0 Y_l^0 +
+                        \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
+           Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
+                 c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
+        Re_Ylmm =  sm*Re_Ylm;
+        Im_Ylmm = -sm*Im_Ylm;
+        Rcsdthm =  sm*Rcsdth; /* assuming func is real */
+        Icsdthm = -sm*Icsdth;
+        Rcdphim =  sm*Rcdphi; /* assuming func is real */
+        Icdphim = -sm*Icdphi;
 
-      if(m==0)
-      {
-        ft += Rcsdth*Re_Ylm;
-        fp += Rcdphi*Re_Ylm;
+        if(m==0)
+        {
+          ft += Rcsdth*Re_Ylm;
+          fp += Rcdphi*Re_Ylm;
+        }
+        else /* assuming fv is real */
+        {
+          ft += Rcsdth*Re_Ylm - Icsdth*Im_Ylm + Rcsdthm*Re_Ylmm - Icsdthm*Im_Ylmm;
+          fp += Rcdphi*Re_Ylm - Icdphi*Im_Ylm + Rcdphim*Re_Ylmm - Icdphim*Im_Ylmm;
+        }
       }
-      else /* assuming fv is real */
-      {
-        ft += Rcsdth*Re_Ylm - Icsdth*Im_Ylm + Rcsdthm*Re_Ylmm - Icsdthm*Im_Ylmm;
-        fp += Rcdphi*Re_Ylm - Icdphi*Im_Ylm + Rcdphim*Re_Ylmm - Icdphim*Im_Ylmm;
-      }
-    }
-  /* get derivs from ft,fp, and dThetadA,dThetadB, dPhidA,dPhidB */
-  fth = ft/sin(Theta);
-  dsig[0] = fth*dThetadA + fp*dPhidA;
-  dsig[1] = fth*dThetadB + fp*dPhidB;
-  free(cdphi);
-  free(csdth);
-  free(ImYtab);
-  free(ReYtab);
+    /* get derivs from ft,fp, and dThetadA,dThetadB, dPhidA,dPhidB */
+    fth = ft/sin(Theta);
+    dsig[0] = fth*dThetadA + fp*dPhidA;
+    dsig[1] = fth*dThetadB + fp*dPhidB;
+    free(cdphi);
+    free(csdth);
+    free(ImYtab);
+    free(ReYtab);
 /*
 if(!finit(dsig[0]) || !finit(dsig[1]))
 {
@@ -190,6 +213,11 @@ fth,fp, dThetadA,dThetadB, dPhidA,dPhidB);
 errorexit("NAN!");
 }
 */
+  }
+  else /* if there are no coeffs sig is constant */
+  {
+    dsig[0] = dsig[1] = 0.;
+  }
   return 0;
 }
 
@@ -263,7 +291,7 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
      to store the table.
      So when is (lmax*(lmax+1))/2 + lmax+1 = n0?
      set L = lmax ==> L^2/2 + 3L/2 + 1 = n0  <==> L^2 + 3 L + 2 - 2*n0 = 0
-     so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1) 
+     so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1)
      L = (sqrt(8*n0 + 1) - 3)/2  */
 
   /* figure out range of si */
