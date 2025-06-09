@@ -97,16 +97,11 @@ void checkpoint_write_pat(FILE *fp, tPat *pat, char *fname)
   for(f=0; f<6; f++)
     fprintf(fp, " bbox[%d] = %.19g\n", f, pat->bbox[f]);
 
-  //fprintf(fp,   " nmax = %d\n", pat->nmax);
+  fprintf(fp,   " npg = %d\n", pat->npg);
+  fprintf(fp,   " pg0 = %d\n", pat->pg0);
 
   //for(d=0; d<3; d++)
   //  fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
-
-  //for(d=0; d<3; d++)
-  //  fprintf(fp, " rnode->n[%d] = %d\n", d, pat->rnode->n[d]);
-
-  //for(d=0; d<3; d++)
-  //  fprintf(fp, " rnode->pt_typ[%d] = %d\n", d, pat->rnode->pt_typ[d]);
 
   //printCI(pat);
   checkpoint_write_CI(fp, pat, fname);

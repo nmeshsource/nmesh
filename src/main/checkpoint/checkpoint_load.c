@@ -23,6 +23,7 @@ int checkpoint_load_patches(tMesh *mesh, char *fname)
   char par[1000], val[1000];
   int useF=0;
   double bbox[] = { 0.,0.,0.,0.,0.,0. };
+  int npg=0, pg0=0;
 
 /*
 char ttt[] = "  domu=read 99 newl=wwww 6    6  = qqqq3=xyz";
@@ -72,6 +73,8 @@ exit(8);
       //prbbox(bbox, 3);
       //printf("n = %d %d %d\n", n[0],n[1],n[2]);
       pat = add_patch_without_rnode(mesh, bbox);
+      pat->npg = npg;
+      pat->pg0 = pg0;
       useF = 0;
     }
 
@@ -89,7 +92,8 @@ exit(8);
       if(strcmp(par, "bbox[3]")==0) bbox[3] = atof(val);
       if(strcmp(par, "bbox[4]")==0) bbox[4] = atof(val);
       if(strcmp(par, "bbox[5]")==0) bbox[5] = atof(val);
-      //if(strcmp(par, "nmax")==0) nmax = atoi(val);
+      if(strcmp(par, "npg")==0) npg = atoi(val);
+      if(strcmp(par, "pg0")==0) pg0 = atoi(val);
       if(strcmp(par, "s[0]")==0)  pat->CI->s[0] = atof(val);
       if(strcmp(par, "s[1]")==0)  pat->CI->s[1] = atof(val);
       if(strcmp(par, "s[2]")==0)  pat->CI->s[2] = atof(val);
