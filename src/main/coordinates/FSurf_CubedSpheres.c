@@ -279,6 +279,8 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
   int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
   int lmax;
 
+  errorexit("This function is not needed. "
+            "set_1_CubedSphere_pat should set all that is here already...");
   errorexit("this function needs to be tested!!!");
 
   if(pi_dom0!=pg0) return -1; /* do nothing if this is not dom0 */
@@ -314,19 +316,28 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
   /* loop if si0<=si1 */
   for(si=si0; si<=si1; si++)
   {
-    int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
-    int nc[] = { nYs*2, 1, 1 };           /* number of coeffs we need */
+    //int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
+    //int nc[] = { nYs*2, 1, 1 };           /* number of coeffs we need */
 
     if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
 
-    /* set CI func and coeff pointers only if CI->FSurf[si] was there
-       already */
-    /*FIXME: is this a good idea? What if we start from checkpoint
-             and all is NULL??? */
-    //if(pat->CI->FSurf[si])
-    //???
-    if(1)
+    /* set CI func pointers only if CI->FSurf[si] was set to non-NULL
+       by set_1_CubedSphere_pat */
+    /*FIXME: is this a good idea? YES. checkpoint also calls
+             set_1_CubedSphere_pat first */
+    if(pat->CI->FSurf[si])
     {
+      /* If coeffs are wanted the user has to alloc and set them. Therefore
+         the lines blow are commented out: */
+      ///* alloc memory for coeffs in one of the six patches but only for si=0 */
+      //if(si==0)
+      //{
+      //  if(pat->CI->Fcoef[si])
+      //    redimension_array(pat->CI->Fcoef[si], nc);
+      //  else
+      //    pat->CI->Fcoef[si] = alloc_array(nc);
+      //}
+
       /* loop over 6 patches */
       for(i=0; i<npg; i++)
       {
@@ -336,15 +347,6 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
         /* set surface functions */
         CI->FSurf[si]    = FSurf_CubSph_sigma01;
         CI->dFSurfdC[si] = FSurf_CubSph_dsigma01;
-      }
-
-      /* alloc memory for coeffs in one of the six patches but only for si=0 */
-      if(si==0)
-      {
-        if(pat->CI->Fcoef[si])
-          redimension_array(pat->CI->Fcoef[si], nc);
-        else
-          pat->CI->Fcoef[si] = alloc_array(nc);
       }
     }
   }
@@ -693,7 +695,18 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
 
   if(innerSphere)
   {
+    int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
+    int nc[] = { nYs*2, 1, 1 };           /* number of coeffs we need */
+
     if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
+
+    /* alloc memory for coeffs in this 1st of the six patches */
+    if(pat->CI->Fcoef[0])
+      redimension_array(pat->CI->Fcoef[0], nc);
+    else
+      pat->CI->Fcoef[0] = alloc_array(nc);
+
+    /* set pat->CI->Fcoef[0] from CubedSphere_sigma0_def */
     FSurf_CubSph_set_Ylm_coefArray(mesh, 0, pg0, isigma0,-1, lmax,
                                    pat->CI->Fcoef[0]);
   }
