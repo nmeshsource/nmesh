@@ -66,3 +66,7 @@ void keep_only_active_dirs_in_dXdx(double dXdx[3][3], int dir_active[3]);
 
 /* tests.c */
 int coordinates_tests(tMesh *mesh);
+
+/* FSurf_CubedSpheres.c */
+int FSurf_CubSph_sigma01(tPat *pat, int si, double AB[2], double *sig);
+int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2]);

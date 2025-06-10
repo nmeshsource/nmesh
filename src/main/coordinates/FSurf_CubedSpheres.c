@@ -214,7 +214,7 @@ errorexit("NAN!");
 }
 */
   }
-  else /* if there are no coeffs sig is constant */
+  else /* if there are no coeffs sig is constant, so its derivs are 0 */
   {
     dsig[0] = dsig[1] = 0.;
   }
@@ -223,7 +223,7 @@ errorexit("NAN!");
 
 
 /* set var pat->CI->iSurf and its derivs from FSurf_CubSph_sigma01 */
-int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tNode *node, int si)
+int FSurf_CubSph_set_sigma01vars_from_CI_FSurf(tNode *node, int si)
 {
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
