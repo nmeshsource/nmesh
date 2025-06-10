@@ -319,24 +319,33 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 
     if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
 
-    /* alloc memory for coeffs in one of the six patches and only for si=0 */
-    if(si==0)
+    /* set CI func and coeff pointers only if CI->FSurf[si] was there
+       already */
+    /*FIXME: is this a good idea? What if we start from checkpoint
+             and all is NULL??? */
+    //if(pat->CI->FSurf[si])
+    //???
+    if(1)
     {
-      if(pat->CI->Fcoef[si])
-        redimension_array(pat->CI->Fcoef[si], nc);
-      else
-        pat->CI->Fcoef[si] = alloc_array(nc);
-    }
+      /* loop over 6 patches */
+      for(i=0; i<npg; i++)
+      {
+        tPat *pati = mesh->pat[pg0 + i];
+        tCoordInfo *CI = pati->CI;
 
-    /* loop over 6 patches */
-    for(i=0; i<npg; i++)
-    {
-      tPat *pati = mesh->pat[pg0 + i];
-      tCoordInfo *CI = pati->CI;
+        /* set surface functions */
+        CI->FSurf[si]    = FSurf_CubSph_sigma01;
+        CI->dFSurfdC[si] = FSurf_CubSph_dsigma01;
+      }
 
-      /* set surface functions */
-      CI->FSurf[si]    = FSurf_CubSph_sigma01;
-      CI->dFSurfdC[si] = FSurf_CubSph_dsigma01;
+      /* alloc memory for coeffs in one of the six patches but only for si=0 */
+      if(si==0)
+      {
+        if(pat->CI->Fcoef[si])
+          redimension_array(pat->CI->Fcoef[si], nc);
+        else
+          pat->CI->Fcoef[si] = alloc_array(nc);
+      }
     }
   }
 
@@ -581,17 +590,21 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
   for(l=0; l<=lmax; l++)
   for(m=0; m<=l; m++)
   {
+    double Integval;
+
     /* set Re and Im part of Integ */
     Ijk = (i%n0) + Ng*(i/n0);
 
     //Integ[ijk++] = Re_Integp[Ijk];
     //Integ[ijk++] = Im_Integp[Ijk];
+    Integval = Re_Integp[Ijk];
     GEN_Pragma(omp atomic update)
-    { Integ[ijk] += Re_Integp[Ijk]; }
+    { Integ[ijk] += Integval; }
     ijk++;
 
+    Integval = Im_Integp[Ijk];
     GEN_Pragma(omp atomic update)
-    { Integ[ijk] += Im_Integp[Ijk]; }
+    { Integ[ijk] += Integval; }
     ijk++;
 
     i++;
