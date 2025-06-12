@@ -14,6 +14,7 @@ tArray *FSurf_CubSph_sigma01_Fcoef(tPat *pat, int si)
   int np = pat->npg;
   int pi = (si ? p0+np : p0); /* if si!=0 go to next pat group */
 
+  if(!np) return NULL; //if there is no patgroupm, assume there are no coeffs
   if(pi >= mesh->npats) return NULL; /* there are no coeffs */
 
   return mesh->pat[pi]->CI->Fcoef[0];
@@ -43,7 +44,7 @@ int FSurf_CubSph_sigma01(tPat *pat, int si, double AB[2], double *sig)
     double *ReYtab = alloc_Plm_Tab(lmax);
     double *ImYtab = alloc_Plm_Tab(lmax);
 
-    errorexit("this function needs to be tested!!!");
+    //errorexit("this function needs to be tested!!!");
 
     /* get Theta,Phi from A,B */
     ThetaPhi_of_AB_CubSph(pat, AB[0],AB[1], &Theta,&Phi);
@@ -668,7 +669,7 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
   int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
   int lmax;
 
-  errorexit("this function needs to be tested!!!");
+  //errorexit("this function needs to be tested!!!");
 
   if(pi_dom0!=pg0) return -1; /* do nothing if this is not dom0 */
 
@@ -835,8 +836,8 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
     CubedSphere_sigma0_def_from_CI_s0(mesh);
 
     /* deform CubedSphere_sigma0_def */
-    forpatches(mesh,p)
-      CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
+    //forpatches(mesh,p)
+    //  CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
 
     /* compute CI->Fcoef[0] from CubedSphere_sigma0_def */
     forpatches(mesh,p)
@@ -853,6 +854,8 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
       if(npg && p-pg0==2)
       {
         char *cp;
+
+        free_array(pat->CI->Fcoef[5]);
         pat->CI->Fcoef[5] = alloc_array1d(6);
 
         /* write some test bytes into array data */

@@ -59,7 +59,7 @@ int nmesh_coordinates(tMesh *mesh)
   if(Getb(Par("CubedSphere_sigma01_test")))
   {
     Sets(Par("CubedSphere_sigma01_def"), "yes");
-    AddFun(POST_INITMESH, CubSphTest_CI_Fcoef0_for_deformed_sigma);
+    AddFun(POST_COORDINATES, CubSphTest_CI_Fcoef0_for_deformed_sigma);
   }
   if(Getb(Par("CubedSphere_sigma01_def")))
   {
