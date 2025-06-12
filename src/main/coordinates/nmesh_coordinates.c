@@ -11,7 +11,7 @@ int nmesh_coordinates(tMesh *mesh)
 
   /* functions */
   AddFun(POST_PARAMETERS, coordinates_set_globals);
-  AddFun(COORDINATES, coordinates_init); //is also called in make_child_node!
+  AddFun(COORDINATES, coordinates_init); //is also called in make_child_elm!
 
   /* variables */
   AddAuxVar("X", "",    "coord0 in each patch e.g. lam"); // don't put any-
@@ -57,7 +57,10 @@ int nmesh_coordinates(tMesh *mesh)
   AddPar("CubedSphere_sigma01_def", "no", "switch on sigma01_def [no,yes]");
   AddPar("CubedSphere_sigma01_test", "no", "run tests [no,yes]");
   if(Getb(Par("CubedSphere_sigma01_test")))
+  {
     Sets(Par("CubedSphere_sigma01_def"), "yes");
+    AddFun(POST_INITMESH, CubSphTest_CI_Fcoef0_for_deformed_sigma);
+  }
   if(Getb(Par("CubedSphere_sigma01_def")))
   {
     /* Var to we use to compute CI->FSurf[0]: */
