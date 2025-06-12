@@ -304,7 +304,12 @@ void SphHarm_dphi_forRealFunc(double *c, double *cdphi, int lmax)
      (\sin(\theta)\partial_{\theta} f)_l^m
        = (l-1) e_l^m f_{l-1}^m  -  (l+2) e_{l+1}^m f_{l+1}^m
    where:
-     e_0^0 := 0,   e_l^m := \sqrt{ (l^2 - m^2)/((2l+1)(2l-1)) }   */
+     e_0^0 := 0,   e_l^m := \sqrt{ (l^2 - m^2)/((2l+1)(2l-1)) }
+   Caution: We need f_{l+1}^m. I.e. for l=lmax we need f_{lmax+1}^m !
+   -------  The latter is likely outside the coef-array c.
+            ==> We loop only up to l=lmax-1.
+   NOTE: The sgrid func SphHarm_sin_theta_dtheta_forRealFunc has an l-loop
+         that goes up to l=lmax, which is DIFFERENT!!! */
 void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
 {
   int i, l,m, lp1, lm1, lp1_2, l_2, lp2;
@@ -313,8 +318,8 @@ void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
   double Rclm1,Iclm1, Rclp1,Iclp1; /* Re, Im part of c_{l-1}^m and c_{l+1}^m */
   double Rcld,Icld; /* Re, Im part of csdth */
 
-  for(i=0, l=0; l<=lmax; l++)
-    for(m=0; m<=l; m++, i+=2) /* here we set only use  m>=0 */
+  for(i=0, l=0; l<=lmax-1; l++) /* here we go only up to l=lmax-1 */
+    for(m=0; m<=l; m++, i+=2)   /* here we only use m>=0 */
     {
       l_2 = l*2;
       elm = l*l - m*m;
@@ -347,4 +352,8 @@ errorexit("NAN!");
 }
 */
     }
+
+  /* zero the remaining csdth (i.e. the ones for l=lmax) */
+  for(m=0; m<=l; m++, i+=2)
+    csdth[i] = csdth[i+1] = 0.;
 }
