@@ -967,7 +967,11 @@ void free_pat_CI(tPat *pat)
 {
   int d;
 
-  for(d=0; d<6; d++) free_array(pat->CI->Fcoef[d]);
+  for(d=0; d<6; d++)
+  {
+    free_array(pat->CI->Fcoef[d]);
+    pat->CI->Fcoef[d] = NULL;
+  }
 }
 
 /* free pat, currently leaves mesh untouched */
@@ -1071,6 +1075,10 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
   if(!mesh) return;
 
   if(PR) PRFs(":\n");
+
+  /* since deleting patches invalidates patch group info, we just
+     delete all of it here already */
+  coordinates_zero_all_pat_npg_pg0(mesh);
 
   /* free patches */
   for(i = 0; i < mesh->npats; i++)
