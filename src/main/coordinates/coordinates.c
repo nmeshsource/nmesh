@@ -135,7 +135,7 @@ int coordinates_init_node(tNode *node)
   tPat *pat = node->pat;
   tMesh *mesh = pat->mesh;
   tDat *dat = node->dat;
-  tCoordInfo *CI = pat->CI;
+  //tCoordInfo *CI = pat->CI;
   int *n = node->n;
   int i,j,k, d,e, f;
   int dir_active[3];
