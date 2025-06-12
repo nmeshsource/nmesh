@@ -280,49 +280,6 @@ int coordinates_init_node(tNode *node)
     }
   }
 
-  /* set surface vars */
-  for(f=0; f<6; f++)
-    if(CI->iSurf[f] > 0)
-    {
-      int dir = f/2;
-      int pl = (n[dir]-1)*(f%2);
-      int d1  = Dir1_norm(dir);
-      int d2  = Dir2_norm(dir);
-      double *sig = Vard(node, CI->iSurf[f]);
-      double C[2], F;
-
-      forplaneN(dir, i,j,k, n, pl)
-      {
-        int ijk = Ind_n(i,j,k, n);
-        int ind = Ind_n_norm(i,j,k, n, dir);
-
-        C[0] = pX[d1][ijk];
-        C[1] = pX[d2][ijk];
-        CI->FSurf[f](pat, f, C, &F);
-        sig[ind] = F;
-      }
-
-      /* and their derivs */
-      if(CI->idSurfdX[f][d1] > 0)
-      {
-        double *dsig1 = Vard(node, CI->idSurfdX[f][d1]);
-        double *dsig2 = Vard(node, CI->idSurfdX[f][d2]);
-        double dF[2];
-
-        forplaneN(dir, i,j,k, n, pl)
-        {
-          int ijk = Ind_n(i,j,k, n);
-          int ind = Ind_n_norm(i,j,k, n, dir);
-
-          C[0] = pX[d1][ijk];
-          C[1] = pX[d2][ijk];
-          CI->dFSurfdC[f](pat, f, C, dF);
-          dsig1[ind] = dF[0];
-          dsig2[ind] = dF[1];
-        }
-      }
-    }
-
   /* set extra vars to store stuff in the middle between grid points */
   if(Getb(coordinates->midpoint_data))
   {
