@@ -715,6 +715,68 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
 
 
 /**************************************************************************/
+/* funcs for CubedSphere_sigma0_def  */
+/**************************************************************************/
+
+/* enable CubedSphere_sigma0_def only in elms that touch face0
+   of inner Cubed Spheres */
+int CubedSphere_sigma0_def_EnableAlongInnerSphere(tMesh *mesh)
+{
+  int isigma0 = Ind("CubedSphere_sigma0_def");
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tPat *pat = node->pat;
+    int type = pat->CI->type;
+    int InnerSphere;
+
+    /* figure out if patchface0 is spherical */
+    switch(type)
+    {
+    case innerCubedSphere:
+    case CubedShell:
+      InnerSphere = 1;
+      break;
+    default:
+      InnerSphere = 0;
+    }
+
+    if(InnerSphere && Node_patface(node, 0))
+      enablevar_innode(node, isigma0);
+    else
+      disablevar_innode(node, isigma0);
+  }
+
+  return 0;
+}
+
+/* set CubedSphere_sigma0_def to the constant CI->s[0] */
+int CubedSphere_sigma0_def_from_CI_s0(tMesh *mesh)
+{
+  int isigma0 = Ind("CubedSphere_sigma0_def");
+
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tPat *pat = node->pat;
+    tCoordInfo *CI = pat->CI;
+
+    if(VarA(node,isigma0))
+    {
+      double *sigma0 = Vard(node,isigma0);
+      int i;
+      forpoints(node, i)
+      {
+        sigma0[i] = CI->s[0];
+      }
+    }
+  }
+  return 0;
+}
+
+
+/**************************************************************************/
 /* funcs for testing  */
 /**************************************************************************/
 
@@ -758,31 +820,7 @@ void CubSphTest_deform_sigmavar(tMesh *mesh, int pi_dom0,
   }
 }
 
-/* set CubedSphere_sigma0_def to the constant CI->s[0] */
-int CubedSphere_sigma0_def_from_CI_s0(tMesh *mesh)
-{
-  int isigma0 = Ind("CubedSphere_sigma0_def");
-
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    tPat *pat = node->pat;
-    tCoordInfo *CI = pat->CI;
-
-    if(VarA(node,isigma0))
-    {
-      double *sigma0 = Vard(node,isigma0);
-      int i;
-      forpoints(node, i)
-      {
-        sigma0[i] = CI->s[0];
-      }
-    }
-  }
-  return 0;
-}
-
-/**/
+/* set var CubedSphere_sigma0_def to test values */
 int CubSphTest_set_CubedSphere_sigma0_def(tMesh *mesh)
 {
   if(Getb(Par("CubedSphere_sigma01_test")))
@@ -790,10 +828,13 @@ int CubSphTest_set_CubedSphere_sigma0_def(tMesh *mesh)
     int isigma0 = Ind("CubedSphere_sigma0_def");
     int p;
 
+    /* enable CubedSphere_sigma0_def */
+    CubedSphere_sigma0_def_EnableAlongInnerSphere(mesh);
+
     /* set const CubedSphere_sigma0_def */
     CubedSphere_sigma0_def_from_CI_s0(mesh);
 
-    /* defoem CubedSphere_sigma0_def */
+    /* deform CubedSphere_sigma0_def */
     forpatches(mesh,p)
       CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
 
@@ -814,7 +855,7 @@ int CubSphTest_set_CubedSphere_sigma0_def(tMesh *mesh)
         char *cp;
         pat->CI->Fcoef[5] = alloc_array1d(6);
 
-        /* write some bytes into array data */
+        /* write some test bytes into array data */
         cp = (char *) pat->CI->Fcoef[5]->d;
         cp[0] = '5';
         cp[1] = 'A' + p;
