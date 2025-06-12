@@ -1537,7 +1537,9 @@ void enablevarcomp_innode(tNode *node, int i)
     dat->nvenabled++;
     if(PR)
     {
-      PRF;printf(": var_%d: %s\n", i, MeshVarName(node->pat->mesh, i));
+      PRFs(": ");
+      printeploc(node->eploc);
+      printf(": var_%d: %s\n", i, MeshVarName(node->pat->mesh, i));
     }
   }
 }
@@ -1558,7 +1560,9 @@ void disablevarcomp_innode(tNode *node, int i)
     dat->nvenabled--;
     if(PR)
     {
-      PRF;printf(": var_%d: %s\n", i, MeshVarName(node->pat->mesh, i));
+      PRFs(": ");
+      printeploc(node->eploc);
+      printf(": var_%d: %s\n", i, MeshVarName(node->pat->mesh, i));
     }
   }
 }
