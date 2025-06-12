@@ -174,6 +174,9 @@ int coordinates_init_node(tNode *node)
   dXbYbZb_dXYZ(node, dXbdX);
   det_dXbYbZb_dXYZ = dXbdX[0] * dXbdX[1] * dXbdX[2];
 
+  /* set X,Y,Z coords and surface vars */
+  coordinates_set_XYZ_and_CI_iSurf_idSurfdX(node);
+
   /* set coords */
   forijk(i,j,k, n)
   {
@@ -539,11 +542,106 @@ int coordinates_init(tMesh *mesh)
   return 0;
 }
 
+/* re-initialize coordinates in each node */
+int coordinates_reinit(tMesh *mesh)
+{
+  PRF;printf(":\n");
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tDat *dat = node->dat;
+
+    /* do nothing if vars are off */
+    if(!dat) continue;
+
+    /* signal that coords are not set and then init them */
+    dat->coords_set = 0;
+    coordinates_init_node(node);
+  }
+
+  return 0;
+}
+
+
+/********************************************************************/
+/* some functions to init parts of coordinates */
+/********************************************************************/
+
+/* set X,Y,Z coords and surface vars */
+int coordinates_set_XYZ_and_CI_iSurf_idSurfdX(tNode *node)
+{
+  tPat *pat = node->pat;
+  tMesh *mesh = pat->mesh;
+  //tDat *dat = node->dat;
+  tCoordInfo *CI = pat->CI;
+  int *n = node->n;
+  int i,j,k, f;
+  int iX = Ind("X");
+  double *pX[] = { Vard(node,iX), Vard(node,iX+1), Vard(node,iX+2) };
+
+  /* set X,Y,Z-coords */
+  forijk(i,j,k, n)
+  {
+    double Xb[] = { node_Xb(node,0)->d[i], node_Xb(node,1)->d[j],
+                    node_Xb(node,2)->d[k] };
+    double X[3];
+    int ijk = Ind_n(i,j,k, n);
+    int d;
+
+    /* get X from Xb */
+    XYZ_of_XbYbZb(node, Xb, X);
+    for(d=0; d<3; d++) pX[d][ijk] = X[d];
+  }
+
+  /* set surface vars */
+  for(f=0; f<6; f++)
+    if(CI->iSurf[f] > 0)
+    {
+      int dir = f/2;
+      int pl = (n[dir]-1)*(f%2);
+      int d1  = Dir1_norm(dir);
+      int d2  = Dir2_norm(dir);
+      double *sig = Vard(node, CI->iSurf[f]);
+      double C[2], F;
+
+      forplaneN(dir, i,j,k, n, pl)
+      {
+        int ijk = Ind_n(i,j,k, n);
+        int ind = Ind_n_norm(i,j,k, n, dir);
+
+        C[0] = pX[d1][ijk];
+        C[1] = pX[d2][ijk];
+        CI->FSurf[f](pat, f, C, &F);
+        sig[ind] = F;
+      }
+
+      /* and their derivs */
+      if(CI->idSurfdX[f][d1] > 0)
+      {
+        double *dsig1 = Vard(node, CI->idSurfdX[f][d1]);
+        double *dsig2 = Vard(node, CI->idSurfdX[f][d2]);
+        double dF[2];
+
+        forplaneN(dir, i,j,k, n, pl)
+        {
+          int ijk = Ind_n(i,j,k, n);
+          int ind = Ind_n_norm(i,j,k, n, dir);
+
+          C[0] = pX[d1][ijk];
+          C[1] = pX[d2][ijk];
+          CI->dFSurfdC[f](pat, f, C, dF);
+          dsig1[ind] = dF[0];
+          dsig2[ind] = dF[1];
+        }
+      }
+    }
+  return 0;
+}
+
 
 /********************************************************************/
 /* some functions to set surface metric for DG-surface terms */
 /********************************************************************/
-
 
 /* Write sqrt(det(2g)/det(3gamma_ij)) on node faces into the 6 vars
    sqrtdet2g_o_det3gamma^i. We calculate sqrtdet2g_o_det3gamma from

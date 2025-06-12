@@ -8,6 +8,7 @@
 
 /* coordinates.c */
 int coordinates_set_globals(tMesh *mesh);
+int coordinates_set_XYZ_and_CI_iSurf_idSurfdX(tNode *node);
 
 /* coordtrans_CubedSphere.c */
 double CubedSphere_sigma(tPat *pat, tNode *node, int si, int ind,
