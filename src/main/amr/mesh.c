@@ -439,8 +439,8 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3],
   int mesh_type = Par("amr_mesh_type");
   int npats = Geti(mesh_type);
   int CubedSphere_ndomains = Geti(Par("amr_CubedSphere_ndomains"));
-  double rf_surf1 = 4.884000724603178; // 0.25;
-  double rf_surf2 = 6.695189346321037; // 0.25;
+  double rf_surf1 = 0.25; // 4.884000724603178; // 0.25;
+  double rf_surf2 = 0.25; // 6.695189346321037; // 0.25;
   double BoxMesh_rc_max = max3(BoxMesh_rc[0],BoxMesh_rc[1],BoxMesh_rc[2]);
   double dc = Getd(Par("amr_CubedSphere_dc"));
   double csize = 0.375; //extent of inner cubes from center (must be below ~1/sqrt(3))
