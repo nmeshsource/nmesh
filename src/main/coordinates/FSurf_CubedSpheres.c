@@ -231,6 +231,8 @@ int FSurf_CubSph_return_sgrid_CubedSphere_sigma01_lmax(tMesh *mesh, int n[3])
   int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
   int lmax;
 
+  errorexit("this function may not be needed!");
+
   /* set lmax we use */
   if(Getv(CubedSphere_sigma01_lmax,"from_n0"))
     /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
