@@ -59,7 +59,11 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
 void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, const char *pats,
                                       char *Fcoef_filename)
 {
+  tMesh *mesh = pat->mesh;
   int headlen;
+  char fmt[100];
+
+  snprintf(fmt,99, "%%d.%%0%dd", (int) log10(mesh->npats)+1);
 
   /* copy pats without patches_file part */
   strcpy(Fcoef_filename, pats);
@@ -72,7 +76,7 @@ void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, const char *pats,
   headlen = strlen(Fcoef_filename);
 
   /* complete output file name */
-  sprintf(Fcoef_filename+headlen, "%d.%d", f, pat->p);
+  sprintf(Fcoef_filename+headlen, fmt, f, pat->p);
 }
 
 
