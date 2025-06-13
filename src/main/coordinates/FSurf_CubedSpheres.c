@@ -869,8 +869,8 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
     CubedSphere_sigma0_def_from_CI_s0(mesh);
 
     /* deform CubedSphere_sigma0_def */
-    //forpatches(mesh,p)
-    //  CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
+    forpatches(mesh,p)
+      CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
 
     /* compute CI->Fcoef[0] from CubedSphere_sigma0_def */
     forpatches(mesh,p)
