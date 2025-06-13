@@ -77,6 +77,12 @@ int nmesh_coordinates(tMesh *mesh)
        room to store sigma0 from previous iterations. To checkpoint
        CubedSphere_sigma0_def we make it a DATAVAR: */
     MeshVarSetType(mesh, Ind("CubedSphere_sigma0_def"), DATAVAR);
+
+    /* For some unknown reason there is a large error in the coefs of
+       Ylm expansiom if we go beyond lmax=3. */
+    if(Geti(Par("CubedSphere_sigma01_lmax"))>=4)
+      errorexit("CubedSphere_sigma01_lmax is too large! For some unknown "
+                "reason the Fcoef for l=4,m=0 has a large error...");
   }
 
   /* Variables to store some things in the middle between two regular grid
