@@ -123,7 +123,7 @@ int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2])
     double *cdphi = calloc(nYs*2, sizeof(double));
     double A=AB[0], B=AB[1];
 
-    errorexit("this function needs to be tested!!!");
+    //errorexit("this function needs to be tested!!!");
 
     /* regularize case where A=B=0 <==> Theta=0:
        Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
@@ -222,6 +222,37 @@ errorexit("NAN!");
   return 0;
 }
 
+/* parse and return par CubedSphere_sigma01_lmax as in sgrid */
+int FSurf_CubSph_return_sgrid_CubedSphere_sigma01_lmax(tMesh *mesh, int n[3])
+{
+  int n0=n[0];
+  int n1=n[1];
+  int n2=n[2];
+  int CubedSphere_sigma01_lmax = Par("CubedSphere_sigma01_lmax");
+  int lmax;
+
+  /* set lmax we use */
+  if(Getv(CubedSphere_sigma01_lmax,"from_n0"))
+    /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
+       to store the table.
+       So when is (lmax*(lmax+1))/2 + lmax+1 = n0?
+       set L = lmax ==> L^2/2 + 3L/2 + 1 = n0  <==> L^2 + 3 L + 2 - 2*n0 = 0
+       so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n0)) = -3 +- sqrt(8*n0 + 1)
+       L = (sqrt(8*n0 + 1) - 3)/2  */
+    lmax = (sqrt(8*n0 + 1) - 3)/2;
+  else if(Getv(CubedSphere_sigma01_lmax,"sqrt(n1*n2)/4+1"))
+    lmax = sqrt(n1*n2)/4 + 1;
+  else if(Getv(CubedSphere_sigma01_lmax,"sqrt(n1*n2)/4"))
+    lmax = sqrt(n1*n2)/4;
+  else if(Getv(CubedSphere_sigma01_lmax,"sqrt(n1*n2)/2"))
+    lmax = sqrt(n1*n2)/2;
+  else if(Getv(CubedSphere_sigma01_lmax,"sqrt(n1*n2)"))
+    lmax = sqrt(n1*n2);
+  else
+    lmax = Geti(CubedSphere_sigma01_lmax);
+
+  return lmax;
+}
 
 /* set var pat->CI->iSurf and its derivs from FSurf_CubSph_sigma01 */
 int FSurf_CubSph_set_sigma01vars_from_CI_FSurf(tNode *node, int si)
@@ -864,6 +895,7 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
         cp[1] = 'A' + p;
       }
     }
+    coordinates_reinit(mesh);
   }
   return 0;
 }
