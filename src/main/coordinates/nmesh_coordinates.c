@@ -52,7 +52,7 @@ int nmesh_coordinates(tMesh *mesh)
          "e.g. in coordinates_init_node [sqrtgdiag,sqrtdet2g_o_det3gamma]");
 
   /* special CubedSphere pars and vars */
-  AddPar("CubedSphere_sigma01_lmax", "8", "lmax for Ylm's used in the "
+  AddPar("CubedSphere_sigma01_lmax", "3", "lmax for Ylm's used in the "
          "func FSurf_CubSph_sigma01");
   AddPar("CubedSphere_sigma01_def", "no", "switch on sigma01_def [no,yes]");
   AddPar("CubedSphere_sigma01_test", "no", "run tests [no,yes]");
