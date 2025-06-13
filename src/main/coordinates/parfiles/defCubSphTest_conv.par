@@ -1,0 +1,49 @@
+###################################################################
+# modules we use
+
+physics =
+
+errorexit = abort
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = 38 CubedSpheres
+# DNSdata_b = 16
+# rf_surf1 = 4.884000724603178
+# rf_surf2 = 6.695189346321037
+amr_CubedSphere_dc  = 16
+amr_CubedSphere_r0fac = 4
+amr_CubedSphere_r1fac = 10000
+
+amr_n0 = 6
+amr_n1 = 6
+amr_n2 = 6
+
+iterate_parameters = yes
+iterate_parameter1 = amr_n0  6 10 14 18
+iterate_parameter2 = amr_n1  6 10 14 18
+iterate_parameter3 = amr_n2  6 10 14 18
+
+CubedSphere_sigma01_lmax = 3
+CubedSphere_sigma01_test = yes
+
+###################################################################
+# checkpoint
+checkpoint = yes
+
+###################################################################
+# output
+
+logfile_creation = no
+
+1doutiter = 1
+1doutput = CubedSphere_sigma0 CubedSphere_dsigma0_dA CubedSphere_dsigma0_dB
+           CubedSphere_sigma1 CubedSphere_dsigma1_dA CubedSphere_dsigma1_dB
+           CubedSphere_sigma0_def
+
+2doutiter = 1
+2doutput = CubedSphere_sigma0 CubedSphere_dsigma0_dA CubedSphere_dsigma0_dB
+           CubedSphere_sigma1 CubedSphere_dsigma1_dA CubedSphere_dsigma1_dB
+           CubedSphere_sigma0_def
+2dformat = gnuplot # xdmf
