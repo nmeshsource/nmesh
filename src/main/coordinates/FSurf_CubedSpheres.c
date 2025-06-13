@@ -897,6 +897,8 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
         cp[1] = 'A' + p;
       }
     }
+
+    /* use new CI->Fcoef to re-init all coordinates vars */
     coordinates_reinit(mesh);
   }
   return 0;
