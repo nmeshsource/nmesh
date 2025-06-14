@@ -727,12 +727,15 @@ int FSurf_CubSph_set_CI_Fcoef0(tMesh *mesh, int pi_dom0)
     innerSphere = 0;
   }
 
-  if(innerSphere)
+  /* if face0 is a sphere and if FSurf[0] is on, set Fcoef[0] */
+  if(innerSphere && pat->CI->FSurf[0])
   {
     int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
     int nc[] = { nYs*2, 1, 1 };           /* number of coeffs we need */
 
     if(npg==0) errorexit("we need a patgroup, i.e. npg>0");
+
+    //PRF;printf(": pg0=%d\n", pg0);
 
     /* alloc memory for coeffs in this 1st of the six patches */
     if(pat->CI->Fcoef[0])
