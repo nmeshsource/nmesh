@@ -897,7 +897,7 @@ void CubSphTest_l1deform_sigmavar(tMesh *mesh, int pi_dom0,
 /* set var CubedSphere_sigma0_def to test values */
 int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
 {
-  if(Getb(Par("CubedSphere_sigma01_test")))
+  if(Getv(Par("CubedSphere_sigma01_def"),"test"))
   {
     int isigma0 = Ind("CubedSphere_sigma0_def");
     int p;

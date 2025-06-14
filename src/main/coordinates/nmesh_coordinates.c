@@ -54,13 +54,8 @@ int nmesh_coordinates(tMesh *mesh)
   /* special CubedSphere pars and vars */
   AddPar("CubedSphere_sigma01_lmax", "3", "lmax for Ylm's used in the "
          "func FSurf_CubSph_sigma01");
-  AddPar("CubedSphere_sigma01_def", "no", "switch on sigma01_def [no,yes]");
-  AddPar("CubedSphere_sigma01_test", "no", "run tests [no,yes]");
-  if(Getb(Par("CubedSphere_sigma01_test")))
-  {
-    Sets(Par("CubedSphere_sigma01_def"), "yes");
-    AddFun(POST_COORDINATES, CubSphTest_CI_Fcoef0_for_deformed_sigma);
-  }
+  AddPar("CubedSphere_sigma01_def", "no", "switch on sigma01_def [no,yes,"
+         "yes test]");
   if(Getb(Par("CubedSphere_sigma01_def")))
   {
     /* Var to we use to compute CI->FSurf[0]: */
@@ -77,7 +72,6 @@ int nmesh_coordinates(tMesh *mesh)
        room to store sigma0 from previous iterations. To checkpoint
        CubedSphere_sigma0_def we make it a DATAVAR: */
     MeshVarSetType(mesh, Ind("CubedSphere_sigma0_def"), DATAVAR);
-
     /* For some unknown reason there is a large error in the coefs of
        Ylm expansiom if we go beyond lmax=3. */
     if(Geti(Par("CubedSphere_sigma01_lmax"))>=4)
@@ -121,6 +115,10 @@ int nmesh_coordinates(tMesh *mesh)
     AddAuxVar("divb_J_sqrtgdiag_n","i", "d_{ib}(J sqrtgdiag^{ib} n^{ib}_i)");
     AddAuxVar("ooJ_Db_J_sqrtgdiag_n","i",
               "(1/J) D_{ib} (J sqrtgdiag^{ib} n^{ib}_i)");
+  }
+  if(Getv(Par("CubedSphere_sigma01_def"),"test"))
+  {
+    AddFun(POST_COORDINATES, CubSphTest_CI_Fcoef0_for_deformed_sigma);
   }
 
   return 0;
