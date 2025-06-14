@@ -595,21 +595,6 @@ int coordinates_set_XYZ_and_CI_iSurf_idSurfdX(tNode *node)
   return 0;
 }
 
-/* zero patch group info for an entire patch group */
-void coordinates_zero_pat_npg_pg0(tPat *pat)
-{
-  tMesh *mesh = pat->mesh;
-  int p0 = pat->pg0;
-  int np = pat->npg;
-  int i;
-
-  for(i=0; i<np; i++)
-  {
-    tPat *pat_i = mesh->pat[p0+i];
-    pat_i->npg = pat_i->pg0 = 0;
-  }
-}
-
 
 /********************************************************************/
 /* some functions to set surface metric for DG-surface terms */
