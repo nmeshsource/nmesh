@@ -59,11 +59,14 @@ int checkpoint_create_pathnames(tMesh *mesh, const char *outdir_suffix,
 void checkpoint_set_CI_Fcoef_filename(tPat *pat, int f, const char *dir,
                                       char *Fcoef_filename)
 {
-  tMesh *mesh = pat->mesh;
+  //tMesh *mesh = pat->mesh;
+  int npats_MAX = 9000;
   int headlen;
   char fmt[100];
 
-  snprintf(fmt,99, "%%d.%%0%dd", (int) log10(mesh->npats)+1);
+  snprintf(fmt,99, "%%d.%%0%dd", (int) log10(npats_MAX)+1);
+  //mesh->npats changes during checkpoint load, so this does not work:
+  //snprintf(fmt,99, "%%d.%%0%dd", (int) log10(mesh->npats)+1);
 
   /* set dir part */
   strcpy(Fcoef_filename, dir);
