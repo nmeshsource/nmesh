@@ -263,6 +263,7 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
                         int *ai, int *imax);
 int finit(double x);
 double rand_32primitive_u01(uint32_t *num);
+char *strdup_cat(const char *s, const char *src, int npad);
 int remove_chars_from_str(char *str, const char *del);
 void trim_whitespace(char *str);
 int get_par_from_str(const char *str, char *name, const char *delim,

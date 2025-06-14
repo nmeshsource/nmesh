@@ -324,6 +324,17 @@ double rand_32primitive_u01(uint32_t *num)
   return ((double) *num)/4294967296.0;
 }
 
+/* Duplicate s and then append src. Also add npad chars of padding.
+   Needs to be freed with free. */
+char *strdup_cat(const char *s, const char *src, int npad)
+{
+  int len = strlen(s) + strlen(src) + 1 + npad;
+  char *str = calloc(len, sizeof(char));
+  strcpy(str, s);
+  strcat(str, src);
+  return str;
+}
+
 /* remove all chars that occur in del from string str,
    return number of removed chars */
 int remove_chars_from_str(char *str, const char *del)
