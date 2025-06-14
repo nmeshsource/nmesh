@@ -196,6 +196,8 @@ typedef struct tPAT {
   double bbox[6];       /* bounding box (in X,Y,Z) of this patch */
   double bbdiag;        /* length (in X,Y,Z-coords) of 3D-diagonal in bbox */
   int p;                /* index of this patch */
+  int npg;              /* if pat is in a patgroup, npg is num of pats in this group */
+  int pg0;              /* pg0 if 1st pat in group if npg!=0 */
   struct tMESH *mesh;   /* pointer to mesh that contains patch */
   /* funcs to compute x,y,z from X,Y,Z and vice versa: */
   int (*xyz_of_XYZ)(struct tPAT *pat, tNode *node, int ind,
@@ -205,8 +207,6 @@ typedef struct tPAT {
   int (*dXYZ_dxyz)(struct tPAT *pat, tNode *node, int ind,
                    const double X[3], double x[3], double dXYZdxyz[3][3]);
   tCoordInfo CI[1];     /* info about coords, access e.g. as: pat->CI->xc[1] */
-  int npg;              /* if pat is in a patgroup, npg is num of pats in this group */
-  int pg0;              /* pg0 if 1st pat in group if npg!=0 */
   int periodic[3];      /* if e.g. periodic[0]=1, patch is periodic in dir0 */
   struct tBFACE *bfaces[6]; /* 1st bface of this patch on each face */
   //tElm0 rnode[1];     //FIXME: remove!  /* root node in this patch */
