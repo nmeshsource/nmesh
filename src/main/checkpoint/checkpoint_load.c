@@ -109,8 +109,11 @@ exit(8);
       if(strcmp(par, "co[3]")==0) pat->CI->co[3] = atof(val);
       if(strcmp(par, "dom")==0)   pat->CI->dom = atoi(val);
       if(strcmp(par, "type")==0)  pat->CI->type = atoi(val);
-      if(strcmp(par, "use_FSurf")==0)  useF = atoi(val);
-      if(useF) checkpoint_load_CI_Fcoef(pat, dir);
+      if(strcmp(par, "use_FSurf")==0)
+      {
+        useF = atoi(val);
+        if(useF) checkpoint_load_CI_Fcoef(pat, dir);
+      }
 
       if(strcmp(par, "label")==0 ||
          strcmp(par, "coordinates_get_label(pat)")==0)
@@ -145,6 +148,8 @@ void checkpoint_load_CI_Fcoef(tPat *pat, const char *dir)
   char *Fcname = cmalloc(strlen(dir)+128);
   int f;
 
+  //PRF;printf(": pat->p=%d\n", pat->p);
+
   for(f=0; f<6; f++)
   {
     tArray arrbuf[1] = {0};
@@ -161,6 +166,7 @@ void checkpoint_load_CI_Fcoef(tPat *pat, const char *dir)
 
       /* read Fcoef from file Fcname */
       CI->Fcoef[f] = array_alloc_read(pat->mesh, Fcname, 0);
+      //if(CI->Fcoef[f]) { PRF;printf("  found CI->Fcoef[%d]\n", f); }
     }
 
     /* copy into arrbuf */
