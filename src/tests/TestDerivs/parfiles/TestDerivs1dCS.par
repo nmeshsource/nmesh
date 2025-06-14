@@ -13,7 +13,7 @@ logfile_creation = no
 
 amr_mesh_type = 38 CubedSpheres
 CubedSphere_sigma01_lmax = 3
-CubedSphere_sigma01_test = yes
+CubedSphere_sigma01_def = yes test
 
 iterate_parameters = yes
 iterate_parameter1 = amr_n0  3 5 7  9 11
