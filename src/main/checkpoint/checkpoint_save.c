@@ -87,7 +87,7 @@ int checkpoint_save_patches(tMesh *mesh, char *dir, char *fname)
 }
 
 /* write non-pointer part of tPat */
-void checkpoint_write_pat(FILE *fp, tPat *pat, char *fname)
+void checkpoint_write_pat(FILE *fp, tPat *pat, const char *dir)
 {
   int f;
 
@@ -104,12 +104,12 @@ void checkpoint_write_pat(FILE *fp, tPat *pat, char *fname)
   //  fprintf(fp, " periodic[%d] = %d\n", d, pat->periodic[d]);
 
   //printCI(pat);
-  checkpoint_write_CI(fp, pat, fname);
+  checkpoint_write_CI(fp, pat, dir);
 }
 
 
 /* write non-pointer part of tCoordInfo */
-void checkpoint_write_CI(FILE *fp, tPat *pat, char *fname)
+void checkpoint_write_CI(FILE *fp, tPat *pat, const char *dir)
 {
   tCoordInfo *CI = pat->CI;
   int d, f, i, useF=0;
@@ -137,24 +137,24 @@ void checkpoint_write_CI(FILE *fp, tPat *pat, char *fname)
 
   for(f=0; f<6; f++) if(CI->FSurf[f]) { useF = 1; break; }
   fprintf(fp,     "  use_FSurf = %d\n", useF);
-  if(useF) checkpoint_write_CI_Fcoef(pat, fname);
+  if(useF) checkpoint_write_CI_Fcoef(pat, dir);
 
   /* this signifies end of patch info, so this needs to be last */
   fprintf(fp,     "  label = %d\n", CI->label);
 }
 
 /* write arrays with coeffs in CI->Fcoef */
-void checkpoint_write_CI_Fcoef(tPat *pat, char *fname)
+void checkpoint_write_CI_Fcoef(tPat *pat, const char *dir)
 {
   tCoordInfo *CI = pat->CI;
-  char *Fcname = cmalloc(strlen(fname)+64);
+  char *Fcname = cmalloc(strlen(dir)+128);
   int f;
 
   for(f=0; f<6; f++)
     if(CI->Fcoef[f])
     {
       /* set output file name in Fcname */
-      checkpoint_set_CI_Fcoef_filename(pat, f, fname, Fcname);
+      checkpoint_set_CI_Fcoef_filename(pat, f, dir, Fcname);
 
       /* write Fcoef into file Fcname */
       array_write(NULL, CI->Fcoef[f], Fcname);
