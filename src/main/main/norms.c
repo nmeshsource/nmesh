@@ -380,10 +380,16 @@ void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
     crc64_continue_counters(CI, offsetof(tCoordInfo, FSurf), crc, cnt);
     /* include CI->Fcoef[f]->d of all non-NULL CI->Fcoef */
     for(f=0; f<6; f++)
-      if(CI->Fcoef[f])
-        crc64_continue_counters(CI->Fcoef[f]->d,
-                                sizeof(CI->Fcoef[f]->d[0])*(CI->Fcoef[f]->N),
-                                crc, cnt);
+    {
+      tArray *Fc = CI->Fcoef[f];
+      if(Fc)
+      {
+        //if(i>22) continue;
+        PRF;printf(": pat%d->CI->Fcoef[%d]\n", i, f);
+        //crc64_continue_counters(Fc->d, 4, crc, cnt);
+        crc64_continue_counters(Fc->d, sizeof(Fc->d[0])*(Fc->N), crc, cnt);
+      }
+    }
     //PRF;printf(": *crc=%lu\n", *crc);
   }
 }
