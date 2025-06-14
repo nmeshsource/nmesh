@@ -137,7 +137,7 @@ void checkpoint_write_CI(FILE *fp, tPat *pat, const char *dir)
 
   for(f=0; f<6; f++) if(CI->FSurf[f]) { useF = 1; break; }
   fprintf(fp,     "  use_FSurf = %d\n", useF);
-  if(useF) checkpoint_write_CI_Fcoef(pat, dir);
+  checkpoint_write_CI_Fcoef(pat, dir);
 
   /* this signifies end of patch info, so this needs to be last */
   fprintf(fp,     "  label = %d\n", CI->label);

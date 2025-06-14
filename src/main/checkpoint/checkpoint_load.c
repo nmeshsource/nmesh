@@ -112,7 +112,7 @@ exit(8);
       if(strcmp(par, "use_FSurf")==0)
       {
         useF = atoi(val);
-        if(useF) checkpoint_load_CI_Fcoef(pat, dir);
+        checkpoint_load_CI_Fcoef(pat, dir);
       }
 
       if(strcmp(par, "label")==0 ||
