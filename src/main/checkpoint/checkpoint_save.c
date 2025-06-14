@@ -78,7 +78,7 @@ int checkpoint_save_patches(tMesh *mesh, char *dir, char *fname)
   {
     tPat *pat = mesh->pat[p];
 
-    checkpoint_write_pat(fp, pat, fname);
+    checkpoint_write_pat(fp, pat, dir);
     fprintf(fp, "\n");
   }
 
