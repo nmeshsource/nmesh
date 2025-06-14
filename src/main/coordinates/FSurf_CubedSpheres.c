@@ -902,6 +902,8 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
     int isigma0 = Ind("CubedSphere_sigma0_def");
     int p;
 
+    PRFs(":\n");
+
     /* enable CubedSphere_sigma0_def */
     CubedSphere_sigma0_def_EnableAlongInnerSphere(mesh);
 
