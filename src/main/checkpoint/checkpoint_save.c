@@ -52,7 +52,7 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
 /* functions to save patches */
 /******************************************************************/
 /* save patch info */
-int checkpoint_save_patches(tMesh *mesh, char *fname)
+int checkpoint_save_patches(tMesh *mesh, char *dir, char *fname)
 {
   FILE *fp;
   int p;

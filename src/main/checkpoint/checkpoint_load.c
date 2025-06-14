@@ -13,7 +13,7 @@
 /* functions to load patches */
 /******************************************************************/
 /* load patch info */
-int checkpoint_load_patches(tMesh *mesh, char *fname)
+int checkpoint_load_patches(tMesh *mesh, char *dir, char *fname)
 {
   char *buffer=NULL;
   long nbuffer;

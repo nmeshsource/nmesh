@@ -244,7 +244,7 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
     nmesh_load_parameters(mesh, pars, 0, 1);
     PRF;printf(": finished loading pars.\n");
     fflush(stdout);
-    checkpoint_load_patches(mesh, pats);
+    checkpoint_load_patches(mesh, dir, pats);
     PRF;printf(": finished loading patches.\n");
     fflush(stdout);
     checkpoint_load_elms(mesh, elms);
@@ -341,7 +341,7 @@ int checkpoint_save(tMesh *mesh)
 
   /* save checkpoint in various files */
   checkpoint_save_pars(mesh, pars);
-  checkpoint_save_patches(mesh, pats);
+  checkpoint_save_patches(mesh, dirn, pats);
   checkpoint_save_elms(mesh, elms);
   checkpoint_save_nbinfoVars(mesh, nbinfo);
   checkpoint_save_EvoVars(mesh, vars);
