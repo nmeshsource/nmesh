@@ -881,6 +881,7 @@ void CubSphTest_l1deform_sigmavar(tMesh *mesh, int pi_dom0,
     if(VarA(node,isigma))
     {
       int i;
+      PRF;printf(": deform %s in pat%d\n", VarName(isigma), p);
       forpoints(node, i)
       {
         double A = Vard(node,iA)[i];
