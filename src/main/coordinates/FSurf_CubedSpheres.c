@@ -779,7 +779,7 @@ int CubedSphere_sigma0_def_EnableAlongInnerSphere(tMesh *mesh)
       InnerSphere = 0;
     }
 
-    if(InnerSphere && Node_patface(node, 0))
+    if(InnerSphere && pat->CI->FSurf[0] && Node_patface(node, 0))
       enablevar_innode(node, isigma0);
     else
       disablevar_innode(node, isigma0);
