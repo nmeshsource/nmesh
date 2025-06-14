@@ -384,9 +384,7 @@ void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
       tArray *Fc = CI->Fcoef[f];
       if(Fc)
       {
-        //if(i>22) continue;
-        PRF;printf(": pat%d->CI->Fcoef[%d]\n", i, f);
-        //crc64_continue_counters(Fc->d, 4, crc, cnt);
+        //PRF;printf(": pat%d->CI->Fcoef[%d]\n", i, f);
         crc64_continue_counters(Fc->d, sizeof(Fc->d[0])*(Fc->N), crc, cnt);
       }
     }
