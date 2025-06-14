@@ -372,11 +372,18 @@ void crc_pats(tMesh *mesh, uint64_t *crc, size_t *cnt)
   {
     tPat *pat = mesh->pat[i];
     tCoordInfo *CI = pat->CI;
+    int f;
 
     /* include everything before mesh in crc */
     crc64_continue_counters(pat, offsetof(tPat, mesh), crc, cnt);
     /* include everything before FSurf in crc */
     crc64_continue_counters(CI, offsetof(tCoordInfo, FSurf), crc, cnt);
+    /* include CI->Fcoef[f]->d of all non-NULL CI->Fcoef */
+    for(f=0; f<6; f++)
+      if(CI->Fcoef[f])
+        crc64_continue_counters(CI->Fcoef[f]->d,
+                                sizeof(CI->Fcoef[f]->d[0])*(CI->Fcoef[f]->N),
+                                crc, cnt);
     //PRF;printf(": *crc=%lu\n", *crc);
   }
 }
