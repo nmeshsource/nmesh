@@ -610,18 +610,6 @@ void coordinates_zero_pat_npg_pg0(tPat *pat)
   }
 }
 
-/* zero patch group info for all patches on mesh */
-int coordinates_zero_all_pat_npg_pg0(tMesh *mesh)
-{
-  int pi;
-  forpatches(mesh, pi)
-  {
-    tPat *pat = mesh->pat[pi];
-    pat->npg = pat->pg0 = 0;
-  }
-  return 0;
-}
-
 
 /********************************************************************/
 /* some functions to set surface metric for DG-surface terms */

@@ -117,6 +117,18 @@ void amr_set_patgroup_npg_pg0(tMesh *mesh, int npg, int pg0)
   }
 }
 
+/* zero patch group info for all patches on mesh */
+int amr_zero_all_patgroup_npg_pg0(tMesh *mesh)
+{
+  int pi;
+  forpatches(mesh, pi)
+  {
+    tPat *pat = mesh->pat[pi];
+    pat->npg = pat->pg0 = 0;
+  }
+  return 0;
+}
+
 
 /*************************************************************************/
 /* funcs for MPI exchange */

@@ -52,7 +52,6 @@ typedef struct {
 int coordinates_init_node(tNode *node);
 int coordinates_init(tMesh *mesh);
 int coordinates_reinit(tMesh *mesh);
-int coordinates_zero_all_pat_npg_pg0(tMesh *mesh);
 void coordinates_set_sqrtdet2g_o_det3gamma_var(tNode *node, int igxx,
                                                int isqrtdet2g_o_det3gamma0);
 void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,

@@ -1078,7 +1078,7 @@ void free_mesh_patches_and_nodes(tMesh *mesh)
 
   /* since deleting patches invalidates patch group info, we just
      delete all of it here already */
-  coordinates_zero_all_pat_npg_pg0(mesh);
+  amr_zero_all_patgroup_npg_pg0(mesh);
 
   /* free patches */
   for(i = 0; i < mesh->npats; i++)

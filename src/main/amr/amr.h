@@ -94,6 +94,7 @@ void get_all_myln_ghostdata(tMesh *mesh);
 
 /* amr.c */
 int amr_print_thread_info(tMesh *mesh);
+int amr_zero_all_patgroup_npg_pg0(tMesh *mesh);
 
 /* timing.c  */
 void printTiming(void);
