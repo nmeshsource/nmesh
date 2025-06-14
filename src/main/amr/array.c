@@ -490,10 +490,13 @@ tArray *array_alloc_read(tMesh *mesh, char *fname, int fatal)
   int IObufsz = ((mesh) ? Geti(Par("fread_bufsize")) : 0);
   char *IObuf; /* larger buffer for write */
 
+  //PRF;printf(": %s\n", fname);
+
   /* open destination file */
   fp = fopen_buf(fname, "rb", &IObuf,IObufsz);
   if(!fp)
   {
+    //printf("  could not open %s\n", fname);
     if(fatal) errorexits("failed opening %s", fname);
     else      return NULL;
   }
@@ -518,6 +521,8 @@ tArray *array_alloc_read(tMesh *mesh, char *fname, int fatal)
   nmemb = Nt * (array->ns);
   fread_little(array->d, size1, nmemb, fp);
 
+  //printarray(array);
+
   fclose_buf(fp, &IObuf);
-  return 0;
+  return array;
 }
