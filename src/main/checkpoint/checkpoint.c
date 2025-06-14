@@ -276,6 +276,11 @@ int checkpoint_load_stage(tMesh *mesh, const char *outdir_suffix,
   prdivider(1);
   fflush(stdout);
 
+  ///* output Fcoef we just loaded */
+  //int pi;
+  //forpatches(mesh, pi)
+  //  checkpoint_write_CI_Fcoef(mesh->pat[pi], Gets(Par("outdir")));
+
   /* free strings */
   free(crcs);
   free(vars);
