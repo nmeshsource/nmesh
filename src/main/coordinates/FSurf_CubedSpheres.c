@@ -854,6 +854,46 @@ void CubSphTest_deform_sigmavar(tMesh *mesh, int pi_dom0,
   }
 }
 
+/* add a l=m=1 deformation to sigma for testing purposes */
+void CubSphTest_l1deform_sigmavar(tMesh *mesh, int pi_dom0,
+                                   int isigma, double amp)
+{
+  tPat *pat0 = mesh->pat[pi_dom0];
+  int npg = pat0->npg; /* pick patch group */
+  int pg0 = pat0->pg0;
+  int iA = Ind("Y");
+  int iB = Ind("Z");
+
+  if(!npg) return;
+
+  /* do nothing if pi_dom0 is not 1st patch */
+  if(pi_dom0 != pg0) return;
+
+  /* deform in all nodes in patch group */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    tPat *pat = node->pat;
+    int p = pat->p;
+
+    if(p<pg0 || p>=pg0+npg) continue;
+
+    if(VarA(node,isigma))
+    {
+      int i;
+      forpoints(node, i)
+      {
+        double A = Vard(node,iA)[i];
+        double B = Vard(node,iB)[i];
+        double Theta, Phi, fac;
+        ThetaPhi_of_AB_CubSph(pat, A,B, &Theta,&Phi); //get Theta,Phi from A,B
+        fac = 1. + amp*sin(Theta)*cos(Phi);
+        Vard(node,isigma)[i] *= fac;
+      }
+    }
+  }
+}
+
 /* set var CubedSphere_sigma0_def to test values */
 int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
 {
@@ -870,7 +910,8 @@ int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh)
 
     /* deform CubedSphere_sigma0_def */
     forpatches(mesh,p)
-      CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
+      CubSphTest_l1deform_sigmavar(mesh, p, isigma0, 0.1);
+      //CubSphTest_deform_sigmavar(mesh, p, isigma0, 0.2, -0.1);
 
     /* compute CI->Fcoef[0] from CubedSphere_sigma0_def */
     forpatches(mesh,p)
