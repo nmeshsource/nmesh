@@ -12,6 +12,7 @@ errorexit = abort
 logfile_creation = no
 
 amr_mesh_type = 38 CubedSpheres
+amr_luni = 1
 CubedSphere_sigma01_lmax = 3
 CubedSphere_sigma01_def = yes test
 
@@ -19,6 +20,8 @@ iterate_parameters = yes
 iterate_parameter1 = amr_n0  3 5 7  9 11
 iterate_parameter2 = amr_n1  4 6 8 10 12
 iterate_parameter3 = amr_n2  5 7 9 11 13
+
+#checkpoint = yes
 
 #outputX0Y0Z0coord = Xb
 

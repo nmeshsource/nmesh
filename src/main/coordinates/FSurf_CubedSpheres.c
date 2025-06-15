@@ -418,7 +418,7 @@ int FSurf_CubSph_init6pats(tMesh *mesh, int pi_dom0)
 
         /* set surface functions */
         CI->FSurf[si]    = FSurf_CubSph_sigma01;
-        CI->dFSurfdC[si] = FSurf_CubSph_dsigma01;
+        CI->dFSurfdC[si] = FSurf_CubSph_dsigma01_fd;
       }
     }
   }

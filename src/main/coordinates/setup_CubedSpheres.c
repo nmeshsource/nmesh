@@ -990,7 +990,7 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
       pat->CI->idSurfdX[0][2] = isigma0_dB;
       /* default surface functions */
       pat->CI->FSurf[0] = FSurf_CubSph_sigma01;
-      pat->CI->dFSurfdC[0] = FSurf_CubSph_dsigma01;
+      pat->CI->dFSurfdC[0] = FSurf_CubSph_dsigma01_fd;
       break;
 
     case outerCubedSphere:
@@ -1001,7 +1001,7 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
       pat->CI->idSurfdX[1][2] = isigma1_dB;
       /* default surface functions */
       pat->CI->FSurf[1] = FSurf_CubSph_sigma01;
-      pat->CI->dFSurfdC[1] = FSurf_CubSph_dsigma01;
+      pat->CI->dFSurfdC[1] = FSurf_CubSph_dsigma01_fd;
       break;
 
     case CubedShell:
@@ -1017,8 +1017,8 @@ int set_1_CubedSphere_pat(tPat *pat, int stretch, int SigFunc)
       /* default surface functions */
       pat->CI->FSurf[0] = FSurf_CubSph_sigma01;
       pat->CI->FSurf[1] = FSurf_CubSph_sigma01;
-      pat->CI->dFSurfdC[0] = FSurf_CubSph_dsigma01;
-      pat->CI->dFSurfdC[1] = FSurf_CubSph_dsigma01;
+      pat->CI->dFSurfdC[0] = FSurf_CubSph_dsigma01_fd;
+      pat->CI->dFSurfdC[1] = FSurf_CubSph_dsigma01_fd;
       break;
 
     default:
