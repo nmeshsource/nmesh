@@ -101,15 +101,21 @@ int FSurf_CubSph_sigma01(tPat *pat, int si, double AB[2], double *sig)
   return 0;
 }
 
-/* compute values of surface function derivs */
+/* compute values of surface function derivs
+   Note: FSurf_CubSph_dsigma01_fd is much more accurate at the poles for
+         e.g. tests/TestDerivs/parfiles/TestDerivs1dCS.par.
+         We thus use FSurf_CubSph_dsigma01_fd if we are near one of the
+         poles. */
 int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2])
 {
   tArray *Co = FSurf_CubSph_sigma01_Fcoef(pat, si);
 
   if(Co) /* if we have coeffs we now compute dsig from them */
   {
+    int dom = pat->CI->dom;
     double A=AB[0], B=AB[1];
-    if(fabs(A) + fabs(B) > 1e-8)
+
+    if( (dom<4) || (fabs(A) + fabs(B) > 1e-8) ) /* if we are not at the poles */
     {
       int N = Co->N;
       int nYs = N/2; /* number of Ylm's we use */
@@ -229,7 +235,9 @@ int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2])
   return 0;
 }
 
-/* compute values of surface function derivs using finite diff */
+/* compute values of surface function derivs using finite diff
+   Note: this is more accurate than the FSurf_CubSph_dsigma01
+         which uses coeffs as in sgrid */
 int FSurf_CubSph_dsigma01_fd(tPat *pat, int si, double AB[2], double dsig[2])
 {
   tArray *Co = FSurf_CubSph_sigma01_Fcoef(pat, si);
