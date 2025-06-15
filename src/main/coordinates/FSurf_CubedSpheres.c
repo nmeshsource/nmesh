@@ -108,112 +108,150 @@ int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2])
 
   if(Co) /* if we have coeffs we now compute dsig from them */
   {
-    int N = Co->N;
-    int nYs = N/2; /* number of Ylm's we use */
-    int lmax = (sqrt(8*nYs + 1) - 3)/2;
-    int ijk, l,m;
-    double sm;
-    double *co = Co->d;
-    double ft, fp; /* ft = sin(Theta) dsigma/dTheta, fp = dsigma/dPhi */
-    double fth;    /* fth= dsigma/dTheta */
-    double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB;
-    double *ReYtab = alloc_Plm_Tab(lmax);
-    double *ImYtab = alloc_Plm_Tab(lmax);
-    double *csdth = calloc(nYs*2, sizeof(double));
-    double *cdphi = calloc(nYs*2, sizeof(double));
     double A=AB[0], B=AB[1];
+    if(fabs(A) + fabs(B) > 1e-8)
+    {
+      int N = Co->N;
+      int nYs = N/2; /* number of Ylm's we use */
+      int lmax = (sqrt(8*nYs + 1) - 3)/2;
+      int ijk, l,m;
+      double sm;
+      double *co = Co->d;
+      double ft, fp; /* ft = sin(Theta) dsigma/dTheta, fp = dsigma/dPhi */
+      double fth;    /* fth= dsigma/dTheta */
+      double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB;
+      double *ReYtab = alloc_Plm_Tab(lmax);
+      double *ImYtab = alloc_Plm_Tab(lmax);
+      double *csdth = calloc(nYs*2, sizeof(double));
+      double *cdphi = calloc(nYs*2, sizeof(double));
 
-    //errorexit("this function needs to be tested!!!");
+      //errorexit("this function needs to be tested!!!");
 
-    /* regularize case where A=B=0 <==> Theta=0:
-       Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
-       to find d/dTheta Ylm. Also dPhidA blows up!!!
-       So for now just add epsilon to B. */
-    if(A==0. && B==0.) B = 1e-10;
+      /* regularize case where A=B=0 <==> Theta=0:
+         Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
+         to find d/dTheta Ylm. Also dPhidA blows up!!!
+         So for now just add epsilon to B. */
+      if(A==0. && B==0.) B = 1e-10;
 
-    /* get Theta,Phi and their derivs from A,B */
-    ThetaPhi_dThetaPhidAB_of_AB_CubSph(pat, A,B, &Theta,&Phi,
-                                       &dThetadA,&dThetadB, &dPhidA,&dPhidB);
-    /* make tables of Ylm at Theta,Phi */
-    set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
+      /* get Theta,Phi and their derivs from A,B */
+      ThetaPhi_dThetaPhidAB_of_AB_CubSph(pat, A,B, &Theta,&Phi,
+                                         &dThetadA,&dThetadB, &dPhidA,&dPhidB);
+      /* make tables of Ylm at Theta,Phi */
+      set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
 
-    /* get coeffs of derivs */
-    SphHarm_sin_theta_dtheta_forRealFunc(co, csdth, lmax);
-    SphHarm_dphi_forRealFunc(co, cdphi, lmax);
+      /* get coeffs of derivs */
+      SphHarm_sin_theta_dtheta_forRealFunc(co, csdth, lmax);
+      SphHarm_dphi_forRealFunc(co, cdphi, lmax);
 
-    /* get func vals ft,fp at Theta,Phi */
-    fp = ft = 0.;
-    ijk=0;
-    /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
-    for(l=0; l<=lmax; l++)
-      for(sm=1., m=0;  m<=l;  m++, sm=-sm)
+      /* get func vals ft,fp at Theta,Phi */
+      fp = ft = 0.;
+      ijk=0;
+      /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
+      for(l=0; l<=lmax; l++)
+        for(sm=1., m=0;  m<=l;  m++, sm=-sm)
+        {
+          double Re_Ylm, Im_Ylm, Re_Ylmm, Im_Ylmm;
+          double Rcsdth, Icsdth, Rcsdthm, Icsdthm;
+          double Rcdphi, Icdphi, Rcdphim, Icdphim;
+
+          /* get real and imag part of coeffs in arrays */
+          Rcsdth = csdth[ijk];
+          Rcdphi = cdphi[ijk++];
+          Icsdth = csdth[ijk];
+          Icdphi = cdphi[ijk++];
+          /*
+          if(!finit(Rcsdth+Rcdphi+Icsdth+Icdphi))
+          {
+          printf("l=%d m=%d ijk=%d Rcsdth=%g Rcdphi=%g Icsdth=%g Icdphi=%g\n",
+          l,m,ijk, Rcsdth,Rcdphi,Icsdth,Icdphi);
+          errorexit("NAN!");
+          }
+          */
+          /* get Ylm at Theta,Phi */
+          Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
+
+          /* There is a choice of sign here: define the inner product by
+             (f,g) = int f^* g
+             and define
+             psi_mode = (Ylm, psi)  */
+          /* fv = \sum_{l,m} c_l^m Y_l^m
+             fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                              i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
+          /* fv = \sum_{l,m} c_l^m Y_l^m
+                = \sum_l [ c_l^0 Y_l^0 +
+                          \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
+             Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
+                   c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
+          Re_Ylmm =  sm*Re_Ylm;
+          Im_Ylmm = -sm*Im_Ylm;
+          Rcsdthm =  sm*Rcsdth; /* assuming func is real */
+          Icsdthm = -sm*Icsdth;
+          Rcdphim =  sm*Rcdphi; /* assuming func is real */
+          Icdphim = -sm*Icdphi;
+
+          if(m==0)
+          {
+            ft += Rcsdth*Re_Ylm;
+            fp += Rcdphi*Re_Ylm;
+          }
+          else /* assuming fv is real */
+          {
+            ft += Rcsdth*Re_Ylm - Icsdth*Im_Ylm + Rcsdthm*Re_Ylmm - Icsdthm*Im_Ylmm;
+            fp += Rcdphi*Re_Ylm - Icdphi*Im_Ylm + Rcdphim*Re_Ylmm - Icdphim*Im_Ylmm;
+          }
+        }
+      /* get derivs from ft,fp, and dThetadA,dThetadB, dPhidA,dPhidB */
+      fth = ft/sin(Theta);
+      dsig[0] = fth*dThetadA + fp*dPhidA;
+      dsig[1] = fth*dThetadB + fp*dPhidB;
+      free(cdphi);
+      free(csdth);
+      free(ImYtab);
+      free(ReYtab);
+      /*
+      if(!finit(dsig[0]) || !finit(dsig[1]))
       {
-        double Re_Ylm, Im_Ylm, Re_Ylmm, Im_Ylmm;
-        double Rcsdth, Icsdth, Rcsdthm, Icsdthm;
-        double Rcdphi, Icdphi, Rcdphim, Icdphim;
-
-        /* get real and imag part of coeffs in arrays */
-        Rcsdth = csdth[ijk];
-        Rcdphi = cdphi[ijk++];
-        Icsdth = csdth[ijk];
-        Icdphi = cdphi[ijk++];
-/*
-if(!finit(Rcsdth+Rcdphi+Icsdth+Icdphi))
-{
-printf("l=%d m=%d ijk=%d Rcsdth=%g Rcdphi=%g Icsdth=%g Icdphi=%g\n",
-l,m,ijk, Rcsdth,Rcdphi,Icsdth,Icdphi);
-errorexit("NAN!");
-}
-*/
-        /* get Ylm at Theta,Phi */
-        Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
-
-        /* There is a choice of sign here: define the inner product by
-           (f,g) = int f^* g
-           and define
-           psi_mode = (Ylm, psi)  */
-        /* fv = \sum_{l,m} c_l^m Y_l^m
-           fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                            i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
-        /* fv = \sum_{l,m} c_l^m Y_l^m
-              = \sum_l [ c_l^0 Y_l^0 +
-                        \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
-           Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
-                 c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
-        Re_Ylmm =  sm*Re_Ylm;
-        Im_Ylmm = -sm*Im_Ylm;
-        Rcsdthm =  sm*Rcsdth; /* assuming func is real */
-        Icsdthm = -sm*Icsdth;
-        Rcdphim =  sm*Rcdphi; /* assuming func is real */
-        Icdphim = -sm*Icdphi;
-
-        if(m==0)
-        {
-          ft += Rcsdth*Re_Ylm;
-          fp += Rcdphi*Re_Ylm;
-        }
-        else /* assuming fv is real */
-        {
-          ft += Rcsdth*Re_Ylm - Icsdth*Im_Ylm + Rcsdthm*Re_Ylmm - Icsdthm*Im_Ylmm;
-          fp += Rcdphi*Re_Ylm - Icdphi*Im_Ylm + Rcdphim*Re_Ylmm - Icdphim*Im_Ylmm;
-        }
+      printf("fth=%g fp=%g dThetadA=%g dThetadB=%g dPhidA=%g dPhidB=%g\n",
+      fth,fp, dThetadA,dThetadB, dPhidA,dPhidB);
+      errorexit("NAN!");
       }
-    /* get derivs from ft,fp, and dThetadA,dThetadB, dPhidA,dPhidB */
-    fth = ft/sin(Theta);
-    dsig[0] = fth*dThetadA + fp*dPhidA;
-    dsig[1] = fth*dThetadB + fp*dPhidB;
-    free(cdphi);
-    free(csdth);
-    free(ImYtab);
-    free(ReYtab);
-/*
-if(!finit(dsig[0]) || !finit(dsig[1]))
-{
-printf("fth=%g fp=%g dThetadA=%g dThetadB=%g dPhidA=%g dPhidB=%g\n",
-fth,fp, dThetadA,dThetadB, dPhidA,dPhidB);
-errorexit("NAN!");
+      */
+    }
+    else /* use fd for small AB */
+    {
+      FSurf_CubSph_dsigma01_fd(pat, si, AB, dsig);
+    }
+  }
+  else /* if there are no coeffs sig is constant, so its derivs are 0 */
+  {
+    dsig[0] = dsig[1] = 0.;
+  }
+  return 0;
 }
-*/
+
+/* compute values of surface function derivs using finite diff */
+int FSurf_CubSph_dsigma01_fd(tPat *pat, int si, double AB[2], double dsig[2])
+{
+  tArray *Co = FSurf_CubSph_sigma01_Fcoef(pat, si);
+
+  if(Co) /* if we have coeffs we now compute dsig from them */
+  {
+    double h = 1e-7;
+    double oo2h = 0.5/h;
+    double A=AB[0], B=AB[1];
+    double ApB[] = { A+h, B };
+    double AmB[] = { A-h, B };
+    double ABp[] = { A, B+h };
+    double ABm[] = { A, B-h };
+    double sigAp, sigAm, sigBp, sigBm;
+
+    FSurf_CubSph_sigma01(pat, si, ApB, &sigAp);
+    FSurf_CubSph_sigma01(pat, si, AmB, &sigAm);
+    FSurf_CubSph_sigma01(pat, si, ABp, &sigBp);
+    FSurf_CubSph_sigma01(pat, si, ABm, &sigBm);
+
+    dsig[0] = (sigAp - sigAm)*oo2h;
+    dsig[1] = (sigBp - sigBm)*oo2h;
   }
   else /* if there are no coeffs sig is constant, so its derivs are 0 */
   {
