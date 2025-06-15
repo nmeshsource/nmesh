@@ -26,7 +26,7 @@ iterate_parameter3 = amr_n2  5 7 9 11 13
 0doutput = TestDerivs_Err_dux TestDerivs_Err_dduxx
 
 #1doutiter = 1
-#1doutput = X TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+#1doutput = TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
 
 #2doutiter = 1
-#2doutput = X TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+#2doutput = TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
