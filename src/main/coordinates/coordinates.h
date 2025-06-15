@@ -71,4 +71,5 @@ int coordinates_tests(tMesh *mesh);
 /* FSurf_CubedSpheres.c */
 int FSurf_CubSph_sigma01(tPat *pat, int si, double AB[2], double *sig);
 int FSurf_CubSph_dsigma01(tPat *pat, int si, double AB[2], double dsig[2]);
+int FSurf_CubSph_dsigma01_fd(tPat *pat, int si, double AB[2], double dsig[2]);
 int CubSphTest_CI_Fcoef0_for_deformed_sigma(tMesh *mesh);
