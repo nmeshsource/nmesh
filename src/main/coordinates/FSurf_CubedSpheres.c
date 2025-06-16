@@ -681,12 +681,12 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
     //Integ[ijk++] = Im_Integp[Ijk];
     Integval = Re_Integp[Ijk];
     GEN_Pragma(omp atomic update)
-    { Integ[ijk] += Integval; }
+    Integ[ijk] += Integval;
     ijk++;
 
     Integval = Im_Integp[Ijk];
     GEN_Pragma(omp atomic update)
-    { Integ[ijk] += Integval; }
+    Integ[ijk] += Integval;
     ijk++;
 
     i++;
