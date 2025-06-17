@@ -244,7 +244,7 @@ int FSurf_CubSph_dsigma01_fd(tPat *pat, int si, double AB[2], double dsig[2])
 
   if(Co) /* if we have coeffs we now compute dsig from them */
   {
-    double h = 1e-7;
+    double h = 1e-5;  /* cube root of machine acc */
     double oo2h = 0.5/h;
     double A=AB[0], B=AB[1];
     double ApB[] = { A+h, B };
