@@ -14,7 +14,7 @@ tArray *FSurf_CubSph_sigma01_Fcoef(tPat *pat, int si)
   int np = pat->npg;
   int pi = (si ? p0+np : p0); /* if si!=0 go to next pat group */
 
-  if(!np) return NULL; //if there is no patgroupm, assume there are no coeffs
+  if(!np) return NULL; //if there is no patgroup, assume there are no coeffs
   if(pi >= mesh->npats) return NULL; /* there are no coeffs */
 
   return mesh->pat[pi]->CI->Fcoef[0];
