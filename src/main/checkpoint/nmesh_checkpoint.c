@@ -28,7 +28,7 @@ int nmesh_checkpoint(tMesh *mesh)
   AddPar("checkpoint_save_pars", "", "pars in this list will be saved, all "
          "others come from parfile or earlier call to initialize_libraries "
          "when we restart");
-  AddPar("checkpoint_CRC", "2048", "exit if CRC error is higher that this "
+  AddPar("checkpoint_CRC", "2048", "exit if CRC error is higher than this "
          "number [1,2,4,8,16,32]");
 
   return 0;
