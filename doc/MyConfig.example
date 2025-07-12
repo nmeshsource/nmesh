@@ -9,6 +9,7 @@
 
 # compile test modules from main part of nmesh:
 libpaths += src/tests/advection1
+libpaths += src/tests/scalarwave1
 
 ## add and compile modules from nmesh-projects repo:
 #repo = giter@quark.physics.fau.edu:nmesh-projects
