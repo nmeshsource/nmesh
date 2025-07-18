@@ -14,7 +14,7 @@ TOP := ../../..
 
 # name of program, location of executable and extra projects
 EXEC = nmesh
-EXECDIR = exe
+EXECDIR = $(TOP)/exe
 RELAPROJECTDIR = src/projects
 PROJECTDIR = $(RELAPROJECTDIR)
 
