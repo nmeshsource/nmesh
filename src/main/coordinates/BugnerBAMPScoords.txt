@@ -1,0 +1,86 @@
+PhdThesis of Bugner: {Bugner2018a}
+==================================
+https://www.db-thueringen.de/receive/dbt_mods_00033822
+
+Bugner		Nmesh
+\xi^i		x^{\bar{i}}=\bar{X}^i
+u^i		X^i
+x^i		x^i
+
+
+Bugner (along positive x-axis):
+x = u^1/s,  y = u^1 u^2/s,  z = u^1 u^3/s
+
+for the transition shells, Bugner says:
+λ = [(u^1)^2 - (u^1_{min})^2] / [(u^1_{max})^2 - (u^1_{min})^2]
+s = \sqrt{ [1 + 2λ] / [1 + λ ((u^2)^2 + (u^3)^2)] } <-- wrong!
+However, bamps_v4.0/src/grid/grid_coordtrans.c line 107 shows that Bugner
+has a typo in his thesis and s is really:
+s = \sqrt{ [1 + λ ((u^2)^2 + (u^3)^2)] / [1 + 2λ] }
+==>
+u^1 = \sqrt{ [(u^1_{max})^2 - (u^1_{min})^2]*λ + (u^1_{min})^2 }
+
+def: U := [u^1 - u^1_{min}] / [u^1_{max} - u^1_{min}]
+==> u^1    = [u^1_{max} - u^1_{min}] U + u^1_{min}
+
+Look at at
+r^2 = x^2 + y^2 + z^2 = (u^1/s)^2 (1 + (u^2)^2 + (u^3)^2))
+= (u^1)^2 (1 + (u^2)^2 + (u^3)^2)) [1 + 2λ]/[1 + λ ((u^2)^2 + (u^3)^2)]
+
+At u^1 = u^1_{max}, we have λ = 1 and thus
+r^2(u^1_{max}) = 3 (u^1_{max})^2
+At u^1 = u^1_{min}, we have λ = 0 and thus
+r^2(u^1_{min}) = (u^1_{min})^2 (1 + (u^2)^2 + (u^3)^2))
+
+def: a0 := u^1_{min},
+     a1 := sigma1/\sqrt{1 + (u^2)^2 + (u^3)^2},  sigma1 := \sqrt{3} u^1_{max}
+
+==> r(u^1_{max}) = sigma1 = a1 \sqrt{1 + (u^2)^2 + (u^3)^2)}
+    r(u^1_{min}) = a0 \sqrt{1 + (u^2)^2 + (u^3)^2)}
+
+==> u^1 = [u^1_{max} - u^1_{min}] U + u^1_{min}
+        = [sigma1/\sqrt{3} - a0] U + a0
+
+x = u^1/s
+  = ([sigma1/\sqrt{3} - a0] U + a0) \sqrt{ [1 + 2λ] / [1 + λ ((u^2)^2 + (u^3)^2)] }
+y = u^2 u^1/s
+z = u^3 u^1/s
+
+def:  A := u^2,   B := u^3   ==> s = \sqrt{ [1 + λ (A^2 + B^2)] / [1 + 2λ] }
+==>
+x = u^1/s
+  = ([sigma1/\sqrt{3} - a0] U + a0) \sqrt{ [1 + 2λ] / [1 + λ (A^2 + B^2)] }
+y = x A
+z = x B
+
+if centered on the origin SGRID and Nmesh have:
+===============================================
+x = (a1 − a0)*lam + a0
+y = x A
+z = x B
+where a0 = const,  a1 = sigma1/\sqrt{1 + A^2 + B^2},  sigma1 = const.
+==>
+x = (sigma1/\sqrt{1 + A^2 + B^2} - a0)*lam + a0
+y = x A
+z = x B
+
+While this is quite similar, it is not the same as in bamps!
+--------------------------------------------------------------------------
+The anglular points are the same, but the radial points are distributed
+differently.
+Nmesh trafo for x looks easier, but its trafo for r lloks harder (see
+below).
+---------------------------------------------------------------------------
+
+Nmesh r^2 = x^2 + y^2 + z^2 = x^2 (1 + A^2 + B^2)
+x^2 = (a1 − a0)^2*lam^2 + 2(a1 − a0)*a0*lam + a0^2
+(a1 − a0)^2 = sigma1^2/(1 + A^2 + B^2) - 2a0*sigma1/\sqrt{1 + A^2 + B^2} + a0^2
+==>
+x^2
+= ( [sigma1^2/(1 + A^2 + B^2) - 2a0*sigma1/\sqrt{1 + A^2 + B^2} + a0^2]*lam^2
+   +2[sigma1/\sqrt{1 + A^2 + B^2} - a0]*a0*lam + a0^2] )
+==>
+r^2
+= ( [sigma1^2 - 2a0*sigma1\sqrt{1 + A^2 + B^2} + a0^2(1 + A^2 + B^2)]*lam^2
+   +2[sigma1\sqrt{1 + A^2 + B^2} - a0(1 + A^2 + B^2)]*a0*lam
+   + a0^2(1 + A^2 + B^2) )
