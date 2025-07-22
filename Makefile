@@ -8,13 +8,15 @@
 Compile_nmesh: nmesh
 
 # top level dir
-TOP := $(shell pwd)
+# TOP := $(shell pwd)
+# But if we assume that all source files are in src/some_dir/module_dir
+TOP := ../../..
 
 # name of program, location of executable and extra projects
 EXEC = nmesh
 EXECDIR = $(TOP)/exe
 RELAPROJECTDIR = src/projects
-PROJECTDIR = $(TOP)/$(RELAPROJECTDIR)
+PROJECTDIR = $(RELAPROJECTDIR)
 
 # default for variables used in all cases
 CC      = cc	# gcc, clang, or icc
@@ -184,7 +186,7 @@ $(autoinclude): MyConfig $(mainheaders)
 	@for X in $(libnames); do \
 	  echo int nmesh\_$$X\(struct tMESH *\)\; >> $(autoinclude); \
 	done
-	touch $(TOP)/src/main/main/nmesh.h
+	touch src/main/main/nmesh.h
 
 $(autoinitial): MyConfig
 	@echo $(autotext) > $(autoinitial)
@@ -240,13 +242,13 @@ git_pull: install_git_hooks
 	@echo ====================== main part of nmesh ======================
 	git pull
 	@echo ======================== nmesh projects ========================
-	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; cd $(TOP); fi done
 
 git_status:
 	@echo ====================== main part of nmesh ======================
 	git status -uno
 	@echo ======================== nmesh projects ========================
-	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; cd $(TOP); fi done
 
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
@@ -263,13 +265,13 @@ cc_utilities:
 
 # target to run unit tests
 unittests: cc_utilities
-	@for X in $(testnames); do if [ -d "$(TOP)/src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd $(TOP)/src/tests/$$X/unittests; sh unittests.sh; fi done
-	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh unittests.sh; fi done
+	@for X in $(testnames); do if [ -d "src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd src/tests/$$X/unittests; sh unittests.sh; cd ..; cd $(TOP); fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh unittests.sh; cd ..; cd $(TOP); fi done
 
 # target to reset the unit test results, we consider to be "correct"
 resetunits:
-	@for X in $(testnames); do if [ -d "$(TOP)/src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd $(TOP)/src/tests/$$X/unittests; sh resetunits.sh; fi done
-	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh resetunits.sh; fi done
+	@for X in $(testnames); do if [ -d "src/tests/$$X/unittests" ]; then printf "==== %s ====\n" $$X; cd src/tests/$$X/unittests; sh resetunits.sh; cd ..; cd $(TOP); fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N/unittests" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N/unittests; sh resetunits.sh; cd ..; cd $(TOP); fi done
 
 
 # target to reset MyConfig timestamp to the old timestamp of Makefile
