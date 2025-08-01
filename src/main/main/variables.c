@@ -5,6 +5,9 @@
 
 
 
+/************************************************************************/
+/* functions for nmesh variables */
+/************************************************************************/
 
 /* add a variable to data base that is located in mesh */
 void AddMeshVar(tMesh *mesh, const char *name,
@@ -346,7 +349,71 @@ int MeshVar_Nextra(tMesh *mesh, int i)
 
 
 /************************************************************************/
+/* functions to copy variables at one point to and from C-arrays */
+/************************************************************************/
+
+/* copy all components of var vi at point ijk into Carray */
+int Var_at_ijk_to_Carray(tElm *elm, int vi, int ijk,
+                         int arr_size, double *Carray, int offset)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  int ncomps = MeshVarNComponents(mesh, vi);
+  int l;
+
+  if(offset+ncomps > arr_size) errorexit("Carray is too small");
+
+  for(l=0; l<ncomps; l++) Carray[offset + l] = Vard(elm, vi+l)[ijk];
+
+  return ncomps;
+}
+
+/* use Carray+offset to set all components of var vi at point ijk */
+int Var_at_ijk_from_Carray(tElm *elm, int vi, int ijk,
+                           int arr_size, const double *Carray, int offset)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  int ncomps = MeshVarNComponents(mesh, vi);
+  int l;
+
+  if(offset+ncomps > arr_size) errorexit("Carray is too small");
+
+  for(l=0; l<ncomps; l++) Vard(elm, vi+l)[ijk] = Carray[offset + l];
+
+  return ncomps;
+}
+
+/* copy all components of varlist vl at point ijk into Carray */
+int vl_at_ijk_to_Carray(tElm *elm, tVarList *vl, int ijk,
+                        int arr_size, double *Carray, int offset)
+{
+  int nvars = VLn(vl);
+  int l;
+
+  if(offset+nvars > arr_size) errorexit("Carray is too small");
+
+  forvl(vl, l) Carray[offset + l] = Vard(elm, Vind(vl, l))[ijk];
+
+  return nvars;
+}
+
+/* use Carray+offset to set all components of var vi at point ijk */
+int vl_at_ijk_from_Carray(tElm *elm, tVarList *vl, int ijk,
+                          int arr_size, const double *Carray, int offset)
+{
+  int nvars = VLn(vl);
+  int l;
+
+  if(offset+nvars > arr_size) errorexit("Carray is too small");
+
+  forvl(vl, l) Vard(elm, Vind(vl, l))[ijk] = Carray[offset + l];
+
+  return nvars;
+}
+
+
+/************************************************************************/
 /* utility functions for variable lists */
+/************************************************************************/
 
 /* print variable list */
 void prvarlist(tVarList *v)

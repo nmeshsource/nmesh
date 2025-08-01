@@ -192,7 +192,16 @@ int MeshVar_Nextra(tMesh *mesh, int i);
 #define AddAuxVarDim(name, tensorindices, description, ns0,ns1,ns2) \
   AddAuxMeshVarDim(mesh, (name), (tensorindices), (description), \
                   (ns0),(ns1),(ns2))
-/* variable lists in variables.c*/
+/* copy vars to and from C-arrays in variables.c */
+int Var_at_ijk_to_Carray(tElm *elm, int vi, int ijk,
+                         int arr_size, double *Carray, int offset);
+int Var_at_ijk_from_Carray(tElm *elm, int vi, int ijk,
+                           int arr_size, const double *Carray, int offset);
+int vl_at_ijk_to_Carray(tElm *elm, tVarList *vl, int ijk,
+                        int arr_size, double *Carray, int offset);
+int vl_at_ijk_from_Carray(tElm *elm, tVarList *vl, int ijk,
+                          int arr_size, const double *Carray, int offset);
+/* variable lists in variables.c */
 void prvarlist(tVarList *v);
 tVarList *vlalloc(tMesh *mesh);
 void vlfree(tVarList *u);
