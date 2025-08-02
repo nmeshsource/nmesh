@@ -19,6 +19,11 @@ n = sympy.Idx('n', (1, 3))
 # Program Text and Eqations (in one long string tuple)
 ########################################################################
 tocompute = (
+
+# If we later want to declare symmetries for unused variables we need to
+# declare the unused variables here:
+':Decl: UnusedVar1[i,j]; UnusedVar2[i,j]; UnusedVar3[i,j,k];',
+
 r''':Text =
 /* Some defines to make it compile without nmesh: */
 #include <stdlib.h>
@@ -31,10 +36,10 @@ r''':Text =
 #define forpoints(node, ijk)   for(ijk=0; ijk<10; ijk++)
 double Mem[100]; // instead of the data arrays of nmesh
 
-
 /* To compile with nmesh remove the above #includes and #defines
    INSTEAD uncomment this: */
 //#include "nmesh.h"
+
 
 #define POWER(x,y) pow(x,y)
 #define POW2(x)    ((x)*(x))
@@ -90,7 +95,7 @@ r''':Text =
 }
 
 
-/* To compile with nmesh remove the entire main below: */
+/* To compile with nmesh remove the entire "int main()" below: */
 
 //test main so that it compiles and runs without nmesh
 int main()
@@ -125,15 +130,16 @@ if __name__ == '__main__':
   # declare all symmetries for all variables we use
   ########################################################################
   symmetries = {
-      S[i,j] :   {  '+': ( [j,i], ) },
-      A[i,j] :   {  '-': ( [j,i], ) },
-      T[k,l,m] : {   '+': ( [l,k,m], [k,m,l], ) },
-      SS[k,l,m] : {  '+': ( [l,k,m], [k,m,l], ) },
-      AA[k,l,m] : {  '-': ( [l,k,m], [k,m,l], ) },
-  ##    T[i,j,k,l,m] : {  '+': ( [j,i,k,l,m], [i,j,l,k,m] ),
-  ##                      '-': ( [i,j,k,m,l], ) }
+      S[i,j]		: {  '+': ( [j,i], ) },
+      A[i,j]		: {  '-': ( [j,i], ) },
+      T[k,l,m]		: {   '+': ( [l,k,m], [k,m,l], ) },
+      SS[k,l,m]		: {  '+': ( [l,k,m], [k,m,l], ) },
+      AA[k,l,m]		: {  '-': ( [l,k,m], [k,m,l], ) },
+      ## T[i,j,k,l,m]	: {  '+': ( [j,i,k,l,m], [i,j,l,k,m] ),
+      ##                     '-': ( [i,j,k,m,l], ) }
+      UnusedVar1[i,j]	: {  '+': ( [j,i], ) },
+      UnusedVar2[i,j]	: {  '+': ( [j,i], ) },
   }
-
 
   ########################################################################
   # apply symmetries and remove duplicates. This step takes the longest.
