@@ -212,7 +212,7 @@ double inv4Dmat_from_4Dsymmmat(double s11,double s12,double s13,double s14,
                                double *i11,double *i12,double *i13,double *i14,
                                double *i22, double *i23, double *i24,
                                double *i33, double *i34, double *i44);
-double invmat_from_symmmat(int n, const double *S, double *I);
+double invmat_from_symmmat(int n, const double *S, double *Si);
 int index_symmmat(int n, int a, int b);
 double matel_symmmat(int n, const double *M, int a, int b);
 void symmmat_times_vec(int n, const double *M, const double *v, double *Mv);

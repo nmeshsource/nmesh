@@ -395,24 +395,24 @@ invS = matrix([[i11,i12,i13,i14],[i12,i22,i23,i24],[i13,i23,i33,i34],
   return detS;
 }
 
-/* store inverse of symm. S in I */
-double invmat_from_symmmat(int n, const double *S, double *I)
+/* store inverse of symm. S in Si */
+double invmat_from_symmmat(int n, const double *S, double *Si)
 {
   switch(n)
   {
   case 1:
-    I[0] = 1./S[0];
+    Si[0] = 1./S[0];
     return S[0];
   case 2:
-    return inv2Dmat_from_2Dsymmmat(S[0], S[1], S[2],  I, I+1, I+2);
+    return inv2Dmat_from_2Dsymmmat(S[0], S[1], S[2],  Si, Si+1, Si+2);
   case 3:
     return inv3Dmat_from_3Dsymmmat(S[0], S[1], S[2], S[3], S[4], S[5],
-                                   I,    I+1,  I+2,  I+3,  I+4,  I+5);
+                                   Si,   Si+1, Si+2, Si+3, Si+4, Si+5);
   case 4:
     return inv4Dmat_from_4Dsymmmat(S[0], S[1], S[2], S[3],
                                          S[4], S[5], S[6],  S[7],S[8],  S[9],
-                                   I, I+1, I+2, I+3,
-                                      I+4, I+5, I+6,  I+7,I+8,  I+9);
+                                   Si, Si+1, Si+2, Si+3,
+                                       Si+4, Si+5, Si+6,  Si+7,Si+8,  Si+9);
   default:
     errorexit("n must be 1,2,3,4");
   }
