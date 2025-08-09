@@ -404,7 +404,7 @@ double LG_integrate_f_theta_phi(int ntheta, int nphi, const double *w,
       In += f[j*ntheta + i] * w[i];
 
   In *= 2.*PI/nphi;
-  return I;
+  return In;
 }
 
 /* test for LG_integrate_f_theta_phi */
