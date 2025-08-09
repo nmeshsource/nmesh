@@ -12,5 +12,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>      /* for uint64_t */
+#include <complex.h>
 
 #include "nmesh_automatic_include.h"
