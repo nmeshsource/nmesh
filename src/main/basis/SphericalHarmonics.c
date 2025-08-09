@@ -170,29 +170,29 @@ double Plm_slowly(int l, int m, double x)
 }
 double Re_Ylm_slowly(int l, int m, double theta, double phi)
 {
-  double R, I;
+  double Re, Im;
   double *ReYtab = alloc_Plm_Tab(l);
   double *ImYtab = alloc_Plm_Tab(l);
 
   set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
-  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R,&I);
+  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &Re,&Im);
 
   free(ImYtab);
   free(ReYtab);
-  return R;
+  return Re;
 }
 double Im_Ylm_slowly(int l, int m, double theta, double phi)
 {
-  double R, I;
+  double Re, Im;
   double *ReYtab = alloc_Plm_Tab(l);
   double *ImYtab = alloc_Plm_Tab(l);
 
   set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
-  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R,&I);
+  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &Re,&Im);
 
   free(ImYtab);
   free(ReYtab);
-  return I;
+  return Im;
 }
 
 /* get ReYlm, ImYlm for given theta,phi and one l,m
