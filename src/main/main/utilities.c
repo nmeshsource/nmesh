@@ -487,12 +487,17 @@ long str_from_buf(const char *buffer, long nbuffer, long offset,
 /* return the number of bytes in a file */
 long nbytes_infile(FILE *fp)
 {
-  long nbytes;
+  long curr, nbytes;
+
+  /* get current position */
+  curr = ftell(fp);
 
   /* find number of bytes in file */
   fseek(fp, 0L, SEEK_END);
   nbytes = ftell(fp);
-  fseek(fp, 0L, SEEK_SET);
+
+  /* go back to curr */
+  fseek(fp, curr, SEEK_SET);
   return nbytes;
 }
 
