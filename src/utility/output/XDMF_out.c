@@ -434,7 +434,6 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
               xyzoffset = xyzoffset0 + xyztotal;
               /* we wrote 3 things (x,y,z) for vli=0 */
               xyzcnt = 3*np;      //number of items written
-              xyzoffset = xyzoffset0 + (xyztotal - xyzcnt);
             }
             xyzcnt *= vbytes;   //number of bytes written
             xyztotal += xyzcnt; //byte total outputted for xyz so far
