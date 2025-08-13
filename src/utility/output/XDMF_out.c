@@ -141,17 +141,18 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
 
   /* current number of bytes in file */
   nbytes = nbytes_infile_name(fname);
-
+  PRF;printf(": %s has %ld bytes\n", fname, nbytes);
   /* make str with stuff we want to remove */
-  sprintf(str, B_spatial, time);
-  sprintf(str, "%s", E_spatial);
-  sprintf(str, "%s", E_temporal);
-  sprintf(str, "%s", E_head);
-  rmbytes = strlen(str);
+  rmbytes = 0;
+  rmbytes += sprintf(str+rmbytes, B_spatial, time);
+  rmbytes += sprintf(str+rmbytes, "%s", E_spatial);
+  rmbytes += sprintf(str+rmbytes, "%s", E_temporal);
+  rmbytes += sprintf(str+rmbytes, "%s", E_head);
 
   /* remove last rmbytes */
   nbytes -= rmbytes;
   truncate(fname, nbytes);
+  PRF;printf(": remove %ld bytes, i.e. truncate to %ld\n", rmbytes, nbytes);
 
   /* open file and append the now missing end markers */
   fp = fopen(fname, "a");
@@ -402,6 +403,8 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
     MCK( nMPI_Allreduce(&vtotal, &Vtotal, 1, nMPI_LONG, nMPI_SUM) );
     /* if we have written no binary data for vname at all, the last rank
        removes the entire xmf entry from the file */
+    PRF;printf(": Vtotal=%ld\n", Vtotal);
+    //if(0)
     if( (Vtotal==0) && (nMPI_rank()==size-1) )
       rm_empty_spatial_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
   }
