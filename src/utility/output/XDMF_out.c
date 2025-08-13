@@ -401,9 +401,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
     /* get number of bytes written for binary data of vname */
     Vtotal = vtotal;
     MCK( nMPI_Allreduce(&vtotal, &Vtotal, 1, nMPI_LONG, nMPI_SUM) );
+    //PRF;printf(": Vtotal=%ld\n", Vtotal);
     /* if we have written no binary data for vname at all, the last rank
        removes the entire xmf entry from the file */
-    //PRF;printf(": Vtotal=%ld\n", Vtotal);
     if( (Vtotal==0) && (nMPI_rank()==size-1) )
       rm_empty_spatial_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
   }
@@ -534,9 +534,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
     /* get number of bytes written for binary data of vname */
     Vtotal = vtotal;
     MCK( nMPI_Allreduce(&vtotal, &Vtotal, 1, nMPI_LONG, nMPI_SUM) );
+    //PRF;printf(": Vtotal=%ld\n", Vtotal);
     /* if we have written no binary data for vname at all, the last rank
        removes the entire xmf entry from the file */
-    //PRF;printf(": Vtotal=%ld\n", Vtotal);
     if( (Vtotal==0) && (nMPI_rank()==size-1) )
       rm_empty_spatial_xdmf_xmf(vname, outdir, suffix, Time, syncmode);
   }
