@@ -377,8 +377,8 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                 /* write binary data in var */
                 voffset = ftell(fpbin);
                 vcnt = write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
-                vcnt *= vbytes;   //number of bytes written
-                vtotal += xyzcnt; //byte total outputted for var so far
+                vcnt *= vbytes; //number of bytes written
+                vtotal += vcnt; //byte total outputted for var so far
 
                 /* write grid information into xmf file */
                 write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
@@ -513,8 +513,8 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
               /* write binary data in var */
               voffset = ftell(fpbin);
               vcnt = write_buffer(Vard(node,vi), np, dbl, fpbin);
-              vcnt *= vbytes;   //number of bytes written
-              vtotal += xyzcnt; //byte total outputted for var so far
+              vcnt *= vbytes; //number of bytes written
+              vtotal += vcnt; //byte total outputted for var so far
 
               /* write grid information into xmf file */
               write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix,
