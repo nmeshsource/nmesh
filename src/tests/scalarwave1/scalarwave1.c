@@ -721,8 +721,7 @@ int scalarwave1_analyze(tMesh *mesh)
   vlpush(vlu, iphi);
 
   /* RHS of u */
-  vlr = NULL;
-//  vlr = AddDuplicateEnable(vlu, "_r", AUXVAR, 0);
+  vlr = AddDuplicateEnable(vlu, "_r", AUXVAR, 0);
 
   /* add vars for errors in vlu and vlr */
   vle  = AddDuplicateEnable(vlu, "_err", AUXVAR, 0);
