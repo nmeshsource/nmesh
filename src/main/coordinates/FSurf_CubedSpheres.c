@@ -589,16 +589,16 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
     for(l=0; l<=lmax; l++)
     for(m=0; m<=l; m++, i++) /* here we set only integrands for m>=0 */
     {
-      double R,I, RYlm,IYlm, A,B;
+      double Re,Im, RYlm,IYlm, A,B;
       double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB, Jac, fac;
 
       /* get A,B and Re, Im part of data at surface where i=s */
       ijk=Ind_n(s,j,k, nn);
       A = Yp[ijk];
       B = Zp[ijk];
-      R = Re_varp[ijk];
-      if(Im_vind<=0) I = 0.; /* imag. part is zero */
-      else           I = Im_varp[ijk];
+      Re = Re_varp[ijk];
+      if(Im_vind<=0) Im = 0.; /* imag. part is zero */
+      else           Im = Im_varp[ijk];
 
       /* We need to compute \int d\phi d\theta \sin(theta) (Y_l^m)^* var .
          Later we actually compute  \int dA dB (Integ).
@@ -609,8 +609,8 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
                                          &dThetadA,&dThetadB, &dPhidA,&dPhidB);
       Jac = fabs(dThetadA*dPhidB - dThetadB*dPhidA); /* Jacobian */
       fac = Jac * sin(Theta);
-      R = R * fac;
-      I = I * fac;
+      Re = Re * fac;
+      Im = Im * fac;
 
       /* get spherical harmonic Ylm */
       ijk=Ind_n(i%n0,j,k, nn);
@@ -622,10 +622,10 @@ int FSurf_CubSph_add_Ylm_integrals(tNode *node, int s, int Re_vind, int Im_vind,
          (f,g) = int f^* g
          and define
          psi_Integ = (Y, psi)  */
-      Re_Integp[Ijk] = RYlm * R + IYlm * I;
-      Im_Integp[Ijk] = RYlm * I - IYlm * R;
-      //printf("b%ds%d Jac=%g R=%g RYlm=%g IYlm=%g @ %g %g\n",
-      //box->b,s, Jac, R, RYlm, IYlm, A,B);
+      Re_Integp[Ijk] = RYlm * Re + IYlm * Im;
+      Im_Integp[Ijk] = RYlm * Im - IYlm * Re;
+      //printf("b%ds%d Jac=%g Re=%g RYlm=%g IYlm=%g @ %g %g\n",
+      //box->b,s, Jac, Re, RYlm, IYlm, A,B);
       //quick_Array_output(box, Re_Integp, "Re_Integp", 8,8);
     }
   }

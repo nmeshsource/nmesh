@@ -103,18 +103,18 @@ void Legendre_P_dP_Q_dQ(int l, double x,
    \frac{d}{dx}[(1-x^{2})\frac{dP_k}{dx}] + k(k+1) P_k(x) = 0 */
 double int_LegendreP_x_1(int k, double x)
 {
-  double I, P,dP, Q,dQ;
+  double Integ, P,dP, Q,dQ;
 
   if(k == 0)
   {
-    I = 1. - x;
+    Integ = 1. - x;
   }
   else
   {
     Legendre_P_dP_Q_dQ(k,x, &P,&dP, &Q,&dQ);
-    I = dP * (1. - x*x) / (k*(k+1));
+    Integ = dP * (1. - x*x) / (k*(k+1));
   }
-  return I;
+  return Integ;
 }
 
 /* integral from a to b of Legendre polynomial P_k */
@@ -230,16 +230,16 @@ void scale_x_wquad_to_a_b(int npoints, double *x, double *w,
 }
 
 /* Gauss or Gauss-Lobatto (GL) quadrature:
-   compute I = \int_{-1}^1 dx f(x) where f(x) is known at the nodes.
+   compute Integ = \int_{-1}^1 dx f(x) where f(x) is known at the nodes.
    For LGL nodes, the w[i] are the integration weights from LGL_x_wquad
    This is accurate for polynomials up to degree 2n-3 for LGL. */
 double Gauss_integral(int n, const double *w, const double *f)
 {
   int i;
-  double I = 0.;
+  double Integ = 0.;
 
-  for(i = 0; i < n; i++)  I += w[i] * f[i];
-  return I;
+  for(i = 0; i < n; i++)  Integ += w[i] * f[i];
+  return Integ;
 }
 
 /* same as Gauss_integral, but use arrays. */
@@ -379,8 +379,8 @@ void LG_x_wquad(int np, double *x, double *w)
    J. Austral. Math. Soc. (Series B) 23 (1982), 332-347
    https://www.cambridge.org/core/services/aop-cambridge-core/content/view/1E811EF7FC701F86F8F530C020F65AC8/S0334270000000278a.pdf/numerical-integration-on-the-sphere.pdf
 
-   Integral I over a sphere:
-   I = \int_0^{2\pi} d\phi [ \int_0^{\pi} d\theta \sin(\theta) f(\theta,\phi) ]
+   Integral In over a sphere:
+   In = \int_0^{2\pi} d\phi [ \int_0^{\pi} d\theta \sin(\theta) f(\theta,\phi) ]
      ~ (\pi/n) \sum_{j=0}^{2n-1} \sum_{i=0}^{n-1} w_i f(\theta_i,\phi_j)
    where we use 2n points in the phi-dir:
      \phi_j = \pi j/n,      j \in [0,2n-1]
@@ -388,7 +388,7 @@ void LG_x_wquad(int np, double *x, double *w)
      \theta_i = acos(x_i),  i \in [0,n-1]
      (the x_i are the Legendre Gauss nodes with weights w_i)
 
-   "With this choice of node points and weights, I integrates exactly any
+   "With this choice of node points and weights, In integrates exactly any
     polynomial f(x, y, z) of degree less than 2n."
 
    Note: f[i + j*n] = f(\theta_i,\phi_j,),
@@ -397,14 +397,14 @@ double LG_integrate_f_theta_phi(int ntheta, int nphi, const double *w,
                                 const double f[nphi * ntheta])
 {
   int i, j;
-  double I = 0.;
+  double In = 0.;
 
   for(j=0; j<nphi; j++)
     for(i=0; i<ntheta; i++)
-      I += f[j*ntheta + i] * w[i];
+      In += f[j*ntheta + i] * w[i];
 
-  I *= 2.*PI/nphi;
-  return I;
+  In *= 2.*PI/nphi;
+  return In;
 }
 
 /* test for LG_integrate_f_theta_phi */

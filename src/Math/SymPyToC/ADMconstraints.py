@@ -33,49 +33,49 @@ Cal  = sympy.Function('Cal')
 # Program Text and Eqations (in one long string list)
 ########################################################################
 tocompute = (
-  ':Text = #include \"nmesh.h\"\n',
-  ':Text = #include \"ADM.h\"\n',
-  ':Text = \n',
-  ':Text = #define POWER(x,y) (pow((double) (x), (double) (y)))\n',
-  ':Text = #define Log(x)     log((double) (x)))\n',
-  ':Text = #define POW2(x)    ((x)*(x))\n',
-  ':Text = #define POW2inv(x) (1.0/((x)*(x)))\n',
-  ':Text = #define POW1inv(x) (1.0/(x))\n',
-  ':Text = #define Cal(x,y,z) ((x)?(y):(z))\n\n',
-
-  ':Text = \n\n\n',
-
-  ':Text = void ADMconstraints(tVarList *u)\n',
-  ':Text = {\n',
-  ':Text = tMesh *mesh = u->mesh;\n',
-  ':Text = \n',
-
-  ':Text = int normConstr = Getv(Par(\"ADM_normalizedConstraints\"), \"yes\");\n',
-  ':Text = int TermByTerm = GetvLax(Par(\"ADM_ConstraintNorm\"), \"TermByTerm\");\n',
-  ':Text = \n',
-  ':Text = int iADM_gxx     = Ind(\"ADM_gxx\");\n',
-  ':Text = int iADM_dgxxx   = Ind(\"ADM_dgxxx\");\n',
-  ':Text = int iADM_ddgxxxx = Ind(\"ADM_ddgxxxx\");\n',
-  ':Text = int iADM_alpha   = Ind(\"ADM_alpha\");\n',
-  ':Text = int iADM_dalphax   = Ind(\"ADM_dalphax\");\n',
-  ':Text = int iADM_ddalphaxx = Ind(\"ADM_ddalphaxx\");\n',
-  ':Text = int iADM_Kxx     = Ind(\"ADM_Kxx\");\n',
-  ':Text = int iADM_dKxxx   = Ind(\"ADM_dKxxx\");\n',
-  ':Text = \n',
-
-  ':Text = formylnodes(mesh)\n',
-  ':Text = {\n',
-  ':Text = tNode *node = MyLnode;\n',
-  ':Text = int ijk;\n\n',
 ''':Text =
-  cart_partials_dSij_dk_dSij_dkl(node, iADM_gxx, iADM_dgxxx, iADM_ddgxxxx);
-  cart_partials_dU_di_dU_dij(node, iADM_alpha, iADM_dalphax, iADM_ddalphaxx);
-  cart_partials_dSij_dk(node, iADM_Kxx, iADM_dKxxx);
-''',
-  ':Text = \n',
+#include "nmesh.h"
+#include "ADM.h"
 
-  ':Text = forpoints(node, ijk)\n',
-  ':Text = {\n',
+#define POWER(x,y) (pow((double) (x), (double) (y)))
+#define Log(x)     log((double) (x)))
+#define POW2(x)    ((x)*(x))
+#define POW2inv(x) (1.0/((x)*(x)))
+#define POW1inv(x) (1.0/(x))
+#define Cal(x,y,z) ((x)?(y):(z))
+
+
+
+
+void ADMconstraints(tVarList *u)
+{
+tMesh *mesh = u->mesh;
+
+int normConstr = Getv(Par("ADM_normalizedConstraints"), "yes");
+int TermByTerm = GetvLax(Par("ADM_ConstraintNorm"), "TermByTerm");
+
+int iADM_gxx     = Ind("ADM_gxx");
+int iADM_dgxxx   = Ind("ADM_dgxxx");
+int iADM_ddgxxxx = Ind("ADM_ddgxxxx");
+int iADM_alpha   = Ind("ADM_alpha");
+int iADM_dalphax   = Ind("ADM_dalphax");
+int iADM_ddalphaxx = Ind("ADM_ddalphaxx");
+int iADM_Kxx     = Ind("ADM_Kxx");
+int iADM_dKxxx   = Ind("ADM_dKxxx");
+
+formylnodes(mesh)
+{
+tNode *node = MyLnode;
+int ijk;
+
+cart_partials_dSij_dk_dSij_dkl(node, iADM_gxx, iADM_dgxxx, iADM_ddgxxxx);
+cart_partials_dU_di_dU_dij(node, iADM_alpha, iADM_dalphax, iADM_ddalphaxx);
+cart_partials_dSij_dk(node, iADM_Kxx, iADM_dKxxx);
+
+
+forpoints(node, ijk)
+{
+''',
 
 # custom variable declaration
 # we have to translate between the tensor names and the C variables
@@ -193,7 +193,7 @@ tocompute = (
 
     # normalized Hamiltonian constraint
     # normham = ham/(fabs(R) + K K + fabs(Kud[a,b] Kud[b,a]) + fabs(hamrhs)),
-    ':Text = if(TermByTerm) {\n',
+    ':Text = if(TermByTerm) {',
       # compute fabs of some terms in R separately
       'RA[a,b] = ginv[c,d] * (-deldelg[c,d,a,b])',
       'RB[a,b] = ginv[c,d] * ( deldelg[a,c,b,d])',
@@ -206,7 +206,7 @@ tocompute = (
       # hamnum = RA + RB + RC + RD + K*K - KudKud - hamrhs,
       'denom  = fabs(RA)+fabs(RB)+fabs(RC)+fabs(RD) + K*K + fabs(KudKud) +\
                 fabs(hamrhs)',
-    ':Text = } else {\n',
+    ':Text = } else {',
       'denom  = fabs(R) + K*K + fabs(KudKud) + fabs(hamrhs)',
     ':Text = }',
 
@@ -215,7 +215,7 @@ tocompute = (
     # normalized momentum constraint
     # 'normmom[a] = mom[a]/( fabs( cdKudd[c,a,d]*Kdelta[c,d] ) \
     #                         +fabs( ginv[b,c]*codelK[a,b,c] ) )',
-    ':Text = if(TermByTerm) {\n',
+    ':Text = if(TermByTerm) {',
       # compute fabs of some terms in codelK separately
       'codelKA[a,b,c] =  delK[a,b,c]',
       'codelKB[a,b,c] = -gamma[d,a,b]*K[d,c]',
@@ -232,22 +232,26 @@ tocompute = (
       'denom[a] =  fabs(cdKdA[a]) + fabs(cdKdB[a]) + fabs(cdKdC[a]) +\
                    fabs(codelTrKA[a]) + fabs(codelTrKB[a]) +\
                    fabs(codelTrKC[a]) + fabs(momrhs[a])',
-    ':Text = } else {\n',
+    ':Text = } else {',
       'denom[a]  = fabs(cdKudd[c,a,d]*Kdelta[c,d]) + \
                    fabs(ginv[b,c]*codelK[a,b,c]) + fabs(momrhs[a])',
-    ':Text = }\n',
+    ':Text = }',
 
     'denom = denom[1] + denom[2] + denom[3]',
 
     'normmom[a] = Cal(denom <= 0.0, 0.0, mom[a]/denom)',
 
-  ':Text = }\n',
+  ':Text = }',
 
 # the end or tail of the function (we need at least a })
-  ':Text = } /* end of points */\n',
-  ':Text = } /* end of nodes */\n',
-  ':Text = \n\n',
-  ':Text = }  /* end of function */\n\n',
+''':Text =
+
+} /* end of points */
+} /* end of nodes */
+
+
+}  /* end of function */
+''',
 )
 
 if __name__ == '__main__':

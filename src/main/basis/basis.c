@@ -430,16 +430,16 @@ tArray *array_GLquadrature2X(tNode *node, int norm, tArray *var, tArray *Ivar)
 /* compute 3d integral (\int d^3Xb var) of array var */
 double array_GLquadrature3(tNode *node, tArray *var)
 {
-  double I;
+  double Integ;
   tArray *Ivar = alloc_array(node->n);
 
   array_GLquadrature1(node, 0, var, Ivar);
   array_GLquadrature1(node, 1, Ivar, Ivar); //should work because it uses mm_array1
   array_GLquadrature1(node, 2, Ivar, Ivar);
-  I = Ivar->d[0];
+  Integ = Ivar->d[0];
   free_array(Ivar);
 
-  return I;
+  return Integ;
 }
 
 /* compute average of array var */
