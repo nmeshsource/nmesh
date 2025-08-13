@@ -124,12 +124,12 @@ void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
   fclose_sync_mode(fp, syncmode);
 }
 
-/* Remove an empty B_temporal,B_spatial,E_spatial,E_temporal block:
+/* Remove an empty B_spatial,E_spatial block:
    In case we have written B_spatial and E_spatial with nothing in between
    it is better to remove it. */
-void rm_empty_temporal_xdmf_xmf(char *varname,
-                                const char *outdir, const char *suffix,
-                                double time, int syncmode)
+void rm_empty_spatial_xdmf_xmf(char *varname,
+                               const char *outdir, const char *suffix,
+                               double time, int syncmode)
 {
   FILE *fp;
   char fname[1000];
@@ -144,7 +144,6 @@ void rm_empty_temporal_xdmf_xmf(char *varname,
   PRF;printf(": %s has %ld bytes\n", fname, nbytes);
   /* make str with stuff we want to remove */
   rmbytes = 0;
-  rmbytes += sprintf(str+rmbytes, "%s", B_temporal);
   rmbytes += sprintf(str+rmbytes, B_spatial, time);
   rmbytes += sprintf(str+rmbytes, "%s", E_spatial);
   rmbytes += sprintf(str+rmbytes, "%s", E_temporal);
@@ -159,6 +158,7 @@ void rm_empty_temporal_xdmf_xmf(char *varname,
   fp = fopen(fname, "a");
   if(!fp) errorexits("cannot add to %s if file was never created with "
                      "fopen_xdmf_xmf", fname);
+  fprintf(fp, "%s", E_temporal);
   fprintf(fp, "%s", E_head);
   fclose_sync_mode(fp, syncmode);
 }
@@ -406,7 +406,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
     PRF;printf(": Vtotal=%ld\n", Vtotal);
     //if(0)
     if( (Vtotal==0) && (nMPI_rank()==size-1) )
-      rm_empty_temporal_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
+      rm_empty_spatial_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
   }
   free(bufxyz);
   free(bufbin);
@@ -424,7 +424,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   int dbl = 0; /* we output float not double */
   int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
-  long xyzoffset0=0, xyztotal, xyzcnt;
+  long xyzoffset0=0, xyztotal, xyzcnt, vtotal, vcnt, Vtotal;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -448,6 +448,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
     char *vname = VarName(vi);
     int rk;
     int size = nMPI_size();
+
+    /* num of bytes written for var so far */
+    vtotal = 0;
 
     /* MPI motivated loop to assign work */
     for(rk=0; rk<size; rk++)
@@ -509,7 +512,9 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
 
               /* write binary data in var */
               voffset = ftell(fpbin);
-              write_buffer(Vard(node,vi), np, dbl, fpbin);
+              vcnt = write_buffer(Vard(node,vi), np, dbl, fpbin);
+              vcnt *= vbytes;   //number of bytes written
+              vtotal += xyzcnt; //byte total outputted for var so far
 
               /* write grid information into xmf file */
               write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix,
@@ -526,6 +531,16 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
       /* wait until everyone is here */
       MCK( nMPI_barrier() );
     } /* end rk-loop */
+
+    /* get number of bytes written for binary data of vname */
+    Vtotal = vtotal;
+    MCK( nMPI_Allreduce(&vtotal, &Vtotal, 1, nMPI_LONG, nMPI_SUM) );
+    /* if we have written no binary data for vname at all, the last rank
+       removes the entire xmf entry from the file */
+    PRF;printf(": Vtotal=%ld\n", Vtotal);
+    //if(0)
+    if( (Vtotal==0) && (nMPI_rank()==size-1) )
+      rm_empty_spatial_xdmf_xmf(vname, outdir, suffix, Time, syncmode);
   }
   free(bufxyz);
   free(bufbin);
