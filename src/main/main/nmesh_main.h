@@ -281,6 +281,7 @@ int str_to_intList(const char *str, const char *delim, intList *il);
 long str_from_buf(const char *buffer, long nbuffer, long offset,
                   char delim, char *str, long nstr, long *strlen);
 long nbytes_infile(FILE *fp);
+long nbytes_infile_name(const char *fname);
 FILE *fopen_buf(const char *pathname, const char *mode,
                 char **buf, size_t bufsiz);
 int fclose_buf(FILE *fp, char **buf);
