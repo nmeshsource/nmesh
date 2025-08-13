@@ -129,7 +129,7 @@ void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
    it is better to remove it. */
 void rm_empty_spatial_xdmf_xmf(char *varname,
                                const char *outdir, const char *suffix,
-                               double time)
+                               double time, int syncmode)
 {
   FILE *fp;
   char fname[1000];
@@ -159,7 +159,7 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
                      "fopen_xdmf_xmf", fname);
   fprintf(fp, "%s", E_temporal);
   fprintf(fp, "%s", E_head);
-  fclose(fp);
+  fclose_sync_mode(fp, syncmode);
 }
 
 /* open file to add more nodes still with the same Time Value */
@@ -268,7 +268,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   int dbl = 0; /* we output float not double */
   int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
-  long xyzoffset0=0, xyztotal, xyzcnt;
+  long xyzoffset0=0, xyztotal, xyzcnt, vtotal, vcnt, Vtotal;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -295,6 +295,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
     char *vname = VarName(vi);
     int rk;
     int size = nMPI_size();
+
+    /* num of bytes written for var so far */
+    vtotal = 0;
 
     /* MPI motivated loop to assign work */
     for(rk=0; rk<size; rk++)
@@ -372,7 +375,9 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
               {
                 /* write binary data in var */
                 voffset = ftell(fpbin);
-                write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+                vcnt = write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
+                vcnt *= vbytes;   //number of bytes written
+                vtotal += xyzcnt; //byte total outputted for var so far
 
                 /* write grid information into xmf file */
                 write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
@@ -391,6 +396,14 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
       /* wait until everyone is here */
       MCK( nMPI_barrier() );
     } /* end rk-loop */
+
+    /* get number of bytes written for binary data of vname */
+    Vtotal = vtotal;
+    MCK( nMPI_Allreduce(&vtotal, &Vtotal, 1, nMPI_LONG, nMPI_SUM) );
+    /* if we have written no binary data for vname at all, the last rank
+       removes the entire xmf entry from the file */
+    if( (Vtotal==0) && (nMPI_rank()==size-1) )
+      rm_empty_spatial_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
   }
   free(bufxyz);
   free(bufbin);
