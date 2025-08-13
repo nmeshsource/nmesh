@@ -123,8 +123,12 @@ void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
   fclose_sync_mode(fp, syncmode);
 }
 
-void truncate_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
-                       double time)
+/* Remove and empty B_spatial - E_spatial block:
+   In case we have written B_spatial and E_spatial with nothing in between
+   it is better to remove it. */
+void rm_empty_spatial_xdmf_xmf(char *varname,
+                               const char *outdir, const char *suffix,
+                               double time)
 {
   char fname[1000];
   long nbytes, rmbytes;
@@ -147,7 +151,7 @@ void truncate_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   nbytes -= rmbytes;
   truncate(fname, nbytes);
 
-  /* open file such that we can append the now missing end markers */
+  /* open file and append the now missing end markers */
   fp = fopen(fname, "a");
   if(!fp) errorexits("cannot add to %s if file was never created with "
                      "fopen_xdmf_xmf", fname);
