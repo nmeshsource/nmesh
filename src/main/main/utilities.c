@@ -501,6 +501,22 @@ long nbytes_infile(FILE *fp)
   return nbytes;
 }
 
+/* return the number of bytes in a file of name fname */
+long nbytes_infile_name(const char *fname)
+{
+  FILE *fp;
+  long nbytes;
+
+  fp = fopen(fname, "rb");
+  if(!fp) errorexits("cannot open %s", fname);
+
+  nbytes = nbytes_infile(fp);
+
+  fclose(fp);
+
+  return nbytes;
+}
+
 
 /* Open a file where we use a buffer of size bufsiz (set with setvbuf).
    The buffer buf is allocated here and needs to be freed later, e.g.
