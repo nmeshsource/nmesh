@@ -136,9 +136,6 @@ void truncate_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   /* current number of bytes in file */
   nbytes = nbytes_infile_name(fname);
 
-
-
-
   /* make str with stuff we want to remove */
   sprintf(str, B_spatial, time);
   sprintf(str, "%s", E_spatial);
@@ -148,17 +145,14 @@ void truncate_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
 
   /* remove last rmbytes */
   nbytes -= rmbytes;
-
-///...
-//truncate
+  truncate(fname, nbytes);
 
   /* open file such that we can append the now missing end markers */
   fp = fopen(fname, "a");
   if(!fp) errorexits("cannot add to %s if file was never created with "
                      "fopen_xdmf_xmf", fname);
-
-//...
-
+  fprintf(fp, "%s", E_temporal);
+  fprintf(fp, "%s", E_head);
   fclose(fp);
 }
 
