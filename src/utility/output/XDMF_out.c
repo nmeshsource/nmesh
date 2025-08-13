@@ -154,7 +154,7 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
   truncate(fname, nbytes);
   PRF;printf(": remove %ld bytes, i.e. truncate to %ld\n", rmbytes, nbytes);
 
-  /* open file and append the now missing end marker */
+  /* open file and append the now missing end markers */
   fp = fopen(fname, "a");
   if(!fp) errorexits("cannot add to %s if file was never created with "
                      "fopen_xdmf_xmf", fname);
