@@ -53,13 +53,10 @@ void xdmf_set_format_strings(int mode)
 }
 
 
-/* open file xmf file with XML description and position file pointer */
-FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
-                     double time, char *IObuf, size_t IObufsiz)
+/* write filename of xml file into string fname */
+void filename_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
+                       int nfname, char *fname)
 {
-  FILE *fp;
-  char fname[1000];
-  long offset;
   const char *ext;
 
   /* set file extension */
@@ -68,7 +65,19 @@ FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
   else errorexit("B_E_grid is not set correctly");
 
   /* name of XML file */
-  snprintf(fname, 1000, "%s/%s.%s.%s", outdir, varname, suffix, ext);
+  snprintf(fname, nfname, "%s/%s.%s.%s", outdir, varname, suffix, ext);
+}
+
+/* open file xmf file with XML description and position file pointer */
+FILE *fopen_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
+                     double time, char *IObuf, size_t IObufsiz)
+{
+  FILE *fp;
+  char fname[1000];
+  long offset;
+
+  /* put name of XML file into fname */
+  filename_xdmf_xmf(varname, outdir, suffix, 1000, fname);
 
   /* open file such that we can append and seek backwards */
   fp = fopen(fname, "r+"); //with "a" fseek below would fail
@@ -113,6 +122,47 @@ void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
   }
   fclose_sync_mode(fp, syncmode);
 }
+
+void truncate_xdmf_xmf(char *varname, const char *outdir, const char *suffix,
+                       double time)
+{
+  char fname[1000];
+  long nbytes, rmbytes;
+  char str[10000];
+
+  /* put name of XML file into fname */
+  filename_xdmf_xmf(varname, outdir, suffix, 1000, fname);
+
+  /* current number of bytes in file */
+  nbytes = nbytes_infile_name(fname);
+
+
+
+
+  /* make str with stuff we want to remove */
+  sprintf(str, B_spatial, time);
+  sprintf(str, "%s", E_spatial);
+  sprintf(str, "%s", E_temporal);
+  sprintf(str, "%s", E_head);
+  rmbytes = strlen(str);
+
+  /* remove last rmbytes */
+  nbytes -= rmbytes;
+
+///...
+//truncate
+
+  /* open file such that we can append the now missing end markers */
+  fp = fopen(fname, "a");
+  if(!fp) errorexits("cannot add to %s if file was never created with "
+                     "fopen_xdmf_xmf", fname);
+
+//...
+
+  fclose(fp);
+}
+
+
 
 /* open file to add more nodes still with the same Time Value */
 FILE *fopen_add_spatial_xdmf_xmf(char *varname,

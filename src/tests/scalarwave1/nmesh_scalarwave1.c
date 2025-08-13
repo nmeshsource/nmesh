@@ -25,6 +25,8 @@ int nmesh_scalarwave1(tMesh *mesh)
   AddAuxVar("scalarwave1_divf_pi", "", "d_i f_{pi}^i");
   AddAuxVar("scalarwave1_divf_c", "i", "d_j f_{c_i}^j");
 
+AddAuxVar("scalarwave1_phi_r",   "", "scalar field phi");
+
   /* parameters */
   AddPar("scalarwave1_profile", "sin", "initial profile [sin,square]");
   AddPar("scalarwave1_k", "0.8 -0.5 0.33166247903554", "wave vector k^i");
