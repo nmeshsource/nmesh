@@ -4,6 +4,7 @@
 #include "nmesh.h"
 #include "output.h"
 
+#include <unistd.h>      /* for truncate */
 
 /* VisIt and ParaView can read XDMF format.
    Our output in XDMF format consists of a .xml file and a .bin file. The
@@ -123,13 +124,14 @@ void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
   fclose_sync_mode(fp, syncmode);
 }
 
-/* Remove and empty B_spatial - E_spatial block:
+/* Remove an empty B_spatial, E_spatial block:
    In case we have written B_spatial and E_spatial with nothing in between
    it is better to remove it. */
 void rm_empty_spatial_xdmf_xmf(char *varname,
                                const char *outdir, const char *suffix,
                                double time)
 {
+  FILE *fp;
   char fname[1000];
   long nbytes, rmbytes;
   char str[10000];
@@ -159,7 +161,6 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
   fprintf(fp, "%s", E_head);
   fclose(fp);
 }
-
 
 
 /* open file to add more nodes still with the same Time Value */
