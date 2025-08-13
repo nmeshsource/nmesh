@@ -162,7 +162,6 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
   fclose(fp);
 }
 
-
 /* open file to add more nodes still with the same Time Value */
 FILE *fopen_add_spatial_xdmf_xmf(char *varname,
                                  const char *outdir, const char *suffix,
