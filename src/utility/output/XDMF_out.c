@@ -220,7 +220,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
   int dbl = 0; /* we output float not double */
   int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
-  long xyzoffset0=0, vtotal, vcnt;
+  long xyzoffset0=0, xyztotal, xyzcnt;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -263,7 +263,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
 
         /* open binary files */
         fpbin = fopen_bin(vname, outdir, suffix[norm], bufbin,bufsize);
-        vtotal = 0; /* num of bytes written for var vname */
+        xyztotal = 0; /* num of bytes written for xyz */
         if(vli==0) /* write xyz only for first var in list */
         {
           fpxyz = fopen_bin("xyz", outdir, suffix[norm], bufxyz,bufsize);
@@ -277,7 +277,6 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
 
           /* do something only if this proc has dat */
           if(node->dat)
-          if(node->dat->v[vi])
           {
             int n[] = { node->n[0], node->n[1], node->n[2] };
             int plane[3];
@@ -303,12 +302,6 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
               /* list of points in plane */
               plist = pointindexList_plane(node, normal, plane);
 
-              /* write binary data in var */
-              voffset = ftell(fpbin);
-              vcnt = write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
-              vcnt *= vbytes; //number of bytes written by write_buffer
-              vtotal += vcnt; //total num of bytes outputted for var so far
-
               /* write point's x,y,z coordinates */
               if(vli==0) /* write xyz only for first var in list */
               {
@@ -316,18 +309,27 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                 double *py = Vard(node, ix+1);
                 double *pz = Vard(node, ix+2);
                 xyzoffset = ftell(fpxyz);
-                write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
+                xyzcnt = write_3buffers_idx(px,py,pz, plist, dbl, fpxyz);
               }
               else
               {
-                /* we wrote 3 things (x,y,z) for each var */
-                xyzoffset = xyzoffset0 + 3*(vtotal - vcnt);
+                xyzoffset = xyzoffset0 + xyztotal;
+                /* we wrote 3 things (x,y,z) for vli=0 */
+                xyzcnt = 3*(plist->n); //number of items written
               }
+              xyzcnt *= vbytes;   //number of bytes written
+              xyztotal += xyzcnt; //byte total outputted for xyz so far
 
-              /* write grid information into xmf file */
-              write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
-                             ndname, Time, n, bin, dbl);
+              if(node->dat->v[vi])
+              {
+                /* write binary data in var */
+                voffset = ftell(fpbin);
+                write_buffer_idx(Vard(node,vi), plist, dbl, fpbin);
 
+                /* write grid information into xmf file */
+                write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix[norm],
+                               ndname, Time, n, bin, dbl);
+              }
               intList_free(plist);
             }
           }
@@ -358,7 +360,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   int dbl = 0; /* we output float not double */
   int vbytes = ((dbl) ? sizeof(double) : sizeof(float));
   long voffset, xyzoffset;
-  long xyzoffset0=0, vtotal, vcnt;
+  long xyzoffset0=0, xyztotal, xyzcnt;
   FILE *fpxmf, *fpbin, *fpxyz=NULL;
   char ndname[100];
   int ix = Ind( Gets(Par("output_xcoord")) );
@@ -396,7 +398,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
                                              bufxmf,bufsize);
         /* open binary files */
         fpbin = fopen_bin(vname, outdir, suffix, bufbin,bufsize);
-        vtotal = 0; /* num of bytes written for var vname */
+        xyztotal = 0; /* num of bytes written for xyz */
         if(vli==0) /* write xyz only for first var in list */
         {
           fpxyz = fopen_bin("xyz",outdir,suffix, bufxyz,bufsize);
@@ -410,39 +412,41 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
 
           /* do something only if this proc has dat */
           if(node->dat)
-          if(node->dat->v[vi])
           {
             int np = node->np;
             int n[] = { node->n[0], node->n[1], node->n[2] };
 
-            {
-              /* Check if we want to output this node. Skip node if it
-                 is outside the output region */
-              if( !output_keep_elm(node, outpars) ) continue;
+            /* Check if we want to output this node. Skip node if it
+               is outside the output region */
+            if( !output_keep_elm(node, outpars) ) continue;
 
-              /* node name and n */
+            /* write point's x,y,z coordinates */
+            if(vli==0) /* write xyz only for first var in list */
+            {
+              double *px = Vard(node, ix);
+              double *py = Vard(node, ix+1);
+              double *pz = Vard(node, ix+2);
+              xyzoffset = ftell(fpxyz);
+              xyzcnt = write_3buffers(px,py,pz, np, dbl, fpxyz);
+            }
+            else
+            {
+              xyzoffset = xyzoffset0 + xyztotal;
+              /* we wrote 3 things (x,y,z) for vli=0 */
+              xyzcnt = 3*np;      //number of items written
+              xyzoffset = xyzoffset0 + (xyztotal - xyzcnt);
+            }
+            xyzcnt *= vbytes;   //number of bytes written
+            xyztotal += xyzcnt; //byte total outputted for xyz so far
+
+            if(node->dat->v[vi])
+            {
+              /* get node name */
               nodename(node, ndname,99);
 
               /* write binary data in var */
               voffset = ftell(fpbin);
-              vcnt = write_buffer(Vard(node,vi), np, dbl, fpbin);
-              vcnt *= vbytes; //number of bytes written by write_buffer
-              vtotal += vcnt; //total num of bytes outputted for var so far
-
-              /* write point's x,y,z coordinates */
-              if(vli==0) /* write xyz only for first var in list */
-              {
-                double *px = Vard(node, ix);
-                double *py = Vard(node, ix+1);
-                double *pz = Vard(node, ix+2);
-                xyzoffset = ftell(fpxyz);
-                write_3buffers(px,py,pz, np, dbl, fpxyz);
-              }
-              else
-              {
-                /* we wrote 3 things (x,y,z) for each var */
-                xyzoffset = xyzoffset0 + 3*(vtotal - vcnt);
-              }
+              write_buffer(Vard(node,vi), np, dbl, fpbin);
 
               /* write grid information into xmf file */
               write_xdmf_xmf(fpxmf, voffset, xyzoffset, vname, suffix,
