@@ -124,12 +124,12 @@ void fclose_xdmf_xmf(FILE *fp, int syncmode, int E_markers)
   fclose_sync_mode(fp, syncmode);
 }
 
-/* Remove an empty B_spatial, E_spatial block:
+/* Remove an empty B_temporal,B_spatial,E_spatial,E_temporal block:
    In case we have written B_spatial and E_spatial with nothing in between
    it is better to remove it. */
-void rm_empty_spatial_xdmf_xmf(char *varname,
-                               const char *outdir, const char *suffix,
-                               double time, int syncmode)
+void rm_empty_temporal_xdmf_xmf(char *varname,
+                                const char *outdir, const char *suffix,
+                                double time, int syncmode)
 {
   FILE *fp;
   char fname[1000];
@@ -144,6 +144,7 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
   PRF;printf(": %s has %ld bytes\n", fname, nbytes);
   /* make str with stuff we want to remove */
   rmbytes = 0;
+  rmbytes += sprintf(str+rmbytes, "%s", B_temporal);
   rmbytes += sprintf(str+rmbytes, B_spatial, time);
   rmbytes += sprintf(str+rmbytes, "%s", E_spatial);
   rmbytes += sprintf(str+rmbytes, "%s", E_temporal);
@@ -154,11 +155,10 @@ void rm_empty_spatial_xdmf_xmf(char *varname,
   truncate(fname, nbytes);
   PRF;printf(": remove %ld bytes, i.e. truncate to %ld\n", rmbytes, nbytes);
 
-  /* open file and append the now missing end markers */
+  /* open file and append the now missing end marker */
   fp = fopen(fname, "a");
   if(!fp) errorexits("cannot add to %s if file was never created with "
                      "fopen_xdmf_xmf", fname);
-  fprintf(fp, "%s", E_temporal);
   fprintf(fp, "%s", E_head);
   fclose_sync_mode(fp, syncmode);
 }
@@ -406,7 +406,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
     PRF;printf(": Vtotal=%ld\n", Vtotal);
     //if(0)
     if( (Vtotal==0) && (nMPI_rank()==size-1) )
-      rm_empty_spatial_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
+      rm_empty_temporal_xdmf_xmf(vname, outdir, suffix[norm], Time, syncmode);
   }
   free(bufxyz);
   free(bufbin);
