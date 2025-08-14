@@ -74,4 +74,4 @@ SPECIALLIBS += -lgsl -lgslcblas
 #DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
 
 # link with libsgrid from inside DNSdataReader
-SPECIALLIBS += -L$(TOP)/src/projects/DNSdataReader/sgrid/lib -lsgrid
+SPECIALLIBS += $(TOP)/src/projects/DNSdataReader/sgrid/lib/libsgrid.a
