@@ -106,7 +106,14 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     /* if max<min there was no node with any data, then we skip the output */
     if(finit(min) && finit(max))
     {
-      if(max<min) continue;
+      if(max<min)
+      {
+        PRF;printf(": skipping %s: "
+                   "No elm with valid data found (max<min). "
+                   "Probably all NaN.\n", name);
+        //printf("min=%g max=%g\n", min, max);
+        continue;
+      }
     }
 
     /* maxAbs and its pos. */
