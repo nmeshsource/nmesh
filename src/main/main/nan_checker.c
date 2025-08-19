@@ -105,6 +105,7 @@ int array_in_var_finite(tNode *node, tArray *a, char *name, int ijk[3])
 int var_finite(tNode *node, int vi, int errexit)
 {
   tMesh *mesh = node->pat->mesh;
+  double time = mesh->time;
   char *vname = VarName(vi);
   char str[1000];
   char nname[100];
@@ -120,6 +121,7 @@ int var_finite(tNode *node, int vi, int errexit)
   ind = array_in_var_finite(node, a, str, ijk);
   if(ind>=0)
   {
+    printf("time = %g\n", time);
     printf("node: %s,  var%d %s\n",
            nname, vi, vname);
     if(errexit) errorexiti("not finite at ind=%d", ind);
@@ -140,6 +142,7 @@ int var_finite(tNode *node, int vi, int errexit)
       ind = array_in_var_finite(node, msa, str, ijk);
       if(ind>=0)
       {
+        printf("time = %g\n", time);
         printf("node: %s,  var%d %s, f%d mysurf\n",
                nname, vi, vname, f);
         if(errexit) errorexiti("not finite at ind=%d", ind);
@@ -155,6 +158,7 @@ int var_finite(tNode *node, int vi, int errexit)
         ind = array_in_var_finite(node, nsa[ni], str, ijk);
         if(ind>=0)
         {
+          printf("time = %g\n", time);
           printf("node: %s,  var%d %s, f%d nbsurf[%d]\n",
                  nname, vi, vname, f, ni);
           if(errexit) errorexiti("not finite at ind=%d", ind);
@@ -168,6 +172,7 @@ int var_finite(tNode *node, int vi, int errexit)
       ind = array_in_var_finite(node, asa, str, ijk);
       if(ind>=0)
       {
+        printf("time = %g\n", time);
         printf("node: %s,  var%d %s, f%d ajsurf\n",
                nname, vi, vname, f);
         if(errexit) errorexiti("not finite at ind=%d", ind);
