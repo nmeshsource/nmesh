@@ -74,7 +74,7 @@ SPECIALLIBS += -lgsl -lgslcblas
 #DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
 
 # compile with libsgrid
-SGRIDDIR = $(TOP)/src/projects/sgrid
+SGRIDDIR = $(shell pwd)/src/projects/sgrid
 LIBSGRID = $(SGRIDDIR)/lib/libsgrid.a
 SPECIALLIBS += $(LIBSGRID)
 # add dependency on libsgrid.a
