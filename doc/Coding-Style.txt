@@ -3,7 +3,7 @@ specific function calls. Since there is no real documentation we rely on
 nicely written code with plenty of comments.
 
 For readable code formatting we use:
------------------------------------
+------------------------------------
 *2 spaces for indentation, no tabs!
 *no more than 80 characters per line
 *no stray spaces or tabs ("git diff" shows those in red)
@@ -38,6 +38,15 @@ tParameter *make_empty_pdb(int npdb1max)
   return pdb1;
 }
 ---
+
+clang-format:
+-------------
+*The file .clang-format in the main nmesh dir should achieve roughly the
+ formatting described above.
+*I.e. to format your C-code you can install and use clang-format, e.g.
+clang-format -i file.c
+ will reformat the file.c in place (-i).
+
 
 To ensure code quality one should run tests before and after changes
 --------------------------------------------------------------------
