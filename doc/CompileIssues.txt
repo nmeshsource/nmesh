@@ -65,5 +65,5 @@ way around this is to explicitly change all global variable declarations in
 nmesh from something like "int ex1;" to "int ex1=0;". But who came up with
 all this nonsense at Apple? After all Sec. 6.9.2-2 of the C99-standard
 clearly states that "int ex1;" will have the same behavior as "int ex1=0;"
-On Apple, the former causes linker errors. No such problem happens on
-Linux...
+On Apple, the former causes linker errors. No such problems occur on Linux,
+FreeBSD, NetBSD or OpenBSD. Why has Apple screwed this up???
