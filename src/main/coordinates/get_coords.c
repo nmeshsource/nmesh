@@ -1098,35 +1098,6 @@ int ind_on_elmface(tElm *elm, int ind, int *face)
   return ijk_on_elmface(elm, i,j,k, face);
 }
 
-/* check if ind is on a node face */
-/*
-int ind_on_nodeface(tNode *node, int ind, int *face)
-{
-  int *n = node->n;
-  int In[3];
-  int f, nf;
-
-  In[2] = kOfInd_n(ind, n);
-  In[1] = jOfInd_n_k(ind, n, In[2]);
-  In[0] = iOfInd_n_jk(ind, n, In[1],In[2]);
-
-  for(nf=0, f=0; f<6; f++)
-  {
-    int d = f/2;
-    int pl = (n[d]-1)*(f%2);
-    if(In[d]==pl) { face[f] = 1; nf++; }
-    else          { face[f] = 0; }
-  }
-  if(0)
-  {
-    printf("%d: %d %d %d  ", ind, In[0],In[1],In[2]);
-    for(f=0; f<6; f++) printf("%d ", face[f]);
-    printf(" -> nf=%d\n ", nf);
-  }
-  return nf;
-}
-*/
-
 /* check if ind is on outer boundary */
 int ind_on_outerbound(tNode *node, int ind)
 {
