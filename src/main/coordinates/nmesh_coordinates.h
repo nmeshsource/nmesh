@@ -106,7 +106,8 @@ int XYZ_on_elmface(tElm *elm, int *face, const double X[3]);
 int ijk_on_elmface(tElm *elm, int i, int j, int k, int *face);
 int ind_on_elmface(tElm *elm, int ind, int *face);
 #define ind_on_nodeface ind_on_elmface
-int ind_on_outerbound(tNode *node, int ind);
+int ijk_on_outerbound(tElm *elm, int i, int j, int k);
+int ind_on_outerbound(tElm *elm, int ind);
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
 int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3]);
 int set_xyz_dXYZdxyz(tPat *pat, tNode *node, int ind,
