@@ -34,6 +34,7 @@ enum
 typedef struct {
   /* frequently used par values */
   double outerBC_flux_fac[3]; /* values from par dg_outerBC_flux_fac */
+  double penalty_scale;       /* Getd(Par("dg_penalty_scale")) */
   int fv_rec_mode;            /* reconstruction mode based on par fv_rec */
   int fv_rec_mode_WENOm;      /* 1 if WENOm3, WENOm5, or WENOmZ*/
   double fv_rec_WENOm_s1;     /* value of par fv_rec_WENOm_s1 */

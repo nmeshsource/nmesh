@@ -381,6 +381,9 @@ int dg_set_DGglobals(tMesh *mesh)
              &(DGglobals->outerBC_flux_fac[2])) != 3 )
     errorexit("par dg_outerBC_flux_fac must contain 3 numbers");
 
+  /* scale factor for penalty term in LLF */
+  DGglobals->penalty_scale = Getd(Par("dg_penalty_scale"));
+
   /* set some more par values */
   DGglobals->fv_divf_extrap_s1 = Getd(Par("fv_divf_extrap_s1"));
   DGglobals->fv_divf_extrap_s2 = Getd(Par("fv_divf_extrap_s2"));
@@ -420,6 +423,7 @@ int dg_print_DGglobals(tMesh *mesh)
   printf(" DGglobals->outerBC_flux_fac = {");
   for(d=0; d<3; d++) printf(" %.16g", DGglobals->outerBC_flux_fac[d]);
   printf(" }\n");
+  printf(" DGglobals->penalty_scale = %.16g\n", DGglobals->penalty_scale);
   printf(" DGglobals->fv_rec_mode = %d\n", DGglobals->fv_rec_mode);
   printf(" DGglobals->fv_rec_mode_WENOm = %d\n",
          DGglobals->fv_rec_mode_WENOm);
