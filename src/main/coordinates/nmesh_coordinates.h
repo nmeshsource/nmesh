@@ -103,7 +103,9 @@ tElm *set_elm0_XYZ_of_xyz_mesh(tMesh *mesh, tElm0 elm0[1],
 int elmXYZ_of_xyz(tElm *elm, int ind, double X[3], const double x[3]);
 int XYZ_on_face(tPat *pat, int *face, const double X[3]);
 int XYZ_on_elmface(tElm *elm, int *face, const double X[3]);
-int ind_on_nodeface(tNode *node, int ind, int *face);
+int ijk_on_elmface(tElm *elm, int i, int j, int k, int *face);
+int ind_on_elmface(tElm *elm, int ind, int *face);
+#define ind_on_nodeface ind_on_elmface
 int ind_on_outerbound(tNode *node, int ind);
 int set_xyz(tPat *pat, tNode *node, int ind, const double X[3], double x[3]);
 int set_XYZ(tPat *pat, tNode *node, int ind, double X[3], const double x[3]);

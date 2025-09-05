@@ -1065,7 +1065,41 @@ int XYZ_on_elmface(tElm *elm, int *face, const double X[3])
   return XYZ_on_elmface_tol(elm, face, X, 1e-10);
 }
 
+/* check if i,j,k is on any elm face */
+int ijk_on_elmface(tElm *elm, int i, int j, int k, int *face)
+{
+  int *n = elm->n;
+  int In[] = { i,j,k };
+  int f, nf;
+
+  for(nf=0, f=0; f<6; f++)
+  {
+    int d = f/2;
+    int pl = (n[d]-1)*(f%2);
+    if(In[d]==pl) { face[f] = 1; nf++; }
+    else          { face[f] = 0; }
+  }
+  if(0)
+  {
+    printf("%d %d %d  ", In[0],In[1],In[2]);
+    for(f=0; f<6; f++) printf("%d ", face[f]);
+    printf(" -> nf=%d\n ", nf);
+  }
+  return nf;
+}
+
+/* check if ind is on any elm face */
+int ind_on_elmface(tElm *elm, int ind, int *face)
+{
+  int *n = elm->n;
+  int k  = kOfInd_n(ind, n);
+  int j  = jOfInd_n_k(ind, n, k);
+  int i  = iOfInd_n_jk(ind, n, j,k);
+  return ijk_on_elmface(elm, i,j,k, face);
+}
+
 /* check if ind is on a node face */
+/*
 int ind_on_nodeface(tNode *node, int ind, int *face)
 {
   int *n = node->n;
@@ -1091,13 +1125,14 @@ int ind_on_nodeface(tNode *node, int ind, int *face)
   }
   return nf;
 }
+*/
 
 /* check if ind is on outer boundary */
 int ind_on_outerbound(tNode *node, int ind)
 {
   int face[6];
 
-  if(ind_on_nodeface(node, ind, face))
+  if(ind_on_elmface(node, ind, face))
   {
     int f;
     for(f=0; f<6; f++)
