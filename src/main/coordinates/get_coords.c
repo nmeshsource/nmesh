@@ -1098,24 +1098,32 @@ int ind_on_elmface(tElm *elm, int ind, int *face)
   return ijk_on_elmface(elm, i,j,k, face);
 }
 
-/* check if ind is on outer boundary */
-int ind_on_outerbound(tNode *node, int ind)
+/* check if i,j,k is on outer boundary */
+int ijk_on_outerbound(tElm *elm, int i, int j, int k)
 {
   int face[6];
 
-  if(ind_on_elmface(node, ind, face))
+  if(ijk_on_elmface(elm, i,j,k, face))
   {
     int f;
     for(f=0; f<6; f++)
       if(face[f])
       {
-        //tBface *bfaces = node->pat->bfaces[f];
-        //if(node->patface[f] && bfaces && bfaces->boundary==OUTERBOUND)
-        if(Elm_on_OUTERBOUND(node,f))
+        if(Elm_on_OUTERBOUND(elm,f))
           return 1;
       }
   }
   return 0;
+}
+
+/* check if ind is on outer boundary */
+int ind_on_outerbound(tElm *elm, int ind)
+{
+  int *n = elm->n;
+  int k  = kOfInd_n(ind, n);
+  int j  = jOfInd_n_k(ind, n, k);
+  int i  = iOfInd_n_jk(ind, n, j,k);
+  return ijk_on_outerbound(elm, i,j,k);
 }
 
 
