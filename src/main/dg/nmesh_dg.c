@@ -26,8 +26,7 @@ int nmesh_dg(tMesh *mesh)
   AddPar("dg_outerBC_flux_fac", "1 1 1", "factors in all 3 directions that "
          "can be used to switch off all surface flux terms (e.g. use "
          "'dg_outerBC_flux_fac = 1 0 0' for 1d meshes)");
-  AddPar("dg_penalty_scale", "1", "scale penalty term in "
-         "numflux1d_LLF_penalty_scale");
+  AddPar("dg_penalty_scale", "1", "scale penalty term in numflux1d_LLF");
   /* Finite Volume (fv) pars */
   AddPar("fv_rec", "WENOm3_2", "how we reconstruct with fv [1,WENOm3_2,"
          "WENOm5_2,WENOmT_2,WENOmZ_2,WENOm3_1,WENOm5_1,WENOmZ_1,"
