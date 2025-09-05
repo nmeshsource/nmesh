@@ -6,11 +6,8 @@
 #include "dg.h"
 
 
-/* global vars for dg */
-extern tDGglobals DGglobals[1];
-
-
 /* several numerical fluxes in 1d */
+
 
 
 /* flux at interface of 1d scalar Godunov method for Burgers eqn */
@@ -103,8 +100,6 @@ void numflux1d_LLF(tDGinfo *d)
   apl = fabs(apl);
   ami = fabs(ami);
   amax = max2(ami,apl);
-  /* extra factor to make penalty term in LLF bigger */
-  amax *= DGglobals->penalty_scale;
 
   /* build fluxes */
   for(i=0; i<nf; i++) 
