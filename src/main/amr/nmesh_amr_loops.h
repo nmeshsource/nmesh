@@ -133,6 +133,9 @@
   ( Elm_patface(elm, face) && \
     (elm)->pat->bfaces[face] && \
     ((elm)->pat->bfaces[face]->boundary==INNERBOUND) )
+/* NOTE: Elm_on_*BOUND have a flaw!!! They check bfaces[face]->boundary
+         only on the 1st bface on a patface. What if there is more than one
+         bface???? */
 
 
 /* get parts of tNode struct */
