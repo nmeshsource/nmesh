@@ -73,9 +73,5 @@ int nmesh_dg(tMesh *mesh)
               "n^{kb}_i = i-component of normal in dir Xb^{k}");
   }
 
-  /* Old parameters that are now banned */
-  BanPar("dg_penalty_scale", "use GH_LLF_eigenval_fac or GRHD_eigenvals_fac "
-         "instead");
-
   return 0;
 }
