@@ -357,8 +357,9 @@ int setup_box_mesh(tMesh *mesh, double boxes_rc[3])
   if(npats<=0 || BoxMesh_npatches>0)
     npats = BoxMesh_npatches;
 
-  /* do nothing if npats=0 */
-  if(npats<=0) return 0;
+  /* exit if npats=0 */
+  if(npats<=0)
+    errorexit("npats<=0. Set par amr_BoxMesh_npatches to 1 or more!");
 
   sscanf(mesh_xc, "%lg %lg %lg", &(xc[0]), &(xc[1]), &(xc[2]));
   //pr3v("xc", xc);printf("\n");
