@@ -476,6 +476,8 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3],
   if(npats>0 && CubedSphere_ndomains>0)
     errorexit("remove the number of patches from amr_mesh_type if "
               "amr_CubedSphere_ndomains>0");
+  if(npats<=0 && CubedSphere_ndomains<=0)
+    errorexit("Set par amr_CubedSphere_ndomains to e.g. 6.");
 
   /* set AB_div_mode from par amr_CubedSphere_domain_divide */
   if(Getv(CubedSphere_domain_divide,"AB"))
