@@ -594,6 +594,9 @@ int setup_CubedSphere_mesh(tMesh *mesh, double BoxMesh_rc[3],
                                          ssfac*dc, obfac*dc,
                                          r2fac*dc, stretch);
     break;
+  default:
+    errorexiti("amr_CubedSphere_ndomains = %d   <--not implemented",
+               CubedSphere_ndomains);
   }
 
   /*
