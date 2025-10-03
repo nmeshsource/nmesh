@@ -505,6 +505,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
   {
     double af = Getd(Par("evolve_filter_alp"));
     double sf = Getd(Par("evolve_filter_s"));
+    int dnf   = 0;
 
     if(PR) { PRF;printf(": filtering all evolution vars in evosys->u\n"); }
 
@@ -512,7 +513,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
     forList(u, i)
     {
       tVarList *vl = ListEntry(u,i);
-      expfilter_vl(vl, af, sf);
+      expfilter_vl(vl, af, sf, dnf);
     }
   }
 
@@ -520,6 +521,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
   {
     double af = Getd(Par("evolve_filter_alp"));
     double sf = Getd(Par("evolve_filter_s"));
+    int dnf   = 0;
     char *list = strdup(Gets(evolve_filter_varlist));
     char *name, *saveptr;
     tVarList *vl = vlalloc(mesh);
@@ -534,7 +536,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
       if(vi>=0) vlpush(vl, vi);
     }
 
-    if(vl->n) expfilter_vl(vl, af, sf);
+    if(vl->n) expfilter_vl(vl, af, sf, dnf);
 
     vlfree(vl);
     free(list);
