@@ -14,13 +14,15 @@ extern tbasis basis[1];
 /***********************************************************************/
 
 /* Apply exponential filter as in https://arxiv.org/abs/1804.02003
-   In 1D: c_i -> c_i * e^{-alp (i/(n0-1))^s} */
-void expfilter_coeff_array(tArray *ca, double alp[3], double s[3])
+   In 1D: c_i -> c_i * e^{-alp (i/(n0-1))^s}
+   Except we also can use dn[3] to reduce n0, so that if dn != 0:
+   In 1D: c_i -> c_i * e^{-alp (i/(n0-1-dn0))^s} */
+void expfilter_coeff_array(tArray *ca, double alp[3], double s[3], int dn[3])
 {
   int *n = ca->n;
-  double N0 = n[0] - 1;
-  double N1 = n[1] - 1;
-  double N2 = n[2] - 1;
+  double N0 = n[0] - 1 - dn[0];
+  double N1 = n[1] - 1 - dn[1];
+  double N2 = n[2] - 1 - dn[2];
   double *c = Arrd_(ca);
   double alp0 = alp[0];
   double alp1 = alp[1];
@@ -32,9 +34,9 @@ void expfilter_coeff_array(tArray *ca, double alp[3], double s[3])
   int i,j,k, ijk;
 
   /* make sure we don't divide by zero */
-  if(N0==0.) N0 = 1.;
-  if(N1==0.) N1 = 1.;
-  if(N2==0.) N2 = 1.;
+  if(N0<=0.) N0 = 1.;
+  if(N1<=0.) N1 = 1.;
+  if(N2<=0.) N2 = 1.;
 
   /* loop over array and let c -> c * f0*f1*f2 */
   for(k = 0; k < n[2]; k++)
@@ -54,17 +56,18 @@ void expfilter_coeff_array(tArray *ca, double alp[3], double s[3])
 }
 
 /* get coeffs ca of array ua, filter and then reset ua */
-void expfilter_array(tNode *node, tArray *ua, double alp[3], double s[3])
+void expfilter_array(tNode *node, tArray *ua, double alp[3], double s[3],
+                     int dn[3])
 {
   DECL_STACK_ARRAY(ca, ua->n);
 
   basis_array_analysis3(node, ua, ca);
-  expfilter_coeff_array(ca, alp, s);
+  expfilter_coeff_array(ca, alp, s, dn);
   basis_array_synthesis3(node, ua, ca);
 }
 
 /* filter var with index ui */
-int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
+int expfilter_var(tNode *node, int ui, double alp[3], double s[3], int dn[3])
 {
   tArray *ua;
   tDat *dat = node->dat;
@@ -80,7 +83,7 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
     //PRF;printf(": Jpow=%d\n", Jpow);
     var_to_var_times_JtoPower(node, ui, Jpow);
     ua = dat->v[ui];
-    expfilter_array(node, ua, alp, s);
+    expfilter_array(node, ua, alp, s, dn);
     var_to_var_times_JtoPower(node, ui, -Jpow);
     return 1;
   }
@@ -89,7 +92,7 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3])
 }
 
 /* filter varlist on entire mesh */
-void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3])
+void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3], int dn[3])
 {
   tMesh *mesh;
 
@@ -104,17 +107,18 @@ void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3])
     forvl(vl, vli)
     {
       //PRF;printf("vli=%d\n", Vind(vl,vli));
-      expfilter_var(node, Vind(vl,vli), alp, s);
+      expfilter_var(node, Vind(vl,vli), alp, s, dn);
     }
   }
 }
 
 /* filter varlist on entire mesh with same filter pars in all 3 directions */
-void expfilter_vl(tVarList *vl, double af, double sf)
+void expfilter_vl(tVarList *vl, double af, double sf, int dnf)
 {
   double alp[] = { af, af, af }; /* use same filter pars in all 3 directions */
   double s[]   = { sf, sf, sf };
-  expfilter_mesh_vl(vl, alp, s);
+  int dn[]     = {dnf,dnf,dnf };
+  expfilter_mesh_vl(vl, alp, s, dn);
 }
 
 /***********************************************************************/
@@ -141,9 +145,9 @@ int has_expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
   int i,j,k, ijk;
 
   /* make sure we don't divide by zero */
-  if(N0==0.) N0 = 1.;
-  if(N1==0.) N1 = 1.;
-  if(N2==0.) N2 = 1.;
+  if(N0<=0.) N0 = 1.;
+  if(N1<=0.) N1 = 1.;
+  if(N2<=0.) N2 = 1.;
 
   /* L1 norm of coeffs */
   norm = Lp_norm_array(ca, 1.);
@@ -372,9 +376,9 @@ void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
   int d, m;
 
   /* make sure we don't divide by zero */
-  if(N[0]==0.) N[0] = 1.;
-  if(N[1]==0.) N[1] = 1.;
-  if(N[2]==0.) N[2] = 1.;
+  if(N[0]<=0.) N[0] = 1.;
+  if(N[1]<=0.) N[1] = 1.;
+  if(N[2]<=0.) N[2] = 1.;
 
   for(d=0; d<3; d++)
   {
