@@ -373,9 +373,10 @@ double linear_fit_result(double beta[4], int i, int j, int k)
 
 /* find num of unfiltered coeffs for exp. filter, return in n_unfilt[3] */
 void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
-                                   double f_unfilt, int n_unfilt[3])
+                                   int dn[3], double f_unfilt,
+                                   int n_unfilt[3])
 {
-  double N[] = { n[0]-1, n[1]-1, n[2]-1 };
+  double N[] = { n[0]-1-dn[0], n[1]-1-dn[1], n[2]-1-dn[2] };
   int d, m;
 
   /* make sure we don't divide by zero */
@@ -439,8 +440,10 @@ double fit_unfiltered_coefflogs(tArray *ca, double alp[3], double s[3],
                                 double f_unfilt, int n_unfilt[3],
                                 double beta[4])
 {
+  int dn[] = {0,0,0}; // zero for now
+
   /* find n of unfilt. coeffs */
-  unfiltered_range_of_expfilter(ca->n, alp,s, f_unfilt, n_unfilt);
+  unfiltered_range_of_expfilter(ca->n, alp,s,dn, f_unfilt, n_unfilt);
 
   return fit_n_coefflogs(ca, n_unfilt, beta);
 }
