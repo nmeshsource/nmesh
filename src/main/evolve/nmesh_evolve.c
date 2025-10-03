@@ -22,8 +22,9 @@ int nmesh_evolve(tMesh *mesh)
   AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
   AddPar("evolve_filter", "no", "whether we filter all evo. vars [no,yes]");
   AddPar("evolve_filter_varlist", "", "1st comps of other vars we filter");
-  AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1))^s}");
-  AddPar("evolve_filter_s",   "32",   "s in e^{-alp (i/(n0-1))^s}");
+  AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1-dn))^s}");
+  AddPar("evolve_filter_s",   "32",   "s in e^{-alp (i/(n0-1-dn))^s}");
+  AddPar("evolve_filter_dn",  "0",   "dn in e^{-alp (i/(n0-1-dn))^s}");
   AddPar("evolve_compute_change", "no", "compute change over 1 evo step [no,yes]");
 
   /* just a test, not needed for anything else */
