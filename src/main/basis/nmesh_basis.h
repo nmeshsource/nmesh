@@ -188,7 +188,8 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);
 /* filter.c */
 int expfilter_var(tNode *node, int ui, double alp[3], double s[3], int dn[3]);
 void expfilter_vl(tVarList *vl, double af, double sf, int dnf);
-int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3]);
+int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3],
+                       int dn[3]);
 double linear_fit_result(double beta[4], int i, int j, int k);
 void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
                                    double f_unfilt, int n_unfilt[3]);

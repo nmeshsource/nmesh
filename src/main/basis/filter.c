@@ -126,12 +126,13 @@ void expfilter_vl(tVarList *vl, double af, double sf, int dnf)
 /***********************************************************************/
 
 /* is array ca falling off? */
-int has_expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
+int has_expfalloff_coeff_array(tArray *ca, double alp[3], double s[3],
+                               int dn[3])
 {
   int *n = ca->n;
-  double N0 = n[0] - 1;
-  double N1 = n[1] - 1;
-  double N2 = n[2] - 1;
+  double N0 = n[0] - 1 - dn[0];
+  double N1 = n[1] - 1 - dn[1];
+  double N2 = n[2] - 1 - dn[2];
   double *c = Arrd_(ca);
   double absc;
   double alp0 = alp[0];
@@ -185,22 +186,24 @@ int has_expfalloff_coeff_array(tArray *ca, double alp[3], double s[3])
 }
 
 /* get coeffs ca of array ua, and check for falloff */
-int has_expfalloff_array(tNode *node, tArray *ua, double alp[3], double s[3])
+int has_expfalloff_array(tNode *node, tArray *ua, double alp[3], double s[3],
+                         int dn[3])
 {
   DECL_STACK_ARRAY(ca, ua->n);
   basis_array_analysis3(node, ua, ca);
-  return has_expfalloff_coeff_array(ca, alp, s);
+  return has_expfalloff_coeff_array(ca, alp, s, dn);
 }
 
 /* check var for exp falloff */
-int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3])
+int has_expfalloff_var(tNode *node, int ui, double alp[3], double s[3],
+                       int dn[3])
 {
   tArray *ua;
   tDat *dat = node->dat;
   if(dat)
   {
     ua = dat->v[ui];
-    return has_expfalloff_array(node, ua, alp, s);
+    return has_expfalloff_array(node, ua, alp, s, dn);
   }
   return 1; /* return 1 if we do not have var ui on this proc */
 }
