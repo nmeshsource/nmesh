@@ -914,6 +914,7 @@ int test_filter(tMesh *mesh, int Jpow)
   int ix = Ind("x");
   //int iooJ = Ind("det_dXbdx");
   double alp[3], s[3];
+  int dn[3];
   int dir;
 
   prdivider(0);
@@ -976,11 +977,12 @@ int test_filter(tMesh *mesh, int Jpow)
   {
     alp[dir] = 36.;
     s[dir] = 32.;
+    dn[dir] = 0;
   }
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    expfilter_var(node, ui, alp, s);
+    expfilter_var(node, ui, alp, s, dn);
   }
 
   PRF;printf(": coeffs after expfilter_var with Jpow=%d\n", Jpow);
