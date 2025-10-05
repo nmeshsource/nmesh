@@ -113,7 +113,7 @@ void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3], int dn[3])
 }
 
 /* filter varlist on entire mesh with same filter pars in all 3 directions */
-void expfilter_vl(tVarList *vl, double af, double sf, int dnf)
+void expfilter_vl1(tVarList *vl, double af, double sf, int dnf)
 {
   double alp[] = { af, af, af }; /* use same filter pars in all 3 directions */
   double s[]   = { sf, sf, sf };

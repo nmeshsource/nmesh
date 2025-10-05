@@ -513,7 +513,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
     forList(u, i)
     {
       tVarList *vl = ListEntry(u,i);
-      expfilter_vl(vl, af, sf, dnf);
+      expfilter_vl1(vl, af, sf, dnf);
     }
   }
 
@@ -536,7 +536,7 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
       if(vi>=0) vlpush(vl, vi);
     }
 
-    if(vl->n) expfilter_vl(vl, af, sf, dnf);
+    if(vl->n) expfilter_vl1(vl, af, sf, dnf);
 
     vlfree(vl);
     free(list);
