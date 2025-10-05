@@ -92,8 +92,8 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3], int dn[3])
 }
 
 /* filter varlist in one elm */
-int expfilter_elm_vl(tElm *elm, tVarList *vl,
-                     double alp[3], double s[3], int dn[3])
+int expfilter_vl(tElm *elm, tVarList *vl,
+                 double alp[3], double s[3], int dn[3])
 {
   int ret, vli;
 
