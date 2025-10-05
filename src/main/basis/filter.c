@@ -91,6 +91,22 @@ int expfilter_var(tNode *node, int ui, double alp[3], double s[3], int dn[3])
     return 0;
 }
 
+/* filter varlist in one elm */
+int expfilter_elm_vl(tElm *elm, tVarList *vl,
+                     double alp[3], double s[3], int dn[3])
+{
+  int ret, vli;
+
+  if(!vl) return 0;
+
+  forvl(vl, vli)
+  {
+    //PRF;printf("vli=%d\n", Vind(vl,vli));
+    ret = expfilter_var(elm, Vind(vl,vli), alp, s, dn);
+  }
+  return ret;
+}
+
 /* filter varlist on entire mesh */
 void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3], int dn[3])
 {
