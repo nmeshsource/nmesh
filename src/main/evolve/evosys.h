@@ -22,7 +22,7 @@ enum
 
   PRELIM,   /* set vars that are needed early, e.g. gmunu */
   LIMDATA,  /* produce data such as min,max on each node */
-            /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, vl)
+            /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, evv)
                      must return number of data vals we need */
   LIMITER,  /* apply limiter on node using data from limdata */
 
