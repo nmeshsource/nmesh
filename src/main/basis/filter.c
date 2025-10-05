@@ -107,6 +107,15 @@ int expfilter_vl(tElm *elm, tVarList *vl,
   return ret;
 }
 
+/* filter varlist in one elm with same filter pars in all 3 directions */
+int expfilter_vl1(tElm *elm, tVarList *vl, double af, double sf, int dnf)
+{
+  double alp[] = { af, af, af }; /* use same filter pars in all 3 directions */
+  double s[]   = { sf, sf, sf };
+  int dn[]     = {dnf,dnf,dnf };
+  return expfilter_vl(elm, vl, alp, s, dn);
+}
+
 /* filter varlist on entire mesh */
 void expfilter_mesh_vl(tVarList *vl, double alp[3], double s[3], int dn[3])
 {
