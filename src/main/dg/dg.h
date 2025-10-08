@@ -53,3 +53,6 @@ int fv_tests(tMesh *mesh);
 void rec1d_LR_uface_to_uin_1_Carray(int n, double *u, int right, int forward,
                                     double u_scale, double s1, double s2,
                                     int opt);
+
+/* penalty.c */
+double dg_scale_penalty_bamps(tDGinfo *dgi);

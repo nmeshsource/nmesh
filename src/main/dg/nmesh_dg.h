@@ -212,3 +212,9 @@ void dissipation_add_taperedKO_order_min(tNode *node,
                                          int min_order);
 void dissipation_add_WTmodKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
                                    double dissfac, int order);
+
+/* penalty.c */
+int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
+                               tVarList *vlr, tVarList *vlu, tVarList *vls,
+                               void (*u_fnum)(tDGinfo *d),
+                               int use_fv);
