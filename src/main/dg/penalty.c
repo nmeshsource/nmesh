@@ -6,11 +6,9 @@
 #include "dg.h"
 
 
-/* get glabal amr and coordinate vars */
+/* get global amr and DG vars */
 extern tAMR amr[1];
-
-/* global vars for dg */
-tDGglobals DGglobals[1];
+extern tDGglobals DGglobals[1];
 
 
 /***************************************************************************/
