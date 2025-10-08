@@ -96,6 +96,7 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
       double *sqrtgdiag = Vard(node, isqrtgdiagx+dir);
       double *Wq = Wquad(node, dir);
       double Wqmod = fabs(distXb[face]);
+      double oow = 1./(Wq[p]*mod0 + Wqmod*mod1);
       int i,j,k;
 
       /* do nothing if dir is not active */
@@ -108,8 +109,6 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
       {
         int ijk = Ind_n(i,j,k, n);
         int JK = Ind_n_norm(i,j,k, n, dir);
-        int i0 = i0_norm(i,j,k, dir);
-        double oow = 1./(Wq[i0]*mod0 + Wqmod*mod1);
         double sdg_oJ_ow = sqrtd2g_o_d3g[JK] * fabs(ooJ[ijk]) * oow;
         double gd_ow = sqrtgdiag[ijk] * oow;
         double Ffac;
