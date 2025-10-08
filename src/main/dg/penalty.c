@@ -66,7 +66,7 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
     {
       int dir = face/2;
       int p = (face%2)*(n[dir] - 1);
-      double twooLX = 2./(elm->bbox[dir+1] - elm->bbox[dir]);
+      double twooLX = 2./(elm->bbox[2*dir+1] - elm->bbox[2*dir]);
       double *Wq = Wquad(elm, dir);
       double Wqmod = fabs(distXb[face]);
       double oow = 1./(Wq[p]*mod0 + Wqmod*mod1);
@@ -84,7 +84,7 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
       forplaneN(dir, i,j,k, n, p)
       {
         int ijk = Ind_n(i,j,k, n);
-        double gd_ow = twooLX * oow;
+        double pen = twooLX * oow; /* same as bamps' bndy->penalty */
         double Ffac;
         int l;
 
@@ -102,7 +102,7 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
         /* get Ffac, this can be set in u_f_lam or numflux */
         Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
 
-        /* get F from dgi and add boundary flux terms to vlr */
+        /* get F from dgi and add penalty terms to vlr */
         forvl(vlr, l)
         {
           int ir = Vind(vlr,l);
@@ -110,7 +110,14 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
           double F;
 
           F = (dgi->fnum[l]) * Ffac;
-          r[ijk] += F * sign * gd_ow;
+          r[ijk] += F * sign * pen;
+
+          //if(i==2 && j==0 && k==0 &&  elm->eploc->eid==1  &&  l==10)
+          //{
+          //  printf("Ffac=%g sign=%g oow=%g pen=%g: F=%g F*sign*pen=%g: "
+          //         "r[ijk]=%g\n", Ffac, sign, oow, pen, F, F*sign*pen,
+          //         r[ijk]);
+          //}
         }
       }
     } /* end loop over faces */
@@ -139,5 +146,6 @@ double dg_scale_penalty_bamps(tDGinfo *dgi)
     if(dgi->face <= 1) scale *= 1./(CI->s[1] - CI->s[0]);
   }
 
+  //printf("scale=%g\n", scale);
   return scale;
 }
