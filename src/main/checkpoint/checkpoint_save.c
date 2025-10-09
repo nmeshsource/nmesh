@@ -200,8 +200,8 @@ int checkpoint_write_elms(tMesh *mesh, FILE *fp)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
-  int n_def[3]      = {0}; /* defaults for n */
-  int pt_typ_def[3] = {0}; /* and pt_typ     */
+  int n_def[]      = {0,0,0};             /* defaults for n */
+  int pt_typ_def[] = {P_LGL,P_LGL,P_LGL}; /* and pt_typ     */
   int rk;
   for(rk=0; rk<size; rk++)
     if(rank==rk || rank==0)
