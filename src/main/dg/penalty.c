@@ -78,9 +78,6 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
       /* set DG face info */
       dgi->face = face;
 
-      /* scale twooLX as in bamps */
-      twooLX *= dg_scale_penalty_bamps(dgi);
-
       forplaneN(dir, i,j,k, n, p)
       {
         int ijk = Ind_n(i,j,k, n);
@@ -98,6 +95,12 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
 
         /* set vars on both sides, set correction to rhs in fnum */
         u_fnum(dgi);
+        /* Note: in u_fnum we need to use normal vectors v_i that are just
+                 v_i = dX/dx^i
+           So v_i is not normalized with the flat metric (see GH_penalty_pt).
+           Then we must not scale twooLX with dg_scale_penalty_bamps(dgi),
+           since our radial normal vectors already contain a factor of
+           dlam/dr = 1/(CI->s[1] - CI->s[0]) */
 
         /* get Ffac, this can be set in u_f_lam or numflux */
         Ffac = dgi->Ffac; /* usually 1, set to 0 to turn off surface fluxes */
@@ -109,14 +112,19 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
           double *r = Vard_(elm, ir);
           double F;
 
+          //if(i==2 && j==0 && k==0 &&  elm->eploc->eid==8  &&  l==10)
+          //{
+          //  printf("0:Ffac=%g sign=%g oow=%g pen=%g: r[ijk]=%.16g\n",
+          //         Ffac, sign, oow, pen, r[ijk]);
+          //}
+
           F = (dgi->fnum[l]) * Ffac;
           r[ijk] += F * sign * pen;
 
-          //if(i==2 && j==0 && k==0 &&  elm->eploc->eid==1  &&  l==10)
+          //if(i==2 && j==0 && k==0 &&  elm->eploc->eid==8  &&  l==10)
           //{
-          //  printf("Ffac=%g sign=%g oow=%g pen=%g: F=%g F*sign*pen=%g: "
-          //         "r[ijk]=%g\n", Ffac, sign, oow, pen, F, F*sign*pen,
-          //         r[ijk]);
+          //  printf("1:F=%g F*sign*pen=%g: r[ijk]=%.16g\n",
+          //         F, F*sign*pen, r[ijk]);
           //}
         }
       }
