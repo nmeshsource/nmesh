@@ -27,7 +27,7 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
   tMesh *mesh = vlu->mesh;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
   int add_surface_fluxes = 1; /* by default we want to set fluxes here */
-  int useLGL_Wq = 0;
+  int useLGL_Wq = 1; //bamps always uses LGL quad. weights
   double distXb[6] = {0};
 
   /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
