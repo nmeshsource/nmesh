@@ -85,15 +85,8 @@ int amr_set_use_fv_flag(tMesh *mesh)
 /* switch nodes with uniform spacing into fv mode */
 int amr_use_fv_if_P_UNIFORM(tMesh *mesh)
 {
-  int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
-  int ptLGL[] = { P_LGL, P_LGL, P_LGL };
-
-  /* switch on fv on all uniform nodes */
-  refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
-
-  /* switch off fv on all LGL nodes */
-  refine_set_use_fv_if_pt_typ(mesh, ptLGL, 0);
-
+  /* switch on fv on in all uniform nodes and off in all other nodes */
+  refine_set_use_fv_true_iff_P_UNIFORM(mesh);
   return 0;
 }
 
