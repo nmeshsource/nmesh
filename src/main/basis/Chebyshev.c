@@ -136,8 +136,16 @@ void Chebyshev_coeffs_fromExtrema(int np, double u[], double c[])
   int k, j;
   double fac, sum, PIoN;
 
-  PIoN=PI/N;
-  fac=2.0/N;
+  if(N>0)
+  {
+    PIoN = PI/N;
+    fac  = 2.0/N;
+  }
+  else
+  {
+    PIoN = PI;
+    fac  = 4.0;
+  }
 
   for(j=0;j<=N;j++)
   {
@@ -175,9 +183,12 @@ void Chebyshev_eval_onExtrema(int np, double c[], double u[])
 {
   int N = np-1;
   int k, j;
-  double sum;
-  double PIoN=PI/N;
-  //double fac=2.0/N;
+  double sum, PIoN;
+
+  if(N>0)
+    PIoN = PI/N;
+  else
+    PIoN = PI;
 
   for(j=0;j<=N;j++)
   {
@@ -283,7 +294,6 @@ void DiffMatrix_DT_fromFptrs(int np, double *DT,
 
     /* set DT */
     for(i=0; i<np; i++) DT[np*i + j] = c[i];
-    //FIXME: is this the transpose ????
 
     u[j]=0.0;
   }
@@ -328,7 +338,6 @@ void AnaOrSynMatrix_MT(int np, double *MT,
 
     /* set MT */
     for(i=0; i<np; i++) MT[np*i + j] = c[i];
-    //FIXME: is this the transpose ????
 
     u[j]=0.0;
   }
