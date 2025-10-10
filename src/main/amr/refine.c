@@ -292,9 +292,9 @@ tElm *refine_sib_with_max_np_pt_typ(tElm *sib0)
   unsigned char l_sib0 = sib0->eploc->l;
   struct list_head *pos_ijk;
   int ijk;
-  int np_LGL  = 0; /* default */
-  int np_UNI  = 0; /* default */
-  int use_LGL = 1; /* default: use P_LGL */
+  int np_LGL     = 0; /* default */
+  int np_UNI     = 0; /* default */
+  int use_NonUni = 1; /* default: use non-uniform grid (e.g. LGL) */
   tElm *sib_max = NULL;
 
   /* loop over 8 siblings */
@@ -314,13 +314,13 @@ tElm *refine_sib_with_max_np_pt_typ(tElm *sib0)
       errorexiti("this is not sib%d", ijk);
 
     /* look at dir0 to decide if P_LGL or not */
-    if((use_LGL==1) && (sib->pt_typ[0]==P_LGL))
+    if((use_NonUni==1) && (sib->pt_typ[0]!=P_UNIFORM))
     {
       if(sib->np > np_LGL) { np_LGL = sib->np;  sib_max = sib; }
     }
     else
     {
-      use_LGL = 0;
+      use_NonUni = 0;
       if(sib->np > np_UNI) { np_UNI = sib->np;  sib_max = sib; }
     }
 
