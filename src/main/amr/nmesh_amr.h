@@ -638,6 +638,7 @@ void refine_set_rflag_forall_nodes(tMesh *mesh, int rflag);
 void refine_set_use_fv_if_rflag(tMesh *mesh, int use_fv);
 void refine_set_use_fv_if_pt_typ(tMesh *mesh, int pt_typ[3], int use_fv);
 void refine_set_use_fv_if_Ptyp(tMesh *mesh, int Ptyp, int use_fv);
+void refine_set_use_fv_true_iff_P_UNIFORM(tMesh *mesh);
 int refine_synchronize_ref_method(tRef *ref);
 void refine_set_datinfo_unlimited_mesh(tMesh *mesh, int unlimited);
 void hrefine_nodes_if_nb_finer_by_dl(tMesh *mesh, int dl, tRef *ref);

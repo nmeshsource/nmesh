@@ -694,6 +694,24 @@ void refine_set_use_fv_if_Ptyp(tMesh *mesh, int Ptyp, int use_fv)
   refine_set_use_fv_if_pt_typ(mesh, pt_typ, use_fv);
 }
 
+/* set use_fv flag to usefv in all nodes that have pt_typ
+   and set use_fv flag to !usefv in all other nodes */
+void refine_set_use_fv_true_iff_P_UNIFORM(tMesh *mesh)
+{
+  /* go over mesh */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    int d, usefv;
+
+    usefv=0;
+    for(d=0; d<3; d++)
+      if(node->pt_typ[d] == P_UNIFORM) { usefv=1; break; }
+
+    node->dat->info->use_fv = usefv;
+  }
+}
+
 /* Synchronize ref->method on all procs. This assumes that some procs have
    ref->method=REF_METH_DONOTHING, while others have one particular
    value that is higher. We use MPI_Allreduce to set them all to the max
