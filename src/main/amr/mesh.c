@@ -37,14 +37,22 @@ int choose_patch_points(tMesh *mesh, int p)
   int ret;
   intList *pl = intList_alloc();
 
+  /* push all ints from amr_ChebExtrema_p into pl */
+  str_to_intList(Gets(Par("amr_ChebExtrema_p")), " ", pl);
+
+  /* now check if patch p is mentioned in amr_ChebExtrema_p */
+  if(intList_in(pl, p))
+    ret = P_CHEBEXTR;
+  else
+    ret = P_LGL; /* default is Legendre Gauss-Lobatto */
+
   /* push all ints from amr_uniform_p into pl */
+  intList_clear(pl);
   str_to_intList(Gets(Par("amr_uniform_p")), " ", pl);
 
   /* now check if patch p is mentioned in amr_uniform_p */
   if(intList_in(pl, p))
     ret = P_UNIFORM;
-  else
-    ret = P_LGL; /* default is Legendre Gauss-Lobatto */
 
   intList_free(pl);
   return ret;

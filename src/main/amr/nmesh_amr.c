@@ -65,6 +65,7 @@ int nmesh_amr(tMesh *mesh)
   AddPar("amr_Shell_nr", "1", "divide into nr domains in radial dir.");
   AddPar("amr_innerboundary_faces", "", "list of patch-faces we set to "
          "INNERBOUND");
+  AddPar("amr_ChebExtrema_p", "", "list of pats with points at ChebExtrema");
   AddPar("amr_uniform_p", "", "list of patches with uniform grid spacing");
   AddPar("amr_fv_p", "", "patches where we use finite volume");
   AddPar("amr_fv_if_uniform", "no", "set use_fv in uniform elms [no,yes]");
