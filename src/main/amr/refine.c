@@ -313,7 +313,7 @@ tElm *refine_sib_with_max_np_pt_typ(tElm *sib0)
     if(eloc->loc[l_sib0-1] != '0' + ijk)
       errorexiti("this is not sib%d", ijk);
 
-    /* look at dir0 to decide if P_LGL or not */
+    /* look at dir0 to decide if non-uniform or not */
     if((use_NonUni==1) && (sib->pt_typ[0]!=P_UNIFORM))
     {
       if(sib->np > np_LGL) { np_LGL = sib->np;  sib_max = sib; }
