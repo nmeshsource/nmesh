@@ -27,6 +27,7 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
   tMesh *mesh = vlu->mesh;
   int skip_fv = DGglobals->fv_divf_adds_surface_fluxes;
   int add_surface_fluxes = 1; /* by default we want to set fluxes here */
+  int useLGL_Wq = 0;
   double distXb[6] = {0};
 
   /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
@@ -44,8 +45,9 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
     }
     else
     {
-      /* find distance from faces to nearest midpoint */
+      /* find distance from faces to nearest midpoint, and don't use LGL Wq */
       set_nodemidpoints_to_face_distXb(elm, distXb);
+      useLGL_Wq = 0;
     }
   }
 
@@ -65,11 +67,13 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
     for(face=0; face<6; face++)
     {
       int dir = face/2;
-      int p = (face%2)*(n[dir] - 1);
+      int N = n[dir] - 1;
+      int p = (face%2)*N;
       double twooLX = 2./(elm->bbox[2*dir+1] - elm->bbox[2*dir]);
-      double *Wq = Wquad(elm, dir);
+      double *WQ = Wquad(elm, dir);
+      double Wq = (useLGL_Wq) ? 2./(N*(N+1.)) : WQ[p];
       double Wqmod = fabs(distXb[face]);
-      double oow = 1./(Wq[p]*mod0 + Wqmod*mod1);
+      double oow = 1./(Wq*mod0 + Wqmod*mod1);
       int i,j,k;
 
       /* do nothing if dir is not active */
