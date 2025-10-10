@@ -1148,8 +1148,7 @@ int hadapt_to_desired_l(tMesh *mesh, int lmax,
   refine_set_rflag_forall_nodes(mesh, 0);
 
   /* make sure use_fv flags are set */
-  refine_set_use_fv_if_Ptyp(mesh, P_UNIFORM, 1); //set use_fv=1
-  refine_set_use_fv_if_Ptyp(mesh, P_LGL, 0);     //set use_fv=0
+  refine_set_use_fv_true_iff_P_UNIFORM(mesh);
 
   /* call evo limiters in all newly created elms (opt=2) */
   evolve_limiter_mesh(mesh, mesh->evosys->u, 2);
