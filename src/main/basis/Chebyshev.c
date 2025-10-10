@@ -152,7 +152,7 @@ void Chebyshev_coeffs_fromExtrema(int np, double u[], double c[])
 
 
 /* find function u on the zeros of T_{np}(x) */
-void Chebyshev_eval_onZeros(int np, double u[], double c[])
+void Chebyshev_eval_onZeros(int np, double c[], double u[])
 {
   int k, j;
   double sum;
@@ -171,7 +171,7 @@ void Chebyshev_eval_onZeros(int np, double u[], double c[])
 
 
 /* find function u on the extrema of T_N(X) */
-void Chebyshev_eval_onExtrema(int np, double u[], double c[])
+void Chebyshev_eval_onExtrema(int np, double c[], double u[])
 {
   int N = np-1;
   int k, j;
@@ -243,4 +243,144 @@ double Chebyshev_basisfunc(int n, double X, int np)
   //if(y>1. || y<-1.) printf("Chebyshev_basisfunc: y=%.19g out of range\n", y);
 
   return cos(n*acos(y));
+}
+
+
+/* ************************************************************************ */
+/* various functions to set Chebyshev diff matrices */
+/* ************************************************************************ */
+
+/* init the np*np diff. matrix D */
+void DiffMatrix_DT_fromFptrs(int np, double *DT,
+                             void (*get_coeffs)(int, double *u, double *c),
+                             void (*coeffs_of_deriv)(int, double *c, double *d),
+                             void (*eval_onPoints)(int, double *c, double *u) )
+{
+  int i,j;
+  double *u;
+  double *c;
+  double *d;
+
+  u = (double *) calloc(np, sizeof(double));
+  c = (double *) calloc(np, sizeof(double));
+  d = (double *) calloc(np, sizeof(double));
+
+  if( !(u && c && d) ) errorexit("out of memory for u, c, d");
+
+  /* read matrix from functions */
+  for(j=0; j<np; j++)
+  {
+    u[j]=1.0;
+
+    //Chebyshev_coeffs_fromExtrema(np, u, c);
+    get_coeffs(np, u, c);
+
+    //Chebyshev_deriv(np, c, d);
+    coeffs_of_deriv(np, c, d);
+
+    //Chebyshev_eval_onExtrema(np, d, c);
+    eval_onPoints(np, d, c);
+
+    /* set DT */
+    for(i=0; i<np; i++) DT[np*i + j] = c[i];
+    //FIXME: is this the transpose ????
+
+    u[j]=0.0;
+  }
+
+  free(u);
+  free(c);
+  free(d);
+}
+
+/* get diff matrix if we use Chebyshev Extrema as grid points */
+void ChebyshevExtrema_DT(int np, double *DT)
+{
+  DiffMatrix_DT_fromFptrs(np, DT, Chebyshev_coeffs_fromExtrema,
+                          Chebyshev_deriv, Chebyshev_eval_onExtrema);
+}
+
+
+/* ************************************************************************ */
+/* various functions to set synthesis and analysis matrices */
+/* ************************************************************************ */
+
+/* init a np*np matrix M used to compute coeffs (ana) the func values (syn) */
+void AnaOrSynMatrix_MT(int np, double *MT,
+                       void (*AnaOrSyn)(int, double *, double *))
+{
+  int i,j;
+  double *u;
+  double *c;
+
+  u = (double *) calloc(np, sizeof(double));
+  c = (double *) calloc(np, sizeof(double));
+
+  if( !(u && c) ) errorexit("out of memory for u, c");
+
+
+  /* read matrix from functions */
+  for(j=0; j<np; j++)
+  {
+    u[j]=1.0;
+
+    AnaOrSyn(np, u, c);
+
+    /* set MT */
+    for(i=0; i<np; i++) MT[np*i + j] = c[i];
+    //FIXME: is this the transpose ????
+
+    u[j]=0.0;
+  }
+  free(u);
+  free(c);
+}
+
+/* set ana. and syn. matrices for Chebyshev Extrema as grid points */
+void ChebyshevExtrema_AT_ST(int np, double *AT, double *ST)
+{
+  AnaOrSynMatrix_MT(np, AT, Chebyshev_coeffs_fromExtrema);
+  AnaOrSynMatrix_MT(np, ST, Chebyshev_eval_onExtrema);
+}
+
+
+/* ************************************************************************ */
+/* various functions to set Chebyshev grid points */
+/* ************************************************************************ */
+
+/*
+in SGRID:
+          if( Getv(str, "ChebExtrema") )
+          {
+            if(m==0)          box->v[varb][ijk] = box->bbox[bbi];
+            else if(m==nb-1)  box->v[varb][ijk] = box->bbox[bbi+1];
+            else
+              box->v[varb][ijk]
+                = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])*cos(m*PI/(nb-1))
+                       +(box->bbox[bbi] + box->bbox[bbi+1]));
+          }
+          else if( Getv(str, "ChebZeros") )
+            box->v[varb][ijk]
+              = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])
+                      *cos( ((double) m + 0.5)*PI/nb)
+                     +(box->bbox[bbi] + box->bbox[bbi+1]));
+
+*/
+
+/* gridpoints for Chebyshev Extrema in [-1,1] */
+void ChebyshevExtrema_x(int np, double *x)
+{
+  int m;
+  /* Extrema */
+  x[0]    = -1.;
+  x[np-1] = +1.;
+  for(m=1; m<np-1; m++) x[m] = -cos( m*PI/(np-1) );
+}
+
+/* gridpoints for Chebyshev Zeros in [-1,1] */
+void ChebyshevZeros_x(int np, double *x)
+{
+  int m;
+  /* Zeros */
+  for(m=0; m<np; m++) x[m] = -cos( (((double) m) + 0.5)*PI/np );
 }
