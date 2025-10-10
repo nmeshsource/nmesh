@@ -364,7 +364,6 @@ in SGRID:
               = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])
                       *cos( ((double) m + 0.5)*PI/nb)
                      +(box->bbox[bbi] + box->bbox[bbi+1]));
-
 */
 
 /* gridpoints for Chebyshev Extrema in [-1,1] */

@@ -163,8 +163,17 @@ int init_gridpoints(tMesh *mesh)
         Lagrange_DT(ni, Xb, WL, DmT);
       }
     }
-    /* set Legendre polys as basis since AT and ST are for Legendre basis */
-    gridpoints->basis[typ] = basis_normLegendreP;
+
+    /* set basis function for each grid type */
+    switch(typ)
+    {
+    //case P_CHEBEXTR:
+    //  break;
+    case P_LGL:
+    case P_UNIFORM:
+    default: /* set Legendre poly. as basis if AT,ST are for Legendre basis */
+      gridpoints->basis[typ] = basis_normLegendreP;
+    }
   }
   return 0;
 }
