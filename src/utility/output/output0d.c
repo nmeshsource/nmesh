@@ -108,10 +108,13 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
     {
       if(max<min)
       {
-        PRF;printf(": skipping %s: "
-                   "No elm with valid data found (max<min). "
-                   "Probably all NaN.\n", name);
-        //printf("min=%g max=%g\n", min, max);
+        if(!finit(rms))
+        {
+          PRF;printf(": skipping %s: "
+                     "No elm with valid data found (max<min). "
+                     "Probably all NaN (rms=%g).\n", name, rms);
+          //printf("min=%g max=%g\n", min, max);
+        }
         continue;
       }
     }
