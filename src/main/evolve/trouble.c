@@ -150,8 +150,6 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
   int firstit;
-  int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
-  int ptLGL[] = { P_LGL, P_LGL, P_LGL };
   if(PR) PRFs(":\n");
 
   /* free surfaces & indc since they will change now anyway */
@@ -201,11 +199,8 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
 
-  /* switch on fv on all uniform nodes */
-  refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
-
-  /* switch off fv on all LGL nodes */
-  refine_set_use_fv_if_pt_typ(mesh, ptLGL, 0);
+  /* switch on fv on in all uniform nodes and off in all others */
+  refine_set_use_fv_true_iff_P_UNIFORM(mesh);
 
   /* now that nodes are changed re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
@@ -219,8 +214,6 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
   int firstit, order_sav, force_sav;
-  int ptUNI[] = { P_UNIFORM, P_UNIFORM, P_UNIFORM };
-  int ptLGL[] = { P_LGL, P_LGL, P_LGL };
   tVarList *vl_extrap;
 
   if(PR) PRFs(":\n");
@@ -289,11 +282,8 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
 
-  /* switch on fv on all uniform nodes */
-  refine_set_use_fv_if_pt_typ(mesh, ptUNI, 1);
-
-  /* switch off fv on all LGL nodes */
-  refine_set_use_fv_if_pt_typ(mesh, ptLGL, 0);
+  /* switch on fv on in all uniform nodes and off in all others */
+  refine_set_use_fv_true_iff_P_UNIFORM(mesh);
 
   /* now that nodes are changed re-init surfaces & indc */
   evolve_init_communication_structs(mesh);
