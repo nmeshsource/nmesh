@@ -26,3 +26,9 @@ double Lagrange_interp_barycentric2_ds(double x, int n, const double *x_p,
 double interpolate_WENO_n_ds(double x, int n, const double *x_p,
                              const double *w_interp,
                              const double *f, int ds, double fscal);
+
+/* Chebyshev.c */
+void ChebyshevExtrema_DT(int np, double *DT);
+void ChebyshevExtrema_AT_ST(int np, double *AT, double *ST);
+void ChebyshevExtrema_x(int np, double *x);
+double Chebyshev_basisfunc(int n, double X, int np);

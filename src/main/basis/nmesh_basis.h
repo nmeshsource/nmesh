@@ -22,9 +22,10 @@ typedef struct {
 /* types of grid points we can have in 1d */
 enum
 {
-  P_LGL,     /* Legendre Gauss-Lobatto points */
-  P_UNIFORM, /* uniform grid spacing */
-  P_NTYPES   /* number of point types */
+  P_LGL,       /* Legendre Gauss-Lobatto points */
+  P_UNIFORM,   /* uniform grid spacing */
+  P_CHEBEXTR,  /* Chebyshev extrema grid points */
+  P_NTYPES     /* number of point types */
 };
 
 

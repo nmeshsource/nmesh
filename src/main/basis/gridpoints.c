@@ -147,6 +147,34 @@ int init_gridpoints(tMesh *mesh)
 
         break;
 
+      case P_CHEBEXTR: /* set Cheb. extrema points, weights, ... */
+        ChebyshevExtrema_x(ni, Xb);
+        Gauss_wquad_from_symm_x(ni, Xb, Wq);
+        //printarray(gridpoints->Wq[typ][ni]);
+        //if(ni==13) errorexit("Wq matrices are above");
+
+        /* get analysis & synthesis matrix */
+        ChebyshevExtrema_AT_ST(ni, AT, ST);
+        //printarray(gridpoints->At[typ][ni]);
+        //printarray(gridpoints->St[typ][ni]);
+        //if(ni==3) errorexit("AT ST matrices are above");
+
+        /* Lagrange interp. weights WL */
+        Lagrange_winterp(ni, Xb, WL);
+
+        /* diff matrices */
+        //Lagrange_DT(ni, Xb, WL, DT); // Lagrange_DT seems less accurate
+        //Lagrange_DT(ni, Xb, WL, DpT);
+        //Lagrange_DT(ni, Xb, WL, DmT);
+        //printarray(gridpoints->Dt[typ][ni]);
+        ChebyshevExtrema_DT(ni, DT);
+        ChebyshevExtrema_DT(ni, DpT);
+        ChebyshevExtrema_DT(ni, DmT);
+        //printarray(gridpoints->Dt[typ][ni]);
+        //if(ni==9) errorexit("diff. matrices are above");
+
+        break;
+
       default: /* set Legendre Gauss-Lobatto points, weights, ... */
         LGL_x_wquad(ni, Xb, Wq);
         //Gauss_wquad_from_symm_x(npoints, x, w); // test Gauss_wquad_from_symm_x
@@ -167,8 +195,9 @@ int init_gridpoints(tMesh *mesh)
     /* set basis function for each grid type */
     switch(typ)
     {
-    //case P_CHEBEXTR:
-    //  break;
+    case P_CHEBEXTR:
+      gridpoints->basis[typ] = Chebyshev_basisfunc;
+      break;
     case P_LGL:
     case P_UNIFORM:
     default: /* set Legendre poly. as basis if AT,ST are for Legendre basis */
