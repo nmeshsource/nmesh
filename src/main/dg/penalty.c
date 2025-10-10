@@ -45,9 +45,8 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
     }
     else
     {
-      /* find distance from faces to nearest midpoint, and don't use LGL Wq */
+      /* find distance from faces to nearest midpoint */
       set_nodemidpoints_to_face_distXb(elm, distXb);
-      useLGL_Wq = 0;
     }
   }
 
