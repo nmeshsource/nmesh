@@ -378,11 +378,18 @@ in SGRID:
 /* gridpoints for Chebyshev Extrema in [-1,1] */
 void ChebyshevExtrema_x(int np, double *x)
 {
-  int m;
   /* Extrema */
-  x[0]    = -1.;
-  x[np-1] = +1.;
-  for(m=1; m<np-1; m++) x[m] = -cos( m*PI/(np-1) );
+  if(np>1)
+  {
+    int m;
+    x[0]    = -1.;
+    x[np-1] = +1.;
+    for(m=1; m<np-1; m++) x[m] = -cos( m*PI/(np-1) );
+  }
+  else
+  {
+    x[0] = 0; /* if only one point, we choose x=0 */
+  }
 }
 
 /* gridpoints for Chebyshev Zeros in [-1,1] */
