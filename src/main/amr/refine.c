@@ -1220,8 +1220,9 @@ void prefine_pat(tMesh *mesh, int p, int n[3])
   }
 }
 
-/* switch to e.g. P_CHEBEXTR on outer boundary, unless we have
-   P_UNIFORM there */
+/* p-refine on outer boundary if we do not use P_UNIFORM there.
+   E.g. if we use ref->method=PARENT_n_P_CHEBEXTR we can switch to
+   P_CHEBEXTR on outer boundary. */
 void prefine_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh, tRef *ref)
 {
   /* go over mesh */
