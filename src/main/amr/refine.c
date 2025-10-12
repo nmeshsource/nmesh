@@ -129,6 +129,21 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
       pt_typ[d] = P_UNIFORM;
     }
     break;
+  case GIVEN_n_P_CHEBEXTR:
+    for(d=0; d<3; d++)
+    {
+      n[d] = ref->n[d];
+      pt_typ[d] = P_CHEBEXTR;
+    }
+    break;
+  case GIVEN_n_P_LGL_OR_NONUNIFORM:
+    for(d=0; d<3; d++)
+    {
+      n[d] = ref->n[d];
+      if(pnode->pt_typ[d] == P_UNIFORM) pt_typ[d] = P_LGL;
+      else                              pt_typ[d] = pnode->pt_typ[d];
+    }
+    break;
 
   case PARENT_n:
   default:
