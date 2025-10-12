@@ -25,6 +25,7 @@ enum
   GIVEN_n,               /* use a n given by the user */
   PARENT_n_P_LGL,        /* use same n as parent, and LGL gridpoints */
   PARENT_n_P_UNIFORM,    /* use same n as parent, and UNIFORM gridpoints */
+  PARENT_n_P_CHEBEXTR,   /* use same n as parent, and CHEBEXTR gridpoints */
   PARENT_nO2_P_LGL,      /* use parent->n/2, and LGL gridpoints */
   PARENT_nO2_P_UNIFORM,  /* use parent->n/2, and UNIFORM gridpoints */
   PARENT_2n_P_LGL,       /* use parent->n*2, and LGL gridpoints */

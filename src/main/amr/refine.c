@@ -73,6 +73,13 @@ void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ)
       pt_typ[d] = P_UNIFORM;
     }
     break;
+  case PARENT_n_P_CHEBEXTR:
+    for(d=0; d<3; d++)
+    {
+      n[d] = pnode->n[d];
+      pt_typ[d] = P_CHEBEXTR;
+    }
+    break;
 
   case PARENT_nO2_P_LGL:
     for(d=0; d<3; d++)
