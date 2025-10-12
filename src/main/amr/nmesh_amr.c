@@ -69,7 +69,6 @@ int nmesh_amr(tMesh *mesh)
          "elm is on outer boundary [no,yes]");
   if(Getb(Par("amr_outerboundary_ChebExtrema")))
     AddFun(POST_EVOLVE, amr_use_P_CHEBEXTR_on_OUTERBOUND_ifnot_P_UNIFORM);
-
   AddPar("amr_ChebExtrema_p", "", "list of pats with points at ChebExtrema");
   AddPar("amr_uniform_p", "", "list of patches with uniform grid spacing");
   AddPar("amr_fv_p", "", "patches where we use finite volume");
