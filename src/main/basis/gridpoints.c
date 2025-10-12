@@ -151,7 +151,13 @@ int init_gridpoints(tMesh *mesh)
         ChebyshevExtrema_x(ni, Xb);
         Gauss_wquad_from_symm_x(ni, Xb, Wq);
         //printarray(gridpoints->Wq[typ][ni]);
-        //if(ni==13) errorexit("Wq matrices are above");
+        //tArray *u = alloc_array1d(ni);
+        //for(int i=0; i<ni; i++) u->d[i] = 5.*(Xb[i]-1.)*(Xb[i]-1.)*(Xb[i]-1.)*(Xb[i]-1.);
+        //double Gauss_Integral(tArray *Wq, tArray *func);
+        //printf("int(u)=%.16g   u", Gauss_Integral(gridpoints->Wq[typ][ni], u));
+        //printarray(u);
+        //free_array(u);
+        //if(ni==6) errorexit("Wq matrices are above");
 
         /* get analysis & synthesis matrix */
         ChebyshevExtrema_AT_ST(ni, AT, ST);
