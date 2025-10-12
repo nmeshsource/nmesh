@@ -1262,7 +1262,7 @@ void prefine_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh, tRef *ref)
         {
           /* check if elm is P_UNIFORM */
           if(elm->pt_typ[d] == P_UNIFORM) UNI++;
-          /* count dirs in wich elm is already the same pt_typ we specify */
+          /* count dirs in which elm is already the same pt_typ we specify */
           if(elm->pt_typ[d] == pt_typ[d]) same_pt_typ++;
         }
 
