@@ -90,6 +90,16 @@ int amr_use_fv_if_P_UNIFORM(tMesh *mesh)
   return 0;
 }
 
+/* switch elms to P_CHEBEXTR on outer boundary unless elm has P_UNIFORM */
+int amr_use_P_CHEBEXTR_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh)
+{
+  tRef ref[1] = {0};
+  ref->method = PARENT_n_P_CHEBEXTR;
+
+  prefine_on_OUTERBOUND_ifnot_P_UNIFORM(mesh, ref);
+  return 0;
+}
+
 
 /* add a patch to the mesh */
 tPat *add_patch_without_rnode(tMesh *mesh, double bbox[6])

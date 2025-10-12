@@ -18,6 +18,7 @@ tElm *replace_8localchildren_by_parent(tElm *child0, int n[3], int pt_typ[3],
 
 /* mesh.c */
 int amr_set_use_fv_flag(tMesh *mesh);
+int amr_use_P_CHEBEXTR_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh);
 void remove_all_patches(tMesh *mesh);
 int amr_set_bfaces_and_rnode_nbinfo_fnb(tMesh *mesh,
                                         int pr_bfaces, int pr_mesh);
@@ -87,6 +88,7 @@ void hrefine_pat(tMesh *mesh, int p);
 void hcoarsen_pat(tMesh *mesh, int p);
 void hrefine_sphere_loadbalance(tMesh *mesh, double radius, double xc[3],
                                 int levels);
+void prefine_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh, tRef *ref);
 
 /* ghostzones.c */
 void request_all_myln_ghostdata(tMesh *mesh);
