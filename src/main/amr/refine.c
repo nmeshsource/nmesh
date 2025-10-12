@@ -1212,3 +1212,49 @@ void prefine_pat(tMesh *mesh, int p, int n[3])
     printmesh(mesh);
   }
 }
+
+/* switch to e.g. P_CHEBEXTR on outer boundary, unless we have
+   P_UNIFORM there */
+void prefine_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh, tRef *ref)
+{
+  /* go over mesh */
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int face;
+    int n[3];
+    int pt_typ[3];
+
+    /* set local int arrays n, pt_typ from ref->method */
+    hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
+
+    for(face=0; face<6; face++)
+    {
+      if(Elm_on_OUTERBOUND(elm, face))
+      {
+        int UNI, same_pt_typ, d;
+
+        UNI = same_pt_typ = 0;
+        for(d=0; d<3; d++)
+        {
+          /* check if elm is P_UNIFORM */
+          if(elm->pt_typ[d] == P_UNIFORM) UNI++;
+          /* count dirs in wich elm is already the same pt_typ we specify */
+          if(elm->pt_typ[d] == pt_typ[d]) same_pt_typ++;
+        }
+
+        /* if we have e.g. P_LGL and pt_typ=P_CHEBEXTR switch to P_CHEBEXTR */
+        if(UNI || (same_pt_typ==3))
+          elm->rflag = REF_METH_DONOTHING;
+        else
+          elm->rflag = ref->method;
+      }
+    }
+  }
+
+  /* now p-refine where needed */
+  prefine_elms_if_rflag(mesh, ref);
+
+  /* zero all rflags */
+  refine_set_rflag_forall_nodes(mesh, 0);
+}
