@@ -263,27 +263,13 @@ int output_keep_elm(tElm *elm, tOutpars *outpars)
 int TimeForNodeOutput_di_dt(tNode *node, int di, double dt)
 {
   tMesh *mesh = node->pat->mesh;  // NOTE: later each node might have its
-  double Time = fabs(mesh->time); // own time
-  double dT = fabs(mesh->dt);
-  long Iter = mesh->iteration;
+  long double Time = fabs(mesh->time); // own time
+  long double dT   = fabs(mesh->dt);
+  long Iter        = mesh->iteration;
 
   errorexit("this function is not tested yet!");
 
-  /* time for output based on number of iterations */
-  if(di > 0 && Iter % di == 0)
-    return Iter/di + 1;
-
-  /* time for output based on time, assumes Time >= 0 */
-  if(dt > 0)
-  {
-    int i = (0.5 + Time/dt); /* (Time + dequaleps)/dt; */
-    /* if(dequal(Time-i*dt, 0)) */
-    if( Time-i*dt > -0.5*dT && Time-i*dt <= 0.5*dT )
-      return i + 1;
-  }
-
-  /* not time for output */
-  return 0;
+  return Time_dT_Iter_IsAt_di_dt(Time,dT,Iter, di, dt);
 }
 
 /* is it time to output a variable with index vindex? */
