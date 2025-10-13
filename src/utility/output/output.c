@@ -36,14 +36,11 @@ int Noutco = LENco;
 tOutput output[1];
 
 
-/* Check if time has reached a multiple of a time-interval dt
-   or an interation-interval di */
-int TimeIsAt_di_dt(tMesh *mesh, int di, double dt)
+/* Check if Time has reached a multiple of a time-interval dt
+   or if Iter has reached an interation-interval di */
+int Time_dT_Iter_IsAt_di_dt(long double Time, long double dT, long Iter,
+                            int di, double dt)
 {
-  double Time = fabs(mesh->time);
-  double dT = fabs(mesh->dt);
-  long Iter = mesh->iteration;
-
   /* time for output based on number of iterations */
   if(di > 0 && Iter % di == 0)
     return Iter/di + 1;
@@ -51,15 +48,27 @@ int TimeIsAt_di_dt(tMesh *mesh, int di, double dt)
   /* time for output based on time, assumes Time >= 0 */
   if(dt > 0)
   {
-    int i = (0.5 + Time/dt); /* (Time + dequaleps)/dt; */
-    /* if(dequal(Time-i*dt, 0)) */
-    if( Time-i*dt > -0.5*dT && Time-i*dt <= 0.5*dT )
+    long double i    = roundl(Time/dt);
+    long double i_dt = i*dt;
+    if( Time-i_dt > -0.5*dT && Time-i_dt <= 0.5*dT )
       return i + 1;
   }
 
   /* not time for output */
   return 0;
 }
+
+/* Check if time has reached a multiple of a time-interval dt
+   or an interation-interval di */
+int TimeIsAt_di_dt(tMesh *mesh, int di, double dt)
+{
+  long double Time = fabs(mesh->time);
+  long double dT   = fabs(mesh->dt);
+  long Iter        = mesh->iteration;
+
+  return Time_dT_Iter_IsAt_di_dt(Time,dT,Iter, di, dt);
+}
+
 
 /* is it time to output all nodes? */
 int TimeForMeshOutput_di_dt(tMesh *mesh, int di, double dt)
