@@ -10,7 +10,7 @@ extern tcenter center[1];
 
 /* struct for more pars */
 typedef struct {
-  int lmax;         /* max ref.-level */
+  int lmax;         /* max ref.-level (could have an lmax for each center) */
   double radius[3]; /* radius[1] is radius of max ref.-level around center1 */
   int N_first;      /* id of first center */
   int N_last;       /* id of last center */
