@@ -440,8 +440,9 @@ int str_to_intList(const char *str, const char *delim, intList *il)
   return ret;
 }
 
-/* start at buffer + offset and read into array mem until first delim,
-   return offset to mem after last read, write length of mem read in len */
+/* start at buffer + offset and copy into array mem until first delim,
+   return newoffset to place in buffer after last read,
+   write length of mem read into len */
 long mem_from_buf(const char *buffer, long nbuffer, long offset,
                   char delim, char *mem, long memsize, long *len)
 {
@@ -469,7 +470,8 @@ long mem_from_buf(const char *buffer, long nbuffer, long offset,
 }
 
 /* start at buffer + offset and read into string str until first delim,
-   return offset to mem after last read, write length of mem read in len:
+   return newoffset to place in buffer after last read,
+   write length of string str into strlen:
    To be used like e.g. this:
      while((off = str_from_buf(buffer,nbuffer, off, '\n', buf,999, &len))>=0)
    or:
