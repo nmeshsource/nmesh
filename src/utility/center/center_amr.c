@@ -10,6 +10,7 @@ extern tcenter center[1];
 
 /* struct for more pars */
 typedef struct {
+  int lmin;         /* min ref.-level, no matter where elm is */
   int lmax;         /* max ref.-level (could have an lmax for each center) */
   double radius[3]; /* radius[1] is radius of max ref.-level around center1 */
   int N_first;      /* id of first center */
@@ -24,6 +25,7 @@ int center_amr_l(tElm *elm, void *pars)
 {
   tMesh *mesh = Elm_mesh(elm);
   tcenter_amr_pars *center_amr_pars = pars;
+  int l_min      = center_amr_pars->lmin;
   int l_max      = center_amr_pars->lmax;
   double *radius = center_amr_pars->radius;
   int N_first    = center_amr_pars->N_first;
@@ -66,6 +68,10 @@ int center_amr_l(tElm *elm, void *pars)
     /* shrink r for next level l */
     for(N=N_first; N<=N_last; N++) r[N] *= 0.5;
   }
+
+  /* make sure l_ref is never below l_min */
+  if(l_ref<l_min) l_ref = l_min;
+
   //PRFs(": ");printeploc(elm->eploc);
   //printf(" l_ref=%d\n", l_ref);
   return l_ref;
@@ -77,7 +83,8 @@ int center_amr(tMesh *mesh)
   double dt = Getd(Par("center_amr_time"));
   if(dt >= 0.)
   {
-    tcenter_amr_pars pars = {.lmax    = Geti(Par("center1_amr_lmax")),
+    tcenter_amr_pars pars = {.lmin    = Geti(Par("center_amr_lmin")),
+                             .lmax    = Geti(Par("center1_amr_lmax")),
                              .radius  = {0., Getd(Par("center1_amr_radius")),
                                              Getd(Par("center2_amr_radius")) },
                              .N_first = 1,
