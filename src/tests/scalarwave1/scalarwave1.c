@@ -297,6 +297,9 @@ int scalarwave1_surf_rhs_u(tNode *node, tEvoVars *evv)
   vldivf = vlalloc(mesh);
   vlpush(vldivf, idivf_pi);
   vlpush(vldivf, idivf_cx);
+  /* Note: vldivf does not contain the div of the flux of phi. That means
+           dg_add_surface_fluxes_sign will not add any surface terms to
+           the RHS of d_t phi = pi. */
 
   /* extrapolate u back to face on fv nodes */
   if(DGglobals->fv_rec_mode >= FV_REC_WENO3if2away_1)

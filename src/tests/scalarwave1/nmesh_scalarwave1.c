@@ -24,6 +24,8 @@ int nmesh_scalarwave1(tMesh *mesh)
   AddAuxVar("scalarwave1_f_c", "iJ", "flux for c_i: f_{c_i}^j= -g_i^j pi");
   AddAuxVar("scalarwave1_divf_pi", "", "d_i f_{pi}^i");
   AddAuxVar("scalarwave1_divf_c", "i", "d_j f_{c_i}^j");
+  /* Note: We do not introduce a flux for phi, because we have decided to not
+           add any surface terms to the RHS of d_t phi = pi. */
 
   /* parameters */
   AddPar("scalarwave1_profile", "sin", "initial profile [sin,square]");
