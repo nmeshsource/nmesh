@@ -20,7 +20,8 @@ enum
   VOLRHS,   /* set vol. terms of RHS of evo eqns (after setsrc) */
   SURFRHS,  /* add RHS terms from surf. fluxes (after volrhs) */
 
-  PRELIM,   /* set vars that are needed early, e.g. gmunu */
+  PRELIM0,  /* set vars that are needed very early, e.g. gmunu */
+  PRELIM,   /* use PRELIM0 vars to set other vars needed early */
   LIMDATA,  /* produce data such as min,max on each node */
             /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, evv)
                      must return number of data vals we need */

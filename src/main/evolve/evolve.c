@@ -372,6 +372,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
       {
         tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
         /* call funcs that we need before limiters */
+        if(ListEntry(evosys->f[PRELIM0],i))
+          troubled |= ListEntry(evosys->f[PRELIM0],i)(node, evv);
         if(ListEntry(evosys->f[PRELIM],i))
           troubled |= ListEntry(evosys->f[PRELIM],i)(node, evv);
 
@@ -481,8 +483,10 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
 
         /* we do not need to run PRELIM, since evolve_limiter_mesh will
            run right before evolve_setsrc_mesh is called */
-        /* if(ListEntry(evosys->f[PRELIM],i))
-             ListEntry(evosys->f[PRELIM],i)(node, vlu);*/
+        /* if(ListEntry(evosys->f[PRELIM0],i))
+             ListEntry(evosys->f[PRELIM0],i)(node, evv);
+           if(ListEntry(evosys->f[PRELIM],i))
+             ListEntry(evosys->f[PRELIM],i)(node, evv); */
       }
   }
 }
