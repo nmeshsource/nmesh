@@ -9,7 +9,8 @@ enum
 {
   PRESURF0, /* set some source terms that are needed early, e.g. gmunu and
                its time- and space-derivs */
-  PRESURF,  /* set vars needed before surf exchange, e.g. prims */
+  PRESURF,  /* use PRESURF0 vars to set other vars needed early */
+  PRESURF2, /* set vars needed before surf exchange, e.g. prims */
 
   SETSRC0,  /* set some source terms needed before SETSRC */
   SETSRC,   /* set some source terms, is called before VOLRHS */

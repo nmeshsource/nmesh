@@ -209,6 +209,8 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
         troubled |= ListEntry(evosys->f[PRESURF0],i)(node, evv);
       if(ListEntry(evosys->f[PRESURF],i))
         troubled |= ListEntry(evosys->f[PRESURF],i)(node, evv);
+      if(ListEntry(evosys->f[PRESURF2],i))
+        troubled |= ListEntry(evosys->f[PRESURF2],i)(node, evv);
     }
     node->dat->info->evo_troubled |= troubled;
 
@@ -474,6 +476,9 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
 
         if(ListEntry(evosys->f[PRESURF],i))
           ListEntry(evosys->f[PRESURF],i)(node, evv);
+
+        if(ListEntry(evosys->f[PRESURF2],i))
+          ListEntry(evosys->f[PRESURF2],i)(node, evv);
 
         if(ListEntry(evosys->f[SETSRC0],i))
           ListEntry(evosys->f[SETSRC0],i)(node, evv);
