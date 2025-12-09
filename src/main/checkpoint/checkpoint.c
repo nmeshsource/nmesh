@@ -344,6 +344,18 @@ int checkpoint_save(tMesh *mesh)
   snprintf(dir,pl, "%s/%s", outdir, chckpt_dir);
   snprintf(dirp,pl, "%s_previous", dir);
 
+  /* If checkpoint_n_previous<0 we delete the current checkpoint before
+     writing the new one!
+     This is almost certainly a terrible idea, but it does temporarily
+     save disk space... */
+  if(Geti(Par("checkpoint_n_previous"))<0)
+  {
+    PRFs(": *** WARNING *** : checkpoint_n_previous < 0\n");
+    PRFs(": *** WARNING *** : This is CRAZILY RISKY!!!\n");
+    PRFs(": *** DELETING current checkpoint BEFORE writing the new one!!!\n");
+    if(Rank0) system2("rm -rf", dir);
+  }
+
   /* make new dir */
   if(Rank0) system2("mkdir", dirn);
 
