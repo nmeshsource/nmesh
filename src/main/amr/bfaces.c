@@ -912,7 +912,7 @@ void mark_all_bfaces_without_op_as_OUTERBOUND(tMesh *mesh)
 /* set boundary flag on bfaces that have no other patch if mark(pat,xyz)
    returns 1 (or non-zero) */
 void mark_bfaces_without_op_as_boundary(tMesh *mesh,
-        int (*mark)(tPat *pat, const double xyz[3]), int boundary)
+        int (*mark)(tPat *pat, double xyz[3]), int boundary)
 {
   int p;
 
