@@ -619,7 +619,8 @@ tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);
 tBface *first_obface_of_bface_containing_point(tPat *pat, int f, double C[2]);
 tBface *nbbface_of_bface_containing_point(tNode *nb,
                                           tPat *pat, int f, double C[2]);
-int common_facepoints(tNode *node, int f, tNode *nb, int nb_f);
+void mark_bfaces_without_op_as_boundary(tMesh *mesh,
+        int (*mark)(tPat *pat, const double xyz[3]), int boundary);
 
 /* indicators.c */
 void init_all_myln_myindc_for_vl(tMesh *mesh, tVarList  *vl, int nvals);

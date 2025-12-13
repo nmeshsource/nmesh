@@ -909,6 +909,44 @@ void mark_all_bfaces_without_op_as_OUTERBOUND(tMesh *mesh)
   }
 }
 
+/* set boundary flag on bfaces that have no other patch if mark(pat,xyz)
+   returns 1 (or non-zero) */
+void mark_bfaces_without_op_as_boundary(tMesh *mesh,
+        int (*mark)(tPat *pat, const double xyz[3]), int boundary)
+{
+  int p;
+
+  forpatches(mesh, p)
+  {
+    tPat *pat = mesh->pat[p];
+    int face;
+    tBface *bface;
+
+    for(face=0; face<6; face++)
+    forbfacesonface(pat, face, bface)
+    {
+      /* if op=-1 there is no other box, check if we should set the flag */
+      if(bface->op == -1)
+      {
+        double Xf = pat->bbox[face];
+        double *brct = bface->brct;
+        int dir = face/2;
+        double XYZ[3], xyz[3];
+
+        /* set XYZ to point in the middle of bface */
+        XYZ[dir]            = Xf;
+        XYZ[Dir1_norm(dir)] = 0.5*(brct[0] + brct[1]);
+        XYZ[Dir2_norm(dir)] = 0.5*(brct[2] + brct[3]);
+
+        /* get xyz */
+        set_xyz(pat,NULL,-1, XYZ, xyz);
+
+        if(mark(pat,xyz)) bface->boundary = boundary;
+      }
+    }
+  }
+}
+
 /* set boundary flag on bfaces that have no other patch and are on face */
 void mark_bfacesonface_without_op_as_boundary(tMesh *mesh, int face,
                                               int boundary)
