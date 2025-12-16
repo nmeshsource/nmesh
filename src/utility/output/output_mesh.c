@@ -172,17 +172,17 @@ void write_elm_dat_info(FILE *fp, tElm *elm)
   {
     tNodeInfo *info = dat->info;
     int i;
-    fprintf(fp, "evo_troubled=%d trbl_score=%d use_fv=%d nlim=%d trbl_ref=",
+    fprintf(fp, " evo_troubled=%d trbl_score=%d use_fv=%d nlim=%d trbl_ref=",
             info->evo_troubled, info->trbl_score, info->use_fv, info->nlim);
     fwrite_little(info->trbl_ref, sizeof(info->trbl_ref[0]),1 , fp);
     fprintf(fp, "\n");
-    fprintf(fp, "load_timer_running=%d load_TimeIn_s=%g load_start=",
+    fprintf(fp, " load_timer_running=%d load_TimeIn_s=%g load_start=",
             info->load_timer_running, info->load_TimeIn_s);
     fwrite_little(info->load_start, sizeof(info->load_start[0]),1 , fp);
     fprintf(fp, "\n");
-    fprintf(fp, "desrank=%d nnbinfo=", info->desrank);
+    fprintf(fp, " desrank=%d  nnbinfo=", info->desrank);
     for(i=0; i<6; i++) fprintf(fp, "%d ", info->nnbinfo[i]);
-    fprintf(fp, "unlimited=%d\n", info->unlimited);
+    fprintf(fp, " unlimited=%d\n", info->unlimited);
   }
 }
 
@@ -211,7 +211,7 @@ void write_elm_dat_infos(tMesh *mesh, const char *header)
       formyelms_noomp(mesh)
       {
         tNode *elm = MyElm;
-        write_lnode0(fp, elm, 1, ":");
+        write_lnode0(fp, elm, 1, ":\n");
         write_elm_dat_info(fp, elm);
       }
       if(rk==size-1) fprintf(fp, "\n");
