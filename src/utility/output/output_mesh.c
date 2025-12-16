@@ -165,29 +165,38 @@ void write_nblnodes(tMesh *mesh, const char *info, int mode)
 /*************************************************************************/
 
 /* write a single dat->info from inside a elm->dat */
-void write_elm_dat_info(FILE *fp, tElm *elm)
+void write_elm_dat_info(FILE *fp, tElm *elm, int mode)
 {
   tDat *dat = elm->dat;
   if(dat)
   {
     tNodeInfo *info = dat->info;
     int i;
-    fprintf(fp, " evo_troubled=%d trbl_score=%d use_fv=%d nlim=%d trbl_ref=",
+    fprintf(fp, " evo_troubled=%d trbl_score=%d use_fv=%d nlim=%d",
             info->evo_troubled, info->trbl_score, info->use_fv, info->nlim);
-    fwrite_little(info->trbl_ref, sizeof(info->trbl_ref[0]),1 , fp);
-    fprintf(fp, "\n");
-    fprintf(fp, " load_timer_running=%d load_TimeIn_s=%g load_start=",
-            info->load_timer_running, info->load_TimeIn_s);
-    fwrite_little(info->load_start, sizeof(info->load_start[0]),1 , fp);
-    fprintf(fp, "\n");
-    fprintf(fp, " desrank=%d  nnbinfo=", info->desrank);
+    if(mode==1)
+    {
+      fprintf(fp, " trbl_ref=");
+      fwrite_little(info->trbl_ref, sizeof(info->trbl_ref[0]),1 , fp);
+      fprintf(fp, "\n");
+      fprintf(fp, " load_timer_running=%d load_TimeIn_s=%g load_start=",
+              info->load_timer_running, info->load_TimeIn_s);
+      fwrite_little(info->load_start, sizeof(info->load_start[0]),1 , fp);
+      fprintf(fp, "\n");
+      fprintf(fp, " desrank=%d ", info->desrank);
+    }
+    else
+    {
+      fprintf(fp, "\n");
+    }
+    fprintf(fp, " nnbinfo=");
     for(i=0; i<6; i++) fprintf(fp, "%d ", info->nnbinfo[i]);
     fprintf(fp, " unlimited=%d\n", info->unlimited);
   }
 }
 
 /* open file and write the dat->info from all elms into it */
-void write_elm_dat_infos(tMesh *mesh, const char *header)
+void write_elm_dat_infos(tMesh *mesh, const char *header, int mode)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
@@ -211,8 +220,8 @@ void write_elm_dat_infos(tMesh *mesh, const char *header)
       formyelms_noomp(mesh)
       {
         tNode *elm = MyElm;
-        write_lnode0(fp, elm, 1, ":\n");
-        write_elm_dat_info(fp, elm);
+        write_lnode0(fp, elm, mode, ":\n");
+        write_elm_dat_info(fp, elm, mode);
       }
       if(rk==size-1) fprintf(fp, "\n");
       fclose(fp);
