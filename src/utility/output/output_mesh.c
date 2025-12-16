@@ -5,6 +5,9 @@
 #include "output.h"
 
 
+/*************************************************************************/
+/* funcs to write elms, i.e. leaf nodes */
+/*************************************************************************/
 
 /* write essential info */
 void write_lnode0(FILE *fp, tNode *e, int mode, const char *s)
@@ -150,6 +153,68 @@ void write_nblnodes(tMesh *mesh, const char *info, int mode)
         write_lnode(fp, elm, mode);
       }
       fprintf(fp, "\n");
+      fclose(fp);
+    }
+    /* wait until everyone is here */
+    MCK( nMPI_barrier() );
+  } /* end rk-loop */
+}
+
+/*************************************************************************/
+/* funcs to write all dat->info */
+/*************************************************************************/
+
+/* write a single dat->info from inside a elm->dat */
+void write_elm_dat_info(FILE *fp, tElm *elm)
+{
+  tDat *dat = elm->dat;
+  if(dat)
+  {
+    tNodeInfo *info = dat->info;
+    int i;
+    fprintf(fp, "evo_troubled=%d trbl_score=%d use_fv=%d nlim=%d trbl_ref=",
+            info->evo_troubled, info->trbl_score, info->use_fv, info->nlim);
+    fwrite_little(info->trbl_ref, sizeof(info->trbl_ref[0]),1 , fp);
+    fprintf(fp, "\n");
+    fprintf(fp, "load_timer_running=%d load_TimeIn_s=%g load_start=",
+            info->load_timer_running, info->load_TimeIn_s);
+    fwrite_little(info->load_start, sizeof(info->load_start[0]),1 , fp);
+    fprintf(fp, "\n");
+    fprintf(fp, "desrank=%d nnbinfo=", info->desrank);
+    for(i=0; i<6; i++) fprintf(fp, "%d ", info->nnbinfo[i]);
+    fprintf(fp, "unlimited=%d\n", info->unlimited);
+  }
+}
+
+/* open file and write the dat->info from all elms into it */
+void write_elm_dat_infos(tMesh *mesh, const char *header)
+{
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int rk;
+  int outd = Par("outdir");
+  char *outdir = Gets(outd);
+  char fname[1000];
+  FILE *fp;
+
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<size; rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == rank)
+    {
+      sprintf(fname, "%s/%s", outdir, "elm_dat_infos.txt");
+      fp = fopen(fname, "a");
+
+      if(rk==0 && header) fprintf(fp, "%s\n", header);
+
+      formyelms_noomp(mesh)
+      {
+        tNode *elm = MyElm;
+        write_lnode0(fp, elm, 1, ":");
+        write_elm_dat_info(fp, elm);
+      }
+      if(rk==size-1) fprintf(fp, "\n");
       fclose(fp);
     }
     /* wait until everyone is here */

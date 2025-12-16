@@ -36,3 +36,4 @@ void outputPatchPlanes_meshvar(tMesh *mesh, char *name, int It, double T);
 /* output_mesh.c */
 void write_mylnodes(tMesh *mesh, const char *info, int mode);
 void write_nblnodes(tMesh *mesh, const char *info, int mode);
+void write_elm_dat_infos(tMesh *mesh, const char *header);
