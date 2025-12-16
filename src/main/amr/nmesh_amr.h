@@ -443,6 +443,7 @@ void *memcpy_to_array(tArray *ar, size_t bytestride, size_t pos,
                       const void *src, size_t n);
 void *memcpy_to_array_redim(tArray *ar, size_t bytestride, size_t pos,
                             const void *src, size_t n);
+int array_Neplocs(tArray *ar);
 tElm *alloc_elm(tMesh *mesh);
 tElm *alloc_elm_init_pat(tMesh *mesh, int p);
 tElm *alloc_elm_of_elmheader(tMesh *mesh, tElm0 *elmheader);
@@ -668,6 +669,7 @@ void eloc_from_elmname(tEloc *eloc, char *name);
 tElm *elm_eid_from_elmname(tMesh *mesh, char *name, ulong *eid);
 tElm *elm_from_elmname(tMesh *mesh,  char *name);
 int elmname_is(tElm *elm, const char *nname);
+char *eplocname(tEploc *eploc, char *s, int slen);
 int elm_get_ijk(tElm *elm);
 tElm *elm_from_eid(tMesh *mesh, ulong eid, ulong *elmindex, int *elmrank);
 tElm *elm_eploc_from_eid(tMesh *mesh, ulong eid, tEploc *eploc);

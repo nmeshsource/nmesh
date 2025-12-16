@@ -1009,6 +1009,15 @@ int elocname_is(tEloc *eloc, const char *ename)
     return 0;
 }
 
+/* write elocname into string s */
+char *eplocname(tEploc *eploc, char *s, int slen)
+{
+  tEloc eloc[1];
+  eloc_from_eploc(eloc, eploc);
+  elocname(eloc, s,slen);
+  return s;
+}
+
 
 //instead of elm_from_elmname and elm_from_location_str use:
 /* get elmindex and elmrank for eid

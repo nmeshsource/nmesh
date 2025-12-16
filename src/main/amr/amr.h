@@ -9,7 +9,6 @@ extern nMPI_Comm main_comm;
 
 
 /* storage.c */
-int array_Neplocs(tArray *ar);
 int redim_array_Neplocs(tArray *array, int Neplocs);
 ulong alloc_and_set_mesh_myelm(tMesh *mesh);
 void make_and_add_root_elm(tPat *pat, int n[3], int pt_typ[3], int datrank);
