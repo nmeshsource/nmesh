@@ -230,3 +230,78 @@ void write_elm_dat_infos(tMesh *mesh, const char *header, int mode)
     MCK( nMPI_barrier() );
   } /* end rk-loop */
 }
+
+/*************************************************************************/
+/* funcs to write all amr_elm_nbinfo? vars */
+/*************************************************************************/
+
+/* write the amr_elm_nbinfo? for one elm */
+void write_amr_elm_nbinfo(FILE *fp, tElm *elm, int elm_nbinfo0)
+{
+  tDat *dat = elm->dat;
+  if(dat)
+  {
+    int f;
+    for(f=0; f<6; f++)
+    {
+      int i_nbinfo = elm_nbinfo0 + f;
+      tArray *nbinfo = VarA(elm, i_nbinfo);
+      int Neplocs, ni;
+
+      /* if there is no nbinfo do nothing */
+      if(!nbinfo) continue;
+      Neplocs = array_Neplocs(nbinfo);
+      if(!Neplocs) continue;
+
+      fprintf(fp, " f%d: %d: ", f, Neplocs);
+
+      /* loop over eplocs in nbinfo and write them */
+      for(ni=0; ni<Neplocs; ni++)
+      {
+        tEploc *eploc = &(nbinfo->eploc[ni]);
+        ulong eid = eploc->eid;
+        char nbname[100];
+        eplocname(eploc, nbname,100);
+        fprintf(fp, " %s:eid%lu", nbname, eid);
+      }
+      fprintf(fp, "\n");
+    }
+  }
+}
+
+/* open file and write amr_elm_nbinfo? from all elms into it */
+void write_amr_elm_nbinfos(tMesh *mesh, const char *header, int mode)
+{
+  int elm_nbinfo0 = Ind("amr_elm_nbinfo0");
+  int size = nMPI_size();
+  int rank = nMPI_rank();
+  int rk;
+  int outd = Par("outdir");
+  char *outdir = Gets(outd);
+  char fname[1000];
+  FILE *fp;
+
+  /* MPI motivated loop to assign work */
+  for(rk=0; rk<size; rk++)
+  {
+    /* do work when it is my turn */
+    if(rk == rank)
+    {
+      sprintf(fname, "%s/%s", outdir, "amr_elm_nbinfos.txt");
+      fp = fopen(fname, "a");
+
+      if(rk==0 && header) fprintf(fp, "%s\n", header);
+
+      formyelms_noomp(mesh)
+      {
+        tNode *elm = MyElm;
+        write_lnode0(fp, elm, mode, ":\n");
+        write_amr_elm_nbinfo(fp, elm, elm_nbinfo0);
+      }
+      if(rk==size-1) fprintf(fp, "\n");
+      fclose(fp);
+    }
+    /* wait until everyone is here */
+    MCK( nMPI_barrier() );
+  } /* end rk-loop */
+}
