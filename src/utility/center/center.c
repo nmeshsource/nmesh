@@ -68,6 +68,25 @@ int centerN_update(tMesh *mesh, int N)
     center_track_extremum(mesh, h, var, findMax, xold, minmove, xnew);
     setCenter = 1;
   }
+  else if(Getv(track, "circle"))
+  {
+    double dx, d2, d, omega, mo, M=m1+m2, t=mesh->time;
+    for(d2=0., dir=0; dir<3; dir++)
+    {
+      x1[dir] = Getd(center->cx[1][dir]);
+      x2[dir] = Getd(center->cx[2][dir]);
+      dx = x1[dir] - x2[dir];
+      d2 += dx*dx;
+    }
+    d = sqrt(d2);
+    /* Kepler: M = omega^2 d^3 */
+    omega = sqrt(M/(d*d2));
+    mo = (N==1 ? m2 : -m1); /* mass of other object */
+    xnew[0] = d*cos(omega*t) * mo/M; /* circ. orbit centered on 0 */
+    xnew[1] = d*sin(omega*t) * mo/M;
+    xnew[2] = 0.;
+    setCenter = 1;
+  }
   else if(Getv(track, "CM"))
   {
     /* track CM computed from centers 1 and 2 */
