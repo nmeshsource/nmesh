@@ -10,12 +10,12 @@
 /*************************************************************************/
 
 /* write essential info */
-void write_lnode0(FILE *fp, tNode *e, int mode, const char *s)
+void write_elm0(FILE *fp, tElm *e, int mode, const char *s)
 {
   char nns[100];
-  fprintf(fp, "%s", nodename(e, nns,99));
+  fprintf(fp, "%s", elmname(e, nns,99));
   fprintf(fp, ": eid%lu [%g,%g]x[%g,%g]x[%g,%g]",
-         Node_eid(e),
+         Elm_eid(e),
          e->bbox[0],e->bbox[1], e->bbox[2],e->bbox[3], e->bbox[4],e->bbox[5]);
   fprintf(fp, " n=%dx%dx%d=%d", e->n[0],e->n[1],e->n[2], e->np);
   switch(mode)
@@ -30,7 +30,7 @@ void write_lnode0(FILE *fp, tNode *e, int mode, const char *s)
 
 
 /* write fnb on one face */
-void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
+void write_elm_fnb(FILE *fp, tElm *e, int face, int sorted)
 {
   int j;
   int nlocs = 100;
@@ -44,7 +44,7 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
 
   for(j=0; j<nnb; j++)
   {
-    if(e->fnb[face][j]) nodename(e->fnb[face][j], fnbstr[j],nlocs);
+    if(e->fnb[face][j]) elmname(e->fnb[face][j], fnbstr[j],nlocs);
     else                sprintf(fnbstr[j], "nil");
   }
   //for(j=0; j<nnb; j++) printf("%s\n",fnbstr[j]);
@@ -66,14 +66,14 @@ void write_lnode_fnb(FILE *fp, tNode *e, int face, int sorted)
 
 
 /* write essential info + some more */
-void write_lnode(FILE *fp, tNode *e, int mode)
+void write_elm(FILE *fp, tElm *e, int mode)
 {
   tDat *dat = e->dat;
   int i;
-  //union { const tNode *elm; tNode0 *elm0; } e2e0;
+  //union { const tElm *elm; tElm0 *elm0; } e2e0;
   //e2e0.elm = e;
   //printelm0(e2e0.elm0, "");
-  write_lnode0(fp, e, mode, "");
+  write_elm0(fp, e, mode, "");
 
   switch(mode)
   {
@@ -86,7 +86,7 @@ void write_lnode(FILE *fp, tNode *e, int mode)
 
   fprintf(fp, " fnb =");
   for(i=0; i<6; i++)
-    write_lnode_fnb(fp, e, i, 1);
+    write_elm_fnb(fp, e, i, 1);
   fprintf(fp, "\n");
 }
 
@@ -115,7 +115,7 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
       formylnodes_noomp(mesh)
       {
         tNode *elm = MyLnode;
-        write_lnode(fp, elm, mode);
+        write_elm(fp, elm, mode);
       }
       if(rk==size-1) fprintf(fp, "\n");
       fclose(fp);
@@ -150,7 +150,7 @@ void write_nblnodes(tMesh *mesh, const char *info, int mode)
       for(ei=0; ei < mesh->nnbelm; ei++)
       {
         tNode *elm = mesh->nbelm[ei];
-        write_lnode(fp, elm, mode);
+        write_elm(fp, elm, mode);
       }
       fprintf(fp, "\n");
       fclose(fp);
@@ -220,7 +220,7 @@ void write_elm_dat_infos(tMesh *mesh, const char *header, int mode)
       formyelms_noomp(mesh)
       {
         tNode *elm = MyElm;
-        write_lnode0(fp, elm, mode, ":\n");
+        write_elm0(fp, elm, mode, ":\n");
         write_elm_dat_info(fp, elm, mode);
       }
       if(rk==size-1) fprintf(fp, "\n");
@@ -295,7 +295,7 @@ void write_amr_elm_nbinfos(tMesh *mesh, const char *header, int mode)
       formyelms_noomp(mesh)
       {
         tNode *elm = MyElm;
-        write_lnode0(fp, elm, mode, ":\n");
+        write_elm0(fp, elm, mode, ":\n");
         write_amr_elm_nbinfo(fp, elm, elm_nbinfo0);
       }
       if(rk==size-1) fprintf(fp, "\n");
