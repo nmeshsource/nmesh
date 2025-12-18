@@ -90,7 +90,7 @@ void write_elm(FILE *fp, tElm *e, int mode, int nbsorted)
   fprintf(fp, "\n");
 }
 
-/* open file and write all my node elms into it */
+/* open file and write all my elms into it */
 void write_myelms(tMesh *mesh, const char *info, int mode, int nbsorted)
 {
   int size = nMPI_size();
@@ -125,7 +125,7 @@ void write_myelms(tMesh *mesh, const char *info, int mode, int nbsorted)
   } /* end rk-loop */
 }
 
-/* open file and write neighbor node elms into it */
+/* open file and write neighbor elms into it */
 void write_nbelms(tMesh *mesh, const char *info, int mode, int nbsorted)
 {
   int rk;
@@ -160,14 +160,11 @@ void write_nbelms(tMesh *mesh, const char *info, int mode, int nbsorted)
   } /* end rk-loop */
 }
 
-
-/* open file and write all my node elms into it */
+/* 2 shims: */
 void write_mylnodes(tMesh *mesh, const char *info, int mode)
 {
   write_myelms(mesh, info, mode, 1);
 }
-
-/* open file and write neighbor node elms into it */
 void write_nblnodes(tMesh *mesh, const char *info, int mode)
 {
   write_nbelms(mesh, info, mode, 1);
