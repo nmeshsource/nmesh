@@ -70,14 +70,16 @@ int centerN_update(tMesh *mesh, int N)
   }
   else if(Getv(track, "circle"))
   {
-    double dx, d2, d, omega, mo, M=m1+m2, t=mesh->time;
-    for(d2=0., dir=0; dir<3; dir++)
-    {
-      x1[dir] = Getd(center->cx[1][dir]);
-      x2[dir] = Getd(center->cx[2][dir]);
-      dx = x1[dir] - x2[dir];
-      d2 += dx*dx;
-    }
+    double dx, d, omega, mo, M=m1+m2, t=mesh->time;
+    static double d2 = -1.;
+    if(d2<0.) //compute d2 only once to ensure both centers get same d2!
+      for(d2=0., dir=0; dir<3; dir++)
+      {
+        x1[dir] = Getd(center->cx[1][dir]);
+        x2[dir] = Getd(center->cx[2][dir]);
+        dx = x1[dir] - x2[dir];
+        d2 += dx*dx;
+      }
     d = sqrt(d2);
     /* Kepler: M = omega^2 d^3 */
     omega = sqrt(M/(d*d2));
