@@ -66,7 +66,7 @@ void write_elm_fnb(FILE *fp, tElm *e, int face, int sorted)
 
 
 /* write essential info + some more */
-void write_elm(FILE *fp, tElm *e, int mode)
+void write_elm(FILE *fp, tElm *e, int mode, int nbsorted)
 {
   tDat *dat = e->dat;
   int i;
@@ -86,12 +86,12 @@ void write_elm(FILE *fp, tElm *e, int mode)
 
   fprintf(fp, " fnb =");
   for(i=0; i<6; i++)
-    write_elm_fnb(fp, e, i, 1);
+    write_elm_fnb(fp, e, i, nbsorted);
   fprintf(fp, "\n");
 }
 
 /* open file and write all my node elms into it */
-void write_mylnodes(tMesh *mesh, const char *info, int mode)
+void write_myelms(tMesh *mesh, const char *info, int mode, int nbsorted)
 {
   int size = nMPI_size();
   int rank = nMPI_rank();
@@ -115,7 +115,7 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
       formylnodes_noomp(mesh)
       {
         tNode *elm = MyLnode;
-        write_elm(fp, elm, mode);
+        write_elm(fp, elm, mode, nbsorted);
       }
       if(rk==size-1) fprintf(fp, "\n");
       fclose(fp);
@@ -126,7 +126,7 @@ void write_mylnodes(tMesh *mesh, const char *info, int mode)
 }
 
 /* open file and write neighbor node elms into it */
-void write_nblnodes(tMesh *mesh, const char *info, int mode)
+void write_nbelms(tMesh *mesh, const char *info, int mode, int nbsorted)
 {
   int rk;
   int outd = Par("outdir");
@@ -150,7 +150,7 @@ void write_nblnodes(tMesh *mesh, const char *info, int mode)
       for(ei=0; ei < mesh->nnbelm; ei++)
       {
         tNode *elm = mesh->nbelm[ei];
-        write_elm(fp, elm, mode);
+        write_elm(fp, elm, mode, nbsorted);
       }
       fprintf(fp, "\n");
       fclose(fp);
@@ -158,6 +158,19 @@ void write_nblnodes(tMesh *mesh, const char *info, int mode)
     /* wait until everyone is here */
     MCK( nMPI_barrier() );
   } /* end rk-loop */
+}
+
+
+/* open file and write all my node elms into it */
+void write_mylnodes(tMesh *mesh, const char *info, int mode)
+{
+  write_myelms(mesh, info, mode, 1);
+}
+
+/* open file and write neighbor node elms into it */
+void write_nblnodes(tMesh *mesh, const char *info, int mode)
+{
+  write_nbelms(mesh, info, mode, 1);
 }
 
 /*************************************************************************/
