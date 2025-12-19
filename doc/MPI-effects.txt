@@ -1,0 +1,82 @@
+About numbers and MPI
+=====================
+*If floating point numbers are summed in a different order we get different
+ results!!!
+*This kind of summing happens often in calls to MPI_Allreduce and such.
+*Thus if the MPI distribution changes due to load balance, such sums
+ will change!
+*What also can change in nmesh is the order of the nbs in nb-lists such as
+ amr_elm_nbinfo and fnb. Then any sum over nbs gives different results!
+ Such sums can occur e.g. in the surface exchange if more than ONE nb has
+ a point.
+
+
+Observation:
+------------
+When we run GRHD+GH for NS binaries with MPI, runs are not reproducible in
+the sense that every run gives slightly different numbers (even though the
+orbits look the same).
+
+If we set:
+  center_amr_time = 1e222
+  amr_outerboundary_ChebExtrema = yes
+  amr_loadbalance_hours = -1
+  GRHD_troublescore = no
+*All elms are unchanged and the load is never rebalanced
+==> The runs are now reproducible!
+
+If we set:
+  center_amr_time = 0.7071067811865475
+  amr_outerboundary_ChebExtrema = yes
+  amr_loadbalance_hours = -1
+  GRHD_troublescore = no
+*Note that center_amr causes calls to load_balance
+*elms change and the load is rebalanced
+==> The runs are not reproducible!
+
+If we set:
+  amr_loadbalance_hours = 0.25 # or if center_amr causes load_balance
+*load is rebalanced based on timings in each elm
+*But the timings will be different in each run, so we can expect the
+ MPI distribution to be different for each run.
+
+If we set:
+  physics = scalarwave1 ADM
+  amr_n0 = 9
+  center_amr_time = 1e222
+  amr_outerboundary_ChebExtrema = yes
+  amr_loadbalance_hours = 0.06
+*The runs are not reproducible!
+*With 9 pts there is always one in the middle. If there are 4 adjacent nbs,
+ the middle point gets the average from the 4 adjacent nbs. The order of
+ these fnb changes during the run. The sum-order in the average thus changes
+ which causes small floating point diffs.
+
+If we set:
+  physics = scalarwave1 ADM
+  amr_n0 = 8
+  center_amr_time = 1e222
+  amr_outerboundary_ChebExtrema = yes
+  amr_loadbalance_hours = 0.06
+*The actual evo vars e.g. scalarwave1_pi.12X are now reproducible!
+*This happens because there is no middle point, so that all adjacent values
+ come from only ONE nb. Since there is no sum, there is no difference due
+ to any sum-ordering.
+*HOWEVER, any sum in the output like scalarwave1_pi_VolInt.t still depends
+ on the sum-order, so different MPI distributions give slightly different
+ answers!
+
+Side Note:
+  center_amr_time = 1e222
+  amr_outerboundary_ChebExtrema = yes
+  amr_loadbalance_hours = 0.06
+*The order of the fnb and even the order of the amr_elm_nbinfo vars change
+ during the run!!!
+*This is caused by amr_use_P_CHEBEXTR_on_OUTERBOUND_ifnot_P_UNIFORM which
+ is called if amr_outerboundary_ChebExtrema=yes
+*amr_use_P_CHEBEXTR_on_OUTERBOUND_ifnot_P_UNIFORM leads to calls to
+ prefine_elms_if_rflag which does update amr_elm_nbinfo and fnb. Since
+ no nbs actually change all that happens is a reordering of the nb lists
+ in amr_elm_nbinfo and fnb.
+*If we set amr_outerboundary_ChebExtrema=no, amr_elm_nbinfo and the fnb
+ never change!
