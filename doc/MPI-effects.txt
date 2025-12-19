@@ -80,3 +80,16 @@ Side Note:
  in amr_elm_nbinfo and fnb.
 *If we set amr_outerboundary_ChebExtrema=no, amr_elm_nbinfo and the fnb
  never change!
+
+
+Resolution for reproducible runs
+================================
+*for short reproducible test runs use:
+  +an even number of gridpoints, e.g:
+     amr_n0 = 8
+     amr_n1 = 8
+     amr_n2 = 8
+  +make sure the center tracker gives reproducible answers, e.g. set:
+     center1_track = circle
+     center2_track = circle
+   (of course for real runs we need center1_track=min)
