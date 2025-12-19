@@ -132,7 +132,7 @@ int center_update(tMesh *mesh)
   {
     for(N=0; N<3; N++)
       for(dir=0; dir<3; dir++)
-        printf("  center%d_%c = %g\n", N, 'x'+dir,
+        printf("  center%d_%c = %.15g\n", N, 'x'+dir,
                Getd(center->cx[N][dir]));
   }
 
