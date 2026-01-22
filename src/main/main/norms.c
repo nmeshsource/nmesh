@@ -476,7 +476,8 @@ void nmesh_CRCs(tMesh *mesh, int nCRCs, ulong *CRCs)
 {
   tVarList *vl;
   int vi;
-  uint64_t crc, cnt;
+  uint64_t crc;
+  size_t cnt;
   ulong parsCRC=0, patsCRC=0, elmsCRC, nbinfoCRC, varsCRC, datinfosCRC;
 
   if(Rank0)
