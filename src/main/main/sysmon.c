@@ -122,7 +122,7 @@ void write_sysmon(tMesh *mesh, double last_mesh_time, const char *name,
 }
 
 
-/* write into sysmon.log if the time is right for it */
+/* ignore the par sysmon_hours and write into sysmon.log now */
 int sysmon_now(tMesh *mesh)
 {
   char *sysmon_hours_bak = strdup(Gets(Par("sysmon_hours")));
