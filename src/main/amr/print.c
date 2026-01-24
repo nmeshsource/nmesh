@@ -30,6 +30,26 @@ void printmesh(tMesh *mesh)
   printnbelms(mesh);
 }
 
+/* print number of elms only */
+int print_number_of_elms(tMesh *mesh)
+{
+  int size = nMPI_size();
+
+  PRFs(":\n");
+  if(mesh==main_mesh) printf("mesh=main_mesh: ");
+  else                printf("mesh=%p: ", (void *) mesh);
+
+  printf("npats=%d npdb=%d nvdb=%d ", mesh->npats, mesh->npdb, mesh->nvdb);
+  printf("nln=%lu ", mesh->eidlim[size-1]);
+  printf("dt=%g\n", mesh->dt);
+
+  printf("total number of elms: %lu \n", mesh->eidlim[size-1]);
+  printf("elms on this rank: %lu \n", mesh->nmyelm);
+  printf("elms on nearby ranks: %lu\n", mesh->nnbelm);
+
+  return 0;
+}
+
 void printpatch(tPat *pat)
 {
   printf("p%d: [%g,%g]x[%g,%g]x[%g,%g]\n",

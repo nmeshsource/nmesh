@@ -505,6 +505,7 @@ tArray *array_alloc_read(tMesh *mesh, char *fname, int fatal);
 
 /* print.c */
 void printmesh(tMesh *g);
+int print_number_of_elms(tMesh *mesh);
 void printpatch(tPat *box);
 void printCI(tPat *pat);
 void printeloc(const tEloc *eloc);
