@@ -45,7 +45,7 @@ int print_number_of_elms(tMesh *mesh)
 
   printf("total number of elms: %lu \n", mesh->eidlim[size-1]);
   printf("elms on this rank: %lu \n", mesh->nmyelm);
-  printf("elms on nearby ranks: %lu\n", mesh->nnbelm);
+  printf("neighbor elms on other ranks: %lu\n", mesh->nnbelm);
 
   return 0;
 }
