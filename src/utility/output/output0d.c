@@ -136,6 +136,7 @@ void output0d_mesh_vl(tVarList *vl, tPat *pat, int It, double T)
       have_pt[ipt] = interpolate_var_ok(node_pt[ipt], vi, Xb_pt[ipt],
                                  interp_np, INTERP_LAGRANGE, &(val_pt[ipt]));
                                   /* ^-- FIXME: use interp_var_xyz instead */
+                                  /* NOTE: use INTERP_WENO if P_UNIFORM & fv */
     /* output is done by rank0 */
     if(Rank0)
     {
