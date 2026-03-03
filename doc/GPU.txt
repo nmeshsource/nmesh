@@ -1,0 +1,35 @@
+schematically nmesh has this structure:
+=======================================
+formyelms:
+	func_1(elm)
+	func_2(elm)
+	...
+-------------------
+Here e.g. func_1 has:
+func_1(elm)
+	forpoints(elm, ijk)
+		calc something at point ijk
+
+chatGTP suggested to use:
+=========================
+*1 MPI rank per GPU (i.e. 1 MPI rank per compute node if, it has only 1 GPU)
+*1 GPU thread block per elm, e.g. 10^4 blocks if each rank has 10^4 elms
+*1 or 0.5 threads per point in each element
+ ==> if element has 512 points use 256 or 512 threads per block
+*we want at least 10^5 or 10^6 threads in total for a high end GPU
+
+About GPUs:
+===========
+*In GPU architecture, floating-point units (FPUs) are the actual physical
+ components that execute instructions.
+*For double precsions we need FP64 units
+*A GPU needs many more threads than it has actual floating-point execution
+ units, because it uses massive hardware multithreading to hide latency.
+
+extra Problems:
+===============
+-need to copy all (or most) of nested elm struct into GPU
+-need to copy all of pat and mesh structs into GPU
+-each elm reads global struct vars (e.g. ADM[1])
+ ==> need to copy global vars into GPU
+     +GPU has Constant Memory, but only 10 KB or so
