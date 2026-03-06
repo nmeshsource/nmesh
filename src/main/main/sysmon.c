@@ -29,12 +29,12 @@ int sysmon(tMesh *mesh)
   ///* is sysmon on? */
   //if(!Getb(Par("sysmon"))) return 0;
 
-  /* reset firstcall & last_mesh_time if we are again at interation 0 */
-  if(mesh->iteration==0 && firstcall==0)
-  {
+  /* Reset firstcall if mesh->time seems to have gone backwards.
+     This can happen if checkpoint=yes and iterate_parameters=yes causes
+     the loading of more than one checkpoint for one of the later pars in
+     iterate_parameter1. Then we can get a negative dtPhys/dtWall. */
+  if( (mesh->time < last_mesh_time) || mesh->time==0. )
     firstcall = 1;
-    last_mesh_time = mesh->time;
-  }
 
   /* test if it is time */
   time_since_sysmon = time - last_sysmon_time;
