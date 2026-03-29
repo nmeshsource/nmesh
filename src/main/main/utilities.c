@@ -774,6 +774,7 @@ void print_system_info(void)
                      "cat /proc/%ld/stat | cut -d ' ' -f 39", pid);
   system1(str);
   system1("free -h");
+  system1("cat /proc/sys/kernel/perf_event_paranoid");
 }
 
 /* construct an argv array from a string and return number of args */
