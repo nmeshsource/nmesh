@@ -231,6 +231,7 @@ int nMPI_Init(int *pargc, char ***pargv)
 {
   int ret=0;
 #ifdef USEMPI
+  int size=1, rank=0;
 #if defined(USEOMP) && !defined(PLAIN_MPI_INIT)
   int required = MPI_THREAD_FUNNELED; /* only masterthread makes MPI calls */
   int provided;
@@ -243,6 +244,9 @@ int nMPI_Init(int *pargc, char ***pargv)
   ret = MPI_Init(pargc, pargv); /* no OpenMP, no threads */
   PR1;
 #endif
+  /* perf programs like HPCtoolkit want calls to MPI_Comm_rank */
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #else
   /* for debugging we can start nmesh as:
      nmesh nam.par 2 5
