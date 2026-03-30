@@ -11,8 +11,9 @@ extern tMesh *main_mesh;
 /* timer data base */
 typedef struct tTIMER {
   char *name;    /* name of function we time */
-  double start;  /* time when timer was started */
-  double time;   /* time in s spent in this func */
+  double start;  /* time when timer was started, or -1 if not running */
+  double time;   /* total time in s spent in this func */
+  double dtime;  /* time diff in s between last start/stop of this timer */
   long n;        /* number of times func was timed */
 } tTimer;
 
@@ -60,6 +61,7 @@ tTimer *timer_get(const char *funcname)
       tdb[i]->name  = name;
       tdb[i]->start = -1.;
       tdb[i]->time  = 0.;
+      tdb[i]->dtime = 0.;
       tdb[i]->n     = 0;
     }
     else /* timer has index i and now we do not need name anymore */
@@ -73,11 +75,11 @@ tTimer *timer_get(const char *funcname)
 
 
 /* start a timer */
-tTimer *timer_start(const char *name)
+tTimer *timer_start(const char *name, int override)
 {
   tTimer *t = 0;
 
-  if(timer_on)
+  if(timer_on || override)
   {
     /* is this the first time we start a timer? */
     if(timer_on == -1)
@@ -97,11 +99,11 @@ tTimer *timer_start(const char *name)
 }
 
 /* stop timer */
-tTimer *timer_stop(const char *name)
+tTimer *timer_stop(const char *name, int override)
 {
   tTimer *t = 0;
 
-  if(timer_on)
+  if(timer_on || override)
   {
     t = timer_get(name);
 
@@ -111,7 +113,8 @@ tTimer *timer_stop(const char *name)
     if(timer_MPI_barrier) MCK( nMPI_barrier() );
 
     /* save timing info */
-    t->time += getTimeIn_s() - t->start;
+    t->dtime = getTimeIn_s() - t->start;
+    t->time += t->dtime;
 
     /* t->start = -1 marks that timer is stopped now */
     t->start = -1.;
@@ -119,24 +122,46 @@ tTimer *timer_stop(const char *name)
   return t;
 }
 
+/* read out time of a stopped timer */
+double timer_get_time(const char *name, int override)
+{
+  if(timer_on || override)
+  {
+    tTimer *t = timer_get(name);
+    return t->time;
+  }
+  return -1.;
+}
+
+/* read out dtime of a stopped timer */
+double timer_get_dtime(const char *name, int override)
+{
+  if(timer_on || override)
+  {
+    tTimer *t = timer_get(name);
+    return t->dtime;
+  }
+  return -1.;
+}
+
 /* update time field of timer without stopping it */
-tTimer *timer_update(const char *name)
+tTimer *timer_update(const char *name, int override)
 {
   tTimer *t = 0;
 
-  if(timer_on)
+  if(timer_on || override)
   {
-    timer_stop(name);
-    t = timer_start(name);
+    timer_stop(name, override);
+    t = timer_start(name, override);
     t->n -= 1;
   }
   return t;
 }
 
 /* read out timer without stopping it */
-double timer_read(const char *name)
+double timer_read(const char *name, int override)
 {
-  if(timer_on)
+  if(timer_on || override)
   {
     tTimer *t = timer_get(name);
 
@@ -189,7 +214,7 @@ int write_all_timers(tMesh *mesh)
   if (!timer_on) return 0;
 
   /* read timer for main() */
-  t = timer_update("main");
+  t = timer_update("main", 0);
   total = t->time;
 
   /* open file */

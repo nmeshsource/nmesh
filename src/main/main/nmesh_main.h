@@ -335,10 +335,10 @@ int sysmon_now(tMesh *mesh);
 /* timer.c */
 int write_all_timers(tMesh *mesh);
 int free_all_timers(tMesh *mesh);
-struct tTIMER *timer_start(const char *name);
-struct tTIMER *timer_stop(const char *name);
-#define TIMER_START timer_start(__func__)
-#define TIMER_STOP  timer_stop(__func__)
+struct tTIMER *timer_start(const char *name, int override);
+struct tTIMER *timer_stop(const char *name, int override);
+#define TIMER_START timer_start(__func__, 0)
+#define TIMER_STOP  timer_stop(__func__, 0)
 
 /* nan_checker.c */
 int array_finite(tArray *a, char *name, int ijk[3]);
