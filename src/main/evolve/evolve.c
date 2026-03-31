@@ -560,26 +560,26 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
 /* start special EVOLVE_time timer */
 int EVOLVE_timer_start(tMesh *mesh)
 {
-  timer_start("EVOLVE_time", 1);
+  if(Getb(Par("evolve_output_timers"))) timer_start("EVOLVE-time", 1);
   return 0;
 }
 /* stop special EVOLVE_time timer */
 int EVOLVE_timer_stop(tMesh *mesh)
 {
-  timer_stop("EVOLVE_time", 1);
+  if(Getb(Par("evolve_output_timers"))) timer_stop("EVOLVE-time", 1);
   return 0;
 }
 
 /* output EVOLVE timer and the loadtimers */
 int evolve_output_timers(tMesh *mesh)
 {
-  if(1) // use par "evolve_output_timers"
+  if(Getb(Par("evolve_output_timers")))
   {
     static int firstcall = 1;
     char *outdir = Gets(Par("outdir"));
     char f[100], s[1000];
     FILE *fp;
-    double EVOLVE_time = timer_get_dtime("EVOLVE_time", 1);
+    double EVOLVE_time = timer_get_dtime("EVOLVE-time", 1);
     double rank_loadtime;
 
     /* open file */
@@ -589,7 +589,7 @@ int evolve_output_timers(tMesh *mesh)
     if(!fp) errorexits("could not open %s", s);
     if(firstcall)
     {
-      fprintf(fp, "#    PhysTime     EVOLVE_time   rank_loadtime"
+      fprintf(fp, "#    PhysTime     EVOLVE-time   rank_loadtime"
                   "   elm0_loadtime   elm1_loadtime   ...\n");
       firstcall = 0;
     }
