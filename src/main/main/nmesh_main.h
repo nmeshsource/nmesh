@@ -339,6 +339,8 @@ struct tTIMER *timer_start(const char *name, int override);
 struct tTIMER *timer_stop(const char *name, int override);
 #define TIMER_START timer_start(__func__, 0)
 #define TIMER_STOP  timer_stop(__func__, 0)
+double timer_get_time(const char *name, int override);
+double timer_get_dtime(const char *name, int override);
 
 /* nan_checker.c */
 int array_finite(tArray *a, char *name, int ijk[3]);

@@ -10,6 +10,9 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u);
 void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs);
 int evolve_filter_evosys_mesh(tMesh *mesh);
+int EVOLVE_timer_start(tMesh *mesh);
+int EVOLVE_timer_stop(tMesh *mesh);
+int evolve_output_timers(tMesh *mesh);
 
 
 /* evosys.c */

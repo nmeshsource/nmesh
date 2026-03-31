@@ -555,6 +555,73 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
 }
 
 
+/* funcs to time the EVOLVE time bin, and also to output times */
+
+/* start special EVOLVE_time timer */
+int EVOLVE_timer_start(tMesh *mesh)
+{
+  timer_start("EVOLVE_time", 1);
+  return 0;
+}
+/* stop special EVOLVE_time timer */
+int EVOLVE_timer_stop(tMesh *mesh)
+{
+  timer_stop("EVOLVE_time", 1);
+  return 0;
+}
+
+/* output EVOLVE timer and the loadtimers */
+int evolve_output_timers(tMesh *mesh)
+{
+  if(1) // use par "evolve_output_timers"
+  {
+    static int firstcall = 1;
+    char *outdir = Gets(Par("outdir"));
+    char f[100], s[1000];
+    FILE *fp;
+    double EVOLVE_time = timer_get_dtime("EVOLVE_time", 1);
+    double rank_loadtime;
+
+    /* open file */
+    snprintf(f, 100, "%%s/evolve_timers.%%0%dd", (int) log10(nMPI_size())+1);
+    snprintf(s, 1000, f, outdir, nMPI_rank());
+    fp = fopen(s, "a");
+    if(!fp) errorexits("could not open %s", s);
+    if(firstcall)
+    {
+      fprintf(fp, "#    PhysTime     EVOLVE_time   rank_loadtime"
+                  "   elm0_loadtime   elm1_loadtime   ...\n");
+      firstcall = 0;
+    }
+
+    /* calc total load_Time on this rank */
+    rank_loadtime = 0.;
+    formyelms(mesh)
+    {
+      tElm *elm = MyElm;
+      tDat *dat = elm->dat;
+      if(dat)
+      {
+        tNodeInfo *info = dat->info;
+        rank_loadtime += info->load_TimeIn_s;
+      }
+    }
+    /* ouput timer data */
+    fprintf(fp, "%13g  %13gs  %13gs", mesh->time, EVOLVE_time, rank_loadtime);
+    formyelms(mesh)
+    {
+      tElm *elm = MyElm;
+      tDat *dat = elm->dat;
+      if(dat)
+        fprintf(fp, "  %13gs", dat->info->load_TimeIn_s);
+    }
+    fprintf(fp, "\n");
+    fclose(fp);
+  }
+  return 0;
+}
+
+
 /*************************************************************************/
 /* NOTE: functions below do not work yet !!! */
 /*************************************************************************/
