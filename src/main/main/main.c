@@ -128,7 +128,7 @@ int read_command_line(tMesh *mesh, int argc, char **argv)
   if(Rank0) printf("Making first parameters\n");
   makeparameter(mesh, "errorexit", "exit", "how we exit");
   /* this is about how we output */
-  makeparameter(mesh, "logfile_creation", "yes", "whether we create logfile");
+  makeparameter(mesh, "logfile_creation", "no", "whether we create logfile");
 
   /* got two or more arguments? */
   if (argc >= 2)
