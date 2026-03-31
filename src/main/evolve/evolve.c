@@ -576,6 +576,9 @@ int evolve_output_timers(tMesh *mesh)
   if(Getb(Par("evolve_output_timers")))
   {
     static int firstcall = 1;
+    int size = nMPI_size();
+    int nelms = mesh->eidlim[size-1];
+    int nmyelms = mesh->nmyelm;
     char *outdir = Gets(Par("outdir"));
     char f[100], s[1000];
     FILE *fp;
@@ -589,8 +592,9 @@ int evolve_output_timers(tMesh *mesh)
     if(!fp) errorexits("could not open %s", s);
     if(firstcall)
     {
-      fprintf(fp, "#    PhysTime     EVOLVE-time   rank_loadtime"
-                  "   elm0_loadtime   elm1_loadtime   ...\n");
+      fprintf(fp, "#    PhysTime nmyelms   nelms    EVOLVE-time  rank_loadtime"
+                  "  elm0_loadtime  elm1_loadtime"
+                  "  ...\n");
       firstcall = 0;
     }
 
@@ -607,13 +611,14 @@ int evolve_output_timers(tMesh *mesh)
       }
     }
     /* ouput timer data */
-    fprintf(fp, "%13g  %13gs  %13gs", mesh->time, EVOLVE_time, rank_loadtime);
+    fprintf(fp, "%13g %7d %7d %13gs %13gs",
+            mesh->time, nmyelms,nelms, EVOLVE_time, rank_loadtime);
     formyelms(mesh)
     {
       tElm *elm = MyElm;
       tDat *dat = elm->dat;
       if(dat)
-        fprintf(fp, "  %13gs", dat->info->load_TimeIn_s);
+        fprintf(fp, " %13gs", dat->info->load_TimeIn_s);
     }
     fprintf(fp, "\n");
     fclose(fp);
