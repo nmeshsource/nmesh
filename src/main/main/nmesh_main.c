@@ -36,7 +36,7 @@ int nmesh_main(tMesh *mesh)
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
 
   AddPar("errorexit", "exit", "how we stop on errors [exit,abort;errno]");
-  AddPar("logfile_creation", "yes","create logfile [yes,no,/dev/null,none]");
+  AddPar("logfile_creation", "no","create logfile [yes,no,/dev/null,none]");
   AddPar("logfile_reproducible", "no","printf only stuff that is the same "
          "for each run (e.g. no timing) [yes,no]");
 
