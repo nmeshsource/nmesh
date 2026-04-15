@@ -555,7 +555,9 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
 }
 
 
+/*************************************************************************/
 /* funcs to time the EVOLVE time bin, and also to output times */
+/*************************************************************************/
 
 /* start special EVOLVE_time timer */
 int EVOLVE_timer_start(tMesh *mesh)
