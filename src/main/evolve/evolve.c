@@ -321,7 +321,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 }
 
 /* parse options for evolve_limiter_mesh */
-int evolve_use_limiter(tElm *elm, int opt)
+int evolve_limiter_needed(tElm *elm, int opt)
 {
   int trbl_score;
 
@@ -367,7 +367,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     /* time PRELIM & LIMDATA */
     loadtimer_start(node);
 
-    if(evolve_use_limiter(node, opt))
+    if(evolve_limiter_needed(node, opt))
     {
       troubled = 0;
       forList(u, i)
@@ -418,7 +418,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     /* time LIMITER */
     loadtimer_start(node);
 
-    if(evolve_use_limiter(node, opt))
+    if(evolve_limiter_needed(node, opt))
     {
       forList(u, i)
       {
