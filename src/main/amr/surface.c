@@ -1503,6 +1503,47 @@ void free_all_myln_nbsurf_only(tMesh *mesh)
 }
 
 
+/* free all ajsurf in a tSurface, this can be useful if n,pt_typ have
+   changed and we want to recompute the ajsurf */
+void free_ajsurf_only(tSurface *s)
+{
+  if(!s) return;
+  if(!s->ajsurf) return;
+
+  /* free ajsurf only if is allocd */
+  if(s->allocd_ajsurf) free_array(s->ajsurf);
+
+  /* make it NULL again, as it was before it was set */
+  s->ajsurf = NULL;
+}
+
+/* free all ajsurf on face f of node */
+void free_ajsurf_only_forall_vars(tNode *node, int f)
+{
+  tDat *dat = node->dat;
+  int vi;
+
+  if(!dat) return;
+
+  /* free all ajsurf on face f */
+  for(vi=0; vi<dat->nv; vi++)
+    free_ajsurf_only(dat->s[f][vi]);
+}
+
+/* free all ajsurf surfaces on node */
+void free_all_ajsurf_only(tNode *node)
+{
+  tDat *dat = node->dat;
+  int vi,f;
+
+  if(!dat) return;
+
+  /* free all ajsurf */
+  for(f=0; f<6; f++)
+    for(vi=0; vi<dat->nv; vi++)
+      free_ajsurf_only(dat->s[f][vi]);
+}
+
 /*************************************************************************/
 /*************************************************************************/
 
