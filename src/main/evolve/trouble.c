@@ -210,7 +210,7 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 }
 
 /* switch from fv to dg based on node->dat->info->trbl_score flag */
-void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
+void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
 {
   tRef ref[1]; /* for ref info */
   int firstit, order_sav, force_sav;
@@ -231,14 +231,14 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh)
     tNode *node = MyLnode;
 
     /* mark non-troubled nodes as to be refined */
-    if(node->dat->info->trbl_score <= -NOTROUBLES)
+    if(node->dat->info->trbl_score <= -notroubles)
     {
       tRef *info_ref = node->dat->info->trbl_ref;
       //if(elmname_is(node, "0_700")) {PRFs(": trbl_ref: ");printref(info_ref);}
 
       if(!firstit)
         if(info_ref->method != ref->method)
-          errorexit("nodes with trbl_score<=-NOTROUBLES must all have same trbl_ref");
+          errorexit("nodes with trbl_score<=-notroubles must all have same trbl_ref");
       firstit = 0;
 
       /* set ref and node->rflag, since ref is global don't use OpenMP! */

@@ -131,7 +131,7 @@ int evolve_myln(tMesh *mesh)
                    trouble_score);
       }
       /* switch all nodes with negative enough trbl_score to dg */
-      evolve_switch_nontroubled_nodes_mesh(mesh);
+      evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES);
       /* now some aux vars (and others) are not set */
     }
 
