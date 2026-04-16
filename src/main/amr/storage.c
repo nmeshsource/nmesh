@@ -919,7 +919,7 @@ void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old)
 void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
 {
   /* free any newly allocated dat in node */
-  free_dat(node->dat);
+  if(node->dat != node_old->dat) free_dat(node->dat);
 
   /* use info in node_old to restore node */
   memcpy(node, node_old, sizeof(node[0]));
@@ -930,9 +930,21 @@ void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
    should be called for all 8 siblings */
 void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
 {
-  tNode *node_old;
-  node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
-  update_node_n_pt_typ_free_node_old(node, node_old);
+  /* check if n,pt_typ are different from what node already has */
+  int d, diff = 0;
+  for(d=0; d<3; d++)
+  {
+    if(n[d]      != node->n[d])      diff = 1;
+    if(pt_typ[d] != node->pt_typ[d]) diff = 1;
+    if(diff) break;
+  }
+  /* do something only if n,pt_typ are different */
+  if(diff) // I.e. slow interp is skipped if diff=0
+  {
+    tNode *node_old;
+    node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
+    update_node_n_pt_typ_free_node_old(node, node_old);
+  }
 }
 
 /* update node->n on one node, should be called for all 8 siblings */
