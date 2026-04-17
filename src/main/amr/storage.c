@@ -924,7 +924,15 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
 }
 
 /* free the node_old returned by update_node_n_pt_typ_return_node_old */
-void update_node_n_pt_typ_free_node_old(tNode *node, tNode *node_old)
+void update_node_n_pt_typ_free_node_old(tNode *node_old)
+{
+  free_dat(node_old->dat);
+  free(node_old);
+}
+
+/* free the node_old returned by update_node_n_pt_typ_return_node_old, but
+   check if dat needs to be freed as well */
+void update_node_n_pt_typ_free_node_old2(tNode *node, tNode *node_old)
 {
   if(node_old->dat != node->dat) free_dat(node_old->dat);
   free(node_old);
@@ -959,7 +967,7 @@ void update_node_n_pt_typ(tNode *node, int *n, int *pt_typ)
   {
     tNode *node_old;
     node_old = update_node_n_pt_typ_return_node_old(node, n, pt_typ);
-    update_node_n_pt_typ_free_node_old(node, node_old);
+    update_node_n_pt_typ_free_node_old2(node, node_old);
   }
 }
 
