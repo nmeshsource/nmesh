@@ -67,7 +67,7 @@ void evolve_RK4_mesh(tMesh *mesh)
         // copy all surface data pointers from elm_old to elm
         surface_copy_all_pointers(elm_old[MyID], elm);
 
-        // interp nb surfs to adj again
+        // interp nb surfs to adj for our new elm
         set_all_ajsurf(elm);
 
         // run RHS funcs again
