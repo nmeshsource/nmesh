@@ -1422,6 +1422,10 @@ void set_all_myln_ajsurf(tMesh *mesh)
 }
 
 
+/**********************************************************************/
+/* some funcs to free and copy parts of the surfaces */
+/**********************************************************************/
+
 /* free all nbsurf in a tSurface, this can be useful to free up memory
    after ajsurf is constructed, and it does not touch ajsurf */
 void free_nbsurf_only(tSurface *s)
@@ -1543,6 +1547,34 @@ void free_all_ajsurf_only(tNode *node)
     for(vi=0; vi<dat->nv; vi++)
       free_ajsurf_only(dat->s[f][vi]);
 }
+
+
+/* Copy nbsurf data from s to sdest, this allocates sdest.
+   It copies all nbsurf arrays, so that s could be freed after this. */
+tSurface *surface_copy_with_nbsurf_only(tSurface *s)
+{
+  tSurface *sdest;
+  int i;
+
+  if(!s) return NULL;
+  if(!s->nbsurf) return NULL;
+
+  /* make sdest and copy some info */
+  sdest = alloc_empty_surface(s->nnbsurf);
+  sdest->dat  = s->dat;
+  sdest->face = s->face;
+  sdest->vi   = s->vi;
+
+  /* now copy all nbsurf arrays, and mark them as allocated */
+  for(i=0; i<s->nnbsurf; i++)
+  {
+    sdest->nbsurf[i] = array_copy(s->nbsurf[i]);
+    sdest->allocd_nbsurf[i] = 1;
+  }
+  return sdest;
+}
+
+
 
 /*************************************************************************/
 /*************************************************************************/
