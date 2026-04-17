@@ -68,8 +68,6 @@ int evolve_myln(tMesh *mesh)
   if(allnodes)
   {
     int trouble_score;
-    //tNode *node = node_from_nodename(mesh, "0_366");
-    //tPoint pt[] =  {{.node=node, .ijk=17}};
 
     /* make one full evo step */
     Evolve_mesh(mesh);
@@ -83,16 +81,10 @@ int evolve_myln(tMesh *mesh)
     {
       PRF;printf(": trouble_score=%d (bad) => switch troubled nodes & "
                  "redo evo step\n", trouble_score);
-      //if(node) { Yo(80); printelm_nodeinfo(node); }
-      //if(node) { GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u_p,0)); }
-      //printvarlist_atpoint(pt, ListEntry(evosys->u_p,0), "");
-      //printvarlist_atpoint(pt, ListEntry(evosys->u_p,1), "");
+
       /* go back to u_p and switch to fv */
       evolve_prepare_do_over_mesh(mesh);
-      //if(node) { Yo(84); printelm_nodeinfo(node); }
-      //if(node) { GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u,0)); }
-      //printvarlist_atpoint(pt, ListEntry(evosys->u,0), "");
-      //printvarlist_atpoint(pt, ListEntry(evosys->u,1), "");
+
       /* Now all new fv nodes have newly interpolated evo vars, so we need
          to limit them again. ALSO, we need to run PRELIM again to update
          fields (like the ADM metric) that are not in evosys->u to the new
@@ -100,10 +92,6 @@ int evolve_myln(tMesh *mesh)
       //evolve_limiter_mesh(mesh, evosys->u, 1); //but only if trbl_score>0
       evolve_limiter_mesh(mesh, evosys->u, 0); //in all nodes
       refine_set_datinfo_unlimited_mesh(mesh, 0); //mark elms as now limited
-      //if(node) { Yo(90); printelm_nodeinfo(node); }
-      //if(node) { GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u,0)); }
-      //printvarlist_atpoint(pt, ListEntry(evosys->u,0), "");
-      //printvarlist_atpoint(pt, ListEntry(evosys->u,1), "");
 
       /* redo evo step */
       //PRF;printf(": redo evo step\n");
@@ -137,7 +125,6 @@ int evolve_myln(tMesh *mesh)
 
     /* we limit the final u only here */
     evolve_limiter_mesh(mesh, evosys->u, 0);
-    //if(node) { Yo(100); GRHD_cons2prim_needs_cons_fix(node, ListEntry(evosys->u_p,0)); }
 
     /* update some vars by calling funcs in PRESURF*, SETSRC*
        often PRESURF does cons2prim, SETSRC sets stress-energy */
