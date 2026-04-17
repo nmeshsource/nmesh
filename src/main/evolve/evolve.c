@@ -134,7 +134,7 @@ int evolve_myln(tMesh *mesh)
        often PRESURF does cons2prim, SETSRC sets stress-energy */
     if(trouble_score>0 || trouble_score<=-NOTROUBLES)
       evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs,
-                                                 evosys->u);
+                                                 evosys->u, NOTROUBLES);
   }
   else /* evolve each node on its own */
   {
@@ -439,7 +439,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
    often PRESURF does cons2prim, SETSRC sets stress-energy,
    PRELIM sets ADM metric */
 void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
-                                                pVLList *rhs, pVLList *u)
+                                                pVLList *rhs, pVLList *u,
+                                                int notroubles)
 {
   tEvoSys *evosys = mesh->evosys;
   pVLList *x = evosys->x; /* extra vars needed for LDG */
@@ -454,7 +455,7 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
     /* set some things again, e.g. cons2prim */
     /* this is only needed on nodes that had a very neg. trouble score and
        were thus converted to dg */
-    if(node->dat->info->trbl_score <= -NOTROUBLES)
+    if(node->dat->info->trbl_score <= -notroubles)
       forList(u, i)
       {
         tEvoVars evv[1] = {{
