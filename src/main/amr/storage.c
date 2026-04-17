@@ -137,9 +137,16 @@ void point_array_d_to_data(tArray *array, void *data, int nofree)
    Here we use alloc_array and thus return only segment 0. */
 tArray *array_copy(tArray *arr)
 {
-  tArray *array = alloc_array(arr->n);
-  copy_array_data(arr, array);
-  return array;
+  if(arr)
+  {
+    tArray *array = alloc_array(arr->n);
+    copy_array_data(arr, array);
+    return array;
+  }
+  else
+  {
+    return NULL;
+  }
 }
 
 /* re-dimension array, return values:

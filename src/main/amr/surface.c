@@ -1574,6 +1574,20 @@ tSurface *surface_copy_with_nbsurf_only(tSurface *s)
   return sdest;
 }
 
+/* copy all nbsurf from node_src to node_dest */
+void surface_copy_all_nbsurf_only(tNode *node_src, tNode *node_dest)
+{
+  tDat *dat_src = node_src->dat;
+  tDat *dat_dest = node_dest->dat;
+  int vi,f;
+
+  if(!dat_src || !dat_dest) return;
+
+  /* loop over faces, vars and copy nbsurf of each surf */
+  for(f=0; f<6; f++)
+    for(vi=0; vi<dat_dest->nv; vi++)
+      dat_dest->s[f][vi] = surface_copy_with_nbsurf_only(dat_src->s[f][vi]);
+}
 
 
 /*************************************************************************/

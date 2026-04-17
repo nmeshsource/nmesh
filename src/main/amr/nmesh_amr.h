@@ -566,7 +566,7 @@ void get_all_surfaces(tNode *node);
 void get_all_myln_surfaces(tMesh *mesh);
 int causeMPIprogress_all_myln_surfaces(tMesh *mesh, int sendrecv);
 void free_all_myln_nbsurf_only(tMesh *mesh);
-tSurface *surface_copy_with_nbsurf_only(tSurface *s);
+void surface_copy_all_nbsurf_only(tNode *node_src, tNode *node_dest);
 void init_all_vl_surfaces(tMesh *mesh, tVarList *vl);
 void set_all_vl_mysurf(tNode *node, tVarList *vl);
 void request_all_vl_surfaces(tNode *node, tVarList *vl);
