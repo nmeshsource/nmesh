@@ -70,31 +70,6 @@ tArray *alloc_array_with_segs(int n[3], int Ne, int ns)
   return array;
 }
 
-/* allocate a new array of same size as array arr */
-tArray *alloc_array_of_same_size(tArray *arr)
-{
-  return alloc_array_with_segs(arr->n, arr->Ne, arr->ns);
-}
-
-/* return a copy of array arr */
-tArray *array_copy(tArray *arr)
-{
-  tArray *array = alloc_array_of_same_size(arr);
-  int Nt = array->N + array->Ne;
-  int nmemb = Nt * array->ns;
-  /* copy data */
-  if(nmemb>0)
-  {
-    double *dest = array->d;
-    double *src  = arr->d;
-    int size1 = max3(sizeof(array->d[0]), sizeof(array->i[0]),
-                     sizeof(array->l[0]));
-    int n = nmemb * size1;
-    memcpy(dest, src, n);
-  }
-  return array;
-}
-
 /* allocate a 1d array */
 tArray *alloc_array1d_with_segs(int N, int Ne, int ns)
 {
@@ -156,6 +131,15 @@ void point_array_d_to_data(tArray *array, void *data, int nofree)
     free(array->d);
   array->d = data;
   array->d_nofree = nofree;
+}
+
+/* Return a copy of array arr.
+   Here we use alloc_array and thus return only segment 0. */
+tArray *array_copy(tArray *arr)
+{
+  tArray *array = alloc_array(arr->n);
+  copy_array_data(arr, array);
+  return array;
 }
 
 /* re-dimension array, return values:

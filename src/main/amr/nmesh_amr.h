@@ -425,8 +425,6 @@ int amr_set_all_bfaces(tMesh *mesh);
 /* storage.c */
 tArray *alloc_empty_array_with_segs(int n[3], int Ne, int ns);
 tArray *alloc_array_with_segs(int n[3], int Ne, int ns);
-tArray *alloc_array_of_same_size(tArray *arr);
-tArray *array_copy(tArray *arr);
 tArray *alloc_array1d_with_segs(int N, int Ne, int ns);
 tArray *alloc_array(int n[3]);
 tArray *alloc_array1d(int N);
@@ -434,6 +432,7 @@ tArray *alloc_array2d(int n0, int n1);
 tArray *alloc_empty_array2d(int n0, int n1);
 tArray *get_array_seg(tArray *array, int si);
 void point_array_d_to_data(tArray *array, void *data, int nofree);
+tArray *array_copy(tArray *arr);
 int redimension_array(tArray *array, int n[3]);
 int redim_array(tArray *array, int n0, int n1, int n2);
 void alloc_2darray_irange_of_j(tArray *array);
