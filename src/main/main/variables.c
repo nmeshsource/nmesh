@@ -265,6 +265,14 @@ void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
   vdb[i].falloff = falloff;
 }
 
+/* set information on type of one variable comp */
+void MeshVarComponentSetType(tMesh *mesh, int i, int type)
+{
+  tVar *vdb = mesh->vdb;
+  vdb[i].type = type;
+  if(0) printf("  setting type=%d\n", vdb[i].type);
+}
+
 /* set information on type of variable */
 void MeshVarSetType(tMesh *mesh, int i, int type)
 {
@@ -731,6 +739,14 @@ tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
   newvl = AddDuplicate(vl, postfix, type, surfacezones);
   enablevarlist(newvl);
   return newvl;
+}
+
+/* set type of all vars in VarList */
+void VLSetType(tVarList *vl, int type)
+{
+  tMesh *mesh = vl->mesh;
+  int i;
+  forvl(vl, i) MeshVarComponentSetType(mesh, i, type);
 }
 
 /********************************************************************/

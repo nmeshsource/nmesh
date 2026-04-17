@@ -219,6 +219,7 @@ tVarList *AddDuplicate(tVarList *vl, const char *postfix,
                        int type, int surfacezones);
 tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones);
+void VLSetType(tVarList *vl, int type);
 
 void vlsetconst(const void *el, tVarList *u, const double c);
 #define vlsetconstant_node(node, u, c) vlsetconst((node), (u), (c))
