@@ -107,6 +107,11 @@ int evolve_myln(tMesh *mesh)
          again, trbl_score of some nodes may further decrease ... */
     }
 
+    /* if redo_substep=1, Evolve_mesh should have set a trouble score
+       in each elm, we now read it */
+    if(redo_substep)
+      trouble_score = evolve_read_trouble_score_mesh(mesh);
+
     /* Since this is the end of the evo step (that we now consider
        successful), reset evo_troubled flag here. If any evo trouble
        happens aftrwards (e.g. when we call the limiter later) this should
