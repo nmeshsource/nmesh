@@ -28,42 +28,52 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);             // r  = RHS(u, t)
-  pVLList_addto(u, dt/6.0, r, vladdto,0);     // u += r dt/6
+  pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   if(redo_substeps)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.0);
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
   evolve_limiter_mesh(mesh, w, 0);
-
-
-
-
-
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/3.);
+  }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/3.);
+  }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);    // w  = u_p + r dt
   mesh->time = t+dt;
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+  }
+
   mesh->time = t+dt;                          // we are now at t+dt
 
-  /* switch from fv to dg if we had NOTROUBLES*3 RK substeps without trouble */
-  evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES*3);
+  /* switch from fv to dg if we had NOTROUBLES*4 RK substeps without trouble */
+  evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES*4);
   // apply limiter
   // FIXME: call limiter
-
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
@@ -79,12 +89,26 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
+  int redo_substeps = 1;
+  int trbl_score = 0;
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   pVLList_addto(u, dt, r, vladdto,0);     // u += r dt
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt);
+  }
+
   mesh->time = t+dt;                      // we are now at t+dt
+
+  /* switch from fv to dg if we had NOTROUBLES steps without trouble */
+  evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES);
+  // apply limiter
+  // FIXME: call limiter
+
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
@@ -111,39 +135,62 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
+  int redo_substeps = 1;
+  int trbl_score = 0;
 
   //tNode *node = node_from_nodename(mesh, "0_366");
   //tPoint pt[] =  {{.node=node, .ijk=17}};
-
-  if(PR) PRFs(": 0\n");
+  //if(PR) PRFs(": 0\n");
   //printvarlist_atpoint(pt, ListEntry(u,0), "");
   //printvarlist_atpoint(pt, ListEntry(u,1), "");
   pVLList_copy(u_p, u, vlcopy,0);              // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);              // r  = RHS(u, t)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+  }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
   mesh->time = t+dt;                           // c_2=1 from Butcher tab.
-  //printvarlist_atpoint(pt, ListEntry(w,0), "");
   evolve_limiter_mesh(mesh, w, 0);
-  if(PR) PRFs(": 1\n");
-  //printvarlist_atpoint(pt, ListEntry(w,0), "");
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+    /* reconstruct old w_1 from u_2, u_p and r_1:
+       u_0 = u_p,  u_1 = u_p + r_0 dt/6,  w_1 = u_p + r_0 dt
+              but: u_1 = u_2 - r_1 dt/6
+       => u_p + r_0 dt/6 = u_2 - r_1 dt/6  => r_0 dt = 6 (u_2 - u_p) - r_1 dt
+       => w_1 = u_p + r_0 dt = 6 u_2 - 5 u_p - r_1 dt */
+    pVLList_add(w, 6., u, -5., u_p, vladd,0);  // w  = 6 u - 5 u_p
+    pVLList_addto(w, -dt, r, vladdto,0);       // w -= r dt
+  }
+
 
   pVLList_addto(w, dt, r, vladdto,0);          // w += r dt
   pVLList_add(w, 0.75, u_p, 0.25, w, vladd,0); // w = 0.75*u_p + 0.25*w
   mesh->time = t+0.5*dt;                       // c_3=1/2 from Butcher tab.
-  //printvarlist_atpoint(pt, ListEntry(w,0), "");
   evolve_limiter_mesh(mesh, w, 0);
-  if(PR) PRFs(": 2\n");
-  //printvarlist_atpoint(pt, ListEntry(w,0), "");
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt*2./3.);
+  }
+
   mesh->time = t+dt;                           // we are now at t+dt
-  if(PR) PRFs(": 3\n");
-  //printvarlist_atpoint(pt, ListEntry(u,0), "");
+
+  /* switch from fv to dg if we had NOTROUBLES*3 RK substeps without trouble */
+  evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES*3);
+  // apply limiter
+  // FIXME: call limiter
+
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
