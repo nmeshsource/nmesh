@@ -1589,6 +1589,53 @@ void surface_copy_all_nbsurf_only(tNode *node_src, tNode *node_dest)
       dat_dest->s[f][vi] = surface_copy_with_nbsurf_only(dat_src->s[f][vi]);
 }
 
+/* Copy mysurf,nbsurf,ajsurf pointers from s to sdest, this allocates sdest.
+   mysurf,nbsurf,ajsurf will be marked as not allocated.
+   If we free_surface the new surface, all the data that mysurf,nbsurf,ajsurf
+   point to will not be freed. */
+tSurface *surface_point_to_same_data(tSurface *s)
+{
+  tSurface *sdest;
+  int i;
+
+  if(!s) return NULL;
+  if(!s->nbsurf) return NULL;
+
+  /* make sdest and copy some info */
+  sdest = alloc_empty_surface(s->nnbsurf);
+  sdest->dat  = s->dat;
+  sdest->face = s->face;
+  sdest->vi   = s->vi;
+
+  /* now copy all surface pointers, and mark them as not allocated */
+  sdest->mysurf = s->mysurf;
+  sdest->allocd_mysurf = 0;
+  sdest->ajsurf = s->ajsurf;
+  sdest->allocd_ajsurf = 0;
+  for(i=0; i<s->nnbsurf; i++)
+  {
+    sdest->nbsurf[i] = s->nbsurf[i];
+    sdest->allocd_nbsurf[i] = 0;
+  }
+  return sdest;
+}
+
+/* Copy mysurf,nbsurf,ajsurf pointers from node_src to node_dest,
+   this allocates room for the surfaces but not their data. */
+void surface_copy_all_pointers(tNode *node_src, tNode *node_dest)
+{
+  tDat *dat_src = node_src->dat;
+  tDat *dat_dest = node_dest->dat;
+  int vi,f;
+
+  if(!dat_src || !dat_dest) return;
+
+  /* loop over faces, vars and copy nbsurf of each surf */
+  for(f=0; f<6; f++)
+    for(vi=0; vi<dat_dest->nv; vi++)
+      dat_dest->s[f][vi] = surface_point_to_same_data(dat_src->s[f][vi]);
+}
+
 
 /*************************************************************************/
 /*************************************************************************/

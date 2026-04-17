@@ -57,10 +57,11 @@ void evolve_RK4_mesh(tMesh *mesh)
         // make u_p an AUXVAR again:
         //...
 
-        // copy all surfaces from node_old to elm
-        surface_copy_all_nbsurf_only(node_old, elm);
-        // ^--this only works no node_old has been freed yet, because
-        // nbsurf on node_old may point to other node_olds
+        // remove all ajsurf of node_old
+        free_all_ajsurf_only(node_old);
+
+        // copy all surface data pointers from node_old to elm
+        surface_copy_all_pointers(node_old, elm);
 
         // interp nb surfs to adj again
         set_all_ajsurf(elm);
@@ -82,11 +83,19 @@ void evolve_RK4_mesh(tMesh *mesh)
     evolve_switch_troubled_nodes_mesh(mesh);
 
     /* now free all the elms in list elms_old_head */
-    loop over elms_old_head:
+    formyelms()
     {
-      // now that we have its surface data, free node_old
-      update_node_n_pt_typ_free_node_old(elm, node_old);
+      int trb = elm->dat->info->trbl_score;
+      if(trb > 0)
+      {
+        list_next_entry(pos, list)
+
+        // now that we have its surface data, free node_old
+        update_node_n_pt_typ_free_node_old(elm, node_old);
+      }
     }
+    // free list itself
+    glist_free_elems(elms_old_head);
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
