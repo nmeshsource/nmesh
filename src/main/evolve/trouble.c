@@ -101,13 +101,11 @@ int evolve_set_trouble_score(tNode *node)
 }
 
 /* determine and set trouble score in each node,
-   i.e. set node->dat->info->trbl_score */
+   i.e. set node->dat->info->trbl_score, and then return a global score */
 int evolve_set_trouble_score_mesh(tMesh *mesh)
 {
   tEvoSys *evosys = mesh->evosys;
   pVLList *u_p = evosys->u_p;
-  int Max_trb, max_trb=INT_MIN;
-  int Min_trb, min_trb=INT_MAX;
   if(PR) PRFs(":\n");
 
   /* collect min/max values of all nodes and their of neighbors */
@@ -119,6 +117,16 @@ int evolve_set_trouble_score_mesh(tMesh *mesh)
     tNode *node = MyLnode;
     evolve_set_trouble_score(node);
   }
+  /* return a global score */
+  return evolve_read_trouble_score_mesh(mesh);
+}
+
+/* read trouble score in each node, and return a global trouble score */
+int evolve_read_trouble_score_mesh(tMesh *mesh)
+{
+  int Max_trb, max_trb=INT_MIN;
+  int Min_trb, min_trb=INT_MAX;
+  if(PR) PRFs(":\n");
 
   /* now find rank-local max of node->dat->info->trbl_score */
   formylnodes_noomp(mesh)

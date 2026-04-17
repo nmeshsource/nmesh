@@ -67,6 +67,7 @@ int evolve_myln(tMesh *mesh)
   /* how we evolve the mesh */
   if(allnodes)
   {
+    int notroubles = evolve_notroubles(mesh);
     int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
     int trouble_score;
 
@@ -113,17 +114,17 @@ int evolve_myln(tMesh *mesh)
        the next time. */
     trouble_reset_evo_troubled_mesh(mesh);
 
-    /* If trouble_score>0 or trouble_score<=-NOTROUBLES, some nodes may have
-       trbl_score<=-NOTROUBLES. We now switch these nodes back to dg. */
-    if(trouble_score>0 || trouble_score<=-NOTROUBLES)
+    /* If trouble_score>0 or trouble_score<=-notroubles, some nodes may have
+       trbl_score<=-notroubles. We now switch these nodes back to dg. */
+    if(trouble_score>0 || trouble_score<=-notroubles)
     {
-      if(trouble_score<=-NOTROUBLES) //all nodes have trbl_score<=0
+      if(trouble_score<=-notroubles) //all nodes have trbl_score<=0
       {
         PRF;printf(": trouble_score=%d (great) => switch nontroubled nodes\n",
                    trouble_score);
       }
       /* switch all nodes with negative enough trbl_score to dg */
-      evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES);
+      evolve_switch_nontroubled_nodes_mesh(mesh, notroubles);
       /* now some aux vars (and others) are not set */
     }
 
@@ -132,9 +133,9 @@ int evolve_myln(tMesh *mesh)
 
     /* update some vars by calling funcs in PRESURF*, SETSRC*
        often PRESURF does cons2prim, SETSRC sets stress-energy */
-    if(trouble_score>0 || trouble_score<=-NOTROUBLES)
+    if(trouble_score>0 || trouble_score<=-notroubles)
       evolve_setsrc_again_nontroubled_nodes_mesh(mesh, evosys->rhs,
-                                                 evosys->u, NOTROUBLES);
+                                                 evosys->u, notroubles);
   }
   else /* evolve each node on its own */
   {
@@ -341,6 +342,7 @@ int evolve_limiter_needed(tElm *elm, int opt, int notroubles)
 /* Version for entire mesh: */
 void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 {
+  int notroubles = evolve_notroubles(mesh);
   tEvoSys *evosys = mesh->evosys;
   int j;
   tVarList *vl;
@@ -358,7 +360,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     /* time PRELIM & LIMDATA */
     loadtimer_start(node);
 
-    if(evolve_limiter_needed(node, opt, NOTROUBLES))
+    if(evolve_limiter_needed(node, opt, notroubles))
     {
       troubled = 0;
       forList(u, i)
@@ -409,7 +411,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     /* time LIMITER */
     loadtimer_start(node);
 
-    if(evolve_limiter_needed(node, opt, NOTROUBLES))
+    if(evolve_limiter_needed(node, opt, notroubles))
     {
       forList(u, i)
       {

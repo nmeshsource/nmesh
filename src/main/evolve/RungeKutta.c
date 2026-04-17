@@ -195,6 +195,29 @@ void evolve_sspRK3_mesh(tMesh *mesh)
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
 
+/* return number of substeps an RK scheme takes */
+int evolve_nsubsteps(tMesh *mesh)
+{
+  /* check evo method */
+  int evolve_method = Par("evolve_method");
+  if(Getv(evolve_method,      "RK4"))    return 4;
+  else if(Getv(evolve_method, "Euler"))  return 1;
+  else if(Getv(evolve_method, "sspRK3")) return 3;
+  else
+    errorexits("unknown value:   evolve_method = %s", Gets(evolve_method));
+}
+
+/* Return limit after which we consider switching back to dg.
+   If we check for trouble only after full evo step we want to say all is
+   great the trouble score is less than -NOTROUBLES, but if we check after
+   each substep -NOTROUBLES*evolve_nsubsteps(mesh). */
+int evolve_notroubles(tMesh *mesh)
+{
+  int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
+  if(redo_substep) return NOTROUBLES*evolve_nsubsteps(mesh);
+  else             return NOTROUBLES;
+}
+
 
 /*************************************************************************/
 /* functions to redo an RK substep */

@@ -31,6 +31,7 @@ int evolve_test_analyze(tMesh *mesh);
 void evolve_RK4_mesh(tMesh *mesh);
 void evolve_Euler_mesh(tMesh *mesh);
 void evolve_sspRK3_mesh(tMesh *mesh);
+int evolve_notroubles(tMesh *mesh);
 void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac);
 void evolve_RK4(tNode *node);
 void evolve_Euler(tNode *node);
@@ -39,6 +40,7 @@ void evolve_Euler(tNode *node);
 /* trouble.c */
 #define NOTROUBLES 11 /* if accum. trouble<=-NOTROUBLES, we switch to dg */
 int evolve_set_trouble_score_mesh(tMesh *mesh);
+int evolve_read_trouble_score_mesh(tMesh *mesh);
 void evolve_prepare_do_over_mesh(tMesh *mesh);
 void evolve_switch_troubled_nodes_mesh(tMesh *mesh);
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles);
