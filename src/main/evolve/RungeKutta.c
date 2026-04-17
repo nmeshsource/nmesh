@@ -22,14 +22,18 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
-  int trouble_score;
+  int redo_substeps = 1;
+  int trbl_score = 0;
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);             // r  = RHS(u, t)
   pVLList_addto(u, dt/6.0, r, vladdto,0);     // u += r dt/6
-  trouble_score = evolve_set_trouble_score_mesh(mesh); // scores u
-  if(trouble_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.0);
+  if(redo_substeps)
+  {
+    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
+    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.0);
+  }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
