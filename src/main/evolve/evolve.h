@@ -27,11 +27,12 @@ int evolve_test_analyze(tMesh *mesh);
 
 
 /* RungeKutta.c */
-void evolve_RK4(tNode *node);
-void evolve_Euler(tNode *node);
 void evolve_RK4_mesh(tMesh *mesh);
 void evolve_Euler_mesh(tMesh *mesh);
 void evolve_sspRK3_mesh(tMesh *mesh);
+void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac);
+void evolve_RK4(tNode *node);
+void evolve_Euler(tNode *node);
 
 
 /* trouble.c */

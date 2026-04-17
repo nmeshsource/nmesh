@@ -29,70 +29,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   evolve_setrhs_mesh(mesh, r, u);             // r  = RHS(u, t)
   pVLList_addto(u, dt/6.0, r, vladdto,0);     // u += r dt/6
   trouble_score = evolve_set_trouble_score_mesh(mesh); // scores u
-  if(trouble_score>0)
-  {
-    /* alloc list to store old dg elms */
-    tElm **elm_old = checked_calloc(mesh->nmyelm, sizeof(elm_old[0]));
-
-    formyelms(mesh)
-    {
-      tElm *elm = MyElm;
-      int n[3], pt_typ[3];
-      int trb = elm->dat->info->trbl_score;
-      if(trb > 0)
-      {
-        int li;
-        tRef *ref = elm->dat->info->trbl_ref;
-
-        // take substep back
-        pVLList_addto(u, -dt/6.0, r, vladdto, elm);  // u -= r dt/6
-
-        // pick n, pt_typ
-        hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
-
-        // make u_p a DATAVAR so that it will be interp'd on p-refine
-        forList(u_p, li) VLSetType(ListEntry(u_p,li), DATAVAR);
-
-        // p-refine locally
-        elm_old[MyID] = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
-        // ^-need to keep old elm in case something is pointing to its data
-        //   So we store old elm in list elm_old and free it later.
-
-        // make u_p an AUXVAR again:
-        forList(u_p, li) VLSetType(ListEntry(u_p,li), AUXVAR);
-
-        // remove all ajsurf of elm_old
-        free_all_ajsurf_only(elm_old[MyID]);
-
-        // copy all surface data pointers from elm_old to elm
-        surface_copy_all_pointers(elm_old[MyID], elm);
-
-        // interp nb surfs to adj for our new elm
-        set_all_ajsurf(elm);
-
-        // run RHS funcs again
-        /*
-        ???
-        todo: 1. rewrite evolve_setrhs_mesh(mesh), s.t. it calls a funcs
-                 for each elm in each of the formylnodes(mesh) loops
-              2. make evolve_setrhs(elm) that calls these same elm based funcs
-        */
-
-        // set u again
-        pVLList_addto(u, dt/6.0, r, vladdto, elm);  // u += r dt/6
-      }
-    }
-    /* Finally we call p-refine so that nb-info such as fnb gets updated. But
-       interp should not happen again since update_node_n_pt_typ (called form
-       hp_refine_elms_if_rflag) will notice that n,pt_typ are set already. */
-    evolve_switch_troubled_nodes_mesh(mesh);
-
-    /* now free all the elms in list elm_old */
-    formyelms(mesh)
-      if(elm_old[MyID]) update_node_n_pt_typ_free_node_old(elm_old[MyID]);
-    /* free list itself */
-    free(elm_old);
-  }
+  if(trouble_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.0);
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
@@ -205,6 +142,81 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   //printvarlist_atpoint(pt, ListEntry(u,0), "");
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
+}
+
+
+/*************************************************************************/
+/* functions to redo an RK substep */
+/*************************************************************************/
+
+void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
+{
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *u   = evosys->u;
+  pVLList *u_p = evosys->u_p;
+  pVLList *r   = evosys->rhs;
+
+  /* alloc list to store old dg elms */
+  tElm **elm_old = checked_calloc(mesh->nmyelm, sizeof(elm_old[0]));
+
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    int n[3], pt_typ[3];
+    int trb = elm->dat->info->trbl_score;
+    if(trb > 0)
+    {
+      int li;
+      tRef *ref = elm->dat->info->trbl_ref;
+
+      // take substep back
+      pVLList_addto(u, -rfac, r, vladdto, elm);  // e.g. u -= r dt/6
+
+      // pick n, pt_typ
+      hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
+
+      // make u_p a DATAVAR so that it will be interp'd on p-refine
+      forList(u_p, li) VLSetType(ListEntry(u_p,li), DATAVAR);
+
+      // p-refine locally
+      elm_old[MyID] = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
+      // ^-need to keep old elm in case something is pointing to its data
+      //   So we store old elm in list elm_old and free it later.
+
+      // make u_p an AUXVAR again:
+      forList(u_p, li) VLSetType(ListEntry(u_p,li), AUXVAR);
+
+      // remove all ajsurf of elm_old
+      free_all_ajsurf_only(elm_old[MyID]);
+
+      // copy all surface data pointers from elm_old to elm
+      surface_copy_all_pointers(elm_old[MyID], elm);
+
+      // interp nb surfs to adj for our new elm
+      set_all_ajsurf(elm);
+
+      // run RHS funcs again
+      /*
+      ???
+      todo: 1. rewrite evolve_setrhs_mesh(mesh), s.t. it calls a funcs
+               for each elm in each of the formylnodes(mesh) loops
+            2. make evolve_setrhs(elm) that calls these same elm based funcs
+      */
+
+      // set u again
+      pVLList_addto(u, rfac, r, vladdto, elm);  // e.g. u += r dt/6
+    }
+  }
+  /* Finally we call p-refine so that nb-info such as fnb gets updated. But
+     interp should not happen again since update_node_n_pt_typ (called form
+     hp_refine_elms_if_rflag) will notice that n,pt_typ are set already. */
+  evolve_switch_troubled_nodes_mesh(mesh);
+
+  /* now free all the elms in list elm_old */
+  formyelms(mesh)
+    if(elm_old[MyID]) update_node_n_pt_typ_free_node_old(elm_old[MyID]);
+  /* free list itself */
+  free(elm_old);
 }
 
 
