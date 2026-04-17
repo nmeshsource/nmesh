@@ -22,14 +22,14 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
-  int redo_substeps = 1;
+  int redo_substep = 1;
   int trbl_score = 0;
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);             // r  = RHS(u, t)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
@@ -40,7 +40,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/3.);
@@ -51,7 +51,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/3.);
@@ -62,7 +62,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
@@ -89,14 +89,14 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
-  int redo_substeps = 1;
+  int redo_substep = 1;
   int trbl_score = 0;
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
   pVLList_addto(u, dt, r, vladdto,0);     // u += r dt
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt);
@@ -135,7 +135,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
-  int redo_substeps = 1;
+  int redo_substep = 1;
   int trbl_score = 0;
 
   //tNode *node = node_from_nodename(mesh, "0_366");
@@ -147,7 +147,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);              // r  = RHS(u, t)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
@@ -158,7 +158,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
@@ -178,7 +178,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   evolve_limiter_mesh(mesh, w, 0);
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
-  if(redo_substeps)
+  if(redo_substep)
   {
     trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
     if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt*2./3.);
