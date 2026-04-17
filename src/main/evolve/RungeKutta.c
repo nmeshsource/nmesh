@@ -27,10 +27,76 @@ void evolve_RK4_mesh(tMesh *mesh)
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, u);             // r  = RHS(u, t)
   pVLList_addto(u, dt/6.0, r, vladdto,0);     // u += r dt/6
+  trouble_score = evolve_set_trouble_score_mesh(mesh); // scores u
+  if(trouble_score>0)
+  {
+    struct list_head elms_old_head; /* list head to store old dg elms */
+    INIT_LIST_HEAD(&elms_old_head);
+
+    formyelms()
+    {
+      int trb = elm->dat->info->trbl_score;
+      if(trb > 0)
+      {
+        pVLList_addto(u, -dt/6.0, r, vladdto, elm);  // u -= r dt/6
+
+        // pick n, pt_typ
+        tRef *ref = elm->dat->info->trbl_ref
+        hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
+
+        // make u_p a DATAVAR so that it will be interp'd on p-refine
+        //...
+
+        // p-refine locally
+        node_old = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
+        // ^-keep node_old in case something is pointing to its data
+        // we need to store this node_old in some list and free this list only
+        // after the current loop is done
+        glist_entry_add_tail(node_old, &elms_old_head);
+
+        // make u_p an AUXVAR again:
+        //...
+
+        // copy all surfaces from node_old to elm
+        surface_copy_all_nbsurf_only(node_old, elm);
+        // ^--this only works no node_old has been freed yet, because
+        // nbsurf on node_old may point to other node_olds
+
+        // interp nb surfs to adj again
+        set_all_ajsurf(elm);
+
+        // run RHS funcs again
+        ???
+        todo: 1. rewrite evolve_setrhs_mesh(mesh), s.t. it calls a funcs
+                 for each elm in each of the formylnodes(mesh) loops
+              2. make evolve_setrhs(elm) that calls these same elm based funcs
+
+
+        // set u again
+        pVLList_addto(u, dt/6.0, r, vladdto, elm);  // u += r dt/6
+      }
+    }
+    /* Finally we call p-refine so that nb-info such as fnb gets updated. But
+       interp should not happen again since update_node_n_pt_typ (called form
+       hp_refine_elms_if_rflag) will notice that n,pt_typ are set already. */
+    evolve_switch_troubled_nodes_mesh(mesh);
+
+    /* now free all the elms in list elms_old_head */
+    loop over elms_old_head:
+    {
+      // now that we have its surface data, free node_old
+      update_node_n_pt_typ_free_node_old(elm, node_old);
+    }
+  }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
   mesh->time = t+0.5*dt;
   evolve_limiter_mesh(mesh, w, 0);
+
+
+
+
+
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt/2)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
 
@@ -46,6 +112,12 @@ void evolve_RK4_mesh(tMesh *mesh)
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t+dt)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   mesh->time = t+dt;                          // we are now at t+dt
+
+  /* switch from fv to dg if we had NOTROUBLES*3 RK substeps without trouble */
+  evolve_switch_nontroubled_nodes_mesh(mesh, NOTROUBLES*3);
+  limiter
+
+
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
 }
