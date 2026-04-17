@@ -200,6 +200,8 @@ void evolve_sspRK3_mesh(tMesh *mesh)
 /* functions to redo an RK substep */
 /*************************************************************************/
 
+/* Redo substep on all elms with elm->dat->info->trbl_score > 0.
+   We 1st take pre substep of amount rfac back. */
 void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
 {
   tEvoSys *evosys = mesh->evosys;

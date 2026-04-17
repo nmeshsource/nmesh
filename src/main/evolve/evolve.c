@@ -312,7 +312,7 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 }
 
 /* parse options for evolve_limiter_mesh */
-int evolve_limiter_needed(tElm *elm, int opt)
+int evolve_limiter_needed(tElm *elm, int opt, int notroubles)
 {
   int trbl_score;
 
@@ -322,7 +322,7 @@ int evolve_limiter_needed(tElm *elm, int opt)
     return 1;
   case 1: /* call limiter only for switched elms */
     trbl_score = elm->dat->info->trbl_score;
-    if(trbl_score>=1 || trbl_score<=-NOTROUBLES) return 1;
+    if(trbl_score>=1 || trbl_score<=-notroubles) return 1;
     else                                         return 0;
   case 2: /* call limiter only for elms that are still unlimited */
     if(elm->dat->info->unlimited) return 1;
@@ -334,7 +334,7 @@ int evolve_limiter_needed(tElm *elm, int opt)
 
 /* Apply limiters to evo subsystems.
    If opt=1
-     we do it only if trbl_score >= 1 or trbl_score<=-NOTROUBLES
+     we do it only if trbl_score >= 1 or trbl_score<=-notroubles
      i.e. only for switched nodes.
    If opt=0
      we ALWAYS do it. */
@@ -358,7 +358,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     /* time PRELIM & LIMDATA */
     loadtimer_start(node);
 
-    if(evolve_limiter_needed(node, opt))
+    if(evolve_limiter_needed(node, opt, NOTROUBLES))
     {
       troubled = 0;
       forList(u, i)
@@ -409,7 +409,7 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
     /* time LIMITER */
     loadtimer_start(node);
 
-    if(evolve_limiter_needed(node, opt))
+    if(evolve_limiter_needed(node, opt, NOTROUBLES))
     {
       forList(u, i)
       {
