@@ -23,6 +23,8 @@ int nmesh_evolve(tMesh *mesh)
 
   /* parameters */
   AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
+  AddPar("evolve_redo_troubled", "step", "what we redo in troubled elms "
+         "[step,substep]");
   AddPar("evolve_filter", "no", "whether we filter all evo. vars [no,yes]");
   AddPar("evolve_filter_varlist", "", "1st comps of other vars we filter");
   AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1-dn))^s}");

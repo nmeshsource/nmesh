@@ -67,13 +67,17 @@ int evolve_myln(tMesh *mesh)
   /* how we evolve the mesh */
   if(allnodes)
   {
+    int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
     int trouble_score;
 
     /* make one full evo step */
     Evolve_mesh(mesh);
 
-    /* get global trouble score */
-    trouble_score = evolve_set_trouble_score_mesh(mesh);
+    /* get global trouble score, if it wasn't done after each RK substep */
+    if(redo_substep)
+      trouble_score = 0; //signal no trouble here if were already redone
+    else
+      trouble_score = evolve_set_trouble_score_mesh(mesh);
 
     /* If trouble_score>0 at least some nodes are troubled.
        In this case we switch them to fv and redo the evo step. */

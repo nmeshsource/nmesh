@@ -22,7 +22,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
-  int redo_substep = 1;
+  int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
   int trbl_score = 0;
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
@@ -89,7 +89,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
-  int redo_substep = 1;
+  int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
   int trbl_score = 0;
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
@@ -135,7 +135,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
-  int redo_substep = 1;
+  int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
   int trbl_score = 0;
 
   //tNode *node = node_from_nodename(mesh, "0_366");
