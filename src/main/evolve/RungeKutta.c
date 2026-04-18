@@ -209,7 +209,7 @@ int evolve_notroubles(tMesh *mesh)
 /*************************************************************************/
 
 /* Redo substep on all elms with elm->dat->info->trbl_score > 0.
-   We 1st take pre substep of amount rfac back. */
+   We 1st take pre substep of amount rfac back. Here rfac is e.g. dt/6 */
 void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
 {
   tEvoSys *evosys = mesh->evosys;
@@ -231,7 +231,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       tRef *ref = elm->dat->info->trbl_ref;
 
       // take substep back
-      pVLList_addto(u, -rfac, r, vladdto, elm);  // e.g. u -= r dt/6
+      pVLList_addto(u, -rfac, r, vladdto, elm);  // u -= r rfac
 
       // pick n, pt_typ
       hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
@@ -260,7 +260,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       evolve_setrhs(elm, u, r, 0);
 
       // set u again
-      pVLList_addto(u, rfac, r, vladdto, elm);  // e.g. u += r dt/6
+      pVLList_addto(u, rfac, r, vladdto, elm);  // u += r rfac
     }
   }
   /* Finally we call p-refine so that nb-info such as fnb gets updated. But
