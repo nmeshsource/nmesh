@@ -223,12 +223,12 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
   formyelms(mesh)
   {
     tElm *elm = MyElm;
-    int n[3], pt_typ[3];
     int trb = elm->dat->info->trbl_score;
     if(trb > 0)
     {
       int li;
       tRef *ref = elm->dat->info->trbl_ref;
+      int n[3], pt_typ[3];
 
       // take substep back
       pVLList_addto(u, -rfac, r, vladdto, elm);  // u -= r rfac
