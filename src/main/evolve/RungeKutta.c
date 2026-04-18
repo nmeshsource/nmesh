@@ -256,6 +256,9 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // interp nb surfs to adj for our new elm
       set_all_ajsurf(elm);
 
+      /* NOTE: elm->dat now has surfaces, but no indic, as this never got set.
+         LUCKILY evolve_setrhs never calls any LIMDATA or LIMITER funcs. */
+
       // run RHS funcs again
       evolve_setrhs(elm, u, r, 0);
 
@@ -267,6 +270,8 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
      interp should not happen again since update_node_n_pt_typ (called form
      hp_refine_elms_if_rflag) will notice that n,pt_typ are set already. */
   evolve_switch_troubled_nodes_mesh(mesh);
+  // ^-This calls evolve_init_communication_structs and prefine_elms_if_rflag
+  //   prefine_elms_if_rflag updates nb-info such as fnb.
 
   /* now free all the elms in list elm_old */
   formyelms(mesh)
