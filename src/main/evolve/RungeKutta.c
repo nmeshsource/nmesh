@@ -23,7 +23,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
-  int trbl_score = 0;
+  int nrs = 0; //counts how many substep we redone
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
   mesh->time = t;
@@ -31,8 +31,8 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
@@ -42,8 +42,8 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/3.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/3.);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
@@ -53,8 +53,8 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList_addto(u, dt/3., r, vladdto,0);      // u += r dt/3
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/3.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/3.);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);    // w  = u_p + r dt
@@ -64,11 +64,14 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
 
   mesh->time = t+dt;                          // we are now at t+dt
+
+  if(nrs>0) { PRF;printf(": trouble_score was bad => switched troubled "
+                         "elms & redid %d substeps\n", nrs); }
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
@@ -85,7 +88,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   //pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
-  int trbl_score = 0;
+  int nrs = 0; //counts how many substep we redone
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
   mesh->time = t;
@@ -93,11 +96,14 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList_addto(u, dt, r, vladdto,0);     // u += r dt
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt);  nrs++; }
   }
 
   mesh->time = t+dt;                      // we are now at t+dt
+
+  if(nrs>0) { PRF;printf(": trouble_score was bad => switched troubled "
+                         "elms & redid %d substeps\n", nrs); }
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
@@ -126,7 +132,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
-  int trbl_score = 0;
+  int nrs = 0; //counts how many substep we redone
 
   //tNode *node = node_from_nodename(mesh, "0_366");
   //tPoint pt[] =  {{.node=node, .ijk=17}};
@@ -139,8 +145,8 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
@@ -150,8 +156,8 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt/6.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
     /* reconstruct old w_1 from u_2, u_p and r_1:
        u_0 = u_p,  u_1 = u_p + r_0 dt/6,  w_1 = u_p + r_0 dt
               but: u_1 = u_2 - r_1 dt/6
@@ -170,11 +176,14 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList_addto(u, dt*2./3., r, vladdto,0);    // u += r dt*2/3
   if(redo_substep)
   {
-    trbl_score = evolve_set_trouble_score_mesh(mesh); //score u after step
-    if(trbl_score>0) evolve_trouble_redo_u_step_mesh(mesh, dt*2./3.);
+    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    { evolve_trouble_redo_u_step_mesh(mesh, dt*2./3.);  nrs++; }
   }
 
   mesh->time = t+dt;                           // we are now at t+dt
+
+  if(nrs>0) { PRF;printf(": trouble_score was bad => switched troubled "
+                         "elms & redid %d substeps\n", nrs); }
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
