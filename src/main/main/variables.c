@@ -746,7 +746,7 @@ void VLSetType(tVarList *vl, int type)
 {
   tMesh *mesh = vl->mesh;
   int i;
-  forvl(vl, i) MeshVarComponentSetType(mesh, i, type);
+  forvl(vl, i) MeshVarComponentSetType(mesh, Vind(vl,i), type);
 }
 
 /********************************************************************/
