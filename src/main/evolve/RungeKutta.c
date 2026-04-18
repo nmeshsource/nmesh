@@ -201,10 +201,10 @@ int evolve_nsubsteps(tMesh *mesh)
     errorexits("unknown value:   evolve_method = %s", Gets(evolve_method));
 }
 
-/* Return limit after which we consider switching back to dg.
-   If we check for trouble only after full evo step we want to say all is
-   great the trouble score is less than -NOTROUBLES, but if we check after
-   each substep -NOTROUBLES*evolve_nsubsteps(mesh). */
+/* Return limit after which we consider switching back to dg. If we check
+   for trouble only after full evo step we want to say all is great if the
+   trouble score is less than -NOTROUBLES, but if we check after each
+   substep it's great if it's less then -NOTROUBLES*evolve_nsubsteps(mesh). */
 int evolve_notroubles(tMesh *mesh)
 {
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
