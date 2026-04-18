@@ -257,12 +257,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       set_all_ajsurf(elm);
 
       // run RHS funcs again
-      /*
-      ???
-      todo: 1. rewrite evolve_setrhs_mesh(mesh), s.t. it calls a funcs
-               for each elm in each of the formylnodes(mesh) loops
-            2. make evolve_setrhs(elm) that calls these same elm based funcs
-      */
+      evolve_setrhs(elm, u, r, 0);
 
       // set u again
       pVLList_addto(u, rfac, r, vladdto, elm);  // e.g. u += r dt/6
