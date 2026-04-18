@@ -70,8 +70,7 @@ void evolve_RK4_mesh(tMesh *mesh)
 
   mesh->time = t+dt;                          // we are now at t+dt
 
-  if(nrs>0) { PRF;printf(": trouble_score was bad => switched troubled "
-                         "elms & redid %d substeps\n", nrs); }
+  if(nrs>0) {PRF;printf(": switched troubled elms & redid %d substeps\n",nrs);}
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
@@ -102,8 +101,7 @@ void evolve_Euler_mesh(tMesh *mesh)
 
   mesh->time = t+dt;                      // we are now at t+dt
 
-  if(nrs>0) { PRF;printf(": trouble_score was bad => switched troubled "
-                         "elms & redid %d substeps\n", nrs); }
+  if(nrs>0) {PRF;printf(": switched troubled elms & redid %d substeps\n",nrs);}
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
@@ -182,8 +180,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
 
   mesh->time = t+dt;                           // we are now at t+dt
 
-  if(nrs>0) { PRF;printf(": trouble_score was bad => switched troubled "
-                         "elms & redid %d substeps\n", nrs); }
+  if(nrs>0) {PRF;printf(": switched troubled elms & redid %d substeps\n",nrs);}
 
   /* The new u is not limited yet!
      A final evolve_limiter_mesh(mesh, u, 0) is called in evolve_myln */
