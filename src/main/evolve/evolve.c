@@ -175,45 +175,14 @@ int evolve_myln(tMesh *mesh)
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
-  pVLList *x = evosys->x; /* extra vars needed for LDG */
   int have_XRHS; /* is set to 1 if we have a XVOLRHS or a XSURFRHS for x */
   int ie;
 
   if(PR) PRFs(":\n");
 
   /* loop over all nodes before MPI requests */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int i, troubled;
-
-    /* time PRESURF */
-    loadtimer_start(node);
-
-    /* set time on all nodes */
-    node->time = mesh->time;
-    node->dt   = mesh->dt;
-
-    /* set things before surface exchange, e.g. cons2prim */
-    troubled = 0;
-    forList(u, i)
-    {
-      tEvoVars evv[1] = {{
-        .vlu = ListEntry(u,i),
-        .vlr = ListEntry(rhs,i),
-        .vlx = ListEntry(x,i)    }};
-      if(ListEntry(evosys->f[PRESURF0],i))
-        troubled |= ListEntry(evosys->f[PRESURF0],i)(node, evv);
-      if(ListEntry(evosys->f[PRESURF],i))
-        troubled |= ListEntry(evosys->f[PRESURF],i)(node, evv);
-      if(ListEntry(evosys->f[PRESURF2],i))
-        troubled |= ListEntry(evosys->f[PRESURF2],i)(node, evv);
-    }
-    node->dat->info->evo_troubled |= troubled;
-
-    /* add time spend on PRESURF */
-    loadtimer_stop(node);
-  }
+  formyelms(mesh)
+    evolve_setrhs_PRESURF(MyElm, rhs, u);
 
   /* do surface exchange on entire mesh */
   MPIexchange_set_all_myln_localdata(mesh);
@@ -224,48 +193,8 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
      MPIexchange_request_all_myln_data with other calculations. */
 
   /* loop over all nodes after MPI exchange has been requested */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int i, troubled;
-
-    /* time SETSRC & VOLRHS */
-    loadtimer_start(node);
-
-    troubled = 0;
-    forList(u, i)
-    {
-      tEvoVars evv[1] = {{
-        .vlu = ListEntry(u,i),
-        .vlr = ListEntry(rhs,i),
-        .vlx = ListEntry(x,i)    }};
-
-      /* set all early sources */
-      if(ListEntry(evosys->f[SETSRC0],i))
-        troubled |= ListEntry(evosys->f[SETSRC0],i)(node, evv);
-      /* set all sources */
-      if(ListEntry(evosys->f[SETSRC],i))
-        troubled |= ListEntry(evosys->f[SETSRC],i)(node, evv);
-
-      /* check if we have to set extra vars for LDG */
-      if(ListEntry(evosys->f[XVOLRHS],i))
-        troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
-      if(ListEntry(evosys->f[XSURFRHS],i))
-      {
-        get_all_surfaces(node); //get surfaces of u, don't need surf of x yet
-        //FIXME: make get_all_surfaces_vl that does it just for a varlist
-        troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
-      }
-
-      /* set all volume RHSs */
-      if(ListEntry(evosys->f[VOLRHS],i))
-        troubled |= ListEntry(evosys->f[VOLRHS],i)(node, evv);
-    }
-    node->dat->info->evo_troubled |= troubled;
-
-    /* add time spend on SETSRC & VOLRHS */
-    loadtimer_stop(node);
-  }
+  formyelms(mesh)
+    evolve_setrhs_VOLRHS(MyElm, rhs, u);
 
   /* check if there is a single XVOLRHS */
   have_XRHS = 0;
@@ -291,31 +220,156 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
   /* Now we have all surface data */
 
   /* loop over all nodes, after MPI data has been received */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int i, troubled;
-
-    /* time SURFRHS */
-    loadtimer_start(node);
-
-    /* add all surface RHSs */
-    troubled = 0;
-    forList(u, i)
-    {
-      tEvoVars evv[1] = {{
-        .vlu = ListEntry(u,i),
-        .vlr = ListEntry(rhs,i),
-        .vlx = ListEntry(x,i)    }};
-      if(ListEntry(evosys->f[SURFRHS],i))
-        troubled |= ListEntry(evosys->f[SURFRHS],i)(node, evv);
-    }
-    node->dat->info->evo_troubled |= troubled;
-
-    /* add time spend on SURFRHS */
-    loadtimer_stop(node);
-  }
+  formyelms(mesh)
+    evolve_setrhs_SURFRHS(MyElm, rhs, u);
 }
+
+/* PRESURF part of evolve_setrhs */
+void evolve_setrhs_PRESURF(tElm *node, pVLList *rhs, pVLList *u)
+{
+  tMesh *mesh = Elm_mesh(node);
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *x = evosys->x; /* extra vars needed for LDG */
+  int i, troubled;
+
+  /* time PRESURF */
+  loadtimer_start(node);
+
+  /* set time on all nodes */
+  node->time = mesh->time;
+  node->dt   = mesh->dt;
+
+  /* set things before surface exchange, e.g. cons2prim */
+  troubled = 0;
+  forList(u, i)
+  {
+    tEvoVars evv[1] = {{
+      .vlu = ListEntry(u,i),
+      .vlr = ListEntry(rhs,i),
+      .vlx = ListEntry(x,i)    }};
+    if(ListEntry(evosys->f[PRESURF0],i))
+      troubled |= ListEntry(evosys->f[PRESURF0],i)(node, evv);
+    if(ListEntry(evosys->f[PRESURF],i))
+      troubled |= ListEntry(evosys->f[PRESURF],i)(node, evv);
+    if(ListEntry(evosys->f[PRESURF2],i))
+      troubled |= ListEntry(evosys->f[PRESURF2],i)(node, evv);
+  }
+  node->dat->info->evo_troubled |= troubled;
+
+  /* add time spend on PRESURF */
+  loadtimer_stop(node);
+}
+
+/* SETSRC & VOLRHS part of evolve_setrhs */
+void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
+{
+  tMesh *mesh = Elm_mesh(node);
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *x = evosys->x; /* extra vars needed for LDG */
+  int i, troubled;
+
+  /* time SETSRC & VOLRHS */
+  loadtimer_start(node);
+
+  troubled = 0;
+  forList(u, i)
+  {
+    tEvoVars evv[1] = {{
+      .vlu = ListEntry(u,i),
+      .vlr = ListEntry(rhs,i),
+      .vlx = ListEntry(x,i)    }};
+
+    /* set all early sources */
+    if(ListEntry(evosys->f[SETSRC0],i))
+      troubled |= ListEntry(evosys->f[SETSRC0],i)(node, evv);
+    /* set all sources */
+    if(ListEntry(evosys->f[SETSRC],i))
+      troubled |= ListEntry(evosys->f[SETSRC],i)(node, evv);
+
+    /* check if we have to set extra vars for LDG */
+    if(ListEntry(evosys->f[XVOLRHS],i))
+      troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
+    if(ListEntry(evosys->f[XSURFRHS],i))
+    {
+      get_all_surfaces(node); //get surfaces of u, don't need surf of x yet
+      //FIXME: make get_all_surfaces_vl that does it just for a varlist
+      troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
+    }
+
+    /* set all volume RHSs */
+    if(ListEntry(evosys->f[VOLRHS],i))
+      troubled |= ListEntry(evosys->f[VOLRHS],i)(node, evv);
+  }
+  node->dat->info->evo_troubled |= troubled;
+
+  /* add time spend on SETSRC & VOLRHS */
+  loadtimer_stop(node);
+}
+
+/* SURFRHS part of evolve_setrhs */
+void evolve_setrhs_SURFRHS(tElm *node, pVLList *rhs, pVLList *u)
+{
+  tMesh *mesh = Elm_mesh(node);
+  tEvoSys *evosys = mesh->evosys;
+  pVLList *x = evosys->x; /* extra vars needed for LDG */
+  int i, troubled;
+
+  /* time SURFRHS */
+  loadtimer_start(node);
+
+  /* add all surface RHSs */
+  troubled = 0;
+  forList(u, i)
+  {
+    tEvoVars evv[1] = {{
+      .vlu = ListEntry(u,i),
+      .vlr = ListEntry(rhs,i),
+      .vlx = ListEntry(x,i)    }};
+    if(ListEntry(evosys->f[SURFRHS],i))
+      troubled |= ListEntry(evosys->f[SURFRHS],i)(node, evv);
+  }
+  node->dat->info->evo_troubled |= troubled;
+
+  /* add time spend on SURFRHS */
+  loadtimer_stop(node);
+}
+
+/* set RHS of all evo subsystems. This first also calls the setsrc
+   functions in case some sources in the RHSs have to be set. */
+/* Version for one elm: */
+void evolve_setrhs(tElm *elm, pVLList *rhs, pVLList *u, int MPI_exchange)
+{
+  //tMesh *mesh = Elm_mesh(elm);
+  //tEvoSys *evosys = mesh->evosys;
+  ////pVLList *x = evosys->x; /* extra vars needed for LDG */
+  //int have_XRHS; /* is set to 1 if we have a XVOLRHS or a XSURFRHS for x */
+  //int ie;
+
+  if(MPI_exchange)
+  {
+    errorexit("MPI_exchange=1 case is not implemented");
+    /* request all surfaces on node for all vars in u */
+    evolve_request_surfaces(elm, u);
+  }
+
+  evolve_setrhs_PRESURF(elm, rhs, u);
+
+  evolve_setrhs_VOLRHS(elm, rhs, u);
+
+  //if(MPI_exchange)
+  //{
+  //  Test: if(MPI_exchange) get_all_surfaces(node);
+
+      /* check if there is a single XVOLRHS */
+  //  have_XRHS = 0;
+  //  forList(u, ie)
+  //    if( (ListEntry(evosys->f[XVOLRHS],ie)) ||
+  //        (ListEntry(evosys->f[XSURFRHS],ie)) ) { have_XRHS = 1;  break; }
+  //}
+
+  evolve_setrhs_SURFRHS(elm, rhs, u);
+}
+
 
 /* parse options for evolve_limiter_mesh */
 int evolve_limiter_needed(tElm *elm, int opt, int notroubles)
@@ -642,7 +696,7 @@ int evolve_output_timers(tMesh *mesh)
 /* set RHS of all evo subsystems. This first also calls the setsrc
    functions in case some sources in the RHSs have to be set. */
 /* Version for just one node: */
-void evolve_setrhs(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
+void evolve_setrhs__old(tNode *node, pVLList *rhs, pVLList *u, int request_surfs)
 {
   tMesh *mesh = node->pat->mesh;
   tEvoSys *evosys = mesh->evosys;
