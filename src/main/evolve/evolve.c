@@ -84,7 +84,7 @@ int evolve_myln(tMesh *mesh)
        In this case we switch them to fv and redo the evo step. */
     if(trouble_score>0)
     {
-      PRF;printf(": trouble_score=%d (bad) => switch troubled nodes & "
+      PRF;printf(": trouble_score=%d (bad) => switch troubled elms & "
                  "redo evo step\n", trouble_score);
 
       /* go back to u_p and switch to fv */
@@ -125,7 +125,7 @@ int evolve_myln(tMesh *mesh)
     {
       if(trouble_score<=-notroubles) //all nodes have trbl_score<=0
       {
-        PRF;printf(": trouble_score=%d (great) => switch nontroubled nodes\n",
+        PRF;printf(": trouble_score=%d (great) => switch nontroubled elms\n",
                    trouble_score);
       }
       /* switch all nodes with negative enough trbl_score to dg */
