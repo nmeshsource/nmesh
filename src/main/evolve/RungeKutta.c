@@ -130,7 +130,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
-  int nrs = 0; //counts how many substep we redone
+  int nrs = 0; //counts how many substeps were redone
 
   //tNode *node = node_from_nodename(mesh, "0_366");
   //tPoint pt[] =  {{.node=node, .ijk=17}};
