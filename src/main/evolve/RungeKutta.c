@@ -250,6 +250,11 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // ^-need to keep old elm in case something is pointing to its data
       //   So we store old elm in list elm_old and free it later.
 
+      // Since elm is now refined we reset its ref method to PARENT_n, which
+      // is a no-op. Then evolve_switch_troubled_nodes_mesh below will not
+      // refine again.
+      elm->dat->info->trbl_ref->method = PARENT_n;
+
       // make u_p an AUXVAR again:
       forList(u_p, li) VLSetType(ListEntry(u_p,li), AUXVAR);
 

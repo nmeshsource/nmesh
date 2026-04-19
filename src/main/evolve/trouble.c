@@ -198,6 +198,7 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 
   /* get ref->method from my proc to all others */
   refine_synchronize_ref_method(ref);
+  //PRF;printref(ref);
 
   /* do p-refinement to desired n and point type */
   prefine_nodes_if_rflag(mesh, ref);
