@@ -272,7 +272,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
 
       // run RHS funcs again
       evolve_PRELIM(elm, u, 1);
-      evolve_setrhs(elm, u, r, 0);
+      evolve_setrhs(elm, r, u, 0);
 
       // set u again
       pVLList_addto(u, rfac, r, vladdto, elm);  // u += r rfac
