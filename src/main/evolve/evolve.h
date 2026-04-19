@@ -10,6 +10,7 @@ void evolve_setrhs_PRESURF(tElm *node, pVLList *rhs, pVLList *u);
 void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u);
 void evolve_setrhs_SURFRHS(tElm *node, pVLList *rhs, pVLList *u);
 void evolve_setrhs(tElm *elm, pVLList *rhs, pVLList *u, int MPI_exchange);
+void evolve_PRELIM(tElm *elm, pVLList *u, int update_evo_troubled);
 void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u,
                                                 int notroubles);

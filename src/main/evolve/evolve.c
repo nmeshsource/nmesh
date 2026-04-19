@@ -371,6 +371,32 @@ void evolve_setrhs(tElm *elm, pVLList *rhs, pVLList *u, int MPI_exchange)
 }
 
 
+/* update some vars by calling funcs in PRELIM*,
+   often PRELIM sets ADM metric */
+void evolve_PRELIM(tElm *elm, pVLList *u, int update_evo_troubled)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  tEvoSys *evosys = mesh->evosys;
+  int i, troubled;
+
+  if(PR) PRFs(":\n");
+
+  /* set some things again, e.g. ADM metric */
+  troubled = 0;
+  forList(u, i)
+  {
+    tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
+    /* call funcs that we need before limiters */
+    if(ListEntry(evosys->f[PRELIM0],i))
+      troubled |= ListEntry(evosys->f[PRELIM0],i)(elm, evv);
+    if(ListEntry(evosys->f[PRELIM],i))
+      troubled |= ListEntry(evosys->f[PRELIM],i)(elm, evv);
+  }
+  if(update_evo_troubled)
+    elm->dat->info->evo_troubled |= troubled;
+}
+
+
 /* parse options for evolve_limiter_mesh */
 int evolve_limiter_needed(tElm *elm, int opt, int notroubles)
 {

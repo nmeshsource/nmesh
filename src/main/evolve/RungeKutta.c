@@ -271,6 +271,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
          LUCKILY evolve_setrhs never calls any LIMDATA or LIMITER funcs. */
 
       // run RHS funcs again
+      //evolve_PRELIM(elm, u, 1);
       evolve_setrhs(elm, u, r, 0);
 
       // set u again
