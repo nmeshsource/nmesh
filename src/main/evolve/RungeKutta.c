@@ -237,7 +237,6 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
     {
       tElm *elm_sav;
       int li;
-      tVarList *vl;
       int n[3], pt_typ[3];
 
       // take substep back
@@ -286,41 +285,12 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       set_all_ajsurf(elm);
 
       /* NOTE: elm->dat now has surfaces, but no indic */
+
       // init indicators in new elm
-      errorexit("impl");
-
-
-      // like:  init_all_myln_myindc_in_evosys(mesh);
-
-      //VarList with w
-      vl = vlalloc(mesh);
-      forList(w, li)
-        if(ListEntry(evosys->f[LIMDATA],li))
-          vlpushvl(vl, ListEntry(w,li)); //add ListEntry(w,li) to vl
-      //init_myindc_for_vl(elm, vl, nvals);
-      //OR:
-      //forList(evosys->w, i)
-      //{
-      //  tVarList *vl = ListEntry(evosys->w,i);
-      //  tEvoVars evv[1] = {{ .vlu = vl }};
-
-      //  if(ListEntry(evosys->f[LIMDATA],i))
-      //  {
-      //    /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, evv)
-      //             must return number of data vals we need */
-      //    int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, evv);
-      //    if(nvals>0)
-      //      init_all_myln_myindc_for_vl(mesh, vl, nvals);
-      //  }
-      //} /* end forList */
-
-      vlfree(vl);
-
-
-//could try something like:  surface_copy_all_pointers(elm_sav, elm);
+      init_myindc_for_evosys_u_or_w(elm, w);
 
       // let all indicators in new elm point to indicators of old elm.
-      errorexit("impl");
+      indic_copy_nbindc_pointers(elm_sav, elm);
 
       // run RHS funcs again
       evolve_limiter(elm, w, 0, notroubles, 0);//like evolve_limiter_mesh(mesh, w, 0);
