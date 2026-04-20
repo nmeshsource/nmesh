@@ -572,7 +572,6 @@ void evolve_limiter(tElm *elm, pVLList *u, int opt, int notroubles,
     //{
     //  /* now get the indicators and wait for MPI buffers if necessary */
     //  get_all_indc_for_vl(elm, vl);
-
     //}
     //vlfree(vl);
   }
