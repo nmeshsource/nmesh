@@ -1,7 +1,7 @@
 physics =
 
 evolve_method       = RK4 evolve_test
-evolve_method_order = 4
+#evolve_method_order = 4
 
 finaltime = 5
 
