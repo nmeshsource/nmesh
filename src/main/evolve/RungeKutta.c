@@ -156,14 +156,6 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
-//FIXME: w_1 was now intrp'd, so remove this:
-    /* reconstruct old w_1 from u_2, u_p and r_1:
-       u_0 = u_p,  u_1 = u_p + r_0 dt/6,  w_1 = u_p + r_0 dt
-              but: u_1 = u_2 - r_1 dt/6
-       => u_p + r_0 dt/6 = u_2 - r_1 dt/6  => r_0 dt = 6 (u_2 - u_p) - r_1 dt
-       => w_1 = u_p + r_0 dt = 6 u_2 - 5 u_p - r_1 dt */
-    pVLList_add(w, 6., u, -5., u_p, vladd,0);  // w  = 6 u - 5 u_p
-    pVLList_addto(w, -dt, r, vladdto,0);       // w -= r dt
   }
 
 
@@ -275,18 +267,18 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // init surfaces in new elm, could use MPIexchange_init(elm)
       init_all_surfaces(elm);
 
-      // Let surfaces in new elm point to nbsurf of old elm.
-      surface_copy_nbsurf_pointers(elm_sav, elm);
-
       // set mysurf on new elm, could use MPIexchange_set_localdata(elm)
       set_all_mysurf(elm);
+
+      // Let surfaces in new elm point to nbsurf of old elm.
+      surface_copy_nbsurf_pointers(elm_sav, elm);
 
       // interp nb surfs to adj for our new elm
       set_all_ajsurf(elm);
 
       /* NOTE: elm->dat now has surfaces, but no indic */
 
-      // init indicators in new elm
+      // init indicators for w in new elm
       init_myindc_for_evosys_u_or_w(elm, w);
 
       // let all indicators in new elm point to indicators of old elm.
