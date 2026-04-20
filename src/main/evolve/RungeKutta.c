@@ -86,7 +86,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList *u   = evosys->u;
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
-  //pVLList *w   = evosys->w;
+  pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
   int nrs = 0; //counts how many substep we redone
 
