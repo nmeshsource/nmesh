@@ -26,12 +26,12 @@ void evolve_RK4_mesh(tMesh *mesh)
   int nrs = 0; //counts how many substep were redone
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
+  pVLList_copy(w, u_p, vlcopy,0);             // w = u_p
   mesh->time = t;
-  evolve_setrhs_mesh(mesh, r, u);             // r  = RHS(u, t)
+  evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   if(redo_substep)
   {
-    pVLList_copy(w, u_p, vlcopy,0);           // w = u_p
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
@@ -91,12 +91,12 @@ void evolve_Euler_mesh(tMesh *mesh)
   int nrs = 0; //counts how many substep were redone
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
+  pVLList_copy(w, u_p, vlcopy,0);         // w = u_p
   mesh->time = t;
-  evolve_setrhs_mesh(mesh, r, u);         // r  = RHS(u, t)
+  evolve_setrhs_mesh(mesh, r, w);         // r  = RHS(w, t)
   pVLList_addto(u, dt, r, vladdto,0);     // u += r dt
   if(redo_substep)
   {
-    pVLList_copy(w, u_p, vlcopy,0);       // w = u_p
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt);  nrs++; }
   }
@@ -140,12 +140,12 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   //printvarlist_atpoint(pt, ListEntry(u,0), "");
   //printvarlist_atpoint(pt, ListEntry(u,1), "");
   pVLList_copy(u_p, u, vlcopy,0);              // u_p = u
+  pVLList_copy(w, u_p, vlcopy,0);              // w = u_p
   mesh->time = t;
-  evolve_setrhs_mesh(mesh, r, u);              // r  = RHS(u, t)
+  evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
   if(redo_substep)
   {
-    pVLList_copy(w, u_p, vlcopy,0);            // w = u_p
     if(evolve_set_trouble_score_mesh(mesh)>0)  //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
