@@ -222,6 +222,8 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
   pVLList *u   = evosys->u;
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
+  pVLList *w   = evosys->w;
+  int notroubles = evolve_notroubles(mesh);
 
   /* alloc list to store old dg elms */
   tElm **elm_new = checked_calloc(mesh->nmyelm, sizeof(elm_new[0]));
@@ -243,8 +245,12 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // pick n, pt_typ
       hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
 
-      // make u_p a DATAVAR so that it will be interp'd on p-refine
-      forList(u_p, li) VLSetType(ListEntry(u_p,li), DATAVAR);
+      // make u_p, w DATAVARs so that they will be interp'd on p-refine
+      forList(u_p, li)
+      {
+        VLSetType(ListEntry(u_p,li), DATAVAR);
+        VLSetType(ListEntry(w,li), DATAVAR);
+      }
 
       // p-refine locally
       elm_sav = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
@@ -256,8 +262,12 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // refine again.
       elm->dat->info->trbl_ref->method = PARENT_n;
 
-      // make u_p an AUXVAR again:
-      forList(u_p, li) VLSetType(ListEntry(u_p,li), AUXVAR);
+      // make u_p, w AUXVAR again:
+      forList(u_p, li)
+      {
+        VLSetType(ListEntry(u_p,li), AUXVAR);
+        VLSetType(ListEntry(w,li), AUXVAR);
+      }
 
       // remove all ajsurf of old elm
       free_all_ajsurf_only(elm_sav);
@@ -274,12 +284,16 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // interp nb surfs to adj for our new elm
       set_all_ajsurf(elm);
 
-      /* NOTE: elm->dat now has surfaces, but no indic, as this never got set.
-         LUCKILY evolve_setrhs never calls any LIMDATA or LIMITER funcs. */
+      /* NOTE: elm->dat now has surfaces, but no indic */
+      // init indicators in new elm
+      errorexit("impl");
+
+      // let all indicators in new elm point to indicators of old elm.
+      errorexit("impl");
 
       // run RHS funcs again
-      evolve_PRELIM(elm, u, 1);
-      evolve_setrhs(elm, r, u, 0);
+      evolve_limiter(elm, w, 0, notroubles, 0);//like evolve_limiter_mesh(mesh, w, 0);
+      evolve_setrhs(elm, r, w, 0);
 
       // set u again
       pVLList_addto(u, rfac, r, vladdto, elm);  // u += r rfac
@@ -289,7 +303,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       elm_new[MyID] = elm_sav;
       // Now elm is the old elm again. We need this for the next iter of
       // this loop, otherwise set_all_ajsurf gets confused.
-      // We fix this later!
+      // Below, we swap the new elm back in!
     }
   }
 
