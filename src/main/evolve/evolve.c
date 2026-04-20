@@ -437,36 +437,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   if(PR) PRFs(":\n");
 
   /* loop over all nodes before MPI requests */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int i, troubled;
-
-    /* time PRELIM & LIMDATA */
-    loadtimer_start(node);
-
-    if(evolve_limiter_needed(node, opt, notroubles))
-    {
-      troubled = 0;
-      forList(u, i)
-      {
-        tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
-        /* call funcs that we need before limiters */
-        if(ListEntry(evosys->f[PRELIM0],i))
-          troubled |= ListEntry(evosys->f[PRELIM0],i)(node, evv);
-        if(ListEntry(evosys->f[PRELIM],i))
-          troubled |= ListEntry(evosys->f[PRELIM],i)(node, evv);
-
-        /* set data limiter needs in myindc arrays of each node */
-        if(ListEntry(evosys->f[LIMDATA],i))
-          troubled |= ListEntry(evosys->f[LIMDATA],i)(node, evv);
-      }
-      node->dat->info->evo_troubled |= troubled;
-    } /* end if */
-
-    /* add time spend on PRELIM & LIMDATA */
-    loadtimer_stop(node);
-  }
+  formyelms(mesh)
+    evolve_limiter_PRELIM_LIMDATA(MyElm, u, opt, notroubles);
 
   /* create varlist that needs MPI exchange */
   vl = vlalloc(mesh);
@@ -488,38 +460,103 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
   vlfree(vl);
 
   /* loop over all nodes after MPI exchange */
-  formylnodes(mesh)
-  {
-    tNode *node = MyLnode;
-    int i;
-
-    /* time LIMITER */
-    loadtimer_start(node);
-
-    if(evolve_limiter_needed(node, opt, notroubles))
-    {
-      forList(u, i)
-      {
-        tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
-        /* apply limiter */
-        if(ListEntry(evosys->f[LIMITER],i))
-        {
-          int ret = ListEntry(evosys->f[LIMITER],i)(node, evv);
-
-          /* increase nlim if limiter was active, otherwise reset nlim */
-          if(ret) node->dat->info->nlim += 1;
-          else    node->dat->info->nlim = 0;
-
-          /* also count a ret!=0 as trouble */
-          node->dat->info->evo_troubled |= ret;
-        }
-      }
-    } /* end if */
-
-    /* add time spend on LIMITER */
-    loadtimer_stop(node);
-  }
+  formyelms(mesh)
+    evolve_limiter_LIMITER(MyElm, u, opt, notroubles);
 }
+
+/* PRELIM and LIMDATA parts of evolve_limiter_mesh */
+void evolve_limiter_PRELIM_LIMDATA(tElm *node, pVLList *u, int opt,
+                                   int notroubles)
+{
+  tMesh *mesh = Elm_mesh(node);
+  tEvoSys *evosys = mesh->evosys;
+  int i, troubled;
+
+  if(!u) return;
+
+  /* time PRELIM & LIMDATA */
+  loadtimer_start(node);
+
+  if(evolve_limiter_needed(node, opt, notroubles))
+  {
+    troubled = 0;
+    forList(u, i)
+    {
+      tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
+      /* call funcs that we need before limiters */
+      if(ListEntry(evosys->f[PRELIM0],i))
+        troubled |= ListEntry(evosys->f[PRELIM0],i)(node, evv);
+      if(ListEntry(evosys->f[PRELIM],i))
+        troubled |= ListEntry(evosys->f[PRELIM],i)(node, evv);
+
+      /* set data limiter needs in myindc arrays of each node */
+      if(ListEntry(evosys->f[LIMDATA],i))
+        troubled |= ListEntry(evosys->f[LIMDATA],i)(node, evv);
+    }
+    node->dat->info->evo_troubled |= troubled;
+  } /* end if */
+
+  /* add time spend on PRELIM & LIMDATA */
+  loadtimer_stop(node);
+}
+
+/* LIMITER part of evolve_limiter_mesh */
+void evolve_limiter_LIMITER(tElm *node, pVLList *u, int opt, int notroubles)
+{
+  tMesh *mesh = Elm_mesh(node);
+  tEvoSys *evosys = mesh->evosys;
+  int i;
+
+  if(!u) return;
+
+  /* time LIMITER */
+  loadtimer_start(node);
+
+  if(evolve_limiter_needed(node, opt, notroubles))
+  {
+    forList(u, i)
+    {
+      tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
+      /* apply limiter */
+      if(ListEntry(evosys->f[LIMITER],i))
+      {
+        int ret = ListEntry(evosys->f[LIMITER],i)(node, evv);
+
+        /* increase nlim if limiter was active, otherwise reset nlim */
+        if(ret) node->dat->info->nlim += 1;
+        else    node->dat->info->nlim = 0;
+
+        /* also count a ret!=0 as trouble */
+        node->dat->info->evo_troubled |= ret;
+      }
+    }
+  } /* end if */
+
+  /* add time spend on LIMITER */
+  loadtimer_stop(node);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* update some vars by calling funcs in PRESURF*, SETSRC*
