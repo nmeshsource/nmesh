@@ -23,7 +23,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
-  int nrs = 0; //counts how many substep we redone
+  int nrs = 0; //counts how many substep were redone
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
   mesh->time = t;
@@ -88,7 +88,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
   int redo_substep = Getv(Par("evolve_redo_troubled"), "substep");
-  int nrs = 0; //counts how many substep we redone
+  int nrs = 0; //counts how many substep were redone
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
   mesh->time = t;
