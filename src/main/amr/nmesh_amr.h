@@ -634,11 +634,13 @@ void mark_bfaces_without_op_as_boundary(tMesh *mesh,
         int (*mark)(tPat *pat, double xyz[3]), int boundary);
 
 /* indicators.c */
+int init_myindc_for_vl(tNode *node, tVarList  *vl, int nvals);
 void init_all_myln_myindc_for_vl(tMesh *mesh, tVarList  *vl, int nvals);
 void free_indc(tIndic *ic);
 void free_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
 void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl);
 void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl);
+void indic_copy_nbindc_pointers(tElm *elm_src, tElm *elm_dest);
 
 /* refine.c */
 void hp_refine_set_n_pt_typ(tNode *pnode, tRef *ref, int *n, int *pt_typ);

@@ -151,6 +151,8 @@
 #define Node_on_OUTERBOUND(node, face) Elm_on_OUTERBOUND(node, face)
 #define Node_on_INNERBOUND(node, face) Elm_on_INNERBOUND(node, face)
 
+/* get elm from dat */
+#define Dat_elm(dat) ((dat)->node)
 
 /* marcos to start and stop node load timers */
 #define LOAD_START loadtimer_start(node)

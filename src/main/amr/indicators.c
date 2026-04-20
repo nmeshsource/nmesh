@@ -393,3 +393,55 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl)
 
   TIMER_STOP;
 }
+
+
+/**********************************************************************/
+/* some funcs to copy parts of the indicators */
+/**********************************************************************/
+
+/* Copy nbindc pointers from ic to icdest.
+   nbindc will be marked as not allocated in icdest.
+   If we free_indc icdest, all the data that nbindc points to will not
+   be freed. */
+tIndic *indic_point_to_same_nbindc(tIndic *ic, tIndic *icdest)
+{
+  int f;
+
+  if(!ic) return NULL;
+  if(!icdest) return NULL;
+
+  /* go over all faces */
+  for(f=0; f<6; f++)
+  {
+    tElm *elm = Dat_elm(ic->dat);
+    tElm *elmdest = Dat_elm(icdest->dat);
+    int nnb = elm->nfnb[f];
+    int nnbdest = elmdest->nfnb[f];
+    int ni;
+
+    if(nnb != nnbdest)
+      errorexit("source and dest must have same number of nbs");
+
+    /* now copy all nbindc pointers, and mark them as not allocated */
+    for(ni=0; ni<nnb; ni++)
+    {
+      icdest->nbindc[f][ni]        = ic->nbindc[f][ni];
+      icdest->allocd_nbindc[f][ni] = 0;
+    }
+  }
+  return icdest;
+}
+
+/* Copy nbindc pointers from elm_src to elm_dest */
+void indic_copy_nbindc_pointers(tElm *elm_src, tElm *elm_dest)
+{
+  tDat *dat_src = elm_src->dat;
+  tDat *dat_dest = elm_dest->dat;
+  int vi;
+
+  if(!dat_src || !dat_dest) return;
+
+  /* loop over vars and copy nbindc of each indic */
+  for(vi=0; vi<dat_dest->nv; vi++)
+    indic_point_to_same_nbindc(dat_src->ic[vi], dat_dest->ic[vi]);
+}
