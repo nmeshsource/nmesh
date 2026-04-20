@@ -31,6 +31,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   if(redo_substep)
   {
+    pVLList_copy(w, u_p, vlcopy,0);           // w = u_p
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
@@ -95,6 +96,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   pVLList_addto(u, dt, r, vladdto,0);     // u += r dt
   if(redo_substep)
   {
+    pVLList_copy(w, u_p, vlcopy,0);       // w = u_p
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt);  nrs++; }
   }
@@ -143,7 +145,8 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
   if(redo_substep)
   {
-    if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
+    pVLList_copy(w, u_p, vlcopy,0);            // w = u_p
+    if(evolve_set_trouble_score_mesh(mesh)>0)  //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
 
