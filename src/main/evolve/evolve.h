@@ -14,6 +14,8 @@ void evolve_PRELIM(tElm *elm, pVLList *u, int update_evo_troubled);
 void evolve_limiter_PRELIM_LIMDATA(tElm *node, pVLList *u, int opt,
                                    int notroubles);
 void evolve_limiter_LIMITER(tElm *node, pVLList *u, int opt, int notroubles);
+void evolve_limiter(tElm *elm, pVLList *u, int opt, int notroubles,
+                    int MPI_exchange);
 void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u,
                                                 int notroubles);

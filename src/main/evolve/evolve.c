@@ -536,27 +536,49 @@ void evolve_limiter_LIMITER(tElm *node, pVLList *u, int opt, int notroubles)
   loadtimer_stop(node);
 }
 
+/* Apply limiters to evo subsystems.
+   If opt=1
+     we do it only if trbl_score >= 1 or trbl_score<=-notroubles
+     i.e. only for switched nodes.
+   If opt=0
+     we ALWAYS do it. */
+/* Version for one elm: */
+void evolve_limiter(tElm *elm, pVLList *u, int opt, int notroubles,
+                    int MPI_exchange)
+{
+  if(!u) return;
 
+  if(PR) PRFs(":\n");
 
+  evolve_limiter_PRELIM_LIMDATA(elm, u, opt, notroubles);
 
+  if(MPI_exchange)
+  {
+    errorexit("MPI_exchange=1 case is not implemented");
+    //tMesh *mesh = Elm_mesh(elm);
+    //tEvoSys *evosys = mesh->evosys;
+    //int j;
+    //tVarList *vl;
 
+    ///* create varlist that needs MPI exchange */
+    //vl = vlalloc(mesh);
+    //forList(u, j)
+    //{
+    //  if(ListEntry(evosys->f[LIMDATA],j))
+    //    vlpushvl(vl, ListEntry(u,j)); //add ListEntry(u,j) to vl
+    //}
+    ///* exchange data in indicators (indc) if needed */
+    //if(VLn(vl)>0)
+    //{
+    //  /* now get the indicators and wait for MPI buffers if necessary */
+    //  get_all_indc_for_vl(elm, vl);
 
+    //}
+    //vlfree(vl);
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  evolve_limiter_LIMITER(elm, u, opt, notroubles);
+}
 
 
 /* update some vars by calling funcs in PRESURF*, SETSRC*
