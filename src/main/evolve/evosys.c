@@ -425,6 +425,28 @@ void free_all_myln_myindc_in_evosys(tMesh *mesh)
   }
 }
 
+/* Init all indc on one elm for u_or_w.
+   u_or_w imust be either evosys->u or evosys->w */
+void init_myindc_for_evosys_u_or_w(tElm *elm, pVLList *u_or_w)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  tEvoSys *evosys = mesh->evosys;
+  int li;
+  forList(u_or_w, li)
+  {
+    tVarList *vl = ListEntry(u_or_w,li);
+    if(ListEntry(evosys->f[LIMDATA],li))
+    {
+      tEvoVars evv[1] = {{ .vlu = vl }};
+      /* NOTE: ListEntry(evosys->f[LIMDATA],li)(NULL, evv)
+               must return number of data vals we need */
+      int nvals = ListEntry(evosys->f[LIMDATA],li)(NULL, evv);
+      if(nvals>0)
+        init_myindc_for_vl(elm, vl, nvals);
+    }
+  } /* end forList */
+}
+
 
 /*************************************************************************/
 /* NOTE: functions below do not work yet !!! */

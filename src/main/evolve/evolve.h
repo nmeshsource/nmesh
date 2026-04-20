@@ -29,6 +29,7 @@ int evolve_output_timers(tMesh *mesh);
 int evolve_free_evosys(tMesh *mesh);
 int evolve_init_evosys(tMesh *mesh);
 void evolve_request_surfaces(tNode *node, pVLList *u);
+void init_myindc_for_evosys_u_or_w(tElm *elm, pVLList *u_or_w);
 
 
 /* evolve_test.c */
