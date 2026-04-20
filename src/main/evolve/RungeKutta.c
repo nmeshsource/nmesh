@@ -236,14 +236,14 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
     {
       tElm *elm_sav;
       int li;
-      tRef *ref = elm->dat->info->trbl_ref;
+      tVarList *vl;
       int n[3], pt_typ[3];
 
       // take substep back
       pVLList_addto(u, -rfac, r, vladdto, elm);  // u -= r rfac
 
       // pick n, pt_typ
-      hp_refine_set_n_pt_typ(elm, ref, n, pt_typ);
+      hp_refine_set_n_pt_typ(elm, elm->dat->info->trbl_ref, n, pt_typ);
 
       // make u_p, w DATAVARs so that they will be interp'd on p-refine
       forList(u_p, li)
@@ -287,6 +287,18 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       /* NOTE: elm->dat now has surfaces, but no indic */
       // init indicators in new elm
       errorexit("impl");
+      //init_all_myln_myindc_in_evosys(mesh);
+
+      //VarList with w
+      vl = vlalloc(mesh);
+      forList(w, li)
+        if(ListEntry(evosys->f[LIMDATA],li))
+          vlpushvl(vl, ListEntry(w,li)); //add ListEntry(w,li) to vl
+      //init_myindc_for_vl(elm, vl, nvals);
+      vlfree(vl);
+
+
+//could try something like:  surface_copy_all_pointers(elm_sav, elm);
 
       // let all indicators in new elm point to indicators of old elm.
       errorexit("impl");
