@@ -224,7 +224,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
   pVLList *r   = evosys->rhs;
 
   /* alloc list to store old dg elms */
-  tElm **elm_old = checked_calloc(mesh->nmyelm, sizeof(elm_old[0]));
+  tElm **elm_new = checked_calloc(mesh->nmyelm, sizeof(elm_new[0]));
 
   formyelms(mesh)
   {
@@ -232,6 +232,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
     int trb = elm->dat->info->trbl_score;
     if(trb > 0)
     {
+      tElm *elm_sav;
       int li;
       tRef *ref = elm->dat->info->trbl_ref;
       int n[3], pt_typ[3];
@@ -246,9 +247,9 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       forList(u_p, li) VLSetType(ListEntry(u_p,li), DATAVAR);
 
       // p-refine locally
-      elm_old[MyID] = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
+      elm_sav = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
       // ^-need to keep old elm in case something is pointing to its data
-      //   So we store old elm in list elm_old and free it later.
+      //   So we store old elm in elm_sav.
 
       // Since elm is now refined we reset its ref method to PARENT_n, which
       // is a no-op. Then evolve_switch_troubled_nodes_mesh below will not
@@ -258,11 +259,17 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       // make u_p an AUXVAR again:
       forList(u_p, li) VLSetType(ListEntry(u_p,li), AUXVAR);
 
-      // remove all ajsurf of elm_old
-      free_all_ajsurf_only(elm_old[MyID]);
+      // remove all ajsurf of old elm
+      free_all_ajsurf_only(elm_sav);
 
-      // copy all surface data pointers from elm_old to elm
-      surface_copy_all_pointers(elm_old[MyID], elm);
+      // init surfaces in new elm, could use MPIexchange_init(elm)
+      init_all_surfaces(elm);
+
+      // Let surfaces in new elm point to nbsurf of old elm.
+      surface_copy_nbsurf_pointers(elm_sav, elm);
+
+      // set mysurf on new elm, could use MPIexchange_set_localdata(elm)
+      set_all_mysurf(elm);
 
       // interp nb surfs to adj for our new elm
       set_all_ajsurf(elm);
@@ -276,20 +283,36 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
 
       // set u again
       pVLList_addto(u, rfac, r, vladdto, elm);  // u += r rfac
+
+      // make elm_sav the new elm and save it in elm_new list
+      elm_swap_shallow(elm, elm_sav);
+      elm_new[MyID] = elm_sav;
+      // Now elm is the old elm again. We need this for the next iter of
+      // this loop, otherwise set_all_ajsurf gets confused.
+      // We fix this later!
     }
   }
+
+  /* now insert all the elms in list elm_new, and free the old elms */
+  formyelms(mesh)
+  {
+    tElm *elm = MyElm;
+    tElm *elm2 = elm_new[MyID];
+    if(elm2)
+    {
+      elm_swap_shallow(elm, elm2); //new elm is in elm, old elm is in elm2
+      update_node_n_pt_typ_free_node_old(elm2); // free old elm2
+    }
+  }
+  /* free list itself */
+  free(elm_new);
+
   /* Finally we call p-refine so that nb-info such as fnb gets updated. But
      interp should not happen again since update_node_n_pt_typ (called form
      hp_refine_elms_if_rflag) will notice that n,pt_typ are set already. */
   evolve_switch_troubled_nodes_mesh(mesh);
   // ^-This calls evolve_init_communication_structs and prefine_elms_if_rflag
   //   prefine_elms_if_rflag updates nb-info such as fnb.
-
-  /* now free all the elms in list elm_old */
-  formyelms(mesh)
-    if(elm_old[MyID]) update_node_n_pt_typ_free_node_old(elm_old[MyID]);
-  /* free list itself */
-  free(elm_old);
 }
 
 
