@@ -1,7 +1,7 @@
 physics =
 
-evolve_method       = sspRK3 evolve_test
-evolve_method_order = 3
+evolve_method       = Euler evolve_test
+evolve_method_order = 1
 
 finaltime = 5
 
