@@ -949,6 +949,16 @@ void update_node_n_pt_typ_restore_from_node_old(tNode *node, tNode *node_old)
   memcpy(node, node_old, sizeof(node[0]));
 }
 
+/* Swap two elms. Can be used to swap node and node_old from
+   update_node_n_pt_typ_return_node_old. This frees nothing! */
+void elm_swap_shallow(tElm *elm1, tElm *elm2)
+{
+  tElm sav[1];
+  memcpy(sav,  elm1, sizeof(sav[0]));
+  memcpy(elm1, elm2, sizeof(elm1[0]));
+  memcpy(elm2, sav,  sizeof(elm2[0]));
+}
+
 /* update node->n (and node->pt_typ if pt_typ != NULL) on one node,
    { int *n, int *pt_typ are really int n[3], int pt_typ[3] },
    should be called for all 8 siblings */

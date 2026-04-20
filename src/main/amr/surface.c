@@ -1556,6 +1556,8 @@ tSurface *surface_copy_with_nbsurf_only(tSurface *s)
   tSurface *sdest;
   int i;
 
+  errorexit("use surface_point_to_same_nbsurf instead");
+
   if(!s) return NULL;
   if(!s->nbsurf) return NULL;
 
@@ -1574,12 +1576,15 @@ tSurface *surface_copy_with_nbsurf_only(tSurface *s)
   return sdest;
 }
 
-/* copy all nbsurf from node_src to node_dest */
+/* copy all nbsurf from node_src to node_dest
+   this allocates room for the surfaces but not their data. */
 void surface_copy_all_nbsurf_only(tNode *node_src, tNode *node_dest)
 {
   tDat *dat_src = node_src->dat;
   tDat *dat_dest = node_dest->dat;
   int vi,f;
+
+  errorexit("use surface_copy_nbsurf_pointers instead");
 
   if(!dat_src || !dat_dest) return;
 
@@ -1634,6 +1639,45 @@ void surface_copy_all_pointers(tNode *node_src, tNode *node_dest)
   for(f=0; f<6; f++)
     for(vi=0; vi<dat_dest->nv; vi++)
       dat_dest->s[f][vi] = surface_point_to_same_data(dat_src->s[f][vi]);
+}
+
+
+/* Copy nbsurf pointers from s to sdest.
+   nbsurf will be marked as not allocated in sdest.
+   If we free_surface sdest, all the data that nbsurf points to will not
+   be freed. */
+tSurface *surface_point_to_same_nbsurf(tSurface *s, tSurface *sdest)
+{
+  int i;
+
+  if(!s) return NULL;
+  if(!s->nbsurf) return NULL;
+
+  if(s->nnbsurf != sdest->nnbsurf)
+    errorexit("the two nbsurf lists differ in size");
+
+  /* now copy all nbsurf pointers, and mark them as not allocated */
+  for(i=0; i<s->nnbsurf; i++)
+  {
+    sdest->nbsurf[i] = s->nbsurf[i];
+    sdest->allocd_nbsurf[i] = 0;
+  }
+  return sdest;
+}
+
+/* Copy nbsurf pointers from node_src to node_dest */
+void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest)
+{
+  tDat *dat_src = node_src->dat;
+  tDat *dat_dest = node_dest->dat;
+  int vi,f;
+
+  if(!dat_src || !dat_dest) return;
+
+  /* loop over faces, vars and copy nbsurf of each surf */
+  for(f=0; f<6; f++)
+    for(vi=0; vi<dat_dest->nv; vi++)
+      surface_point_to_same_nbsurf(dat_src->s[f][vi], dat_dest->s[f][vi]);
 }
 
 

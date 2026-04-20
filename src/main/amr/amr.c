@@ -134,7 +134,8 @@ int amr_zero_all_patgroup_npg_pg0(tMesh *mesh)
 /* funcs for MPI exchange */
 /*************************************************************************/
 
-/* init exchange */
+/* init exchange. Could be replaced by:
+   formyelms(mesh) MPIexchange_init(MyElm); */
 void MPIexchange_init_all_myln(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
@@ -150,8 +151,25 @@ void MPIexchange_init_all_myln(tMesh *mesh)
     errorexit("unknown value in amr_MPIexchange");
   }
 }
+/* init exchange on just one elm */
+void MPIexchange_init(tElm *elm)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  if(PR) PRFs(":\n");
+  switch(Geti(amr->MPIexchange))
+  {
+  case 1:
+    init_all_surfaces(elm);
+    break;
+  case 2:
+    break;
+  default:
+    errorexit("unknown value in amr_MPIexchange");
+  }
+}
 
-/* set some local data */
+/* set some local data. Could be replaced by:
+   formyelms(mesh) MPIexchange_set_localdata(MyElm); */
 void MPIexchange_set_all_myln_localdata(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
@@ -160,6 +178,22 @@ void MPIexchange_set_all_myln_localdata(tMesh *mesh)
   {
   case 1:
     set_all_myln_mysurf(mesh);
+    break;
+  case 2:
+    break;
+  default:
+    errorexit("unknown value in amr_MPIexchange");
+  }
+}
+/* set some local data on just one elm */
+void MPIexchange_set_localdata(tElm *elm)
+{
+  tMesh *mesh = Elm_mesh(elm);
+  if(PR) PRFs(":\n");
+  switch(Geti(amr->MPIexchange))
+  {
+  case 1:
+    set_all_mysurf(elm);
     break;
   case 2:
     break;
