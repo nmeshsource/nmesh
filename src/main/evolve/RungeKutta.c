@@ -156,6 +156,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
+//FIXME: w_1 was now intrp'd, so remove this:
     /* reconstruct old w_1 from u_2, u_p and r_1:
        u_0 = u_p,  u_1 = u_p + r_0 dt/6,  w_1 = u_p + r_0 dt
               but: u_1 = u_2 - r_1 dt/6
@@ -287,7 +288,9 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       /* NOTE: elm->dat now has surfaces, but no indic */
       // init indicators in new elm
       errorexit("impl");
-      //init_all_myln_myindc_in_evosys(mesh);
+
+
+      // like:  init_all_myln_myindc_in_evosys(mesh);
 
       //VarList with w
       vl = vlalloc(mesh);
@@ -295,6 +298,22 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
         if(ListEntry(evosys->f[LIMDATA],li))
           vlpushvl(vl, ListEntry(w,li)); //add ListEntry(w,li) to vl
       //init_myindc_for_vl(elm, vl, nvals);
+      //OR:
+      //forList(evosys->w, i)
+      //{
+      //  tVarList *vl = ListEntry(evosys->w,i);
+      //  tEvoVars evv[1] = {{ .vlu = vl }};
+
+      //  if(ListEntry(evosys->f[LIMDATA],i))
+      //  {
+      //    /* NOTE: ListEntry(evosys->f[LIMDATA],i)(NULL, evv)
+      //             must return number of data vals we need */
+      //    int nvals = ListEntry(evosys->f[LIMDATA],i)(NULL, evv);
+      //    if(nvals>0)
+      //      init_all_myln_myindc_for_vl(mesh, vl, nvals);
+      //  }
+      //} /* end forList */
+
       vlfree(vl);
 
 
