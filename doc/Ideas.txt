@@ -30,6 +30,9 @@ Reduce suface communication:
  needed!!!
 *Create surfaces and indicators only for the vars (e.g. w) that need it!!!
 
+*Keep indicators for u_p for all of full RK step. Currently they get reset
+ each time the trouble score is calculated, even though they never change.
+
 
 About artificial viscosity (av):
 ================================
