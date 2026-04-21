@@ -161,7 +161,6 @@ void evolve_sspRK3_mesh(tMesh *mesh)
     { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
   }
 
-
   pVLList_addto(w, dt, r, vladdto,0);          // w += r dt
   pVLList_add(w, 0.75, u_p, 0.25, w, vladd,0); // w = 0.75*u_p + 0.25*w
   mesh->time = t+0.5*dt;                       // c_3=1/2 from Butcher tab.
