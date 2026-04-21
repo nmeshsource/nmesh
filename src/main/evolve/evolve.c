@@ -438,7 +438,8 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 
   /* loop over all nodes before MPI requests */
   formyelms(mesh)
-    evolve_limiter_PRELIM_LIMDATA(MyElm, u, opt, notroubles);
+    if(evolve_limiter_needed(MyElm, opt, notroubles))
+      evolve_limiter_PRELIM_LIMDATA(MyElm, u);
 
   /* create varlist that needs MPI exchange */
   vl = vlalloc(mesh);
@@ -461,12 +462,12 @@ void evolve_limiter_mesh(tMesh *mesh, pVLList *u, int opt)
 
   /* loop over all nodes after MPI exchange */
   formyelms(mesh)
-    evolve_limiter_LIMITER(MyElm, u, opt, notroubles);
+    if(evolve_limiter_needed(MyElm, opt, notroubles))
+      evolve_limiter_LIMITER(MyElm, u);
 }
 
 /* PRELIM and LIMDATA parts of evolve_limiter_mesh */
-void evolve_limiter_PRELIM_LIMDATA(tElm *node, pVLList *u, int opt,
-                                   int notroubles)
+void evolve_limiter_PRELIM_LIMDATA(tElm *node, pVLList *u)
 {
   tMesh *mesh = Elm_mesh(node);
   tEvoSys *evosys = mesh->evosys;
@@ -477,31 +478,28 @@ void evolve_limiter_PRELIM_LIMDATA(tElm *node, pVLList *u, int opt,
   /* time PRELIM & LIMDATA */
   loadtimer_start(node);
 
-  if(evolve_limiter_needed(node, opt, notroubles))
+  troubled = 0;
+  forList(u, i)
   {
-    troubled = 0;
-    forList(u, i)
-    {
-      tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
-      /* call funcs that we need before limiters */
-      if(ListEntry(evosys->f[PRELIM0],i))
-        troubled |= ListEntry(evosys->f[PRELIM0],i)(node, evv);
-      if(ListEntry(evosys->f[PRELIM],i))
-        troubled |= ListEntry(evosys->f[PRELIM],i)(node, evv);
+    tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
+    /* call funcs that we need before limiters */
+    if(ListEntry(evosys->f[PRELIM0],i))
+      troubled |= ListEntry(evosys->f[PRELIM0],i)(node, evv);
+    if(ListEntry(evosys->f[PRELIM],i))
+      troubled |= ListEntry(evosys->f[PRELIM],i)(node, evv);
 
-      /* set data limiter needs in myindc arrays of each node */
-      if(ListEntry(evosys->f[LIMDATA],i))
-        troubled |= ListEntry(evosys->f[LIMDATA],i)(node, evv);
-    }
-    node->dat->info->evo_troubled |= troubled;
-  } /* end if */
+    /* set data limiter needs in myindc arrays of each node */
+    if(ListEntry(evosys->f[LIMDATA],i))
+      troubled |= ListEntry(evosys->f[LIMDATA],i)(node, evv);
+  }
+  node->dat->info->evo_troubled |= troubled;
 
   /* add time spend on PRELIM & LIMDATA */
   loadtimer_stop(node);
 }
 
 /* LIMITER part of evolve_limiter_mesh */
-void evolve_limiter_LIMITER(tElm *node, pVLList *u, int opt, int notroubles)
+void evolve_limiter_LIMITER(tElm *node, pVLList *u)
 {
   tMesh *mesh = Elm_mesh(node);
   tEvoSys *evosys = mesh->evosys;
@@ -512,25 +510,22 @@ void evolve_limiter_LIMITER(tElm *node, pVLList *u, int opt, int notroubles)
   /* time LIMITER */
   loadtimer_start(node);
 
-  if(evolve_limiter_needed(node, opt, notroubles))
+  forList(u, i)
   {
-    forList(u, i)
+    tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
+    /* apply limiter */
+    if(ListEntry(evosys->f[LIMITER],i))
     {
-      tEvoVars evv[1] = {{.vlu=ListEntry(u,i), .vlr=NULL, .vlx=NULL}};
-      /* apply limiter */
-      if(ListEntry(evosys->f[LIMITER],i))
-      {
-        int ret = ListEntry(evosys->f[LIMITER],i)(node, evv);
+      int ret = ListEntry(evosys->f[LIMITER],i)(node, evv);
 
-        /* increase nlim if limiter was active, otherwise reset nlim */
-        if(ret) node->dat->info->nlim += 1;
-        else    node->dat->info->nlim = 0;
+      /* increase nlim if limiter was active, otherwise reset nlim */
+      if(ret) node->dat->info->nlim += 1;
+      else    node->dat->info->nlim = 0;
 
-        /* also count a ret!=0 as trouble */
-        node->dat->info->evo_troubled |= ret;
-      }
+      /* also count a ret!=0 as trouble */
+      node->dat->info->evo_troubled |= ret;
     }
-  } /* end if */
+  }
 
   /* add time spend on LIMITER */
   loadtimer_stop(node);
@@ -543,14 +538,13 @@ void evolve_limiter_LIMITER(tElm *node, pVLList *u, int opt, int notroubles)
    If opt=0
      we ALWAYS do it. */
 /* Version for one elm: */
-void evolve_limiter(tElm *elm, pVLList *u, int opt, int notroubles,
-                    int MPI_exchange)
+void evolve_limiter(tElm *elm, pVLList *u, int MPI_exchange)
 {
   if(!u) return;
 
   if(PR) PRFs(":\n");
 
-  evolve_limiter_PRELIM_LIMDATA(elm, u, opt, notroubles);
+  evolve_limiter_PRELIM_LIMDATA(elm, u);
 
   if(MPI_exchange)
   {
@@ -576,7 +570,7 @@ void evolve_limiter(tElm *elm, pVLList *u, int opt, int notroubles,
     //vlfree(vl);
   }
 
-  evolve_limiter_LIMITER(elm, u, opt, notroubles);
+  evolve_limiter_LIMITER(elm, u);
 }
 
 

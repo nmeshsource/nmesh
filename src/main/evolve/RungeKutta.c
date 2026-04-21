@@ -218,7 +218,6 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
-  int notroubles = evolve_notroubles(mesh);
 
   /* alloc list to store old dg elms */
   tElm **elm_new = checked_calloc(mesh->nmyelm, sizeof(elm_new[0]));
@@ -287,7 +286,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       indic_copy_nbindc_pointers(elm_sav, elm);
 
       // run RHS funcs again
-      evolve_limiter(elm, w, 0, notroubles, 0);//like evolve_limiter_mesh(mesh, w, 0);
+      evolve_limiter(elm, w, 0);//like evolve_limiter_mesh(mesh, w, 0);
       evolve_setrhs(elm, r, w, 0);
 
       // set u again
