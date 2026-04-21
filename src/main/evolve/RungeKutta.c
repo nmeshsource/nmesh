@@ -26,14 +26,15 @@ void evolve_RK4_mesh(tMesh *mesh)
   int nrs = 0; //counts how many substep were redone
 
   pVLList_copy(u_p, u, vlcopy,0);             // u_p = u
-  pVLList_copy(w, u_p, vlcopy,0);             // w = u_p
+  pVLList_copy(w, u, vlcopy,0);               // w = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, w);             // r  = RHS(w, t)
+  pVLList_copy(u, w, vlcopy,0); //set u=w in case e.g. atmo in RHS reset w
   pVLList_addto(u, dt/6., r, vladdto,0);      // u += r dt/6
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 0);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
@@ -44,7 +45,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/3.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/3., 1);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
@@ -55,7 +56,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/3.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/3., 1);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);    // w  = u_p + r dt
@@ -66,7 +67,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 1);  nrs++; }
   }
 
   mesh->time = t+dt;                          // we are now at t+dt
@@ -91,14 +92,15 @@ void evolve_Euler_mesh(tMesh *mesh)
   int nrs = 0; //counts how many substep were redone
 
   pVLList_copy(u_p, u, vlcopy,0);         // u_p = u
-  pVLList_copy(w, u_p, vlcopy,0);         // w = u_p
+  pVLList_copy(w, u, vlcopy,0);           // w = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, w);         // r  = RHS(w, t)
+  pVLList_copy(u, w, vlcopy,0); //set u=w in case e.g. atmo in RHS reset w
   pVLList_addto(u, dt, r, vladdto,0);     // u += r dt
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt, 0);  nrs++; }
   }
 
   mesh->time = t+dt;                      // we are now at t+dt
@@ -140,14 +142,15 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   //printvarlist_atpoint(pt, ListEntry(u,0), "");
   //printvarlist_atpoint(pt, ListEntry(u,1), "");
   pVLList_copy(u_p, u, vlcopy,0);              // u_p = u
-  pVLList_copy(w, u_p, vlcopy,0);              // w = u_p
+  pVLList_copy(w, u, vlcopy,0);                // w = u
   mesh->time = t;
   evolve_setrhs_mesh(mesh, r, w);              // r  = RHS(w, t)
+  pVLList_copy(u, w, vlcopy,0); //set u=w in case e.g. atmo in RHS reset w
   pVLList_addto(u, dt/6., r, vladdto,0);       // u += r dt/6
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0)  //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 0);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
@@ -158,7 +161,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/6.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 1);  nrs++; }
   }
 
   pVLList_addto(w, dt, r, vladdto,0);          // w += r dt
@@ -170,7 +173,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt*2./3.);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt*2./3., 1);  nrs++; }
   }
 
   mesh->time = t+dt;                           // we are now at t+dt
@@ -210,8 +213,9 @@ int evolve_notroubles(tMesh *mesh)
 /*************************************************************************/
 
 /* Redo substep on all elms with elm->dat->info->trbl_score > 0.
-   We 1st take prev substep of amount rfac back. Here rfac is e.g. dt/6 */
-void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
+   We 1st take prev substep of amount rfac back. Here rfac is e.g. dt/6,
+   We limit w only if limit_w=1, before calling RHS. */
+void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
 {
   tEvoSys *evosys = mesh->evosys;
   pVLList *u   = evosys->u;
@@ -286,7 +290,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac)
       indic_copy_nbindc_pointers(elm_sav, elm);
 
       // run RHS funcs again
-      evolve_limiter(elm, w, 0);//like evolve_limiter_mesh(mesh, w, 0);
+      if(limit_w) evolve_limiter(elm, w, 0);//like evolve_limiter_mesh(mesh, w, 0);
       evolve_setrhs(elm, r, w, 0);
 
       // set u again

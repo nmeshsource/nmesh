@@ -40,7 +40,7 @@ void evolve_RK4_mesh(tMesh *mesh);
 void evolve_Euler_mesh(tMesh *mesh);
 void evolve_sspRK3_mesh(tMesh *mesh);
 int evolve_notroubles(tMesh *mesh);
-void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac);
+void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w);
 void evolve_RK4(tNode *node);
 void evolve_Euler(tNode *node);
 
