@@ -76,7 +76,7 @@ int evolve_myln(tMesh *mesh)
 
     /* get global trouble score, if it wasn't done after each RK substep */
     if(redo_substep)
-      trouble_score = 0; //signal no trouble here if were already redone
+      trouble_score = 0; //signal no trouble here if substeps were already redone
     else
       trouble_score = evolve_set_trouble_score_mesh(mesh);
 
