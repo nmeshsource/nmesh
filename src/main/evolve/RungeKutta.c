@@ -34,7 +34,7 @@ void evolve_RK4_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 0);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 1);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt/2., r, vladd,0); // w  = u_p + r dt/2
@@ -100,7 +100,7 @@ void evolve_Euler_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0) //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt, 0);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt, 1);  nrs++; }
   }
 
   mesh->time = t+dt;                      // we are now at t+dt
@@ -150,7 +150,7 @@ void evolve_sspRK3_mesh(tMesh *mesh)
   if(redo_substep)
   {
     if(evolve_set_trouble_score_mesh(mesh)>0)  //score u after step
-    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 0);  nrs++; }
+    { evolve_trouble_redo_u_step_mesh(mesh, dt/6., 1);  nrs++; }
   }
 
   pVLList_add(w, 1., u_p, dt, r, vladd,0);     // w  = u_p + r dt
