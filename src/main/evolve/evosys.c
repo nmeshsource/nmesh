@@ -299,29 +299,59 @@ int var_added_by_evolve_init_evosys(tMesh *mesh, int vi)
   return 0;
 }
 
-/* get number of surface zones of vars in evosys var u */
-int pVLList_get_surfacezones_unique(tMesh *mesh, pVLList *u)
+/* printf surface zones of vars in evosys var u */
+void pVLList_print_surfacezones(tMesh *mesh, pVLList *u)
 {
-  int zones=-911, zones_prev=-99999;
-
   if(u)
   {
     int i;
     forList(u, i)
     {
       tVarList *vl = ListEntry(u, i);
+      int li;
+      forvl(vl, li)
+        printf("%d: %s: surfacezones=%d\n", i,
+               VarName(Vind(vl,li)), MeshVarSurfacezones(mesh, Vind(vl,li)) );
+    }
+  }
+}
+
+/* get number of surface zones of vars in evosys var u */
+int pVLList_get_surfacezones_unique(tMesh *mesh, pVLList *u)
+{
+  int zones=-911, zones_prev=-99999;
+  //pVLList_print_surfacezones(mesh, u);
+
+  if(u)
+  {
+    int first_it=1;
+    int i;
+    forList(u, i)
+    {
+      tVarList *vl = ListEntry(u, i);
+
+      //printf("%d: first_it=%d\n", i, first_it);
 
       if(!vl) continue;
+      if(VLn(vl)<=0) continue;
+
+      //int li;
+      //forvl(vl, li)
+      //  printf("%d: %s: %d\n", i,
+       //        VarName(Vind(vl,li)), MeshVarSurfacezones(mesh, Vind(vl,li)) );
 
       zones = VLSurfZonesUnique(vl);
+      //printf("zones=%d\n", zones);
 
-      if(i>0)
+      if(!first_it)
         if(zones!=zones_prev)
           errorexiti("zones=%d differs from previous VL in list", zones);
+      first_it = 0;
 
       zones_prev = zones;
     }
   }
+  //PRF;printf(": zones=%d\n", zones);
   return zones;
 }
 
