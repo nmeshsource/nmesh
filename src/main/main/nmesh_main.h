@@ -168,7 +168,7 @@ char *MeshVarTensorIndices(tMesh *mesh, int i);
 void MeshVarNameSetBoundaryInfo(tMesh *mesh, const char *name,
 			        double farlimit, double falloff);
 void MeshVarSetType(tMesh *mesh, int i, int type);
-void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones);
+void MeshVarSetSurfZones(tMesh *mesh, int i, int surfacezones);
 void MeshVarSetSpecial(tMesh *mesh, int i,  int ns0, int ns1, int ns2);
 void MeshVarSetNextra(tMesh *mesh, int i, int Nextra);
 double MeshVarFallOff(tMesh *mesh, int i);

@@ -113,7 +113,7 @@ void AddEvoMeshVar(tMesh *mesh, const char *name,
 
   AddMeshVar(mesh, name, tensorindices, description);
   MeshVarSetType(mesh, nvdb, EVOVAR);
-  MeshVarSetSurfInfo(mesh, nvdb, 1);
+  MeshVarSetSurfZones(mesh, nvdb, 1);
   MeshVarSetNextra(mesh, nvdb, Nextra);
 }
 
@@ -287,8 +287,14 @@ void MeshVarSetType(tMesh *mesh, int i, int type)
   }
 }
 
+/* set information how many surface/ghost zones this var-comp has */
+void MeshVarComponentSetSurfZones(tMesh *mesh, int i, int surfacezones)
+{
+  tVar *vdb = mesh->vdb;
+  vdb[i].surfacezones = surfacezones;
+}
 /* set information how many surface/ghost zones this var has */
-void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones)
+void MeshVarSetSurfZones(tMesh *mesh, int i, int surfacezones)
 {
   tVar *vdb = mesh->vdb;
   int j, i0 = MeshVarIndComponent0(mesh, i);
@@ -299,10 +305,10 @@ void MeshVarSetSurfInfo(tMesh *mesh, int i, int surfacezones)
     vdb[i0+j].surfacezones = surfacezones;
   }
 }
-void MeshVarNameSetSurfInfo(tMesh *mesh, const char *name, int surfacezones)
+void MeshVarNameSetSurfZones(tMesh *mesh, const char *name, int surfacezones)
 {
   int i = MeshVarInd(mesh, name);
-  MeshVarSetSurfInfo(mesh, i, surfacezones);
+  MeshVarSetSurfZones(mesh, i, surfacezones);
 }
 
 void MeshVarSetSpecial(tMesh *mesh, int i,  int ns0, int ns1, int ns2)
@@ -747,6 +753,22 @@ void VLSetType(tVarList *vl, int type)
   tMesh *mesh = vl->mesh;
   int i;
   forvl(vl, i) MeshVarComponentSetType(mesh, Vind(vl,i), type);
+}
+
+/* set surface zones of all vars in VarList */
+void VLSetSurfZones(tVarList *vl, int surfacezones)
+{
+  tMesh *mesh = vl->mesh;
+  int i;
+  forvl(vl, i) MeshVarComponentSetSurfZones(mesh, Vind(vl,i), surfacezones);
+}
+
+/* get surface zones of vars in VarList */
+int VLUniqueSurfZones(tVarList *vl, int surfacezones)
+{
+  tMesh *mesh = vl->mesh;
+  int i;
+//FIXME:  forvl(vl, i) MeshVarSurfZones(mesh, Vind(vl,i), surfacezones);
 }
 
 /********************************************************************/
