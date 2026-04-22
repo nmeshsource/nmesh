@@ -247,7 +247,7 @@ int advectionFDy_init(tMesh *mesh)
   advectionFDy_init_global_pars(mesh);
 
   /* set surface to thickness 2 */
-  MeshVarSetSurfInfo(mesh, iu, 2);
+  MeshVarSetSurfZones(mesh, iu, 2);
 
   /* varlist */
   vlpush(vlu, iu);
