@@ -767,7 +767,7 @@ void VLSetSurfZones(tVarList *vl, int surfacezones)
 int VLSurfZonesUnique(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
-  int surfacezones, surfacezones_prev=-999;
+  int surfacezones=-911, surfacezones_prev=-99999;
   int i;
   forvl(vl, i)
   {

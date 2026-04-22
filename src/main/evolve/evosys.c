@@ -299,6 +299,50 @@ int var_added_by_evolve_init_evosys(tMesh *mesh, int vi)
   return 0;
 }
 
+/* get number of surface zones of vars in evosys var u */
+int pVLList_get_surfacezones_unique(tMesh *mesh, pVLList *u)
+{
+  int zones=-911, zones_prev=-99999;
+
+  if(u)
+  {
+    int i;
+    forList(u, i)
+    {
+      tVarList *vl = ListEntry(u, i);
+
+      if(!vl) continue;
+
+      zones = VLSurfZonesUnique(vl);
+
+      if(i>0)
+        if(zones!=zones_prev)
+          errorexiti("zones=%d differs from previous VL in list", zones);
+
+      zones_prev = zones;
+    }
+  }
+  return zones;
+}
+
+/* reset number of zones for vars in evosys->u */
+void pVLList_set_surfacezones(tMesh *mesh, pVLList *u, int zones)
+{
+  if(u)
+  {
+    int i;
+    forList(u, i)
+    {
+      tVarList *vl = ListEntry(u, i);
+
+      if(!vl) continue;
+
+      VLSetSurfZones(vl, zones);
+    }
+  }
+}
+
+
 /* init structs that are used for node to neighbor node communication */
 int evolve_init_communication_structs(tMesh *mesh)
 {
