@@ -221,7 +221,7 @@ tVarList *AddDuplicateEnable(tVarList *vl, const char *postfix,
                              int type, int surfacezones);
 void VLSetType(tVarList *vl, int type);
 void VLSetSurfZones(tVarList *vl, int surfacezones);
-int VLSurfZonesUnique(tVarList *vl, int surfacezones);
+int VLSurfZonesUnique(tVarList *vl);
 void vlsetconst(const void *el, tVarList *u, const double c);
 #define vlsetconstant_node(node, u, c) vlsetconst((node), (u), (c))
 #define vlsetconstant(u, c) vlsetconst(NULL, (u), (c))

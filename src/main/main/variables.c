@@ -764,7 +764,7 @@ void VLSetSurfZones(tVarList *vl, int surfacezones)
 }
 
 /* get surface zones of vars in VarList */
-int VLSurfZonesUnique(tVarList *vl, int surfacezones)
+int VLSurfZonesUnique(tVarList *vl)
 {
   tMesh *mesh = vl->mesh;
   int surfacezones, surfacezones_prev=-999;
