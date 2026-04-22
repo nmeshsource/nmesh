@@ -764,11 +764,24 @@ void VLSetSurfZones(tVarList *vl, int surfacezones)
 }
 
 /* get surface zones of vars in VarList */
-int VLUniqueSurfZones(tVarList *vl, int surfacezones)
+int VLSurfZonesUnique(tVarList *vl, int surfacezones)
 {
   tMesh *mesh = vl->mesh;
+  int surfacezones, surfacezones_prev=-999;
   int i;
-//FIXME:  forvl(vl, i) MeshVarSurfZones(mesh, Vind(vl,i), surfacezones);
+  forvl(vl, i)
+  {
+    int vi = Vind(vl,i);
+    surfacezones = MeshVarSurfacezones(mesh, vi);
+
+    if(i>0)
+      if(surfacezones!=surfacezones_prev)
+        errorexits("surfacezones of %s differs from previous var in list",
+                   VarName(vi));
+
+    surfacezones_prev = surfacezones;
+  }
+  return surfacezones;
 }
 
 /********************************************************************/
