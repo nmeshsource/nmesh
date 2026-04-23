@@ -453,14 +453,16 @@ int get_file_sync_mode(tMesh *mesh, int SyncModePar)
 /* commit file caches to disk if desired, then close file */
 int fclose_file_sync(tMesh *mesh, FILE *fp, int SyncModePar)
 {
-  file_sync(mesh, fp, SyncModePar);
-  return fclose(fp);
+  int ret = file_sync(mesh, fp, SyncModePar);
+  ret    |= fclose(fp);
+  return ret;
 }
 /* commit file caches to disk if desired, then close file and free buf */
 int fclose_buf_file_sync(tMesh *mesh, FILE *fp, char **buf, int SyncModePar)
 {
-  file_sync(mesh, fp, SyncModePar);
-  return fclose_buf(fp, buf);
+  int ret = file_sync(mesh, fp, SyncModePar);
+  ret    |= fclose_buf(fp, buf);
+  return ret;
 }
 
 
