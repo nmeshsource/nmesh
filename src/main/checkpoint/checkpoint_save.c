@@ -377,6 +377,7 @@ int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl,
   int rk;
   int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
+  int ret = 0;
 
   /* MPI motivated loop to assign work */
   for(rk=0; rk<nMPI_size(); rk++)
@@ -392,14 +393,14 @@ int checkpoint_save_VL(tMesh *mesh, char *fname, tVarList *vl,
       /* write var list vl in native or little endian format */
       checkpoint_write_vl(fp, vl, write_native);
 
-      fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
+      ret = fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
       fs_sync(mesh); /* make sure every MPI proc flushes buffers to disk */
     }
     /* wait until everyone is here */
     MCK( nMPI_barrier() );
   } /* end rk-loop */
 
-  return 0;
+  return ret;
 }
 
 /* output varlist on each node */
