@@ -339,6 +339,7 @@ int checkpoint_save(tMesh *mesh)
                                        &crcs);
   char *dir = cmalloc(pl);
   char *dirp = cmalloc(pl);
+  int ret = 0;
 
   /* output filenames */
   snprintf(dir,pl, "%s/%s", outdir, chckpt_dir);
@@ -360,12 +361,17 @@ int checkpoint_save(tMesh *mesh)
   if(Rank0) system2("mkdir", dirn);
 
   /* save checkpoint in various files */
-  checkpoint_save_pars(mesh, pars);
-  checkpoint_save_patches(mesh, dirn, pats);
-  checkpoint_save_elms(mesh, elms);
-  checkpoint_save_nbinfoVars(mesh, nbinfo);
-  checkpoint_save_EvoVars(mesh, vars);
-  checkpoint_save_CRCs(mesh, crcs);
+  ret |= checkpoint_save_pars(mesh, pars);
+  ret |= checkpoint_save_patches(mesh, dirn, pats);
+  ret |= checkpoint_save_elms(mesh, elms);
+  ret |= checkpoint_save_nbinfoVars(mesh, nbinfo);
+  ret |= checkpoint_save_EvoVars(mesh, vars);
+  ret |= checkpoint_save_CRCs(mesh, crcs);
+
+  /* exit if there was a problem */
+  if(ret!=0)
+    errorexits("One of the checkpoint_save functions failed!\n"
+               "Please check the files in %s", dirn);
 
   /* wait until all get here */
   MCK( nMPI_barrier() );
@@ -390,7 +396,7 @@ int checkpoint_save(tMesh *mesh)
   free(pats);
   free(pars);
   free(dirn);
-  return 0;
+  return ret;
 }
 
 /* keep nprev previous checkpoints */
