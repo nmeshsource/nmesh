@@ -4,6 +4,12 @@
 
 
 
+/* structure that holds global evolve pars */
+typedef struct {
+  int loadtime;    /* Par("evolve_loadtime") */
+} tEvolveGlobals;
+
+
 /* evolve.c */
 void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u);
 void evolve_setrhs_PRESURF(tElm *node, pVLList *rhs, pVLList *u);
@@ -17,6 +23,7 @@ void evolve_limiter(tElm *elm, pVLList *u, int MPI_exchange);
 void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
                                                 pVLList *rhs, pVLList *u,
                                                 int notroubles);
+int evolve_set_EvolveGlobals(tMesh *mesh);
 int evolve_filter_evosys_mesh(tMesh *mesh);
 int EVOLVE_timer_start(tMesh *mesh);
 int EVOLVE_timer_stop(tMesh *mesh);

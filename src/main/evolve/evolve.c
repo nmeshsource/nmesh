@@ -6,6 +6,9 @@
 
 #define PR 0
 
+/* globals for evolve */
+tEvolveGlobals EvolveGlobals[1];
+
 /* The functions below are a little complex because they deal with lists of
    variable lists and a list of RHSs (one for each VarList). This was done to
    be able to couple two systems such as e.g. Z4 and matter. Each have their
@@ -625,6 +628,20 @@ void evolve_setsrc_again_nontroubled_nodes_mesh(tMesh *mesh,
              ListEntry(evosys->f[PRELIM],i)(node, evv); */
       }
   }
+}
+
+
+/* init globals in tevolve */
+int evolve_set_EvolveGlobals(tMesh *mesh)
+{
+  /* set gloabls */
+  EvolveGlobals->loadtime = Par("evolve_loadtime");
+
+  /* print globals */
+  PRFs(":\n");
+  printf("  ->loadtime = par_%d: value=%s\n",
+         EvolveGlobals->loadtime, Gets(EvolveGlobals->loadtime));
+  return 0;
 }
 
 

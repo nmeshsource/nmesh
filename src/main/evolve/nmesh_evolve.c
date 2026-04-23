@@ -10,6 +10,7 @@ int nmesh_evolve(tMesh *mesh)
   printf("Adding evolve\n");
 
   /* functions */
+  AddFun(POST_PARAMETERS, evolve_set_EvolveGlobals);
   AddFun(EVOLVE, evolve_output_timers);
   AddFun(EVOLVE, loadtimer_reset_mesh);
   AddFun(EVOLVE, EVOLVE_timer_start);
@@ -25,6 +26,8 @@ int nmesh_evolve(tMesh *mesh)
   AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
   AddPar("evolve_u_surfaces", "yes", "MPI-surface exchange for u [yes,no]"
          "(see comment before pVLList_set_surfacezones in evolve_init_evosys)");
+  AddPar("evolve_loadtime", "3", "3: time RHS & limiter, 7: also time TROUBLE "
+         "[3,7]"); //could extend: 1:time RHS, 2:time limiter, 4:time trouble
   AddPar("evolve_redo_troubled", "step", "what we redo in troubled elms "
          "[step,substep]");
   AddPar("evolve_filter", "no", "whether we filter all evo. vars [no,yes]");
