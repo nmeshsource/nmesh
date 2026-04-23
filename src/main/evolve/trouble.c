@@ -10,6 +10,7 @@
 /* use amr vars */
 extern tAMR amr[1];
 extern tDGglobals DGglobals[1];
+extern tEvolveGlobals EvolveGlobals[1];
 
 
 /* Determine and set trouble score in a node,
@@ -30,6 +31,7 @@ int evolve_set_trouble_score(tNode *node)
   pVLList *u_p = evosys->u_p;
   pVLList *u   = evosys->u;
   pVLList *r   = evosys->rhs;
+  int timeTROUBLE = Geti(EvolveGlobals->loadtime) & 4;
   int max_trouble = 1073741824;
   int troubled = 0; /* default is to assume that we change nothing */
   int tr_max = -max_trouble; /* init to low value */
@@ -38,6 +40,9 @@ int evolve_set_trouble_score(tNode *node)
   if(node->dat == NULL) errorexit("node->dat is NULL");
 
   //if(PR) PRFs(":\n");
+
+  /* time calls to TROUBLE funcs */
+  if(timeTROUBLE) loadtimer_start(node);
 
   /* check all evo systems for trouble and put max into tr_max */
   forList(u, i)
@@ -58,6 +63,8 @@ int evolve_set_trouble_score(tNode *node)
       }
     }
   }
+
+  if(timeTROUBLE) loadtimer_stop(node);
 
   /* set troubled flag to 1, 0, or -1 */
   if(tr_max>0) /* new trouble found, switch to fv */
