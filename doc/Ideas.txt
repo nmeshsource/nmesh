@@ -22,12 +22,20 @@ Improve trouble score:
 +We can take substep back locally and never need to go back for all elements.
 
 
+Improve load balance:
+=====================
+*In evolve_set_trouble_score add
+   loadtimer_start(node);   and   loadtimer_stop(node);
+ around the loop containing the evosys->f[TROUBLE] calls.
+*Will this speed it up, because of better load balance???
+
+
 Reduce suface communication:
 ============================
 *in the new version we always comute r = RHS(w)
 *for this we need surfaces (and maybe indicators) for w only
--BUT currently nmesh creates surfaces for u also. I think these are not
- needed!!!
+-the default (evolve_u_surfaces=yes) creates surfaces for u also.
+ I think these are not needed!!!
 *Create surfaces and indicators only for the vars (e.g. w) that need it!!!
 
 *Keep indicators for u_p for all of full RK step. Currently they get reset
