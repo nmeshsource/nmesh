@@ -265,7 +265,7 @@ int evolve_init_evosys(tMesh *mesh)
        If evolve_u_surfaces=no, u-surfaces are switched off permanently! */
     if(!Getb(Par("evolve_u_surfaces")))
     {
-      printf("Switching off MPI-surface exchange for u in RK substeps.\n");
+      printf("Switching off MPI-surface exchange for u permanently.\n");
       pVLList_set_surfacezones(mesh, evosys->u, 0);
     }
 
