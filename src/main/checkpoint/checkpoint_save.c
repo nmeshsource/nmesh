@@ -43,8 +43,7 @@ int checkpoint_save_pars(tMesh *mesh, char *fname)
   }
 
   free(list);
-  fclose_buf(fp, &IObuf);
-  return 0;
+  return fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
 }
 
 
@@ -82,8 +81,7 @@ int checkpoint_save_patches(tMesh *mesh, char *dir, char *fname)
     fprintf(fp, "\n");
   }
 
-  fclose_buf(fp, &IObuf);
-  return 0;
+  return fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
 }
 
 /* write non-pointer part of tPat */
@@ -172,6 +170,7 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
   FILE *fp = NULL;
   int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
+  int ret = 0;
 
   /* only Rank0 writes the file */
   if(Rank0)
@@ -190,9 +189,9 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
 
   /* Rank0 needs to close file */
   if(Rank0)
-    fclose_buf(fp, &IObuf);
+    ret = fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
 
-  return 0;
+  return ret;
 }
 
 /* write out info about all elms */
@@ -275,6 +274,7 @@ int checkpoint_save_datinfo(tMesh *mesh, char *fname)
   int IObufsz = Geti(Par("fwrite_bufsize"));
   char *IObuf; /* larger buffer for write */
   int rk;
+  int ret = 0;
 
   /* ranks write one after the other */
   for(rk=0; rk<nMPI_size(); rk++)
@@ -319,10 +319,10 @@ int checkpoint_save_datinfo(tMesh *mesh, char *fname)
         // ...
         fprintf(fp, "\n");
       }
-      fclose_buf(fp, &IObuf);
+      ret = fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
     }
   }
-  return 0;
+  return ret;
 }
 
 
@@ -475,6 +475,7 @@ int checkpoint_save_CRCs(tMesh *mesh, char *fname)
 {
   ulong CRC[5]; //nmesh CRCs for pars,pats,elms,nbinfo,vars
   FILE *fp;
+  int ret = 0;
 
   /* get current CRCs */
   nmesh_CRCs(mesh, 5, CRC);
@@ -490,8 +491,8 @@ int checkpoint_save_CRCs(tMesh *mesh, char *fname)
       fprintf(fp, "elms:\t%lu\n", CRC[2]);
       fprintf(fp, "nbinfo:\t%lu\n", CRC[3]);
       fprintf(fp, "vars:\t%lu\n", CRC[4]);
-      fclose(fp);
+      ret = fclose_file_sync(mesh, fp, Par("checkpoint_file_sync"));
     }
   }
-  return 0;
+  return ret;
 }
