@@ -23,6 +23,8 @@ int nmesh_evolve(tMesh *mesh)
 
   /* parameters */
   AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
+  AddPar("evolve_u_surfaces", "yes", "MPI-surface exchange for u [yes,no]"
+         "(see comment before pVLList_set_surfacezones in evolve_init_evosys)");
   AddPar("evolve_redo_troubled", "step", "what we redo in troubled elms "
          "[step,substep]");
   AddPar("evolve_filter", "no", "whether we filter all evo. vars [no,yes]");
