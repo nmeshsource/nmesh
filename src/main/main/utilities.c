@@ -585,14 +585,16 @@ int file_sync_mode(FILE *fp, int mode)
 /* call file_sync_mode, then close file */
 int fclose_sync_mode(FILE *fp, int mode)
 {
-  file_sync_mode(fp, mode);
-  return fclose(fp);
+  int ret = file_sync_mode(fp, mode);
+  ret    |= fclose(fp);
+  return ret;
 }
 /* call file_sync_mode, then close file and free its buffer */
 int fclose_buf_sync_mode(FILE *fp, char **buf, int mode)
 {
-  file_sync_mode(fp, mode);
-  return fclose_buf(fp, buf);
+  int ret = file_sync_mode(fp, mode);
+  ret    |= fclose_buf(fp, buf);
+  return ret;
 }
 
 /* make copy of a file: cp fname newname */
