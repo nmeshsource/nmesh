@@ -30,6 +30,8 @@ int nmesh_checkpoint(tMesh *mesh)
          "when we restart");
   AddPar("checkpoint_CRC", "2048", "exit if CRC error is higher than this "
          "number [1,2,4,8,16,32]");
+  AddPar("checkpoint_file_sync", "no", "how we sync a file "
+         "[fdatasync,fsync,sync]");
 
   return 0;
 }
