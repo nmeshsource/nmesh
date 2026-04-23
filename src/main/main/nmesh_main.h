@@ -380,9 +380,9 @@ void crc64_0start_global(tMesh *mesh,
 FILE *fopen_bufsize(tMesh *mesh, const char *pathname, const char *mode,
                     char **buf);
 int fs_sync(tMesh *mesh);
-int get_file_sync_mode(tMesh *mesh);
-int fclose_file_sync(tMesh *mesh, FILE *fp);
-int fclose_buf_file_sync(tMesh *mesh, FILE *fp, char **buf);
+int get_file_sync_mode(tMesh *mesh, int SyncModePar);
+int fclose_file_sync(tMesh *mesh, FILE *fp, int SyncModePar);
+int fclose_buf_file_sync(tMesh *mesh, FILE *fp, char **buf, int SyncModePar);
 void RunFunFINALIZE_finalize_all(tMesh *mesh);
 void finalize_all_and_exit(tMesh *mesh, int ec);
 void RunFunFINALIZE_finalize_all_and_exit(tMesh *mesh, int ec);

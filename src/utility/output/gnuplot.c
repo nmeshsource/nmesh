@@ -271,7 +271,7 @@ void gnuplot_output1d_perpat_meshvar(tMesh *mesh, char *name,
   char Yfil[1000];
   char Zfil[1000];
   int IObufsz = Geti(Par("fwrite_bufsize"));
-  int syncmode = get_file_sync_mode(mesh); /* uses Par("file_sync") */
+  int syncmode = get_file_sync_mode(mesh, Par("file_sync"));
   char *IObufX = cmalloc(IObufsz); /* larger buffer for write */
   char *IObufY = cmalloc(IObufsz); /* larger buffer for write */
   char *IObufZ = cmalloc(IObufsz); /* larger buffer for write */

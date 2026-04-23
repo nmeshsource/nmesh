@@ -279,7 +279,7 @@ void write_plane_xdmf(tVarList *vl, int norm, const char *outdir,
                   Getd(Par("outputZ0")) };
   int vli;
   int bufsize  = Geti(Par("fwrite_bufsize"));
-  int syncmode = get_file_sync_mode(mesh); /* uses Par("file_sync") */
+  int syncmode = get_file_sync_mode(mesh, Par("file_sync"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
@@ -430,7 +430,7 @@ void output3d_xdmf(tVarList *vl, int It, double Time)
   const char *suffix = "xyz";
   int vli;
   int bufsize  = Geti(Par("fwrite_bufsize"));
-  int syncmode = get_file_sync_mode(mesh); /* uses Par("file_sync") */
+  int syncmode = get_file_sync_mode(mesh, Par("file_sync"));
   char *bufxmf = cmalloc(bufsize); /* larger buffers for write */
   char *bufbin = cmalloc(bufsize);
   char *bufxyz = cmalloc(bufsize);
