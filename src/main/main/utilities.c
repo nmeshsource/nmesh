@@ -573,9 +573,9 @@ int file_sync_mode(FILE *fp, int mode)
   ret = fflush(fp);
 
   if(mode & 1)
-    ret = fdatasync(fd);
+    ret |= fdatasync(fd);
   if(mode & 2)
-    ret = fsync(fd);
+    ret |= fsync(fd);
   if(mode & 4)
     sync();
 
