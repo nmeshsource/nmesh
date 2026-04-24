@@ -468,7 +468,7 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_native)
 
   /* end marker */
   if(nMPI_rank() == nMPI_size()-1)
-    fprintf(fp, "End-Of-File.\n");
+    fprintf(fp, "EndOfFile.\n");
 }
 
 
