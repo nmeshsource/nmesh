@@ -28,10 +28,10 @@ parser = argparse.ArgumentParser(description=
     epilog='''Example:
 ChkptVarsOrNbsToElms.py --np 729:9:0 --np 5832:18:1 --OutBoundPats 31,32,33,34,35,36:2 variables.bin''')
 parser.add_argument('--np', metavar='POINTS', dest='points', action='append',
-        required=True, help="gridpoints in an elm")
+        required=True, help='gridpoints in an elm. E.g. --np 729:9:0 prints elms with 729 points as 9*9*9 with pt_typ=0')
 parser.add_argument('--OutBoundPats', metavar='OUTBOUNDPATS',
         dest='OutBoundPats',
-        help="boundary pats and their pt_typ at outer boundary")
+        help='boundary pats and their pt_typ at outer boundary')
 parser.add_argument('file', help='filename')
 
 args = parser.parse_args()
