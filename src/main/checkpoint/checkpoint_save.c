@@ -189,7 +189,10 @@ int checkpoint_save_elms(tMesh *mesh, char *fname)
 
   /* Rank0 needs to close file */
   if(Rank0)
+  {
+    fprintf(fp, "EndOfFile.\n");
     ret = fclose_buf_file_sync(mesh, fp, &IObuf, Par("checkpoint_file_sync"));
+  }
 
   return ret;
 }
