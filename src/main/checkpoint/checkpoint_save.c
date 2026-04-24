@@ -465,6 +465,10 @@ void checkpoint_write_vl(FILE *fp, tVarList *vl, int write_native)
     fprintf(fp, "}\n");
     fprintf(fp, "\n");
   } /* end node-loop */
+
+  /* end marker */
+  if(nMPI_rank() == nMPI_size()-1)
+    fprintf(fp, "End_Of_File.\n");
 }
 
 
