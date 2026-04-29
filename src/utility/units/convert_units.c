@@ -10,12 +10,15 @@
 /* constants of nature*/
 struct tNATURECONSTS
 {
-  const double c;
-  const double G;
-  const double GMsun;
+  const double c;      /* speed of light */
+  const double G;      /* gravitational constant */
+  const double GMsun;  /* G * solar Mass */
+  const double h;      /* Planck's constant */
+  const double kB;     /* Boltzmann constant */
+  const double e;      /* electron charge */
 };
 
-/* values of consts of nature we use */
+/* SI values of consts of nature we use */
 struct tNATURECONSTS natureconsts =
 {
   .c     = 299792458,     // [m/s],          c is defined to have this value
@@ -45,6 +48,9 @@ struct tNATURECONSTS natureconsts =
      we use here.
      On https://ssd.jpl.nasa.gov/planets/phys_par.html it lists only planets.
   */
+  .h     = 6.62607015e-34, // [J s],         h is defined to have this value
+  .kB    = 1.380649e-23,   // [J/K],        kB is defined to have this value
+  .e     = 1.602176634e-19,// [C],           e is defined to have this value
 };
 
 
