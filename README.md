@@ -1,7 +1,8 @@
 # Readme file for nmesh
 Wolfgang Tichy, 4/2026:
 
-nmesh is a code for numerical relativity using spectral methods.
+nmesh is a program for numerical relativity using discontinuous Galerkin
+and finite volume methods.
 The code is public under the GPL, see the files
 [LICENSE](LICENSE) and [COPYING](COPYING).
 
