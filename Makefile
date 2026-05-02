@@ -73,6 +73,10 @@ libpaths += $(projectpaths)
 #libpaths += src/utility/NumericUtils
 
 # --------------------------------------------------------------------------
+# make a list of paths that do not actually exist on disk
+missingpaths := $(filter-out $(wildcard $(libpaths)),$(libpaths))
+
+# --------------------------------------------------------------------------
 # remove all paths in libpaths that do not contain a corresponding
 # nmesh_LIB.c file:
 
@@ -80,8 +84,14 @@ libpaths += $(projectpaths)
 libpathCfiles := $(foreach X, $(libpaths),\
                    $(wildcard $(X)/nmesh_$(notdir $(X)).c))
 
-# use list of C files to make paths, afterwards remove trailing slashes
+# use list of C files to make paths
 libpaths := $(dir $(libpathCfiles))
+
+# --------------------------------------------------------------------------
+# add missingpaths to cause errors during build when projects are missing
+libpaths += $(missingpaths)
+
+# remove trailing slashes
 libpaths := $(patsubst %/, %, $(libpaths))
 
 # make list of all non-main modules to find possible physics parameters
@@ -223,6 +233,7 @@ printvars:
 	@echo projectnames=$(projectnames)
 	@echo testnames=$(testnames)
 #	@echo libpathCfiles=$(libpathCfiles)
+#	@echo missingpaths=$(missingpaths)
 	@echo libpaths=$(libpaths)
 	@echo compiledphysics=$(compiledphysics)
 	@echo LIBS=$(LIBS)
