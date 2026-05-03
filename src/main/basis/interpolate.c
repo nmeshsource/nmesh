@@ -527,7 +527,7 @@ void insert_array_inplane(tArray *var, int dir, int p, tArray *interp2d)
 
 
 /***********************************************************************/
-/* Interpolate using a particular interpolation scheme */
+/* Interpolate arrays using a particular interpolation scheme */
 /***********************************************************************/
 
 /* call Lagrange, or WENO depending on scheme */
@@ -546,7 +546,7 @@ double interpolate1d_ds(double x, int n, const double *x_p,
   }
 }
 
-/* 3d interp of var onto point Xb using np points around Xb */
+/* 3d interp of array var onto point Xb using np points around Xb */
 double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
                      int scheme, double vscal)
 {
@@ -734,6 +734,152 @@ void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
     interpolate_toIpoints(elm, var, Xp,Ip, np,scheme,vscal, interp);
   }
 }
+
+
+/* 2d interp of array var onto point Xb using np points around Xb */
+double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
+                       int np[2], int scheme, double vscal)
+{
+  int *nn = elm->n;
+  int *an = var->n;
+  int *pt_typ = elm->pt_typ;
+  double *Xb[2];
+  double *x_p[2];
+  double *w[2];
+  int CenterOnXb0, b0[2], nb[2];
+  double *vd;
+  double *r2;
+  double *r1;
+  double interp;
+  int d,d2, j,k;
+
+  /* center interp box for WENO only */
+  CenterOnXb0 = (scheme==INTERP_WENO);
+
+  d2 = 0;
+  for(d=0; d<3; d++)
+    if(d != dir)
+    {
+      /* WENO does currently not work for non-uniform grids */
+      if( (scheme==INTERP_WENO) && (pt_typ[d]!=P_UNIFORM) )
+        errorexit("INTERP_WENO works only on uniform grids!!!");
+
+      if(an[d] != nn[d])
+        errorexiti("elm and var need same dimension in dir%d", d2)
+
+      /* reset np from elm->n, if it is zero */
+      if(np[d2]<1) np[d2] = an[d];
+
+      /* get point coords in elm */
+      Xb[d2] = node_Xb(elm,d)->d;
+
+      /* get index range into b0[2], nb[2] */
+      IndexRange_Xb0_get(elm, d, Xb0[d2], np[d2], CenterOnXb0,
+                         &(b0[d2]), &(nb[d2]));
+      /* get coords in box */
+      x_p[d2] = Xb[d2] + b0[d2];
+
+      /* get interpolation weights if needed */
+      if(scheme==INTERP_LAGRANGE)
+      {
+        w[d2] = dmalloc(nb[d2]);    /* alloc w */
+        Lagrange_winterp(nb[d2], x_p[d2], w[d2]);
+      }
+      else
+      {
+        w[d2] = NULL;
+      }
+      /* increment d2 */
+      d2++;
+    }
+  //d2=0;
+  //printf(" b0=%d nb=%d ", b0[d2], nb[d2]);
+  //printf("  x_p[d2] =");
+  //for(k=0; k<nb[d2]; k++) printf(" %g", x_p[d2][k]);
+  //printf("\n");
+
+  /* get pointer vd to start of var data */
+  vd = Arrd(var);
+
+  switch(dir)
+  {
+  case 0:
+    /* interp vd along Y for all Z */
+    r1 = dmalloc(nb[1]);
+    for(k=0; k<nb[1]; k++)
+      r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                               vd + Ind_n(p,b0[0],b0[1]+k, an), 1, vscal);
+    /* interp r1 along Z */
+    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+                              r1, 1, vscal);
+    free(r1);
+    break;
+  case 1:
+    /* interp vd along X for all Y,Z */
+    r2 = dmalloc(nb[1]*nb[2]);
+    for(k=0; k<nb[2]; k++)
+    for(j=0; j<nb[1]; j++)
+      r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                                         vd + Ind_n(b0[0],b0[1]+j,b0[2]+k, nn),
+                                         1, vscal);
+    //printf("  r2 =");
+    //for(k=0; k<nb[1]*nb[2]; k++) printf(" %g", r2[k]);
+    //printf("\n");
+
+    /* interp r2 along Y for all Z */
+    r1 = dmalloc(nb[2]);
+    for(k=0; k<nb[2]; k++)
+      r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+                               r2 + nb[1]*k, 1, vscal);
+    //printf("  r1 =");
+    //for(k=0; k<nb[2]; k++) printf(" %g", r1[k]);
+    //printf("\n");
+
+    /* interp r1 along Z */
+    interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+                              r1, 1, vscal);
+    free(r1);
+    free(r2);
+    break;
+  case 2:
+    /* interp vd along X for all Y,Z */
+    r2 = dmalloc(nb[1]*nb[2]);
+    for(k=0; k<nb[2]; k++)
+    for(j=0; j<nb[1]; j++)
+      r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                                         vd + Ind_n(b0[0],b0[1]+j,b0[2]+k, nn),
+                                         1, vscal);
+    //printf("  r2 =");
+    //for(k=0; k<nb[1]*nb[2]; k++) printf(" %g", r2[k]);
+    //printf("\n");
+
+    /* interp r2 along Y for all Z */
+    r1 = dmalloc(nb[2]);
+    for(k=0; k<nb[2]; k++)
+      r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+                               r2 + nb[1]*k, 1, vscal);
+    //printf("  r1 =");
+    //for(k=0; k<nb[2]; k++) printf(" %g", r1[k]);
+    //printf("\n");
+
+    /* interp r1 along Z */
+    interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+                              r1, 1, vscal);
+    free(r1);
+    free(r2);
+    break;
+  default:
+    errorexit("dir must be 0,1,2")
+  }
+
+  for(d=2; d>=0; d--) free(w[d]);
+
+  return interp;
+}
+
+/***********************************************************************/
+/* Interpolate mesh vars using a particular interpolation scheme */
+/***********************************************************************/
 
 /* 3d interpolation from var iu in node to a number of points (set by
    Arrn(interp) = interp->n) with point type pt_typ. The result will be
