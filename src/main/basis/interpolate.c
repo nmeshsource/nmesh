@@ -696,7 +696,7 @@ void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
   int *n = elm->n;
 
   /* if npts is either very small or very large and we want LAGRANGE we use
-     the more optimized basis_interp_toIpoints */
+     the more optimized basis_interp_topoints */
   if( (scheme == INTERP_LAGRANGE) &&
       ( (npts<1) || ((npts>=n[0]) && (npts>=n[1]) && (npts>=n[2])) ) )
   {
