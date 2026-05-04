@@ -765,7 +765,7 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
         errorexit("INTERP_WENO works only on uniform grids!!!");
 
       if(an[d] != nn[d])
-        errorexiti("elm and var need same dimension in dir%d", d2)
+        errorexiti("elm and var need same dimension in dir%d", d2);
 
       /* reset np from elm->n, if it is zero */
       if(np[d2]<1) np[d2] = an[d];
@@ -869,7 +869,7 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
     free(r2);
     break;
   default:
-    errorexit("dir must be 0,1,2")
+    errorexit("dir must be 0,1,2");
   }
 
   for(d=2; d>=0; d--) free(w[d]);
