@@ -130,6 +130,89 @@ double interpolate_WENO_4_ds(double x, int n, const double *x_p,
 }
 
 
+/* How we can get WENO3 weights:
+# 3 points and their function values
+pt = [ 1,2,3 ]
+fv = [ 1,4,9 ]
+
+# 2nd order Lagrange poly
+P2(x) =
+fv[0]*(x-pt[1])*(x-pt[2])/((pt[0]-pt[1])*(pt[0]-pt[2])) +
+fv[1]*(x-pt[0])*(x-pt[2])/((pt[1]-pt[0])*(pt[1]-pt[2])) +
+fv[2]*(x-pt[0])*(x-pt[1])/((pt[2]-pt[0])*(pt[2]-pt[1]))
+
+# 2 1st order Lagrange polys
+# L0(x) = fv[0]*(x-pt[1])/((pt[0]-pt[1])) + fv[1]*(x-pt[0])/((pt[1]-pt[0]))
+# L1(x) = fv[1]*(x-pt[2])/((pt[1]-pt[2])) + fv[2]*(x-pt[1])/((pt[2]-pt[1]))
+
+# coeffs for linear interpolation
+a00(x) = (x-pt[1])/(pt[0]-pt[1])
+a01(x) = (x-pt[0])/(pt[1]-pt[0])
+a10(x) = (x-pt[2])/(pt[1]-pt[2])
+a11(x) = (x-pt[1])/(pt[2]-pt[1])
+
+# linear interpolation
+L0(x) = fv[0]*a00(x) + fv[1]*a01(x)
+L1(x) = fv[1]*a10(x) + fv[2]*a11(x)
+
+# weights for L0 and L1 to reconstruct P2
+g0(x) = (x-pt[2])/(pt[0]-pt[2])
+g1(x) = (x-pt[0])/(pt[2]-pt[0])
+
+# This S(x) is equal to P2(x):
+S(x) = g0(x)*L0(x) + g1(x)*L1(x)
+*/
+/* centered WENO3 interpolation, i.e. not the one used to reconstruct fluxes
+   in e.g. an upwind scheme */
+double interpolate_cenWENO_3_ds(double x, int n, const double *x_p,
+                                const double *w_interp,
+                                const double *f, int ds, double f_scale)
+{
+  double u[] = { f[0], f[ds], f[2*ds] };
+  double fs2 = f_scale*f_scale;
+  double epsl = 1e-6 * fs2;
+
+  /* grid spacings */
+  double h0 = x_p[1]-x_p[0];
+  double h1 = x_p[2]-x_p[1];
+  double h0sqr = h0*h0;
+  double h1sqr = h1*h1;
+
+  /* coeffs for linear polys */
+  double a00 = (x-x_p[1])/(-h0);
+  double a01 = (x-x_p[0])/(+h0);
+  double a10 = (x-x_p[2])/(-h1);
+  double a11 = (x-x_p[1])/(+h1);
+  /* 2 linear interpolations */
+  double L0 = u[0]*a00 + u[1]*a01;
+  double L1 = u[1]*a10 + u[2]*a11;
+  /* optimal weights, to reconstruct 2nd order Lagrange poly */
+  double g0 = (x-x_p[2])/(x_p[0]-x_p[2]);
+  double g1 = (x-x_p[0])/(x_p[2]-x_p[0]);
+
+  /* diffs */
+  double d0 = u[1] - u[0];
+  double d1 = u[2] - u[1];
+
+  /* smoothness indicators */
+  double beta0 = d0*d0;
+  double beta1 = d1*d1;
+  double beta0_p_eps = (beta0 + epsl)/h0sqr;
+  double beta1_p_eps = (beta1 + epsl)/h1sqr;
+
+  /* non-normalized weights */
+  double omegab0 = g0/(beta0_p_eps*beta0_p_eps);
+  double omegab1 = g1/(beta1_p_eps*beta1_p_eps);
+  double omegab_sum = omegab0 + omegab1;
+
+  /* normalized weights */
+  double omega0 = omegab0/(omegab_sum);
+  double omega1 = omegab1/(omegab_sum);
+
+  /* final interpolation */
+  return omega0*L0 + omega1*L1;
+}
+
 /***********************************************************************/
 /* func to select correct WENO */
 /***********************************************************************/
