@@ -736,7 +736,8 @@ void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
 }
 
 
-/* 2d interp of array var onto point Xb using np points around Xb */
+/* 2d interp of array var onto point Xb using np points around Xb.
+   interp2d_to_Xb0 is very similar to the 3d interp in interp_to_Xb0 */
 double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
                        int np[2], int scheme, double vscal)
 {
