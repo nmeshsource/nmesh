@@ -748,7 +748,6 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
   double *w[2];
   int CenterOnXb0, b0[2], nb[2];
   double *vd;
-  double *r2;
   double *r1;
   double interp;
   int d,d2, j,k;
@@ -815,64 +814,32 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
     free(r1);
     break;
   case 1:
-    /* interp vd along X for all Y,Z */
-    r2 = dmalloc(nb[1]*nb[2]);
-    for(k=0; k<nb[2]; k++)
-    for(j=0; j<nb[1]; j++)
-      r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
-                                         vd + Ind_n(b0[0],b0[1]+j,b0[2]+k, nn),
-                                         1, vscal);
-    //printf("  r2 =");
-    //for(k=0; k<nb[1]*nb[2]; k++) printf(" %g", r2[k]);
-    //printf("\n");
-
-    /* interp r2 along Y for all Z */
-    r1 = dmalloc(nb[2]);
-    for(k=0; k<nb[2]; k++)
-      r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
-                               r2 + nb[1]*k, 1, vscal);
-    //printf("  r1 =");
-    //for(k=0; k<nb[2]; k++) printf(" %g", r1[k]);
-    //printf("\n");
-
+    /* interp vd along X for all Z */
+    r1 = dmalloc(nb[1]);
+    for(k=0; k<nb[1]; k++)
+      r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                               vd + Ind_n(b0[0],p,b0[1]+k, an), 1, vscal);
     /* interp r1 along Z */
-    interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
                               r1, 1, vscal);
     free(r1);
-    free(r2);
     break;
   case 2:
-    /* interp vd along X for all Y,Z */
-    r2 = dmalloc(nb[1]*nb[2]);
-    for(k=0; k<nb[2]; k++)
+    /* interp vd along X for all Y */
+    r1 = dmalloc(nb[1]);
     for(j=0; j<nb[1]; j++)
-      r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
-                                         vd + Ind_n(b0[0],b0[1]+j,b0[2]+k, nn),
-                                         1, vscal);
-    //printf("  r2 =");
-    //for(k=0; k<nb[1]*nb[2]; k++) printf(" %g", r2[k]);
-    //printf("\n");
-
-    /* interp r2 along Y for all Z */
-    r1 = dmalloc(nb[2]);
-    for(k=0; k<nb[2]; k++)
-      r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
-                               r2 + nb[1]*k, 1, vscal);
-    //printf("  r1 =");
-    //for(k=0; k<nb[2]; k++) printf(" %g", r1[k]);
-    //printf("\n");
-
-    /* interp r1 along Z */
-    interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+      r1[j] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+                               vd + Ind_n(b0[0],b0[1]+j,p, an), 1, vscal);
+    /* interp r1 along Y */
+    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
                               r1, 1, vscal);
     free(r1);
-    free(r2);
     break;
   default:
     errorexit("dir must be 0,1,2");
   }
 
-  for(d=2; d>=0; d--) free(w[d]);
+  for(d2=1; d2>=0; d2--) free(w[d2]);
 
   return interp;
 }
