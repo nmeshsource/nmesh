@@ -522,7 +522,7 @@ double var_GLquadrature3X(tNode *node, int ui)
    wouldn't fit into the node. Otherwise, we just push the range inside the
    node.
    Out: i0 = start of range , ni = size of range */
-void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
+void IndexRange_Xb0_get__old(tNode *node, int dir, double Xb0, int n,
                         int CenterOnXb0, int *i0, int *ni)
 {
   double *Xb = node_Xb(node,dir)->d; /* get point coords in node */
@@ -655,7 +655,7 @@ int HalfZoneOf_right(int n, const double xp[], double x)
    wouldn't fit into the node. Otherwise, we just push the range inside the
    node.
    Out: i0 = start of range , ni = size of range */
-void IndexRange_Xb0_get__new(tNode *node, int dir, double Xb0, int n,
+void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
                         int CenterOnXb0, int *i0, int *ni)
 {
   double *Xb = node_Xb(node,dir)->d; /* get point coords in node */
