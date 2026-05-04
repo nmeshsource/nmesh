@@ -845,6 +845,42 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
   return interp;
 }
 
+/* 2d interpolation from array var in elm onto a set of points given in
+   arrays Xp[0..1]. The arrays Xp[0..1] are in Xb coords. The result will
+   be written into array interp.
+   The interpolation will use np[2] points around Xp. scheme describes
+   the interpolation scheme, and vscal is the scale used in WENO, usually 1 */
+void interpolate2d_topoints(tElm *elm, tArray *var, int dir, int p,
+                            tArray *Xp[2], int np[2], int scheme,
+                            double vscal, tArray *interp)
+{
+  int k;
+  forarray(Xp[0], k)
+  {
+    double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k] };
+    interp->d[k] = interp2d_to_Xb0(elm, var, dir,p, Xb, np, scheme, vscal);
+  }
+}
+
+/* 2d interpolation from array var in node to a set of points indicated by
+   the arrays Xp[0..1] and Ip. Xp[0..1] has the point coords in Xb coords
+   and Ip has the index where the interpolation result is written to in
+   interp. For points where Ip<0 nothing will be written into interp. */
+void interpolate2d_toIpoints(tElm *elm, tArray *var, int dir, int p,
+                             tArray *Xp[2], tArray *Ip, int np[2],
+                             int scheme, double vscal, tArray *interp)
+{
+  int k;
+  forarray(Xp[0], k)
+  {
+    double Xb[]  = { Xp[0]->d[k], Xp[1]->d[k] };
+    int idx = Ip->i[k];
+    if(idx>=0)
+      interp->d[idx] = interp2d_to_Xb0(elm, var, dir,p, Xb, np,scheme,vscal);
+  }
+}
+
+
 /***********************************************************************/
 /* Interpolate mesh vars using a particular interpolation scheme */
 /***********************************************************************/
