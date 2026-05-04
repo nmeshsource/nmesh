@@ -583,9 +583,9 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 /* Consider n (e.g. 7) grid points marked by o:
    0       1       2       3       4       5       6    <-- gridpoint number
    o   |   o   |   o   |   o   |   o   |   o   |   o    <-- gridpoints
--1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10| 11| 12 <-- half zone number
+   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10| 11|    <-- half zone number
 
-    HalfZoneOf_left returns the half zone number x is in for the points xp[] */
+   HalfZoneOf_left returns the half zone number x is in for the points xp[] */
 int HalfZoneOf_left(int n, const double xp[], double x)
 {
   int i, h;
@@ -597,11 +597,7 @@ int HalfZoneOf_left(int n, const double xp[], double x)
     else          return 1;
   }
 
-  /* if x is outside */
-  if(x < xp[0])   return -1;
-  //if(x > xp[n-1]) return (n-1)*2;
-
-  /* find zone if x is inside */
+  /* find zone */
   h = 0;
   for(i=0; i<n-1; i++)
   {
@@ -613,11 +609,13 @@ int HalfZoneOf_left(int n, const double xp[], double x)
     if(x<end) break;
     h++;
   }
+  /* check if we are at or beyond last zone */
+  if(h >= (n-1)*2) h = (n-1)*2 - 1;
   return h;
 }
 
 /* same as HalfZoneOf_left but start from right end */
-int HalfZoneOf_right(int n, const double xp[], double x)
+int HalfZoneOf_back(int n, const double xp[], double x)
 {
   int i, h;
 
@@ -628,11 +626,7 @@ int HalfZoneOf_right(int n, const double xp[], double x)
     else          return 1;
   }
 
-  /* if x is outside */
-  //if(x < xp[0])   return -1;
-  if(x > xp[n-1]) return (n-1)*2;
-
-  /* find zone if x is inside */
+  /* find zone */
   h = (n-1)*2 - 1;
   for(i=n-1; i>0; i--)
   {
@@ -644,9 +638,19 @@ int HalfZoneOf_right(int n, const double xp[], double x)
     if(x>beg) break;
     h--;
   }
+  /* check if we are at or beyond first zone */
+  if(h < 0) h = 0;
   return h;
 }
 
+/* return 0 in last zone, 1 in 2nd to last, etc. */
+int HalfZoneOf_right(int n, const double xp[], double x)
+{
+  int h = HalfZoneOf_back(n, xp, x);
+  return (n-1)*2 - 1 - h;
+}
+
+/**/
 void IndexRange_Xb0_get__new(tNode *node, int dir, double Xb0, int n,
                         int CenterOnXb0, int *i0, int *ni)
 {
@@ -680,19 +684,23 @@ void IndexRange_Xb0_get__new(tNode *node, int dir, double Xb0, int n,
     if(b0==0)
     {
       int hl = HalfZoneOf_left(nn, Xb, Xb0);
-      int nl=0;
-      //int nl = amr_func(hl); //basis->WENO_boundary_order[hl]
-      nb = b1 - b0 + 1;
-      if(nb > nl) b1 -= nb-nl; //pull in right end
+      int nl = basis->WENO_boundary_order[hl];
+      if(nl)
+      {
+        nb = b1 - b0 + 1;
+        if(nb > nl) b1 -= nb-nl; //pull in right end
+      }
     }
 
     if(b1==nn-1)
     {
       int hr = HalfZoneOf_right(nn, Xb, Xb0);
-      int nr=0;
-      //int nr = amr_func(hr); //basis->WENO_boundary_order[hr]
-      nb = b1 - b0 + 1;
-      if(nb > nr) b0 += nb-nr; //pull in left end
+      int nr = basis->WENO_boundary_order[hr];
+      if(nr)
+      {
+        nb = b1 - b0 + 1;
+        if(nb > nr) b0 += nb-nr; //pull in left end
+      }
     }
   }
 
