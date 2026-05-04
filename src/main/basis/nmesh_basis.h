@@ -17,7 +17,7 @@ enum
 typedef struct {
   int expfilter_JacobianPower; /* Par("basis_expfilter_JacobianPower") */
   int filter_fv;               /* Par("basis_filter_fv") */
-  int WENO_boundary_order[N_WENO_BOUNDARY_ORDERS]; //vals of par basis_WENO_boundary_order
+  int boundary_interp_order[N_WENO_BOUNDARY_ORDERS]; //vals of par basis_boundary_interp_order
 } tbasis;
 
 

@@ -21,12 +21,12 @@ int basis_init_globals(tMesh *mesh)
   /* set some global vars */
   basis->expfilter_JacobianPower = Par("basis_expfilter_JacobianPower");
   basis->filter_fv = Par("basis_filter_fv");
-  str_to_intList(Gets(Par("basis_WENO_boundary_order")), " ", il);
+  str_to_intList(Gets(Par("basis_boundary_interp_order")), " ", il);
   forList(il, k)
   {
     if(k>=N_WENO_BOUNDARY_ORDERS)
       errorexit("N_WENO_BOUNDARY_ORDERS is too small");
-    basis->WENO_boundary_order[k] = ListEntry(il, k);
+    basis->boundary_interp_order[k] = ListEntry(il, k);
   }
 
   /* print global vars */
@@ -35,10 +35,10 @@ int basis_init_globals(tMesh *mesh)
          basis->expfilter_JacobianPower, Gets(basis->expfilter_JacobianPower));
   printf(" basis->filter_fv = par_%04d :  Gets(basis->filter_fv) = %s\n",
          basis->filter_fv, Gets(basis->filter_fv));
-  printf(" basis->WENO_boundary_order =");
+  printf(" basis->boundary_interp_order =");
   for(k=0; k<N_WENO_BOUNDARY_ORDERS; k++)
   {
-    int ord = basis->WENO_boundary_order[k];
+    int ord = basis->boundary_interp_order[k];
     if(ord>0) printf(" %d", ord);
   }
   printf("\n");
@@ -688,7 +688,7 @@ void IndexRange_Xb0_get__new(tNode *node, int dir, double Xb0, int n,
     if(b0==0)
     {
       int hl = HalfZoneOf_left(nn, Xb, Xb0);
-      int nl = basis->WENO_boundary_order[hl];
+      int nl = basis->boundary_interp_order[hl];
       if(nl)
       {
         nb = b1 - b0 + 1;
@@ -699,7 +699,7 @@ void IndexRange_Xb0_get__new(tNode *node, int dir, double Xb0, int n,
     if(b1==nn-1)
     {
       int hr = HalfZoneOf_right(nn, Xb, Xb0);
-      int nr = basis->WENO_boundary_order[hr];
+      int nr = basis->boundary_interp_order[hr];
       if(nr)
       {
         nb = b1 - b0 + 1;
