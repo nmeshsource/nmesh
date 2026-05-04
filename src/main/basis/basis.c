@@ -13,11 +13,37 @@ tbasis basis[1];
 /* initialize coordinates in each patch */
 int basis_init_globals(tMesh *mesh)
 {
+  intList *il = intList_alloc();
+  int k;
+
   PRF;printf(":\n");
 
   /* set some global vars */
   basis->expfilter_JacobianPower = Par("basis_expfilter_JacobianPower");
   basis->filter_fv = Par("basis_filter_fv");
+  str_to_intList(Gets(Par("basis_WENO_boundary_order")), " ", il);
+  forList(il, k)
+  {
+    if(k>=N_WENO_BOUNDARY_ORDERS)
+      errorexit("N_WENO_BOUNDARY_ORDERS is too small");
+    basis->WENO_boundary_order[k] = ListEntry(il, k);
+  }
+
+  /* print global vars */
+  printf(" basis->expfilter_JacobianPower = par_%04d :  "
+         "Gets(basis->expf...Power) = %s\n",
+         basis->expfilter_JacobianPower, Gets(basis->expfilter_JacobianPower));
+  printf(" basis->filter_fv = par_%04d :  Gets(basis->filter_fv) = %s\n",
+         basis->filter_fv, Gets(basis->filter_fv));
+  printf(" basis->WENO_boundary_order =");
+  for(k=0; k<N_WENO_BOUNDARY_ORDERS; k++)
+  {
+    int ord = basis->WENO_boundary_order[k];
+    if(ord>0) printf(" %d", ord);
+  }
+  printf("\n");
+
+  intList_free(il);
 
   return 0;
 }
@@ -552,6 +578,129 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   *i0 = b0;
   *ni = b1 - b0 + 1;
 }
+
+
+/* Consider n (e.g. 7) grid points marked by o:
+   0       1       2       3       4       5       6    <-- gridpoint number
+   o   |   o   |   o   |   o   |   o   |   o   |   o    <-- gridpoints
+-1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10| 11| 12 <-- half zone number
+
+    HalfZoneOf_left returns the half zone number x is in for the points xp[] */
+int HalfZoneOf_left(int n, const double xp[], double x)
+{
+  int i, h;
+
+  /* special case for n=1 */
+  if(n<2)
+  {
+    if(x < xp[0]) return 0;
+    else          return 1;
+  }
+
+  /* if x is outside */
+  if(x < xp[0])   return -1;
+  //if(x > xp[n-1]) return (n-1)*2;
+
+  /* find zone if x is inside */
+  h = 0;
+  for(i=0; i<n-1; i++)
+  {
+    double beg = xp[i];
+    double end = xp[i+1];
+    double mid = (beg + end)*0.5;
+    if(x<mid) break;
+    h++;
+    if(x<end) break;
+    h++;
+  }
+  return h;
+}
+
+/* same as HalfZoneOf_left but start from right end */
+int HalfZoneOf_right(int n, const double xp[], double x)
+{
+  int i, h;
+
+  /* special case for n=1 */
+  if(n<2)
+  {
+    if(x < xp[0]) return 0;
+    else          return 1;
+  }
+
+  /* if x is outside */
+  //if(x < xp[0])   return -1;
+  if(x > xp[n-1]) return (n-1)*2;
+
+  /* find zone if x is inside */
+  h = (n-1)*2 - 1;
+  for(i=n-1; i>0; i--)
+  {
+    double beg = xp[i-1];
+    double end = xp[i];
+    double mid = (beg + end)*0.5;
+    if(x>mid) break;
+    h--;
+    if(x>beg) break;
+    h--;
+  }
+  return h;
+}
+
+void IndexRange_Xb0_get__new(tNode *node, int dir, double Xb0, int n,
+                        int CenterOnXb0, int *i0, int *ni)
+{
+  double *Xb = node_Xb(node,dir)->d; /* get point coords in node */
+  int nn = node->n[dir];
+  int ind0, b0,b1, nb;
+
+  /* the default for nb is n */
+  nb = n;
+
+  /* find node-point ind0 closest to Xb0 */
+  ind0 = nearest_i0_of_Xb_indir(node, dir, Xb0);
+  if(ind0==-1)      ind0 = 0;
+  else if(ind0<-1)  ind0 = nn-1;
+
+  /* move ind0 to the left of Xb0 if needed */
+  if( (n%2 == 0) && (Xb[ind0] > Xb0) ) ind0--;
+
+  /* find index range start b0 and end b1 */
+  b0 = ind0 - (nb-1)/2;
+  b1 = b0 + (nb-1);
+
+  /* push range inside and shorten it, if it does not fit */
+  if(b0 < 0)   { b1 += -b0;      b0 = 0; }
+  if(b1 >= nn) { b0 -= b1-nn+1;  b1 = nn-1; }
+  /* cut off left piece if needed */
+  if(b0 < 0) b0 = 0;
+
+  if(CenterOnXb0) /* shorten range if it does not fit */
+  {
+    if(b0==0)
+    {
+      int hl = HalfZoneOf_left(nn, Xb, Xb0);
+      int nl=0;
+      //int nl = amr_func(hl); //basis->WENO_boundary_order[hl]
+      nb = b1 - b0 + 1;
+      if(nb > nl) b1 -= nb-nl; //pull in right end
+    }
+
+    if(b1==nn-1)
+    {
+      int hr = HalfZoneOf_right(nn, Xb, Xb0);
+      int nr=0;
+      //int nr = amr_func(hr); //basis->WENO_boundary_order[hr]
+      nb = b1 - b0 + 1;
+      if(nb > nr) b0 += nb-nr; //pull in left end
+    }
+  }
+
+  /* set i0 and ni */
+  *i0 = b0;
+  *ni = b1 - b0 + 1;
+}
+
 
 /* Find an index box of size n[3] around Xb0.
    If CenterOnXb0=1 we center exactly on Xb0, and shrink the box if it
