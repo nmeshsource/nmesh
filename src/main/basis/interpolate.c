@@ -901,6 +901,7 @@ void interp2d_topoints(tElm *elm, tArray *var, int dir, int p,
    interp. For points where Ip<0 nothing will be written into interp.
    FIXME: For INTERP_LAGRANGE this func should call either:
      basis_interp2d_toIpoints  OR  interpolate2d_toIpoints
+     (see func interp_toIpoints to see how this is done)
    For INTERP_WENO it always uses interpolate2d_toIpoints */
 void interp2d_toIpoints(tElm *elm, tArray *var, int dir, int p,
                         tArray *Xp[2], tArray *Ip, int npts,
