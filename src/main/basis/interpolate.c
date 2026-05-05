@@ -881,6 +881,36 @@ void interpolate2d_toIpoints(tElm *elm, tArray *var, int dir, int p,
 }
 
 
+/* 2d interpolation from array var in elm onto a set of points given in
+   arrays Xp[0..1]. The arrays Xp[0..1] are in Xb coords. The result will
+   be written into array interp.
+   FIXME: For INTERP_LAGRANGE this func should call either:
+     basis_interp2d_topoints  OR  interpolate2d_topoints
+   For INTERP_WENO it always uses interpolate2d_topoints */
+void interp2d_topoints(tElm *elm, tArray *var, int dir, int p,
+                       tArray *Xp[2], int npts, int scheme,
+                       double vscal, tArray *interp)
+{
+  int np[] = {npts, npts, npts};
+  interpolate2d_topoints(elm, var, dir,p, Xp, np,scheme,vscal, interp);
+}
+
+/* 2d interpolation from array var in node to a set of points indicated by
+   the arrays Xp[0..1] and Ip. Xp[0..1] has the point coords in Xb coords
+   and Ip has the index where the interpolation result is written to in
+   interp. For points where Ip<0 nothing will be written into interp.
+   FIXME: For INTERP_LAGRANGE this func should call either:
+     basis_interp2d_toIpoints  OR  interpolate2d_toIpoints
+   For INTERP_WENO it always uses interpolate2d_toIpoints */
+void interp2d_toIpoints(tElm *elm, tArray *var, int dir, int p,
+                        tArray *Xp[2], tArray *Ip, int npts,
+                        int scheme, double vscal, tArray *interp)
+{
+  int np[] = {npts, npts};
+  interpolate2d_toIpoints(elm, var, dir,p, Xp,Ip, np,scheme,vscal, interp);
+}
+
+
 /***********************************************************************/
 /* Interpolate mesh vars using a particular interpolation scheme */
 /***********************************************************************/

@@ -6,7 +6,8 @@
 
 #define PR 0
 
-/* use DGglobals */
+/* use amr and DGglobals */
+extern tAMR amr[1];
 extern tDGglobals DGglobals[1];
 
 /* functions to exchange surface data */
@@ -756,6 +757,7 @@ tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 /* set ajsurf array from data in nbsurf on face f for all vars */
 void set_ajsurf_forall_vars(tNode *node, int f)
 {
+  tMesh *mesh = Elm_mesh(node);
   tPat *pat = node->pat;
   int nnb = node->nfnb[f];
   int dir = f/2;
@@ -769,6 +771,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tArray *(*Cb)[2];
   tDat *dat = node->dat;
   char str[100];
+  int WENOorder;
   double (*interp1d_fv)(int k, double x, int np,
                         const double *x_p, const double *w_interp);
   if(!dat) return;
@@ -829,7 +832,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
             ( node->pt_typ[d2] == nb->pt_typ[od1] &&
               node->pt_typ[d1] == nb->pt_typ[od2] ) )
         {
-          tMesh *mesh = node->pat->mesh;
+          //tMesh *mesh = node->pat->mesh;
           int ix = Ind("x");
           double *px[] = { Vard(node,ix), Vard(node,ix+1), Vard(node,ix+2) };
           int i,j,k, ind;
@@ -1140,6 +1143,10 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   case FV_2DINTERP_PARAB:
     interp1d_fv = basis_pw_parab;
     break;
+  case FV_2DINTERP_WENO:
+    interp1d_fv = NULL;
+    WENOorder = Geti(amr->WENO_interp_order);
+    break;
   default:
     errorexiti("illegal value: DGglobals->fv_surface_interp_mode = %d",
                DGglobals->fv_surface_interp_mode);
@@ -1176,15 +1183,23 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         od1 = Dir1_norm(nb_dir);
         od2 = Dir2_norm(nb_dir);
         if(nb->pt_typ[od1]==P_UNIFORM && nb->pt_typ[od2]==P_UNIFORM)
-          basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
-                                   Cb[ni],Ip[ni], Res[ni], interp1d_fv);
+        {
+          if(DGglobals->fv_surface_interp_mode == FV_2DINTERP_WENO)
+            interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0, Cb[ni],Ip[ni],
+                               WENOorder,INTERP_WENO,1., Res[ni]);
+          else
+            basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
+                                     Cb[ni],Ip[ni], Res[ni], interp1d_fv);
+        }
         else /* Lagrange interpolation is the default */
+        {
           basis_interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0,
                                    Cb[ni],Ip[ni], Res[ni], Lagrange_of_x);
+        }
 
 if(0 && Node_eid(nb)==17 && Node_eid(nb)==64 && vi==35)
 {
-tMesh *mesh = node->pat->mesh;
+//tMesh *mesh = node->pat->mesh;
 int ll;
 printelm(node);
 printelm(nb);
