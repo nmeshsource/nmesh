@@ -661,12 +661,18 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   double *Xb = node_Xb(node,dir)->d; /* get point coords in node */
   int nn = node->n[dir];
   int ind0, b0,b1, nb;
+  double diff;
 
   /* the default for nb is n */
   nb = n;
 
   /* find node-point ind0 closest to Xb0 */
-  ind0 = nearest_i0_of_Xb_indir(node, dir, Xb0);
+  ind0 = nearest_i0_of_Xb_indir_diff(node, dir, Xb0, &diff);
+
+  /* return range of size one if Xb0 is on a grid point */
+  if(fabs(diff) < dequaleps) { *i0 = ind0;  *ni = 1;  return; }
+
+  /* ensure ind0 is inside elm */
   if(ind0==-1)      ind0 = 0;
   else if(ind0<-1)  ind0 = nn-1;
 
