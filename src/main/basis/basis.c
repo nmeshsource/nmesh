@@ -685,14 +685,9 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 
   if(CenterOnXb0) /* shorten range if it does not fit */
   {
-    int hl = HalfZoneOf_left(nn, Xb, Xb0);
-    int hr = HalfZoneOf_right(nn, Xb, Xb0);
-
-    /* catch case where Xb0 has same dist from both ends*/
-    if(hl==hr && hl>0) { hl--; hr--; }
-
     if(b0==0)
     {
+      int hl = HalfZoneOf_left(nn, Xb, Xb0);
       int nl = basis->boundary_interp_order[hl];
       if(nl)
       {
@@ -703,6 +698,7 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 
     if(b1==nn-1)
     {
+      int hr = HalfZoneOf_right(nn, Xb, Xb0);
       int nr = basis->boundary_interp_order[hr];
       if(nr)
       {
