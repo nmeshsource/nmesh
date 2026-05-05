@@ -365,6 +365,8 @@ int dg_set_DGglobals(tMesh *mesh)
     DGglobals->fv_surface_interp_mode = FV_2DINTERP_LINEAR;
   else if(Getv(fv_surface_interp, "parabolic"))
     DGglobals->fv_surface_interp_mode = FV_2DINTERP_PARAB;
+  else if(Getv(fv_surface_interp, "WENO"))
+    DGglobals->fv_surface_interp_mode = FV_2DINTERP_WENO;
   else
     errorexits("unknown value %s in par fv_surface_interp.",
                Gets(fv_surface_interp));

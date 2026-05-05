@@ -26,8 +26,9 @@ enum
   FV_NO_EXTRAP,           /* do not iterpolate div(flux) */
   FV_DIVF_EXTRAP1,        /* extrapolate all of div(flux) = d_i f^i */
   FV_DNFN_EXTRAP1,        /* in d_i f^i extrap. only term along face normal */
-  FV_2DINTERP_LINEAR,     /* use linear interp. on fv node surface */
-  FV_2DINTERP_PARAB       /* use parabolic interp. on fv node surface */
+  FV_2DINTERP_LINEAR,     /* use linear interp. on fv elm surface */
+  FV_2DINTERP_PARAB,      /* use parabolic interp. on fv elm surface */
+  FV_2DINTERP_WENO        /* use WENO interp. on fv elm surface */
 };
 
 /* structure that holds global dg pars */
