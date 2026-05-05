@@ -46,8 +46,8 @@ int nearest_i0_of_Xb_indir_diff(tNode *node, int dir, const double Xb0,
   /* set a, b */
   Xb_of_X_indir(node, dir, &a, node->bbox[2*dir]);
   Xb_of_X_indir(node, dir, &b, node->bbox[2*dir + 1]);
-  if(dgreater(Xb0, b)) return -k-1;
-  if(dless(Xb0, a))    return -1;
+  if(dgreater(Xb0, b)) { *diff = b - Xb0;  return -k-1; }
+  if(dless(Xb0, a))    { *diff = a - Xb0;  return -1;   }
 
   while(k-i>1)
   {
