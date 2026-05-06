@@ -609,11 +609,13 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
     }
     */
   }
-  //d=0;
-  //printf(" b0=%d nb=%d ", b0[d], nb[d]);
-  //printf("  x_p[d] =");
-  //for(k=0; k<nb[d]; k++) printf(" %g", x_p[d][k]);
-  //printf("\n");
+  //for(d=1; d<3; d++)
+  //{
+  //  printf("d=%d: b0=%d nb=%d ", d, b0[d], nb[d]);
+  //  printf("  x_p[%d] =", d);
+  //  for(k=0; k<nb[d]; k++) printf(" %g", x_p[d][k]);
+  //  printf("\n");
+  //}
 
   /* get pointer vd to start of var data */
   vd = Arrd(var);
@@ -792,11 +794,13 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
       /* increment d2 */
       d2++;
     }
-  //d2=0;
-  //printf(" b0=%d nb=%d ", b0[d2], nb[d2]);
-  //printf("  x_p[d2] =");
-  //for(k=0; k<nb[d2]; k++) printf(" %g", x_p[d2][k]);
-  //printf("\n");
+  //for(d2=0; d2<2; d2++)
+  //{
+  //  printf("d2=%d: b0=%d nb=%d ", d2, b0[d2], nb[d2]);
+  //  printf("  x_p[%d] =", d2);
+  //  for(k=0; k<nb[d2]; k++) printf(" %g", x_p[d2][k]);
+  //  printf("\n");
+  //}
 
   /* get pointer vd to start of var data */
   vd = Arrd(var);
@@ -804,11 +808,11 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
   switch(dir)
   {
   case 0:
-    /* interp vd along Y for all Z */
+    /* interp vd along Y for all Z. Note Y has stride an[0]. */
     r1 = dmalloc(nb[1]);
     for(k=0; k<nb[1]; k++)
       r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
-                               vd + Ind_n(p,b0[0],b0[1]+k, an), 1, vscal);
+                               vd + Ind_n(p,b0[0],b0[1]+k, an), an[0], vscal);
     /* interp r1 along Z */
     interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
                               r1, 1, vscal);
