@@ -199,6 +199,7 @@ double interpolate_WENO_3_ds(double x, int n, const double *x_p,
   double beta1 = d1*d1;
   double beta0_p_eps = (beta0 + epsl)/h0sqr;
   double beta1_p_eps = (beta1 + epsl)/h1sqr;
+beta1_p_eps = beta0_p_eps = 1;
 
   /* non-normalized weights */
   double omegab0 = g0/(beta0_p_eps*beta0_p_eps);
