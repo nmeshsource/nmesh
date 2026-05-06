@@ -626,8 +626,8 @@ int HalfZoneOf_back(int n, const double xp[], double x)
   /* special case for n=1 */
   if(n<2)
   {
-    if(x < xp[0]) return 0;
-    else          return 1;
+    if(x > xp[0]) return 1;
+    else          return 0;
   }
 
   /* find zone */
@@ -651,6 +651,10 @@ int HalfZoneOf_back(int n, const double xp[], double x)
 int HalfZoneOf_right(int n, const double xp[], double x)
 {
   int h = HalfZoneOf_back(n, xp, x);
+
+  /* special case for n=1 */
+  if(n<2) return 1 - h;
+
   return (n-1)*2 - 1 - h;
 }
 
