@@ -190,9 +190,15 @@ int test_point_interpolation(tMesh *mesh)
     int np[] = {npts,npts,npts};
     printf("X[0]=%+.3f ", X[0]);
     interp = interp_to_Xb0(nd, VarA(nd, vi), X, np, INTERP_LAGRANGE, 1.);
-    printf(" Lagr=%+.4f ", interp);
+    printf(" Lag6=%+.4f ", interp);
     interp = interp_to_Xb0(nd, VarA(nd, vi), X, np, INTERP_WENO, 1.);
-    printf(" WENO=%+.4f ", interp);
+    printf(" WENO6=%+.4f ", interp);
+    for(k=0; k<3; k++) np[k] = 4;
+    interp = interp_to_Xb0(nd, VarA(nd, vi), X, np, INTERP_WENO, 1.);
+    printf(" WENO4=%+.4f ", interp);
+    for(k=0; k<3; k++) np[k] = 3;
+    interp = interp_to_Xb0(nd, VarA(nd, vi), X, np, INTERP_WENO, 1.);
+    printf(" WENO3=%+.4f ", interp);
     printf("\n");
   }
 
