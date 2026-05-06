@@ -5,8 +5,8 @@
 
 /* basis.c */
 int basis_init_globals(tMesh *mesh);
-void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
-                        int CenterOnXb0, int *i0, int *ni);
+int IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
+                       int CenterOnXb0, int *i0, int *ni);
 
 /* gridpoints.c */
 int init_gridpoints(tMesh *mesh);

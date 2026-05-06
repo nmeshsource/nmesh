@@ -655,12 +655,13 @@ int HalfZoneOf_right(int n, const double xp[], double x)
    wouldn't fit into the node. Otherwise, we just push the range inside the
    node.
    Out: i0 = start of range , ni = size of range */
-void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
-                        int CenterOnXb0, int *i0, int *ni)
+int IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
+                       int CenterOnXb0, int *i0, int *ni)
 {
   double *Xb = node_Xb(node,dir)->d; /* get point coords in node */
   int nn = node->n[dir];
   int ind0, b0,b1, nb;
+  int hr_or_hl_is_zero = 0;
   double diff;
 
   /* the default for nb is n */
@@ -670,7 +671,7 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
   ind0 = nearest_i0_of_Xb_indir_diff(node, dir, Xb0, &diff);
 
   /* return range of size one if Xb0 is on a grid point */
-  if(fabs(diff) < dequaleps) { *i0 = ind0;  *ni = 1;  return; }
+  if(fabs(diff) < dequaleps) { *i0 = ind0;  *ni = 1;  return 0; }
 
   /* ensure ind0 is inside elm */
   if(ind0==-1)      ind0 = 0;
@@ -700,6 +701,7 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
         nb = b1 - b0 + 1;
         if(nb > nl) b1 -= nb-nl; //pull in right end
       }
+      if(hl==0) hr_or_hl_is_zero |= 1;
     }
 
     if(b1==nn-1)
@@ -711,12 +713,14 @@ void IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
         nb = b1 - b0 + 1;
         if(nb > nr) b0 += nb-nr; //pull in left end
       }
+      if(hr==0) hr_or_hl_is_zero |= 2;
     }
   }
 
   /* set i0 and ni */
   *i0 = b0;
   *ni = b1 - b0 + 1;
+  return hr_or_hl_is_zero;
 }
 
 
