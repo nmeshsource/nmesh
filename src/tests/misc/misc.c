@@ -283,18 +283,81 @@ int test_point_interpolation(tMesh *mesh)
     //printarray(Interp);
   }*/
 
+  /* interp for 4 points from var u in dir,p */
   dir = 1;
   p = (n2>1);
   printf("--- dir=%d  p=%d ---\n", dir, p);
 
+  basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+                           basis_pw_linear);
+  printf("basis_pw_linear Interp");
+  printarray(Interp);
 
+  npts = 2;
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_LAGRANGE,1., Interp);
+  printf("INTERP_LAGRANGE 2 Interp");
+  printarray(Interp);
+
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_WENO,1., Interp);
+  printf("INTERP_WENO 2 Interp");
+  printarray(Interp);
+
+  basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+                           basis_pw_parab);
+  printf("basis_pw_parab Interp");
+  printarray(Interp);
+
+  npts = 3;
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_LAGRANGE,1., Interp);
+  printf("INTERP_LAGRANGE 3 Interp");
+  printarray(Interp);
+
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_WENO,1., Interp);
+  printf("INTERP_WENO 3 Interp");
+  printarray(Interp);
+
+  /* interp for 4 points from var u in dir,p */
   dir = 2;
   p = (n2>1);
   printf("--- dir=%d  p=%d ---\n", dir, p);
 
+  basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+                           basis_pw_linear);
+  printf("basis_pw_linear Interp");
+  printarray(Interp);
 
-exit(88);
+  npts = 2;
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_LAGRANGE,1., Interp);
+  printf("INTERP_LAGRANGE 2 Interp");
+  printarray(Interp);
 
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_WENO,1., Interp);
+  printf("INTERP_WENO 2 Interp");
+  printarray(Interp);
+
+  basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+                           basis_pw_parab);
+  printf("basis_pw_parab Interp");
+  printarray(Interp);
+
+  npts = 3;
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_LAGRANGE,1., Interp);
+  printf("INTERP_LAGRANGE 3 Interp");
+  printarray(Interp);
+
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_WENO,1., Interp);
+  printf("INTERP_WENO 3 Interp");
+  printarray(Interp);
+
+  /* done with interp2d_toIpoints tests so free arrays */
   free_array(Xp[0]);
   free_array(Xp[1]);
   free_array(Xp[2]);
@@ -302,7 +365,7 @@ exit(88);
   free_array(Cp[1]);
   free_array(Interp);
   free_array(Ip);
-
+  //exit(88);
 
   /* reset nd->pt_typ */
   printf("reset pt_typ\n");
