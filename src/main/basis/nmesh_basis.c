@@ -22,6 +22,7 @@ int nmesh_basis(tMesh *mesh)
   AddPar("basis_expfilter_JacobianPower", "1",
          "multiply var with Jacobian to this power before filtering it");
   AddPar("basis_filter_fv", "yes", "filter in fv nodes [yes,no]");
+  AddPar("basis_boundary_interp_Lagrange", "no", "force Lagrange at elm bndry");
   AddPar("basis_boundary_interp_order", "2 2 4 4 6 6", "interpolation order "
          "we use in the half zones near an elm boundary");
 

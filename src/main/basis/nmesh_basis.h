@@ -15,8 +15,9 @@ enum
 /* structure that holds global coordinates vars and pars */
 #define N_WENO_BOUNDARY_ORDERS 10
 typedef struct {
-  int expfilter_JacobianPower; /* Par("basis_expfilter_JacobianPower") */
-  int filter_fv;               /* Par("basis_filter_fv") */
+  int expfilter_JacobianPower;  /* Par("basis_expfilter_JacobianPower") */
+  int filter_fv;                /* Par("basis_filter_fv") */
+  int boundary_interp_Lagrange; /* Par("basis_boundary_interp_Lagrange"); */
   int boundary_interp_order[N_WENO_BOUNDARY_ORDERS]; //vals of par basis_boundary_interp_order
 } tbasis;
 

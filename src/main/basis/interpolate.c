@@ -5,6 +5,9 @@
 #include "nmesh.h"
 #include "basis.h"
 
+/* frequently used global vars */
+extern tbasis basis[1];
+
 
 /* ************************************************************************ */
 /* various functions needed for piecewise const or linear interpolation     */
@@ -550,6 +553,7 @@ double interpolate1d_ds(double x, int n, const double *x_p,
 double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
                      int scheme, double vscal)
 {
+  tMesh *mesh = Elm_mesh(elm);
   int *nn = elm->n;
   int *pt_typ = elm->pt_typ;
   int schm[] = {scheme,scheme,scheme}; //defaults
@@ -588,7 +592,7 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
 
     /* if we want to force Lagrange at boundary */
     if(bou) //if at boundary
-      if(0)
+      if(Getb(basis->boundary_interp_Lagrange))
         schm[d] = INTERP_LAGRANGE;
 
     /* get interpolation weights if needed */
@@ -751,6 +755,7 @@ void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
 double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
                        int np[2], int scheme, double vscal)
 {
+  tMesh *mesh = Elm_mesh(elm);
   int *nn = elm->n;
   int *an = var->n;
   int *pt_typ = elm->pt_typ;
@@ -794,7 +799,7 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
 
       /* if we want to force Lagrange at boundary */
       if(bou) //if at boundary
-        if(0)
+        if(Getb(basis->boundary_interp_Lagrange))
           schm[d2] = INTERP_LAGRANGE;
 
       /* get interpolation weights if needed */

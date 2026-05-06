@@ -21,6 +21,7 @@ int basis_init_globals(tMesh *mesh)
   /* set some global vars */
   basis->expfilter_JacobianPower = Par("basis_expfilter_JacobianPower");
   basis->filter_fv = Par("basis_filter_fv");
+  basis->boundary_interp_Lagrange = Par("basis_boundary_interp_Lagrange");
   str_to_intList(Gets(Par("basis_boundary_interp_order")), " ", il);
   forList(il, k)
   {
@@ -35,6 +36,9 @@ int basis_init_globals(tMesh *mesh)
          basis->expfilter_JacobianPower, Gets(basis->expfilter_JacobianPower));
   printf(" basis->filter_fv = par_%04d :  Gets(basis->filter_fv) = %s\n",
          basis->filter_fv, Gets(basis->filter_fv));
+  printf(" basis->boundary_interp_Lagrange = par_%04d : "
+         "Gets(basis->b...Lagrange) = %s\n",
+         basis->boundary_interp_Lagrange, Gets(basis->boundary_interp_Lagrange));
   printf(" basis->boundary_interp_order =");
   for(k=0; k<N_WENO_BOUNDARY_ORDERS; k++)
   {
