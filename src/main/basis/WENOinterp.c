@@ -164,9 +164,9 @@ S(x) = g0(x)*L0(x) + g1(x)*L1(x)
 */
 /* centered WENO3 interpolation, i.e. not the one used to reconstruct fluxes
    in e.g. an upwind scheme */
-double interpolate_cenWENO_3_ds(double x, int n, const double *x_p,
-                                const double *w_interp,
-                                const double *f, int ds, double f_scale)
+double interpolate_WENO_3_ds(double x, int n, const double *x_p,
+                             const double *w_interp,
+                             const double *f, int ds, double f_scale)
 {
   double u[] = { f[0], f[ds], f[2*ds] };
   double fs2 = f_scale*f_scale;
@@ -213,6 +213,7 @@ double interpolate_cenWENO_3_ds(double x, int n, const double *x_p,
   return omega0*L0 + omega1*L1;
 }
 
+
 /***********************************************************************/
 /* func to select correct WENO */
 /***********************************************************************/
@@ -230,6 +231,8 @@ double interpolate_WENO_n_ds(double x, int n, const double *x_p,
     /* set Lagrange interp. weights in case they are not in w_interp */
     Lagrange_winterp(n, x_p, w); // cheap for n=2
     return Lagrange_interp_barycentric2_ds(x, n,x_p, w, f, ds, fscal);
+  case 3:
+    return interpolate_WENO_3_ds(x, n,x_p, w_interp, f, ds, fscal);
   case 4:
     return interpolate_WENO_4_ds(x, n,x_p, w_interp, f, ds, fscal);
   case 6:
