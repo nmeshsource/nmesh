@@ -771,7 +771,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tArray *(*Cb)[2];
   tDat *dat = node->dat;
   char str[100];
-  int WENOorder;
+  int WENOorder = Geti(amr->WENO_interp_order);
   double (*interp1d_fv)(int k, double x, int np,
                         const double *x_p, const double *w_interp);
   if(!dat) return;
@@ -1144,8 +1144,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     interp1d_fv = basis_pw_parab;
     break;
   case FV_2DINTERP_WENO:
-    interp1d_fv = NULL;
-    WENOorder = Geti(amr->WENO_interp_order);
+    interp1d_fv = NULL; //WENO's interp2d_toIpoints does not need interp1d_fv
     break;
   default:
     errorexiti("illegal value: DGglobals->fv_surface_interp_mode = %d",
