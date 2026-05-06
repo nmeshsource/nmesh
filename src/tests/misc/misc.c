@@ -92,7 +92,7 @@ int test_point_interpolation(tMesh *mesh)
   double *Xb[] = { NULL, NULL, NULL };
   double X[3], Cb[2];
   double f, interp;
-  tArray *coef, *Xp[3], *Cp[2];
+  tArray *coef, *Xp[3], *Cp[2], *Ip, *Interp;
   int p_ori[3];
   int p_uni[] = {P_UNIFORM,P_UNIFORM,P_UNIFORM};
 
@@ -195,6 +195,115 @@ int test_point_interpolation(tMesh *mesh)
     printf(" WENO=%+.4f ", interp);
     printf("\n");
   }
+
+  prdivider(0);
+  PRF;printf(": 2d interp. in plane with interp2d_toIpoints:\n");
+  Ip     = alloc_array1d(5);
+  Interp = alloc_array1d(5);  // used to store interp vals
+  Cp[0] = alloc_array1d(5);
+  Cp[1] = alloc_array1d(5);
+  Xp[0] = alloc_array1d(5);
+  Xp[1] = alloc_array1d(5);
+  Xp[2] = alloc_array1d(5);
+
+  /* 4 points, with hole at index 2*/
+  Cp[0]->d[0] = -0.98;  Cp[1]->d[0] = -0.97;  Ip->i[0] = 0;
+  Cp[0]->d[1] = -0.71;  Cp[1]->d[1] = -0.63;  Ip->i[1] = 1;
+                                              Ip->i[2] = -1;
+  Cp[0]->d[3] = -0.33;  Cp[1]->d[3] = -0.27;  Ip->i[3] = 3;
+  Cp[0]->d[4] = +0.18;  Cp[1]->d[4] = +0.17;  Ip->i[4] = 4;
+
+  printf("Interp var u\n");
+  printvar_innode(nd, ui);
+  printf("to points\n");
+  printarray(Cp[0]);
+  printarray(Cp[1]);
+
+  /* interp for these 4 points from var u in dir,p */
+  dir = 0;
+  p = (n2>1);
+  printf("--- dir=%d  p=%d ---\n", dir, p);
+
+  //basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+  //                         Lagrange_of_x); //basis_pw_linear
+  //printf("Lagrange_of_x Interp");
+  //printarray(Interp);
+
+  //basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+  //                         basis_pw_const);
+  //printf("basis_pw_const Interp");
+  //printarray(Interp);
+
+  basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+                           basis_pw_linear);
+  printf("basis_pw_linear Interp");
+  printarray(Interp);
+
+  npts = 2;
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_LAGRANGE,1., Interp);
+  printf("INTERP_LAGRANGE 2 Interp");
+  printarray(Interp);
+
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_WENO,1., Interp);
+  printf("INTERP_WENO 2 Interp");
+  printarray(Interp);
+
+  basis_interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip, Interp,
+                           basis_pw_parab);
+  printf("basis_pw_parab Interp");
+  printarray(Interp);
+
+  npts = 3;
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_LAGRANGE,1., Interp);
+  printf("INTERP_LAGRANGE 3 Interp");
+  printarray(Interp);
+
+  interp2d_toIpoints(nd, VarA(nd, ui), dir,p, Cp,Ip,
+                     npts, INTERP_WENO,1., Interp);
+  printf("INTERP_WENO 3 Interp");
+  printarray(Interp);
+
+  /*{
+    int np[] = {1,npts,npts};
+    // this uses 3d interp but X=-0.5 where plane p=1 is located
+    forarray(Xp[0], k) Arrd(Xp[0])[k] = -0.5;
+    copy_array_data(Cp[0], Xp[1]);
+    copy_array_data(Cp[1], Xp[2]);
+    interpolate_toIpoints(nd, VarA(nd, ui), Xp,Ip,
+                          np, INTERP_LAGRANGE,1., Interp);
+    printf("3d interpolate_toIpoints INTERP_LAGRANGE Interp");
+    printarray(Interp);
+
+    //interp_toIpoints(nd, VarA(nd, ui), Xp,Ip,
+    //                 npts, INTERP_LAGRANGE,1., Interp);
+    //printf("3d interp_toIpoints INTERP_LAGRANGE Interp");
+    //printarray(Interp);
+  }*/
+
+  dir = 1;
+  p = (n2>1);
+  printf("--- dir=%d  p=%d ---\n", dir, p);
+
+
+  dir = 2;
+  p = (n2>1);
+  printf("--- dir=%d  p=%d ---\n", dir, p);
+
+
+exit(88);
+
+  free_array(Xp[0]);
+  free_array(Xp[1]);
+  free_array(Xp[2]);
+  free_array(Cp[0]);
+  free_array(Cp[1]);
+  free_array(Interp);
+  free_array(Ip);
+
+
   /* reset nd->pt_typ */
   printf("reset pt_typ\n");
   //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
