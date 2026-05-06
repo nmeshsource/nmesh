@@ -746,6 +746,7 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
   int *nn = elm->n;
   int *an = var->n;
   int *pt_typ = elm->pt_typ;
+  int schm[] = {scheme,scheme}; //defaults
   double *Xb[2];
   double *x_p[2];
   double *w[2];
@@ -762,6 +763,8 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
   for(d=0; d<3; d++)
     if(d != dir)
     {
+      int bou;
+
       /* WENO does currently not work for non-uniform grids */
       if( (scheme==INTERP_WENO) && (pt_typ[d]!=P_UNIFORM) )
         errorexit("INTERP_WENO works only on uniform grids!!!");
@@ -776,13 +779,18 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
       Xb[d2] = node_Xb(elm,d)->d;
 
       /* get index range into b0[2], nb[2] */
-      IndexRange_Xb0_get(elm, d, Xb0[d2], np[d2], CenterOnXb0,
-                         &(b0[d2]), &(nb[d2]));
+      bou = IndexRange_Xb0_get(elm, d, Xb0[d2], np[d2], CenterOnXb0,
+                               &(b0[d2]), &(nb[d2]));
       /* get coords in box */
       x_p[d2] = Xb[d2] + b0[d2];
 
+      /* if we want to force Lagrange at boundary */
+      if(bou) //if at boundary
+        if(0)
+          schm[d2] = INTERP_LAGRANGE;
+
       /* get interpolation weights if needed */
-      if(scheme==INTERP_LAGRANGE)
+      if(schm[d2]==INTERP_LAGRANGE)
       {
         w[d2] = dmalloc(nb[d2]);    /* alloc w */
         Lagrange_winterp(nb[d2], x_p[d2], w[d2]);
@@ -811,10 +819,10 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
     /* interp vd along Y for all Z. Note Y has stride an[0]. */
     r1 = dmalloc(nb[1]);
     for(k=0; k<nb[1]; k++)
-      r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+      r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], schm[0], w[0],
                                vd + Ind_n(p,b0[0],b0[1]+k, an), an[0], vscal);
     /* interp r1 along Z */
-    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], schm[1], w[1],
                               r1, 1, vscal);
     free(r1);
     break;
@@ -822,10 +830,10 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
     /* interp vd along X for all Z */
     r1 = dmalloc(nb[1]);
     for(k=0; k<nb[1]; k++)
-      r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+      r1[k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], schm[0], w[0],
                                vd + Ind_n(b0[0],p,b0[1]+k, an), 1, vscal);
     /* interp r1 along Z */
-    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], schm[1], w[1],
                               r1, 1, vscal);
     free(r1);
     break;
@@ -833,10 +841,10 @@ double interp2d_to_Xb0(tElm *elm, tArray *var, int dir, int p, double Xb0[2],
     /* interp vd along X for all Y */
     r1 = dmalloc(nb[1]);
     for(j=0; j<nb[1]; j++)
-      r1[j] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+      r1[j] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], schm[0], w[0],
                                vd + Ind_n(b0[0],b0[1]+j,p, an), 1, vscal);
     /* interp r1 along Y */
-    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+    interp = interpolate1d_ds(Xb0[1], nb[1], x_p[1], schm[1], w[1],
                               r1, 1, vscal);
     free(r1);
     break;
