@@ -552,6 +552,7 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
 {
   int *nn = elm->n;
   int *pt_typ = elm->pt_typ;
+  int schm[] = {scheme,scheme,scheme}; //defaults
   double *Xb[3];
   double *x_p[3];
   double *w[3];
@@ -567,6 +568,8 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
 
   for(d=0; d<3; d++)
   {
+    int bou;
+
     /* WENO does currently not work for non-uniform grids */
     if( (scheme==INTERP_WENO) && (pt_typ[d]!=P_UNIFORM) )
       errorexit("INTERP_WENO works only on uniform grids!!!");
@@ -578,13 +581,18 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
     Xb[d] = node_Xb(elm,d)->d;
 
     /* get index range into b0[3], nb[3] */
-    IndexRange_Xb0_get(elm, d, Xb0[d], np[d], CenterOnXb0,
-                       &(b0[d]), &(nb[d]));
+    bou = IndexRange_Xb0_get(elm, d, Xb0[d], np[d], CenterOnXb0,
+                             &(b0[d]), &(nb[d]));
     /* get coords in box */
     x_p[d] = Xb[d] + b0[d];
 
+    /* if we want to force Lagrange at boundary */
+    if(bou) //if at boundary
+      if(0)
+        schm[d] = INTERP_LAGRANGE;
+
     /* get interpolation weights if needed */
-    if(scheme==INTERP_LAGRANGE)
+    if(schm[d]==INTERP_LAGRANGE)
     {
       w[d] = dmalloc(nb[d]);    /* alloc w */
       Lagrange_winterp(nb[d], x_p[d], w[d]);
@@ -624,7 +632,7 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
   r2 = dmalloc(nb[1]*nb[2]);
   for(k=0; k<nb[2]; k++)
   for(j=0; j<nb[1]; j++)
-    r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], scheme, w[0],
+    r2[j + nb[1]*k] = interpolate1d_ds(Xb0[0], nb[0], x_p[0], schm[0], w[0],
                                        vd + Ind_n(b0[0],b0[1]+j,b0[2]+k, nn),
                                        1, vscal);
   //printf("  r2 =");
@@ -634,14 +642,14 @@ double interp_to_Xb0(tElm *elm, tArray *var, double Xb0[3], int np[3],
   /* interp r2 along Y for all Z */
   r1 = dmalloc(nb[2]);
   for(k=0; k<nb[2]; k++)
-    r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], scheme, w[1],
+    r1[k] = interpolate1d_ds(Xb0[1], nb[1], x_p[1], schm[1], w[1],
                              r2 + nb[1]*k, 1, vscal);
   //printf("  r1 =");
   //for(k=0; k<nb[2]; k++) printf(" %g", r1[k]);
   //printf("\n");
 
   /* interp r1 along Z */
-  interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], scheme, w[2],
+  interp = interpolate1d_ds(Xb0[2], nb[2], x_p[2], schm[2], w[2],
                             r1, 1, vscal);
   free(r1);
   free(r2);
