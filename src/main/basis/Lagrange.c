@@ -187,6 +187,8 @@ void fd_deriv_DT_uniform__old(int n, const double *x, int sr, double *DT)
   int ssz = 2*sr + 1; /* stencil size */
   double *w_interp = malloc(ssz * sizeof(w_interp[0]));
 
+  if(ssz<=0) errorexit("stencil size ssz needs to be possitive");
+
   /* for small n use Lagrange_DT for n points */
   if(n <= ssz)
   {
@@ -261,6 +263,8 @@ void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
   int sszo2 = ssz/2;  /* stencil radius without forward or backward shift */
   int sdl, sdr;       /* stencil radius on left and right after shift */
   double *w_interp;
+
+  if(ssz<=0) errorexit("stencil size ssz needs to be possitive");
 
   if(abs(lop)>sszo2)
     errorexiti("stencil size ssz is too small for lop=%d", lop);
