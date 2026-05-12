@@ -791,7 +791,9 @@ double rec1d_LR_extrap3_u(int n, double *u, int right, double u_scale,
   2 linear recs:  L0 = 4/3 ux - 1/3 u1 ,   L1 = 2 u1 - u2
   we want u0  =  g0 L0 + (1-g0) L1  =  6/5 ux - 1/10 (u1 + u2)
   ==> 4/3 g0 ux - 1/3 g0 u1 + 2(1-g0) u1 - (1-g0)u2 = 6/5 ux - 1/10 (u1 + u2)
-  ==> g0 = 9/10,  g1 = 1-g0 = 1/10  <-- these are the optimal WENO weights */
+  ==> g0 = 9/10,  g1 = 1-g0 = 1/10  <-- these are the optimal WENO weights
+  Note: For s1=0 rec1d_LR_extrapW3_u gives the same answer as
+        rec1d_LR_extrap3_u */
 double rec1d_LR_extrapW3_u(int n, double *u, int right, double u_scale,
                            double s1, double s2, int opt)
 {
@@ -861,7 +863,7 @@ void rec1d_LR_uin_to_uface_3_Carray(int n, double *u, int right,
   u[i0] = rec1d_LR_extrap3_u(n,u, right, u_scale, s1, s2, opt);
 }
 
-/* convert from u at 0.25h in to u at face, using 3 points and WENO3
+/* convert from u at 0.25h in to u at face, using 3 points
    If right=1 do it on the right
    If right=0 do it on the left
    s1,s2,opt are ignored for now */
