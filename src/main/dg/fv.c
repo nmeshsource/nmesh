@@ -571,6 +571,22 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
                                              extrap_s1, extrap_s2, extrap_opt);
           }
         }
+        if(extrap_mode == FV_DNFN_EXTRAP3)
+        {
+          forvl(vldivf, l)
+          {
+            int rec1d_midpt = fv_stat[l]; //stat of rec. q[l]
+            int extrap_left  = !(rec1d_midpt & FV_REC_NO_LEFT_EXTRAP1);
+            int extrap_right = !(rec1d_midpt & FV_REC_NO_RIGHT_EXTRAP1);
+            double *df = di0fi0[l];
+            if(extrap_left)
+              rec1d_LR_uin_to_uface_3_Carray(n[dir], df, 0, q_scale,
+                                             extrap_s1, extrap_s2, extrap_opt);
+            if(extrap_right)
+              rec1d_LR_uin_to_uface_3_Carray(n[dir], df, 1, q_scale,
+                                             extrap_s1, extrap_s2, extrap_opt);
+          }
+        }
 
         /* final loop over points in dir */
         for(i0=0; i0<n[dir]; i0++)
