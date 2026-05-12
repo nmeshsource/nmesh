@@ -845,28 +845,6 @@ double rec1d_LR_extrapW3_u(int n, double *u, int right, double u_scale,
    If right=1 do it on the right
    If right=0 do it on the left
    s1,s2,opt are ignored for now */
-void rec1d_LR_uin_to_uface_3_Carray(int n, double *u, int right,
-                                    double u_scale, double s1, double s2,
-                                    int opt)
-{
-  int i0;
-
-  /* use only 2 points to extrap if n<=3 */
-  if(n<=3)
-  {
-    /* here we disregard s1,s2,opt and always use linear extrap: */
-    rec1d_LR_uface_to_uin_1_Carray(n,u, right,0, u_scale,0.,DBL_MAX,0);
-    return;
-  }
-
-  i0 = right * (n-1);
-  u[i0] = rec1d_LR_extrap3_u(n,u, right, u_scale, s1, s2, opt);
-}
-
-/* convert from u at 0.25h in to u at face, using 3 points
-   If right=1 do it on the right
-   If right=0 do it on the left
-   s1,s2,opt are ignored for now */
 void rec1d_LR_uin_to_uface_W3_Carray(int n, double *u, int right,
                                      double u_scale, double s1, double s2,
                                      int opt)
