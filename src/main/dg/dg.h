@@ -56,9 +56,9 @@ void rec1d_LR_uface_to_uin_1_Carray(int n, double *u, int right, int forward,
 void rec1d_LR_uin_to_uface_3_Carray(int n, double *u, int right,
                                     double u_scale, double s1, double s2,
                                     int opt);
-void rec1d_LR_uin_to_uface_WENO3_Carray(int n, double *u, int right,
-                                        double u_scale, double s1, double s2,
-                                        int opt);
+void rec1d_LR_uin_to_uface_W3_Carray(int n, double *u, int right,
+                                     double u_scale, double s1, double s2,
+                                     int opt);
 
 /* penalty.c */
 double dg_scale_penalty_bamps(tDGinfo *dgi);

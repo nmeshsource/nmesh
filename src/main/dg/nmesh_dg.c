@@ -40,7 +40,7 @@ int nmesh_dg(tMesh *mesh)
          "order extrapolation [0,-1,1,2] (see rec1d_u_in1_weightfac)");
   AddPar("fv_flux", "fnum", "[fnum_minus_fi, fnum]");
   AddPar("fv_divf_extrap", "dnfn_extrap1", "how we extrap div(f) [no,"
-         "divf_extrap1,dnfn_extrap1,dnfn_extrap3,dnfn_extrapWENO3]");
+         "divf_extrap1,dnfn_extrap1,dnfn_extrap3,dnfn_extrapW3]");
   AddPar("fv_divf_extrap_s1", "0", "use 0th order extrapolation if "
          "|u1-u0|/|u2-u1| < 0.75 s1, [0, 0.5, ...]");
   AddPar("fv_divf_extrap_s2", "DBL_MAX", "use 0th order extrapolation if "

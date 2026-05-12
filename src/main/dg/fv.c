@@ -587,7 +587,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
                                              extrap_s1, extrap_s2, extrap_opt);
           }
         }
-        else if(extrap_mode == FV_DNFN_EXTRAPWENO3)
+        else if(extrap_mode == FV_DNFN_EXTRAPW3)
         {
           forvl(vldivf, l)
           {
@@ -596,11 +596,11 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
             int extrap_right = !(rec1d_midpt & FV_REC_NO_RIGHT_EXTRAP1);
             double *df = di0fi0[l];
             if(extrap_left)
-              rec1d_LR_uin_to_uface_WENO3_Carray(n[dir], df, 0, q_scale,
-                                             extrap_s1, extrap_s2, extrap_opt);
+              rec1d_LR_uin_to_uface_W3_Carray(n[dir], df, 0, q_scale,
+                                              extrap_s1, extrap_s2, extrap_opt);
             if(extrap_right)
-              rec1d_LR_uin_to_uface_WENO3_Carray(n[dir], df, 1, q_scale,
-                                             extrap_s1, extrap_s2, extrap_opt);
+              rec1d_LR_uin_to_uface_W3_Carray(n[dir], df, 1, q_scale,
+                                              extrap_s1, extrap_s2, extrap_opt);
           }
         }
 

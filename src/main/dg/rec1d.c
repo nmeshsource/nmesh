@@ -785,15 +785,15 @@ double rec1d_LR_extrap3_u(int n, double *u, int right, double u_scale,
   return w0*u[i0] + w12*(u[i0in1] + u[i0in2]);
 }
 
-/* like rec1d_LR_extrap3_u, but use WENO3 strategy
+/* like rec1d_LR_extrap3_u, but use WENO3-like strategy
   | x |   o   |   o   |  <-- x,o,o are gridpoints before extrap
   -4/5  -1/5     3/5     <-- gridpoint coords
   2 linear recs:  L0 = 4/3 ux - 1/3 u1 ,   L1 = 2 u1 - u2
   we want u0  =  g0 L0 + (1-g0) L1  =  6/5 ux - 1/10 (u1 + u2)
   ==> 4/3 g0 ux - 1/3 g0 u1 + 2(1-g0) u1 - (1-g0)u2 = 6/5 ux - 1/10 (u1 + u2)
   ==> g0 = 9/10,  g1 = 1-g0 = 1/10  <-- these are the optimal WENO weights */
-double rec1d_LR_extrapWENO3_u(int n, double *u, int right, double u_scale,
-                              double s1, double s2, int opt)
+double rec1d_LR_extrapW3_u(int n, double *u, int right, double u_scale,
+                           double s1, double s2, int opt)
 {
   int i0 = right * (n-1);
   int sign = 2*right - 1;
@@ -802,30 +802,34 @@ double rec1d_LR_extrapWENO3_u(int n, double *u, int right, double u_scale,
   double u0 = u[i0]; //this is ux
   double u1 = u[i0in1];
   double u2 = u[i0in2];
-  double h0 = 3.; // 3/5 * 5
-  double h1 = 4.; // 4/5 * 5
-  double h0sqr = h0*h0;
-  double h1sqr = h1*h1;
   /* 2 linear interpolations */
   double L0 = (4.*u0 - u1)*0.333333333333333333333333;
   double L1 =  2.*u1 - u2;
-  /* optimal weights, to reconstruct 2nd order Lagrange poly */
+  /* optimal weights, to get 6/5 ux - 1/10 (u1 + u2) from rec1d_LR_extrap3_u */
   double g0 = 0.9;
   double g1 = 1. - g0;
   /* diffs */
   double d0 = u1 - u0;
   double d1 = u2 - u1;
-  /* smoothness indicators */
+  /* WENO smoothness indicators:
+  double h0 = 3.; // 3/5 * 5
+  double h1 = 4.; // 4/5 * 5
+  double h0sqr = h0*h0;
+  double h1sqr = h1*h1;
   double beta0 = d0*d0;
   double beta1 = d1*d1;
   double epsl = 1e-6 * u_scale;
   double beta0_p_eps = (beta0 + epsl)/h0sqr;
   double beta1_p_eps = (beta1 + epsl)/h1sqr;
-  //beta1_p_eps = beta0_p_eps = 1; // <-- switch to optimal weights
-
-  /* non-normalized weights */
   double omegab0 = g0/(beta0_p_eps*beta0_p_eps);
   double omegab1 = g1/(beta1_p_eps*beta1_p_eps);
+         ^-these weights do not work, they mess up SRHD_riemannp shocks!!! */
+  /* WT's indicator s */
+  double epsl = 1e-100 * u_scale;
+  double s = 1.3333333333*fabs(d0) / (fabs(d1) + epsl);
+  /* non-normalized weights */
+  double omegab0 = g0;
+  double omegab1 = g1 * (s>=s1); //if(s<s1) omegab1=0.;
   double omegab_sum = omegab0 + omegab1;
   /* normalized weights */
   double omega0 = omegab0/(omegab_sum);
@@ -861,9 +865,9 @@ void rec1d_LR_uin_to_uface_3_Carray(int n, double *u, int right,
    If right=1 do it on the right
    If right=0 do it on the left
    s1,s2,opt are ignored for now */
-void rec1d_LR_uin_to_uface_WENO3_Carray(int n, double *u, int right,
-                                        double u_scale, double s1, double s2,
-                                        int opt)
+void rec1d_LR_uin_to_uface_W3_Carray(int n, double *u, int right,
+                                     double u_scale, double s1, double s2,
+                                     int opt)
 {
   int i0;
 
@@ -876,7 +880,7 @@ void rec1d_LR_uin_to_uface_WENO3_Carray(int n, double *u, int right,
   }
 
   i0 = right * (n-1);
-  u[i0] = rec1d_LR_extrapWENO3_u(n,u, right, u_scale, s1, s2, opt);
+  u[i0] = rec1d_LR_extrapW3_u(n,u, right, u_scale, s1, s2, opt);
 }
 
 

@@ -359,9 +359,9 @@ int dg_set_DGglobals(tMesh *mesh)
     DGglobals->fv_divf_extrap_mode = FV_DNFN_EXTRAP3;
     DGglobals->fv_divf_adds_surface_fluxes = 1;
   }
-  else if(Getv(fv_divf_extrap, "dnfn_extrapWENO3"))
+  else if(Getv(fv_divf_extrap, "dnfn_extrapW3"))
   {
-    DGglobals->fv_divf_extrap_mode = FV_DNFN_EXTRAPWENO3;
+    DGglobals->fv_divf_extrap_mode = FV_DNFN_EXTRAPW3;
     DGglobals->fv_divf_adds_surface_fluxes = 1;
   }
   else
