@@ -746,6 +746,68 @@ void rec1d_uface_to_uin_1_var(tNode *node, int vi, int forward)
   vlfree(vl1);
 }
 
+
+/***********************************/
+/* Use 3 points to extrap to face: */
+/***********************************/
+/* Consider this grid:
+  | x |   o   |   o   |   o   |   o   |   o   | x |
+  0 x     1       2      ...   <-- gridpoint labels for points
+
+We want to extrap left from x to 0, using points x,1,2. Now consider only
+left end of entire grid:
+  | x |   o   |   o   |  <-- x,o,o are gridpoints before extrap
+ -1 -3/5     1/5      1  <-- interface coords
+
+ux, u1, u2 are cell averages (integrals)
+ ==> \int_{-1}^{1}dx u = 2/5 ux + 4/5 u1 + 4/5 u2
+
+  o   |   o   |   o   |  <-- o,o,o are gridpoints after extrap
+ -1     -1/5     3/5  1  <-- gridpoints coords x0=-1, x1=-1/5, x2=3/5
+Gaussian quad weights for o,o,o grid: wq0=1/3, wq1=5/6, wq2=5/6 (can check with Gauss_wquad_from_x)
+ ==> \int_{-1}^{1}dx u = 1/3 u0 + 5/6 u1 + 5/6 u2
+
+For mass conservation of u we want
+1/3 u0 + 5/6 u1 + 5/6 u2 = 2/5 ux + 4/5 u1 + 4/5 u2
+==> u0 = 6/5 ux - 1/10 (u1 + u2)
+    ----------------------------
+    Additional info: For linear extrap we would get u0 = 4/3 ux - 1/3 u1 */
+double rec1d_LR_extrap3_u(int n, double *u, int right, double u_scale,
+                          double s1, double s2, int opt)
+{
+  int i0 = right * (n-1);
+  int sign = 2*right - 1;
+  int i0in1 = i0 - sign;     /* one point further in */
+  int i0in2 = i0in1 - sign;  /* two points further in */
+  double w0  = 1.2;
+  double w12 = (1.0 - w0)*0.5;  // w1 = w2 =: w12
+
+  return w0*u[i0] + w12*(u[i0in1] + u[i0in2]);
+}
+
+/* convert from u at 0.25h in to u at face, using 3 points
+   If right=1 do it on the right
+   If right=0 do it on the left
+   s1,s2,opt are ignored for now */
+void rec1d_LR_uin_to_uface_3_Carray(int n, double *u, int right,
+                                    double u_scale, double s1, double s2,
+                                    int opt)
+{
+  int i0;
+
+  /* use only 2 points to extrap if n<=3 */
+  if(n<=3)
+  {
+    /* here we disregard s1,s2,opt and always use linear extrap: */
+    rec1d_LR_uface_to_uin_1_Carray(n,u, right,0, u_scale,0.,DBL_MAX,0);
+    return;
+  }
+
+  i0 = right * (n-1);
+  u[i0] = rec1d_LR_extrap3_u(n,u, right, u_scale, s1, s2, opt);
+}
+
+
 /*************************************************************************/
 /* WENOm3 is much like WENO3 but with weights for uniform grid points */
 /*************************************************************************/
