@@ -545,6 +545,45 @@ void LG_2SphereIntegral_test(void)
    w_j = \int_{-1}^{1} dx l_j(x) = \sum_i wg_i l_j(xg_i)
    where l_j(x) is the interpolating polynomial made from the
    grid points x_i: l_j(x) = Lagrange_of_x(j,x,...).
+   NOTE: w_j = \int_{-1}^{1} dx l_j(x) may not be positive!!! */
+void Gauss_wquad_from_x(int npoints, const double *x, double *w)
+{
+  /* Here wg_i and xg_i are LGL weights and points that we pick such that
+     the numerical integral is exact. */
+  int ng = 1 + (npoints+3)/2; // ng = (npoints+3)/2; is probably enough
+  double *xg = dmalloc(ng);
+  double *wg = dmalloc(ng);
+  double *fg = dmalloc(ng);
+  double *wI = dmalloc(npoints);
+  int i, j;
+
+  /* get points and weights for ng points */
+  LGL_x_wquad(ng, xg, wg);
+
+  /* get interpolation weights wI for l_j(x) for npoints */
+  Lagrange_winterp(npoints, x, wI);
+
+  /* now get w_j by integration */
+  for(j = 0; j < npoints; j++)
+  {
+    /* set fg_i = l_j(xg_i) */
+    for(i=0; i<ng; i++)
+      fg[i] = Lagrange_of_x(j, xg[i], npoints, x, wI);
+
+    /* w_j = \int_{-1}^{1} dx l_j(x) */
+    w[j] = Gauss_integral(ng, wg, fg);
+  }
+
+  free(wI);
+  free(fg);
+  free(wg);
+  free(xg);
+}
+
+/* compute the Gaussian quadrature weights using Gaussian integration itself:
+   w_j = \int_{-1}^{1} dx l_j(x) = \sum_i wg_i l_j(xg_i)
+   where l_j(x) is the interpolating polynomial made from the
+   grid points x_i: l_j(x) = Lagrange_of_x(j,x,...).
    We assume that the x_i are symmetric about x=0.
    NOTE: w_j = \int_{-1}^{1} dx l_j(x) may not be positive!!! */
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w)
