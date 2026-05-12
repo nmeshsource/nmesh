@@ -571,7 +571,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
                                              extrap_s1, extrap_s2, extrap_opt);
           }
         }
-        if(extrap_mode == FV_DNFN_EXTRAP3)
+        else if(extrap_mode == FV_DNFN_EXTRAP3)
         {
           forvl(vldivf, l)
           {
