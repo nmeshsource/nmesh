@@ -223,7 +223,7 @@ because
 
 If:  fv_divf_extrap = dnfn_extrap1
 ----------------------------------
-*fv_divf computes the the full div including surface terms
+*fv_divf computes the full div including surface terms
  -this means we call get_all_surfaces(node) in fv_divf
  -fnumR[l][i] is extended so that for i=-1 we have flux at left face
  -fv_divf interpolates terms like  dx f^x  from x to o, and then adds them
