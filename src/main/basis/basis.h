@@ -9,8 +9,8 @@ int IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
                        int CenterOnXb0, int *i0, int *ni);
 
 /* gridpoints.c */
-int init_gridpoints(tMesh *mesh);
-int free_gridpoints(tMesh *mesh);
+int gridpoints_init(tMesh *mesh);
+int gridpoints_free(tMesh *mesh);
 
 /* Fourier.c */
 void Fourier_coeffs(int N, const double u[], double c[]);

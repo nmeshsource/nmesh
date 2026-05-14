@@ -11,7 +11,7 @@
 tGridPoints gridpoints[1];
 
 /* init gridpoints structure */
-int init_gridpoints(tMesh *mesh)
+int gridpoints_init(tMesh *mesh)
 {
   int nmax = Geti(Par("amr_nmax"));
   int stencilsize = Geti(Par("fd_stencilsize"));
@@ -54,6 +54,13 @@ int init_gridpoints(tMesh *mesh)
     if(!(gridpoints->St[typ]))
       errorexit("out of memory for syn. matrices");
   }
+  /* mem. for interp. matrices [6~*/
+  gridpoints->UNI_to_nLGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_nLGLt[0]));
+  if(!(gridpoints->UNI_to_nLGLt))
+    errorexit("out of memory for interp. matrices UNI_to_nLGLt");
+  gridpoints->UNI_to_no2LGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_no2LGLt[0]));
+  if(!(gridpoints->UNI_to_no2LGLt))
+    errorexit("out of memory for interp. matrices UNI_to_no2LGLt");
 
   /* allocate arrays */
   for(ni=1; ni<=nmax; ni++)
@@ -214,11 +221,11 @@ int init_gridpoints(tMesh *mesh)
 }
 
 /* free all arrays with grid points and such */
-int free_gridpoints(tMesh *mesh)
+int gridpoints_free(tMesh *mesh)
 {
   int ni, typ;
 
-  /* free points, diff matrices, and such */
+  /* free things that have typ: points, diff matrices, and such */
   for(typ=0; typ<P_NTYPES; typ++)
   {
     for(ni=1; ni<=gridpoints->nmax; ni++)
@@ -241,6 +248,15 @@ int free_gridpoints(tMesh *mesh)
     free(gridpoints->Wq[typ]);
     free(gridpoints->WL[typ]);
   }
+
+  /* free UNI_to_nLGLt, UNI_to_no2LGLt */
+  for(ni=1; ni<=gridpoints->nmax; ni++)
+  {
+    free_array(gridpoints->UNI_to_nLGLt[ni]);
+    free_array(gridpoints->UNI_to_no2LGLt[ni]);
+  }
+  free(gridpoints->UNI_to_nLGLt);
+  free(gridpoints->UNI_to_no2LGLt);
 
   /* now set all in gridpoints back to 0 */
   memset(gridpoints, 0, sizeof(gridpoints[0]));

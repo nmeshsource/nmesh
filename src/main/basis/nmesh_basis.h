@@ -9,6 +9,8 @@ enum
   INTERP_NOT_SET=0, /* interpolation mode is not set */
   INTERP_LAGRANGE,  /* Lagrange interpolation */
   INTERP_WENO,      /* WENO interpolation */
+  INTERP_UNIFORM_TO_n_LGL,   //interp from UNI to LGL with n pnts using UNI_to_nLGLt
+  INTERP_UNIFORM_TO_nO2_LGL, //interp from UNI to LGL with n/2 pnts using UNI_to_no2LGLt
 };
 
 
@@ -45,6 +47,8 @@ typedef struct tGRIDPOINTS {
   struct tARRAY **At[P_NTYPES]; /* list of transposed analysis matrices */
   struct tARRAY **St[P_NTYPES]; /* list of transposed synthesis matrices */
   double (*basis[P_NTYPES])(int l, double Xb, int np);//basis related to At,St
+  struct tARRAY **UNI_to_nLGLt;   /* interp matrices from UNIFORM to n LGL */
+  struct tARRAY **UNI_to_no2LGLt; /* interp matrices from UNIFORM to n/2 LGL */
 } tGridPoints;
 
 
