@@ -78,3 +78,14 @@ int M_to_Minv_gaussjordan(int n, const double M[], double Minv[])
   for(i=0; i<n*n; i++) Minv[i] = M[i];
   return gaussjordan_inv(n, Minv);
 }
+
+
+/* Get transpose MT_{ji} = M[j + i*m] of a n*m matrix M_{ij} = M[i + j*n].
+   Here i \in [0,n-1], j \in [0,m-1] */
+void M_to_Mtranspose(int n, int m, const double M[], double MT[])
+{
+  int i, j;
+  for(i=0; i<n; i++)
+    for(j=0; j<m; j++)
+      MT[j + i*m] = M[i + j*n];
+}
