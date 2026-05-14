@@ -155,8 +155,24 @@ int gridpoints_init(tMesh *mesh)
   /* set interp. matrices */
   for(ni=1; ni<=nmax; ni++)
   {
-//    double *UtonL = gridpoints->UNI_to_nLGLt[ni]->d;
-//    double *Utono2L = gridpoints->UNI_to_no2LGLt[ni]->d;
+    tArray *Xb   = gridpoints->Xb[P_UNIFORM][ni];
+    tArray *X    = gridpoints->Xb[P_LGL][ni];
+    tArray *W    = gridpoints->WL[P_LGL][ni];
+    tArray *Pt   = alloc_array2d(ni, ni);
+    tArray *Xo2  = gridpoints->Xb[P_LGL][ni/2];
+    tArray *Wo2  = gridpoints->WL[P_LGL][ni/2];
+    tArray *Pto2 = alloc_array2d(ni/2, ni);
+
+    /* set matrix from LGL with ni to UNIFORM */
+    Lagrange_InterpMatT(X, W, Xb, Pt);
+    /* set matrix from LGL with ni/2 to UNIFORM */
+    Lagrange_InterpMatT(Xo2, Wo2, Xb, Pto2);
+
+    /* Now calc UNI_to_nLGLt and UNI_to_no2LGLt */
+    // ...   <--FIXME: FINISH!!!
+
+    free_array(Pto2);
+    free_array(Pt);
   }
 
   return 0;

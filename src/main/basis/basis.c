@@ -372,6 +372,29 @@ int basis_var_interpolate_mesh(tMesh *mesh, int vi, const double x[3],
 
 
 /***********************************************************************/
+/* set interpolation matrices */
+/***********************************************************************/
+
+/* write transpose of Lagrange interp. matrix into array Mt */
+void Lagrange_InterpMatT(tArray *Xb, tArray *WL, tArray *Yb, tArray *Mt)
+{
+  if(Xb && Yb)
+  {
+    int nx = Xb->n[0];
+    int ny = Yb->n[0];
+    if(nx>0 && ny>0) //do it only if we have grid points
+    {
+      double *x  = Xb->d;
+      double *w  = WL->d;
+      double *y  = Yb->d;
+      double *MT = Mt->d;
+      Lagrange_InterpMatrixT(nx,x, w, ny,y, MT);
+    }
+  }
+}
+
+
+/***********************************************************************/
 /* integrate using Gauss-Lobatto points */
 /***********************************************************************/
 
