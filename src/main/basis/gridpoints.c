@@ -196,7 +196,7 @@ int gridpoints_alloc(tMesh *mesh)
     if(!(gridpoints->St[typ]))
       errorexit("out of memory for syn. matrices");
   }
-  /* mem. for interp. matrices [6~*/
+  /* mem. for interp. matrices */
   gridpoints->UNI_to_nLGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_nLGLt[0]));
   if(!(gridpoints->UNI_to_nLGLt))
     errorexit("out of memory for interp. matrices UNI_to_nLGLt");
@@ -227,6 +227,9 @@ int gridpoints_alloc(tMesh *mesh)
       gridpoints->Wq[typ][ni] = alloc_array(n);
       gridpoints->WL[typ][ni] = alloc_array(n);
     }
+
+    gridpoints->UNI_to_nLGLt[ni]   = alloc_array2d(ni, ni);
+    gridpoints->UNI_to_no2LGLt[ni] = alloc_array2d(ni, ni/2); //this is transpose
   }
 
   return 0;
