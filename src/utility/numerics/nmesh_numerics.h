@@ -28,9 +28,10 @@ int find_2roots_region(double x0[2],
                        double x1, double x2, void *par,
                        int maxits, double xacc, int pr);
 
-/* matrix_inv.c */
+/* matrix.c */
 int gaussjordan_inv(int n, double a[]);
 int M_to_Minv_gaussjordan(int n, const double M[], double Minv[]);
+void M_to_Mtranspose(int n, int m, const double M[], double MT[]);
 
 /* binarysearch.c */
 const void *binarysearch(const void *key, const void *base0,
