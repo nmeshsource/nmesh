@@ -447,6 +447,15 @@ double min_array(tArray *A, int *ind)
 }
 
 /* transpose array on its first 2 indices */
+void array_swap_dim01(tArray *A)
+{
+  int n0 = A->n[0];
+  int n1 = A->n[1];
+  A->n[0] = n1;
+  A->n[1] = n0;
+}
+
+/* transpose array on its first 2 indices */
 void array_transpose01_inplace(tArray *A)
 {
   int n0 = A->n[0];
@@ -485,6 +494,57 @@ void array_transpose01(tArray *A, tArray *At)
   At->n[0] = n1;
   At->n[1] = n0;
   At->n[2] = n2;
+}
+
+/* R = fa A */
+void array_times_factor(tArray *R, double fa, tArray *A)
+{
+  int i;
+  for(i=0; i<R->N; i++) R->d[i] = fa * A->d[i];
+}
+
+/* R = ca A + cb B */
+void array_add(tArray *R, double ca, tArray *A, double cb, tArray *B)
+{
+  int i;
+  for(i=0; i<R->N; i++) R->d[i] = ca * A->d[i] + cb * B->d[i];
+}
+
+/* R += c A */
+void array_addto(tArray *R, double c, tArray *A)
+{
+  int i;
+  for(i=0; i<R->N; i++) R->d[i] += c * A->d[i];
+}
+
+/* take tensor product of 2 vectors in 1d arrays: R_ij = A_i B_j */
+void array1d_outer_vectorproduct(tArray *R, tArray *A, tArray *B)
+{
+  int i, j;
+  int n0 = R->n[0];
+  int n1 = R->n[1];
+  int n2 = R->n[2];
+
+  if(n0 != A->N) errorexit("R->n[0] != A->N");
+  if(n1 != B->N) errorexit("R->n[1] != B->N");
+  if(n2 != 1)    errorexit("R->n[2] must be 1");
+
+  for(j=0; j<n1; j++)
+    for(i=0; i<n0; i++)
+      R->d[i + n0*j] = A->d[i] * B->d[j];
+}
+
+/* take scalar product of 2 vectors in 1d arrays: sum = A_i B_i */
+double array1d_inner_vectorproduct(tArray *A, tArray *B)
+{
+  int i;
+  double sum;
+
+  if(A->N != B->N) errorexit("A->N != B->N");
+
+  sum = 0;
+  for(i=0; i<A->N; i++) sum += A->d[i] * B->d[i];
+  return sum;
 }
 
 

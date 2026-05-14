@@ -393,6 +393,78 @@ void Lagrange_InterpMatT(tArray *Xb, tArray *WL, tArray *Yb, tArray *Mt)
   }
 }
 
+/* Use transposed Lagrange interp matrix Pt (to interp from LGL to UNIFORM),
+   the LGL quad. weights wq, and the UNIFORM quad. weights rq to calculate
+   the inverse matrix Rt that allows to transform back from UNIFORM to LGL.
+   Both Pt and Rt are the transposes of the interpolation matrices. */
+void Inverse_InterpMatT(tArray *Pt, tArray *wq, tArray *rq, tArray *Rt)
+{
+  if(wq)
+  {
+    int nu = Pt->n[0]; //dim of u in:     ubar = P u
+    int nb = Rt->n[0]; //dim of ubar in:  u    = R ubar
+    tArray *Phi   = alloc_array2d(nu, nu);
+    tArray *PhiPt = alloc_array2d(nu, nu);
+    tArray *tmp_v = alloc_array2d(1, nu);
+    tArray *wwt   = alloc_array2d(nu, nu);
+    tArray *R      = alloc_array2d(nu, nb);
+    tArray *tmp_R1 = alloc_array2d(nu, nb);
+    tArray *tmp_R2 = alloc_array2d(nu, nb);
+    double c;
+
+    PRFs(" Pt");printarray_matrix0(Pt);
+    PRFs(" P");printarray(Pt);
+
+    /* use tmp_R1 to temporarily store P: tmp_R1 = Pt^T */
+    array_swap_dim01(tmp_R1);
+    /* set Phi = P^T P. Note: Phi is symmetric  */
+    array_transpose01(Pt, tmp_R1);
+    PRFs(" tmp_R1");printarray_matrix0(tmp_R1);
+    mm_array_indir(tmp_R1, tmp_R1, 0, Phi); // here tmp_R1 = P
+    array_swap_dim01(tmp_R1);
+
+    PRFs(" Phi");printarray_matrix0(Phi);
+
+    /* set Phi Pt */
+    mm_array_indir(Phi, Pt, 0, PhiPt);
+
+    /* set tmp_v = Phi w, and then c = 1/(w^T Phi w) = 1/(wt tmp_v) */
+    mm_array_indir(Phi, wq, 0, tmp_v);
+    c = 1./array1d_inner_vectorproduct(wq, tmp_v);
+
+    /* set wwt = w \otimes w^T */
+    array1d_outer_vectorproduct(wwt, wq, wq); // wwt = w \otimes w^T
+
+    /* Set tmp_R1 = (w \otimes w^T) Phi Pt */
+    mm_array_indir(wwt, PhiPt, 0, tmp_R1);
+    /* Set tmp_R2 = Phi (w \otimes w^T) Phi Pt */
+    mm_array_indir(Phi, tmp_R1, 0, tmp_R2);
+
+    /* Get 1st two terms into R:  R = Phi Pt - c Phi (w \otimes w^T) Phi Pt */
+    array_add(R, 1.,PhiPt, -c,tmp_R2);
+
+    /* set tmp_R1 = w \otimes r^T */
+    array1d_outer_vectorproduct(tmp_R1, wq, rq); // tmp_R1 = w \otimes r^T
+    /* Set tmp_R2 = Phi (w \otimes r^T) */
+    mm_array_indir(Phi, tmp_R1, 0, tmp_R2);
+
+    /* Add last term to R += c Phi (w \otimes r^T) */
+    array_addto(R, c,tmp_R2);
+
+    /* finally set Rt = R^T */
+    array_transpose01(R, Rt);
+
+    /* free temp arrays */
+    free_array(tmp_R2);
+    free_array(tmp_R1);
+    free_array(R);
+    free_array(wwt);
+    free_array(tmp_v);
+    free_array(PhiPt);
+    free_array(Phi);
+  }
+}
+
 
 /***********************************************************************/
 /* integrate using Gauss-Lobatto points */

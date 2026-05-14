@@ -503,8 +503,14 @@ double Lp_norm_array_diff(tArray *A, tArray *B, double p);
 double Lp_norm_array_reldiff(tArray *A, tArray *B, double p);
 double max_array(tArray *A, int *ind);
 double min_array(tArray *A, int *ind);
+void array_swap_dim01(tArray *A);
 void array_transpose01_inplace(tArray *A);
 void array_transpose01(tArray *A, tArray *At);
+void array_times_factor(tArray *R, double fa, tArray *A);
+void array_add(tArray *R, double ca, tArray *A, double cb, tArray *B);
+void array_addto(tArray *R, double c, tArray *A);
+void array1d_outer_vectorproduct(tArray *R, tArray *A, tArray *B);
+double array1d_inner_vectorproduct(tArray *A, tArray *B);
 int array_write(tMesh *mesh, tArray *array, char *fname);
 tArray *array_alloc_read(tMesh *mesh, char *fname, int fatal);
 

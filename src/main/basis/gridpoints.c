@@ -156,20 +156,72 @@ int gridpoints_init(tMesh *mesh)
   for(ni=1; ni<=nmax; ni++)
   {
     tArray *Xb   = gridpoints->Xb[P_UNIFORM][ni];
+    tArray *rq   = gridpoints->Wq[P_UNIFORM][ni];
+    tArray *Rt   = gridpoints->UNI_to_nLGLt[ni];
+    tArray *Rto2 = gridpoints->UNI_to_no2LGLt[ni];
+
     tArray *X    = gridpoints->Xb[P_LGL][ni];
-    tArray *W    = gridpoints->WL[P_LGL][ni];
+    tArray *WL   = gridpoints->WL[P_LGL][ni];
+    tArray *wq   = gridpoints->Wq[P_LGL][ni];
     tArray *Pt   = alloc_array2d(ni, ni);
+
     tArray *Xo2  = gridpoints->Xb[P_LGL][ni/2];
-    tArray *Wo2  = gridpoints->WL[P_LGL][ni/2];
+    tArray *WLo2 = gridpoints->WL[P_LGL][ni/2];
+    tArray *wqo2 = gridpoints->Wq[P_LGL][ni/2];
     tArray *Pto2 = alloc_array2d(ni/2, ni);
 
     /* set matrix from LGL with ni to UNIFORM */
-    Lagrange_InterpMatT(X, W, Xb, Pt);
+    Lagrange_InterpMatT(X, WL, Xb, Pt);
     /* set matrix from LGL with ni/2 to UNIFORM */
-    Lagrange_InterpMatT(Xo2, Wo2, Xb, Pto2);
+    Lagrange_InterpMatT(Xo2, WLo2, Xb, Pto2);
+    PRFs(" Pto2");printarray_matrix0(Pto2);
 
     /* Now calc UNI_to_nLGLt and UNI_to_no2LGLt */
-    // ...   <--FIXME: FINISH!!!
+    /*
+    Inverse_InterpMatT(Pt, wq, rq, Rt);
+    Inverse_InterpMatT(Pto2, wqo2, rq, Rto2);
+    if(ni<=1) array_times_factor(Rto2, 1.,Pto2);
+    */
+    if(ni==47777777777)
+    {
+      Inverse_InterpMatT(Pto2, wqo2, rq, Rto2);
+      errorexit("dasdsadsa");
+    }
+
+    /*
+    tArray *Po2  = alloc_array2d(ni/2, ni);
+    if(ni>3)
+    {
+    Pto2->d[0]+=1;
+    Pto2->d[2]+=1;
+    Pto2->d[3]+=1;
+    }
+    printarray(Pto2);
+    array_transpose01(Pto2, Po2);
+    printarray(Po2);
+    array_transpose01_inplace(Pto2);
+    printarray(Pto2);
+
+    if(ni==6) errorexit("fd diff. matrices are above");
+    free_array(Po2);
+    */
+
+/*
+double M[] = { 1,2,3,4,5,6 };
+double MT[6];
+for(int i=0; i<3; i++)
+{
+for(int j=0; j<2; j++) printf(" %g", M[i + 3*j]);
+printf("\n");
+}
+M_to_Mtranspose(3,2, M, MT);
+for(int i=0; i<2; i++)
+{
+for(int j=0; j<3; j++) printf(" %g", MT[i + 2*j]);
+printf("\n");
+}
+errorexit("fgfd");
+*/
 
     free_array(Pto2);
     free_array(Pt);

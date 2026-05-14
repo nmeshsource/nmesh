@@ -6,6 +6,7 @@
 /* basis.c */
 int basis_init_globals(tMesh *mesh);
 void Lagrange_InterpMatT(tArray *Xb, tArray *WL, tArray *Yb, tArray *Mt);
+void Inverse_InterpMatT(tArray *Pt, tArray *wt, tArray *rt, tArray *Rt);
 int IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
                        int CenterOnXb0, int *i0, int *ni);
 
