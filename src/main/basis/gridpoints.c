@@ -151,6 +151,14 @@ int gridpoints_init(tMesh *mesh)
       gridpoints->basis[typ] = basis_normLegendreP;
     }
   }
+
+  /* set interp. matrices */
+  for(ni=1; ni<=nmax; ni++)
+  {
+//    double *UtonL = gridpoints->UNI_to_nLGLt[ni]->d;
+//    double *Utono2L = gridpoints->UNI_to_no2LGLt[ni]->d;
+  }
+
   return 0;
 }
 
