@@ -13,79 +13,13 @@ tGridPoints gridpoints[1];
 /* init gridpoints structure */
 int gridpoints_init(tMesh *mesh)
 {
-  int nmax = Geti(Par("amr_nmax"));
   int stencilsize = Geti(Par("fd_stencilsize"));
   int lopsidesize = Geti(Par("fd_lopsidesize"));
-  int ni, typ;
-
-  /* save nmax */
-  gridpoints->nmax = nmax;
+  int nmax, ni, typ;
 
   /* get mem. for grid points, diff. matrices, ... */
-
-  for(typ=0; typ<P_NTYPES; typ++)
-  {
-    gridpoints->Xb[typ] = calloc(nmax+1, sizeof(gridpoints->Xb[typ][0]));
-    if(!(gridpoints->Xb[typ]))
-      errorexit("out of memory for points");
-    gridpoints->Wq[typ] = calloc(nmax+1, sizeof(gridpoints->Wq[typ][0]));
-    if(!(gridpoints->Wq[typ]))
-      errorexit("out of memory for integr. weights");
-
-    gridpoints->WL[typ] = calloc(nmax+1, sizeof(gridpoints->WL[typ][0]));
-    if(!(gridpoints->WL[typ]))
-      errorexit("out of memory for Lagrange interp. weights");
-
-    gridpoints->Dt[typ] = calloc(nmax+1, sizeof(gridpoints->Dt[typ][0]));
-    if(!(gridpoints->Dt[typ]))
-      errorexit("out of memory for diff. matrices");
-
-    gridpoints->Dpt[typ] = calloc(nmax+1, sizeof(gridpoints->Dpt[typ][0]));
-    if(!(gridpoints->Dpt[typ]))
-      errorexit("out of memory for forward diff. matrices");
-    gridpoints->Dmt[typ] = calloc(nmax+1, sizeof(gridpoints->Dmt[typ][0]));
-    if(!(gridpoints->Dmt[typ]))
-      errorexit("out of memory for backward diff. matrices");
-
-    gridpoints->At[typ] = calloc(nmax+1, sizeof(gridpoints->At[typ][0]));
-    if(!(gridpoints->At[typ]))
-      errorexit("out of memory for ana. matrices");
-    gridpoints->St[typ] = calloc(nmax+1, sizeof(gridpoints->St[typ][0]));
-    if(!(gridpoints->St[typ]))
-      errorexit("out of memory for syn. matrices");
-  }
-  /* mem. for interp. matrices [6~*/
-  gridpoints->UNI_to_nLGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_nLGLt[0]));
-  if(!(gridpoints->UNI_to_nLGLt))
-    errorexit("out of memory for interp. matrices UNI_to_nLGLt");
-  gridpoints->UNI_to_no2LGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_no2LGLt[0]));
-  if(!(gridpoints->UNI_to_no2LGLt))
-    errorexit("out of memory for interp. matrices UNI_to_no2LGLt");
-
-  /* allocate arrays */
-  for(ni=1; ni<=nmax; ni++)
-  {
-    int n[3];
-
-    n[0] = n[1] = ni;
-    n[2] = 1;
-    for(typ=0; typ<P_NTYPES; typ++)
-    {
-      gridpoints->Dt[typ][ni] = alloc_array(n);
-      gridpoints->Dpt[typ][ni] = alloc_array(n);
-      gridpoints->Dmt[typ][ni] = alloc_array(n);
-      gridpoints->At[typ][ni] = alloc_array(n);
-      gridpoints->St[typ][ni] = alloc_array(n);
-    }
-    n[0] = ni;
-    n[1] = n[2] = 1;
-    for(typ=0; typ<P_NTYPES; typ++)
-    {
-      gridpoints->Xb[typ][ni] = alloc_array(n);
-      gridpoints->Wq[typ][ni] = alloc_array(n);
-      gridpoints->WL[typ][ni] = alloc_array(n);
-    }
-  }
+  gridpoints_alloc(mesh);
+  nmax = gridpoints->nmax;
 
   /* Set points, weights, diff, and other matrices.
      Points in patch coords are then
@@ -217,6 +151,84 @@ int gridpoints_init(tMesh *mesh)
       gridpoints->basis[typ] = basis_normLegendreP;
     }
   }
+  return 0;
+}
+
+/* allocate room for stuff in tGridPoints gridpoints[1] */
+int gridpoints_alloc(tMesh *mesh)
+{
+  int nmax = Geti(Par("amr_nmax"));
+  int ni, typ;
+
+  /* save nmax */
+  gridpoints->nmax = nmax;
+
+  /* get mem. for grid points, diff. matrices, ... */
+
+  for(typ=0; typ<P_NTYPES; typ++)
+  {
+    gridpoints->Xb[typ] = calloc(nmax+1, sizeof(gridpoints->Xb[typ][0]));
+    if(!(gridpoints->Xb[typ]))
+      errorexit("out of memory for points");
+    gridpoints->Wq[typ] = calloc(nmax+1, sizeof(gridpoints->Wq[typ][0]));
+    if(!(gridpoints->Wq[typ]))
+      errorexit("out of memory for integr. weights");
+
+    gridpoints->WL[typ] = calloc(nmax+1, sizeof(gridpoints->WL[typ][0]));
+    if(!(gridpoints->WL[typ]))
+      errorexit("out of memory for Lagrange interp. weights");
+
+    gridpoints->Dt[typ] = calloc(nmax+1, sizeof(gridpoints->Dt[typ][0]));
+    if(!(gridpoints->Dt[typ]))
+      errorexit("out of memory for diff. matrices");
+
+    gridpoints->Dpt[typ] = calloc(nmax+1, sizeof(gridpoints->Dpt[typ][0]));
+    if(!(gridpoints->Dpt[typ]))
+      errorexit("out of memory for forward diff. matrices");
+    gridpoints->Dmt[typ] = calloc(nmax+1, sizeof(gridpoints->Dmt[typ][0]));
+    if(!(gridpoints->Dmt[typ]))
+      errorexit("out of memory for backward diff. matrices");
+
+    gridpoints->At[typ] = calloc(nmax+1, sizeof(gridpoints->At[typ][0]));
+    if(!(gridpoints->At[typ]))
+      errorexit("out of memory for ana. matrices");
+    gridpoints->St[typ] = calloc(nmax+1, sizeof(gridpoints->St[typ][0]));
+    if(!(gridpoints->St[typ]))
+      errorexit("out of memory for syn. matrices");
+  }
+  /* mem. for interp. matrices [6~*/
+  gridpoints->UNI_to_nLGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_nLGLt[0]));
+  if(!(gridpoints->UNI_to_nLGLt))
+    errorexit("out of memory for interp. matrices UNI_to_nLGLt");
+  gridpoints->UNI_to_no2LGLt = calloc(nmax+1, sizeof(gridpoints->UNI_to_no2LGLt[0]));
+  if(!(gridpoints->UNI_to_no2LGLt))
+    errorexit("out of memory for interp. matrices UNI_to_no2LGLt");
+
+  /* allocate arrays */
+  for(ni=1; ni<=nmax; ni++)
+  {
+    int n[3];
+
+    n[0] = n[1] = ni;
+    n[2] = 1;
+    for(typ=0; typ<P_NTYPES; typ++)
+    {
+      gridpoints->Dt[typ][ni] = alloc_array(n);
+      gridpoints->Dpt[typ][ni] = alloc_array(n);
+      gridpoints->Dmt[typ][ni] = alloc_array(n);
+      gridpoints->At[typ][ni] = alloc_array(n);
+      gridpoints->St[typ][ni] = alloc_array(n);
+    }
+    n[0] = ni;
+    n[1] = n[2] = 1;
+    for(typ=0; typ<P_NTYPES; typ++)
+    {
+      gridpoints->Xb[typ][ni] = alloc_array(n);
+      gridpoints->Wq[typ][ni] = alloc_array(n);
+      gridpoints->WL[typ][ni] = alloc_array(n);
+    }
+  }
+
   return 0;
 }
 

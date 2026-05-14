@@ -10,6 +10,7 @@ int IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
 
 /* gridpoints.c */
 int gridpoints_init(tMesh *mesh);
+int gridpoints_alloc(tMesh *mesh);
 int gridpoints_free(tMesh *mesh);
 
 /* Fourier.c */
