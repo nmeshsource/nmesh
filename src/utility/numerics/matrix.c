@@ -1,4 +1,4 @@
-/* matrix_inv.c,  Wolfgang Tichy 10/2020 */
+/* matrix.c,  Wolfgang Tichy 10/2020 */
 
 #include "nmesh.h"
 #include "numerics.h"
