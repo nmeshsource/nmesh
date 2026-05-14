@@ -446,6 +446,47 @@ double min_array(tArray *A, int *ind)
   return min_in_1d_array(A->d, A->N, ind);
 }
 
+/* transpose array on its first 2 indices */
+void array_transpose01_inplace(tArray *A)
+{
+  int n0 = A->n[0];
+  int n1 = A->n[1];
+  int n2 = A->n[2];
+  double *MT = dmalloc(n0*n1);
+  int k;
+
+  for(k=0; k<n2; k++)
+  {
+    double *M = A->d + n0*n1*k;
+    M_to_Mtranspose(n0,n1, M, MT);
+    memcpy(M, MT, n0*n1*sizeof(double));
+  }
+  free(MT);
+  A->n[0] = n1;
+  A->n[1] = n0;
+}
+
+/* put transpose of array A on its first 2 indices into array At */
+void array_transpose01(tArray *A, tArray *At)
+{
+  int n0 = A->n[0];
+  int n1 = A->n[1];
+  int n2 = A->n[2];
+  int k;
+
+  if(At->N < A->N) errorexit("At is too small");
+
+  for(k=0; k<n2; k++)
+  {
+    double *M  = A->d  + n0*n1*k;
+    double *MT = At->d + n0*n1*k;
+    M_to_Mtranspose(n0,n1, M, MT);
+  }
+  At->n[0] = n1;
+  At->n[1] = n0;
+  At->n[2] = n2;
+}
+
 
 /******************************************************************/
 /* functions for array IO */
