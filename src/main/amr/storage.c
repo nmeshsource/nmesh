@@ -319,6 +319,13 @@ void amr_interp_get_order_scheme(tElm *elm, int *order, int *scheme)
   case INTERP_WENO:
     npts = Geti(amr->WENO_interp_order);
     break;
+  case INTERP_UNIFORM_TO_n_LGL:
+  case INTERP_UNIFORM_TO_nO2_LGL:
+  case INTERP_LGL_TO_n_UNIFORM:
+  case INTERP_LGL_TO_2n_UNIFORM:
+    /* npts is irrelevant in these cases, signal this by setting it to -1 */
+    npts = -1;
+    break;
   default:
     errorexit("unknown scheme");
   }
@@ -897,8 +904,8 @@ tNode *update_node_n_pt_typ_return_node_old(tNode *node, int *n, int *pt_typ)
         /* fill node->dat with interpolation data from old dat */
         if( (vt==EVOVAR) || (vt==DATAVAR) ) /* exclude Aux. vars */
         {
-          interp_topoints(node_old, node_old->dat->v[vi], Xp,
-                          order, scheme, 1., node->dat->v[vi]);
+          interp_topoints_scheme(node_old, node_old->dat->v[vi], Xp,
+                                 order, scheme, 1., node->dat->v[vi]);
         }
         /* copy nbinfo vars */
         if( (vi >= amr->elm_nbinfo0) && (vi < amr->elm_nbinfo0+6) )
