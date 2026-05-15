@@ -734,6 +734,8 @@ void interp_topoints_scheme(tElm *elm, tArray *var, tArray *Xp[3],
   {
   case INTERP_UNIFORM_TO_n_LGL:
   case INTERP_UNIFORM_TO_nO2_LGL:
+  case INTERP_LGL_TO_n_UNIFORM:
+  case INTERP_LGL_TO_2n_UNIFORM:
     array_MatrixInterp3_scheme(scheme, var, interp);
     break;
   default:

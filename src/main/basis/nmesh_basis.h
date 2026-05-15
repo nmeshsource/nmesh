@@ -168,6 +168,9 @@ void interpolate_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
 void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
                      int npts, int scheme, double vscal,
                      tArray *interp);
+void interp_topoints_scheme(tElm *elm, tArray *var, tArray *Xp[3],
+                            int npts, int scheme, double vscal,
+                            tArray *interp);
 void interp_toIpoints(tElm *elm, tArray *var, tArray *Xp[3], tArray *Ip,
                       int npts, int scheme, double vscal, tArray *interp);
 void interp2d_topoints(tElm *elm, tArray *var, int dir, int p,
