@@ -559,6 +559,7 @@ void array_MatrixInterp3(tArray *Mt[3], tArray *var, tArray *Ivar)
   if(allocd) errorexit("Ivar is to small");
 }
 
+/* choose inpterp matrix based on scheme, and then interp */
 void array_MatrixInterp3_scheme(int scheme, tArray *var, tArray *Ivar)
 {
   int n0 = var->n[0];
@@ -580,7 +581,10 @@ void array_MatrixInterp3_scheme(int scheme, tArray *var, tArray *Ivar)
       tArray *Mt[] = { gridpoints->UNI_to_no2LGLt[n0],
                        gridpoints->UNI_to_no2LGLt[n1],
                        gridpoints->UNI_to_no2LGLt[n2] };
-      array_MatrixInterp3(Mt, var, Ivar);
+      tArray *Iv2 = alloc_array(var->n); //temp array of correct size
+      array_MatrixInterp3(Mt, var, Iv2);
+      copy_array_data(Iv2, Ivar);
+      free_array(Iv2);
     }
     break;
   default:

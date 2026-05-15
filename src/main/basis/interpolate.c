@@ -723,6 +723,24 @@ void interp_topoints(tElm *elm, tArray *var, tArray *Xp[3],
   }
 }
 
+/* like interp_topoints, but switch the array_MatrixInterp3_scheme
+   for certain scheme values */
+void interp_topoints_scheme(tElm *elm, tArray *var, tArray *Xp[3],
+                            int npts, int scheme, double vscal,
+                            tArray *interp)
+{
+  switch(scheme)
+  {
+  case INTERP_UNIFORM_TO_n_LGL:
+  case INTERP_UNIFORM_TO_nO2_LGL:
+    array_MatrixInterp3_scheme(scheme, var, interp);
+    break;
+  default:
+    interp_topoints(elm, var, Xp, npts,scheme,vscal, interp);
+  }
+}
+
+
 /* 3d interpolation from array var in node to a set of points indicated by
    the arrays Xp[0..2] and Ip. Xp[0..2] has the point coords in Xb coords
    and Ip has the index where the interpolation result is written to in
