@@ -9,6 +9,8 @@
 
 /* frequently used global vars */
 tbasis basis[1];
+extern tGridPoints gridpoints[1];
+
 
 /* initialize coordinates in each patch */
 int basis_init_globals(tMesh *mesh)
@@ -531,6 +533,58 @@ void Inverse_InterpMatT_best_rq(tArray *Pt, tArray *Rt)
     free_array(R);
     free_array(Phi);
     free_array(P);
+  }
+}
+
+
+/***********************************************************************/
+/* functions to interpolate with interpolation matrices */
+/***********************************************************************/
+
+/* interp from var into Ivar using the 3 1d interp matrices in Mt[3] */
+void array_MatrixInterp3(tArray *Mt[3], tArray *var, tArray *Ivar)
+{
+  int allocd;
+
+  mm_array_indir(Mt[0], var, 0, Ivar);
+  allocd = redim_array(Ivar, Mt[0]->n[1], var->n[1], var->n[2]);
+  if(allocd) errorexit("Ivar is to small");
+
+  mm_array_indir(Mt[1], Ivar, 1, Ivar);
+  allocd = redim_array(Ivar, -1, Mt[1]->n[1], -1);
+  if(allocd) errorexit("Ivar is to small");
+
+  mm_array_indir(Mt[2], Ivar, 2, Ivar);
+  allocd = redim_array(Ivar, -1, -1, Mt[2]->n[1]);
+  if(allocd) errorexit("Ivar is to small");
+}
+
+void array_MatrixInterp3_scheme(int scheme, tArray *var, tArray *Ivar)
+{
+  int n0 = var->n[0];
+  int n1 = var->n[1];
+  int n2 = var->n[2];
+
+  switch(scheme)
+  {
+  case INTERP_UNIFORM_TO_n_LGL:
+    {
+      tArray *Mt[] = { gridpoints->UNI_to_nLGLt[n0],
+                       gridpoints->UNI_to_nLGLt[n1],
+                       gridpoints->UNI_to_nLGLt[n2] };
+      array_MatrixInterp3(Mt, var, Ivar);
+    }
+    break;
+  case INTERP_UNIFORM_TO_nO2_LGL:
+    {
+      tArray *Mt[] = { gridpoints->UNI_to_no2LGLt[n0],
+                       gridpoints->UNI_to_no2LGLt[n1],
+                       gridpoints->UNI_to_no2LGLt[n2] };
+      array_MatrixInterp3(Mt, var, Ivar);
+    }
+    break;
+  default:
+    errorexiti("unknown interpolation scheme %d", scheme);
   }
 }
 
