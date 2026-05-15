@@ -503,6 +503,7 @@ double Lp_norm_array_diff(tArray *A, tArray *B, double p);
 double Lp_norm_array_reldiff(tArray *A, tArray *B, double p);
 double max_array(tArray *A, int *ind);
 double min_array(tArray *A, int *ind);
+void array_inverse01_inplace(tArray *A);
 void array_swap_dim01(tArray *A);
 void array_transpose01_inplace(tArray *A);
 void array_transpose01(tArray *A, tArray *At);

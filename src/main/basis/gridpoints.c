@@ -174,17 +174,18 @@ int gridpoints_init(tMesh *mesh)
     Lagrange_InterpMatT(X, WL, Xb, Pt);
     /* set matrix from LGL with ni/2 to UNIFORM */
     Lagrange_InterpMatT(Xo2, WLo2, Xb, Pto2);
-    PRFs(" Pto2");printarray_matrix0(Pto2);
+    PRFs(": Pto2");printarray_matrix0(Pto2);
 
     /* Now calc UNI_to_nLGLt and UNI_to_no2LGLt */
     /*
-    Inverse_InterpMatT(Pt, wq, rq, Rt);
-    Inverse_InterpMatT(Pto2, wqo2, rq, Rto2);
+    Inverse_InterpMatT_best_rq(Pt, Rt);
+    Inverse_InterpMatT_best_rq(Pto2, Rto2);
     if(ni<=1) array_times_factor(Rto2, 1.,Pto2);
     */
-    if(ni==47777777777)
+    if(ni==677777777777777)
     {
-      Inverse_InterpMatT(Pto2, wqo2, rq, Rto2);
+      Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
+      Inverse_InterpMatT_best_rq(Pto2, Rto2);
       errorexit("dasdsadsa");
     }
 

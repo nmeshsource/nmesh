@@ -446,6 +446,23 @@ double min_array(tArray *A, int *ind)
   return min_in_1d_array(A->d, A->N, ind);
 }
 
+/* compute inverse of array on its first 2 indices, which need to be equal */
+void array_inverse01_inplace(tArray *A)
+{
+  int n0 = A->n[0];
+  int n1 = A->n[1];
+  int n2 = A->n[2];
+  int k;
+
+  if(n1 != n0) errorexit("A->n[0] != A->n[1]");
+
+  for(k=0; k<n2; k++)
+  {
+    double *M = A->d + n0*n1*k;
+    gaussjordan_inv(n0, M);
+  }
+}
+
 /* transpose array on its first 2 indices */
 void array_swap_dim01(tArray *A)
 {
