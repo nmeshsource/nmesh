@@ -1562,7 +1562,7 @@ void Lagrange_InterpMatT(tArray *Xb, tArray *WL, tArray *Yb, tArray *Mt)
    R = Phi P^T - c Phi (w.w^T) Phi P^T + c Phi (w.r^T)  */
 void Inverse_InterpMatT_rq(tArray *Pt, tArray *wq, tArray *rq, tArray *Rt)
 {
-  if(wq)
+  if(Pt && wq)
   {
     int nu = Pt->n[0]; //dim of u in:     ubar = P u
     int nb = Rt->n[0]; //dim of ubar in:  u    = R ubar

@@ -152,29 +152,55 @@ int gridpoints_init(tMesh *mesh)
     }
   }
 
-  /* set interp. matrices */
+  /* set interp. matrices from LGL to UNI */
   for(ni=1; ni<=nmax; ni++)
   {
-    tArray *Xb   = gridpoints->Xb[P_UNIFORM][ni];
+    tArray *X   = gridpoints->Xb[P_LGL][ni];
+    tArray *WL  = gridpoints->WL[P_LGL][ni];
+    tArray *Pt  = gridpoints->LGL_to_nUNIt[ni];
+    tArray *Pt2 = gridpoints->LGL_to_2nUNIt[ni];
+    tArray *Xb  = gridpoints->Xb[P_UNIFORM][ni];
+    tArray *Xb2;
+    int ni2 = ni*2;
+
+    /* we have Xb2 only if ni2 is not loo large */
+    if(ni2<=nmax) Xb2 = gridpoints->Xb[P_UNIFORM][ni2];
+    else          Xb2 = NULL;
+
+    /* set matrix from LGL to UNIFORM with ni */
+    Lagrange_InterpMatT(X, WL, Xb, Pt);
+    /* set matrix from LGL to UNIFORM with ni*2 */
+    Lagrange_InterpMatT(X, WL, Xb2, Pt2);
+    //PRFs(": Pt2");printarray_matrix0(Pt2);
+  }
+
+  /* set interp. matrices from UNI to LGL */
+  for(ni=1; ni<=nmax; ni++)
+  {
     //tArray *rq   = gridpoints->Wq[P_UNIFORM][ni];
     tArray *Rt   = gridpoints->UNI_to_nLGLt[ni];
     tArray *Rto2 = gridpoints->UNI_to_no2LGLt[ni];
 
-    tArray *X    = gridpoints->Xb[P_LGL][ni];
-    tArray *WL   = gridpoints->WL[P_LGL][ni];
     //tArray *wq   = gridpoints->Wq[P_LGL][ni];
-    tArray *Pt   = alloc_array2d(ni, ni);
+    //tArray *Pt   = alloc_array2d(ni, ni);
+    tArray *Pt   = gridpoints->LGL_to_nUNIt[ni];
 
-    tArray *Xo2  = gridpoints->Xb[P_LGL][ni/2];
-    tArray *WLo2 = gridpoints->WL[P_LGL][ni/2];
-    //tArray *wqo2 = gridpoints->Wq[P_LGL][ni/2];
-    tArray *Pto2 = alloc_array2d(ni/2, ni);
+    int nio2 = ni/2;
+    //tArray *wqo2 = gridpoints->Wq[P_LGL][nio2];
+    //tArray *Pto2 = alloc_array2d(nio2, ni);
+    tArray *Pto2 = gridpoints->LGL_to_2nUNIt[nio2];
 
-    /* set matrix from LGL with ni to UNIFORM */
-    Lagrange_InterpMatT(X, WL, Xb, Pt);
-    /* set matrix from LGL with ni/2 to UNIFORM */
-    Lagrange_InterpMatT(Xo2, WLo2, Xb, Pto2);
-    //PRFs(": Pto2");printarray_matrix0(Pto2);
+    /* skip odd ni, as there is no LGL_to_2nUNIt that can give an odd ni */
+    if(ni%2) Pto2 = NULL;
+
+    /* test for weights from rec1d_LR_extrap3_u
+    rq->d[0] = rq->d[5] = 1./6.;
+    rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.;
+    double b=3./8., c=0.25;
+    rq->d[0] = rq->d[7] = b/3.;
+    rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
+    rq->d[3] = rq->d[4] = c;
+    */
 
     /* Now calc UNI_to_nLGLt=Rt and UNI_to_no2LGLt=Rto2 */
     //Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
@@ -182,17 +208,18 @@ int gridpoints_init(tMesh *mesh)
     Inverse_InterpMatT_best_rq(Pt, Rt);
     Inverse_InterpMatT_best_rq(Pto2, Rto2);
 
-    //tArray *RP = alloc_array2d(ni/2, ni/2);
-    //array_transpose01_inplace(Pto2);
-    //mm_array_indir(Rto2, Pto2, 0, RP);
-    //PRFs(": P");printarray_matrix0(Pto2);
-    //PRFs(": Rt");printarray_matrix0(Rto2);
-    //PRFs(": RP");printarray_matrix0(RP);
-    //free_array(RP);
-    //if(ni==6) errorexit("dasdsadsa");
-
-    free_array(Pto2);
-    free_array(Pt);
+    //PRFs(": rq");printarray(rq);
+    //if(Pto2)
+    //{
+    //  tArray *RP = alloc_array2d(nio2, nio2);
+    //  array_transpose01_inplace(Pto2);
+    //  mm_array_indir(Rto2, Pto2, 0, RP);
+    //  PRFs(": P");printarray_matrix0(Pto2);
+    //  PRFs(": Rt");printarray_matrix0(Rto2);
+    //  PRFs(": RP");printarray_matrix0(RP);
+    //  free_array(RP);
+    //  if(ni==8) errorexit("dasdsadsa");
+    //}
   }
 
   return 0;
@@ -248,9 +275,18 @@ int gridpoints_alloc(tMesh *mesh)
   if(!(gridpoints->UNI_to_no2LGLt))
     errorexit("out of memory for interp. matrices UNI_to_no2LGLt");
 
+  gridpoints->LGL_to_nUNIt = calloc(nmax+1, sizeof(gridpoints->LGL_to_nUNIt[0]));
+  if(!(gridpoints->LGL_to_nUNIt))
+    errorexit("out of memory for interp. matrices LGL_to_nUNIt");
+  gridpoints->LGL_to_2nUNIt = calloc(nmax+1, sizeof(gridpoints->LGL_to_2nUNIt[0]));
+  if(!(gridpoints->LGL_to_2nUNIt))
+    errorexit("out of memory for interp. matrices LGL_to_2nUNIt");
+
   /* allocate arrays */
   for(ni=1; ni<=nmax; ni++)
   {
+    int ni2  = ni*2;
+    int nio2 = ni/2;
     int n[3];
 
     n[0] = n[1] = ni;
@@ -273,7 +309,9 @@ int gridpoints_alloc(tMesh *mesh)
     }
 
     gridpoints->UNI_to_nLGLt[ni]   = alloc_array2d(ni, ni);
-    gridpoints->UNI_to_no2LGLt[ni] = alloc_array2d(ni, ni/2); //this is transpose
+    gridpoints->UNI_to_no2LGLt[ni] = alloc_array2d(ni, nio2); //this is transpose
+    gridpoints->LGL_to_nUNIt[ni]   = alloc_array2d(ni, ni);
+    gridpoints->LGL_to_2nUNIt[ni]  = alloc_array2d(ni, ni2); //this is transpose
   }
 
   return 0;
@@ -308,14 +346,18 @@ int gridpoints_free(tMesh *mesh)
     free(gridpoints->WL[typ]);
   }
 
-  /* free UNI_to_nLGLt, UNI_to_no2LGLt */
+  /* free UNI_to_nLGLt, UNI_to_no2LGLt, ... */
   for(ni=1; ni<=gridpoints->nmax; ni++)
   {
     free_array(gridpoints->UNI_to_nLGLt[ni]);
     free_array(gridpoints->UNI_to_no2LGLt[ni]);
+    free_array(gridpoints->LGL_to_nUNIt[ni]);
+    free_array(gridpoints->LGL_to_2nUNIt[ni]);
   }
   free(gridpoints->UNI_to_nLGLt);
   free(gridpoints->UNI_to_no2LGLt);
+  free(gridpoints->LGL_to_nUNIt);
+  free(gridpoints->LGL_to_2nUNIt);
 
   /* now set all in gridpoints back to 0 */
   memset(gridpoints, 0, sizeof(gridpoints[0]));

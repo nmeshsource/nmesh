@@ -11,6 +11,8 @@ enum
   INTERP_WENO,      /* WENO interpolation */
   INTERP_UNIFORM_TO_n_LGL,   //interp from UNI to LGL with n pnts using UNI_to_nLGLt
   INTERP_UNIFORM_TO_nO2_LGL, //interp from UNI to LGL with n/2 pnts using UNI_to_no2LGLt
+  INTERP_LGL_TO_n_UNIFORM,   //interp from LGL to UNI with n pnts
+  INTERP_LGL_TO_2n_UNIFORM,  //interp from LGL to UNI with 2n pnts
 };
 
 
@@ -49,6 +51,8 @@ typedef struct tGRIDPOINTS {
   double (*basis[P_NTYPES])(int l, double Xb, int np);//basis related to At,St
   struct tARRAY **UNI_to_nLGLt;   /* interp matrices from UNIFORM to n LGL */
   struct tARRAY **UNI_to_no2LGLt; /* interp matrices from UNIFORM to n/2 LGL */
+  struct tARRAY **LGL_to_nUNIt;   /* interp matrices from LGL to n UNIFORM */
+  struct tARRAY **LGL_to_2nUNIt;  /* interp matrices from LGL to 2n UNIFORM */
 } tGridPoints;
 
 
