@@ -501,31 +501,31 @@ void Inverse_InterpMatT_best_rq(tArray *Pt, tArray *Rt)
     tArray *Phi = alloc_array2d(nu, nu);
     tArray *R   = alloc_array2d(nu, nb);
 
-    PRFs(": Pt");printarray_matrix0(Pt);
+    //PRFs(": Pt");printarray_matrix0(Pt);
+
     /* set P = P^T  */
     array_transpose01(Pt, P);
-    PRFs(": P");printarray_matrix0(P);
+    //PRFs(": P");printarray_matrix0(P);
 
     /* set Phi = (P^T P)^{-1}. Note: Phi is symmetric  */
     mm_array_indir(P, P, 0, Phi); // here tmp_R1 = P
-    PRFs(": Phi^{-1}");printarray_matrix0(Phi);
+    //PRFs(": Phi^{-1}");printarray_matrix0(Phi);
     array_inverse01_inplace(Phi);
-    PRFs(": Phi");printarray_matrix0(Phi);
+    //PRFs(": Phi");printarray_matrix0(Phi);
 
     /* set R = Phi Pt */
     mm_array_indir(Phi, Pt, 0, R);
-    PRFs(": R");printarray_matrix0(R);
+    //PRFs(": R");printarray_matrix0(R);
 
     /* finally set Rt = R^T */
     array_transpose01(R, Rt);
 
     /* check how good the R is. I.e. is  R P = 1  ??? */
-    tArray *RP   = alloc_array2d(nu, nu);
-    mm_array_indir(Rt, P, 0, RP);
-    PRFs(": R");printarray_matrix0(R);
-    PRFs(": P");printarray_matrix0(P);
-    PRFs(": RP");printarray_matrix0(RP);
-    free_array(RP);
+    //tArray *RP = alloc_array2d(nu, nu);
+    //mm_array_indir(Rt, P, 0, RP);
+    //PRFs(": P");printarray_matrix0(P);
+    //PRFs(": RP");printarray_matrix0(RP);
+    //free_array(RP);
 
     /* free temp arrays */
     free_array(R);
