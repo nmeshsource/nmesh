@@ -1746,6 +1746,23 @@ void array_MatrixInterp3_scheme(int scheme, tArray *var, tArray *Ivar)
       free_array(Iv2);
     }
     break;
+  case INTERP_LGL_TO_n_UNIFORM:
+    {
+      tArray *Mt[] = { gridpoints->LGL_to_nUNIt[n0],
+                       gridpoints->LGL_to_nUNIt[n1],
+                       gridpoints->LGL_to_nUNIt[n2] };
+      array_MatrixInterp3(Mt, var, Ivar);
+    }
+    break;
+  case INTERP_LGL_TO_2n_UNIFORM:
+    {
+      tArray *Mt[] = { gridpoints->LGL_to_2nUNIt[n0],
+                       gridpoints->LGL_to_2nUNIt[n1],
+                       gridpoints->LGL_to_2nUNIt[n2] };
+      array_MatrixInterp3(Mt, var, Ivar);
+    }
+    break;
+
   default:
     errorexiti("unknown interpolation scheme %d", scheme);
   }
