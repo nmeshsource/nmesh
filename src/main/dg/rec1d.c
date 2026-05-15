@@ -763,7 +763,7 @@ ux, u1, u2 are cell averages (integrals)
  ==> \int_{-1}^{1}dx u = 2/5 ux + 4/5 u1 + 4/5 u2
 
   o   |   o   |   o   |  <-- o,o,o are gridpoints after extrap
- -1     -1/5     3/5  1  <-- gridpoints coords x0=-1, x1=-1/5, x2=3/5
+ -1     -1/5     3/5  1  <-- gridpoint coords x0=-1, x1=-1/5, x2=3/5
 Gaussian quad weights for o,o,o grid: wq0=1/3, wq1=5/6, wq2=5/6 (can check with Gauss_wquad_from_x)
  ==> \int_{-1}^{1}dx u = 1/3 u0 + 5/6 u1 + 5/6 u2
 
