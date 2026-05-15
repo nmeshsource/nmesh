@@ -22,6 +22,17 @@ Improve trouble score:
 +We can take substep back locally and never need to go back for all elements.
 
 
+Check if interpolation speed can be improved
+============================================
+*we now have interp_topoints_scheme thaty might be fast if we pick something
+ like:   scheme=INTERP_UNIFORM_TO_nO2_LGL
+*this could help in these:
+   evolve_switch_nontroubled_nodes_mesh
+   evolve_PerssonPmod_trouble_ncoeffs_dg
+*check if INTERP_LGL_TO_2n_UNIFORM is faster than INTERP_LAGRANGE when we
+ go from DG to FV grids in  evolve_switch_troubled_nodes_mesh
+
+
 Improve load balance:
 =====================
 *If  evolve_loadtime=7  evolve_set_trouble_score  adds

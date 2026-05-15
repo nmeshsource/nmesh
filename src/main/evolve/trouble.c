@@ -1,4 +1,4 @@
-/* evolve.c */
+/* trouble.c */
 /* Wolfgang Tichy, 5/2022 */
 
 #include "nmesh.h"

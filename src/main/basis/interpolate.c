@@ -984,7 +984,7 @@ void interp_to_pt_typ(tNode *node, int iu, int pt_typ[3],
   array_1d1d1d_coords_to_3d_coords(Xb, Xp);
 
   /* interpolate to points Xp */
-  interp_topoints(node, VarA(node,iu), Xp, npts,scheme,vscal, interp);
+  interp_topoints_scheme(node, VarA(node,iu), Xp, npts,scheme,vscal, interp);
   //was: basis_interp_topoints(node, VarA(node,iu), Xp, interp, Lagrange_of_x);
 
   free_3_arrays(Xp);
