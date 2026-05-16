@@ -278,7 +278,7 @@ int gridpoints_init(tMesh *mesh)
        which can be calcalated by Inverse_InterpMatT_pseudo */
     Inverse_InterpMatT_pseudo(Pt, Rt);
 
-    if(0 && ni==8)
+    if(1 && ni==8)
     {
       PRFs(": rq");printarray(rq);
       tArray *RP = alloc_array2d(nio2, nio2);
@@ -292,7 +292,7 @@ int gridpoints_init(tMesh *mesh)
       errorexit("non-square matrices above");
     }
 
-    if(1 && ni==4)
+    if(0 && ni==4)
     {
       PRFs(": rq");printarray(rq);
       tArray *RP = alloc_array2d(ni, ni);
