@@ -218,13 +218,14 @@ int gridpoints_init(tMesh *mesh)
       else if(Getv(BackInterpMatrix, "r_WT2"))
       {
         errorexit("set weights for r_WT2");
+        /* test for weights from rec1d_LR_extrap3_u
+        rq->d[0] = rq->d[5] = 1./6.;
+        rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.; */
       }
       else if(Getv(BackInterpMatrix, "r_WT3"))
       {
         errorexit("set weights for r_WT3");
         /* test for weights from rec1d_LR_extrap3_u
-        rq->d[0] = rq->d[5] = 1./6.;
-        rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.;
         double b=3./8., c=0.25;
         rq->d[0] = rq->d[7] = b/3.;
         rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
@@ -238,19 +239,22 @@ int gridpoints_init(tMesh *mesh)
       /* use rq to get Rt, Rto2 */
       Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
       Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
+
     }
-    //PRFs(": rq");printarray(rq);
-    //if(Pto2)
-    //{
-    //  tArray *RP = alloc_array2d(nio2, nio2);
-    //  array_transpose01_inplace(Pto2);
-    //  mm_array_indir(Rto2, Pto2, 0, RP);
-    //  PRFs(": P");printarray_matrix0(Pto2);
-    //  PRFs(": Rt");printarray_matrix0(Rto2);
-    //  PRFs(": RP");printarray_matrix0(RP);
-    //  free_array(RP);
-    //  if(ni==8) errorexit("dasdsadsa");
-    //}
+
+    if(0 && ni==6)
+    {
+      PRFs(": rq");printarray(rq);
+      tArray *RP = alloc_array2d(nio2, nio2);
+      array_transpose01_inplace(Pto2);
+      mm_array_indir(Rto2, Pto2, 0, RP);
+      PRFs(": P");printarray_matrix0(Pto2);
+      PRFs(": Rt");printarray_matrix0(Rto2);
+      PRFs(": RP");printarray_matrix0(RP);
+      array_transpose01_inplace(Pto2);
+      free_array(RP);
+      errorexit("matrices above");
+    }
 
     free_array(rq);
   }
