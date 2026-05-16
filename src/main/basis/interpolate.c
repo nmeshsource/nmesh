@@ -1717,6 +1717,13 @@ void array_MatrixInterp3(tArray *Mt[3], tArray *var, tArray *Ivar)
   mm_array_indir(Mt[2], Ivar, 2, Ivar);
   allocd = redim_array(Ivar, -1, -1, Mt[2]->n[1]);
   if(allocd) errorexit("Ivar is to small");
+
+  //PRFs(": Mt[0]");printarray(Mt[0]);
+  //PRFs(": Mt[1]");printarray(Mt[1]);
+  //PRFs(": Mt[2]");printarray(Mt[2]);
+  //PRFs(": var");printarray(var);
+  //PRFs(": Ivar");printarray(Ivar);
+  //exit(88);
 }
 
 /* choose inpterp matrix based on scheme, and then interp */

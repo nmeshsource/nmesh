@@ -208,6 +208,9 @@ int gridpoints_init(tMesh *mesh)
     Inverse_InterpMatT_pseudo(Pt, Rt);
     Inverse_InterpMatT_pseudo(Pto2, Rto2);
 
+    /* special value for 1x1 matrix Rto2 if ni=1 */
+    if(ni==1) Rto2->d[0] = 1;
+
     //PRFs(": rq");printarray(rq);
     //if(Pto2)
     //{
@@ -286,7 +289,7 @@ int gridpoints_alloc(tMesh *mesh)
   for(ni=1; ni<=nmax; ni++)
   {
     int ni2  = ni*2;
-    int nio2 = ni/2;
+    int nio2 = ni>1 ?  ni/2 : 1 ; //so we do not get 1x0 matrix
     int n[3];
 
     n[0] = n[1] = ni;
