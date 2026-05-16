@@ -185,7 +185,7 @@ int gridpoints_init(tMesh *mesh)
     tArray *Rt   = gridpoints->UNI_to_nLGLt[ni];
     tArray *Rto2 = gridpoints->UNI_to_no2LGLt[ni];
 
-    tArray *wq   = gridpoints->Wq[P_LGL][ni];
+    //tArray *wq   = gridpoints->Wq[P_LGL][ni];
     tArray *Pt   = gridpoints->LGL_to_nUNIt[ni];
 
     int nio2 = ni/2;
@@ -198,10 +198,9 @@ int gridpoints_init(tMesh *mesh)
     /* special value for 1x1 matrix Rto2 if ni=1 */
     if(ni==1) Rto2->d[0] = 1.;
 
-    /* Now calc UNI_to_nLGLt=Rt and UNI_to_no2LGLt=Rto2 */
+    /* Now calc UNI_to_no2LGLt=Rto2 */
     if(Getv(BackInterpMatrix, "PseudoInv"))
     {
-      Inverse_InterpMatT_pseudo(Pt, Rt);
       Inverse_InterpMatT_pseudo(Pto2, Rto2);
     }
     else
@@ -270,13 +269,30 @@ int gridpoints_init(tMesh *mesh)
         errorexits("illegal:  basis_BackInterpMatrix = %s",
                    Gets(BackInterpMatrix));
       }
-      /* use rq to get Rt, Rto2 */
-      Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
+      /* use rq to get Rto2 */
       Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
-
     }
 
-    if(1 && ni==6)
+    /* Now calc UNI_to_nLGLt=Rt :
+       there is a unique R, so for Rt we always use the inverse,
+       which can be calcalated by Inverse_InterpMatT_pseudo */
+    Inverse_InterpMatT_pseudo(Pt, Rt);
+
+    if(0 && ni==8)
+    {
+      PRFs(": rq");printarray(rq);
+      tArray *RP = alloc_array2d(nio2, nio2);
+      array_transpose01_inplace(Pto2);
+      mm_array_indir(Rto2, Pto2, 0, RP);
+      PRFs(": P");printarray_matrix0(Pto2);
+      PRFs(": Rt");printarray_matrix0(Rto2);
+      PRFs(": RP");printarray_matrix0(RP);
+      array_transpose01_inplace(Pto2);
+      free_array(RP);
+      errorexit("non-square matrices above");
+    }
+
+    if(1 && ni==4)
     {
       PRFs(": rq");printarray(rq);
       tArray *RP = alloc_array2d(ni, ni);
@@ -287,7 +303,7 @@ int gridpoints_init(tMesh *mesh)
       PRFs(": RP");printarray_matrix0(RP);
       array_transpose01_inplace(Pt);
       free_array(RP);
-      errorexit("matrices above");
+      errorexit("square matrices above");
     }
 
     free_array(rq);
