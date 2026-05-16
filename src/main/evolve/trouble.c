@@ -272,7 +272,7 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
   /* get ref->method from my proc to all others */
   refine_synchronize_ref_method(ref);
 
-  /* set interpolation scheme */
+  /* get interpolation scheme from BackInterpScheme and ref->method */
   switch(BackInterpScheme)
   {
   case 1:
@@ -286,7 +286,6 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
   default:
     errorexit("BackInterpScheme is unknown");
   }
-
 
   /* set varlist where we use extrap to face before interp to dg */
   if(DGglobals->fv2dg_interp_use_extrap1)
@@ -302,7 +301,7 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
   /* 1. select interpolation scheme and order */
   force_sav = amr->force_interp_scheme;         //backup flag
   order_sav = Geti(amr->Lagrange_interp_order); //backup order par
-  amr->force_interp_scheme = INTERP_LAGRANGE;   //set internal amr flag
+  amr->force_interp_scheme = scheme;            //set internal amr flag
   Seti(amr->Lagrange_interp_order, 12);         //set 12th order Lag interp
   /* 2. now call p-refinement from amr */
   rec1d_fv_uface_to_uin_1_if_rflag(mesh, vl_extrap, 0); //extrap to face
