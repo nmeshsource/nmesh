@@ -6,7 +6,8 @@
 
 /* structure that holds global evolve pars */
 typedef struct {
-  int loadtime;    /* Par("evolve_loadtime") */
+  int loadtime;                 /* Par("evolve_loadtime") */
+  int trouble_BackInterpScheme; /* Par("evolve_trouble_BackInterpScheme") */
 } tEvolveGlobals;
 
 

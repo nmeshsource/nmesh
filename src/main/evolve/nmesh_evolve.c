@@ -30,6 +30,8 @@ int nmesh_evolve(tMesh *mesh)
          "[3,7]"); //could extend: 1:time RHS, 2:time limiter, 4:time trouble
   AddPar("evolve_redo_troubled", "step", "what we redo in troubled elms "
          "[step,substep]");
+  AddPar("evolve_trouble_BackInterpScheme", "1", "scheme we use to interp "
+         "back from UNIFORM to LGL grids [1,2]. 1: Lagrange, 2: matrix R");
   AddPar("evolve_filter", "no", "whether we filter all evo. vars [no,yes]");
   AddPar("evolve_filter_varlist", "", "1st comps of other vars we filter");
   AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1-dn))^s}");

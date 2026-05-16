@@ -228,6 +228,8 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 /* switch from fv to dg based on node->dat->info->trbl_score flag */
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
 {
+  int BackInterpScheme = Getd(EvolveGlobals->trouble_BackInterpScheme);
+  int scheme;
   tRef ref[1]; /* for ref info */
   int firstit, order_sav, force_sav;
   tVarList *vl_extrap;
@@ -269,6 +271,22 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
 
   /* get ref->method from my proc to all others */
   refine_synchronize_ref_method(ref);
+
+  /* set interpolation scheme */
+  switch(BackInterpScheme)
+  {
+  case 1:
+    scheme = INTERP_LAGRANGE;
+    break;
+  case 2:
+    if(ref->method == PARENT_nO2_P_LGL)    scheme = INTERP_UNIFORM_TO_nO2_LGL;
+    else if(ref->method == PARENT_n_P_LGL) scheme = INTERP_UNIFORM_TO_n_LGL;
+    else errorexit("ref->method not implemented");
+    break;
+  default:
+    errorexit("BackInterpScheme is unknown");
+  }
+
 
   /* set varlist where we use extrap to face before interp to dg */
   if(DGglobals->fv2dg_interp_use_extrap1)

@@ -636,11 +636,14 @@ int evolve_set_EvolveGlobals(tMesh *mesh)
 {
   /* set gloabls */
   EvolveGlobals->loadtime = Par("evolve_loadtime");
+  EvolveGlobals->trouble_BackInterpScheme = Par("evolve_trouble_BackInterpScheme");
 
   /* print globals */
   PRFs(":\n");
   printf("  ->loadtime = par_%d: value=%s\n",
          EvolveGlobals->loadtime, Gets(EvolveGlobals->loadtime));
+  printf("  ->trouble_BackInterpScheme = par_%d: value=%s\n",
+         EvolveGlobals->trouble_BackInterpScheme, Gets(EvolveGlobals->trouble_BackInterpScheme));
   return 0;
 }
 

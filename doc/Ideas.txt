@@ -24,7 +24,7 @@ Improve trouble score:
 
 Check if interpolation speed can be improved
 ============================================
-*we now have interp_topoints_scheme thaty might be fast if we pick something
+*we now have interp_topoints_scheme that might be fast if we pick something
  like:   scheme=INTERP_UNIFORM_TO_nO2_LGL
 *this could help in these:
    evolve_switch_nontroubled_nodes_mesh
