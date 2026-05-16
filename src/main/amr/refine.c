@@ -176,6 +176,8 @@ void hp_refine_elms_if_rflag(tMesh *mesh, tRef *ref)
   struct list_head plist; //list in which we temporarily keep all refined parents
   struct list_head *pos, *sav;
 
+  if(ref->method == REF_METH_DONOTHING) return;
+
   /* table with missing nb info */
   khash_t(u32_gptr) *ef = kh_init(u32_gptr);
 
