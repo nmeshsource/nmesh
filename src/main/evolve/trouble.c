@@ -225,14 +225,38 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
   //FIXME: do something better than simple_load_balance
 }
 
+/* set order & scheme to be used for interpolation from FV to DG */
+void evolve_InterpToDG_order_scheme(tMesh *mesh, tRef *ref,
+                                    int *order, int *scheme)
+{
+  int BackInterpScheme = Getd(EvolveGlobals->trouble_BackInterpScheme);
+
+  /* get interpolation scheme from BackInterpScheme and ref->method */
+  switch(BackInterpScheme)
+  {
+  case 1:
+    *scheme = INTERP_LAGRANGE;
+    break;
+  case 2:
+    if(ref->method == PARENT_nO2_P_LGL)    *scheme = INTERP_UNIFORM_TO_nO2_LGL;
+    else if(ref->method == PARENT_n_P_LGL) *scheme = INTERP_UNIFORM_TO_n_LGL;
+    else errorexit("ref->method not implemented");
+    break;
+  default:
+    errorexit("BackInterpScheme is unknown");
+  }
+
+  /* for now we use 12th order for INTERP_LAGRANGE */
+  *order = 12;
+}
+
 /* switch from fv to dg based on node->dat->info->trbl_score flag */
 void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
 {
-  int BackInterpScheme = Getd(EvolveGlobals->trouble_BackInterpScheme);
-  int scheme;
   tRef ref[1]; /* for ref info */
   int firstit, order_sav, force_sav;
   tVarList *vl_extrap;
+  int order, scheme;
 
   if(PR) PRFs(":\n");
 
@@ -272,20 +296,8 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
   /* get ref->method from my proc to all others */
   refine_synchronize_ref_method(ref);
 
-  /* get interpolation scheme from BackInterpScheme and ref->method */
-  switch(BackInterpScheme)
-  {
-  case 1:
-    scheme = INTERP_LAGRANGE;
-    break;
-  case 2:
-    if(ref->method == PARENT_nO2_P_LGL)    scheme = INTERP_UNIFORM_TO_nO2_LGL;
-    else if(ref->method == PARENT_n_P_LGL) scheme = INTERP_UNIFORM_TO_n_LGL;
-    else errorexit("ref->method not implemented");
-    break;
-  default:
-    errorexit("BackInterpScheme is unknown");
-  }
+  /* get interp order & scheme from BackInterpScheme and ref->method */
+  evolve_InterpToDG_order_scheme(mesh, ref, &order, &scheme);
 
   /* set varlist where we use extrap to face before interp to dg */
   if(DGglobals->fv2dg_interp_use_extrap1)
@@ -302,7 +314,7 @@ void evolve_switch_nontroubled_nodes_mesh(tMesh *mesh, int notroubles)
   force_sav = amr->force_interp_scheme;         //backup flag
   order_sav = Geti(amr->Lagrange_interp_order); //backup order par
   amr->force_interp_scheme = scheme;            //set internal amr flag
-  Seti(amr->Lagrange_interp_order, 12);         //set 12th order Lag interp
+  Seti(amr->Lagrange_interp_order, order);      //usually 12 for Lag interp
   /* 2. now call p-refinement from amr */
   rec1d_fv_uface_to_uin_1_if_rflag(mesh, vl_extrap, 0); //extrap to face
   prefine_nodes_if_rflag(mesh, ref);
