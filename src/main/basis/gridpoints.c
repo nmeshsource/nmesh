@@ -232,12 +232,12 @@ int gridpoints_init(tMesh *mesh)
              ==> c = (2 - 4b)/(ni-4)  */
           double b = 2./ni;
           double cn = (2. - 4.*b); // c = cn/(ni-4)
-          for(i=3; i<ni-2; i++) rq->d[i] = cn/(ni-4);
+          for(i=2; i<ni-2; i++) rq->d[i] = cn/(ni-4);
           for(i=0; i<2; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
         }
         else
         {
-          for(i=0; i<ni; i++) rq->d[i] =
+          uniform_x_wTrapez(ni, Xb->d, rq->d);
         }
       }
       else if(Getv(BackInterpMatrix, "r_WT3"))
@@ -253,7 +253,7 @@ int gridpoints_init(tMesh *mesh)
              ==> c = (2 - 4b)/(ni-6)  */
           double b = 3./ni;
           double cn = (2. - 4.*b); // c = cn/(ni-6)
-          for(i=4; i<ni-3; i++) rq->d[i] = cn/(ni-6);
+          for(i=3; i<ni-3; i++) rq->d[i] = cn/(ni-6);
           for(i=0; i<3; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
         }
         /* for ni=6:
