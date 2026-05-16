@@ -765,14 +765,15 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tSurface *s1;
   int *s1_n;
   tNode *nb;
-  int useWENO, useLagrange;
   int vi, ni, found, nb_f, nb_ni, nb_dir;
   int Cp_is_set;
   tArray *Cp[2], **Ip, **Res;
   tArray *(*Cb)[2];
   tDat *dat = node->dat;
   char str[100];
+  int useWENO, useLagrangeUNI;
   int WENOorder = Geti(amr->WENO_interp_order);
+  int LagrangeUNIorder = 12; //we could make this a par
   double (*interp1d_fv)(int k, double x, int np,
                         const double *x_p, const double *w_interp);
   if(!dat) return;
@@ -1136,7 +1137,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
 
   /* 2. use interpolation to get vars from neighbors to node */
   /* choose 1d interpolator for basis_interp2d_toIpoints in fv case: */
-  useWENO = useLagrange = 0;
+  useWENO = useLagrangeUNI = 0;
   switch(DGglobals->fv_surface_interp_mode & FV_2DINTERP_VAL_MASK)
   {
   case FV_2DINTERP_LINEAR:
@@ -1155,7 +1156,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   }
   if(!pt_typ_has(node->pt_typ, P_UNIFORM)) //if this node uses DG
     if(DGglobals->fv_surface_interp_mode & FV_2DINTERP_LAGRANGE_IF_DG)
-      useLagrange = 1;
+      useLagrangeUNI = 1;
 
   /* now loop over all vars and interpolate */
   for(vi=0; vi<dat->nv; vi++)
@@ -1189,9 +1190,12 @@ void set_ajsurf_forall_vars(tNode *node, int f)
         od1 = Dir1_norm(nb_dir);
         od2 = Dir2_norm(nb_dir);
         nb_UNI = (nb->pt_typ[od1]==P_UNIFORM && nb->pt_typ[od2]==P_UNIFORM);
-        if(nb_UNI && !useLagrange) /* if uniform we use special interp */
+        if(nb_UNI) /* if uniform we use special interp */
         {
-          if(useWENO)
+          if(useLagrangeUNI)
+            interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0, Cb[ni],Ip[ni],
+                               LagrangeUNIorder,INTERP_LAGRANGE,1., Res[ni]);
+          else if(useWENO)
             interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0, Cb[ni],Ip[ni],
                                WENOorder,INTERP_WENO,1., Res[ni]);
           else
