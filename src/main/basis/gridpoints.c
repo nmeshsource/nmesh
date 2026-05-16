@@ -209,7 +209,7 @@ int gridpoints_init(tMesh *mesh)
     Inverse_InterpMatT_pseudo(Pto2, Rto2);
 
     /* special value for 1x1 matrix Rto2 if ni=1 */
-    if(ni==1) Rto2->d[0] = 1;
+    if(ni==1) Rto2->d[0] = 1.;
 
     //PRFs(": rq");printarray(rq);
     //if(Pto2)
