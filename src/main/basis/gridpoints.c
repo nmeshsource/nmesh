@@ -215,18 +215,52 @@ int gridpoints_init(tMesh *mesh)
       {
         uniform_x_wTrapez(ni, Xb->d, rq->d);
       }
-      else if(Getv(BackInterpMatrix, "r_WT2"))
+      else if( Getv(BackInterpMatrix, "r_WT2") ||
+               (ni<6 && Getv(BackInterpMatrix, "r_WT3")) )
       {
-        errorexit("set weights for r_WT2");
-        /* test for weights from rec1d_LR_extrap3_u
-        rq->d[0] = rq->d[5] = 1./6.;
-        rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.; */
+        //double x[] = {-1., 0.3333333333333333};
+        //double w[2];
+        //Gauss_wquad_from_x(2, x, w);
+        //printf("w = %g %g\n", w[0], w[1]); // ==> w = 0.5 1.5
+        if(ni>=4)
+        {
+          int i;
+          double w[] = {0.5, 1.5};
+          /* let rq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
+             with b = (1/2) 4/ni
+             ==> 2*(w0+w1)*b + (ni-4)*c = 2 ==> 4b + (ni-4)*c = 2
+             ==> c = (2 - 4b)/(ni-4)  */
+          double b = 2./ni;
+          double cn = (2. - 4.*b); // c = cn/(ni-4)
+          for(i=3; i<ni-2; i++) rq->d[i] = cn/(ni-4);
+          for(i=0; i<2; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
+        }
+        else
+        {
+          for(i=0; i<ni; i++) rq->d[i] =
+        }
       }
       else if(Getv(BackInterpMatrix, "r_WT3"))
       {
-        errorexit("set weights for r_WT3");
-        /* test for weights from rec1d_LR_extrap3_u
-        double b=3./8., c=0.25;
+        /* weights from rec1d_LR_extrap3_u */
+        if(ni>=6)
+        {
+          int i;
+          double w[] = {1./3., 5./6., 5./6.};
+          /* let rq = { w0*b, w1*b, w2*b, c, ..., c, w2*b, w1*b, w0*b}
+             with b = (1/2) 6/ni
+             ==> 2*(w0+w1+w2)*b + (ni-6)*c = 2 ==> 4b + (ni-6)*c = 2
+             ==> c = (2 - 4b)/(ni-6)  */
+          double b = 3./ni;
+          double cn = (2. - 4.*b); // c = cn/(ni-6)
+          for(i=4; i<ni-3; i++) rq->d[i] = cn/(ni-6);
+          for(i=0; i<3; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
+        }
+        /* for ni=6:
+        rq->d[0] = rq->d[5] = 1./6.;
+        rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.; */
+        /* for ni=8:
+        b=3./8., c=0.25;
         rq->d[0] = rq->d[7] = b/3.;
         rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
         rq->d[3] = rq->d[4] = c; */
@@ -242,16 +276,16 @@ int gridpoints_init(tMesh *mesh)
 
     }
 
-    if(0 && ni==6)
+    if(1 && ni==6)
     {
       PRFs(": rq");printarray(rq);
-      tArray *RP = alloc_array2d(nio2, nio2);
-      array_transpose01_inplace(Pto2);
-      mm_array_indir(Rto2, Pto2, 0, RP);
-      PRFs(": P");printarray_matrix0(Pto2);
-      PRFs(": Rt");printarray_matrix0(Rto2);
+      tArray *RP = alloc_array2d(ni, ni);
+      array_transpose01_inplace(Pt);
+      mm_array_indir(Rt, Pt, 0, RP);
+      PRFs(": P");printarray_matrix0(Pt);
+      PRFs(": Rt");printarray_matrix0(Rt);
       PRFs(": RP");printarray_matrix0(RP);
-      array_transpose01_inplace(Pto2);
+      array_transpose01_inplace(Pt);
       free_array(RP);
       errorexit("matrices above");
     }
