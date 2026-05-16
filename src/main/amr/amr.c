@@ -430,3 +430,21 @@ double node_basis(tNode *node, int dir,
   int typ = node->pt_typ[dir];
   return gridpoints->basis[typ](i, x, np);
 }
+
+/* check if all pt_typ[3] are are of type typ */
+int pt_typ_all(int pt_typ[3], int typ)
+{
+  int d;
+  int is_typ=1;
+  for(d=0; d<3; d++) if(pt_typ[d]!=typ) { is_typ=0; break; }
+  return is_typ;
+}
+
+/* check if pt_typ[3] has some of type typ */
+int pt_typ_has(int pt_typ[3], int typ)
+{
+  int d;
+  int has_typ=0;
+  for(d=0; d<3; d++) if(pt_typ[d]==typ) { has_typ=1; break; }
+  return has_typ;
+}

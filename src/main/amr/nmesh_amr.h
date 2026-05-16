@@ -633,6 +633,8 @@ void St3_pt_typ_n(int pt_typ[3], int n[3], tArray *St[3]);
 void St3_n(tNode *node, int n[3], tArray *St[3]);
 void node_St3(tNode *node, tArray *St[3]);
 double node_basis(tNode *node, int dir, int i, double x, int np);
+int pt_typ_all(int pt_typ[3], int typ);
+int pt_typ_has(int pt_typ[3], int typ);
 
 /* bfaces.c */
 tBface *first_bface_containing_point(tPat *pat, int f, double C[2]);
