@@ -51,7 +51,7 @@ int nmesh_dg(tMesh *mesh)
          "fnumR_{i} for gridpoint i and assume fnumL_{i} = -fnumR_{i-1}. "
          "Otherwise we also compute fnumL_{i} [yes,no]");
   AddPar("fv_surface_interp", "linear", "how we interpolate on node surfaces "
-         "[linear,parabolic,WENO]");
+         "[linear,parabolic,WENO,Lagrange_if_dg]");
   /* Pars for interpolation between fv and dg */
   AddPar("fv2dg_interp_use_extrap1", "no", "whether we extrap fv vars to "
          "faces before we interpolate from fv to dg [no,yes]");

@@ -765,6 +765,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   tSurface *s1;
   int *s1_n;
   tNode *nb;
+  int useWENO, useLagrange;
   int vi, ni, found, nb_f, nb_ni, nb_dir;
   int Cp_is_set;
   tArray *Cp[2], **Ip, **Res;
@@ -1135,7 +1136,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
 
   /* 2. use interpolation to get vars from neighbors to node */
   /* choose 1d interpolator for basis_interp2d_toIpoints in fv case: */
-  switch(DGglobals->fv_surface_interp_mode)
+  useWENO = useLagrange = 0;
+  switch(DGglobals->fv_surface_interp_mode & FV_2DINTERP_VAL_MASK)
   {
   case FV_2DINTERP_LINEAR:
     interp1d_fv = basis_pw_linear;
@@ -1145,11 +1147,16 @@ void set_ajsurf_forall_vars(tNode *node, int f)
     break;
   case FV_2DINTERP_WENO:
     interp1d_fv = NULL; //WENO's interp2d_toIpoints does not need interp1d_fv
+    useWENO = 1;
     break;
   default:
     errorexiti("illegal value: DGglobals->fv_surface_interp_mode = %d",
                DGglobals->fv_surface_interp_mode);
   }
+  if(!pt_typ_has(node->pt_typ, P_UNIFORM)) //if this node uses DG
+    if(DGglobals->fv_surface_interp_mode & FV_2DINTERP_LAGRANGE_IF_DG)
+      useLagrange = 1;
+
   /* now loop over all vars and interpolate */
   for(vi=0; vi<dat->nv; vi++)
   {
@@ -1169,7 +1176,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       /* interpolation within each nb, save results in Res */
       for(ni=0; ni<nnb; ni++)
       {
-        int od1, od2;
+        int od1, od2, nb_UNI;
 
         nb = node->fnb[f][ni];
         found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
@@ -1181,9 +1188,10 @@ void set_ajsurf_forall_vars(tNode *node, int f)
            to be send via MPI... */
         od1 = Dir1_norm(nb_dir);
         od2 = Dir2_norm(nb_dir);
-        if(nb->pt_typ[od1]==P_UNIFORM && nb->pt_typ[od2]==P_UNIFORM)
+        nb_UNI = (nb->pt_typ[od1]==P_UNIFORM && nb->pt_typ[od2]==P_UNIFORM);
+        if(nb_UNI && !useLagrange) /* if uniform we use special interp */
         {
-          if(DGglobals->fv_surface_interp_mode == FV_2DINTERP_WENO)
+          if(useWENO)
             interp2d_toIpoints(nb, s->nbsurf[ni], nb_dir,0, Cb[ni],Ip[ni],
                                WENOorder,INTERP_WENO,1., Res[ni]);
           else

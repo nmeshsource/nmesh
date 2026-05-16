@@ -373,8 +373,10 @@ int dg_set_DGglobals(tMesh *mesh)
   else if(Getv(fv_surface_interp, "WENO"))
     DGglobals->fv_surface_interp_mode = FV_2DINTERP_WENO;
   else
-    errorexits("unknown value %s in par fv_surface_interp.",
-               Gets(fv_surface_interp));
+    errorexits("illegal:  fv_surface_interp = %s", Gets(fv_surface_interp));
+  /* add bit flags to surface interpolation mode */
+  if(Getv(fv_surface_interp, "Lagrange_if_dg"))
+    DGglobals->fv_surface_interp_mode |= FV_2DINTERP_LAGRANGE_IF_DG;
 
   /* set optimal weights for WENOm3 */
   DGglobals->fv_WENOm3_optw[0] = 1.;

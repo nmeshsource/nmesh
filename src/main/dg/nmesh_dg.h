@@ -26,10 +26,20 @@ enum
   FV_NO_EXTRAP,           /* do not iterpolate div(flux) */
   FV_DIVF_EXTRAP1,        /* extrapolate all of div(flux) = d_i f^i */
   FV_DNFN_EXTRAP1,        /* in d_i f^i extrap. only term along face normal */
-  FV_DNFN_EXTRAP3,        /* extrap. term along face normal, using 3 points */
-  FV_2DINTERP_LINEAR,     /* use linear interp. on fv elm surface */
-  FV_2DINTERP_PARAB,      /* use parabolic interp. on fv elm surface */
-  FV_2DINTERP_WENO        /* use WENO interp. on fv elm surface */
+  FV_DNFN_EXTRAP3         /* extrap. term along face normal, using 3 points */
+};
+
+/* Surface interpolation modes (in DGglobals->fv_surface_interp_mode)
+   that we can choose. This is controlled by the par fv_surface_interp */
+enum
+{
+  /* main values: */
+  FV_2DINTERP_LINEAR=0,   /* use linear interp. on fv elm surface */
+  FV_2DINTERP_PARAB=1,    /* use parabolic interp. on fv elm surface */
+  FV_2DINTERP_WENO=2,     /* use WENO interp. on fv elm surface */
+  /* additional option bits: */
+  FV_2DINTERP_VAL_MASK=31,       /* use this to mask out options */
+  FV_2DINTERP_LAGRANGE_IF_DG=32, /* use Lagrange if we are in a DG elm */
 };
 
 /* structure that holds global dg pars */
