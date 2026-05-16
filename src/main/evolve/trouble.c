@@ -240,7 +240,7 @@ void evolve_InterpToDG_order_scheme(tMesh *mesh, tRef *ref,
   case 2:
     if(ref->method == PARENT_nO2_P_LGL)    *scheme = INTERP_UNIFORM_TO_nO2_LGL;
     else if(ref->method == PARENT_n_P_LGL) *scheme = INTERP_UNIFORM_TO_n_LGL;
-    else errorexit("ref->method not implemented");
+    else errorexiti("ref->method=%d not implemented", ref->method);
     break;
   default:
     errorexit("BackInterpScheme is unknown");
