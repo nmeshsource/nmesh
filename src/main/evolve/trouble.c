@@ -247,7 +247,7 @@ void evolve_InterpToDG_order_scheme(tMesh *mesh, tRef *ref,
   }
 
   /* for now we use 12th order for INTERP_LAGRANGE */
-  *order = 12;
+  *order = 12; // should this be a GRHD par that's passed in???
 }
 
 /* switch from fv to dg based on node->dat->info->trbl_score flag */
@@ -759,7 +759,7 @@ int evolve_PerssonPmod_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     tRef *ref = node->dat->info->trbl_ref;
     int n_dg[3], pt_typ_dg[3];
     tArray *u_interp;
-    int npts, fv_extrap;
+    int npts, scheme, fv_extrap;
 
     /* since evolve_PerssonPmod_array_trouble returns 0 for alpha_fv<0 anyway,
        we do this here already */
@@ -774,17 +774,19 @@ int evolve_PerssonPmod_trouble_ncoeffs_dg(tNode *node, int iu, double u_scale,
     /* get num. and type of points on dg grid that we would switch to */
     hp_refine_set_n_pt_typ(node, ref, n_dg, pt_typ_dg);
 
-    /* Pick a good value for npts:
-       Since We want to test for smoothness in here, we use LAGRANGE as
+    /* select interp scheme and order (called npts here) */
+    evolve_InterpToDG_order_scheme(Elm_mesh(node), ref, &npts, &scheme);
+    /* We need pick a good value for npts if we use LAGRANGE:
+       Since We want to test for smoothness in here, we can use LAGRANGE as
        it is very sensitive to shocks. Yet in order to not incur too large
        of a numerical error (when interpolating on a uniform grid), we
-       need to limit the number of interpolation points npts. */
-    npts = 12; // should this be a GRHD par that's passed in???
+       need to limit the number of interpolation points npts.
+       evolve_InterpToDG_order_scheme usually gives:  npts = 12 */
 
     /* interpolate u to dg grid */
     u_interp = alloc_array(n_dg);
     if(fv_extrap) rec1d_uface_to_uin_1_var(node, iu, 0); //extrap back to face
-    interp_to_pt_typ(node, iu, pt_typ_dg, npts,INTERP_LAGRANGE,1., u_interp);
+    interp_to_pt_typ(node, iu, pt_typ_dg, npts,scheme,1., u_interp);
     if(fv_extrap) rec1d_uface_to_uin_1_var(node, iu, 1); //undo extrap
     troubled = evolve_PerssonPmod_array_trouble(u_interp, u_scale, pt_typ_dg,
                                                 ncoeffs, alpha_fv, mode);
