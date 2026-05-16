@@ -205,8 +205,8 @@ int gridpoints_init(tMesh *mesh)
     /* Now calc UNI_to_nLGLt=Rt and UNI_to_no2LGLt=Rto2 */
     //Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
     //Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
-    Inverse_InterpMatT_best_rq(Pt, Rt);
-    Inverse_InterpMatT_best_rq(Pto2, Rto2);
+    Inverse_InterpMatT_pseudo(Pt, Rt);
+    Inverse_InterpMatT_pseudo(Pto2, Rto2);
 
     //PRFs(": rq");printarray(rq);
     //if(Pto2)

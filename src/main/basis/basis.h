@@ -39,4 +39,4 @@ double Chebyshev_basisfunc(int n, double X, int np);
 /* interpolate.c */
 void Lagrange_InterpMatT(tArray *Xb, tArray *WL, tArray *Yb, tArray *Mt);
 void Inverse_InterpMatT_rq(tArray *Pt, tArray *wq, tArray *rq, tArray *Rt);
-void Inverse_InterpMatT_best_rq(tArray *Pt, tArray *Rt);
+void Inverse_InterpMatT_pseudo(tArray *Pt, tArray *Rt);

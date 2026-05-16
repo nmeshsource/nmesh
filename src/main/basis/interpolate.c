@@ -1648,13 +1648,12 @@ void Inverse_InterpMatT_rq(tArray *Pt, tArray *wq, tArray *rq, tArray *Rt)
 }
 
 /* Use transposed Lagrange interp matrix Pt (to interp from LGL to UNIFORM),
-   the LGL quad. weights wq, and the UNIFORM quad. weights rq to calculate
-   the inverse matrix Rt that allows to transform back from UNIFORM to LGL.
+   to calculate the inverse matrix Rt that allows to transform back from
+   UNIFORM to LGL.
    Both Pt and Rt are the transposes of the interpolation matrices.
-   Here we compute Rt using UNIFORM quad. weights rq coming from
-   uniform_x_wGaussquad(ni, Xb, rq);
+   Here we compute R as the Moore–Penrose pseudoinverse of P.
    Then the formula for R simplifies to: R = Phi P^T */
-void Inverse_InterpMatT_best_rq(tArray *Pt, tArray *Rt)
+void Inverse_InterpMatT_pseudo(tArray *Pt, tArray *Rt)
 {
   if(Pt)
   {
