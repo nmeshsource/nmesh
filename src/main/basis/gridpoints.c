@@ -15,6 +15,8 @@ int gridpoints_init(tMesh *mesh)
 {
   int stencilsize = Geti(Par("fd_stencilsize"));
   int lopsidesize = Geti(Par("fd_lopsidesize"));
+  int BackInterpMatrix = Par("basis_BackInterpMatrix");
+
   int nmax, ni, typ;
 
   /* get mem. for grid points, diff. matrices, ... */
@@ -177,39 +179,67 @@ int gridpoints_init(tMesh *mesh)
   /* set interp. matrices from UNI to LGL */
   for(ni=1; ni<=nmax; ni++)
   {
-    //tArray *rq   = gridpoints->Wq[P_UNIFORM][ni];
+    tArray *Xb  = gridpoints->Xb[P_UNIFORM][ni];
+    tArray *rq  = alloc_array1d(ni);
+
     tArray *Rt   = gridpoints->UNI_to_nLGLt[ni];
     tArray *Rto2 = gridpoints->UNI_to_no2LGLt[ni];
 
-    //tArray *wq   = gridpoints->Wq[P_LGL][ni];
-    //tArray *Pt   = alloc_array2d(ni, ni);
+    tArray *wq   = gridpoints->Wq[P_LGL][ni];
     tArray *Pt   = gridpoints->LGL_to_nUNIt[ni];
 
     int nio2 = ni/2;
-    //tArray *wqo2 = gridpoints->Wq[P_LGL][nio2];
-    //tArray *Pto2 = alloc_array2d(nio2, ni);
+    tArray *wqo2 = gridpoints->Wq[P_LGL][nio2];
     tArray *Pto2 = gridpoints->LGL_to_2nUNIt[nio2];
 
     /* skip odd ni, as there is no LGL_to_2nUNIt that can give an odd ni */
     if(ni%2) Pto2 = NULL;
 
-    /* test for weights from rec1d_LR_extrap3_u
-    rq->d[0] = rq->d[5] = 1./6.;
-    rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.;
-    double b=3./8., c=0.25;
-    rq->d[0] = rq->d[7] = b/3.;
-    rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
-    rq->d[3] = rq->d[4] = c;
-    */
-
-    /* Now calc UNI_to_nLGLt=Rt and UNI_to_no2LGLt=Rto2 */
-    //Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
-    //Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
-    Inverse_InterpMatT_pseudo(Pt, Rt);
-    Inverse_InterpMatT_pseudo(Pto2, Rto2);
-
     /* special value for 1x1 matrix Rto2 if ni=1 */
     if(ni==1) Rto2->d[0] = 1.;
+
+    /* Now calc UNI_to_nLGLt=Rt and UNI_to_no2LGLt=Rto2 */
+    if(Getv(BackInterpMatrix, "r_GQ")) //Gauss quad. weights for rq
+    {
+      uniform_x_wGaussquad(ni, Xb->d, rq->d);
+      Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
+      Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
+    }
+    else if(Getv(BackInterpMatrix, "r_Trapez")) //Trapezoidal weights for rq
+    {
+      uniform_x_wTrapez(ni, Xb->d, rq->d);
+      Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
+      Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
+    }
+    else if(Getv(BackInterpMatrix, "r_WT2"))
+    {
+      errorexit("set weights for r_WT2");
+      Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
+      Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
+    }
+    else if(Getv(BackInterpMatrix, "r_WT3"))
+    {
+      errorexit("set weights for r_WT3");
+      /* test for weights from rec1d_LR_extrap3_u
+      rq->d[0] = rq->d[5] = 1./6.;
+      rq->d[1] = rq->d[2] = rq->d[3] = rq->d[4] = 5./12.;
+      double b=3./8., c=0.25;
+      rq->d[0] = rq->d[7] = b/3.;
+      rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
+      rq->d[3] = rq->d[4] = c; */
+      Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
+      Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
+    }
+    else if(Getv(BackInterpMatrix, "PseudoInv"))
+    {
+      Inverse_InterpMatT_pseudo(Pt, Rt);
+      Inverse_InterpMatT_pseudo(Pto2, Rto2);
+    }
+    else
+    {
+      errorexits("illegal:  basis_BackInterpMatrix = %s",
+                 Gets(BackInterpMatrix));
+    }
 
     //PRFs(": rq");printarray(rq);
     //if(Pto2)
@@ -223,6 +253,8 @@ int gridpoints_init(tMesh *mesh)
     //  free_array(RP);
     //  if(ni==8) errorexit("dasdsadsa");
     //}
+
+    free_array(rq);
   }
 
   return 0;
