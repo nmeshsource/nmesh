@@ -87,6 +87,9 @@ double array_GLquadrature3X(tNode *node, tArray *var);
 double var_nodeaverage(tNode *node, int ui);
 double var_GLquadrature3X(tNode *node, int ui);
 
+/* gridpoints.c */
+int gridpoints_init(tMesh *mesh);
+
 /* Legendre.c */
 double basis_LegendreP(int l, double x, int np);
 double basis_normLegendreP(int i, double x, int np);
