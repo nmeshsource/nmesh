@@ -1670,7 +1670,7 @@ void Inverse_InterpMatT_pseudo(tArray *Pt, tArray *Rt)
     //PRFs(": P");printarray_matrix0(P);
 
     /* set Phi = (P^T P)^{-1}. Note: Phi is symmetric  */
-    mm_array_indir(P, P, 0, Phi); // here tmp_R1 = P
+    mm_array_indir(P, P, 0, Phi);
     //PRFs(": Phi^{-1}");printarray_matrix0(Phi);
     array_inverse01_inplace(Phi);
     //PRFs(": Phi");printarray_matrix0(Phi);
