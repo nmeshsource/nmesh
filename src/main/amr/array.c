@@ -463,7 +463,7 @@ void array_inverse01_inplace(tArray *A)
   }
 }
 
-/* transpose array on its first 2 indices */
+/* swap dimensions of first 2 indices of array */
 void array_swap_dim01(tArray *A)
 {
   int n0 = A->n[0];
