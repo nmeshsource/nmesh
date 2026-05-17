@@ -965,7 +965,7 @@ tNode *elm_from_elmname(tMesh *mesh,  char *name)
 }
 
 /* check if a elm has the name in string nname */
-int elmname_is(tNode *elm, const char *nname)
+int elmname_is(tElm *elm, const char *nname)
 {
   char myname[NLOCS+12];
   elmname(elm, myname,NLOCS+12);            /* get name of elm into myname */
