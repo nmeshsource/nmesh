@@ -1270,7 +1270,7 @@ void prefine_on_OUTERBOUND_ifnot_P_UNIFORM(tMesh *mesh, tRef *ref)
 
         /* if we have e.g. P_LGL and pt_typ=P_CHEBEXTR switch to P_CHEBEXTR */
         if(UNI || (same_pt_typ==3))
-          elm->rflag = REF_METH_DONOTHING;
+          elm->rflag = 0;
         else
           elm->rflag = ref->method;
       }
