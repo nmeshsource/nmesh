@@ -85,16 +85,20 @@ int misc_test(tMesh *mesh)
 int test_point_interpolation(tMesh *mesh)
 {
   tNode *nd;
+  tNode *nd1;
   int n2, npts;
   int ui = Ind("misc_u");
   int vi = Ind("misc_v");
   int dir, p, i,j,k;
   double *Xb[] = { NULL, NULL, NULL };
   double X[3], Cb[2];
-  double f, interp;
+  double f, interp, diff;
   tArray *coef, *Xp[3], *Cp[2], *Ip, *Interp;
+  char str[1000];
+  int n_new[3], n_ori[3];
   int p_ori[3];
   int p_uni[] = {P_UNIFORM,P_UNIFORM,P_UNIFORM};
+  int p_lgl[] = {P_LGL,P_LGL,P_LGL};
 
   prdivider(0);
   PRF;printf(": Starting misc. tests.\n");
@@ -497,6 +501,130 @@ int test_point_interpolation(tMesh *mesh)
   printvar_innode(nd, vi);
   printvar_innode(nd, ui);
 
+  /***********************************/
+  /* test various INTERP_... schemes */
+  /***********************************/
+  prdivider(0);
+  PRF;printf(": 3d interp. with interp_to_pt_typ:\n");
+  nd1 = Lnode_myid(mesh, 1);
+  /* save n, pt_typ of node nd1, and then switch nd1 to P_UNIFORM */
+  for(dir=0; dir<3; dir++) n_ori[dir] = nd1->n[dir];
+  for(dir=0; dir<3; dir++) p_ori[dir] = nd1->pt_typ[dir];
+  printf("set pt_typ to P_UNIFORM on nd1\n");
+  //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
+  //          "Rather call hp_refine_elms_if_rflag !!!");
+  update_node_n_pt_typ(nd1, nd1->n, p_uni);
+  forvari(nd,vi, k) Vard(nd,vi)[k] = rand()/RAND_MAX;
+  printelm(nd);
+  printelm(nd1);
+  //printvar_innode(nd, ui);
+  //printvar_innode(nd, vi);
+  //printvar_innode(nd1, vi);
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("u_nd --INTERP_LAGRANGE-> v_nd1 --INTERP_LAGRANGE-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LAGRANGE,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_LAGRANGE,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("u_nd --INTERP_LAGRANGE-> v_nd1 --INTERP_UNIFORM_TO_n_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LAGRANGE,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_n_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("u_nd --INTERP_LGL_TO_n_UNIFORM-> v_nd1 --INTERP_LAGRANGE-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_LAGRANGE,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  for(dir=0; dir<3; dir++) n_new[dir] = nd1->n[dir]*2;
+  printf("now double n on nd1, but keep pt_typ=P_UNIFORM on nd1\n");
+  //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
+  //          "Rather call hp_refine_elms_if_rflag !!!");
+  update_node_n_pt_typ(nd1, n_new, p_uni);
+  printelm(nd);
+  printelm(nd1);
+
+  printf("u_nd --INTERP_LAGRANGE-> v_nd1 --INTERP_LAGRANGE-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LAGRANGE,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_LAGRANGE,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("u_nd --INTERP_LAGRANGE-> v_nd1 --INTERP_UNIFORM_TO_nO2_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LAGRANGE,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_nO2_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("u_nd --INTERP_LGL_TO_2n_UNIFORM-> v_nd1 --INTERP_LAGRANGE-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_LAGRANGE,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("u_nd --INTERP_LGL_TO_2n_UNIFORM-> v_nd1 --INTERP_UNIFORM_TO_nO2_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_nO2_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  printf("test weights in par basis_BackInterpMatrix:\n");
+  strcpy(str, Gets(Par("basis_BackInterpMatrix")));
+
+  Sets(Par("basis_BackInterpMatrix"), "PseudoInv");
+  gridpoints_init(mesh);
+  printf("basis_BackInterpMatrix = %s\n", Gets(Par("basis_BackInterpMatrix")));
+  printf("u_nd --INTERP_LGL_TO_2n_UNIFORM-> v_nd1 --INTERP_UNIFORM_TO_nO2_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_nO2_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  Sets(Par("basis_BackInterpMatrix"), "r_GQ");
+  gridpoints_init(mesh);
+  printf("basis_BackInterpMatrix = %s\n", Gets(Par("basis_BackInterpMatrix")));
+  printf("u_nd --INTERP_LGL_TO_2n_UNIFORM-> v_nd1 --INTERP_UNIFORM_TO_nO2_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_nO2_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  Sets(Par("basis_BackInterpMatrix"), "r_Trapez");
+  gridpoints_init(mesh);
+  printf("basis_BackInterpMatrix = %s\n", Gets(Par("basis_BackInterpMatrix")));
+  printf("u_nd --INTERP_LGL_TO_2n_UNIFORM-> v_nd1 --INTERP_UNIFORM_TO_nO2_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_nO2_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  Sets(Par("basis_BackInterpMatrix"), "r_WT3");
+  gridpoints_init(mesh);
+  printf("basis_BackInterpMatrix = %s\n", Gets(Par("basis_BackInterpMatrix")));
+  printf("u_nd --INTERP_LGL_TO_2n_UNIFORM-> v_nd1 --INTERP_UNIFORM_TO_nO2_LGL-> v_nd:\n");
+  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+  interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_UNIFORM_TO_nO2_LGL,1., VarA(nd,vi));
+  diff = Lp_norm_array_diff(VarA(nd,ui),VarA(nd,vi),2);
+  printf("diff(u,v)_nd = %g\n\n", diff);
+
+  /* reset basis_BackInterpMatrix */
+  Sets(Par("basis_BackInterpMatrix"), str);
+  gridpoints_init(mesh);
+  printf("reset: basis_BackInterpMatrix = %s\n", Gets(Par("basis_BackInterpMatrix")));
+  /* reset n,pt_typ on nd1 */
+  printf("reset n, pt_typ on nd1\n");
+  //errorexit("It is not allowed to directly call update_node_n_pt_typ. "
+  //          "Rather call hp_refine_elms_if_rflag !!!");
+  update_node_n_pt_typ(nd1, n_ori, p_ori);
+  printelm(nd1);
+  printf("\n");
+
+  /* test 2d interp in plane */
   prdivider(0);
   PRF;printf(": 2d interp. in plane with Lagrange:\n");
   Cp[0] = alloc_array1d(100*n2*n2);

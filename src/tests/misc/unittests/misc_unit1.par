@@ -8,7 +8,7 @@ logfile_reproducible = yes
 sysmon_hours = -1
 
 amr_mesh_type = 3 dom1 CubedSpheres
-
+amr_nmax = 20 # <--to speed up gridpoints_init(mesh);
 amr_n0 =  5
 amr_n1 =  4
 amr_n2 =  3
