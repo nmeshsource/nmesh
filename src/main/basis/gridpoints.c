@@ -20,6 +20,7 @@ int gridpoints_init(tMesh *mesh)
   int nmax, ni, typ;
 
   /* get mem. for grid points, diff. matrices, ... */
+  gridpoints_free(mesh);
   gridpoints_alloc(mesh);
   nmax = gridpoints->nmax;
 
