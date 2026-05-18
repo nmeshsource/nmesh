@@ -355,7 +355,7 @@ void fd_lopderiv_DT_uniform(int n, const double *x, int ssz, int lop,
 }
 
 
-/* Set transpose of 1d interp. matrix M_{i'k}.
+/* Set transpose of 1d interp. matrix M, where M_{i'k} = l_k(y_{i'}).
    M_{i'k} is calculated for Lagrange interpolation from gridpoints x_k
    to gridpoints y_{i'}.
    If we have
