@@ -186,7 +186,7 @@ int gridpoints_init(tMesh *mesh)
     tArray *Rt   = gridpoints->UNI_to_nLGLt[ni];
     tArray *Rto2 = gridpoints->UNI_to_no2LGLt[ni];
 
-    //tArray *wq   = gridpoints->Wq[P_LGL][ni];
+    tArray *wq   = gridpoints->Wq[P_LGL][ni];
     tArray *Pt   = gridpoints->LGL_to_nUNIt[ni];
 
     int nio2 = ni/2;
@@ -199,10 +199,11 @@ int gridpoints_init(tMesh *mesh)
     /* special value for 1x1 matrix Rto2 if ni=1 */
     if(ni==1) Rto2->d[0] = 1.;
 
-    /* Now calc UNI_to_no2LGLt=Rto2 */
+    /* Now calc UNI_to_no2LGLt=Rto2 and UNI_to_nLGLt=Rt */
     if(Getv(BackInterpMatrix, "PseudoInv"))
     {
       Inverse_InterpMatT_pseudo(Pto2, Rto2);
+      Inverse_InterpMatT_pseudo(Pt, Rt);
     }
     else
     {
@@ -270,14 +271,15 @@ int gridpoints_init(tMesh *mesh)
         errorexits("illegal:  basis_BackInterpMatrix = %s",
                    Gets(BackInterpMatrix));
       }
-      /* use rq to get Rto2 */
+      /* use rq to get Rto2 and Rt */
       Inverse_InterpMatT_rq(Pto2, wqo2, rq, Rto2);
-    }
+      Inverse_InterpMatT_rq(Pt, wq, rq, Rt);
 
-    /* Now calc UNI_to_nLGLt=Rt :
-       there is a unique R, so for Rt we always use the inverse,
-       which can be calcalated by Inverse_InterpMatT_pseudo */
-    Inverse_InterpMatT_pseudo(Pt, Rt);
+      /* About UNI_to_nLGLt=Rt :
+         there is a unique R, so for Rt we could always use the inverse,
+         which can be calcalated by Inverse_InterpMatT_pseudo */
+      //Inverse_InterpMatT_pseudo(Pt, Rt);
+    }
 
     if(0 && ni==8)
     {
@@ -293,7 +295,7 @@ int gridpoints_init(tMesh *mesh)
       errorexit("non-square matrices above");
     }
 
-    if(0 && ni==4)
+    if(0 && ni==6)
     {
       PRFs(": rq");printarray(rq);
       tArray *RP = alloc_array2d(ni, ni);
