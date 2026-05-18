@@ -160,12 +160,37 @@ int evolve_read_trouble_score_mesh(tMesh *mesh)
 }
 
 
+/* set scheme to be used for interpolation from DG to FV */
+void evolve_InterpToFV_scheme(tMesh *mesh, tRef *ref, int *scheme)
+{
+  //int ForwInterpScheme = Getd(EvolveGlobals->trouble_ForwInterpScheme);
+  int ForwInterpScheme = 1;
+
+  /* get interpolation scheme from ForwInterpScheme and ref->method */
+  switch(ForwInterpScheme)
+  {
+  case 1:
+    *scheme = INTERP_LAGRANGE;
+    break;
+  case 2:
+    if(ref->method == PARENT_2n_P_UNIFORM)     *scheme = INTERP_LGL_TO_2n_UNIFORM;
+    else if(ref->method == PARENT_n_P_UNIFORM) *scheme = INTERP_LGL_TO_n_UNIFORM;
+    else if(ref->method == REF_METH_DONOTHING) *scheme = INTERP_NOT_SET;
+    else errorexiti("ref->method=%d not implemented", ref->method);
+    break;
+  default:
+    errorexit("ForwInterpScheme is unknown");
+  }
+}
+
+
 /* switch from dg to fv based on node->dat->info->trbl_score flag */
 void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 {
   tRef ref[1]; /* for ref info */
   int firstit;
   if(PR) PRFs(":\n");
+  int force_sav, scheme;
 
   /* free surfaces & indc since they will change now anyway */
   evolve_free_communication_structs(mesh);
@@ -207,10 +232,19 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
   refine_synchronize_ref_method(ref);
   //PRF;printref(ref);
 
+  /* get interp scheme from ref->method */
+  evolve_InterpToFV_scheme(mesh, ref, &scheme);
+
   /* do p-refinement to desired n and point type */
+  /* 1. select interpolation scheme and order */
+  force_sav = amr->force_interp_scheme;         //backup flag
+//  amr->force_interp_scheme = scheme;            //set internal amr flag
+  /* 2. now call p-refinement from amr */
   prefine_nodes_if_rflag(mesh, ref);
   /* now some aux vars (and others) are not set */
   /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
+  /* 3. restore par amr_Lagrange_interp_order and amr->force_interp_scheme */
+  amr->force_interp_scheme = force_sav;
 
   /* clear rflag on all leaf nodes */
   refine_set_rflag_forall_nodes(mesh, 0);
