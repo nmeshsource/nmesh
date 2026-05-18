@@ -173,7 +173,9 @@ int gridpoints_init(tMesh *mesh)
     /* set matrix from LGL to UNIFORM with ni */
     Lagrange_InterpMatT(X, WL, Xb, Pt);
     /* set matrix from LGL to UNIFORM with ni*2 */
-    Lagrange_InterpMatT(X, WL, Xb2, Pt2);
+    if(ni>1) Lagrange_InterpMatT(X, WL, Xb2, Pt2);
+    else     Lagrange_InterpMatT(X, WL, Xb, Pt2); //set Pt2=Pt for ni=1
+
     //PRFs(": Pt2");printarray_matrix0(Pt2);
   }
 
@@ -375,8 +377,8 @@ int gridpoints_alloc(tMesh *mesh)
   /* allocate arrays */
   for(ni=1; ni<=nmax; ni++)
   {
-    int ni2  = ni*2;
-    int nio2 = ni>1 ?  ni/2 : 1 ; //so we do not get 1x0 matrix
+    int ni2  = ni>1 ? ni*2 : 1; //for ni=1 we force LGL_to_2nUNIt=LGL_to_nUNIt
+    int nio2 = ni>1 ? ni/2 : 1; //so we do not get 1x0 matrix
     int n[3];
 
     n[0] = n[1] = ni;
