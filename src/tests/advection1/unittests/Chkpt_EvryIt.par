@@ -23,6 +23,7 @@ iterations = 2
 amr_mesh_type = 13 CubedSpheres
 amr_luni = 1
 
+amr_nmax = 20 # <--to speed up gridpoints_init(mesh)
 amr_n0 = 3
 amr_n1 = 4
 amr_n2 = 5
