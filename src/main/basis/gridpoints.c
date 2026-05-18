@@ -230,10 +230,10 @@ int gridpoints_init(tMesh *mesh)
           /* let rq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
              with b = (1/2) 4/ni
              ==> 2*(w0+w1)*b + (ni-4)*c = 2 ==> 4b + (ni-4)*c = 2
-             ==> c = (2 - 4b)/(ni-4)  */
+             ==> c = (2 - 4b)/(ni-4) = (2ni/ni - 8/ni)/(ni-4) = 2/ni  */
           double b = 2./ni;
-          double cn = (2. - 4.*b); // c = cn/(ni-4)
-          for(i=2; i<ni-2; i++) rq->d[i] = cn/(ni-4);
+          double c = 2./ni;
+          for(i=2; i<ni-2; i++) rq->d[i] = c;
           for(i=0; i<2; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
         }
         else
@@ -251,10 +251,10 @@ int gridpoints_init(tMesh *mesh)
           /* let rq = { w0*b, w1*b, w2*b, c, ..., c, w2*b, w1*b, w0*b}
              with b = (1/2) 6/ni
              ==> 2*(w0+w1+w2)*b + (ni-6)*c = 2 ==> 4b + (ni-6)*c = 2
-             ==> c = (2 - 4b)/(ni-6)  */
+             ==> c = (2 - 4b)/(ni-6) = (2ni/ni - 12/ni)/(ni-6) = 2/ni  */
           double b = 3./ni;
-          double cn = (2. - 4.*b); // c = cn/(ni-6)
-          for(i=3; i<ni-3; i++) rq->d[i] = cn/(ni-6);
+          double c = 2./ni;
+          for(i=3; i<ni-3; i++) rq->d[i] = c;
           for(i=0; i<3; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
         }
         /* for ni=6:
