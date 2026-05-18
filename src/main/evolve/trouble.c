@@ -183,7 +183,6 @@ void evolve_InterpToFV_scheme(tMesh *mesh, tRef *ref, int *scheme)
   }
 }
 
-
 /* switch from dg to fv based on node->dat->info->trbl_score flag */
 void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
 {
@@ -236,7 +235,7 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
   evolve_InterpToFV_scheme(mesh, ref, &scheme);
 
   /* do p-refinement to desired n and point type */
-  /* 1. select interpolation scheme and order */
+  /* 1. select interpolation scheme */
   force_sav = amr->force_interp_scheme;         //backup flag
   amr->force_interp_scheme = scheme;            //set internal amr flag
   /* 2. now call p-refinement from amr */
