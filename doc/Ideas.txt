@@ -24,13 +24,12 @@ Improve trouble score:
 
 Check if interpolation speed can be improved
 ============================================
-*we now have interp_topoints_scheme that might be fast if we pick something
- like:   scheme=INTERP_UNIFORM_TO_nO2_LGL
-*this could help in these:
+*faster because we now use INTERP_UNIFORM_TO_nO2_LGL instead of Lagrange:
    evolve_switch_nontroubled_nodes_mesh
    evolve_PerssonPmod_trouble_ncoeffs_dg
-*check if INTERP_LGL_TO_2n_UNIFORM is faster than INTERP_LAGRANGE when we
- go from DG to FV grids in  evolve_switch_troubled_nodes_mesh
+   evolve_switch_troubled_nodes_mesh
+   evolve_trouble_redo_u_step_mesh
+*maybe 2d interp could be sped up in some cases as well???
 
 
 Improve load balance:
