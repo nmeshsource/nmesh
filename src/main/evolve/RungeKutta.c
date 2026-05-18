@@ -7,9 +7,12 @@
 #define PR 0
 
 
+/* use amr vars */
+extern tAMR amr[1];
+
+
 /*************************************************************************/
-/* functions to evolve all the mesh with a uniform time step
-*/
+/* functions to evolve all the mesh with a uniform time step */
 /*************************************************************************/
 
 /* Runge-Kutta 4 */
@@ -235,12 +238,16 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       tElm *elm_sav;
       int li;
       int n[3], pt_typ[3];
+      int force_sav, scheme;
 
       // take substep back
       pVLList_addto(u, -rfac, r, vladdto, elm);  // u -= r rfac
 
       // pick n, pt_typ
       hp_refine_set_n_pt_typ(elm, elm->dat->info->trbl_ref, n, pt_typ);
+
+      // determine best interp scheme from elm->dat->info->trbl_ref->method
+      evolve_InterpToFV_scheme(mesh, elm->dat->info->trbl_ref, &scheme);
 
       // make u_p, w DATAVARs so that they will be interp'd on p-refine
       forList(u_p, li)
@@ -249,10 +256,17 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
         VLSetType(ListEntry(w,li), DATAVAR);
       }
 
-      // p-refine locally
+      // 1. set interpolation scheme for local p-refine
+      force_sav = amr->force_interp_scheme; //backup flag
+      amr->force_interp_scheme = scheme;    //set internal amr flag
+
+      // 2. p-refine locally
       elm_sav = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
       // ^-need to keep old elm in case something is pointing to its data
       //   So we store old elm in elm_sav.
+
+      // 3. restore amr->force_interp_scheme
+      amr->force_interp_scheme = force_sav;
 
       // Since elm is now refined we reset its ref method to PARENT_n, which
       // is a no-op. Then evolve_switch_troubled_nodes_mesh below will not
