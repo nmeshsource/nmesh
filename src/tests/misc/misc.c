@@ -552,6 +552,22 @@ int test_point_interpolation(tMesh *mesh)
     printelm(nd);
     printelm(nd1);
 
+    ////test speed
+    //struct timespec tp1[1];
+    //struct timespec tp0[1];
+    //getRealTime(tp0);
+    //for(i=0; i<1000; i++)
+    //  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LGL_TO_2n_UNIFORM,1., VarA(nd1,vi));
+    //getRealTime(tp1);
+    //printf("time for INTERP_LGL_TO_2n_UNIFORM: %g\n", getTimeDiffIn_s(tp1, tp0));
+    //getRealTime(tp0);
+    //for(i=0; i<1000; i++)
+    //  interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LAGRANGE,1., VarA(nd1,vi));
+    //getRealTime(tp1);
+    //printf("time for INTERP_LAGRANGE: %g\n", getTimeDiffIn_s(tp1, tp0));
+    //exit(88);
+    ////==> INTERP_LGL_TO_2n_UNIFORM is 30 times faster than INTERP_LAGRANGE!!!
+
     printf("u_nd --INTERP_LAGRANGE-> v_nd1 --INTERP_LAGRANGE-> v_nd:\n");
     interp_to_pt_typ(nd, ui, p_uni, 99,INTERP_LAGRANGE,1., VarA(nd1,vi));
     interp_to_pt_typ(nd1, vi, p_lgl, 99,INTERP_LAGRANGE,1., VarA(nd,vi));
