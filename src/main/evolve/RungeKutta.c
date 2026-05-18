@@ -269,8 +269,10 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       amr->force_interp_scheme = force_sav;
 
       // Since elm is now refined we reset its ref method to PARENT_n, which
-      // is a no-op. Then evolve_switch_troubled_nodes_mesh below will not
-      // refine again.
+      // is a no-op, as far as refinement (and interpolation) is concerned.
+      // Then evolve_switch_troubled_nodes_mesh below will not refine again.
+      // It will however update nb info. That's why we use PARENT_n and not
+      // REF_METH_DONOTHING, which would do nothing at all.
       elm->dat->info->trbl_ref->method = PARENT_n;
 
       // make u_p, w AUXVAR again:
