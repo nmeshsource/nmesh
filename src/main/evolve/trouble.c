@@ -164,7 +164,7 @@ int evolve_read_trouble_score_mesh(tMesh *mesh)
 void evolve_InterpToFV_scheme(tMesh *mesh, tRef *ref, int *scheme)
 {
   //int ForwInterpScheme = Getd(EvolveGlobals->trouble_ForwInterpScheme);
-  int ForwInterpScheme = 1;
+  int ForwInterpScheme = 2;
 
   /* get interpolation scheme from ForwInterpScheme and ref->method */
   switch(ForwInterpScheme)
@@ -175,7 +175,7 @@ void evolve_InterpToFV_scheme(tMesh *mesh, tRef *ref, int *scheme)
   case 2:
     if(ref->method == PARENT_2n_P_UNIFORM)     *scheme = INTERP_LGL_TO_2n_UNIFORM;
     else if(ref->method == PARENT_n_P_UNIFORM) *scheme = INTERP_LGL_TO_n_UNIFORM;
-    else if(ref->method == REF_METH_DONOTHING) *scheme = INTERP_NOT_SET;
+    else if(ref->method == PARENT_n)           *scheme = INTERP_NOT_SET;
     else errorexiti("ref->method=%d not implemented", ref->method);
     break;
   default:
@@ -238,7 +238,7 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
   /* do p-refinement to desired n and point type */
   /* 1. select interpolation scheme and order */
   force_sav = amr->force_interp_scheme;         //backup flag
-//  amr->force_interp_scheme = scheme;            //set internal amr flag
+  amr->force_interp_scheme = scheme;            //set internal amr flag
   /* 2. now call p-refinement from amr */
   prefine_nodes_if_rflag(mesh, ref);
   /* now some aux vars (and others) are not set */
