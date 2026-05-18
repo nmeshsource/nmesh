@@ -235,14 +235,14 @@ void evolve_switch_troubled_nodes_mesh(tMesh *mesh)
   evolve_InterpToFV_scheme(mesh, ref, &scheme);
 
   /* do p-refinement to desired n and point type */
-  /* 1. select interpolation scheme */
+  /* 1. set interpolation scheme */
   force_sav = amr->force_interp_scheme;         //backup flag
   amr->force_interp_scheme = scheme;            //set internal amr flag
   /* 2. now call p-refinement from amr */
   prefine_nodes_if_rflag(mesh, ref);
   /* now some aux vars (and others) are not set */
   /* this will be fixed by evolve_setsrc_again_nontroubled_nodes_mesh */
-  /* 3. restore par amr_Lagrange_interp_order and amr->force_interp_scheme */
+  /* 3. restore amr->force_interp_scheme */
   amr->force_interp_scheme = force_sav;
 
   /* clear rflag on all leaf nodes */
