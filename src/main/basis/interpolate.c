@@ -1764,9 +1764,13 @@ void array_MatrixInterp3_scheme(int scheme, tArray *var, tArray *Ivar)
     break;
   case INTERP_LGL_TO_2n_UNIFORM:
     {
-      tArray *Mt[] = { gridpoints->LGL_to_2nUNIt[n0],
-                       gridpoints->LGL_to_2nUNIt[n1],
-                       gridpoints->LGL_to_2nUNIt[n2] };
+      /* Catch special case for just 1 gridpoint:
+         we want compatibility with PARENT_2n_P_UNIFORM, which actually
+         uses 1 point on UNIFORM if we have only 1 point on LGL */
+      tArray *Mt[] =
+      { n0>1 ? gridpoints->LGL_to_2nUNIt[n0] : gridpoints->LGL_to_nUNIt[n0],
+        n1>1 ? gridpoints->LGL_to_2nUNIt[n1] : gridpoints->LGL_to_nUNIt[n1],
+        n2>1 ? gridpoints->LGL_to_2nUNIt[n2] : gridpoints->LGL_to_nUNIt[n2] };
       array_MatrixInterp3(Mt, var, Ivar);
     }
     break;
