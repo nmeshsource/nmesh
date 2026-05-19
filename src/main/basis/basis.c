@@ -849,8 +849,8 @@ Consider nL grid points in middle of grid:
 xM_i = -1 + h*(i - 1/2),   where h = 2
 NOTE: Here we want to integrate from -1 to 1. BUT the left- and rightmost
       gridpoints are not in [-1,1].
-What is the genral rule to get the integration weights???
-For now we use Eq. (B.4) and (B.5) of 2109.11645.pdf   */
+      ==> Use Gauss_wquad_from_symm_x with these gridpoints
+      We can also use Eq. (B.4) and (B.5) of 2109.11645   */
 void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
                               int stencilsize)
 {
@@ -858,9 +858,9 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
   int sr = stencilsize/2;
   double *xL = dmalloc(nL);
   double *wL = dmalloc(nL);
-  //double *xM = dmalloc(nL);
+  double *xM = dmalloc(nL);
   double *wM = dmalloc(nL);
-  double hL, h;
+  double hL, hM, h;
   int i,k;
 
   /* set xL and wL */
@@ -870,36 +870,31 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
   //PRFs(": wL");for(i=0; i<nL; i++) printf(" %g", wL[i]);  printf("\n");
 
   /* set xM and wM */
-  //WRONG:
-  //hM = 2./nL;
-  //for(i=0; i<nL; i++) xM[i] = -1. + hM*(0.5+i);
-  //Gauss_wquad_from_x(nL, xM, wM);
-  //PRFs(": xM");for(i=0; i<nL; i++) printf(" %g", xM[i]);  printf("\n");
-  //PRFs(": wM");for(i=0; i<nL; i++) printf(" %g", wM[i]);  printf("\n");
-
-  /* set xM and wM */
   switch(nL) //nL=stencilsize
   {
   case 3: // Eq. (B.4) of 2109.11645.pdf
-    //hM = 2./n;
+    hM = 1.;
     wM[1] = 11./12.;
     wM[0] = wM[2] = (1. - wM[1])*0.5;
     break;
   case 5: // Eq. (B.5) of 2109.11645.pdf
-    //hM = 2.;
+    hM = 1.;
     wM[2] = 5178./5760.;
     wM[0] = wM[4] = -17./5760.;
     wM[1] = wM[3] = (1. - 2.*wM[0] - wM[2])*0.5;
     break;
   default:
-    errorexiti("stencilsize=%d is not implemented", stencilsize);
+    hM = 2.;
+    for(i=0; i<nL; i++) xM[i] = -1. + hM*(i-sr+0.5);
+    Gauss_wquad_from_symm_x(nL, xM, wM);
   }
+  //PRFs(": xM");for(i=0; i<nL; i++) printf(" %g", xM[i]);  printf("\n");
   //PRFs(": wM");for(i=0; i<nL; i++) printf(" %g", wM[i]);  printf("\n");
 
   /* scale wL and wM down to real grid spacing of 2/(n-1) */
   h = 2./(n-1);
   for(i=0; i<nL; i++) wL[i] = wL[i]*h/hL;
-  for(i=0; i<nL; i++) wM[i] = wM[i]*h;
+  for(i=0; i<nL; i++) wM[i] = wM[i]*h/hM;
 
   /* set wq */
   memset(wq, 0, sizeof(wq[0])*n);
@@ -925,7 +920,7 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
   */
 
   free(wM);
-  //free(xM);
+  free(xM);
   free(wL);
   free(xL);
 }
