@@ -207,6 +207,12 @@ int gridpoints_init(tMesh *mesh)
     }
     else
     {
+      char *r_WT;  //start of r_WT? string in par
+      int nWT=0;   //stencil size in r_WTn, i.e. the n in r_WTn
+      /* get stencil size for r_WT */
+      r_WT = strstr(Gets(BackInterpMatrix), "r_WT");
+      if(r_WT) nWT = atoi(r_WT+4);
+
       /* set rq */
       if(Getv(BackInterpMatrix, "r_GQ")) //Gauss quad. weights for rq
       {
@@ -215,32 +221,6 @@ int gridpoints_init(tMesh *mesh)
       else if(Getv(BackInterpMatrix, "r_Trapez")) //Trapezoidal weights for rq
       {
         uniform_x_wTrapez(ni, Xb->d, rq->d);
-      }
-      else if( Getv(BackInterpMatrix, "r_WT2") ||
-               (ni<6 && ( Getv(BackInterpMatrix, "r_WT3") ||
-                          Getv(BackInterpMatrix, "r_WT5") )) )
-      {
-        //double x[] = {-1., 0.3333333333333333};
-        //double w[2];
-        //Gauss_wquad_from_x(2, x, w);
-        //printf("w = %g %g\n", w[0], w[1]); // ==> w = 0.5 1.5
-        if(ni>=4)
-        {
-          int i;
-          double w[] = {0.5, 1.5};
-          /* let rq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
-             with b = (1/2) 4/ni
-             ==> 2*(w0+w1)*b + (ni-4)*c = 2 ==> 4b + (ni-4)*c = 2
-             ==> c = (2 - 4b)/(ni-4) = (2ni/ni - 8/ni)/(ni-4) = 2/ni  */
-          double b = 2./ni;
-          double c = 2./ni;
-          for(i=2; i<ni-2; i++) rq->d[i] = c;
-          for(i=0; i<2; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
-        }
-        else
-        {
-          uniform_x_wTrapez(ni, Xb->d, rq->d);
-        }
       }
       else if(Getv(BackInterpMatrix, "r_WT3_BAD"))
       {
@@ -269,16 +249,20 @@ int gridpoints_init(tMesh *mesh)
         rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
         rq->d[3] = rq->d[4] = c; */
       }
-      else if( Getv(BackInterpMatrix, "r_WT3") ||
-               (ni<10 && Getv(BackInterpMatrix, "r_WT5")) )
+      else if(r_WT)
       {
-        /* get weights rq */
-        fv_wquad_stitched_from_x(ni, Xb->d, rq->d, 3);
-      }
-      else if(Getv(BackInterpMatrix, "r_WT5"))
-      {
-        /* get weights rq */
-        fv_wquad_stitched_from_x(ni, Xb->d, rq->d, 5);
+        if(ni<6 || nWT<3)
+        {
+          //printf("ni=%d nWT=%d\n", ni, nWT);
+          fv_wquad_stitched2_from_x(ni, Xb->d, rq->d);
+        }
+        else
+        {
+          /* lower nWT if ni is too small */
+          while(ni<nWT*2) nWT -= 2;
+          //printf("nWT=%d\n", nWT);
+          fv_wquad_stitched_from_x(ni, Xb->d, rq->d, nWT);
+        }
       }
       else
       {

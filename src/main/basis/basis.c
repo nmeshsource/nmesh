@@ -924,3 +924,31 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
   free(wL);
   free(xL);
 }
+
+/* similar to fv_wquad_stitched_from_x but use only 2 points */
+void fv_wquad_stitched2_from_x(int ni, const double *x, double *wq)
+{
+  //double x[] = {-1., 0.3333333333333333};
+  //double w[2];
+  //Gauss_wquad_from_x(2, x, w);
+  //printf("w = %g %g\n", w[0], w[1]); // ==> w = 0.5 1.5
+  if(ni>=4)
+  {
+    int i;
+    double w[] = {0.5, 1.5};
+    /* let rq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
+       with b = (1/2) 4/ni
+       ==> 2*(w0+w1)*b + (ni-4)*c = 2 ==> 4b + (ni-4)*c = 2
+       ==> c = (2 - 4b)/(ni-4) = (2ni/ni - 8/ni)/(ni-4) = 2/ni  */
+    double b = 2./ni;
+    double c = 2./ni;
+    for(i=2; i<ni-2; i++) wq[i] = c;
+    for(i=0; i<2; i++)    wq[i] = wq[ni-1-i] = w[i]*b;
+  }
+  else
+  {
+    double xx[4]; //make copy so that uniform_x_wTrapez does not modify x
+    memcpy(xx, x, sizeof(x[0])*ni);
+    uniform_x_wTrapez(ni, xx, wq);
+  }
+}
