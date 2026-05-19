@@ -889,7 +889,7 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
     //hM = 2.;
     wM[2] = 5178./5760.;
     wM[0] = wM[4] = -17./5760.;
-    wM[1] = wM[3] = (1. - wM[0] - wM[2])*0.5;
+    wM[1] = wM[3] = (1. - 2.*wM[0] - wM[2])*0.5;
     break;
   default:
     errorexiti("stencilsize=%d is not implemented", stencilsize);
@@ -920,8 +920,8 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
   PRFs(": wq");for(i=0; i<n; i++)  printf(" %g", wq[i]);  printf("\n");
   double sum=0.;;
   for(i=0; i<n; i++) sum += wq[i];
-  printf("sum=%g\n", sum);
-  exit(88);
+  printf("n=%d nL=%d sum=%g\n", n, nL, sum);
+  //exit(88);
   */
 
   free(wM);
