@@ -936,7 +936,7 @@ void fv_wquad_stitched2_from_x(int ni, const double *x, double *wq)
   {
     int i;
     double w[] = {0.5, 1.5};
-    /* let rq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
+    /* let wq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
        with b = (1/2) 4/ni
        ==> 2*(w0+w1)*b + (ni-4)*c = 2 ==> 4b + (ni-4)*c = 2
        ==> c = (2 - 4b)/(ni-4) = (2ni/ni - 8/ni)/(ni-4) = 2/ni  */
