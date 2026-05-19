@@ -211,7 +211,11 @@ int gridpoints_init(tMesh *mesh)
       int nWT=0;   //stencil size in r_WTn, i.e. the n in r_WTn
       /* get stencil size for r_WT */
       r_WT = strstr(Gets(BackInterpMatrix), "r_WT");
-      if(r_WT) nWT = atoi(r_WT+4);
+      if(r_WT)
+      {
+        nWT = atoi(r_WT+4);
+        if(!(nWT%2)) errorexit("the number after r_WT must be odd");
+      }
 
       /* set rq */
       if(Getv(BackInterpMatrix, "r_GQ")) //Gauss quad. weights for rq
