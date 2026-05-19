@@ -24,7 +24,7 @@ int nmesh_basis(tMesh *mesh)
   AddPar("basis_filter_fv", "yes", "filter in fv nodes [yes,no]");
   AddPar("basis_BackInterpMatrix", "PseudoInv", "how we set the matrix R to "
          "interp back from UNI to LGL (see gridpoints_init) "
-         "[PseudoInv,r_GQ,r_Trapez,r_WT2,r_WT3]");
+         "[PseudoInv,r_GQ,r_Trapez,r_WT2,r_WT3,r_WT5]");
   AddPar("basis_boundary_interp_Lagrange", "no", "force Lagrange at elm bndry");
   AddPar("basis_boundary_interp_order", "2 2 4 4 6 6", "interpolation order "
          "we use in the half zones near an elm boundary");
