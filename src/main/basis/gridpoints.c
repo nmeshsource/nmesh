@@ -217,7 +217,8 @@ int gridpoints_init(tMesh *mesh)
         uniform_x_wTrapez(ni, Xb->d, rq->d);
       }
       else if( Getv(BackInterpMatrix, "r_WT2") ||
-               (ni<6 && Getv(BackInterpMatrix, "r_WT3")) )
+               (ni<6 && ( Getv(BackInterpMatrix, "r_WT3") ||
+                          Getv(BackInterpMatrix, "r_WT5") )) )
       {
         //double x[] = {-1., 0.3333333333333333};
         //double w[2];
@@ -241,8 +242,10 @@ int gridpoints_init(tMesh *mesh)
           uniform_x_wTrapez(ni, Xb->d, rq->d);
         }
       }
-      else if(Getv(BackInterpMatrix, "r_WT3"))
+      else if(Getv(BackInterpMatrix, "r_WT3_BAD"))
       {
+        /* NOTE: r_WT3_BAD works well only for ni=6, and then it's just
+                 the same as r_WT3. So remove it!!! */
         /* weights from rec1d_LR_extrap3_u */
         if(ni>=6)
         {
@@ -265,6 +268,17 @@ int gridpoints_init(tMesh *mesh)
         rq->d[0] = rq->d[7] = b/3.;
         rq->d[1] = rq->d[2] = rq->d[5] = rq->d[6] = b*5./6.;
         rq->d[3] = rq->d[4] = c; */
+      }
+      else if( Getv(BackInterpMatrix, "r_WT3") ||
+               (ni<10 && Getv(BackInterpMatrix, "r_WT5")) )
+      {
+        /* get weights rq */
+        fv_wquad_stitched_from_x(ni, Xb->d, rq->d, 3);
+      }
+      else if(Getv(BackInterpMatrix, "r_WT5"))
+      {
+        /* get weights rq */
+        fv_wquad_stitched_from_x(ni, Xb->d, rq->d, 5);
       }
       else
       {
