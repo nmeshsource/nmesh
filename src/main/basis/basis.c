@@ -781,3 +781,151 @@ void IndexBox_fill_subarray(tArray *ar, int b0[3], int nb[3], tArray *subar)
     Arrd_(subar)[Ind_n(i,j,k, nb)] = Arrd_(ar)[Ind_n(ia,ja,ka, na)];
   }
 }
+
+
+/*************************************************************************/
+/* functions to set quadrature weights on UNIFORM fv grids */
+/*************************************************************************/
+
+/* Use same idea as in rec1d_LR_extrap3_u to get quadrature weights
+Conceptually, our fv method works on this grid:
+  | x |   o   |   o   |   o   |   o   |   o   |   o   | x |
+  0 x     1       2      ...   <-- gridpoint labels for points
+But really we have only the o-gridpoints:
+  o   |   o   |   o   |   o   |   o   |   o   |   o   |   o
+
+We want to find quadrature weights wq for the o-points such that
+wq0 u0 + wq1 u1 + wq2 u2 + ... = I = wt0 ux + wt1 u1 + wt2 u2 + ...
+where the wt are the trapezoidal weights.
+
+Consider an even number 2n of grid points and look at left half of grid:
+  o   |   o   |   o   |   o   |
+ -1     -1+h    -1+2h         1 <--coord posistions xh_i rescaled to half grid
+                                 where h = 4/(n - 1)
+xh_i = -1 + h*i
+Gaussian quad weights wh for half grid comes from Gauss_wquad_from_x.
+Then wq[i] = (1/2) wh[i] */
+void fv_x_wquad_divby2__NOT_GOOD(int n, double *x, double *wq)
+{
+  double *wt = dmalloc(n);
+  double *xh = dmalloc((n+1)/2); //really we only need n/2
+  double *wh = dmalloc((n+1)/2); //really we only need n/2
+  double h = 4./(n-1);
+  int i;
+
+  /* set x and wt */
+  uniform_x_wTrapez(n, x, wt);
+
+  /* set xh and wh */
+  for(i=0; i<n/2; i++) xh[i] = -1. + h*i;
+  Gauss_wquad_from_x(n/2, xh, wh);
+
+  /* set wq */
+  for(i=0; i<n/2; i++) wq[i] = wq[n-1-i] = 0.5 * wh[i];
+
+  free(wh);
+  free(xh);
+  free(wt);
+}
+
+/* Use 3-point stencils as in in rec1d_LR_extrap3_u to get quadrature weights
+Conceptually, our fv method works on this grid:
+  | x |   o   |   o   |   o   |   o   |   o   |   o   | x |
+But really we have only the o-gridpoints:
+  o   |   o   |   o   |   o   |   o   |   o   |   o   |   o
+
+We want to find quadrature weights wq for the o-points.
+
+Consider nL grid points at left half of grid:
+  o   |   o   |   o   | <--nL leftmost points
+ -1     -1+h   -1+2h  1 <--coord positions xL_i rescaled to left grid
+                                 where h = 4/(2nL - 1)
+xL_i = -1 + h*i
+Gaussian quad weights wL for left of grid comes from Gauss_wquad_from_x.
+
+Consider nL grid points in middle of grid:
+            o     |     o     |     o
+         -1-h/2  -1   -1+h/2  1    1+h/2
+xM_i = -1 + h*(i - 1/2),   where h = 2
+NOTE: Here we want to integrate from -1 to 1. BUT the left- and rightmost
+      gridpoints are not in [-1,1].
+What is the genral rule to get the integration weights???
+For now we use Eq. (B.4) and (B.5) of 2109.11645.pdf   */
+void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
+                              int stencilsize)
+{
+  int nL = stencilsize;
+  int sr = stencilsize/2;
+  double *xL = dmalloc(nL);
+  double *wL = dmalloc(nL);
+  //double *xM = dmalloc(nL);
+  double *wM = dmalloc(nL);
+  double hL, h;
+  int i,k;
+
+  /* set xL and wL */
+  hL = 4./(2*nL-1);
+  for(i=0; i<nL; i++) xL[i] = -1. + hL*i;
+  Gauss_wquad_from_x(nL, xL, wL);
+  //PRFs(": wL");for(i=0; i<nL; i++) printf(" %g", wL[i]);  printf("\n");
+
+  /* set xM and wM */
+  //WRONG:
+  //hM = 2./nL;
+  //for(i=0; i<nL; i++) xM[i] = -1. + hM*(0.5+i);
+  //Gauss_wquad_from_x(nL, xM, wM);
+  //PRFs(": xM");for(i=0; i<nL; i++) printf(" %g", xM[i]);  printf("\n");
+  //PRFs(": wM");for(i=0; i<nL; i++) printf(" %g", wM[i]);  printf("\n");
+
+  /* set xM and wM */
+  switch(nL) //nL=stencilsize
+  {
+  case 3: // Eq. (B.4) of 2109.11645.pdf
+    //hM = 2./n;
+    wM[1] = 11./12.;
+    wM[0] = wM[2] = (1. - wM[1])*0.5;
+    break;
+  case 5: // Eq. (B.5) of 2109.11645.pdf
+    //hM = 2.;
+    wM[2] = 5178./5760.;
+    wM[0] = wM[4] = -17./5760.;
+    wM[1] = wM[3] = (1. - wM[0] - wM[2])*0.5;
+    break;
+  default:
+    errorexiti("stencilsize=%d is not implemented", stencilsize);
+  }
+  //PRFs(": wM");for(i=0; i<nL; i++) printf(" %g", wM[i]);  printf("\n");
+
+  /* scale wL and wM down to real grid spacing of 2/(n-1) */
+  h = 2./(n-1);
+  for(i=0; i<nL; i++) wL[i] = wL[i]*h/hL;
+  for(i=0; i<nL; i++) wM[i] = wM[i]*h;
+
+  /* set wq */
+  memset(wq, 0, sizeof(wq[0])*n);
+  if(n >= 2*nL)
+  {
+    /* set left part */
+    for(i=0; i<nL; i++) wq[i] = wL[i];
+    /* add middle part */
+    for(k=nL; k<n-nL; k++)
+      for(i=0; i<nL; i++) wq[k-sr+i] += wM[i];
+    /* get rest from symmetry */
+    for(i=0; i<n/2; i++) wq[n-1-i] = wq[i];
+  }
+  /*
+  PRFs(":  x");for(i=0; i<n;  i++) printf(" %g", x[i]);   printf("\n");
+  PRFs(": wL");for(i=0; i<nL; i++) printf(" %g", wL[i]);  printf("\n");
+  PRFs(": wM");for(i=0; i<nL; i++) printf(" %g", wM[i]);  printf("\n");
+  PRFs(": wq");for(i=0; i<n; i++)  printf(" %g", wq[i]);  printf("\n");
+  double sum=0.;;
+  for(i=0; i<n; i++) sum += wq[i];
+  printf("sum=%g\n", sum);
+  exit(88);
+  */
+
+  free(wM);
+  //free(xM);
+  free(wL);
+  free(xL);
+}

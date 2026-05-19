@@ -7,6 +7,8 @@
 int basis_init_globals(tMesh *mesh);
 int IndexRange_Xb0_get(tNode *node, int dir, double Xb0, int n,
                        int CenterOnXb0, int *i0, int *ni);
+void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
+                              int stencilsize);
 
 /* gridpoints.c */
 int gridpoints_alloc(tMesh *mesh);

@@ -104,6 +104,7 @@ void LG_2Sphere_get_zi_theta_phi(tArray *Zb, int nphi, int i, int j,
 void LG_2SphereIntegral(tArray *auijk, tArray *Wq, tArray *aUk);
 void Gauss_wquad_from_x(int npoints, const double *x, double *w);
 void Gauss_wquad_from_symm_x(int npoints, const double *x, double *w);
+void uniform_x(int npoints, double *x);
 void uniform_x_wGaussquad(int npoints, double *x, double *w);
 void uniform_x_wTrapez(int npoints, double *x, double *w);
 void Legendre_AT_ST_matrices(int n, const double *x, const double *w,
