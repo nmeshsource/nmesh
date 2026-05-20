@@ -91,3 +91,6 @@ print("Conversion to .pvtu complete!")
 *have some AI write code for conversion from .smf to .xmf and then to .pvtu
 *translate sdmf2xdmf.c to python while still including the xmf parts from
  src/utility/output/XDMF_out.h
+*have AI write nmesh 2d and 3d output to directly write output for .pvtu
+ (AI should first look at Xdmf output in nmesh to know what to do.)
+ ^--can this be done without linking to a library???
