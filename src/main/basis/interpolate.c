@@ -1561,7 +1561,8 @@ void Lagrange_InterpMatT(tArray *Xb, tArray *WL, tArray *Yb, tArray *Mt)
    the inverse matrix Rt that allows to transform back from UNIFORM to LGL.
    Both Pt and Rt are the transposes of the interpolation matrices.
    Here we compute Rt using the specified UNIFORM quad. weights rq:
-   R = Phi P^T - c Phi (w.w^T) Phi P^T + c Phi (w.r^T)  */
+   R = Phi P^T - c Phi (w.w^T) Phi P^T + c Phi (w.r^T)
+   where Phi := (P^T P)^{-1}  */
 void Inverse_InterpMatT_rq(tArray *Pt, tArray *wq, tArray *rq, tArray *Rt)
 {
   if(Pt && wq)
@@ -1652,7 +1653,7 @@ void Inverse_InterpMatT_rq(tArray *Pt, tArray *wq, tArray *rq, tArray *Rt)
    UNIFORM to LGL.
    Both Pt and Rt are the transposes of the interpolation matrices.
    Here we compute R as the Moore–Penrose pseudoinverse of P.
-   Then the formula for R simplifies to: R = Phi P^T */
+   Then the formula for R simplifies to: R = Phi P^T,  Phi := (P^T P)^{-1} */
 void Inverse_InterpMatT_pseudo(tArray *Pt, tArray *Rt)
 {
   if(Pt)
