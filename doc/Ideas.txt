@@ -67,6 +67,30 @@ About artificial viscosity (av):
     filters, there are way more Gibbs oscis than with av.
 
 
+About how to do convergence tests with factors<2 for lower resolutions
+======================================================================
+*If we have this grid:
+amr_mesh_type = BoxMesh CubedSpheres Shell
+amr_BoxMesh_npatches = 1
+amr_CubedSphere_ndomains = 6
+amr_BoxMesh_dout      = 36
+amr_CubedSphere_r0fac = 3.0  # gives rin=108
+amr_Shell_rout        = 1108
+amr_Shell_nr          = 5    # gives r1=308
+center_amr_lmin = 1
+center1_amr_lmax = 6
+center1_amr_radius = 8
+center2_amr_radius = 8
+*Just change amr_BoxMesh_dout from 36 to e.g. (4/3)*36 to get a factor 4/3
+ resolution decrease inside the center1_amr_radius=8 sphere around the star!
+*ONLY DOWNSIDE: Transition CubedSpheres between the BoxMesh and the 1st Shell
+ get wider by same factor, which is ok. BUT then the 5 shells outside of it,
+ get narrower because we want to keep amr_Shell_rout=1108 to keep the outer
+ boundary in place. Hence we now have MORE resolution in the 5 shells!
+*BUT we could compensate for this by reducing the number of shells by
+ decreasing amr_Shell_nr.
+
+
 About better 2d and 3d output
 =============================
 *Google's AI says .pvtu files will be handled much faster than Xdmf files by
