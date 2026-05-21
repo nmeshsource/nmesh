@@ -237,11 +237,12 @@ int gridpoints_init(tMesh *mesh)
           int i;
           double w[] = {1./3., 5./6., 5./6.};
           /* let rq = { w0*b, w1*b, w2*b, c, ..., c, w2*b, w1*b, w0*b}
-             with b = (1/2) 6/ni
+             with b = (1/2) 5/(ni-1)
              ==> 2*(w0+w1+w2)*b + (ni-6)*c = 2 ==> 4b + (ni-6)*c = 2
-             ==> c = (2 - 4b)/(ni-6) = (2ni/ni - 12/ni)/(ni-6) = 2/ni  */
-          double b = 3./ni;
-          double c = 2./ni;
+             ==> c = (2 - 4b)/(ni-6) = (2(ni-1)/(ni-1) - 10/(ni-1))/(ni-6)
+                   = ((2ni-2-10)/(ni-6))/(ni-1) = 2/(ni-1) */
+          double b = 2.5/(ni-1);
+          double c = 2.0/(ni-1);
           for(i=3; i<ni-3; i++) rq->d[i] = c;
           for(i=0; i<3; i++)    rq->d[i] = rq->d[ni-1-i] = w[i]*b;
         }

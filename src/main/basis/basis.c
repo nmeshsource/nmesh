@@ -928,20 +928,22 @@ void fv_wquad_stitched_from_x(int n, const double *x, double *wq,
 /* similar to fv_wquad_stitched_from_x but use only 2 points */
 void fv_wquad_stitched2_from_x(int ni, const double *x, double *wq)
 {
-  //double x[] = {-1., 0.3333333333333333};
-  //double w[2];
-  //Gauss_wquad_from_x(2, x, w);
-  //printf("w = %g %g\n", w[0], w[1]); // ==> w = 0.5 1.5
+  //double x2[] = {-2., 0.};
+  //double w2[2];
+  //Gauss_wquad_from_x(2, x2, w2);
+  //printf("w2 = %g %g\n", w2[0], w2[1]);
+  //--> w2 = 0.5,1.5 for x2=-1,1./3.  and  w2 = 0,2 for x2=-2,0
   if(ni>=4)
   {
     int i;
     double w[] = {0.5, 1.5};
     /* let wq = { w0*b, w1*b, c, ..., c, w1*b, w0*b}
-       with b = (1/2) 4/ni
+       with c = 2/(ni-1);
        ==> 2*(w0+w1)*b + (ni-4)*c = 2 ==> 4b + (ni-4)*c = 2
-       ==> c = (2 - 4b)/(ni-4) = (2ni/ni - 8/ni)/(ni-4) = 2/ni  */
-    double b = 2./ni;
-    double c = 2./ni;
+       ==> b = (1/4)*(2 - 2(ni-4)/(ni-1)) = (1/4)*(2ni-2 -2ni+8)/(ni-1)
+           b = (3/2)/(ni-1) */
+    double b = 1.5/(ni-1);
+    double c = 2.0/(ni-1);
     for(i=2; i<ni-2; i++) wq[i] = c;
     for(i=0; i<2; i++)    wq[i] = wq[ni-1-i] = w[i]*b;
   }
