@@ -63,7 +63,7 @@ void load_balance(tMesh *mesh, int strategy)
 /* function that can be scheduled in LOADBALANCING */
 int load_balance_if_needed(tMesh *mesh)
 {
-  static int loadbalance_delay = 3; //loadbalance only after 2 calls
+  static int loadbalance_delay = 4; //loadbalance on 2nd and 4th call
   static double last_loadbalance_time = -1e200; //signal we never did it
   double time  = getTimeIn_s()/3600.;
   double time_since_loadbalance = time - last_loadbalance_time;
@@ -71,7 +71,11 @@ int load_balance_if_needed(tMesh *mesh)
   int do_loadbalance = 0;
 
   /* decrement delay counter until it is 0 */
-  if(loadbalance_delay > 0) loadbalance_delay--;
+  if(loadbalance_delay > 0)
+  {
+    loadbalance_delay--;
+    last_loadbalance_time = -1e200; //claim that we never did loadbalance
+  }
   /* we have a delay to ensure timing data has been collected */
 
   /* test if it is time */
@@ -80,7 +84,7 @@ int load_balance_if_needed(tMesh *mesh)
     /* test based on walltime */
     if( (hours >= 0.) &&
         (hours <= time_since_loadbalance) &&
-        (loadbalance_delay <= 0) )
+        (loadbalance_delay%2 == 0) )
       do_loadbalance = 1; /* yes, we want to balance load */
   }
   /* broadcast do_loadbalance from rank0 to all others */
