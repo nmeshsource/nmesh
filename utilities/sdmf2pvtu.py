@@ -15,6 +15,7 @@ import struct
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import BinaryIO
 from xml.sax.saxutils import escape
 
 
@@ -239,20 +240,36 @@ def parse_sdmf_file(path: Path, attribute_name: str | None) -> tuple[str, tuple[
     return parse_sdmf(path, attribute_name)
 
 
-def read_binary_item(base_dir: Path, item: DataItem) -> bytes:
-    path = base_dir / item.filename
-    count = 1
-    for dimension in item.dimensions:
-        count *= dimension
-    size = count * item.precision
+class BinaryItemReader:
+    def __init__(self, base_dir: Path):
+        self.base_dir = base_dir
+        self.streams: dict[str, BinaryIO] = {}
 
-    with path.open("rb") as stream:
+    def __enter__(self) -> "BinaryItemReader":
+        return self
+
+    def __exit__(self, exc_type: object, exc_value: object, traceback: object) -> None:
+        self.close()
+
+    def close(self) -> None:
+        for stream in self.streams.values():
+            stream.close()
+        self.streams.clear()
+
+    def read(self, item: DataItem) -> bytes:
+        path = self.base_dir / item.filename
+        size = data_item_count(item.dimensions) * item.precision
+        stream = self.streams.get(item.filename)
+        if stream is None:
+            stream = path.open("rb")
+            self.streams[item.filename] = stream
+
         stream.seek(item.seek)
         data = stream.read(size)
 
-    if len(data) != size:
-        raise ValueError(f"{path} ended while reading {size} bytes at offset {item.seek}")
-    return data
+        if len(data) != size:
+            raise ValueError(f"{path} ended while reading {size} bytes at offset {item.seek}")
+        return data
 
 
 def make_cells(dimensions: tuple[int, int, int], point_offset: int = 0) -> tuple[bytes, bytes, bytes, int]:
@@ -474,7 +491,7 @@ def validate_piece(piece: Piece) -> tuple[int, int]:
 def write_piece_group_vtu(
     path: Path,
     pieces: tuple[Piece, ...],
-    base_dir: Path,
+    reader: BinaryItemReader,
     attribute_name: str,
     attribute_components: int,
 ) -> int:
@@ -498,8 +515,8 @@ def write_piece_group_vtu(
         piece_connectivity, piece_offsets, piece_types, piece_cells = make_cells(
             piece.topology_dimensions, total_points
         )
-        points.extend(read_binary_item(base_dir, piece.geometry))
-        values.extend(read_binary_item(base_dir, piece.attribute))
+        points.extend(reader.read(piece.geometry))
+        values.extend(reader.read(piece.attribute))
         connectivity.extend(piece_connectivity)
         for offset_index in range(piece_cells):
             (local_offset,) = struct.unpack_from("<i", piece_offsets, offset_index * 4)
@@ -543,27 +560,28 @@ def convert(
 
     pvd_entries: list[tuple[str, Path]] = []
 
-    for timestep in timesteps:
-        time_label = safe_time_label(timestep.index, timestep.value)
-        timestep_dir = output_dir / time_label
-        piece_paths: list[Path] = []
-        timestep_precision = 4
-        timestep_components = timestep.pieces[0].attribute_components
+    with BinaryItemReader(base_dir) as reader:
+        for timestep in timesteps:
+            time_label = safe_time_label(timestep.index, timestep.value)
+            timestep_dir = output_dir / time_label
+            piece_paths: list[Path] = []
+            timestep_precision = 4
+            timestep_components = timestep.pieces[0].attribute_components
 
-        for group_index, pieces in enumerate(split_evenly(timestep.pieces, vtu_files_per_pvtu)):
-            piece_path = timestep_dir / f"{stem}_{time_label}_piece{group_index:04d}.vtu"
-            timestep_precision = write_piece_group_vtu(
-                piece_path,
-                pieces,
-                base_dir,
-                attribute_name,
-                timestep_components,
-            )
-            piece_paths.append(piece_path)
+            for group_index, pieces in enumerate(split_evenly(timestep.pieces, vtu_files_per_pvtu)):
+                piece_path = timestep_dir / f"{stem}_{time_label}_piece{group_index:04d}.vtu"
+                timestep_precision = write_piece_group_vtu(
+                    piece_path,
+                    pieces,
+                    reader,
+                    attribute_name,
+                    timestep_components,
+                )
+                piece_paths.append(piece_path)
 
-        pvtu_path = output_dir / f"{stem}_{time_label}.pvtu"
-        write_pvtu(pvtu_path, piece_paths, attribute_name, timestep_components, timestep_precision)
-        pvd_entries.append((timestep.value, pvtu_path))
+            pvtu_path = output_dir / f"{stem}_{time_label}.pvtu"
+            write_pvtu(pvtu_path, piece_paths, attribute_name, timestep_components, timestep_precision)
+            pvd_entries.append((timestep.value, pvtu_path))
 
     write_pvd(output_dir / f"{stem}.pvd", pvd_entries)
 
