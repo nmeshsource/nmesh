@@ -1,0 +1,24 @@
+Background information about Nmesh's sdmf 3d and 2d output
+==========================================================
+*Read nmesh-xdmf.txt in the same directory for more info about Nmesh.
+
+*Nmesh can write 3d and 2d output also in sdmf format. This format is very
+ similar to the Xdmf format described in nmesh-xdmf.txt .
+
+*However, instead of an .xmf file for each quantity of interest it writes
+ a .txt file that is much less verbose to save disk space. The binary files
+ are exactly the same as for Xdmf.
+
+*The .txt file contains the same information as the .xmf in the Xdmf case.
+ It's basic contents are lines starting with # that contain the time,
+ followed by one line per element. Each of these lines lists the element
+ name, the number of points in all 3 directions, as well as the byte offsets
+ into the same binary files that are used for regular Nmesh Xdmf output.
+
+*In ~/nmesh/utilities/ there is the sdmf2xdmf utility that can convert the
+ .txt files into .xmf files. It's source code is ~/nmesh/utilities/sdmf2xdmf.c
+ Note that in it elements are referred to as nodes.
+
+*Most importantly, in ~/nmesh/utilities/ there is the sdmf2pvtu.py utility
+ that can convert the smdf .txt files into VTK PVTU/VTU files that can be
+ displayed much more efficiently than Xdmf files.

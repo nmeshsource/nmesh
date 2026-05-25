@@ -1,0 +1,57 @@
+Nmesh output:
+=============
+*Nmesh has 0d, 1d, 2d and 3d output. What is outputted and how is controlled
+ in the par file. E.g. this par file section
+"
+0douttime = 0.1
+0doutput = scalarwave1_pi
+
+1douttime = 0.1
+1doutput = scalarwave1_pi
+
+2douttime = 0.1
+2doutput = scalarwave1_pi
+2dformat = sdmf
+
+3douttime = 0.1
+3doutput = scalarwave1_pi
+3dformat = sdmf
+"
+ creates 0d, 1d, 2d and 3d output for the variable scalarwave1_pi every 0.1
+ in time. For 1d, 2d, 3d several formats are available.
+
+*See nmesh/src/utility/output/nmesh_output.c for the various options.
+
+
+1d visualization:
+=================
+*1d data is best looked at with tgraph.
+
+
+2d and 3d visualization:
+========================
+*tgraph can show 2d data in gnuplot and vtk format, but it cannot show other
+ formats or most 3d data.
+
+*So it is best to use Paraview or VisIt to look at 2d and 3d the data.
+
+*For later visualization with Paraview and VisIt it is best to use:
+2dformat = sdmf
+3dformat = sdmf
+ I.e. you should output in sdmf format.
+
+*sdmf is a format native to Nmesh that neither Paraview nor VisIt understand
+ without a plugin, or prior translation.
+
+*In nmesh/utilities/ there is sdmf2pvtu.py which can be used to translate
+ sdmf into VTK PVTU/VTU files. These files will be understood by Paraview
+ and displayed very efficiently.
+
+*sdmf2pvtu.py creates a new dir containing the VTK PVTU/VTU files. E.g.
+sdmf2pvtu.py GRHD_D.xy.txt
+ will create a file named GRHD_D.xy_pvtu/GRHD_D.xy.pvd openable with
+paraview GRHD_D.xy_pvtu/GRHD_D.xy.pvd
+
+*nmesh/doc/nmesh-sdmf.txt for more info about sdmf format
+
+*See nmesh/doc/Paraview.txt for usage of Paraview.

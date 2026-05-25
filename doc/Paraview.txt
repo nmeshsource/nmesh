@@ -1,0 +1,106 @@
+Visualization with Paraview:
+============================
+*Use sdmf as your output format and translate it to PVTU/VTU files with
+ nmesh/utilities/sdmf2pvtu.py .
+
+Loading 2d or 3d VTK PVTU/VTU files:
+====================================
+# load data files, e.g. GRHD_D.xyz_pvtu/GRHD_D.xyz.pvd:
+paraview GRHD_D.xyz_pvtu/GRHD_D.xyz.pvd
+# select 'PVD Reader' if it asks
+
+Showing 2D data:
+================
+*after loading, click 'Apply' --> data will be shown
+
+*Activate windows and toolbars
+------------------------------
+-in Menu:'View' we can activate all kinds of windows (e.g. 'Properties' window)
+ and toolbars (e.g. 'View'->'Toolbars'->'VCR Controls')
+
+*make surface plot
+------------------
+-Menu:'Filters'->'Alphabetical'->'Warp by Scalar'
+-in Properties window: enter a 'Scale Factor' that is large enough
+-click 'Apply'
+-click on 2D/3D in layout window
+
+*change color map
+-----------------
+-in Properties Window under Coloring: click on 'Edit'
+-load a preset color map by clicking on little folder with heart (there are
+ lots of them; RGB ones seem to work better)
+
+*change background color
+------------------------
+-Menu:'Edit'->'View Settings', then 'Choose color'
+
+*step trough time
+-----------------
+-click on VCR Controls
+
+*make movie
+-----------
+-switch off undesired stuff like center axis (the toolbar for this can be
+ switched on/off with Menu:'View'->'Toolbars'->'Center Axes Controls')
+-Menu:'File'->'Save Animation'
+
+
+Volume rendering
+================
+*after loading, click 'Apply' --> data will be shown
+
+*When you load 3d data, e.g. with paraview GRHD_D.xyz_pvtu/GRHD_D.xyz.pvd
+ it will only show the surface of your mesh. So you to adjust a few things
+ in paraview.
+
+*Slice or Clip the Volume
+-------------------------
+-if not selected already in Display window, select Representation: 'Surface'
+-choose one of these:
+ Menu:'Filters'->'Common'->'Slice'
+ Menu:'Filters'->'Common'->'Clip'
+-you can:
+ +grab the red axis and rotate it
+ +grab the red circle and expand or shrink it
+ +grab the plane inside the circle to move it along the axis
+-click 'Apply'
+-to later change the axis or plane again, click e.g. on "Slice1" in the
+ Pipeline Browser window
+
+*get Contour from Volume
+------------------------
+-Menu:'Filters'->'Common'->'Contour'
+-click 'Apply'
+
+*move slice???
+-----------
+-Menu:'View'->'Animation View'
+
+
+Paraview python scripts
+=======================
+# python scripts are supposed to be run with pvbatch or pvpython,
+# not just with python. E.g. run like this:
+pvbatch example_script.py
+# pvbatch is non-interactive and will not open a window
+# pvpython can be more interactive (but I only got a black window)
+# pvbatch is probably better as it will run in parallel
+########################################################################
+# example_script.py
+from paraview.simple import *
+
+# Load a dataset
+#reader = LegacyVTKReader(FileNames=['tt2/GRHD_D.xy.xmf'])
+#reader = OpenDataFile('tt2/GRHD_D.xy.xmf')
+reader = XDMFReader(FileNames=['tt2/GRHD_D.xy.xmf'])
+
+# Create a render view
+renderView = CreateView('RenderView')
+
+# Display the dataset in the render view
+Show(reader, renderView)
+
+# Save a screenshot
+SaveScreenshot('screenshot.png', renderView)
+########################################################################

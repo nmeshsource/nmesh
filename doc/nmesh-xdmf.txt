@@ -1,0 +1,58 @@
+Background information about Nmesh's Xdmf 3d and 2d output
+==========================================================
+*Nmesh is a numerical relativity code that evolves fields forwards in time.
+
+*Nmesh often uses millions of elements (called either elm or node in the
+ code) in real numerical relativity simulations.
+
+*Each element contains relatively few grid points, e.g. 6*6*6.
+
+*The elements touch but never overlap to form the entire computational mesh.
+
+*Each element has 6 faces, but the element shape is not always box shaped.
+ Rather elements can have rounded faces, as e.g. pieces of a cubed sphere.
+
+*Nmesh can write 3d and 2d output in Xdmf format. There is one .xmf file for
+ each quantity of interest.
+
+*The .xmf file contains information about each element (e.g. the number of
+ grid points in it, or the time).
+
+*The output from all time steps goes into the same .xmf and binary files
+ for each quantity of interest.
+
+*The .xmf file points to two raw binary files. One contains the values of
+ the quantity of interest (e.g. scalarwave1_pi.xyz.bin) at all the grid
+ points of all elements. Another file e.g. xyz.xyz.bin contains the
+ Cartesian x,y,z coordinates of each grid point. The .xmf contains the byte
+ offsets into these .bin files for each element.
+
+*The functions that write the output are output3d_xdmf and write_plane_xdmf
+ in the file nmesh/src/utility/output/XDMF_out.c .
+
+*However, the implementation details in XDMF_out.c should not be your
+ primary focus. Rather it should be possible to understand the format by
+ looking at example output.
+
+*For 3d output of the quantity scalarwave1_pi the relevant files are
+ scalarwave1_pi.xyz.xmf, scalarwave1_pi.xyz.bin, and xyz.xyz.bin .
+
+*For 2d output e.g. close to the xy-plane of the quantity scalarwave1_pi,
+ the relevant files are scalarwave1_pi.xy.xmf, scalarwave1_pi.xy.bin, and
+ xyz.xy.bin .
+
+*The 2d output format is practically the same as for 3d output, except that
+ it only writes data from elements that contain the selected output plane
+ (e.g. the xy-plane). And it also only writes the plane of grid points that
+ are closest to the output plane. Thus the "Dimensions" parts in the .xmf
+ file may look a little funny.
+
+*Each element Topology is labeled to be of Type="3DSMesh", even in the 2d
+ output.
+
+*The binary files are written in C as floats in native byte order, which on
+ this (and most) machines is little endian.
+
+*Note that Nmesh has AMR, so the number of elements as well as the grid
+ points within them can change from time step to time step.  Of course, the
+ .xmf file and the binary files reflect these changes.
