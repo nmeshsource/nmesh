@@ -4,6 +4,8 @@
 This utility reads the SDMF text files produced by Nmesh, where each
 time slice is a collection of 3DSMesh blocks with explicit XYZ coordinates and
 node-centered scalar data in raw float32 binary files.
+
+Copyright (C) 2026 Wolfgang Tichy
 """
 
 from __future__ import annotations
