@@ -14,8 +14,9 @@ struct tNATURECONSTS
   const double G;      /* gravitational constant */
   const double GMsun;  /* G * solar Mass */
   const double h;      /* Planck's constant */
-  const double kB;     /* Boltzmann constant */
+  const double k_B;    /* Boltzmann constant */
   const double e;      /* electron charge */
+  const double m_u;    /* unified atomic mass unit, (unbound C atom mass)/12 */
 };
 
 /* SI values of consts of nature we use */
@@ -48,9 +49,11 @@ struct tNATURECONSTS natureconsts =
      we use here.
      On https://ssd.jpl.nasa.gov/planets/phys_par.html it lists only planets.
   */
+  /* From: CODATA values of the fundamental physical constants 2022: */
   .h     = 6.62607015e-34, // [J s],         h is defined to have this value
-  .kB    = 1.380649e-23,   // [J/K],        kB is defined to have this value
+  .k_B   = 1.380649e-23,   // [J/K],       k_B is defined to have this value
   .e     = 1.602176634e-19,// [C],           e is defined to have this value
+  .m_u   = 1.6605390689252e-27, //[kg],  measured, last 2 digits uncertain
 };
 
 
