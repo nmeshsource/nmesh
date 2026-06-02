@@ -50,6 +50,7 @@ burgers1_profile = 2
 #0doutiter = 1
 0douttime = 0.01
 0doutput = burgers1_u_err
+0doutput_per_patch = 200
 
 #1doutiter = 1
 1douttime = 0.05
