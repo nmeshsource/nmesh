@@ -19,7 +19,7 @@
 double av_tau_from_Persson(tNode *node, int iu, double filter_alp,
                            double filter_s, double filter_dn, double f_unfilt)
 {
-  tMesh *mesh = node->pat->mesh;
+  //tMesh *mesh = node->pat->mesh;
   int n_unfilt[3], n_max;
   double se, ser, tau;
 
@@ -97,7 +97,7 @@ double av_SuperGaussianViscosity(double xb, double lam)
 }
 
 /* Gevrey viscosity */
-double av_SuperGaussianViscosity(double xb, double lam)
+double av_GevreyViscosity(double xb, double lam)
 {
   double x2 = xb*xb;
   if(x2 < 1.) return exp(x2 / (lam*(x2 - 1.)));
