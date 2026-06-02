@@ -1,0 +1,56 @@
+###################################################################
+# Setup a smooth sine-wave that develops a standing shock at x=0.5
+# Compare with Fig. 4.2 in Atteneder's thesis.
+# Like Atteneder we use N=5 (amr_n0=6), where DG alone can handle
+# the evolution.
+###################################################################
+# modules we use
+
+physics = burgers1
+
+errorexit = abort
+logfile_creation = no
+
+###################################################################
+# evolution
+
+evolve_method = RK4
+dt = auto
+finaltime = 0.6
+
+###################################################################
+# initial mesh
+
+amr_mesh_type = BoxMesh Line
+amr_BoxMesh_npatches = 21
+amr_mesh_xc = 0.5
+amr_BoxMesh_dout = 0.02380952380952381 # is 1/(2*amr_BoxMesh_npatches)
+
+amr_dir_active0 = 1
+amr_dir_active1 = 0
+amr_dir_active2 = 0
+amr_n0 = 6 # i.e. N=5  ##  7 # i.e. N=6
+amr_n1 = 1
+amr_n2 = 1
+
+iterate_parameters = yes
+iterate_parameter1 = amr_BoxMesh_npatches  21 41 81 161
+iterate_parameter2 = amr_BoxMesh_dout      0.02380952380952381 0.01219512195121951 0.006172839506172839 0.003105590062111801
+
+###################################################################
+# initial data
+
+burgers1_profile = 2
+
+###################################################################
+# output
+
+#outputX0Y0Z0coord = Xb
+
+#1doutiter = 1
+1douttime = 0.05
+1doutput = burgers1_u
+
+#2doutiter = 1
+#2doutput = burgers1_u burgers1_u_err
+#2dformat = gnuplot sdmf
