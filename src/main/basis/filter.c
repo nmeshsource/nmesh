@@ -397,6 +397,17 @@ double linear_fit_result(double beta[4], int i, int j, int k)
 /* functions to determine if coeffs fall off exponentially */
 /***********************************************************************/
 
+/* same as unfiltered_range_of_expfilter but with 1d filter args */
+void unfiltered_range_of_expfilter1(int n[3], double alp1, double s1,
+                                    double dn1, double f_unfilt,
+                                    int n_unfilt[3])
+{
+  double alp[] = { alp1, alp1, alp1 };
+  double s[]   = { s1, s1, s1 };
+  int    dn[]  = { dn1, dn1 ,dn1 };
+  unfiltered_range_of_expfilter(n, alp,s,dn, f_unfilt, n_unfilt);
+}
+
 /* find num of unfiltered coeffs for exp. filter, return in n_unfilt[3] */
 void unfiltered_range_of_expfilter(int n[3], double alp[3], double s[3],
                                    int dn[3], double f_unfilt,
