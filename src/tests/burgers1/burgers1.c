@@ -292,7 +292,42 @@ int burgers1_init(tMesh *mesh)
   evolve_print_evosys(mesh);
 
   return 0;
-} 
+}
+
+/* About profile 2: start with u = sin(k(x - tu)) and def c:=cos(k(x-tu))
+  ==> d_t u = c k (-u - t d_t u)       d_x u = c k (1 - t d_x u)
+  Now add d_t u and u d_x u
+  d_t u + u d_x u = c k (-u - t d_t u + u - t u d_x u)
+                  = -c k t (d_t u + u d_x u)
+  ==> (1 + c k t) (d_t u + u d_x u) = 0
+  So as long as 1 + c k t > 0 this satisfies Burgers' eqn
+  c \in [-1,1]
+  For c>0: we always have 1 + c k t > 0
+  1 + c k t > 0  <==> -1 + -c k t < 0
+  For c<0: -1 + -c k t < 0  ==> t < 1/(-c k).
+  The smallest 1/(-c k) is obtained for -c=1
+  Thus for t < 1/k: u = sin(k(x - tu)) satisfies Burger's eqn!!!
+  -------------------------------------------------------------- */
+/* this func returns u - sin(k(x - tu)) */
+double burgers1_profile2_u_minus_sin_kx_ktu(double u, void *p)
+{
+  double *par = p;
+  double x=par[0], t=par[1], k=2.*PI;
+
+  return u - sin(k*(x - t*u));
+}
+
+/* use burgers1_profile2_u_minus_sin_kx_ktu in root finder to get u */
+int burgers1_profile2_u_from_xt(double x, double t, double *u)
+{
+  double u1=-1.01;
+  double u2=+1.01;
+  double par[] = {x,t};
+  int maxits = 30;
+  double tol = 1e-10;
+  return rtbrent_brak(u, burgers1_profile2_u_minus_sin_kx_ktu,
+                      u1,u2, par, maxits,tol,0);
+}
 
 /* set profile for u */
 void burgers1_set_profile_pt(tMesh *mesh,
@@ -310,7 +345,8 @@ void burgers1_set_profile_pt(tMesh *mesh,
     else            u[0] = 0.5;
     break;
   case 2:
-    u[0] = sin(2*PI*d);
+    if(t==0.) u[0] = sin(2*PI*d);
+    else      burgers1_profile2_u_from_xt(d, t, u);
     break;
   default:
     u[0] = 0.;
