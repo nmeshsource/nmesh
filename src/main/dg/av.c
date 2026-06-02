@@ -78,7 +78,7 @@ double av_mu_from_tau(tElm *elm, double tau,
 }
 
 /* set mu var in one elm */
-void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
+void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu, int mode,
                double filter_alp,  double filter_s , double filter_dn,
                double f_unfilt)
 {
@@ -104,8 +104,14 @@ void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
     mu = av_mu_from_tau(elm, taumin, nL,nH, cmax);
   }
 
-  /* make var av_mu const for now */
-  forpoints(elm,ijk) av_mu[ijk]  = mu;
+  switch(mode)
+  {
+  case 0: /* const av_mu */
+    forpoints(elm,ijk) av_mu[ijk]  = mu;
+    break;
+  default:
+    errorexiti("unknown mode=%d", mode);
+  }
 }
 
 

@@ -230,7 +230,7 @@ double av_tau_from_Persson(tNode *node, int iu, double filter_alp,
                            double filter_s, double filter_dn, double f_unfilt);
 double av_mu_from_tau(tNode *node, double tau,
                       double nL, double nH, double cmax);
-void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
+void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu, int mode,
                double filter_alp,  double filter_s , double filter_dn,
                double f_unfilt);
 double av_GegenbauerViscosity(double xb, double lam);
