@@ -10,6 +10,7 @@ typedef struct {
   void (*numflux)(tDGinfo *d); // func pointer for numerical flux
   /* frequently used pars */
   double direction[3];
+  int profile; /* Par("burgers1_profile") */
 } tburgers1;
 
 

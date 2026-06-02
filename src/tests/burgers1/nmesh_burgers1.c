@@ -25,6 +25,7 @@ int nmesh_burgers1(tMesh *mesh)
   /* parameters */
   AddPar("burgers1_direction", "1 0 0", "propagation direction n^i");
   AddPar("burgers1_limiter", "none", "limiter [none,MRS,minmodB]");
+  AddPar("burgers1_profile", "1", "initial profile type [1,2]");
 
   return 0;
 }

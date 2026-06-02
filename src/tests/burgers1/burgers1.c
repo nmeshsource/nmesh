@@ -30,8 +30,9 @@ int burgers1_init_global_pars(tMesh *mesh)
   for(d=0; d<3; d++) printf(" %.16g", burgers1->direction[d]);
   printf(" }\n");
 
-  /* set index of div var */
+  /* set indices of vars and pars */
   burgers1->idivf = Ind("burgers1_divf");
+  burgers1->profile = Par("burgers1_profile");
 
   /* choose numerical flux */
   burgers1->numflux = numflux1d_scalarGodunov;
@@ -296,19 +297,35 @@ int burgers1_init(tMesh *mesh)
   return 0;
 } 
 
+/* set profile for u */
+void burgers1_set_profile_pt(tMesh *mesh,
+                              double xyz[3], double t, double *u)
+{
+  double *md = burgers1->direction;
+  double d = (md[0]*xyz[0] + md[1]*xyz[1] + md[2]*xyz[2]);
+  int prof = Geti(burgers1->profile);
+
+  /* profile */
+  switch(prof)
+  {
+  case 1:
+    if(d < 1.0 + t) u[0] = 1.5;
+    else            u[0] = 0.5;
+    break;
+  case 2:
+    u[0] = sin(2*PI*d);
+    break;
+  default:
+    u[0] = 0.;
+  }
+}
+
 /* calculate errors in u */
 int burgers1_analyze(tMesh *mesh)
 {
   int iu  = Ind("burgers1_u");
   int iue = Ind("burgers1_u_err");
   int ix =  Ind("x");
-  char *advdir = Gets(Par("burgers1_direction"));
-  double nx,ny,nz;
-  //double nmag2;
-
-  /* prop. dir.*/
-  sscanf(advdir, "%lg %lg %lg", &nx, &ny, &nz);
-  //nmag2 = (nx*nx + ny*ny + nz*nz);
 
   if(0) PRFs("\n");
 
@@ -326,13 +343,10 @@ int burgers1_analyze(tMesh *mesh)
 
     forpoints(node, i)
     {
-      double ua;
-      double d = (nx*x[i] + ny*y[i] + nz*z[i]);
-
-      if(d < 1.0 + t) ua = 1.5;
-      else            ua = 0.5;
-
-      ue[i] = fabs(u[i]- ua);
+      double xyz[] = { x[i],y[i],z[i] };
+      double ua[1];
+      burgers1_set_profile_pt(mesh, xyz, t, ua);
+      ue[i] = fabs(u[i]- ua[0]);
     }
   }
   return 0;
