@@ -17,5 +17,7 @@ typedef struct {
 /* burgers1.c */
 int burgers1_init_global_pars(tMesh *mesh);
 int burgers1_init(tMesh *mesh);
+void burgers1_set_profile_pt(tMesh *mesh,
+                              double xyz[3], double t, double *u);
 int burgers1_analyze(tMesh *mesh);
 void burgers1_rec_u_f_lam(tFVinfo *fv, tDGinfo *d);

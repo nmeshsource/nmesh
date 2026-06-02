@@ -246,9 +246,6 @@ int burgers1_init(tMesh *mesh)
   int iue = Ind("burgers1_u_err");
   tVarList *vlu = vlalloc(mesh);
   int limiter = Par("burgers1_limiter");
-  double nx = burgers1->direction[0]; /* prop. dir.*/
-  double ny = burgers1->direction[1];
-  double nz = burgers1->direction[2];
 
   PRF;printf(": dt = %g\n", mesh->dt);
 
@@ -272,9 +269,9 @@ int burgers1_init(tMesh *mesh)
     int i;
     forpoints(node, i)
     {
-      double d = (nx*x[i] + ny*y[i] + nz*z[i]);
-      if(d<1.0) u[i] = 1.5;
-      else      u[i] = 0.5;
+      double xyz[] = { x[i],y[i],z[i] };
+      double t = 0;
+      burgers1_set_profile_pt(mesh, xyz, t, &(u[i]));
     }
   }
 
