@@ -225,17 +225,20 @@ void dissipation_add_taperedKO_order_min(tNode *node,
 void dissipation_add_WTmodKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
                                    double dissfac, int order);
 
-/* av.c*/
+/* av.c */
 double av_tau_from_Persson(tNode *node, int iu, double filter_alp,
                            double filter_s, double filter_dn, double f_unfilt);
 double av_mu_from_tau(tNode *node, double tau,
                       double nL, double nH, double cmax);
-void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu, int mode,
+void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
+               int mode, double lam,
                double filter_alp,  double filter_s , double filter_dn,
                double f_unfilt);
 double av_GegenbauerViscosity(double xb, double lam);
 double av_SuperGaussianViscosity(double xb, double lam);
 double av_GevreyViscosity(double xb, double lam);
+double av_Viscosity3d_ind(tElm *elm, double (*Visc)(double xb, double lam),
+                          int ind, double lam);
 
 /* penalty.c */
 int dg_add_penalty_sign_fvflag(tElm *elm, double sign,

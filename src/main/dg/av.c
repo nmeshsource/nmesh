@@ -78,7 +78,8 @@ double av_mu_from_tau(tElm *elm, double tau,
 }
 
 /* set mu var in one elm */
-void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu, int mode,
+void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
+               int mode, double lam,
                double filter_alp,  double filter_s , double filter_dn,
                double f_unfilt)
 {
@@ -107,7 +108,23 @@ void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu, int mode,
   switch(mode)
   {
   case 0: /* const av_mu */
-    forpoints(elm,ijk) av_mu[ijk]  = mu;
+    forpoints(elm,ijk)
+      av_mu[ijk] = mu;
+    break;
+  case 1: /* Gegenbauer viscosity */
+    forpoints(elm,ijk)
+      av_mu[ijk] = mu * av_Viscosity3d_ind(elm, av_GegenbauerViscosity,
+                                           ijk, lam);
+    break;
+  case 2: /* super Gaussian viscosity */
+    forpoints(elm,ijk)
+      av_mu[ijk] = mu * av_Viscosity3d_ind(elm, av_SuperGaussianViscosity,
+                                           ijk, lam);
+    break;
+  case 3: /* Gevrey viscosity */
+    forpoints(elm,ijk)
+      av_mu[ijk] = mu * av_Viscosity3d_ind(elm, av_GevreyViscosity,
+                                           ijk, lam);
     break;
   default:
     errorexiti("unknown mode=%d", mode);
@@ -139,4 +156,23 @@ double av_GevreyViscosity(double xb, double lam)
   double x2 = xb*xb;
   if(x2 < 1.) return exp(x2 / (lam*(x2 - 1.)));
   else        return 0.;
+}
+
+/* do Gegenbauer,... viscosities in 3d */
+double av_Viscosity3d_Xb(double (*Visc)(double xb, double lam),
+                         double Xb[3], double lam)
+{
+  double v[3];
+  int d;
+  for(d=0; d<3; d++) v[d] = Visc(Xb[d], lam);
+  return v[0]*v[1]*v[2];
+}
+
+/* do Gegenbauer,... viscosities in 3d on elm points with index ind */
+double av_Viscosity3d_ind(tElm *elm, double (*Visc)(double xb, double lam),
+                          int ind, double lam)
+{
+  double Xb[3];
+  XbYbZb_of_ind(elm, ind, Xb);
+  return av_Viscosity3d_Xb(Visc, Xb, lam);
 }
