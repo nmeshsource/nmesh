@@ -48,7 +48,7 @@ burgers1_profile = 2
 #outputX0Y0Z0coord = Xb
 
 #0doutiter = 1
-0douttime = 0.05
+0douttime = 0.01
 0doutput = burgers1_u_err
 
 #1doutiter = 1
