@@ -309,24 +309,41 @@ int burgers1_init(tMesh *mesh)
   Thus for t < 1/k: u = sin(k(x - tu)) satisfies Burger's eqn!!!
   -------------------------------------------------------------- */
 /* this func returns u - sin(k(x - tu)) */
-double burgers1_profile2_u_minus_sin_kx_ktu(double u, void *p)
+double burgers1_u_minus_sin_kx_ktu(double u, void *p)
 {
   double *par = p;
-  double x=par[0], t=par[1], k=2.*PI;
+  double x=par[0], t=par[1], k=par[2];
 
   return u - sin(k*(x - t*u));
 }
 
-/* use burgers1_profile2_u_minus_sin_kx_ktu in root finder to get u */
+/* use burgers1_u_minus_sin_kx_ktu in root finder to get u */
 int burgers1_profile2_u_from_xt(double x, double t, double *u)
 {
-  double u1=-1.01;
-  double u2=+1.01;
-  double par[] = {x,t};
+  double k=2.*PI;
+  double par[] = {x,t,k};
   int maxits = 30;
   double tol = 1e-10;
-  return rtbrent_brak(u, burgers1_profile2_u_minus_sin_kx_ktu,
-                      u1,u2, par, maxits,tol,0);
+  double u1, u2;
+
+  u1 = -1.01;
+  u2 = +1.01;
+
+  /* solution to u = sin(k(x - tu)) may not exist for t > 1/k */
+  if(0 && t >= 1./k)
+  {
+    /* get better initial guess for u by getting u at earlier time */
+    par[1] = 1./k;
+    rtbrent_brak(u, burgers1_u_minus_sin_kx_ktu,
+                 u1,u2, par, maxits,tol,0);
+    //u[0] *= (1. - 1.2*(t-1./k) );
+    //u1 = u[0]*0.95;
+    //u2 = u[0]*1.05;
+    par[1] = t;
+  }
+
+  return rtbrent_brak(u, burgers1_u_minus_sin_kx_ktu,
+                      u1,u2, par, maxits,tol,1);
 }
 
 /* set profile for u */
@@ -380,6 +397,7 @@ int burgers1_analyze(tMesh *mesh)
       double ua[1];
       burgers1_set_profile_pt(mesh, xyz, t, ua);
       ue[i] = fabs(u[i]- ua[0]);
+      //ue[i] = ua[0];
     }
   }
   return 0;
