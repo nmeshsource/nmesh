@@ -227,7 +227,7 @@ void dissipation_add_WTmodKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
 
 /* av.c */
 double av_tau_from_Persson(tElm *elm, int iu, int n_unfilt[3]);
-double av_mu0_from_tau(tNode *node, double tau,
+double av_mu0_from_tau(tElm *elm, double tau,
                        double nL, double nH, double cmax);
 double av_mu0_vl_taumin(tElm *elm, tVarList *vlu,
                         double nL, double nH, double cmax, int n_unfilt[3]);
