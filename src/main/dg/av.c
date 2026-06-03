@@ -16,16 +16,11 @@
 /*************************************************************************/
 
 /* get coeff falloff tau for var u from Persson ratio */
-double av_tau_from_Persson(tElm *elm, int iu, double filter_alp,
-                           double filter_s, double filter_dn, double f_unfilt)
+double av_tau_from_Persson(tElm *elm, int iu, int n_unfilt[3])
 {
   //tMesh *mesh = elm->pat->mesh;
-  int n_unfilt[3], n_max;
+  int n_max;
   double se, ser, tau;
-
-  /* reduce n to take into account filter for GRHD_D on dg grid */
-  unfiltered_range_of_expfilter1(elm->n, filter_alp,filter_s,filter_dn,
-                                 f_unfilt, n_unfilt);
 
   /* use mod. Persson indicator from evolve */
   se = evolve_Pmod_indicator_ncoeffs(elm, iu, -2., n_unfilt);
@@ -46,7 +41,7 @@ double av_tau_from_Persson(tElm *elm, int iu, double filter_alp,
   if(0)
   {
     printeploc(elm->eploc);
-    printf(" f_unfilt=%g n_max=%d ser=%g tau=%g\n", f_unfilt, n_max, ser, tau);
+    printf(" n_unfilt[0]=%d n_max=%d ser=%g tau=%g\n", n_unfilt[0], n_max, ser, tau);
   }
   return tau;
 }
@@ -84,10 +79,15 @@ void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
                double f_unfilt)
 {
   int vli, ijk;
+  int n_unfilt[3];
   double *av_mu = Vard(elm, imu);
   double nL   = 1.;
   double nH   = 3.;
   double mu;
+
+  /* reduce n to take into account filter dg grid */
+  unfiltered_range_of_expfilter1(elm->n, filter_alp,filter_s,filter_dn,
+                                 f_unfilt, n_unfilt);
 
   {
     double taumin = DBL_MAX;
@@ -96,8 +96,7 @@ void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
     forvl(vlu, vli)
     {
       int iu = Vind(vlu, vli);
-      double tau = av_tau_from_Persson(elm, iu, filter_alp, filter_s,
-                                       filter_dn, f_unfilt);
+      double tau = av_tau_from_Persson(elm, iu, n_unfilt);
       if(tau < taumin) taumin = tau;
     }
 
