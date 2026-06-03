@@ -73,13 +73,11 @@ double av_mu_from_tau(tElm *elm, double tau,
 }
 
 /* set mu var in one elm */
-void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
-               int mode, double lam, int n_unfilt[3])
+void av_mu_elm(tElm *elm, tVarList *vlu, double nL, double nH, double cmax,
+               int imu, int mode, double lam, int n_unfilt[3])
 {
   int vli, ijk;
   double *av_mu = Vard(elm, imu);
-  double nL   = 1.;
-  double nH   = 3.;
   double mu;
 
   {
