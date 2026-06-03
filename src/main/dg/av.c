@@ -72,28 +72,34 @@ double av_mu_from_tau(tElm *elm, double tau,
   return mu_max * ( 1. - (tau - nL)/(nH - nL) );
 }
 
+/* return constant part of my for a varlist in an elm */
+double av_mu_const(tElm *elm, tVarList *vlu,
+                   double nL, double nH, double cmax, int n_unfilt[3])
+{
+  int vli;
+  double taumin = DBL_MAX;
+  double mu_const;
+
+  /* find min tau for vars in vlu */
+  forvl(vlu, vli)
+  {
+    int iu = Vind(vlu, vli);
+    double tau = av_tau_from_Persson(elm, iu, n_unfilt);
+    if(tau < taumin) taumin = tau;
+  }
+
+  /* return const part of mu */
+  mu_const = av_mu_from_tau(elm, taumin, nL,nH, cmax);
+  return mu_const;
+}
+
 /* set mu var in one elm */
 void av_mu_elm(tElm *elm, tVarList *vlu, double nL, double nH, double cmax,
                int imu, int mode, double lam, int n_unfilt[3])
 {
-  int vli, ijk;
+  int ijk;
   double *av_mu = Vard(elm, imu);
-  double mu;
-
-  {
-    double taumin = DBL_MAX;
-
-    /* find min tau for vars in vlu */
-    forvl(vlu, vli)
-    {
-      int iu = Vind(vlu, vli);
-      double tau = av_tau_from_Persson(elm, iu, n_unfilt);
-      if(tau < taumin) taumin = tau;
-    }
-
-    /* set mu */
-    mu = av_mu_from_tau(elm, taumin, nL,nH, cmax);
-  }
+  double mu = av_mu_const(elm, vlu, nL,nH,cmax, n_unfilt);
 
   switch(mode)
   {
