@@ -94,39 +94,44 @@ double av_mu_const(tElm *elm, tVarList *vlu,
 }
 
 /* set mu var in one elm */
-void av_mu_elm(tElm *elm, tVarList *vlu, double nL, double nH, double cmax,
-               int imu, int mode, double lam, int n_unfilt[3])
+void av_mu_elm0(tElm *elm, double mu0, int imu, int mode, double lam)
 {
   int ijk;
   double *av_mu = Vard(elm, imu);
-  double mu = av_mu_const(elm, vlu, nL,nH,cmax, n_unfilt);
 
   switch(mode)
   {
   case 0: /* const av_mu */
     forpoints(elm,ijk)
-      av_mu[ijk] = mu;
+      av_mu[ijk] = mu0;
     break;
   case 1: /* Gegenbauer viscosity */
     forpoints(elm,ijk)
-      av_mu[ijk] = mu * av_Viscosity3d_ind(elm, av_GegenbauerViscosity,
-                                           ijk, lam);
+      av_mu[ijk] = mu0 * av_Viscosity3d_ind(elm, av_GegenbauerViscosity,
+                                            ijk, lam);
     break;
   case 2: /* super Gaussian viscosity */
     forpoints(elm,ijk)
-      av_mu[ijk] = mu * av_Viscosity3d_ind(elm, av_SuperGaussianViscosity,
-                                           ijk, lam);
+      av_mu[ijk] = mu0 * av_Viscosity3d_ind(elm, av_SuperGaussianViscosity,
+                                            ijk, lam);
     break;
   case 3: /* Gevrey viscosity */
     forpoints(elm,ijk)
-      av_mu[ijk] = mu * av_Viscosity3d_ind(elm, av_GevreyViscosity,
-                                           ijk, lam);
+      av_mu[ijk] = mu0 * av_Viscosity3d_ind(elm, av_GevreyViscosity,
+                                            ijk, lam);
     break;
   default:
     errorexiti("unknown mode=%d", mode);
   }
 }
 
+/* set mu var in one elm */
+void av_mu_elm(tElm *elm, tVarList *vlu, double nL, double nH, double cmax,
+               int imu, int mode, double lam, int n_unfilt[3])
+{
+  double mu0 = av_mu_const(elm, vlu, nL,nH,cmax, n_unfilt);
+  av_mu_elm0(elm, mu0, imu, mode, lam);
+}
 
 /*************************************************************************/
 /* C^{\infty}_0 funcs from https://arxiv.org/abs/1810.02152 that can
