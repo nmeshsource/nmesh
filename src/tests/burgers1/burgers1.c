@@ -317,7 +317,8 @@ double burgers1_u_minus_sin_kx_ktu(double u, void *p)
   return u - sin(k*(x - t*u));
 }
 
-/* use burgers1_u_minus_sin_kx_ktu in root finder to get u */
+/* use burgers1_u_minus_sin_kx_ktu in root finder to get u
+   NOTE: for t >= 1./k ~ 0.16 this gives the wrong u !!! */
 int burgers1_profile2_u_from_xt(double x, double t, double *u)
 {
   double k=2.*PI;
@@ -363,7 +364,7 @@ void burgers1_set_profile_pt(tMesh *mesh,
     break;
   case 2:
     if(t==0.) u[0] = sin(2*PI*d);
-    else      burgers1_profile2_u_from_xt(d, t, u);
+    else      burgers1_profile2_u_from_xt(d, t, u); //wrong if t>0.16
     break;
   default:
     u[0] = 0.;
