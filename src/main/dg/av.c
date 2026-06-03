@@ -47,8 +47,8 @@ double av_tau_from_Persson(tElm *elm, int iu, int n_unfilt[3])
 }
 
 /* compute mu from tau */
-double av_mu_from_tau(tElm *elm, double tau,
-                      double nL, double nH, double cmax)
+double av_mu0_from_tau(tElm *elm, double tau,
+                       double nL, double nH, double cmax)
 {
   //tMesh *mesh = elm->pat->mesh;
   /* In Atteneder's thesis, he writes nL=1, nH=3 comes from
@@ -72,13 +72,12 @@ double av_mu_from_tau(tElm *elm, double tau,
   return mu_max * ( 1. - (tau - nL)/(nH - nL) );
 }
 
-/* return constant part of my for a varlist in an elm */
-double av_mu_const(tElm *elm, tVarList *vlu,
-                   double nL, double nH, double cmax, int n_unfilt[3])
+/* return constant part of mu for a varlist in an elm */
+double av_mu0_vl_taumin(tElm *elm, tVarList *vlu,
+                        double nL, double nH, double cmax, int n_unfilt[3])
 {
   int vli;
   double taumin = DBL_MAX;
-  double mu_const;
 
   /* find min tau for vars in vlu */
   forvl(vlu, vli)
@@ -89,12 +88,11 @@ double av_mu_const(tElm *elm, tVarList *vlu,
   }
 
   /* return const part of mu */
-  mu_const = av_mu_from_tau(elm, taumin, nL,nH, cmax);
-  return mu_const;
+  return av_mu0_from_tau(elm, taumin, nL,nH, cmax);
 }
 
-/* set mu var in one elm */
-void av_mu_elm0(tElm *elm, double mu0, int imu, int mode, double lam)
+/* set mu var in one elm from constant part, called mu0 here */
+void av_mu_elm(tElm *elm, int imu, double mu0, int mode, double lam)
 {
   int ijk;
   double *av_mu = Vard(elm, imu);
@@ -125,13 +123,6 @@ void av_mu_elm0(tElm *elm, double mu0, int imu, int mode, double lam)
   }
 }
 
-/* set mu var in one elm */
-void av_mu_elm(tElm *elm, tVarList *vlu, double nL, double nH, double cmax,
-               int imu, int mode, double lam, int n_unfilt[3])
-{
-  double mu0 = av_mu_const(elm, vlu, nL,nH,cmax, n_unfilt);
-  av_mu_elm0(elm, mu0, imu, mode, lam);
-}
 
 /*************************************************************************/
 /* C^{\infty}_0 funcs from https://arxiv.org/abs/1810.02152 that can

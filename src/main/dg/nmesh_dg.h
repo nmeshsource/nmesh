@@ -227,10 +227,11 @@ void dissipation_add_WTmodKO_order(tNode *node, tVarList *vlr, tVarList *vlu,
 
 /* av.c */
 double av_tau_from_Persson(tElm *elm, int iu, int n_unfilt[3]);
-double av_mu_from_tau(tNode *node, double tau,
-                      double nL, double nH, double cmax);
-void av_mu_elm(tElm *elm, tVarList *vlu, double nL, double nH, double cmax,
-               int imu, int mode, double lam, int n_unfilt[3]);
+double av_mu0_from_tau(tNode *node, double tau,
+                       double nL, double nH, double cmax);
+double av_mu0_vl_taumin(tElm *elm, tVarList *vlu,
+                        double nL, double nH, double cmax, int n_unfilt[3]);
+void av_mu_elm(tElm *elm, int imu, double mu0, int mode, double lam);
 double av_GegenbauerViscosity(double xb, double lam);
 double av_SuperGaussianViscosity(double xb, double lam);
 double av_GevreyViscosity(double xb, double lam);
