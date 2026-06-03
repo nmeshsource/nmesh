@@ -74,20 +74,13 @@ double av_mu_from_tau(tElm *elm, double tau,
 
 /* set mu var in one elm */
 void av_mu_elm(tElm *elm, tVarList *vlu, double cmax, int imu,
-               int mode, double lam,
-               double filter_alp,  double filter_s , double filter_dn,
-               double f_unfilt)
+               int mode, double lam, int n_unfilt[3])
 {
   int vli, ijk;
-  int n_unfilt[3];
   double *av_mu = Vard(elm, imu);
   double nL   = 1.;
   double nH   = 3.;
   double mu;
-
-  /* reduce n to take into account filter dg grid */
-  unfiltered_range_of_expfilter1(elm->n, filter_alp,filter_s,filter_dn,
-                                 f_unfilt, n_unfilt);
 
   {
     double taumin = DBL_MAX;
