@@ -17,6 +17,7 @@ projects += $(repo)/ADM
 projects += $(repo)/EoS
 projects += $(repo)/SingleBH
 projects += $(repo)/TOVstar
+projects += $(repo)/GRHD_base
 projects += $(repo)/GRHD
 #projects += $(repo)/SRHDtestID
 projects += $(repo)/GH

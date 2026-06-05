@@ -13,6 +13,7 @@ projects += $(repo)/Ein
 projects += $(repo)/ADM
 projects += $(repo)/EoS
 projects += $(repo)/TOVstar
+projects += $(repo)/GRHD_base
 projects += $(repo)/GRHD
 projects += $(repo)/ScalarWave
 projects += $(repo)/TestID

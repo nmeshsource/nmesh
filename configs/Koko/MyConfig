@@ -11,6 +11,7 @@
 #libpaths += src/tests/misc
 libpaths += src/tests/advection1
 repo = giter@mars.physics.fau.edu:nmesh-projects
+projects += $(repo)/GRHD_base
 projects += $(repo)/GRHD
 projects += $(repo)/ADM
 projects += $(repo)/TOVstar
