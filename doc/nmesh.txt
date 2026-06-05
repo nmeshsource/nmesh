@@ -91,8 +91,11 @@ tgraph.py -c 1:2:3 Adv/advection1_u.0XY2
 Or if Cartesian coords are desired on the axes something like:
 tgraph.py -c 3:6:9 { Adv/x.1XY2 Adv/y.1XY2 Adv/advection1_u.1XY2 }
 
-3D output can also be in VTK legacy format or XDMF format. It can be
-visualized with programs like paraview or visit.
+2D and 3D output can be in VTK legacy, SDMF or XDMF format.
+VTK and XDMF can be visualized with programs like paraview or visit.
+Yet, it is almost always better to create SDMF output, convert it to
+PVTU (see OutputViz.txt in this directory), and then load it into
+programs like paraview or visit.
 
 
 Getting more nmesh-projects:
