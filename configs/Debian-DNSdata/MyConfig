@@ -61,12 +61,8 @@ WARN = -std=c11 -pedantic -Wall \
 # use OpenMP pragmas, this also needs something like -fopenmp in OFLAGS
 #DFLAGS += -DUSEOMP
 
+# use MPI, only  DFLAGS += -DUSEMPI  is needed with mpicc
 DFLAGS += -DUSEMPI
-# This works on Debian 9 with openmpi:
-MPIDIR = /usr/lib/x86_64-linux-gnu/openmpi
-MPIDIRL = -L$(MPIDIR)/lib
-MPIDIRI = -I$(MPIDIR)/include
-MPILIBS = -lmpi
 
 # link in GSL
 SPECIALLIBS += -lgsl -lgslcblas
