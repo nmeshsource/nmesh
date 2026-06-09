@@ -24,13 +24,13 @@ int nmesh_evolve(tMesh *mesh)
 
   /* parameters */
   AddPar("evolve_method", "RK4", "[Euler,RK4,sspRK3]");
-  AddPar("evolve_u_surfaces", "yes", "MPI-surface exchange for u [yes,no]"
+  AddPar("evolve_u_surfaces", "no", "MPI-surface exchange for u [yes,no]"
          "(see comment before pVLList_set_surfacezones in evolve_init_evosys)");
   AddPar("evolve_loadtime", "3", "3: time RHS & limiter, 7: also time TROUBLE "
          "[3,7]"); //could extend: 1:time RHS, 2:time limiter, 4:time trouble
-  AddPar("evolve_redo_troubled", "step", "what we redo in troubled elms "
+  AddPar("evolve_redo_troubled", "substep", "what we redo in troubled elms "
          "[step,substep]");
-  AddPar("evolve_trouble_BackInterpScheme", "1", "scheme we use to interp "
+  AddPar("evolve_trouble_BackInterpScheme", "2", "scheme we use to interp "
          "back from UNIFORM to LGL grids [1,2]. 1: Lagrange, 2: matrix R");
   AddPar("evolve_filter_all", "no", "whether we filter all evo. vars [no,yes]");
   AddPar("evolve_filter_varlist", "", "1st comps of other vars we filter");
