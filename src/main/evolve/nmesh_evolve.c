@@ -32,7 +32,7 @@ int nmesh_evolve(tMesh *mesh)
          "[step,substep]");
   AddPar("evolve_trouble_BackInterpScheme", "1", "scheme we use to interp "
          "back from UNIFORM to LGL grids [1,2]. 1: Lagrange, 2: matrix R");
-  AddPar("evolve_filter", "no", "whether we filter all evo. vars [no,yes]");
+  AddPar("evolve_filter_all", "no", "whether we filter all evo. vars [no,yes]");
   AddPar("evolve_filter_varlist", "", "1st comps of other vars we filter");
   AddPar("evolve_filter_alp", "36", "alp in e^{-alp (i/(n0-1-dn))^s}");
   AddPar("evolve_filter_s",   "32",   "s in e^{-alp (i/(n0-1-dn))^s}");
@@ -52,6 +52,10 @@ int nmesh_evolve(tMesh *mesh)
     AddAuxVar("evolve_test_v_err", "", "error in var2");
     AddPar("evolve_method_order", "0", "expected order of convergence");
   }
+
+  /* Old parameters that are now banned */
+  if(ParLax("evolve_filter")>=0 && Getb(Par("evolve_filter")))
+    BanPar("evolve_filter", "use evolve_filter_all instead");
 
   return 0;
 }

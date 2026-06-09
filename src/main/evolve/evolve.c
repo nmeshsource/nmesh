@@ -654,9 +654,9 @@ int evolve_filter_evosys_mesh(tMesh *mesh)
   tEvoSys *evosys = mesh->evosys;
   pVLList *u = evosys->u;
   int i;
-  int evolve_filter         = Par("evolve_filter");
+  int evolve_filter_all     = Par("evolve_filter_all");
   int evolve_filter_varlist = Par("evolve_filter_varlist");
-  int filter_all_evovars = Getb(evolve_filter);
+  int filter_all_evovars = Getb(evolve_filter_all);
   int filter_varlist     = GetLen(evolve_filter_varlist);
 
   if(PR) PRFs(":\n");
