@@ -24,7 +24,7 @@ Improve trouble score:
 
 Check if interpolation speed can be improved
 ============================================
-*faster because we now use INTERP_UNIFORM_TO_nO2_LGL instead of Lagrange:
+*faster when we use INTERP_UNIFORM_TO_nO2_LGL instead of Lagrange in:
    evolve_switch_nontroubled_nodes_mesh
    evolve_PerssonPmod_trouble_ncoeffs_dg
    evolve_switch_troubled_nodes_mesh
@@ -93,8 +93,8 @@ center2_amr_radius = 8
 
 About better 2d and 3d output
 =============================
-*Google's AI says .pvtu files will be handled much faster than Xdmf files by
- paraview. It suggests this script to convert Xdmf to .pvtu :
+*.pvtu files will be handled much faster than Xdmf files by paraview.
+Google AI suggests this script to convert Xdmf to .pvtu :
 ---
 from paraview.simple import *
 
@@ -112,9 +112,11 @@ writer = CreateWriter('output_data.pvtu', reader)
 writer.UpdatePipeline()
 print("Conversion to .pvtu complete!")
 ---
-*have some AI write code for conversion from .smf to .xmf and then to .pvtu
-*translate sdmf2xdmf.c to python while still including the xmf parts from
- src/utility/output/XDMF_out.h
-*have AI write nmesh 2d and 3d output to directly write output for .pvtu
+*we now have sdmf2pvtu.py that converts sdmf to pvtu
+*have AI write nmesh 2d and 3d output to directly write output for .pvtu ???
  (AI should first look at Xdmf output in nmesh to know what to do.)
  ^--can this be done without linking to a library???
+*Probably it is best to not write .pvtu as it creates too many files
+*sdmf is a very good option for now
+*if we ever need higher write performance, we could use VTKHDF. But the AI's
+ claim it to be slower in paraview in case of AMR output such as from nmesh.

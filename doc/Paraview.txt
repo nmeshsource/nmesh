@@ -51,7 +51,7 @@ Volume rendering
 *after loading, click 'Apply' --> data will be shown
 
 *When you load 3d data, e.g. with paraview GRHD_D.xyz_pvtu/GRHD_D.xyz.pvd
- it will only show the surface of your mesh. So you to adjust a few things
+ it will only show the surface of your mesh. So you need to adjust a few things
  in paraview.
 
 *Slice or Clip the Volume
