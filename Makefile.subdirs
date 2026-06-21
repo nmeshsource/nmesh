@@ -44,15 +44,15 @@ $(OBJDIR)/%.o: %.c $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefi
 	$(CC) $(CCFLAGS)  -o $@  -c $*.c
 
 # same, but build if it is a C++ file
-$(OBJDIR)/%.o: %.cc $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-	$(CXX) $(CCFLAGS)  -o $@  -c $*.cc
+$(OBJDIR)/%.o: %.cpp $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
+	$(CXX) $(CCFLAGS)  -o $@  -c $*.cpp
 
 ## First try for C and C++:
 ## [ Note: $(wildcard %.c*) should be the same as %.c*, but is not ]
 #$(OBJDIR)/%.o: %.c* $(TOP)/src/main/main/nmesh.h nmesh_$(NAME).h $(NAME).h Makefile
-#	@if [ -f $*.cc ]; \
-#	then echo $(CXX) $(CFLAGS) -o $@ -c $*.cc ; \
-#	          $(CXX) $(CFLAGS) -o $@ -c $*.cc ; \
+#	@if [ -f $*.cpp ]; \
+#	then echo $(CXX) $(CFLAGS) -o $@ -c $*.cpp ; \
+#	          $(CXX) $(CFLAGS) -o $@ -c $*.cpp ; \
 #	else echo $(CC) $(CFLAGS) -o $@ -c $*.c  ; \
 #	          $(CC) $(CFLAGS) -o $@ -c $*.c  ; \
 #	fi;
