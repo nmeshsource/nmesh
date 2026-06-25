@@ -4,7 +4,7 @@ Using git with nmesh
 *nmesh is spread over several git repos:
  -there is the main part of nmesh, all in one repo, in the dir nmesh
  -there is a separate git repo for each project
- -all projects repos are in src/projects/
+ -all project repos are in src/projects/
 
 *If you type a git command in the main dir, it applies only to the main part
  of git, not to any project. But there is
@@ -12,7 +12,7 @@ make git_clone
 make git_pull
  These 2 will clone or pull all repos mentioned in MyConfig.
 
-*Most of the time you make changes only to the a particular project, that
+*Most of the time you make changes only to a particular project, that
  already has an existing git repo.
 
 *If you have made changes to project foo (i.e. changes in src/projects/foo)
@@ -40,7 +40,7 @@ git commit filename
 git commit .
 # TIP: For beginners it is better to be specific about the file name,
 #      otherwise you accidentally commit things you never wanted to change!
-#      Never use "git commit ." without ar least the ".".
+#      Never use "git commit ." without at least the ".".
 # "git commit ." will open an editor that shows again what will happen. If
 # it wants to commit more files than you wanted, quit the editor without
 # saving! This aborts the commit.
@@ -73,6 +73,24 @@ git commit thing.c
 git push
 
 ##########################################################
+# Renaming files in git
+##########################################################
+# 0. go to the repo, e.g.
+cd src/projects/foo
+
+# 1. first get any changes others have already made
+git pull
+
+# 2. rename a file
+git mv oldname newname
+
+# 3. commit to your local repo
+git commit .
+
+# 4. Now push it to the server, so that others can pull it.
+git push
+
+##########################################################
 # Conflicts
 ##########################################################
 # Sometimes others may have made changes that conflict with you have done.
@@ -81,3 +99,30 @@ git push
 # rename the repo dir and clone it again to get a clean copy. You can then
 # add your changes to this clean copy without conflicts! The later is often
 # better for inexperienced git users.
+
+
+##########################################################
+# What should and should not be added to a git repo
+##########################################################
+*git is meant for text files, not necessarily binary files!
+
+*Text files should have line breaks! For .c or .tex files usually after 76
+ characters or so.
+
+*git diff will not work well without these line breaks!!!
+
+*If you add a binary file, and later notice you want to change it, you can
+ of course commit the new version. However, since git stores all versions,
+ you now likely need twice the space on the server. This can become a
+ problem if the files are large. So add binary files only once you are
+ relatively certain that no change is needed.
+
+*When you change text files git is much more efficient, as there it stores
+ only the lines that change and not the whole thing again.
+
+*So the rule is that text files with line breaks are good for git.
+ Everything else one should at least think about.
+
+*Also since git remembers all versions a "git rm largefile.bin" will make the
+ file not show is you dir listing, but the repo still has the file, since it
+ must be able to restore all prior versions. I.e. you have now wasted space!
