@@ -1,52 +1,83 @@
-General tips about using git:
------------------------------
+Using git with nmesh
+====================
 
-# to start a new repo, got inside the dir and do
-git init
+*nmesh is spread over several git repos:
+ -there is the main part of nmesh, all in one repo, in the dir nmesh
+ -there is a separate git repo for each project
+ -all projects repos are in src/projects/
 
-# use bare repos on the central server, you start them with
-git init --bare
+*If you type a git command in the main dir, it applies only to the main part
+ of git, not to any project. But there is
+make git_clone
+make git_pull
+ These 2 will clone or pull all repos mentioned in MyConfig.
 
-# get repo sgrid.git from titan (works for any other repo you can access)
-git clone ssh://titan/home/wolf/Archives/sgrid.git
+*Most of the time you make changes only to the a particular project, that
+ already has an existing git repo.
 
-# check status of what commit will do
-git status
+*If you have made changes to project foo (i.e. changes in src/projects/foo)
+ you can commit and push it back to the server like this:
 
-# make changes to some files and then put them into the local repo
-git add -u
-git status
-git commit .
+###########################################################
+# Steps for committing and pushing a change in project foo
+###########################################################
+# 0. go to the project, e.g.
+cd src/projects/foo
 
-# Add .gitignore in a dir to let git ignore some files in there.
-# .gitignore simply contains the file names (one per line).
-# if .gitignore contains * use:
-git add -f .gitignore 
-
-# push changes to central server (--dry-run with dry run it doesn't do it)
-git status
-git push --dry-run
-git push
-
-# if I accidentally delete filename.txt I can get it back with one of those:
-git checkout -- .
-git checkout -- filename.txt
-
-# check if something has changed on server
-git remote show origin
-
-# pull from central server. This does a fetch and then a merge.
+# 1. first get any changes others have already made
 git pull
 
-# fetch from server
-# unlike pull this only fetches, we need to use "git merge" later
-git fetch
+# 2. see what files are modified (by you)
 git status
-#   ^ might say something like this:
-# "Your branch is behind 'origin/master' by 2 commits, and can be
-#  fast-forwarded."
-# to get a log and diff about these commits type:
-git log master...origin/master
-git diff master origin/master
-# to merge changes into my working copy do:
-git merge origin/master
+
+# 3. see if the modifications are what you want
+git diff
+# NOTE: both "git diff" and "git status" can also be followed by a file name
+
+# 4. If you like your changes, commit either just one file:
+git commit filename
+# or commit changes to all files in this dir:
+git commit .
+# TIP: For beginners it is better to be specific about the file name,
+#      otherwise you accidentally commit things you never wanted to change!
+#      Never use "git commit ." without ar least the ".".
+# "git commit ." will open an editor that shows again what will happen. If
+# it wants to commit more files than you wanted, quit the editor without
+# saving! This aborts the commit.
+# If it looks all good, type in a good log entry, e.g. something like:
+adding feature ...
+
+This is added because ...
+# After you have entered your message, save it and exit the editor. This
+# will commit your change to your local repo.
+
+# 5. Now push it to the server, so that others can pull it.
+git push
+
+##########################################################
+# Steps for adding a new file to a repo
+##########################################################
+# 0. go to the repo, e.g.
+cd src/projects/foo
+
+# 1. first get any changes others have already made
+git pull
+
+# 2. add the new file, e.g. thing.c
+git add thing.c
+
+# 3. commit to your local repo
+git commit thing.c
+
+# 4. Now push it to the server, so that others can pull it.
+git push
+
+##########################################################
+# Conflicts
+##########################################################
+# Sometimes others may have made changes that conflict with you have done.
+# If that happens, you can EITHER study git more thoroughly online,
+# and the resolve the conflict in the proper git way, OR you can simply
+# rename the repo dir and clone it again to get a clean copy. You can then
+# add your changes to this clean copy without conflicts! The later is often
+# better for inexperienced git users.
