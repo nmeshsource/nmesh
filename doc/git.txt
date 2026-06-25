@@ -123,6 +123,9 @@ git push
 *So the rule is that text files with line breaks are good for git.
  Everything else one should at least think about.
 
-*Also since git remembers all versions a "git rm largefile.bin" will make the
+*Also, since git remembers all versions a "git rm largefile.bin" will make the
  file not show is you dir listing, but the repo still has the file, since it
  must be able to restore all prior versions. I.e. you have now wasted space!
+
+*Also, the output of nmesh should usually not be in the project repos, but
+ example parfiles are of course fine and desired.
