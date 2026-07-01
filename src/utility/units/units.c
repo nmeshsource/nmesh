@@ -10,6 +10,7 @@ int unit_set_for_GMc1_mesh(tMesh *mesh)
 {
   PRFs(": set unit struct for c = G = G*Msun = 1.\n");
   unit_set_for_GMc1();
+  //unit_test_values();
   return 0;
 }
 

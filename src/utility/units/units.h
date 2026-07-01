@@ -3,6 +3,7 @@
 
 /* convert_units.c */
 void unit_set_for_GMc1(void);
+void unit_test_values(void);
 double Length_GMc1_to_SI(double x);
 double Time_GMc1_to_SI(double t);
 double Frequency_GMc1_to_SI(double f);

@@ -1,7 +1,9 @@
 /* convert_units.c */
 /* Wolfgang Tichy 6/2022 */
 
-#include <stdio.h>
+//#include <stdio.h>
+#include "nmesh.h"
+#include "units.h"
 
 /***************************************************************************/
 /* struct with constants of nature */
@@ -105,6 +107,17 @@ void unit_set_for_GMc1(void)
   unit.N  = unit.J / unit.m;
   unit.Pa = unit.N / unit.m2; // = unit.J / unit.m3;
   unit.eV = unit.J * e;
+}
+
+/* test some entries of unit struct */
+void unit_test_values(void)
+{
+  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(unit.m));
+  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(unit.s));
+  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(unit.kg));
+  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(unit.kg/unit.m3));
+  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(unit.J/unit.m3));
+  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(unit.Pa));
 }
 
 
