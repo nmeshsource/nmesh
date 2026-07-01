@@ -1,28 +1,17 @@
 /* convert_units.c */
 /* Wolfgang Tichy 6/2022 */
 
-//#include <stdio.h>
-#include "nmesh.h"
-#include "units.h"
+#include <stdio.h>
+#include "convert_units.h"
+
+
 
 /***************************************************************************/
-/* struct with constants of nature */
+/* init struct with constants of nature */
 /***************************************************************************/
-
-/* constants of nature */
-struct tNATURECONSTS
-{
-  const double c;      /* speed of light */
-  const double G;      /* gravitational constant */
-  const double GMsun;  /* G * solar Mass */
-  const double h;      /* Planck's constant */
-  const double k_B;    /* Boltzmann constant */
-  const double e;      /* electron charge */
-  const double m_u;    /* unified atomic mass unit, (unbound C atom mass)/12 */
-};
 
 /* SI values of consts of nature we use */
-struct tNATURECONSTS natureconsts =
+tNatureconsts natureconsts =
 {
   .c     = 299792458,     // [m/s],          c is defined to have this value
   .G     = 6.67430e-11,   // [m^3/(kg s^2)], from https://physics.nist.gov/cgi-bin/cuu/Value?bg
@@ -60,35 +49,14 @@ struct tNATURECONSTS natureconsts =
 
 
 /***************************************************************************/
-/* struct with conversion factors from SI to nmesh units */
-/***************************************************************************/
-
-/* struct with values of SI units */
-struct tUNIT
-{
-  double m;    /* 1 m in nmesh units */
-  double m2;   /* 1 m^2 in nmesh units */
-  double m3;   /* 1 m^3 in nmesh units */
-  double s;    /* 1 s in nmesh units */
-  double s2;   /* 1 s^2 in nmesh units */
-  double kg;   /* 1 kg in nmesh units */
-  double J;    /* 1 J in nmesh units */
-  double W;    /* 1 W in nmesh units */
-  double N;    /* 1 N in nmesh units */
-  double Pa;   /* 1 Pa = 1 N/m^2 = 1 J/m^3 in nmesh units */
-  double eV;   /* 1 eV in nmesh units */
-};
-
-
-/***************************************************************************/
 /* convert from SI to nmesh units */
 /***************************************************************************/
 
 /* global struct that contains the values of various SI units */
-struct tUNIT unit;
+tUnits units;
 
 /* set the values of SI units for G=Msun=c=1 */
-void unit_set_for_GMc1(void)
+void units_set_for_GMc1(void)
 {
   double c     = natureconsts.c;
   double G     = natureconsts.G;
@@ -96,28 +64,28 @@ void unit_set_for_GMc1(void)
   double Msun  = GMsun/G;
   double e     = natureconsts.e;
 
-  unit.m  = (c*c)/GMsun;
-  unit.m2 = unit.m * unit.m;
-  unit.m3 = unit.m * unit.m2;
-  unit.s  = (c*c*c)/GMsun;
-  unit.s2 = unit.s * unit.s;
-  unit.kg = 1./Msun;
-  unit.J  = 1./(Msun*c*c);
-  unit.W  = unit.J / unit.s;
-  unit.N  = unit.J / unit.m;
-  unit.Pa = unit.N / unit.m2; // = unit.J / unit.m3;
-  unit.eV = unit.J * e;
+  units.m  = (c*c)/GMsun;
+  units.m2 = units.m * units.m;
+  units.m3 = units.m * units.m2;
+  units.s  = (c*c*c)/GMsun;
+  units.s2 = units.s * units.s;
+  units.kg = 1./Msun;
+  units.J  = 1./(Msun*c*c);
+  units.W  = units.J / units.s;
+  units.N  = units.J / units.m;
+  units.Pa = units.N / units.m2; // = units.J / units.m3;
+  units.eV = units.J * e;
 }
 
-/* test some entries of unit struct */
-void unit_test_values(void)
+/* test some entries of units struct */
+void units_test_values(void)
 {
-  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(unit.m));
-  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(unit.s));
-  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(unit.kg));
-  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(unit.kg/unit.m3));
-  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(unit.J/unit.m3));
-  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(unit.Pa));
+  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(units.m));
+  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(units.s));
+  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(units.kg));
+  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(units.kg/units.m3));
+  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(units.J/units.m3));
+  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(units.Pa));
 }
 
 
