@@ -2,6 +2,7 @@
 /* Wolfgang Tichy, June 2022 */
 
 /* convert_units.c */
+void unit_set_for_GMc1(void);
 double Length_GMc1_to_SI(double x);
 double Time_GMc1_to_SI(double t);
 double Frequency_GMc1_to_SI(double f);
@@ -15,4 +16,5 @@ void print_natureconsts(void);
 void print_conversion_factors(void);
 
 /* units.c */
+int unit_set_for_GMc1_mesh(tMesh *mesh);
 int print_unit_conversion_factors(tMesh *mesh);

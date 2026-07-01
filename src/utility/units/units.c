@@ -5,6 +5,14 @@
 #include "units.h"
 
 
+/* set global unit struct */
+int unit_set_for_GMc1_mesh(tMesh *mesh)
+{
+  PRFs(": set unit struct for c = G = G*Msun = 1.\n");
+  unit_set_for_GMc1();
+  return 0;
+}
+
 /* print some unit info */
 int print_unit_conversion_factors(tMesh *mesh)
 {

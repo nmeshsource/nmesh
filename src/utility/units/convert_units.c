@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 /***************************************************************************/
-/* struct with constans of nature */
+/* struct with constants of nature */
 /***************************************************************************/
 
-/* constants of nature*/
+/* constants of nature */
 struct tNATURECONSTS
 {
   const double c;      /* speed of light */
@@ -56,6 +56,56 @@ struct tNATURECONSTS natureconsts =
   .m_u   = 1.6605390689252e-27, //[kg],  measured, last 2 digits uncertain
 };
 
+
+/***************************************************************************/
+/* struct with conversion factors from SI to nmesh units */
+/***************************************************************************/
+
+/* struct with values of SI units */
+struct tUNIT
+{
+  double m;    /* 1 m in nmesh units */
+  double m2;   /* 1 m^2 in nmesh units */
+  double m3;   /* 1 m^3 in nmesh units */
+  double s;    /* 1 s in nmesh units */
+  double s2;   /* 1 s^2 in nmesh units */
+  double kg;   /* 1 kg in nmesh units */
+  double J;    /* 1 J in nmesh units */
+  double W;    /* 1 W in nmesh units */
+  double N;    /* 1 N in nmesh units */
+  double Pa;   /* 1 Pa = 1 N/m^2 = 1 J/m^3 in nmesh units */
+  double eV;   /* 1 eV in nmesh units */
+};
+
+
+/***************************************************************************/
+/* convert from SI to nmesh units */
+/***************************************************************************/
+
+/* global struct that contains the values of various SI units */
+struct tUNIT unit;
+
+/* set the values of SI units for G=Msun=c=1 */
+void unit_set_for_GMc1(void)
+{
+  double c     = natureconsts.c;
+  double G     = natureconsts.G;
+  double GMsun = natureconsts.GMsun;
+  double Msun  = GMsun/G;
+  double e     = natureconsts.e;
+
+  unit.m  = (c*c)/GMsun;
+  unit.m2 = unit.m * unit.m;
+  unit.m3 = unit.m * unit.m2;
+  unit.s  = (c*c*c)/GMsun;
+  unit.s2 = unit.s * unit.s;
+  unit.kg = 1./Msun;
+  unit.J  = 1./(Msun*c*c);
+  unit.W  = unit.J / unit.s;
+  unit.N  = unit.J / unit.m;
+  unit.Pa = unit.N / unit.m2; // = unit.J / unit.m3;
+  unit.eV = unit.J * e;
+}
 
 
 /***************************************************************************/
