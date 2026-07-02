@@ -853,13 +853,14 @@ void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u)
 }
 
 /* wrapper for single variable: v = u (iv/u is index of v/u) */
-void varcopy(tMesh *mesh, int iv, int iu)
+void varcopy(tMesh *mesh, tElm *elm , int iv, int iu)
 {
-  tVarList *v = vlalloc(mesh);
-  tVarList *u = vlalloc(mesh);
+  tMesh *mesh_e = (elm)? Elm_mesh(elm) : mesh;
+  tVarList *v = vlalloc(mesh_e);
+  tVarList *u = vlalloc(mesh_e);
   vlpushone(v, iv);
   vlpushone(u, iu);
-  vlcopy(NULL, v, u);
+  vlcopy(elm, v, u);
   vlfree(u);
   vlfree(v);
 }

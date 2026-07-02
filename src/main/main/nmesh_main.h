@@ -226,7 +226,7 @@ void vlsetconst(const void *el, tVarList *u, const double c);
 #define vlsetconstant_node(node, u, c) vlsetconst((node), (u), (c))
 #define vlsetconstant(u, c) vlsetconst(NULL, (u), (c))
 void vlcopy(const void *el, tVarList *v, tVarList *u);
-void varcopy(tMesh *mesh, int iv, int iu);
+void varcopy(tMesh *mesh, tElm *elm , int iv, int iu);
 void vladd(const void *el,
            tVarList *r, double ca, tVarList *a, double cb, tVarList *b);
 void vladdto(const void *el, tVarList *r, const double ca, tVarList *a);
