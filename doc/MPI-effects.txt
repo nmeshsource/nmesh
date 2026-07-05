@@ -93,3 +93,5 @@ Resolution for reproducible runs
      center1_track = circle
      center2_track = circle
    (of course for real runs we need center1_track=min)
+  +if we also want sums like scalarwave1_pi_VolInt.t to be reproducible set:
+     amr_loadbalance_hours = -1
