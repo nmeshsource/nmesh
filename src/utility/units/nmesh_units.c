@@ -11,7 +11,7 @@ int nmesh_units(tMesh *mesh)
   printf("Adding units\n");
 
   /* functions */
-  AddFun(POST_INITLIBS, units_set_SItoGMc1_mesh);
+  AddFun(POST_INITLIBS, units_set_SItoGMc1_GMc1toSI);
   AddFun(POST_INITIALDATA, print_unit_conversion_factors);
 
   /* variables */

@@ -6,7 +6,7 @@
 
 
 /* set global unit struct */
-int units_set_SItoGMc1_mesh(tMesh *mesh)
+int units_set_SItoGMc1_GMc1toSI(tMesh *mesh)
 {
   PRFs(": set SItoGMc1 struct for c = G = G*Msun = 1.\n");
   units_set_SItoGMc1();

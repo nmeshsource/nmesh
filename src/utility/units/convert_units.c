@@ -74,7 +74,7 @@ void units_set_SItoGMc1(void)
   SItoGMc1.W  = SItoGMc1.J / SItoGMc1.s;
   SItoGMc1.N  = SItoGMc1.J / SItoGMc1.m;
   SItoGMc1.Pa = SItoGMc1.N / SItoGMc1.m2; // = SItoGMc1.J / SItoGMc1.m3;
-  SItoGMc1.eV = SItoGMc1.J * e;
+  SItoGMc1.MeV= SItoGMc1.J * e * 1e6;
 }
 
 /* test some entries of SItoGMc1 struct */
@@ -92,6 +92,32 @@ void units_test_tSItoGMc1(void)
 /***************************************************************************/
 /* convert from units with G=c=Msun=1 to SI */
 /***************************************************************************/
+
+/* global struct that contains the values of various SI units */
+tGMc1toSI GMc1toSI;
+
+/* set the values of G=Msun=c=1 units in SI units */
+void units_set_GMc1toSI(void)
+{
+  double c     = natureconsts.c;
+  double c2    = c*c;
+  double G     = natureconsts.G;
+  double GMsun = natureconsts.GMsun;
+  double Msun  = GMsun/G;
+
+  GMc1toSI.Length = GMsun / c2;
+  GMc1toSI.Area   = GMc1toSI.Length * GMc1toSI.Length;
+  GMc1toSI.Volume = GMc1toSI.Area   * GMc1toSI.Length;
+  GMc1toSI.Time   = GMc1toSI.Length / c;
+  GMc1toSI.Mass   = Msun;
+  GMc1toSI.Energy = GMc1toSI.Mass *c2;
+  GMc1toSI.Power  = GMc1toSI.Energy / GMc1toSI.Time;
+  GMc1toSI.Force  = GMc1toSI.Energy / GMc1toSI.Length;
+  GMc1toSI.Press  = GMc1toSI.Force / GMc1toSI.Area;
+  GMc1toSI.Edens  = GMc1toSI.Energy / GMc1toSI.Volume;
+  GMc1toSI.Mdens  = GMc1toSI.Mass / GMc1toSI.Volume;
+}
+
 
 /* Length in SI units */
 double Length_GMc1_to_SI(double x)

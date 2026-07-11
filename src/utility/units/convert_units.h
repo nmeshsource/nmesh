@@ -19,7 +19,7 @@ typedef struct
 
 
 /***************************************************************************/
-/* struct with conversion factors from SI to nmesh units */
+/* struct with conversion factors from SI to G=Msun=c=1 units */
 /***************************************************************************/
 
 /* struct with values of SI units */
@@ -35,8 +35,29 @@ typedef struct
   double W;    /* 1 W in nmesh units */
   double N;    /* 1 N in nmesh units */
   double Pa;   /* 1 Pa = 1 N/m^2 = 1 J/m^3 in nmesh units */
-  double eV;   /* 1 eV in nmesh units */
+  double MeV;  /* 1 MeV in nmesh units */
 } tSItoGMc1;
+
+
+/***************************************************************************/
+/* struct with conversion factors from G=Msun=c=1 units to SI */
+/***************************************************************************/
+
+/* struct with values of SI units */
+typedef struct
+{
+  double Length;  /* Length=1 in m */
+  double Area;    /* Area=1 in m^2 */
+  double Volume;  /* Volume=1 in m^3 */
+  double Time;    /* Time=1 in s */
+  double Mass ;   /* Mass=1 in kg */
+  double Energy;  /* Energy=1 in J */
+  double Power;   /* Power=1 in W=J/s */
+  double Force;   /* Force=1 in N */
+  double Press;   /* Press=1 in Pa=N/m^2=J/m^3 */
+  double Edens;   /* Edens=1 in J/m^3 */
+  double Mdens;   /* Mdens=1 in kg/m^3 */
+} tGMc1toSI;
 
 
 /***************************************************************************/
