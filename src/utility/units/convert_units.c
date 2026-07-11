@@ -77,17 +77,6 @@ void units_set_SItoGMc1(void)
   SItoGMc1.MeV= SItoGMc1.J * e * 1e6;
 }
 
-/* test some entries of SItoGMc1 struct */
-void units_test_tSItoGMc1(void)
-{
-  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(SItoGMc1.m));
-  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(SItoGMc1.s));
-  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(SItoGMc1.kg));
-  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(SItoGMc1.kg/SItoGMc1.m3));
-  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(SItoGMc1.J/SItoGMc1.m3));
-  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(SItoGMc1.Pa));
-}
-
 
 /***************************************************************************/
 /* convert from units with G=c=Msun=1 to SI */
@@ -186,6 +175,33 @@ double Pressure_GMc1_to_SI(double P)
   double a = Acceleration_GMc1_to_SI(1.);
   double Msun = Mass_GMc1_to_SI(1.);
   return P * Msun*a/(L*L);
+}
+
+
+/* test some entries of the SItoGMc1 and GMc1toSI structs */
+void units_test_SItoGMc1_GMc1toSI(void)
+{
+  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(SItoGMc1.m));
+  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(SItoGMc1.s));
+  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(SItoGMc1.kg));
+  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(SItoGMc1.kg/SItoGMc1.m3));
+  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(SItoGMc1.J/SItoGMc1.m3));
+  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(SItoGMc1.Pa));
+
+  printf("GMc1toSI.Length = %.19g\n", GMc1toSI.Length);
+  printf("GMc1toSI.Area   = %.19g\n", GMc1toSI.Area);
+  printf("GMc1toSI.Volume = %.19g\n", GMc1toSI.Volume);
+  printf("GMc1toSI.Time   = %.19g\n", GMc1toSI.Time);
+  printf("GMc1toSI.Mass   = %.19g\n", GMc1toSI.Mass);
+  printf("GMc1toSI.Energy = %.19g\n", GMc1toSI.Energy);
+  printf("GMc1toSI.Power  = %.19g\n", GMc1toSI.Power);
+  printf("GMc1toSI.Force  = %.19g\n", GMc1toSI.Force);
+  printf("GMc1toSI.Press  = %.19g\n", GMc1toSI.Press);
+  printf("GMc1toSI.Edens  = %.19g\n", GMc1toSI.Edens);
+  printf("GMc1toSI.Mdens  = %.19g\n", GMc1toSI.Mdens);
+
+  printf("h in G=Msun=c=1 units is %.19g\n",
+         natureconsts.h * SItoGMc1.J * SItoGMc1.s);
 }
 
 
