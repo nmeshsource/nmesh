@@ -8,10 +8,10 @@
 /* set global unit struct */
 int units_set_SItoGMc1_GMc1toSI(tMesh *mesh)
 {
-  PRFs(": set SItoGMc1 struct for c = G = G*Msun = 1.\n");
+  PRFs(": set SItoGMc1 GMc1toSI structs for unit conversions.\n");
   units_set_SItoGMc1();
   units_set_GMc1toSI();
-  units_test_SItoGMc1_GMc1toSI();
+  //units_test_SItoGMc1_GMc1toSI();
   return 0;
 }
 
