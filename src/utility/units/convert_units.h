@@ -36,14 +36,14 @@ typedef struct
   double N;    /* 1 N in nmesh units */
   double Pa;   /* 1 Pa = 1 N/m^2 = 1 J/m^3 in nmesh units */
   double eV;   /* 1 eV in nmesh units */
-} tUnits;
+} tSItoGMc1;
 
 
 /***************************************************************************/
 /* functions in convert_units.c */
 /***************************************************************************/
-void units_set_for_GMc1(void);
-void units_test_values(void);
+void units_set_SItoGMc1(void);
+void units_test_tSItoGMc1(void);
 double Length_GMc1_to_SI(double x);
 double Time_GMc1_to_SI(double t);
 double Frequency_GMc1_to_SI(double f);

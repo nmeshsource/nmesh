@@ -53,10 +53,10 @@ tNatureconsts natureconsts =
 /***************************************************************************/
 
 /* global struct that contains the values of various SI units */
-tUnits units;
+tSItoGMc1 SItoGMc1;
 
 /* set the values of SI units for G=Msun=c=1 */
-void units_set_for_GMc1(void)
+void units_set_SItoGMc1(void)
 {
   double c     = natureconsts.c;
   double G     = natureconsts.G;
@@ -64,28 +64,28 @@ void units_set_for_GMc1(void)
   double Msun  = GMsun/G;
   double e     = natureconsts.e;
 
-  units.m  = (c*c)/GMsun;
-  units.m2 = units.m * units.m;
-  units.m3 = units.m * units.m2;
-  units.s  = (c*c*c)/GMsun;
-  units.s2 = units.s * units.s;
-  units.kg = 1./Msun;
-  units.J  = 1./(Msun*c*c);
-  units.W  = units.J / units.s;
-  units.N  = units.J / units.m;
-  units.Pa = units.N / units.m2; // = units.J / units.m3;
-  units.eV = units.J * e;
+  SItoGMc1.m  = (c*c)/GMsun;
+  SItoGMc1.m2 = SItoGMc1.m * SItoGMc1.m;
+  SItoGMc1.m3 = SItoGMc1.m * SItoGMc1.m2;
+  SItoGMc1.s  = (c*c*c)/GMsun;
+  SItoGMc1.s2 = SItoGMc1.s * SItoGMc1.s;
+  SItoGMc1.kg = 1./Msun;
+  SItoGMc1.J  = 1./(Msun*c*c);
+  SItoGMc1.W  = SItoGMc1.J / SItoGMc1.s;
+  SItoGMc1.N  = SItoGMc1.J / SItoGMc1.m;
+  SItoGMc1.Pa = SItoGMc1.N / SItoGMc1.m2; // = SItoGMc1.J / SItoGMc1.m3;
+  SItoGMc1.eV = SItoGMc1.J * e;
 }
 
-/* test some entries of units struct */
-void units_test_values(void)
+/* test some entries of SItoGMc1 struct */
+void units_test_tSItoGMc1(void)
 {
-  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(units.m));
-  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(units.s));
-  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(units.kg));
-  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(units.kg/units.m3));
-  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(units.J/units.m3));
-  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(units.Pa));
+  printf("1m in SI is %.19g\n", Length_GMc1_to_SI(SItoGMc1.m));
+  printf("1s in SI is %.19g\n", Time_GMc1_to_SI(SItoGMc1.s));
+  printf("1kg in SI is %.19g\n", Mass_GMc1_to_SI(SItoGMc1.kg));
+  printf("1kg/m^3 in SI is %.19g\n", MassDensity_GMc1_to_SI(SItoGMc1.kg/SItoGMc1.m3));
+  printf("1J/m^3 in SI is %.19g\n", EnergyDensity_GMc1_to_SI(SItoGMc1.J/SItoGMc1.m3));
+  printf("1Pa in SI is %.19g\n", Pressure_GMc1_to_SI(SItoGMc1.Pa));
 }
 
 
