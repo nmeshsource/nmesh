@@ -14,7 +14,10 @@ typedef struct
   const double h;      /* Planck's constant */
   const double k_B;    /* Boltzmann constant */
   const double e;      /* electron charge */
+  const double m_e;    /* electron mass */
   const double m_u;    /* unified atomic mass unit, (unbound C atom mass)/12 */
+  const double m_n;    /* neutron mass */
+  const double m_p;    /* proton mass */
 } tNatureconsts;
 
 

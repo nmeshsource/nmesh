@@ -40,11 +40,15 @@ tNatureconsts natureconsts =
      we use here.
      On https://ssd.jpl.nasa.gov/planets/phys_par.html it lists only planets.
   */
-  /* From: CODATA values of the fundamental physical constants 2022: */
+  /* From: CODATA values of the fundamental physical constants 2022
+     ( see https://physics.nist.gov/cuu/Constants ): */
   .h     = 6.62607015e-34, // [J s],         h is defined to have this value
   .k_B   = 1.380649e-23,   // [J/K],       k_B is defined to have this value
   .e     = 1.602176634e-19,// [C],           e is defined to have this value
-  .m_u   = 1.6605390689252e-27, //[kg],  measured, last 2 digits uncertain
+  .m_e   = 9.1093837139e-31,  // [kg],     measured, last 2 digits +-28
+  .m_u   = 1.66053906892e-27, // [kg],     measured, last 2 digits +-52
+  .m_n   = 1.67492750056e-27, // [kg],     measured, last 2 digits +-85
+  .m_p   = 1.67262192595e-27, // [kg],     measured, last 2 digits +-52
 };
 
 
