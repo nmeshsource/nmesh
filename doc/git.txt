@@ -4,10 +4,10 @@ Using git with nmesh
 *nmesh is spread over several git repos:
  -there is the main part of nmesh, all in one repo, in the dir nmesh
  -there is a separate git repo for each project
- -all project repos are in src/projects/
+ -all project repos are placed into src/projects/
 
 *If you type a git command in the main dir, it applies only to the main part
- of git, not to any project. But there is
+ of nmesh, not to any project. But there is
 make git_clone
 make git_pull
  These 2 will clone or pull all repos mentioned in MyConfig.
@@ -93,9 +93,9 @@ git push
 ##########################################################
 # Conflicts
 ##########################################################
-# Sometimes others may have made changes that conflict with you have done.
-# If that happens, you can EITHER study git more thoroughly online,
-# and the resolve the conflict in the proper git way, OR you can simply
+# Sometimes others may have made changes that conflict with what you have
+# done. If that happens, you can EITHER study git more thoroughly online,
+# and then resolve the conflict in the proper git way, OR you can simply
 # rename the repo dir and clone it again to get a clean copy. You can then
 # add your changes to this clean copy without conflicts! The later is often
 # better for inexperienced git users.
