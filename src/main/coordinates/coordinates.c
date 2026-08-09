@@ -695,7 +695,7 @@ void coordinates_set_sqrtdet2g_o_det3gamma_var(tNode *node, int igxx,
 void coordinates_set_sqrtgdiag_var(tNode *node, int idXdx, int igxx,
                                    int isqrtgdiagx)
 {
-  /* 3 arrays for dXdx on midpoints */
+  /* 3x3 arrays for dXdx on midpoints */
   tArray *AdXdx[3][3] =
     { { VarA(node,idXdx),   VarA(node,idXdx+1), VarA(node,idXdx+2) },
       { VarA(node,idXdx+3), VarA(node,idXdx+4), VarA(node,idXdx+5) },
@@ -804,6 +804,44 @@ void coordinates_set_sqrtgdiag_array(tNode *node, tArray *AdXdx[3][3],
   free_array(adXdxT);
 }
 
+/* Write g_{XX,YY,ZZ}) (in X-coords) into the 3 arrays AgXXdiag[i].
+   We calculate AgXXdiag from dXdx[3][3] and the symm. 3-metric in
+   Agxx[6] in x-coords. */
+void coordinates_set_gdiag_array(tNode *node, tArray *AdXdx[3][3],
+                                 tArray *Agxx[6], tArray *AgXXdiag[3])
+{
+  double *gxx = Arrd(Agxx[0]);
+  double *gxy = Arrd(Agxx[1]);
+  double *gxz = Arrd(Agxx[2]);
+  double *gyy = Arrd(Agxx[3]);
+  double *gyz = Arrd(Agxx[4]);
+  double *gzz = Arrd(Agxx[5]);
+  double *gXX[] = {Arrd(AgXXdiag[0]), Arrd(AgXXdiag[1]), Arrd(AgXXdiag[2])};
+  int ijk;
+
+  forarray(AgXXdiag[0], ijk)
+  {
+    int i,j, l;
+    double dXdx[3][3], dxdX[3][3];
+    double g[] = {gxx[ijk], gxy[ijk], gxz[ijk], gyy[ijk], gyz[ijk], gzz[ijk]};
+
+    /* get dXdx and its inverse dxdX at point ijk */
+    for(i=0; i<3; i++)
+      for(j=0; j<3; j++)
+        dXdx[i][j] = Arrd(AdXdx[i][j])[ijk];
+    inv3Dmat_from_3Dmat(dXdx, dxdX);
+
+    /* calc:  v2_k = g_kl dx^l/dX^I,  dx^l/dX^I = dxdX[l][I] =: v1_l
+              g_II = dx^k/dX^I g_kl dx^l/dX^I = v1_k v2_k */
+    for(i=0; i<3; i++)
+    {
+      double v1[3], v2[3];
+      for(l=0; l<3; l++) v1[l] = dxdX[l][i];
+      symmmat_times_vec(3, g, v1, v2);
+      gXX[i][ijk] = vec_times_vec(3, v1, v2);
+    }
+  }
+}
 
 /********************************************************************/
 /* some functions to convert between pat->xyz_of_XYZ and labels */
