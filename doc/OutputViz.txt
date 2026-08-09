@@ -25,7 +25,7 @@ Nmesh output:
 
 1d visualization:
 =================
-*1d data is best looked at with tgraph.
+*1d data is best looked at with tgraph, see https://github.com/wofti/tgraph .
 
 
 2d and 3d visualization:
