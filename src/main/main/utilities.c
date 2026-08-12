@@ -421,6 +421,19 @@ int get_par_from_str(const char *str, char *name, const char *delim,
   return ret;
 }
 
+/* parse a string until the string par is found and then write the chars
+   after delim into parval,
+   returns 0 if str does not contain par
+   returns 1 if str contains the delimiter delim (e.g. "=") otherwise 0. */
+int get_parval_from_str(const char *str, const char *par, const char *delim,
+                        char *parval, int n)
+{
+  char name[n];
+  char *st = strstr(str, par);
+  if(!st) return 0;
+  return get_par_from_str(st, name, delim, parval, n);
+}
+
 /* convert a string to an intList */
 int str_to_intList(const char *str, const char *delim, intList *il)
 {

@@ -281,6 +281,8 @@ int remove_chars_from_str(char *str, const char *del);
 void trim_whitespace(char *str);
 int get_par_from_str(const char *str, char *name, const char *delim,
                      char *value, int n);
+int get_parval_from_str(const char *str, const char *par, const char *delim,
+                        char *parval, int n);
 int str_to_intList(const char *str, const char *delim, intList *il);
 long str_from_buf(const char *buffer, long nbuffer, long offset,
                   char delim, char *str, long nstr, long *strlen);
