@@ -39,12 +39,17 @@ timer_on = no # yes
 
 logfile_creation = no
 
-0douttime = 0.4
+0douttime = 0.2
 0doutput = scalarwave1_pi scalarwave1_pi_err
 
-1douttime = 0.4
+1douttime = 0.2
+1dformat = gnuplot
 1doutput = scalarwave1_pi
 
-2douttime = 0.4
+2douttime = 0.2
 2doutput = scalarwave1_pi
-2dformat = xdmf
+2dformat = sdmf
+
+3douttime = 0.2
+3doutput = scalarwave1_pi
+3dformat = sdmf
