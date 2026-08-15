@@ -77,6 +77,7 @@ void free_surface(tSurface *s)
 void free_all_surfaces(tNode *node)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int vi,f;
 
   if(!dat) return;
@@ -84,7 +85,7 @@ void free_all_surfaces(tNode *node)
   /* free all surfaces */
   for(f=0; f<6; f++)
   {
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
     {
       free_surface(dat->s[f][vi]);
       dat->s[f][vi] = NULL;
@@ -159,6 +160,7 @@ tSurface *init_surface(tNode *node, int face, int vi)
 int init_all_surfaces(tNode *node)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int face, vi, cnt;
 
   if(!dat) return 0;
@@ -166,7 +168,7 @@ int init_all_surfaces(tNode *node)
   cnt=0;
   for(face=0; face<6; face++)
   {
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
     {
       free_surface(dat->s[face][vi]);
       dat->s[face][vi] = init_surface(node, face, vi);
@@ -224,13 +226,14 @@ void set_mysurf(tSurface *s)
 int set_all_mysurf(tNode *node)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int face, vi, cnt;
 
   if(!dat) return 0;
 
   cnt=0;
   for(face=0; face<6; face++)
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
     {
       tSurface *s = dat->s[face][vi];
       if(s)
@@ -263,6 +266,7 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
                            int *nvars, int *vind, int my_n[3], int nb_n[3])
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int todo=1;
   int vi, i;
   int my_dir = my_f/2;
@@ -273,7 +277,7 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
 
   /* count number of vars that have surfaces to be exchanged and set myN */
   *nvars=0;
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     int zones = MeshVarSurfacezones(node->pat->mesh, vi);
     if(zones && dat->v[vi])
@@ -300,6 +304,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int nb_f, nb_ni;
   int found, vi;
 
@@ -325,7 +330,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   if(nb->dat)
   {
     /* nb is local so just point s->nbsurf[ni] to its data */
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
     {
       tSurface *my_s = dat->s[face][vi];
       tSurface *nb_s = nb->dat->s[nb_f][vi];
@@ -397,7 +402,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     /* fill send buffer */
     cnt=0;
     si=0;
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
     {
       s = dat->s[face][vi];
       zones = MeshVarSurfacezones(node->pat->mesh, vi);
@@ -545,7 +550,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
 
 //  /* get data out of recv buffer */
 //  cnt=0;
-//  for(vi=0; vi<dat->nv; vi++)
+//  forVind(vls, vi)
 //  {
 //    tSurface *s = dat->s[face][vi];
 //
@@ -747,9 +752,10 @@ int same_node_n_normal_to_norm1_2(tNode *node1, int norm1,
 /* return the first surface tht is not NULL */
 tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 {
+  tVarList *vls = amr->vlSurfExch;
   int vi;
   tSurface *s = NULL;
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     s = dat->s[f][vi];
     if(s) break;
@@ -763,6 +769,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
 {
   tMesh *mesh = Elm_mesh(node);
   tPat *pat = node->pat;
+  tVarList *vls = amr->vlSurfExch;
   int nnb = node->nfnb[f];
   int dir = f/2;
   //int p = (node->n[dir] - 1) * (f%2); /* plane of surface */
@@ -799,7 +806,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
            ajsurf to nbsurf[0] */
         if(same_n_t)
         {
-          for(vi=0; vi<dat->nv; vi++)
+          forVind(vls, vi)
           {
             tSurface *s = dat->s[f][vi];
             /* do nothing if this surface is NULL */
@@ -916,7 +923,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* just copy by pointing to same array */
                     if(PR) printf(" point ajsurf to nbsurf[0]\n");
-                    for(vi=0; vi<dat->nv; vi++)
+                    forVind(vls, vi)
                     {
                       tSurface *s = dat->s[f][vi];
                       /* do nothing if this surface is NULL */
@@ -1163,7 +1170,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       useLagrangeUNI = 1;
 
   /* now loop over all vars and interpolate */
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     tSurface *s = dat->s[f][vi];
     if(s)
@@ -1325,6 +1332,7 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
                               int intrch, int rev1, int rev2)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int dir = f/2;
   //int d1 = Dir1_norm(dir);
   //int d2 = Dir2_norm(dir);
@@ -1337,7 +1345,7 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
   //int on2 = nb_n[od2];
   int oi,oj,ok;
 
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     tSurface *s = dat->s[f][vi];
     if(s)
@@ -1503,12 +1511,13 @@ void free_nbsurf_only(tSurface *s)
 void free_nbsurf_only_forall_vars(tNode *node, int f)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int vi;
 
   if(!dat) return;
 
   /* free all nbsurf on face f */
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
     free_nbsurf_only(dat->s[f][vi]);
 }
 
@@ -1516,13 +1525,14 @@ void free_nbsurf_only_forall_vars(tNode *node, int f)
 void free_all_nbsurf_only(tNode *node)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int vi,f;
 
   if(!dat) return;
 
   /* free all nbsurf */
   for(f=0; f<6; f++)
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
       free_nbsurf_only(dat->s[f][vi]);
 }
 
@@ -1555,12 +1565,13 @@ void free_ajsurf_only(tSurface *s)
 void free_ajsurf_only_forall_vars(tNode *node, int f)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int vi;
 
   if(!dat) return;
 
   /* free all ajsurf on face f */
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
     free_ajsurf_only(dat->s[f][vi]);
 }
 
@@ -1568,13 +1579,14 @@ void free_ajsurf_only_forall_vars(tNode *node, int f)
 void free_all_ajsurf_only(tNode *node)
 {
   tDat *dat = node->dat;
+  tVarList *vls = amr->vlSurfExch;
   int vi,f;
 
   if(!dat) return;
 
   /* free all ajsurf */
   for(f=0; f<6; f++)
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
       free_ajsurf_only(dat->s[f][vi]);
 }
 
