@@ -166,7 +166,7 @@ int init_all_surfaces(tNode *node)
   cnt=0;
   for(face=0; face<6; face++)
   {
-    for(vi=0; vi<node->dat->nv; vi++)
+    for(vi=0; vi<dat->nv; vi++)
     {
       free_surface(dat->s[face][vi]);
       dat->s[face][vi] = init_surface(node, face, vi);
@@ -230,7 +230,7 @@ int set_all_mysurf(tNode *node)
 
   cnt=0;
   for(face=0; face<6; face++)
-    for(vi=0; vi<node->dat->nv; vi++)
+    for(vi=0; vi<dat->nv; vi++)
     {
       tSurface *s = dat->s[face][vi];
       if(s)
@@ -272,7 +272,8 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
   *vind=0;
 
   /* count number of vars that have surfaces to be exchanged and set myN */
-  for(*nvars=0, vi=0; vi<dat->nv; vi++)
+  *nvars=0;
+  for(vi=0; vi<dat->nv; vi++)
   {
     int zones = MeshVarSurfacezones(node->pat->mesh, vi);
     if(zones && dat->v[vi])
@@ -324,7 +325,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   if(nb->dat)
   {
     /* nb is local so just point s->nbsurf[ni] to its data */
-    for(vi=0; vi<node->dat->nv; vi++)
+    for(vi=0; vi<dat->nv; vi++)
     {
       tSurface *my_s = dat->s[face][vi];
       tSurface *nb_s = nb->dat->s[nb_f][vi];
@@ -394,7 +395,9 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     rq = append_buffers_to_com(com, sbuf, nvars*my_N, rbuf,nvars*nb_N);
 
     /* fill send buffer */
-    for(cnt=0, si=0, vi=0; vi<node->dat->nv; vi++)
+    cnt=0;
+    si=0;
+    for(vi=0; vi<dat->nv; vi++)
     {
       s = dat->s[face][vi];
       zones = MeshVarSurfacezones(node->pat->mesh, vi);
@@ -541,7 +544,8 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   set_com_recv_buf(com, rq, NULL);
 
 //  /* get data out of recv buffer */
-//  for(cnt=0, vi=0; vi<node->dat->nv; vi++)
+//  cnt=0;
+//  for(vi=0; vi<dat->nv; vi++)
 //  {
 //    tSurface *s = dat->s[face][vi];
 //

@@ -197,9 +197,13 @@
 #define forvari(node,varindex, k) \
   forarray(node->dat->v[(varindex)], k)
 
-/* loop over var indices of a var list */
+/* loop over the var list indices of a var list */
 #define forvl(vl, vli) \
   for(vli=0; vli<vl->n; vli++)
+
+/* loop over the var indices of the vars inside a var list */
+#define forVind(vl, vi) \
+  for(int vli_=0; vi=vl->index[vli_], vli_<vl->n; vli_++)
 
 /* get global var index from entry vli in VarList vl */
 #define Vind(vl, vli) vl->index[vli]

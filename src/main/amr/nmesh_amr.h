@@ -406,6 +406,7 @@ typedef struct {
   int WENO_interp_order;     /* Par("amr_WENO_interp_order") */
   int force_interp_scheme;   /* can be 0, INTERP_LAGRANGE, INTERP_WENO, ... */
   int elm_nbinfo0;     /* Ind("amr_elm_nbinfo0") */
+  tVarList *vlSurfExch;      /* list of vars that need surface exchange */
 } tAMR;
 
 
