@@ -566,25 +566,20 @@ void print_ef(khash_t(u32_gptr) *ef);
 /* surface.c */
 int init_all_surfaces(tNode *node);
 int set_all_mysurf(tNode *node);
-void request_all_surfaces_exchange(tNode *node);
+void init_all_myln_surfaces(tMesh *mesh);  //only for misc.c
+void free_all_myln_surfaces(tMesh *mesh);  //only for misc.c
+void set_all_myln_mysurf(tMesh *mesh);  //only for misc.c
+void request_all_myln_surfaces_exchange(tMesh *mesh);  //only for misc.c
 void get_all_surfaces(tNode *node);
-void free_dat_reqs_after_Waitall_com_send(tNode *node);
-void init_all_myln_surfaces(tMesh *mesh);
-void free_all_myln_surfaces(tMesh *mesh);
-void set_all_myln_mysurf(tMesh *mesh);
-void request_all_myln_surfaces_exchange(tMesh *mesh);
-void get_all_surfaces(tNode *node);
-void get_all_myln_surfaces(tMesh *mesh);
-int causeMPIprogress_all_myln_surfaces(tMesh *mesh, int sendrecv);
+void get_all_myln_surfaces(tMesh *mesh);  //only for misc.c
 void set_all_ajsurf(tNode *node);
-void free_all_myln_nbsurf_only(tMesh *mesh);
+void free_all_myln_nbsurf_only(tMesh *mesh);  //only for misc.c
 void free_all_ajsurf_only(tNode *node);
-void surface_copy_all_pointers(tNode *node_src, tNode *node_dest);
 void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest);
-void init_all_vl_surfaces(tMesh *mesh, tVarList *vl);
+//void init_all_vl_surfaces(tMesh *mesh, tVarList *vl);
 void set_all_vl_mysurf(tNode *node, tVarList *vl);
 void request_all_vl_surfaces(tNode *node, tVarList *vl);
-void get_all_vl_surfaces(tNode *node, tVarList *vl);
+//void get_all_vl_surfaces(tNode *node, tVarList *vl);
 void free_all_vl_surfaces(tNode *node, tVarList *vl);
 
 /* load.c */
