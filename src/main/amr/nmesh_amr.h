@@ -566,6 +566,7 @@ void print_ef(khash_t(u32_gptr) *ef);
 /* surface.c */
 int init_all_surfaces(tNode *node);
 int set_all_mysurf(tNode *node);
+void request_all_surfaces_exchange(tNode *node);  //only for SurfExchange.c
 void init_all_myln_surfaces(tMesh *mesh);  //only for misc.c
 void free_all_myln_surfaces(tMesh *mesh);  //only for misc.c
 void set_all_myln_mysurf(tMesh *mesh);  //only for misc.c
