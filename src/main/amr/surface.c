@@ -57,6 +57,14 @@ tVarList *vlalloc_AddVarsWithSurfacezones(tMesh *mesh)
   return vls;
 }
 
+/**********************************************************************/
+/* NOTE: The functions below loop only over a varlist (not all vars).
+   But even so, all vars that with MeshVarSurfacezones(mesh,vi)=0 etc. (see
+   e.g. init_surface) are still not included. This mat not be what we
+   intend! It maybe be better to add surfaces to all vars in the varlist
+   even if they have MeshVarSurfacezones(mesh,vi)=0. */
+/**********************************************************************/
+
 
 /**********************************************************************/
 /* allocate and fill surfaces for vars that need it */
