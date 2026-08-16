@@ -1724,7 +1724,7 @@ void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest)
 /*************************************************************************/
 /*************************************************************************/
 
-/* we need the functions below, but they are UNFINISHED!!! */
+/* we may need the functions below, but they are UNFINISHED!!! */
 
 
 /* init surfaces for a VarList */
