@@ -578,11 +578,11 @@ void set_all_ajsurf(tNode *node, tVarList *vls);
 void free_all_myln_nbsurf_only(tMesh *mesh, tVarList *vls);  //only for misc.c
 void free_all_ajsurf_only(tNode *node, tVarList *vls);
 void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest);
-//void init_all_vl_surfaces(tMesh *mesh, tVarList *vl);
-void set_all_vl_mysurf(tNode *node, tVarList *vl);
-void request_all_vl_surfaces(tNode *node, tVarList *vl);
-//void get_all_vl_surfaces(tNode *node, tVarList *vl);
-void free_all_vl_surfaces(tNode *node, tVarList *vl);
+//void init_all_vl_surfaces__UNFINISHED(tMesh *mesh, tVarList *vl);
+void set_all_vl_mysurf__UNFINISHED(tNode *node, tVarList *vl);
+void request_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl);
+//void get_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl);
+void free_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);

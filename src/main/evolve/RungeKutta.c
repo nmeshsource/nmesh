@@ -351,7 +351,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
 
 /*************************************************************************/
 /* functions to evolve on just one node
-   will work only once request_all_vl_surfaces and such in
+   will work only once request_all_vl_surfaces__UNFINISHED and such in
    main/amr/surface.c start working
 */
 /*************************************************************************/

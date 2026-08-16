@@ -1728,19 +1728,19 @@ void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest)
 
 
 /* init surfaces for a VarList */
-void init_all_vl_surfaces(tMesh *mesh, tVarList *vl)
+void init_all_vl_surfaces__UNFINISHED(tMesh *mesh, tVarList *vl)
 {
   init_all_myln_surfaces(mesh, vl);
 }
 
 /* set mysurf for one node and a VarList */
-void set_all_vl_mysurf(tNode *node, tVarList *vl)
+void set_all_vl_mysurf__UNFINISHED(tNode *node, tVarList *vl)
 {
   set_all_mysurf(node, vl);
 }
 
 /* request surface exchange for one node and a VarList */
-void request_all_vl_surfaces(tNode *node, tVarList *vl)
+void request_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
   request_all_surfaces_exchange(node, vl);
   /* ^-We should really adapt this to using MPI Windows */
@@ -1751,14 +1751,14 @@ void request_all_vl_surfaces(tNode *node, tVarList *vl)
 }
 
 /* get surfaces on one node for a varlist */
-void get_all_vl_surfaces(tNode *node, tVarList *vl)
+void get_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
   get_all_surfaces(node, vl);
   free_dat_reqs_after_Waitall_com_send(node); //not needed if we use MPI windows
 }
 
 /* free all surfaces on one node for a varlist */
-void free_all_vl_surfaces(tNode *node, tVarList *vl)
+void free_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
   //FIXME: not needed if we use MPI windows
   free_dat_reqs_after_Waitall_com_send(node);

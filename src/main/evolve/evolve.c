@@ -790,7 +790,7 @@ int evolve_output_timers(tMesh *mesh)
 
 /*************************************************************************/
 /* functions to evolve on just one node
-   will work only once request_all_vl_surfaces and such in
+   will work only once request_all_vl_surfaces__UNFINISHED and such in
    main/amr/surface.c start working
 */
 /*************************************************************************/
