@@ -43,8 +43,8 @@ void free_surface(tSurface *s);
 tSurface *init_surface(tNode *node, int vi, int face);
 void set_mysurf(tSurface *s);
 void free_dat_reqs_after_Waitall_com_send(tNode *node);
-void set_ajsurf_forall_vars(tNode *node, tVarList *vls, int f);
-void free_nbsurf_only_forall_vars(tNode *node, tVarList *vls, int f);
+void set_ajsurf_vl(tNode *node, tVarList *vls, int f);
+void free_nbsurf_only_vl(tNode *node, tVarList *vls, int f);
 void copy_ajsurf_from_nbsurf0(tNode *node, tVarList *vls, int f, int nb_f,
                               int intrch, int rev1, int rev2);
 

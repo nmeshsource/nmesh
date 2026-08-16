@@ -158,7 +158,7 @@ void MPIexchange_init_all_myln(tMesh *mesh)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    init_all_myln_surfaces(mesh, amr->vlSurfExch);
+    init_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -175,7 +175,7 @@ void MPIexchange_init(tElm *elm)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    init_all_surfaces(elm, amr->vlSurfExch);
+    init_all_vl_surfaces(elm, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -195,7 +195,7 @@ void MPIexchange_set_all_myln_localdata(tMesh *mesh)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    set_all_myln_mysurf(mesh, amr->vlSurfExch);
+    set_all_vl_mysurf_mesh(mesh, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -212,7 +212,7 @@ void MPIexchange_set_localdata(tElm *elm)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    set_all_mysurf(elm, amr->vlSurfExch);
+    set_all_vl_mysurf(elm, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -231,7 +231,7 @@ void MPIexchange_request_all_myln_data(tMesh *mesh)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    request_all_myln_surfaces_exchange(mesh, amr->vlSurfExch);
+    request_all_vl_surfaces_exchange_mesh(mesh, amr->vlSurfExch);
     break;
   case 2:
     request_all_myln_ghostdata(mesh);
@@ -251,7 +251,7 @@ void MPIexchange_get_all_myln_data(tMesh *mesh)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    get_all_myln_surfaces(mesh, amr->vlSurfExch);
+    get_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
     break;
   case 2:
     get_all_myln_ghostdata(mesh);
@@ -271,7 +271,7 @@ void MPIexchange_free_all_myln(tMesh *mesh)
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    free_all_myln_surfaces(mesh, amr->vlSurfExch);
+    free_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
     break;
   case 2:
     break;

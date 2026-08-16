@@ -952,18 +952,18 @@ int test_ajsurf(tMesh *mesh)
 
   /* exchange surfaces */
   prdivider(0);
-  PRF;printf(": request_all_myln_surfaces_exchange\n");
-  init_all_myln_surfaces(mesh, amr->vlSurfExch);
-  set_all_myln_mysurf(mesh, amr->vlSurfExch);
-  request_all_myln_surfaces_exchange(mesh, amr->vlSurfExch);
+  PRF;printf(": request_all_vl_surfaces_exchange_mesh\n");
+  init_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
+  set_all_vl_mysurf_mesh(mesh, amr->vlSurfExch);
+  request_all_vl_surfaces_exchange_mesh(mesh, amr->vlSurfExch);
 
   /* Here we can do work. MPI is now busy sending buffers */
 
   /* now get the surfaces and wait for buffers if necessary */
-  get_all_myln_surfaces(mesh, amr->vlSurfExch);
+  get_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
 
-  /* get_all_myln_surfaces sets ajsurf via interpolation */
-  PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
+  /* get_all_vl_surfaces_mesh sets ajsurf via interpolation */
+  PRF;printf(": get_all_vl_surfaces_mesh has set ajsurf via interpolation\n");
 
   /* print var in one node yet again with surfaces */
 //  nd = Lnode_myid(mesh, 7);
@@ -991,7 +991,7 @@ int test_ajsurf(tMesh *mesh)
   }
 
   /* free redundant nbsurf stuff */
-  free_all_myln_nbsurf_only(mesh, amr->vlSurfExch);
+  free_all_vl_nbsurf_only_mesh(mesh, amr->vlSurfExch);
 
   /* print var in all nodes again */
   prdivider(0);
@@ -1032,7 +1032,7 @@ int test_ajsurf(tMesh *mesh)
   printf("on all procs: total %.15g\n", sqrt(Sum));
 
   /* after we have printed them, we no longer need the surfaces */
-  free_all_myln_surfaces(mesh, amr->vlSurfExch);
+  free_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
   return 0;
 }
 

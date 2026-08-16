@@ -59,11 +59,11 @@ int SurfExchange_test(tMesh *mesh)
   /* exchange surfaces */
   prdivider('S');
   PRF;printf(": exchange surfaces\n");
-  init_all_myln_surfaces(mesh, amr->vlSurfExch);
+  init_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
   /* instead of:
-       set_all_myln_mysurf(mesh);
-       request_all_myln_surfaces_exchange(mesh);
-       get_all_myln_surfaces(mesh);
+       set_all_vl_mysurf_mesh(mesh);
+       request_all_vl_surfaces_exchange_mesh(mesh);
+       get_all_vl_surfaces_mesh(mesh);
      we do the exchange nodewise */
 
   /* do exchange 4 times similar to RK4 */
@@ -73,8 +73,8 @@ int SurfExchange_test(tMesh *mesh)
     {
       tNode *node = MyLnode;
 
-      set_all_mysurf(node, amr->vlSurfExch);
-      request_all_surfaces_exchange(node, amr->vlSurfExch);
+      set_all_vl_mysurf(node, amr->vlSurfExch);
+      request_all_vl_surfaces_exchange(node, amr->vlSurfExch);
     }
 
     /* Here we can do work. MPI is now busy sending buffers */
@@ -84,11 +84,11 @@ int SurfExchange_test(tMesh *mesh)
     {
       tNode *node = MyLnode;
 
-      get_all_surfaces(node, amr->vlSurfExch);
+      get_all_vl_surfaces(node, amr->vlSurfExch);
     }
   }
 
-  /* get_all_myln_surfaces sets ajsurf via interpolation */
+  /* get_all_vl_surfaces_mesh sets ajsurf via interpolation */
 
   /* print var in one node yet again with surfaces */
   nd = Lnode_myid(mesh, 0); /* my first node */
@@ -96,6 +96,6 @@ int SurfExchange_test(tMesh *mesh)
   printvar_innode(nd, ui);
 
   /* after we have printed them, we no longer need the surfaces */
-  free_all_myln_surfaces(mesh, amr->vlSurfExch);
+  free_all_vl_surfaces_mesh(mesh, amr->vlSurfExch);
   return 0;
 }

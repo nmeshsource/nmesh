@@ -298,8 +298,8 @@ void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
       troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
     if(ListEntry(evosys->f[XSURFRHS],i))
     {
-      get_all_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
-      //FIXME: make get_all_surfaces_vl that does it just for a varlist
+      get_all_vl_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
+      //FIXME: make get_all_vl_surfaces_vl that does it just for a varlist
       troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
     }
 
@@ -365,7 +365,7 @@ void evolve_setrhs(tElm *elm, pVLList *rhs, pVLList *u, int MPI_exchange)
 
   //if(MPI_exchange)
   //{
-  //  Test: if(MPI_exchange) get_all_surfaces(node);
+  //  Test: if(MPI_exchange) get_all_vl_surfaces(node);
 
       /* check if there is a single XVOLRHS */
   //  have_XRHS = 0;
@@ -826,7 +826,7 @@ void evolve_setrhs__old(tNode *node, pVLList *rhs, pVLList *u, int request_surfs
       ListEntry(evosys->f[VOLRHS],i)(node, evv);
   }
 
-  //Test:  get_all_surfaces(node);
+  //Test:  get_all_vl_surfaces(node);
 
   /* add all surf. RHSs */
   forList(u, i)

@@ -46,10 +46,10 @@ int dg_add_surface_fluxes_sign_fvflag(tNode *node, double sign,
   if(coordinates->sqrtdet2g_o_det3gamma) { det2g = 1.; gdiag = 0.; }
   else                                   { det2g = 0.; gdiag = 1.; }
 
-  /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
+  /* we now call get_all_vl_surfaces_mesh in evolve_setrhs_mesh
      so we do not need to do it here */
   ///* get surfaces so that we can compute fluxes */
-  //get_all_myln_surfaces(mesh);
+  //get_all_vl_surfaces_mesh(mesh);
 
   /* set overall sign by multiplying det2g and gdiag */
   det2g *= sign;
