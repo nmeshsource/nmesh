@@ -7,6 +7,9 @@
 #define PR 1
 
 
+/* global pars for amr */
+extern tAMR amr[1];
+
 
 double test_func(double x, double y, double z)
 {
@@ -950,14 +953,14 @@ int test_ajsurf(tMesh *mesh)
   /* exchange surfaces */
   prdivider(0);
   PRF;printf(": request_all_myln_surfaces_exchange\n");
-  init_all_myln_surfaces(mesh);
-  set_all_myln_mysurf(mesh);
-  request_all_myln_surfaces_exchange(mesh);
+  init_all_myln_surfaces(mesh, amr->vlSurfExch);
+  set_all_myln_mysurf(mesh, amr->vlSurfExch);
+  request_all_myln_surfaces_exchange(mesh, amr->vlSurfExch);
 
   /* Here we can do work. MPI is now busy sending buffers */
 
   /* now get the surfaces and wait for buffers if necessary */
-  get_all_myln_surfaces(mesh);
+  get_all_myln_surfaces(mesh, amr->vlSurfExch);
 
   /* get_all_myln_surfaces sets ajsurf via interpolation */
   PRF;printf(": get_all_myln_surfaces has set ajsurf via interpolation\n");
@@ -988,7 +991,7 @@ int test_ajsurf(tMesh *mesh)
   }
 
   /* free redundant nbsurf stuff */
-  free_all_myln_nbsurf_only(mesh);
+  free_all_myln_nbsurf_only(mesh, amr->vlSurfExch);
 
   /* print var in all nodes again */
   prdivider(0);
@@ -1029,7 +1032,7 @@ int test_ajsurf(tMesh *mesh)
   printf("on all procs: total %.15g\n", sqrt(Sum));
 
   /* after we have printed them, we no longer need the surfaces */
-  free_all_myln_surfaces(mesh);
+  free_all_myln_surfaces(mesh, amr->vlSurfExch);
   return 0;
 }
 

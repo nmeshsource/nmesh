@@ -7,6 +7,9 @@
 #define PR 1
 
 
+/* global pars for amr */
+extern tAMR amr[1];
+
 
 /* exchange some surfaces for testing */
 int SurfExchange_test(tMesh *mesh)
@@ -56,7 +59,7 @@ int SurfExchange_test(tMesh *mesh)
   /* exchange surfaces */
   prdivider('S');
   PRF;printf(": exchange surfaces\n");
-  init_all_myln_surfaces(mesh);
+  init_all_myln_surfaces(mesh, amr->vlSurfExch);
   /* instead of:
        set_all_myln_mysurf(mesh);
        request_all_myln_surfaces_exchange(mesh);
@@ -70,8 +73,8 @@ int SurfExchange_test(tMesh *mesh)
     {
       tNode *node = MyLnode;
 
-      set_all_mysurf(node);
-      request_all_surfaces_exchange(node);
+      set_all_mysurf(node, amr->vlSurfExch);
+      request_all_surfaces_exchange(node, amr->vlSurfExch);
     }
 
     /* Here we can do work. MPI is now busy sending buffers */
@@ -81,7 +84,7 @@ int SurfExchange_test(tMesh *mesh)
     {
       tNode *node = MyLnode;
 
-      get_all_surfaces(node);
+      get_all_surfaces(node, amr->vlSurfExch);
     }
   }
 
@@ -93,6 +96,6 @@ int SurfExchange_test(tMesh *mesh)
   printvar_innode(nd, ui);
 
   /* after we have printed them, we no longer need the surfaces */
-  free_all_myln_surfaces(mesh);
+  free_all_myln_surfaces(mesh, amr->vlSurfExch);
   return 0;
 }

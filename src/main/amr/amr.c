@@ -40,6 +40,8 @@ int amr_init_global_pars(tMesh *mesh)
   amr->nbsearch_n  = Par("amr_nbsearch_n");
   amr->Lagrange_interp_order = Par("amr_Lagrange_interp_order");
   amr->WENO_interp_order     = Par("amr_WENO_interp_order");
+  vlfree(amr->vlSurfExch);
+  amr->vlSurfExch = vlalloc_AddVarsWithSurfacezones(mesh);
 
   /* print global vars and pars */
   printf(" amr->elm_nbinfo0 = var_%04d : VarName(amr->elm_nbinfo0) = %s\n",
@@ -62,6 +64,7 @@ int amr_init_global_pars(tMesh *mesh)
          amr->Lagrange_interp_order, Geti(amr->Lagrange_interp_order));
   printf(" amr->WENO_interp_order = par_%04d :   Geti(amr->WENO_interp_order) = %d\n",
          amr->WENO_interp_order, Geti(amr->WENO_interp_order));
+  printf(" amr->vlSurfExch contains %d variables\n", VLn(amr->vlSurfExch));
 
   /* set amr_n0,... from amr_N0, ... */
   if(Geti(amr_N0)>0)
@@ -83,6 +86,14 @@ int amr_init_global_pars(tMesh *mesh)
     printf("  amr_n1 = %d\n", Geti(Par("amr_n1")));
     printf("  amr_n2 = %d\n", Geti(Par("amr_n2")));
   }
+  return 0;
+}
+
+/* free all globals */
+int amr_finalize(tMesh *mesh)
+{
+  vlfree(amr->vlSurfExch);
+  amr->vlSurfExch = NULL;
   return 0;
 }
 
@@ -134,16 +145,20 @@ int amr_zero_all_patgroup_npg_pg0(tMesh *mesh)
 /* funcs for MPI exchange */
 /*************************************************************************/
 
-/* init exchange. Could be replaced by:
+/* init exchange. Could loop over:
    formyelms(mesh) MPIexchange_init(MyElm); */
 void MPIexchange_init_all_myln(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
 
+  /* setup varlist that contains all vars that have surfaces */
+  vlfree(amr->vlSurfExch);
+  amr->vlSurfExch = vlalloc_AddVarsWithSurfacezones(mesh);
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    init_all_myln_surfaces(mesh);
+    init_all_myln_surfaces(mesh, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -156,10 +171,11 @@ void MPIexchange_init(tElm *elm)
 {
   tMesh *mesh = Elm_mesh(elm);
   if(PR) PRFs(":\n");
+  if(amr->vlSurfExch==NULL) errorexit("amr->vlSurfExch is not set");
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    init_all_surfaces(elm);
+    init_all_surfaces(elm, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -174,10 +190,12 @@ void MPIexchange_set_all_myln_localdata(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
 
+  if(amr->vlSurfExch==NULL) errorexit("amr->vlSurfExch is not set");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    set_all_myln_mysurf(mesh);
+    set_all_myln_mysurf(mesh, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -190,10 +208,11 @@ void MPIexchange_set_localdata(tElm *elm)
 {
   tMesh *mesh = Elm_mesh(elm);
   if(PR) PRFs(":\n");
+  if(amr->vlSurfExch==NULL) errorexit("amr->vlSurfExch is not set");
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    set_all_mysurf(elm);
+    set_all_mysurf(elm, amr->vlSurfExch);
     break;
   case 2:
     break;
@@ -207,10 +226,12 @@ void MPIexchange_request_all_myln_data(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
 
+  if(amr->vlSurfExch==NULL) errorexit("amr->vlSurfExch is not set");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    request_all_myln_surfaces_exchange(mesh);
+    request_all_myln_surfaces_exchange(mesh, amr->vlSurfExch);
     break;
   case 2:
     request_all_myln_ghostdata(mesh);
@@ -225,10 +246,12 @@ void MPIexchange_get_all_myln_data(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
 
+  if(amr->vlSurfExch==NULL) errorexit("amr->vlSurfExch is not set");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    get_all_myln_surfaces(mesh);
+    get_all_myln_surfaces(mesh, amr->vlSurfExch);
     break;
   case 2:
     get_all_myln_ghostdata(mesh);
@@ -243,16 +266,22 @@ void MPIexchange_free_all_myln(tMesh *mesh)
 {
   if(PR) PRFs(":\n");
 
+  if(amr->vlSurfExch==NULL) errorexit("amr->vlSurfExch is not set");
+
   switch(Geti(amr->MPIexchange))
   {
   case 1:
-    free_all_myln_surfaces(mesh);
+    free_all_myln_surfaces(mesh, amr->vlSurfExch);
     break;
   case 2:
     break;
   default:
     errorexit("unknown value in amr_MPIexchange");
   }
+
+  /* free varlist that contains all vars that have surfaces */
+  vlfree(amr->vlSurfExch);
+  amr->vlSurfExch = NULL;
 }
 
 

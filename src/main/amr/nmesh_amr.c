@@ -18,6 +18,7 @@ int nmesh_amr(tMesh *mesh)
   AddFun(POST_INITMESH, amr_set_use_fv_flag);
   AddFun(LOADBALANCING, load_balance_if_needed);
   AddFun(POST_INITIALDATA, print_number_of_elms);
+  AddFun(FINALIZE, amr_finalize);
 
   /* variables */
   AddAuxVar("amr_elm_nbinfo", "@", "vars with tEploc arrays for nbinfo[6]");

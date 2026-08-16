@@ -38,13 +38,14 @@ int add_1box_pat(tMesh *mesh, double xc[3], double dout[3]);
 
 
 /* surface.c */
+tVarList *vlalloc_AddVarsWithSurfacezones(tMesh *mesh);
 void free_surface(tSurface *s);
 tSurface *init_surface(tNode *node, int vi, int face);
 void set_mysurf(tSurface *s);
 void free_dat_reqs_after_Waitall_com_send(tNode *node);
-void set_ajsurf_forall_vars(tNode *node, int f);
-void free_nbsurf_only_forall_vars(tNode *node, int f);
-void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
+void set_ajsurf_forall_vars(tNode *node, tVarList *vls, int f);
+void free_nbsurf_only_forall_vars(tNode *node, tVarList *vls, int f);
+void copy_ajsurf_from_nbsurf0(tNode *node, tVarList *vls, int f, int nb_f,
                               int intrch, int rev1, int rev2);
 
 /* load.c */
@@ -94,6 +95,7 @@ void request_all_myln_ghostdata(tMesh *mesh);
 void get_all_myln_ghostdata(tMesh *mesh);
 
 /* amr.c */
+int amr_finalize(tMesh *mesh);
 int amr_print_thread_info(tMesh *mesh);
 int amr_zero_all_patgroup_npg_pg0(tMesh *mesh);
 

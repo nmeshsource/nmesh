@@ -9,6 +9,10 @@
 /* globals for evolve */
 tEvolveGlobals EvolveGlobals[1];
 
+/* global pars for amr */
+extern tAMR amr[1];
+
+
 /* The functions below are a little complex because they deal with lists of
    variable lists and a list of RHSs (one for each VarList). This was done to
    be able to couple two systems such as e.g. Z4 and matter. Each have their
@@ -294,7 +298,7 @@ void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
       troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
     if(ListEntry(evosys->f[XSURFRHS],i))
     {
-      get_all_surfaces(node); //get surfaces of u, don't need surf of x yet
+      get_all_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
       //FIXME: make get_all_surfaces_vl that does it just for a varlist
       troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
     }

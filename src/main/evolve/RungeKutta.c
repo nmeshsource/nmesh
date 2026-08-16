@@ -283,19 +283,19 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       }
 
       // remove all ajsurf of old elm
-      free_all_ajsurf_only(elm_sav);
+      free_all_ajsurf_only(elm_sav, amr->vlSurfExch);
 
       // init surfaces in new elm, could use MPIexchange_init(elm)
-      init_all_surfaces(elm);
+      init_all_surfaces(elm, amr->vlSurfExch);
 
       // set mysurf on new elm, could use MPIexchange_set_localdata(elm)
-      set_all_mysurf(elm);
+      set_all_mysurf(elm, amr->vlSurfExch);
 
       // Let surfaces in new elm point to nbsurf of old elm.
       surface_copy_nbsurf_pointers(elm_sav, elm);
 
       // interp nb surfs to adj for our new elm
-      set_all_ajsurf(elm);
+      set_all_ajsurf(elm, amr->vlSurfExch);
 
       /* NOTE: elm->dat now has surfaces, but no indic */
 
