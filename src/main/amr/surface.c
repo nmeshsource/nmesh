@@ -32,7 +32,7 @@ extern tDGglobals DGglobals[1];
 */
 
 /**********************************************************************/
-/* allocate and fill surfaces for vars that need it */
+/* get varlist of all vars that have surface zones */
 /**********************************************************************/
 
 /* add vars that have surface zones to varlist vl */
