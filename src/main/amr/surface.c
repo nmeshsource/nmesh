@@ -34,6 +34,33 @@ extern tDGglobals DGglobals[1];
 /**********************************************************************/
 /* allocate and fill surfaces for vars that need it */
 /**********************************************************************/
+
+/* add vars that have surface zones to varlist vl */
+int vlAddVarsWithSurfacezones(tMesh *mesh, tVarList *vl)
+{
+  intList *il = vl2intList(vl);
+  int vi, cnt;
+  for(cnt=0, vi=0; vi<mesh->nvdb; vi++)
+  {
+    int zones = MeshVarSurfacezones(mesh, vi);
+    /* add only if var has surface zones */
+    if(zones) { intList_unionpush(il, vi); cnt++; }
+  }
+  return cnt;
+}
+
+/* return new varlist with all vars that have surface zones */
+tVarList *vlalloc_AddVarsWithSurfacezones(tMesh *mesh)
+{
+  tVarList *vls = vlalloc(mesh);
+  vlAddVarsWithSurfacezones(mesh, vls);
+  return vls;
+}
+
+
+/**********************************************************************/
+/* allocate and fill surfaces for vars that need it */
+/**********************************************************************/
 /* empty surface that we need to fill in */
 tSurface *alloc_empty_surface(int nnb)
 {
