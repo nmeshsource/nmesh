@@ -18,7 +18,7 @@ amr_hrefine_p = 1
 amr_prefine_p = 2
 amr_prefine_n0 = 3
 amr_prefine_n1 = 3
-amr_prefine_n2 = 4
+amr_prefine_n2 = 5
 
 
 1doutiter = 1
