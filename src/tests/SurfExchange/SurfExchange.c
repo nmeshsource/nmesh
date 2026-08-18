@@ -87,10 +87,13 @@ int SurfExchange_test(tMesh *mesh)
 
   /* get_all_myln_surfaces sets ajsurf via interpolation */
 
-  /* print var in one node yet again with surfaces */
-  nd = Lnode_myid(mesh, 0); /* my first node */
-  printelm(nd);
-  printvar_innode(nd, ui);
+  /* print vars yet again with surfaces */
+  formylnodes(mesh)
+  {
+    tNode *node = MyLnode;
+    printelm(node);
+    printvar_innode(node, ui);
+  }
 
   /* after we have printed them, we no longer need the surfaces */
   free_all_myln_surfaces(mesh);
