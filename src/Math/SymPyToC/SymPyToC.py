@@ -537,9 +537,9 @@ def get_AUTOVARS(Declvars, LHSvars):
 
     # remove duplicates from AUTOVARS1
     AUTOVARS = []
-    for av in AUTOVARS1:
-        if av not in AUTOVARS:
-            AUTOVARS.append(av)
+    for autovar1 in AUTOVARS1:
+        if autovar1 not in AUTOVARS:
+            AUTOVARS.append(autovar1)
 
     return AUTOVARS
 
