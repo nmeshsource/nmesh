@@ -203,7 +203,7 @@
 
 /* loop over the var indices of the vars inside a var list */
 #define forVind(vl, vi) \
-  for(int vli_=0; vi=vl->index[vli_], vli_<vl->n; vli_++)
+  for(int vli_=0; vli_<vl->n && (((vi)=vl->index[vli_]), 1); vli_++)
 
 /* get global var index from entry vli in VarList vl */
 #define Vind(vl, vli) vl->index[vli]
