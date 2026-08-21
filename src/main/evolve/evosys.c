@@ -259,7 +259,7 @@ int evolve_init_evosys(tMesh *mesh)
     }
     //printf("evosys->w = %p\n", evosys->w);
 
-    /* In the new RungeKutta.c we always comute r = RHS(w). I.e. we need
+    /* In the new RungeKutta.c we always compute r = RHS(w). I.e. we need
        surfaces (and maybe indicators) for w only, and not for u!
        Normally nmesh creates surfaces for all EVOVARS, i.e. for u as well.
        If evolve_u_surfaces=no, u-surfaces are switched off permanently! */
