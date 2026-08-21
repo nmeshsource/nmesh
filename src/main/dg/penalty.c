@@ -30,10 +30,10 @@ int dg_add_penalty_sign_fvflag(tElm *elm, double sign,
   int useLGL_Wq = 1; //bamps always uses LGL quad. weights
   double distXb[6] = {0};
 
-  /* we now call get_all_myln_surfaces in evolve_setrhs_mesh
+  /* we now call get_all_vl_surfaces_mesh in evolve_setrhs_mesh
      so we do not need to do it here */
   ///* get surfaces so that we can compute fluxes */
-  //get_all_myln_surfaces(mesh);
+  //get_all_vl_surfaces_mesh(mesh);
 
   /* special fv cases */
   if(use_fv)

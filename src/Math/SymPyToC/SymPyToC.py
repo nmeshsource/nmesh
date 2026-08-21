@@ -537,9 +537,35 @@ def get_AUTOVARS(Declvars, LHSvars):
 
     # remove duplicates from AUTOVARS1
     AUTOVARS = []
-    for av in AUTOVARS1:
-        if av not in AUTOVARS:
-            AUTOVARS.append(av)
+    for autovar1 in AUTOVARS1:
+        if autovar1 not in AUTOVARS:
+            AUTOVARS.append(autovar1)
+    #########################################################################
+    # The commented out loop below is also intended to remove duplicates. But
+    # it does not work if su[a] is an AUTOVAR and we set both
+    #  'su[0] = 0', 'su[i] = vu[i]',
+    # as in e.g. GH_CPBC_nat_freeze.py :
+    #########################################################################
+    #for autovar1 in AUTOVARS1:
+    #    Tautovar1 = eval(autovar1)
+    #    typ_Tautovar1 = type(Tautovar1)
+    #    autovar1_is_in_AUTOVARS = False
+    #    for autovar in AUTOVARS:
+    #        Tautovar = eval(autovar)
+    #        typ_Tautovar = type(Tautovar)
+    #        if typ_Tautovar1 != typ_Tautovar:
+    #            continue
+    #        if typ_Tautovar1 == sympy.tensor.indexed.Indexed:
+    #            if Tautovar1.base == Tautovar.base:
+    #                if Tautovar1.rank == Tautovar.rank:
+    #                    autovar1_is_in_AUTOVARS = True
+    #                    break
+    #        else:
+    #            if Tautovar1 == Tautovar:
+    #                autovar1_is_in_AUTOVARS = True
+    #                break
+    #    if autovar1_is_in_AUTOVARS == False:
+    #        AUTOVARS.append(autovar1)
 
     return AUTOVARS
 

@@ -283,19 +283,19 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       }
 
       // remove all ajsurf of old elm
-      free_all_ajsurf_only(elm_sav);
+      free_all_vl_ajsurf_only(elm_sav, amr->vlSurfExch);
 
       // init surfaces in new elm, could use MPIexchange_init(elm)
-      init_all_surfaces(elm);
+      init_all_vl_surfaces(elm, amr->vlSurfExch);
 
       // set mysurf on new elm, could use MPIexchange_set_localdata(elm)
-      set_all_mysurf(elm);
+      set_all_vl_mysurf(elm, amr->vlSurfExch);
 
       // Let surfaces in new elm point to nbsurf of old elm.
       surface_copy_nbsurf_pointers(elm_sav, elm);
 
       // interp nb surfs to adj for our new elm
-      set_all_ajsurf(elm);
+      set_all_vl_ajsurf(elm, amr->vlSurfExch);
 
       /* NOTE: elm->dat now has surfaces, but no indic */
 
@@ -316,7 +316,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       elm_swap_shallow(elm, elm_sav);
       elm_new[MyID] = elm_sav;
       // Now elm is the old elm again. We need this for the next iter of
-      // this loop, otherwise set_all_ajsurf gets confused.
+      // this loop, otherwise set_all_vl_ajsurf gets confused.
       // Below, we swap the new elm back in!
     }
   }
@@ -351,7 +351,7 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
 
 /*************************************************************************/
 /* functions to evolve on just one node
-   will work only once request_all_vl_surfaces and such in
+   will work only once request_all_vl_surfaces__UNFINISHED and such in
    main/amr/surface.c start working
 */
 /*************************************************************************/

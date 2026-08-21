@@ -538,7 +538,7 @@ void init_myindc_for_evosys_u_or_w(tElm *elm, pVLList *u_or_w)
 
 /*************************************************************************/
 /* functions to evolve on just one node
-   will work only once request_all_vl_surfaces and such in
+   will work only once request_all_vl_surfaces__UNFINISHED and such in
    main/amr/surface.c start working
 */
 /*************************************************************************/
@@ -557,8 +557,8 @@ void evolve_request_surfaces(tNode *node, pVLList *u)
     vlpushvl(allu, ListEntry(u,i));
 
   /* 2. now start surface requests */
-  set_all_vl_mysurf(node, allu);
-  request_all_vl_surfaces(node, allu);
+  set_all_vl_mysurf__UNFINISHED(node, allu);
+  request_all_vl_surfaces__UNFINISHED(node, allu);
 
   /* we don't need allu anymore */
   vlfree(allu);
@@ -578,7 +578,7 @@ void evolve_free_surfaces(tNode *node, pVLList *u)
     vlpushvl(allu, ListEntry(u,i));
 
   /* 2. now free */
-  free_all_vl_surfaces(node, allu);
+  free_all_vl_surfaces__UNFINISHED(node, allu);
 
   /* we don't need allu anymore */
   vlfree(allu);

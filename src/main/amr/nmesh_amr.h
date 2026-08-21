@@ -406,6 +406,7 @@ typedef struct {
   int WENO_interp_order;     /* Par("amr_WENO_interp_order") */
   int force_interp_scheme;   /* can be 0, INTERP_LAGRANGE, INTERP_WENO, ... */
   int elm_nbinfo0;     /* Ind("amr_elm_nbinfo0") */
+  tVarList *vlSurfExch;      /* list of vars that need surface exchange */
 } tAMR;
 
 
@@ -564,24 +565,24 @@ void print_u32(khash_t(u32) *nbranks);
 void print_ef(khash_t(u32_gptr) *ef);
 
 /* surface.c */
-int init_all_surfaces(tNode *node);
-int set_all_mysurf(tNode *node);
-void request_all_surfaces_exchange(tNode *node);  //only for SurfExchange.c
-void init_all_myln_surfaces(tMesh *mesh);  //only for misc.c
-void free_all_myln_surfaces(tMesh *mesh);  //only for misc.c
-void set_all_myln_mysurf(tMesh *mesh);  //only for misc.c
-void request_all_myln_surfaces_exchange(tMesh *mesh);  //only for misc.c
-void get_all_surfaces(tNode *node);
-void get_all_myln_surfaces(tMesh *mesh);  //only for misc.c
-void set_all_ajsurf(tNode *node);
-void free_all_myln_nbsurf_only(tMesh *mesh);  //only for misc.c
-void free_all_ajsurf_only(tNode *node);
+int init_all_vl_surfaces(tNode *node, tVarList *vls);
+int set_all_vl_mysurf(tNode *node, tVarList *vls);
+void request_all_vl_surfaces_exchange(tNode *node, tVarList *vls);  //only for SurfExchange.c
+void init_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
+void free_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
+void set_all_vl_mysurf_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
+void request_all_vl_surfaces_exchange_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
+void get_all_vl_surfaces(tNode *node, tVarList *vls);
+void get_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
+void set_all_vl_ajsurf(tNode *node, tVarList *vls);
+void free_all_vl_nbsurf_only_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
+void free_all_vl_ajsurf_only(tNode *node, tVarList *vls);
 void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest);
-//void init_all_vl_surfaces(tMesh *mesh, tVarList *vl);
-void set_all_vl_mysurf(tNode *node, tVarList *vl);
-void request_all_vl_surfaces(tNode *node, tVarList *vl);
-//void get_all_vl_surfaces(tNode *node, tVarList *vl);
-void free_all_vl_surfaces(tNode *node, tVarList *vl);
+//void init_all_vl_surfaces__UNFINISHED(tMesh *mesh, tVarList *vl);
+void set_all_vl_mysurf__UNFINISHED(tNode *node, tVarList *vl);
+void request_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl);
+//void get_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl);
+void free_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl);
 
 /* load.c */
 void simple_load_balance(tMesh *mesh);

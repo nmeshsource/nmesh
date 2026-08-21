@@ -224,7 +224,7 @@ void request_indc_exchange_for_vl(tNode *node, tVarList  *vl)
         /* ALSO: We are sending the same data to all nbs at face face. Thus we
            can as well use the same s_tag! One day we should optimize this,
            and send the same data only once even if several nbs want it. */
-        /* see also func request_surfaces_exchange_for_all_vars */
+        /* see also func request_surfaces_exchange_vl */
         s_ltag = lid*6 + f;
         r_ltag = nb_lid*6 + nb_f;
         nMPI_long_tag_to_commi_tag(s_ltag, &ci, &s_tag);

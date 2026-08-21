@@ -282,7 +282,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
       d_info_midnorm = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
-    if(nghosts || add_surface_fluxes) get_all_surfaces(node);
+    if(nghosts || add_surface_fluxes) get_all_vl_surfaces(node, amr->vlSurfExch);
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
@@ -802,7 +802,7 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
       d->info = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
-    if(nghosts || add_surface_fluxes) get_all_surfaces(node);
+    if(nghosts || add_surface_fluxes) get_all_vl_surfaces(node, amr->vlSurfExch);
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)

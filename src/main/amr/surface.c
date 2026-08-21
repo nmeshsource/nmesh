@@ -32,6 +32,41 @@ extern tDGglobals DGglobals[1];
 */
 
 /**********************************************************************/
+/* get varlist of all vars that have surface zones */
+/**********************************************************************/
+
+/* add vars that have surface zones to varlist vl */
+int vlAddVarsWithSurfacezones(tMesh *mesh, tVarList *vl)
+{
+  intList *il = vl2intList(vl);
+  int vi, cnt;
+  for(cnt=0, vi=0; vi<mesh->nvdb; vi++)
+  {
+    int zones = MeshVarSurfacezones(mesh, vi);
+    /* add only if var has surface zones */
+    if(zones) { intList_unionpush(il, vi); cnt++; }
+  }
+  return cnt;
+}
+
+/* return new varlist with all vars that have surface zones */
+tVarList *vlalloc_AddVarsWithSurfacezones(tMesh *mesh)
+{
+  tVarList *vls = vlalloc(mesh);
+  vlAddVarsWithSurfacezones(mesh, vls);
+  return vls;
+}
+
+/**********************************************************************/
+/* NOTE: The functions below loop only over a varlist (not all vars).
+   But even so, all vars with MeshVarSurfacezones(mesh,vi)=0 etc. (see
+   e.g. init_surface) are still not included. This mat not be what we
+   intend! It maybe be better to add surfaces to all vars in the varlist
+   even if they have MeshVarSurfacezones(mesh,vi)=0. */
+/**********************************************************************/
+
+
+/**********************************************************************/
 /* allocate and fill surfaces for vars that need it */
 /**********************************************************************/
 /* empty surface that we need to fill in */
@@ -74,7 +109,7 @@ void free_surface(tSurface *s)
 }
 
 /* free surfaces on node */
-void free_all_surfaces(tNode *node)
+void free_all_vl_surfaces(tNode *node, tVarList *vls)
 {
   tDat *dat = node->dat;
   int vi,f;
@@ -84,7 +119,7 @@ void free_all_surfaces(tNode *node)
   /* free all surfaces */
   for(f=0; f<6; f++)
   {
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
     {
       free_surface(dat->s[f][vi]);
       dat->s[f][vi] = NULL;
@@ -93,14 +128,14 @@ void free_all_surfaces(tNode *node)
 }
 
 /* free all surfaces on all nodes in the mesh */
-void free_all_myln_surfaces(tMesh *mesh)
+void free_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls)
 {
   if(PR) PRFs(":\n");
   TIMER_START;
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    free_all_surfaces(node);
+    free_all_vl_surfaces(node, vls);
   }
   TIMER_STOP;
 }
@@ -156,7 +191,7 @@ tSurface *init_surface(tNode *node, int face, int vi)
 }
 
 /* init all sufaces of a node */
-int init_all_surfaces(tNode *node)
+int init_all_vl_surfaces(tNode *node, tVarList *vls)
 {
   tDat *dat = node->dat;
   int face, vi, cnt;
@@ -166,7 +201,7 @@ int init_all_surfaces(tNode *node)
   cnt=0;
   for(face=0; face<6; face++)
   {
-    for(vi=0; vi<node->dat->nv; vi++)
+    forVind(vls, vi)
     {
       free_surface(dat->s[face][vi]);
       dat->s[face][vi] = init_surface(node, face, vi);
@@ -177,14 +212,14 @@ int init_all_surfaces(tNode *node)
 }
 
 /* init all surfaces on all nodes in the mesh */
-void init_all_myln_surfaces(tMesh *mesh)
+void init_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls)
 {
   if(PR) PRFs(":\n");
   TIMER_START;
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    init_all_surfaces(node);
+    init_all_vl_surfaces(node, vls);
   }
   TIMER_STOP;
 }
@@ -221,7 +256,7 @@ void set_mysurf(tSurface *s)
 }
 
 /* set all mysurf of a node */
-int set_all_mysurf(tNode *node)
+int set_all_vl_mysurf(tNode *node, tVarList *vls)
 {
   tDat *dat = node->dat;
   int face, vi, cnt;
@@ -230,7 +265,7 @@ int set_all_mysurf(tNode *node)
 
   cnt=0;
   for(face=0; face<6; face++)
-    for(vi=0; vi<node->dat->nv; vi++)
+    forVind(vls, vi)
     {
       tSurface *s = dat->s[face][vi];
       if(s)
@@ -243,12 +278,12 @@ int set_all_mysurf(tNode *node)
 }
 
 /* set all surfaces on all nodes in the mesh */
-void set_all_myln_mysurf(tMesh *mesh)
+void set_all_vl_mysurf_mesh(tMesh *mesh, tVarList *vls)
 {
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    set_all_mysurf(node);
+    set_all_vl_mysurf(node, vls);
   }
 }
 
@@ -258,8 +293,9 @@ void set_all_myln_mysurf(tMesh *mesh)
 /***************************************************************************/
 
 /* count number of vars that have surfaces to be exchanged and set myN,
-   input: node,my_f, nb,nb_f   output: nvars, vind, my_n, nb_n */
-void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
+   input: node,vls,my_f, nb,nb_f   output: nvars, vind, my_n, nb_n */
+void find_nvars_vind_n_nbn(tNode *node, tVarList *vls,
+                           int my_f, tNode *nb, int nb_f,
                            int *nvars, int *vind, int my_n[3], int nb_n[3])
 {
   tDat *dat = node->dat;
@@ -272,7 +308,8 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
   *vind=0;
 
   /* count number of vars that have surfaces to be exchanged and set myN */
-  for(*nvars=0, vi=0; vi<dat->nv; vi++)
+  *nvars=0;
+  forVind(vls, vi)
   {
     int zones = MeshVarSurfacezones(node->pat->mesh, vi);
     if(zones && dat->v[vi])
@@ -295,7 +332,8 @@ void find_nvars_vind_n_nbn(tNode *node, int my_f, tNode *nb, int nb_f,
 }
 
 /* get all surfaces from neighbor with index ni at face */
-void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
+void request_surfaces_exchange_vl(tNode *node, tVarList *vls,
+                                            int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
@@ -324,7 +362,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
   if(nb->dat)
   {
     /* nb is local so just point s->nbsurf[ni] to its data */
-    for(vi=0; vi<node->dat->nv; vi++)
+    forVind(vls, vi)
     {
       tSurface *my_s = dat->s[face][vi];
       tSurface *nb_s = nb->dat->s[nb_f][vi];
@@ -347,7 +385,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     int zones, nvars, cnt, si;
 
     /* count number of vars that have surfaces to exchange and set my_N */
-    find_nvars_vind_n_nbn(node,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
+    find_nvars_vind_n_nbn(node,vls,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
     nb_N = nb_n[0] * nb_n[1] * nb_n[2];
     my_N = my_n[0] * my_n[1] * my_n[2];
 
@@ -394,7 +432,9 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
     rq = append_buffers_to_com(com, sbuf, nvars*my_N, rbuf,nvars*nb_N);
 
     /* fill send buffer */
-    for(cnt=0, si=0, vi=0; vi<node->dat->nv; vi++)
+    cnt=0;
+    si=0;
+    forVind(vls, vi)
     {
       s = dat->s[face][vi];
       zones = MeshVarSurfacezones(node->pat->mesh, vi);
@@ -439,7 +479,7 @@ void request_surfaces_exchange_for_all_vars(tNode *node, int face, int ni)
 
 
 /* put nbsurf from all faces and variables for this node in buffers */
-void request_all_surfaces_exchange(tNode *node)
+void request_all_vl_surfaces_exchange(tNode *node, tVarList *vls)
 {
   int face, ni;
   tDat *dat = node->dat;
@@ -455,11 +495,11 @@ void request_all_surfaces_exchange(tNode *node)
   for(face=0; face<6; face++)
   {
     /* FIXME: set sendbuffer sbuf here already because
-       request_surfaces_exchange_for_all_vars sends the some sbuf for all ni */
+       request_surfaces_exchange_vl sends the some sbuf for all ni */
 
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
-      request_surfaces_exchange_for_all_vars(node, face, ni);
+      request_surfaces_exchange_vl(node, vls, face, ni);
     }
   }
 
@@ -468,11 +508,11 @@ void request_all_surfaces_exchange(tNode *node)
 }
 
 /* request surface exchanges on all my nodes in the mesh
-   Note: The user has to call request_all_myln_surfaces_exchange! It calls
-   request_all_surfaces_exchange on all nodes. If we call
-   request_all_surfaces_exchange(n1) for only node n1, MPI deadlocks because
+   Note: The user has to call request_all_vl_surfaces_exchange_mesh! It calls
+   request_all_vl_surfaces_exchange on all nodes. If we call
+   request_all_vl_surfaces_exchange(n1) for only node n1, MPI deadlocks because
    the other nodes are not sending to n1 or receiving from n1 */
-void request_all_myln_surfaces_exchange(tMesh *mesh)
+void request_all_vl_surfaces_exchange_mesh(tMesh *mesh, tVarList *vls)
 {
   TIMER_START;
 
@@ -481,7 +521,7 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
-    request_all_surfaces_exchange(node);
+    request_all_vl_surfaces_exchange(node, vls);
   }
   TIMER_STOP;
 }
@@ -492,7 +532,7 @@ void request_all_myln_surfaces_exchange(tMesh *mesh)
 /**********************************************************************/
 
 /* get all surfaces from neighbor with index ni at face */
-void get_surfaces_for_all_vars(tNode *node, int face, int ni)
+void get_surfaces_vl(tNode *node, tVarList *vls, int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
@@ -520,7 +560,7 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   /* nb is on other process, we have used MPI to exchange data */
 
   /* count number of vars that exchanged surfaces and set my_N */
-  find_nvars_vind_n_nbn(node,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
+  find_nvars_vind_n_nbn(node,vls,face, nb,nb_f, &nvars, &vi, my_n, nb_n);
   //nb_N = nb_n[0] * nb_n[1] * nb_n[2];
   /* do nothing if there are no vars that exchanged surfaces */
   if(!nvars) return;
@@ -541,7 +581,8 @@ void get_surfaces_for_all_vars(tNode *node, int face, int ni)
   set_com_recv_buf(com, rq, NULL);
 
 //  /* get data out of recv buffer */
-//  for(cnt=0, vi=0; vi<node->dat->nv; vi++)
+//  cnt=0;
+//  forVind(vls, vi)
 //  {
 //    tSurface *s = dat->s[face][vi];
 //
@@ -578,7 +619,7 @@ void free_dat_reqs_after_Waitall_com_send(tNode *node)
 }
 
 /* get nbsurf from all faces and variables for this node out of buffers */
-void get_all_surfaces(tNode *node)
+void get_all_vl_surfaces(tNode *node, tVarList *vls)
 {
   int face, ni;
   tDat *dat = node->dat;
@@ -593,18 +634,18 @@ void get_all_surfaces(tNode *node)
     /* get nbsurf for each neighbor */
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
-      get_surfaces_for_all_vars(node, face, ni);
+      get_surfaces_vl(node,vls, face, ni);
     }
 
     /* set ajsurf on this nodeface via interpolation */
-    set_ajsurf_forall_vars(node, face);
-    /* FIXME: if we use formylnodes_noomp to call get_all_surfaces, it might
-       be better to later call set_all_myln_ajsurf instead of using the
-       set_ajsurf_forall_vars above. */
+    set_ajsurf_vl(node, vls, face);
+    /* FIXME: if we use formylnodes_noomp to call get_all_vl_surfaces, it might
+       be better to later call set_all_vl_ajsurf_mesh instead of using the
+       set_ajsurf_vl above. */
 
-    /* After set_ajsurf_forall_vars we could free nbsurf already */
+    /* After set_ajsurf_vl we could free nbsurf already */
     //FIXME: to conserve memory we should free nbsurf here!!!
-    //free_nbsurf_only_forall_vars(node, face);
+    //free_nbsurf_only_vl(node, face);
   }
 
   /* signal that nb. surfaces on this node have been received now */
@@ -612,7 +653,7 @@ void get_all_surfaces(tNode *node)
 }
 
 /* get nbsurf for all nodes out of buffers and free the buffers */
-void get_all_myln_surfaces(tMesh *mesh)
+void get_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls)
 {
   TIMER_START;
 
@@ -622,13 +663,13 @@ void get_all_myln_surfaces(tMesh *mesh)
   {
     tNode *node = MyLnode;
 
-    loadtimer_start(node);  /* time interp in set_ajsurf_forall_vars */
-    get_all_surfaces(node);
+    loadtimer_start(node);  /* time interp in set_ajsurf_vl */
+    get_all_vl_surfaces(node, vls);
     loadtimer_stop(node);
   }
 
   /* postpone Waitall until we have finished all nodefaces. This could have
-     been already called in get_all_surfaces to free mem earlier.*/
+     been already called in get_all_vl_surfaces to free mem earlier.*/
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
@@ -741,11 +782,11 @@ int same_node_n_normal_to_norm1_2(tNode *node1, int norm1,
 
 
 /* return the first surface tht is not NULL */
-tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
+tSurface *first_nonNULL_surf_in_dat(tDat *dat, tVarList *vls, int f)
 {
   int vi;
   tSurface *s = NULL;
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     s = dat->s[f][vi];
     if(s) break;
@@ -755,7 +796,7 @@ tSurface *first_nonNULL_surf_in_dat(tDat *dat, int f)
 
 
 /* set ajsurf array from data in nbsurf on face f for all vars */
-void set_ajsurf_forall_vars(tNode *node, int f)
+void set_ajsurf_vl(tNode *node, tVarList *vls, int f)
 {
   tMesh *mesh = Elm_mesh(node);
   tPat *pat = node->pat;
@@ -795,19 +836,19 @@ void set_ajsurf_forall_vars(tNode *node, int f)
            ajsurf to nbsurf[0] */
         if(same_n_t)
         {
-          for(vi=0; vi<dat->nv; vi++)
+          forVind(vls, vi)
           {
             tSurface *s = dat->s[f][vi];
             /* do nothing if this surface is NULL */
             if(s) s->ajsurf = s->nbsurf[0];
           }
-          goto end_set_ajsurf_forall_vars;
+          goto end_set_ajsurf_vl;
         }
       }
     }
     else /* neighbor is from diff patch */
     {
-      tSurface *s0 = first_nonNULL_surf_in_dat(dat, f);
+      tSurface *s0 = first_nonNULL_surf_in_dat(dat, vls, f);
 
       found = locate_facenb_in_fnbs(nb, node, &nb_f, &nb_ni);
       if(!found) errorexit("couldn't find nb face!!!");
@@ -912,13 +953,13 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* just copy by pointing to same array */
                     if(PR) printf(" point ajsurf to nbsurf[0]\n");
-                    for(vi=0; vi<dat->nv; vi++)
+                    forVind(vls, vi)
                     {
                       tSurface *s = dat->s[f][vi];
                       /* do nothing if this surface is NULL */
                       if(s) s->ajsurf = s->nbsurf[0];
                     }
-                    goto end_set_ajsurf_forall_vars;
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -930,8 +971,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with two axis interchanged */
                     if(PR) printf(" copy from nbsurf[0] with two axis interchanged\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,0);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 1,0,0);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -948,8 +989,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with axis1 reversed */
                     if(PR) printf(" copy from nbsurf[0] with axis1 reversed\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,0);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 0,1,0);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -961,8 +1002,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with two axis interchanged and axis1 reversed */
                     if(PR) printf(" copy from nbsurf[0] with two axis interchanged and axis1 reversed\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,0);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 1,1,0);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -979,8 +1020,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with axis2 reversed */
                     if(PR) printf(" copy from nbsurf[0] with axis2 reversed\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,0,1);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 0,0,1);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -992,8 +1033,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with two axis interchanged and axis2 reversed */
                     if(PR) printf(" copy from nbsurf[0] with two axis interchanged and axis2 reversed\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,0,1);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 1,0,1);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -1010,8 +1051,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with both axis reversed */
                     if(PR) printf(" copy from nbsurf[0] with both axis reversed\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 0,1,1);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 0,1,1);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -1023,8 +1064,8 @@ void set_ajsurf_forall_vars(tNode *node, int f)
                   {
                     /* copy with two axis interchanged and both reversed */
                     if(PR) printf(" copy from nbsurf[0] with both axis interchanged and both reversed\n");
-                    copy_ajsurf_from_nbsurf0(node,f,nb_f, 1,1,1);
-                    goto end_set_ajsurf_forall_vars;
+                    copy_ajsurf_from_nbsurf0(node,vls,f,nb_f, 1,1,1);
+                    goto end_set_ajsurf_vl;
                   }
                 }
               }
@@ -1038,9 +1079,9 @@ void set_ajsurf_forall_vars(tNode *node, int f)
   }
 
   /* Ok if we get here we need interpolation */
-  s1 = first_nonNULL_surf_in_dat(dat, f);
+  s1 = first_nonNULL_surf_in_dat(dat, vls, f);
   /* do nothing if all sufaces are NULL */
-  if(!s1) goto end_set_ajsurf_forall_vars;
+  if(!s1) goto end_set_ajsurf_vl;
   s1_n = s1->mysurf->n;
 
   /* array memory to store points of mysurf in X coords */
@@ -1159,7 +1200,7 @@ void set_ajsurf_forall_vars(tNode *node, int f)
       useLagrangeUNI = 1;
 
   /* now loop over all vars and interpolate */
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     tSurface *s = dat->s[f][vi];
     if(s)
@@ -1311,13 +1352,13 @@ Res[ni]->d[ll], s->mysurf->d[ll]);
   free_array(Cp[1]);
   free_array(Cp[0]);
 
-end_set_ajsurf_forall_vars:
+end_set_ajsurf_vl:
   TIMER_STOP;
 }
 
 
 /* copy from nbsurf[0] to ajsurf.  */
-void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
+void copy_ajsurf_from_nbsurf0(tNode *node, tVarList *vls, int f, int nb_f,
                               int intrch, int rev1, int rev2)
 {
   tDat *dat = node->dat;
@@ -1333,7 +1374,7 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
   //int on2 = nb_n[od2];
   int oi,oj,ok;
 
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
   {
     tSurface *s = dat->s[f][vi];
     if(s)
@@ -1426,7 +1467,7 @@ void copy_ajsurf_from_nbsurf0(tNode *node, int f, int nb_f,
 
 
 /* set all ajsurf of a node */
-void set_all_ajsurf(tNode *node)
+void set_all_vl_ajsurf(tNode *node, tVarList *vls)
 {
   tDat *dat = node->dat;
   int face;
@@ -1434,16 +1475,16 @@ void set_all_ajsurf(tNode *node)
   if(!dat) return;
 
   for(face=0; face<6; face++)
-    set_ajsurf_forall_vars(node, face);
+    set_ajsurf_vl(node, vls, face);
 }
 
 /* get nbsurf for all nodes out of buffers and free the buffers */
-void set_all_myln_ajsurf(tMesh *mesh)
+void set_all_vl_ajsurf_mesh(tMesh *mesh, tVarList *vls)
 {
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    set_all_ajsurf(node);
+    set_all_vl_ajsurf(node, vls);
   }
 }
 
@@ -1496,7 +1537,7 @@ void free_nbsurf_only(tSurface *s)
 }
 
 /* free all nbsurf on face f of node */
-void free_nbsurf_only_forall_vars(tNode *node, int f)
+void free_nbsurf_only_vl(tNode *node, tVarList *vls, int f)
 {
   tDat *dat = node->dat;
   int vi;
@@ -1504,12 +1545,12 @@ void free_nbsurf_only_forall_vars(tNode *node, int f)
   if(!dat) return;
 
   /* free all nbsurf on face f */
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
     free_nbsurf_only(dat->s[f][vi]);
 }
 
 /* free all nbsurf surfaces on node */
-void free_all_nbsurf_only(tNode *node)
+void free_all_vl_nbsurf_only(tNode *node, tVarList *vls)
 {
   tDat *dat = node->dat;
   int vi,f;
@@ -1518,17 +1559,17 @@ void free_all_nbsurf_only(tNode *node)
 
   /* free all nbsurf */
   for(f=0; f<6; f++)
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
       free_nbsurf_only(dat->s[f][vi]);
 }
 
 /* free nbsurf on all nodes in the mesh */
-void free_all_myln_nbsurf_only(tMesh *mesh)
+void free_all_vl_nbsurf_only_mesh(tMesh *mesh, tVarList *vls)
 {
   formylnodes(mesh)
   {
     tNode *node = MyLnode;
-    free_all_nbsurf_only(node);
+    free_all_vl_nbsurf_only(node, vls);
   }
 }
 
@@ -1548,7 +1589,7 @@ void free_ajsurf_only(tSurface *s)
 }
 
 /* free all ajsurf on face f of node */
-void free_ajsurf_only_forall_vars(tNode *node, int f)
+void free_ajsurf_only_vl(tNode *node, tVarList *vls, int f)
 {
   tDat *dat = node->dat;
   int vi;
@@ -1556,12 +1597,12 @@ void free_ajsurf_only_forall_vars(tNode *node, int f)
   if(!dat) return;
 
   /* free all ajsurf on face f */
-  for(vi=0; vi<dat->nv; vi++)
+  forVind(vls, vi)
     free_ajsurf_only(dat->s[f][vi]);
 }
 
 /* free all ajsurf surfaces on node */
-void free_all_ajsurf_only(tNode *node)
+void free_all_vl_ajsurf_only(tNode *node, tVarList *vls)
 {
   tDat *dat = node->dat;
   int vi,f;
@@ -1570,55 +1611,10 @@ void free_all_ajsurf_only(tNode *node)
 
   /* free all ajsurf */
   for(f=0; f<6; f++)
-    for(vi=0; vi<dat->nv; vi++)
+    forVind(vls, vi)
       free_ajsurf_only(dat->s[f][vi]);
 }
 
-
-/* Copy nbsurf data from s to sdest, this allocates sdest.
-   It copies all nbsurf arrays, so that s could be freed after this. */
-tSurface *surface_copy_with_nbsurf_only(tSurface *s)
-{
-  tSurface *sdest;
-  int i;
-
-  errorexit("use surface_point_to_same_nbsurf instead");
-
-  if(!s) return NULL;
-  if(!s->nbsurf) return NULL;
-
-  /* make sdest and copy some info */
-  sdest = alloc_empty_surface(s->nnbsurf);
-  sdest->dat  = s->dat;
-  sdest->face = s->face;
-  sdest->vi   = s->vi;
-
-  /* now copy all nbsurf arrays, and mark them as allocated */
-  for(i=0; i<s->nnbsurf; i++)
-  {
-    sdest->nbsurf[i] = array_copy(s->nbsurf[i]);
-    sdest->allocd_nbsurf[i] = 1;
-  }
-  return sdest;
-}
-
-/* copy all nbsurf from node_src to node_dest
-   this allocates room for the surfaces but not their data. */
-void surface_copy_all_nbsurf_only(tNode *node_src, tNode *node_dest)
-{
-  tDat *dat_src = node_src->dat;
-  tDat *dat_dest = node_dest->dat;
-  int vi,f;
-
-  errorexit("use surface_copy_nbsurf_pointers instead");
-
-  if(!dat_src || !dat_dest) return;
-
-  /* loop over faces, vars and copy nbsurf of each surf */
-  for(f=0; f<6; f++)
-    for(vi=0; vi<dat_dest->nv; vi++)
-      dat_dest->s[f][vi] = surface_copy_with_nbsurf_only(dat_src->s[f][vi]);
-}
 
 /* Copy mysurf,nbsurf,ajsurf pointers from s to sdest, this allocates sdest.
    mysurf,nbsurf,ajsurf will be marked as not allocated.
@@ -1728,53 +1724,44 @@ void surface_copy_nbsurf_pointers(tNode *node_src, tNode *node_dest)
 /*************************************************************************/
 /*************************************************************************/
 
-/* we need the functions below, but they are UNFINISHED!!! */
+/* we may need the functions below, but they are UNFINISHED!!! */
 
 
 /* init surfaces for a VarList */
-void init_all_vl_surfaces(tMesh *mesh, tVarList *vl)
+void init_all_vl_surfaces__UNFINISHED(tMesh *mesh, tVarList *vl)
 {
-  //FIXME: we should loop over vl only, but for now we just request
-  //       surfaces for all vars and do this:
-  init_all_myln_surfaces(mesh);
+  init_all_vl_surfaces_mesh(mesh, vl);
 }
 
 /* set mysurf for one node and a VarList */
-void set_all_vl_mysurf(tNode *node, tVarList *vl)
+void set_all_vl_mysurf__UNFINISHED(tNode *node, tVarList *vl)
 {
-  //FIXME: we should loop over vl only, but for now we just set
-  //       surfaces for all vars and do this:
-  set_all_mysurf(node);
+  set_all_vl_mysurf(node, vl);
 }
 
 /* request surface exchange for one node and a VarList */
-void request_all_vl_surfaces(tNode *node, tVarList *vl)
+void request_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
-  //FIXME: we should loop over vl only, but for now we just request
-  //       surfaces for all vars and do this:
-  request_all_surfaces_exchange(node);
+  request_all_vl_surfaces_exchange(node, vl);
   /* ^-We should really adapt this to using MPI Windows */
 
-  // NOTE: request_all_surfaces_exchange has a Waitall in
+  // NOTE: request_all_vl_surfaces_exchange has a Waitall in
   // free_dat_reqs_after_Waitall_com_send that leads to a deadlock when it
   // is called repeatedly from the same node, as I would like to do in RK4.
 }
 
 /* get surfaces on one node for a varlist */
-void get_all_vl_surfaces(tNode *node, tVarList *vl)
+void get_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
-  //FIXME: we should loop over vl only, but for now we just get
-  //       surfaces for all vars and do this:
-  get_all_surfaces(node);
+  get_all_vl_surfaces(node, vl);
   free_dat_reqs_after_Waitall_com_send(node); //not needed if we use MPI windows
 }
 
 /* free all surfaces on one node for a varlist */
-void free_all_vl_surfaces(tNode *node, tVarList *vl)
+void free_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
   //FIXME: not needed if we use MPI windows
   free_dat_reqs_after_Waitall_com_send(node);
 
-  //FIXME: we could free only the surfaces associated with vl, but for now:
-  free_all_surfaces(node);
+  free_all_vl_surfaces(node, vl);
 }

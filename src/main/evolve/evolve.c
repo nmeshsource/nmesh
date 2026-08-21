@@ -9,6 +9,10 @@
 /* globals for evolve */
 tEvolveGlobals EvolveGlobals[1];
 
+/* global pars for amr */
+extern tAMR amr[1];
+
+
 /* The functions below are a little complex because they deal with lists of
    variable lists and a list of RHSs (one for each VarList). This was done to
    be able to couple two systems such as e.g. Z4 and matter. Each have their
@@ -294,8 +298,8 @@ void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
       troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
     if(ListEntry(evosys->f[XSURFRHS],i))
     {
-      get_all_surfaces(node); //get surfaces of u, don't need surf of x yet
-      //FIXME: make get_all_surfaces_vl that does it just for a varlist
+      get_all_vl_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
+      //FIXME: make get_all_vl_surfaces_vl that does it just for a varlist
       troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
     }
 
@@ -361,7 +365,7 @@ void evolve_setrhs(tElm *elm, pVLList *rhs, pVLList *u, int MPI_exchange)
 
   //if(MPI_exchange)
   //{
-  //  Test: if(MPI_exchange) get_all_surfaces(node);
+  //  Test: if(MPI_exchange) get_all_vl_surfaces(node);
 
       /* check if there is a single XVOLRHS */
   //  have_XRHS = 0;
@@ -786,7 +790,7 @@ int evolve_output_timers(tMesh *mesh)
 
 /*************************************************************************/
 /* functions to evolve on just one node
-   will work only once request_all_vl_surfaces and such in
+   will work only once request_all_vl_surfaces__UNFINISHED and such in
    main/amr/surface.c start working
 */
 /*************************************************************************/
@@ -822,7 +826,7 @@ void evolve_setrhs__old(tNode *node, pVLList *rhs, pVLList *u, int request_surfs
       ListEntry(evosys->f[VOLRHS],i)(node, evv);
   }
 
-  //Test:  get_all_surfaces(node);
+  //Test:  get_all_vl_surfaces(node);
 
   /* add all surf. RHSs */
   forList(u, i)
