@@ -265,6 +265,12 @@ git_status:
 	@echo ======================== nmesh projects ========================
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; cd $(TOP); fi done
 
+git_switch:
+	@echo ====================== main part of nmesh ======================
+	git switch $(ARGS)
+	@echo ======================== nmesh projects ========================
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git switch $(ARGS); cd $(TOP); fi done
+
 # targets for git hooks
 .git/hooks/pre-commit: git_hooks/pre-commit
 	@$(MAKE) install_git_hooks
