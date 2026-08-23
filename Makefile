@@ -267,7 +267,7 @@ git_status:
 
 git_switch:
 	@echo ====================== main part of nmesh ======================
-	git switch $(ARGS)
+	-git switch $(ARGS)
 	@echo ======================== nmesh projects ========================
 	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git switch $(ARGS); cd $(TOP); fi done
 
