@@ -60,6 +60,9 @@ typedef struct
   double Press;   /* Press=1 in Pa=N/m^2=J/m^3 */
   double Edens;   /* Edens=1 in J/m^3 */
   double Mdens;   /* Mdens=1 in kg/m^3 */
+  double Ndens;   /* Ndens=1 in 1/m^3 */
+  double Energy_MeV;  /* Energy=1 in MeV */
+  double Edens_MeV;   /* Edens=1 in MeV/m^3 */
 } tGMc1toSI;
 
 

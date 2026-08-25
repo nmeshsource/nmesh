@@ -97,6 +97,7 @@ void units_set_GMc1toSI(void)
   double G     = natureconsts.G;
   double GMsun = natureconsts.GMsun;
   double Msun  = GMsun/G;
+  double e     = natureconsts.e;
 
   GMc1toSI.Length = GMsun / c2;
   GMc1toSI.Area   = GMc1toSI.Length * GMc1toSI.Length;
@@ -109,6 +110,9 @@ void units_set_GMc1toSI(void)
   GMc1toSI.Press  = GMc1toSI.Force / GMc1toSI.Area;
   GMc1toSI.Edens  = GMc1toSI.Energy / GMc1toSI.Volume;
   GMc1toSI.Mdens  = GMc1toSI.Mass / GMc1toSI.Volume;
+  GMc1toSI.Ndens  = 1. / GMc1toSI.Volume;
+  GMc1toSI.Energy_MeV = GMc1toSI.Energy / (e * 1e6);
+  GMc1toSI.Edens_MeV  = GMc1toSI.Edens  / (e * 1e6);
 }
 
 
@@ -203,6 +207,9 @@ void units_test_SItoGMc1_GMc1toSI(void)
   printf("GMc1toSI.Press  = %.19g\n", GMc1toSI.Press);
   printf("GMc1toSI.Edens  = %.19g\n", GMc1toSI.Edens);
   printf("GMc1toSI.Mdens  = %.19g\n", GMc1toSI.Mdens);
+  printf("GMc1toSI.Ndens  = %.19g\n", GMc1toSI.Ndens);
+  printf("GMc1toSI.Energy_MeV = %.19g\n", GMc1toSI.Energy_MeV);
+  printf("GMc1toSI.Edens_MeV  = %.19g\n", GMc1toSI.Edens_MeV);
 
   printf("h in G=Msun=c=1 units is %.19g\n",
          natureconsts.h * SItoGMc1.J * SItoGMc1.s);
