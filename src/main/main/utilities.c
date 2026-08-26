@@ -499,6 +499,27 @@ long str_from_buf(const char *buffer, long nbuffer, long offset,
 }
 
 
+/* return how often char ch occurs in a file */
+long nchar_infile(FILE *fp, char ch)
+{
+  long curr, nch;
+  char buf[65536];
+  size_t len, i;
+
+  /* get current position */
+  curr = ftell(fp);
+
+  /* read through file in chunks */
+  nch = 0;
+  while((len = fread(buf, 1, sizeof(buf), fp)) != 0)
+    for(i=0; i<len; i++)
+      nch += (buf[i] == ch);
+
+  /* go back to curr */
+  fseek(fp, curr, SEEK_SET);
+  return nch;
+}
+
 /* return the number of bytes in a file */
 long nbytes_infile(FILE *fp)
 {
