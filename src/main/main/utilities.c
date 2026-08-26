@@ -50,6 +50,15 @@ void prdivider(int n)
 }
 
 
+/* return str or fixedstr if logfile_reproducible=yes */
+const char *str_or_fixedstr_if_reproducible(tMesh *mesh, const char *str,
+                                            const char *fixedstr)
+{
+  if(GetvLax(ParLax("logfile_reproducible"),"yes")) return fixedstr;
+  return str;
+}
+
+
 /* wrapper around clock_gettime */
 int getRealTime(struct timespec *tp)
 {

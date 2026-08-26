@@ -6,6 +6,9 @@
 #define MSTR(x) #x
 #define MSTR_OFVAL(x) MSTR(x)
 
+/* module rev string */
+#define RevStr(x) str_or_fixedstr_if_reproducible(mesh, MSTR(x), "OMITTED")
+
 /* constants */
 #ifdef PI
 #undef PI
@@ -252,6 +255,8 @@ NORET void errorexiti(const char *file, int line, const char *func,
 
 void Yo(double x);
 void prdivider(int n);
+const char *str_or_fixedstr_if_reproducible(tMesh *mesh, const char *str,
+                                            const char *fixedstr);
 int getRealTime(struct timespec *tp);
 void initTimeIn_s(void);
 void getTimeDiff(struct timespec dtp[1],

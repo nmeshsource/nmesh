@@ -8,7 +8,7 @@
 
 int nmesh_main(tMesh *mesh)
 {
-  printf("Adding main (rev "MSTR_OFVAL(MAINREV)")\n");
+  printf("Adding main (rev %s)\n", RevStr(MAINREV));
 
   /* functions */
   AddFun(POST_INITLIBS, print_endian_info);
