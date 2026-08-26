@@ -50,4 +50,8 @@ clang-format -i file.c
 
 To ensure code quality one should run tests before and after changes
 --------------------------------------------------------------------
-one can e.g. use floatdiff (sgrid/utilities) to see how much the output changes
+*One can e.g. use floatdiff (in nmesh/utilities) to see how much the output
+ changes
+*And one should at least run
+make unittests
+ to see if things have changed.
