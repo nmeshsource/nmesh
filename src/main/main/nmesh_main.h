@@ -286,6 +286,7 @@ int get_parval_from_str(const char *str, const char *par, const char *delim,
 int str_to_intList(const char *str, const char *delim, intList *il);
 long str_from_buf(const char *buffer, long nbuffer, long offset,
                   char delim, char *str, long nstr, long *strlen);
+long nchar_infile(FILE *fp, char ch);
 long nbytes_infile(FILE *fp);
 long nbytes_infile_name(const char *fname);
 FILE *fopen_buf(const char *pathname, const char *mode,
