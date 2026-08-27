@@ -52,6 +52,6 @@ sdmf2pvtu.py GRHD_D.xy.txt
  will create a file named GRHD_D.xy_pvtu/GRHD_D.xy.pvd openable with
 paraview GRHD_D.xy_pvtu/GRHD_D.xy.pvd
 
-*nmesh/doc/nmesh-sdmf.txt for more info about sdmf format
+*See nmesh/doc/nmesh-sdmf.txt for more info about sdmf format
 
 *See nmesh/doc/Paraview.txt for usage of Paraview.
