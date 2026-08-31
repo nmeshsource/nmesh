@@ -14,6 +14,10 @@ int rtbisect(double *x0, double (*func)(double,void *par),
 int rtbrent_brak(double *x0, double (*func)(double,void *par),
                  double x1, double x2, void *par, int maxits, double xacc,
                  int pr);
+int rtbrent_brak_fdf(double *x0,
+                     void (*fdf)(double x, void *par, double *f, double *df),
+                     double x1, double x2, void *par, int maxits, double xacc,
+                     int pr);
 
 /* widen_brak.c */
 int widen_brak(double (*func)(double,void *par),
