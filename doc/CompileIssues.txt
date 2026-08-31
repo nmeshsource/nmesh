@@ -46,13 +46,15 @@ get it back if we add:
 DFLAGS += -D_DARWIN_C_SOURCE
 to MyConfig. And even worse, ru_maxrss should contain the number of
 kilobytes used, but on Macs it contains the number of bytes even with
--D_DARWIN_C_SOURCE. In addition, the Apple compiler seems to often fail at
-the final linking step: "ld: symbol(s) not found for architecture...". The
-latter seems to be related to symbols coming from global variables, that are
-defined outside functions (at file scope), e.g. "int ex1;". According to the
-C-standard such variables are automatically initialized to 0. However, the
-compiler marks the symbol as "C" (i.e. common, can be checked with nm). When
-we then create a module library by invoking Apple's ar (from inside the
+-D_DARWIN_C_SOURCE.
+
+In addition, the Apple compiler seems to often fail at the final linking
+step: "ld: symbol(s) not found for architecture...".
+The latter seems to be related to symbols coming from global variables, that
+are defined outside functions (at file scope), e.g. "int ex1;". According to
+the C-standard such variables are automatically initialized to 0. However,
+the compiler marks the symbol as "C" (i.e. common, can be checked with nm).
+When we then create a module library by invoking Apple's ar (from inside the
 Makefile), this library's table of contents is missing all symbols marked as
 "C". And then the compiler cannot find these symbols. This nonsense only
 happens with the ar from MacOS. The ar on Linux puts all symbols into the
@@ -63,7 +65,7 @@ to MyConfig. Then the compiler marks the symbols as "B" instead, and Apple's
 ar adds them to the table of contents, so that linking can work. Another
 way around this is to explicitly change all global variable declarations in
 nmesh from something like "int ex1;" to "int ex1=0;". But who came up with
-all this nonsense at Apple? After all Sec. 6.9.2-2 of the C99-standard
+all this nonsense at Apple? After all, Sec. 6.9.2-2 of the C99-standard
 clearly states that "int ex1;" will have the same behavior as "int ex1=0;"
 On Apple, the former causes linker errors. No such problems occur on Linux,
 FreeBSD, NetBSD or OpenBSD. Why has Apple screwed this up???
