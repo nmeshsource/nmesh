@@ -160,7 +160,7 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
      double (*func)(double,void *par) */
 /*************************************************************************/
 
-/* struct with vecfuncP and pars for it */
+/* struct with fdf and pars for it */
 struct fdf_And_Pars
 {
   void (*fdf)(double x, void *par, double *f, double *df);
