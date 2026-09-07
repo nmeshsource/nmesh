@@ -718,8 +718,8 @@ void refine_set_use_fv_if_Ptyp(tMesh *mesh, int Ptyp, int use_fv)
   refine_set_use_fv_if_pt_typ(mesh, pt_typ, use_fv);
 }
 
-/* set use_fv flag to usefv in all nodes that have pt_typ
-   and set use_fv flag to !usefv in all other nodes */
+/* set use_fv flag to 1 in all nodes that have pt_typ=P_UNIFORM
+   and set use_fv flag to 0 in all other nodes */
 void refine_set_use_fv_true_iff_P_UNIFORM(tMesh *mesh)
 {
   /* go over mesh */
