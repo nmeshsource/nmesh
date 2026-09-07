@@ -8,6 +8,7 @@ Nmesh output:
 
 1douttime = 0.1
 1doutput = scalarwave1_pi
+1dformat = gnuplot
 
 2douttime = 0.1
 2doutput = scalarwave1_pi
@@ -26,12 +27,14 @@ Nmesh output:
 1d visualization:
 =================
 *1d data is best looked at with tgraph, see https://github.com/wofti/tgraph .
+ E.g. to show scalarwave1_pi in patch 0 along the X-axis, you can use:
+tgraph.py -m sw7/scalarwave1_pi.0X
 
 
 2d and 3d visualization:
 ========================
-*tgraph can show 2d data in gnuplot and vtk format, but it cannot show other
- formats or most 3d data.
+*tgraph can show 2d data in gnuplot and legacy vtk format, but it cannot
+ show other formats or most 3d data.
 
 *So it is best to use Paraview or VisIt to look at 2d and 3d the data.
 
