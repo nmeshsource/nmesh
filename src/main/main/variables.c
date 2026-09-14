@@ -816,6 +816,17 @@ void vlsetconst(const void *el, tVarList *u, const double c)
   }
 }
 
+/* wrapper for variable: set var u = c */
+void varsetconst(tMesh *mesh, tElm *elm, int iu, const double c)
+{
+  tMesh *mesh_e = (elm)? Elm_mesh(elm) : mesh;
+  tVarList *u = vlalloc(mesh_e);
+  vlpush(u, iu);
+  vlsetconst(elm, u, c);
+  vlfree(u);
+}
+
+
 /* copy: v = u on one elm */
 void vlcopy(const void *el, tVarList *v, tVarList *u)
 {
@@ -852,7 +863,7 @@ void vlcopymesh(tMesh *mesh, tVarList *v, tVarList *u)
   vlcopy(NULL, v, u);
 }
 
-/* wrapper for single variable: v = u (iv/u is index of v/u) */
+/* wrapper for variable: v = u (iv/u is index of v/u) */
 void varcopy(tMesh *mesh, tElm *elm , int iv, int iu)
 {
   tMesh *mesh_e = (elm)? Elm_mesh(elm) : mesh;
@@ -903,7 +914,7 @@ void vlswap(tVarList *v, tVarList *u)
   }
 }
 
-/* wrapper for single variable: swap u and v (iv/u is index of v/u) */
+/* wrapper for variable: swap u and v (iv/u is index of v/u) */
 void varswap(tMesh *mesh, int iv, int iu)
 {
   tVarList *v = vlalloc(mesh);
@@ -970,7 +981,7 @@ void vladd(const void *el,
   }
 }
 
-/* wrapper for single variable: r = ca*a + cb*b (ia/b/r is index of a/b/r) */
+/* wrapper for variable: r = ca*a + cb*b (ia/b/r is index of a/b/r) */
 void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
 {
   tVarList *a = vlalloc(mesh);
