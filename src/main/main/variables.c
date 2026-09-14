@@ -858,8 +858,8 @@ void varcopy(tMesh *mesh, tElm *elm , int iv, int iu)
   tMesh *mesh_e = (elm)? Elm_mesh(elm) : mesh;
   tVarList *v = vlalloc(mesh_e);
   tVarList *u = vlalloc(mesh_e);
-  vlpushone(v, iv);
-  vlpushone(u, iu);
+  vlpush(v, iv);
+  vlpush(u, iu);
   vlcopy(elm, v, u);
   vlfree(u);
   vlfree(v);
@@ -908,8 +908,8 @@ void varswap(tMesh *mesh, int iv, int iu)
 {
   tVarList *v = vlalloc(mesh);
   tVarList *u = vlalloc(mesh);
-  vlpushone(v, iv);
-  vlpushone(u, iu);
+  vlpush(v, iv);
+  vlpush(u, iu);
   vlswap(v, u);
   vlfree(u);
   vlfree(v);
@@ -976,9 +976,9 @@ void varadd(tMesh *mesh, int ir, double ca, int ia, double cb, int ib)
   tVarList *a = vlalloc(mesh);
   tVarList *b = vlalloc(mesh);
   tVarList *r = vlalloc(mesh);
-  vlpushone(a, ia);
-  vlpushone(b, ib);
-  vlpushone(r, ir);
+  vlpush(a, ia);
+  vlpush(b, ib);
+  vlpush(r, ir);
   vladd(NULL, r, ca,a, cb,b);
   vlfree(a);
   vlfree(b);
