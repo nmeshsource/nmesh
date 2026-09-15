@@ -1,0 +1,77 @@
+# MyConfig
+#
+# The file MyConfig is included verbatim in the Makefile to determine which
+# libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# projects we add:
+#libpaths += src/tests/TestDerivs
+#libpaths += src/tests/advection1
+libpaths += src/tests/scalarwave1
+repo = giter@quark.physics.fau.edu:nmesh-projects
+projects += $(repo)/GRHD_base
+projects += $(repo)/GRHD
+projects += $(repo)/ADM
+projects += $(repo)/TOVstar
+projects += $(repo)/EoS
+projects += $(repo)/Ein
+projects += $(repo)/SRHDtestID
+#projects += $(repo)/ScalarWave
+projects += $(repo)/SingleBH
+projects += $(repo)/GH
+projects += $(repo)/DNSdataReader
+projects += $(repo)/BNSdataReader
+projects += $(repo)/FUKAdataReader
+projects += $(repo)/Invariants
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = nmesh
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler
+CC = mpicc # mpiicc # gcc # icc
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -g -O3 # -fopenmp # -fp-trap-all=common # -fopenmp # -Wall -Werror
+WARN = -pedantic -Wall
+
+# use OpenMP pragmas, this also needs something -fopenmp in OFLAGS
+#DFLAGS += -DUSEOMP
+
+# use MPI, no paths should be needed with mpicc
+DFLAGS += -DUSEMPI # -DMPI_ERR_RET
+
+# GSL on new athene
+#SPECIALLIBS += $(shell pkg-config --libs gsl)
+#SPECIALINCS += $(shell pkg-config --cflags gsl)
+##SPECIALLIBS += -lgsl -lgslcblas
+SPECIALLIBS += -lgsl -lopenblas # -lgslcblas
+
+# generate SIGFPE on NANs, works only on GNU, BSD or similar systems
+#DFLAGS += -D_GNU_SOURCE -DFPEEXCEPTIONS="FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW"
+
+# link with libsgrid from inside DNSdataReader
+SPECIALLIBS += $(TOP)/src/projects/DNSdataReader/sgrid/lib/libsgrid.a
+
+########################################################
+# Extra lines needed to compile FUKAdataReader and fuka:
+########################################################
+# link with libkadath from inside FUKAdataReader
+SPECIALLIBS += $(TOP)/src/projects/FUKAdataReader/fuka/lib/libkadath.a
+SPECIALLIBS += -lfftw3 -lopenblas # since kadath needs fftw3 and blas
+
+# since FUKAdataReader contains some C++ we need this:
+CXX = mpic++
+CLINKER = mpic++
+
+# Since fuka has a really bad CMake conf, we directly set the CPATH and
+# LIBRARY_PATH environment variables that the compiler uses:
+FFTWDIR = /opt/ohpc/pub/spack/opt/spack/linux-rocky8-x86_64/gcc-12.4.0/fftw-3.3.10-cfng67fg2n7hns6mrvf3lmkhlaepkyik
+BOOSTDIR = /opt/ohpc/pub/spack/opt/spack/linux-rocky8-x86_64/gcc-13.2.0/boost-1.85.0-q37q3jzmx6h2ef6gzmy6qlcs32pta63r
+export CPATH := $(CPATH):$(FFTWDIR)/include:$(BOOSTDIR)/include
+export LIBRARY_PATH := $(LIBRARY_PATH):$(FFTWDIR)/lib:$(BOOSTDIR)/lib

@@ -1,0 +1,10 @@
+# modules needed for nmesh or sgrid
+module rm openmpi4
+module rm gnu9
+module load gcc/14
+module load suite-sparse
+module load gsl
+module load openmpi4
+# additional modules needed for fuka
+module load fftw
+module load boost
