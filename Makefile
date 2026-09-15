@@ -231,6 +231,8 @@ cleantilde:
 
 # print some vars
 printvars:
+	@echo CPATH=$(CPATH)
+	@echo LIBRARY_PATH=$(LIBRARY_PATH)
 	@echo projects=$(projects)
 	@echo PROJECTDIR=$(PROJECTDIR)
 	@echo projectpaths=$(projectpaths)
