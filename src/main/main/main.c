@@ -501,8 +501,9 @@ int inidata_mesh(tMesh *mesh)
   printf("Initializing mesh\n");
   prTimeIn_s("WallTime at beginning of inidata_mesh: ");
 
-  /* hook for funs right after iterate_parameters */
+  /* hooks for funs right after iterate_parameters */
   RunFun(POST_PARAMETERS);
+  RunFun(POST_PARAMETERS2);
 
   /* check if there is a saved checkpoint, and if we want checkpointing */
   chkpt_exists = checkpoint_exists(mesh, "", "");
