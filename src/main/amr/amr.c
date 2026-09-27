@@ -278,10 +278,6 @@ void MPIexchange_free_all_myln(tMesh *mesh)
   default:
     errorexit("unknown value in amr_MPIexchange");
   }
-
-  /* free varlist that contains all vars that have surfaces */
-  vlfree(amr->vlSurfExch);
-  amr->vlSurfExch = NULL;
 }
 
 
