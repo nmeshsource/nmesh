@@ -187,3 +187,14 @@ int rtbrent_brak_fdf(double *x0,
   return rtbrent_brak(x0, rtbrent_brak_func_from_fdf,
                       x1,x2, p, maxits, xacc, pr);
 }
+
+/* bracket finder for fdf interface */
+int widen_brak_f_fdf(void (*fdf)(double x, void *par, double *f, double *df),
+                     double *x1, double *x2, void *par, double Fac, int ntries,
+                     int pr)
+{
+  struct fdf_And_Pars p[1];
+  p->fdf = fdf;
+  p->par = par;
+  return widen_brak_f(rtbrent_brak_func_from_fdf, x1,x2, p, Fac, ntries, pr);
+}
