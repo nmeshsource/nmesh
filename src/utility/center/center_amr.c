@@ -81,7 +81,7 @@ int center_amr_l(tElm *elm, void *pars)
 int center_amr(tMesh *mesh)
 {
   double dt = Getd(Par("center_amr_time"));
-  if(dt >= 0.)
+  if(dt > 0.)
   {
     tcenter_amr_pars pars = {.lmin    = Geti(Par("center_amr_lmin")),
                              .lmax    = Geti(Par("center1_amr_lmax")),
