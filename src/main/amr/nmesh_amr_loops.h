@@ -23,6 +23,7 @@
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 
 /* for easy access */
+#define nMyElms mesh->nmyelm
 #define MyID   ei_
 #define MyElm  mesh->myelm[ei_]
 #define MyElm0 mesh->myelm[0]
