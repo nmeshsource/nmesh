@@ -41,7 +41,7 @@ int nmesh_center(tMesh *mesh)
   AddPar("center1_mass", "1", "mass1 used for CM calculation");
   AddPar("center2_mass", "1", "mass2 used for CM calculation");
   /* for AMR following centers 1 & 2 */
-  AddPar("center_amr_time", "-1", "when to call center_amr (-1=never)");
+  AddPar("center_amr_time", "-1", "t-interval of center_amr calls (-1=never)");
   AddPar("center_amr_lmin", "0", "coarsest level allowed anywhere");
   AddPar("center1_amr_lmax", "0", "finest level at center1");
   AddPar("center1_amr_radius", "8", "radius of finest level around center1");
