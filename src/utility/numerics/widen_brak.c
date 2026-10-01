@@ -51,3 +51,5 @@ int widen_brak(double (*func)(double,void *par),
 {
   return widen_brak_f(func, x1,x2, par, 1.6, ntries, pr);
 }
+
+/* Note: see also widen_brak_f_fdf in rtbrent_brak.c */

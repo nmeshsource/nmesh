@@ -18,6 +18,9 @@ int rtbrent_brak_fdf(double *x0,
                      void (*fdf)(double x, void *par, double *f, double *df),
                      double x1, double x2, void *par, int maxits, double xacc,
                      int pr);
+int widen_brak_f_fdf(void (*fdf)(double x, void *par, double *f, double *df),
+                     double *x1, double *x2, void *par, double Fac, int ntries,
+                     int pr);
 
 /* widen_brak.c */
 int widen_brak_f(double (*func)(double,void *par),
