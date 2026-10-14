@@ -97,7 +97,7 @@ git push
 # done. If that happens, you can EITHER study git more thoroughly online,
 # and then resolve the conflict in the proper git way, OR you can simply
 # rename the repo dir and clone it again to get a clean copy. You can then
-# add your changes to this clean copy without conflicts! The later is often
+# add your changes to this clean copy without conflicts! The latter is often
 # better for inexperienced git users.
 
 
