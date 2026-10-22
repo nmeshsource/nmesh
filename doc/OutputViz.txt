@@ -27,8 +27,11 @@ Nmesh output:
 1d visualization:
 =================
 *1d data is best looked at with tgraph, see https://github.com/wofti/tgraph .
- E.g. to show scalarwave1_pi in patch 0 along the X-axis, you can use:
+ E.g. to plot scalarwave1_pi in patch 0 along the X-axis, you can use:
 tgraph.py -m sw7/scalarwave1_pi.0X
+
+*To plot scalarwave1_pi versus the Cartesian x (along X), you can use:
+tgraph.py -c 2:4 { sw7/x.1X sw7/scalarwave1_pi.1X } { sw7/x.0X sw7/scalarwave1_pi.0X }  { sw7/x.2X sw7/scalarwave1_pi.2X }
 
 
 2d and 3d visualization:

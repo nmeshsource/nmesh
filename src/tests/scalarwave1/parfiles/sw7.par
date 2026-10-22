@@ -44,7 +44,7 @@ logfile_creation = no
 
 1douttime = 0.2
 1dformat = gnuplot
-1doutput = scalarwave1_pi
+1doutput = scalarwave1_pi  x y z
 
 2douttime = 0.2
 2doutput = scalarwave1_pi
