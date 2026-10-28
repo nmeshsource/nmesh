@@ -91,6 +91,37 @@ git commit .
 git push
 
 ##########################################################
+# Branches in git
+##########################################################
+# to list all branches type
+git branch -a
+
+# make a new branch b1 and then switch to it
+git branch b1
+git switch b1
+
+# after switching to b1, any change can be commited to b1 with
+git commit .
+
+# to push the branch b1 back to the server (i.e. origin) for the first time
+git push --set-upstream origin b1
+# after this, pushing works simply with
+git push
+
+# delete a branch b2 locally, and then also on the remote server (origin)
+git branch -d b2      # before delete we should merge b2 into some other branch
+git push origin -d b2
+
+##########################################################
+# Merging branches in git
+##########################################################
+# to merge branch b2 into b1
+git switch b2   # switch to b2, so that we can pull its newest version
+git pull        # make sure you have the newest version of b2
+git switch b1   # we want to merge b2 into b1, so we should be on b1
+git merge b2    # now merge in b2
+
+##########################################################
 # Conflicts
 ##########################################################
 # Sometimes others may have made changes that conflict with what you have
