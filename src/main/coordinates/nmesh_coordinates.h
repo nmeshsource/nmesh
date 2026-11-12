@@ -69,7 +69,8 @@ int nearest_i0_of_Xb_indir_diff(tNode *node, int dir, const double Xb0,
 int nearest_i0_of_Xb_indir(tNode *node, int dir, const double Xb0);
 void nearest_ijk_of_XbYbZb(tNode *node, int ijk[3], const double Xb0[3]);
 void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);
-void nearest_ijk_of_XYZplus(tNode *node, int ijk[3], const double X0[3]);
+void nearest_ijk_of_XYZplus(tNode *node, int ijk[3], const double X0[3],
+                            int StayInPatch);
 void nearest_lowernode_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3]);
 double nearest_ijk_of_xyz(tNode *node, int ijk[3], const double x0[3]);
 double nearest_ijk_of_xyz_inplaneN(tNode *node, int N, int pl,

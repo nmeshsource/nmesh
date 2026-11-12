@@ -90,18 +90,27 @@ void nearest_ijk_of_XYZ(tNode *node, int ijk[3], const double X0[3])
   nearest_ijk_of_XbYbZb(node, ijk, Xb);
 }
 
-/* find i,j,k closest to X0+epsilon */
-void nearest_ijk_of_XYZplus(tNode *node, int ijk[3], const double X0[3])
+/* find i,j,k closest to X0+epsilon,
+   but keep X0+epsilon within patch if StayInPatch=1 */
+void nearest_ijk_of_XYZplus(tNode *node, int ijk[3], const double X0[3],
+                            int StayInPatch)
 {
   double X0_plus[3];
   int dir;
 
-  /* create a point X0_plus, that is moved in the positive dir (1,1,1) */
+  /* create a point X0_plus, that is moved in the positive dir (1,1,1),
+     but keep X0_plus in patch if StayInPatch=1 */
   for(dir=0; dir<3; dir++)
   {
+    int face = 2*dir + 1; /* pat face we hit if we move in positive dir */
     double X = X0[dir];
-    X0_plus[dir] = X + (1. + fabs(X))*10.*dequaleps;
+
+    if(StayInPatch && Elm_patface(node, face))
+      X0_plus[dir] = X;
+    else
+      X0_plus[dir] = X + (1. + fabs(X))*10.*dequaleps;
   }
+  //pr_nodename(node);  pr3v(" X0_plus", X0_plus);  printf("\n");
   /* get ijk of X0_plus */
   nearest_ijk_of_XYZ(node, ijk, X0_plus);
 }
