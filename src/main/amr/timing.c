@@ -119,6 +119,14 @@ int timing_mm_speed(tMesh *mesh)
   /* time before loop */
   getRealTime(tp0);
 
+  /* check if ELMLEVEL_Pragma would create nested parallelism */
+#ifdef USE_OMP_TASKLOOP
+  errorexit("If we have:\n"
+            "  GEN_Pragma(omp parallel)\n"
+            "  GEN_Pragma(omp master)\n");
+            "in main() 'omp parallel for' will do nothing!!!")
+#endif
+
   /* time nruns times to have less jitter */
   mm1_time = 0.;
   ELMLEVEL_Pragma(omp parallel for reduction(+:mm1_time))
