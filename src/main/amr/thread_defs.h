@@ -11,7 +11,7 @@
 
 #include <omp.h>
 #define OMP_VERSION _OPENMP
-#define NODELEVEL_Pragmas
+#define ELMLEVEL_Pragmas
 #define tMUTEX omp_lock_t
 #define DECL_MESH_MUTEX(node, mutex) \
   tMesh *mesh = (node)->pat->mesh; \
@@ -46,14 +46,14 @@
 /* To parallelize with OpenMP we need _Pragma ( "omp parallel for" ) 
    in many places. But for different applications we want to switch 
    them on or off depending on where they are.
-   NODELEVEL_Pragma used for omp loops all nodes
+   ELMLEVEL_Pragma used for omp loops all nodes
 */
-/* define NODELEVEL_Pragma macros that allow us to include
-   certain pragmas only if certain things like NODELEVEL_Pragmas are defined */
-#ifdef NODELEVEL_Pragmas
-#define NODELEVEL_Pragma(x)  _Pragma ( #x )
+/* define ELMLEVEL_Pragma macros that allow us to include
+   certain pragmas only if certain things like ELMLEVEL_Pragmas are defined */
+#ifdef ELMLEVEL_Pragmas
+#define ELMLEVEL_Pragma(x)  _Pragma ( #x )
 #else
-#define NODELEVEL_Pragma(x)
+#define ELMLEVEL_Pragma(x)
 #endif
 
 #if defined(LEVEL6_Pragmas) || defined(TOPLEVEL_Pragmas)

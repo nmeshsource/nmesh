@@ -37,16 +37,16 @@
 
 /* we use OpenMP to parallelize the loop in formyelms_noomp */
 #define formyelms(mesh) \
-  NODELEVEL_Pragma(omp parallel) \
-  NODELEVEL_Pragma(omp master) \
-  NODELEVEL_Pragma(omp taskloop) \
+  ELMLEVEL_Pragma(omp parallel) \
+  ELMLEVEL_Pragma(omp master) \
+  ELMLEVEL_Pragma(omp taskloop) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 
 /* this one will have no "parallel" on its own */
 /*
 #define formyelms_ompfor(mesh) \
-  NODELEVEL_Pragma(omp master) \
-  NODELEVEL_Pragma(omp taskloop) \
+  ELMLEVEL_Pragma(omp master) \
+  ELMLEVEL_Pragma(omp taskloop) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 */
 /* THIS DIDN'T WORK in dg_add_surface_fluxes!!! It caused a race for e.g.
@@ -59,14 +59,14 @@
 
 /* we use OpenMP to parallelize the loop in formyelms_noomp */
 #define formyelms(mesh) \
-  NODELEVEL_Pragma(omp parallel for) \
+  ELMLEVEL_Pragma(omp parallel for) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 #endif
 
 
 /* this one will have no "parallel" on its own */
 #define formyelms_ompfor(mesh) \
-  NODELEVEL_Pragma(omp for) \
+  ELMLEVEL_Pragma(omp for) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 /* to start tasks formyelms_ompfor has to be inside a:
    #pragma omp parallel {  } */
@@ -88,15 +88,15 @@
 /* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
 #define old_taskloop_formylnodes(mesh) \
   for(int cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  NODELEVEL_Pragma(omp parallel) \
-  NODELEVEL_Pragma(omp master) \
-  NODELEVEL_Pragma(omp taskloop) \
+  ELMLEVEL_Pragma(omp parallel) \
+  ELMLEVEL_Pragma(omp master) \
+  ELMLEVEL_Pragma(omp taskloop) \
   for(int li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
 /* we use OpenMP to parallelize the 2nd loop in formylnodes_noomp */
 #define old_formylnodes(mesh) \
   for(int li_, cat_=0; cat_ < mesh->myln->nncats; cat_++) \
-  NODELEVEL_Pragma(omp parallel for) \
+  ELMLEVEL_Pragma(omp parallel for) \
   for(li_=0; li_ < mesh->myln->ncat[cat_]; li_++)
 
 /* get leaf node from mesh, cat_ and li_ */
