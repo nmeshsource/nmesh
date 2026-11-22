@@ -109,7 +109,7 @@ int timing_mm_speed(tMesh *mesh)
 
   /* time nrunso10 with 1 thread to have less jitter */
   mm1_time = 0.;
-  //ELMLEVEL_Pragma(omp parallel for reduction(+:mm1_time))
+  //GEN_Pragma(omp parallel for reduction(+:mm1_time))
   for(i=0; i<nrunso10; i++)
   {
     mm1_time += time_mm_array0(nxmax);
@@ -119,7 +119,7 @@ int timing_mm_speed(tMesh *mesh)
   /* time before loop */
   getRealTime(tp0);
 
-  /* check if ELMLEVEL_Pragma would create nested parallelism */
+  /* check if GEN_Pragma would create nested parallelism */
 #ifdef USE_OMP_TASKLOOP
   errorexit("If we have:\n"
             "  GEN_Pragma(omp parallel)\n"
@@ -129,7 +129,7 @@ int timing_mm_speed(tMesh *mesh)
 
   /* time nruns times to have less jitter */
   mm1_time = 0.;
-  ELMLEVEL_Pragma(omp parallel for reduction(+:mm1_time))
+  GEN_Pragma(omp parallel for reduction(+:mm1_time))
   for(i=0; i<nruns; i++)
   {
     mm1_time += time_mm_array0(nxmax);
@@ -144,7 +144,7 @@ int timing_mm_speed(tMesh *mesh)
   /* time nruns with 1 thread to have less jitter */
   /*
   mm1_time = 0.;
-  //ELMLEVEL_Pragma(omp parallel for reduction(+:mm1_time))
+  //GEN_Pragma(omp parallel for reduction(+:mm1_time))
   for(i=0; i<nrunso10; i++)
   {
     mm1_time += time_mm_array0(nxmax);
