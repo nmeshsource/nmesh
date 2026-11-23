@@ -69,7 +69,7 @@
 
 /* we use OpenMP to parallelize the loop in formyelms_noomp */
 #define formyelms(mesh) \
-  ELMLEVEL_Pragma(omp parallel for) \
+  ELMLEVEL_Pragma(omp parallel for schedule(dynamic,1)) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 #endif
 
