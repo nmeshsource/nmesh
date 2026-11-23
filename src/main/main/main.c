@@ -64,6 +64,12 @@ int main(int argc, char **argv)
   initialize_libraries(mesh);
   TIMER_START;
 
+  /* launch omp, so we can use ELMLEVEL_Pragma(omp taskloop) later */
+#ifdef USE_OMP_TASKLOOP
+  GEN_Pragma(omp parallel);
+  GEN_Pragma(omp master);
+#endif
+
   /* print skeleton of function bins */
   PrintMeshFuncs(mesh);
 

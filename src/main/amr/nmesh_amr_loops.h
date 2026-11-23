@@ -35,10 +35,20 @@
 /* do we use omp taskloop? */
 #ifdef USE_OMP_TASKLOOP
 
-/* we use OpenMP to parallelize the loop in formyelms_noomp */
+/* we use OpenMP's taskloop to parallelize the loop in formyelms_noomp */
+/*
 #define formyelms(mesh) \
   ELMLEVEL_Pragma(omp parallel) \
   ELMLEVEL_Pragma(omp master) \
+  ELMLEVEL_Pragma(omp taskloop) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+*/
+/* ^-THIS is does not need "omp parallel" and "omp master" in e.g. main,
+     but has more overhead. */
+
+/* taskloop only: this needs "omp parallel" and "omp master" earlier,
+                  e.g. in main */
+#define formyelms(mesh) \
   ELMLEVEL_Pragma(omp taskloop) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
 
