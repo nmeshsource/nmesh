@@ -123,8 +123,8 @@ int timing_mm_speed(tMesh *mesh)
 #ifdef USE_OMP_TASKLOOP
   errorexit("If we have:\n"
             "  GEN_Pragma(omp parallel)\n"
-            "  GEN_Pragma(omp master)\n");
-            "in main() 'omp parallel for' will do nothing!!!")
+            "  GEN_Pragma(omp master)\n"
+            "in main() 'omp parallel for' will do nothing!!!");
 #endif
 
   /* time nruns times to have less jitter */
