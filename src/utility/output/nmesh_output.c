@@ -51,9 +51,9 @@ int nmesh_output(tMesh *mesh)
   AddPar("1dformat", "gnuplot pernode",
 	 "format for 1d output [gnuplot;pernode]");
   AddPar("2dformat", "gnuplot", "format for 2d output "
-         "[xdmf,sdmf,gnuplot,vtk,text,binary,float,double]");
+         "[xdmf,sdmf,gnuplot,vtk;text,binary,float,double,addpoints]");
   AddPar("3dformat", "vtk binary float", "format for 3d output "
-	 "[xdmf,sdmf,vtk,text,binary,float,double,addpoints]");
+	 "[xdmf,sdmf,vtk;text,binary,float,double,addpoints]");
   AddPar("coformat", "vtk text arrange_as_1d", "format for coef output "
 	 "[vtk,text,binary,float,double]");
 
