@@ -223,6 +223,28 @@ void nMPI_print_Comm_name(nMPI_Comm comm)
 
 
 /********************************************************************/
+/* get strings from numbers */
+/********************************************************************/
+
+/* return name of MPI thread level number */
+const char *nMPI_threadlevel_name(int threadlevel)
+{
+#ifdef USEMPI
+  switch(threadlevel)
+  {
+  case MPI_THREAD_SINGLE:     return "MPI_THREAD_SINGLE";
+  case MPI_THREAD_FUNNELED:   return "MPI_THREAD_FUNNELED";
+  case MPI_THREAD_SERIALIZED: return "MPI_THREAD_SERIALIZED";
+  case MPI_THREAD_MULTIPLE:   return "MPI_THREAD_MULTIPLE";
+  default:                    return "UNKNOWN MPI thread level";
+  }
+#else
+  return "MPI is off"
+#endif
+}
+
+
+/********************************************************************/
 /* Wrappers for MPI functions */
 /********************************************************************/
 
@@ -237,6 +259,9 @@ int nMPI_Init(int *pargc, char ***pargv)
   int provided;
   ret = MPI_Init_thread(pargc, pargv, required, &provided);
   PR1;
+  PRF;printf("MPI_Init_thread:\n"
+             "  required=%s -> provided=%s ret=%d\n",
+      nMPI_threadlevel_name(required), nMPI_threadlevel_name(provided), ret);
   if(provided < required) /* exit if MPI cannot do threads */
     errorexit("MPI_Init_thread: provided < required. "
               "MPI library doesn't support USEOMP.");
@@ -537,7 +562,7 @@ int nMPI_Isend_Irecv(void *sbuf, int ns, void *rbuf, int nr,
     PRF;printf(": MPI_Isend failed: %d\n", errS);
     return errS;
   }
-  
+
   errR = MPI_Irecv(rbuf, nr, datatype, rank_other, r_tag, r_comm, r_req);
   if(errR != MPI_SUCCESS)
   {
