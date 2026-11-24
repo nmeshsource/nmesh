@@ -362,7 +362,7 @@ void free_dat_icom_reqs_after_Waitall_com_send(tNode *node)
 }
 
 /* get nbindc from all faces and variables for this node out of buffers */
-void get_all_indc_for_vl(tNode *node, tVarList  *vl)
+void get_all_indc_for_vl(tNode *node, tVarList  *vl, int wait)
 {
   int face, ni;
   tDat *dat = node->dat;
@@ -372,7 +372,7 @@ void get_all_indc_for_vl(tNode *node, tVarList  *vl)
   /* get nbindc for each face and neighbor */
   for(face=0; face<6; face++)
     for(ni=0; ni<node->nfnb[face]; ni++)
-      get_indc_for_vl(node, vl, 1, face, ni);
+      get_indc_for_vl(node, vl, wait, face, ni);
 }
 
 /* get nbindc for all nodes out of buffers and free the buffers */
@@ -385,7 +385,7 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl)
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
-    get_all_indc_for_vl(node, vl);
+    get_all_indc_for_vl(node, vl, 1);
   }
 
   /* postpone Waitall until we have finished all nodefaces. This could have

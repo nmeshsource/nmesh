@@ -622,7 +622,7 @@ void free_dat_reqs_after_Waitall_com_send(tNode *node)
 }
 
 /* get nbsurf from all faces and variables for this node out of buffers */
-void get_all_vl_surfaces(tNode *node, tVarList *vls)
+void get_all_vl_surfaces(tNode *node, tVarList *vls, int wait)
 {
   int face, ni;
   tDat *dat = node->dat;
@@ -637,7 +637,7 @@ void get_all_vl_surfaces(tNode *node, tVarList *vls)
     /* get nbsurf for each neighbor */
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
-      get_surfaces_vl(node,vls, 1, face, ni);
+      get_surfaces_vl(node,vls, wait, face, ni);
     }
 
     /* set ajsurf on this nodeface via interpolation */
@@ -667,7 +667,7 @@ void get_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls)
     tNode *node = MyLnode;
 
     loadtimer_start(node);  /* time interp in set_ajsurf_vl */
-    get_all_vl_surfaces(node, vls);
+    get_all_vl_surfaces(node, vls, 1);
     loadtimer_stop(node);
   }
 
@@ -1756,7 +1756,7 @@ void request_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 /* get surfaces on one node for a varlist */
 void get_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
-  get_all_vl_surfaces(node, vl);
+  get_all_vl_surfaces(node, vl, 1);
   free_dat_reqs_after_Waitall_com_send(node); //not needed if we use MPI windows
 }
 

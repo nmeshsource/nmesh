@@ -282,7 +282,10 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
       d_info_midnorm = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
-    if(nghosts || add_surface_fluxes) get_all_vl_surfaces(node, amr->vlSurfExch);
+    if(nghosts || add_surface_fluxes)
+      get_all_vl_surfaces(node, amr->vlSurfExch, 1);
+      //for MPI_THREAD_FUNNELED we should call get_all_vl_surfaces_mesh earlier
+      //and then use get_all_vl_surfaces(node, amr->vlSurfExch, 0) here!!!
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
@@ -802,7 +805,8 @@ void fv_divf__old(tNode *node, tVarList *vldivf, tVarList *vlq,
       d->info = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
-    if(nghosts || add_surface_fluxes) get_all_vl_surfaces(node, amr->vlSurfExch);
+    if(nghosts || add_surface_fluxes)
+      get_all_vl_surfaces(node, amr->vlSurfExch, 1);
 
     /* add fluxes in each direction to RHS */
     for(dir=0; dir<3; dir++)
