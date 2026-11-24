@@ -815,6 +815,16 @@ void print_system_info(void)
   system1("lscpu");
   snprintf(str,1023, "cat /proc/%ld/status", pid);
   system1(str);
+  #ifdef USEOMP
+    GEN_Pragma(omp parallel)
+    {
+      GEN_Pragma(omp critical)
+      {
+          printf("OMP thread %d: ", TID); fflush(stdout);
+          system("grep Cpus_allowed_list /proc/self/status");
+      }
+    }
+  #endif
   snprintf(str,1023, "printf \"%%s\" \"Running on CPU \" ; "
                      "cat /proc/%ld/stat | cut -d ' ' -f 39", pid);
   system1(str);
