@@ -259,7 +259,7 @@ int nMPI_Init(int *pargc, char ***pargv)
   int provided;
   ret = MPI_Init_thread(pargc, pargv, required, &provided);
   PR1;
-  PRF;printf("MPI_Init_thread:\n"
+  PRF;printf(": calling MPI_Init_thread with:\n"
              "  required=%s -> provided=%s ret=%d\n",
       nMPI_threadlevel_name(required), nMPI_threadlevel_name(provided), ret);
   if(provided < required) /* exit if MPI cannot do threads */
