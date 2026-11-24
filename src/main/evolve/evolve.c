@@ -299,7 +299,7 @@ void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
     if(ListEntry(evosys->f[XSURFRHS],i))
     {
       get_all_vl_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
-      //FIXME: make get_all_vl_surfaces_vl that does it just for a varlist
+      //FIXME: replace amr->vlSurfExch by smaller varlist with u only
       troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
     }
 
@@ -538,12 +538,7 @@ void evolve_limiter_LIMITER(tElm *node, pVLList *u)
   loadtimer_stop(node);
 }
 
-/* Apply limiters to evo subsystems.
-   If opt=1
-     we do it only if trbl_score >= 1 or trbl_score<=-notroubles
-     i.e. only for switched nodes.
-   If opt=0
-     we ALWAYS do it. */
+/* Apply limiters to evo subsystems. */
 /* Version for one elm: */
 void evolve_limiter(tElm *elm, pVLList *u, int MPI_exchange)
 {
