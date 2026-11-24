@@ -259,9 +259,11 @@ int nMPI_Init(int *pargc, char ***pargv)
   int provided;
   ret = MPI_Init_thread(pargc, pargv, required, &provided);
   PR1;
-  PRF;printf(": calling MPI_Init_thread with:\n"
-             "  required=%s -> provided=%s ret=%d\n",
-      nMPI_threadlevel_name(required), nMPI_threadlevel_name(provided), ret);
+  #if PR != 0
+    PRF;printf(": called MPI_Init_thread with:\n"
+               "  required=%s -> provided=%s ret=%d\n",
+        nMPI_threadlevel_name(required), nMPI_threadlevel_name(provided), ret);
+  #endif
   if(provided < required) /* exit if MPI cannot do threads */
     errorexit("MPI_Init_thread: provided < required. "
               "MPI library doesn't support USEOMP.");
