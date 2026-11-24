@@ -337,7 +337,9 @@ void get_indc_for_vl(tNode *node, tVarList  *vl, int face, int ni)
   rq = dat->ic[vi]->nbindc[face][ni]->info;
 
   /* wait for MPI buffer */
+  loadtimer_pause(node);  /* we don't want to time MPI_Wait */
   MCK( nMPI_Wait_com_recv(com, rq) );
+  loadtimer_resume(node); /* but we time everything else */
 }
 
 
