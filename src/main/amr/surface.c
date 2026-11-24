@@ -567,38 +567,37 @@ void get_surfaces_vl(tNode *node, tVarList *vls, int wait, int face, int ni)
 
   //PRF;printf(": nvars=%d\n", nvars);
 
-  /* get MPI request number */
-  rq = dat->s[face][vi]->nbsurf[ni]->info;
-
-  /* wait for MPI buffer */
   if(wait)
   {
+    /* get MPI request number */
+    rq = dat->s[face][vi]->nbsurf[ni]->info;
+
+    /* wait for MPI buffer */
     loadtimer_pause(node);  /* we don't want to time MPI_Wait */
     MCK( nMPI_Wait_com_recv(com, rq) );
     loadtimer_resume(node); /* but we time everything else */
+
+    /* find our recv buffer, and set it to NULL.
+       We do this because s->nbsurf[ni]->d already points there, and because
+       then realloc_com_reqs or free_com will not free s->nbsurf[ni]->d */
+    set_com_recv_buf(com, rq, NULL);
+
+    //  /* get data out of recv buffer */
+    //  cnt=0;
+    //  forVind(vls, vi)
+    //  {
+    //    tSurface *s = dat->s[face][vi];
+    //    zones = MeshVarSurfacezones(node->pat->mesh, vi);
+    //    if(!zones) continue; /* do nothing if var has no zones to exchange */
+    //    /* do nothing if var has no zones to exchange */
+    //    if(zones && dat->v[vi])
+    //    {
+    //      /* get neighbor data from buffer */
+    //      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
+    //      cnt += nb_N;
+    //    }
+    //  }
   }
-
-  /* find our recv buffer, and set it to NULL.
-     We do this because s->nbsurf[ni]->d already points there, and because
-     then realloc_com_reqs or free_com will not free s->nbsurf[ni]->d */
-  set_com_recv_buf(com, rq, NULL);
-
-//  /* get data out of recv buffer */
-//  cnt=0;
-//  forVind(vls, vi)
-//  {
-//    tSurface *s = dat->s[face][vi];
-//
-//    zones = MeshVarSurfacezones(node->pat->mesh, vi);
-//    if(!zones) continue; /* do nothing if var has no zones to exchange */
-//    /* do nothing if var has no zones to exchange */
-//    if(zones && dat->v[vi])
-//    {
-//      /* get neighbor data from buffer */
-//      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
-//      cnt += nb_N;
-//    }
-//  }
 }
 
 

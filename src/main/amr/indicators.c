@@ -332,13 +332,13 @@ void get_indc_for_vl(tNode *node, tVarList  *vl, int wait, int face, int ni)
   /* do nothing if there are no vars that exchanged indc */
   if(!nvars) return;
 
-  /* get MPI request number */
-  vi = vl->index[0]; // first var in vl
-  rq = dat->ic[vi]->nbindc[face][ni]->info;
-
-  /* wait for MPI buffer */
   if(wait)
   {
+    /* get MPI request number */
+    vi = vl->index[0]; // first var in vl
+    rq = dat->ic[vi]->nbindc[face][ni]->info;
+
+    /* wait for MPI buffer */
     loadtimer_pause(node);  /* we don't want to time MPI_Wait */
     MCK( nMPI_Wait_com_recv(com, rq) );
     loadtimer_resume(node); /* but we time everything else */
