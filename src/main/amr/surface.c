@@ -532,7 +532,7 @@ void request_all_vl_surfaces_exchange_mesh(tMesh *mesh, tVarList *vls)
 /**********************************************************************/
 
 /* get all surfaces from neighbor with index ni at face */
-void get_surfaces_vl(tNode *node, tVarList *vls, int face, int ni)
+void get_surfaces_vl(tNode *node, tVarList *vls, int wait, int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
@@ -571,9 +571,12 @@ void get_surfaces_vl(tNode *node, tVarList *vls, int face, int ni)
   rq = dat->s[face][vi]->nbsurf[ni]->info;
 
   /* wait for MPI buffer */
-  loadtimer_pause(node);  /* we don't want to time MPI_Wait */
-  MCK( nMPI_Wait_com_recv(com, rq) );
-  loadtimer_resume(node); /* but we time everything else */
+  if(wait)
+  {
+    loadtimer_pause(node);  /* we don't want to time MPI_Wait */
+    MCK( nMPI_Wait_com_recv(com, rq) );
+    loadtimer_resume(node); /* but we time everything else */
+  }
 
   /* find our recv buffer, and set it to NULL.
      We do this because s->nbsurf[ni]->d already points there, and because
@@ -634,7 +637,7 @@ void get_all_vl_surfaces(tNode *node, tVarList *vls)
     /* get nbsurf for each neighbor */
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
-      get_surfaces_vl(node,vls, face, ni);
+      get_surfaces_vl(node,vls, 1, face, ni);
     }
 
     /* set ajsurf on this nodeface via interpolation */
