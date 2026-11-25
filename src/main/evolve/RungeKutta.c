@@ -257,16 +257,17 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       }
 
       // 1. set interpolation scheme for local p-refine
-      force_sav = amr->force_interp_scheme; //backup flag
-      amr->force_interp_scheme = scheme;    //set internal amr flag
+      force_sav = elm->dat->info->force_interp_scheme; //backup flag
+      elm->dat->info->force_interp_scheme = scheme;    //set internal amr flag
 
       // 2. p-refine locally
       elm_sav = update_node_n_pt_typ_return_node_old(elm, n, pt_typ);
       // ^-need to keep old elm in case something is pointing to its data
       //   So we store old elm in elm_sav.
 
-      // 3. restore amr->force_interp_scheme
-      amr->force_interp_scheme = force_sav;
+      // 3. restore info->force_interp_scheme in both elms
+      elm_sav->dat->info->force_interp_scheme = force_sav;
+      elm->dat->info->force_interp_scheme = force_sav;
 
       // Since elm is now refined we reset its ref method to PARENT_n, which
       // is a no-op, as far as refinement (and interpolation) is concerned.

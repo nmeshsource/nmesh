@@ -130,6 +130,7 @@ typedef struct tNODEINFO {
   int use_fv;             /* whether we currently use fin. vol. in node */
   int nlim;               /* number of consectutive evo substeps in which
                              limiter was active */
+  int force_interp_scheme; //overrides interp scheme if not 0
   int load_timer_running;        //1 if node load timer is running, else 0
   struct timespec load_start[1]; //time when node load timer was started
   double load_TimeIn_s;          //time spent on this node in seconds

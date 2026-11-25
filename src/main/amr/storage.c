@@ -294,6 +294,7 @@ int redim_array_Neplocs(tArray *ar, int Neplocs)
 void amr_interp_get_order_scheme(tElm *elm, int *order, int *scheme)
 {
   tMesh *mesh = Elm_mesh(elm);
+  tDat *dat = elm->dat;
   int *pt_typ = elm->pt_typ;
   int is_UNI, schm, npts;
   int d;
@@ -309,6 +310,10 @@ void amr_interp_get_order_scheme(tElm *elm, int *order, int *scheme)
 
   /* BUT amr->force_interp_scheme can override scheme */
   if(amr->force_interp_scheme) schm = amr->force_interp_scheme;
+
+  /* can FURTHER override scheme via info->force_interp_scheme in elm */
+  if(dat)
+    if(dat->info->force_interp_scheme) schm = dat->info->force_interp_scheme;
 
   /* set npts */
   switch(schm)
