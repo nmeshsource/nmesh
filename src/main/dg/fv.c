@@ -230,6 +230,8 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
     rec1d_p = rec1d_p_WENO3_2g;
     rec1d_m = rec1d_m_WENO3_2g;
     nghosts = 1;
+    errorexit("after /* get nbsurf and ajsurf already */ add:\n"
+              "if(nghosts) get_all_vl_surfaces(node,amr->vlSurfExch);");
     break;
   default:
     errorexit("unknown DGglobals->fv_rec_mode");
@@ -282,7 +284,7 @@ void fv_divf(tNode *node, tVarList *vldivf, tVarList *vlq,
       d_info_midnorm = DGINFO_NULL;
 
     /* get nbsurf and ajsurf already */
-    if(nghosts || add_surface_fluxes) get_all_vl_surfaces(node, amr->vlSurfExch);
+    //if(nghosts || add_surface_fluxes) get_all_vl_surfaces(node, amr->vlSurfExch);
     //for MPI_THREAD_FUNNELED we should call get_all_vl_surfaces_mesh earlier
     //so that get_all_vl_surfaces is not needed here!!!
 

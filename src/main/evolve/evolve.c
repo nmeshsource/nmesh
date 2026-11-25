@@ -307,8 +307,10 @@ void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
       troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
     if(ListEntry(evosys->f[XSURFRHS],i))
     {
-      get_all_vl_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
+      //get_all_vl_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
       //FIXME: replace amr->vlSurfExch by smaller varlist with u only
+      //for MPI_THREAD_FUNNELED we should call get_all_vl_surfaces_mesh earlier
+      //so that get_all_vl_surfaces is not needed here!!!
       troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
     }
 
