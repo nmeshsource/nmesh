@@ -43,9 +43,9 @@ l=4         |-elm-|-elm-|
 */
 
 /* The leaf nodes are the nodes we do all our calculations in and thus the
-   the most important nodes. In fact it may be good to keep only the leaf
+   the most important nodes. In fact it is good to keep only the leaf
    nodes to save memory.
-   We also call a leaf nodes an element or elm for short. */
+   We also call a leaf node an element or elm for short. */
 
 /* abbreviation for unsigned long */
 typedef unsigned long ulong;
