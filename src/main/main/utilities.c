@@ -820,8 +820,8 @@ void print_system_info(void)
     {
       GEN_Pragma(omp critical)
       {
-          printf("OMP thread %d: ", TID); fflush(stdout);
-          system("grep Cpus_allowed_list /proc/self/status");
+        printf("OMP thread %d: ", TID); fflush(stdout);
+        system("grep Cpus_allowed_list /proc/self/status");
       }
     }
   #endif
