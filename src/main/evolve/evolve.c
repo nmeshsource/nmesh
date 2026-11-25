@@ -9,8 +9,9 @@
 /* globals for evolve */
 tEvolveGlobals EvolveGlobals[1];
 
-/* global pars for amr */
+/* global pars for amr and dg */
 extern tAMR amr[1];
+extern tDGglobals DGglobals[1];
 
 
 /* The functions below are a little complex because they deal with lists of
@@ -183,9 +184,20 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
 {
   tEvoSys *evosys = mesh->evosys;
   int have_XRHS; /* is set to 1 if we have a XVOLRHS or a XSURFRHS for x */
+  int surfaces_early; /* cannot overlap comm & calc if we need surf data early */
   int ie;
 
   if(PR) PRFs(":\n");
+
+  /* check if there is a single XVOLRHS */
+  have_XRHS = 0;
+  forList(u, ie)
+    if( (ListEntry(evosys->f[XVOLRHS],ie)) ||
+        (ListEntry(evosys->f[XSURFRHS],ie)) ) { have_XRHS = 1;  break; }
+
+  /* surfaces_early=1 if fv_divf needs surf data already during VOLRHS
+                      or if there are X RHS */
+  surfaces_early = DGglobals->fv_divf_adds_surface_fluxes || have_XRHS;
 
   /* loop over all nodes before MPI requests */
   formyelms(mesh)
@@ -199,20 +211,17 @@ void evolve_setrhs_mesh(tMesh *mesh, pVLList *rhs, pVLList *u)
      I.e. we overlap the communication started by
      MPIexchange_request_all_myln_data with other calculations. */
 
+  /* in some cases we surface already before VOLRHS */
+  if(surfaces_early) MPIexchange_get_all_myln_data(mesh);
+
   /* loop over all nodes after MPI exchange has been requested */
   formyelms(mesh)
     evolve_setrhs_VOLRHS(MyElm, rhs, u);
 
-  /* check if there is a single XVOLRHS */
-  have_XRHS = 0;
-  forList(u, ie)
-    if( (ListEntry(evosys->f[XVOLRHS],ie)) ||
-        (ListEntry(evosys->f[XSURFRHS],ie)) ) { have_XRHS = 1;  break; }
-
   /* After we have done all we can without the surface data, we now wait
      until we get all the surface data: */
   /* get surfaces of u so that we can compute fluxes that depend on u */
-  MPIexchange_get_all_myln_data(mesh);
+  if(!surfaces_early) MPIexchange_get_all_myln_data(mesh);
 
   /* We may also need to get the surface data for the extra vars in x.
      Note, the surface data for u has already arrived. */
