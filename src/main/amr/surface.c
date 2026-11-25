@@ -667,6 +667,13 @@ void get_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls)
     get_all_vl_surfaces(node, vls);
     loadtimer_stop(node);
   }
+  /*^--get_all_vl_surfaces calls nMPI_Wait_com_recv and set_ajsurf_vl.
+    -nMPI_Wait_com_recv needs a formylnodes_noomp with MPI_THREAD_FUNNELED.
+    -BUT we could make a new func wait_all_vl_surfaces that just waits
+     inside a formylnodes_noomp loop.
+    -Afterwards can just call set_all_vl_ajsurf_mesh which has formylnodes!
+    -YET, maybe nMPI_Wait_com_recv followed by set_ajsurf_vl is efficient,
+     because MPI's send can make progress during set_ajsurf_vl interp??? */
 
   /* postpone Waitall until we have finished all nodefaces. This could have
      been already called in get_all_vl_surfaces to free mem earlier.*/
