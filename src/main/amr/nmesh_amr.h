@@ -572,7 +572,7 @@ void init_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
 void free_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
 void set_all_vl_mysurf_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
 void request_all_vl_surfaces_exchange_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
-void get_all_vl_surfaces(tNode *node, tVarList *vls, int wait);
+void get_all_vl_surfaces(tNode *node, tVarList *vls);
 void get_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c
 void set_all_vl_ajsurf(tNode *node, tVarList *vls);
 void free_all_vl_nbsurf_only_mesh(tMesh *mesh, tVarList *vls);  //only for misc.c

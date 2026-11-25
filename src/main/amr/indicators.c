@@ -308,7 +308,7 @@ void request_all_myln_indc_exchange_for_vl(tMesh *mesh, tVarList  *vl)
 /**********************************************************************/
 
 /* get all indc from neighbor with index ni at face */
-void get_indc_for_vl(tNode *node, tVarList  *vl, int wait, int face, int ni)
+void get_indc_for_vl(tNode *node, tVarList  *vl, int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
@@ -332,17 +332,14 @@ void get_indc_for_vl(tNode *node, tVarList  *vl, int wait, int face, int ni)
   /* do nothing if there are no vars that exchanged indc */
   if(!nvars) return;
 
-  if(wait)
-  {
-    /* get MPI request number */
-    vi = vl->index[0]; // first var in vl
-    rq = dat->ic[vi]->nbindc[face][ni]->info;
+  /* get MPI request number */
+  vi = vl->index[0]; // first var in vl
+  rq = dat->ic[vi]->nbindc[face][ni]->info;
 
-    /* wait for MPI buffer */
-    loadtimer_pause(node);  /* we don't want to time MPI_Wait */
-    MCK( nMPI_Wait_com_recv(com, rq) );
-    loadtimer_resume(node); /* but we time everything else */
-  }
+  /* wait for MPI buffer */
+  loadtimer_pause(node);  /* we don't want to time MPI_Wait */
+  MCK( nMPI_Wait_com_recv(com, rq) );
+  loadtimer_resume(node); /* but we time everything else */
 }
 
 
@@ -362,7 +359,7 @@ void free_dat_icom_reqs_after_Waitall_com_send(tNode *node)
 }
 
 /* get nbindc from all faces and variables for this node out of buffers */
-void get_all_indc_for_vl(tNode *node, tVarList  *vl, int wait)
+void get_all_indc_for_vl(tNode *node, tVarList  *vl)
 {
   int face, ni;
   tDat *dat = node->dat;
@@ -372,7 +369,7 @@ void get_all_indc_for_vl(tNode *node, tVarList  *vl, int wait)
   /* get nbindc for each face and neighbor */
   for(face=0; face<6; face++)
     for(ni=0; ni<node->nfnb[face]; ni++)
-      get_indc_for_vl(node, vl, wait, face, ni);
+      get_indc_for_vl(node, vl, face, ni);
 }
 
 /* get nbindc for all nodes out of buffers and free the buffers */
@@ -385,7 +382,7 @@ void get_all_myln_indc_for_vl(tMesh *mesh, tVarList  *vl)
   formylnodes_noomp(mesh)
   {
     tNode *node = MyLnode;
-    get_all_indc_for_vl(node, vl, 1);
+    get_all_indc_for_vl(node, vl);
   }
 
   /* postpone Waitall until we have finished all nodefaces. This could have

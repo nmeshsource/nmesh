@@ -298,7 +298,7 @@ void evolve_setrhs_VOLRHS(tElm *node, pVLList *rhs, pVLList *u)
       troubled |= ListEntry(evosys->f[XVOLRHS],i)(node, evv);
     if(ListEntry(evosys->f[XSURFRHS],i))
     {
-      get_all_vl_surfaces(node, amr->vlSurfExch, 1); //get surfaces of u, don't need surf of x yet
+      get_all_vl_surfaces(node, amr->vlSurfExch); //get surfaces of u, don't need surf of x yet
       //FIXME: replace amr->vlSurfExch by smaller varlist with u only
       troubled |= ListEntry(evosys->f[XSURFRHS],i)(node, evv);
     }
@@ -567,7 +567,7 @@ void evolve_limiter(tElm *elm, pVLList *u, int MPI_exchange)
     //if(VLn(vl)>0)
     //{
     //  /* now get the indicators and wait for MPI buffers if necessary */
-    //  get_all_indc_for_vl(elm, vl, 1);
+    //  get_all_indc_for_vl(elm, vl);
     //}
     //vlfree(vl);
   }

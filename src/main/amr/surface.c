@@ -532,7 +532,7 @@ void request_all_vl_surfaces_exchange_mesh(tMesh *mesh, tVarList *vls)
 /**********************************************************************/
 
 /* get all surfaces from neighbor with index ni at face */
-void get_surfaces_vl(tNode *node, tVarList *vls, int wait, int face, int ni)
+void get_surfaces_vl(tNode *node, tVarList *vls, int face, int ni)
 {
   tNode *nb = node->fnb[face][ni];
   tDat *dat = node->dat;
@@ -567,37 +567,35 @@ void get_surfaces_vl(tNode *node, tVarList *vls, int wait, int face, int ni)
 
   //PRF;printf(": nvars=%d\n", nvars);
 
-  if(wait)
-  {
-    /* get MPI request number */
-    rq = dat->s[face][vi]->nbsurf[ni]->info;
+  /* get MPI request number */
+  rq = dat->s[face][vi]->nbsurf[ni]->info;
 
-    /* wait for MPI buffer */
-    loadtimer_pause(node);  /* we don't want to time MPI_Wait */
-    MCK( nMPI_Wait_com_recv(com, rq) );
-    loadtimer_resume(node); /* but we time everything else */
+  /* wait for MPI buffer */
+  loadtimer_pause(node);  /* we don't want to time MPI_Wait */
+  MCK( nMPI_Wait_com_recv(com, rq) );
+  loadtimer_resume(node); /* but we time everything else */
 
-    /* find our recv buffer, and set it to NULL.
-       We do this because s->nbsurf[ni]->d already points there, and because
-       then realloc_com_reqs or free_com will not free s->nbsurf[ni]->d */
-    set_com_recv_buf(com, rq, NULL);
+  /* find our recv buffer, and set it to NULL.
+     We do this because s->nbsurf[ni]->d already points there, and because
+     then realloc_com_reqs or free_com will not free s->nbsurf[ni]->d */
+  set_com_recv_buf(com, rq, NULL);
 
-    //  /* get data out of recv buffer */
-    //  cnt=0;
-    //  forVind(vls, vi)
-    //  {
-    //    tSurface *s = dat->s[face][vi];
-    //    zones = MeshVarSurfacezones(node->pat->mesh, vi);
-    //    if(!zones) continue; /* do nothing if var has no zones to exchange */
-    //    /* do nothing if var has no zones to exchange */
-    //    if(zones && dat->v[vi])
-    //    {
-    //      /* get neighbor data from buffer */
-    //      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
-    //      cnt += nb_N;
-    //    }
-    //  }
-  }
+//  /* get data out of recv buffer */
+//  cnt=0;
+//  forVind(vls, vi)
+//  {
+//    tSurface *s = dat->s[face][vi];
+//
+//    zones = MeshVarSurfacezones(node->pat->mesh, vi);
+//    if(!zones) continue; /* do nothing if var has no zones to exchange */
+//    /* do nothing if var has no zones to exchange */
+//    if(zones && dat->v[vi])
+//    {
+//      /* get neighbor data from buffer */
+//      memcpy(s->nbsurf[ni]->d, rbuf+cnt, nb_N * sizeof(rbuf[0]));
+//      cnt += nb_N;
+//    }
+//  }
 }
 
 
@@ -621,7 +619,7 @@ void free_dat_reqs_after_Waitall_com_send(tNode *node)
 }
 
 /* get nbsurf from all faces and variables for this node out of buffers */
-void get_all_vl_surfaces(tNode *node, tVarList *vls, int wait)
+void get_all_vl_surfaces(tNode *node, tVarList *vls)
 {
   int face, ni;
   tDat *dat = node->dat;
@@ -636,7 +634,7 @@ void get_all_vl_surfaces(tNode *node, tVarList *vls, int wait)
     /* get nbsurf for each neighbor */
     for(ni=0; ni<node->nfnb[face]; ni++)
     {
-      get_surfaces_vl(node,vls, wait, face, ni);
+      get_surfaces_vl(node,vls, face, ni);
     }
 
     /* set ajsurf on this nodeface via interpolation */
@@ -666,7 +664,7 @@ void get_all_vl_surfaces_mesh(tMesh *mesh, tVarList *vls)
     tNode *node = MyLnode;
 
     loadtimer_start(node);  /* time interp in set_ajsurf_vl */
-    get_all_vl_surfaces(node, vls, 1);
+    get_all_vl_surfaces(node, vls);
     loadtimer_stop(node);
   }
 
@@ -1755,7 +1753,7 @@ void request_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 /* get surfaces on one node for a varlist */
 void get_all_vl_surfaces__UNFINISHED(tNode *node, tVarList *vl)
 {
-  get_all_vl_surfaces(node, vl, 1);
+  get_all_vl_surfaces(node, vl);
   free_dat_reqs_after_Waitall_com_send(node); //not needed if we use MPI windows
 }
 

@@ -84,7 +84,7 @@ int SurfExchange_test(tMesh *mesh)
     {
       tNode *node = MyLnode;
 
-      get_all_vl_surfaces(node, amr->vlSurfExch, 1);
+      get_all_vl_surfaces(node, amr->vlSurfExch);
     }
   }
 
