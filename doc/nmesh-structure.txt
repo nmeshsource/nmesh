@@ -1,0 +1,73 @@
+Overview over the mesh structure
+================================
+
+tMesh:    ---------------------mesh-----------------------------------------
+tPat:     |-----patch0-----|-------patch1-------|--patch2----|...
+tElm:      elm elm ...      elm elm elm ...      elm elm  ...
+                ^
+  The elements (elm) shown here are our computational subdomains in each
+  patch.
+
+  Each elm has a tDat struct that can be empty if the data is on another
+  proc. The tDat struct contains lists of arrays, one for each variable.
+
+  The elms are the leaf nodes of an oct-tree. Here we show the structure
+  in one patch starting from a root-node. Each part of the tree is a node.
+  The leaf nodes are marked as elm. We only show 2 children instead of 8:
+level
+l=0                  _________root-node______________________
+l=1          ______node_________                     ______node______
+l=2     __node__        |------elm-------|       _node__     |-------elm-----|
+l=3 |-elm---|   _node_                   |---elm---|---elm---|
+l=4         |-elm-|-elm-|
+  We have one tree per patch.
+  The ends of the tree are called leaf nodes (marked as elm here).
+  The elms cover our entire computational domain. Since the elms are nodes
+  themselves we sometimes call them nodes as well.
+
+  The leaf nodes are the nodes we do all our calculations in and thus the
+  the most important nodes.
+  We also call a leaf node an element or elm for short.
+
+  This structure is implemented via structs in src/main/amr/nmesh_amr.h
+
+
+The nmesh program
+=================
+nmesh is parallelized with MPI and also OpenMP. In either case the goal
+is to distribute all elms amoung the available MPI ranks and threads.
+I.e. paralelization works on the elms. Each rank can then also launch OpenMP
+threads to work on elms in parallel. Usually the formyelms loop macro is
+used for this. It can be defined e.g. as:
+#define formyelms(mesh) \
+  ELMLEVEL_Pragma(omp parallel for schedule(dynamic,1)) \
+  for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+#endif
+But in older parts it is also called formylnodes, both are the same.
+Currently each formyelms macro launches threads. But if we do not want
+threads we can use formyelms_noomp which doesn't have an omp pragma.
+
+nmesh's main() calls nMPI_Init which in turn calls MPI_Init_thread with
+MPI_THREAD_FUNNELED. This means only the main thread is allowed to make MPI
+calls. E.g. no function that makes MPI calls is allowed in formyelms loops.
+Also note that nmesh never calls MPI functions directly, instead it
+calls wrappers that are prefaced with nMPI_ .
+
+nmesh has various global variables, that are usually just read, which is
+thread safe. However, some are written to. This has to happen outside
+formyelms loops, otherwise we get bad race conditions. And of course
+all variables defined outside formyelms are shared amoung threads and thus
+we need to be careful to only read them inside formyelms loops.
+
+Each elm usually has has heap allocated variable data inside (accessed like
+elm->dat). However, this is access through macros e.g. to set a variablke
+named "ADM_alpha" to 1 on all points of an elm we can use this:
+void set_ADM_alpha(tElm *elm)
+{
+  int ialpha   = Ind("ADM_alpha");
+  double *alpha = Vard(elm, ialpha);
+  int ijk;
+  forpoints(elm, ijk) alpha[ijk] = 1.;
+}
+
+Most important macros are defined in src/main/amr/nmesh_amr_loops.h
