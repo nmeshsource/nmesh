@@ -51,7 +51,8 @@
 /* define ELMLEVEL_Pragma macros that allow us to include
    certain pragmas only if certain things like ELMLEVEL_Pragmas are defined */
 #ifdef ELMLEVEL_Pragmas
-#define ELMLEVEL_Pragma(x)  _Pragma ( #x )
+#define ELMLEVEL_Pragma(...) _Pragma(#__VA_ARGS__)
+        //we use ... and __VA_ARGS__ in case the arg has commas
 #else
 #define ELMLEVEL_Pragma(x)
 #endif

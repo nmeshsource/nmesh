@@ -1114,7 +1114,7 @@ int hadapt_towards_desired_l(tMesh *mesh,
   int Min_dl;
 
   /* go over mesh to set elm->rflag */
-  formyelms(mesh)
+  formyelms(mesh, reduction(min:min_dl))
   {
     tElm *elm = MyElm;
     int l = Elm_l(elm);

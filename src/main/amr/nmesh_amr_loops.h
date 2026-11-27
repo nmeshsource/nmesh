@@ -68,9 +68,12 @@
 #else
 
 /* we use OpenMP to parallelize the loop in formyelms_noomp */
-#define formyelms(mesh) \
-  ELMLEVEL_Pragma(omp parallel for schedule(dynamic,1)) \
+#define formyelms(mesh, ...) \
+  ELMLEVEL_Pragma(omp parallel for schedule(dynamic,1) __VA_ARGS__) \
   for(int ei_=0; ei_ < mesh->nmyelm; ei_++)
+/* The __VA_ARGS__ can be used to add options, e.g. this:
+   formyelms(mesh, reduction(min:mindl)) */
+
 #endif
 
 
