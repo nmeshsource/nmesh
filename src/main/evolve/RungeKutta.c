@@ -225,10 +225,20 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
   pVLList *u_p = evosys->u_p;
   pVLList *r   = evosys->rhs;
   pVLList *w   = evosys->w;
+  int li;
 
   /* alloc list to store old dg elms */
   tElm **elm_new = checked_calloc(mesh->nmyelm, sizeof(elm_new[0]));
 
+  /* make u_p, w DATAVARs so that they will be interp'd on p-refine */
+  forList(u_p, li)
+  {
+    VLSetType(ListEntry(u_p,li), DATAVAR);
+    VLSetType(ListEntry(w,li), DATAVAR);
+  }
+
+  /* Use update_node_n_pt_typ_return_node_old tp p-refine some elms.
+     Do not add anything here that will depend on u_p, w being AUXVAR! */
   formyelms(mesh)
   {
     tElm *elm = MyElm;
@@ -236,7 +246,6 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
     if(trb > 0)
     {
       tElm *elm_sav;
-      int li;
       int n[3], pt_typ[3];
       int force_sav, scheme;
 
@@ -248,13 +257,6 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
 
       // determine best interp scheme from elm->dat->info->trbl_ref->method
       evolve_InterpToFV_scheme(mesh, elm->dat->info->trbl_ref, &scheme);
-
-      // make u_p, w DATAVARs so that they will be interp'd on p-refine
-      forList(u_p, li)
-      {
-        VLSetType(ListEntry(u_p,li), DATAVAR);
-        VLSetType(ListEntry(w,li), DATAVAR);
-      }
 
       // 1. set interpolation scheme for local p-refine
       force_sav = elm->dat->info->force_interp_scheme; //backup flag
@@ -275,13 +277,6 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       // It will however update nb info. That's why we use PARENT_n and not
       // REF_METH_DONOTHING, which would do nothing at all.
       elm->dat->info->trbl_ref->method = PARENT_n;
-
-      // make u_p, w AUXVAR again:
-      forList(u_p, li)
-      {
-        VLSetType(ListEntry(u_p,li), AUXVAR);
-        VLSetType(ListEntry(w,li), AUXVAR);
-      }
 
       // remove all ajsurf of old elm
       free_all_vl_ajsurf_only(elm_sav, amr->vlSurfExch);
@@ -320,6 +315,13 @@ void evolve_trouble_redo_u_step_mesh(tMesh *mesh, double rfac, int limit_w)
       // this loop, otherwise set_all_vl_ajsurf gets confused.
       // Below, we swap the new elm back in!
     }
+  }
+
+  /* make u_p, w AUXVAR again: */
+  forList(u_p, li)
+  {
+    VLSetType(ListEntry(u_p,li), AUXVAR);
+    VLSetType(ListEntry(w,li), AUXVAR);
   }
 
   /* now insert all the elms in list elm_new, and free the old elms */
